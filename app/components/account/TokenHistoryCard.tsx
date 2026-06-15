@@ -2,6 +2,7 @@
 
 import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
+import { InstructionDetails } from '@components/common/InstructionDetails';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
@@ -23,12 +24,12 @@ import { cn } from '@shared/utils';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
-import { getTokenProgramInstructionName } from '@utils/instruction';
+import { getTokenProgramInstructionName, InstructionType } from '@utils/instruction';
 import { displayAddress, intoTransactionInstruction } from '@utils/tx';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback } from 'react';
-import { ChevronDown, MinusSquare, PlusSquare } from 'react-feather';
+import { ChevronDown } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
@@ -40,11 +41,6 @@ import { BaseTable } from '@/app/shared/ui/Table';
 
 const TRUNCATE_TOKEN_LENGTH = 10;
 const ALL_TOKENS = '';
-
-type InstructionType = {
-    name: string;
-    innerInstructions: (ParsedInstruction | PartiallyDecodedInstruction)[];
-};
 
 export function TokenHistoryCard({ address }: { address: string }) {
     const ownedTokens = useAccountOwnedTokens(address);
@@ -411,49 +407,6 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
         </tr>
     );
 });
-
-function InstructionDetails({ instructionType, tx }: { instructionType: InstructionType; tx: ConfirmedSignatureInfo }) {
-    const [expanded, setExpanded] = React.useState(false);
-
-    const instructionTypes = instructionType.innerInstructions
-        .map(ix => {
-            if ('parsed' in ix && isTokenProgramData(ix)) {
-                return getTokenProgramInstructionName(ix, tx);
-            }
-            return undefined;
-        })
-        .filter(type => type !== undefined);
-
-    return (
-        <>
-            <p className="e-tree">
-                {instructionTypes.length > 0 && (
-                    <span
-                        onClick={e => {
-                            e.preventDefault();
-                            setExpanded(!expanded);
-                        }}
-                        className="e-mr-1.5 e-cursor-pointer"
-                    >
-                        {expanded ? (
-                            <MinusSquare className="e-align-text-top" size={13} />
-                        ) : (
-                            <PlusSquare className="e-align-text-top" size={13} />
-                        )}
-                    </span>
-                )}
-                {instructionType.name}
-            </p>
-            {expanded && (
-                <ul className="e-tree">
-                    {instructionTypes.map((type, index) => {
-                        return <li key={index}>{type}</li>;
-                    })}
-                </ul>
-            )}
-        </>
-    );
-}
 
 function formatTokenName(pubkey: string, cluster: Cluster, tokenInfo: TokenInfoWithPubkey): string {
     let display = displayAddress(pubkey, cluster, tokenInfo);

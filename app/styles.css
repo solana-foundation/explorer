@@ -330,37 +330,6 @@ caption {
         visibility: visible;
     }
 
-    /* Expandable instruction-type list port (_solana.scss .tree) — joint lines drawn via li borders. */
-    .e-tree,
-    ul.e-tree,
-    ul.e-tree ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-    .e-tree ul {
-        margin-left: 1em;
-    }
-    .e-tree li {
-        margin-left: 0.35em;
-        border-left: thin solid #808080;
-    }
-    .e-tree li:last-child {
-        border-left: none;
-    }
-    .e-tree li:before {
-        width: 1.4em;
-        height: 0.6em;
-        margin-right: 0.1em;
-        vertical-align: top;
-        border-bottom: thin solid #808080;
-        content: '';
-        display: inline-block;
-    }
-    .e-tree li:last-child:before {
-        border-left: thin solid #808080;
-    }
-
     /* Homepage staking stats port (_solana.scss .staking-card). */
     .e-staking-card em {
         font-style: normal;
