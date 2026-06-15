@@ -59,10 +59,10 @@ export const Loading: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         // Shows skeleton loaders while fetching
-        const skeletons = canvasElement.querySelectorAll('[class*="skeleton"], [class*="Skeleton"]');
+        const skeletons = canvasElement.querySelectorAll('[class*="e-animate-pulse"]');
         // No account data labels while loading
         expect(canvas.queryByText('Assigned Program Id')).not.toBeInTheDocument();
-        expect(skeletons.length).toBeGreaterThanOrEqual(0);
+        expect(skeletons.length).toBeGreaterThan(0);
     },
 };
 

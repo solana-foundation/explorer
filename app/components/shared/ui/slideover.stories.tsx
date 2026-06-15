@@ -65,7 +65,7 @@ export const WithFooter: Story = {
         const closeBtn = body.getByRole('button', { name: 'Close' });
         expect(closeBtn).toBeInTheDocument();
         await userEvent.click(closeBtn);
-        expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(body.queryByRole('dialog')).toHaveAttribute('data-state', 'closed');
     },
     render: function WithFooterSlideover() {
         const [open, setOpen] = useState(false);

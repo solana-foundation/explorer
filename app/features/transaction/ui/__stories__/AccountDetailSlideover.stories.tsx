@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 
 import { AccountDetailSlideover } from '../AccountDetailSlideover';
 

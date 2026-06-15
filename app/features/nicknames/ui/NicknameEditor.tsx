@@ -44,6 +44,7 @@ export function NicknameEditor({ address, onClose }: Props) {
     // Support Enter to save, Escape to cancel
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
+            if (!nickname.trim()) return;
             handleSave();
         } else if (e.key === 'Escape') {
             onClose();

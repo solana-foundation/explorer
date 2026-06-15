@@ -65,7 +65,7 @@ function SlideoverHeader({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 }
 
 function SlideoverTitle({ className, ...props }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>) {
-    return <DialogPrimitive.Title className={cn('e-text-md e-font-medium e-text-white', className)} {...props} />;
+    return <DialogPrimitive.Title className={cn('e-text-base e-font-medium e-text-white', className)} {...props} />;
 }
 
 function SlideoverBody({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
