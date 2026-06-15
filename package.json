@@ -26,6 +26,7 @@
         "test:e2e:ci": "playwright test",
         "test:e2e:ui": "playwright test --ui",
         "test:packages": "pnpm -r --filter './packages/**' run test",
+        "pretest:sb": "pnpm build:packages",
         "test:sb": "vitest --project storybook run",
         "test:sb:changed": "vitest --project storybook --changed --run",
         "test:sb:coverage": "vitest --project storybook run --coverage",
