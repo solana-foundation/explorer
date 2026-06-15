@@ -1,7 +1,9 @@
+import { MangoInstructionLayout } from '@blockworks-foundation/mango-client';
 import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { isMangoInstruction } from '../detection';
+import { isMangoInstruction, parseMangoInstructionTitle } from '../detection';
+import { MANGO_INSTRUCTION_NAMES } from '../instruction-names';
 import { ENCODED_INSTRUCTIONS, makeInstruction, MANGO_PROGRAM_IDS } from './fixtures';
 
 describe('isMangoInstruction', () => {
@@ -29,5 +31,34 @@ describe('isMangoInstruction', () => {
             new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
         );
         expect(isMangoInstruction(ix)).toBe(false);
+    });
+});
+
+describe('parseMangoInstructionTitle', () => {
+    it.each([
+        'Deposit',
+        'Withdraw',
+        'AddToBasket',
+        'PlaceSpotOrder',
+        'CancelSpotOrder',
+        'PlacePerpOrder',
+        'PlacePerpOrder2',
+        'CancelPerpOrder',
+        'AddSpotMarket',
+        'AddPerpMarket',
+        'ChangePerpMarketParams',
+    ] as const)('should parse %s instruction', title => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS[title], MANGO_PROGRAM_IDS.mainnet);
+        expect(parseMangoInstructionTitle(ix)).toBe(title);
+    });
+
+    it('should match the layout registry exactly', () => {
+        const { registry } = MangoInstructionLayout as unknown as {
+            registry: Record<string, { property: string }>;
+        };
+        const expected = new Map(
+            Object.entries(registry).map(([index, variant]) => [Number(index), variant.property]),
+        );
+        expect(MANGO_INSTRUCTION_NAMES).toEqual(expected);
     });
 });

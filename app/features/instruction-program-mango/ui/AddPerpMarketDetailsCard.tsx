@@ -24,10 +24,12 @@ export function AddPerpMarketDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <BaseTable.Row>
-                <BaseTable.Cell>Market index</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.marketIndex}</BaseTable.Cell>
-            </BaseTable.Row>
+            {info.marketIndex !== undefined && (
+                <BaseTable.Row>
+                    <BaseTable.Cell>Market index</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.marketIndex}</BaseTable.Cell>
+                </BaseTable.Row>
+            )}
             <BaseTable.Row>
                 <BaseTable.Cell>Maintenance leverage</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">{info.maintLeverage}</BaseTable.Cell>

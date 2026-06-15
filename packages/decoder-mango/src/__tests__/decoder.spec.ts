@@ -13,7 +13,6 @@ import {
     decodePlacePerpOrder2,
     decodePlaceSpotOrder,
     decodeWithdraw,
-    parseMangoInstructionTitle,
 } from '../decoder';
 import { ENCODED_INSTRUCTIONS, makeInstruction, MANGO_PROGRAM_IDS, TEST_KEYS } from './fixtures';
 
@@ -117,15 +116,16 @@ describe('decodeCancelPerpOrder', () => {
     });
 });
 
-// Both AddSpotMarket and AddPerpMarket layouts lack a marketIndex field (it comes
-// from account keys), so the decoder throws when accessing .marketIndex.toNumber().
+// Neither AddSpotMarket nor AddPerpMarket layout carries a marketIndex field (it's
+// assigned from mango group state), so it decodes as undefined rather than throwing.
 describe.each([
     ['decodeAddSpotMarket', decodeAddSpotMarket, ENCODED_INSTRUCTIONS.AddSpotMarket],
     ['decodeAddPerpMarket', decodeAddPerpMarket, ENCODED_INSTRUCTIONS.AddPerpMarket],
 ] as const)('%s', (_name, decodeFn, data) => {
-    it('should throw because layout does not include marketIndex field', () => {
+    it('should decode without a marketIndex field', () => {
         const ix = makeInstruction(data, programId);
-        expect(() => decodeFn(ix)).toThrow();
+        const result = decodeFn(ix);
+        expect(result.marketIndex).toBeUndefined();
     });
 });
 
@@ -151,24 +151,5 @@ describe('decodeConsumeEvents', () => {
         const ix = makeInstruction(ENCODED_INSTRUCTIONS.Deposit, programId, TEST_KEYS);
         const result = decodeConsumeEvents(ix);
         expect(result.perpMarket.pubkey).toEqual(TEST_KEYS[2]);
-    });
-});
-
-describe('parseMangoInstructionTitle', () => {
-    it.each([
-        'Deposit',
-        'Withdraw',
-        'AddToBasket',
-        'PlaceSpotOrder',
-        'CancelSpotOrder',
-        'PlacePerpOrder',
-        'PlacePerpOrder2',
-        'CancelPerpOrder',
-        'AddSpotMarket',
-        'AddPerpMarket',
-        'ChangePerpMarketParams',
-    ] as const)('should parse %s instruction', title => {
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS[title], programId);
-        expect(parseMangoInstructionTitle(ix)).toBe(title);
     });
 });

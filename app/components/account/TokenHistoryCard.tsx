@@ -14,8 +14,7 @@ import {
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
-import { parseMangoInstructionTitle } from '@explorer/decoder-mango';
-import { isMangoInstruction } from '@explorer/decoder-mango/detection';
+import { isMangoInstruction, parseMangoInstructionTitle } from '@explorer/decoder-mango/detection';
 import { isTokenProgramData } from '@providers/accounts';
 import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts/history';
 import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';

@@ -211,7 +211,8 @@ export const decodeChangePerpMarketParams = (ix: TransactionInstruction): Change
 };
 
 export type AddSpotMarket = {
-    marketIndex: number;
+    // optional: not in the AddSpotMarket binary layout, it's assigned from mango group state
+    marketIndex?: number;
     maintLeverage: number;
     initLeverage: number;
     liquidationFee: number;
@@ -226,7 +227,6 @@ export const decodeAddSpotMarket = (ix: TransactionInstruction): AddSpotMarket =
         initLeverage: decoded.AddSpotMarket.initLeverage.toNumber(),
         liquidationFee: decoded.AddSpotMarket.liquidationFee.toNumber(),
         maintLeverage: decoded.AddSpotMarket.maintLeverage.toNumber(),
-        marketIndex: decoded.AddSpotMarket.marketIndex.toNumber(),
         maxRate: decoded.AddSpotMarket.maxRate.toNumber(),
         optimalRate: decoded.AddSpotMarket.optimalRate.toNumber(),
         optimalUtil: decoded.AddSpotMarket.optimalUtil.toNumber(),
@@ -235,7 +235,8 @@ export const decodeAddSpotMarket = (ix: TransactionInstruction): AddSpotMarket =
 };
 
 export type AddPerpMarket = {
-    marketIndex: number;
+    // optional: not in the AddPerpMarket binary layout, it's assigned from mango group state
+    marketIndex?: number;
     maintLeverage: number;
     initLeverage: number;
     liquidationFee: number;
@@ -257,7 +258,6 @@ export const decodeAddPerpMarket = (ix: TransactionInstruction): AddPerpMarket =
         liquidationFee: decoded.AddPerpMarket.liquidationFee.toNumber(),
         maintLeverage: decoded.AddPerpMarket.maintLeverage.toNumber(),
         makerFee: decoded.AddPerpMarket.makerFee.toNumber(),
-        marketIndex: decoded.AddPerpMarket.marketIndex.toNumber(),
         maxDepthBps: decoded.AddPerpMarket.maxDepthBps.toNumber(),
         mngoPerPeriod: decoded.AddPerpMarket.mngoPerPeriod.toNumber(),
         quoteLotSize: decoded.AddPerpMarket.quoteLotSize.toNumber(),
@@ -280,8 +280,3 @@ export type ConsumeEvents = {
 export const decodeConsumeEvents = (ix: TransactionInstruction): ConsumeEvents => ({
     perpMarket: ix.keys[2],
 });
-
-export const parseMangoInstructionTitle = (instruction: TransactionInstruction): string => {
-    const decodedInstruction = MangoInstructionLayout.decode(instruction.data, 0);
-    return Object.keys(decodedInstruction)[0];
-};
