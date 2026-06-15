@@ -59,7 +59,7 @@ describe('GET /api/token-image/[mintAddress]', () => {
     describe('successful requests', () => {
         it('should return the image URL when the asset has one', async () => {
             getAssetBatch.mockResolvedValueOnce([
-                { id: VALID_MINT, content: { links: { image: 'https://example.com/image.png' } } },
+                { content: { links: { image: 'https://example.com/image.png' } }, id: VALID_MINT },
             ]);
 
             const response = await GET(makeRequest(), makeParams());
@@ -70,7 +70,7 @@ describe('GET /api/token-image/[mintAddress]', () => {
         });
 
         it('should return undefined image when asset has no image link', async () => {
-            getAssetBatch.mockResolvedValueOnce([{ id: VALID_MINT, content: { links: {} } }]);
+            getAssetBatch.mockResolvedValueOnce([{ content: { links: {} }, id: VALID_MINT }]);
 
             const response = await GET(makeRequest(), makeParams());
 
@@ -90,7 +90,7 @@ describe('GET /api/token-image/[mintAddress]', () => {
 
         it('should return cache headers on a successful image response', async () => {
             getAssetBatch.mockResolvedValueOnce([
-                { id: VALID_MINT, content: { links: { image: 'https://example.com/image.png' } } },
+                { content: { links: { image: 'https://example.com/image.png' } }, id: VALID_MINT },
             ]);
 
             const response = await GET(makeRequest(), makeParams());
@@ -101,7 +101,7 @@ describe('GET /api/token-image/[mintAddress]', () => {
         });
 
         it('should call getAssetBatch with the mint address', async () => {
-            getAssetBatch.mockResolvedValueOnce([{ id: VALID_MINT, content: { links: {} } }]);
+            getAssetBatch.mockResolvedValueOnce([{ content: { links: {} }, id: VALID_MINT }]);
 
             await GET(makeRequest(), makeParams());
 
