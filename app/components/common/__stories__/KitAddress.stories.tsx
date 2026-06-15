@@ -10,7 +10,9 @@ const meta: Meta<typeof KitAddress> = {
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/KitAddress',
+    // TODO: rename to 'Components/Common/KitAddress' once we move off Dashkit — keeping the legacy
+    // title for now avoids churn in the Storybook tree mid-migration.
+    title: 'Features/Stake/KitAddress',
 };
 
 export default meta;

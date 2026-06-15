@@ -14,7 +14,9 @@ const meta: Meta<typeof VotesCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Vote/VotesCard/Responsive',
+    // TODO: rename to 'Features/Vote/VotesCard/Responsive' once we move off Dashkit — keeping the
+    // legacy title for now avoids churn in the Storybook tree mid-migration.
+    title: 'Components/Account/VotesCard/Responsive',
 };
 
 export default meta;

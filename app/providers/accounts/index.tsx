@@ -2,9 +2,7 @@
 
 import { fetchNftData } from '@entities/nft';
 import { getStakeActivation, StakeAccount } from '@features/stake';
-// Deep import on purpose: this provider is in most route bundles and only needs the
-// account schema, not the vote UI the barrel re-exports.
-import { VoteAccount } from '@features/vote/lib/validators';
+import { VoteAccount } from '@features/vote/lib/validators'; // deep import on purpose: this provider only needs the account schema, not the vote UI the barrel re-exports
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';

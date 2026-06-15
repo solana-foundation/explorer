@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { Keypair } from '@solana/web3.js';
 import { create } from 'superstruct';
 import { describe, expect, it } from 'vitest';
@@ -14,231 +15,235 @@ import {
     UpdateVoteStateInfo,
 } from '../instruction-types';
 
-const HASH = 'EGmiq6yYZJyZHpUcXc7yFXG4SQB6oPCxYS8L2Hxb1tNe';
+// gen.blockhash is a deterministic 32-byte base58 string — the same shape as a vote/tower hash.
+const HASH = gen.blockhash();
 
-describe('vote instruction types: towerSync', () => {
-    it('should validate the RPC parsed shape of towersync', () => {
-        const voteAccount = randomAddress();
+describe('@features/vote', () => {
+    describe('instruction-types: towerSync', () => {
+        it('should validate the RPC parsed shape of towersync', () => {
+            const voteAccount = randomAddress();
 
-        const parsed = create(
-            {
-                towerSync: {
-                    blockId: HASH,
-                    hash: HASH,
-                    lockouts: [
-                        { confirmation_count: 31, slot: 414213970 },
-                        { confirmation_count: 30, slot: 414213971 },
-                    ],
-                    root: 414213969,
-                    timestamp: 1781015375,
+            const parsed = create(
+                {
+                    towerSync: {
+                        blockId: HASH,
+                        hash: HASH,
+                        lockouts: [
+                            { confirmation_count: 31, slot: 414213970 },
+                            { confirmation_count: 30, slot: 414213971 },
+                        ],
+                        root: 414213969,
+                        timestamp: 1781015375,
+                    },
+                    voteAccount,
+                    voteAuthority: randomAddress(),
                 },
-                voteAccount,
-                voteAuthority: randomAddress(),
-            },
-            TowerSyncInfo,
-        );
+                TowerSyncInfo,
+            );
 
-        expect(parsed.voteAccount).toBe(voteAccount);
-        expect(parsed.towerSync.lockouts[0].slot).toBe(414213970);
-        expect(parsed.towerSync.root).toBe(414213969);
-        expect(parsed.hash).toBeUndefined();
-    });
+            expect(parsed.voteAccount).toBe(voteAccount);
+            expect(parsed.towerSync.lockouts[0].slot).toBe(414213970);
+            expect(parsed.towerSync.root).toBe(414213969);
+            expect(parsed.hash).toBeUndefined();
+        });
 
-    it('should validate towersyncswitch (top-level hash) and null root/timestamp', () => {
-        const parsed = create(
-            {
-                hash: HASH,
-                towerSync: {
-                    blockId: HASH,
+        it('should validate towersyncswitch (top-level hash) and null root/timestamp', () => {
+            const parsed = create(
+                {
                     hash: HASH,
-                    lockouts: [],
-                    root: null,
-                    timestamp: null,
+                    towerSync: {
+                        blockId: HASH,
+                        hash: HASH,
+                        lockouts: [],
+                        root: null,
+                        timestamp: null,
+                    },
+                    voteAccount: randomAddress(),
+                    voteAuthority: randomAddress(),
                 },
-                voteAccount: randomAddress(),
-                voteAuthority: randomAddress(),
-            },
-            TowerSyncInfo,
-        );
+                TowerSyncInfo,
+            );
 
-        expect(parsed.hash).toBe(HASH);
-        expect(parsed.towerSync.root).toBeNull();
-    });
-});
-
-describe('vote instruction types: updateVoteState', () => {
-    it('should validate the RPC parsed shape shared by all updatevotestate variants', () => {
-        const parsed = create(
-            {
-                voteAccount: randomAddress(),
-                voteAuthority: randomAddress(),
-                voteStateUpdate: {
-                    hash: HASH,
-                    lockouts: [{ confirmation_count: 12, slot: 250000000 }],
-                    root: null,
-                    timestamp: 1700000000,
-                },
-            },
-            UpdateVoteStateInfo,
-        );
-
-        expect(parsed.voteStateUpdate.timestamp).toBe(1700000000);
-        expect(parsed.voteStateUpdate.lockouts[0].confirmation_count).toBe(12);
-    });
-});
-
-describe('vote instruction types: authorityType serde forms', () => {
-    it('should accept the string form emitted for unit variants', () => {
-        const authority = randomAddress();
-
-        const parsed = create(
-            {
-                authority,
-                authorityType: 'Withdrawer',
-                clockSysvar: randomAddress(),
-                newAuthority: randomAddress(),
-                voteAccount: randomAddress(),
-            },
-            AuthorizeInfo,
-        );
-
-        expect(parsed.authorityType).toBe('Withdrawer');
-        expect(parsed.authority).toBe(authority);
+            expect(parsed.hash).toBe(HASH);
+            expect(parsed.towerSync.root).toBeNull();
+        });
     });
 
-    it('should reject forms agave never emits (serde serializes unit variants as strings)', () => {
-        const info = {
-            authority: randomAddress(),
-            authorityType: 0,
-            clockSysvar: randomAddress(),
-            newAuthority: randomAddress(),
-            voteAccount: randomAddress(),
-        };
-
-        expect(() => create(info, AuthorizeInfo)).toThrow();
-        expect(() => create({ ...info, authorityType: 'Staker' }, AuthorizeInfo)).toThrow();
-    });
-
-    it('should accept the VoterWithBLS object form (SIMD-0387, authorizeChecked)', () => {
-        const parsed = create(
-            {
-                authority: randomAddress(),
-                authorityType: {
-                    VoterWithBLS: {
-                        bls_proof_of_possession: new Array(96).fill(7),
-                        bls_pubkey: new Array(48).fill(3),
+    describe('instruction-types: updateVoteState', () => {
+        it('should validate the RPC parsed shape shared by all updatevotestate variants', () => {
+            const parsed = create(
+                {
+                    voteAccount: randomAddress(),
+                    voteAuthority: randomAddress(),
+                    voteStateUpdate: {
+                        hash: HASH,
+                        lockouts: [{ confirmation_count: 12, slot: 250000000 }],
+                        root: null,
+                        timestamp: 1700000000,
                     },
                 },
+                UpdateVoteStateInfo,
+            );
+
+            expect(parsed.voteStateUpdate.timestamp).toBe(1700000000);
+            expect(parsed.voteStateUpdate.lockouts[0].confirmation_count).toBe(12);
+        });
+    });
+
+    describe('instruction-types: authorityType serde forms', () => {
+        it('should accept the string form emitted for unit variants', () => {
+            const authority = randomAddress();
+
+            const parsed = create(
+                {
+                    authority,
+                    authorityType: 'Withdrawer',
+                    clockSysvar: randomAddress(),
+                    newAuthority: randomAddress(),
+                    voteAccount: randomAddress(),
+                },
+                AuthorizeInfo,
+            );
+
+            expect(parsed.authorityType).toBe('Withdrawer');
+            expect(parsed.authority).toBe(authority);
+        });
+
+        it('should reject forms agave never emits (serde serializes unit variants as strings)', () => {
+            const info = {
+                authority: randomAddress(),
+                authorityType: 0,
                 clockSysvar: randomAddress(),
                 newAuthority: randomAddress(),
                 voteAccount: randomAddress(),
-            },
-            AuthorizeInfo,
-        );
+            };
 
-        expect(typeof parsed.authorityType).toBe('object');
-        const blsArgs = (parsed.authorityType as Exclude<typeof parsed.authorityType, number | string>).VoterWithBLS;
-        expect(blsArgs.bls_pubkey).toHaveLength(48);
-        expect(blsArgs.bls_proof_of_possession).toHaveLength(96);
+            expect(() => create(info, AuthorizeInfo)).toThrow();
+            expect(() => create({ ...info, authorityType: 'Staker' }, AuthorizeInfo)).toThrow();
+        });
+
+        it('should accept the VoterWithBLS object form (SIMD-0387, authorizeChecked)', () => {
+            const parsed = create(
+                {
+                    authority: randomAddress(),
+                    authorityType: {
+                        VoterWithBLS: {
+                            bls_proof_of_possession: new Array(96).fill(7),
+                            bls_pubkey: new Array(48).fill(3),
+                        },
+                    },
+                    clockSysvar: randomAddress(),
+                    newAuthority: randomAddress(),
+                    voteAccount: randomAddress(),
+                },
+                AuthorizeInfo,
+            );
+
+            expect(typeof parsed.authorityType).toBe('object');
+            const blsArgs = (parsed.authorityType as Exclude<typeof parsed.authorityType, number | string>)
+                .VoterWithBLS;
+            expect(blsArgs.bls_pubkey).toHaveLength(48);
+            expect(blsArgs.bls_proof_of_possession).toHaveLength(96);
+        });
+
+        it('should validate the seed variants shape', () => {
+            const parsed = create(
+                {
+                    authorityBaseKey: randomAddress(),
+                    authorityOwner: randomAddress(),
+                    authoritySeed: 'seed',
+                    authorityType: 'Voter',
+                    clockSysvar: randomAddress(),
+                    newAuthority: randomAddress(),
+                    voteAccount: randomAddress(),
+                },
+                AuthorizeWithSeedInfo,
+            );
+
+            expect(parsed.authoritySeed).toBe('seed');
+        });
     });
 
-    it('should validate the seed variants shape', () => {
-        const parsed = create(
-            {
-                authorityBaseKey: randomAddress(),
-                authorityOwner: randomAddress(),
-                authoritySeed: 'seed',
-                authorityType: 'Voter',
-                clockSysvar: randomAddress(),
-                newAuthority: randomAddress(),
-                voteAccount: randomAddress(),
-            },
-            AuthorizeWithSeedInfo,
-        );
+    describe('instruction-types: updateValidatorIdentity', () => {
+        it('should validate the RPC parsed shape', () => {
+            const newValidatorIdentity = randomAddress();
 
-        expect(parsed.authoritySeed).toBe('seed');
+            const parsed = create(
+                {
+                    newValidatorIdentity,
+                    voteAccount: randomAddress(),
+                    withdrawAuthority: randomAddress(),
+                },
+                UpdateValidatorIdentityInfo,
+            );
+
+            expect(parsed.newValidatorIdentity).toBe(newValidatorIdentity);
+        });
     });
-});
 
-describe('vote instruction types: updateValidatorIdentity', () => {
-    it('should validate the RPC parsed shape', () => {
-        const newValidatorIdentity = randomAddress();
+    describe('instruction-types: Alpenglow additions', () => {
+        it('should validate initializeV2', () => {
+            const parsed = create(
+                {
+                    authorizedVoter: randomAddress(),
+                    authorizedVoterBlsProofOfPossession: 'mOZcyrqpCckPeKVYksZsCInRO6MZc2uc93Hf2Oeb',
+                    authorizedVoterBlsPubkey: 'sz/sKhfNFcN7Kcszzomb1fONZjhMClKxVx/L3EHj',
+                    authorizedWithdrawer: randomAddress(),
+                    blockRevenueCollector: randomAddress(),
+                    blockRevenueCommissionBps: 10000,
+                    inflationRewardsCollector: randomAddress(),
+                    inflationRewardsCommissionBps: 500,
+                    node: randomAddress(),
+                    voteAccount: randomAddress(),
+                },
+                InitializeV2Info,
+            );
 
-        const parsed = create(
-            {
-                newValidatorIdentity,
+            expect(parsed.inflationRewardsCommissionBps).toBe(500);
+        });
+
+        it('should validate updateCommissionBps and reject unknown commission kinds', () => {
+            const info = {
+                commissionBps: 800,
+                commissionKind: 'InflationRewards',
                 voteAccount: randomAddress(),
                 withdrawAuthority: randomAddress(),
-            },
-            UpdateValidatorIdentityInfo,
-        );
+            };
 
-        expect(parsed.newValidatorIdentity).toBe(newValidatorIdentity);
-    });
-});
+            const parsed = create(info, UpdateCommissionBpsInfo);
 
-describe('vote instruction types: Alpenglow additions', () => {
-    it('should validate initializeV2', () => {
-        const parsed = create(
-            {
-                authorizedVoter: randomAddress(),
-                authorizedVoterBlsProofOfPossession: 'mOZcyrqpCckPeKVYksZsCInRO6MZc2uc93Hf2Oeb',
-                authorizedVoterBlsPubkey: 'sz/sKhfNFcN7Kcszzomb1fONZjhMClKxVx/L3EHj',
-                authorizedWithdrawer: randomAddress(),
-                blockRevenueCollector: randomAddress(),
-                blockRevenueCommissionBps: 10000,
-                inflationRewardsCollector: randomAddress(),
-                inflationRewardsCommissionBps: 500,
-                node: randomAddress(),
-                voteAccount: randomAddress(),
-            },
-            InitializeV2Info,
-        );
+            expect(parsed.commissionKind).toBe('InflationRewards');
+            expect(() => create({ ...info, commissionKind: 'Other' }, UpdateCommissionBpsInfo)).toThrow();
+        });
 
-        expect(parsed.inflationRewardsCommissionBps).toBe(500);
-    });
+        it('should validate updateCommissionCollector', () => {
+            const newCollector = randomAddress();
 
-    it('should validate updateCommissionBps and reject unknown commission kinds', () => {
-        const info = {
-            commissionBps: 800,
-            commissionKind: 'InflationRewards',
-            voteAccount: randomAddress(),
-            withdrawAuthority: randomAddress(),
-        };
+            const parsed = create(
+                {
+                    commissionKind: 'BlockRevenue',
+                    newCollector,
+                    voteAccount: randomAddress(),
+                    withdrawAuthority: randomAddress(),
+                },
+                UpdateCommissionCollectorInfo,
+            );
 
-        const parsed = create(info, UpdateCommissionBpsInfo);
+            expect(parsed.newCollector).toBe(newCollector);
+        });
 
-        expect(parsed.commissionKind).toBe('InflationRewards');
-        expect(() => create({ ...info, commissionKind: 'Other' }, UpdateCommissionBpsInfo)).toThrow();
-    });
+        it('should validate depositDelegatorRewards', () => {
+            const parsed = create(
+                {
+                    deposit: 1000000,
+                    source: randomAddress(),
+                    voteAccount: randomAddress(),
+                },
+                DepositDelegatorRewardsInfo,
+            );
 
-    it('should validate updateCommissionCollector', () => {
-        const newCollector = randomAddress();
-
-        const parsed = create(
-            {
-                commissionKind: 'BlockRevenue',
-                newCollector,
-                voteAccount: randomAddress(),
-                withdrawAuthority: randomAddress(),
-            },
-            UpdateCommissionCollectorInfo,
-        );
-
-        expect(parsed.newCollector).toBe(newCollector);
-    });
-
-    it('should validate depositDelegatorRewards', () => {
-        const parsed = create(
-            {
-                deposit: 1000000,
-                source: randomAddress(),
-                voteAccount: randomAddress(),
-            },
-            DepositDelegatorRewardsInfo,
-        );
-
-        expect(parsed.deposit).toBe(1000000);
+            expect(parsed.deposit).toBe(1000000);
+        });
     });
 });
 

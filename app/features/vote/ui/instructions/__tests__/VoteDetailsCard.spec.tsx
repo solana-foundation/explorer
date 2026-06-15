@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+import { gen } from '@__fixtures__/gen';
 import { ParsedInstruction, ParsedTransaction, PublicKey, VOTE_PROGRAM_ID } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
@@ -19,97 +20,100 @@ import { VoteDetailsCard } from '../VoteDetailsCard';
 const VOTE_ACCOUNT = 'FMYmiwty1hMicTqzLqp4USvrjtqhsPhocquaUYMZsbPo';
 const VOTE_AUTHORITY = 'Bdjmn2pTy6q7xZ5cHsCxZSCjdW2tUU86ZzwgjU9qsYKQ';
 const CLOCK_SYSVAR = 'SysvarC1ock11111111111111111111111111111111';
-const HASH = 'EGmiq6yYZJyZHpUcXc7yFXG4SQB6oPCxYS8L2Hxb1tNe';
+// gen.blockhash is a deterministic 32-byte base58 string — the same shape as a vote/tower hash.
+const HASH = gen.blockhash();
 
-describe('instruction::VoteDetailsCard', () => {
-    test('should render "towersync" instruction', async () => {
-        const ix = voteParsedInstruction({
-            info: {
-                towerSync: {
-                    blockId: HASH,
-                    hash: HASH,
-                    lockouts: [
-                        { confirmation_count: 31, slot: 414213970 },
-                        { confirmation_count: 30, slot: 414213971 },
-                    ],
-                    root: 414213969,
-                    timestamp: 1781015375,
-                },
-                voteAccount: VOTE_ACCOUNT,
-                voteAuthority: VOTE_AUTHORITY,
-            },
-            type: 'towersync',
-        });
-
-        renderCard(ix);
-
-        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
-        await waitFor(() => {
-            expect(screen.getByText(/Vote: Tower Sync/)).toBeInTheDocument();
-        });
-        expect(screen.getByText(/Root Slot/)).toBeInTheDocument();
-        expect(screen.getByText(/414213970 \(31\)/)).toBeInTheDocument();
-        expect(screen.queryByText(/Unknown Instruction/)).not.toBeInTheDocument();
-    });
-
-    test('should render "authorizeChecked" instruction with a BLS authority type', async () => {
-        const ix = voteParsedInstruction({
-            info: {
-                authority: VOTE_AUTHORITY,
-                authorityType: {
-                    VoterWithBLS: {
-                        bls_proof_of_possession: new Array(96).fill(7),
-                        bls_pubkey: new Array(48).fill(3),
+describe('@features/vote', () => {
+    describe('instruction::VoteDetailsCard', () => {
+        test('should render "towersync" instruction', async () => {
+            const ix = voteParsedInstruction({
+                info: {
+                    towerSync: {
+                        blockId: HASH,
+                        hash: HASH,
+                        lockouts: [
+                            { confirmation_count: 31, slot: 414213970 },
+                            { confirmation_count: 30, slot: 414213971 },
+                        ],
+                        root: 414213969,
+                        timestamp: 1781015375,
                     },
+                    voteAccount: VOTE_ACCOUNT,
+                    voteAuthority: VOTE_AUTHORITY,
                 },
-                clockSysvar: CLOCK_SYSVAR,
-                newAuthority: VOTE_AUTHORITY,
-                voteAccount: VOTE_ACCOUNT,
-            },
-            type: 'authorizeChecked',
+                type: 'towersync',
+            });
+
+            renderCard(ix);
+
+            // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+            await waitFor(() => {
+                expect(screen.getByText(/Vote: Tower Sync/)).toBeInTheDocument();
+            });
+            expect(screen.getByText(/Root Slot/)).toBeInTheDocument();
+            expect(screen.getByText(/414213970 \(31\)/)).toBeInTheDocument();
+            expect(screen.queryByText(/Unknown Instruction/)).not.toBeInTheDocument();
         });
 
-        renderCard(ix);
+        test('should render "authorizeChecked" instruction with a BLS authority type', async () => {
+            const ix = voteParsedInstruction({
+                info: {
+                    authority: VOTE_AUTHORITY,
+                    authorityType: {
+                        VoterWithBLS: {
+                            bls_proof_of_possession: new Array(96).fill(7),
+                            bls_pubkey: new Array(48).fill(3),
+                        },
+                    },
+                    clockSysvar: CLOCK_SYSVAR,
+                    newAuthority: VOTE_AUTHORITY,
+                    voteAccount: VOTE_ACCOUNT,
+                },
+                type: 'authorizeChecked',
+            });
 
-        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
-        await waitFor(() => {
-            expect(screen.getByText(/Vote: Authorize Checked/)).toBeInTheDocument();
-        });
-        expect(screen.getByText(/Voter \(BLS\)/)).toBeInTheDocument();
-        expect(screen.getByText(/BLS Pubkey/)).toBeInTheDocument();
-        expect(screen.queryByText(/Unknown Instruction/)).not.toBeInTheDocument();
-    });
+            renderCard(ix);
 
-    test('should render "updateValidatorIdentity" instruction', async () => {
-        const ix = voteParsedInstruction({
-            info: {
-                newValidatorIdentity: VOTE_AUTHORITY,
-                voteAccount: VOTE_ACCOUNT,
-                withdrawAuthority: VOTE_AUTHORITY,
-            },
-            type: 'updateValidatorIdentity',
-        });
-
-        renderCard(ix);
-
-        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
-        await waitFor(() => {
-            expect(screen.getByText(/Vote: Update Validator Identity/)).toBeInTheDocument();
-        });
-        expect(screen.queryByText(/Unknown Instruction/)).not.toBeInTheDocument();
-    });
-
-    test('should fall back to UnknownDetailsCard for an unrecognized type', async () => {
-        const ix = voteParsedInstruction({
-            info: {},
-            type: 'someFutureInstruction',
+            // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+            await waitFor(() => {
+                expect(screen.getByText(/Vote: Authorize Checked/)).toBeInTheDocument();
+            });
+            expect(screen.getByText(/Voter \(BLS\)/)).toBeInTheDocument();
+            expect(screen.getByText(/BLS Pubkey/)).toBeInTheDocument();
+            expect(screen.queryByText(/Unknown Instruction/)).not.toBeInTheDocument();
         });
 
-        renderCard(ix);
+        test('should render "updateValidatorIdentity" instruction', async () => {
+            const ix = voteParsedInstruction({
+                info: {
+                    newValidatorIdentity: VOTE_AUTHORITY,
+                    voteAccount: VOTE_ACCOUNT,
+                    withdrawAuthority: VOTE_AUTHORITY,
+                },
+                type: 'updateValidatorIdentity',
+            });
 
-        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
-        await waitFor(() => {
-            expect(screen.getByText(/Unknown Instruction/)).toBeInTheDocument();
+            renderCard(ix);
+
+            // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+            await waitFor(() => {
+                expect(screen.getByText(/Vote: Update Validator Identity/)).toBeInTheDocument();
+            });
+            expect(screen.queryByText(/Unknown Instruction/)).not.toBeInTheDocument();
+        });
+
+        test('should fall back to UnknownDetailsCard for an unrecognized type', async () => {
+            const ix = voteParsedInstruction({
+                info: {},
+                type: 'someFutureInstruction',
+            });
+
+            renderCard(ix);
+
+            // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+            await waitFor(() => {
+                expect(screen.getByText(/Unknown Instruction/)).toBeInTheDocument();
+            });
         });
     });
 });

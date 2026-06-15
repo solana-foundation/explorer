@@ -9,7 +9,9 @@ const meta: Meta<typeof VotesCard> = {
     decorators: [withCluster],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Features/Vote/VotesCard',
+    // TODO: rename to 'Features/Vote/VotesCard' once we move off Dashkit — keeping the legacy
+    // title for now avoids churn in the Storybook tree mid-migration.
+    title: 'Components/Account/VotesCard',
 };
 
 export default meta;
