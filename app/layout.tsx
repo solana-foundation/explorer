@@ -1,4 +1,5 @@
-import './scss/theme-dark.scss';
+import './reboot.css';
+import './body-base.css';
 import './styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';

@@ -1,0 +1,12 @@
+/* App body base — restores the body styling the original dashkit bundle set via
+   `$font-family-base`/`$font-size-base`/`$body-bg`, which the interim theme-dark.scss
+   stopgap had silently dropped to Bootstrap defaults (system font, 16px). Prebuilt
+   Bootstrap Reboot ships stock vars, so the app needs this explicitly. Mirrors
+   Storybook's .storybook/body-base.css. bg mirrors dk dark #161b19. */
+body {
+    background-color: #161b19;
+    color: #1b4e3f;
+    font-family: var(--explorer-default-font);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}

@@ -1,4 +1,5 @@
-import 'bootstrap/dist/css/bootstrap-reboot.min.css';
+import '@/app/reboot.css';
+import '@/app/body-base.css';
 import './body-base.css';
 import '@/app/styles.css';
 

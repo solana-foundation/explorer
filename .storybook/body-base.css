@@ -1,8 +1,8 @@
+/* Storybook-only override. Font + size + bg come from the shared @/app/body-base.css
+   (imported just before this), so an app font regression also breaks Storybook and the
+   pixel rig catches it. Only the text color differs: the app body color (#1b4e3f) is
+   invisible-on-dark by design (components set their own), but bare story text needs to
+   read on the dark canvas, so force white here. */
 body {
-    background-color: #161a19;
     color: #fff;
-    font-family: var(--explorer-default-font);
-    font-size: 0.9375rem;
-    font-weight: 400;
-    line-height: 1.5;
 }

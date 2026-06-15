@@ -1,3 +1,8 @@
+/* @tailwind base is intentionally omitted: preflight's `*{border-width:0}` + `button{padding:0}`
+   strip the UA form-element box model that components were built against, causing wide pixel drift.
+   The reset instead comes from the vendored `reboot.css`. FOLLOW-UP: recover `@tailwind base`
+   incrementally — adopt preflight element groups one at a time (and drop the matching reboot rules)
+   rather than swapping the whole reset at once, so each step can be pixel-verified. */
 @tailwind components;
 @tailwind utilities;
 
