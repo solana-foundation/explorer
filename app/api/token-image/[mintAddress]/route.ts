@@ -45,6 +45,6 @@ export async function GET(request: Request, props: Params) {
     }
 
     const asset = assets.find(a => a.id === mintAddress);
-    const image = asset?.content.links?.image;
+    const image = asset?.content?.links?.image;
     return NextResponse.json({ image }, { headers: IMAGE_CACHE_HEADERS });
 }

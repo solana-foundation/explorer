@@ -83,7 +83,7 @@ export async function resolveSearchTokens(
         clearTimeout(imageTimeout);
     }
 
-    const iconMap = new Map(assets?.map(a => [a.id, a.content.links?.image]) ?? []);
+    const iconMap = new Map(assets?.map(a => [a.id, a.content?.links?.image]) ?? []);
 
     return discovered.map(t => ({
         decimals: t.decimals,
