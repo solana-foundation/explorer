@@ -1,8 +1,5 @@
-/* @tailwind base is intentionally omitted: preflight's `*{border-width:0}` + `button{padding:0}`
-   strip the UA form-element box model that components were built against, causing wide pixel drift.
-   The reset instead comes from the vendored `reboot.css`. FOLLOW-UP: recover `@tailwind base`
-   incrementally — adopt preflight element groups one at a time (and drop the matching reboot rules)
-   rather than swapping the whole reset at once, so each step can be pixel-verified. */
+/* Preflight (`@tailwind base`) lives in preflight.css, imported BEFORE preflight-adjustments.css, so the
+   cascade is preflight < adjustments < these app overrides (utilities beat all element rules). */
 @tailwind components;
 @tailwind utilities;
 
@@ -136,39 +133,6 @@ caption {
     /* Storybook canvas swatches; --background doubles as the dark swatch. */
     --sb-bg-card: #1e2423;
     --sb-bg-light: oklch(96.5% 0.005 86);
-
-    /* Compatibility stubs — normally declared by @tailwind base (skipped, see top of file).
-     * Real values come from the ring/transform/filter utilities that override them. */
-    --tw-translate-x: 0;
-    --tw-translate-y: 0;
-    --tw-rotate: 0;
-    --tw-skew-x: 0;
-    --tw-skew-y: 0;
-    --tw-scale-x: 1;
-    --tw-scale-y: 1;
-    --tw-ring-inset: var(--tw-empty, /*!*/ /*!*/);
-    --tw-ring-offset-width: 0px;
-    --tw-ring-offset-color: #fff;
-    --tw-ring-color: rgb(59 130 246 / 0.5);
-    --tw-ring-width: 0px;
-    --tw-blur: ;
-    --tw-brightness: ;
-    --tw-contrast: ;
-    --tw-grayscale: ;
-    --tw-hue-rotate: ;
-    --tw-invert: ;
-    --tw-saturate: ;
-    --tw-sepia: ;
-    --tw-drop-shadow: ;
-    --tw-backdrop-blur: ;
-    --tw-backdrop-brightness: ;
-    --tw-backdrop-contrast: ;
-    --tw-backdrop-grayscale: ;
-    --tw-backdrop-hue-rotate: ;
-    --tw-backdrop-invert: ;
-    --tw-backdrop-opacity: ;
-    --tw-backdrop-saturate: ;
-    --tw-backdrop-sepia: ;
 }
 
 /* Dashkit component ports kept as-is: spinners */

@@ -1,0 +1,181 @@
+/* Preflight-adjustments layer: explicit deltas where this app diverges from Tailwind Preflight.
+   Imported after preflight.css, before styles.css — beats preflight, loses to app overrides + utilities.
+   Each rule names the preflight default it counteracts (these formerly came from vendored Bootstrap Reboot). */
+
+/* Preflight forces media to display:block; baseline kept UA inline, so inline icons (svg link/chevron
+   glyphs) sit beside text instead of dropping to their own line. */
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+    display: revert;
+}
+
+/* Preflight strips list markers (list-style:none); baseline kept UA bullets/numbers. */
+ol,
+ul {
+    list-style: revert;
+}
+
+/* Preflight defaults border-color to a gray (theme borderColor.DEFAULT) on every element; baseline left
+   it as currentColor, so width-only borders (card dividers, table cells) shifted color. */
+*,
+::before,
+::after {
+    border-color: currentColor;
+}
+
+/* Preflight strips the UA button box model (transparent bg, color:inherit, padding:0, border-width:0);
+   baseline kept UA chrome for buttons without explicit utility styling. Revert to UA — utility classes
+   (e-bg-*, e-text-*, e-border-*, e-p-*) still win by specificity. */
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+    padding: revert;
+    color: revert;
+    background-color: revert;
+    background-image: revert;
+    border-width: revert;
+    border-style: revert;
+    border-color: revert;
+}
+
+sub,
+sup {
+    position: relative;
+    font-size: 0.75em;
+    line-height: 0;
+    vertical-align: baseline;
+}
+sub {
+    bottom: -0.25em;
+}
+sup {
+    top: -0.5em;
+}
+
+/* --- Bootstrap Reboot deltas vs preflight (pruned out of the vendored reboot.css) --- */
+
+/* Preflight zeroes typographic margins (margin:0); baseline kept Bootstrap's reading rhythm. */
+p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+dl,
+ol,
+ul {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+ol ol,
+ol ul,
+ul ol,
+ul ul {
+    margin-bottom: 0;
+}
+dd {
+    margin-bottom: 0.5rem;
+    margin-left: 0;
+}
+blockquote {
+    margin: 0 0 1rem;
+}
+figure {
+    margin: 0 0 1rem;
+}
+address {
+    margin-bottom: 1rem;
+    font-style: normal;
+    line-height: inherit;
+}
+
+/* Preflight resets headings to font-weight:inherit; baseline kept Bootstrap's 500 (styles.css owns sizes). */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 500;
+}
+dt {
+    font-weight: 700;
+}
+
+/* No preflight rules for these; baseline kept Bootstrap's UA-ish behavior. */
+th {
+    text-align: inherit;
+    text-align: -webkit-match-parent;
+}
+label {
+    display: inline-block;
+}
+table {
+    caption-side: bottom;
+}
+tbody,
+td,
+tfoot,
+th,
+thead,
+tr {
+    border-color: inherit;
+}
+
+/* styles.css colors every <a> $primary-dark; reboot kept href-less, class-less anchors at inherit. */
+a:not([href]):not([class]),
+a:not([href]):not([class]):hover {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Preflight leaves UA button border-radius; baseline squared it. */
+button {
+    border-radius: 0;
+}
+
+/* Bootstrap chrome preflight has no equivalent for. */
+mark {
+    padding: 0.2em;
+    background-color: #fcf8e3;
+}
+kbd {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.875em;
+    color: #fff;
+    background-color: #212529;
+    border-radius: 0.2rem;
+}
+kbd kbd {
+    padding: 0;
+    font-size: 1em;
+    font-weight: 700;
+}
+legend {
+    float: left;
+    width: 100%;
+    padding: 0;
+    margin-bottom: 0.5rem;
+    font-size: calc(1.275rem + 0.3vw);
+    line-height: inherit;
+}
+@media (min-width: 1200px) {
+    legend {
+        font-size: 1.5rem;
+    }
+}
+legend + * {
+    clear: left;
+}
+
+/* User-chosen: keep Bootstrap smooth scrolling (preflight leaves scroll-behavior:auto). */
+@media (prefers-reduced-motion: no-preference) {
+    :root {
+        scroll-behavior: smooth;
+    }
+}

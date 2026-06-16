@@ -1,5 +1,5 @@
-import './styles/reboot.css';
-import './styles/reboot-tw.css';
+import './styles/preflight.css';
+import './styles/preflight-adjustments.css';
 import './styles/styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';
