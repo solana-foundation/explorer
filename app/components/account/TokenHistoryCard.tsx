@@ -238,11 +238,13 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px">Slot</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Slot</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Token</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="e-text-dk-gray-700">Instruction Type</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                            Transaction Signature
+                        </BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>
@@ -277,7 +279,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     >
                         {fetching ? (
                             <>
-                                <span className="e-align-text-top e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
+                                <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
                                 Loading
                             </>
                         ) : (
@@ -296,7 +298,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     >
                         {fetching ? (
                             <>
-                                <span className="e-align-text-top e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
+                                <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
                                 Loading
                             </>
                         ) : (
@@ -460,7 +462,7 @@ function InstructionDetailsCell({
     if (isFetching) {
         return (
             <td>
-                <span className="e-align-text-top e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
+                <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
                 Loading
             </td>
         );

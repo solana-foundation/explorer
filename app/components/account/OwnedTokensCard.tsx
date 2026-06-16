@@ -86,7 +86,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
                 <BaseTable.Head>
                     <BaseTable.Row>
                         {showLogos && (
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700 e-w-px e-p-0 e-text-center">
+                            <BaseTable.HeaderCell className="e-w-px e-p-0 e-text-center e-text-dk-gray-700">
                                 Logo
                             </BaseTable.HeaderCell>
                         )}

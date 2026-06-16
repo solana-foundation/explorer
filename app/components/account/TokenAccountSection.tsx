@@ -186,7 +186,7 @@ function FungibleTokenMintAccountCard({
                     <BaseTable.Cell className="md:e-text-right">
                         <a rel="noopener noreferrer" target="_blank" href={tokenInfo.extensions.website}>
                             {tokenInfo.extensions.website}
-                            <ExternalLink className="e-align-text-top e-ml-1.5" size={13} />
+                            <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
                         </a>
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -337,7 +337,7 @@ function NonFungibleTokenMintAccountCard({
                     <BaseTable.Cell className="md:e-text-right">
                         <a rel="noopener noreferrer" target="_blank" href={nftData.json.external_url}>
                             {nftData.json.external_url}
-                            <ExternalLink className="e-align-text-top e-ml-1.5" size={13} />
+                            <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
                         </a>
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -709,7 +709,9 @@ export function TokenExtensionRow(
                     {extension.auditorElgamalPubkey && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Auditor Elgamal Pubkey</BaseTable.Cell>
-                            <BaseTable.Cell className="md:e-text-right">{extension.auditorElgamalPubkey}</BaseTable.Cell>
+                            <BaseTable.Cell className="md:e-text-right">
+                                {extension.auditorElgamalPubkey}
+                            </BaseTable.Cell>
                         </BaseTable.Row>
                     )}
                     <BaseTable.Row>
@@ -1012,7 +1014,7 @@ export function TokenExtensionRow(
                             {extension.uri.startsWith('http') ? (
                                 <a rel="noopener noreferrer" target="_blank" href={extension.uri}>
                                     {extension.uri}
-                                    <ExternalLink className="e-align-text-top e-ml-1.5" size={13} />
+                                    <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
                                 </a>
                             ) : (
                                 extension.uri
@@ -1059,7 +1061,9 @@ export function TokenExtensionRow(
                     {headerStyle === 'header' ? <HHeader name="Confidential Transfer" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Status</BaseTable.Cell>
-                        <BaseTable.Cell className="md:e-text-right">{!extension.approved && 'not '}approved</BaseTable.Cell>
+                        <BaseTable.Cell className="md:e-text-right">
+                            {!extension.approved && 'not '}approved
+                        </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Elgamal Pubkey</BaseTable.Cell>
@@ -1083,7 +1087,9 @@ export function TokenExtensionRow(
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Decryptable Available Balance</BaseTable.Cell>
-                        <BaseTable.Cell className="md:e-text-right">{extension.decryptableAvailableBalance}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:e-text-right">
+                            {extension.decryptableAvailableBalance}
+                        </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Pending Balance, Low Bits</BaseTable.Cell>
@@ -1095,7 +1101,9 @@ export function TokenExtensionRow(
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Pending Balance Credit Counter</BaseTable.Cell>
-                        <BaseTable.Cell className="md:e-text-right">{extension.pendingBalanceCreditCounter}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:e-text-right">
+                            {extension.pendingBalanceCreditCounter}
+                        </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Expected Pending Balance Credit Counter</BaseTable.Cell>

@@ -57,7 +57,13 @@ export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
                 <Dropdown className="e-inline-flex">
                     <DropdownToggle asChild>
                         {/* e-rounded-r-none mirrors legacy .btn-group>.btn:not(:last-child) corner squaring. */}
-                        <Button ui="dashkit" variant="dark" size="sm" className="e-w-[150px] e-rounded-r-none" type="button">
+                        <Button
+                            ui="dashkit"
+                            variant="dark"
+                            size="sm"
+                            className="e-w-[150px] e-rounded-r-none"
+                            type="button"
+                        >
                             Creators <ChevronDown size={15} className="e-align-text-top" />
                         </Button>
                     </DropdownToggle>

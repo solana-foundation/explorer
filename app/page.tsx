@@ -131,8 +131,8 @@ function StakingComponent() {
                     <CardBody ui="dashkit">
                         <h4>Circulating Supply</h4>
                         <h1 className="e-mb-3">
-                            <em className="e-not-italic e-text-dark-accent">{displayLamports(supply.circulating)}</em>{' '}
-                            / <small className="e-text-base">{displayLamports(supply.total)}</small>
+                            <em className="e-not-italic e-text-dark-accent">{displayLamports(supply.circulating)}</em> /{' '}
+                            <small className="e-text-base">{displayLamports(supply.total)}</small>
                         </h1>
                         <h5 className="e-mb-0">
                             <em className="e-not-italic e-text-dark-accent">{circulatingPercentage}%</em> is circulating

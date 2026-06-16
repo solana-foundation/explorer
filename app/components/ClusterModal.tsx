@@ -155,7 +155,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                         />
                     </FormControl>
                     {saving ? (
-                        <div className="e-w-full e-mb-3 e-mt-1.5" data-testid="save-cluster-form">
+                        <div className="e-mb-3 e-mt-1.5 e-w-full" data-testid="save-cluster-form">
                             <FormControl className="e-mb-1.5">
                                 <input
                                     type="text"
@@ -211,7 +211,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                             ui="dashkit"
                             variant="white"
                             size="sm"
-                            className="e-w-full e-mb-3 e-mt-1.5"
+                            className="e-mb-3 e-mt-1.5 e-w-full"
                             onClick={() => setSaving(true)}
                             data-testid="save-custom-cluster-btn"
                         >
@@ -245,7 +245,7 @@ function SavedClusterItem({
     const clusterUrl = `${pathname}?${nextQueryString}`;
 
     return (
-        <div className="e-w-full e-relative e-mb-3" data-testid={`saved-cluster-${cluster.name}`}>
+        <div className="e-relative e-mb-3 e-w-full" data-testid={`saved-cluster-${cluster.name}`}>
             <Link
                 className={cn(clusterButtonVariants({ active: isActive, status }), 'e-text-center')}
                 href={clusterUrl}

@@ -267,7 +267,7 @@ export const DashkitWithIcons: Story = {
                 <Check size={13} className="e-mr-1.5" /> Save
             </Button>
             <Button ui="dashkit" variant="white" size="sm">
-                <RefreshCw size={13} className="e-align-text-top e-mr-1.5" /> Refresh
+                <RefreshCw size={13} className="e-mr-1.5 e-align-text-top" /> Refresh
             </Button>
             <Button ui="dashkit" variant="outline-primary" size="sm">
                 <Download size={13} className="e-mr-1.5" /> Download

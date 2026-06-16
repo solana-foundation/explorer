@@ -49,7 +49,7 @@ export function InstructionDetails({
                 {instructionType.name}
             </p>
             {expanded && (
-                <ul className="e-list-none e-m-0 e-p-0">
+                <ul className="e-m-0 e-list-none e-p-0">
                     {instructionTypes.map((type, index) => {
                         return (
                             <li key={index} className={treeItemClass}>

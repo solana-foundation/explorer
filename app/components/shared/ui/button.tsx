@@ -81,7 +81,11 @@ const buttonVariants = cva([], {
             ui: 'dashkit',
         },
         // Size modifiers — each owns padding, font-size, line-height, and radius outright.
-        { class: 'e-px-3 e-py-2 e-text-[0.9375rem] e-leading-[1.5] e-rounded-[0.375rem]', size: 'default', ui: 'dashkit' },
+        {
+            class: 'e-px-3 e-py-2 e-text-[0.9375rem] e-leading-[1.5] e-rounded-[0.375rem]',
+            size: 'default',
+            ui: 'dashkit',
+        },
         { class: 'e-px-2 e-py-0.5 e-text-[0.8125rem] e-leading-[1.75] e-rounded-[0.25rem]', size: 'sm', ui: 'dashkit' },
         { class: 'e-px-5 e-py-3 e-text-[0.9375rem] e-leading-[1.5] e-rounded-[0.5rem]', size: 'lg', ui: 'dashkit' },
         {

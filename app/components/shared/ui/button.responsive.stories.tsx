@@ -26,7 +26,7 @@ const ToolbarRow = () => (
         <div className="e-flex e-flex-wrap e-items-center e-gap-1.5">
             <span className="e-mr-auto e-text-dk-h4 e-font-medium">Program Account</span>
             <Button ui="dashkit" variant="white" size="sm">
-                <RefreshCw className="e-align-text-top e-mr-1.5" size={13} /> Refresh
+                <RefreshCw className="e-mr-1.5 e-align-text-top" size={13} /> Refresh
             </Button>
             <Button ui="dashkit" variant="white" size="sm">
                 <Download className="e-mr-1.5" size={13} /> Download

@@ -81,7 +81,12 @@ function CssVariablesPalette() {
     return (
         <Grid>
             {CSS_VAR_TOKENS.map(token => (
-                <TokenRow key={token} preview={<ColorBox color={`var(${token})`} />} label={token} value={values[token] ?? ''} />
+                <TokenRow
+                    key={token}
+                    preview={<ColorBox color={`var(${token})`} />}
+                    label={token}
+                    value={values[token] ?? ''}
+                />
             ))}
         </Grid>
     );
@@ -163,7 +168,10 @@ export const BorderRadii: Story = {
                 <TokenRow
                     key={name}
                     preview={
-                        <div aria-hidden style={{ ...BOX, background: '#1e2423', border: '1px solid #282d2b', borderRadius: value }} />
+                        <div
+                            aria-hidden
+                            style={{ ...BOX, background: '#1e2423', border: '1px solid #282d2b', borderRadius: value }}
+                        />
                     }
                     label={name}
                     value={value}
@@ -197,7 +205,9 @@ export const FontSizes: Story = {
                 <TokenRow
                     key={name}
                     preview={
-                        <div style={{ color: '#fff', flexShrink: 0, fontSize: value, lineHeight: 1, width: '3rem' }}>Aa</div>
+                        <div style={{ color: '#fff', flexShrink: 0, fontSize: value, lineHeight: 1, width: '3rem' }}>
+                            Aa
+                        </div>
                     }
                     label={name}
                     value={value}
@@ -214,7 +224,18 @@ export const Spacing: Story = {
             {Object.entries(extend.spacing).map(([name, value]) => (
                 <TokenRow
                     key={name}
-                    preview={<div aria-hidden style={{ background: '#13d89b', borderRadius: '2px', flexShrink: 0, height: '1rem', width: value }} />}
+                    preview={
+                        <div
+                            aria-hidden
+                            style={{
+                                background: '#13d89b',
+                                borderRadius: '2px',
+                                flexShrink: 0,
+                                height: '1rem',
+                                width: value,
+                            }}
+                        />
+                    }
                     label={name}
                     value={value}
                 />

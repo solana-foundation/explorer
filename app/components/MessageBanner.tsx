@@ -45,7 +45,7 @@ export function MessageBanner() {
     if (estimate || start || end) {
         timeframe = (
             <div>
-                <hr className="e-text-dk-gray-500 e-my-3 e-w-full e-opacity-50" />
+                <hr className="e-my-3 e-w-full e-text-dk-gray-500 e-opacity-50" />
                 {estimate && (
                     <h5 className="e-text-dk-gray-200">
                         <span className="e-uppercase">Estimated Duration: </span>

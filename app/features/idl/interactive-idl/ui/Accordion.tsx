@@ -37,7 +37,7 @@ function AccordionTrigger({ className, children, ...props }: React.ComponentProp
                     'e-flex e-items-center e-justify-between',
                     'e-w-full',
                     'e-m-0',
-                    'e-border-0 e-appearance-none e-bg-transparent e-shadow-none',
+                    'e-appearance-none e-border-0 e-bg-transparent e-shadow-none',
                     'e-px-6 e-py-4',
                     className,
                 )}

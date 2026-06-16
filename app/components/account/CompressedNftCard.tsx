@@ -62,7 +62,7 @@ export function CompressedNftCard({ account }: { account: Account }) {
                 <BaseTable.Cell className="e-text-right">
                     <a rel="noopener noreferrer" target="_blank" href={compressedNft.content.links.external_url}>
                         {compressedNft.content.links.external_url}
-                        <ExternalLink className="e-align-text-top e-ml-1.5" size={13} />
+                        <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
                     </a>
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -122,7 +122,13 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
                 <Dropdown className="e-inline-flex">
                     <DropdownToggle asChild>
                         {/* e-rounded-r-none mirrors legacy .btn-group>.btn:not(:last-child) corner squaring. */}
-                        <Button ui="dashkit" variant="dark" size="sm" className="e-w-[150px] e-rounded-r-none" type="button">
+                        <Button
+                            ui="dashkit"
+                            variant="dark"
+                            size="sm"
+                            className="e-w-[150px] e-rounded-r-none"
+                            type="button"
+                        >
                             Creators <ChevronDown size={15} className="e-align-text-top" />
                         </Button>
                     </DropdownToggle>

@@ -94,7 +94,7 @@ const DropdownMenu = React.forwardRef<HTMLDivElement, DropdownMenuProps>(
             <div
                 ref={ref}
                 className={cn(
-                    'e-absolute e-top-full e-z-[1000] e-min-w-40 e-px-0 e-py-2 e-list-none e-rounded-dk e-border e-border-solid e-border-dk-black e-bg-dk-gray-800-dark e-bg-clip-padding e-text-left e-text-dk-base e-text-white e-animate-dropdown-menu',
+                    'e-absolute e-top-full e-z-[1000] e-min-w-40 e-animate-dropdown-menu e-list-none e-rounded-dk e-border e-border-solid e-border-dk-black e-bg-dk-gray-800-dark e-bg-clip-padding e-px-0 e-py-2 e-text-left e-text-dk-base e-text-white',
                     context?.open ? 'e-block' : 'e-hidden',
                     align === 'end' ? 'e-left-auto e-right-0' : 'e-left-0',
                     className,
@@ -129,7 +129,7 @@ const DropdownItem = React.forwardRef<HTMLDivElement, DropdownItemProps>(
             <Comp
                 ref={ref}
                 className={cn(
-                    'e-clear-both e-block e-w-full e-whitespace-nowrap e-border-0 e-bg-transparent e-px-6 e-py-1.5 e-text-left e-font-normal e-text-dark-muted-foreground e-no-underline hover:e-text-white focus:e-text-white active:e-text-white [&.active]:e-text-white disabled:e-pointer-events-none disabled:e-text-[#abd5c6] [&.disabled]:e-pointer-events-none [&.disabled]:e-text-[#abd5c6]',
+                    'e-clear-both e-block e-w-full e-whitespace-nowrap e-border-0 e-bg-transparent e-px-6 e-py-1.5 e-text-left e-font-normal e-text-dark-muted-foreground e-no-underline hover:e-text-white focus:e-text-white active:e-text-white disabled:e-pointer-events-none disabled:e-text-[#abd5c6] [&.active]:e-text-white [&.disabled]:e-pointer-events-none [&.disabled]:e-text-[#abd5c6]',
                     className,
                 )}
                 onClick={event => {

@@ -28,7 +28,7 @@ export function Copyable({ text, children }: { text: string | null; children?: R
 
     const copyStrategy: Record<CopyState | 'loading', JSX.Element> = {
         copied: <CheckCircle className="e-align-text-top" size={13} />,
-        copy: <Copy className="e-align-text-top e-cursor-pointer" onClick={handleClick} size={13} />,
+        copy: <Copy className="e-cursor-pointer e-align-text-top" onClick={handleClick} size={13} />,
         errored: (
             <span title="Please check your browser's copy permissions.">
                 <XCircle className="e-align-text-top" size={13} />
