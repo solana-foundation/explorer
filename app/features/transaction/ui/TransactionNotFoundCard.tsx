@@ -39,7 +39,7 @@ export function TransactionNotFoundCard({
                 <AdjacentTransactionLink signature={signature} foundCluster={foundCluster} />
             </span>
         );
-    } else if (firstAvailableBlock !== undefined && firstAvailableBlock > 0n) {
+    } else if (status === 'not-found' && firstAvailableBlock !== undefined && firstAvailableBlock > 0n) {
         subtext = `Note: Transactions processed before block ${firstAvailableBlock} are not available at this time`;
     }
 
