@@ -105,6 +105,7 @@ function useClusterTransactionSearch(signature: string, currentCluster: Cluster)
             if (searchIdRef.current !== currentSearchId) return;
 
             setStatus('searching');
+            setFoundCluster(undefined);
 
             for (const cluster of clusters) {
                 if (searchIdRef.current !== currentSearchId) return;
