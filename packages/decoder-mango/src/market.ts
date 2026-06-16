@@ -23,7 +23,11 @@ function getAccountInfo(clusterUrl: string, publicKey: PublicKey): Promise<Accou
         return accountInfoCache[cacheKey];
     }
     const connection = new Connection(clusterUrl);
-    const accountInfoPromise = connection.getAccountInfo(publicKey);
+    // Evict on rejection so a transient RPC failure (timeout, rate-limit) isn't cached permanently.
+    const accountInfoPromise = connection.getAccountInfo(publicKey).catch((error: unknown) => {
+        delete accountInfoCache[cacheKey];
+        throw error;
+    });
     accountInfoCache[cacheKey] = accountInfoPromise;
     return accountInfoPromise;
 }
