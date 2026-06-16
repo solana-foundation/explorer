@@ -1,14 +1,17 @@
-import { array, Infer, optional, string, type } from 'superstruct';
+import { array, Infer, nullable, optional, string, type } from 'superstruct';
 
 export const DigitalAssetSchema = type({
-    content: type({
-        links: optional(
-            type({
-                external_url: optional(string()),
-                image: optional(string()),
-            }),
-        ),
-    }),
+    content: nullable(
+        type({
+            links: nullable(
+                optional(
+                    type({
+                        image: nullable(optional(string())),
+                    }),
+                ),
+            ),
+        }),
+    ),
     id: string(),
 });
 
