@@ -78,7 +78,7 @@ export async function getAssetBatch(
             return undefined;
         }
 
-        return validData.result;
+        return validData.result.filter((item): item is DigitalAsset => item !== null);
     } catch (error) {
         Logger.error(error instanceof Error ? error : new Error('[das] getAssets failed'), {
             sentry: true,
