@@ -1500,7 +1500,7 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 970,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1085,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": "This SIMD imposes a hard restriction on the maximum number of account references that an instruction may declare. There is already a limit of 255 account references imposed during serialization in ABI v0 and v1, but it does not currently apply to builtin invocations or precompil\u2026"
@@ -1546,7 +1546,7 @@
     "testnet_activation_epoch": 954,
     "devnet_activation_epoch": 1059,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 986,
     "description": "This proposal introduces a new family of syscalls to provide native support for cryptographic operations on the BLS12-381 elliptic curve. These syscalls will expose:"
   },
   {
@@ -2006,5 +2006,29 @@
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": "Serialize pointers for instruction accounts to allow direct account access without requiring parsing of the account section."
+  },
+  {
+    "comms_required": null,
+    "description": "Specify the protocol for validating chained block ids under both TowerBFT and Alpenglow.",
+    "devnet_activation_epoch": null,
+    "key": "vcmrw431aNM8ngQ46derkZXipoTGQdbHkEygBDh12dA",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.0.2 / v4.1.0-beta.3"
+    ],
+    "min_fd_versions": [
+      "v1.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0340-validate-chained-block-id.md"
+    ],
+    "simds": [
+      "0340"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-340: Encompassing check for validate chained block ID"
   }
 ]
