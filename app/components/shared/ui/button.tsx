@@ -64,12 +64,12 @@ const buttonVariants = cva([], {
 
         // ===== ui="dashkit" =====
         // Defaults that would conflict with per-variant compounds (bg/border) or per-size
-        // compounds (padding/text/leading/rounded) are intentionally omitted — twMerge can't
-        // dedupe through the e- prefix, so source order in the compiled CSS would otherwise
+        // compounds (padding/text/leading/rounded) are intentionally omitted — cn (clsx) keeps
+        // all classes, so source order in the compiled CSS would otherwise
         // let the larger/wider base values beat the size compound.
         {
-            // text-white intentionally omitted — variant compounds own text color and twMerge
-            // can't dedupe through the e- prefix, so a base color would beat the variant's arbitrary
+            // text-white intentionally omitted — variant compounds own text color and cn (clsx)
+            // keeps all classes, so a base color would beat the variant's arbitrary
             // value in CSS source order (e.g. .btn-primary needs #1b4e3f per _solana.scss override).
             class: cn(
                 'inline-block text-center align-middle cursor-pointer select-none',

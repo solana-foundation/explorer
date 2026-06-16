@@ -53,8 +53,8 @@ const badgeVariants = cva([], {
         // ===== ui="dashkit" =====
         // Base `.badge` layout, matching dashkit `_badge.scss` + Bootstrap `.badge`:
         // 76% font-size, line-height 1, vertical-align middle, em-based padding (0.33em y, 0.5em x).
-        // Padding-x and rounded live on per-pill compounds — twMerge can't dedupe through the
-        // e- prefix, so non-pill horizontal padding/rounded would beat the pill compound's
+        // Padding-x and rounded live on per-pill compounds — cn (clsx) keeps all classes, so
+        // non-pill horizontal padding/rounded would beat the pill compound's
         // arbitrary values in CSS source order if listed here.
         {
             class: 'inline-block align-middle text-center whitespace-nowrap font-normal leading-none text-[76%] py-[0.33em] empty:hidden',

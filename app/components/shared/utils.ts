@@ -8,5 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Deduping variant (BaseCard dashkit consumers rely on className overriding base utilities).
-// Was extendTailwindMerge({ prefix: 'e-' }); plain twMerge now that the prefix is gone.
+// Was extendTailwindMerge({ prefix: 'e-' }): stock twMerge only recognizes unprefixed Tailwind
+// classes, so under the `e-` prefix it couldn't see conflicts and skipped dedupe — the config
+// taught it the prefix. Plain twMerge now that the prefix is gone.
 export const cnPrefixed = (...inputs: ClassValue[]) => twMerge(clsx(inputs));

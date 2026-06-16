@@ -41,7 +41,7 @@ const tableVariants = cva([], {
             dashkit: [
                 // mb-* intentionally omitted — per-variant compounds own bottom margin so the
                 // card variant's mb-0 isn't beaten by a base mb-6 in CSS source order
-                // (twMerge can't dedupe through the e- prefix).
+                // (cn is clsx — it keeps all classes, so CSS source order decides).
                 'w-full text-dk-sm text-white',
                 '[&_thead_th]:bg-dark-background [&_thead_th]:uppercase [&_thead_th]:text-dk-xs',
                 '[&_thead_th]:font-normal [&_thead_th]:tracking-[0.08em] [&_thead_th]:text-dark-muted-foreground',
