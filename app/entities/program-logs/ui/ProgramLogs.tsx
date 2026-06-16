@@ -20,12 +20,16 @@ export function ProgramLogs({
     const [showRaw, setShowRaw] = useState(false);
 
     const content = showRaw ? (
-        <div className="e-rounded-lg e-bg-gray-900 e-p-3">
+        <div className="e-overflow-hidden e-rounded-lg">
             <SolarizedJsonViewer
                 src={logs}
-                name={false}
+                name={null}
+                enableClipboard={true}
                 collapsed={false}
-                style={{ fontSize: '14px', padding: '0', wordBreak: 'break-word' }}
+                displayObjectSize={false}
+                displayDataTypes={false}
+                displayArrayKey={false}
+                style={{ padding: 25, wordBreak: 'break-word' }}
             />
         </div>
     ) : (

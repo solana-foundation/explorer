@@ -76,7 +76,7 @@ export function Navbar({ children }: INavbarProps) {
                                 <Link href={inspectorPath}>Inspector</Link>
                             </NavbarLink>
                         </NavbarItem>
-                        <NavbarItem className="e-flex e-items-center e-justify-center e-pt-1.5">
+                        <NavbarItem className="e-flex e-items-center e-justify-center">
                             <a
                                 aria-label="GitHub Repository"
                                 href="https://github.com/solana-foundation/explorer"
