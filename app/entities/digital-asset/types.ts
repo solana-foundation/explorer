@@ -16,7 +16,7 @@ export const DigitalAssetSchema = type({
 });
 
 export const GetAssetBatchResponseSchema = type({
-    result: array(DigitalAssetSchema),
+    result: array(nullable(DigitalAssetSchema)),
 });
 
 export type DigitalAsset = Infer<typeof DigitalAssetSchema>;
