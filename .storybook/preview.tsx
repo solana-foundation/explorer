@@ -64,8 +64,10 @@ const preview: Preview = {
 
     decorators: [
         Story => {
-            // Add useEffect to ensure font is properly loaded
+            // rubikFont.variable defines --explorer-default-font; put it on <html> so :root-level
+            // consumers (dashkit-polyfill's --bs-body-font-family) resolve it, mirroring app/layout.tsx.
             useEffect(() => {
+                document.documentElement.classList.add(rubikFont.variable);
                 document.getElementById('storybook-outer')?.classList.add(rubikFont.className);
             }, []);
 

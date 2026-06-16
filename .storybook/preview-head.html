@@ -1,13 +1,3 @@
-<!-- Preload Rubik font to prevent flaky loading -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<!-- Rubik is loaded + --explorer-default-font defined by next/font (rubikFont in preview.tsx).
+     Keep the gstatic preconnect to warm the connection for next/font's woff2 fetch. -->
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --explorer-default-font: 'Rubik', system-ui, sans-serif;
-  }
-
-  body {
-    font-family: var(--explorer-default-font);
-  }
-</style>
