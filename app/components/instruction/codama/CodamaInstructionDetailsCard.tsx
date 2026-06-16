@@ -79,12 +79,14 @@ export function CodamaInstructionCard({
                     <Address pubkey={new PublicKey(ix.programId)} alignRight link raw overrideText={programName} />
                 </BaseTable.Cell>
             </BaseTable.Row>
-            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
-                <BaseTable.Cell>Account Name</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right" colSpan={2}>
-                    Address
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            {accountDetails.length > 0 && (
+                <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                    <BaseTable.Cell>Account Name</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right" colSpan={2}>
+                        Address
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+            )}
             {accountDetails}
             {parsedIx.data ? (
                 <>
