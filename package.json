@@ -191,7 +191,7 @@
             "@sentry/cli",
             "bigint-buffer",
             "esbuild"
-        ],
+        ]
         "overrides": {
             "@babel/runtime@<7.26.10": "7.26.10",
             "avsc": "git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef",
@@ -244,7 +244,7 @@
     "sharp",
     "unrs-resolver",
     "utf-8-validate"
-],
+]
         "pnpm": {
   "overrides": {
     "@babel/runtime@<7.26.10": "7.26.10",
@@ -307,5 +307,6 @@
     "sharp",
     "unrs-resolver",
     "utf-8-validate"
-  ],
+  ]
+}
 }
