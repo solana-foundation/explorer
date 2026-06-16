@@ -1,5 +1,3 @@
-const semver = require('semver');
-
 const deps = [
     { package: 'lighthouse-sdk', packageVersion: '2.0.1', peerDependency: '@solana/web3.js', newVersion: '2.0.0' },
 ];
@@ -9,7 +7,8 @@ function overridesPeerDependencies(pkg) {
         return pkg;
     }
     for (const dep of deps) {
-        if (pkg.name === dep.package && pkg.version && semver.eq(semver.coerce(pkg.version), semver.coerce(dep.packageVersion))) {
+        // Compare version exactly – no need for semver
+        if (pkg.name === dep.package && pkg.version === dep.packageVersion) {
             console.log(`  🔍 Checking ${pkg.name}@${pkg.version}`);
             if (dep.peerDependency in pkg.peerDependencies) {
                 try {
