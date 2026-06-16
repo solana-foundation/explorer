@@ -495,9 +495,6 @@ importers:
       postcss-import:
         specifier: 16.1.0
         version: 16.1.0(postcss@8.5.10)
-      postcss@3.4.17:
-        specifier: link:tailwindcss/postcss@3.4.17
-        version: link:tailwindcss/postcss@3.4.17
       prettier:
         specifier: 3.5.3
         version: 3.5.3
