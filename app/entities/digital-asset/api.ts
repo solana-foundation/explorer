@@ -73,7 +73,11 @@ export async function getAssetBatch(
         }
 
         if (!is(data, GetAssetBatchResponseSchema)) {
-            Logger.warn('[das] getAssets invalid response', { sentry: true });
+            const resultType = typeof data?.result;
+            const resultIsArray = Array.isArray(data?.result);
+            Logger.warn(`[das] getAssets invalid response (result type: ${resultType}, isArray: ${resultIsArray})`, {
+                sentry: true,
+            });
             return undefined;
         }
 
