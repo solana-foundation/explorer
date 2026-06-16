@@ -12,6 +12,7 @@ type CollapsibleSectionProps = {
     children: ReactNode;
     defaultExpanded?: boolean;
     className?: string;
+    titleClassName?: string;
 };
 
 export function CollapsibleSection({
@@ -21,13 +22,14 @@ export function CollapsibleSection({
     children,
     defaultExpanded = true,
     className = baseCardVariants({ ui: 'dashkit' }),
+    titleClassName,
 }: CollapsibleSectionProps) {
     const [expanded, setExpanded] = useState(defaultExpanded);
     const headingId = useId();
 
     return (
         <section id={id} aria-labelledby={headingId} className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
+            <div className={cn('flex items-center justify-between', titleClassName)}>
                 <h2 id={headingId} className="m-0 text-lg font-normal text-white">
                     {title}
                 </h2>

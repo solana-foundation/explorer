@@ -56,7 +56,12 @@ export function ProgramLogSection({ signature }: SignatureProps) {
     );
 
     return (
-        <CollapsibleSection title="Logs" actions={chips} className="">
+        <CollapsibleSection
+            title="Logs"
+            actions={chips}
+            className=""
+            titleClassName="xxl:sticky xxl:top-0 xxl:z-10 xxl:bg-[var(--bs-body-bg)] xxl:pb-3"
+        >
             <Card ui="dashkit">
                 {prettyLogs !== null && logMessages !== null ? (
                     showRaw ? (

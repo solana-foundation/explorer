@@ -17,7 +17,7 @@ import { ClusterStatus } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
 import bs58 from 'bs58';
 import { useSearchParams } from 'next/navigation';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 
 import { AccountsCard } from '@/app/features/transaction/ui/AccountsCard';
 import { InstructionsSection } from '@/app/features/transaction/ui/InstructionsSection';
@@ -117,6 +117,80 @@ function DetailsSection({ signature }: SignatureProps) {
     const { isXxl } = useBreakpoint();
     const refreshDetails = () => fetchDetails(signature);
 
+    const logsPanelRef = useRef<HTMLDivElement>(null);
+    const isManualScrollRef = useRef(false);
+    const manualScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Sync the sticky logs panel with the active instruction on the left.
+    // Proportionally scrolls the log panel within the active instruction's log
+    // section as the user scrolls through that instruction's detail card.
+    // Wheel events on the log panel scroll it independently for 2 s before
+    // auto-sync resumes.
+    useEffect(() => {
+        if (!isXxl) return;
+        const logsPanel = logsPanelRef.current;
+        if (!logsPanel) return;
+
+        const handleWheel = (e: WheelEvent) => {
+            const { scrollTop, scrollHeight, clientHeight } = logsPanel;
+            const atTop = scrollTop === 0 && e.deltaY < 0;
+            const atBottom = scrollTop + clientHeight >= scrollHeight && e.deltaY > 0;
+            if (atTop || atBottom) return;
+            e.preventDefault();
+            logsPanel.scrollTop += e.deltaY;
+            isManualScrollRef.current = true;
+            if (manualScrollTimeoutRef.current) clearTimeout(manualScrollTimeoutRef.current);
+            manualScrollTimeoutRef.current = setTimeout(() => {
+                isManualScrollRef.current = false;
+            }, 2000);
+        };
+
+        const handlePageScroll = () => {
+            if (isManualScrollRef.current) return;
+            // Top-level instruction cards have id="ix-N" (set by useScrollAnchor).
+            // Keep only top-level instruction cards (id="ix-N"), not inner ones (id="ix-N-M").
+            const cards = Array.from(document.querySelectorAll<HTMLElement>('[id^="ix-"]')).filter(el => {
+                const suffix = el.id.slice(3); // strip "ix-"
+                return suffix.length > 0 && !suffix.includes('-') && !Number.isNaN(Number(suffix));
+            });
+            if (cards.length === 0) return;
+
+            // The "active" instruction is the last one whose top has scrolled
+            // past the sticky nav bar (~70 px).
+            const threshold = 80;
+            let activeIndex = 0;
+            for (let i = 0; i < cards.length; i++) {
+                if (cards[i].getBoundingClientRect().top <= threshold) activeIndex = i;
+                else break;
+            }
+
+            const cardRect = cards[activeIndex].getBoundingClientRect();
+            // 0 = just entered view, 1 = fully scrolled past
+            const progress = Math.max(0, Math.min(1, (threshold - cardRect.top) / cardRect.height));
+
+            const logRow = logsPanel.querySelector<HTMLElement>(`[data-ix-index="${activeIndex}"]`);
+            if (!logRow) return;
+
+            // `logRow` is a <tr> whose offsetParent is the <table>, not logsPanel.
+            // Use getBoundingClientRect to get the row's absolute position within
+            // the scroll container, independent of current scrollTop.
+            // Offset by the sticky title height so the row header appears below it, not under it.
+            const titleHeight = (logsPanel.querySelector('section > div') as HTMLElement | null)?.offsetHeight ?? 0;
+            const panelRect = logsPanel.getBoundingClientRect();
+            const rowRect = logRow.getBoundingClientRect();
+            const rowAbsoluteTop = rowRect.top - panelRect.top + logsPanel.scrollTop;
+            logsPanel.scrollTop = Math.max(0, rowAbsoluteTop - titleHeight + rowRect.height * progress);
+        };
+
+        logsPanel.addEventListener('wheel', handleWheel, { passive: false });
+        window.addEventListener('scroll', handlePageScroll, { passive: true });
+        return () => {
+            logsPanel.removeEventListener('wheel', handleWheel);
+            window.removeEventListener('scroll', handlePageScroll);
+            if (manualScrollTimeoutRef.current) clearTimeout(manualScrollTimeoutRef.current);
+        };
+    }, [isXxl, transactionWithMeta]);
+
     useEffect(() => {
         if (!details && clusterStatus === ClusterStatus.Connected && status?.status === FetchStatus.Fetched) {
             fetchDetails(signature);
@@ -165,7 +239,11 @@ function DetailsSection({ signature }: SignatureProps) {
                 <div className="xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden">
                     <InstructionsSection signature={signature} />
                 </div>
-                <div className="xxl:sticky xxl:top-[70px] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden" id="logs">
+                <div
+                    ref={logsPanelRef}
+                    className="xxl:sticky xxl:top-[70px] xxl:max-h-[calc(100vh-90px)] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-y-auto"
+                    id="logs"
+                >
                     <ProgramLogSection signature={signature} />
                     <CUProfilingSection signature={signature} />
                 </div>
