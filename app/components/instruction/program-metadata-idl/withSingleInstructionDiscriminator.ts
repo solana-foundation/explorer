@@ -28,9 +28,7 @@ export function withSingleInstructionDiscriminator(root: RootNode): RootNode {
                 select: '[instructionNode]',
                 transform: node => {
                     assertIsNode(node, 'instructionNode');
-                    return node.discriminators?.length
-                        ? node
-                        : { ...node, discriminators: [CATCH_ALL_DISCRIMINATOR] };
+                    return node.discriminators?.length ? node : { ...node, discriminators: [CATCH_ALL_DISCRIMINATOR] };
                 },
             },
         ]),
