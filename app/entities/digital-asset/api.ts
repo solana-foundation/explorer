@@ -67,6 +67,11 @@ export async function getAssetBatch(
 
         const data = await response.json();
 
+        if (data?.error) {
+            Logger.warn(`[das] getAssets RPC error: ${data.error?.message ?? 'unknown'}`);
+            return undefined;
+        }
+
         if (!is(data, GetAssetBatchResponseSchema)) {
             Logger.warn('[das] getAssets invalid response', { sentry: true });
             return undefined;
