@@ -205,7 +205,6 @@
     "pnpm": {
         "onlyBuiltDependencies": [
             "@sentry/cli",
-            "bigint-buffer",
             "esbuild"
         ],
         "overrides": {
