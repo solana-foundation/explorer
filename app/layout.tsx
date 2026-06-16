@@ -10,7 +10,7 @@ import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { Toaster } from '@shared/ui/sonner/toaster';
-import { isEnvEnabled } from '@utils/env';
+import { EXPLORER_BASE_URL, isEnvEnabled } from '@utils/env';
 import { BotIdClient } from 'botid/client';
 import type { Viewport } from 'next';
 import { type Metadata } from 'next/types';
@@ -28,6 +28,7 @@ import { botIdProtectedRoutes } from '../proxy';
 export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
     manifest: '/manifest.json',
+    metadataBase: new URL(EXPLORER_BASE_URL),
     title: 'Explorer | Solana',
 };
 
