@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "build": "next build",
+        "build": "next build --webpack",
         "build:info": "node scripts/update-build-info.js",
         "build-sb": "storybook build",
         "coverage": "vitest --coverage",
@@ -125,6 +125,10 @@
         "use-async-effect": "2.2.7"
     },
     "devDependencies": {
+        "@babel/core": "^7.29.7",
+        "@babel/preset-env": "^7.29.7",
+        "@babel/preset-react": "^7.29.7",
+        "@babel/preset-typescript": "^7.29.7",
         "@eslint-community/eslint-plugin-eslint-comments": "4.7.2",
         "@eslint/eslintrc": "3.3.5",
         "@eslint/js": "10.0.1",
@@ -153,6 +157,7 @@
         "@vitest/browser": "4.1.8",
         "@vitest/coverage-v8": "4.1.8",
         "autoprefixer": "10.5.0",
+        "babel-loader": "^10.1.1",
         "bootstrap": "5.3.8",
         "dotenv": "17.4.2",
         "eslint": "10.4.1",
@@ -247,7 +252,7 @@
             "form-data": ">=4.0.6",
             "ws": ">=8.21.0",
             "esbuild": ">=0.28.1",
-            "tmp": ">=0.2.6",
+            "tmp": ">=0.2.6"
         },
         "patchedDependencies": {
             "@solana-developers/helpers@2.8.1": "patches/@solana-developers__helpers@2.8.1.patch"
