@@ -25,6 +25,8 @@ import { capitalCase } from 'change-case';
 import React from 'react';
 import { Code, Info } from 'react-feather';
 
+import { StatusBadge } from '@/app/components/account/TokenAccountSection';
+
 const FlatContext = React.createContext(false);
 
 type StakeAccount = StakeProgramData['parsed'];
@@ -71,15 +73,9 @@ function TokenAccountSection({ info }: { info: TokenAccountInfo }) {
             <AddressRow label="Mint" value={info.mint} />
             <AddressRow label="Owner" value={info.owner} />
             <DetailRow label="Token Balance">{info.tokenAmount.uiAmountString}</DetailRow>
+            {/* "active" = account can transfer tokens; "inactive" = frozen by the mint's freeze authority */}
             <DetailRow label="Status">
-                <span
-                    className={cn(
-                        info.state === 'frozen' && 'e-text-warning',
-                        info.state === 'initialized' && 'e-text-success',
-                    )}
-                >
-                    {capitalCase(info.state)}
-                </span>
+                <StatusBadge status={info.state} />
             </DetailRow>
             {info.isNative && <DetailRow label="Native Wrapped SOL">Yes</DetailRow>}
             {info.rentExemptReserve && (
@@ -319,7 +315,7 @@ export function AccountExpandedContent({ accountInfo, accountInfoLoading, addres
         accountInfo && accountInfo.size > 0 ? (
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="ghost" className="e-h-auto !e-p-1 !e-text-sm">
+                    <Button variant="ghost" className="e-h-auto !e-p-0 !e-text-sm">
                         <Code size={11} />
                         <span>{accountInfo.size.toLocaleString('en-US')} byte(s)</span>
                     </Button>
@@ -334,7 +330,7 @@ export function AccountExpandedContent({ accountInfo, accountInfoLoading, addres
 
     return (
         <FlatContext.Provider value={flat ?? false}>
-            <div className={cn(flat ? 'e-pb-2.5' : 'e-ml-14 e-pb-2.5')}>
+            <div className={cn(flat ? 'e-pb-2.5' : 'e-ml-14 e-pb-10')}>
                 {data.data.parsed && <ParsedSection parsed={data.data.parsed} />}
                 <DetailRow label="Assigned Program Id">
                     <Address pubkey={data.owner} link />

@@ -82,8 +82,9 @@ function TransactionAccountRow({
                     <div className="[grid-area:address]">
                         <div className="e-flex e-items-center e-justify-between e-gap-1 lg:e-justify-normal">
                             <Address
+                                className={!isLg ? 'e-text-[#33a382]' : ''}
                                 pubkey={pubkey}
-                                link
+                                link={isLg}
                                 fetchTokenLabelInfo
                                 noNicknameEditing={!isLg}
                                 noCopy={!isLg}
@@ -107,7 +108,7 @@ function TransactionAccountRow({
                         <Button
                             aria-expanded={expanded}
                             aria-label={expanded ? 'Collapse account details' : 'Expand account details'}
-                            className="-e-mt-1 e-h-6 e-w-6"
+                            className="!e-h-5 e-w-6"
                             onClick={e => {
                                 e.stopPropagation();
                                 setExpanded(v => !v);

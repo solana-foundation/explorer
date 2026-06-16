@@ -58,6 +58,7 @@ export function AccountDetailSlideover({
                         <div className="e-break-all e-font-mono e-text-xl e-leading-snug e-text-white">
                             {nickname ?? address}
                         </div>
+                        {nickname && <span className="e-break-all e-text-sm e-text-outer-space-300">{address}</span>}
                     </div>
                     <div className="e-flex">
                         <AccountBadges index={index} account={account} message={message} pubkey={pubkey} />

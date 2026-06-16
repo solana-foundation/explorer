@@ -33,6 +33,7 @@ const rowVariants = cva('relative flex w-full min-w-0 items-baseline overflow-x-
 type Props = {
     pubkey: PublicKey;
     alignRight?: boolean;
+    className?: string;
     link?: boolean;
     raw?: boolean;
     noTruncate?: boolean;
@@ -54,6 +55,7 @@ export function Address({
     useMetadata,
     overrideText,
     tokenLabelInfo,
+    className,
     fetchTokenLabelInfo,
     'aria-label': ariaLabel,
     noCopy,
@@ -134,7 +136,7 @@ export function Address({
             {nickname ? nicknameDisplay : visibleText}
         </Link>
     ) : (
-        <span className={innerTextClassName}>{nickname ? nicknameDisplay : visibleText}</span>
+        <span className={cn(innerTextClassName, className)}>{nickname ? nicknameDisplay : visibleText}</span>
     );
 
     const addressDisplay = isMidTruncateCandidate ? (
@@ -192,7 +194,7 @@ export function Address({
                         title="Edit nickname"
                         style={{ fontSize: '0.875rem', lineHeight: 1 }}
                     >
-                        <EditIcon />
+                        <EditIcon className="-e-mt-0.5" />
                     </button>
                 )}
                 {!noNicknameEditing && showNicknameEditor && (
