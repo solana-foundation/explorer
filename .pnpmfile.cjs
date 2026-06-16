@@ -3,23 +3,20 @@ const deps = [
 ];
 
 function overridesPeerDependencies(pkg) {
-    if (!pkg.peerDependencies || Object.keys(pkg.peerDependencies).length === 0) {
-        return pkg;
-    }
+    if (!pkg.peerDependencies || Object.keys(pkg.peerDependencies).length === 0) return pkg;
     for (const dep of deps) {
-        // Compare version exactly – no need for semver
         if (pkg.name === dep.package && pkg.version === dep.packageVersion) {
             console.log(`  🔍 Checking ${pkg.name}@${pkg.version}`);
             if (dep.peerDependency in pkg.peerDependencies) {
                 try {
                     const oldVersion = pkg.peerDependencies[dep.peerDependency];
-                    console.log(`    ⚡ Overriding ${pkg.name}@${pkg.version} peerDependency ${dep.peerDependency}@${oldVersion} → ${dep.newVersion}`);
+                    console.log(`    ⚡ Overriding ${dep.peerDependency}@${oldVersion} → ${dep.newVersion}`);
                     pkg.dependencies = pkg.dependencies || {};
                     pkg.dependencies[dep.peerDependency] = dep.newVersion;
                     delete pkg.peerDependencies[dep.peerDependency];
-                    console.log(`    ✅ Successfully overrode ${dep.peerDependency} for ${pkg.name}`);
+                    console.log(`    ✅ Success`);
                 } catch (err) {
-                    console.error(`    ❌ Failed to override ${dep.peerDependency} for ${pkg.name}:`, err.message);
+                    console.error(`    ❌ Failed:`, err.message);
                 }
             }
         }
