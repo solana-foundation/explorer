@@ -71,7 +71,7 @@ export function CustomToast(props: CustomToastProps) {
                         className={cn(
                             'e-h-full e-w-full e-rounded e-border-0 e-border-solid e-bg-transparent e-p-0',
                             'e-text-neutral-400 hover:e-text-neutral-500',
-                            'focus:e-outline-none focus:e-ring-2 focus:e-ring-neutral-400 focus:e-ring-offset-2',
+                            'focus:e-outline-none focus-visible:e-ring-1 focus-visible:e-ring-neutral-300',
                         )}
                         onClick={() => sonnerToast.dismiss(id)}
                     >
