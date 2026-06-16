@@ -162,6 +162,10 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     const seriesData = perfHistory[series];
     const chartOptions = React.useMemo<ChartOptions<'bar'>>(() => TPS_CHART_OPTIONS(historyMaxTps), [historyMaxTps]);
 
+    // The external tooltip div is appended to document.body, outside React; without mouseout (e.g. keyboard
+    // navigation) it would otherwise linger after the chart unmounts.
+    React.useEffect(() => () => document.getElementById('chartjs-tooltip')?.remove(), []);
+
     const seriesLength = seriesData.length;
     const chartData: ChartData<'bar'> = {
         datasets: [

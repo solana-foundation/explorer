@@ -92,7 +92,7 @@ export function ProgramHeader({
                 <div className="e-relative e-h-10 e-w-10 e-flex-shrink-0 e-overflow-hidden e-rounded sm:e-h-16 sm:e-w-16">
                     <ProxiedImage
                         alt="Program logo"
-                        className="e-h-full e-w-full e-rounded e-border-4 e-border-current e-object-cover"
+                        className="e-h-full e-w-full e-rounded e-border-4 e-border-solid e-border-dk-black-dark e-object-cover"
                         uri={logo}
                     />
                 </div>
