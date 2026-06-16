@@ -17,26 +17,26 @@ export function ErrorCard({
     const buttonText = retryText || 'Try Again';
     return (
         <Card ui="dashkit">
-            <CardBody ui="dashkit" className="e-text-center">
+            <CardBody ui="dashkit" className="text-center">
                 {text}
                 {retry && (
                     <>
                         <Button
                             ui="dashkit"
                             variant="white"
-                            className="e-ml-3 e-hidden md:e-inline"
+                            className="ml-3 hidden md:inline"
                             onClick={retry}
                             asChild
                         >
                             <span>{buttonText}</span>
                         </Button>
-                        <div className="e-mt-6 e-block md:e-hidden">
-                            <Button ui="dashkit" variant="white" className="e-w-full" onClick={retry} asChild>
+                        <div className="mt-6 block md:hidden">
+                            <Button ui="dashkit" variant="white" className="w-full" onClick={retry} asChild>
                                 <span>{buttonText}</span>
                             </Button>
                         </div>
                         {subtext && (
-                            <div className="e-text-dk-gray-700">
+                            <div className="text-dk-gray-700">
                                 <hr></hr>
                                 {subtext}
                             </div>

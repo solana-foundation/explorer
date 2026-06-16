@@ -6,13 +6,13 @@ import { cn } from '@/app/components/shared/utils';
 
 // Tokens mirror Dashkit-dark `.navbar-nav` / `.nav-item` / `.nav-link` computed styles
 // (color #698582 = dk-gray-700, 15px = dk-base, padding 10px 8px, no underline).
-const navbarListVariants = cva(['e-m-0 e-flex e-list-none e-p-0']);
+const navbarListVariants = cva(['m-0 flex list-none p-0']);
 
 const navbarItemVariants = cva(['']);
 
 const navbarLinkVariants = cva([
-    'e-block e-px-2 e-py-2.5 e-text-dk-gray-700 hover:e-text-dk-white e-no-underline',
-    'data-[active=true]:e-text-dk-white',
+    'block px-2 py-2.5 text-dk-gray-700 hover:text-dk-white no-underline',
+    'data-[active=true]:text-dk-white',
 ]);
 
 export interface NavbarListProps extends React.HTMLAttributes<HTMLUListElement> {}

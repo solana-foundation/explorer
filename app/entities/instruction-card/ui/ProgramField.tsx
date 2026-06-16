@@ -13,7 +13,7 @@ export function ProgramField({ programId, showExtendedInfo = false }: ProgramFie
     return (
         <BaseTable.Row>
             <BaseTable.Cell>Program</BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">
+            <BaseTable.Cell className="text-right">
                 {showExtendedInfo ? (
                     <AddressWithContext pubkey={programId} validator={programValidator} />
                 ) : (

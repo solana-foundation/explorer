@@ -29,8 +29,8 @@ export function BaseAccountCard({
 
     return (
         <Card ui="dashkit">
-            <CardHeader ui="dashkit" className="e-gap-2">
-                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+            <CardHeader ui="dashkit" className="gap-2">
+                <CardTitle as="h3" ui="dashkit" className="flex items-center">
                     {title}
                 </CardTitle>
                 {refresh && analyticsSection && <RefreshButton analyticsSection={analyticsSection} onClick={refresh} />}
@@ -39,11 +39,11 @@ export function BaseAccountCard({
                         variant={showRaw ? 'default' : 'outline'}
                         size="sm"
                         aria-label="Raw"
-                        className={showRaw ? 'e-shadow-active-sm' : undefined}
+                        className={showRaw ? 'shadow-active-sm' : undefined}
                         onClick={() => setShowRaw(r => !r)}
                     >
                         <Code size={12} />
-                        <span className="e-hidden md:e-inline">Raw</span>
+                        <span className="hidden md:inline">Raw</span>
                     </Button>
                 )}
                 {headerActions}

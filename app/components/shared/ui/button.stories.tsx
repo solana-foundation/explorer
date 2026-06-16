@@ -81,7 +81,7 @@ export const Default: Story = {
 
 export const AllVariants: Story = {
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {twVariantOptions.map(variant => (
                 <Button key={variant} variant={variant}>
                     {variant}
@@ -93,7 +93,7 @@ export const AllVariants: Story = {
 
 export const AllSizes: Story = {
     render: () => (
-        <div className="e-flex e-items-center e-gap-4">
+        <div className="flex items-center gap-4">
             {sizeOptions.map(size => (
                 <Button key={size} size={size}>
                     {size === 'icon' ? <Check /> : `Size ${size}`}
@@ -124,7 +124,7 @@ export const WithIcons: Story = {
         };
 
         return (
-            <div className="e-flex e-flex-wrap e-gap-4">
+            <div className="flex flex-wrap gap-4">
                 {twVariantOptions.map(variant => {
                     const { icon: Icon, label, position = 'left' } = variantIcons[variant];
                     return (
@@ -142,7 +142,7 @@ export const WithIcons: Story = {
 
 export const Disabled: Story = {
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {twVariantOptions.map(variant => (
                 <Button key={variant} variant={variant} disabled>
                     Disabled {variant}
@@ -154,7 +154,7 @@ export const Disabled: Story = {
 
 export const IconOnly: Story = {
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {twVariantOptions.map(variant => {
                 const Icon = twVariantIcons[variant];
                 return (
@@ -178,11 +178,11 @@ export const VariantsBySize: Story = {
         };
 
         return (
-            <div className="e-flex e-flex-col e-gap-6">
+            <div className="flex flex-col gap-6">
                 {sizeOptions.map(size => (
-                    <div key={size} className="e-flex e-flex-col e-gap-2">
-                        <h3 className="e-text-sm e-font-semibold">{sizeLabels[size]}</h3>
-                        <div className="e-flex e-flex-wrap e-gap-4">
+                    <div key={size} className="flex flex-col gap-2">
+                        <h3 className="text-sm font-semibold">{sizeLabels[size]}</h3>
+                        <div className="flex flex-wrap gap-4">
                             {twVariantOptions.map(variant => {
                                 const Icon = twVariantIcons[variant];
                                 return (
@@ -216,7 +216,7 @@ export const Interactive: Story = {
 export const DashkitVariants: Story = {
     name: 'Dashkit / Variants',
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {dashkitVariantOptions.map(variant => (
                 <Button key={variant} ui="dashkit" variant={variant}>
                     {variant}
@@ -229,7 +229,7 @@ export const DashkitVariants: Story = {
 export const DashkitVariantsSm: Story = {
     name: 'Dashkit / Variants (size=sm)',
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {dashkitVariantOptions.map(variant => (
                 <Button key={variant} ui="dashkit" variant={variant} size="sm">
                     {variant}
@@ -242,11 +242,11 @@ export const DashkitVariantsSm: Story = {
 export const DashkitVariantsBySize: Story = {
     name: 'Dashkit / Variants by size',
     render: () => (
-        <div className="e-flex e-flex-col e-gap-6">
+        <div className="flex flex-col gap-6">
             {dashkitSizeOptions.map(size => (
-                <div key={size} className="e-flex e-flex-col e-gap-2">
-                    <h3 className="e-text-sm e-font-semibold">size=&quot;{size}&quot;</h3>
-                    <div className="e-flex e-flex-wrap e-gap-4">
+                <div key={size} className="flex flex-col gap-2">
+                    <h3 className="text-sm font-semibold">size=&quot;{size}&quot;</h3>
+                    <div className="flex flex-wrap gap-4">
                         {dashkitVariantOptions.map(variant => (
                             <Button key={variant} ui="dashkit" variant={variant} size={size}>
                                 {variant}
@@ -262,21 +262,21 @@ export const DashkitVariantsBySize: Story = {
 export const DashkitWithIcons: Story = {
     name: 'Dashkit / With icons',
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             <Button ui="dashkit" variant="primary" size="sm">
-                <Check size={13} className="e-mr-1.5" /> Save
+                <Check size={13} className="mr-1.5" /> Save
             </Button>
             <Button ui="dashkit" variant="white" size="sm">
-                <RefreshCw size={13} className="e-mr-1.5 e-align-text-top" /> Refresh
+                <RefreshCw size={13} className="mr-1.5 align-text-top" /> Refresh
             </Button>
             <Button ui="dashkit" variant="outline-primary" size="sm">
-                <Download size={13} className="e-mr-1.5" /> Download
+                <Download size={13} className="mr-1.5" /> Download
             </Button>
             <Button ui="dashkit" variant="outline-danger" size="sm">
-                <X size={13} className="e-mr-1.5" /> Remove
+                <X size={13} className="mr-1.5" /> Remove
             </Button>
             <Button ui="dashkit" variant="dark" size="sm">
-                Creators <ChevronDown size={15} className="e-align-text-top" />
+                Creators <ChevronDown size={15} className="align-text-top" />
             </Button>
         </div>
     ),
@@ -292,10 +292,10 @@ function DashkitToggleDemo() {
             size="sm"
             variant={showRaw ? 'black' : 'white'}
             active={showRaw}
-            className="e-flex e-items-center"
+            className="flex items-center"
             onClick={() => setShowRaw(r => !r)}
         >
-            <ExternalLink size={13} className="e-mr-1.5" /> Raw {showRaw ? '(on)' : '(off)'}
+            <ExternalLink size={13} className="mr-1.5" /> Raw {showRaw ? '(on)' : '(off)'}
         </Button>
     );
 }
@@ -308,11 +308,11 @@ export const DashkitToggleGroup: Story = {
 export const DashkitAsLink: Story = {
     name: 'Dashkit / As link',
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             <Button ui="dashkit" variant="outline-primary" size="sm" asChild>
                 <a href="https://example.com" target="_blank" rel="noopener noreferrer">
                     Full documentation
-                    <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
                 </a>
             </Button>
             <Button ui="dashkit" variant="white" size="sm" asChild>
@@ -327,7 +327,7 @@ export const DashkitAsLink: Story = {
 export const DashkitDisabled: Story = {
     name: 'Dashkit / Disabled',
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {dashkitVariantOptions.map(variant => (
                 <Button key={variant} ui="dashkit" variant={variant} disabled>
                     Disabled {variant}
@@ -341,7 +341,7 @@ export const DashkitDisabled: Story = {
 export const DashkitSolidWarningDanger: Story = {
     name: 'Dashkit / Variants (solid warning, danger)',
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {(['warning', 'danger'] as const satisfies readonly ButtonVariant[]).map(variant => (
                 <Button key={variant} ui="dashkit" variant={variant}>
                     {variant}

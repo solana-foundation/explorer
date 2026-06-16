@@ -71,7 +71,7 @@ export const Default: Story = {
 
 export const AllVariants: Story = {
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {variantOptions.map(variant => (
                 <Badge key={variant} variant={variant}>
                     {variant}
@@ -83,7 +83,7 @@ export const AllVariants: Story = {
 
 export const AllSizes: Story = {
     render: () => (
-        <div className="e-flex e-items-center e-gap-4">
+        <div className="flex items-center gap-4">
             {sizeOptions.map(size => (
                 <Badge key={size} size={size}>
                     Size {size}
@@ -95,7 +95,7 @@ export const AllSizes: Story = {
 
 export const StatusVariants: Story = {
     render: () => (
-        <div className="e-flex e-gap-4">
+        <div className="flex gap-4">
             {statusOptions.map(status => (
                 <Badge key={status} status={status}>
                     {status}
@@ -107,9 +107,9 @@ export const StatusVariants: Story = {
 
 export const AsLink: Story = {
     render: () => (
-        <div className="e-flex e-flex-col e-gap-4">
+        <div className="flex flex-col gap-4">
             {(['default', 'transparent'] as const satisfies readonly BadgeVariant[]).map(variant => (
-                <div key={variant} className="e-flex e-items-center e-gap-4">
+                <div key={variant} className="flex items-center gap-4">
                     {sizeOptions.map(size => (
                         <Badge key={size} as="link" size={size} variant={variant}>
                             <Link href="#" target="_blank" rel="noopener noreferrer">
@@ -138,7 +138,7 @@ const variantIcons: Record<BadgeVariant, { icon: Icon; label: string }> = {
 
 export const WithIcon: Story = {
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {variantOptions.map(variant => {
                 const { icon: Icon, label } = variantIcons[variant];
                 return (
@@ -157,7 +157,7 @@ export const WithIcon: Story = {
 export const DashkitVariantsSoft: Story = {
     name: 'Dashkit / Soft variants',
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {dashkitVariantOptions.map(variant => (
                 <Badge key={variant} ui="dashkit" variant={variant}>
                     {variant}
@@ -170,7 +170,7 @@ export const DashkitVariantsSoft: Story = {
 export const DashkitVariantsSolid: Story = {
     name: 'Dashkit / Solid variants',
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {dashkitVariantOptions.map(variant => (
                 <Badge key={variant} ui="dashkit" tone="solid" variant={variant}>
                     {variant}
@@ -183,7 +183,7 @@ export const DashkitVariantsSolid: Story = {
 export const DashkitWithIcon: Story = {
     name: 'Dashkit / With icon',
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             {dashkitVariantOptions.map(variant => {
                 const { icon: Icon, label } = variantIcons[variant];
                 return (
@@ -201,15 +201,15 @@ export const DashkitOnDark: Story = {
     globals: { backgrounds: { value: 'dark' } },
     name: 'Dashkit / On dark background',
     render: () => (
-        <div className="e-flex e-flex-col e-gap-4">
-            <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap gap-4">
                 {dashkitVariantOptions.map(variant => (
                     <Badge key={variant} ui="dashkit" variant={variant}>
                         {variant}
                     </Badge>
                 ))}
             </div>
-            <div className="e-flex e-flex-wrap e-gap-4">
+            <div className="flex flex-wrap gap-4">
                 {dashkitVariantOptions.map(variant => (
                     <Badge key={variant} ui="dashkit" tone="solid" variant={variant}>
                         {variant}
@@ -223,7 +223,7 @@ export const DashkitOnDark: Story = {
 export const DashkitAsLink: Story = {
     name: 'Dashkit / As link',
     render: () => (
-        <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-wrap gap-4">
             <Badge ui="dashkit" variant="success" asChild>
                 <Link href="#">Verified</Link>
             </Badge>
@@ -239,16 +239,16 @@ export const DashkitAsLink: Story = {
 
 // In production, dashkit badges inside table cells inherit a smaller font (~10px) via
 // `.badge { font-size: 0.75em }` chained off the parent `<td>`. `size="sm"` on a `ui="dashkit"`
-// Badge emits `e-text-dk-xs` (10px) so the compact look is reproducible standalone.
+// Badge emits `text-dk-xs` (10px) so the compact look is reproducible standalone.
 export const DashkitTableSize: Story = {
     name: 'Dashkit / Table size (compact)',
     render: () => (
-        <div className="e-flex e-flex-col e-gap-4">
+        <div className="flex flex-col gap-4">
             <div>
-                <div className="e-mb-2 e-text-xs e-text-neutral-500">
+                <div className="mb-2 text-xs text-neutral-500">
                     default — inherits from parent (here body 16px)
                 </div>
-                <div className="e-flex e-flex-wrap e-gap-3">
+                <div className="flex flex-wrap gap-3">
                     {dashkitVariantOptions.map(variant => (
                         <Badge key={variant} ui="dashkit" variant={variant}>
                             {variant}
@@ -257,10 +257,10 @@ export const DashkitTableSize: Story = {
                 </div>
             </div>
             <div>
-                <div className="e-mb-2 e-text-xs e-text-neutral-500">
+                <div className="mb-2 text-xs text-neutral-500">
                     size=&quot;sm&quot; — table-cell appearance (10px)
                 </div>
-                <div className="e-flex e-flex-wrap e-gap-3">
+                <div className="flex flex-wrap gap-3">
                     {dashkitVariantOptions.map(variant => (
                         <Badge key={variant} ui="dashkit" size="sm" variant={variant}>
                             {variant}
@@ -269,7 +269,7 @@ export const DashkitTableSize: Story = {
                 </div>
             </div>
             <div>
-                <div className="e-mb-2 e-text-xs e-text-neutral-500">
+                <div className="mb-2 text-xs text-neutral-500">
                     inside a mock `&lt;td&gt;` (font: 13px) — natural inheritance, ≈10px badge
                 </div>
                 <table style={{ fontSize: '13px' }}>
@@ -293,19 +293,19 @@ export const DashkitTableSize: Story = {
     ),
 };
 
-// pill=true swaps the dashkit radius/padding compound (e-rounded-[50rem] e-px-[0.6em]) — no other story renders it
+// pill=true swaps the dashkit radius/padding compound (rounded-[50rem] px-[0.6em]) — no other story renders it
 export const DashkitPill: Story = {
     name: 'Dashkit / Pill',
     render: () => (
-        <div className="e-flex e-flex-col e-gap-4">
-            <div className="e-flex e-flex-wrap e-gap-4">
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap gap-4">
                 {dashkitVariantOptions.map(variant => (
                     <Badge key={variant} ui="dashkit" variant={variant} pill>
                         {variant}
                     </Badge>
                 ))}
             </div>
-            <div className="e-flex e-flex-wrap e-gap-4">
+            <div className="flex flex-wrap gap-4">
                 {dashkitVariantOptions.map(variant => (
                     <Badge key={variant} ui="dashkit" tone="solid" variant={variant} pill>
                         {variant}

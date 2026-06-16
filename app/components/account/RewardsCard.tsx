@@ -89,14 +89,14 @@ export function RewardsCard({ address }: { address: string }) {
                     <BaseTable ui="dashkit" variant="card" nowrap>
                         <BaseTable.Head>
                             <BaseTable.Row>
-                                <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Epoch</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Epoch</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="text-dk-gray-700">
                                     Effective Slot
                                 </BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                                <BaseTable.HeaderCell className="text-dk-gray-700">
                                     Reward Amount
                                 </BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="e-text-dk-gray-700">Post Balance</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="text-dk-gray-700">Post Balance</BaseTable.HeaderCell>
                             </BaseTable.Row>
                         </BaseTable.Head>
                         <BaseTable.Body>{rewardsList}</BaseTable.Body>
@@ -109,18 +109,18 @@ export function RewardsCard({ address }: { address: string }) {
 
                 <CardFooter ui="dashkit">
                     {foundOldest ? (
-                        <div className="e-text-center e-text-dk-gray-700">Fetched full reward history</div>
+                        <div className="text-center text-dk-gray-700">Fetched full reward history</div>
                     ) : (
                         <Button
                             ui="dashkit"
                             variant="primary"
-                            className="e-w-full"
+                            className="w-full"
                             onClick={() => loadMore()}
                             disabled={fetching}
                         >
                             {fetching ? (
                                 <>
-                                    <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
+                                    <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
                                     Loading
                                 </>
                             ) : (

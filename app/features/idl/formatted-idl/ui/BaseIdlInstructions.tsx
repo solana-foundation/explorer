@@ -17,16 +17,16 @@ export function BaseIdlInstructions({ data }: FormattedIdlDataView<'instructions
         <BaseTable ui="dashkit" variant="card" nowrap>
             <BaseTable.Head>
                 <BaseTable.Row>
-                    <BaseTable.HeaderCell className="e-text-neutral-500">Name</BaseTable.HeaderCell>
-                    <BaseTable.HeaderCell className="e-text-neutral-500">Arguments</BaseTable.HeaderCell>
-                    <BaseTable.HeaderCell className="e-text-neutral-500">Accounts</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="text-neutral-500">Name</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="text-neutral-500">Arguments</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="text-neutral-500">Accounts</BaseTable.HeaderCell>
                 </BaseTable.Row>
             </BaseTable.Head>
-            <BaseTable.Body className="e-font-mono e-text-xs">
+            <BaseTable.Body className="font-mono text-xs">
                 {data.map(ix => (
                     <BaseTable.Row key={ix.name}>
                         <BaseTable.Cell>
-                            <HighlightNode className="e-rounded e-py-0.5">{ix.name}</HighlightNode>
+                            <HighlightNode className="rounded py-0.5">{ix.name}</HighlightNode>
                             <BaseIdlDoc docs={ix.docs} />
                         </BaseTable.Cell>
                         <BaseTable.Cell>
@@ -49,13 +49,13 @@ function IdlInstructionArguments({ data }: { data: IxArgsData }) {
 
 function IdlInstructionAccounts({ data }: { data: IxAccountsData }) {
     return (
-        <div className="e-flex e-flex-col e-flex-wrap e-items-start e-justify-start e-gap-1">
+        <div className="flex flex-col flex-wrap items-start justify-start gap-1">
             {data.map(acc => {
                 if ('accounts' in acc) {
                     return (
                         <div key={acc.name}>
-                            <HighlightNode className="e-font-mono e-text-xs">{acc.name}</HighlightNode>
-                            <div className="e-bg-neutral-800 e-px-3 e-py-2">
+                            <HighlightNode className="font-mono text-xs">{acc.name}</HighlightNode>
+                            <div className="bg-neutral-800 px-3 py-2">
                                 <InstructionAccounts accounts={acc.accounts} />
                             </div>
                         </div>
@@ -79,7 +79,7 @@ function IdlInstructionAccounts({ data }: { data: IxAccountsData }) {
 
 function InstructionAccounts({ accounts }: { accounts: InstructionAccountData[] }) {
     return (
-        <div className="e-flex e-flex-col e-flex-wrap e-items-start e-justify-start e-gap-1">
+        <div className="flex flex-col flex-wrap items-start justify-start gap-1">
             {accounts.map(({ docs, name, writable, signer, pda, optional }) => (
                 <IdlInstructionAccount
                     key={name}
@@ -113,10 +113,10 @@ function IdlInstructionAccount({
     return (
         <IdlDocTooltip key={name} docs={docs}>
             <div>
-                <HighlightNode className="e-rounded">
-                    <div className="e-inline-flex e-items-center e-gap-2">
+                <HighlightNode className="rounded">
+                    <div className="inline-flex items-center gap-2">
                         {name}
-                        <div className="e-flex e-gap-1">
+                        <div className="flex gap-1">
                             {isWritable && (
                                 <Badge variant="warning" size="xs">
                                     Mutable

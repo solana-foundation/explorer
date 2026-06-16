@@ -28,14 +28,14 @@ export function UnknownDetailsCard({
             ref={scrollAnchorRef}
             defaultExpanded={false}
             title={
-                <span className="e-flex e-min-w-0 e-flex-1 e-items-center">
-                    <Badge ui="dashkit" variant="info" className="e-mr-1.5 e-flex-none">
+                <span className="flex min-w-0 flex-1 items-center">
+                    <Badge ui="dashkit" variant="info" className="mr-1.5 flex-none">
                         #{index + 1}
                     </Badge>
-                    <span className="e-min-w-0 e-flex-1 e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
+                    <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                         {programName}
                     </span>
-                    <span className="e-ml-1.5 e-flex-none">Instruction</span>
+                    <span className="ml-1.5 flex-none">Instruction</span>
                 </span>
             }
         >
@@ -44,7 +44,7 @@ export function UnknownDetailsCard({
                 <BaseRawDetails ix={ix} />
                 {innerCards && innerCards.length > 0 && (
                     <>
-                        <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                        <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                             <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>

@@ -20,5 +20,5 @@ const SOURCE_ICONS = {
 export function SourceIcon({ source }: { source: EVerificationSource }) {
     const icon = SOURCE_ICONS[source];
 
-    return <Image src={icon} alt={source} width={ICON_SIZE} height={ICON_SIZE} className="e-rounded-full" />;
+    return <Image src={icon} alt={source} width={ICON_SIZE} height={ICON_SIZE} className="rounded-full" />;
 }

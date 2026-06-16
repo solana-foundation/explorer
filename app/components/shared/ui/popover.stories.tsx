@@ -34,10 +34,10 @@ export const Default: Story = {
                         Open Popover
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent align="start" className="e-w-64 e-p-4">
-                    <div className="e-space-y-2">
-                        <p className="e-m-0 e-text-sm e-font-semibold e-text-white">Popover</p>
-                        <p className="e-m-0 e-text-xs e-text-neutral-300">This is popover content.</p>
+                <PopoverContent align="start" className="w-64 p-4">
+                    <div className="space-y-2">
+                        <p className="m-0 text-sm font-semibold text-white">Popover</p>
+                        <p className="m-0 text-xs text-neutral-300">This is popover content.</p>
                     </div>
                 </PopoverContent>
             </Popover>

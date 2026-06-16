@@ -70,12 +70,12 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
                 </CardHeader>
                 <TableCardBody>
                     <BaseTable.Row>
-                        <BaseTable.Cell className="e-w-full">Unique Programs Count</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right e-font-mono">{programEntries.length}</BaseTable.Cell>
+                        <BaseTable.Cell className="w-full">Unique Programs Count</BaseTable.Cell>
+                        <BaseTable.Cell className="text-right font-mono">{programEntries.length}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
-                        <BaseTable.Cell className="e-w-full">Total Instructions</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right e-font-mono">{totalInstructions}</BaseTable.Cell>
+                        <BaseTable.Cell className="w-full">Total Instructions</BaseTable.Cell>
+                        <BaseTable.Cell className="text-right font-mono">{totalInstructions}</BaseTable.Cell>
                     </BaseTable.Row>
                 </TableCardBody>
             </Card>
@@ -88,17 +88,17 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
                 <BaseTable ui="dashkit" variant="card" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Program</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Program</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">
                                 Transaction Count
                             </BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">% of Total</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                            <BaseTable.HeaderCell className="text-dk-gray-700">% of Total</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">
                                 Instruction Count
                             </BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">% of Total</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">% of Total</BaseTable.HeaderCell>
                             {showSuccessRate && (
-                                <BaseTable.HeaderCell className="e-text-dk-gray-700">Success Rate</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="text-dk-gray-700">Success Rate</BaseTable.HeaderCell>
                             )}
                         </BaseTable.Row>
                     </BaseTable.Head>

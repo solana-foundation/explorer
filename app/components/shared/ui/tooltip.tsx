@@ -35,13 +35,13 @@ function TooltipContent({
                 data-slot="tooltip-content"
                 sideOffset={sideOffset}
                 className={cn(
-                    'e-animate-in e-fade-in-0 e-zoom-in-95 data-[state=closed]:e-animate-out data-[state=closed]:e-fade-out-0 data-[state=closed]:e-zoom-out-95 data-[side=bottom]:e-slide-in-from-top-2 data-[side=left]:e-slide-in-from-right-2 data-[side=right]:e-slide-in-from-left-2 data-[side=top]:e-slide-in-from-bottom-2 e-origin-(--radix-tooltip-content-transform-origin) e-z-50 e-w-fit e-text-balance e-rounded-md e-bg-neutral-900 e-px-3 e-py-1.5 e-text-xs e-text-neutral-50',
+                    'animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-tooltip-content-transform-origin) z-50 w-fit text-balance rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-neutral-50',
                     className,
                 )}
                 {...props}
             >
                 {children}
-                <TooltipPrimitive.Arrow className="e-fill-primary e-z-50 e-size-2.5 e-translate-y-[calc(-50%_-_2px)] e-rotate-0 e-rounded-[2px] e-fill-transparent" />
+                <TooltipPrimitive.Arrow className="fill-primary z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-0 rounded-[2px] fill-transparent" />
             </TooltipPrimitive.Content>
         </TooltipPrimitive.Portal>
     );

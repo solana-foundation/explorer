@@ -26,14 +26,14 @@ export const ClusterStatusButton = () => {
     const onClickHandler = useCallback(() => setShow(true), [setShow]);
     const statusName = cluster !== Cluster.Custom ? `${name}` : getCustomUrlClusterName(customUrl);
 
-    const spinnerClasses = 'e-align-text-top e-spinner-grow e-spinner-grow-sm e-mr-1.5';
+    const spinnerClasses = 'align-text-top spinner-grow spinner-grow-sm mr-1.5';
 
     switch (status) {
         case ClusterStatus.Connected:
             return (
-                <Button ui="dashkit" variant="primary" className="!e-block" asChild>
+                <Button ui="dashkit" variant="primary" className="!block" asChild>
                     <span onClick={onClickHandler}>
-                        <CheckCircle className="e-mr-1.5" size={15} />
+                        <CheckCircle className="mr-1.5" size={15} />
                         {statusName}
                     </span>
                 </Button>
@@ -41,7 +41,7 @@ export const ClusterStatusButton = () => {
 
         case ClusterStatus.Connecting:
             return (
-                <Button ui="dashkit" variant="warning" className="!e-block" asChild>
+                <Button ui="dashkit" variant="warning" className="!block" asChild>
                     <span onClick={onClickHandler}>
                         <span className={spinnerClasses} role="status" aria-hidden="true"></span>
                         {statusName}
@@ -51,9 +51,9 @@ export const ClusterStatusButton = () => {
 
         case ClusterStatus.Failure:
             return (
-                <Button ui="dashkit" variant="danger" className="!e-block" asChild>
+                <Button ui="dashkit" variant="danger" className="!block" asChild>
                     <span onClick={onClickHandler}>
-                        <AlertCircle className="e-mr-1.5" size={15} />
+                        <AlertCircle className="mr-1.5" size={15} />
                         {statusName}
                     </span>
                 </Button>

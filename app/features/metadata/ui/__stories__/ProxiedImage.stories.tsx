@@ -126,7 +126,7 @@ export const FallbackProbing: Story = {
         const canvas = within(canvasElement);
         canvas.getByAltText('nft').dispatchEvent(new Event('error'));
         // The skeleton keeps holding the slot while the reason probe runs…
-        await waitFor(() => expect(canvasElement.querySelector('.e-animate-pulse')).not.toBeNull());
+        await waitFor(() => expect(canvasElement.querySelector('.animate-pulse')).not.toBeNull());
         // …and no failure reason is surfaced yet (no logo fallback with a reason).
         expect(canvas.queryByAltText('Image could not be displayed')).toBeNull();
     },
@@ -164,7 +164,7 @@ export const Loading: Story = {
     args: { alt: 'nft', style: { height: 120, width: 120 }, uri: solanaHero.src },
     decorators: [withImageLoadPending],
     play: async ({ canvasElement }) => {
-        expect(canvasElement.querySelector('.e-animate-pulse')).not.toBeNull();
+        expect(canvasElement.querySelector('.animate-pulse')).not.toBeNull();
     },
 };
 

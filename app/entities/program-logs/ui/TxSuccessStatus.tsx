@@ -14,18 +14,18 @@ export function TxSuccessStatus({ signature, date, link }: { signature: string; 
     const timestamp = `${time} UTC`;
 
     return (
-        <div className="e-border-1 e-flex e-items-center e-gap-2 e-rounded e-border e-border-solid e-border-neutral-600 e-px-4 e-py-2">
-            <div className="e-flex e-w-1/2 e-items-center e-gap-1">
+        <div className="border-1 flex items-center gap-2 rounded border border-solid border-neutral-600 px-4 py-2">
+            <div className="flex w-1/2 items-center gap-1">
                 <Copyable text={signature}>
-                    <span className="e-overflow-hidden e-text-ellipsis e-whitespace-nowrap e-font-mono e-text-sm e-tracking-tight e-text-accent-700">
+                    <span className="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-sm tracking-tight text-accent-700">
                         {signature}
                     </span>
                 </Copyable>
             </div>
-            <div className="e-flex e-items-center">
-                <span className="e-whitespace-nowrap e-text-xs e-tracking-tight e-text-accent-700">{timestamp}</span>
+            <div className="flex items-center">
+                <span className="whitespace-nowrap text-xs tracking-tight text-accent-700">{timestamp}</span>
             </div>
-            <a href={link} target="_blank" rel="noopener noreferrer" className="e-ml-auto">
+            <a href={link} target="_blank" rel="noopener noreferrer" className="ml-auto">
                 <Badge variant="success" size="xs">
                     Success <ExternalLink size={12} />
                 </Badge>

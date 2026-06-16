@@ -14,7 +14,7 @@ function AccordionItem({ className, ...props }: React.ComponentProps<typeof Acco
             data-slot="accordion-item"
             data-value={props.value}
             className={cn(
-                'e-border-b e-border-l-0 e-border-r-0 e-border-t-0 e-border-solid e-border-neutral-700 e-px-4 last:e-border-b-0',
+                'border-b border-l-0 border-r-0 border-t-0 border-solid border-neutral-700 px-4 last:border-b-0',
                 className,
             )}
             {...props}
@@ -27,22 +27,22 @@ const AccordionTrigger = React.forwardRef<
     React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => {
     return (
-        <AccordionPrimitive.Header className="e-mb-0 e-flex">
+        <AccordionPrimitive.Header className="mb-0 flex">
             <AccordionPrimitive.Trigger
                 ref={ref}
                 data-slot="accordion-trigger"
                 className={cn(
-                    'e-flex e-flex-1 e-items-start e-gap-4 e-rounded-md e-border-0 e-bg-transparent e-py-4',
-                    'e-text-left e-text-sm e-font-medium e-text-neutral-200 e-outline-none e-transition-all',
-                    'hover:e-underline',
-                    'focus-visible:e-border-neutral-950 focus-visible:e-ring-2 focus-visible:e-ring-neutral-950/50',
-                    'disabled:e-pointer-events-none disabled:e-opacity-50',
-                    '[&[data-state=open]>svg]:e-rotate-90',
+                    'flex flex-1 items-start gap-4 rounded-md border-0 bg-transparent py-4',
+                    'text-left text-sm font-medium text-neutral-200 outline-none transition-all',
+                    'hover:underline',
+                    'focus-visible:border-neutral-950 focus-visible:ring-2 focus-visible:ring-neutral-950/50',
+                    'disabled:pointer-events-none disabled:opacity-50',
+                    '[&[data-state=open]>svg]:rotate-90',
                     className,
                 )}
                 {...props}
             >
-                <ChevronRightIcon className="e-pointer-events-none e-size-4 e-shrink-0 e-translate-y-0.5 e-text-neutral-500 e-transition-transform e-duration-200" />
+                <ChevronRightIcon className="pointer-events-none size-4 shrink-0 translate-y-0.5 text-neutral-500 transition-transform duration-200" />
                 {children}
             </AccordionPrimitive.Trigger>
         </AccordionPrimitive.Header>
@@ -58,10 +58,10 @@ const AccordionContent = React.forwardRef<
         <AccordionPrimitive.Content
             ref={ref}
             data-slot="accordion-content"
-            className="[data-state=closed]:e-animate-accordion-up [data-state=open]:e-animate-accordion-down e-overflow-hidden e-text-sm"
+            className="[data-state=closed]:animate-accordion-up [data-state=open]:animate-accordion-down overflow-hidden text-sm"
             {...props}
         >
-            <div className={cn('e-pb-4 e-pt-0', className)}>{children}</div>
+            <div className={cn('pb-4 pt-0', className)}>{children}</div>
         </AccordionPrimitive.Content>
     );
 });

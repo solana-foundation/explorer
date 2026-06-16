@@ -41,7 +41,7 @@ export const Default: Story = {
         <Card {...args}>
             <CardTitle>Card Title</CardTitle>
             <CardContent>
-                <p className="e-m-0">This is a simple card with some content. You can put any content inside it.</p>
+                <p className="m-0">This is a simple card with some content. You can put any content inside it.</p>
             </CardContent>
         </Card>
     ),
@@ -61,14 +61,14 @@ export const AllVariants: Story = {
         };
 
         return (
-            <div className="e-flex e-w-full e-max-w-2xl e-flex-col e-gap-6">
+            <div className="flex w-full max-w-2xl flex-col gap-6">
                 {variantOptions.map(variant => (
-                    <div key={variant} className="e-flex e-flex-col e-gap-2">
-                        <h3 className="e-text-sm e-font-semibold e-text-white">{variantLabels[variant]}</h3>
+                    <div key={variant} className="flex flex-col gap-2">
+                        <h3 className="text-sm font-semibold text-white">{variantLabels[variant]}</h3>
                         <Card ui="tw" variant={variant}>
                             {variant === 'tight' ? (
                                 <>
-                                    <h3 className="e-border e-border-neutral-800 e-bg-neutral-900 e-px-6 e-py-4 e-text-[10px] e-font-medium e-uppercase e-tracking-widest e-text-gray-400">
+                                    <h3 className="border border-neutral-800 bg-neutral-900 px-6 py-4 text-[10px] font-medium uppercase tracking-widest text-gray-400">
                                         No Padding
                                     </h3>
                                     <CardContent>
@@ -99,17 +99,17 @@ export const CompleteCard: Story = {
         variant: 'default',
     },
     render: args => (
-        <Card {...args} className="e-w-full e-max-w-md">
+        <Card {...args} className="w-full max-w-md">
             <CardHeader>
                 <CardTitle>Complete Card Example</CardTitle>
                 <CardDescription>This card demonstrates all available sub-components working together.</CardDescription>
             </CardHeader>
             <CardContent>
-                <p className="e-mb-4">
+                <p className="mb-4">
                     This is the main content area of the card. You can place any content here, including forms, lists,
                     images, or other components.
                 </p>
-                <ul className="e-list-inside e-list-disc e-space-y-2">
+                <ul className="list-inside list-disc space-y-2">
                     <li>CardHeader - Contains title and description</li>
                     <li>CardTitle - Main heading</li>
                     <li>CardDescription - Supporting text</li>
@@ -118,7 +118,7 @@ export const CompleteCard: Story = {
                 </ul>
             </CardContent>
             <CardFooter>
-                <button className="e-hover:e-bg-neutral-700 e-rounded e-bg-neutral-800 e-px-3 e-py-1 e-text-white">
+                <button className="hover:bg-neutral-700 rounded bg-neutral-800 px-3 py-1 text-white">
                     Action Button
                 </button>
             </CardFooter>

@@ -25,7 +25,7 @@ export type BaseNavigationTabsProps = {
     /**
      * Enables scroll-spy mode: active tab tracks scroll position, clicking scrolls smoothly.
      * Wraps the tab bar in a sticky full-width container with a shadow on stuck.
-     * Use `wrapperClassName` to provide the background color (e.g. "e-bg-heavy-metal-900").
+     * Use `wrapperClassName` to provide the background color (e.g. "bg-heavy-metal-900").
      */
     scrollSpy?: boolean;
     tabs: NavigationTab[];
@@ -154,7 +154,7 @@ export function BaseNavigationTabs({
             <div
                 ref={tablistRef}
                 role="tablist"
-                className={cn('e-inline-flex e-w-full e-gap-[18px] e-overflow-hidden', className)}
+                className={cn('inline-flex w-full gap-[18px] overflow-hidden', className)}
             >
                 {visibleTabs.map(tab => (
                     <TabLink key={tab.path} path={tab.path} title={tab.title} />
@@ -171,7 +171,7 @@ export function BaseNavigationTabs({
 
             {children && (
                 <NavigationTabsContext.Provider value={hiddenContextValue}>
-                    <div className="e-hidden">{children}</div>
+                    <div className="hidden">{children}</div>
                 </NavigationTabsContext.Provider>
             )}
         </NavigationTabsContext.Provider>
@@ -182,12 +182,12 @@ export function BaseNavigationTabs({
             <div
                 ref={wrapperRef}
                 className={cn(
-                    'e-sticky e-top-0 e-z-10',
-                    'e-ml-[calc(50%-50vw)] e-mr-[calc(50%-50vw)]',
-                    'e-pl-[calc(50vw-50%)] e-pr-[calc(50vw-50%)]',
-                    'e-[scrollbar-width:none] e-overflow-x-auto [&::-webkit-scrollbar]:e-hidden',
-                    'e-transition-[box-shadow] e-duration-200',
-                    stuck && 'e-shadow-[0_6px_16px_rgba(0,0,0,0.45)]',
+                    'sticky top-0 z-10',
+                    'ml-[calc(50%-50vw)] mr-[calc(50%-50vw)]',
+                    'pl-[calc(50vw-50%)] pr-[calc(50vw-50%)]',
+                    '[scrollbar-width:none] overflow-x-auto [&::-webkit-scrollbar]:hidden',
+                    'transition-[box-shadow] duration-200',
+                    stuck && 'shadow-[0_6px_16px_rgba(0,0,0,0.45)]',
                     wrapperClassName,
                 )}
             >

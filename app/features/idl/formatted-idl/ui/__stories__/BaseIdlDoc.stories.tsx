@@ -45,7 +45,7 @@ const tooltipMeta = {
     component: IdlDocTooltip,
     decorators: [
         Story => (
-            <div className="p-10 flex items-center e-justify-center">
+            <div className="p-10 flex items-center justify-center">
                 <Story />
             </div>
         ),

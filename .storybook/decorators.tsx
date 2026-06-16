@@ -81,7 +81,7 @@ export const withCardTableField: Decorator = Story => (
     <ClusterProvider>
         <MockAccountsProvider>
             <Card ui="dashkit">
-                <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!e-border-t-0">
+                <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
                     <BaseTable.Body>
                         <Story />
                     </BaseTable.Body>

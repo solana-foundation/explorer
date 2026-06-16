@@ -23,8 +23,8 @@ export function ProgramSecurityTXTLabel({ programPubkey }: { programPubkey: Publ
                 target="_blank"
                 href={programMetadataSecurityTxt ? PMP_SECURITY_TXT_DOC_LINK : NEODYME_SECURITY_TXT_DOC_LINK}
             >
-                <span className="e-text-dk-white">Security.txt</span>
-                <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                <span className="text-dk-white">Security.txt</span>
+                <ExternalLink className="ml-1.5 align-text-top" size={13} />
             </Link>
         </InfoTooltip>
     );

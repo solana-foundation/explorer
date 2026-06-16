@@ -55,16 +55,16 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                             <VisibilityProvider>
                                 <TokenInfoBatchProvider>
                                     <ClusterModal />
-                                    <div className="e-flex e-min-h-screen e-flex-col">
-                                        <div className="e-min-w-[292px] e-flex-1 e-pb-6">
+                                    <div className="flex min-h-screen flex-col">
+                                        <div className="min-w-[292px] flex-1 pb-6">
                                             <Navbar>
                                                 <SearchBar />
                                             </Navbar>
                                             <MessageBanner />
-                                            <PageContainer className="e-my-3 xl:e-hidden">
+                                            <PageContainer className="my-3 xl:hidden">
                                                 <SearchBar />
                                             </PageContainer>
-                                            <PageContainer className="e-my-3 lg:e-hidden">
+                                            <PageContainer className="my-3 lg:hidden">
                                                 <ClusterStatusButton />
                                             </PageContainer>
                                             {children}

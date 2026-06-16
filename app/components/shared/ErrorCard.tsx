@@ -7,7 +7,7 @@ import { cnPrefixed } from './utils';
 export function ErrorCard({ className, message }: React.HTMLAttributes<unknown> & { message?: string }) {
     return (
         <div className={cnPrefixed(baseCardVariants({ ui: 'dashkit' }), className)}>
-            <CardBody ui="dashkit" className="!e-p-1 e-text-center">
+            <CardBody ui="dashkit" className="!p-1 text-center">
                 {message || 'Error'}
             </CardBody>
         </div>

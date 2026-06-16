@@ -22,8 +22,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const TableRow = () => (
-    <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
-        <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">In-table status (parent 13px → badge ≈10px)</h3>
+    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+        <h3 className="mb-2 text-dk-sm text-dk-gray-700">In-table status (parent 13px → badge ≈10px)</h3>
         <BaseTable ui="dashkit" variant="card" nowrap>
             <BaseTable.Head>
                 <BaseTable.Row>
@@ -54,22 +54,22 @@ const TableRow = () => (
 );
 
 const InlineMetaRow = () => (
-    <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
-        <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">Inline meta tags (wrap)</h3>
-        <div className="e-flex e-flex-col e-gap-2">
+    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+        <h3 className="mb-2 text-dk-sm text-dk-gray-700">Inline meta tags (wrap)</h3>
+        <div className="flex flex-col gap-2">
             <div>
                 Account #1
-                <span className="e-ml-1.5">
-                    <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                <span className="ml-1.5">
+                    <Badge ui="dashkit" variant="info" className="mr-[3px]">
                         Fee Payer
                     </Badge>
-                    <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                    <Badge ui="dashkit" variant="info" className="mr-[3px]">
                         Signer
                     </Badge>
-                    <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                    <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
                         Writable
                     </Badge>
-                    <Badge ui="dashkit" variant="warning" className="e-mr-[3px]">
+                    <Badge ui="dashkit" variant="warning" className="mr-[3px]">
                         Program
                     </Badge>
                     <Badge ui="dashkit" variant="gray">
@@ -82,9 +82,9 @@ const InlineMetaRow = () => (
 );
 
 const HeaderPillsRow = () => (
-    <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
-        <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">Header pills (solid, e.g. NFT metadata)</h3>
-        <div className="e-flex e-flex-wrap e-gap-1.5">
+    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+        <h3 className="mb-2 text-dk-sm text-dk-gray-700">Header pills (solid, e.g. NFT metadata)</h3>
+        <div className="flex flex-wrap gap-1.5">
             <Badge ui="dashkit" variant="dark" tone="solid">
                 Compressed
             </Badge>
@@ -105,9 +105,9 @@ const HeaderPillsRow = () => (
 );
 
 const StatusToggleRow = () => (
-    <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
-        <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">Feature activation status (solid)</h3>
-        <div className="e-flex e-flex-wrap e-gap-1.5">
+    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+        <h3 className="mb-2 text-dk-sm text-dk-gray-700">Feature activation status (solid)</h3>
+        <div className="flex flex-wrap gap-1.5">
             <Badge ui="dashkit" variant="success" tone="solid">
                 Active on mainnet-beta
             </Badge>
@@ -119,22 +119,22 @@ const StatusToggleRow = () => (
 );
 
 const TitleBadgeRow = () => (
-    <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
-        <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">Title with leading index badge (truncation)</h3>
-        <div className="e-flex e-min-w-0 e-items-center">
-            <Badge ui="dashkit" variant="info" className="e-mr-1.5 e-flex-none">
+    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+        <h3 className="mb-2 text-dk-sm text-dk-gray-700">Title with leading index badge (truncation)</h3>
+        <div className="flex min-w-0 items-center">
+            <Badge ui="dashkit" variant="info" className="mr-1.5 flex-none">
                 #3
             </Badge>
-            <span className="e-min-w-0 e-flex-1 e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
+            <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                 Some Very Long Program Name That Will Truncate On Mobile Layouts
             </span>
-            <span className="e-ml-1.5 e-flex-none">Instruction</span>
+            <span className="ml-1.5 flex-none">Instruction</span>
         </div>
     </div>
 );
 
 const Showcase = () => (
-    <div className="e-flex e-flex-col e-gap-3">
+    <div className="flex flex-col gap-3">
         <TableRow />
         <InlineMetaRow />
         <HeaderPillsRow />

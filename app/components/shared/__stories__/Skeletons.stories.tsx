@@ -14,7 +14,7 @@ import {
 } from '../Skeletons';
 
 const hasPulse = (canvasElement: HTMLElement) =>
-    expect(canvasElement.querySelectorAll('.e-animate-pulse').length).toBeGreaterThan(0);
+    expect(canvasElement.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
 
 function TableWrapper({ children }: { children: React.ReactNode }) {
     return (

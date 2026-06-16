@@ -17,8 +17,8 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
                 <BaseTable ui="dashkit" variant="card" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
-                            <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Slot</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                            <BaseTable.HeaderCell className="w-px text-dk-gray-700">Slot</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">
                                 Confirmation Count
                             </BaseTable.HeaderCell>
                         </BaseTable.Row>
@@ -30,7 +30,7 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
                 </BaseTable>
 
                 <CardFooter ui="dashkit">
-                    <div className="e-text-center e-text-dk-gray-700">
+                    <div className="text-center text-dk-gray-700">
                         {voteAccount.info.votes.length > 0 ? '' : 'No votes found'}
                     </div>
                 </CardFooter>
@@ -42,10 +42,10 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
 const renderAccountRow = (vote: Vote, index: number) => {
     return (
         <BaseTable.Row key={index}>
-            <BaseTable.Cell className="e-w-px e-font-mono">
+            <BaseTable.Cell className="w-px font-mono">
                 <Slot slot={vote.slot} link />
             </BaseTable.Cell>
-            <BaseTable.Cell className="e-font-mono">{vote.confirmationCount}</BaseTable.Cell>
+            <BaseTable.Cell className="font-mono">{vote.confirmationCount}</BaseTable.Cell>
         </BaseTable.Row>
     );
 };

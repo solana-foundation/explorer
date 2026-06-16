@@ -217,7 +217,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
             {accountFilter !== null && (
                 <CardBody ui="dashkit">
                     Showing transactions which load account:
-                    <div className="e-ml-1.5 e-inline-block">
+                    <div className="ml-1.5 inline-block">
                         <Address pubkey={accountFilter} link />
                     </div>
                 </CardBody>
@@ -234,7 +234,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                     <BaseTable.Head>
                         <BaseTable.Row>
                             <BaseTable.HeaderCell
-                                className="e-cursor-pointer e-text-dk-gray-700"
+                                className="cursor-pointer text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.delete('sort');
@@ -245,12 +245,12 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             >
                                 #
                             </BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">
                                 Transaction Signature
                             </BaseTable.HeaderCell>
                             <BaseTable.HeaderCell
-                                className="e-cursor-pointer e-text-dk-gray-700"
+                                className="cursor-pointer text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'fee');
@@ -262,7 +262,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 Fee
                             </BaseTable.HeaderCell>
                             <BaseTable.HeaderCell
-                                className="e-cursor-pointer e-text-dk-gray-700"
+                                className="cursor-pointer text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'reservedCUs');
@@ -275,7 +275,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             </BaseTable.HeaderCell>
                             {showComputeUnits && (
                                 <BaseTable.HeaderCell
-                                    className="e-cursor-pointer e-text-dk-gray-700"
+                                    className="cursor-pointer text-dk-gray-700"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'compute');
@@ -288,7 +288,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 </BaseTable.HeaderCell>
                             )}
                             <BaseTable.HeaderCell
-                                className="e-cursor-pointer e-text-dk-gray-700"
+                                className="cursor-pointer text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'txnCost');
@@ -299,7 +299,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             >
                                 Txn Cost
                             </BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Invoked Programs</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Invoked Programs</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
                     <BaseTable.Body>
@@ -361,9 +361,9 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                             ? 'NA'
                                             : entries.map(([programId, count], i) => {
                                                   return (
-                                                      <div key={i} className="e-flex e-items-center">
+                                                      <div key={i} className="flex items-center">
                                                           <Address pubkey={new PublicKey(programId)} link />
-                                                          <span className="e-ml-1.5 e-text-dk-gray-700">{`(${count})`}</span>
+                                                          <span className="ml-1.5 text-dk-gray-700">{`(${count})`}</span>
                                                       </div>
                                                   );
                                               })}
@@ -380,7 +380,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                     <Button
                         ui="dashkit"
                         variant="primary"
-                        className="e-w-full"
+                        className="w-full"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
@@ -445,13 +445,13 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
     });
 
     return (
-        <Dropdown className="e-mr-1.5">
+        <Dropdown className="mr-1.5">
             <DropdownToggle asChild>
                 <Button ui="dashkit" variant="white" size="sm" type="button">
-                    {currentFilterOption.name} <ChevronDown className="e-align-text-top" size={13} />
+                    {currentFilterOption.name} <ChevronDown className="align-text-top" size={13} />
                 </Button>
             </DropdownToggle>
-            <DropdownMenu align="end" className="e-max-h-80 e-overflow-y-auto">
+            <DropdownMenu align="end" className="max-h-80 overflow-y-auto">
                 {filterOptions.map(({ name, programId, transactionCount }) => (
                     <FilterLink
                         currentFilter={filter}

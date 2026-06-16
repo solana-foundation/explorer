@@ -23,14 +23,14 @@ export function UpcomingFeatures() {
     const features = filterUpcomingForCluster(upcoming, cluster);
 
     const header = (
-        <div className="e-flex e-flex-col e-gap-1.5 e-border-b e-border-heavy-metal-950 e-px-4 e-py-3 md:e-flex-row md:e-items-center md:e-justify-between">
-            <span className="e-font-medium e-text-dk-white">
-                <span className="e-mr-2">🚀</span>
+        <div className="flex flex-col gap-1.5 border-b border-heavy-metal-950 px-4 py-3 md:flex-row md:items-center md:justify-between">
+            <span className="font-medium text-dk-white">
+                <span className="mr-2">🚀</span>
                 Upcoming {clusterName(cluster)} Features
             </span>
             <Link
                 href={featureGatesPath}
-                className="e-text-dk-sm e-text-dk-primary-dark hover:e-text-dk-primary-on-dark"
+                className="text-dk-sm text-dk-primary-dark hover:text-dk-primary-on-dark"
             >
                 View all feature gates
             </Link>
@@ -44,12 +44,12 @@ export function UpcomingFeatures() {
             secondColumn={{
                 header: 'Activation Epochs',
                 render: feature => (
-                    <div className="e-flex e-flex-col e-gap-0.5 e-whitespace-nowrap e-text-dk-sm">
+                    <div className="flex flex-col gap-0.5 whitespace-nowrap text-dk-sm">
                         {feature.otherActivations.map(({ cluster: c, epoch }) => (
                             <Link
                                 key={c}
                                 href={`/epoch/${epoch}?cluster=${clusterSlug(c)}`}
-                                className="e-text-dk-primary-dark hover:e-text-dk-primary-on-dark"
+                                className="text-dk-primary-dark hover:text-dk-primary-on-dark"
                             >
                                 {clusterName(c)}: {epoch}
                             </Link>

@@ -63,20 +63,20 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
             value={tab}
             onValueChange={handleTabChange}
             // we need to do -32px because this is padding for left and right 16px
-            className="e-max-w-[calc(100vw-32px)] e-overflow-hidden e-rounded-lg e-border e-border-solid e-border-outer-space-800 e-bg-heavy-metal-900 lg:e-max-w-[540px]"
+            className="max-w-[calc(100vw-32px)] overflow-hidden rounded-lg border border-solid border-outer-space-800 bg-heavy-metal-900 lg:max-w-[540px]"
         >
-            <div className="e-flex e-flex-wrap e-justify-between e-gap-8 e-border-b e-border-outer-space-800 e-px-3 [border-bottom-style:solid]">
+            <div className="flex flex-wrap justify-between gap-8 border-b border-outer-space-800 px-3 [border-bottom-style:solid]">
                 <TabsList>
-                    <TabsTrigger className="!e-py-2 e-text-xs" value="hex">
+                    <TabsTrigger className="!py-2 text-xs" value="hex">
                         Hex
                     </TabsTrigger>
-                    <TabsTrigger className="!e-py-2 e-text-xs" value="base64">
+                    <TabsTrigger className="!py-2 text-xs" value="base64">
                         Base64
                     </TabsTrigger>
                 </TabsList>
-                <div className="e-flex e-items-center e-gap-2">
+                <div className="flex items-center gap-2">
                     {data !== undefined && !loading && (
-                        <span className="e-whitespace-nowrap e-text-xs e-text-outer-space-300">
+                        <span className="whitespace-nowrap text-xs text-outer-space-300">
                             {data.length} bytes
                         </span>
                     )}
@@ -88,7 +88,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                         onClick={() => copy(tab === 'base64' ? base64String : hexString)}
                     >
                         {copyState === 'copied' ? <Check size={12} /> : <Copy size={12} />}
-                        <span className="e-hidden md:e-inline">{copyState === 'copied' ? 'Copied!' : 'Copy'}</span>
+                        <span className="hidden md:inline">{copyState === 'copied' ? 'Copied!' : 'Copy'}</span>
                     </Button>
                     <DownloadDropdown
                         filename={filename}
@@ -103,18 +103,18 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
             <TabsContent
                 value="hex"
                 className={cn(
-                    'e-max-h-80 e-overflow-y-auto e-p-1.5 e-text-start',
-                    loading && 'e-p-3',
-                    tooLarge && 'e-px-3 e-py-2',
+                    'max-h-80 overflow-y-auto p-1.5 text-start',
+                    loading && 'p-3',
+                    tooLarge && 'px-3 py-2',
                 )}
             >
                 {loading ? (
-                    <span className="e-spinner-grow e-spinner-grow-sm" />
+                    <span className="spinner-grow spinner-grow-sm" />
                 ) : tooLarge ? (
-                    <span className="e-text-sm e-text-outer-space-200">Too large to display - use download/copy.</span>
+                    <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>
                 ) : (
                     <HexData
-                        className="e-w-full"
+                        className="w-full"
                         raw={visibleData ?? new Uint8Array(0)}
                         isCopyable={false}
                         rowSize={HEX_ROW_BYTES}
@@ -125,16 +125,16 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
 
             <TabsContent
                 value="base64"
-                className={cn('e-max-h-80 e-overflow-y-auto e-p-3 e-text-start', !loading && data?.length && 'e-py-2')}
+                className={cn('max-h-80 overflow-y-auto p-3 text-start', !loading && data?.length && 'py-2')}
             >
                 {loading ? (
-                    <span className="e-spinner-grow e-spinner-grow-sm" />
+                    <span className="spinner-grow spinner-grow-sm" />
                 ) : !hasData ? (
-                    <span className="e-text-sm e-text-outer-space-200">No data</span>
+                    <span className="text-sm text-outer-space-200">No data</span>
                 ) : tooLarge ? (
-                    <span className="e-text-sm e-text-outer-space-200">Too large to display - use download/copy.</span>
+                    <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>
                 ) : (
-                    <span className="e-text-wrap e-break-all e-font-mono e-text-xs e-text-white">
+                    <span className="text-wrap break-all font-mono text-xs text-white">
                         {visibleBase64}
                         {!expanded && hasMoreBase64 && '…'}
                     </span>
@@ -142,17 +142,17 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
             </TabsContent>
 
             {hasMore && !tooLarge && !loading && hasData && (
-                <div className="e-mt-1 e-flex e-justify-center e-border-t e-border-outer-space-800 [border-top-style:solid]">
+                <div className="mt-1 flex justify-center border-t border-outer-space-800 [border-top-style:solid]">
                     <Button
                         variant="ghost"
-                        className="hover:!e-bg-transparent"
+                        className="hover:!bg-transparent"
                         size="sm"
                         onClick={() => setExpanded(e => !e)}
                     >
-                        <span className="e-text-xs e-text-outer-space-300">{expanded ? 'Show less' : 'Show more'}</span>
+                        <span className="text-xs text-outer-space-300">{expanded ? 'Show less' : 'Show more'}</span>
                         <ChevronDown
                             size={14}
-                            className={expanded ? 'e-rotate-180 e-transition-transform' : 'e-transition-transform'}
+                            className={expanded ? 'rotate-180 transition-transform' : 'transition-transform'}
                         />
                     </Button>
                 </div>

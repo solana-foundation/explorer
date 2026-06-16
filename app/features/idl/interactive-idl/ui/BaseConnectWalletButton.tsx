@@ -16,7 +16,7 @@ export function BaseConnectWalletButton({ displayAddress, onClick, isVisible = t
     return (
         <Button variant="outline" size="sm" onClick={onClick}>
             <Image src={WalletIcon} width={12} height={12} alt="" />
-            <div className="e-whitespace-nowrap">{displayAddress}</div>
+            <div className="whitespace-nowrap">{displayAddress}</div>
         </Button>
     );
 }

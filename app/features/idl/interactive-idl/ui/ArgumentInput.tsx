@@ -107,18 +107,18 @@ const ArrayArgumentInput = forwardRef<HTMLInputElement, ArrayArgumentInputProps>
                     <button
                         type="button"
                         onClick={handleAddItem}
-                        className="e-m-0 e-w-fit e-border-none e-bg-transparent e-p-0 e-text-xs e-text-accent-700 disabled:e-text-neutral-400"
+                        className="m-0 w-fit border-none bg-transparent p-0 text-xs text-accent-700 disabled:text-neutral-400"
                         disabled={lastItemIsEmpty || isAtMaxLength}
                     >
                         Add
                     </button>
                 }
             >
-                <div className="e-space-y-2">
+                <div className="space-y-2">
                     {values.map((item, index) => {
                         const itemId = stableIds[index];
                         return (
-                            <div key={itemId} className="e-flex e-items-center e-gap-2">
+                            <div key={itemId} className="flex items-center gap-2">
                                 <Input
                                     ref={inputElement => {
                                         setRef(itemId, inputElement);
@@ -143,7 +143,7 @@ const ArrayArgumentInput = forwardRef<HTMLInputElement, ArrayArgumentInputProps>
                                     <button
                                         type="button"
                                         onClick={() => handleRemoveItem(index)}
-                                        className="e-m-0 e-flex e-h-6 e-w-6 e-cursor-pointer e-items-center e-justify-center e-border-none e-bg-transparent e-p-0 e-text-xs e-text-neutral-400 hover:e-text-destructive"
+                                        className="m-0 flex h-6 w-6 cursor-pointer items-center justify-center border-none bg-transparent p-0 text-xs text-neutral-400 hover:text-destructive"
                                         aria-label="Remove item"
                                         tabIndex={-1}
                                     >
@@ -320,9 +320,9 @@ function ArgumentInputLayout({
     actions?: React.ReactNode;
 }) {
     return (
-        <div className="e-space-y-2">
-            <div className="e-flex e-items-center e-gap-2">
-                <Label className="e-text-sm e-font-normal e-text-neutral-200" htmlFor={inputId}>
+        <div className="space-y-2">
+            <div className="flex items-center gap-2">
+                <Label className="text-sm font-normal text-neutral-200" htmlFor={inputId}>
                     {arg.name}
                 </Label>
                 <Badge variant="info" size="xs">
@@ -333,11 +333,11 @@ function ArgumentInputLayout({
                         Optional
                     </Badge>
                 )}
-                {actions && <div className="e-ml-auto e-flex e-gap-2">{actions}</div>}
+                {actions && <div className="ml-auto flex gap-2">{actions}</div>}
             </div>
             {children}
-            {arg.docs.length > 0 && <p className="e-text-xs e-text-neutral-400">{arg.docs.join(' ')}</p>}
-            {error && <p className="e-mt-1 e-text-xs e-text-destructive">{error.message}</p>}
+            {arg.docs.length > 0 && <p className="text-xs text-neutral-400">{arg.docs.join(' ')}</p>}
+            {error && <p className="mt-1 text-xs text-destructive">{error.message}</p>}
         </div>
     );
 }

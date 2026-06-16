@@ -20,8 +20,8 @@ const statusBadgeIconVariants = cva('', {
     },
     variants: {
         status: {
-            active: 'e-text-[#1E5E32]',
-            inactive: 'e-text-[#24D66C]',
+            active: 'text-[#1E5E32]',
+            inactive: 'text-[#24D66C]',
         },
     },
 });
@@ -32,8 +32,8 @@ const statusBadgeVariants = cva('', {
     },
     variants: {
         status: {
-            active: 'e-gap-0 e-bg-[#1E5E32]',
-            inactive: 'e-bg-[#423500]',
+            active: 'gap-0 bg-[#1E5E32]',
+            inactive: 'bg-[#423500]',
         },
     },
 });
@@ -44,8 +44,8 @@ const statusBadgeTextVariants = cva('', {
     },
     variants: {
         status: {
-            active: 'e-text-[#24D66C]',
-            inactive: 'e-text-[#EBC032]',
+            active: 'text-[#24D66C]',
+            inactive: 'text-[#EBC032]',
         },
     },
 });

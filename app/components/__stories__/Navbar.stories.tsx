@@ -22,6 +22,6 @@ export const Default: Story = {};
 
 export const WithChildren: Story = {
     args: {
-        children: <div className="e-text-dk-gray-700">Page-level slot content (e.g., breadcrumbs)</div>,
+        children: <div className="text-dk-gray-700">Page-level slot content (e.g., breadcrumbs)</div>,
     },
 };

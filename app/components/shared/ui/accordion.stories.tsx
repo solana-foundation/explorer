@@ -16,7 +16,7 @@ const meta: Meta<typeof Accordion> = {
     component: Accordion,
     decorators: [
         Story => (
-            <div className="e-w-96">
+            <div className="w-96">
                 <Story />
             </div>
         ),
@@ -36,7 +36,7 @@ export const Default = {
         expect(accordion).toBeInTheDocument();
     },
     render: () => (
-        <Accordion type="single" collapsible className="e-w-full e-max-w-md">
+        <Accordion type="single" collapsible className="w-full max-w-md">
             <AccordionItem value="item-1">
                 <AccordionTrigger>Is it accessible?</AccordionTrigger>
                 <AccordionContent>
@@ -50,7 +50,7 @@ export const Default = {
 export const SingleCollapsible = {
     args: {} as never,
     render: () => (
-        <Accordion type="single" collapsible className="e-w-full e-max-w-md">
+        <Accordion type="single" collapsible className="w-full max-w-md">
             <AccordionItem value="item-1">
                 <AccordionTrigger>What is an accordion?</AccordionTrigger>
                 <AccordionContent>
@@ -80,7 +80,7 @@ export const SingleCollapsible = {
 export const Multiple = {
     args: {} as never,
     render: () => (
-        <Accordion type="multiple" className="e-w-full e-max-w-md">
+        <Accordion type="multiple" className="w-full max-w-md">
             <AccordionItem value="item-1">
                 <AccordionTrigger>Section 1</AccordionTrigger>
                 <AccordionContent>
@@ -106,7 +106,7 @@ export const Multiple = {
 export const DefaultValue = {
     args: {} as never,
     render: () => (
-        <Accordion type="single" defaultValue="item-2" collapsible className="e-w-full e-max-w-md">
+        <Accordion type="single" defaultValue="item-2" collapsible className="w-full max-w-md">
             <AccordionItem value="item-1">
                 <AccordionTrigger>Closed by default</AccordionTrigger>
                 <AccordionContent>This item starts closed.</AccordionContent>
@@ -126,16 +126,16 @@ export const DefaultValue = {
 export const WithLongContent = {
     args: {} as never,
     render: () => (
-        <Accordion type="single" collapsible className="e-w-full e-max-w-md">
+        <Accordion type="single" collapsible className="w-full max-w-md">
             <AccordionItem value="item-1">
                 <AccordionTrigger>Long content example</AccordionTrigger>
                 <AccordionContent>
-                    <div className="e-space-y-2">
+                    <div className="space-y-2">
                         <p>
                             This accordion item contains longer content to demonstrate how the component handles
                             substantial amounts of text and nested elements.
                         </p>
-                        <ul className="e-list-inside e-list-disc e-space-y-1">
+                        <ul className="list-inside list-disc space-y-1">
                             <li>First bullet point with some additional information</li>
                             <li>Second bullet point explaining another concept</li>
                             <li>Third bullet point with more details</li>
@@ -170,7 +170,7 @@ export const ManyItems = {
         ];
 
         return (
-            <Accordion type="single" collapsible className="e-w-full e-max-w-md">
+            <Accordion type="single" collapsible className="w-full max-w-md">
                 {items.map(item => (
                     <AccordionItem key={item.value} value={item.value}>
                         <AccordionTrigger>{item.title}</AccordionTrigger>

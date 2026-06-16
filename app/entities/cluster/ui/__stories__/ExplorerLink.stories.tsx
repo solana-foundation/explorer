@@ -30,7 +30,7 @@ export const TransactionPath: Story = {
 
 export const WithCustomClass: Story = {
     args: {
-        className: 'e-text-blue-500 e-underline',
+        className: 'text-blue-500 underline',
         label: 'Open',
         path: '/',
     },

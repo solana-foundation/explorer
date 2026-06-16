@@ -28,7 +28,7 @@ export function BaseTokenVerificationBadge({ verificationResult, isLoading }: Ba
                 align="start"
                 collisionPadding={8}
                 side="bottom"
-                className="e-w-72 e-p-4"
+                className="w-72 p-4"
                 {...hoverHandlers}
             >
                 <TokenVerificationContent

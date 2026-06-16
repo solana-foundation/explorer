@@ -66,7 +66,7 @@ export function InteractWithIdl({
                 description: (
                     <ExplorerLink
                         path={`/tx/${txSignature}`}
-                        className="e-shrink-0 e-text-xs"
+                        className="shrink-0 text-xs"
                         label="View Transaction"
                     />
                 ),

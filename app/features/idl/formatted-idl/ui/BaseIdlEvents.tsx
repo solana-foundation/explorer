@@ -11,15 +11,15 @@ export function BaseIdlEvents({ data }: FormattedIdlDataView<'events'>) {
         <BaseTable ui="dashkit" variant="card" nowrap>
             <BaseTable.Head>
                 <BaseTable.Row>
-                    <BaseTable.HeaderCell className="e-text-neutral-500">Name</BaseTable.HeaderCell>
-                    <BaseTable.HeaderCell className="e-text-neutral-500">Fields</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="text-neutral-500">Name</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="text-neutral-500">Fields</BaseTable.HeaderCell>
                 </BaseTable.Row>
             </BaseTable.Head>
-            <BaseTable.Body className="e-font-mono e-text-xs">
+            <BaseTable.Body className="font-mono text-xs">
                 {data.map(event => (
                     <BaseTable.Row key={event.name}>
                         <BaseTable.Cell>
-                            <HighlightNode className="e-rounded e-py-0.5">{event.name}</HighlightNode>
+                            <HighlightNode className="rounded py-0.5">{event.name}</HighlightNode>
                             <BaseIdlDoc docs={event.docs} />
                         </BaseTable.Cell>
                         <BaseTable.Cell>

@@ -101,7 +101,7 @@ export function IdlCard({ programId }: { programId: string }) {
                     </CardTitle>
                 </CardHeader>
                 <CardBody ui="dashkit">
-                    <div className="e-mb-6 e-flex e-items-center e-gap-2 e-text-destructive">
+                    <div className="mb-6 flex items-center gap-2 text-destructive">
                         <AlertTriangle size={16} />
                         <span>
                             This program doesn&apos;t have an IDL yet. If you&apos;re the developer, upload it using the
@@ -109,20 +109,20 @@ export function IdlCard({ programId }: { programId: string }) {
                         </span>
                     </div>
 
-                    <div className="e-space-y-6">
+                    <div className="space-y-6">
                         <IdlInstructionSection
                             title="Upload IDL"
                             description="Use this command to upload generated idl in JSON format"
                             commands={['npx @solana-program/program-metadata@latest write idl $PROGRAM_ID ./idl.json']}
                         />
 
-                        <div className="e-flex e-items-center e-justify-between">
+                        <div className="flex items-center justify-between">
                             <span>In case you want to upload IDL with a multisig, follow the documentation.</span>
                             <Button
                                 ui="dashkit"
                                 variant="outline-primary"
                                 size="sm"
-                                className="e-whitespace-nowrap"
+                                className="whitespace-nowrap"
                                 asChild
                             >
                                 <a
@@ -131,7 +131,7 @@ export function IdlCard({ programId }: { programId: string }) {
                                     rel="noopener noreferrer"
                                 >
                                     Full documentation
-                                    <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
                                 </a>
                             </Button>
                         </div>
@@ -148,10 +148,11 @@ export function IdlCard({ programId }: { programId: string }) {
         <Card ui="dashkit">
             {/* dashkit .card-header-tabs: header height comes from the tabs (not the fixed 60px),
                 negative tab margins cancel the header padding so the active underline (via the
-                trigger's -1px bottom margin) overlays the header border. !important because cn()'s
-                twMerge is not e-prefix-aware and can't drop conflicting base classes. */}
-            <CardHeader ui="dashkit" className="!e-h-auto">
-                <TabsList className="!-e-mb-3 -e-mt-3 !e-border-0">
+                trigger's -1px bottom margin) overlays the header border. !important so these win
+                over dashkit's base classes, since cn() (clsx) keeps all classes and stylesheet order
+                would otherwise decide. */}
+            <CardHeader ui="dashkit" className="!h-auto">
+                <TabsList className="!-mb-3 -mt-3 !border-0">
                     {tabs
                         .filter(tab => tab.idl)
                         .map(tab => (

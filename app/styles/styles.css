@@ -1,7 +1,7 @@
 /* Single global stylesheet. Order matters: `@tailwind base` (Preflight) first, then the element/reset rules,
    then `@tailwind components`/`@tailwind utilities`. The element rules MUST stay above the utilities directive —
    the button reset below targets `[type='button']` etc. (an attribute selector, specificity 0,1,0, equal to a
-   utility class), so if it sat after `@tailwind utilities` it would beat `e-bg-transparent`/`e-border-0` by
+   utility class), so if it sat after `@tailwind utilities` it would beat `bg-transparent`/`border-0` by
    source order and resurrect native UA button chrome. Element rules carry their provenance: "Preflight …" /
    "Bootstrap Reboot …" notes mark rules that bend Preflight back to the app's rendering; "Dashkit …" notes
    mark app overrides. */
@@ -218,7 +218,7 @@ button:focus {
 
 /* Preflight strips the UA button box model (transparent bg, color:inherit, padding:0, border-width:0);
    baseline kept UA chrome for buttons without explicit utility styling. Revert to UA — utility classes
-   (e-bg-*, e-text-*, e-border-*, e-p-*) still win by specificity. Preflight leaves UA button border-radius;
+   (bg-*, text-*, border-*, p-*) still win by specificity. Preflight leaves UA button border-radius;
    baseline squared it. */
 button,
 [type='button'],
@@ -306,12 +306,12 @@ tr {
 
 /* Dashkit component ports kept as-is: spinners */
 @layer components {
-    @keyframes e-spinner-border {
+    @keyframes spinner-border {
         to {
             transform: rotate(360deg) /* rtl:ignore */;
         }
     }
-    .e-spinner-border {
+    .spinner-border {
         display: inline-block;
         width: 2rem;
         height: 2rem;
@@ -319,14 +319,14 @@ tr {
         border: 0.25em solid currentColor;
         border-right-color: transparent;
         border-radius: 50%;
-        animation: 0.75s linear infinite e-spinner-border;
+        animation: 0.75s linear infinite spinner-border;
     }
-    .e-spinner-border-sm {
+    .spinner-border-sm {
         width: 1rem;
         height: 1rem;
         border-width: 0.2em;
     }
-    @keyframes e-spinner-grow {
+    @keyframes spinner-grow {
         0% {
             transform: scale(0);
         }
@@ -335,7 +335,7 @@ tr {
             transform: none;
         }
     }
-    .e-spinner-grow {
+    .spinner-grow {
         display: inline-block;
         width: 2rem;
         height: 2rem;
@@ -343,39 +343,39 @@ tr {
         background-color: currentColor;
         border-radius: 50%;
         opacity: 0;
-        animation: 0.75s linear infinite e-spinner-grow;
+        animation: 0.75s linear infinite spinner-grow;
     }
-    .e-spinner-grow-xs {
+    .spinner-grow-xs {
         width: 0.5rem;
         height: 0.5rem;
     }
-    .e-spinner-grow-sm {
+    .spinner-grow-sm {
         width: 1rem;
         height: 1rem;
     }
     @media (prefers-reduced-motion: reduce) {
-        .e-spinner-border,
-        .e-spinner-grow {
+        .spinner-border,
+        .spinner-grow {
             animation-duration: 1.5s;
         }
     }
 }
 
 @media (max-width: 575px) {
-    .max-sm\:e-hidden {
+    .max-sm\:hidden {
         display: none;
     }
-    .max-sm\:e-col-span-6 {
+    .max-sm\:col-span-6 {
         grid-column: span 6 / span 6;
     }
     /* Adjust template for small displays so columns do not overlap each other */
-    .e-grid-cols-12-ext {
+    .grid-cols-12-ext {
         grid-template-columns: minmax(22rem, 1fr) repeat(11, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 767px) {
-    .max-md\:e-hidden {
+    .max-md\:hidden {
         display: none;
     }
 }

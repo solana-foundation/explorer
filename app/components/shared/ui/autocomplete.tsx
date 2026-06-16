@@ -14,20 +14,20 @@ export type AutocompleteItem = {
     keywords?: string[];
 };
 
-const commandListVariants = cva(['e-max-h-96 e-overflow-x-hidden e-overflow-y-auto e-py-2'], {
+const commandListVariants = cva(['max-h-96 overflow-x-hidden overflow-y-auto py-2'], {
     defaultVariants: {
         scrollbar: 'styled',
     },
     variants: {
         scrollbar: {
             styled: [
-                '[&::-webkit-scrollbar]:e-w-2',
-                '[&::-webkit-scrollbar-thumb]:e-bg-heavy-metal-600',
-                '[&::-webkit-scrollbar-thumb]:e-rounded-full',
-                '[&::-webkit-scrollbar-thumb]:e-transition-colors',
-                '[&::-webkit-scrollbar-thumb]:hover:e-bg-heavy-metal-500',
-                '[&::-webkit-scrollbar-track]:e-bg-heavy-metal-800',
-                '[&::-webkit-scrollbar-track]:e-rounded-md',
+                '[&::-webkit-scrollbar]:w-2',
+                '[&::-webkit-scrollbar-thumb]:bg-heavy-metal-600',
+                '[&::-webkit-scrollbar-thumb]:rounded-full',
+                '[&::-webkit-scrollbar-thumb]:transition-colors',
+                '[&::-webkit-scrollbar-thumb]:hover:bg-heavy-metal-500',
+                '[&::-webkit-scrollbar-track]:bg-heavy-metal-800',
+                '[&::-webkit-scrollbar-track]:rounded-md',
             ],
         },
     },
@@ -122,7 +122,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                         <Input ref={inptutRef} />
                     </Command.Input>
                 </PopoverPrimitive.Anchor>
-                {!open && <CommandList aria-hidden="true" className="e-hidden" />}
+                {!open && <CommandList aria-hidden="true" className="hidden" />}
                 <PopoverPrimitive.Content
                     asChild
                     align="start"
@@ -133,7 +133,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                             e.preventDefault();
                         }
                     }}
-                    className="e-z-50 e-w-[var(--radix-popover-trigger-width)] e-min-w-[min(400px,100vw)] e-rounded-md e-border e-border-heavy-metal-900 e-bg-heavy-metal-800 e-shadow-2xl [border-style:solid]"
+                    className="z-50 w-[var(--radix-popover-trigger-width)] min-w-[min(400px,100vw)] rounded-md border border-heavy-metal-900 bg-heavy-metal-800 shadow-2xl [border-style:solid]"
                 >
                     <CommandList
                         onMouseDown={e => {
@@ -146,7 +146,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                         className={commandListVariants()}
                     >
                         {loading && (
-                            <Command.Loading className="e-px-4 e-py-2 e-text-sm e-text-heavy-metal-400">
+                            <Command.Loading className="px-4 py-2 text-sm text-heavy-metal-400">
                                 Loading...
                             </Command.Loading>
                         )}
@@ -169,7 +169,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                                     <CommandGroup
                                         key={groupName}
                                         heading={groupName}
-                                        className="[&_[cmdk-group-heading]]:e-mb-1 [&_[cmdk-group-heading]]:e-mt-2 [&_[cmdk-group-heading]]:e-select-none [&_[cmdk-group-heading]]:e-border-b [&_[cmdk-group-heading]]:e-border-heavy-metal-700 [&_[cmdk-group-heading]]:e-px-4 [&_[cmdk-group-heading]]:e-pb-1.5 [&_[cmdk-group-heading]]:e-pt-1 [&_[cmdk-group-heading]]:e-text-xs [&_[cmdk-group-heading]]:e-font-semibold [&_[cmdk-group-heading]]:e-uppercase [&_[cmdk-group-heading]]:e-tracking-wide [&_[cmdk-group-heading]]:e-text-heavy-metal-200"
+                                        className="[&_[cmdk-group-heading]]:mb-1 [&_[cmdk-group-heading]]:mt-2 [&_[cmdk-group-heading]]:select-none [&_[cmdk-group-heading]]:border-b [&_[cmdk-group-heading]]:border-heavy-metal-700 [&_[cmdk-group-heading]]:px-4 [&_[cmdk-group-heading]]:pb-1.5 [&_[cmdk-group-heading]]:pt-1 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-heavy-metal-200"
                                     >
                                         {groupItems.map(option => (
                                             <AutocompleteItemComponent<Item>
@@ -185,7 +185,7 @@ function Autocomplete<Item extends AutocompleteItem = AutocompleteItem>({
                             </>
                         ) : null}
                         {!loading ? (
-                            <CommandEmpty className="e-w-full e-px-4 e-py-2 e-text-sm e-text-heavy-metal-400">
+                            <CommandEmpty className="w-full px-4 py-2 text-sm text-heavy-metal-400">
                                 {emptyMessage}
                             </CommandEmpty>
                         ) : null}
@@ -216,7 +216,7 @@ function AutocompleteItemComponent<Item extends AutocompleteItem = AutocompleteI
             onMouseDown={e => e.preventDefault()}
             onSelect={() => onSelectItem(option.value)}
             keywords={option.keywords}
-            className="e-cursor-pointer e-transition-colors hover:e-bg-heavy-metal-700 aria-[selected=true]:e-bg-heavy-metal-600"
+            className="cursor-pointer transition-colors hover:bg-heavy-metal-700 aria-[selected=true]:bg-heavy-metal-600"
         >
             {renderItemContent
                 ? renderItemContent(option)
@@ -230,9 +230,9 @@ function renderItemContentDefault<Item extends AutocompleteItem = AutocompleteIt
     renderItemLabel: (option: Item) => React.ReactNode,
 ) {
     return (
-        <div className="e-flex e-w-full e-items-center e-justify-between e-px-4 e-py-1.5 e-text-xs">
+        <div className="flex w-full items-center justify-between px-4 py-1.5 text-xs">
             {renderItemLabel(option)}
-            <span className="e-font-mono e-text-xs e-text-white md:e-ml-2 md:e-text-heavy-metal-400">
+            <span className="font-mono text-xs text-white md:ml-2 md:text-heavy-metal-400">
                 {option.value}
             </span>
         </div>
@@ -240,7 +240,7 @@ function renderItemContentDefault<Item extends AutocompleteItem = AutocompleteIt
 }
 
 function renderItemLabelDefault<Item extends AutocompleteItem>(option: Item) {
-    return <span className="e-hidden md:e-inline">{option.label}</span>;
+    return <span className="hidden md:inline">{option.label}</span>;
 }
 
 export { Autocomplete };

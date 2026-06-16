@@ -55,7 +55,7 @@ function AccountRow({ label, pubkey }: { label: string; pubkey: unknown }) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">
+            <BaseTable.Cell className="text-right">
                 <Address pubkey={pubkey} alignRight link />
             </BaseTable.Cell>
         </BaseTable.Row>
@@ -67,7 +67,7 @@ function DataRow({ label, value }: { label: string; value: unknown }) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">{String(value)}</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">{String(value)}</BaseTable.Cell>
         </BaseTable.Row>
     );
 }
@@ -78,7 +78,7 @@ function RoyaltyRow({ basisPoints }: { basisPoints: unknown }) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>Royalty</BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">{pct % 1 === 0 ? `${pct}%` : `${pct.toFixed(2)}%`}</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">{pct % 1 === 0 ? `${pct}%` : `${pct.toFixed(2)}%`}</BaseTable.Cell>
         </BaseTable.Row>
     );
 }
@@ -89,7 +89,7 @@ function GenericAccountRows({ ix }: { ix: TransactionInstruction }) {
             {ix.keys.map((key, i) => (
                 <BaseTable.Row key={i}>
                     <BaseTable.Cell>Account #{i + 1}</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <Address pubkey={key.pubkey} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>

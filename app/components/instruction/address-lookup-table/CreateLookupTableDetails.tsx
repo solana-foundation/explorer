@@ -21,37 +21,37 @@ export function CreateLookupTableDetailsCard(props: InstructionDetailsProps & { 
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={AddressLookupTableProgram.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Lookup Table</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.lookupTableAccount} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Lookup Table Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.lookupTableAuthority} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Payer Account</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.payerAccount} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Recent Slot</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Slot slot={info.recentSlot} link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Bump Seed</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.bumpSeed}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.bumpSeed}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

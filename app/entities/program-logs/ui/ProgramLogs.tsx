@@ -20,7 +20,7 @@ export function ProgramLogs({
     const [showRaw, setShowRaw] = useState(false);
 
     const content = showRaw ? (
-        <div className="e-overflow-hidden e-rounded-lg">
+        <div className="overflow-hidden rounded-lg">
             <SolarizedJsonViewer
                 src={logs}
                 name={false}
@@ -37,14 +37,14 @@ export function ProgramLogs({
     );
 
     return (
-        <div className="e-flex e-min-h-0 e-flex-col e-gap-1">
-            <div className="e-flex e-justify-end">
+        <div className="flex min-h-0 flex-col gap-1">
+            <div className="flex justify-end">
                 <Button variant={showRaw ? 'accent' : 'outline'} size="sm" onClick={() => setShowRaw(!showRaw)}>
                     <Code size={12} />
                     Raw
                 </Button>
             </div>
-            <div className="e-flex e-min-h-0 e-flex-col e-gap-2 e-overflow-auto">
+            <div className="flex min-h-0 flex-col gap-2 overflow-auto">
                 {header}
 
                 {content}
@@ -70,8 +70,8 @@ function ProgramLogRows({
                     ))}
                 </div>
             ) : (
-                <div className="e-flex e-items-center e-justify-center e-pb-6 e-text-center">
-                    <p className="e-m-0 e-text-sm e-italic e-text-muted">No logs yet</p>
+                <div className="flex items-center justify-center pb-6 text-center">
+                    <p className="m-0 text-sm italic text-muted">No logs yet</p>
                 </div>
             )}
         </>
@@ -85,13 +85,13 @@ function ProgramLogRow({ entry, index, programName }: { entry: InstructionLogs; 
                 <span className={instructionNumberVariants({ variant: entry.failed ? 'destructive' : 'success' })}>
                     #{index + 1}
                 </span>
-                <span className="e-ml-1.5 e-text-xs">{programName ? `${programName} Instruction` : 'Instruction'}</span>
+                <span className="ml-1.5 text-xs">{programName ? `${programName} Instruction` : 'Instruction'}</span>
             </div>
-            <div className="e-flex e-flex-col e-items-start e-p-2 e-font-mono e-text-sm">
+            <div className="flex flex-col items-start p-2 font-mono text-sm">
                 {entry.logs.map((log, key) => {
                     return (
                         <span key={key}>
-                            <span className="e-text-neutral-500">{log.prefix}</span>
+                            <span className="text-neutral-500">{log.prefix}</span>
                             <span className={logTextVariants({ variant: log.style })}>{log.text}</span>
                         </span>
                     );
@@ -101,27 +101,27 @@ function ProgramLogRow({ entry, index, programName }: { entry: InstructionLogs; 
     );
 }
 
-const logTextVariants = cva('e-font-mono e-text-xs e-leading-relaxed e-m-0', {
+const logTextVariants = cva('font-mono text-xs leading-relaxed m-0', {
     defaultVariants: {
         variant: 'default',
     },
     variants: {
         variant: {
-            default: 'e-text-neutral-400',
-            info: 'e-text-cyan-500',
-            muted: 'e-text-neutral-400',
-            program: 'e-text-neutral-200',
-            success: 'e-text-accent',
-            warning: 'e-text-destructive',
+            default: 'text-neutral-400',
+            info: 'text-cyan-500',
+            muted: 'text-neutral-400',
+            program: 'text-neutral-200',
+            success: 'text-accent',
+            warning: 'text-destructive',
         },
     },
 });
 
-const instructionNumberVariants = cva('e-py-0.5 e-px-1 e-text-xs e-rounded', {
+const instructionNumberVariants = cva('py-0.5 px-1 text-xs rounded', {
     variants: {
         variant: {
-            destructive: 'e-text-destructive e-bg-destructive-900 ',
-            success: 'e-text-accent e-bg-accent-900',
+            destructive: 'text-destructive bg-destructive-900 ',
+            success: 'text-accent bg-accent-900',
         },
     },
 });

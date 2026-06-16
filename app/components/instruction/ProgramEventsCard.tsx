@@ -74,10 +74,10 @@ function EventCard({
     const fields = ((eventFields?.type as IdlTypeDefTyStruct)?.fields as IdlField[]) ?? [];
 
     return (
-        <Card ui="dashkit" className="e-mb-1.5">
+        <Card ui="dashkit" className="mb-1.5">
             <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
-                    <Badge ui="dashkit" variant="info" className="e-mr-1.5">
+                <CardTitle as="h3" ui="dashkit" className="flex items-center">
+                    <Badge ui="dashkit" variant="info" className="mr-1.5">
                         #{instructionIndex + 1}.{eventIndex + 1}
                     </Badge>
                     {camelToTitleCase(event.name)}
@@ -87,10 +87,10 @@ function EventCard({
                     size="sm"
                     variant={showRaw ? 'black' : 'white'}
                     active={showRaw}
-                    className="e-flex e-items-center"
+                    className="flex items-center"
                     onClick={() => setShowRaw(r => !r)}
                 >
-                    <Code className="e-mr-1.5" size={13} /> Raw
+                    <Code className="mr-1.5" size={13} /> Raw
                 </Button>
             </CardHeader>
             <BaseTable ui="dashkit" variant="card" nowrap>
@@ -99,9 +99,9 @@ function EventCard({
                         <>
                             <BaseTable.Row>
                                 <BaseTable.Cell>
-                                    Event Data <span className="e-text-dk-gray-700">(Hex)</span>
+                                    Event Data <span className="text-dk-gray-700">(Hex)</span>
                                 </BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right">
+                                <BaseTable.Cell className="text-right">
                                     <HexData raw={fromBase64(rawEventData)} />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
@@ -110,10 +110,10 @@ function EventCard({
                         <>
                             {fields.length > 0 && (
                                 <>
-                                    <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                                    <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                                         <BaseTable.Cell>Field Name</BaseTable.Cell>
                                         <BaseTable.Cell>Type</BaseTable.Cell>
-                                        <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>
+                                        <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
                                     </BaseTable.Row>
                                     {mapIxArgsToRows(event.data, { ...eventDef, args: fields } as any, program.idl)}
                                 </>

@@ -67,22 +67,22 @@ export function BaseInstructionCard({
             ref={scrollAnchorRef}
             collapsible={collapsible}
             title={
-                <span className="e-flex e-min-w-0 e-flex-1 e-items-center">
+                <span className="flex min-w-0 flex-1 items-center">
                     <Badge
                         ui="dashkit"
                         variant={resultClass as 'success' | 'warning' | 'dark'}
-                        className="e-mr-1.5 e-flex-none"
+                        className="mr-1.5 flex-none"
                     >
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </Badge>
-                    <span className="e-min-w-0 e-flex-1 e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
+                    <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                         {title}
                     </span>
                 </span>
             }
             headerButtons={
-                <div className="e-flex e-items-center e-gap-1.5">
+                <div className="flex items-center gap-1.5">
                     {headerButtons}
                     <Button
                         ui="dashkit"
@@ -91,23 +91,23 @@ export function BaseInstructionCard({
                         active={showRaw}
                         disabled={defaultRaw}
                         className={cn(
-                            'e-flex e-items-center',
-                            defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed',
+                            'flex items-center',
+                            defaultRaw && '!pointer-events-auto cursor-not-allowed',
                         )}
                         onClick={rawClickHandler}
                     >
-                        <Code className="e-mr-1.5" size={13} /> Raw
+                        <Code className="mr-1.5" size={13} /> Raw
                     </Button>
                 </div>
             }
         >
-            <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!e-border-t-0">
+            <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
                 <BaseTable.Body>
                     {showRaw ? (
                         <>
                             <BaseTable.Row>
                                 <BaseTable.Cell>Program</BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right">
+                                <BaseTable.Cell className="text-right">
                                     <Address pubkey={ix.programId} alignRight link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
@@ -124,7 +124,7 @@ export function BaseInstructionCard({
                     )}
                     {innerCards && innerCards.length > 0 && (
                         <>
-                            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                                 <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
                             </BaseTable.Row>
                             <BaseTable.Row>
@@ -136,12 +136,12 @@ export function BaseInstructionCard({
                     )}
                     {eventCards && eventCards.length > 0 && (
                         <>
-                            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                                 <BaseTable.Cell colSpan={3}>Events</BaseTable.Cell>
                             </BaseTable.Row>
                             <BaseTable.Row>
                                 <BaseTable.Cell colSpan={3}>
-                                    <div className="e-m-6">{eventCards}</div>
+                                    <div className="m-6">{eventCards}</div>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         </>

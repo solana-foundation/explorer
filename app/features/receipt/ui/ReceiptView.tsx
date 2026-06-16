@@ -63,11 +63,11 @@ export function ReceiptView({
     }
 
     return (
-        <PageContainer className="e-flex e-min-h-[80vh] e-min-w-[theme(screens.xs)] e-flex-col e-items-center e-justify-center e-gap-6 e-px-5 e-py-10">
+        <PageContainer className="flex min-h-[80vh] min-w-[theme(screens.xs)] flex-col items-center justify-center gap-6 px-5 py-10">
             <BlurredCircle />
             <BaseReceipt data={data} />
-            <div className="e-flex e-flex-row e-items-center e-gap-1">
-                <div className="e-flex e-items-start e-gap-0.5">
+            <div className="flex flex-row items-center gap-1">
+                <div className="flex items-start gap-0.5">
                     <Button variant="compact" size="compact" asChild>
                         <Link
                             href={transactionPath}
@@ -79,9 +79,9 @@ export function ReceiptView({
                         </Link>
                     </Button>
                 </div>
-                <div className="e-flex e-items-start e-gap-0.5">
+                <div className="flex items-start gap-0.5">
                     {canNativeShare ? (
-                        <Button variant="compact" size="compact" onClick={handleNativeShare} className="e-max-h-[25px]">
+                        <Button variant="compact" size="compact" onClick={handleNativeShare} className="max-h-[25px]">
                             <Share2 size={12} aria-hidden="true" />
                             Share
                         </Button>
@@ -89,19 +89,19 @@ export function ReceiptView({
                         <PopoverButton
                             icon={<Share2 size={12} aria-hidden="true" />}
                             label="Share"
-                            className="e-max-h-[25px]"
+                            className="max-h-[25px]"
                         >
                             <ShareOnXShareItem onShare={() => receiptAnalytics.trackShareOnX(signature)} />
                             <CopyLinkShareItem onCopy={() => receiptAnalytics.trackShareCopyLink(signature)} />
                         </PopoverButton>
                     )}
                 </div>
-                <div className="e-flex e-items-start e-gap-0.5">
+                <div className="flex items-start gap-0.5">
                     <PopoverButton
                         icon={<Download size={12} />}
                         label="Download"
                         loading={isPriceLoading}
-                        className="e-max-h-[25px]"
+                        className="max-h-[25px]"
                     >
                         <DownloadReceiptItem
                             icon={<Table size={12} />}

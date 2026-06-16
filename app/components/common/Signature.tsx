@@ -10,19 +10,19 @@ import Link from 'next/link';
 import { Copyable } from './Copyable';
 import { useMidTruncation } from './useMidTruncation';
 
-const signatureVariants = cva('e-relative e-flex e-w-full e-min-w-0 e-justify-start', {
+const signatureVariants = cva('relative flex w-full min-w-0 justify-start', {
     defaultVariants: {
         alignItems: 'center',
         alignRight: false,
     },
     variants: {
         alignItems: {
-            center: 'e-items-center',
-            start: 'e-items-start',
+            center: 'items-center',
+            start: 'items-start',
         },
         alignRight: {
             false: '',
-            true: 'lg:e-justify-end',
+            true: 'lg:justify-end',
         },
     },
 });
@@ -47,7 +47,7 @@ export function Signature({ signature, alignItems, alignRight, className, link, 
             {!noTruncate && (
                 <span
                     ref={hiddenTextRef}
-                    className="e-pointer-events-none e-invisible e-absolute e-whitespace-nowrap e-font-mono"
+                    className="pointer-events-none invisible absolute whitespace-nowrap font-mono"
                     aria-hidden
                 >
                     {signature}
@@ -56,19 +56,19 @@ export function Signature({ signature, alignItems, alignRight, className, link, 
             <Copyable text={signature}>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <span className="e-relative e-min-w-0 e-overflow-hidden e-font-mono">
+                        <span className="relative min-w-0 overflow-hidden font-mono">
                             {link ? (
-                                <Link href={transactionPath} className="e-font-mono">
+                                <Link href={transactionPath} className="font-mono">
                                     {visibleText}
                                 </Link>
                             ) : (
-                                <span className="e-font-mono">{visibleText}</span>
+                                <span className="font-mono">{visibleText}</span>
                             )}
                         </span>
                     </TooltipTrigger>
                     {isMidTruncated && (
-                        <TooltipContent className="e-max-w-[min(320px,90vw)]">
-                            <span className="e-break-all e-font-mono">{signature}</span>
+                        <TooltipContent className="max-w-[min(320px,90vw)]">
+                            <span className="break-all font-mono">{signature}</span>
                         </TooltipContent>
                     )}
                 </Tooltip>

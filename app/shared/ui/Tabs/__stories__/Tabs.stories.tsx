@@ -35,7 +35,7 @@ function ControlledTabs({ disabledId, size }: { disabledId?: string; size?: 'sm'
                     </TabsTrigger>
                 ))}
             </TabsList>
-            <div className="e-pt-4">
+            <div className="pt-4">
                 {TABS.map(tab => (
                     <TabsContent key={tab.id} active={active === tab.id}>
                         {tab.content}

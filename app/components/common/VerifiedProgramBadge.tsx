@@ -57,7 +57,7 @@ export function VerifiedProgramBadge({
 
         return (
             <CardTitle as="h3" ui="dashkit">
-                <Badge ui="dashkit" variant={badgeVariant} className="e-cursor-pointer" asChild>
+                <Badge ui="dashkit" variant={badgeVariant} className="cursor-pointer" asChild>
                     <Link href={verifiedBuildTabPath}>{badgeText}</Link>
                 </Badge>
             </CardTitle>

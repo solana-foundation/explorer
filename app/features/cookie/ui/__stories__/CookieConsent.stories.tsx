@@ -25,20 +25,20 @@ type Story = StoryObj<typeof meta>;
 export const EUBanner: Story = {
     args: {
         children: (
-            <div className="e-flex e-flex-col e-gap-4">
-                <p className="e-m-0 e-text-base e-leading-relaxed e-text-white">
+            <div className="flex flex-col gap-4">
+                <p className="m-0 text-base leading-relaxed text-white">
                     This website uses cookies to offer you a better browsing experience. Find out more on{' '}
                     <PrivacyPolicyLink>how we use cookies</PrivacyPolicyLink>.
                 </p>
 
-                <div className="e-flex e-flex-row e-items-center e-justify-end e-gap-4">
+                <div className="flex flex-row items-center justify-end gap-4">
                     <button
-                        className="e-cursor-pointer e-border-none e-bg-transparent e-p-0 e-text-sm e-font-medium e-tracking-wider e-text-white e-transition-opacity hover:e-opacity-70"
+                        className="cursor-pointer border-none bg-transparent p-0 text-sm font-medium tracking-wider text-white transition-opacity hover:opacity-70"
                         onClick={() => alert('Opted out')}
                     >
                         OPT-OUT
                     </button>
-                    <Button ui="dashkit" variant="white" className="e-bg-transparent" onClick={() => alert('Accepted')}>
+                    <Button ui="dashkit" variant="white" className="bg-transparent" onClick={() => alert('Accepted')}>
                         ACCEPT
                     </Button>
                 </div>
@@ -50,7 +50,7 @@ export const EUBanner: Story = {
 export const CardOnly: Story = {
     args: {
         children: (
-            <p className="e-m-0 e-text-base e-text-white">Cookie consent card container with customizable content.</p>
+            <p className="m-0 text-base text-white">Cookie consent card container with customizable content.</p>
         ),
     },
 };

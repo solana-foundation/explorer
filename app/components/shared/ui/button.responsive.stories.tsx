@@ -21,27 +21,27 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const ToolbarRow = () => (
-    <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
-        <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">Card-header toolbar</h3>
-        <div className="e-flex e-flex-wrap e-items-center e-gap-1.5">
-            <span className="e-mr-auto e-text-dk-h4 e-font-medium">Program Account</span>
+    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+        <h3 className="mb-2 text-dk-sm text-dk-gray-700">Card-header toolbar</h3>
+        <div className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-auto text-dk-h4 font-medium">Program Account</span>
             <Button ui="dashkit" variant="white" size="sm">
-                <RefreshCw className="e-mr-1.5 e-align-text-top" size={13} /> Refresh
+                <RefreshCw className="mr-1.5 align-text-top" size={13} /> Refresh
             </Button>
             <Button ui="dashkit" variant="white" size="sm">
-                <Download className="e-mr-1.5" size={13} /> Download
+                <Download className="mr-1.5" size={13} /> Download
             </Button>
             <Button ui="dashkit" variant="outline-danger" size="sm">
-                <X className="e-mr-1.5" size={13} /> Remove
+                <X className="mr-1.5" size={13} /> Remove
             </Button>
         </div>
     </div>
 );
 
 const ToggleRow = () => (
-    <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
-        <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">Toggle group</h3>
-        <div className="e-flex e-flex-wrap e-gap-1.5">
+    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+        <h3 className="mb-2 text-dk-sm text-dk-gray-700">Toggle group</h3>
+        <div className="flex flex-wrap gap-1.5">
             <Button ui="dashkit" variant="black" active size="sm">
                 30m
             </Button>
@@ -59,36 +59,36 @@ const ToggleRow = () => (
 );
 
 const FooterRow = () => (
-    <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
-        <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">Footer (full-width Load More)</h3>
-        <Button ui="dashkit" variant="primary" className="e-w-full">
+    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+        <h3 className="mb-2 text-dk-sm text-dk-gray-700">Footer (full-width Load More)</h3>
+        <Button ui="dashkit" variant="primary" className="w-full">
             Load More
         </Button>
     </div>
 );
 
 const DropdownTriggerRow = () => (
-    <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
-        <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">Dropdown triggers</h3>
-        <div className="e-flex e-flex-wrap e-gap-1.5">
-            <Button ui="dashkit" variant="dark" size="sm" className="e-w-[150px]">
-                Creators <ChevronDown size={15} className="e-align-text-top" />
+    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+        <h3 className="mb-2 text-dk-sm text-dk-gray-700">Dropdown triggers</h3>
+        <div className="flex flex-wrap gap-1.5">
+            <Button ui="dashkit" variant="dark" size="sm" className="w-[150px]">
+                Creators <ChevronDown size={15} className="align-text-top" />
             </Button>
             <Button ui="dashkit" variant="white" size="sm">
-                Filter: All <ChevronDown className="e-align-text-top" size={13} />
+                Filter: All <ChevronDown className="align-text-top" size={13} />
             </Button>
         </div>
     </div>
 );
 
 const ModalFooterRow = () => (
-    <div className="e-rounded-dk e-border e-border-solid e-border-dk-card-outline-dark e-bg-dk-gray-800-dark e-p-3">
-        <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">Modal-style action row</h3>
-        <div className="e-flex e-justify-between e-gap-1.5">
+    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+        <h3 className="mb-2 text-dk-sm text-dk-gray-700">Modal-style action row</h3>
+        <div className="flex justify-between gap-1.5">
             <Button ui="dashkit" variant="outline-danger" size="sm">
                 Remove
             </Button>
-            <div className="e-flex e-gap-1.5">
+            <div className="flex gap-1.5">
                 <Button ui="dashkit" variant="secondary" size="sm">
                     Cancel
                 </Button>
@@ -101,7 +101,7 @@ const ModalFooterRow = () => (
 );
 
 const Showcase = () => (
-    <div className="e-flex e-flex-col e-gap-3">
+    <div className="flex flex-col gap-3">
         <ToolbarRow />
         <ToggleRow />
         <DropdownTriggerRow />

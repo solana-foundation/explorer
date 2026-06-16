@@ -120,7 +120,7 @@ export const DashkitCardInsideCard: Story = {
             <BaseCardHeader ui="dashkit">
                 <BaseCardTitle ui="dashkit">Top Accounts</BaseCardTitle>
             </BaseCardHeader>
-            <BaseCardBody ui="dashkit" className="e-p-0">
+            <BaseCardBody ui="dashkit" className="p-0">
                 <BaseTable {...args}>
                     <CardSampleRows />
                 </BaseTable>

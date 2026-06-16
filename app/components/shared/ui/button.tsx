@@ -13,51 +13,51 @@ const buttonVariants = cva([], {
         // ===== ui="tw" =====
         {
             class: cn(
-                'e-border-solid',
-                'e-inline-flex e-items-center e-justify-center e-gap-2',
-                'e-whitespace-nowrap e-rounded e-text-sm e-font-medium',
-                'e-transition-colors',
-                'focus-visible:e-outline-none focus-visible:e-ring-2 focus-visible:e-ring-offset-2 focus-visible:e-ring-offset-transparent focus-visible:e-ring-neutral-950',
-                'disabled:e-pointer-events-none disabled:e-opacity-50',
-                '[&_svg]:e-pointer-events-none [&_svg]:e-size-3 [&_svg]:e-shrink-0',
+                'border-solid',
+                'inline-flex items-center justify-center gap-2',
+                'whitespace-nowrap rounded text-sm font-medium',
+                'transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent focus-visible:ring-neutral-950',
+                'disabled:pointer-events-none disabled:opacity-50',
+                '[&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0',
             ),
             ui: 'tw',
         },
-        { class: 'e-h-6 e-px-2 !e-text-[11px] !e-font-normal', size: 'compact', ui: 'tw' },
-        { class: 'e-h-9 e-px-2 e-text-xs', size: 'default', ui: 'tw' },
-        { class: 'e-h-7 e-w-7', size: 'icon', ui: 'tw' },
-        { class: 'e-h-10 e-px-8', size: 'lg', ui: 'tw' },
-        { class: 'e-h-7 e-px-2 e-text-xs', size: 'sm', ui: 'tw' },
-        { class: 'e-border-0 e-bg-accent e-text-gray-900 hover:e-bg-accent/90', ui: 'tw', variant: 'accent' },
+        { class: 'h-6 px-2 !text-[11px] !font-normal', size: 'compact', ui: 'tw' },
+        { class: 'h-9 px-2 text-xs', size: 'default', ui: 'tw' },
+        { class: 'h-7 w-7', size: 'icon', ui: 'tw' },
+        { class: 'h-10 px-8', size: 'lg', ui: 'tw' },
+        { class: 'h-7 px-2 text-xs', size: 'sm', ui: 'tw' },
+        { class: 'border-0 bg-accent text-gray-900 hover:bg-accent/90', ui: 'tw', variant: 'accent' },
         {
-            class: 'e-border e-border-outer-space-800 e-bg-outer-space-900 e-text-neutral-200 e-rounded-sm e-leading-none e-tracking-[-0.44px]',
+            class: 'border border-outer-space-800 bg-outer-space-900 text-neutral-200 rounded-sm leading-none tracking-[-0.44px]',
             ui: 'tw',
             variant: 'compact',
         },
         {
-            class: 'e-border e-border-neutral-700 e-bg-neutral-900 e-text-neutral-50 e-shadow hover:e-bg-neutral-900/90',
+            class: 'border border-neutral-700 bg-neutral-900 text-neutral-50 shadow hover:bg-neutral-900/90',
             ui: 'tw',
             variant: 'default',
         },
         {
-            // e-border-0 (here and below): UA buttons carry a 2px border and @tailwind base is skipped
-            class: 'e-border-0 e-bg-red-500 e-text-neutral-50 e-shadow-sm hover:e-bg-red-500/90',
+            // border-0 (here and below): UA buttons carry a 2px border and @tailwind base is skipped
+            class: 'border-0 bg-red-500 text-neutral-50 shadow-sm hover:bg-red-500/90',
             ui: 'tw',
             variant: 'destructive',
         },
         {
-            class: 'e-border-0 e-bg-transparent e-text-neutral-50 hover:e-bg-neutral-800 hover:e-text-neutral-50',
+            class: 'border-0 bg-transparent text-neutral-50 hover:bg-neutral-800 hover:text-neutral-50',
             ui: 'tw',
             variant: 'ghost',
         },
-        { class: 'e-border-0 e-text-neutral-900 e-underline-offset-4 hover:e-underline', ui: 'tw', variant: 'link' },
+        { class: 'border-0 text-neutral-900 underline-offset-4 hover:underline', ui: 'tw', variant: 'link' },
         {
-            class: 'e-border e-border-neutral-600 e-bg-transparent e-text-white hover:e-bg-neutral-600/10 hover:e-text-white focus-visible:e-ring-1 focus-visible:e-ring-offset-1 focus-visible:e-ring-neutral-950',
+            class: 'border border-neutral-600 bg-transparent text-white hover:bg-neutral-600/10 hover:text-white focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:ring-neutral-950',
             ui: 'tw',
             variant: 'outline',
         },
         {
-            class: 'e-border-0 e-bg-neutral-100 e-text-neutral-900 e-shadow-sm hover:e-bg-neutral-100/80',
+            class: 'border-0 bg-neutral-100 text-neutral-900 shadow-sm hover:bg-neutral-100/80',
             ui: 'tw',
             variant: 'secondary',
         },
@@ -68,79 +68,79 @@ const buttonVariants = cva([], {
         // dedupe through the e- prefix, so source order in the compiled CSS would otherwise
         // let the larger/wider base values beat the size compound.
         {
-            // e-text-white intentionally omitted — variant compounds own text color and twMerge
+            // text-white intentionally omitted — variant compounds own text color and twMerge
             // can't dedupe through the e- prefix, so a base color would beat the variant's arbitrary
             // value in CSS source order (e.g. .btn-primary needs #1b4e3f per _solana.scss override).
             class: cn(
-                'e-inline-block e-text-center e-align-middle e-cursor-pointer e-select-none',
-                'e-border e-border-solid',
-                'e-font-normal',
-                'e-transition-[color,background-color,border-color,box-shadow] e-duration-150 e-ease-in-out',
-                'disabled:e-pointer-events-none disabled:e-opacity-[0.65]',
+                'inline-block text-center align-middle cursor-pointer select-none',
+                'border border-solid',
+                'font-normal',
+                'transition-[color,background-color,border-color,box-shadow] duration-150 ease-in-out',
+                'disabled:pointer-events-none disabled:opacity-[0.65]',
             ),
             ui: 'dashkit',
         },
         // Size modifiers — each owns padding, font-size, line-height, and radius outright.
         {
-            class: 'e-px-3 e-py-2 e-text-[0.9375rem] e-leading-[1.5] e-rounded-[0.375rem]',
+            class: 'px-3 py-2 text-[0.9375rem] leading-[1.5] rounded-[0.375rem]',
             size: 'default',
             ui: 'dashkit',
         },
-        { class: 'e-px-2 e-py-0.5 e-text-[0.8125rem] e-leading-[1.75] e-rounded-[0.25rem]', size: 'sm', ui: 'dashkit' },
-        { class: 'e-px-5 e-py-3 e-text-[0.9375rem] e-leading-[1.5] e-rounded-[0.5rem]', size: 'lg', ui: 'dashkit' },
+        { class: 'px-2 py-0.5 text-[0.8125rem] leading-[1.75] rounded-[0.25rem]', size: 'sm', ui: 'dashkit' },
+        { class: 'px-5 py-3 text-[0.9375rem] leading-[1.5] rounded-[0.5rem]', size: 'lg', ui: 'dashkit' },
         {
             // _solana.scss .btn-primary{color:$gray-900} only beats the idle rule — Bootstrap's :hover/:disabled (class+pseudo) kept white.
-            class: 'e-bg-[#1dd79b] e-border-[#1dd79b] e-text-[#1b4e3f] hover:e-bg-[#19b784] hover:e-border-[#17ac7c] hover:e-text-white disabled:e-text-white',
+            class: 'bg-[#1dd79b] border-[#1dd79b] text-[#1b4e3f] hover:bg-[#19b784] hover:border-[#17ac7c] hover:text-white disabled:text-white',
             ui: 'dashkit',
             variant: 'primary',
         },
         {
-            class: 'e-bg-[#698582] e-border-[#698582] e-text-white hover:e-bg-[#59716f] hover:e-border-[#546a68]',
+            class: 'bg-[#698582] border-[#698582] text-white hover:bg-[#59716f] hover:border-[#546a68]',
             ui: 'dashkit',
             variant: 'secondary',
         },
         {
-            class: 'e-bg-[#1e2423] e-border-[#343a37] e-text-white hover:e-bg-[#1a1f1e] hover:e-border-[#2a2e2c]',
+            class: 'bg-[#1e2423] border-[#343a37] text-white hover:bg-[#1a1f1e] hover:border-[#2a2e2c]',
             ui: 'dashkit',
             variant: 'white',
         },
         {
-            class: 'e-bg-[#232323] e-border-[#232323] e-text-white hover:e-bg-[#1e1e1e] hover:e-border-[#1c1c1c]',
+            class: 'bg-[#232323] border-[#232323] text-white hover:bg-[#1e1e1e] hover:border-[#1c1c1c]',
             ui: 'dashkit',
             variant: 'black',
         },
         {
-            class: 'e-bg-[#1b4e3f] e-border-[#1b4e3f] e-text-white hover:e-bg-[#174236] hover:e-border-[#163e32]',
+            class: 'bg-[#1b4e3f] border-[#1b4e3f] text-white hover:bg-[#174236] hover:border-[#163e32]',
             ui: 'dashkit',
             variant: 'dark',
         },
         {
-            class: 'e-bg-transparent e-border-[#1dd79b] e-text-[#1dd79b] hover:e-bg-[#1dd79b] hover:e-border-[#1dd79b] hover:e-text-white disabled:e-bg-transparent disabled:e-text-[#1dd79b]',
+            class: 'bg-transparent border-[#1dd79b] text-[#1dd79b] hover:bg-[#1dd79b] hover:border-[#1dd79b] hover:text-white disabled:bg-transparent disabled:text-[#1dd79b]',
             ui: 'dashkit',
             variant: 'outline-primary',
         },
         {
-            class: 'e-bg-transparent e-border-[#b45be1] e-text-[#b45be1] hover:e-bg-[#b45be1] hover:e-border-[#b45be1] hover:e-text-white disabled:e-bg-transparent disabled:e-text-[#b45be1]',
+            class: 'bg-transparent border-[#b45be1] text-[#b45be1] hover:bg-[#b45be1] hover:border-[#b45be1] hover:text-white disabled:bg-transparent disabled:text-[#b45be1]',
             ui: 'dashkit',
             variant: 'outline-danger',
         },
         {
-            class: 'e-bg-transparent e-border-[#fa62fc] e-text-[#fa62fc] hover:e-bg-[#fa62fc] hover:e-border-[#fa62fc] hover:e-text-white disabled:e-bg-transparent disabled:e-text-[#fa62fc]',
+            class: 'bg-transparent border-[#fa62fc] text-[#fa62fc] hover:bg-[#fa62fc] hover:border-[#fa62fc] hover:text-white disabled:bg-transparent disabled:text-[#fa62fc]',
             ui: 'dashkit',
             variant: 'outline-warning',
         },
         {
-            class: 'e-bg-[#fa62fc] e-border-[#fa62fc] e-text-white hover:e-bg-[#d553d6] hover:e-border-[#c84eca]',
+            class: 'bg-[#fa62fc] border-[#fa62fc] text-white hover:bg-[#d553d6] hover:border-[#c84eca]',
             ui: 'dashkit',
             variant: 'warning',
         },
         {
-            class: 'e-bg-[#b45be1] e-border-[#b45be1] e-text-white hover:e-bg-[#994dbf] hover:e-border-[#9049b4]',
+            class: 'bg-[#b45be1] border-[#b45be1] text-white hover:bg-[#994dbf] hover:border-[#9049b4]',
             ui: 'dashkit',
             variant: 'danger',
         },
         // Toggle-on ring; only meaningful when paired with `variant="black"` in `btn-group-toggle`.
-        { active: true, class: 'e-shadow-[0_0_0_0.15rem_#33a382]', ui: 'dashkit' },
+        { active: true, class: 'shadow-[0_0_0_0.15rem_#33a382]', ui: 'dashkit' },
     ],
     defaultVariants: {
         active: false,

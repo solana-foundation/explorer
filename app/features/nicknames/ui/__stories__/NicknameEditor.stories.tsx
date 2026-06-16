@@ -56,7 +56,7 @@ export const LongAddress: Story = {
 };
 
 // Forces visible truncation by passing an oversized base58-like string. Used to confirm that
-// the text-truncate Bootstrap utility is replaceable with Tailwind's e-truncate without losing
+// the text-truncate Bootstrap utility is replaceable with Tailwind's truncate without losing
 // the ellipsis behaviour for long values.
 export const TruncatedAddress: Story = {
     args: {

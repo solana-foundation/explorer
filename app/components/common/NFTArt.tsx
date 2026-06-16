@@ -7,7 +7,7 @@ export const NFTImageContent = ({ uri }: { uri?: string }) => {
                 image loads; `object-fit: contain` keeps the aspect ratio inside it. */}
             <ProxiedImage
                 alt="nft"
-                className="e-rounded"
+                className="rounded"
                 height={150}
                 showOriginalLink
                 style={{ objectFit: 'contain' }}

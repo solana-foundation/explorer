@@ -24,7 +24,7 @@ vi.mock('../../InstructionCard', () => ({
             <div className="card-header">
                 <div>{title}</div>
             </div>
-            <div className="table-responsive e-mb-0">
+            <div className="table-responsive mb-0">
                 <table className="table table-sm table-nowrap card-table">
                     <tbody>{children}</tbody>
                 </table>

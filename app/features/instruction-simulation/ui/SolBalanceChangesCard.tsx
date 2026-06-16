@@ -19,17 +19,17 @@ export function SolBalanceChangesCard({ balanceChanges }: { balanceChanges: SolB
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">#</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Address</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Change (SOL)</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Post Balance (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">#</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Change (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Post Balance (SOL)</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>
                     {balanceChanges.map((change, i) => (
                         <BaseTable.Row key={change.pubkey.toBase58()}>
                             <BaseTable.Cell>
-                                <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                <Badge ui="dashkit" variant="info" className="mr-[3px]">
                                     {i + 1}
                                 </Badge>
                             </BaseTable.Cell>

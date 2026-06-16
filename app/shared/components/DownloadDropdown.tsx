@@ -15,7 +15,7 @@ const DEFAULT_ENCODINGS: EncodingFormat[] = ['hex', 'base58', 'base64'];
 const DefaultTrigger = React.forwardRef<HTMLButtonElement, { disabled: boolean }>(({ disabled, ...props }, ref) => (
     <Button ref={ref} variant="outline" size="sm" aria-label="Download" disabled={disabled} {...props}>
         <Download size={12} />
-        <span className="e-hidden md:e-inline">Download</span>
+        <span className="hidden md:inline">Download</span>
     </Button>
 ));
 DefaultTrigger.displayName = 'DefaultTrigger';

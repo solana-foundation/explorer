@@ -80,15 +80,15 @@ export function DasCompressionInfoCard({
                 </BaseTable.Row>
                 <BaseTable.Row>
                     <BaseTable.Cell>Proof Size {getProofSizePill(proofSize)}</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{proofSize}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{proofSize}</BaseTable.Cell>
                 </BaseTable.Row>
                 <BaseTable.Row>
                     <BaseTable.Cell>Leaf Number</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{compressedInfo.leaf_id}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{compressedInfo.leaf_id}</BaseTable.Cell>
                 </BaseTable.Row>
                 <BaseTable.Row>
                     <BaseTable.Cell>Sequence Number of Last Update</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{compressedInfo.seq}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{compressedInfo.seq}</BaseTable.Cell>
                 </BaseTable.Row>
                 <BaseTable.Row>
                     <BaseTable.Cell>Compressed Nft Hash</BaseTable.Cell>
@@ -115,7 +115,7 @@ export function DasCompressionInfoCard({
 
 function getVerifiedProofPill(verified: boolean) {
     return (
-        <div className="e-ml-1.5 e-inline-flex e-items-center">
+        <div className="ml-1.5 inline-flex items-center">
             {verified ? (
                 <Badge ui="dashkit" variant="dark" tone="solid">
                     Proof Verified
@@ -132,7 +132,7 @@ function getVerifiedProofPill(verified: boolean) {
 function getProofSizePill(proofSize: number) {
     if (proofSize === 0) {
         return (
-            <div className="e-ml-1.5 e-inline-flex e-items-center">
+            <div className="ml-1.5 inline-flex items-center">
                 <Badge ui="dashkit" variant="dark" tone="solid">
                     No Proof Required
                 </Badge>
@@ -141,7 +141,7 @@ function getProofSizePill(proofSize: number) {
     }
     if (proofSize > 8) {
         return (
-            <div className="e-ml-1.5 e-inline-flex e-items-center">
+            <div className="ml-1.5 inline-flex items-center">
                 <Badge ui="dashkit" variant="danger">
                     Composability Hazard
                 </Badge>

@@ -18,7 +18,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const args = {
-    children: <textarea rows={3} className="e-font-mono" placeholder="Paste a base64 transaction message..." />,
+    children: <textarea rows={3} className="font-mono" placeholder="Paste a base64 transaction message..." />,
     variant: 'flush-auto' as const,
 };
 

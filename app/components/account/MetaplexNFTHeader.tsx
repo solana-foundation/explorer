@@ -36,31 +36,31 @@ export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
     const data = nftData.json;
     const isVerifiedCollection = collection != null && collection?.verified && collectionMintInfo !== undefined;
     return (
-        <div className="-e-mx-3 e-flex e-flex-wrap">
-            <div className="e-ml-1.5 e-flex e-flex-none e-items-center e-px-3">
+        <div className="-mx-3 flex flex-wrap">
+            <div className="ml-1.5 flex flex-none items-center px-3">
                 <NFTImageContent uri={data?.image} />
             </div>
-            <div className="e-mb-3 e-mt-3 e-min-w-0 e-flex-1 e-px-3">
-                {<h6 className="e-ml-[3px] e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Metaplex NFT</h6>}
-                <div className="e-flex e-items-center">
-                    <h2 className="e-mb-0 e-ml-[3px] e-items-center e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
+            <div className="mb-3 mt-3 min-w-0 flex-1 px-3">
+                {<h6 className="ml-[3px] uppercase tracking-[0.08em] text-dk-gray-700">Metaplex NFT</h6>}
+                <div className="flex items-center">
+                    <h2 className="mb-0 ml-[3px] items-center overflow-hidden text-ellipsis whitespace-nowrap">
                         {metadata.name !== '' ? metadata.name : 'No NFT name was found'}
                     </h2>
                     {getEditionPill(nftData.editionInfo)}
                     {isVerifiedCollection ? getVerifiedCollectionPill() : null}
                 </div>
-                <h4 className="e-ml-[3px] e-mt-[3px] e-overflow-hidden e-text-ellipsis e-whitespace-nowrap e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">
+                <h4 className="ml-[3px] mt-[3px] overflow-hidden text-ellipsis whitespace-nowrap uppercase tracking-[0.08em] text-dk-gray-700">
                     {metadata.symbol !== '' ? metadata.symbol : 'No Symbol was found'}
                 </h4>
-                <div className="e-mb-1.5 e-mt-1.5">{getSaleTypePill(metadata.primarySaleHappened)}</div>
-                <div className="e-mb-3 e-mt-1.5">{getIsMutablePill(metadata.isMutable)}</div>
-                <Dropdown className="e-inline-flex">
+                <div className="mb-1.5 mt-1.5">{getSaleTypePill(metadata.primarySaleHappened)}</div>
+                <div className="mb-3 mt-1.5">{getIsMutablePill(metadata.isMutable)}</div>
+                <Dropdown className="inline-flex">
                     <DropdownToggle asChild>
-                        <Button ui="dashkit" variant="dark" size="sm" className="e-w-[150px]" type="button">
-                            Creators <ChevronDown size={15} className="e-align-text-top" />
+                        <Button ui="dashkit" variant="dark" size="sm" className="w-[150px]" type="button">
+                            Creators <ChevronDown size={15} className="align-text-top" />
                         </Button>
                     </DropdownToggle>
-                    <DropdownMenu className="e-mt-1.5">
+                    <DropdownMenu className="mt-1.5">
                         {getCreatorDropdownItems(isSome(metadata.creators) ? metadata.creators.value : null)}
                     </DropdownMenu>
                 </Dropdown>
@@ -76,13 +76,13 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
         const shareTooltip = 'The percentage of the proceeds a creator receives when this NFT is sold.';
 
         return (
-            <DropdownHeader className="e-flex e-flex-wrap e-items-center">
-                <div className="e-flex e-max-w-[80%] e-grow-0 e-basis-[80%] e-font-mono">
+            <DropdownHeader className="flex flex-wrap items-center">
+                <div className="flex max-w-[80%] grow-0 basis-[80%] font-mono">
                     <span>Creator Address</span>
                     <InfoTooltip bottom text={creatorTooltip} />
                 </div>
-                <div className="e-flex e-font-mono">
-                    <span className="e-font-mono">Royalty</span>
+                <div className="flex font-mono">
+                    <span className="font-mono">Royalty</span>
                     <InfoTooltip bottom text={shareTooltip} />
                 </div>
             </DropdownHeader>
@@ -90,21 +90,21 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
     };
 
     const getVerifiedIcon = (isVerified: boolean) => {
-        return isVerified ? <Check className="e-ml-3" size={15} /> : <AlertOctagon className="e-mr-3" size={15} />;
+        return isVerified ? <Check className="ml-3" size={15} /> : <AlertOctagon className="mr-3" size={15} />;
     };
 
     const CreatorEntry = (creator: { address: string; verified: boolean; share: number }) => {
         const creatorPath = useClusterPath({ pathname: `/address/${creator.address}` });
         return (
-            <div className="e-ml-3 e-mr-3 e-flex e-flex-wrap e-items-center e-font-mono">
+            <div className="ml-3 mr-3 flex flex-wrap items-center font-mono">
                 {getVerifiedIcon(creator.verified)}
                 <DropdownItem
                     asChild
-                    className="e-max-w-[80%] e-grow-0 e-basis-[80%] e-overflow-hidden e-text-ellipsis e-font-mono"
+                    className="max-w-[80%] grow-0 basis-[80%] overflow-hidden text-ellipsis font-mono"
                 >
                     <Link href={creatorPath}>{creator.address}</Link>
                 </DropdownItem>
-                <div className="e-mr-3"> {`${creator.share}%`}</div>
+                <div className="mr-3"> {`${creator.share}%`}</div>
             </div>
         );
     };
@@ -121,8 +121,8 @@ export function getCreatorDropdownItems(creators: Array<{ address: string; verif
     }
 
     return (
-        <DropdownItem className="e-font-mono">
-            <div className="e-mr-3">No creators are associated with this NFT.</div>
+        <DropdownItem className="font-mono">
+            <div className="mr-3">No creators are associated with this NFT.</div>
         </DropdownItem>
     );
 }
@@ -132,7 +132,7 @@ function getEditionPill(editionInfo: EditionInfo) {
     const edition = editionInfo.edition;
 
     return (
-        <div className="e-ml-1.5 e-inline-flex">
+        <div className="ml-1.5 inline-flex">
             <Badge ui="dashkit" variant="dark" tone="solid">
                 {edition && masterEdition
                     ? `Edition ${Number(edition.edition)} / ${Number(masterEdition.supply)}`
@@ -151,7 +151,7 @@ function getSaleTypePill(hasPrimarySaleHappened: boolean) {
         'Creator(s) split the Seller Fee when this NFT is sold. The owner receives the remaining proceeds.';
 
     return (
-        <div className="e-inline-flex e-items-center">
+        <div className="inline-flex items-center">
             <Badge ui="dashkit" variant="dark" tone="solid">
                 {hasPrimarySaleHappened ? 'Secondary Market' : 'Primary Market'}
             </Badge>
@@ -172,7 +172,7 @@ export function getVerifiedCollectionPill() {
     const onchainVerifiedToolTip =
         'This NFT has been verified as a member of an on-chain collection. This tag guarantees authenticity.';
     return (
-        <div className="e-ml-1.5 e-inline-flex e-items-center">
+        <div className="ml-1.5 inline-flex items-center">
             <Badge ui="dashkit" variant="dark" tone="solid">
                 Verified Collection
             </Badge>

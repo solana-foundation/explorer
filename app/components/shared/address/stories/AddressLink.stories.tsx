@@ -76,7 +76,7 @@ export const Errored: Story = {
         const copyButton = canvas.getByRole('button', { name: /copy address/i });
         await userEvent.click(copyButton);
 
-        await waitFor(() => expect(copyButton.className).toContain('e-text-destructive'));
+        await waitFor(() => expect(copyButton.className).toContain('text-destructive'));
     },
 };
 
@@ -85,7 +85,7 @@ export const InsideTableCell: Story = {
         address: SAMPLE_ADDRESS,
     },
     render: args => (
-        <div className="e-w-[28rem] e-rounded e-border e-border-heavy-metal-950 e-bg-heavy-metal-800 e-p-3">
+        <div className="w-[28rem] rounded border border-heavy-metal-950 bg-heavy-metal-800 p-3">
             <AddressLink {...args} />
         </div>
     ),

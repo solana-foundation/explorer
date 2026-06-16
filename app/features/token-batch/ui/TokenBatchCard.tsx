@@ -34,10 +34,10 @@ export function TokenBatchCard({
     return (
         <InstructionCard title={title} collapsible {...{ childIndex, index, innerCards, ix, result }}>
             <BaseTable.Row>
-                <BaseTable.Cell colSpan={3} className="e-p-0">
-                    <div className="e-pb-2">
+                <BaseTable.Cell colSpan={3} className="p-0">
+                    <div className="pb-2">
                         {error && (
-                            <div className="e-mb-2 e-text-sm e-text-red-500" data-testid="batch-error">
+                            <div className="mb-2 text-sm text-red-500" data-testid="batch-error">
                                 Parse error: {error}
                             </div>
                         )}
@@ -54,7 +54,7 @@ export function TokenBatchCard({
                             </BatchMintRegistryProvider>
                         )}
                         {instructions.length === 0 && !error && (
-                            <div className="e-text-sm e-text-neutral-500" data-testid="batch-empty">
+                            <div className="text-sm text-neutral-500" data-testid="batch-empty">
                                 No sub-instructions found
                             </div>
                         )}

@@ -21,7 +21,7 @@ export function DownloadReceiptItemBase({ disabled, icon, label, state, onTrigge
     const isDownloading = state === 'downloading';
 
     function getIcon() {
-        if (isDownloading) return <span className="e-spinner-grow e-spinner-grow-xs e-mx-0.5" aria-hidden="true" />;
+        if (isDownloading) return <span className="spinner-grow spinner-grow-xs mx-0.5" aria-hidden="true" />;
         return icon;
     }
 

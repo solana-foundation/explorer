@@ -24,8 +24,8 @@ export function SubInstructionRow({
     const typeName = TokenInstruction[parsed.instructionType] ?? 'Unknown';
 
     return (
-        <div className="e-border-b e-border-neutral-700 e-py-3 last:e-border-b-0" data-testid={`sub-ix-${index}`}>
-            <div className="e-mb-2 e-flex e-items-center e-gap-2">
+        <div className="border-b border-neutral-700 py-3 last:border-b-0" data-testid={`sub-ix-${index}`}>
+            <div className="mb-2 flex items-center gap-2">
                 <Badge ui="dashkit" variant="success">
                     #{index + 1}
                 </Badge>
@@ -41,7 +41,7 @@ export function SubInstructionRow({
 
 function DecodedContent({ decoded }: { decoded: DecodedParams }) {
     return (
-        <div className="e-ml-6 e-space-y-1">
+        <div className="ml-6 space-y-1">
             {decoded.fields.map(field => (
                 <FieldRow key={field.label} field={field} />
             ))}
@@ -54,12 +54,12 @@ function DecodedContent({ decoded }: { decoded: DecodedParams }) {
 
 function FieldRow({ field }: { field: DecodedField }) {
     return (
-        <div className="e-flex e-items-center e-gap-2 e-text-sm">
-            <span className="e-min-w-[120px] e-text-neutral-500">{field.label}:</span>
+        <div className="flex items-center gap-2 text-sm">
+            <span className="min-w-[120px] text-neutral-500">{field.label}:</span>
             {field.isAddress ? (
                 <Address pubkey={new PublicKey(field.value)} link aria-label={field.value} />
             ) : (
-                <span className="e-font-mono e-text-xs">{field.value}</span>
+                <span className="font-mono text-xs">{field.value}</span>
             )}
         </div>
     );
@@ -67,8 +67,8 @@ function FieldRow({ field }: { field: DecodedField }) {
 
 function AccountRow({ account }: { account: LabeledAccount }) {
     return (
-        <div className="e-flex e-items-center e-gap-2 e-text-sm">
-            <span className="e-min-w-[120px] e-text-neutral-500">{account.label}:</span>
+        <div className="flex items-center gap-2 text-sm">
+            <span className="min-w-[120px] text-neutral-500">{account.label}:</span>
             <Address pubkey={account.pubkey} link />
             {account.isWritable && (
                 <Badge variant="warning" size="xs">

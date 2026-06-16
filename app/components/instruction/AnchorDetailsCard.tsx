@@ -148,7 +148,7 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
     if (!ixAccounts || !decodedIxData || !ixDef) {
         return (
             <BaseTable.Row>
-                <BaseTable.Cell colSpan={3} className="lg:e-text-center">
+                <BaseTable.Cell colSpan={3} className="lg:text-center">
                     Failed to decode account data according to the public Anchor interface
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -173,13 +173,13 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
         <>
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right" colSpan={2}>
+                <BaseTable.Cell className="text-right" colSpan={2}>
                     <Address pubkey={ix.programId} alignRight link raw overrideText={programName} />
                 </BaseTable.Cell>
             </BaseTable.Row>
-            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                 <BaseTable.Cell>Account Name</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right" colSpan={2}>
+                <BaseTable.Cell className="text-right" colSpan={2}>
                     Address
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -222,18 +222,18 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                             {camelToTitleCase(currentInfo.name)}
                                         </BaseTable.Cell>
                                         <BaseTable.Cell
-                                            className="e-text-right"
+                                            className="text-right"
                                             onClick={() => toggleGroup(groupHeaderIndex)}
                                         >
-                                            <div className="e-cursor-pointer">
+                                            <div className="cursor-pointer">
                                                 {isExpanded ? (
                                                     <>
-                                                        <span className="e-mr-1.5 e-text-dk-info">Collapse</span>
+                                                        <span className="mr-1.5 text-dk-info">Collapse</span>
                                                         <ChevronUp size={15} />
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <span className="e-mr-1.5 e-text-dk-info">Expand</span>
+                                                        <span className="mr-1.5 text-dk-info">Expand</span>
                                                         <ChevronDown size={15} />
                                                     </>
                                                 )}
@@ -277,13 +277,13 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                     }
 
                     rows.push(
-                        <BaseTable.Row key={keyIndex} className={accountInfo?.isNested ? 'e-bg-black/20' : ''}>
+                        <BaseTable.Row key={keyIndex} className={accountInfo?.isNested ? 'bg-black/20' : ''}>
                             <BaseTable.Cell>
-                                <div className="e-flex e-flex-row e-items-center">
+                                <div className="flex flex-row items-center">
                                     {accountInfo?.isNested && (
-                                        <CornerDownRight className="e-mb-[3px] e-mr-1.5" size={14} />
+                                        <CornerDownRight className="mb-[3px] mr-1.5" size={14} />
                                     )}
-                                    <div className="e-mr-1.5 md:e-inline">
+                                    <div className="mr-1.5 md:inline">
                                         {accountInfo
                                             ? `${camelToTitleCase(accountInfo.name)}`
                                             : ixAccounts
@@ -291,18 +291,18 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                               : `Account #${keyIndex + 1}`}
                                     </div>
                                     {isWritable && (
-                                        <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                        <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
                                             Writable
                                         </Badge>
                                     )}
                                     {isSigner && (
-                                        <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                        <Badge ui="dashkit" variant="info" className="mr-[3px]">
                                             Signer
                                         </Badge>
                                     )}
                                 </div>
                             </BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right" colSpan={2}>
+                            <BaseTable.Cell className="text-right" colSpan={2}>
                                 <Address pubkey={pubkey} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>,
@@ -316,10 +316,10 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
 
             {decodedIxData && ixDef && ixDef.args.length > 0 && (
                 <>
-                    <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                    <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                         <BaseTable.Cell>Argument Name</BaseTable.Cell>
                         <BaseTable.Cell>Type</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>
+                        <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
                     </BaseTable.Row>
                     {mapIxArgsToRows(decodedIxData.data, ixDef, anchorProgram.idl)}
                 </>

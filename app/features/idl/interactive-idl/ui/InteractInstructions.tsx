@@ -32,7 +32,7 @@ export function InteractInstructions({
     );
 
     return (
-        <Accordion type="multiple" value={expandedSections} onValueChange={handleValueChange} className="e-space-y-4">
+        <Accordion type="multiple" value={expandedSections} onValueChange={handleValueChange} className="space-y-4">
             {instructions.map(instruction => (
                 <InteractInstruction
                     key={instruction.name}

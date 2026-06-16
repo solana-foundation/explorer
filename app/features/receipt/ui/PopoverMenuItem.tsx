@@ -15,9 +15,9 @@ export function PopoverMenuItem({ icon, label, disabled, onClick }: PopoverMenuI
             onClick={onClick}
             disabled={disabled}
             className={cn(
-                'e-flex e-h-6 e-w-full e-items-center e-gap-1 e-border-0 e-bg-transparent e-px-2 e-text-[11px] e-leading-none e-tracking-[-0.44px] e-text-neutral-200 hover:e-bg-outer-space-800',
+                'flex h-6 w-full items-center gap-1 border-0 bg-transparent px-2 text-[11px] leading-none tracking-[-0.44px] text-neutral-200 hover:bg-outer-space-800',
                 {
-                    'e-cursor-not-allowed e-opacity-50': disabled,
+                    'cursor-not-allowed opacity-50': disabled,
                 },
             )}
         >

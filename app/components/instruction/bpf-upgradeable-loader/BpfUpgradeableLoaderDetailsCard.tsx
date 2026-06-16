@@ -75,17 +75,17 @@ function renderDetails<T extends object>(props: DetailsProps, parsed: ParsedInfo
         if (value instanceof PublicKey) {
             value = <Address pubkey={value} alignRight link />;
         } else if (key === 'bytes') {
-            value = <pre className="data-wrap e-mb-0 e-inline-block e-text-left">{value}</pre>;
+            value = <pre className="data-wrap mb-0 inline-block text-left">{value}</pre>;
         } else if (value === null) {
-            value = <span className="e-text-dk-gray-700">None</span>;
+            value = <span className="text-dk-gray-700">None</span>;
         }
 
         attributes.push(
             <BaseTable.Row key={key}>
                 <BaseTable.Cell>
-                    {camelToTitleCase(key)} {key === 'bytes' && <span className="e-text-dk-gray-700">(Base 64)</span>}
+                    {camelToTitleCase(key)} {key === 'bytes' && <span className="text-dk-gray-700">(Base 64)</span>}
                 </BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{value}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{value}</BaseTable.Cell>
             </BaseTable.Row>,
         );
     }
@@ -94,7 +94,7 @@ function renderDetails<T extends object>(props: DetailsProps, parsed: ParsedInfo
         <InstructionCard {...props} title={`BPF Upgradeable Loader: ${camelToTitleCase(parsed.type)}`}>
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={props.ix.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>

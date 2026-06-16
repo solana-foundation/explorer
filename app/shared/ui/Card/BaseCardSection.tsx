@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-const sectionVariants = cva('e-mb-6', {
+const sectionVariants = cva('mb-6', {
     defaultVariants: { ui: 'tw' },
     variants: {
         ui: {
@@ -16,13 +16,13 @@ const sectionVariants = cva('e-mb-6', {
 });
 
 const sectionTitleVariants = cva(
-    'e-px-6 e-py-4 e-text-[10px] e-font-medium e-uppercase e-tracking-widest e-border e-border-solid',
+    'px-6 py-4 text-[10px] font-medium uppercase tracking-widest border border-solid',
     {
         defaultVariants: { ui: 'tw' },
         variants: {
             ui: {
-                dashkit: 'e-border-dk-gray-700-dark e-bg-dk-gray-800-dark e-text-dk-gray-600',
-                tw: 'e-border-neutral-800 e-bg-neutral-900 e-text-gray-400',
+                dashkit: 'border-dk-gray-700-dark bg-dk-gray-800-dark text-dk-gray-600',
+                tw: 'border-neutral-800 bg-neutral-900 text-gray-400',
             },
         },
     },

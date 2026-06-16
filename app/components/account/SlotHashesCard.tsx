@@ -17,8 +17,8 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Slot</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Hash</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Slot</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Hash</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>
@@ -30,7 +30,7 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
             </BaseTable>
 
             <CardFooter ui="dashkit">
-                <div className="e-text-center e-text-dk-gray-700">{slotHashes.length > 0 ? '' : 'No hashes found'}</div>
+                <div className="text-center text-dk-gray-700">{slotHashes.length > 0 ? '' : 'No hashes found'}</div>
             </CardFooter>
         </Card>
     );
@@ -39,10 +39,10 @@ export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount
 const renderAccountRow = (entry: SlotHashEntry, index: number) => {
     return (
         <BaseTable.Row key={index}>
-            <BaseTable.Cell className="e-w-px e-font-mono">
+            <BaseTable.Cell className="w-px font-mono">
                 <Slot slot={entry.slot} link />
             </BaseTable.Cell>
-            <BaseTable.Cell className="e-font-mono">{entry.hash}</BaseTable.Cell>
+            <BaseTable.Cell className="font-mono">{entry.hash}</BaseTable.Cell>
         </BaseTable.Row>
     );
 };

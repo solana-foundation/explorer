@@ -5,7 +5,7 @@ import { cn } from '@/app/components/shared/utils';
 
 // Self-contained replacement for Bootstrap's JS Dropdown: the root owns open state and closes on
 // outside click / Escape / item click. Skin is inlined as `e-*` utilities (ported from the former
-// dashkit `.e-dropdown*` rules).
+// dashkit `.dropdown*` rules).
 // TODO: fold into the Radix-backed dropdown-menu.tsx once visual parity with dashkit is no longer required.
 
 interface DropdownContextValue {
@@ -52,7 +52,7 @@ const Dropdown = React.forwardRef<HTMLDivElement, DropdownProps>(
 
         return (
             <DropdownContext.Provider value={{ open, setOpen }}>
-                <div ref={setRefs} className={cn('e-relative', className)} {...props} />
+                <div ref={setRefs} className={cn('relative', className)} {...props} />
             </DropdownContext.Provider>
         );
     },
@@ -95,9 +95,9 @@ const DropdownMenu = React.forwardRef<HTMLDivElement, DropdownMenuProps>(
             <div
                 ref={ref}
                 className={cn(
-                    'e-absolute e-top-full e-z-[1000] e-min-w-40 e-animate-dropdown-menu e-list-none e-rounded-dk e-border e-border-solid e-border-dk-black e-bg-dk-gray-800-dark e-bg-clip-padding e-px-0 e-py-2 e-text-left e-text-dk-base e-text-white',
-                    context?.open ? 'e-block' : 'e-hidden',
-                    align === 'end' ? 'e-left-auto e-right-0' : 'e-left-0',
+                    'absolute top-full z-[1000] min-w-40 animate-dropdown-menu list-none rounded-dk border border-solid border-dk-black bg-dk-gray-800-dark bg-clip-padding px-0 py-2 text-left text-dk-base text-white',
+                    context?.open ? 'block' : 'hidden',
+                    align === 'end' ? 'left-auto right-0' : 'left-0',
                     className,
                 )}
                 {...props}
@@ -111,7 +111,7 @@ const DropdownHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTM
     ({ className, ...props }, ref) => (
         <div
             ref={ref}
-            className={cn('e-mb-0 e-whitespace-nowrap e-px-6 e-py-2 e-text-dk-sm e-text-[#abd5c6]', className)}
+            className={cn('mb-0 whitespace-nowrap px-6 py-2 text-dk-sm text-[#abd5c6]', className)}
             {...props}
         />
     ),
@@ -130,7 +130,7 @@ const DropdownItem = React.forwardRef<HTMLDivElement, DropdownItemProps>(
             <Comp
                 ref={ref}
                 className={cn(
-                    'e-clear-both e-block e-w-full e-whitespace-nowrap e-border-0 e-bg-transparent e-px-6 e-py-1.5 e-text-left e-font-normal e-text-dark-muted-foreground e-no-underline hover:e-text-white focus:e-text-white active:e-text-white disabled:e-pointer-events-none disabled:e-text-[#abd5c6] [&.active]:e-text-white [&.disabled]:e-pointer-events-none [&.disabled]:e-text-[#abd5c6]',
+                    'clear-both block w-full whitespace-nowrap border-0 bg-transparent px-6 py-1.5 text-left font-normal text-dark-muted-foreground no-underline hover:text-white focus:text-white active:text-white disabled:pointer-events-none disabled:text-[#abd5c6] [&.active]:text-white [&.disabled]:pointer-events-none [&.disabled]:text-[#abd5c6]',
                     className,
                 )}
                 onClick={event => {

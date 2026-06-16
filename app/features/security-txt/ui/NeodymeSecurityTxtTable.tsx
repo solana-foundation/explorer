@@ -27,7 +27,7 @@ export function NeodymeSecurityTxtTable({ data }: { data: NeodymeSecurityTXT }) 
             {ROWS.filter(x => x.key in data).map((x, idx) => {
                 return (
                     <BaseTable.Row key={idx}>
-                        <BaseTable.Cell className="e-w-full">{x.display}</BaseTable.Cell>
+                        <BaseTable.Cell className="w-full">{x.display}</BaseTable.Cell>
                         <RenderEntry value={data[x.key]} type={x.type} />
                     </BaseTable.Row>
                 );
@@ -108,8 +108,8 @@ function RenderEntry({ value, type }: { value: NeodymeSecurityTXT[keyof NeodymeS
             return <StringCell value={value} />;
         case DisplayType.Contacts:
             return (
-                <BaseTable.Cell className="e-text-right e-font-mono">
-                    <ul className="e-m-0 e-list-none e-pl-0 e-text-right">
+                <BaseTable.Cell className="text-right font-mono">
+                    <ul className="m-0 list-none pl-0 text-right">
                         {value?.split(',').map((c, i) => {
                             const idx = c.indexOf(':');
                             if (idx < 0) {
@@ -143,8 +143,8 @@ function RenderEntry({ value, type }: { value: NeodymeSecurityTXT[keyof NeodymeS
                 return <ExternalLinkCell url={value} />;
             }
             return (
-                <BaseTable.Cell className="e-text-right">
-                    <ul className="e-m-0 e-list-none e-pl-0 e-text-right">
+                <BaseTable.Cell className="text-right">
+                    <ul className="m-0 list-none pl-0 text-right">
                         {value?.split(',').map((c, idx) => {
                             return <li key={idx}>{c}</li>;
                         })}

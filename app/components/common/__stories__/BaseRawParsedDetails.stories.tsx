@@ -39,7 +39,7 @@ export const WithChildRow: Story = {
         children: (
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">System</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">System</BaseTable.Cell>
             </BaseTable.Row>
         ),
         ix: sampleIx,

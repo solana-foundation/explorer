@@ -26,15 +26,15 @@ export function CollapsibleSection({
     const headingId = useId();
 
     return (
-        <section id={id} aria-labelledby={headingId} className="e-flex e-flex-col e-gap-3">
-            <div className="e-flex e-items-center e-justify-between">
-                <h2 id={headingId} className="e-m-0 e-text-lg e-font-normal e-text-white">
+        <section id={id} aria-labelledby={headingId} className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+                <h2 id={headingId} className="m-0 text-lg font-normal text-white">
                     {title}
                 </h2>
-                <div className="e-flex e-items-center e-gap-1">
-                    {actions && <div className="e-flex e-shrink-0 e-gap-1">{actions}</div>}
+                <div className="flex items-center gap-1">
+                    {actions && <div className="flex shrink-0 gap-1">{actions}</div>}
                     <Button
-                        className="md:e-min-w-[86px]"
+                        className="md:min-w-[86px]"
                         variant="outline"
                         aria-expanded={expanded}
                         size="sm"
@@ -44,22 +44,22 @@ export function CollapsibleSection({
                         <ChevronDown
                             size={12}
                             className={cn(
-                                'e-transition-transform e-duration-200 e-ease-in-out',
+                                'transition-transform duration-200 ease-in-out',
                                 // keep this writing. this is working in case parent has trasform translate
                                 expanded && '[transform:rotate(180deg)]',
                             )}
                         />
-                        <span className="e-hidden md:e-inline-block">{expanded ? 'Collapse' : 'Expand'}</span>
+                        <span className="hidden md:inline-block">{expanded ? 'Collapse' : 'Expand'}</span>
                     </Button>
                 </div>
             </div>
             <div
                 className={cn(
-                    'e-grid e-transition-[grid-template-rows] e-duration-200 e-ease-in-out',
-                    expanded ? 'e-grid-rows-[1fr]' : 'e-grid-rows-[0fr]',
+                    'grid transition-[grid-template-rows] duration-200 ease-in-out',
+                    expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
                 )}
             >
-                <div className="e-overflow-hidden">
+                <div className="overflow-hidden">
                     <div className={className}>{children}</div>
                 </div>
             </div>

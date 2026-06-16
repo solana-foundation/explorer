@@ -71,14 +71,14 @@ export function ProgramHeader({
         const text =
             'Program name and icon are self-reported by the program authority. See program security tab for more details';
         return (
-            <div className="e-ml-2 e-inline-flex e-items-center">
+            <div className="ml-2 inline-flex items-center">
                 <Tooltip>
-                    <TooltipTrigger className="e-border-0 e-bg-transparent e-p-0">
-                        <AlertCircle className="e-size-3 e-text-destructive" aria-label="Self-reported program" />
+                    <TooltipTrigger className="border-0 bg-transparent p-0">
+                        <AlertCircle className="size-3 text-destructive" aria-label="Self-reported program" />
                     </TooltipTrigger>
                     {text && (
                         <TooltipContent>
-                            <div className="e-min-w-36 e-max-w-64">{text}</div>
+                            <div className="min-w-36 max-w-64">{text}</div>
                         </TooltipContent>
                     )}
                 </Tooltip>
@@ -87,25 +87,25 @@ export function ProgramHeader({
     })();
 
     return (
-        <div className="e-inline-flex e-items-center e-gap-2">
+        <div className="inline-flex items-center gap-2">
             <div>
-                <div className="e-relative e-h-10 e-w-10 e-flex-shrink-0 e-overflow-hidden e-rounded sm:e-h-16 sm:e-w-16">
+                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded sm:h-16 sm:w-16">
                     <ProxiedImage
                         alt="Program logo"
-                        className="e-h-full e-w-full e-rounded e-border-4 e-border-solid e-border-dk-black-dark e-object-cover"
+                        className="h-full w-full rounded border-4 border-solid border-dk-black-dark object-cover"
                         uri={logo}
                     />
                 </div>
             </div>
 
-            <div className="e-flex-1">
-                <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Program account</h6>
-                <div className="e-inline-flex">
-                    <h2 className="e-mb-0">{programName}</h2>
+            <div className="flex-1">
+                <h6 className="uppercase tracking-[0.08em] text-dk-gray-700">Program account</h6>
+                <div className="inline-flex">
+                    <h2 className="mb-0">{programName}</h2>
                     {warningChunk}
                 </div>
                 {version && (
-                    <div className="e-overflow-hidden e-text-ellipsis e-whitespace-nowrap e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">
+                    <div className="overflow-hidden text-ellipsis whitespace-nowrap uppercase tracking-[0.08em] text-dk-gray-700">
                         {version}
                     </div>
                 )}

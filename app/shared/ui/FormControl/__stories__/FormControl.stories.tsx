@@ -44,7 +44,7 @@ export const Flush: Story = {
 export const FlushAuto: Story = {
     args: {
         children: <textarea rows={3} placeholder="Flush-auto textarea..." />,
-        className: 'e-font-mono',
+        className: 'font-mono',
         variant: 'flush-auto',
     },
 };
@@ -53,7 +53,7 @@ export const FlushAuto: Story = {
 // Useful for verifying that user-supplied className on the child is preserved alongside the variant classes.
 export const WithChildClassName: Story = {
     args: {
-        children: <textarea rows={3} className="e-font-mono" placeholder="Child has its own className" />,
+        children: <textarea rows={3} className="font-mono" placeholder="Child has its own className" />,
         variant: 'flush-auto',
     },
 };

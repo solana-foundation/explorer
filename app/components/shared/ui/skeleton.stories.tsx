@@ -7,7 +7,7 @@ const meta: Meta<typeof Skeleton> = {
     component: Skeleton,
     decorators: [
         Story => (
-            <div className="e-w-96">
+            <div className="w-96">
                 <Story />
             </div>
         ),
@@ -21,36 +21,36 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
-        className: 'e-h-4 e-w-48',
+        className: 'h-4 w-48',
     },
     play: async ({ canvasElement }) => {
-        await expect(canvasElement.querySelector('.e-animate-pulse')).toBeInTheDocument();
+        await expect(canvasElement.querySelector('.animate-pulse')).toBeInTheDocument();
     },
 };
 
 export const TextBlock: Story = {
     render: () => (
-        <div className="e-flex e-flex-col e-gap-2">
-            <Skeleton className="e-h-4 e-w-full" />
-            <Skeleton className="e-h-4 e-w-3/4" />
-            <Skeleton className="e-h-4 e-w-1/2" />
+        <div className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
         </div>
     ),
 };
 
 export const Circle: Story = {
     args: {
-        className: 'e-size-12 e-rounded-full',
+        className: 'size-12 rounded-full',
     },
 };
 
 export const CardPlaceholder: Story = {
     render: () => (
-        <div className="e-flex e-items-center e-gap-4">
-            <Skeleton className="e-size-12 e-rounded-full" />
-            <div className="e-flex e-flex-1 e-flex-col e-gap-2">
-                <Skeleton className="e-h-4 e-w-1/2" />
-                <Skeleton className="e-h-4 e-w-full" />
+        <div className="flex items-center gap-4">
+            <Skeleton className="size-12 rounded-full" />
+            <div className="flex flex-1 flex-col gap-2">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-full" />
             </div>
         </div>
     ),

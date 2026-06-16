@@ -20,19 +20,19 @@ export function ExtendLookupTableDetailsCard(props: InstructionDetailsProps & { 
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={AddressLookupTableProgram.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Lookup Table</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.lookupTableAccount} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Lookup Table Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.lookupTableAuthority} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -43,8 +43,8 @@ export function ExtendLookupTableDetailsCard(props: InstructionDetailsProps & { 
                         <BaseTable.Body>
                             {info.newAddresses.map((address, index) => (
                                 <BaseTable.Row key={address.toString()}>
-                                    <BaseTable.Cell className="e-w-px e-font-mono">{index}</BaseTable.Cell>
-                                    <BaseTable.Cell className="e-text-right">
+                                    <BaseTable.Cell className="w-px font-mono">{index}</BaseTable.Cell>
+                                    <BaseTable.Cell className="text-right">
                                         <Address pubkey={new PublicKey(address)} alignRight link />
                                     </BaseTable.Cell>
                                 </BaseTable.Row>

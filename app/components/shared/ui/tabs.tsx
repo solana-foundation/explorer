@@ -9,7 +9,7 @@ const TabsList = React.forwardRef<
     React.ElementRef<typeof TabsPrimitive.List>,
     React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
-    <TabsPrimitive.List ref={ref} className={cn('e-inline-flex e-gap-3', className)} {...props} />
+    <TabsPrimitive.List ref={ref} className={cn('inline-flex gap-3', className)} {...props} />
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;
 
@@ -20,12 +20,12 @@ const TabsTrigger = React.forwardRef<
     <TabsPrimitive.Trigger
         ref={ref}
         className={cn(
-            'e-appearance-none e-border-solid e-shadow-none e-outline-none',
-            'e-border-b e-border-transparent data-[state=active]:e-border-b-accent',
-            'e-bg-transparent',
-            'e-px-0 e-py-4',
-            'e-text-sm e-font-normal e-text-outer-space-200 data-[state=active]:e-text-white',
-            'disabled:e-pointer-events-none disabled:e-cursor-not-allowed disabled:e-opacity-50',
+            'appearance-none border-solid shadow-none outline-none',
+            'border-b border-transparent data-[state=active]:border-b-accent',
+            'bg-transparent',
+            'px-0 py-4',
+            'text-sm font-normal text-outer-space-200 data-[state=active]:text-white',
+            'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
             className,
         )}
         {...props}

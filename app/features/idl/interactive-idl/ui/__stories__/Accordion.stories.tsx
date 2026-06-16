@@ -8,7 +8,7 @@ const meta: Meta = {
     component: Accordion,
     decorators: [
         Story => (
-            <div className="e-w-96">
+            <div className="w-96">
                 <Story />
             </div>
         ),
@@ -25,13 +25,13 @@ const Items = () => (
         <AccordionItem value="transfer">
             <AccordionTrigger>transfer</AccordionTrigger>
             <AccordionContent>
-                <div className="e-px-6 e-pb-4">Transfers lamports between two accounts.</div>
+                <div className="px-6 pb-4">Transfers lamports between two accounts.</div>
             </AccordionContent>
         </AccordionItem>
         <AccordionItem value="initialize">
             <AccordionTrigger>initialize</AccordionTrigger>
             <AccordionContent>
-                <div className="e-px-6 e-pb-4">Initializes a new account with the given seed.</div>
+                <div className="px-6 pb-4">Initializes a new account with the given seed.</div>
             </AccordionContent>
         </AccordionItem>
     </>

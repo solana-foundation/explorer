@@ -43,7 +43,7 @@ export function ViewReceiptButton({ signature, receiptPath, transactionWithMeta 
                 aria-label="View Receipt"
             >
                 <FileText />
-                <span className="e-hidden sm:e-inline">View Receipt</span>
+                <span className="hidden sm:inline">View Receipt</span>
             </Link>
         </Button>
     );

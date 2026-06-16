@@ -10,8 +10,8 @@ import { HexData } from './HexData';
 function RawDetailsLoader() {
     return (
         <BaseTable.Row>
-            <BaseTable.Cell colSpan={2} className="e-text-center">
-                <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
+            <BaseTable.Cell colSpan={2} className="text-center">
+                <span className="spinner-grow spinner-grow-sm mr-1.5"></span>
                 Loading instruction data...
             </BaseTable.Cell>
         </BaseTable.Row>
@@ -36,19 +36,19 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
             {ix.keys.map(({ pubkey, isSigner, isWritable }, keyIndex) => (
                 <BaseTable.Row key={keyIndex}>
                     <BaseTable.Cell>
-                        <div className="e-mr-1.5 md:e-inline">Account #{keyIndex + 1}</div>
+                        <div className="mr-1.5 md:inline">Account #{keyIndex + 1}</div>
                         {isWritable && (
-                            <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                            <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
                                 Writable
                             </Badge>
                         )}
                         {isSigner && (
-                            <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                            <Badge ui="dashkit" variant="info" className="mr-[3px]">
                                 Signer
                             </Badge>
                         )}
                     </BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <Address pubkey={pubkey} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -56,9 +56,9 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
 
             <BaseTable.Row>
                 <BaseTable.Cell>
-                    Instruction Data <span className="e-text-dk-gray-700">(Hex)</span>
+                    Instruction Data <span className="text-dk-gray-700">(Hex)</span>
                 </BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <HexData raw={ix.data} />
                 </BaseTable.Cell>
             </BaseTable.Row>

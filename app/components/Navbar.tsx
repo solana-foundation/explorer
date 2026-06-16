@@ -27,10 +27,10 @@ export function Navbar({ children }: INavbarProps) {
     const selectedLayoutSegments = useSelectedLayoutSegments();
 
     return (
-        <nav className="e-flex e-flex-wrap e-items-center e-bg-dk-gray-800-dark e-py-3 e-text-dk-white">
+        <nav className="flex flex-wrap items-center bg-dk-gray-800-dark py-3 text-dk-white">
             <div
                 // Per-breakpoint max-widths mirror Bootstrap `.container` (sm 540 / md 720 / lg 960 / xl 1140 / xxl 1320) so logo + links land in the same gutter as before the shell migration.
-                className="e-mx-auto e-flex e-w-full e-flex-wrap e-items-center e-justify-between e-px-6 sm:e-max-w-[540px] md:e-max-w-[720px] lg:e-max-w-[960px] xl:e-max-w-[1140px] xxl:e-max-w-[1320px]"
+                className="mx-auto flex w-full flex-wrap items-center justify-between px-6 sm:max-w-[540px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1140px] xxl:max-w-[1320px]"
             >
                 <Link href={homePath}>
                     <Image alt="Solana Explorer" height={22} src={Logo} width={214} priority />
@@ -40,13 +40,13 @@ export function Navbar({ children }: INavbarProps) {
                     type="button"
                     aria-label="Toggle navigation"
                     onClick={navHandlers.toggle}
-                    className="e-rounded-dk e-border e-border-solid e-border-transparent e-bg-transparent e-px-0 e-py-1 e-text-dk-gray-700 lg:e-hidden"
+                    className="rounded-dk border border-solid border-transparent bg-transparent px-0 py-1 text-dk-gray-700 lg:hidden"
                 >
                     <Menu size={24} aria-hidden />
                 </button>
 
                 <div
-                    className="e-flex e-hidden e-h-full e-grow e-items-center e-pl-6 e-pr-2 xl:e-block"
+                    className="flex hidden h-full grow items-center pl-6 pr-2 xl:block"
                     style={{ minWidth: 0 }}
                 >
                     {children}
@@ -54,13 +54,13 @@ export function Navbar({ children }: INavbarProps) {
 
                 <div
                     className={cn(
-                        'e-ml-auto e-shrink-0',
+                        'ml-auto shrink-0',
                         navOpened
-                            ? 'e-flex e-w-full e-flex-col'
-                            : 'e-hidden lg:e-flex lg:e-w-auto lg:e-flex-row lg:e-items-center',
+                            ? 'flex w-full flex-col'
+                            : 'hidden lg:flex lg:w-auto lg:flex-row lg:items-center',
                     )}
                 >
-                    <NavbarList className="e-mr-auto e-flex-col lg:e-flex-row">
+                    <NavbarList className="mr-auto flex-col lg:flex-row">
                         <NavbarItem>
                             <NavbarLink asChild active={selectedLayoutSegment === 'feature-gates'}>
                                 <Link href={featureGatesPath}>Feature Gates</Link>
@@ -76,13 +76,13 @@ export function Navbar({ children }: INavbarProps) {
                                 <Link href={inspectorPath}>Inspector</Link>
                             </NavbarLink>
                         </NavbarItem>
-                        <NavbarItem className="e-flex e-items-center e-justify-center">
+                        <NavbarItem className="flex items-center justify-center">
                             <a
                                 aria-label="GitHub Repository"
                                 href="https://github.com/solana-foundation/explorer"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="e-mx-3"
+                                className="mx-3"
                             >
                                 <svg width="30" height="30" viewBox="0 0 98 98" xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -97,7 +97,7 @@ export function Navbar({ children }: INavbarProps) {
                     </NavbarList>
                 </div>
 
-                <div className="e-ml-[3px] e-hidden e-shrink-0 lg:e-block">
+                <div className="ml-[3px] hidden shrink-0 lg:block">
                     <ClusterStatusButton />
                 </div>
             </div>

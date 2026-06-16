@@ -61,10 +61,10 @@ export const AllVariants: Story = {
         };
 
         return (
-            <div className="e-flex e-w-full e-max-w-md e-flex-col e-gap-4">
+            <div className="flex w-full max-w-md flex-col gap-4">
                 {variantOptions.map(variant => (
-                    <div key={variant} className="e-flex e-flex-col e-gap-2">
-                        <label htmlFor={`${variant}-variant`} className="e-text-sm e-font-semibold e-text-white">
+                    <div key={variant} className="flex flex-col gap-2">
+                        <label htmlFor={`${variant}-variant`} className="text-sm font-semibold text-white">
                             {variantLabels[variant]}
                         </label>
                         <Input
@@ -81,10 +81,10 @@ export const AllVariants: Story = {
 
 export const WithValue: Story = {
     render: () => (
-        <div className="e-flex e-w-full e-max-w-md e-flex-col e-gap-4">
+        <div className="flex w-full max-w-md flex-col gap-4">
             {variantOptions.map(variant => (
-                <div key={variant} className="e-flex e-flex-col e-gap-2">
-                    <label htmlFor={`${variant}-with-value`} className="e-text-sm e-font-semibold e-text-white">
+                <div key={variant} className="flex flex-col gap-2">
+                    <label htmlFor={`${variant}-with-value`} className="text-sm font-semibold text-white">
                         {variant.charAt(0).toUpperCase() + variant.slice(1)} with value
                     </label>
                     <Input id={`${variant}-with-value`} variant={variant} defaultValue="Sample text value" />
@@ -96,18 +96,18 @@ export const WithValue: Story = {
 
 export const Disabled: Story = {
     render: () => (
-        <div className="e-flex e-w-full e-max-w-md e-flex-col e-gap-4">
+        <div className="flex w-full max-w-md flex-col gap-4">
             {variantOptions.flatMap(variant => [
-                <div key={`${variant}-placeholder`} className="e-flex e-flex-col e-gap-2">
-                    <label htmlFor={`disabled-${variant}`} className="e-text-sm e-font-semibold e-text-white">
+                <div key={`${variant}-placeholder`} className="flex flex-col gap-2">
+                    <label htmlFor={`disabled-${variant}`} className="text-sm font-semibold text-white">
                         Disabled {variant.charAt(0).toUpperCase() + variant.slice(1)}
                     </label>
                     <Input id={`disabled-${variant}`} variant={variant} placeholder="Disabled input" disabled />
                 </div>,
-                <div key={`${variant}-value`} className="e-flex e-flex-col e-gap-2">
+                <div key={`${variant}-value`} className="flex flex-col gap-2">
                     <label
                         htmlFor={`disabled-${variant}-with-value`}
-                        className="e-text-sm e-font-semibold e-text-white"
+                        className="text-sm font-semibold text-white"
                     >
                         Disabled {variant.charAt(0).toUpperCase() + variant.slice(1)} with value
                     </label>
@@ -125,14 +125,14 @@ export const Disabled: Story = {
 
 export const ErrorState: Story = {
     render: () => (
-        <div className="e-flex e-w-full e-max-w-md e-flex-col e-gap-4">
+        <div className="flex w-full max-w-md flex-col gap-4">
             {variantOptions.map(variant => (
-                <div key={variant} className="e-flex e-flex-col e-gap-2">
-                    <label htmlFor={`error-${variant}`} className="e-text-sm e-font-semibold e-text-white">
+                <div key={variant} className="flex flex-col gap-2">
+                    <label htmlFor={`error-${variant}`} className="text-sm font-semibold text-white">
                         Error State ({variant.charAt(0).toUpperCase() + variant.slice(1)})
                     </label>
                     <Input id={`error-${variant}`} variant={variant} placeholder="Invalid input" aria-invalid="true" />
-                    <p className="e-text-xs e-text-destructive">This field has an error</p>
+                    <p className="text-xs text-destructive">This field has an error</p>
                 </div>
             ))}
         </div>

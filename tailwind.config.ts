@@ -58,7 +58,6 @@ export const dkColors = {
 const config: Config = {
     content: ['./app/**/*.{ts,tsx}'],
     plugins: [],
-    prefix: 'e-',
     theme: {
         extend: {
             boxShadow: {
@@ -107,7 +106,7 @@ const config: Config = {
                     foreground: '#e5ebe9',
                     'muted-foreground': '#698582',
                 },
-                // TODO: replace with e-text-neutral-400
+                // TODO: replace with text-neutral-400
                 muted: 'oklch(0.6406 0.0038 174.41)', // #8a8d8c
                 'heavy-metal': {
                     DEFAULT: 'oklch(21.275% 0.00721 164.22)',

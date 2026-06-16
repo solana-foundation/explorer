@@ -9,8 +9,8 @@ export function Overlay({ show }: OverlayProps) {
     return (
         <div
             className={cn(
-                'e-fixed e-left-0 e-top-0 e-z-[1050] e-h-screen e-w-screen e-bg-dk-black e-transition-opacity e-duration-150 e-ease-linear',
-                show ? 'e-pointer-events-auto e-opacity-50' : 'e-pointer-events-none e-opacity-0',
+                'fixed left-0 top-0 z-[1050] h-screen w-screen bg-dk-black transition-opacity duration-150 ease-linear',
+                show ? 'pointer-events-auto opacity-50' : 'pointer-events-none opacity-0',
             )}
         ></div>
     );

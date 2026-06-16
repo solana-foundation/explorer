@@ -25,13 +25,13 @@ export function RefreshButton({ analyticsSection, fetching = false, onClick }: P
         >
             {fetching ? (
                 <>
-                    <span className="e-spinner-grow e-spinner-grow-sm" />
-                    <span className="e-hidden md:e-inline">Loading</span>
+                    <span className="spinner-grow spinner-grow-sm" />
+                    <span className="hidden md:inline">Loading</span>
                 </>
             ) : (
                 <>
                     <RefreshCw size={12} />
-                    <span className="e-hidden md:e-inline">Refresh</span>
+                    <span className="hidden md:inline">Refresh</span>
                 </>
             )}
         </Button>

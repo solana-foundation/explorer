@@ -83,8 +83,8 @@ const BaseFeatureCard = ({
     if (activatedAt) {
         activatedAtSlot = (
             <BaseTable.Row>
-                <BaseTable.Cell className="e-whitespace-nowrap">Activated At Slot</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="whitespace-nowrap">Activated At Slot</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Slot slot={activatedAt} link />
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -94,7 +94,7 @@ const BaseFeatureCard = ({
         simdLink = (
             <BaseTable.Row>
                 <BaseTable.Cell>SIMDs</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {featureInfo.simds.map((simd, index) => (
                         <div key={index}>
                             {simd && featureInfo.simd_link[index] ? (
@@ -104,7 +104,7 @@ const BaseFeatureCard = ({
                                     rel="noopener noreferrer"
                                     className=""
                                 >
-                                    SIMD {simd} <ExternalLinkIcon className="e-align-text-top" size={13} />
+                                    SIMD {simd} <ExternalLinkIcon className="align-text-top" size={13} />
                                 </a>
                             ) : (
                                 <code>No link</code>
@@ -126,8 +126,8 @@ const BaseFeatureCard = ({
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell className="e-whitespace-nowrap">Activated?</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="whitespace-nowrap">Activated?</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     {activatedAt !== null ? (
                         <Badge ui="dashkit" variant="success" tone="solid">
                             Active on {clusterName(cluster)}
@@ -145,8 +145,8 @@ const BaseFeatureCard = ({
             {activatedAtSlot}
 
             <BaseTable.Row>
-                <BaseTable.Cell className="e-whitespace-nowrap">Cluster Activation</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="whitespace-nowrap">Cluster Activation</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <ClusterActivationEpochAtCluster
                         cluster={cluster}
                         clusterInfo={clusterInfo}
@@ -159,7 +159,7 @@ const BaseFeatureCard = ({
             {featureInfo?.description && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Description</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{featureInfo?.description}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{featureInfo?.description}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 
@@ -199,7 +199,7 @@ function EpochCountdown({ remainingSlots }: { remainingSlots: bigint }) {
     const label = formatCountdown(secondsLeft);
 
     return (
-        <span className="e-text-dk-warning-on-dark" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        <span className="text-dk-warning-on-dark" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {secondsLeft > 0 ? `${label} remaining` : label}
         </span>
     );
@@ -235,7 +235,7 @@ function ClusterActivationEpochAtCluster({
                 <Link href={`/epoch/${nextEpoch}?cluster=${cluster}`}>
                     {clusterName(cluster)} Epoch {nextEpoch.toString()}
                 </Link>
-                <div className="e-mt-[3px]">
+                <div className="mt-[3px]">
                     <EpochCountdown remainingSlots={remainingSlots} />
                 </div>
             </div>

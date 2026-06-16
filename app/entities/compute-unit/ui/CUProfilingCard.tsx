@@ -246,20 +246,20 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
     return (
         <CollapsibleCard title="CU profiling" className={baseCardVariants({ ui: 'dashkit' })}>
             <CardBody ui="dashkit">
-                {Boolean(unitsConsumed) && <div className="e-mb-3">Total: {unitsConsumed?.toLocaleString()} CU</div>}
+                {Boolean(unitsConsumed) && <div className="mb-3">Total: {unitsConsumed?.toLocaleString()} CU</div>}
 
                 <div style={{ height: '32px', marginLeft: '-8px' }}>
                     <Bar data={chartData} options={chartOptions} />
                 </div>
 
                 {/* Legend */}
-                <div className="e-mt-3 e-flex e-flex-wrap e-gap-3 e-text-xs">
+                <div className="mt-3 flex flex-wrap gap-3 text-xs">
                     {instructions.map((item, i) => {
                         const isReserved = !item.computeUnits && !item.reservedValue && item.displayUnits;
                         const value = item.computeUnits || item.reservedValue || item.displayUnits;
 
                         return (
-                            <div key={i} className="e-align-items-center e-flex">
+                            <div key={i} className="align-items-center flex">
                                 <div
                                     style={{
                                         backgroundColor: getInstructionColor(i),
