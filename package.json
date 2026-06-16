@@ -32,7 +32,6 @@
         "@codama/dynamic-parsers": "1.2.1",
         "@codama/nodes-from-anchor": "1.5.0",
         "@coral-xyz/anchor": "0.32.1",
-        "@emnapi/core": "1.11.1",
         "@fast-csv/format": "5.0.7",
         "@mantine/hooks": "9.3.0",
         "@metaplex-foundation/mpl-token-metadata": "3.4.0",
