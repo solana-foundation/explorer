@@ -16,6 +16,7 @@ import { Badge } from '@/app/components/shared/ui/badge';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { useVisibility } from '@/app/shared/lib/visibility';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { Card } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -113,10 +114,11 @@ type TransactionRowProps = {
 };
 
 function TransactionRow({ signature, slot, blockTime, statusClass, statusText, hasTimestamps }: TransactionRowProps) {
-    const instructionNames = useInstructionNames(signature);
+    const { isVisible, ref } = useVisibility<HTMLTableRowElement>(true);
+    const instructionNames = useInstructionNames(signature, isVisible);
 
     return (
-        <BaseTable.Row>
+        <BaseTable.Row ref={ref}>
             <BaseTable.Cell>
                 <Signature signature={signature} link />
                 {instructionNames !== null && instructionNames.length > 0 ? (
