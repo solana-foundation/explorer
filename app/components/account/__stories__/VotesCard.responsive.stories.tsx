@@ -14,7 +14,7 @@ const meta: Meta<typeof VotesCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/VotesCard/Responsive',
+    title: 'Components/Account/VotesCard@Media',
 };
 
 export default meta;

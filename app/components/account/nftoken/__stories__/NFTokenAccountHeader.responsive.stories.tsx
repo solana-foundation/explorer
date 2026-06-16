@@ -20,7 +20,7 @@ const meta: Meta<typeof NFTokenNFTHeader> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/NFToken/NFTokenAccountHeader/Responsive',
+    title: 'Components/Account/NFToken/NFTokenAccountHeader@Media',
 };
 
 export default meta;

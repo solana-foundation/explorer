@@ -31,7 +31,7 @@ const meta: Meta<typeof LighthouseDetailsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/LighthouseDetailsCard/Responsive',
+    title: 'Components/Instruction/LighthouseDetailsCard@Media',
 };
 
 export default meta;

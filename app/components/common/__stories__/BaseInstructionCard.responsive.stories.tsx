@@ -21,7 +21,7 @@ const meta: Meta<typeof BaseInstructionCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/BaseInstructionCard/Responsive',
+    title: 'Components/Common/BaseInstructionCard@Media',
 };
 
 export default meta;

@@ -48,7 +48,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/AnchorDetailsCard/Responsive',
+    title: 'Components/Instruction/AnchorDetailsCard@Media',
 } satisfies Meta<typeof AnchorDetailsCard>;
 
 export default meta;

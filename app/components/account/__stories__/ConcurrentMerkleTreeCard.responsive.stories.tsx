@@ -13,7 +13,7 @@ const meta: Meta<typeof ConcurrentMerkleTreeCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/ConcurrentMerkleTreeCard/Responsive',
+    title: 'Components/Account/ConcurrentMerkleTreeCard@Media',
 };
 
 export default meta;

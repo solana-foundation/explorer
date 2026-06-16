@@ -60,7 +60,7 @@ const meta: Meta<typeof TransactionHistoryCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/TransactionHistory/TransactionHistoryCard/Responsive',
+    title: 'Features/TransactionHistory/TransactionHistoryCard@Media',
 };
 
 export default meta;

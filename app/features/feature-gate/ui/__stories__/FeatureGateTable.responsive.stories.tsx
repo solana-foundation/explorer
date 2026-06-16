@@ -38,7 +38,7 @@ const meta: Meta<typeof FeatureGateTable<ActivatedFeature>> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/FeatureGate/FeatureGateTable/Responsive',
+    title: 'Features/FeatureGate/FeatureGateTable@Media',
 };
 
 export default meta;

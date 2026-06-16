@@ -14,7 +14,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/security/PmpSecurityTxtTable/Responsive',
+    title: 'Components/Account/security/PmpSecurityTxtTable@Media',
 } satisfies Meta<typeof PmpSecurityTxtTable>;
 
 export default meta;

@@ -67,7 +67,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Stake/StakeAccountSection/Responsive',
+    title: 'Features/Stake/StakeAccountSection@Media',
 } satisfies Meta<typeof StakeAccountSection>;
 
 export default meta;

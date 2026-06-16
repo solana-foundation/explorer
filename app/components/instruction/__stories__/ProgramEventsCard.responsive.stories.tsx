@@ -54,7 +54,7 @@ const meta: Meta<typeof ProgramEventsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/ProgramEventsCard/Responsive',
+    title: 'Components/Instruction/ProgramEventsCard@Media',
 };
 
 export default meta;

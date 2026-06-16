@@ -13,7 +13,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/FeatureGate/UpcomingFeatures/Responsive',
+    title: 'Features/FeatureGate/UpcomingFeatures@Media',
 } satisfies Meta<typeof UpcomingFeatures>;
 
 export default meta;

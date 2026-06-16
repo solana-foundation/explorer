@@ -16,7 +16,7 @@ const meta: Meta<typeof SlotHashesCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/SlotHashesCard/Responsive',
+    title: 'Components/Account/SlotHashesCard@Media',
 };
 
 export default meta;

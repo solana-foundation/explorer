@@ -12,7 +12,7 @@ const meta: Meta<typeof ErrorCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/ErrorCard/Responsive',
+    title: 'Components/Common/ErrorCard@Media',
 };
 
 export default meta;

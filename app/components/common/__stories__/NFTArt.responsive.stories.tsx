@@ -12,7 +12,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/NFTArt/Responsive',
+    title: 'Components/Common/NFTArt@Media',
 } satisfies Meta;
 
 export default meta;

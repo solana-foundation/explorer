@@ -12,7 +12,7 @@ const meta: Meta<typeof BlockAccountsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Block/BlockAccountsCard/Responsive',
+    title: 'Components/Block/BlockAccountsCard@Media',
 };
 
 export default meta;

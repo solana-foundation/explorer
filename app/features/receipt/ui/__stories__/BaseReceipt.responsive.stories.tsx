@@ -11,7 +11,7 @@ const meta: Meta<typeof BaseReceipt> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Receipt/BaseReceipt/Responsive',
+    title: 'Features/Receipt/BaseReceipt@Media',
 };
 
 export default meta;

@@ -10,7 +10,7 @@ const meta: Meta<typeof TokenMintHeaderCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/AccountHeader/TokenMintHeaderCard/Responsive',
+    title: 'Components/Account/AccountHeader/TokenMintHeaderCard@Media',
 };
 
 export default meta;

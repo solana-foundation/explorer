@@ -19,7 +19,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/AddressLookupTable/LookupTableEntriesCard/Responsive',
+    title: 'Components/Account/AddressLookupTable/LookupTableEntriesCard@Media',
 } satisfies Meta<ParsedArgs>;
 
 export default meta;

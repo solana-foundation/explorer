@@ -14,7 +14,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Inspector/RawInputCard/Responsive',
+    title: 'Components/Inspector/RawInputCard@Media',
 } satisfies Meta<typeof RawInput>;
 
 export default meta;

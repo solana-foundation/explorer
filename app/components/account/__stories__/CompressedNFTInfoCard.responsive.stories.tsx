@@ -40,7 +40,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/CompressedNFTInfoCard/Responsive',
+    title: 'Components/Account/CompressedNFTInfoCard@Media',
 } satisfies Meta<typeof DasCompressionInfoCard>;
 
 export default meta;

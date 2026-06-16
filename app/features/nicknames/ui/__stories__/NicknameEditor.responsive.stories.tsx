@@ -16,7 +16,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Nicknames/NicknameEditor/Responsive',
+    title: 'Features/Nicknames/NicknameEditor@Media',
 } satisfies Meta<typeof NicknameEditor>;
 
 export default meta;

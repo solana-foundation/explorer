@@ -18,7 +18,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/ProgramMultisigCard/Responsive',
+    title: 'Components/Account/ProgramMultisigCard@Media',
 } satisfies Meta<typeof ProgramMultisigCard>;
 
 export default meta;

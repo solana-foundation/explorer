@@ -12,7 +12,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Providers/Accounts/FlaggedAccountWarnings/Responsive',
+    title: 'Providers/Accounts/FlaggedAccountWarnings@Media',
 } satisfies Meta;
 
 export default meta;

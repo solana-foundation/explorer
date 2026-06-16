@@ -56,7 +56,7 @@ const meta: Meta<typeof CompressedNFTHeader> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/CompressedNFTHeader/Responsive',
+    title: 'Components/Account/CompressedNFTHeader@Media',
 };
 
 export default meta;

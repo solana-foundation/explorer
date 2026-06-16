@@ -10,7 +10,7 @@ const meta: Meta<typeof TimestampToggle> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/TimestampToggle/Responsive',
+    title: 'Components/Common/TimestampToggle@Media',
 };
 
 export default meta;

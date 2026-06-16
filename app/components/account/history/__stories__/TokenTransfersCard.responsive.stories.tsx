@@ -21,7 +21,7 @@ const meta: Meta<typeof TokenTransfersCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/History/TokenTransfersCard/Responsive',
+    title: 'Components/Account/History/TokenTransfersCard@Media',
 };
 
 export default meta;

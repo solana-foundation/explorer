@@ -78,7 +78,7 @@ const meta: Meta<typeof TokenHistoryCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/TokenHistoryCard/Responsive',
+    title: 'Components/Account/TokenHistoryCard@Media',
 };
 
 export default meta;

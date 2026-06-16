@@ -9,7 +9,7 @@ const meta: Meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Skeletons/Responsive',
+    title: 'Components/Shared/UI/Skeletons@Media',
 };
 
 export default meta;

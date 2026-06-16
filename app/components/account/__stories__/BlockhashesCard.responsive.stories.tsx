@@ -12,7 +12,7 @@ const meta: Meta<typeof BlockhashesCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/BlockhashesCard/Responsive',
+    title: 'Components/Account/BlockhashesCard@Media',
 };
 
 export default meta;

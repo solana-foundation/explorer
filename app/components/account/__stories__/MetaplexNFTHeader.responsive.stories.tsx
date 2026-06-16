@@ -28,7 +28,7 @@ const meta: Meta<typeof MetaplexNFTHeader> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/MetaplexNFTHeader/Responsive',
+    title: 'Components/Account/MetaplexNFTHeader@Media',
 };
 
 export default meta;

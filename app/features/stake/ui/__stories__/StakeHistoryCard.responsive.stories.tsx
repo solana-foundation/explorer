@@ -18,7 +18,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Stake/StakeHistoryCard/Responsive',
+    title: 'Features/Stake/StakeHistoryCard@Media',
 } satisfies Meta<typeof StakeHistoryCard>;
 
 export default meta;

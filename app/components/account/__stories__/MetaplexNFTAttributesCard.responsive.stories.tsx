@@ -28,7 +28,7 @@ const meta: Meta<typeof NormalMetaplexNFTAttributesCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/MetaplexNFTAttributesCard/Responsive',
+    title: 'Components/Account/MetaplexNFTAttributesCard@Media',
 };
 
 export default meta;

@@ -14,7 +14,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Inspector/AddressWithContext/Responsive',
+    title: 'Components/Inspector/AddressWithContext@Media',
 } satisfies Meta<typeof AddressWithContext>;
 
 export default meta;

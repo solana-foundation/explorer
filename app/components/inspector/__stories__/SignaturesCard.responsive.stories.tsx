@@ -31,7 +31,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Inspector/SignaturesCard/Responsive',
+    title: 'Components/Inspector/SignaturesCard@Media',
 } satisfies Meta<typeof TransactionSignatures>;
 
 export default meta;

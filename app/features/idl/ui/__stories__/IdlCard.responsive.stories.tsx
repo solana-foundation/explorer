@@ -15,7 +15,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/UI/IdlCard/Responsive',
+    title: 'Features/IDL/UI/IdlCard@Media',
 } satisfies Meta<typeof IdlCard>;
 
 export default meta;

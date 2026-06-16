@@ -33,7 +33,7 @@ const meta: Meta<typeof SolanaAttestationDetailsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/SolanaAttestationDetailsCard/Responsive',
+    title: 'Components/Instruction/SolanaAttestationDetailsCard@Media',
 };
 
 export default meta;

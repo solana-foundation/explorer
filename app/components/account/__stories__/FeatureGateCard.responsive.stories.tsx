@@ -11,7 +11,7 @@ const meta: Meta<typeof FeatureGateCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/FeatureGateCard/Responsive',
+    title: 'Components/Account/FeatureGateCard@Media',
 };
 
 export default meta;

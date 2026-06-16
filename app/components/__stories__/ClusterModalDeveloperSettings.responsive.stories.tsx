@@ -10,7 +10,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/ClusterModalDeveloperSettings/Responsive',
+    title: 'Components/ClusterModalDeveloperSettings@Media',
 } satisfies Meta<typeof ClusterModalDeveloperSettings>;
 
 export default meta;
