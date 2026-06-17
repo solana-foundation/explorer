@@ -25,6 +25,7 @@
         "test:e2e:ci": "playwright test",
         "test:e2e:ui": "playwright test --ui",
         "test:sb": "vitest --project storybook run",
+        "test:sb:changed": "vitest --project storybook --changed --run",
         "test:sb:coverage": "vitest --project storybook run --coverage",
         "test:sb:watch": "vitest --project storybook --watch",
         "test:watch": "vitest --project specs --watch",
