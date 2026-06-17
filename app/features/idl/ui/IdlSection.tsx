@@ -1,5 +1,4 @@
-import type { SupportedIdl } from '@entities/idl';
-import { Button } from '@shared/ui/button';
+import { Button } from '@components/shared/ui/button';
 import {
     Dialog,
     DialogClose,
@@ -8,11 +7,12 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from '@shared/ui/dialog';
-import { Dropdown, DropdownMenu, DropdownToggle } from '@shared/ui/dropdown';
-import { Input } from '@shared/ui/input';
-import { Label } from '@shared/ui/label';
-import { Switch } from '@shared/ui/switch';
+} from '@components/shared/ui/dialog';
+import { Dropdown, DropdownMenu, DropdownToggle } from '@components/shared/ui/dropdown';
+import { Input } from '@components/shared/ui/input';
+import { Label } from '@components/shared/ui/label';
+import { Switch } from '@components/shared/ui/switch';
+import type { SupportedIdl } from '@entities/idl';
 import { useMemo, useState } from 'react';
 import { AlertCircle, Code, Download, ExternalLink, Search } from 'react-feather';
 

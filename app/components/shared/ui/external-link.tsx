@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
 
 import { getSafeExternalHref } from '@/app/shared/lib/url';

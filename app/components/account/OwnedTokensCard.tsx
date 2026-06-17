@@ -3,6 +3,7 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
+import { cn } from '@components/shared/utils';
 import {
     TokenInfoWithPubkey,
     useAccountOwnedTokens,
@@ -10,7 +11,6 @@ import {
     useScaledUiAmountForMint,
 } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
-import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
 import Link from 'next/link';

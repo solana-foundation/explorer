@@ -1,11 +1,11 @@
+import { Button } from '@components/shared/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
 import type {
     InstructionAccountData,
     InstructionData,
     NestedInstructionAccountsData,
     SupportedIdl,
 } from '@entities/idl';
-import { Button } from '@shared/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Loader, Send } from 'react-feather';
 import { Control, Controller, FieldPath } from 'react-hook-form';

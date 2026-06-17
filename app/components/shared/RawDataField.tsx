@@ -1,8 +1,9 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 'use client';
 
-import { HexData } from '@shared/HexData';
-import { Button } from '@shared/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
+import { HexData } from '@components/shared/HexData';
+import { Button } from '@components/shared/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/tabs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Check, ChevronDown, Copy } from 'react-feather';
 

@@ -1,10 +1,10 @@
 'use client';
 import { LoadingCard } from '@components/common/LoadingCard';
+import { Badge } from '@components/shared/ui/badge';
+import { Button } from '@components/shared/ui/button';
 import { getIdlVersion, isIdlProgramIdMismatch, type SupportedIdl, useAnchorProgram } from '@entities/idl';
 import { useProgramMetadataCodamaIdl, useProgramMetadataIdl } from '@entities/program-metadata';
 import { useCluster } from '@providers/cluster';
-import { Badge } from '@shared/ui/badge';
-import { Button } from '@shared/ui/button';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 

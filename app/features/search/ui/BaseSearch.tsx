@@ -1,8 +1,8 @@
 'use client';
 
+import { cn } from '@components/shared/utils';
 import { useHotkeys } from '@mantine/hooks';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
-import { cn } from '@shared/utils';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from 'cmdk';
 import React, { useCallback, useRef } from 'react';
 import { Search, X } from 'react-feather';

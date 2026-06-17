@@ -1,5 +1,5 @@
 import { SolarizedJsonViewer } from '@components/common/JsonViewer';
-import { Button } from '@shared/ui/button';
+import { Button } from '@components/shared/ui/button';
 import { cva } from 'class-variance-authority';
 import { useState } from 'react';
 import { Code } from 'react-feather';

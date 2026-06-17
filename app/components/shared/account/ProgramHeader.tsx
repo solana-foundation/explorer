@@ -1,14 +1,15 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 'use client';
 
 // TODO(fsd-layering): this shared-layer component imports from `features/*`, which breaks the
 // FSD dependency rule (features → entities → shared; shared must not import upward). Move
 // `ProxiedImage` and the security-txt helpers down into `shared`/`entities`, re-point
 // consumers, then drop these two imports.
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
 import { ProxiedImage } from '@features/metadata';
 import { isPmpSecurityTXT, useSecurityTxt } from '@features/security-txt';
 import { type UpgradeableLoaderAccountData } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { PROGRAM_INFO_BY_ID } from '@utils/programs';
 import React from 'react';
 import { AlertCircle } from 'react-feather';

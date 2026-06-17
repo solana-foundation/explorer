@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { cn } from '../utils';
 
 function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {

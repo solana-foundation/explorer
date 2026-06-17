@@ -1,4 +1,5 @@
-import { cn } from '@shared/utils';
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
+import { cn } from '@components/shared/utils';
 import { forwardRef, ReactNode, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 

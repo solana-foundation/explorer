@@ -26,7 +26,7 @@
             "@features/*": ["./app/features/*"],
             "@img/*": ["./app/img/*"],
             "@providers/*": ["./app/providers/*"],
-            "@shared/*": ["./app/components/shared/*"],
+            "@shared/*": ["./app/shared/*"],
             "@utils/*": ["./app/utils/*"],
             "@storybook-config/*": ["./.storybook/*"],
             "@validators/*": ["./app/validators/*"],

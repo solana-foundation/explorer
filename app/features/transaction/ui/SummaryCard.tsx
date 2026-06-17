@@ -5,6 +5,10 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
+import { Badge } from '@components/shared/ui/badge';
+import { Button } from '@components/shared/ui/button';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
+import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
 import { ViewReceiptButton } from '@features/receipt';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, AutoRefreshProps } from '@features/transaction';
@@ -16,10 +20,6 @@ import {
     useTransactionDetails,
     useTransactionStatus,
 } from '@providers/transactions';
-import { Badge } from '@shared/ui/badge';
-import { Button } from '@shared/ui/button';
-import { RefreshButton } from '@shared/ui/refresh-button';
-import { cn } from '@shared/utils';
 import { ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { displayTimestamp } from '@utils/date';

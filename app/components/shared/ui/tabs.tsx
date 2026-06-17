@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import * as React from 'react';
 

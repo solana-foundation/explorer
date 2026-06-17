@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import * as SwitchPrimitives from '@radix-ui/react-switch';
 import * as React from 'react';
 

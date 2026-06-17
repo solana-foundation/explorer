@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 'use client';
 
 import type { Address } from '@solana/kit';

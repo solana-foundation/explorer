@@ -1,7 +1,7 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
+import { RawDataField } from '@components/shared/RawDataField';
 import type { Account } from '@providers/accounts';
-import { RawDataField } from '@shared/RawDataField';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 

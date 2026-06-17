@@ -1,10 +1,10 @@
 import { Address } from '@components/common/Address';
 import { SolarizedJsonViewer as ReactJson } from '@components/common/JsonViewer';
+import { cn } from '@components/shared/utils';
 import { BorshEventCoder, BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useAnchorProgram } from '@entities/idl';
-import { cn } from '@shared/utils';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';

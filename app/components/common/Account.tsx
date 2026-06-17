@@ -1,6 +1,6 @@
 import { SolBalance } from '@components/common/SolBalance';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { Account } from '@providers/accounts';
-import { RefreshButton } from '@shared/ui/refresh-button';
 import React from 'react';
 
 import { CardHeader, CardTitle } from '@/app/shared/ui/Card';

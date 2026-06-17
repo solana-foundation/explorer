@@ -1,9 +1,9 @@
 import { Copyable } from '@components/common/Copyable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { TableCardBody } from '@components/common/TableCardBody';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { type AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 

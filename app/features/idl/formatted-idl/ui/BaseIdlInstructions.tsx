@@ -1,5 +1,5 @@
+import { Badge } from '@components/shared/ui/badge';
 import type { FormattedIdl, InstructionAccountData } from '@entities/idl';
-import { Badge } from '@shared/ui/badge';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 

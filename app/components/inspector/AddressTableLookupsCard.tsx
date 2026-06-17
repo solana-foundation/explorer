@@ -1,7 +1,7 @@
 import { Address } from '@components/common/Address';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { useAddressLookupTable } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 

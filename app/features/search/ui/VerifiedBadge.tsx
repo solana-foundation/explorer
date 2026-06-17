@@ -1,4 +1,4 @@
-import { cn } from '@shared/utils';
+import { cn } from '@components/shared/utils';
 import { Check } from 'react-feather';
 
 export function VerifiedBadge() {

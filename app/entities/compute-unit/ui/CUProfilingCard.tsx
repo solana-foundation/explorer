@@ -1,4 +1,4 @@
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { BarElement, CategoryScale, Chart, type ChartData, type ChartOptions, LinearScale, Tooltip } from 'chart.js';
 import React from 'react';
 import { Bar } from 'react-chartjs-2';

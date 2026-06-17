@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import * as React from 'react';
 import { X } from 'react-feather';

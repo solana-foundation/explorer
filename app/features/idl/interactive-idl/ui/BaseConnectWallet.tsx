@@ -1,8 +1,8 @@
+import { Button } from '@components/shared/ui/button';
+import { cn } from '@components/shared/utils';
 import { truncateAddress } from '@entities/address';
 import WalletIcon from '@img/icons/wallet.svg';
 import { Slot } from '@radix-ui/react-slot';
-import { Button } from '@shared/ui/button';
-import { cn } from '@shared/utils';
 import { cva } from 'class-variance-authority';
 import Image from 'next/image';
 import { ReactNode, useMemo } from 'react';

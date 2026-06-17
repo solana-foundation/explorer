@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Slot } from '@radix-ui/react-slot';
 import * as React from 'react';
 

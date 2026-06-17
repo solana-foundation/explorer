@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Toaster as Sonner, ToasterProps } from 'sonner';
 
 import { cn } from '@/app/components/shared/utils';

@@ -1,6 +1,6 @@
 import { LoadingCard } from '@components/shared/LoadingCard';
+import { useToast } from '@components/shared/ui/sonner/use-toast';
 import type { InstructionData, SupportedIdl } from '@entities/idl';
-import { useToast } from '@shared/ui/sonner/use-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAtomValue } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';

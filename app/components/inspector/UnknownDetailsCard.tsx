@@ -1,7 +1,7 @@
 import { TableCardBody } from '@components/common/TableCardBody';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { TransactionInstruction } from '@solana/web3.js';
 
 import { Badge } from '@/app/components/shared/ui/badge';

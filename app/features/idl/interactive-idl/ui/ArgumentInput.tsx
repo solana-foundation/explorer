@@ -1,7 +1,7 @@
+import { Badge } from '@components/shared/ui/badge';
+import { Input } from '@components/shared/ui/input';
+import { Label } from '@components/shared/ui/label';
 import type { ArgField } from '@entities/idl';
-import { Badge } from '@shared/ui/badge';
-import { Input } from '@shared/ui/input';
-import { Label } from '@shared/ui/label';
 import { forwardRef, useEffect, useId, useRef } from 'react';
 import { X } from 'react-feather';
 

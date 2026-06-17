@@ -1,7 +1,7 @@
 'use client';
 
+import { cn } from '@components/shared/utils';
 import type { Idl } from '@coral-xyz/anchor';
-import { cn } from '@shared/utils';
 import type { RootNode } from 'codama';
 import { useEffect, useState } from 'react';
 

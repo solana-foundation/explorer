@@ -1,8 +1,8 @@
 'use client';
 
+import { cn } from '@components/shared/utils';
 import Logo from '@img/logos-solana/dark-explorer-logo.svg';
 import { useDisclosure } from '@mantine/hooks';
-import { cn } from '@shared/utils';
 import { useClusterPath } from '@utils/url';
 import Image from 'next/image';
 import Link from 'next/link';

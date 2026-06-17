@@ -1,4 +1,4 @@
-import { cn } from '@shared/utils';
+import { cn } from '@components/shared/utils';
 import { useEffect, useState } from 'react';
 
 import type { SearchItem } from '../lib/types';

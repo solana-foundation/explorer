@@ -1,10 +1,10 @@
 'use client';
 
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
+import { cn } from '@components/shared/utils';
 import { useTokenMetadata } from '@entities/nft';
 import { useTokenInfo } from '@entities/token-info';
 import { useCluster } from '@providers/cluster';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
-import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';

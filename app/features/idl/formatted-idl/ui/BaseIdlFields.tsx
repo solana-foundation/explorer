@@ -1,5 +1,5 @@
+import { Badge } from '@components/shared/ui/badge';
 import type { FieldType, StructField } from '@entities/idl';
-import { Badge } from '@shared/ui/badge';
 
 import { IdlDocTooltip } from './BaseIdlDoc';
 import { HighlightNode } from './HighlightNode';

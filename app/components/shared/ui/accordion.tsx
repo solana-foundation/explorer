@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import * as React from 'react';
 import { ChevronRight as ChevronRightIcon } from 'react-feather';

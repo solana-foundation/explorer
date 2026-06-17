@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import * as React from 'react';
 

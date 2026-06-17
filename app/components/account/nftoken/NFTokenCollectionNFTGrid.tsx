@@ -1,6 +1,6 @@
 'use client';
 
-import { RefreshButton } from '@shared/ui/refresh-button';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';

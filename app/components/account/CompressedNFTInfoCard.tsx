@@ -1,5 +1,5 @@
+import { Badge } from '@components/shared/ui/badge';
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
-import { Badge } from '@shared/ui/badge';
 import { ConcurrentMerkleTreeAccount, MerkleTree } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';

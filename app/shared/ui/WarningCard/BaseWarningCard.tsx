@@ -1,5 +1,5 @@
+import { cn } from '@components/shared/utils';
 import { Slot } from '@radix-ui/react-slot';
-import { cn } from '@shared/utils';
 import { ReactNode } from 'react';
 import { AlertTriangle } from 'react-feather';
 

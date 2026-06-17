@@ -1,6 +1,6 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/tabs';
 import { useExplorerLink } from '@entities/cluster';
 import { ProgramLogs, TxErrorStatus, TxSuccessStatus } from '@entities/program-logs';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { ReactNode } from 'react';
 
 import { Card } from '@/app/shared/ui/Card';

@@ -1,5 +1,5 @@
+import { cn } from '@components/shared/utils';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
-import { cn } from '@shared/utils';
 import * as React from 'react';
 import { ChevronDown } from 'react-feather';
 

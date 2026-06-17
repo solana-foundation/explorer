@@ -1,5 +1,5 @@
+import { Button } from '@components/shared/ui/button';
 import WalletIcon from '@img/icons/wallet.svg';
-import { Button } from '@shared/ui/button';
 import Image from 'next/image';
 
 type BaseConnectWalletButtonProps = {

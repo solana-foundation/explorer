@@ -2,9 +2,9 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
+import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
-import { cn } from '@shared/utils';
 import {
     ConfirmedTransactionMeta,
     PublicKey,

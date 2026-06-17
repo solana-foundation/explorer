@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { cva } from 'class-variance-authority';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from 'cmdk';

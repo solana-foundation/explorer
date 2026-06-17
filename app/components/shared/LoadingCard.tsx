@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import React from 'react';
 
 import { baseCardVariants, CardBody } from '@/app/shared/ui/Card';

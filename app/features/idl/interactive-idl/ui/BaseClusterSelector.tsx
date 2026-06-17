@@ -1,6 +1,6 @@
+import { Button } from '@components/shared/ui/button';
+import { cn } from '@components/shared/utils';
 import { Slot } from '@radix-ui/react-slot';
-import { Button } from '@shared/ui/button';
-import { cn } from '@shared/utils';
 import { cva } from 'class-variance-authority';
 import { ReactNode } from 'react';
 import { AlertCircle, Check, Globe } from 'react-feather';

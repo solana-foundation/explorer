@@ -1,5 +1,5 @@
 import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
-import { RefreshButton } from '@shared/ui/refresh-button';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import React from 'react';
 import { Code } from 'react-feather';
 

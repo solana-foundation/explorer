@@ -1,6 +1,6 @@
 'use client';
 
-import { Skeleton } from '@shared/ui/skeleton';
+import { Skeleton } from '@components/shared/ui/skeleton';
 import dynamic from 'next/dynamic';
 
 export const SearchBar = dynamic(() => import('@features/search').then(mod => ({ default: mod.SearchBar })), {

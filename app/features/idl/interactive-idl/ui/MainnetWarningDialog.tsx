@@ -1,4 +1,4 @@
-import { Button } from '@shared/ui/button';
+import { Button } from '@components/shared/ui/button';
 import {
     Dialog,
     DialogClose,
@@ -7,7 +7,7 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from '@shared/ui/dialog';
+} from '@components/shared/ui/dialog';
 import { AlertCircle, Send } from 'react-feather';
 
 type MainnetWarningDialogProps = {

@@ -1,8 +1,8 @@
+import { Autocomplete } from '@components/shared/ui/autocomplete';
+import { Badge } from '@components/shared/ui/badge';
+import { Label } from '@components/shared/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
 import type { InstructionAccountData } from '@entities/idl';
-import { Autocomplete } from '@shared/ui/autocomplete';
-import { Badge } from '@shared/ui/badge';
-import { Label } from '@shared/ui/label';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import Image from 'next/image';
 import { forwardRef, useState } from 'react';
 import { Info } from 'react-feather';

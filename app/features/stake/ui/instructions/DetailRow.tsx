@@ -1,4 +1,4 @@
-import { cn } from '@shared/utils';
+import { cn } from '@components/shared/utils';
 import type { Address } from '@solana/kit';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import React, { type ReactNode } from 'react';

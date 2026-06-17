@@ -1,7 +1,7 @@
 'use client';
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
-import { cn } from '@shared/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
+import { cn } from '@components/shared/utils';
 import { TransactionSignature } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import { cva, type VariantProps } from 'class-variance-authority';

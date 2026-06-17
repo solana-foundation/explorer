@@ -1,5 +1,5 @@
-import { Button } from '@shared/ui/button';
-import { RefreshButton } from '@shared/ui/refresh-button';
+import { Button } from '@components/shared/ui/button';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { ConfirmedSignatureInfo, TransactionError } from '@solana/web3.js';
 import React from 'react';
 

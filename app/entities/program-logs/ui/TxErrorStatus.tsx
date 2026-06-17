@@ -1,4 +1,4 @@
-import { Badge } from '@shared/ui/badge';
+import { Badge } from '@components/shared/ui/badge';
 import { ExternalLink } from 'react-feather';
 
 import { Copyable } from '@/app/components/common/Copyable';

@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Copyable } from '@components/common/Copyable';
 import { cva } from 'class-variance-authority';
 import React from 'react';

@@ -1,8 +1,8 @@
 'use client';
 
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
+import { cn } from '@components/shared/utils';
 import { FormattedIdl, isIdlProgramIdMismatch, isInteractiveIdlSupported, type SupportedIdl } from '@entities/idl';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
-import { cn } from '@shared/utils';
 import { isEnvEnabled } from '@utils/env';
 import React, { useMemo } from 'react';
 import { PlayCircle, XCircle } from 'react-feather';

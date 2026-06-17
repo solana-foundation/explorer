@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import type { ImgHTMLAttributes, ReactNode, SyntheticEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 

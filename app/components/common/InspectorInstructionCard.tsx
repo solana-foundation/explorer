@@ -1,9 +1,9 @@
+import { Badge } from '@components/shared/ui/badge';
+import { Button } from '@components/shared/ui/button';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
+import { cn } from '@components/shared/utils';
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { Badge } from '@shared/ui/badge';
-import { Button } from '@shared/ui/button';
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
-import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import React from 'react';
