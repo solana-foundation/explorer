@@ -76,6 +76,10 @@ export default defineConfig({
                         'vite-plugin-node-polyfills/shims/buffer',
                         'vite-plugin-node-polyfills/shims/global',
                         'vite-plugin-node-polyfills/shims/process',
+                        // Pre-bundle the renderer so its runtime react-18 chunk isn't discovered
+                        // mid-run, which re-optimizes deps and 504s in-flight dynamic imports.
+                        '@storybook/nextjs-vite',
+                        'react-dom/client',
                     ],
                 },
                 resolve: {
