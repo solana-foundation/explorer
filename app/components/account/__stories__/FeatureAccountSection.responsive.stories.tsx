@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
@@ -26,7 +27,7 @@ const args = {
         executable: false,
         lamports: 1_000_000_000,
         owner: PublicKey.default,
-        pubkey: PublicKey.unique(),
+        pubkey: gen.publicKey(1),
         space: 9,
     },
 };

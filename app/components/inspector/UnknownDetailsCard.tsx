@@ -49,7 +49,7 @@ export function UnknownDetailsCard({
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell colSpan={3}>
-                                <div className="inner-cards !e-m-0">{innerCards}</div>
+                                <div>{innerCards}</div>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                     </>

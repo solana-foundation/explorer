@@ -8,7 +8,7 @@ const meta = {
     component: NFTokenCollectionNFTGrid,
     decorators: [withCluster],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/NFToken/CollectionNFTGrid',
 } satisfies Meta<typeof NFTokenCollectionNFTGrid>;
 

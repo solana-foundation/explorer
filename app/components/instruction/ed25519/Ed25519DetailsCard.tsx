@@ -123,7 +123,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                 return (
                     <React.Fragment key={index}>
                         <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
-                            <BaseTable.Cell colSpan={2} className="text-lg-start" align="left">
+                            <BaseTable.Cell colSpan={2} className="lg:e-text-left" align="left">
                                 Signature #{index + 1}
                             </BaseTable.Cell>
                         </BaseTable.Row>

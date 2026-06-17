@@ -23,7 +23,7 @@ const meta: Meta<typeof BaseFeatureGateImage> = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/BaseFeatureGateImage',
 };
 

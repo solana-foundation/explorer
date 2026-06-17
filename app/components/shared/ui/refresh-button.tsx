@@ -25,7 +25,7 @@ export function RefreshButton({ analyticsSection, fetching = false, onClick }: P
         >
             {fetching ? (
                 <>
-                    <span className="spinner-grow spinner-grow-sm" />
+                    <span className="e-spinner-grow e-spinner-grow-sm" />
                     <span className="e-hidden md:e-inline">Loading</span>
                 </>
             ) : (

@@ -20,7 +20,7 @@ const fullData: NeodymeSecurityTXT = {
 
 const meta: Meta<typeof NeodymeSecurityTxtTable> = {
     component: NeodymeSecurityTxtTable,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/NeodymeSecurityTxtTable',
 };
 

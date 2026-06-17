@@ -277,7 +277,7 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                     }
 
                     rows.push(
-                        <BaseTable.Row key={keyIndex} className={accountInfo?.isNested ? 'table-nested-account' : ''}>
+                        <BaseTable.Row key={keyIndex} className={accountInfo?.isNested ? 'e-bg-black/20' : ''}>
                             <BaseTable.Cell>
                                 <div className="e-flex e-flex-row e-items-center">
                                     {accountInfo?.isNested && (

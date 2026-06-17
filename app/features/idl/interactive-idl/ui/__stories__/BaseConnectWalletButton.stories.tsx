@@ -8,7 +8,7 @@ const meta = {
         onClick: fn(),
     },
     component: BaseConnectWalletButton,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/IDL/Interactive IDL/UI/BaseConnectWalletButton',
 } satisfies Meta<typeof BaseConnectWalletButton>;
 

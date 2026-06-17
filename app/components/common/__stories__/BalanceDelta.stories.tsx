@@ -6,7 +6,7 @@ import { BalanceDelta } from '../BalanceDelta';
 
 const meta: Meta<typeof BalanceDelta> = {
     component: BalanceDelta,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/BalanceDelta',
 };
 

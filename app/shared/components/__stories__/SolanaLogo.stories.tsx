@@ -11,7 +11,6 @@ const meta = {
         },
     },
     component: Logo,
-    parameters: { layout: 'padded' },
     tags: ['autodocs', 'test'],
     title: 'Shared/SolanaLogo',
 } satisfies Meta<typeof Logo>;

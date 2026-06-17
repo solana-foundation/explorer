@@ -4,7 +4,7 @@ import { SearchGroupHeading } from '../SearchGroupHeading';
 
 const meta: Meta<typeof SearchGroupHeading> = {
     component: SearchGroupHeading,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Search/SearchGroupHeading',
 };
 

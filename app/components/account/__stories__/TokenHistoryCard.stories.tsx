@@ -74,7 +74,7 @@ const meta = {
     component: TokenHistoryCard,
     decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/TokenHistoryCard',
 } satisfies Meta<typeof TokenHistoryCard>;
 

@@ -4,7 +4,7 @@ import { EmptySecurityTxtCard } from '../EmptySecurityTxtCard';
 
 const meta: Meta<typeof EmptySecurityTxtCard> = {
     component: EmptySecurityTxtCard,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/EmptySecurityTxtCard',
 };
 

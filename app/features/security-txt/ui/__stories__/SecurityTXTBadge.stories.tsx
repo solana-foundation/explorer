@@ -6,7 +6,7 @@ import { SecurityTXTBadge } from '../SecurityTXTBadge';
 const meta: Meta<typeof SecurityTXTBadge> = {
     component: SecurityTXTBadge,
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/SecurityTXTBadge',
 };
 

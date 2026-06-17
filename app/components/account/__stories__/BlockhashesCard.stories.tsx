@@ -5,7 +5,7 @@ import { BlockhashesCard } from '../BlockhashesCard';
 
 const meta: Meta<typeof BlockhashesCard> = {
     component: BlockhashesCard,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/BlockhashesCard',
 };
 

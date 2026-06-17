@@ -154,7 +154,7 @@ export function BaseNavigationTabs({
             <div
                 ref={tablistRef}
                 role="tablist"
-                className={cn('e-inline-flex e-w-full e-gap-3 e-overflow-hidden', className)}
+                className={cn('e-inline-flex e-w-full e-gap-[18px] e-overflow-hidden', className)}
             >
                 {visibleTabs.map(tab => (
                     <TabLink key={tab.path} path={tab.path} title={tab.title} />

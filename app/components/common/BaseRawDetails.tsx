@@ -11,7 +11,7 @@ function RawDetailsLoader() {
     return (
         <BaseTable.Row>
             <BaseTable.Cell colSpan={2} className="e-text-center">
-                <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
+                <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
                 Loading instruction data...
             </BaseTable.Cell>
         </BaseTable.Row>

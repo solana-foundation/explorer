@@ -2,7 +2,8 @@ import { ConcurrentMerkleTreeAccount } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 
 import { toBuffer } from '@/app/shared/lib/bytes';
-import { CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { Address } from '../common/Address';
 import { Slot } from '../common/Slot';
@@ -19,79 +20,75 @@ export function ConcurrentMerkleTreeCard({ data }: { data: Uint8Array }) {
     const creationSlot = cmt.getCreationSlot();
     const rightMostIndex = cmt.tree.rightMostPath.index;
     return (
-        <>
-            <div className="card">
-                <CardHeader ui="dashkit">
-                    <div className="row e-items-center">
-                        <div className="col">
-                            <h3 className="card-header-title">Concurrent Merkle Tree</h3>
-                        </div>
-                    </div>
-                </CardHeader>
+        <Card ui="dashkit">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit">
+                    Concurrent Merkle Tree
+                </CardTitle>
+            </CardHeader>
 
-                <TableCardBody>
-                    <tr>
-                        <td>Authority</td>
-                        <td className="e-text-right">
-                            <Address pubkey={authority} alignRight raw />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Creation Slot</td>
-                        <td className="e-text-right">
-                            <Slot slot={creationSlot.toNumber()} link />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Max Depth</td>
-                        <td className="e-text-right">
-                            <span className="text-monospace">{treeHeight}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Max Buffer Size</td>
-                        <td className="e-text-right">
-                            <span className="text-monospace">{maxBufferSize}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Canopy Depth</td>
-                        <td className="e-text-right">
-                            <span className="text-monospace">{canopyDepth}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Current Sequence Number</td>
-                        <td className="e-text-right">
-                            <span className="text-monospace">{seq.toString()}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Current Root</td>
-                        <td className="e-text-right">
-                            <Address pubkey={new PublicKey(root)} alignRight raw />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Current Number of Leaves</td>
-                        <td className="e-text-right">
-                            <span className="text-monospace">{rightMostIndex}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Remaining Leaves</td>
-                        <td className="e-text-right">
-                            <span className="text-monospace">{Math.pow(2, treeHeight) - rightMostIndex}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Max Possible Leaves</td>
-                        <td className="e-text-right">
-                            <span className="text-monospace">{Math.pow(2, treeHeight)}</span>
-                        </td>
-                    </tr>
-                </TableCardBody>
-            </div>
-        </>
+            <TableCardBody>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Authority</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        <Address pubkey={authority} alignRight raw />
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Creation Slot</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        <Slot slot={creationSlot.toNumber()} link />
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Max Depth</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        <span className="e-font-mono">{treeHeight}</span>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Max Buffer Size</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        <span className="e-font-mono">{maxBufferSize}</span>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Canopy Depth</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        <span className="e-font-mono">{canopyDepth}</span>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Current Sequence Number</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        <span className="e-font-mono">{seq.toString()}</span>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Current Root</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        <Address pubkey={new PublicKey(root)} alignRight raw />
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Current Number of Leaves</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        <span className="e-font-mono">{rightMostIndex}</span>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Remaining Leaves</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        <span className="e-font-mono">{Math.pow(2, treeHeight) - rightMostIndex}</span>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Max Possible Leaves</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
+                        <span className="e-font-mono">{Math.pow(2, treeHeight)}</span>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+            </TableCardBody>
+        </Card>
     );
 }

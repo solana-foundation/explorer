@@ -11,7 +11,7 @@ import { ProxiedImage } from '../ProxiedImage';
 const meta: Meta<typeof ProxiedImage> = {
     args: { getProxiedUri: (uri: string) => uri },
     component: ProxiedImage,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Metadata/ProxiedImage',
 };
 

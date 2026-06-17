@@ -24,6 +24,7 @@ import { percentage } from '@utils/math';
 import React from 'react';
 
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 import { DeveloperResources } from './components/DeveloperResources';
 import { SimpleCardSkeleton } from './components/shared/Skeletons';
@@ -32,7 +33,7 @@ export default function Page() {
     return (
         <StatsProvider>
             <SupplyProvider>
-                <div className="container e-mt-4">
+                <PageContainer className="e-mt-4">
                     <StakingComponent />
 
                     <div className="e-flex e-flex-col lg:e-flex-row lg:e-gap-6">
@@ -47,7 +48,7 @@ export default function Page() {
                     <DeveloperResources />
 
                     <UpcomingFeatures />
-                </div>
+                </PageContainer>
             </SupplyProvider>
         </StatsProvider>
     );
@@ -56,7 +57,7 @@ export default function Page() {
 const LoadingStatsCard = ({ title }: { title: string }) => {
     return (
         <div className="e-flex e-items-center e-gap-2">
-            <span className="spinner-grow spinner-grow-sm e-shrink-0" />
+            <span className="e-spinner-grow e-spinner-grow-sm e-shrink-0" />
             {title}
         </div>
     );
@@ -124,17 +125,17 @@ function StakingComponent() {
     }
 
     return (
-        <div className="staking-card e-flex e-flex-col md:e-flex-row md:e-gap-6">
+        <div className="e-flex e-flex-col md:e-flex-row md:e-gap-6">
             <div className="e-w-full md:e-w-1/2">
                 <Card ui="dashkit" className="e-mb-3 md:e-mb-6">
                     <CardBody ui="dashkit">
                         <h4>Circulating Supply</h4>
-                        <h1>
-                            <em>{displayLamports(supply.circulating)}</em> /{' '}
-                            <small>{displayLamports(supply.total)}</small>
+                        <h1 className="e-mb-3">
+                            <em className="e-not-italic e-text-dark-accent">{displayLamports(supply.circulating)}</em> /{' '}
+                            <small className="e-text-base">{displayLamports(supply.total)}</small>
                         </h1>
-                        <h5>
-                            <em>{circulatingPercentage}%</em> is circulating
+                        <h5 className="e-mb-0">
+                            <em className="e-not-italic e-text-dark-accent">{circulatingPercentage}%</em> is circulating
                         </h5>
                     </CardBody>
                 </Card>
@@ -144,13 +145,15 @@ function StakingComponent() {
                     <CardBody ui="dashkit">
                         <h4>Active Stake</h4>
                         {activeStake ? (
-                            <h1>
-                                <em>{displayLamports(activeStake)}</em> / <small>{displayLamports(supply.total)}</small>
+                            <h1 className="e-mb-3">
+                                <em className="e-not-italic e-text-dark-accent">{displayLamports(activeStake)}</em> /{' '}
+                                <small className="e-text-base">{displayLamports(supply.total)}</small>
                             </h1>
                         ) : null}
                         {delinquentStakePercentage && (
-                            <h5>
-                                Delinquent stake: <em>{delinquentStakePercentage}%</em>
+                            <h5 className="e-mb-0">
+                                Delinquent stake:{' '}
+                                <em className="e-not-italic e-text-dark-accent">{delinquentStakePercentage}%</em>
                             </h5>
                         )}
                     </CardBody>

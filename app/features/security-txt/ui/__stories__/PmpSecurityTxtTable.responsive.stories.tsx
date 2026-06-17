@@ -13,7 +13,7 @@ const meta = {
         nextjs: { appDirectory: true },
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/security/PmpSecurityTxtTable/Responsive',
 } satisfies Meta<typeof PmpSecurityTxtTable>;
 

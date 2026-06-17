@@ -44,7 +44,7 @@ const meta = {
     component: DasCompressionInfoCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/CompressedNFTInfoCard',
 } satisfies Meta<typeof DasCompressionInfoCard>;
 

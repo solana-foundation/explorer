@@ -32,7 +32,7 @@ function makeFetchOverride(body: unknown, ok = true): Decorator {
 const meta = {
     component: NormalMetaplexNFTAttributesCard,
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/MetaplexNFTAttributesCard',
 } satisfies Meta<typeof NormalMetaplexNFTAttributesCard>;
 

@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -58,7 +59,7 @@ export const UpdateRewardInfos: Story = {
     args: {
         anchorProgram,
         index: 0,
-        ix: buildInstruction(UPDATE_REWARD_INFOS_DISCRIMINATOR, [PublicKey.unique()]),
+        ix: buildInstruction(UPDATE_REWARD_INFOS_DISCRIMINATOR, [gen.publicKey(1)]),
         result: { err: null },
         signature: '',
     },
@@ -69,7 +70,7 @@ export const FailedToDecode: Story = {
     args: {
         anchorProgram,
         index: 1,
-        ix: buildInstruction(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]), [PublicKey.unique()]),
+        ix: buildInstruction(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]), [gen.publicKey(2)]),
         result: { err: null },
         signature: '',
     },

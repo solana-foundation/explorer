@@ -19,8 +19,8 @@ const message = mockVersionedMessage({
 
 const meta: Meta<typeof SimulatorCUProfilingCard> = {
     component: SimulatorCUProfilingCard,
-    parameters: { ...nextjsParameters, layout: 'padded' },
-    tags: ['autodocs'],
+    parameters: { ...nextjsParameters },
+    tags: ['autodocs', 'test'],
     title: 'Features/InstructionSimulation/SimulatorCUProfilingCard',
 };
 

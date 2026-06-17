@@ -7,11 +7,15 @@ import { CookieCard, PrivacyPolicyLink } from '../CookieConsent';
 const meta = {
     component: CookieCard,
     parameters: {
+        // CookieCard is position:fixed, so inline it escapes the docs flow and the
+        // preview block collapses. Render each story in its own sized iframe so the
+        // card is contained and visible in full per block.
+        docs: { story: { height: '220px', inline: false } },
         nextjs: {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Cookie/CookieConsent',
 } satisfies Meta<typeof CookieCard>;
 

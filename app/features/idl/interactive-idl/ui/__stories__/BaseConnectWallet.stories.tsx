@@ -20,7 +20,7 @@ const meta = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/IDL/Interactive IDL/UI/BaseConnectWallet',
 } satisfies Meta<typeof BaseConnectWallet>;
 

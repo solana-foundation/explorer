@@ -19,6 +19,7 @@ const metaConnected: Meta<typeof TokenBalancesCard> = {
     parameters: {
         ...nextjsParameters,
     },
+    tags: ['autodocs', 'test'],
     title: 'Features/Transaction/TokenBalancesCard',
 };
 

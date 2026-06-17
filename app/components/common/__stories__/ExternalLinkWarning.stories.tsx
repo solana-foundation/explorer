@@ -6,7 +6,7 @@ import { ExternalLinkWarning } from '../ExternalLinkWarning';
 
 const meta: Meta<typeof ExternalLinkWarning> = {
     component: ExternalLinkWarning,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/ExternalLinkWarning',
 };
 

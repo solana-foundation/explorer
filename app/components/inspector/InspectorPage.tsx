@@ -493,7 +493,11 @@ function OverviewCard({
                         <BaseTable.Cell className="e-text-right">
                             <div className="e-flex e-flex-col e-items-end">
                                 {size} bytes
-                                <span className={size <= PACKET_DATA_SIZE ? 'e-text-dk-gray-700' : 'text-warning'}>
+                                <span
+                                    className={
+                                        size <= PACKET_DATA_SIZE ? 'e-text-dk-gray-700' : 'e-text-dk-warning-on-dark'
+                                    }
+                                >
                                     Max transaction size is {PACKET_DATA_SIZE} bytes
                                 </span>
                             </div>

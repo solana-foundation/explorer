@@ -109,7 +109,7 @@ export function BaseConnectWallet({
                         </>
                     )}
                 </div>
-                <div className="e-grow-0">
+                <div className="e-shrink-0 e-grow-0">
                     {!connected && (
                         <Button variant="outline" size="sm" onClick={onConnect}>
                             <Image src={WalletIcon} width={12} height={12} alt="" />

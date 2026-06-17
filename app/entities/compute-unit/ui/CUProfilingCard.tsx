@@ -3,7 +3,7 @@ import { BarElement, CategoryScale, Chart, type ChartData, type ChartOptions, Li
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 
-import { CardBody } from '@/app/shared/ui/Card';
+import { baseCardVariants, CardBody } from '@/app/shared/ui/Card';
 
 import type { InstructionCUData } from '../lib/types';
 
@@ -244,7 +244,7 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
     if (instructions.length === 0) return null;
 
     return (
-        <CollapsibleCard title="CU profiling" className="e-card">
+        <CollapsibleCard title="CU profiling" className={baseCardVariants({ ui: 'dashkit' })}>
             <CardBody ui="dashkit">
                 {Boolean(unitsConsumed) && <div className="e-mb-3">Total: {unitsConsumed?.toLocaleString()} CU</div>}
 

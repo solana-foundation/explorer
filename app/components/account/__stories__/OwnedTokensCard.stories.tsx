@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import {
     DispatchContext as TokensDispatch,
     type State as TokensState,
@@ -68,7 +69,7 @@ const sampleTokensWithLogosEntry = {
                 },
                 // Empty logoURI on one row exercises the placeholder branch alongside the img branch.
                 name: 'Wrapped SOL',
-                pubkey: PublicKey.unique(),
+                pubkey: gen.publicKey(2),
                 symbol: 'wSOL',
             },
         ],

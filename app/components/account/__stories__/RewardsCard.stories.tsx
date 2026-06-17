@@ -56,7 +56,7 @@ const meta = {
     component: RewardsCard,
     decorators: [withClusterAndAccounts],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/RewardsCard',
 } satisfies Meta<typeof RewardsCard>;
 

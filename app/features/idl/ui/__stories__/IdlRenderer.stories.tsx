@@ -9,7 +9,7 @@ import { IdlRenderer } from '../IdlRenderer';
 const meta: Meta<typeof IdlRenderer> = {
     component: IdlRenderer,
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/IDL/UI/IdlRenderer',
 };
 

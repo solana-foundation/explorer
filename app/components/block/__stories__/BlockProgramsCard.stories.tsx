@@ -7,7 +7,7 @@ const meta: Meta<typeof BlockProgramsCard> = {
     component: BlockProgramsCard,
     decorators: [withCluster],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Block/BlockProgramsCard',
 };
 

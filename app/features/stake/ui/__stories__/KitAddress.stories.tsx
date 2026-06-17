@@ -9,7 +9,7 @@ const meta: Meta<typeof KitAddress> = {
     component: KitAddress,
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Stake/KitAddress',
 };
 

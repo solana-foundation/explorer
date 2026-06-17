@@ -16,10 +16,7 @@ const meta: Meta<typeof CollapsibleCard> = {
         },
     },
     component: CollapsibleCard,
-    parameters: {
-        layout: 'padded',
-    },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/CollapsibleCard',
 };
 

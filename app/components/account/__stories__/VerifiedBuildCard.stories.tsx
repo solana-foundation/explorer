@@ -51,7 +51,7 @@ const meta = {
     component: BaseVerifiedBuildCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/VerifiedBuildCard',
 } satisfies Meta<typeof BaseVerifiedBuildCard>;
 

@@ -23,7 +23,7 @@ const meta: Meta<typeof BaseRawAccountRows> = {
     component: BaseRawAccountRows,
     decorators: [withCardTableField, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Account/BaseRawAccountRows',
 };
 

@@ -20,7 +20,7 @@ const meta = {
     component: AnchorAccountCard,
     decorators: [withCluster],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/AnchorAccountCard',
 } satisfies Meta<typeof AnchorAccountCard>;
 

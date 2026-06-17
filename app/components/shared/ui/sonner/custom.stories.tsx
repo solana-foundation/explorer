@@ -21,7 +21,7 @@ const meta = {
         // Centers the trigger button + inline preview in the canvas so they're immediately visible.
         layout: 'centered',
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/Sonner/CustomToast',
 } satisfies Meta<typeof CustomToast>;
 

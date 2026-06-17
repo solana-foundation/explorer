@@ -13,7 +13,7 @@ const sampleData = {
 
 const meta: Meta<typeof JsonViewer> = {
     component: JsonViewer,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/JsonViewer',
 };
 

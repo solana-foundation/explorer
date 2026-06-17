@@ -5,7 +5,7 @@ import { BaseTable } from '../BaseTable';
 
 const meta: Meta<typeof BaseTable> = {
     component: BaseTable,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/Table/BaseTable',
 };
 

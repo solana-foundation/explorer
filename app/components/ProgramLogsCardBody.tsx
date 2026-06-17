@@ -9,6 +9,7 @@ import { InstructionLogs } from '@utils/program-logs';
 import { ProgramName } from '@utils/program-name';
 import { programLabel } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
+import { cva } from 'class-variance-authority';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -18,6 +19,18 @@ import { Badge } from '@/app/components/shared/ui/badge';
 import { fromBase64, toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { BaseTable } from '@/app/shared/ui/Table';
+
+// Matches the compiled dashkit `.text-*` colors the legacy `text-${log.style}` template resolved to (dark theme).
+const logTextVariants = cva('', {
+    variants: {
+        variant: {
+            info: 'e-text-dk-info',
+            muted: 'e-text-dk-gray-700',
+            success: 'e-text-dk-success-on-dark',
+            warning: 'e-text-dk-warning-on-dark',
+        },
+    },
+});
 
 const NATIVE_PROGRAMS_MISSING_INVOKE_LOG: string[] = [
     'AddressLookupTab1e1111111111111111111111111',
@@ -260,7 +273,7 @@ function ProgramLogRow({
                             return (
                                 <span key={key}>
                                     <span className="e-text-dk-gray-700">{log.prefix}</span>
-                                    <span className={`text-${log.style}`}>{log.text}</span>
+                                    <span className={logTextVariants({ variant: log.style })}>{log.text}</span>
                                 </span>
                             );
                         })}

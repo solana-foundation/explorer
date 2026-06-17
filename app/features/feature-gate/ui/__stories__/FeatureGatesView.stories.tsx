@@ -7,7 +7,7 @@ const meta: Meta<typeof FeatureGatesView> = {
     component: FeatureGatesView,
     decorators: [withCluster],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/FeatureGatesView',
 };
 

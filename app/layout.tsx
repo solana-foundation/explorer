@@ -1,5 +1,4 @@
-import './scss/theme-dark.scss';
-import './styles.css';
+import './styles/styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';
 import { ClusterStatusButton } from '@components/ClusterStatusButton';
@@ -9,10 +8,9 @@ import { Navbar } from '@components/Navbar';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { Toaster } from '@shared/ui/sonner/toaster';
-import { isEnvEnabled } from '@utils/env';
+import { EXPLORER_BASE_URL, isEnvEnabled } from '@utils/env';
 import { BotIdClient } from 'botid/client';
 import type { Viewport } from 'next';
-import { Rubik } from 'next/font/google';
 import { type Metadata } from 'next/types';
 import { Suspense } from 'react';
 
@@ -21,12 +19,14 @@ import { TokenInfoBatchProvider } from '@/app/entities/token-info';
 import { CookieConsent } from '@/app/features/cookie';
 import { VisibilityProvider } from '@/app/shared/lib/visibility';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+import { rubikFont } from '@/app/styles';
 
 import { botIdProtectedRoutes } from '../proxy';
 
 export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
     manifest: '/manifest.json',
+    metadataBase: new URL(EXPLORER_BASE_URL),
     title: 'Explorer | Solana',
 };
 
@@ -35,13 +35,6 @@ export const viewport: Viewport = {
     maximumScale: 1,
     width: 'device-width',
 };
-
-const rubikFont = Rubik({
-    display: 'swap',
-    subsets: ['latin'],
-    variable: '--explorer-default-font',
-    weight: ['300', '400', '700'],
-});
 
 export default function RootLayout({ analytics, children }: { analytics: React.ReactNode; children: React.ReactNode }) {
     return (

@@ -35,7 +35,7 @@ const meta: Meta<typeof Input> = {
         },
     },
     component: Input,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/Input',
 };
 

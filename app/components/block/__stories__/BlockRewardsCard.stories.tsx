@@ -7,7 +7,7 @@ const meta: Meta<typeof BlockRewardsCard> = {
     component: BlockRewardsCard,
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Block/BlockRewardsCard',
 };
 

@@ -7,10 +7,7 @@ import { ArgumentInput } from '../ArgumentInput';
 
 const meta = {
     component: ArgumentInput,
-    parameters: {
-        layout: 'padded',
-    },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/IDL/Interactive IDL/UI/ArgumentInput',
 } satisfies Meta<typeof ArgumentInput>;
 

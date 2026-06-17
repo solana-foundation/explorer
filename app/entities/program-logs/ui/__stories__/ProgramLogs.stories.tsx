@@ -21,7 +21,7 @@ const meta = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Entities/Program Logs/UI/ProgramLogs',
 } satisfies Meta<typeof ProgramLogs>;
 

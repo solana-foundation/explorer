@@ -10,7 +10,7 @@ const meta = {
     component: Signature,
     decorators: [withClipboardMock, withCluster],
     parameters: createNextjsParameters(),
-    tags: ['test'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/Signature',
 } satisfies Meta<typeof Signature>;
 

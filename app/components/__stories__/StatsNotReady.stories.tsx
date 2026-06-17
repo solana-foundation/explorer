@@ -7,7 +7,7 @@ const meta: Meta<typeof StatsNotReady> = {
     component: StatsNotReady,
     decorators: [withStats],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/StatsNotReady',
 };
 

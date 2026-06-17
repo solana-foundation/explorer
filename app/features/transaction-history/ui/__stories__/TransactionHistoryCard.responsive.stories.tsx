@@ -59,7 +59,7 @@ const meta: Meta<typeof TransactionHistoryCard> = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/TransactionHistory/TransactionHistoryCard/Responsive',
 };
 

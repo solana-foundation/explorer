@@ -12,7 +12,6 @@ const meta = {
     decorators: [withViewportFromGlobal],
     parameters: {
         docs: { story: { height: INITIAL_VIEWPORTS.iphonex.styles.height } },
-        layout: 'padded',
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],

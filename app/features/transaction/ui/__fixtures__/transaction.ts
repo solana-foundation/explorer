@@ -1,6 +1,6 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import type { ParsedTransactionWithMeta } from '@solana/web3.js';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
-import { DEFAULT_SIGNATURE } from '@storybook-config/__fixtures__/defaults';
 import { mockParsedTransactionDetails, mockTransactionStatus } from '@storybook-config/__fixtures__/transactions';
 
 export { DEFAULT_SIGNATURE };

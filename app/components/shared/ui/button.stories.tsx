@@ -35,6 +35,7 @@ const dashkitVariantOptions = [
     'dark',
     'outline-primary',
     'outline-danger',
+    'outline-warning',
 ] as const satisfies readonly ButtonVariant[];
 
 const dashkitSizeOptions = ['default', 'sm', 'lg'] as const satisfies readonly ButtonSize[];
@@ -60,7 +61,7 @@ const meta: Meta<typeof Button> = {
         variant: { control: 'select', options: [...twVariantOptions, ...dashkitVariantOptions] },
     },
     component: Button,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/Button',
 };
 
@@ -266,7 +267,7 @@ export const DashkitWithIcons: Story = {
                 <Check size={13} className="e-mr-1.5" /> Save
             </Button>
             <Button ui="dashkit" variant="white" size="sm">
-                <RefreshCw size={13} className="align-text-top e-mr-1.5" /> Refresh
+                <RefreshCw size={13} className="e-mr-1.5 e-align-text-top" /> Refresh
             </Button>
             <Button ui="dashkit" variant="outline-primary" size="sm">
                 <Download size={13} className="e-mr-1.5" /> Download
@@ -275,7 +276,7 @@ export const DashkitWithIcons: Story = {
                 <X size={13} className="e-mr-1.5" /> Remove
             </Button>
             <Button ui="dashkit" variant="dark" size="sm">
-                Creators <ChevronDown size={15} className="align-text-top" />
+                Creators <ChevronDown size={15} className="e-align-text-top" />
             </Button>
         </div>
     ),
@@ -330,6 +331,20 @@ export const DashkitDisabled: Story = {
             {dashkitVariantOptions.map(variant => (
                 <Button key={variant} ui="dashkit" variant={variant} disabled>
                     Disabled {variant}
+                </Button>
+            ))}
+        </div>
+    ),
+};
+
+// Solid warning/danger exist in the cva but not in dashkitVariantOptions, so no other story renders them
+export const DashkitSolidWarningDanger: Story = {
+    name: 'Dashkit / Variants (solid warning, danger)',
+    render: () => (
+        <div className="e-flex e-flex-wrap e-gap-4">
+            {(['warning', 'danger'] as const satisfies readonly ButtonVariant[]).map(variant => (
+                <Button key={variant} ui="dashkit" variant={variant}>
+                    {variant}
                 </Button>
             ))}
         </div>

@@ -109,7 +109,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                 )}
             >
                 {loading ? (
-                    <span className="spinner-grow spinner-grow-sm" />
+                    <span className="e-spinner-grow e-spinner-grow-sm" />
                 ) : tooLarge ? (
                     <span className="e-text-sm e-text-outer-space-200">Too large to display - use download/copy.</span>
                 ) : (
@@ -128,7 +128,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                 className={cn('e-max-h-80 e-overflow-y-auto e-p-3 e-text-start', !loading && data?.length && 'e-py-2')}
             >
                 {loading ? (
-                    <span className="spinner-grow spinner-grow-sm" />
+                    <span className="e-spinner-grow e-spinner-grow-sm" />
                 ) : !hasData ? (
                     <span className="e-text-sm e-text-outer-space-200">No data</span>
                 ) : tooLarge ? (

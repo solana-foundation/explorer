@@ -95,7 +95,7 @@ export function UpgradeableProgramSection({
                         refresh(account.pubkey, 'parsed');
                     }}
                 >
-                    <RefreshCw className="align-text-top e-mr-1.5" size={13} />
+                    <RefreshCw className="e-mr-1.5 e-align-text-top" size={13} />
                     Refresh
                 </Button>
                 <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
@@ -200,7 +200,7 @@ function VerifiedLabel() {
                 href="https://github.com/Ellipsis-Labs/solana-verifiable-build"
             >
                 <span className="e-text-dk-white">Verified Build</span>
-                <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
             </Link>
         </InfoTooltip>
     );
@@ -229,7 +229,7 @@ export function UpgradeableProgramDataSection({
                         refresh(account.pubkey, 'parsed');
                     }}
                 >
-                    <RefreshCw className="align-text-top e-mr-1.5" size={13} />
+                    <RefreshCw className="e-mr-1.5 e-align-text-top" size={13} />
                     Refresh
                 </Button>
             </CardHeader>
@@ -305,7 +305,7 @@ export function UpgradeableProgramBufferSection({
                         refresh(account.pubkey, 'parsed');
                     }}
                 >
-                    <RefreshCw className="align-text-top e-mr-1.5" size={13} />
+                    <RefreshCw className="e-mr-1.5 e-align-text-top" size={13} />
                     Refresh
                 </Button>
             </CardHeader>

@@ -8,7 +8,7 @@ const meta: Meta<typeof VotesCard> = {
     component: VotesCard,
     decorators: [withCluster],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/VotesCard',
 };
 

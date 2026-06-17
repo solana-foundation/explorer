@@ -10,7 +10,7 @@ const meta: Meta<typeof Address> = {
     component: Address,
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/Address',
 };
 

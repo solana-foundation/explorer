@@ -14,7 +14,7 @@ const meta = {
     component: SimulatorCard,
     decorators: [withCluster],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/InstructionSimulation/SimulationCard',
 } satisfies Meta<typeof SimulatorCard>;
 

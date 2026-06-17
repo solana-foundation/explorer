@@ -1,13 +1,12 @@
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import { createRef, Suspense } from 'react';
+import { Suspense } from 'react';
 import { ChevronDown, ExternalLink } from 'react-feather';
-import useAsyncEffect from 'use-async-effect';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
-import { DropdownMenu } from '@/app/components/shared/ui/dropdown';
+import { Dropdown, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { getProxiedUri } from '@/app/features/metadata';
 import { useCluster } from '@/app/providers/cluster';
 import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
@@ -63,7 +62,7 @@ export function CompressedNftCard({ account }: { account: Account }) {
                 <BaseTable.Cell className="e-text-right">
                     <a rel="noopener noreferrer" target="_blank" href={compressedNft.content.links.external_url}>
                         {compressedNft.content.links.external_url}
-                        <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                        <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
                     </a>
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -93,26 +92,6 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
     // Empty strings are possible, so the check is necessary.
     const proxiedURI = compressedNft.content.json_uri ? getProxiedUri(compressedNft.content.json_uri) : null;
     const metadataJson = useMetadataJsonLink(proxiedURI);
-    const dropdownRef = createRef<HTMLButtonElement>();
-
-    useAsyncEffect(
-        async isMounted => {
-            if (!dropdownRef.current) {
-                return;
-            }
-            const Dropdown = (await import('bootstrap/js/dist/dropdown')).default;
-            if (!isMounted || !dropdownRef.current) {
-                return;
-            }
-            return new Dropdown(dropdownRef.current);
-        },
-        dropdown => {
-            if (dropdown) {
-                dropdown.dispose();
-            }
-        },
-        [dropdownRef],
-    );
 
     return (
         <div className="-e-mx-3 e-flex e-flex-wrap">
@@ -140,22 +119,14 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
                 </h4>
                 <div className="e-mb-1.5 e-mt-1.5">{getCompressedNftPill()}</div>
                 <div className="e-mb-3 e-mt-1.5">{getIsMutablePill(compressedNft.mutable)}</div>
-                <div className="btn-group">
-                    <Button
-                        ui="dashkit"
-                        variant="dark"
-                        size="sm"
-                        className="e-w-[150px]"
-                        type="button"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        data-bs-toggle="dropdown"
-                        ref={dropdownRef}
-                    >
-                        Creators <ChevronDown size={15} className="align-text-top" />
-                    </Button>
+                <Dropdown className="e-inline-flex">
+                    <DropdownToggle asChild>
+                        <Button ui="dashkit" variant="dark" size="sm" className="e-w-[150px]" type="button">
+                            Creators <ChevronDown size={15} className="e-align-text-top" />
+                        </Button>
+                    </DropdownToggle>
                     <DropdownMenu className="e-mt-1.5">{getCreatorDropdownItems(compressedNft.creators)}</DropdownMenu>
-                </div>
+                </Dropdown>
             </div>
         </div>
     );

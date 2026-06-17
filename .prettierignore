@@ -10,3 +10,4 @@ build/
 .claude/
 .worktrees/
 storybook-static/
+storybook-static-*/

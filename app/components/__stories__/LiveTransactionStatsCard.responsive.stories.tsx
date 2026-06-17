@@ -12,7 +12,7 @@ const meta: Meta<typeof LiveTransactionStatsCard> = {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/LiveTransactionStatsCard/Responsive',
 };
 

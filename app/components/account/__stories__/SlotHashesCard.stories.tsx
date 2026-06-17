@@ -9,7 +9,7 @@ const meta: Meta<typeof SlotHashesCard> = {
     component: SlotHashesCard,
     decorators: [withCluster],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/SlotHashesCard',
 };
 

@@ -4,7 +4,7 @@ import { LoadingCard } from '../LoadingCard';
 
 const meta: Meta<typeof LoadingCard> = {
     component: LoadingCard,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/LoadingCard',
 };
 

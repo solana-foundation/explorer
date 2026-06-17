@@ -40,7 +40,7 @@ const DialogContent = React.forwardRef<
             className={cn(
                 'e-fixed e-left-[50%] e-top-[50%] e-z-50 e-grid e-w-full e-max-w-sm',
                 'e-translate-x-[-50%] e-translate-y-[-50%] e-gap-4',
-                'e-border e-border-neutral-200 e-bg-neutral-800 e-p-4 e-shadow-lg e-duration-200',
+                'e-border e-border-transparent e-bg-neutral-800 e-p-4 e-shadow-lg e-duration-200',
                 'data-[state=open]:e-animate-in data-[state=closed]:e-animate-out',
                 'data-[state=closed]:e-fade-out-0 data-[state=open]:e-fade-in-0',
                 'data-[state=closed]:e-zoom-out-95 data-[state=open]:e-zoom-in-95',
@@ -55,12 +55,12 @@ const DialogContent = React.forwardRef<
             <DialogPrimitive.Close
                 className={cn(
                     'e-border-0 e-bg-transparent e-p-0 e-text-neutral-500',
+                    'e-flex e-items-center e-justify-center',
                     'e-absolute e-right-4 e-top-2 e-rounded-sm e-opacity-70',
                     'e-transition-opacity',
                     'hover:e-opacity-100',
                     'focus:e-outline-none',
-                    'focus-visible:e-ring-2 focus-visible:e-ring-neutral-300',
-                    'focus-visible:e-ring-offset-2 focus-visible:e-ring-offset-neutral-800',
+                    'focus-visible:e-ring-1 focus-visible:e-ring-neutral-300',
                     'disabled:e-pointer-events-none',
                 )}
             >

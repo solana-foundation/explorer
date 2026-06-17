@@ -1,5 +1,3 @@
-import { Keypair } from '@solana/web3.js';
-
 import { Cluster } from '@/app/utils/cluster';
 
 import { formatReceiptData } from '../../model/create-receipt';
@@ -8,14 +6,25 @@ import type { FormattedExtendedReceipt, FormattedReceipt } from '../../types';
 
 const CLUSTER = Cluster.MainnetBeta;
 
-const senderKeypair = Keypair.generate();
-const receiverKeypair = Keypair.generate();
-const extraKeypairs = Array.from({ length: 9 }, () => Keypair.generate());
+// Fixed literal addresses so screenshot captures are deterministic (was Keypair.generate()).
+const SENDER = 'UM1jjYaM2Y4BDSdCw3AiELrP6HDpz62VjUHcHVJosix';
+const RECEIVER = 'UMxTDTS9cXEBVNkNmtaPKY4gZwwNrsLb6K7XiT3MnHP';
+const EXTRA_RECEIVERS = [
+    'UNuAhNHxEFQ2AT8MvxGKyCTuBW7TCRddJYRYVJSEr1p',
+    'UPqtBH9dACJEh67Whonp2FczN8p8mci2tBicQpTDFb1',
+    'UQnbfC1RmvU5NAVVrsUo2idHawqHdsPYoeS6LXk3RsS',
+    'URjK96HJoqgNoA5vzFEyTvSTCDKw3yAnyCQP95LjdLq',
+    'USg2d197RZrDUETv9JvxUPSkR2M5vTxCo1qyLUqFKR8',
+    'UTck4LGQp2t9zBnXr99NfoKSkgiEHRzyiYnndSoMHsV',
+    'UUZTYF8DRm3zfGAX1CqMgGKjyVjP9vnPYNENprKKHpU',
+    'UVVydGP1WgMd5BfpNnrWzun5S6zHgmNvbNfmZVCUhSZ',
+    'UWSh7BEp8QXTkG3oXrYW1NnNev1SZGALRC7MktiShPY',
+];
 
 const raw = {
     date: 1737100062,
-    receiver: receiverKeypair.publicKey.toBase58(),
-    sender: senderKeypair.publicKey.toBase58(),
+    receiver: RECEIVER,
+    sender: SENDER,
 };
 
 const baseSolReceipt: Receipt = {
@@ -99,9 +108,9 @@ export const receiptMultiTransfer3: FormattedReceipt = formatReceiptData(
         ...baseSolReceipt,
         total: 350000000,
         transfers: [
-            { receiver: extraKeypairs[0].publicKey.toBase58(), sender: raw.sender, total: 100000000 },
-            { receiver: extraKeypairs[1].publicKey.toBase58(), sender: raw.sender, total: 50000000 },
-            { receiver: extraKeypairs[2].publicKey.toBase58(), sender: raw.sender, total: 200000000 },
+            { receiver: EXTRA_RECEIVERS[0], sender: raw.sender, total: 100000000 },
+            { receiver: EXTRA_RECEIVERS[1], sender: raw.sender, total: 50000000 },
+            { receiver: EXTRA_RECEIVERS[2], sender: raw.sender, total: 200000000 },
         ],
     },
     CLUSTER,
@@ -112,7 +121,7 @@ export const receiptMultiTransfer9: FormattedReceipt = formatReceiptData(
         ...baseSolReceipt,
         total: 1125000000,
         transfers: Array.from({ length: 9 }, (_, i) => ({
-            receiver: extraKeypairs[i].publicKey.toBase58(),
+            receiver: EXTRA_RECEIVERS[i],
             sender: raw.sender,
             total: (i + 1) * 25000000,
         })),
@@ -131,8 +140,8 @@ export const receiptMultiTokenTransfer: FormattedReceipt = formatReceiptData(
         symbol: 'USDC',
         total: 1.000841,
         transfers: [
-            { receiver: extraKeypairs[0].publicKey.toBase58(), sender: raw.sender, total: 1 },
-            { receiver: extraKeypairs[1].publicKey.toBase58(), sender: raw.sender, total: 0.000841 },
+            { receiver: EXTRA_RECEIVERS[0], sender: raw.sender, total: 1 },
+            { receiver: EXTRA_RECEIVERS[1], sender: raw.sender, total: 0.000841 },
         ],
         type: 'token',
     },
@@ -151,8 +160,8 @@ export const receiptMultiTokenTransferWithMemo: FormattedReceipt = formatReceipt
         symbol: 'USDC',
         total: 1.000841,
         transfers: [
-            { receiver: extraKeypairs[0].publicKey.toBase58(), sender: raw.sender, total: 1 },
-            { receiver: extraKeypairs[1].publicKey.toBase58(), sender: raw.sender, total: 0.000841 },
+            { receiver: EXTRA_RECEIVERS[0], sender: raw.sender, total: 1 },
+            { receiver: EXTRA_RECEIVERS[1], sender: raw.sender, total: 0.000841 },
         ],
         type: 'token',
     },
@@ -171,8 +180,8 @@ export const receiptMultiTokenTransferWithLongMemo: FormattedReceipt = formatRec
         symbol: 'USDC',
         total: 1.000841,
         transfers: [
-            { receiver: extraKeypairs[0].publicKey.toBase58(), sender: raw.sender, total: 1 },
-            { receiver: extraKeypairs[1].publicKey.toBase58(), sender: raw.sender, total: 0.000841 },
+            { receiver: EXTRA_RECEIVERS[0], sender: raw.sender, total: 1 },
+            { receiver: EXTRA_RECEIVERS[1], sender: raw.sender, total: 0.000841 },
         ],
         type: 'token',
     },

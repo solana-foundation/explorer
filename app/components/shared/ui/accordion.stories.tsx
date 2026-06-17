@@ -21,7 +21,7 @@ const meta: Meta<typeof Accordion> = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/Accordion',
 };
 

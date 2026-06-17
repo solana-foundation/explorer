@@ -87,7 +87,7 @@ const meta = {
     component: AddressTableLookupsCard,
     decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Inspector/AddressTableLookupsCard',
 } satisfies Meta<typeof AddressTableLookupsCard>;
 

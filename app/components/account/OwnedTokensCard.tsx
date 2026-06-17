@@ -18,9 +18,12 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback, useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
 
+import { Button } from '@/app/components/shared/ui/button';
+import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { ProxiedImage } from '@/app/features/metadata';
 import { INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
-import { CardFooter, CardHeader } from '@/app/shared/ui/Card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { normalizeTokenAmount } from '@/app/utils';
 
 type Display = 'summary' | 'detail' | null;
@@ -40,7 +43,6 @@ export function OwnedTokensCard({ address }: { address: string }) {
     const ownedTokens = useAccountOwnedTokens(address);
     const fetchAccountTokens = useFetchAccountOwnedTokens();
     const refresh = () => fetchAccountTokens(pubkey);
-    const [showDropdown, setDropdown] = React.useState(false);
     const [visibleCount, setVisibleCount] = React.useState(INITIAL_VISIBLE_COUNT);
     const display = useQueryDisplay();
 
@@ -72,42 +74,43 @@ export function OwnedTokensCard({ address }: { address: string }) {
     const showLogos = tokens.some(t => t.logoURI !== undefined);
 
     return (
-        <>
-            {showDropdown && <div className="dropdown-exit" onClick={() => setDropdown(false)} />}
+        <Card ui="dashkit">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit">
+                    Token Holdings
+                </CardTitle>
+                <DisplayDropdown display={display} />
+            </CardHeader>
 
-            <div className="card">
-                <CardHeader ui="dashkit">
-                    <h3 className="card-header-title">Token Holdings</h3>
-                    <DisplayDropdown display={display} toggle={() => setDropdown(show => !show)} show={showDropdown} />
-                </CardHeader>
-
-                {/* TODO: migrate to <BaseTable variant="card"> from @/app/shared/ui/Table */}
-                <div className="table-responsive e-mb-0">
-                    <table className="table table-sm table-nowrap card-table">
-                        <thead>
-                            <tr>
-                                {showLogos && <th className="w-1 e-p-0 e-text-center e-text-dk-gray-700">Logo</th>}
-                                {display === 'detail' && <th className="e-text-dk-gray-700">Account Address</th>}
-                                <th className="e-text-dk-gray-700">Mint Address</th>
-                                <th className="e-text-dk-gray-700">
-                                    {display === 'detail' ? 'Total Balance' : 'Balance'}
-                                </th>
-                            </tr>
-                        </thead>
-                        {display === 'detail' ? (
-                            <HoldingsDetail tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
-                        ) : (
-                            <HoldingsSummary tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        {showLogos && (
+                            <BaseTable.HeaderCell className="e-w-px e-p-0 e-text-center e-text-dk-gray-700">
+                                Logo
+                            </BaseTable.HeaderCell>
                         )}
-                    </table>
-                </div>
-                <TokensCardFooter
-                    tokens={tokens}
-                    visibleCount={visibleCount}
-                    loadMore={() => setVisibleCount(c => c + LOAD_MORE_COUNT)}
-                />
-            </div>
-        </>
+                        {display === 'detail' && (
+                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Account Address</BaseTable.HeaderCell>
+                        )}
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Mint Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                            {display === 'detail' ? 'Total Balance' : 'Balance'}
+                        </BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                {display === 'detail' ? (
+                    <HoldingsDetail tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
+                ) : (
+                    <HoldingsSummary tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
+                )}
+            </BaseTable>
+            <TokensCardFooter
+                tokens={tokens}
+                visibleCount={visibleCount}
+                loadMore={() => setVisibleCount(c => c + LOAD_MORE_COUNT)}
+            />
+        </Card>
     );
 }
 
@@ -238,7 +241,7 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
     return (
         <tr>
             {showLogo && (
-                <td className="w-1 e-p-0 e-text-center">
+                <td className="e-w-px e-p-0 e-text-center">
                     <ProxiedImage
                         alt="Token icon"
                         className="e-h-6 e-w-6 e-rounded-full e-border-4 e-border-solid e-border-dk-gray-700-dark"
@@ -288,20 +291,18 @@ function TokensCardFooter({
 
     return (
         <CardFooter ui="dashkit">
-            <button className="btn btn-primary e-w-full" onClick={loadMore}>
+            <Button ui="dashkit" variant="primary" className="e-w-full" onClick={loadMore}>
                 Load More ({visibleCount} of {totalCount})
-            </button>
+            </Button>
         </CardFooter>
     );
 }
 
 type DropdownProps = {
     display: Display;
-    toggle: () => void;
-    show: boolean;
 };
 
-const DisplayDropdown = ({ display, toggle, show }: DropdownProps) => {
+const DisplayDropdown = ({ display }: DropdownProps) => {
     const currentSearchParams = useSearchParams();
     const currentPath = usePathname();
     const buildLocation = useCallback(
@@ -320,24 +321,28 @@ const DisplayDropdown = ({ display, toggle, show }: DropdownProps) => {
 
     const DISPLAY_OPTIONS: Display[] = [null, 'detail'];
     return (
-        <div className="dropdown">
-            <button className="btn btn-white btn-sm" type="button" onClick={toggle}>
-                {display === 'detail' ? 'Detailed' : 'Summary'} <ChevronDown size={15} className="align-text-top" />
-            </button>
-            <div className={cn('dropdown-menu-end dropdown-menu', show && 'show')}>
+        <Dropdown>
+            <DropdownToggle asChild>
+                <Button ui="dashkit" variant="white" size="sm" type="button">
+                    {display === 'detail' ? 'Detailed' : 'Summary'}{' '}
+                    <ChevronDown size={15} className="e-align-text-top" />
+                </Button>
+            </DropdownToggle>
+            <DropdownMenu align="end">
                 {DISPLAY_OPTIONS.map(displayOption => {
                     return (
-                        <Link
+                        <DropdownItem
+                            asChild
                             key={displayOption || 'null'}
-                            href={buildLocation(displayOption)}
-                            className={cn('dropdown-item', displayOption === display && 'active')}
-                            onClick={toggle}
+                            className={cn(displayOption === display && 'active')}
                         >
-                            {displayOption === 'detail' ? 'Detailed' : 'Summary'}
-                        </Link>
+                            <Link href={buildLocation(displayOption)}>
+                                {displayOption === 'detail' ? 'Detailed' : 'Summary'}
+                            </Link>
+                        </DropdownItem>
                     );
                 })}
-            </div>
-        </div>
+            </DropdownMenu>
+        </Dropdown>
     );
 };

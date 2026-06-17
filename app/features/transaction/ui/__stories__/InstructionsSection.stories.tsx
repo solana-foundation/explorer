@@ -19,7 +19,7 @@ const meta: Meta<typeof InstructionsSection> = {
     parameters: {
         ...nextjsParameters,
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Transaction/InstructionsSection',
 };
 

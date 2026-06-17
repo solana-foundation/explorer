@@ -87,7 +87,7 @@ const meta = {
     component: AccountsCard,
     decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Inspector/AccountsCard',
 } satisfies Meta<typeof AccountsCard>;
 

@@ -11,7 +11,6 @@ const meta = {
     decorators: [withViewportFromGlobal],
     parameters: {
         docs: { story: { height: INITIAL_VIEWPORTS.iphonex.styles.height } },
-        layout: 'padded',
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
@@ -27,7 +26,7 @@ const ToolbarRow = () => (
         <div className="e-flex e-flex-wrap e-items-center e-gap-1.5">
             <span className="e-mr-auto e-text-dk-h4 e-font-medium">Program Account</span>
             <Button ui="dashkit" variant="white" size="sm">
-                <RefreshCw className="align-text-top e-mr-1.5" size={13} /> Refresh
+                <RefreshCw className="e-mr-1.5 e-align-text-top" size={13} /> Refresh
             </Button>
             <Button ui="dashkit" variant="white" size="sm">
                 <Download className="e-mr-1.5" size={13} /> Download
@@ -73,10 +72,10 @@ const DropdownTriggerRow = () => (
         <h3 className="e-mb-2 e-text-dk-sm e-text-dk-gray-700">Dropdown triggers</h3>
         <div className="e-flex e-flex-wrap e-gap-1.5">
             <Button ui="dashkit" variant="dark" size="sm" className="e-w-[150px]">
-                Creators <ChevronDown size={15} className="align-text-top" />
+                Creators <ChevronDown size={15} className="e-align-text-top" />
             </Button>
             <Button ui="dashkit" variant="white" size="sm">
-                Filter: All <ChevronDown className="align-text-top" size={13} />
+                Filter: All <ChevronDown className="e-align-text-top" size={13} />
             </Button>
         </div>
     </div>
