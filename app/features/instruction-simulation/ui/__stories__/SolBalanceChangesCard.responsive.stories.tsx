@@ -1,8 +1,8 @@
+import { gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import type { Meta, StoryObj } from '@storybook/react';
-import { getPubkey } from '@storybook-config/__fixtures__/pubkey';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import BN from 'bn.js';
@@ -10,7 +10,7 @@ import BN from 'bn.js';
 import type { SolBalanceChange } from '../../lib/types';
 import { SolBalanceChangesCard } from '../SolBalanceChangesCard';
 
-const ALICE = getPubkey('alice').toBase58();
+const ALICE = gen.publicKey(1).toBase58();
 
 function change(pubkey: string, delta: string, preBalance: string, postBalance: string): SolBalanceChange {
     return {

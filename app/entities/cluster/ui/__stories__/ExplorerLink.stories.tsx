@@ -1,5 +1,5 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import type { Meta, StoryObj } from '@storybook/react';
-import { DEFAULT_SIGNATURE } from '@storybook-config/__fixtures__/defaults';
 import { withCluster } from '@storybook-config/decorators';
 
 import { ExplorerLink } from '../ExplorerLink';
