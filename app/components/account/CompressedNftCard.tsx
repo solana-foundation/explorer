@@ -121,12 +121,11 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
                 <div className="e-mb-3 e-mt-1.5">{getIsMutablePill(compressedNft.mutable)}</div>
                 <Dropdown className="e-inline-flex">
                     <DropdownToggle asChild>
-                        {/* e-rounded-r-none mirrors legacy .btn-group>.btn:not(:last-child) corner squaring. */}
                         <Button
                             ui="dashkit"
                             variant="dark"
                             size="sm"
-                            className="e-w-[150px] e-rounded-r-none"
+                            className="e-w-[150px]"
                             type="button"
                         >
                             Creators <ChevronDown size={15} className="e-align-text-top" />
