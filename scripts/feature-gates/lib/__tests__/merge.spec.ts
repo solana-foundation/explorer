@@ -2,6 +2,15 @@ import type { FeatureGateDraft } from '../../../../app/entities/feature-gate/ser
 import { appendNewFeatures, hasDescription, resolveEpoch } from '../merge';
 import type { FeatureProbeResult } from '../rpc';
 
+// The merge pipeline logs CLI progress via console.log; silence it under test.
+beforeEach(() => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+});
+
+afterEach(() => {
+    vi.restoreAllMocks();
+});
+
 // The merge pipeline operates on drafts (plain-string `key`), so these fixtures
 // use sentinel keys like 'A'/'KEY' to exercise dedup/append logic — base58
 // validation happens later, at the `create()` write boundary.
