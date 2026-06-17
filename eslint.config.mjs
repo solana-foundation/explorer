@@ -30,6 +30,7 @@ export default tseslint.config(
             '.claude/**',
             '.worktrees/**',
             'storybook-static/**',
+            'storybook-static-*/**',
             'next-env.d.ts',
         ],
     },
