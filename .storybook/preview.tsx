@@ -3,7 +3,7 @@ import '@/app/styles/preflight-adjustments.css';
 import '@/app/styles/styles.css';
 
 import type { Preview } from '@storybook/react';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { rubikFont } from '@/app/styles';
 
@@ -64,17 +64,15 @@ const preview: Preview = {
 
     decorators: [
         Story => {
-            // rubikFont.variable defines --explorer-default-font; put it on <html> so :root-level
-            // consumers (dashkit-polyfill's --bs-body-font-family) resolve it, mirroring app/layout.tsx.
-            useEffect(() => {
-                document.documentElement.classList.add(rubikFont.variable);
-                document.getElementById('storybook-outer')?.classList.add(rubikFont.className);
-            }, []);
-
             return (
-                <div id="storybook-outer" className={rubikFont.className}>
-                    <Story />
-                </div>
+                <>
+                    {/* Mirror app/layout.tsx: define --explorer-default-font on :root so body
+                        (and portal-mounted modals/dropdowns) inherit Rubik via styles.css. */}
+                    <style>{`:root { --explorer-default-font: ${rubikFont.style.fontFamily}; }`}</style>
+                    <div id="storybook-outer">
+                        <Story />
+                    </div>
+                </>
             );
         },
     ],
