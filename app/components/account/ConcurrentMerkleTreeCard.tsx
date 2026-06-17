@@ -3,6 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 
 import { toBuffer } from '@/app/shared/lib/bytes';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { Address } from '../common/Address';
 import { Slot } from '../common/Slot';
@@ -27,66 +28,66 @@ export function ConcurrentMerkleTreeCard({ data }: { data: Uint8Array }) {
             </CardHeader>
 
             <TableCardBody>
-                <tr>
-                    <td>Authority</td>
-                    <td className="e-text-right">
+                <BaseTable.Row>
+                    <BaseTable.Cell>Authority</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={authority} alignRight raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Creation Slot</td>
-                    <td className="e-text-right">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Creation Slot</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Slot slot={creationSlot.toNumber()} link />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Max Depth</td>
-                    <td className="e-text-right">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Max Depth</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <span className="e-font-mono">{treeHeight}</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Max Buffer Size</td>
-                    <td className="e-text-right">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Max Buffer Size</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <span className="e-font-mono">{maxBufferSize}</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Canopy Depth</td>
-                    <td className="e-text-right">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Canopy Depth</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <span className="e-font-mono">{canopyDepth}</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Current Sequence Number</td>
-                    <td className="e-text-right">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Current Sequence Number</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <span className="e-font-mono">{seq.toString()}</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Current Root</td>
-                    <td className="e-text-right">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Current Root</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <Address pubkey={new PublicKey(root)} alignRight raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Current Number of Leaves</td>
-                    <td className="e-text-right">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Current Number of Leaves</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <span className="e-font-mono">{rightMostIndex}</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Remaining Leaves</td>
-                    <td className="e-text-right">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Remaining Leaves</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <span className="e-font-mono">{Math.pow(2, treeHeight) - rightMostIndex}</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Max Possible Leaves</td>
-                    <td className="e-text-right">
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Max Possible Leaves</BaseTable.Cell>
+                    <BaseTable.Cell className="e-text-right">
                         <span className="e-font-mono">{Math.pow(2, treeHeight)}</span>
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             </TableCardBody>
         </Card>
     );
