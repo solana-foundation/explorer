@@ -15,7 +15,7 @@ const meta: Meta<typeof Label> = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Label',
+    title: 'Components/Shared/Label',
 };
 
 export default meta;

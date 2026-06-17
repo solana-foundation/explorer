@@ -14,7 +14,7 @@ const meta: Meta<typeof Tabs> = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Tabs',
+    title: 'Components/Shared/Tabs',
 };
 
 export default meta;

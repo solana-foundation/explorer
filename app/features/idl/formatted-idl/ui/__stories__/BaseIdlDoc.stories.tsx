@@ -7,7 +7,7 @@ import { BaseIdlDoc, IdlDocTooltip } from '../BaseIdlDoc';
 const meta = {
     component: BaseIdlDoc,
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/BaseIdlDoc',
+    title: 'Features/IDL/Formatted IDL/BaseIdlDoc',
 } satisfies Meta<typeof BaseIdlDoc>;
 
 export default meta;
@@ -51,7 +51,7 @@ const tooltipMeta = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/IdlDocTooltip',
+    title: 'Features/IDL/Formatted IDL/IdlDocTooltip',
 } satisfies Meta<typeof IdlDocTooltip>;
 
 export const Tooltip: StoryObj<typeof tooltipMeta> = {

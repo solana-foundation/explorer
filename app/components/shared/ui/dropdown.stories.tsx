@@ -11,7 +11,7 @@ import { Dropdown, DropdownHeader, DropdownItem, DropdownMenu, DropdownToggle } 
 const meta = {
     component: Dropdown,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Dropdown',
+    title: 'Components/Shared/Dropdown',
 } satisfies Meta<typeof Dropdown>;
 
 export default meta;

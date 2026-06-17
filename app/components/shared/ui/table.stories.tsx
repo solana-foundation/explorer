@@ -8,7 +8,7 @@ import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, Tabl
 const meta: Meta<typeof Table> = {
     component: Table,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Table',
+    title: 'Components/Shared/Table',
 };
 
 export default meta;

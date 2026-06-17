@@ -9,7 +9,7 @@ const meta = {
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Entities/Domain/UI/BaseDomainsCard',
+    title: 'Entities/Domain/BaseDomainsCard',
 } satisfies Meta<typeof BaseDomainsCard>;
 
 export default meta;

@@ -19,7 +19,7 @@ const meta = {
         },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/CodamaFormattedIdl',
+    title: 'Features/IDL/Formatted IDL/CodamaFormattedIdl',
 } satisfies Meta<typeof CodamaFormattedIdl>;
 
 export default meta;

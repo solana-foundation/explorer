@@ -27,7 +27,7 @@ function TableWrapper({ children }: { children: React.ReactNode }) {
 const meta = {
     component: TableRowSkeleton,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Skeletons',
+    title: 'Components/Shared/Skeletons',
 } satisfies Meta<typeof TableRowSkeleton>;
 
 export default meta;

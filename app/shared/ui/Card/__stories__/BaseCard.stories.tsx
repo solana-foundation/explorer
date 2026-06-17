@@ -14,7 +14,7 @@ import {
 const meta: Meta<typeof BaseCard> = {
     component: BaseCard,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Card/BaseCard',
+    title: 'Components/Shared/Card/BaseCard',
 };
 
 export default meta;

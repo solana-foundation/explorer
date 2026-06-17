@@ -5,7 +5,7 @@ import { PageContainer } from '../PageContainer';
 const meta = {
     component: PageContainer,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/PageContainer',
+    title: 'Components/Shared/PageContainer',
 } satisfies Meta<typeof PageContainer>;
 
 export default meta;

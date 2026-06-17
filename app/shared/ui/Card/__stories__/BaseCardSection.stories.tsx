@@ -6,7 +6,7 @@ import { BaseCardSection } from '../BaseCardSection';
 const meta: Meta<typeof BaseCardSection> = {
     component: BaseCardSection,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Card/BaseCardSection',
+    title: 'Components/Shared/Card/BaseCardSection',
 };
 
 export default meta;

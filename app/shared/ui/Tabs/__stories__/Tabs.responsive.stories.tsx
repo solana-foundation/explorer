@@ -11,7 +11,7 @@ const meta: Meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/Tabs@Media',
+    title: 'Shared/Tabs@Media',
 };
 
 export default meta;

@@ -8,7 +8,7 @@ import { ArgumentInput } from '../ArgumentInput';
 const meta = {
     component: ArgumentInput,
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Interactive IDL/UI/ArgumentInput',
+    title: 'Features/IDL/Interactive IDL/ArgumentInput',
 } satisfies Meta<typeof ArgumentInput>;
 
 export default meta;

@@ -18,7 +18,7 @@ const meta: Meta<typeof Toaster> = {
         docs: { story: { autoplay: true, height: '180px', inline: false } },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Sonner/Toaster',
+    title: 'Components/Shared/Sonner/Toaster',
 };
 
 export default meta;

@@ -6,7 +6,7 @@ import { TabsContent, TabsList, TabsTrigger } from '../Tabs';
 
 const meta: Meta = {
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/Tabs',
+    title: 'Shared/Tabs',
 };
 
 export default meta;

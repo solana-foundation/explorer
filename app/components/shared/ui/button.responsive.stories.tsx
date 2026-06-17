@@ -14,7 +14,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Button@Media',
+    title: 'Components/Shared/Button@Media',
 } satisfies Meta<typeof Button>;
 
 export default meta;

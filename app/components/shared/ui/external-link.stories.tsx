@@ -6,7 +6,7 @@ import { ExternalLink } from './external-link';
 const meta: Meta<typeof ExternalLink> = {
     component: ExternalLink,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/ExternalLink',
+    title: 'Components/Shared/ExternalLink',
 };
 
 export default meta;

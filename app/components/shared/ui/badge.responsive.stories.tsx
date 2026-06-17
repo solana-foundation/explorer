@@ -15,7 +15,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Badge@Media',
+    title: 'Components/Shared/Badge@Media',
 } satisfies Meta<typeof Badge>;
 
 export default meta;

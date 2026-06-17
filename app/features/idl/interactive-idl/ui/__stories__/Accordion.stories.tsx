@@ -14,7 +14,7 @@ const meta: Meta = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Interactive IDL/UI/Accordion',
+    title: 'Features/IDL/Interactive IDL/Accordion',
 };
 
 export default meta;

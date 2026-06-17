@@ -8,7 +8,7 @@ const meta = {
     decorators: [withClipboardMock],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/UI/IdlInstructionSection',
+    title: 'Features/IDL/IdlInstructionSection',
 } satisfies Meta<typeof IdlInstructionSection>;
 
 export default meta;

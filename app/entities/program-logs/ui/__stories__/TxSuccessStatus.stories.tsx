@@ -19,7 +19,7 @@ const meta = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Entities/Program Logs/UI/TxSuccessStatus',
+    title: 'Entities/Program Logs/TxSuccessStatus',
 } satisfies Meta<typeof TxSuccessStatus>;
 
 export default meta;

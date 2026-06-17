@@ -21,7 +21,7 @@ const variantOptions = ['default', 'narrow', 'tight'] as const satisfies readonl
 const meta: Meta<typeof Card> = {
     component: Card,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Card',
+    title: 'Components/Shared/Card',
 };
 
 export default meta;

@@ -19,7 +19,7 @@ const meta = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Entities/Program Logs/UI/TxErrorStatus',
+    title: 'Entities/Program Logs/TxErrorStatus',
 } satisfies Meta<typeof TxErrorStatus>;
 
 export default meta;

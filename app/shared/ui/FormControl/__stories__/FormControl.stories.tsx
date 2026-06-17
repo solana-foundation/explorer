@@ -6,7 +6,7 @@ import { FormControl } from '../FormControl';
 const meta: Meta<typeof FormControl> = {
     component: FormControl,
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/FormControl',
+    title: 'Shared/FormControl',
 };
 
 export default meta;

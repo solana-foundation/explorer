@@ -12,7 +12,7 @@ const meta: Meta<typeof BaseDomainsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Entities/Domain/UI/BaseDomainsCard@Media',
+    title: 'Entities/Domain/BaseDomainsCard@Media',
 };
 
 export default meta;

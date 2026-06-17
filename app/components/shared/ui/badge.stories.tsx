@@ -52,7 +52,7 @@ const meta: Meta<typeof Badge> = {
     // Uses the global default (Dark) — switch to Light via the Backgrounds toolbar (top-right)
     // when you need to inspect the badges against a non-app surface.
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Badge',
+    title: 'Components/Shared/Badge',
 };
 
 export default meta;

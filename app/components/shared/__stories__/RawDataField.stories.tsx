@@ -18,7 +18,7 @@ const mockLargeData = (() => {
 const meta: Meta<typeof RawDataField> = {
     component: RawDataField,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/RawDataField',
+    title: 'Components/Shared/RawDataField',
 };
 
 export default meta;

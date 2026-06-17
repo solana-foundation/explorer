@@ -10,7 +10,7 @@ const meta: Meta<typeof PageContainer> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/PageContainer@Media',
+    title: 'Components/Shared/PageContainer@Media',
 };
 
 export default meta;

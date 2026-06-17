@@ -22,7 +22,7 @@ const meta = {
         layout: 'centered',
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Sonner/CustomToast',
+    title: 'Components/Shared/Sonner/CustomToast',
 } satisfies Meta<typeof CustomToast>;
 
 export default meta;

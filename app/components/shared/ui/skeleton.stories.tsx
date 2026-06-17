@@ -13,7 +13,7 @@ const meta: Meta<typeof Skeleton> = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Skeleton',
+    title: 'Components/Shared/Skeleton',
 };
 
 export default meta;

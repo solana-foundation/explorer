@@ -5,7 +5,7 @@ import { BaseWarningCard } from '../BaseWarningCard';
 const meta: Meta<typeof BaseWarningCard> = {
     component: BaseWarningCard,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/WarningCard/BaseWarningCard',
+    title: 'Components/Shared/WarningCard/BaseWarningCard',
 };
 
 export default meta;

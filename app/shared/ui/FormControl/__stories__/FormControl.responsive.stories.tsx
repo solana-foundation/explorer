@@ -11,7 +11,7 @@ const meta: Meta<typeof FormControl> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/FormControl@Media',
+    title: 'Shared/FormControl@Media',
 };
 
 export default meta;

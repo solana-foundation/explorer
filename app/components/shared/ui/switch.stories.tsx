@@ -23,7 +23,7 @@ const meta: Meta<typeof Switch> = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Switch',
+    title: 'Components/Shared/Switch',
 };
 
 export default meta;

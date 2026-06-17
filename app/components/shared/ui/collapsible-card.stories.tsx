@@ -17,7 +17,7 @@ const meta: Meta<typeof CollapsibleCard> = {
     },
     component: CollapsibleCard,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/CollapsibleCard',
+    title: 'Components/Shared/CollapsibleCard',
 };
 
 export default meta;

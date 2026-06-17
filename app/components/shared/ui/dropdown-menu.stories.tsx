@@ -24,7 +24,7 @@ import {
 const meta: Meta<typeof DropdownMenu> = {
     component: DropdownMenu,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/DropdownMenu',
+    title: 'Components/Shared/DropdownMenu',
 };
 
 export default meta;

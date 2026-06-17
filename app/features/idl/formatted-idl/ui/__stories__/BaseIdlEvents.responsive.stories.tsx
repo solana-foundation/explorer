@@ -11,7 +11,7 @@ const meta: Meta<typeof BaseIdlEvents> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/BaseIdlEvents@Media',
+    title: 'Features/IDL/Formatted IDL/BaseIdlEvents@Media',
 };
 
 export default meta;

@@ -22,7 +22,7 @@ const meta: Meta<typeof Autocomplete> = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Autocomplete',
+    title: 'Components/Shared/Autocomplete',
 };
 
 export default meta;

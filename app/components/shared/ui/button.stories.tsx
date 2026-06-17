@@ -62,7 +62,7 @@ const meta: Meta<typeof Button> = {
     },
     component: Button,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Button',
+    title: 'Components/Shared/Button',
 };
 
 export default meta;

@@ -12,7 +12,7 @@ const meta = {
     decorators: [withCardTableField, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Entities/Instruction Card/UI/Field/ProgramField',
+    title: 'Entities/Instruction Card/Field/ProgramField',
 } satisfies Meta<typeof ProgramField>;
 
 export default meta;

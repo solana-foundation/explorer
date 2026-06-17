@@ -22,7 +22,7 @@ const meta: Meta<typeof Accordion> = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Accordion',
+    title: 'Components/Shared/Accordion',
 };
 
 export default meta;

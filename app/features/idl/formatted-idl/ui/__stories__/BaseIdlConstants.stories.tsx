@@ -13,7 +13,7 @@ const meta = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/BaseIdlConstants',
+    title: 'Features/IDL/Formatted IDL/BaseIdlConstants',
 } satisfies Meta<typeof BaseIdlConstants>;
 
 export default meta;

@@ -6,7 +6,7 @@ import { Alert } from '../Alert';
 const meta: Meta<typeof Alert> = {
     component: Alert,
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/Alert',
+    title: 'Shared/Alert',
 };
 
 export default meta;
