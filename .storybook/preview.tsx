@@ -41,8 +41,9 @@ const preview: Preview = {
         },
         layout: 'padded',
         options: {
-            // Deterministic sidebar order: alphabetical, with `Responsive` groups last among
-            // siblings. Must be self-contained — Storybook stringifies this function.
+            // Deterministic sidebar order: alphabetical, with `Design System` groups first
+            // and `Responsive` groups last among siblings. Must be self-contained — Storybook
+            // stringifies this function.
             storySort: (a, b) => {
                 if (a.title === b.title) return 0; // keep story definition order within a file
                 const ap = a.title.split('/');
@@ -51,6 +52,8 @@ const preview: Preview = {
                     const as = ap[i] ?? '';
                     const bs = bp[i] ?? '';
                     if (as === bs) continue;
+                    if (as === 'Design System') return -1;
+                    if (bs === 'Design System') return 1;
                     if (as === 'Responsive') return 1;
                     if (bs === 'Responsive') return -1;
                     return as.localeCompare(bs, undefined, { numeric: true });
