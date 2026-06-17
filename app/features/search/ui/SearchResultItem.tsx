@@ -45,9 +45,7 @@ export function SearchResultItem({ option }: { option: SearchItem }) {
                     {option.verified && <VerifiedBadge />}
                 </div>
                 {option.sublabel && (
-                    <span className="block truncate font-mono text-xs text-heavy-metal-300">
-                        {option.sublabel}
-                    </span>
+                    <span className="block truncate font-mono text-xs text-heavy-metal-300">{option.sublabel}</span>
                 )}
                 {option.verified && option.pathname.includes('/verified-build') && (
                     <span className="block text-xs text-heavy-metal-400">

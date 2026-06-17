@@ -242,9 +242,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="text-dk-gray-700">Token</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="text-dk-gray-700">Instruction Type</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">
-                            Transaction Signature
-                        </BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>
@@ -444,13 +442,7 @@ function InstructionDetailsCell({
     if (!details) {
         return (
             <td>
-                <Button
-                    ui="dashkit"
-                    variant="outline-primary"
-                    size="sm"
-                    className="px-[3px] py-0 leading-none"
-                    asChild
-                >
+                <Button ui="dashkit" variant="outline-primary" size="sm" className="px-[3px] py-0 leading-none" asChild>
                     <span role="button" onClick={handleLoadClick}>
                         Load
                     </span>
@@ -471,13 +463,7 @@ function InstructionDetailsCell({
     if (hasFailed || !instructions) {
         return (
             <td>
-                <Button
-                    ui="dashkit"
-                    variant="outline-warning"
-                    size="sm"
-                    className="px-[3px] py-0 leading-none"
-                    asChild
-                >
+                <Button ui="dashkit" variant="outline-warning" size="sm" className="px-[3px] py-0 leading-none" asChild>
                     <span role="button" onClick={handleLoadClick}>
                         Retry
                     </span>

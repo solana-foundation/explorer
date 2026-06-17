@@ -117,9 +117,7 @@ export function Address({
     const nicknameDisplay = nickname ? (
         <span className="flex min-w-0 flex-col">
             <span className="truncate font-mono">&quot;{nickname}&quot;</span>
-            <span className="truncate font-mono text-muted">
-                {isMidTruncated ? midTruncatedText : addressLabel}
-            </span>
+            <span className="truncate font-mono text-muted">{isMidTruncated ? midTruncatedText : addressLabel}</span>
         </span>
     ) : undefined;
 

@@ -28,10 +28,7 @@ export function UpcomingFeatures() {
                 <span className="mr-2">🚀</span>
                 Upcoming {clusterName(cluster)} Features
             </span>
-            <Link
-                href={featureGatesPath}
-                className="text-dk-sm text-dk-primary-dark hover:text-dk-primary-on-dark"
-            >
+            <Link href={featureGatesPath} className="text-dk-sm text-dk-primary-dark hover:text-dk-primary-on-dark">
                 View all feature gates
             </Link>
         </div>

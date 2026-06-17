@@ -21,13 +21,7 @@ export function ErrorCard({
                 {text}
                 {retry && (
                     <>
-                        <Button
-                            ui="dashkit"
-                            variant="white"
-                            className="ml-3 hidden md:inline"
-                            onClick={retry}
-                            asChild
-                        >
+                        <Button ui="dashkit" variant="white" className="ml-3 hidden md:inline" onClick={retry} asChild>
                             <span>{buttonText}</span>
                         </Button>
                         <div className="mt-6 block md:hidden">

@@ -54,10 +54,7 @@ export function ExternalResourceLink({
                 {children}
             </ExternalLink>
             <Tooltip>
-                <TooltipTrigger
-                    aria-label={hint}
-                    className="inline-flex border-0 bg-transparent p-0 text-dk-gray-600"
-                >
+                <TooltipTrigger aria-label={hint} className="inline-flex border-0 bg-transparent p-0 text-dk-gray-600">
                     <HelpCircle aria-hidden size={13} />
                 </TooltipTrigger>
                 <TooltipContent>

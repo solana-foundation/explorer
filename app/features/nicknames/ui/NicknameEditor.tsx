@@ -101,9 +101,7 @@ export function NicknameEditor({ address, onClose }: Props) {
                             />
                         </FormControl>
                         <div className="flex justify-between">
-                            <small className="text-dk-gray-700">
-                                This nickname is stored locally on your device.
-                            </small>
+                            <small className="text-dk-gray-700">This nickname is stored locally on your device.</small>
                             <small className="text-dk-gray-700">
                                 {nickname.length}/{MAX_NICKNAME_LENGTH}
                             </small>

@@ -49,8 +49,6 @@ export const EUBanner: Story = {
 
 export const CardOnly: Story = {
     args: {
-        children: (
-            <p className="m-0 text-base text-white">Cookie consent card container with customizable content.</p>
-        ),
+        children: <p className="m-0 text-base text-white">Cookie consent card container with customizable content.</p>,
     },
 };

@@ -19,11 +19,7 @@ const rootSizeVariants = {
     lg: 'h-6 w-12',
 };
 
-const thumbVariants = [
-    'pointer-events-none block rounded-full',
-    'shrink-0 bg-white shadow-lg ring-0',
-    'transition',
-];
+const thumbVariants = ['pointer-events-none block rounded-full', 'shrink-0 bg-white shadow-lg ring-0', 'transition'];
 
 // symmetric thumb inset on both ends: 2px at default size, 3px at lg
 const thumbSizeVariants = {

@@ -11,12 +11,7 @@ type SearchFilterProps = {
 
 export function SearchFilters({ tabs, activeFilter, counts, onFilterChange }: SearchFilterProps) {
     return (
-        <div
-            className={cn(
-                'flex gap-1.5 overflow-x-auto px-3 pb-2 pt-2.5',
-                '[&::-webkit-scrollbar]:hidden',
-            )}
-        >
+        <div className={cn('flex gap-1.5 overflow-x-auto px-3 pb-2 pt-2.5', '[&::-webkit-scrollbar]:hidden')}>
             {tabs.map(tab => (
                 <button
                     key={tab.id}

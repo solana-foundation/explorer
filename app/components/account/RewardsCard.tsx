@@ -90,12 +90,8 @@ export function RewardsCard({ address }: { address: string }) {
                         <BaseTable.Head>
                             <BaseTable.Row>
                                 <BaseTable.HeaderCell className="w-px text-dk-gray-700">Epoch</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="text-dk-gray-700">
-                                    Effective Slot
-                                </BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="text-dk-gray-700">
-                                    Reward Amount
-                                </BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="text-dk-gray-700">Effective Slot</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="text-dk-gray-700">Reward Amount</BaseTable.HeaderCell>
                                 <BaseTable.HeaderCell className="text-dk-gray-700">Post Balance</BaseTable.HeaderCell>
                             </BaseTable.Row>
                         </BaseTable.Head>

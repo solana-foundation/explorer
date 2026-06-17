@@ -15,18 +15,15 @@ const sectionVariants = cva('mb-6', {
     },
 });
 
-const sectionTitleVariants = cva(
-    'px-6 py-4 text-[10px] font-medium uppercase tracking-widest border border-solid',
-    {
-        defaultVariants: { ui: 'tw' },
-        variants: {
-            ui: {
-                dashkit: 'border-dk-gray-700-dark bg-dk-gray-800-dark text-dk-gray-600',
-                tw: 'border-neutral-800 bg-neutral-900 text-gray-400',
-            },
+const sectionTitleVariants = cva('px-6 py-4 text-[10px] font-medium uppercase tracking-widest border border-solid', {
+    defaultVariants: { ui: 'tw' },
+    variants: {
+        ui: {
+            dashkit: 'border-dk-gray-700-dark bg-dk-gray-800-dark text-dk-gray-600',
+            tw: 'border-neutral-800 bg-neutral-900 text-gray-400',
         },
     },
-);
+});
 
 interface BaseCardSectionProps
     extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,

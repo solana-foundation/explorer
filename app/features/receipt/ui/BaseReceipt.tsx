@@ -178,12 +178,7 @@ function TransferRowItem({
                     <span className="flex items-center gap-1 whitespace-nowrap text-left font-mono text-white">
                         {logoURI &&
                             (tokenHref ? (
-                                <a
-                                    href={tokenHref}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex-shrink-0"
-                                >
+                                <a href={tokenHref} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={logoURI}
@@ -195,13 +190,7 @@ function TransferRowItem({
                                 </a>
                             ) : (
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={logoURI}
-                                    alt="Token logo"
-                                    height="16"
-                                    width="16"
-                                    className="flex-shrink-0"
-                                />
+                                <img src={logoURI} alt="Token logo" height="16" width="16" className="flex-shrink-0" />
                             ))}
                         {amount.formatted} <span className="text-gray-400">{amount.unit}</span>
                     </span>

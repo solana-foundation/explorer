@@ -245,9 +245,7 @@ export const DashkitTableSize: Story = {
     render: () => (
         <div className="flex flex-col gap-4">
             <div>
-                <div className="mb-2 text-xs text-neutral-500">
-                    default — inherits from parent (here body 16px)
-                </div>
+                <div className="mb-2 text-xs text-neutral-500">default — inherits from parent (here body 16px)</div>
                 <div className="flex flex-wrap gap-3">
                     {dashkitVariantOptions.map(variant => (
                         <Badge key={variant} ui="dashkit" variant={variant}>
@@ -257,9 +255,7 @@ export const DashkitTableSize: Story = {
                 </div>
             </div>
             <div>
-                <div className="mb-2 text-xs text-neutral-500">
-                    size=&quot;sm&quot; — table-cell appearance (10px)
-                </div>
+                <div className="mb-2 text-xs text-neutral-500">size=&quot;sm&quot; — table-cell appearance (10px)</div>
                 <div className="flex flex-wrap gap-3">
                     {dashkitVariantOptions.map(variant => (
                         <Badge key={variant} ui="dashkit" size="sm" variant={variant}>

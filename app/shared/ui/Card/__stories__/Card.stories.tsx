@@ -118,7 +118,7 @@ export const CompleteCard: Story = {
                 </ul>
             </CardContent>
             <CardFooter>
-                <button className="hover:bg-neutral-700 rounded bg-neutral-800 px-3 py-1 text-white">
+                <button className="rounded bg-neutral-800 px-3 py-1 text-white hover:bg-neutral-700">
                     Action Button
                 </button>
             </CardFooter>

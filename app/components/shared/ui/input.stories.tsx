@@ -105,10 +105,7 @@ export const Disabled: Story = {
                     <Input id={`disabled-${variant}`} variant={variant} placeholder="Disabled input" disabled />
                 </div>,
                 <div key={`${variant}-value`} className="flex flex-col gap-2">
-                    <label
-                        htmlFor={`disabled-${variant}-with-value`}
-                        className="text-sm font-semibold text-white"
-                    >
+                    <label htmlFor={`disabled-${variant}-with-value`} className="text-sm font-semibold text-white">
                         Disabled {variant.charAt(0).toUpperCase() + variant.slice(1)} with value
                     </label>
                     <Input

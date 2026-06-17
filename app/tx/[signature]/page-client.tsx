@@ -90,9 +90,7 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
         <div className="transaction-page mx-auto flex max-w-5xl flex-col space-y-9 px-4 pt-3 lg:space-y-12 lg:px-6 lg:pt-5">
             <header className="-mb-6 flex flex-col gap-1.5 pb-3 pt-2 lg:mb-0">
                 <span className="text-xs font-normal uppercase text-muted">Details</span>
-                <h1 className="m-0 text-2xl font-normal leading-none text-white md:text-3xl">
-                    Transaction
-                </h1>
+                <h1 className="m-0 text-2xl font-normal leading-none text-white md:text-3xl">Transaction</h1>
             </header>
 
             {signature === undefined ? (
@@ -170,10 +168,7 @@ function DetailsSection({ signature }: SignatureProps) {
                 <div className="xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden">
                     <InstructionsSection signature={signature} />
                 </div>
-                <div
-                    className="xxl:sticky xxl:top-[70px] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden"
-                    id="logs"
-                >
+                <div className="xxl:sticky xxl:top-[70px] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden" id="logs">
                     <ProgramLogSection signature={signature} />
                     <CUProfilingSection signature={signature} />
                 </div>

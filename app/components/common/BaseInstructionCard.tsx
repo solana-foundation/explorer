@@ -76,9 +76,7 @@ export function BaseInstructionCard({
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </Badge>
-                    <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                        {title}
-                    </span>
+                    <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{title}</span>
                 </span>
             }
             headerButtons={
@@ -90,10 +88,7 @@ export function BaseInstructionCard({
                         variant={showRaw ? 'black' : 'white'}
                         active={showRaw}
                         disabled={defaultRaw}
-                        className={cn(
-                            'flex items-center',
-                            defaultRaw && '!pointer-events-auto cursor-not-allowed',
-                        )}
+                        className={cn('flex items-center', defaultRaw && '!pointer-events-auto cursor-not-allowed')}
                         onClick={rawClickHandler}
                     >
                         <Code className="mr-1.5" size={13} /> Raw

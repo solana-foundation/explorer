@@ -18,9 +18,7 @@ export function VotesCard({ voteAccount }: { voteAccount: VoteAccount }) {
                     <BaseTable.Head>
                         <BaseTable.Row>
                             <BaseTable.HeaderCell className="w-px text-dk-gray-700">Slot</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="text-dk-gray-700">
-                                Confirmation Count
-                            </BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Confirmation Count</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
                     <BaseTable.Body>

@@ -89,9 +89,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                         {hasTimestamps && (
                             <>
                                 <BaseTable.HeaderCell className="w-px text-dk-gray-700">Age</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">
-                                    Timestamp
-                                </BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Timestamp</BaseTable.HeaderCell>
                             </>
                         )}
                         <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>

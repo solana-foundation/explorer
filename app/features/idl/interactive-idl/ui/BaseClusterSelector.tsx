@@ -74,16 +74,13 @@ export function BaseClusterSelector({
     );
 }
 
-const cardVariants = cva(
-    'flex w-full flex-col gap-[7px] border border-heavy-metal-950 bg-heavy-metal-800 px-3 py-2',
-    {
-        defaultVariants: {
-            disabled: false,
-        },
-        variants: {
-            disabled: {
-                true: 'opacity-50 cursor-not-allowed',
-            },
+const cardVariants = cva('flex w-full flex-col gap-[7px] border border-heavy-metal-950 bg-heavy-metal-800 px-3 py-2', {
+    defaultVariants: {
+        disabled: false,
+    },
+    variants: {
+        disabled: {
+            true: 'opacity-50 cursor-not-allowed',
         },
     },
-);
+});

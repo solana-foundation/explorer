@@ -12,10 +12,7 @@ interface BaseWarningCardProps {
 }
 
 export function BaseWarningCard({ className, message, description, children, asChild = false }: BaseWarningCardProps) {
-    const baseClassName = cn(
-        'flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4',
-        className,
-    );
+    const baseClassName = cn('flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4', className);
 
     if (asChild) {
         return <Slot className={baseClassName}>{children}</Slot>;

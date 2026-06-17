@@ -709,9 +709,7 @@ export function TokenExtensionRow(
                     {extension.auditorElgamalPubkey && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Auditor Elgamal Pubkey</BaseTable.Cell>
-                            <BaseTable.Cell className="md:text-right">
-                                {extension.auditorElgamalPubkey}
-                            </BaseTable.Cell>
+                            <BaseTable.Cell className="md:text-right">{extension.auditorElgamalPubkey}</BaseTable.Cell>
                         </BaseTable.Row>
                     )}
                     <BaseTable.Row>
@@ -1025,10 +1023,7 @@ export function TokenExtensionRow(
                         <>
                             <BaseTable.Row>
                                 {/*use important here as there is rule from .table-sm that affects all the underline elements*/}
-                                <BaseTable.HeaderCell
-                                    colSpan={2}
-                                    className="mb-2 h-5 !pl-6 font-normal italic"
-                                >
+                                <BaseTable.HeaderCell colSpan={2} className="mb-2 h-5 !pl-6 font-normal italic">
                                     Additional Metadata
                                 </BaseTable.HeaderCell>
                             </BaseTable.Row>

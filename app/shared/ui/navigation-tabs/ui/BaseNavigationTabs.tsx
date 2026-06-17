@@ -185,7 +185,7 @@ export function BaseNavigationTabs({
                     'sticky top-0 z-10',
                     'ml-[calc(50%-50vw)] mr-[calc(50%-50vw)]',
                     'pl-[calc(50vw-50%)] pr-[calc(50vw-50%)]',
-                    '[scrollbar-width:none] overflow-x-auto [&::-webkit-scrollbar]:hidden',
+                    'overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
                     'transition-[box-shadow] duration-200',
                     stuck && 'shadow-[0_6px_16px_rgba(0,0,0,0.45)]',
                     wrapperClassName,

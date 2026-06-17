@@ -45,11 +45,7 @@ function CardWithTabs({ tabs }: { tabs: { id: string; title: string; component: 
                     </TabsList>
                 </div>
                 {tabs.map(tab => (
-                    <TabsContent
-                        key={tab.id}
-                        value={tab.id}
-                        className="flex min-h-0 flex-1 flex-col px-6 py-2"
-                    >
+                    <TabsContent key={tab.id} value={tab.id} className="flex min-h-0 flex-1 flex-col px-6 py-2">
                         {tab.component}
                     </TabsContent>
                 ))}

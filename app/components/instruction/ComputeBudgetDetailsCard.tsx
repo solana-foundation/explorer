@@ -65,9 +65,9 @@ export function ComputeBudgetDetailsCard({
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Requested Compute Units</BaseTable.Cell>
-                            <BaseTable.Cell className="text-right font-mono">{`${new Intl.NumberFormat(
-                                'en-US',
-                            ).format(units)} compute units`}</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">{`${new Intl.NumberFormat('en-US').format(
+                                units,
+                            )} compute units`}</BaseTable.Cell>
                         </BaseTable.Row>
 
                         <BaseTable.Row>
@@ -130,9 +130,9 @@ export function ComputeBudgetDetailsCard({
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Compute Unit Limit</BaseTable.Cell>
-                            <BaseTable.Cell className="text-right font-mono">{`${new Intl.NumberFormat(
-                                'en-US',
-                            ).format(units)} compute units`}</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">{`${new Intl.NumberFormat('en-US').format(
+                                units,
+                            )} compute units`}</BaseTable.Cell>
                         </BaseTable.Row>
                     </InstructionCardComponent>
                 );

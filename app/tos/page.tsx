@@ -597,9 +597,7 @@ export default function TermsOfServicePage() {
                 </section>
 
                 <section className="mb-8">
-                    <h2 className="mb-4 text-2xl font-bold text-white">
-                        MODIFYING AND TERMINATING OUR SERVICE
-                    </h2>
+                    <h2 className="mb-4 text-2xl font-bold text-white">MODIFYING AND TERMINATING OUR SERVICE</h2>
                     <p className="mb-4 text-gray-400">
                         We reserve the right to modify our Service or to suspend or stop providing all or portions of
                         our Service at any time. You also have the right to stop using our Service at any time. We are

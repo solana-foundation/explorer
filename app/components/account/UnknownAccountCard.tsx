@@ -217,10 +217,7 @@ function SearchingAddressIndicator({ searchingCluster }: { searchingCluster: Clu
                 }}
                 className={`${spinnerCls} inline-block align-middle`}
             />
-            <span
-                className="align-middle text-dk-gray-700"
-                style={{ marginRight: '10px', verticalAlign: 'middle' }}
-            >
+            <span className="align-middle text-dk-gray-700" style={{ marginRight: '10px', verticalAlign: 'middle' }}>
                 checking {clusterName(searchingCluster).toLowerCase()}
             </span>
         </>

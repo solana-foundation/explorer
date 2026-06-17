@@ -45,19 +45,14 @@ export function Navbar({ children }: INavbarProps) {
                     <Menu size={24} aria-hidden />
                 </button>
 
-                <div
-                    className="flex hidden h-full grow items-center pl-6 pr-2 xl:block"
-                    style={{ minWidth: 0 }}
-                >
+                <div className="flex hidden h-full grow items-center pl-6 pr-2 xl:block" style={{ minWidth: 0 }}>
                     {children}
                 </div>
 
                 <div
                     className={cn(
                         'ml-auto shrink-0',
-                        navOpened
-                            ? 'flex w-full flex-col'
-                            : 'hidden lg:flex lg:w-auto lg:flex-row lg:items-center',
+                        navOpened ? 'flex w-full flex-col' : 'hidden lg:flex lg:w-auto lg:flex-row lg:items-center',
                     )}
                 >
                     <NavbarList className="mr-auto flex-col lg:flex-row">

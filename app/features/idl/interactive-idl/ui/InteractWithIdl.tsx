@@ -64,11 +64,7 @@ export function InteractWithIdl({
         (txSignature: string) => {
             toast.custom({
                 description: (
-                    <ExplorerLink
-                        path={`/tx/${txSignature}`}
-                        className="shrink-0 text-xs"
-                        label="View Transaction"
-                    />
+                    <ExplorerLink path={`/tx/${txSignature}`} className="shrink-0 text-xs" label="View Transaction" />
                 ),
                 title: 'Transaction is sent',
                 type: 'success',

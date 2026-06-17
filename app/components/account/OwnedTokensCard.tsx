@@ -324,8 +324,7 @@ const DisplayDropdown = ({ display }: DropdownProps) => {
         <Dropdown>
             <DropdownToggle asChild>
                 <Button ui="dashkit" variant="white" size="sm" type="button">
-                    {display === 'detail' ? 'Detailed' : 'Summary'}{' '}
-                    <ChevronDown size={15} className="align-text-top" />
+                    {display === 'detail' ? 'Detailed' : 'Summary'} <ChevronDown size={15} className="align-text-top" />
                 </Button>
             </DropdownToggle>
             <DropdownMenu align="end">

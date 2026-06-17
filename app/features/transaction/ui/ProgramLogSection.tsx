@@ -65,9 +65,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                         <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
                     )
                 ) : (
-                    <BaseCardBody className="text-sm text-muted">
-                        Logs not supported for this transaction
-                    </BaseCardBody>
+                    <BaseCardBody className="text-sm text-muted">Logs not supported for this transaction</BaseCardBody>
                 )}
             </Card>
         </CollapsibleSection>

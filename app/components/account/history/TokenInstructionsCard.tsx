@@ -130,9 +130,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
                         <BaseTable.HeaderCell className="w-px text-dk-gray-700">
                             Transaction Signature
                         </BaseTable.HeaderCell>
-                        {hasTimestamps && (
-                            <BaseTable.HeaderCell className="text-dk-gray-700">Age</BaseTable.HeaderCell>
-                        )}
+                        {hasTimestamps && <BaseTable.HeaderCell className="text-dk-gray-700">Age</BaseTable.HeaderCell>}
                         <BaseTable.HeaderCell className="text-dk-gray-700">Instruction</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="text-dk-gray-700">Program</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>

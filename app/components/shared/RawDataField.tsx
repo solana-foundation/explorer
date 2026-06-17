@@ -76,9 +76,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                 </TabsList>
                 <div className="flex items-center gap-2">
                     {data !== undefined && !loading && (
-                        <span className="whitespace-nowrap text-xs text-outer-space-300">
-                            {data.length} bytes
-                        </span>
+                        <span className="whitespace-nowrap text-xs text-outer-space-300">{data.length} bytes</span>
                     )}
                     <Button
                         variant="outline"
@@ -102,11 +100,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
 
             <TabsContent
                 value="hex"
-                className={cn(
-                    'max-h-80 overflow-y-auto p-1.5 text-start',
-                    loading && 'p-3',
-                    tooLarge && 'px-3 py-2',
-                )}
+                className={cn('max-h-80 overflow-y-auto p-1.5 text-start', loading && 'p-3', tooLarge && 'px-3 py-2')}
             >
                 {loading ? (
                     <span className="spinner-grow spinner-grow-sm" />

@@ -255,12 +255,8 @@ export function TokenTransfersCard({ address }: { address: string }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">
-                            Transaction Signature
-                        </BaseTable.HeaderCell>
-                        {hasTimestamps && (
-                            <BaseTable.HeaderCell className="text-dk-gray-700">Age</BaseTable.HeaderCell>
-                        )}
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
+                        {hasTimestamps && <BaseTable.HeaderCell className="text-dk-gray-700">Age</BaseTable.HeaderCell>}
                         <BaseTable.HeaderCell className="text-dk-gray-700">Source</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="text-dk-gray-700">Destination</BaseTable.HeaderCell>
                         <BaseTable.HeaderCell className="text-dk-gray-700">Amount</BaseTable.HeaderCell>

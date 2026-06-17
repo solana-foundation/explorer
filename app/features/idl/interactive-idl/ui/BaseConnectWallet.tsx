@@ -96,16 +96,12 @@ export function BaseConnectWallet({
                     {!connected ? (
                         <>
                             <div className="text-sm tracking-tight text-neutral-200">Connect wallet</div>
-                            <div className="mt-0.5 text-xs tracking-tight text-neutral-400">
-                                Link your wallet
-                            </div>
+                            <div className="mt-0.5 text-xs tracking-tight text-neutral-400">Link your wallet</div>
                         </>
                     ) : (
                         <>
                             <div className="text-sm tracking-tight text-neutral-200">Connect wallet</div>
-                            <div className="mt-0.5 text-xs tracking-tight text-neutral-400">
-                                Wallet connected
-                            </div>
+                            <div className="mt-0.5 text-xs tracking-tight text-neutral-400">Wallet connected</div>
                         </>
                     )}
                 </div>

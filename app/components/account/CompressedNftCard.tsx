@@ -99,11 +99,7 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
                 <NFTImageContent uri={metadataJson?.image} />
             </div>
             <div className="mb-3 mt-3 min-w-0 flex-1 px-3">
-                {
-                    <h6 className="ml-[3px] uppercase tracking-[0.08em] text-dk-gray-700">
-                        Metaplex Compressed NFT
-                    </h6>
-                }
+                {<h6 className="ml-[3px] uppercase tracking-[0.08em] text-dk-gray-700">Metaplex Compressed NFT</h6>}
                 <div className="flex items-center">
                     <h2 className="mb-0 ml-[3px] items-center overflow-hidden text-ellipsis whitespace-nowrap">
                         {compressedNft.content.metadata.name !== ''

@@ -120,9 +120,7 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
             {!loading && totalAccountSize > 0 && (
                 <CardFooter ui="dashkit">
                     <div className="flex items-baseline justify-end">
-                        <span className="me-2 text-[0.625rem] uppercase text-dk-gray-700">
-                            Total Account Size:
-                        </span>
+                        <span className="me-2 text-[0.625rem] uppercase text-dk-gray-700">Total Account Size:</span>
                         <span className="text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
                     </div>
                 </CardFooter>

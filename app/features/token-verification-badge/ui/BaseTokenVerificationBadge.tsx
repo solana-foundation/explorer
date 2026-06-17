@@ -24,13 +24,7 @@ export function BaseTokenVerificationBadge({ verificationResult, isLoading }: Ba
                     verificationFoundSources={verificationFoundSources}
                 />
             </PopoverTrigger>
-            <PopoverContent
-                align="start"
-                collisionPadding={8}
-                side="bottom"
-                className="w-72 p-4"
-                {...hoverHandlers}
-            >
+            <PopoverContent align="start" collisionPadding={8} side="bottom" className="w-72 p-4" {...hoverHandlers}>
                 <TokenVerificationContent
                     isLoading={isLoading}
                     rateLimitedSources={rateLimitedSources}

@@ -280,9 +280,7 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                         <BaseTable.Row key={keyIndex} className={accountInfo?.isNested ? 'bg-black/20' : ''}>
                             <BaseTable.Cell>
                                 <div className="flex flex-row items-center">
-                                    {accountInfo?.isNested && (
-                                        <CornerDownRight className="mb-[3px] mr-1.5" size={14} />
-                                    )}
+                                    {accountInfo?.isNested && <CornerDownRight className="mb-[3px] mr-1.5" size={14} />}
                                     <div className="mr-1.5 md:inline">
                                         {accountInfo
                                             ? `${camelToTitleCase(accountInfo.name)}`

@@ -225,27 +225,19 @@ function FullContent({
             <div className={cn('hidden lg:flex', fullContentVariants({ align }), className)}>
                 {isCopyable ? (
                     <Copyable text={copyText}>
-                        <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">
-                            {divs}
-                        </pre>
+                        <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
                     </Copyable>
                 ) : (
-                    <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">
-                        {divs}
-                    </pre>
+                    <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
                 )}
             </div>
             <div className={cn('flex lg:hidden', fullContentVariants({ align }), className)}>
                 {isCopyable ? (
                     <Copyable text={copyText}>
-                        <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">
-                            {divs}
-                        </pre>
+                        <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
                     </Copyable>
                 ) : (
-                    <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">
-                        {divs}
-                    </pre>
+                    <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
                 )}
             </div>
         </>

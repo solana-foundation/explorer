@@ -55,10 +55,7 @@ export function Row({ children, className, divider, ...props }: RowProps) {
 function Label({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     return (
         <div
-            className={cn(
-                'flex flex-wrap items-center gap-1 overflow-hidden text-sm text-outer-space-300',
-                className,
-            )}
+            className={cn('flex flex-wrap items-center gap-1 overflow-hidden text-sm text-outer-space-300', className)}
             {...props}
         >
             {children}

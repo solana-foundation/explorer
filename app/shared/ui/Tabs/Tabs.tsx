@@ -5,10 +5,7 @@ import { cn } from '@/app/components/shared/utils';
 
 // Tokens map to Dashkit-dark `.nav-tabs` + `.nav-link` (see app/scss/dashkit/_nav.scss): bottom-highlight tabs
 // with `gray-600` idle / `white` active text and a `primary-on-dark` underline on the active tab.
-const tabsListVariants = cva([
-    'mb-0 flex flex-wrap',
-    'border-0 border-b border-solid border-dk-gray-700-dark',
-]);
+const tabsListVariants = cva(['mb-0 flex flex-wrap', 'border-0 border-b border-solid border-dk-gray-700-dark']);
 
 const tabsTriggerVariants = cva(
     [

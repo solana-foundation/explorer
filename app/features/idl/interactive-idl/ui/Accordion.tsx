@@ -46,9 +46,7 @@ function AccordionTrigger({ className, children, ...props }: React.ComponentProp
                 {children}
                 <span className="flex items-center gap-2 text-xs text-emerald-600">
                     {isOpen ? 'Collapse' : 'Expand'}
-                    <ChevronDown
-                        className={cn('size-4 shrink-0 transition-transform', isOpen ? 'rotate-180' : '')}
-                    />
+                    <ChevronDown className={cn('size-4 shrink-0 transition-transform', isOpen ? 'rotate-180' : '')} />
                 </span>
             </AccordionPrimitive.Trigger>
         </AccordionPrimitive.Header>

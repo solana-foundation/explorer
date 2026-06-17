@@ -173,11 +173,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                 </small>
                             )}
                             {saveError && (
-                                <Alert
-                                    variant="danger"
-                                    className="mb-0 mt-1.5 py-1.5"
-                                    data-testid="save-cluster-error"
-                                >
+                                <Alert variant="danger" className="mb-0 mt-1.5 py-1.5" data-testid="save-cluster-error">
                                     {saveError.message}
                                 </Alert>
                             )}
@@ -246,10 +242,7 @@ function SavedClusterItem({
 
     return (
         <div className="relative mb-3 w-full" data-testid={`saved-cluster-${cluster.name}`}>
-            <Link
-                className={cn(clusterButtonVariants({ active: isActive, status }), 'text-center')}
-                href={clusterUrl}
-            >
+            <Link className={cn(clusterButtonVariants({ active: isActive, status }), 'text-center')} href={clusterUrl}>
                 {cluster.name}
             </Link>
             <Button

@@ -27,9 +27,7 @@ export function AddSpotMarketDetailsCard(props: {
             {spotMarketFromIndex(ix, info.marketIndex) !== 'UNKNOWN' && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Market</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        {spotMarketFromIndex(ix, info.marketIndex)}
-                    </BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{spotMarketFromIndex(ix, info.marketIndex)}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
             <BaseTable.Row>

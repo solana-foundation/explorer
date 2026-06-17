@@ -232,9 +232,7 @@ function renderItemContentDefault<Item extends AutocompleteItem = AutocompleteIt
     return (
         <div className="flex w-full items-center justify-between px-4 py-1.5 text-xs">
             {renderItemLabel(option)}
-            <span className="font-mono text-xs text-white md:ml-2 md:text-heavy-metal-400">
-                {option.value}
-            </span>
+            <span className="font-mono text-xs text-white md:ml-2 md:text-heavy-metal-400">{option.value}</span>
         </div>
     );
 }
