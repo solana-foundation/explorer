@@ -23,7 +23,7 @@ export function ProgramLogs({
         <div className="e-overflow-hidden e-rounded-lg">
             <SolarizedJsonViewer
                 src={logs}
-                name={null}
+                name={false}
                 enableClipboard={true}
                 collapsed={false}
                 displayObjectSize={false}

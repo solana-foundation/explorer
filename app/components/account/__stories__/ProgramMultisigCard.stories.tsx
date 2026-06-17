@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Decorator } from '@storybook/react';
+import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { SWRConfig, unstable_serialize } from 'swr';
 
 import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
