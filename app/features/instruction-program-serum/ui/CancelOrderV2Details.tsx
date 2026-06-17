@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { Prune, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { CancelOrderV2 } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function PruneDetailsCard(props: SerumIxDetailsProps<Prune>) {
+export function CancelOrderV2DetailsCard(props: SerumIxDetailsProps<CancelOrderV2>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,7 +15,7 @@ export function PruneDetailsCard(props: SerumIxDetailsProps<Prune>) {
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Prune`}
+            title={`${programName} Program: Cancel Order v2`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
@@ -47,13 +48,6 @@ export function PruneDetailsCard(props: SerumIxDetailsProps<Prune>) {
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Prune Authority</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.pruneAuthority} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
                 <BaseTable.Cell>Open Orders</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.openOrders} alignRight link />
@@ -75,8 +69,13 @@ export function PruneDetailsCard(props: SerumIxDetailsProps<Prune>) {
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Iteration Limit</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.limit}</BaseTable.Cell>
+                <BaseTable.Cell>Side</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.side}</BaseTable.Cell>
+            </BaseTable.Row>
+
+            <BaseTable.Row>
+                <BaseTable.Cell>Order Id</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.orderId.toString(10)}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

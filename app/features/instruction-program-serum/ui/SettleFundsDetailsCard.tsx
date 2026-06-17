@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { NewOrder, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { SettleFunds } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function NewOrderDetailsCard(props: SerumIxDetailsProps<NewOrder>) {
+export function SettleFundsDetailsCard(props: SerumIxDetailsProps<SettleFunds>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,7 +15,7 @@ export function NewOrderDetailsCard(props: SerumIxDetailsProps<NewOrder>) {
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: New Order`}
+            title={`${programName} Program: Settle Funds`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
@@ -40,20 +41,6 @@ export function NewOrderDetailsCard(props: SerumIxDetailsProps<NewOrder>) {
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Request Queue</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.requestQueue} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Payer</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.payer} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
                 <BaseTable.Cell>Open Orders Owner</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
@@ -75,29 +62,34 @@ export function NewOrderDetailsCard(props: SerumIxDetailsProps<NewOrder>) {
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Side</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.side}</BaseTable.Cell>
+                <BaseTable.Cell>Base Wallet</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
+                    <Address pubkey={info.accounts.baseWallet} alignRight link />
+                </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Order Type</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.orderType}</BaseTable.Cell>
+                <BaseTable.Cell>Quote Wallet</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
+                    <Address pubkey={info.accounts.quoteWallet} alignRight link />
+                </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Limit Price</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.limitPrice.toString(10)}</BaseTable.Cell>
+                <BaseTable.Cell>Vault Signer</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
+                    <Address pubkey={info.accounts.vaultSigner} alignRight link />
+                </BaseTable.Cell>
             </BaseTable.Row>
 
-            <BaseTable.Row>
-                <BaseTable.Cell>Max Quantity</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.maxQuantity.toString(10)}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Client Id</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.clientId.toString(10)}</BaseTable.Cell>
-            </BaseTable.Row>
+            {info.accounts.referrerQuoteWallet && (
+                <BaseTable.Row>
+                    <BaseTable.Cell>Referrer Quote Wallet</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">
+                        <Address pubkey={info.accounts.referrerQuoteWallet} alignRight link />
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+            )}
         </InstructionCard>
     );
 }

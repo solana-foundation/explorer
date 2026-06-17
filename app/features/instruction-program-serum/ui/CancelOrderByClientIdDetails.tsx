@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { CloseOpenOrders, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { CancelOrderByClientId } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function CloseOpenOrdersDetailsCard(props: SerumIxDetailsProps<CloseOpenOrders>) {
+export function CancelOrderByClientIdDetailsCard(props: SerumIxDetailsProps<CancelOrderByClientId>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,14 +15,14 @@ export function CloseOpenOrdersDetailsCard(props: SerumIxDetailsProps<CloseOpenO
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Close Open Orders`}
+            title={`${programName} Program: Cancel Order By Client Id`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
             <BaseTable.Row>
-                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell>Market</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.programId} alignRight link />
+                    <Address pubkey={info.accounts.market} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
@@ -33,6 +34,13 @@ export function CloseOpenOrdersDetailsCard(props: SerumIxDetailsProps<CloseOpenO
             </BaseTable.Row>
 
             <BaseTable.Row>
+                <BaseTable.Cell>Request Queue</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
+                    <Address pubkey={info.accounts.requestQueue} alignRight link />
+                </BaseTable.Cell>
+            </BaseTable.Row>
+
+            <BaseTable.Row>
                 <BaseTable.Cell>Open Orders Owner</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
@@ -40,17 +48,8 @@ export function CloseOpenOrdersDetailsCard(props: SerumIxDetailsProps<CloseOpenO
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Rent Receiver</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.rentReceiver} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Market</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.market} alignRight link />
-                </BaseTable.Cell>
+                <BaseTable.Cell>Client Id</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.clientId.toString(10)}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

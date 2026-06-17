@@ -3,8 +3,9 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { DisableMarket, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { DisableMarket } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
 export function DisableMarketDetailsCard(props: SerumIxDetailsProps<DisableMarket>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;

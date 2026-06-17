@@ -1,19 +1,8 @@
-import { decodeInstruction, MARKETS } from '@project-serum/serum';
-import { AccountMeta, PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import { BigIntFromString } from '@validators/number';
+import { decodeInstruction } from '@project-serum/serum';
+import { AccountMeta, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { create, enums, Infer, number, type } from 'superstruct';
 
-import { readUint32LE } from '@/app/shared/lib/bytes';
-
-export const OPEN_BOOK_PROGRAM_ID = 'srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX';
-
-const SERUM_PROGRAM_IDS = [
-    '4ckmDgGdxQoPDLUkDT3vHgSAkzA3QRdNq5ywwY4sUSJn',
-    '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin',
-    OPEN_BOOK_PROGRAM_ID,
-];
-
-export const SERUM_DECODED_MAX = 6;
+import { BigIntFromString } from './superstructHelpers';
 
 export type Side = Infer<typeof Side>;
 export const Side = enums(['buy', 'sell']);
@@ -527,66 +516,3 @@ export function decodeConsumeEventsPermissioned(ix: TransactionInstruction): Con
         programId: ix.programId,
     };
 }
-
-export function isSerumInstruction(instruction: TransactionInstruction) {
-    return (
-        SERUM_PROGRAM_IDS.includes(instruction.programId.toBase58()) ||
-        MARKETS.some(market => market.programId && market.programId.equals(instruction.programId))
-    );
-}
-
-export function parseSerumInstructionKey(instruction: TransactionInstruction): string {
-    const decoded = decodeInstruction(instruction.data);
-    const keys = Object.keys(decoded);
-
-    if (keys.length < 1) {
-        throw new Error('Serum instruction key not decoded');
-    }
-
-    return keys[0];
-}
-
-const SERUM_CODE_LOOKUP: { [key: number]: string } = {
-    0: 'Initialize Market',
-    1: 'New Order',
-    10: 'New Order v3',
-    11: 'Cancel Order v2',
-    12: 'Cancel Order by Client Id v2',
-    13: 'Send Take',
-    14: 'Close Open Orders',
-    15: 'Init Open Orders',
-    16: 'Prune',
-    17: 'Consume Events Permissioned',
-    2: 'Match Orders',
-    3: 'Consume Events',
-    4: 'Cancel Order',
-    5: 'Settle Funds',
-    6: 'Cancel Order by Client Id',
-    7: 'Disable Market',
-    8: 'Sweep Fees',
-    9: 'New Order v2',
-};
-
-export function parseSerumInstructionCode(instruction: TransactionInstruction) {
-    return readUint32LE(instruction.data.slice(1, 5), 0);
-}
-
-export function parseSerumInstructionTitle(instruction: TransactionInstruction): string {
-    const code = parseSerumInstructionCode(instruction);
-
-    if (!(code in SERUM_CODE_LOOKUP)) {
-        throw new Error(`Unrecognized Serum instruction code: ${code}`);
-    }
-
-    return SERUM_CODE_LOOKUP[code];
-}
-
-export type SerumIxDetailsProps<T> = {
-    ix: TransactionInstruction;
-    index: number;
-    result: SignatureResult;
-    info: T;
-    programName: string;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-};

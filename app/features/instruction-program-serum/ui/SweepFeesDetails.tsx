@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { CancelOrderV2, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { SweepFees } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function CancelOrderV2DetailsCard(props: SerumIxDetailsProps<CancelOrderV2>) {
+export function SweepFeesDetailsCard(props: SerumIxDetailsProps<SweepFees>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,7 +15,7 @@ export function CancelOrderV2DetailsCard(props: SerumIxDetailsProps<CancelOrderV
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Cancel Order v2`}
+            title={`${programName} Program: Sweep Fees`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
@@ -33,48 +34,31 @@ export function CancelOrderV2DetailsCard(props: SerumIxDetailsProps<CancelOrderV
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Bids</BaseTable.Cell>
+                <BaseTable.Cell>Quote Vault</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.bids} alignRight link />
+                    <Address pubkey={info.accounts.quoteVault} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Asks</BaseTable.Cell>
+                <BaseTable.Cell>Fee Sweeping Authority</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.asks} alignRight link />
+                    <Address pubkey={info.accounts.feeSweepingAuthority} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Open Orders</BaseTable.Cell>
+                <BaseTable.Cell>Fee Receiver</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.openOrders} alignRight link />
+                    <Address pubkey={info.accounts.quoteFeeReceiver} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Open Orders Owner</BaseTable.Cell>
+                <BaseTable.Cell>Vault Signer</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
+                    <Address pubkey={info.accounts.vaultSigner} alignRight link />
                 </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Event Queue</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.eventQueue} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Side</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.side}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Order Id</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.orderId.toString(10)}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

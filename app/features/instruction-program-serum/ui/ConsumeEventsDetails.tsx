@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { MatchOrders, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { ConsumeEvents } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function MatchOrdersDetailsCard(props: SerumIxDetailsProps<MatchOrders>) {
+export function ConsumeEventsDetailsCard(props: SerumIxDetailsProps<ConsumeEvents>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,7 +15,7 @@ export function MatchOrdersDetailsCard(props: SerumIxDetailsProps<MatchOrders>) 
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Match Orders`}
+            title={`${programName} Program: Consume Events`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
@@ -33,13 +34,6 @@ export function MatchOrdersDetailsCard(props: SerumIxDetailsProps<MatchOrders>) 
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Request Queue</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.requestQueue} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
                 <BaseTable.Cell>Event Queue</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.eventQueue} alignRight link />
@@ -47,16 +41,11 @@ export function MatchOrdersDetailsCard(props: SerumIxDetailsProps<MatchOrders>) 
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Bids</BaseTable.Cell>
+                <BaseTable.Cell>Open Orders Accounts</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.bids} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Asks</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.asks} alignRight link />
+                    {info.accounts.openOrders.map((account, index) => {
+                        return <Address pubkey={account} key={index} alignRight link />;
+                    })}
                 </BaseTable.Cell>
             </BaseTable.Row>
 

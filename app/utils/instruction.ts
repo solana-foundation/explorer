@@ -1,4 +1,4 @@
-import { isSerumInstruction, parseSerumInstructionTitle } from '@components/instruction/serum/types';
+import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
 import { IX_TITLES, TokenInstructionType } from '@components/instruction/token/types';
 import {
     isTokenLendingInstruction,

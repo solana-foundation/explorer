@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { SerumIxDetailsProps, SweepFees } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { MatchOrders } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function SweepFeesDetailsCard(props: SerumIxDetailsProps<SweepFees>) {
+export function MatchOrdersDetailsCard(props: SerumIxDetailsProps<MatchOrders>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,7 +15,7 @@ export function SweepFeesDetailsCard(props: SerumIxDetailsProps<SweepFees>) {
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Sweep Fees`}
+            title={`${programName} Program: Match Orders`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
@@ -33,31 +34,36 @@ export function SweepFeesDetailsCard(props: SerumIxDetailsProps<SweepFees>) {
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Quote Vault</BaseTable.Cell>
+                <BaseTable.Cell>Request Queue</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.quoteVault} alignRight link />
+                    <Address pubkey={info.accounts.requestQueue} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Fee Sweeping Authority</BaseTable.Cell>
+                <BaseTable.Cell>Event Queue</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.feeSweepingAuthority} alignRight link />
+                    <Address pubkey={info.accounts.eventQueue} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Fee Receiver</BaseTable.Cell>
+                <BaseTable.Cell>Bids</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.quoteFeeReceiver} alignRight link />
+                    <Address pubkey={info.accounts.bids} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Vault Signer</BaseTable.Cell>
+                <BaseTable.Cell>Asks</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.vaultSigner} alignRight link />
+                    <Address pubkey={info.accounts.asks} alignRight link />
                 </BaseTable.Cell>
+            </BaseTable.Row>
+
+            <BaseTable.Row>
+                <BaseTable.Cell>Limit</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.limit}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

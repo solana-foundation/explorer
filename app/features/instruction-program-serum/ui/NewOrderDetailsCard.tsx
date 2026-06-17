@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { NewOrderV3, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { NewOrder } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function NewOrderV3DetailsCard(props: SerumIxDetailsProps<NewOrderV3>) {
+export function NewOrderDetailsCard(props: SerumIxDetailsProps<NewOrder>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,7 +15,7 @@ export function NewOrderV3DetailsCard(props: SerumIxDetailsProps<NewOrderV3>) {
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: New Order v3`}
+            title={`${programName} Program: New Order`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
@@ -47,27 +48,6 @@ export function NewOrderV3DetailsCard(props: SerumIxDetailsProps<NewOrderV3>) {
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Event Queue</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.eventQueue} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Bids</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.bids} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Asks</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.asks} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
                 <BaseTable.Cell>Payer</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.payer} alignRight link />
@@ -95,18 +75,9 @@ export function NewOrderV3DetailsCard(props: SerumIxDetailsProps<NewOrderV3>) {
                 </BaseTable.Cell>
             </BaseTable.Row>
 
-            {info.accounts.feeDiscountPubkey && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Fee Discount</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={info.accounts.feeDiscountPubkey} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
             <BaseTable.Row>
                 <BaseTable.Cell>Side</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.side.toUpperCase()}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.side}</BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
@@ -120,23 +91,13 @@ export function NewOrderV3DetailsCard(props: SerumIxDetailsProps<NewOrderV3>) {
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Max Base Quantity</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.maxBaseQuantity.toString(10)}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Max Quote Quantity</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.maxQuoteQuantity.toString(10)}</BaseTable.Cell>
+                <BaseTable.Cell>Max Quantity</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.maxQuantity.toString(10)}</BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Client Id</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">{info.data.clientId.toString(10)}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Match Iteration Limit</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.limit}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

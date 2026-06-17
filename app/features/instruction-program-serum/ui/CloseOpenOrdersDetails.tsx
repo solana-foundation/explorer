@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { InitOpenOrders, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { CloseOpenOrders } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function InitOpenOrdersDetailsCard(props: SerumIxDetailsProps<InitOpenOrders>) {
+export function CloseOpenOrdersDetailsCard(props: SerumIxDetailsProps<CloseOpenOrders>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,7 +15,7 @@ export function InitOpenOrdersDetailsCard(props: SerumIxDetailsProps<InitOpenOrd
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Init Open Orders`}
+            title={`${programName} Program: Close Open Orders`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
@@ -40,20 +41,18 @@ export function InitOpenOrdersDetailsCard(props: SerumIxDetailsProps<InitOpenOrd
             </BaseTable.Row>
 
             <BaseTable.Row>
+                <BaseTable.Cell>Rent Receiver</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
+                    <Address pubkey={info.accounts.rentReceiver} alignRight link />
+                </BaseTable.Cell>
+            </BaseTable.Row>
+
+            <BaseTable.Row>
                 <BaseTable.Cell>Market</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
-
-            {info.accounts.openOrdersMarketAuthority && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Open Orders Market Authority</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={info.accounts.openOrdersMarketAuthority} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
         </InstructionCard>
     );
 }

@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { ConsumeEvents, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { ConsumeEventsPermissioned } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function ConsumeEventsDetailsCard(props: SerumIxDetailsProps<ConsumeEvents>) {
+export function ConsumeEventsPermissionedDetailsCard(props: SerumIxDetailsProps<ConsumeEventsPermissioned>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,7 +15,7 @@ export function ConsumeEventsDetailsCard(props: SerumIxDetailsProps<ConsumeEvent
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Consume Events`}
+            title={`${programName} Program: Consume Events Permissioned`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
@@ -36,6 +37,13 @@ export function ConsumeEventsDetailsCard(props: SerumIxDetailsProps<ConsumeEvent
                 <BaseTable.Cell>Event Queue</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.eventQueue} alignRight link />
+                </BaseTable.Cell>
+            </BaseTable.Row>
+
+            <BaseTable.Row>
+                <BaseTable.Cell>Crank Authority</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
+                    <Address pubkey={info.accounts.crankAuthority} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 

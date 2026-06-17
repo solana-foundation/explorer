@@ -3,8 +3,9 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { InitializeMarket, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { InitializeMarket } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
 export function InitializeMarketDetailsCard(props: SerumIxDetailsProps<InitializeMarket>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;

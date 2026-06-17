@@ -6,7 +6,7 @@ import { InstructionDetails } from '@components/common/InstructionDetails';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
-import { isSerumInstruction, parseSerumInstructionTitle } from '@components/instruction/serum/types';
+import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
 import {
     isTokenLendingInstruction,
     parseTokenLendingInstructionTitle,

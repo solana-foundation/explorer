@@ -3,8 +3,9 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { CancelOrderByClientIdV2, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { CancelOrderByClientIdV2 } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
 export function CancelOrderByClientIdV2DetailsCard(props: SerumIxDetailsProps<CancelOrderByClientIdV2>) {
     const { ix, index, result, info, innerCards, childIndex } = props;

@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { ConsumeEventsPermissioned, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { CancelOrder } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function ConsumeEventsPermissionedDetailsCard(props: SerumIxDetailsProps<ConsumeEventsPermissioned>) {
+export function CancelOrderDetailsCard(props: SerumIxDetailsProps<CancelOrder>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,7 +15,7 @@ export function ConsumeEventsPermissionedDetailsCard(props: SerumIxDetailsProps<
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Consume Events Permissioned`}
+            title={`${programName} Program: Cancel Order`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
@@ -33,31 +34,39 @@ export function ConsumeEventsPermissionedDetailsCard(props: SerumIxDetailsProps<
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Event Queue</BaseTable.Cell>
+                <BaseTable.Cell>Open Orders</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.eventQueue} alignRight link />
+                    <Address pubkey={info.accounts.openOrders} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Crank Authority</BaseTable.Cell>
+                <BaseTable.Cell>Open Orders Owner</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.crankAuthority} alignRight link />
+                    <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Open Orders Accounts</BaseTable.Cell>
+                <BaseTable.Cell>Request Queue</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    {info.accounts.openOrders.map((account, index) => {
-                        return <Address pubkey={account} key={index} alignRight link />;
-                    })}
+                    <Address pubkey={info.accounts.requestQueue} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Limit</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.limit}</BaseTable.Cell>
+                <BaseTable.Cell>Side</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.side}</BaseTable.Cell>
+            </BaseTable.Row>
+
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders Slot</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.openOrdersSlot}</BaseTable.Cell>
+            </BaseTable.Row>
+
+            <BaseTable.Row>
+                <BaseTable.Cell>Order Id</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.orderId.toString(10)}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

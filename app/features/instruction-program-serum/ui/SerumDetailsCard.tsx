@@ -1,26 +1,4 @@
-import { useCluster } from '@providers/cluster';
-import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import React from 'react';
-
-import { Logger } from '@/app/shared/lib/logger';
-
-import { InstructionCard } from './InstructionCard';
-import { CancelOrderByClientIdDetailsCard } from './serum/CancelOrderByClientIdDetails';
-import { CancelOrderByClientIdV2DetailsCard } from './serum/CancelOrderByClientIdV2Details';
-import { CancelOrderDetailsCard } from './serum/CancelOrderDetails';
-import { CancelOrderV2DetailsCard } from './serum/CancelOrderV2Details';
-import { CloseOpenOrdersDetailsCard } from './serum/CloseOpenOrdersDetails';
-import { ConsumeEventsDetailsCard } from './serum/ConsumeEventsDetails';
-import { ConsumeEventsPermissionedDetailsCard } from './serum/ConsumeEventsPermissionedDetails';
-import { DisableMarketDetailsCard } from './serum/DisableMarketDetails';
-import { InitializeMarketDetailsCard } from './serum/InitializeMarketDetailsCard';
-import { InitOpenOrdersDetailsCard } from './serum/InitOpenOrdersDetails';
-import { MatchOrdersDetailsCard } from './serum/MatchOrdersDetailsCard';
-import { NewOrderDetailsCard } from './serum/NewOrderDetailsCard';
-import { NewOrderV3DetailsCard } from './serum/NewOrderV3DetailsCard';
-import { PruneDetailsCard } from './serum/PruneDetails';
-import { SettleFundsDetailsCard } from './serum/SettleFundsDetailsCard';
-import { SweepFeesDetailsCard } from './serum/SweepFeesDetails';
+import { InstructionCard } from '@components/instruction/InstructionCard';
 import {
     decodeCancelOrder,
     decodeCancelOrderByClientId,
@@ -38,10 +16,32 @@ import {
     decodePrune,
     decodeSettleFunds,
     decodeSweepFees,
-    OPEN_BOOK_PROGRAM_ID,
+    isDeprecatedSerumProgram,
     parseSerumInstructionKey,
     parseSerumInstructionTitle,
-} from './serum/types';
+} from '@explorer/decoder-serum';
+import { useCluster } from '@providers/cluster';
+import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import React from 'react';
+
+import { Logger } from '@/app/shared/lib/logger';
+
+import { CancelOrderByClientIdDetailsCard } from './CancelOrderByClientIdDetails';
+import { CancelOrderByClientIdV2DetailsCard } from './CancelOrderByClientIdV2Details';
+import { CancelOrderDetailsCard } from './CancelOrderDetails';
+import { CancelOrderV2DetailsCard } from './CancelOrderV2Details';
+import { CloseOpenOrdersDetailsCard } from './CloseOpenOrdersDetails';
+import { ConsumeEventsDetailsCard } from './ConsumeEventsDetails';
+import { ConsumeEventsPermissionedDetailsCard } from './ConsumeEventsPermissionedDetails';
+import { DisableMarketDetailsCard } from './DisableMarketDetails';
+import { InitializeMarketDetailsCard } from './InitializeMarketDetailsCard';
+import { InitOpenOrdersDetailsCard } from './InitOpenOrdersDetails';
+import { MatchOrdersDetailsCard } from './MatchOrdersDetailsCard';
+import { NewOrderDetailsCard } from './NewOrderDetailsCard';
+import { NewOrderV3DetailsCard } from './NewOrderV3DetailsCard';
+import { PruneDetailsCard } from './PruneDetails';
+import { SettleFundsDetailsCard } from './SettleFundsDetailsCard';
+import { SweepFeesDetailsCard } from './SweepFeesDetails';
 
 export function SerumDetailsCard(initialProps: {
     ix: TransactionInstruction;
@@ -54,7 +54,9 @@ export function SerumDetailsCard(initialProps: {
     const { ix, index, result, signature, innerCards, childIndex } = initialProps;
 
     const props = React.useMemo(() => {
-        const programName = initialProps.ix.programId.toBase58() === OPEN_BOOK_PROGRAM_ID ? 'OpenBook' : 'Serum';
+        const programName = isDeprecatedSerumProgram(initialProps.ix.programId.toBase58())
+            ? 'Serum (deprecated)'
+            : 'OpenBook';
         return { ...initialProps, programName };
     }, [initialProps]);
 

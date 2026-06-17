@@ -3,10 +3,11 @@ import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '../InstructionCard';
-import { CancelOrder, SerumIxDetailsProps } from './types';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { InitOpenOrders } from '@explorer/decoder-serum';
+import { SerumIxDetailsProps } from './types';
 
-export function CancelOrderDetailsCard(props: SerumIxDetailsProps<CancelOrder>) {
+export function InitOpenOrdersDetailsCard(props: SerumIxDetailsProps<InitOpenOrders>) {
     const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
@@ -14,7 +15,7 @@ export function CancelOrderDetailsCard(props: SerumIxDetailsProps<CancelOrder>) 
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Cancel Order`}
+            title={`${programName} Program: Init Open Orders`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
@@ -22,13 +23,6 @@ export function CancelOrderDetailsCard(props: SerumIxDetailsProps<CancelOrder>) 
                 <BaseTable.Cell>Program</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
                     <Address pubkey={info.programId} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Market</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.market} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
@@ -47,26 +41,20 @@ export function CancelOrderDetailsCard(props: SerumIxDetailsProps<CancelOrder>) 
             </BaseTable.Row>
 
             <BaseTable.Row>
-                <BaseTable.Cell>Request Queue</BaseTable.Cell>
+                <BaseTable.Cell>Market</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.accounts.requestQueue} alignRight link />
+                    <Address pubkey={info.accounts.market} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
-            <BaseTable.Row>
-                <BaseTable.Cell>Side</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.side}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Open Orders Slot</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.openOrdersSlot}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Order Id</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{info.data.orderId.toString(10)}</BaseTable.Cell>
-            </BaseTable.Row>
+            {info.accounts.openOrdersMarketAuthority && (
+                <BaseTable.Row>
+                    <BaseTable.Cell>Open Orders Market Authority</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">
+                        <Address pubkey={info.accounts.openOrdersMarketAuthority} alignRight link />
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+            )}
         </InstructionCard>
     );
 }
