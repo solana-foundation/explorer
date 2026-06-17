@@ -1,9 +1,14 @@
 'use client';
 
 // TODO: encodeTransactionData is generic byte encoding — move to a shared entity (e.g. @shared/bytes)
+import { Button } from '@components/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@components/shared/ui/dropdown-menu';
 import { type ByteArray, encodeTransactionData as encodeBytes, type EncodingFormat } from '@entities/transaction-data';
-import { Button } from '@shared/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@shared/ui/dropdown-menu';
 import React from 'react';
 import { Download } from 'react-feather';
 
@@ -15,7 +20,7 @@ const DEFAULT_ENCODINGS: EncodingFormat[] = ['hex', 'base58', 'base64'];
 const DefaultTrigger = React.forwardRef<HTMLButtonElement, { disabled: boolean }>(({ disabled, ...props }, ref) => (
     <Button ref={ref} variant="outline" size="sm" aria-label="Download" disabled={disabled} {...props}>
         <Download size={12} />
-        <span className="e-hidden md:e-inline">Download</span>
+        <span className="hidden md:inline">Download</span>
     </Button>
 ));
 DefaultTrigger.displayName = 'DefaultTrigger';

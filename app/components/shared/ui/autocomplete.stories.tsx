@@ -16,13 +16,13 @@ const meta: Meta<typeof Autocomplete> = {
     component: Autocomplete,
     decorators: [
         Story => (
-            <div className="e-w-96">
+            <div className="w-96">
                 <Story />
             </div>
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Autocomplete',
+    title: 'Components/Shared/Autocomplete',
 };
 
 export default meta;
@@ -146,9 +146,9 @@ export const CustomLabel: Story = {
 
             const renderItemLabel = (option: AutocompleteItem) => {
                 return (
-                    <span className="e-flex e-hidden e-items-center e-gap-2 md:e-flex">
+                    <span className="flex hidden items-center gap-2 md:flex">
                         {option.label}
-                        {option.value === 'other' && <Star className="e-h-3 e-w-3 e-text-heavy-metal-100" />}
+                        {option.value === 'other' && <Star className="h-3 w-3 text-heavy-metal-100" />}
                     </span>
                 );
             };
@@ -184,15 +184,15 @@ export const CustomContent: Story = {
 
             const getIcon = (option: AutocompleteItem) => {
                 if (option.group === 'Program') {
-                    return <Code className="e-h-4 e-w-4 e-text-blue-400" />;
+                    return <Code className="h-4 w-4 text-blue-400" />;
                 }
                 if (option.group === 'Sysvar') {
-                    return <Database className="e-h-4 e-w-4 e-text-purple-400" />;
+                    return <Database className="h-4 w-4 text-purple-400" />;
                 }
                 if (option.value === 'other') {
-                    return <Star className="e-h-4 e-w-4 e-text-yellow-400" />;
+                    return <Star className="h-4 w-4 text-yellow-400" />;
                 }
-                return <Settings className="e-h-4 e-w-4 e-text-green-400" />;
+                return <Settings className="h-4 w-4 text-green-400" />;
             };
 
             const renderItemContent = (option: AutocompleteItem) => {
@@ -201,28 +201,28 @@ export const CustomContent: Story = {
                 const isFeatured = option.value === 'other' || option.keywords?.includes('wallet');
 
                 return (
-                    <div className="e-flex e-w-full e-items-center e-gap-3 e-px-4 e-py-2">
-                        <div className="e-flex e-shrink-0 e-items-center e-justify-center">{getIcon(option)}</div>
-                        <div className="e-flex e-min-w-0 e-flex-1 e-flex-col e-gap-1">
-                            <div className="e-flex e-items-center e-gap-2">
-                                <span className="e-text-xs e-font-medium e-text-white">{option.label}</span>
+                    <div className="flex w-full items-center gap-3 px-4 py-2">
+                        <div className="flex shrink-0 items-center justify-center">{getIcon(option)}</div>
+                        <div className="flex min-w-0 flex-1 flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-white">{option.label}</span>
                                 {isFeatured && (
-                                    <span className="e-rounded e-bg-yellow-500/20 e-px-1.5 e-py-0.5 e-text-[10px] e-font-semibold e-text-yellow-400">
+                                    <span className="rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-yellow-400">
                                         Featured
                                     </span>
                                 )}
                             </div>
-                            <div className="e-flex e-items-center e-gap-2">
-                                <span className="e-font-mono e-text-[10px] e-text-heavy-metal-400">
+                            <div className="flex items-center gap-2">
+                                <span className="font-mono text-[10px] text-heavy-metal-400">
                                     {option.value.slice(0, 20)}...
                                 </span>
                                 {isProgram && (
-                                    <span className="e-rounded e-bg-blue-500/20 e-px-1.5 e-py-0.5 e-text-[10px] e-font-medium e-text-blue-400">
+                                    <span className="rounded bg-blue-500/20 px-1.5 py-0.5 text-[10px] font-medium text-blue-400">
                                         Program
                                     </span>
                                 )}
                                 {isSysvar && (
-                                    <span className="e-rounded e-bg-purple-500/20 e-px-1.5 e-py-0.5 e-text-[10px] e-font-medium e-text-purple-400">
+                                    <span className="rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] font-medium text-purple-400">
                                         Sysvar
                                     </span>
                                 )}
@@ -269,20 +269,20 @@ function Layout({
     inputId: string;
 }) {
     return (
-        <div className="e-space-y-4">
-            <div className="e-text-sm e-text-neutral-400">
-                <p className="e-mb-2">
-                    Value: <span className="e-font-mono e-text-white">{value || '(empty)'}</span>
+        <div className="space-y-4">
+            <div className="text-sm text-neutral-400">
+                <p className="mb-2">
+                    Value: <span className="font-mono text-white">{value || '(empty)'}</span>
                 </p>
             </div>
-            <div className="e-flex e-flex-col e-gap-2">
-                <label htmlFor={inputId} className="e-text-sm e-font-medium e-text-white">
+            <div className="flex flex-col gap-2">
+                <label htmlFor={inputId} className="text-sm font-medium text-white">
                     {label}
                 </label>
                 {children}
             </div>
-            <div className="e-text-sm e-text-neutral-400">
-                <p className="e-mb-2">{description}</p>
+            <div className="text-sm text-neutral-400">
+                <p className="mb-2">{description}</p>
             </div>
         </div>
     );

@@ -17,13 +17,13 @@ export function PopoverButton({ icon, label, children, className, disabled, load
         <Popover>
             <PopoverTrigger asChild>
                 <Button variant="compact" size="compact" className={className} disabled={disabled || loading}>
-                    {loading ? <span className="e-spinner-grow e-spinner-grow-xs e-mx-0.5" aria-hidden="true" /> : icon}
+                    {loading ? <span className="spinner-grow spinner-grow-xs mx-0.5" aria-hidden="true" /> : icon}
                     {label}
                     <ChevronDown size={12} aria-hidden="true" />
                 </Button>
             </PopoverTrigger>
 
-            <PopoverContent align="start" className="e-rounded-sm e-shadow-[0px_4px_20px_0px_rgba(0,0,0,0.5)]">
+            <PopoverContent align="start" className="rounded-sm shadow-[0px_4px_20px_0px_rgba(0,0,0,0.5)]">
                 {children}
             </PopoverContent>
         </Popover>

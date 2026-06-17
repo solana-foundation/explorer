@@ -30,12 +30,12 @@ export function StickyHeader({ children, className }: Props) {
             <div ref={sentinelRef} aria-hidden="true" />
             <div
                 className={cn(
-                    'e-sticky e-top-0 e-z-10 e-mb-8 e-border-0 e-border-b e-border-solid e-border-neutral-800 e-bg-heavy-metal-900',
+                    'sticky top-0 z-10 mb-8 border-0 border-b border-solid border-neutral-800 bg-heavy-metal-900',
                     className,
                 )}
                 style={isStuck ? { marginLeft: 'calc(50% - 50vw)', width: '100vw' } : undefined}
             >
-                <div className={cn(!isStuck && '-e-mx-3')}>{children}</div>
+                <div className={cn(!isStuck && '-mx-3')}>{children}</div>
             </div>
         </>
     );

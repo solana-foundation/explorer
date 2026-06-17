@@ -1,6 +1,6 @@
 import { SolBalance } from '@components/common/SolBalance';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { Account } from '@providers/accounts';
-import { RefreshButton } from '@shared/ui/refresh-button';
 import React from 'react';
 
 import { CardHeader, CardTitle } from '@/app/shared/ui/Card';
@@ -33,7 +33,7 @@ export function AccountAddressRow({ account }: AccountProps) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>Address</BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">
+            <BaseTable.Cell className="text-right">
                 <Address pubkey={account.pubkey} alignRight raw />
             </BaseTable.Cell>
         </BaseTable.Row>
@@ -45,7 +45,7 @@ export function AccountBalanceRow({ account }: AccountProps) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right e-uppercase">
+            <BaseTable.Cell className="text-right uppercase">
                 <SolBalance lamports={lamports} />
             </BaseTable.Cell>
         </BaseTable.Row>

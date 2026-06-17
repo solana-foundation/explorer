@@ -64,7 +64,7 @@ const meta: Meta<typeof OwnedTokensCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/OwnedTokensCard/Responsive',
+    title: 'Components/Account/OwnedTokensCard@Media',
 };
 
 export default meta;

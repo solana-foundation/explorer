@@ -11,7 +11,7 @@ const badgeVariants = cva('', {
     },
     variants: {
         size: {
-            sm: 'e-text-14',
+            sm: 'text-14',
         },
     },
 });
@@ -35,13 +35,13 @@ export function TokenExtensionBadge({
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <div className="e-inline-block e-cursor-default" onClick={handleClick}>
+                <div className="inline-block cursor-default" onClick={handleClick}>
                     <StatusBadge status={status} label={label} className={badgeVariants({ size })} />
                 </div>
             </TooltipTrigger>
             {tooltip && (
                 <TooltipContent>
-                    <div className="e-min-w-36 e-max-w-16">{tooltip}</div>
+                    <div className="min-w-36 max-w-16">{tooltip}</div>
                 </TooltipContent>
             )}
         </Tooltip>

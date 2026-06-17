@@ -11,11 +11,11 @@ export function TimestampToggle({ unixTimestamp, shorter }: { unixTimestamp: num
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <span className="e-w-full e-cursor-pointer" onClick={() => setIsUtc(prev => !prev)}>
+                <span className="w-full cursor-pointer" onClick={() => setIsUtc(prev => !prev)}>
                     {isUtc ? displayTimestampUtc(unixTimestamp, shorter) : displayTimestamp(unixTimestamp, shorter)}
                 </span>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="e-max-w-80">
+            <TooltipContent side="bottom" className="max-w-80">
                 (Click to toggle between local and UTC)
             </TooltipContent>
         </Tooltip>

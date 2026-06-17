@@ -1,7 +1,7 @@
 import { Address } from '@components/common/Address';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { useAddressLookupTable } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
@@ -37,21 +37,21 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                        <BaseTable.HeaderCell className="text-dk-gray-700">
                             Address Lookup Table Address
                         </BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Table Index</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Resolved Address</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Details</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Table Index</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Resolved Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Details</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 {lookupRows.length > 0 ? (
                     <BaseTable.Body>{lookupRows}</BaseTable.Body>
                 ) : (
-                    <BaseTable.Body className="e-border-0 e-border-t e-border-solid e-border-dark-border e-px-dk-4 e-py-4">
+                    <BaseTable.Body className="border-0 border-t border-solid border-dark-border px-dk-4 py-4">
                         <BaseTable.Row>
                             <BaseTable.Cell colSpan={4}>
-                                <span className="e-text-center e-text-dk-gray-700">No entries found</span>
+                                <span className="text-center text-dk-gray-700">No entries found</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                     </BaseTable.Body>
@@ -73,8 +73,8 @@ function LookupRow({
     const lookupTableInfo = useAddressLookupTable(lookupTableKey.toBase58());
 
     const loadingComponent = (
-        <span className="e-text-dk-gray-700">
-            <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5"></span>
+        <span className="text-dk-gray-700">
+            <span className="spinner-grow spinner-grow-sm mr-1.5"></span>
             Loading
         </span>
     );
@@ -87,11 +87,11 @@ function LookupRow({
         if (status === FetchStatus.Fetching) {
             resolvedKeyComponent = loadingComponent;
         } else if (status === FetchStatus.FetchFailed || !lookupTable) {
-            resolvedKeyComponent = <span className="e-text-dk-gray-700">Failed to fetch Lookup Table</span>;
+            resolvedKeyComponent = <span className="text-dk-gray-700">Failed to fetch Lookup Table</span>;
         } else if (typeof lookupTable === 'string') {
-            resolvedKeyComponent = <span className="e-text-dk-gray-700">Invalid Lookup Table</span>;
+            resolvedKeyComponent = <span className="text-dk-gray-700">Invalid Lookup Table</span>;
         } else if (lookupTableIndex >= lookupTable.state.addresses.length) {
-            resolvedKeyComponent = <span className="e-text-dk-gray-700">Invalid Lookup Table Index</span>;
+            resolvedKeyComponent = <span className="text-dk-gray-700">Invalid Lookup Table Index</span>;
         } else {
             const resolvedKey = lookupTable.state.addresses[lookupTableIndex];
             resolvedKeyComponent = <Address pubkey={resolvedKey} link />;
@@ -100,14 +100,14 @@ function LookupRow({
 
     return (
         <BaseTable.Row>
-            <BaseTable.Cell className="e-text-right">
+            <BaseTable.Cell className="text-right">
                 <Address pubkey={lookupTableKey} link />
             </BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">{lookupTableIndex}</BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">{resolvedKeyComponent}</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">{lookupTableIndex}</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">{resolvedKeyComponent}</BaseTable.Cell>
             <BaseTable.Cell>
                 {!readOnly && (
-                    <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                    <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
                         Writable
                     </Badge>
                 )}

@@ -25,7 +25,7 @@ const meta: Meta<typeof UnknownDetailsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Inspector/UnknownDetailsCard/Responsive',
+    title: 'Components/Inspector/UnknownDetailsCard@Media',
 };
 
 export default meta;

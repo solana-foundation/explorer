@@ -4,12 +4,12 @@ import { Card } from '@/app/shared/ui/Card';
 
 export function BaseSecurityNotification({ message }: { message: string }) {
     return (
-        <Card ui="dashkit" className="e-px-6 e-py-5">
-            <div className="e-flex e-flex-row e-items-start e-gap-2">
-                <MessageCircle className="e-shrink-0 e-text-xs e-text-accent" />
+        <Card ui="dashkit" className="px-6 py-5">
+            <div className="flex flex-row items-start gap-2">
+                <MessageCircle className="shrink-0 text-xs text-accent" />
                 <div>
-                    <h3 className="e-mb-1 e-text-sm e-font-normal e-text-white">Notification from security.txt</h3>
-                    <p className="e-m-0 e-whitespace-pre-wrap e-text-xs e-text-neutral-400">{message}</p>
+                    <h3 className="mb-1 text-sm font-normal text-white">Notification from security.txt</h3>
+                    <p className="m-0 whitespace-pre-wrap text-xs text-neutral-400">{message}</p>
                 </div>
             </div>
         </Card>

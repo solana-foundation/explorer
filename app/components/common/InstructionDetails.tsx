@@ -6,7 +6,7 @@ import { MinusSquare, PlusSquare } from 'react-feather';
 
 // Tree connector lines ported from dashkit `.tree`: ::before draws the elbow, the left border the spine (dropped on the last row, which corners its ::before instead); `thin` ≡ 1px, em units keep it text-relative.
 const treeItemClass =
-    "e-ml-[0.35em] e-border-0 e-border-l e-border-solid e-border-[#808080] last:e-border-l-0 before:e-inline-block before:e-h-[0.6em] before:e-w-[1.4em] before:e-mr-[0.1em] before:e-align-top before:e-border-0 before:e-border-b before:e-border-solid before:e-border-[#808080] before:e-content-[''] last:before:e-border-l";
+    "ml-[0.35em] border-0 border-l border-solid border-[#808080] last:border-l-0 before:inline-block before:h-[0.6em] before:w-[1.4em] before:mr-[0.1em] before:align-top before:border-0 before:border-b before:border-solid before:border-[#808080] before:content-[''] last:before:border-l";
 
 export function InstructionDetails({
     instructionType,
@@ -30,26 +30,26 @@ export function InstructionDetails({
 
     return (
         <>
-            <p className="e-m-0 e-p-0">
+            <p className="m-0 p-0">
                 {instructionTypes.length > 0 && (
                     <span
                         onClick={e => {
                             e.preventDefault();
                             setExpanded(!expanded);
                         }}
-                        className="e-mr-1.5 e-cursor-pointer"
+                        className="mr-1.5 cursor-pointer"
                     >
                         {expanded ? (
-                            <MinusSquare className="e-align-[-0.1em]" size={13} />
+                            <MinusSquare className="align-[-0.1em]" size={13} />
                         ) : (
-                            <PlusSquare className="e-align-[-0.1em]" size={13} />
+                            <PlusSquare className="align-[-0.1em]" size={13} />
                         )}
                     </span>
                 )}
                 {instructionType.name}
             </p>
             {expanded && (
-                <ul className="e-m-0 e-list-none e-p-0">
+                <ul className="m-0 list-none p-0">
                     {instructionTypes.map((type, index) => {
                         return (
                             <li key={index} className={treeItemClass}>

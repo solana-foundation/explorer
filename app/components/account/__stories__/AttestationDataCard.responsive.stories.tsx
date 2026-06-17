@@ -51,7 +51,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/AttestationDataCard/Responsive',
+    title: 'Components/Account/AttestationDataCard@Media',
 } satisfies Meta<typeof AttestationDataCard>;
 
 export default meta;

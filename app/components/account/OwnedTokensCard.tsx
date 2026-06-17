@@ -3,6 +3,7 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
+import { cn } from '@components/shared/utils';
 import {
     TokenInfoWithPubkey,
     useAccountOwnedTokens,
@@ -10,7 +11,6 @@ import {
     useScaledUiAmountForMint,
 } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
-import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
 import Link from 'next/link';
@@ -86,15 +86,15 @@ export function OwnedTokensCard({ address }: { address: string }) {
                 <BaseTable.Head>
                     <BaseTable.Row>
                         {showLogos && (
-                            <BaseTable.HeaderCell className="e-w-px e-p-0 e-text-center e-text-dk-gray-700">
+                            <BaseTable.HeaderCell className="w-px p-0 text-center text-dk-gray-700">
                                 Logo
                             </BaseTable.HeaderCell>
                         )}
                         {display === 'detail' && (
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Account Address</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Account Address</BaseTable.HeaderCell>
                         )}
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Mint Address</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Mint Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">
                             {display === 'detail' ? 'Total Balance' : 'Balance'}
                         </BaseTable.HeaderCell>
                     </BaseTable.Row>
@@ -241,10 +241,10 @@ function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRow
     return (
         <tr>
             {showLogo && (
-                <td className="e-w-px e-p-0 e-text-center">
+                <td className="w-px p-0 text-center">
                     <ProxiedImage
                         alt="Token icon"
-                        className="e-h-6 e-w-6 e-rounded-full e-border-4 e-border-solid e-border-dk-gray-700-dark"
+                        className="h-6 w-6 rounded-full border-4 border-solid border-dk-gray-700-dark"
                         height={16}
                         uri={token.logoURI}
                         width={16}
@@ -291,7 +291,7 @@ function TokensCardFooter({
 
     return (
         <CardFooter ui="dashkit">
-            <Button ui="dashkit" variant="primary" className="e-w-full" onClick={loadMore}>
+            <Button ui="dashkit" variant="primary" className="w-full" onClick={loadMore}>
                 Load More ({visibleCount} of {totalCount})
             </Button>
         </CardFooter>
@@ -324,8 +324,7 @@ const DisplayDropdown = ({ display }: DropdownProps) => {
         <Dropdown>
             <DropdownToggle asChild>
                 <Button ui="dashkit" variant="white" size="sm" type="button">
-                    {display === 'detail' ? 'Detailed' : 'Summary'}{' '}
-                    <ChevronDown size={15} className="e-align-text-top" />
+                    {display === 'detail' ? 'Detailed' : 'Summary'} <ChevronDown size={15} className="align-text-top" />
                 </Button>
             </DropdownToggle>
             <DropdownMenu align="end">

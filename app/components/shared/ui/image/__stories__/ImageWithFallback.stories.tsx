@@ -16,7 +16,7 @@ const SolanaPlaceholder = (
 const meta: Meta<typeof ImageWithFallback> = {
     component: ImageWithFallback,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/ImageWithFallback',
+    title: 'Components/Shared/ImageWithFallback',
 };
 
 export default meta;

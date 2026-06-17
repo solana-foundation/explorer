@@ -28,7 +28,7 @@ export default function UpdateProductDetailsCard({
     function Content() {
         return (
             <Copyable text={attrsJSON}>
-                <pre className="e-mb-0 e-inline-block e-text-left">{attrsJSON}</pre>
+                <pre className="mb-0 inline-block text-left">{attrsJSON}</pre>
             </Copyable>
         );
     }
@@ -44,34 +44,34 @@ export default function UpdateProductDetailsCard({
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={ix.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Funding Account</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.fundingPubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Product Account</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.productPubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>
-                    Attributes <span className="e-text-dk-gray-700">(JSON)</span>
+                    Attributes <span className="text-dk-gray-700">(JSON)</span>
                 </BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
-                    <div className="e-hidden e-items-center e-justify-end lg:e-flex">
+                <BaseTable.Cell className="text-right">
+                    <div className="hidden items-center justify-end lg:flex">
                         <Content />
                     </div>
-                    <div className="e-flex e-items-center lg:e-hidden">
+                    <div className="flex items-center lg:hidden">
                         <Content />
                     </div>
                 </BaseTable.Cell>

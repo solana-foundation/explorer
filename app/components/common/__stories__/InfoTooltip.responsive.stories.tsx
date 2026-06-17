@@ -10,7 +10,7 @@ const meta: Meta<typeof InfoTooltip> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/InfoTooltip/Responsive',
+    title: 'Components/Common/InfoTooltip@Media',
 };
 
 export default meta;

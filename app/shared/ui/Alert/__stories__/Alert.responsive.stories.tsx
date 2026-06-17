@@ -11,7 +11,7 @@ const meta: Meta<typeof Alert> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/Alert/Responsive',
+    title: 'Shared/Alert@Media',
 };
 
 export default meta;

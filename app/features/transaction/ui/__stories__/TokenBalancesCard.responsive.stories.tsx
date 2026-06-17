@@ -31,7 +31,7 @@ const meta: Meta<typeof TokenBalancesCardInner> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Transaction/TokenBalancesCard/Responsive',
+    title: 'Components/Transaction/TokenBalancesCard@Media',
 };
 
 export default meta;

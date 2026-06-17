@@ -24,7 +24,7 @@ import {
 const meta: Meta<typeof DropdownMenu> = {
     component: DropdownMenu,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/DropdownMenu',
+    title: 'Components/Shared/DropdownMenu',
 };
 
 export default meta;
@@ -128,7 +128,7 @@ export const WithGroups: Story = {
                     <ChevronDown size={14} />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="e-w-56">
+            <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
@@ -253,7 +253,7 @@ export const DisabledItems: Story = {
 
 export const AlignEnd: Story = {
     render: () => (
-        <div className="e-flex e-w-96 e-justify-end">
+        <div className="flex w-96 justify-end">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
@@ -294,7 +294,7 @@ export const OpenByDefault: Story = {
     ),
 };
 
-// inset (e-pl-8) on items/labels and disabled checkbox/radio items — no other story renders these
+// inset (pl-8) on items/labels and disabled checkbox/radio items — no other story renders these
 export const InsetAndDisabledSelectionItems: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);

@@ -23,7 +23,7 @@ const meta: Meta<typeof AnchorAccountCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/AnchorAccountCard/Responsive',
+    title: 'Components/Account/AnchorAccountCard@Media',
 };
 
 export default meta;

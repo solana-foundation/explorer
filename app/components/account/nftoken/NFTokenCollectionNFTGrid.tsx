@@ -1,6 +1,6 @@
 'use client';
 
-import { RefreshButton } from '@shared/ui/refresh-button';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
@@ -25,8 +25,8 @@ export function NFTokenCollectionNFTGrid({ collection }: { collection: string })
                 <RefreshButton analyticsSection="nft_token_collection_grid" onClick={mutate} />
             </CardHeader>
 
-            <div className="e-py-6">
-                {nfts.length === 0 && <div className="e-px-6">No NFTs Found</div>}
+            <div className="py-6">
+                {nfts.length === 0 && <div className="px-6">No NFTs Found</div>}
 
                 {nfts.length > 0 && (
                     <div

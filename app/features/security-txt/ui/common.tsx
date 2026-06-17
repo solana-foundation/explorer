@@ -45,21 +45,21 @@ export function ContactInfo({ type, information }: { type: string; information: 
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`mailto:${information}`}>
                     {information}
-                    <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
                 </a>
             );
         case 'telegram':
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`https://t.me/${information}`}>
                     Telegram: {information}
-                    <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
                 </a>
             );
         case 'twitter':
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`https://twitter.com/${information}`}>
                     Twitter {information}
-                    <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
                 </a>
             );
         case 'link':
@@ -67,7 +67,7 @@ export function ContactInfo({ type, information }: { type: string; information: 
                 return (
                     <a rel="noopener noreferrer" target="_blank" href={`${information}`}>
                         {information}
-                        <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                        <ExternalLink className="ml-1.5 align-text-top" size={13} />
                     </a>
                 );
             }
@@ -84,10 +84,10 @@ export function ContactInfo({ type, information }: { type: string; information: 
 
 export function RenderExternalLink({ url }: { url: string }) {
     return (
-        <span className="e-font-mono">
+        <span className="font-mono">
             <a rel="noopener noreferrer" target="_blank" href={url}>
                 {url}
-                <ExternalLink className="e-ml-1.5 e-align-text-top" size={13} />
+                <ExternalLink className="ml-1.5 align-text-top" size={13} />
             </a>
         </span>
     );
@@ -95,20 +95,20 @@ export function RenderExternalLink({ url }: { url: string }) {
 
 export function ExternalLinkCell({ url }: { url: string }) {
     return (
-        <BaseTable.Cell className="e-text-right">
+        <BaseTable.Cell className="text-right">
             <RenderExternalLink url={url} />
         </BaseTable.Cell>
     );
 }
 
 export function StringCell({ value }: { value: string }) {
-    return <BaseTable.Cell className="e-text-right e-font-mono">{value}</BaseTable.Cell>;
+    return <BaseTable.Cell className="text-right font-mono">{value}</BaseTable.Cell>;
 }
 
 export function RenderCode({ value, alignRight = true }: { value: any; alignRight?: boolean }) {
     return (
-        <div className="e-flex e-items-end">
-            <pre className={classNames('e-max-w-[500px] e-overflow-x-auto', { 'lg:e-ml-auto': alignRight })}>
+        <div className="flex items-end">
+            <pre className={classNames('max-w-[500px] overflow-x-auto', { 'lg:ml-auto': alignRight })}>
                 {parseCodeValue(value)}
             </pre>
         </div>

@@ -12,7 +12,7 @@ const meta = {
     decorators: [withCluster, withClipboardMock],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/UI/IdlCard',
+    title: 'Features/IDL/IdlCard',
 } satisfies Meta<typeof IdlCard>;
 
 export default meta;

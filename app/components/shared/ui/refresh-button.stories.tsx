@@ -6,7 +6,7 @@ import { RefreshButton } from './refresh-button';
 const meta: Meta<typeof RefreshButton> = {
     component: RefreshButton,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/RefreshButton',
+    title: 'Components/Shared/RefreshButton',
 };
 
 export default meta;

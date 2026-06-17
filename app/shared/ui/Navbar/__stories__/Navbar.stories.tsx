@@ -6,7 +6,7 @@ import { NavbarItem, NavbarLink, NavbarList } from '../Navbar';
 
 const meta: Meta = {
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/Navbar',
+    title: 'Shared/Navbar',
 };
 
 export default meta;

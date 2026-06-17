@@ -20,42 +20,42 @@ export function SweepFeesDetailsCard(props: SerumIxDetailsProps<SweepFees>) {
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Market</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Quote Vault</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.quoteVault} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Fee Sweeping Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.feeSweepingAuthority} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Fee Receiver</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.quoteFeeReceiver} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Vault Signer</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.vaultSigner} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>

@@ -12,11 +12,11 @@ export function VerificationIcon({
     verificationFoundSources: VerificationSource[];
 }): React.ReactElement | null {
     if (isLoading) {
-        return <HelpCircle className="e-text-gray-500" size={ICON_SIZE} />;
+        return <HelpCircle className="text-gray-500" size={ICON_SIZE} />;
     }
     if (verificationFoundSources.length) {
         return null;
     }
 
-    return <HelpCircle className="e-text-gray-500" size={ICON_SIZE} />;
+    return <HelpCircle className="text-gray-500" size={ICON_SIZE} />;
 }

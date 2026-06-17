@@ -9,7 +9,7 @@ const meta = {
     },
     component: BaseConnectWalletButton,
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Interactive IDL/UI/BaseConnectWalletButton',
+    title: 'Features/IDL/Interactive IDL/BaseConnectWalletButton',
 } satisfies Meta<typeof BaseConnectWalletButton>;
 
 export default meta;

@@ -10,7 +10,7 @@ const meta: Meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/HistoryCardComponents/Responsive',
+    title: 'Components/Account/HistoryCardComponents@Media',
 };
 
 export default meta;

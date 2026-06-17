@@ -33,43 +33,43 @@ export default function UpdatePriceDetailsCard({
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={ix.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Publisher</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.publisherPubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Price Account</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.pricePubkey} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Status</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{TradingStatus[info.status]}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{TradingStatus[info.status]}</BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Price</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.price}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.price}</BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Conf</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.conf}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.conf}</BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Publish Slot</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.publishSlot}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.publishSlot}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

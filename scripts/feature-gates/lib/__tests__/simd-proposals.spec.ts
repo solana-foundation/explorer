@@ -1,5 +1,14 @@
 import { parseProposals, resolveMissingSimdLinks, resolveSimdLinks } from '../simd-proposals';
 
+// resolveMissingSimdLinks logs CLI progress via console.log; silence it under test.
+beforeEach(() => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+});
+
+afterEach(() => {
+    vi.restoreAllMocks();
+});
+
 const PROPOSALS = parseProposals([
     { html_url: 'https://github.com/sf/simd/blob/main/proposals/0148-x.md', name: '0148-x.md' },
     { html_url: 'https://github.com/sf/simd/blob/main/proposals/0337-y.md', name: '0337-y.md' },

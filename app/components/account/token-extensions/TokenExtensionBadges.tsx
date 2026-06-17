@@ -15,7 +15,7 @@ export function TokenExtensionBadges({
     onClick?: ComponentProps<typeof TokenExtensionBadge>['onClick'];
 }) {
     return (
-        <div className={cn('e-flex e-flex-wrap e-gap-2', className)}>
+        <div className={cn('flex flex-wrap gap-2', className)}>
             {extensions.map((extension, i) => (
                 <TokenExtensionBadge
                     key={`token-extension-${extension.extension}-${i}`}

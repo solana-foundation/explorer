@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
@@ -5,13 +6,13 @@ import { cn } from '../utils';
 
 const inputVariants = cva(
     cn(
-        'e-border-solid',
-        'e-font-normal e-font-mono',
-        'e-flex e-h-9 e-w-full e-rounded e-border',
-        'e-px-4 e-py-2.5 e-text-xs',
-        'focus-visible:e-outline-none focus-visible:e-ring-2 focus-visible:e-ring-offset-2 focus-visible:e-ring-offset-neutral-900',
-        'disabled:e-cursor-not-allowed disabled:e-opacity-50',
-        'aria-[invalid="true"]:!e-border-destructive aria-[invalid="true"]:focus-visible:e-ring-destructive',
+        'border-solid',
+        'font-normal font-mono',
+        'flex h-9 w-full rounded border',
+        'px-4 py-2.5 text-xs',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900',
+        'disabled:cursor-not-allowed disabled:opacity-50',
+        'aria-[invalid="true"]:!border-destructive aria-[invalid="true"]:focus-visible:ring-destructive',
     ),
     {
         defaultVariants: {
@@ -19,9 +20,9 @@ const inputVariants = cva(
         },
         variants: {
             variant: {
-                dark: 'e-border-outer-space-950 e-bg-heavy-metal-900 e-text-neutral-200 placeholder:e-text-neutral-400 focus-visible:e-ring-neutral-300 focus-visible:e-ring-offset-neutral-900',
+                dark: 'border-outer-space-950 bg-heavy-metal-900 text-neutral-200 placeholder:text-neutral-400 focus-visible:ring-neutral-300 focus-visible:ring-offset-neutral-900',
                 default:
-                    'e-border-neutral-200 e-bg-transparent e-text-neutral-200 placeholder:e-text-neutral-300 focus-visible:e-ring-neutral-300 focus-visible:e-ring-offset-neutral-900',
+                    'border-neutral-200 bg-transparent text-neutral-200 placeholder:text-neutral-300 focus-visible:ring-neutral-300 focus-visible:ring-offset-neutral-900',
             },
         },
     },

@@ -41,7 +41,7 @@ const meta: Meta<typeof Ed25519DetailsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/Ed25519DetailsCard/Responsive',
+    title: 'Components/Instruction/Ed25519DetailsCard@Media',
 };
 
 export default meta;

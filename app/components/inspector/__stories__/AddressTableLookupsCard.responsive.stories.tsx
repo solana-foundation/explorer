@@ -78,7 +78,7 @@ const meta: Meta<typeof AddressTableLookupsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Inspector/AddressTableLookupsCard/Responsive',
+    title: 'Components/Inspector/AddressTableLookupsCard@Media',
 };
 
 export default meta;

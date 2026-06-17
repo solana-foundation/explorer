@@ -40,8 +40,8 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
     if (simulation.status === 'simulating') {
         return (
             <SimulationCardShell>
-                <CardBody ui="dashkit" className="e-text-center">
-                    <span className="e-spinner-grow e-spinner-grow-sm e-mr-2"></span>
+                <CardBody ui="dashkit" className="text-center">
+                    <span className="spinner-grow spinner-grow-sm mr-2"></span>
                     Simulating
                 </CardBody>
             </SimulationCardShell>
@@ -54,7 +54,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
                 <CardBody ui="dashkit">
                     <div>
                         Simulation Failure:
-                        <span className="e-ml-2 e-text-yellow-500">{simulation.error}</span>
+                        <span className="ml-2 text-yellow-500">{simulation.error}</span>
                     </div>
                 </CardBody>
             </SimulationCardShell>
@@ -65,7 +65,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
         return (
             <SimulationCardShell action={<SimulateButton label="Simulate" onClick={simulation.simulate} />}>
                 <CardBody ui="dashkit">
-                    <ul className="e-list-disc e-space-y-2 e-pl-5 e-text-neutral-500">
+                    <ul className="list-disc space-y-2 pl-5 text-neutral-500">
                         <li>
                             Simulation is free and will run this transaction against the latest confirmed ledger state.
                         </li>
@@ -89,7 +89,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
                     <CardBody ui="dashkit">
                         <div>
                             Simulation Failure:
-                            <span className="e-ml-2 e-text-yellow-500">{error}</span>
+                            <span className="ml-2 text-yellow-500">{error}</span>
                         </div>
                     </CardBody>
                 )}
@@ -113,7 +113,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
 
 function SimulateButton({ label, onClick }: { label: string; onClick: () => void }) {
     return (
-        <Button ui="dashkit" variant="white" size="sm" className="e-flex" onClick={onClick}>
+        <Button ui="dashkit" variant="white" size="sm" className="flex" onClick={onClick}>
             {label}
         </Button>
     );

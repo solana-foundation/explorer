@@ -1,6 +1,6 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/tabs';
 import { useExplorerLink } from '@entities/cluster';
 import { ProgramLogs, TxErrorStatus, TxSuccessStatus } from '@entities/program-logs';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { ReactNode } from 'react';
 
 import { Card } from '@/app/shared/ui/Card';
@@ -33,10 +33,10 @@ export function InstructionActivity({ lastResult, logs, parseLogs }: Instruction
 
 function CardWithTabs({ tabs }: { tabs: { id: string; title: string; component: ReactNode }[] }) {
     return (
-        <Card variant="tight" className="e-flex e-min-h-0 e-flex-grow e-flex-col">
-            <Tabs defaultValue={tabs[0]?.id} className="e-flex e-min-h-0 e-flex-col">
-                <div className="e-border-b e-border-neutral-950 e-px-6 [border-bottom-style:solid]">
-                    <TabsList className="-e-mb-px">
+        <Card variant="tight" className="flex min-h-0 flex-grow flex-col">
+            <Tabs defaultValue={tabs[0]?.id} className="flex min-h-0 flex-col">
+                <div className="border-b border-neutral-950 px-6 [border-bottom-style:solid]">
+                    <TabsList className="-mb-px">
                         {tabs.map(tab => (
                             <TabsTrigger key={tab.id} value={tab.id}>
                                 {tab.title}
@@ -45,11 +45,7 @@ function CardWithTabs({ tabs }: { tabs: { id: string; title: string; component: 
                     </TabsList>
                 </div>
                 {tabs.map(tab => (
-                    <TabsContent
-                        key={tab.id}
-                        value={tab.id}
-                        className="e-flex e-min-h-0 e-flex-1 e-flex-col e-px-6 e-py-2"
-                    >
+                    <TabsContent key={tab.id} value={tab.id} className="flex min-h-0 flex-1 flex-col px-6 py-2">
                         {tab.component}
                     </TabsContent>
                 ))}

@@ -7,7 +7,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { WalletProvider } from '../wallet-provider';
 
 const mockToastCustom = vi.fn();
-vi.mock('@shared/ui/sonner/use-toast', () => ({
+vi.mock('@components/shared/ui/sonner/use-toast', () => ({
     useToast: () => ({
         custom: mockToastCustom,
     }),

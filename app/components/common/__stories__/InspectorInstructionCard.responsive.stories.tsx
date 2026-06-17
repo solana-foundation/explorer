@@ -48,7 +48,7 @@ const meta: Meta<typeof InspectorInstructionCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/InspectorInstructionCard/Responsive',
+    title: 'Components/Common/InspectorInstructionCard@Media',
 };
 
 export default meta;

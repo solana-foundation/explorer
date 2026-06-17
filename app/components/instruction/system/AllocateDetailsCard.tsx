@@ -28,21 +28,21 @@ export function AllocateDetailsCard(props: {
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={SystemProgram.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Account Address</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.account} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Allocated Data Size</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.space} byte(s)</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.space} byte(s)</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

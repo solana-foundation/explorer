@@ -11,7 +11,7 @@ const meta: Meta<typeof BaseIdlAccounts> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/BaseIdlAccounts/Responsive',
+    title: 'Features/IDL/Formatted IDL/BaseIdlAccounts@Media',
 };
 
 export default meta;

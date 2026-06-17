@@ -8,7 +8,7 @@ import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, Tabl
 const meta: Meta<typeof Table> = {
     component: Table,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Table',
+    title: 'Components/Shared/Table',
 };
 
 export default meta;
@@ -26,7 +26,7 @@ export const Default: Story = {
         await expect(canvas.getByText('Curve25519 Restore')).toBeInTheDocument();
     },
     render: () => (
-        <Card variant="tight" className="e-w-[40rem] e-overflow-hidden">
+        <Card variant="tight" className="w-[40rem] overflow-hidden">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -38,9 +38,9 @@ export const Default: Story = {
                 <TableBody>
                     {ROWS.map(row => (
                         <TableRow key={row.key}>
-                            <TableCell className="e-font-medium">{row.name}</TableCell>
+                            <TableCell className="font-medium">{row.name}</TableCell>
                             <TableCell>{row.activation}</TableCell>
-                            <TableCell className="e-font-mono e-text-dk-xs">{row.key.slice(0, 8)}…</TableCell>
+                            <TableCell className="font-mono text-dk-xs">{row.key.slice(0, 8)}…</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
@@ -51,7 +51,7 @@ export const Default: Story = {
 
 export const WithSelectedRow: Story = {
     render: () => (
-        <Card variant="tight" className="e-w-[40rem] e-overflow-hidden">
+        <Card variant="tight" className="w-[40rem] overflow-hidden">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -62,7 +62,7 @@ export const WithSelectedRow: Story = {
                 <TableBody>
                     {ROWS.map((row, idx) => (
                         <TableRow key={row.key} data-state={idx === 1 ? 'selected' : undefined}>
-                            <TableCell className="e-font-medium">{row.name}</TableCell>
+                            <TableCell className="font-medium">{row.name}</TableCell>
                             <TableCell>{row.activation}</TableCell>
                         </TableRow>
                     ))}
@@ -74,7 +74,7 @@ export const WithSelectedRow: Story = {
 
 export const WithFooterAndCaption: Story = {
     render: () => (
-        <Card variant="tight" className="e-w-[40rem] e-overflow-hidden">
+        <Card variant="tight" className="w-[40rem] overflow-hidden">
             <Table>
                 <TableCaption>Recently activated feature gates on mainnet.</TableCaption>
                 <TableHeader>
@@ -86,7 +86,7 @@ export const WithFooterAndCaption: Story = {
                 <TableBody>
                     {ROWS.map(row => (
                         <TableRow key={row.key}>
-                            <TableCell className="e-font-medium">{row.name}</TableCell>
+                            <TableCell className="font-medium">{row.name}</TableCell>
                             <TableCell>{row.activation}</TableCell>
                         </TableRow>
                     ))}

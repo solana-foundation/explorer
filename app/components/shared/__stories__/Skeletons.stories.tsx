@@ -14,7 +14,7 @@ import {
 } from '../Skeletons';
 
 const hasPulse = (canvasElement: HTMLElement) =>
-    expect(canvasElement.querySelectorAll('.e-animate-pulse').length).toBeGreaterThan(0);
+    expect(canvasElement.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
 
 function TableWrapper({ children }: { children: React.ReactNode }) {
     return (
@@ -27,7 +27,7 @@ function TableWrapper({ children }: { children: React.ReactNode }) {
 const meta = {
     component: TableRowSkeleton,
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/Skeletons',
+    title: 'Components/Shared/Skeletons',
 } satisfies Meta<typeof TableRowSkeleton>;
 
 export default meta;

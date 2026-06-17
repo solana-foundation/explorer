@@ -52,7 +52,7 @@ export function TokenExtensionsSection({
     );
 
     return (
-        <Accordion type="single" value={selectedExtension} collapsible className="e-px-0">
+        <Accordion type="single" value={selectedExtension} collapsible className="px-0">
             {parsedExtensions.map(ext => {
                 const extension = extensions.find(({ extension }) => {
                     return extension === ext.extension;
@@ -107,20 +107,20 @@ function TokenExtensionAccordionItem({
 
     return (
         <>
-            <div className="e-flex e-items-center e-justify-between">
-                <AccordionTrigger className="e-items-baseline">
+            <div className="flex items-center justify-between">
+                <AccordionTrigger className="items-baseline">
                     <ExtensionListItem ext={parsedExtension} />
                 </AccordionTrigger>
-                <div className="e-flex e-items-center e-gap-1">
+                <div className="flex items-center gap-1">
                     <button
                         onClick={handleToggleRaw}
                         type="button"
-                        className="e-cursor-pointer e-border-0 e-bg-transparent e-p-0"
+                        className="cursor-pointer border-0 bg-transparent p-0"
                         aria-label={showRaw ? 'Hide raw data' : 'Show raw data'}
                         aria-pressed={showRaw}
                     >
                         <Badge
-                            className="e-font-normal e-text-white"
+                            className="font-normal text-white"
                             as="link"
                             size="sm"
                             status={showRaw ? 'active' : 'inactive'}
@@ -131,7 +131,7 @@ function TokenExtensionAccordionItem({
                     </button>
                     {parsedExtension.externalLinks.map((link, index) => (
                         <a key={index} href={link.url} target="_blank" rel="noopener noreferrer">
-                            <Badge variant="transparent" size="sm" as="link" className="e-font-normal e-text-white">
+                            <Badge variant="transparent" size="sm" as="link" className="font-normal text-white">
                                 <ExternalLink size={16} />
                                 {link.label}
                             </Badge>
@@ -141,13 +141,13 @@ function TokenExtensionAccordionItem({
             </div>
             <AccordionContent>
                 {!showRaw ? (
-                    <Card ui="dashkit" className="e-m-4">
+                    <Card ui="dashkit" className="m-4">
                         <TableCardBodyHeaded headerComponent={tableHeaderComponent}>
                             {TokenExtensionRow(extension, undefined, decimals, symbol, 'omit')}
                         </TableCardBodyHeaded>
                     </Card>
                 ) : (
-                    <div className="e-p-4">
+                    <div className="p-4">
                         <ReactJson src={parsedExtension.parsed || {}} style={{ padding: 25 }} />
                     </div>
                 )}
@@ -159,23 +159,23 @@ function TokenExtensionAccordionItem({
 function TokenExtensionStateHeader({ name }: { name: string }) {
     return (
         <BaseTable.Row>
-            <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">{name}</BaseTable.HeaderCell>
-            <BaseTable.HeaderCell className="e-text-dk-gray-700"></BaseTable.HeaderCell>
+            <BaseTable.HeaderCell className="w-px text-dk-gray-700">{name}</BaseTable.HeaderCell>
+            <BaseTable.HeaderCell className="text-dk-gray-700"></BaseTable.HeaderCell>
         </BaseTable.Row>
     );
 }
 
 function ExtensionListItem({ ext }: { ext: ParsedTokenExtension }) {
     return (
-        <div className="e-w-100 e-flex e-w-full e-items-center e-gap-2 e-text-sm e-text-white">
+        <div className="w-100 flex w-full items-center gap-2 text-sm text-white">
             {/* Name */}
-            <div className="e-flex e-min-w-80 e-items-center e-gap-2 e-whitespace-nowrap e-font-normal">
+            <div className="flex min-w-80 items-center gap-2 whitespace-nowrap font-normal">
                 <span>{ext.name}</span>
                 <TokenExtensionBadge extension={ext} />
             </div>
 
             {/* Description */}
-            <div className="e-flex-1 e-text-[0.75rem] e-text-[#8E9090] e-underline e-decoration-[#1e2423] max-lg:e-hidden">
+            <div className="flex-1 text-[0.75rem] text-[#8E9090] underline decoration-[#1e2423] max-lg:hidden">
                 {ext.description ?? null}
             </div>
         </div>

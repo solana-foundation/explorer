@@ -38,37 +38,37 @@ export function CreateDetailsCard({
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Source</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[0].pubkey} hideInfo />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Account</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[1].pubkey} hideInfo />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Mint</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[3].pubkey} hideInfo />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Wallet</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[2].pubkey} hideInfo />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>System Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[4].pubkey} hideInfo />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Token Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[5].pubkey} hideInfo />
                 </BaseTable.Cell>
             </BaseTable.Row>

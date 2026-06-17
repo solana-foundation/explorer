@@ -1,5 +1,5 @@
-import { Button } from '@shared/ui/button';
-import { RefreshButton } from '@shared/ui/refresh-button';
+import { Button } from '@components/shared/ui/button';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { ConfirmedSignatureInfo, TransactionError } from '@solana/web3.js';
 import React from 'react';
 
@@ -48,18 +48,18 @@ export function HistoryCardFooter({
     return (
         <CardFooter ui="dashkit">
             {foundOldest ? (
-                <div className="e-text-center e-text-dk-gray-700">Fetched full history</div>
+                <div className="text-center text-dk-gray-700">Fetched full history</div>
             ) : (
                 <Button
                     ui="dashkit"
                     variant="primary"
-                    className="e-w-full"
+                    className="w-full"
                     onClick={() => loadMore()}
                     disabled={fetching}
                 >
                     {fetching ? (
                         <>
-                            <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
+                            <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
                             Loading
                         </>
                     ) : (

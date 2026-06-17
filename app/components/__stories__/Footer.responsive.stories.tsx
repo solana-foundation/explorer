@@ -12,7 +12,7 @@ const meta: Meta<typeof Footer> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Layout/Footer/Responsive',
+    title: 'Components/Layout/Footer@Media',
 };
 
 export default meta;

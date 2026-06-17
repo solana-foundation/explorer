@@ -70,7 +70,7 @@ function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
         return null;
     }
     return (
-        <Alert variant="warning" className="e-text-center">
+        <Alert variant="warning" className="text-center">
             <strong>Account is locked!</strong> Lockup expires on {displayTimestampUtc(lockupExpiryMs)}
         </Alert>
     );
@@ -95,26 +95,26 @@ function OverviewCard({
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <KitAddress address={toKitAddress(account.pubkey)} alignRight raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right e-uppercase">
+                <BaseTable.Cell className="text-right uppercase">
                     <SolBalance lamports={account.lamports} />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Rent Reserve (SOL)</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <SolBalance lamports={stakeAccount.meta.rentExemptReserve} />
                 </BaseTable.Cell>
             </BaseTable.Row>
             {status !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Status</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{status}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{status}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
         </AccountCard>
@@ -143,14 +143,14 @@ function DelegationCard({
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                <CardTitle as="h3" ui="dashkit" className="flex items-center">
                     Stake Delegation
                 </CardTitle>
             </CardHeader>
             <TableCardBody>
                 <BaseTable.Row>
                     <BaseTable.Cell>Status</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         {activation ? `Delegated (${activation.state})` : 'Delegated'}
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -159,7 +159,7 @@ function DelegationCard({
                     <>
                         <BaseTable.Row>
                             <BaseTable.Cell>Delegated Stake (SOL)</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 <SolBalance lamports={stake.delegation.stake} />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -168,14 +168,14 @@ function DelegationCard({
                             <>
                                 <BaseTable.Row>
                                     <BaseTable.Cell>Active Stake (SOL)</BaseTable.Cell>
-                                    <BaseTable.Cell className="e-text-right">
+                                    <BaseTable.Cell className="text-right">
                                         <SolBalance lamports={activation.active} />
                                     </BaseTable.Cell>
                                 </BaseTable.Row>
 
                                 <BaseTable.Row>
                                     <BaseTable.Cell>Inactive Stake (SOL)</BaseTable.Cell>
-                                    <BaseTable.Cell className="e-text-right">
+                                    <BaseTable.Cell className="text-right">
                                         <SolBalance lamports={activation.inactive} />
                                     </BaseTable.Cell>
                                 </BaseTable.Row>
@@ -185,7 +185,7 @@ function DelegationCard({
                         {voterPubkey && (
                             <BaseTable.Row>
                                 <BaseTable.Cell>Delegated Vote Address</BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right">
+                                <BaseTable.Cell className="text-right">
                                     <KitAddress address={voterPubkey} alignRight link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
@@ -193,13 +193,13 @@ function DelegationCard({
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Activation Epoch</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 {activationEpoch !== undefined ? <Epoch epoch={activationEpoch} link /> : '-'}
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell>Deactivation Epoch</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 {deactivationEpoch !== undefined ? <Epoch epoch={deactivationEpoch} link /> : '-'}
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -215,21 +215,21 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                <CardTitle as="h3" ui="dashkit" className="flex items-center">
                     Authorities
                 </CardTitle>
             </CardHeader>
             <TableCardBody>
                 <BaseTable.Row>
                     <BaseTable.Cell>Stake Authority Address</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <KitAddress address={meta.authorized.staker} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
 
                 <BaseTable.Row>
                     <BaseTable.Cell>Withdraw Authority Address</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <KitAddress address={meta.authorized.withdrawer} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -237,7 +237,7 @@ function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
                 {hasLockup && (
                     <BaseTable.Row>
                         <BaseTable.Cell>Lockup Authority Address</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">
+                        <BaseTable.Cell className="text-right">
                             <KitAddress address={meta.lockup.custodian} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>

@@ -16,17 +16,17 @@ function SolanaCredentialCard({ credential }: { credential: SasCredential }) {
         <>
             <BaseTable.Row>
                 <BaseTable.Cell>Credential Name</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{decodeString(credential.name)}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{decodeString(credential.name)}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Credential Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={mapToPublicKey(credential.authority)} alignRight raw link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Authorized Signers</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {credential.authorizedSigners.map((signer, idx) => (
                         <Address key={idx} pubkey={mapToPublicKey(signer)} alignRight raw link />
                     ))}
@@ -41,25 +41,25 @@ function SolanaSchemaCard({ schema }: { schema: SasSchema }) {
         <>
             <BaseTable.Row>
                 <BaseTable.Cell>Schema Name</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{decodeString(schema.name)}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{decodeString(schema.name)}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Credential</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={mapToPublicKey(schema.credential)} alignRight raw link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Description</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{decodeString(schema.description)}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{decodeString(schema.description)}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Is Paused</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{schema.isPaused ? 'Yes' : 'No'}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{schema.isPaused ? 'Yes' : 'No'}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Version</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{schema.version}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{schema.version}</BaseTable.Cell>
             </BaseTable.Row>
         </>
     );
@@ -70,31 +70,31 @@ function SolanaAttestationCard({ attestation }: { attestation: SasAttestation })
         <>
             <BaseTable.Row>
                 <BaseTable.Cell>Nonce</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={mapToPublicKey(attestation.nonce)} alignRight raw link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Credential</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={mapToPublicKey(attestation.credential)} alignRight raw link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Schema</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={mapToPublicKey(attestation.schema)} alignRight raw link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Signer</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={mapToPublicKey(attestation.signer)} alignRight raw link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Token Account</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {attestation.tokenAccount.toString() === SystemProgram.programId.toBase58() ? (
                         'Not Initialized'
                     ) : (
@@ -104,7 +104,7 @@ function SolanaAttestationCard({ attestation }: { attestation: SasAttestation })
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Expiry</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{Number(attestation.expiry)}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{Number(attestation.expiry)}</BaseTable.Cell>
             </BaseTable.Row>
         </>
     );

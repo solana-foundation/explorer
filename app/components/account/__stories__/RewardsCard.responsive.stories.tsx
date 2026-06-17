@@ -64,7 +64,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/RewardsCard/Responsive',
+    title: 'Components/Account/RewardsCard@Media',
 } satisfies Meta<typeof RewardsCard>;
 
 export default meta;

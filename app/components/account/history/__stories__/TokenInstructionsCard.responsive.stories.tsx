@@ -21,7 +21,7 @@ const meta: Meta<typeof TokenInstructionsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/History/TokenInstructionsCard/Responsive',
+    title: 'Components/Account/History/TokenInstructionsCard@Media',
 };
 
 export default meta;

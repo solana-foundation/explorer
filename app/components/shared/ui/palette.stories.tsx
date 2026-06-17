@@ -39,11 +39,11 @@ const BOX = { borderRadius: '0.375rem', flexShrink: 0, height: '3rem', width: '3
 
 function TokenRow({ preview, label, value }: { preview: React.ReactNode; label: string; value: string }) {
     return (
-        <div className="e-flex e-items-center e-gap-3">
+        <div className="flex items-center gap-3">
             {preview}
-            <div className="e-flex e-flex-col e-gap-0.5" style={{ minWidth: 0 }}>
-                <code className="e-text-dk-sm e-text-dk-white">{label}</code>
-                <span className="e-text-dk-xs e-text-dk-gray-600" style={{ overflowWrap: 'anywhere' }}>
+            <div className="flex flex-col gap-0.5" style={{ minWidth: 0 }}>
+                <code className="text-dk-sm text-dk-white">{label}</code>
+                <span className="text-dk-xs text-dk-gray-600" style={{ overflowWrap: 'anywhere' }}>
                     {value || '—'}
                 </span>
             </div>
@@ -56,7 +56,7 @@ function ColorBox({ color }: { color: string }) {
 }
 
 function Grid({ children }: { children: React.ReactNode }) {
-    return <div className="e-grid e-grid-cols-1 e-gap-4 sm:e-grid-cols-2 lg:e-grid-cols-3">{children}</div>;
+    return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>;
 }
 
 function flattenColors(colors: Record<string, string | ColorScale>): { label: string; color: string }[] {
@@ -98,16 +98,16 @@ function TypographyPalette() {
         setFont(getComputedStyle(document.documentElement).getPropertyValue(FONT_VAR).trim());
     }, []);
     return (
-        <div className="e-flex e-flex-col e-gap-3" style={{ color: '#fff', fontFamily: `var(${FONT_VAR})` }}>
-            <div className="e-flex e-flex-col e-gap-0.5">
-                <code className="e-text-dk-sm e-text-dk-white">{FONT_VAR}</code>
-                <span className="e-text-dk-xs e-text-dk-gray-600" style={{ overflowWrap: 'anywhere' }}>
+        <div className="flex flex-col gap-3" style={{ color: '#fff', fontFamily: `var(${FONT_VAR})` }}>
+            <div className="flex flex-col gap-0.5">
+                <code className="text-dk-sm text-dk-white">{FONT_VAR}</code>
+                <span className="text-dk-xs text-dk-gray-600" style={{ overflowWrap: 'anywhere' }}>
                     {font || '—'}
                 </span>
             </div>
             {FONT_WEIGHTS.map(({ label, weight }) => (
-                <div key={weight} className="e-flex e-flex-col e-gap-0.5">
-                    <span className="e-text-dk-xs e-text-dk-gray-600">
+                <div key={weight} className="flex flex-col gap-0.5">
+                    <span className="text-dk-xs text-dk-gray-600">
                         {label} · {weight}
                     </span>
                     <div style={{ fontSize: '1.5rem', fontWeight: weight }}>
@@ -220,7 +220,7 @@ export const FontSizes: Story = {
 export const Spacing: Story = {
     name: 'Styles / spacing',
     render: () => (
-        <div className="e-flex e-flex-col e-gap-3">
+        <div className="flex flex-col gap-3">
             {Object.entries(extend.spacing).map(([name, value]) => (
                 <TokenRow
                     key={name}

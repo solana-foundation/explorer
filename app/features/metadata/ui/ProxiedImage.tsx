@@ -108,7 +108,7 @@ export function ProxiedImage({
     }
 
     return (
-        <div className="e-inline-flex e-flex-col e-items-center e-gap-2">
+        <div className="inline-flex flex-col items-center gap-2">
             {image}
             {uri ? <ExternalResourceLink detail={failure?.reason} href={uri} /> : undefined}
         </div>

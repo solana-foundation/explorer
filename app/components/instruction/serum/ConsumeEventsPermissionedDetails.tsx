@@ -20,35 +20,35 @@ export function ConsumeEventsPermissionedDetailsCard(props: SerumIxDetailsProps<
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Market</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Event Queue</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.eventQueue} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Crank Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.crankAuthority} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Open Orders Accounts</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {info.accounts.openOrders.map((account, index) => {
                         return <Address pubkey={account} key={index} alignRight link />;
                     })}
@@ -57,7 +57,7 @@ export function ConsumeEventsPermissionedDetailsCard(props: SerumIxDetailsProps<
 
             <BaseTable.Row>
                 <BaseTable.Cell>Limit</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.data.limit}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.limit}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

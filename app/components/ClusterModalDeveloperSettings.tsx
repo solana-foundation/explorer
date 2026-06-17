@@ -25,14 +25,14 @@ export default function ClusterModalDeveloperSettings() {
     return (
         <>
             <hr />
-            <h2 className="e-mb-6 e-mt-6 e-text-center">Developer Settings</h2>
-            <div className="e-flex e-items-center e-justify-between">
-                <label htmlFor="cardToggle" className="e-mr-3 e-cursor-pointer">
+            <h2 className="mb-6 mt-6 text-center">Developer Settings</h2>
+            <div className="flex items-center justify-between">
+                <label htmlFor="cardToggle" className="mr-3 cursor-pointer">
                     Enable custom url param
                 </label>
                 <Switch size="lg" id="cardToggle" checked={enabled} onCheckedChange={onToggleCustomUrlFeature} />
             </div>
-            <p className="e-mt-3 e-text-dk-gray-700">
+            <p className="mt-3 text-dk-gray-700">
                 Enable this setting to easily connect to a custom cluster via the &ldquo;customUrl&rdquo; url param.
             </p>
         </>

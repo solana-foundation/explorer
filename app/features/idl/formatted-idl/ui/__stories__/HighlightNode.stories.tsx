@@ -13,7 +13,7 @@ const meta = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/HighlightNode',
+    title: 'Features/IDL/Formatted IDL/HighlightNode',
 } satisfies Meta<typeof HighlightNode & { searchStr?: string }>;
 
 export default meta;

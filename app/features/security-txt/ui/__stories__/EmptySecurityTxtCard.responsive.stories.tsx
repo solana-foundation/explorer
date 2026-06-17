@@ -12,7 +12,7 @@ const meta: Meta<typeof EmptySecurityTxtCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/SecurityTxt/EmptySecurityTxtCard/Responsive',
+    title: 'Features/SecurityTxt/EmptySecurityTxtCard@Media',
 };
 
 export default meta;

@@ -10,10 +10,10 @@ export function BaseRawParsedDetails({ ix, children }: { ix: ParsedInstruction; 
 
             <BaseTable.Row>
                 <BaseTable.Cell>
-                    Instruction Data <span className="e-text-dk-gray-700">(JSON)</span>
+                    Instruction Data <span className="text-dk-gray-700">(JSON)</span>
                 </BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
-                    <pre className="e-inline-block e-max-w-[36rem] e-whitespace-pre-wrap e-break-words e-text-left">
+                <BaseTable.Cell className="text-right">
+                    <pre className="inline-block max-w-[36rem] whitespace-pre-wrap break-words text-left">
                         {JSON.stringify(ix.parsed, null, 2)}
                     </pre>
                 </BaseTable.Cell>

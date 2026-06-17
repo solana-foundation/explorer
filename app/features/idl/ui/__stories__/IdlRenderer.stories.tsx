@@ -10,7 +10,7 @@ const meta: Meta<typeof IdlRenderer> = {
     component: IdlRenderer,
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/UI/IdlRenderer',
+    title: 'Features/IDL/IdlRenderer',
 };
 
 export default meta;

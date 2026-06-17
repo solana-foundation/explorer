@@ -22,7 +22,7 @@ const meta = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Entities/Program Logs/UI/ProgramLogs',
+    title: 'Entities/Program Logs/ProgramLogs',
 } satisfies Meta<typeof ProgramLogs>;
 
 export default meta;

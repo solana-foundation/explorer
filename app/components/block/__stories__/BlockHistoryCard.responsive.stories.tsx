@@ -21,7 +21,7 @@ const meta: Meta<typeof BlockHistoryCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Block/BlockHistoryCard/Responsive',
+    title: 'Components/Block/BlockHistoryCard@Media',
 };
 
 export default meta;

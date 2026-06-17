@@ -11,7 +11,7 @@ const meta: Meta<typeof BaseIdlErrors> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/BaseIdlErrors/Responsive',
+    title: 'Features/IDL/Formatted IDL/BaseIdlErrors@Media',
 };
 
 export default meta;

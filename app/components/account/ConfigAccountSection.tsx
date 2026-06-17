@@ -45,12 +45,12 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
 
             <BaseTable.Row>
                 <BaseTable.Cell>Warmup / Cooldown Rate</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{warmupCooldownFormatted}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{warmupCooldownFormatted}</BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Slash Penalty</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{slashPenaltyFormatted}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{slashPenaltyFormatted}</BaseTable.Cell>
             </BaseTable.Row>
         </AccountCard>
     );
@@ -71,14 +71,14 @@ function ValidatorInfoCard({ account, configAccount }: { account: Account; confi
             {configAccount.info.configData.name && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Name</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{configAccount.info.configData.name}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{configAccount.info.configData.name}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 
             {configAccount.info.configData.keybaseUsername && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Keybase Username</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         {configAccount.info.configData.keybaseUsername}
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -87,7 +87,7 @@ function ValidatorInfoCard({ account, configAccount }: { account: Account; confi
             {configAccount.info.configData.website && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Website</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <a href={configAccount.info.configData.website} target="_blank" rel="noopener noreferrer">
                             {configAccount.info.configData.website}
                         </a>
@@ -98,14 +98,14 @@ function ValidatorInfoCard({ account, configAccount }: { account: Account; confi
             {configAccount.info.configData.details && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Details</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{configAccount.info.configData.details}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{configAccount.info.configData.details}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 
             {configAccount.info.keys && configAccount.info.keys.length > 1 && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Signer</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <Address pubkey={new PublicKey(configAccount.info.keys[1].pubkey)} link alignRight />
                     </BaseTable.Cell>
                 </BaseTable.Row>

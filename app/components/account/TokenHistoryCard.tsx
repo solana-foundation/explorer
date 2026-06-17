@@ -13,14 +13,14 @@ import {
     parseTokenLendingInstructionTitle,
 } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
+import { cn } from '@components/shared/utils';
 import { isTokenProgramData } from '@providers/accounts';
 import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts/history';
 import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Details, useFetchTransactionDetails, useTransactionDetailsCache } from '@providers/transactions/parsed';
-import { RefreshButton } from '@shared/ui/refresh-button';
-import { cn } from '@shared/utils';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
@@ -193,7 +193,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         </CardTitle>
                     </CardHeader>
                     <CardBody ui="dashkit">
-                        <p className="e-mb-0 e-text-center e-text-dk-gray-700">
+                        <p className="mb-0 text-center text-dk-gray-700">
                             Click the button below to load token transaction history
                         </p>
                     </CardBody>
@@ -201,7 +201,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         <Button
                             ui="dashkit"
                             variant="primary"
-                            className="e-w-full"
+                            className="w-full"
                             onClick={() => setTokensToFetchCount(LOAD_MORE_COUNT)}
                         >
                             Load Token History
@@ -238,13 +238,11 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Slot</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Token</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Instruction Type</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">
-                            Transaction Signature
-                        </BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Slot</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Token</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Instruction Type</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>
@@ -264,7 +262,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     <Button
                         ui="dashkit"
                         variant="primary"
-                        className="e-w-full"
+                        className="w-full"
                         onClick={() => setVisibleTxCount(c => c + LOAD_MORE_COUNT)}
                     >
                         {`Show More (${visibleTxCount} of ${mintAndTxs.length})`}
@@ -273,13 +271,13 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     <Button
                         ui="dashkit"
                         variant="primary"
-                        className="e-w-full"
+                        className="w-full"
                         onClick={() => setTokensToFetchCount(c => c + LOAD_MORE_COUNT)}
                         disabled={fetching}
                     >
                         {fetching ? (
                             <>
-                                <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
+                                <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
                                 Loading
                             </>
                         ) : (
@@ -287,18 +285,18 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                         )}
                     </Button>
                 ) : allFoundOldest ? (
-                    <div className="e-text-center e-text-dk-gray-700">Fetched full history</div>
+                    <div className="text-center text-dk-gray-700">Fetched full history</div>
                 ) : (
                     <Button
                         ui="dashkit"
                         variant="primary"
-                        className="e-w-full"
+                        className="w-full"
                         onClick={() => fetchHistories()}
                         disabled={fetching}
                     >
                         {fetching ? (
                             <>
-                                <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
+                                <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
                                 Loading
                             </>
                         ) : (
@@ -341,15 +339,15 @@ const FilterDropdown = ({ filter, tokens }: FilterProps) => {
     });
 
     return (
-        <Dropdown className="e-mr-1.5">
-            <small className="e-mr-1.5">Filter:</small>
+        <Dropdown className="mr-1.5">
+            <small className="mr-1.5">Filter:</small>
             <DropdownToggle asChild>
                 <Button ui="dashkit" variant="white" size="sm" type="button">
                     {filter === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filter)}{' '}
-                    <ChevronDown size={15} className="e-align-text-top" />
+                    <ChevronDown size={15} className="align-text-top" />
                 </Button>
             </DropdownToggle>
-            <DropdownMenu align="end" className="e-max-h-80 e-overflow-y-auto">
+            <DropdownMenu align="end" className="max-h-80 overflow-y-auto">
                 {filterOptions.map(filterOption => {
                     return (
                         <DropdownItem asChild key={filterOption} className={cn(filterOption === filter && 'active')}>
@@ -387,7 +385,7 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
 
     return (
         <tr key={tx.signature}>
-            <td className="e-w-px">
+            <td className="w-px">
                 <Slot slot={tx.slot} link />
             </td>
 
@@ -444,13 +442,7 @@ function InstructionDetailsCell({
     if (!details) {
         return (
             <td>
-                <Button
-                    ui="dashkit"
-                    variant="outline-primary"
-                    size="sm"
-                    className="e-px-[3px] e-py-0 e-leading-none"
-                    asChild
-                >
+                <Button ui="dashkit" variant="outline-primary" size="sm" className="px-[3px] py-0 leading-none" asChild>
                     <span role="button" onClick={handleLoadClick}>
                         Load
                     </span>
@@ -462,7 +454,7 @@ function InstructionDetailsCell({
     if (isFetching) {
         return (
             <td>
-                <span className="e-spinner-grow e-spinner-grow-sm e-mr-1.5 e-align-text-top"></span>
+                <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
                 Loading
             </td>
         );
@@ -471,13 +463,7 @@ function InstructionDetailsCell({
     if (hasFailed || !instructions) {
         return (
             <td>
-                <Button
-                    ui="dashkit"
-                    variant="outline-warning"
-                    size="sm"
-                    className="e-px-[3px] e-py-0 e-leading-none"
-                    asChild
-                >
+                <Button ui="dashkit" variant="outline-warning" size="sm" className="px-[3px] py-0 leading-none" asChild>
                     <span role="button" onClick={handleLoadClick}>
                         Retry
                     </span>

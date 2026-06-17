@@ -122,7 +122,7 @@ function TokenInstruction({
         attributes.push(
             <BaseTable.Row key={mintAddress}>
                 <BaseTable.Cell>Token</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(mintAddress)} alignRight link fetchTokenLabelInfo />
                 </BaseTable.Cell>
             </BaseTable.Row>,
@@ -142,7 +142,7 @@ function TokenInstruction({
                 attributes.push(
                     <BaseTable.Row key={key + i}>
                         <BaseTable.Cell>{label}</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">
+                        <BaseTable.Cell className="text-right">
                             <Address pubkey={publicKey} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>,
@@ -185,7 +185,7 @@ function TokenInstruction({
         attributes.push(
             <BaseTable.Row key={key}>
                 <BaseTable.Cell>{label}</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{tag}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{tag}</BaseTable.Cell>
             </BaseTable.Row>,
         );
     }

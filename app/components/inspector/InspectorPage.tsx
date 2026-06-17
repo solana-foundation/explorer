@@ -351,10 +351,10 @@ export function TransactionInspectorPage({
     }, [currentPathname, currentSearchParams, router]);
 
     return (
-        <PageContainer className="e-mt-6">
-            <div className="e-mb-8">
-                <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
-                    <h2 className="e-mb-0">Transaction Inspector</h2>
+        <PageContainer className="mt-6">
+            <div className="mb-8">
+                <div className="border-0 border-b border-solid border-dk-gray-700-dark py-6">
+                    <h2 className="mb-0">Transaction Inspector</h2>
                 </div>
             </div>
             {signature ? (
@@ -478,11 +478,11 @@ function OverviewCard({
     return (
         <>
             <Card ui="dashkit">
-                <CardHeader ui="dashkit" className="e-gap-2">
+                <CardHeader ui="dashkit" className="gap-2">
                     <CardTitle as="h3" ui="dashkit">
                         Transaction Overview
                     </CardTitle>
-                    <Button ui="dashkit" variant="white" size="sm" className="e-flex" onClick={onClear}>
+                    <Button ui="dashkit" variant="white" size="sm" className="flex" onClick={onClear}>
                         Clear
                     </Button>
                     <DownloadDropdown filename={signature || 'signature'} data={raw} />
@@ -490,12 +490,12 @@ function OverviewCard({
                 <TableCardBody>
                     <BaseTable.Row>
                         <BaseTable.Cell>Serialized Size</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">
-                            <div className="e-flex e-flex-col e-items-end">
+                        <BaseTable.Cell className="text-right">
+                            <div className="flex flex-col items-end">
                                 {size} bytes
                                 <span
                                     className={
-                                        size <= PACKET_DATA_SIZE ? 'e-text-dk-gray-700' : 'e-text-dk-warning-on-dark'
+                                        size <= PACKET_DATA_SIZE ? 'text-dk-gray-700' : 'text-dk-warning-on-dark'
                                     }
                                 >
                                     Max transaction size is {PACKET_DATA_SIZE} bytes
@@ -505,10 +505,10 @@ function OverviewCard({
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Fees</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">
-                            <div className="e-flex e-flex-col e-items-end">
+                        <BaseTable.Cell className="text-right">
+                            <div className="flex flex-col items-end">
                                 <SolBalance lamports={fee} />
-                                <span className="e-text-dk-gray-700">
+                                <span className="text-dk-gray-700">
                                     {`Each signature costs ${DEFAULT_FEES.lamportsPerSignature} lamports`}
                                 </span>
                             </div>
@@ -517,19 +517,19 @@ function OverviewCard({
 
                     <BaseTable.Row>
                         <BaseTable.Cell>
-                            <div className="e-flex e-flex-col e-items-start">
+                            <div className="flex flex-col items-start">
                                 Fee payer
-                                <span className="e-mt-[3px]">
-                                    <Badge ui="dashkit" variant="info" className="e-mr-1.5">
+                                <span className="mt-[3px]">
+                                    <Badge ui="dashkit" variant="info" className="mr-1.5">
                                         Signer
                                     </Badge>
-                                    <Badge ui="dashkit" variant="destructive" className="e-mr-1.5">
+                                    <Badge ui="dashkit" variant="destructive" className="mr-1.5">
                                         Writable
                                     </Badge>
                                 </span>
                             </div>
                         </BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">
+                        <BaseTable.Cell className="text-right">
                             {message.staticAccountKeys.length === 0 ? (
                                 'No Fee Payer'
                             ) : (

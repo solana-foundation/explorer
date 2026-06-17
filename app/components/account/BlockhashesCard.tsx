@@ -16,9 +16,9 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
                 <BaseTable ui="dashkit" variant="card" nowrap>
                     <BaseTable.Head>
                         <BaseTable.Row>
-                            <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Recency</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Blockhash</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Fee Calculator</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="w-px text-dk-gray-700">Recency</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="w-px text-dk-gray-700">Blockhash</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Fee Calculator</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
                     <BaseTable.Body>
@@ -30,7 +30,7 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
                 </BaseTable>
 
                 <CardFooter ui="dashkit">
-                    <div className="e-text-center e-text-dk-gray-700">
+                    <div className="text-center text-dk-gray-700">
                         {blockhashes.length > 0 ? '' : 'No blockhashes found'}
                     </div>
                 </CardFooter>
@@ -42,8 +42,8 @@ export function BlockhashesCard({ blockhashes }: { blockhashes: RecentBlockhashe
 const renderAccountRow = (entry: RecentBlockhashesEntry, index: number) => {
     return (
         <BaseTable.Row key={index}>
-            <BaseTable.Cell className="e-w-px">{index + 1}</BaseTable.Cell>
-            <BaseTable.Cell className="e-w-px e-font-mono">{entry.blockhash}</BaseTable.Cell>
+            <BaseTable.Cell className="w-px">{index + 1}</BaseTable.Cell>
+            <BaseTable.Cell className="w-px font-mono">{entry.blockhash}</BaseTable.Cell>
             <BaseTable.Cell className="">
                 {entry.feeCalculator.lamportsPerSignature} lamports per signature
             </BaseTable.Cell>

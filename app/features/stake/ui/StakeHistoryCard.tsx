@@ -19,10 +19,10 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Epoch</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Effective (SOL)</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Activating (SOL)</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Deactivating (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Epoch</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Effective (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Activating (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Deactivating (SOL)</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>
@@ -34,7 +34,7 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
 
             {stakeHistory.length === 0 && (
                 <CardFooter ui="dashkit">
-                    <div className="e-text-center e-text-dk-gray-700">No stake history found</div>
+                    <div className="text-center text-dk-gray-700">No stake history found</div>
                 </CardFooter>
             )}
         </Card>
@@ -44,16 +44,16 @@ export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStake
 function HistoryEntryRow({ entry }: { entry: StakeHistoryEntry }) {
     return (
         <BaseTable.Row>
-            <BaseTable.Cell className="e-w-px e-font-mono">
+            <BaseTable.Cell className="w-px font-mono">
                 <Epoch epoch={entry.epoch} link />
             </BaseTable.Cell>
-            <BaseTable.Cell className="e-font-mono">
+            <BaseTable.Cell className="font-mono">
                 <SolBalance lamports={entry.stakeHistory.effective} />
             </BaseTable.Cell>
-            <BaseTable.Cell className="e-font-mono">
+            <BaseTable.Cell className="font-mono">
                 <SolBalance lamports={entry.stakeHistory.activating} />
             </BaseTable.Cell>
-            <BaseTable.Cell className="e-font-mono">
+            <BaseTable.Cell className="font-mono">
                 <SolBalance lamports={entry.stakeHistory.deactivating} />
             </BaseTable.Cell>
         </BaseTable.Row>

@@ -38,7 +38,7 @@ export function CancelSpotOrderDetailsCard(props: {
             {mangoSpotMarketConfig !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Spot market</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{mangoSpotMarketConfig.name}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{mangoSpotMarketConfig.name}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 
@@ -51,7 +51,7 @@ export function CancelSpotOrderDetailsCard(props: {
 
             <BaseTable.Row>
                 <BaseTable.Cell>Order Id</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.orderId}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.orderId}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

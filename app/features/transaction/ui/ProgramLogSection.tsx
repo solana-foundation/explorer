@@ -19,7 +19,7 @@ export function Chip({ children, className, active, ...props }: ChipProps) {
         <Button
             variant={active ? 'default' : 'outline'}
             size="sm"
-            className={cn(active && '!e-border-accent', className)}
+            className={cn(active && '!border-accent', className)}
             {...props}
         >
             {children}
@@ -65,9 +65,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                         <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
                     )
                 ) : (
-                    <BaseCardBody className="e-text-sm e-text-muted">
-                        Logs not supported for this transaction
-                    </BaseCardBody>
+                    <BaseCardBody className="text-sm text-muted">Logs not supported for this transaction</BaseCardBody>
                 )}
             </Card>
         </CollapsibleSection>
@@ -79,7 +77,7 @@ const RawProgramLogs = ({ raw }: { raw: string[] }) => {
         <TableCardBody>
             <BaseTable.Row>
                 <BaseTable.Cell>
-                    <pre className="e-text-left">{JSON.stringify(raw, null, 2)}</pre>
+                    <pre className="text-left">{JSON.stringify(raw, null, 2)}</pre>
                 </BaseTable.Cell>
             </BaseTable.Row>
         </TableCardBody>

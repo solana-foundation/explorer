@@ -40,7 +40,7 @@ export function GenericSpotMngoDetailsCard(props: {
             {mangoSpotMarketConfig !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Spot market</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{mangoSpotMarketConfig.name}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{mangoSpotMarketConfig.name}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 

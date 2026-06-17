@@ -14,7 +14,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Navbar/Responsive',
+    title: 'Components/Navbar@Media',
 } satisfies Meta<typeof Navbar>;
 
 export default meta;

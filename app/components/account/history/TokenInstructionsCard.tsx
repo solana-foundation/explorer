@@ -75,7 +75,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
                             </BaseTable.Cell>
 
                             {hasTimestamps && (
-                                <BaseTable.Cell className="e-text-dk-gray-700">
+                                <BaseTable.Cell className="text-dk-gray-700">
                                     {blockTime && <RelativeTime date={blockTime * 1000} />}
                                 </BaseTable.Cell>
                             )}
@@ -127,15 +127,13 @@ export function TokenInstructionsCard({ address }: { address: string }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">
                             Transaction Signature
                         </BaseTable.HeaderCell>
-                        {hasTimestamps && (
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Age</BaseTable.HeaderCell>
-                        )}
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Instruction</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Program</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
+                        {hasTimestamps && <BaseTable.HeaderCell className="text-dk-gray-700">Age</BaseTable.HeaderCell>}
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Instruction</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Program</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>{detailsList}</BaseTable.Body>

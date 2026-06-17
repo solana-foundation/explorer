@@ -18,7 +18,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/InstructionSimulation/SimulationCard/Responsive',
+    title: 'Features/InstructionSimulation/SimulationCard@Media',
 } satisfies Meta<typeof SimulatorCard>;
 
 export default meta;

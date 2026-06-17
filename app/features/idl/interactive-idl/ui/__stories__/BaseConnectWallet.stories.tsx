@@ -21,7 +21,7 @@ const meta = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Interactive IDL/UI/BaseConnectWallet',
+    title: 'Features/IDL/Interactive IDL/BaseConnectWallet',
 } satisfies Meta<typeof BaseConnectWallet>;
 
 export default meta;

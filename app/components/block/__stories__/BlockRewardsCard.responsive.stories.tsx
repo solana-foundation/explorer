@@ -26,7 +26,7 @@ const meta: Meta<typeof BlockRewardsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Block/BlockRewardsCard/Responsive',
+    title: 'Components/Block/BlockRewardsCard@Media',
 };
 
 export default meta;

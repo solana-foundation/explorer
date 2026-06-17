@@ -3,7 +3,7 @@
 // import wallet styles to not redeclare every style
 import '@solana/wallet-adapter-react-ui/styles.css';
 
-import { useToast } from '@shared/ui/sonner/use-toast';
+import { useToast } from '@components/shared/ui/sonner/use-toast';
 import { WalletError } from '@solana/wallet-adapter-base';
 import { ConnectionProvider, WalletProvider as WalletAdapterProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';

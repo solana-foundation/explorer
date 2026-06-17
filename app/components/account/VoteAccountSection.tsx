@@ -28,7 +28,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
                     Authorized Voter
                     {voteAccount.info.authorizedVoters.length > 1 ? 's' : ''}
                 </BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {voteAccount.info.authorizedVoters.map(voter => {
                         return (
                             <Address
@@ -45,26 +45,26 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
 
             <BaseTable.Row>
                 <BaseTable.Cell>Authorized Withdrawer</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={voteAccount.info.authorizedWithdrawer} alignRight raw link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Last Timestamp</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right e-font-mono">
+                <BaseTable.Cell className="text-right font-mono">
                     {displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000)}
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Commission</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{`${voteAccount.info.commission}%`}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{`${voteAccount.info.commission}%`}</BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Root Slot</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {rootSlot !== null ? <Slot slot={rootSlot} link /> : 'N/A'}
                 </BaseTable.Cell>
             </BaseTable.Row>

@@ -17,7 +17,7 @@ const meta = {
         },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/AnchorFormattedIdl',
+    title: 'Features/IDL/Formatted IDL/AnchorFormattedIdl',
 } satisfies Meta<typeof AnchorFormattedIdl>;
 
 export default meta;

@@ -49,7 +49,7 @@ export default defineConfig({
             '@entities': path.resolve(__dirname, './app/entities'),
             '@features': path.resolve(__dirname, './app/features'),
             '@providers': path.resolve(__dirname, './app/providers'),
-            '@shared': path.resolve(__dirname, './app/components/shared'),
+            '@shared': path.resolve(__dirname, './app/shared'),
             '@utils': path.resolve(__dirname, './app/utils'),
             '@storybook-config': path.resolve(__dirname, './.storybook'),
             '@validators': path.resolve(__dirname, './app/validators'),

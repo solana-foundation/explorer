@@ -66,8 +66,8 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
             attributes.push(
                 <BaseTable.Row key="vote-hash">
                     <BaseTable.Cell>Vote Hash</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
-                        <pre className="e-mb-0 e-inline-block e-text-left">{value.hash}</pre>
+                    <BaseTable.Cell className="text-right">
+                        <pre className="mb-0 inline-block text-left">{value.hash}</pre>
                     </BaseTable.Cell>
                 </BaseTable.Row>,
             );
@@ -76,7 +76,7 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
                 attributes.push(
                     <BaseTable.Row key="timestamp">
                         <BaseTable.Cell>Timestamp</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right e-font-mono">
+                        <BaseTable.Cell className="text-right font-mono">
                             {displayTimestamp(value.timestamp * 1000)}
                         </BaseTable.Cell>
                     </BaseTable.Row>,
@@ -86,8 +86,8 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
             attributes.push(
                 <BaseTable.Row key="vote-slots">
                     <BaseTable.Cell>Slots</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right e-font-mono">
-                        <pre className="e-mb-0 e-inline-block e-text-left">{value.slots.join('\n')}</pre>
+                    <BaseTable.Cell className="text-right font-mono">
+                        <pre className="mb-0 inline-block text-left">{value.slots.join('\n')}</pre>
                     </BaseTable.Cell>
                 </BaseTable.Row>,
             );
@@ -95,7 +95,7 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
             attributes.push(
                 <BaseTable.Row key={key}>
                     <BaseTable.Cell>{camelToTitleCase(key)} </BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{value}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{value}</BaseTable.Cell>
                 </BaseTable.Row>,
             );
         }
@@ -105,7 +105,7 @@ function renderDetails<T extends object>(props: InstructionDetailsProps, parsed:
         <InstructionCard {...props} title={`Vote: ${camelToTitleCase(parsed.type)}`}>
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={props.ix.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>

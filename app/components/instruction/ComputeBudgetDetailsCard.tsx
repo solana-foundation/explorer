@@ -58,21 +58,21 @@ export function ComputeBudgetDetailsCard({
                     >
                         <BaseTable.Row>
                             <BaseTable.Cell>Program</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 <Address pubkey={ix.programId} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Requested Compute Units</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">{`${new Intl.NumberFormat(
-                                'en-US',
-                            ).format(units)} compute units`}</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">{`${new Intl.NumberFormat('en-US').format(
+                                units,
+                            )} compute units`}</BaseTable.Cell>
                         </BaseTable.Row>
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Additional Fee (SOL)</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 <SolBalance lamports={additionalFee} />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -94,14 +94,14 @@ export function ComputeBudgetDetailsCard({
                     >
                         <BaseTable.Row>
                             <BaseTable.Cell>Program</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 <Address pubkey={ix.programId} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Requested Heap Frame (Bytes)</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">
+                            <BaseTable.Cell className="text-right font-mono">
                                 {new Intl.NumberFormat('en-US').format(bytes)}
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -123,16 +123,16 @@ export function ComputeBudgetDetailsCard({
                     >
                         <BaseTable.Row>
                             <BaseTable.Cell>Program</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 <Address pubkey={ix.programId} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Compute Unit Limit</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">{`${new Intl.NumberFormat(
-                                'en-US',
-                            ).format(units)} compute units`}</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">{`${new Intl.NumberFormat('en-US').format(
+                                units,
+                            )} compute units`}</BaseTable.Cell>
                         </BaseTable.Row>
                     </InstructionCardComponent>
                 );
@@ -155,14 +155,14 @@ export function ComputeBudgetDetailsCard({
                     >
                         <BaseTable.Row>
                             <BaseTable.Cell>Program</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 <Address pubkey={ix.programId} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Compute Unit Price</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">{`${microLamportsToLamportsString(
+                            <BaseTable.Cell className="text-right font-mono">{`${microLamportsToLamportsString(
                                 microLamports,
                             )} lamports per compute unit`}</BaseTable.Cell>
                         </BaseTable.Row>
@@ -187,14 +187,14 @@ export function ComputeBudgetDetailsCard({
                     >
                         <BaseTable.Row>
                             <BaseTable.Cell>Program</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 <Address pubkey={ix.programId} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
 
                         <BaseTable.Row>
                             <BaseTable.Cell>Account Data Size Limit</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">{`${accountDataSizeLimit} bytes`}</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">{`${accountDataSizeLimit} bytes`}</BaseTable.Cell>
                         </BaseTable.Row>
                     </InstructionCardComponent>
                 );

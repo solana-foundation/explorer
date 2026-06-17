@@ -1,7 +1,7 @@
 export function SearchGroupHeading({ label }: { label: string }) {
     return (
-        <div className="e-px-3 e-pb-1 e-pt-3">
-            <span className="e-shrink-0 e-select-none e-text-xs e-font-semibold e-uppercase e-tracking-widest e-text-heavy-metal-400">
+        <div className="px-3 pb-1 pt-3">
+            <span className="shrink-0 select-none text-xs font-semibold uppercase tracking-widest text-heavy-metal-400">
                 {label}
             </span>
         </div>

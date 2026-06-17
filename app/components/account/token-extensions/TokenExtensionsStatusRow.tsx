@@ -34,8 +34,8 @@ export function TokenExtensionsStatusRow({ address, extensions }: { address: str
     return (
         <BaseTable.Row>
             <BaseTable.Cell>Extensions</BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">
-                <TokenExtensionBadges className="e-justify-end" extensions={parsedExtensions} onClick={onClick} />
+            <BaseTable.Cell className="text-right">
+                <TokenExtensionBadges className="justify-end" extensions={parsedExtensions} onClick={onClick} />
             </BaseTable.Cell>
         </BaseTable.Row>
     );

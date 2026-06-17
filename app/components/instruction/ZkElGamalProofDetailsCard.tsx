@@ -48,14 +48,14 @@ export function ZkElGamalProofDetailsCard({
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={ix.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             {ix.keys.map((meta, i) => (
                 <BaseTable.Row key={i}>
                     <BaseTable.Cell>{labelFor(i, isClose, accountCount)}</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <Address pubkey={meta.pubkey} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -63,7 +63,7 @@ export function ZkElGamalProofDetailsCard({
             {!isClose && proofBytes > 0 && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Proof size</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right e-font-mono">{proofBytes} bytes</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right font-mono">{proofBytes} bytes</BaseTable.Cell>
                 </BaseTable.Row>
             )}
         </InstructionCardComponent>

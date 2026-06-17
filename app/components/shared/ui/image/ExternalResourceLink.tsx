@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import type { ReactNode } from 'react';
 import { HelpCircle } from 'react-feather';
 
@@ -46,24 +47,21 @@ export function ExternalResourceLink({
     return (
         <span
             className={cn(
-                'e-inline-flex e-items-center e-gap-1.5 e-text-dk-xs e-uppercase e-tracking-wider e-text-dk-gray-600',
+                'inline-flex items-center gap-1.5 text-dk-xs uppercase tracking-wider text-dk-gray-600',
                 className,
             )}
         >
-            <ExternalLink className="e-text-dk-gray-600 hover:e-text-dk-white" href={href}>
+            <ExternalLink className="text-dk-gray-600 hover:text-dk-white" href={href}>
                 {children}
             </ExternalLink>
             <Tooltip>
-                <TooltipTrigger
-                    aria-label={hint}
-                    className="e-inline-flex e-border-0 e-bg-transparent e-p-0 e-text-dk-gray-600"
-                >
+                <TooltipTrigger aria-label={hint} className="inline-flex border-0 bg-transparent p-0 text-dk-gray-600">
                     <HelpCircle aria-hidden size={13} />
                 </TooltipTrigger>
                 <TooltipContent>
                     {detail ? (
-                        <div className="e-flex e-flex-col e-gap-1">
-                            <span className="e-font-medium">{detail}</span>
+                        <div className="flex flex-col gap-1">
+                            <span className="font-medium">{detail}</span>
                             <span>{EXTERNAL_RESOURCE_HINT}</span>
                         </div>
                     ) : (

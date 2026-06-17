@@ -42,7 +42,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/SecurityTxt/SecurityCard/Responsive',
+    title: 'Features/SecurityTxt/SecurityCard@Media',
 } satisfies Meta<typeof SecurityCard>;
 
 export default meta;

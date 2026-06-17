@@ -13,7 +13,7 @@ const meta: Meta<typeof LiveTransactionStatsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/LiveTransactionStatsCard/Responsive',
+    title: 'Components/LiveTransactionStatsCard@Media',
 };
 
 export default meta;

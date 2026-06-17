@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 'use client';
 
 import type { Address } from '@solana/kit';
@@ -24,11 +25,11 @@ export function AddressLink({ address, truncate, className, 'aria-label': ariaLa
     const displayText = truncate ? abbreviateAddress(address, truncate) : address;
 
     return (
-        <span className={cn('e-inline-flex e-items-center e-gap-1.5 e-font-mono e-text-dk-sm', className)}>
+        <span className={cn('inline-flex items-center gap-1.5 font-mono text-dk-sm', className)}>
             <CopyButton text={address} />
             <Link
                 href={href}
-                className="e-text-dk-primary-dark hover:e-text-dark-accent"
+                className="text-dk-primary-dark hover:text-dark-accent"
                 aria-label={ariaLabel ?? `Open address ${address}`}
                 title={truncate ? address : undefined}
             >
@@ -52,11 +53,11 @@ function CopyButton({ text }: { text: string }) {
             type="button"
             onClick={() => copy(text)}
             className={cn(
-                'e-inline-flex e-h-5 e-w-5 e-shrink-0 e-items-center e-justify-center',
-                'e-rounded e-border-0 e-bg-transparent e-p-0 e-leading-none',
-                'e-text-dark-muted-foreground hover:e-text-dk-white',
-                state === 'copied' && 'e-text-dark-accent',
-                state === 'errored' && 'e-text-destructive',
+                'inline-flex h-5 w-5 shrink-0 items-center justify-center',
+                'rounded border-0 bg-transparent p-0 leading-none',
+                'text-dark-muted-foreground hover:text-dk-white',
+                state === 'copied' && 'text-dark-accent',
+                state === 'errored' && 'text-destructive',
             )}
             aria-label={state === 'copied' ? 'Copied' : 'Copy address'}
         >

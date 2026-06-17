@@ -24,10 +24,10 @@ import { BaseTable } from '@/app/shared/ui/Table';
 const logTextVariants = cva('', {
     variants: {
         variant: {
-            info: 'e-text-dk-info',
-            muted: 'e-text-dk-gray-700',
-            success: 'e-text-dk-success-on-dark',
-            warning: 'e-text-dk-warning-on-dark',
+            info: 'text-dk-info',
+            muted: 'text-dk-gray-700',
+            success: 'text-dk-success-on-dark',
+            warning: 'text-dk-warning-on-dark',
         },
     },
 });
@@ -247,16 +247,16 @@ function ProgramLogRow({
     return (
         <BaseTable.Row>
             <BaseTable.Cell>
-                <Link className="e-flex e-items-center" href={anchorPath}>
+                <Link className="flex items-center" href={anchorPath}>
                     {/* badgeColor='white' falls through to a plain `.badge` (no bg-white-soft is defined in dashkit) — same as legacy. */}
                     <Badge
                         ui="dashkit"
                         variant={badgeColor === 'success' || badgeColor === 'warning' ? badgeColor : 'default'}
-                        className="e-mr-1.5"
+                        className="mr-1.5"
                     >
                         #{index + 1}
                     </Badge>
-                    <span className="e-text-dk-white">
+                    <span className="text-dk-white">
                         <ProgramNameWithInstruction
                             programId={programId}
                             cluster={cluster}
@@ -265,14 +265,14 @@ function ProgramLogRow({
                             anchorProgram={anchorProgram}
                         />
                     </span>
-                    <ChevronsUp className="e-m-1.5 e-cursor-pointer" size={13} />
+                    <ChevronsUp className="m-1.5 cursor-pointer" size={13} />
                 </Link>
                 {programLogs && (
-                    <div className="e-flex e-flex-col e-items-start e-p-1.5 e-font-mono">
+                    <div className="flex flex-col items-start p-1.5 font-mono">
                         {programLogs.logs.map((log, key) => {
                             return (
                                 <span key={key}>
-                                    <span className="e-text-dk-gray-700">{log.prefix}</span>
+                                    <span className="text-dk-gray-700">{log.prefix}</span>
                                     <span className={logTextVariants({ variant: log.style })}>{log.text}</span>
                                 </span>
                             );

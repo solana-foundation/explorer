@@ -1,9 +1,9 @@
 import { Copyable } from '@components/common/Copyable';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { TableCardBody } from '@components/common/TableCardBody';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { type AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
@@ -119,11 +119,9 @@ export function AccountsCard({ message }: { message: VersionedMessage }) {
             <TableCardBody>{accountRows}</TableCardBody>
             {!loading && totalAccountSize > 0 && (
                 <CardFooter ui="dashkit">
-                    <div className="e-flex e-items-baseline e-justify-end">
-                        <span className="e-me-2 e-text-[0.625rem] e-uppercase e-text-dk-gray-700">
-                            Total Account Size:
-                        </span>
-                        <span className="e-text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
+                    <div className="flex items-baseline justify-end">
+                        <span className="me-2 text-[0.625rem] uppercase text-dk-gray-700">Total Account Size:</span>
+                        <span className="text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
                     </div>
                 </CardFooter>
             )}
@@ -145,11 +143,11 @@ function AccountFromLookupTableRow({
     return (
         <BaseTable.Row>
             <BaseTable.Cell>
-                <div className="e-flex e-flex-col e-items-start">
+                <div className="flex flex-col items-start">
                     Account #{accountIndex + 1}
-                    <span className="e-mt-[3px]">
+                    <span className="mt-[3px]">
                         {!readOnly && (
-                            <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                            <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
                                 Writable
                             </Badge>
                         )}
@@ -159,7 +157,7 @@ function AccountFromLookupTableRow({
                     </span>
                 </div>
             </BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">
+            <BaseTable.Cell className="text-right">
                 <AddressFromLookupTableWithContext
                     lookupTableKey={lookupTableKey}
                     lookupTableIndex={lookupTableIndex}
@@ -189,24 +187,24 @@ function AccountRow({
     return (
         <BaseTable.Row>
             <BaseTable.Cell>
-                <div className="e-flex e-flex-col e-items-start">
+                <div className="flex flex-col items-start">
                     Account #{accountIndex + 1}
-                    <span className="e-mt-[3px]">
+                    <span className="mt-[3px]">
                         {signer && (
-                            <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                            <Badge ui="dashkit" variant="info" className="mr-[3px]">
                                 Signer
                             </Badge>
                         )}
                         {!readOnly && (
-                            <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                            <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
                                 Writable
                             </Badge>
                         )}
                         {loading ? (
-                            <span className="e-text-dk-gray-700">Loading...</span>
+                            <span className="text-dk-gray-700">Loading...</span>
                         ) : accountInfo ? (
                             <Copyable text={hexData}>
-                                <span className="e-text-dk-gray-700">
+                                <span className="text-dk-gray-700">
                                     {accountInfo.size.toLocaleString('en-US')} bytes
                                 </span>
                             </Copyable>
@@ -214,7 +212,7 @@ function AccountRow({
                     </span>
                 </div>
             </BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">
+            <BaseTable.Cell className="text-right">
                 <AddressWithContext pubkey={publicKey} />
             </BaseTable.Cell>
         </BaseTable.Row>

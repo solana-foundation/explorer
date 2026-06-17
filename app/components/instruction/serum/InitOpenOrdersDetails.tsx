@@ -20,28 +20,28 @@ export function InitOpenOrdersDetailsCard(props: SerumIxDetailsProps<InitOpenOrd
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Open Orders</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.openOrders} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Open Orders Owner</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Market</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -49,7 +49,7 @@ export function InitOpenOrdersDetailsCard(props: SerumIxDetailsProps<InitOpenOrd
             {info.accounts.openOrdersMarketAuthority && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Open Orders Market Authority</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <Address pubkey={info.accounts.openOrdersMarketAuthority} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>

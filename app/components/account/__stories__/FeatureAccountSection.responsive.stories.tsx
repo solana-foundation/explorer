@@ -15,7 +15,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/FeatureAccountSection/Responsive',
+    title: 'Components/Account/FeatureAccountSection@Media',
 } satisfies Meta<typeof FeatureAccountSection>;
 
 export default meta;

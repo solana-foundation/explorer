@@ -60,7 +60,7 @@ export function NicknameEditor({ address, onClose }: Props) {
 
     return (
         <div
-            className="e-fixed e-left-0 e-top-0 e-flex e-h-full e-w-full e-items-center e-justify-center"
+            className="fixed left-0 top-0 flex h-full w-full items-center justify-center"
             style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 zIndex: 9999,
@@ -69,7 +69,7 @@ export function NicknameEditor({ address, onClose }: Props) {
         >
             <Card
                 ui="dashkit"
-                className="e-shadow-lg"
+                className="shadow-lg"
                 style={{ maxWidth: '500px', minWidth: '400px' }}
                 onClick={e => e.stopPropagation()}
             >
@@ -79,12 +79,12 @@ export function NicknameEditor({ address, onClose }: Props) {
                     </CardTitle>
                 </CardHeader>
                 <CardBody ui="dashkit">
-                    <div className="e-mb-3">
-                        <label className="e-mb-2 e-inline-block e-text-sm e-text-dk-gray-700">Address</label>
-                        <div className="e-truncate e-font-mono e-text-sm">{address}</div>
+                    <div className="mb-3">
+                        <label className="mb-2 inline-block text-sm text-dk-gray-700">Address</label>
+                        <div className="truncate font-mono text-sm">{address}</div>
                     </div>
-                    <div className="e-mb-3">
-                        <label htmlFor="nickname-input" className="e-mb-2 e-inline-block">
+                    <div className="mb-3">
+                        <label htmlFor="nickname-input" className="mb-2 inline-block">
                             Nickname
                         </label>
                         <FormControl>
@@ -100,16 +100,14 @@ export function NicknameEditor({ address, onClose }: Props) {
                                 autoFocus
                             />
                         </FormControl>
-                        <div className="e-flex e-justify-between">
-                            <small className="e-text-dk-gray-700">
-                                This nickname is stored locally on your device.
-                            </small>
-                            <small className="e-text-dk-gray-700">
+                        <div className="flex justify-between">
+                            <small className="text-dk-gray-700">This nickname is stored locally on your device.</small>
+                            <small className="text-dk-gray-700">
                                 {nickname.length}/{MAX_NICKNAME_LENGTH}
                             </small>
                         </div>
                     </div>
-                    <div className="e-flex e-justify-between">
+                    <div className="flex justify-between">
                         <div>
                             {getNickname(address) && (
                                 <Button ui="dashkit" variant="outline-danger" size="sm" onClick={handleRemove}>
@@ -117,7 +115,7 @@ export function NicknameEditor({ address, onClose }: Props) {
                                 </Button>
                             )}
                         </div>
-                        <div className="e-flex e-gap-1.5">
+                        <div className="flex gap-1.5">
                             <Button ui="dashkit" variant="secondary" size="sm" onClick={onClose}>
                                 Cancel
                             </Button>

@@ -8,8 +8,8 @@ export function FeatureGateCard({ children }: { children: React.ReactNode }) {
                     Feature Information
                 </CardTitle>
             </CardHeader>
-            <CardFooter ui="dashkit" className="e-border-t-0">
-                <div className="e-text-dk-gray-700">{children}</div>
+            <CardFooter ui="dashkit" className="border-t-0">
+                <div className="text-dk-gray-700">{children}</div>
             </CardFooter>
         </Card>
     );

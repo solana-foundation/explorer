@@ -27,7 +27,7 @@ const meta: Meta<typeof CodamaInstructionCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/CodamaInstructionDetailsCard/Responsive',
+    title: 'Components/Instruction/CodamaInstructionDetailsCard@Media',
 };
 
 export default meta;

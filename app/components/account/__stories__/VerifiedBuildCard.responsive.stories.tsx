@@ -38,7 +38,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/VerifiedBuildCard/Responsive',
+    title: 'Components/Account/VerifiedBuildCard@Media',
 } satisfies Meta<typeof BaseVerifiedBuildCard>;
 
 export default meta;
