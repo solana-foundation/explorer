@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockhashesCard } from '../BlockhashesCard';
 

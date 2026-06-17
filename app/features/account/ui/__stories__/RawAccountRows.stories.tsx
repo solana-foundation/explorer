@@ -1,7 +1,7 @@
 import type { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseRawAccountRows } from '../BaseRawAccountRows';
 

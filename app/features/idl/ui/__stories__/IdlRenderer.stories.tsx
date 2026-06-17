@@ -1,8 +1,8 @@
 import type { AnchorIdl, CodamaIdl } from '@entities/idl';
 import codamaIdlMock from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { IdlRenderer } from '../IdlRenderer';
 

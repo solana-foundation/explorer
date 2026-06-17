@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import React, { useEffect, useState } from 'react';
 
 import config, { dkColors } from '@/tailwind.config';

@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { withAutoFocusReleased } from '@storybook-config/decorators';
 import { withFixedContainer } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
 import { NicknameEditor } from '../NicknameEditor';

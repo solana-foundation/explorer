@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, fn, within } from 'storybook/test';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';

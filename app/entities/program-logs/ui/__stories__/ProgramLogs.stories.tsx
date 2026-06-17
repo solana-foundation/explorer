@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { baseLogs, errorLogs } from '../../model/mocks/logs';
 import { parsedBaseLogs, parsedErrorLogs } from '../../model/mocks/parsedLogs';

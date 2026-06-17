@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { useState } from 'react';
 import { Code, Database, Settings, Star } from 'react-feather';
 

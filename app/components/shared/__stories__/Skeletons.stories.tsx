@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect } from 'storybook/test';
 
 import { BaseTable } from '@/app/shared/ui/Table';

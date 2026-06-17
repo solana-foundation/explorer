@@ -1,5 +1,5 @@
-import type { Decorator, Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 
 import { NormalMetaplexNFTAttributesCard } from '../MetaplexNFTAttributesCard';
 

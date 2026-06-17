@@ -1,8 +1,8 @@
 import type { ClusterState } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/nextjs-vite';
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { hashProgramData } from '@utils/verified-builds';
 import { SWRConfig } from 'swr';

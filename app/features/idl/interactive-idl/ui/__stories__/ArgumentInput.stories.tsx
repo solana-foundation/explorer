@@ -1,5 +1,5 @@
 import type { ArgField } from '@entities/idl';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { useState } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 

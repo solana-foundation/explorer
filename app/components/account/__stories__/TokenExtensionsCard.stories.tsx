@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TokenExtensionsCard } from '../TokenExtensionsCard';
 

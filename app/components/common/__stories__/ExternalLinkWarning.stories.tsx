@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { ExternalLink } from 'react-feather';
 import { expect, userEvent, within } from 'storybook/test';
 

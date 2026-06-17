@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseCard, BaseCardBody, BaseCardHeader, BaseCardTitle } from '../../Card';
 import { BaseTable } from '../BaseTable';

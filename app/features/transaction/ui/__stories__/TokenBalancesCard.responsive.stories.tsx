@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withMockTransactions, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import BigNumber from 'bignumber.js';
 
 import { TokenBalancesCardInner, type TokenBalancesCardInnerProps } from '../TokenBalancesCard';

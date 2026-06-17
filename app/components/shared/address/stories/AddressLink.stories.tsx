@@ -1,11 +1,11 @@
 import { address } from '@solana/kit';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import {
     nextjsParameters,
     withClipboardMock,
     withClipboardMockErrored,
     withCluster,
 } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { AddressLink } from '../AddressLink';

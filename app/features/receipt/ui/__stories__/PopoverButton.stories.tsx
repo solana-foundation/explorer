@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { withClipboardMock } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { Share2 } from 'react-feather';
 import { expect, userEvent, within } from 'storybook/test';
 

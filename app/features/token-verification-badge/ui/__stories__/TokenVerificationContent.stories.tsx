@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { EVerificationSource, type VerificationSource } from '../../lib/types';
 import { ERiskLevel } from '../../model/use-rugcheck';

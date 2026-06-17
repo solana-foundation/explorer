@@ -1,7 +1,7 @@
 import { AutoRefresh } from '@features/transaction';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { mockTransactionStatus } from '@storybook-config/__fixtures__/transactions';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import {
     DEFAULT_SIGNATURE,

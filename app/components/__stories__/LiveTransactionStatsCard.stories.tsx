@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withStats } from '@storybook-config/decorators';
 import { withMockRpc } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { LiveTransactionStatsCard } from '../LiveTransactionStatsCard';
 

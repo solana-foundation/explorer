@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { address } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { Cluster } from '@utils/cluster';
 
 import type { ActivatedFeature, UpcomingFeature } from '../../lib/partition-features';

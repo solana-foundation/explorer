@@ -1,6 +1,6 @@
 import solanaLogo from '@img/logos-solana/low-contrast-solana-logo.svg';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { withImageLoadPending } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { Skeleton } from '../../skeleton';

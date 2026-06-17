@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { withImageLoadPending } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, waitFor, within } from 'storybook/test';
 
 import solanaHero from '@/app/components/shared/ui/image/__stories__/solana_hero_generated.jpg';
