@@ -11,6 +11,12 @@ const meta: Meta<typeof Toaster> = {
         toastOptions: { duration: Infinity },
     },
     component: Toaster,
+    parameters: {
+        // Sonner renders toasts into a fixed-position portal, and play() fires them.
+        // In docs, render each story in its own sized iframe and autoplay so the toast
+        // is contained and visible per block instead of escaping to the page bottom.
+        docs: { story: { autoplay: true, height: '180px', inline: false } },
+    },
     tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/Sonner/Toaster',
 };

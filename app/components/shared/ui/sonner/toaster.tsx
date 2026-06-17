@@ -14,6 +14,7 @@ export const Toaster = ({ toastOptions, ...props }: Props) => {
                     'data-[type=success]:!e-bg-accent-secondary data-[type=success]:!e-border-accent-secondary data-[type=success]:!e-text-foreground',
                     'data-[type=error]:!e-bg-destructive data-[type=error]:!e-border-destructive data-[type=error]:!e-text-foreground',
                 ),
+                classNames: { description: '!e-text-neutral-400' },
                 ...toastOptions,
             }}
             style={

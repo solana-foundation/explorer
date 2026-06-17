@@ -40,11 +40,11 @@ export function CustomToast(props: CustomToastProps) {
             aria-labelledby={titleId}
             aria-describedby={descriptionId}
             className={cn(
-                'e-w-full e-rounded-lg e-border e-border-neutral-950 e-bg-neutral-800 e-text-white',
+                'e-w-full e-rounded-lg e-border e-border-transparent e-bg-neutral-800 e-text-white e-shadow-lg',
                 'md:e-max-w-80',
             )}
         >
-            <div className="e-relative e-flex e-flex-1 e-items-start e-gap-2 e-px-3 e-py-2">
+            <div className="e-relative e-flex e-flex-1 e-items-start e-gap-2 e-p-4">
                 <div className="e-text-xs" aria-hidden="true">
                     {icon}
                 </div>
@@ -64,20 +64,19 @@ export function CustomToast(props: CustomToastProps) {
                         )
                     )}
                 </div>
-                <div className="e-absolute e-right-0 e-top-0 e-h-6 e-w-6">
-                    <button
-                        type="button"
-                        aria-label={`Dismiss ${title} notification`}
-                        className={cn(
-                            'e-h-full e-w-full e-rounded e-border-0 e-border-solid e-bg-transparent e-p-0',
-                            'e-text-neutral-400 hover:e-text-neutral-500',
-                            'focus:e-outline-none focus-visible:e-ring-1 focus-visible:e-ring-neutral-300',
-                        )}
-                        onClick={() => sonnerToast.dismiss(id)}
-                    >
-                        <X size={12} aria-hidden="true" />
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    aria-label={`Dismiss ${title} notification`}
+                    className={cn(
+                        'e-absolute e-right-4 e-top-2 e-flex e-items-center e-justify-center',
+                        'e-rounded-sm e-border-0 e-bg-transparent e-p-0 e-text-neutral-500 e-opacity-70',
+                        'e-transition-opacity hover:e-opacity-100',
+                        'focus:e-outline-none focus-visible:e-ring-1 focus-visible:e-ring-neutral-300',
+                    )}
+                    onClick={() => sonnerToast.dismiss(id)}
+                >
+                    <X size={16} aria-hidden="true" />
+                </button>
             </div>
         </div>
     );
