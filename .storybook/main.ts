@@ -24,6 +24,9 @@ const config: StorybookConfig = {
         // Core renders the "Level up" checklist widget in dev unless this is false; STORYBOOK_ONBOARDING_UI=true opts in.
         sidebarOnboardingChecklist: process.env.STORYBOOK_ONBOARDING_UI === 'true',
     },
+    core: {
+        disableTelemetry: true,
+    },
     framework: {
         name: '@storybook/nextjs-vite',
         options: {},
