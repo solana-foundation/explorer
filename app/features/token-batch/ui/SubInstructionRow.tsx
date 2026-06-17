@@ -24,10 +24,7 @@ export function SubInstructionRow({
     const typeName = TokenInstruction[parsed.instructionType] ?? 'Unknown';
 
     return (
-        <div
-            className="e-border-b e-border-neutral-700 e-py-3 last:e-border-b-0"
-            data-testid={`sub-ix-${index}`}
-        >
+        <div className="e-border-b e-border-neutral-700 e-py-3 last:e-border-b-0" data-testid={`sub-ix-${index}`}>
             <div className="e-mb-2 e-flex e-items-center e-gap-2">
                 <Badge ui="dashkit" variant="success">
                     #{index + 1}

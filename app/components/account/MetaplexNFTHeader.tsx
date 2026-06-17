@@ -56,13 +56,7 @@ export function MetaplexNFTHeader({ nftData }: { nftData: NFTData }) {
                 <div className="e-mb-3 e-mt-1.5">{getIsMutablePill(metadata.isMutable)}</div>
                 <Dropdown className="e-inline-flex">
                     <DropdownToggle asChild>
-                        <Button
-                            ui="dashkit"
-                            variant="dark"
-                            size="sm"
-                            className="e-w-[150px]"
-                            type="button"
-                        >
+                        <Button ui="dashkit" variant="dark" size="sm" className="e-w-[150px]" type="button">
                             Creators <ChevronDown size={15} className="e-align-text-top" />
                         </Button>
                     </DropdownToggle>
