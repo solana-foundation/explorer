@@ -121,11 +121,8 @@ function DetailsSection({ signature }: SignatureProps) {
     const isManualScrollRef = useRef(false);
     const manualScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Sync the sticky logs panel with the active instruction on the left.
-    // Proportionally scrolls the log panel within the active instruction's log
-    // section as the user scrolls through that instruction's detail card.
-    // Wheel events on the log panel scroll it independently for 2 s before
-    // auto-sync resumes.
+    // Sync the sticky logs panel with the active instruction as the page scrolls.
+    // Manual wheel scroll on the panel takes over for 2s before auto-sync resumes.
     useEffect(() => {
         if (!isXxl) return;
         const logsPanel = logsPanelRef.current;
@@ -147,16 +144,14 @@ function DetailsSection({ signature }: SignatureProps) {
 
         const handlePageScroll = () => {
             if (isManualScrollRef.current) return;
-            // Top-level instruction cards have id="ix-N" (set by useScrollAnchor).
-            // Keep only top-level instruction cards (id="ix-N"), not inner ones (id="ix-N-M").
+            // Top-level ix-N cards only (excludes nested ix-N-M).
             const cards = Array.from(document.querySelectorAll<HTMLElement>('[id^="ix-"]')).filter(el => {
-                const suffix = el.id.slice(3); // strip "ix-"
+                const suffix = el.id.slice(3);
                 return suffix.length > 0 && !suffix.includes('-') && !Number.isNaN(Number(suffix));
             });
             if (cards.length === 0) return;
 
-            // The "active" instruction is the last one whose top has scrolled
-            // past the sticky nav bar (~70 px).
+            // Active = last card whose top has crossed the sticky nav threshold.
             const threshold = 80;
             let activeIndex = 0;
             for (let i = 0; i < cards.length; i++) {
@@ -165,16 +160,12 @@ function DetailsSection({ signature }: SignatureProps) {
             }
 
             const cardRect = cards[activeIndex].getBoundingClientRect();
-            // 0 = just entered view, 1 = fully scrolled past
             const progress = Math.max(0, Math.min(1, (threshold - cardRect.top) / cardRect.height));
 
             const logRow = logsPanel.querySelector<HTMLElement>(`[data-ix-index="${activeIndex}"]`);
             if (!logRow) return;
 
-            // `logRow` is a <tr> whose offsetParent is the <table>, not logsPanel.
-            // Use getBoundingClientRect to get the row's absolute position within
-            // the scroll container, independent of current scrollTop.
-            // Offset by the sticky title height so the row header appears below it, not under it.
+            // Use getBoundingClientRect for position independent of current scrollTop.
             const titleHeight = (logsPanel.querySelector('section > div') as HTMLElement | null)?.offsetHeight ?? 0;
             const panelRect = logsPanel.getBoundingClientRect();
             const rowRect = logRow.getBoundingClientRect();
