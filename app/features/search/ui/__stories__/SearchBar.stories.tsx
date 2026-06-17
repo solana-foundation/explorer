@@ -20,6 +20,12 @@ const defaultArgs: BaseSearchProps = {
 const meta: Meta<typeof BaseSearch> = {
     args: defaultArgs,
     component: BaseSearch,
+    parameters: {
+        // The results panel is a floating Radix popover; inline it escapes the docs
+        // block and gets clipped. Render each story in its own sized iframe so the
+        // open-state dropdown is contained and visible in full per block.
+        docs: { story: { height: '440px', inline: false } },
+    },
     tags: ['autodocs'],
     title: 'Features/Search/BaseSearch',
 };
