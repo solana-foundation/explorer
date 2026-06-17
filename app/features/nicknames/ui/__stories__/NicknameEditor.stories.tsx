@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { withAutoFocusReleased } from '@storybook-config/decorators';
 import { withFixedContainer } from '@storybook-config/responsive-decorators';
 import { fn } from 'storybook/test';

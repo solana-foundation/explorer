@@ -6,7 +6,7 @@ import {
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { none, some } from '@metaplex-foundation/umi';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withTokenInfoBatch, withTransactions } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 

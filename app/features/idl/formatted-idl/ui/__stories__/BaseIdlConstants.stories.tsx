@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { BaseIdlConstants } from '../BaseIdlConstants';
 import { SearchHighlightProvider } from '../SearchHighlightContext';

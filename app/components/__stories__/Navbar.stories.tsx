@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 
 import { Navbar } from '../Navbar';

@@ -1,6 +1,6 @@
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withTokenInfoBatch, withTransactions } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 

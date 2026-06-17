@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 
 import { UnknownAccountCard } from '../UnknownAccountCard';

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withClipboardMock } from '@storybook-config/decorators';
 
 import { IdlInstructionSection } from '../IdlInstructionSection';

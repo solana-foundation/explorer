@@ -1,6 +1,6 @@
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { type ParsedInstruction, PublicKey, type VersionedMessage } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
+import type { Decorator, Meta, StoryObj } from '@storybook/nextjs-vite';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';

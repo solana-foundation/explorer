@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters } from '@storybook-config/decorators';
 
 import FLAGGED_ACCOUNTS_WARNING from '../flagged-accounts';

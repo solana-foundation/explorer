@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { toast as sonnerToast } from 'sonner';
 import { expect, fn, within } from 'storybook/test';
 

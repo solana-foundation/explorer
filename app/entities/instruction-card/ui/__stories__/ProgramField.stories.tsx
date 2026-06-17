@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { SystemProgram } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 

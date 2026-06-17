@@ -1,5 +1,5 @@
 import { useClusterModal } from '@providers/cluster';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withClusterModalOpen } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS } from '@storybook-config/responsive-decorators';
 import { createStore, Provider as JotaiProvider } from 'jotai';

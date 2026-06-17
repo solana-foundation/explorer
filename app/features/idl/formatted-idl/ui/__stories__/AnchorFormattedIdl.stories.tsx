@@ -1,6 +1,6 @@
 import type { Idl } from '@coral-xyz/anchor';
 import idlMock from '@entities/idl/mocks/codama/whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc-idl.json';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { AnchorFormattedIdl } from '../AnchorFormattedIdl';
 

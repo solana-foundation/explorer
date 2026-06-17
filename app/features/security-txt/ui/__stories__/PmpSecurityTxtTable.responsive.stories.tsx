@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '../../../../../.storybook/responsive-decorators';
 import { PmpSecurityTxtTable } from '../PmpSecurityTxtTable';

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import type { VariantProps } from 'class-variance-authority';
 import Link from 'next/link';
 import { AlertTriangle, Check, Circle, Code, ExternalLink, type Icon, Info, Lock, Moon, X } from 'react-feather';

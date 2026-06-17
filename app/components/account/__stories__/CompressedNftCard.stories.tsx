@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { withClusterAndAccounts } from '@storybook-config/decorators';
 
 import type { CompressedNft } from '@/app/providers/compressed-nft';

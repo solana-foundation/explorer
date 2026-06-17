@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { buildTokenTransferCheckedIx } from '@features/receipt/model/__fixtures__/builders';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { mockConfirmedSignatureInfo } from '@storybook-config/__fixtures__/account-history';
 
 import { InstructionDetails } from '../InstructionDetails';
