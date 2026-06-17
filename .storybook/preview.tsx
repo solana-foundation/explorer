@@ -1,5 +1,3 @@
-import '@/app/styles/preflight.css';
-import '@/app/styles/preflight-adjustments.css';
 import '@/app/styles/styles.css';
 
 import type { Preview } from '@storybook/react';

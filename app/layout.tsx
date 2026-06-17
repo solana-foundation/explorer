@@ -1,5 +1,3 @@
-import './styles/preflight.css';
-import './styles/preflight-adjustments.css';
 import './styles/styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';

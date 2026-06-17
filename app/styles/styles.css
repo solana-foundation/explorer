@@ -1,10 +1,14 @@
-/* Preflight (`@tailwind base`) lives in preflight.css, imported BEFORE preflight-adjustments.css, so the
-   cascade is preflight < adjustments < these app overrides (utilities beat all element rules). */
-@tailwind components;
-@tailwind utilities;
+/* Single global stylesheet. Order matters: `@tailwind base` (Preflight) first, then the element/reset rules,
+   then `@tailwind components`/`@tailwind utilities`. The element rules MUST stay above the utilities directive —
+   the button reset below targets `[type='button']` etc. (an attribute selector, specificity 0,1,0, equal to a
+   utility class), so if it sat after `@tailwind utilities` it would beat `e-bg-transparent`/`e-border-0` by
+   source order and resurrect native UA button chrome. Element rules carry their provenance: "Preflight …" /
+   "Bootstrap Reboot …" notes mark rules that bend Preflight back to the app's rendering; "Dashkit …" notes
+   mark app overrides. */
+@tailwind base;
 
-/* App body base — dashkit set body font/size/color/bg via SCSS vars; prebuilt Reboot ships stock
-   defaults, so restore them explicitly. */
+/* App body base — dashkit set body font/size/color/bg via SCSS vars; Preflight ships stock defaults, so
+   restore them explicitly. */
 body {
     background-color: var(--background);
     color: var(--foreground);
@@ -13,13 +17,37 @@ body {
     line-height: 1.5;
 }
 
-/* Heading sizes from the former dashkit scale; kept explicit because Tailwind preflight is skipped — without them headings fall back to Reboot's larger defaults. */
+/* Preflight forces media to display:block; baseline kept UA inline, so inline icons (svg link/chevron
+   glyphs) sit beside text instead of dropping to their own line. */
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+    display: revert;
+}
+
+/* Preflight defaults border-color to a gray (theme borderColor.DEFAULT) on every element; baseline left
+   it as currentColor, so width-only borders (card dividers, table cells) shifted color. */
+*,
+::before,
+::after {
+    border-color: currentColor;
+}
+
+/* Heading sizes from the former dashkit scale; kept explicit because Preflight resets headings to unstyled
+   (font-weight:inherit, no margin) — without these they fall back to Preflight's bare defaults. The
+   font-weight:500 is Bootstrap Reboot's heading weight (styles.css owns the sizes). */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
+    font-weight: 500;
     line-height: 1.1;
     letter-spacing: -0.02em;
 }
@@ -57,12 +85,70 @@ strong {
     font-weight: 600;
 }
 
-/* Dashkit $small-font-size (13px flat) — prebuilt Reboot uses .875em (13.125px at 15px base). */
+/* Bootstrap Reboot delta: Preflight zeroes typographic margins (margin:0); baseline kept the reading rhythm. */
+p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+/* Dashkit `_reboot.scss` list extension (padding-left:2.5rem — Bootstrap Reboot alone indents 2rem) merged
+   with Bootstrap Reboot deltas: Preflight strips list markers (list-style:none) and zeroes margins. */
+ul,
+ol,
+dl {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+ul,
+ol {
+    list-style: revert;
+    padding-left: 2.5rem;
+}
+ol ol,
+ol ul,
+ul ol,
+ul ul {
+    margin-bottom: 0;
+}
+dd {
+    margin-bottom: 0.5rem;
+    margin-left: 0;
+}
+dt {
+    font-weight: 700;
+}
+blockquote {
+    margin: 0 0 1rem;
+}
+figure {
+    margin: 0 0 1rem;
+}
+address {
+    margin-bottom: 1rem;
+    font-style: normal;
+    line-height: inherit;
+}
+
+/* Dashkit $small-font-size (13px flat) — Preflight/Reboot use .875em (13.125px at 15px base). */
 small {
     font-size: 0.8125rem;
 }
 
-/* Dashkit hr — solid #282d2b 1px line; Reboot renders border-top currentColor at .25 opacity instead. */
+sub,
+sup {
+    position: relative;
+    font-size: 0.75em;
+    line-height: 0;
+    vertical-align: baseline;
+}
+sub {
+    bottom: -0.25em;
+}
+sup {
+    top: -0.5em;
+}
+
+/* Dashkit hr — solid #282d2b 1px line; Preflight/Reboot render border-top currentColor at .25 opacity. */
 hr {
     height: 1px;
     margin: 1rem 0;
@@ -72,7 +158,7 @@ hr {
     opacity: 1;
 }
 
-/* Dashkit code/pre chips (dark cascade) — Reboot only sets mono font + pink code color. */
+/* Dashkit code/pre chips (dark cascade) — Preflight only sets mono font. */
 code,
 pre {
     padding: 0.33rem;
@@ -90,8 +176,27 @@ pre {
     text-align: left;
 }
 
-/* Dashkit link overrides — $link-color $primary-dark (#33a382), text-decoration none.
-   Bootstrap reboot's default link color is #0d6efd (blue) with underline. */
+/* Bootstrap chrome Preflight has no equivalent for. */
+mark {
+    padding: 0.2em;
+    background-color: #fcf8e3;
+}
+kbd {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.875em;
+    color: #fff;
+    background-color: #212529;
+    border-radius: 0.2rem;
+}
+kbd kbd {
+    padding: 0;
+    font-size: 1em;
+    font-weight: 700;
+}
+
+/* Dashkit link overrides — $link-color $primary-dark (#33a382), text-decoration none. Preflight/Reboot
+   default link color is #0d6efd (blue) with underline. The a:not([href]):not([class]) rule is a Bootstrap
+   Reboot delta: keep href-less, class-less anchors at inherit (styles.css colors every other <a>). */
 a {
     color: #33a382;
     text-decoration: none;
@@ -100,17 +205,60 @@ a:hover {
     color: #2b8a6e;
     text-decoration: none;
 }
-
+a:not([href]):not([class]),
+a:not([href]):not([class]):hover {
+    color: inherit;
+    text-decoration: none;
+}
 /* Dashkit `_type.scss` focus-outline removal on links/buttons; without it the UA blue ring leaks. */
 a:focus,
 button:focus {
     outline: none !important;
 }
 
-/* Dashkit `_reboot.scss` list extension — Bootstrap Reboot alone indents lists 2rem. */
-ul,
-ol {
-    padding-left: 2.5rem;
+/* Preflight strips the UA button box model (transparent bg, color:inherit, padding:0, border-width:0);
+   baseline kept UA chrome for buttons without explicit utility styling. Revert to UA — utility classes
+   (e-bg-*, e-text-*, e-border-*, e-p-*) still win by specificity. Preflight leaves UA button border-radius;
+   baseline squared it. */
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+    padding: revert;
+    color: revert;
+    background-color: revert;
+    background-image: revert;
+    border-width: revert;
+    border-style: revert;
+    border-color: revert;
+}
+button {
+    border-radius: 0;
+}
+
+/* Bootstrap Reboot deltas Preflight has no equivalent for: form/table UA-ish behavior. */
+th {
+    text-align: inherit;
+    text-align: -webkit-match-parent;
+}
+label {
+    display: inline-block;
+}
+legend {
+    float: left;
+    width: 100%;
+    padding: 0;
+    margin-bottom: 0.5rem;
+    font-size: calc(1.275rem + 0.3vw);
+    line-height: inherit;
+}
+@media (min-width: 1200px) {
+    legend {
+        font-size: 1.5rem;
+    }
+}
+legend + * {
+    clear: left;
 }
 
 /* Bootstrap global caption rule from the dashkit bundle ($table-cell-padding-y / $text-muted). */
@@ -119,6 +267,17 @@ caption {
     padding-bottom: 1rem;
     color: #698582;
     text-align: left;
+}
+table {
+    caption-side: bottom;
+}
+tbody,
+td,
+tfoot,
+th,
+thead,
+tr {
+    border-color: inherit;
 }
 
 :root {
@@ -134,6 +293,16 @@ caption {
     --sb-bg-card: #1e2423;
     --sb-bg-light: oklch(96.5% 0.005 86);
 }
+
+/* User-chosen: keep Bootstrap smooth scrolling (Preflight leaves scroll-behavior:auto). */
+@media (prefers-reduced-motion: no-preference) {
+    :root {
+        scroll-behavior: smooth;
+    }
+}
+
+@tailwind components;
+@tailwind utilities;
 
 /* Dashkit component ports kept as-is: spinners */
 @layer components {

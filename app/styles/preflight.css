@@ -1,3 +1,0 @@
-/* Tailwind Preflight. Imported FIRST so it sits below the preflight-adjustments layer and the app
-   overrides in styles.css (cascade: preflight < adjustments < app overrides; utilities beat all). */
-@tailwind base;
