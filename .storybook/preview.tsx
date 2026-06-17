@@ -1,10 +1,11 @@
 import '@/app/styles/styles.css';
 
-import type { Preview } from '@storybook/react';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import React from 'react';
 
 import { rubikFont } from '@/app/styles';
+
+import type { Preview } from './types';
 
 // MSW is opt-in: STORYBOOK_MSW=true registers the service worker so stories with
 // `parameters.msw.handlers` mock network calls. Off by default so normal runs are untouched.
