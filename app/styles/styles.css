@@ -386,6 +386,13 @@ tr {
     }
 }
 
+/* toggled imperatively in Address.tsx to highlight identical addresses on hover */
+@layer components {
+    .address-highlight {
+        @apply box-border rounded outline outline-1 outline-dashed outline-dk-primary-dark;
+    }
+}
+
 /* ported as is from _solana.scss; styles the chart.js external tooltip
    built at runtime in LiveTransactionStatsCard (#chartjs-tooltip) */
 @layer components {
