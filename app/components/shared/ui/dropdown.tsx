@@ -70,6 +70,7 @@ const DropdownToggle = React.forwardRef<HTMLButtonElement, DropdownToggleProps>(
         return (
             <Comp
                 ref={ref}
+                type={asChild ? undefined : 'button'}
                 aria-haspopup="true"
                 aria-expanded={context?.open ?? false}
                 onClick={event => {
