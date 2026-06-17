@@ -20,8 +20,7 @@ import { CookieConsent } from '@/app/features/cookie';
 import { VisibilityProvider } from '@/app/shared/lib/visibility';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { rubikFont } from '@/app/styles';
-
-import { botIdProtectedRoutes } from '../proxy';
+import { botIdProtectedRoutes } from '@/config/botid-middleware.mjs';
 
 export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
