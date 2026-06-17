@@ -1,3 +1,12 @@
 <!-- Rubik is loaded + --explorer-default-font defined by next/font (rubikFont in preview.tsx).
      Keep the gstatic preconnect to warm the connection for next/font's woff2 fetch. -->
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- The autodocs Primary block's panel isn't targeted by the backgrounds addon, so it shows the
+     white docs frame. --sb-doc-bg mirrors the selected background (preview.tsx); the addon's own
+     rule still wins on the Stories blocks where it applies. -->
+<style>
+    .docs-story {
+        background-color: var(--sb-doc-bg, var(--background));
+    }
+</style>

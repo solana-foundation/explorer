@@ -120,6 +120,11 @@ function TypographyPalette() {
 }
 
 const meta: Meta = {
+    parameters: {
+        docs: {
+            canvas: { sourceState: 'none' },
+        },
+    },
     tags: ['autodocs', 'test'],
     title: 'Design System/Palette',
 };

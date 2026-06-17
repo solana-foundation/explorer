@@ -28,6 +28,17 @@ BigInt.prototype.toJSON = function () {
     return this.toString();
 };
 
+// The autodocs Primary block sits under #anchor--primary--<id>, which the backgrounds addon never
+// targets, so mirror the selected background onto a CSS var the inner panel reads (preview-head.html).
+function SelectedBackgroundBridge({ value }: { value?: string }) {
+    React.useEffect(() => {
+        const root = document.documentElement;
+        if (value) root.style.setProperty('--sb-doc-bg', value);
+        else root.style.removeProperty('--sb-doc-bg');
+    }, [value]);
+    return <></>;
+}
+
 const preview: Preview = {
     parameters: {
         a11y: {
@@ -73,12 +84,15 @@ const preview: Preview = {
     },
 
     decorators: [
-        Story => {
+        (Story, context) => {
+            const selected = context.globals?.backgrounds?.value;
+            const resolved = selected ? context.parameters?.backgrounds?.options?.[selected]?.value : undefined;
             return (
                 <>
                     {/* Mirror app/layout.tsx: define --explorer-default-font on :root so body
                         (and portal-mounted modals/dropdowns) inherit Rubik via styles.css. */}
                     <style>{`:root { --explorer-default-font: ${rubikFont.style.fontFamily}; }`}</style>
+                    <SelectedBackgroundBridge value={resolved} />
                     <div id="storybook-outer">
                         <Story />
                     </div>
