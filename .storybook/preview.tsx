@@ -1,9 +1,18 @@
 import '@/app/styles/styles.css';
 
 import type { Preview } from '@storybook/react';
+import { initialize, mswLoader } from 'msw-storybook-addon';
 import React from 'react';
 
 import { rubikFont } from '@/app/styles';
+
+// MSW is opt-in: STORYBOOK_MSW=true registers the service worker so stories with
+// `parameters.msw.handlers` mock network calls. Off by default so normal runs are untouched.
+const mswEnabled = process.env.STORYBOOK_MSW === 'true';
+
+if (mswEnabled) {
+    initialize();
+}
 
 // Storybook serialises story args with JSON.stringify (for the controls panel and inter-frame
 // messaging), which throws on BigInt. Story fixtures here use BigInt for lamports / epoch values,
@@ -83,6 +92,8 @@ const preview: Preview = {
             value: 'dark',
         },
     },
+
+    loaders: mswEnabled ? [mswLoader] : [],
 };
 
 export default preview;

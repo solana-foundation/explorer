@@ -25,6 +25,7 @@
         "test:e2e:ci": "playwright test",
         "test:e2e:ui": "playwright test --ui",
         "test:sb": "vitest --project storybook run",
+        "test:sb:coverage": "vitest --project storybook run --coverage",
         "test:sb:watch": "vitest --project storybook --watch",
         "test:watch": "vitest --project specs --watch",
         "pretypecheck": "next build",
@@ -140,11 +141,11 @@
         "@playwright/test": "1.57.0",
         "@solana/prettier-config-solana": "0.0.2",
         "@storybook/addon-a11y": "10.1.4",
-        "@storybook/addon-docs": "10.1.4",
-        "@storybook/addon-onboarding": "9.1.10",
-        "@storybook/addon-vitest": "10.1.4",
-        "@storybook/nextjs-vite": "10.1.4",
-        "@storybook/react": "10.1.4",
+        "@storybook/addon-docs": "10.2.6",
+        "@storybook/addon-onboarding": "10.2.6",
+        "@storybook/addon-vitest": "10.2.6",
+        "@storybook/nextjs-vite": "10.2.6",
+        "@storybook/react": "10.2.6",
         "@testing-library/jest-dom": "5.16.4",
         "@testing-library/react": "15.0.6",
         "@testing-library/user-event": "14.4.3",
@@ -176,13 +177,15 @@
         "globals": "16.2.0",
         "jest-environment-jsdom": "29.5.0",
         "jsdom": "26.0.0",
+        "msw": "2.14.6",
+        "msw-storybook-addon": "2.0.7",
         "playwright": "1.57.0",
         "postcss": "8.5.10",
         "postcss-import": "16.1.0",
         "prettier": "3.5.3",
         "prettier-plugin-tailwindcss": "0.7.2",
         "react-scan": "0.0.26",
-        "storybook": "10.1.10",
+        "storybook": "10.2.6",
         "styled-jsx": "5.1.6",
         "tailwindcss": "3.4.17",
         "tsx": "4.21.0",
@@ -259,6 +262,11 @@
             "sharp",
             "unrs-resolver",
             "utf-8-validate"
+        ]
+    },
+    "msw": {
+        "workerDirectory": [
+            "public"
         ]
     }
 }

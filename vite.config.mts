@@ -122,6 +122,15 @@ export default defineConfig({
         ],
         coverage: {
             provider: 'v8',
+            reporter: ['text', 'html', 'lcov'],
+            include: ['app/**'],
+            exclude: [
+                'app/**/*.stories.*',
+                'app/**/__stories__/**',
+                'app/**/__mocks__/**',
+                'app/**/__fixtures__/**',
+                'app/**/*.d.ts',
+            ],
         },
         poolOptions: {
             threads: {
