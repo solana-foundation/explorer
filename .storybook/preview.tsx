@@ -42,6 +42,14 @@ function SelectedBackgroundBridge({ value }: { value?: string }) {
 const preview: Preview = {
     parameters: {
         a11y: {
+            // Document-scoped rules that can never pass for a component rendered in isolation (no <main>/<h1>/landmark).
+            config: {
+                rules: [
+                    { enabled: false, id: 'landmark-one-main' },
+                    { enabled: false, id: 'page-has-heading-one' },
+                    { enabled: false, id: 'region' },
+                ],
+            },
             test: 'todo',
         },
         backgrounds: {

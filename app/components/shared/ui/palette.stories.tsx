@@ -121,6 +121,7 @@ function TypographyPalette() {
 
 const meta: Meta = {
     parameters: {
+        a11y: { test: 'error' },
         docs: {
             canvas: { sourceState: 'none' },
         },
