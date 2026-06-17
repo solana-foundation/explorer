@@ -78,6 +78,11 @@ export default defineConfig({
                         'vite-plugin-node-polyfills/shims/process',
                     ],
                 },
+                resolve: {
+                    alias: {
+                        'node-fetch': path.resolve(__dirname, '.storybook/node-fetch.browser-shim.ts'),
+                    },
+                },
                 plugins: [
                     // The plugin will run tests for the stories defined in your Storybook config
                     // See options at: https://storybook.js.org/docs/writing-tests/test-addon#storybooktest
