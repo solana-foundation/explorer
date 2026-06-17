@@ -241,7 +241,7 @@ function DetailsSection({ signature }: SignatureProps) {
                 </div>
                 <div
                     ref={logsPanelRef}
-                    className="xxl:sticky xxl:top-[70px] xxl:max-h-[calc(100vh-90px)] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-y-auto"
+                    className="scrollbar-hide xxl:sticky xxl:top-[70px] xxl:max-h-[calc(100vh-90px)] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-y-auto xxl:rounded-b-lg"
                     id="logs"
                 >
                     <ProgramLogSection signature={signature} />

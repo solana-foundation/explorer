@@ -8,7 +8,7 @@ import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { BaseCardBody, Card } from '@/app/shared/ui/Card';
+import { BaseCardBody } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { CollapsibleSection } from './CollapsibleSection';
@@ -59,20 +59,18 @@ export function ProgramLogSection({ signature }: SignatureProps) {
         <CollapsibleSection
             title="Logs"
             actions={chips}
-            className=""
+            sectionClassName="xxl:!gap-0"
             titleClassName="xxl:sticky xxl:top-0 xxl:z-10 xxl:bg-[var(--bs-body-bg)] xxl:pb-3"
         >
-            <Card ui="dashkit">
-                {prettyLogs !== null && logMessages !== null ? (
-                    showRaw ? (
-                        <RawProgramLogs raw={logMessages} />
-                    ) : (
-                        <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
-                    )
+            {prettyLogs !== null && logMessages !== null ? (
+                showRaw ? (
+                    <RawProgramLogs raw={logMessages} />
                 ) : (
-                    <BaseCardBody className="text-sm text-muted">Logs not supported for this transaction</BaseCardBody>
-                )}
-            </Card>
+                    <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
+                )
+            ) : (
+                <BaseCardBody className="text-sm text-muted">Logs not supported for this transaction</BaseCardBody>
+            )}
         </CollapsibleSection>
     );
 }
