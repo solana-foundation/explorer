@@ -25,7 +25,7 @@ export function SubInstructionRow({
 
     return (
         <div
-            className="e-border-b e-border-neutral-200 e-py-3 dark:e-border-neutral-700"
+            className="e-border-b e-border-neutral-700 e-py-3 last:e-border-b-0"
             data-testid={`sub-ix-${index}`}
         >
             <div className="e-mb-2 e-flex e-items-center e-gap-2">
