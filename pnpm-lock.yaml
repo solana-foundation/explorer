@@ -373,8 +373,8 @@ importers:
         specifier: 0.0.2
         version: 0.0.2(prettier@3.5.3)
       '@storybook/addon-a11y':
-        specifier: 10.1.4
-        version: 10.1.4(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))
+        specifier: 10.2.6
+        version: 10.2.6(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))
       '@storybook/addon-docs':
         specifier: 10.2.6
         version: 10.2.6(@types/react@19.2.14)(esbuild@0.27.7)(rollup@4.50.1)(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))(vite@6.3.6(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(webpack@5.99.5(esbuild@0.27.7)(lightningcss@1.29.2)(postcss@8.5.10))
@@ -5196,10 +5196,10 @@ packages:
     resolution: {integrity: sha512-WOiL7La+RSiJsz7jVO85yhSiiSvNMUthiWuLPeWVOoD6IYa34BEAzanF1RdXRWGglSbRFYCTkyr+Ay1WmXmSRQ==}
     engines: {node: '>=14'}
 
-  '@storybook/addon-a11y@10.1.4':
-    resolution: {integrity: sha512-go7SshAyu+pnK7Prq3UnCBCB7DxAQkPMnebsv3fnboeTZHnDXQqfmHdZ15o+pH0JsCedC05RYsdbjd2rMHMvFQ==}
+  '@storybook/addon-a11y@10.2.6':
+    resolution: {integrity: sha512-oFxXEch0/qw50n2rMGrXaM5WjvWa8cRvWSkH/rObOGF+j0NaL2VPqeC1AUOG5rZxvGrGeK8O4XI4TTi02+MelQ==}
     peerDependencies:
-      storybook: ^10.1.4
+      storybook: ^10.2.6
 
   '@storybook/addon-docs@10.2.6':
     resolution: {integrity: sha512-7a37fu2hdOJRCITS+EimhVN9xVVvSeodmX6QdfxOim+2ECYnvMC9YVYpJ0et3XC8xnl9/3AbQ4y670Uw1hXcmg==}
@@ -6194,8 +6194,8 @@ packages:
     resolution: {integrity: sha512-Xm7bpRXnDSX2YE2YFfBk2FnF0ep6tmG7xPh8iHee8MIcrgq762Nkce856dYtJYLkuIoYZvGfTs/PbZhideTcEg==}
     engines: {node: '>=4'}
 
-  axe-core@4.11.0:
-    resolution: {integrity: sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==}
+  axe-core@4.12.0:
+    resolution: {integrity: sha512-FTavr/7Ba0IptwGOPxnQvdyW2tAsdLBMTBXz7rKH6xJ2skpyxpBxyHkDdBs4lf69yRqYpkqCdfhnwS8YULGOmg==}
     engines: {node: '>=4'}
 
   axios@0.30.2:
@@ -17344,10 +17344,10 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@storybook/addon-a11y@10.1.4(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))':
+  '@storybook/addon-a11y@10.2.6(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))':
     dependencies:
       '@storybook/global': 5.0.0
-      axe-core: 4.11.0
+      axe-core: 4.12.0
       storybook: 10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10)
 
   '@storybook/addon-docs@10.2.6(@types/react@19.2.14)(esbuild@0.27.7)(rollup@4.50.1)(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))(vite@6.3.6(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(webpack@5.99.5(esbuild@0.27.7)(lightningcss@1.29.2)(postcss@8.5.10))':
@@ -18648,7 +18648,7 @@ snapshots:
 
   axe-core@4.10.3: {}
 
-  axe-core@4.11.0: {}
+  axe-core@4.12.0: {}
 
   axios@0.30.2:
     dependencies:
