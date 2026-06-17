@@ -142,7 +142,6 @@
         "@solana/prettier-config-solana": "0.0.2",
         "@storybook/addon-a11y": "10.2.6",
         "@storybook/addon-docs": "10.2.6",
-        "@storybook/addon-onboarding": "10.2.6",
         "@storybook/addon-vitest": "10.2.6",
         "@storybook/nextjs-vite": "10.2.6",
         "@storybook/react": "10.2.6",

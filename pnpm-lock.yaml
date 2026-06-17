@@ -378,9 +378,6 @@ importers:
       '@storybook/addon-docs':
         specifier: 10.2.6
         version: 10.2.6(@types/react@19.2.14)(esbuild@0.27.7)(rollup@4.50.1)(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))(vite@6.3.6(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(webpack@5.99.5(esbuild@0.27.7)(lightningcss@1.29.2)(postcss@8.5.10))
-      '@storybook/addon-onboarding':
-        specifier: 10.2.6
-        version: 10.2.6(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))
       '@storybook/addon-vitest':
         specifier: 10.2.6
         version: 10.2.6(@vitest/browser-playwright@4.0.17(bufferutil@4.0.7)(msw@2.14.6(@types/node@22.15.3)(typescript@5.7.3))(playwright@1.57.0)(utf-8-validate@5.0.10)(vite@6.3.6(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@3.2.4))(@vitest/browser@3.2.4)(@vitest/runner@3.2.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))(vitest@3.2.4)
@@ -5203,11 +5200,6 @@ packages:
 
   '@storybook/addon-docs@10.2.6':
     resolution: {integrity: sha512-7a37fu2hdOJRCITS+EimhVN9xVVvSeodmX6QdfxOim+2ECYnvMC9YVYpJ0et3XC8xnl9/3AbQ4y670Uw1hXcmg==}
-    peerDependencies:
-      storybook: ^10.2.6
-
-  '@storybook/addon-onboarding@10.2.6':
-    resolution: {integrity: sha512-ddz0iXHydMK3/Im+uO/gcZFHPtJjbEctXw1F53HAvF2PLVoM/+86H/4d5ek6idXql9Zflrpeef//hM1unQZ+GQ==}
     peerDependencies:
       storybook: ^10.2.6
 
@@ -17366,10 +17358,6 @@ snapshots:
       - rollup
       - vite
       - webpack
-
-  '@storybook/addon-onboarding@10.2.6(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))':
-    dependencies:
-      storybook: 10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10)
 
   '@storybook/addon-vitest@10.2.6(@vitest/browser-playwright@4.0.17(bufferutil@4.0.7)(msw@2.14.6(@types/node@22.15.3)(typescript@5.7.3))(playwright@1.57.0)(utf-8-validate@5.0.10)(vite@6.3.6(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@3.2.4))(@vitest/browser@3.2.4)(@vitest/runner@3.2.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(storybook@10.2.6(@testing-library/dom@10.4.0)(bufferutil@4.0.7)(prettier@3.5.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(utf-8-validate@5.0.10))(vitest@3.2.4)':
     dependencies:

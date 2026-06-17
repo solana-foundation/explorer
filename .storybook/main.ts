@@ -19,16 +19,10 @@ function toAliasArray(alias: AliasOptions | undefined) {
 
 const config: StorybookConfig = {
     stories: ['../app/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
-    addons: [
-        '@storybook/addon-docs',
-        '@storybook/addon-vitest',
-        '@storybook/addon-a11y',
-        // STORYBOOK_ONBOARDING=true enables the guided-tour addon; off by default.
-        ...(process.env.STORYBOOK_ONBOARDING === 'true' ? ['@storybook/addon-onboarding'] : []),
-    ],
+    addons: ['@storybook/addon-docs', '@storybook/addon-vitest', '@storybook/addon-a11y'],
     features: {
-        // Core renders the "Level up" checklist widget in dev unless this is false; gate it on the same flag.
-        sidebarOnboardingChecklist: process.env.STORYBOOK_ONBOARDING === 'true',
+        // Core renders the "Level up" checklist widget in dev unless this is false; STORYBOOK_ONBOARDING_UI=true opts in.
+        sidebarOnboardingChecklist: process.env.STORYBOOK_ONBOARDING_UI === 'true',
     },
     framework: {
         name: '@storybook/nextjs-vite',
