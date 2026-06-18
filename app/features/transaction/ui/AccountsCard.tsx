@@ -9,9 +9,9 @@ import { cn } from '@components/shared/utils';
 import { AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
+import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
-import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import React, { useMemo, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
@@ -66,23 +66,23 @@ function TransactionAccountRow({
 
     return (
         <>
-            <div className="e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid] last:e-border-b-0">
+            <div className="border-1 border-b border-white/10 [border-bottom-style:solid] last:border-b-0">
                 {/* Main row */}
                 <div
                     className={cn(
-                        'e-min-h-9 e-px-3 e-py-2.5 md:e-px-4',
-                        'e-grid e-items-start e-gap-x-0 e-gap-y-0.5 e-whitespace-nowrap e-text-sm md:e-gap-y-0 lg:e-gap-x-5',
-                        'e-grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:e-grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_1.5rem]',
+                        'min-h-9 px-3 py-2.5 md:px-4',
+                        'grid items-start gap-x-0 gap-y-0.5 whitespace-nowrap text-sm md:gap-y-0 lg:gap-x-5',
+                        'grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_1.5rem]',
                         "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance_expand']",
-                        'e-cursor-pointer',
+                        'cursor-pointer',
                     )}
                     onClick={handleRowClick}
                 >
-                    <div className="e-mr-2 e-text-outer-space-300 [grid-area:number] lg:e-mr-0">{index + 1}</div>
+                    <div className="mr-2 text-outer-space-300 [grid-area:number] lg:mr-0">{index + 1}</div>
                     <div className="[grid-area:address]">
-                        <div className="e-flex e-items-center e-justify-between e-gap-1 lg:e-justify-normal">
+                        <div className="flex items-center justify-between gap-1 lg:justify-normal">
                             <Address
-                                className={!isLg ? 'e-text-[#33a382]' : ''}
+                                className={!isLg ? 'text-[#33a382]' : ''}
                                 pubkey={pubkey}
                                 link={isLg}
                                 fetchTokenLabelInfo
@@ -91,24 +91,24 @@ function TransactionAccountRow({
                             />
                         </div>
                         {hasBadges && (
-                            <span className="e-mt-1 e-inline-flex e-flex-wrap e-gap-1">
+                            <span className="mt-1 inline-flex flex-wrap gap-1">
                                 <AccountBadges index={index} message={message} pubkey={pubkey} account={account} />
                             </span>
                         )}
                     </div>
-                    <div className="e-justify-self-end [grid-area:delta]">
+                    <div className="justify-self-end [grid-area:delta]">
                         <BalanceDelta delta={delta} isSol />
                     </div>
-                    <div className="e-justify-self-end [grid-area:balance]">
+                    <div className="justify-self-end [grid-area:balance]">
                         <SolBalance lamports={post} />
                     </div>
 
                     {/* Desktop: expand button */}
-                    <div className="e-hidden e-items-center e-justify-center [grid-area:expand] lg:e-flex">
+                    <div className="hidden items-center justify-center [grid-area:expand] lg:flex">
                         <Button
                             aria-expanded={expanded}
                             aria-label={expanded ? 'Collapse account details' : 'Expand account details'}
-                            className="!e-h-5 e-w-6"
+                            className="!h-5 w-6"
                             onClick={e => {
                                 e.stopPropagation();
                                 setExpanded(v => !v);
@@ -119,8 +119,8 @@ function TransactionAccountRow({
                             <ChevronDown
                                 size={16}
                                 className={cn(
-                                    'e-text-outer-space-300 e-transition-transform e-duration-200 e-ease-in-out [transform:rotate(90deg)]',
-                                    expanded && '[transform:rotate(0deg)]',
+                                    'text-outer-space-300 transition-transform duration-200 ease-in-out',
+                                    expanded ? 'rotate-0' : 'rotate-90',
                                 )}
                             />
                         </Button>
@@ -130,12 +130,12 @@ function TransactionAccountRow({
                 {/* Desktop: animated expanded content */}
                 <div
                     className={cn(
-                        'e-hidden lg:e-grid',
-                        'e-transition-[grid-template-rows] e-duration-200 e-ease-in-out',
-                        expanded ? 'e-grid-rows-[1fr]' : 'e-grid-rows-[0fr]',
+                        'hidden lg:grid',
+                        'transition-[grid-template-rows,opacity] duration-200 ease-in-out',
+                        expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
                     )}
                 >
-                    <div className="e-overflow-hidden">
+                    <div className="min-h-0 overflow-hidden">
                         <AccountExpandedContent
                             accountInfo={accountInfo}
                             accountInfoLoading={accountInfoLoading}

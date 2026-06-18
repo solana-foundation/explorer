@@ -1,12 +1,12 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
+import { RawDataField } from '@components/shared/RawDataField';
+import { Button } from '@components/shared/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
+import { Skeleton } from '@components/shared/ui/skeleton';
 import { cn } from '@components/shared/utils';
 import { AccountInfo, useAccountExpandedInfo } from '@entities/account';
 import { Account } from '@providers/accounts';
-import { RawDataField } from '@shared/RawDataField';
-import { Button } from '@shared/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
-import { Skeleton } from '@shared/ui/skeleton';
 import React from 'react';
 import { Code, Info } from 'react-feather';
 
@@ -26,12 +26,12 @@ export function AccountExpandedContentInner({ accountInfo, accountInfoLoading, a
         accountInfo && accountInfo.size > 0 ? (
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="ghost" className="e-h-auto !e-p-0 !e-text-sm">
+                    <Button variant="ghost" className="h-auto !p-0 !text-sm">
                         <Code size={11} />
                         <span>{accountInfo.size.toLocaleString('en-US')} byte(s)</span>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="e-mx-4 e-w-auto !e-rounded-lg e-border-none e-p-0" align="end">
+                <PopoverContent className="mx-4 w-auto !rounded-lg border-none p-0" align="end">
                     <RawDataField data={accountInfo.data} filename={address} loading={accountInfoLoading} />
                 </PopoverContent>
             </Popover>
@@ -40,7 +40,7 @@ export function AccountExpandedContentInner({ accountInfo, accountInfoLoading, a
         );
 
     return (
-        <div className={cn(flat ? 'e-pb-2.5' : 'e-ml-14 e-pb-10')}>
+        <div className={cn(flat ? 'pb-2.5' : 'ml-14 pb-10')}>
             {data.data.parsed && <ParsedSection parsed={data.data.parsed} />}
             <DetailRow label="Assigned Program Id">
                 <Address pubkey={data.owner} link />
@@ -53,8 +53,8 @@ export function AccountExpandedContentInner({ accountInfo, accountInfoLoading, a
 
             <div
                 className={cn(
-                    'e-mt-3 e-flex e-items-center e-gap-1.5 e-text-xs e-text-outer-space-300',
-                    flat && '!e-items-start e-px-4',
+                    'mt-3 flex items-center gap-1.5 text-xs text-outer-space-300',
+                    flat && '!items-start px-4',
                 )}
             >
                 <Info size={13} />
@@ -77,17 +77,17 @@ export function AccountExpandedContent({ accountInfo, accountInfoLoading, addres
 
     if (enabled && isLoading) {
         return (
-            <div className={cn(flat ? 'e-pb-2.5' : 'e-ml-14 e-pb-2.5')}>
+            <div className={cn(flat ? 'pb-2.5' : 'ml-14 pb-2.5')}>
                 {[120, 160, 100, 80].map((w, i) => (
                     <div
                         key={i}
                         className={cn(
-                            'e-grid e-grid-cols-[clamp(100px,25%,200px)_1fr] e-items-baseline e-gap-2 e-py-1.5',
-                            flat ? 'e-px-4' : 'e-pr-3 md:e-pr-4',
+                            'grid grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2 py-1.5',
+                            flat ? 'px-4' : 'pr-3 md:pr-4',
                         )}
                     >
-                        <Skeleton className="e-h-3.5 e-w-24" />
-                        <Skeleton className="e-h-3.5" style={{ width: w }} />
+                        <Skeleton className="h-3.5 w-24" />
+                        <Skeleton className="h-3.5" style={{ width: w }} />
                     </div>
                 ))}
             </div>
@@ -96,12 +96,7 @@ export function AccountExpandedContent({ accountInfo, accountInfoLoading, addres
 
     if (enabled && isError) {
         return (
-            <div
-                className={cn(
-                    flat ? 'e-px-4 e-py-3' : 'e-ml-10 e-px-3 e-py-3 md:e-px-4',
-                    'e-text-sm e-text-outer-space-300',
-                )}
-            >
+            <div className={cn(flat ? 'px-4 py-3' : 'ml-10 px-3 py-3 md:px-4', 'text-sm text-outer-space-300')}>
                 Failed to load account info
             </div>
         );

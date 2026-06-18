@@ -1,5 +1,5 @@
+import { Button } from '@components/shared/ui/button';
 import type { AccountInfo } from '@entities/account';
-import { Button } from '@shared/ui/button';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
@@ -48,23 +48,21 @@ export function AccountDetailSlideover({
     return (
         <Slideover open={open} onOpenChange={onOpenChange}>
             <SlideoverContent aria-describedby={undefined}>
-                <div className="e-space-y-2 e-px-4 e-pb-3 e-pt-4">
-                    <div className="e-min-w-0 e-flex-1">
-                        <SlideoverTitle className="e-mb-1.5 e-tracking-wide !e-text-outer-space-300">
+                <div className="space-y-2 px-4 pb-3 pt-4">
+                    <div className="min-w-0 flex-1">
+                        <SlideoverTitle className="mb-1.5 tracking-wide !text-outer-space-300">
                             Account {index + 1}
                         </SlideoverTitle>
-                        <div className="e-break-all e-font-mono e-text-xl e-leading-snug e-text-white">
-                            {nickname ?? address}
-                        </div>
-                        {nickname && <span className="e-break-all e-text-sm e-text-outer-space-300">{address}</span>}
+                        <div className="break-all font-mono text-xl leading-snug text-white">{nickname ?? address}</div>
+                        {nickname && <span className="break-all text-sm text-outer-space-300">{address}</span>}
                     </div>
-                    <div className="e-flex">
+                    <div className="flex">
                         <AccountBadges index={index} account={account} message={message} pubkey={pubkey} />
                     </div>
                 </div>
 
                 {/* Scrollable body */}
-                <SlideoverBody className="e-border-t e-border-white/10 e-pt-2 [border-top-style:solid]">
+                <SlideoverBody className="border-t border-white/10 pt-2 [border-top-style:solid]">
                     <AccountExpandedContent
                         accountInfo={accountInfo}
                         accountInfoLoading={accountInfoLoading}
@@ -75,9 +73,9 @@ export function AccountDetailSlideover({
                 </SlideoverBody>
 
                 {/* Footer action bar */}
-                <div className="e-flex e-shrink-0 e-gap-2 e-p-3 e-pb-6">
+                <div className="flex shrink-0 gap-2 p-3 pb-6">
                     <Button
-                        className="e-flex !e-h-16 e-w-1/4 e-flex-col e-gap-1.5"
+                        className="flex !h-16 w-1/4 flex-col gap-1.5"
                         onClick={() => setNicknameOpen(true)}
                         size="sm"
                         variant="outline"
@@ -86,7 +84,7 @@ export function AccountDetailSlideover({
                         Nickname
                     </Button>
                     <Button
-                        className="e-flex !e-h-16 e-w-1/4 e-flex-col e-gap-1.5"
+                        className="flex !h-16 w-1/4 flex-col gap-1.5"
                         onClick={() => copy(address)}
                         size="sm"
                         variant="outline"
@@ -94,14 +92,14 @@ export function AccountDetailSlideover({
                         {copyState === 'copied' ? <CheckCircle size={13} /> : <Copy size={13} />}
                         Copy
                     </Button>
-                    <Button asChild className="e-flex !e-h-16 e-w-1/4 e-flex-col e-gap-1.5" size="sm" variant="accent">
+                    <Button asChild className="flex !h-16 w-1/4 flex-col gap-1.5" size="sm" variant="accent">
                         <Link href={addressPath} target="_blank">
                             <ExternalLink size={13} />
                             Open
                         </Link>
                     </Button>
                     <SlideoverClose asChild>
-                        <Button className="e-flex !e-h-16 e-w-1/4 e-flex-col e-gap-1.5" size="sm" variant="outline">
+                        <Button className="flex !h-16 w-1/4 flex-col gap-1.5" size="sm" variant="outline">
                             <X size={13} />
                             Close
                         </Button>

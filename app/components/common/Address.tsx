@@ -116,11 +116,7 @@ export function Address({
 
     const visibleText = isMidTruncated ? midTruncatedText : displayText;
 
-    const innerTextClassName = cn(
-        'font-mono',
-        !nickname && !noTruncate && 'truncate',
-        nickname && 'block min-w-0',
-    );
+    const innerTextClassName = cn('font-mono', !nickname && !noTruncate && 'truncate', nickname && 'block min-w-0');
 
     // When a nickname is set, render it and the address label as two stacked lines
     // so neither overflows on narrow (mobile) viewports.
@@ -144,7 +140,7 @@ export function Address({
             <TooltipTrigger asChild>
                 <span
                     data-address={address}
-                    className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
+                    className="relative min-w-0 overflow-hidden font-mono"
                     onMouseEnter={() => handleMouseEnter(address)}
                     onMouseLeave={() => handleMouseLeave(address)}
                 >
@@ -153,14 +149,14 @@ export function Address({
             </TooltipTrigger>
             {isMidTruncated && (
                 <TooltipContent>
-                    <span className="e-font-mono">{address}</span>
+                    <span className="font-mono">{address}</span>
                 </TooltipContent>
             )}
         </Tooltip>
     ) : (
         <span
             data-address={address}
-            className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
+            className="relative min-w-0 overflow-hidden font-mono"
             onMouseEnter={() => handleMouseEnter(address)}
             onMouseLeave={() => handleMouseLeave(address)}
             title={nickname ? displayText : undefined}
@@ -194,7 +190,7 @@ export function Address({
                         title="Edit nickname"
                         style={{ fontSize: '0.875rem', lineHeight: 1 }}
                     >
-                        <EditIcon className="-e-mt-0.5" />
+                        <EditIcon className="-mt-0.5" />
                     </button>
                 )}
                 {!noNicknameEditing && showNicknameEditor && (

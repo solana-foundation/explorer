@@ -45,8 +45,8 @@ export const Default: Story = {
                     <SlideoverHeader>
                         <SlideoverTitle>Slideover Title</SlideoverTitle>
                     </SlideoverHeader>
-                    <SlideoverBody className="e-p-4">
-                        <p className="e-text-sm e-text-outer-space-300">
+                    <SlideoverBody className="p-4">
+                        <p className="text-sm text-outer-space-300">
                             This is the slideover body. It scrolls independently from the header and footer.
                         </p>
                     </SlideoverBody>
@@ -80,12 +80,12 @@ export const WithFooter: Story = {
                     <SlideoverHeader>
                         <SlideoverTitle>Account 1</SlideoverTitle>
                     </SlideoverHeader>
-                    <SlideoverBody className="e-p-4">
-                        <p className="e-text-sm e-text-outer-space-300">Account details go here.</p>
+                    <SlideoverBody className="p-4">
+                        <p className="text-sm text-outer-space-300">Account details go here.</p>
                     </SlideoverBody>
-                    <div className="e-flex e-shrink-0 e-gap-2 e-p-3">
+                    <div className="flex shrink-0 gap-2 p-3">
                         <SlideoverClose asChild>
-                            <Button className="e-w-full" size="sm" variant="outline">
+                            <Button className="w-full" size="sm" variant="outline">
                                 Close
                             </Button>
                         </SlideoverClose>

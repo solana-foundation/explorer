@@ -18,13 +18,13 @@ export function DetailRow({ children, className, label }: DetailRowProps) {
     return (
         <div
             className={cn(
-                'e-grid e-grid-cols-[clamp(100px,25%,200px)_1fr] e-items-baseline e-gap-2 e-py-1.5',
-                flat ? 'e-px-4' : 'e-pr-3 md:e-pr-4',
+                'grid grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2 py-1.5',
+                flat ? 'px-4' : 'pr-3 md:pr-4',
                 className,
             )}
         >
-            <div className="e-text-sm e-text-outer-space-300">{label}</div>
-            <div className="e-text-sm">{children}</div>
+            <div className="text-sm text-outer-space-300">{label}</div>
+            <div className="text-sm">{children}</div>
         </div>
     );
 }

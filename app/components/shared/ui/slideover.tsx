@@ -15,10 +15,10 @@ const SlideoverOverlay = React.forwardRef<
     <Overlay
         ref={ref}
         className={cn(
-            'e-fixed e-inset-0 e-z-50 e-bg-black/60',
-            'data-[state=open]:e-animate-in data-[state=closed]:e-animate-out',
-            'data-[state=closed]:e-fade-out-0 data-[state=open]:e-fade-in-0',
-            'e-duration-300',
+            'fixed inset-0 z-50 bg-black/60',
+            'data-[state=open]:animate-in data-[state=closed]:animate-out',
+            'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+            'duration-300',
             className,
         )}
         {...props}
@@ -35,13 +35,13 @@ const SlideoverContent = React.forwardRef<
         <Content
             ref={ref}
             className={cn(
-                'e-fixed e-inset-x-0 e-bottom-0 e-z-50',
-                'e-flex e-max-h-[85dvh] e-flex-col',
-                'e-rounded-t-2xl e-bg-outer-space-950',
-                'e-shadow-[0_-4px_32px_rgba(0,0,0,0.6)]',
-                'data-[state=open]:e-animate-in data-[state=closed]:e-animate-out',
-                'data-[state=closed]:e-slide-out-to-bottom data-[state=open]:e-slide-in-from-bottom',
-                'e-duration-300 e-ease-in-out',
+                'fixed inset-x-0 bottom-0 z-50',
+                'flex max-h-[85dvh] flex-col',
+                'rounded-t-2xl bg-outer-space-950',
+                'shadow-[0_-4px_32px_rgba(0,0,0,0.6)]',
+                'data-[state=open]:animate-in data-[state=closed]:animate-out',
+                'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+                'duration-300 ease-in-out',
                 className,
             )}
             {...props}
@@ -56,7 +56,7 @@ function SlideoverHeader({ className, ...props }: React.HTMLAttributes<HTMLDivEl
     return (
         <div
             className={cn(
-                'e-flex e-shrink-0 e-items-center e-justify-between e-border-b e-border-solid e-border-white/10 e-px-4 e-py-3',
+                'flex shrink-0 items-center justify-between border-b border-solid border-white/10 px-4 py-3',
                 className,
             )}
             {...props}
@@ -65,11 +65,11 @@ function SlideoverHeader({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 }
 
 function SlideoverTitle({ className, ...props }: React.ComponentPropsWithoutRef<typeof Title>) {
-    return <Title className={cn('e-text-base e-font-medium e-text-white', className)} {...props} />;
+    return <Title className={cn('text-base font-medium text-white', className)} {...props} />;
 }
 
 function SlideoverBody({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-    return <div className={cn('e-flex-1 e-overflow-y-auto e-overflow-x-hidden', className)} {...props} />;
+    return <div className={cn('flex-1 overflow-y-auto overflow-x-hidden', className)} {...props} />;
 }
 
 export {
