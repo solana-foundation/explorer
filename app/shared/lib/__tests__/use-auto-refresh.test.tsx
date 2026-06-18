@@ -3,13 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, useAutoRefreshInterval, useAutoRefreshState } from '../use-auto-refresh';
 
-let mockVisible = true;
-vi.mock('@utils/use-tab-visibility', () => ({
-    default: () => ({ visible: mockVisible }),
-}));
-
 beforeEach(() => {
-    mockVisible = true;
     vi.useFakeTimers();
 });
 afterEach(() => {
@@ -19,23 +13,26 @@ afterEach(() => {
 
 describe('useAutoRefreshState', () => {
     it('should return Active when enabled + visible', () => {
-        const { result } = renderHook(() => useAutoRefreshState({ enabled: true }));
+        const isTabVisible = true;
+        const { result } = renderHook(() => useAutoRefreshState({ enabled: true, isTabVisible }));
         expect(result.current).toBe(AutoRefresh.Active);
     });
 
     it('should return Inactive when disabled', () => {
-        const { result } = renderHook(() => useAutoRefreshState({ enabled: false }));
+        const isTabVisible = true;
+        const { result } = renderHook(() => useAutoRefreshState({ enabled: false, isTabVisible }));
         expect(result.current).toBe(AutoRefresh.Inactive);
     });
 
     it('should return Inactive when tab hidden — even if enabled and bailedOut', () => {
-        mockVisible = false;
-        const { result } = renderHook(() => useAutoRefreshState({ bailedOut: true, enabled: true }));
+        const isTabVisible = false;
+        const { result } = renderHook(() => useAutoRefreshState({ bailedOut: true, enabled: true, isTabVisible }));
         expect(result.current).toBe(AutoRefresh.Inactive);
     });
 
     it('should return BailedOut when bailedOut + visible (bailout wins over enabled)', () => {
-        const { result } = renderHook(() => useAutoRefreshState({ bailedOut: true, enabled: true }));
+        const isTabVisible = true;
+        const { result } = renderHook(() => useAutoRefreshState({ bailedOut: true, enabled: true, isTabVisible }));
         expect(result.current).toBe(AutoRefresh.BailedOut);
     });
 });

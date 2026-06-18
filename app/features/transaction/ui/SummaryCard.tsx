@@ -26,13 +26,13 @@ import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
-import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@utils/use-auto-refresh';
 import Link from 'next/link';
 import React, { useEffect, useMemo } from 'react';
 import { ZoomIn } from 'react-feather';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
+import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 import { Card } from '@/app/shared/ui/Card';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 

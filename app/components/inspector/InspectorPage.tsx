@@ -18,7 +18,6 @@ import {
     VersionedMessage,
 } from '@solana/web3.js';
 import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
-import { useAutoRefreshInterval, useAutoRefreshState } from '@utils/use-auto-refresh';
 import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
@@ -29,9 +28,11 @@ import { Button } from '@/app/components/shared/ui/button';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { useAutoRefreshInterval, useAutoRefreshState } from '@/app/shared/lib/use-auto-refresh';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { BaseTable } from '@/app/shared/ui/Table';
+import useTabVisibility from '@/app/utils/use-tab-visibility';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -413,9 +414,11 @@ export function PermalinkView({
     }, [details, fetchConfirmedTx]);
 
     // Poll while the fetch succeeded but returned no tx yet, until we bail out.
+    const { visible: isTabVisible } = useTabVisibility();
     const autoRefresh = useAutoRefreshState({
         bailedOut: retries >= NOT_FOUND_BAILOUT,
         enabled: details?.status === FetchStatus.Fetched && !transaction,
+        isTabVisible,
     });
     useAutoRefreshInterval(autoRefresh, refreshTransaction);
 

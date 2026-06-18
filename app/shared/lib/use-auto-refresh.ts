@@ -1,5 +1,4 @@
 'use client';
-import useTabVisibility from '@utils/use-tab-visibility';
 import { useEffect } from 'react';
 
 export const AUTO_REFRESH_INTERVAL = 2000;
@@ -15,15 +14,17 @@ export type WithAutoRefreshProp = {
 };
 
 type UseAutoRefreshStateArgs = {
+    isTabVisible: boolean; // tab visibility (get from useTabVisibility)
     enabled: boolean; // poll while true
     bailedOut?: boolean; // hard stop even if enabled
 };
 
 // Derives the AutoRefresh value from domain flags + tab visibility.
-// Subscribes to tab visibility (visibilitychange) via useTabVisibility.
-export function useAutoRefreshState({ enabled, bailedOut = false }: UseAutoRefreshStateArgs): AutoRefresh {
-    const { visible: isTabVisible } = useTabVisibility();
-
+export function useAutoRefreshState({
+    isTabVisible,
+    enabled,
+    bailedOut = false,
+}: UseAutoRefreshStateArgs): AutoRefresh {
     if (!isTabVisible) return AutoRefresh.Inactive;
     if (bailedOut) return AutoRefresh.BailedOut;
     if (enabled) return AutoRefresh.Active;

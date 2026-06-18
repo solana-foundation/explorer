@@ -12,7 +12,6 @@ import { NATIVE_MINT } from '@solana/spl-token';
 import { TransactionSignature } from '@solana/web3.js';
 import { Cluster, clusterName, ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
-import { AutoRefresh, useAutoRefreshInterval, type WithAutoRefreshProp } from '@utils/use-auto-refresh';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
 import useSWR from 'swr';
@@ -21,6 +20,7 @@ import { getReceiptAmount, getReceiptMint } from '@/app/entities/token-receipt';
 import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { Logger } from '@/app/shared/lib/logger';
+import { AutoRefresh, useAutoRefreshInterval, type WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 
 import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
