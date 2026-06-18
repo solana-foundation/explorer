@@ -46,7 +46,13 @@ export function AccountDetailSlideover({
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
 
     return (
-        <Slideover open={open} onOpenChange={onOpenChange}>
+        <Slideover
+            open={open}
+            onOpenChange={v => {
+                if (!v) setNicknameOpen(false);
+                onOpenChange(v);
+            }}
+        >
             <SlideoverContent aria-describedby={undefined}>
                 <div className="space-y-2 px-4 pb-3 pt-4">
                     <div className="min-w-0 flex-1">
