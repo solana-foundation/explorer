@@ -1,10 +1,11 @@
+import { gen } from '@__fixtures__/gen';
 import { ParsedMessage, ParsedMessageAccount, PublicKey } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
 
 import { AccountBadges } from '../AccountBadges';
 
-const PUBKEY = new PublicKey('9noXzpXnkyEcKF3AeXqUHTdR59V5uvrRBUZ9bwfQwxNq');
+const PUBKEY = new PublicKey(gen.blockhash(1));
 
 const baseAccount: ParsedMessageAccount = {
     pubkey: PUBKEY,

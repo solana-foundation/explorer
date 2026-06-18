@@ -1,5 +1,3 @@
-'use client';
-
 import type { AccountInfo } from '@entities/account';
 import { Button } from '@shared/ui/button';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';

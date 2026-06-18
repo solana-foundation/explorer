@@ -15,7 +15,7 @@ import {
 
 const meta: Meta<typeof Slideover> = {
     component: Slideover,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Shared/UI/Slideover',
 };
 

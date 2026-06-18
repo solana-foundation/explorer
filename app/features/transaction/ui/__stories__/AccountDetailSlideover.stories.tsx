@@ -1,14 +1,12 @@
-import { ClusterProvider } from '@providers/cluster';
+import { gen } from '@__fixtures__/gen';
 import { ParsedMessage, ParsedMessageAccount, PublicKey, SystemProgram } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
 import { expect, fn, within } from 'storybook/test';
 
 import { AccountDetailSlideover } from '../AccountDetailSlideover';
 
-const FEE_PAYER = new PublicKey('9noXzpXnkyEcKF3AeXqUHTdR59V5uvrRBUZ9bwfQwxNq');
+const FEE_PAYER = new PublicKey(gen.blockhash(2));
 
 const mockAccount: ParsedMessageAccount = {
     pubkey: FEE_PAYER,
@@ -21,7 +19,7 @@ const mockMessage = {
     accountKeys: [mockAccount],
     addressTableLookups: [],
     instructions: [],
-    recentBlockhash: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d',
+    recentBlockhash: gen.blockhash(0),
 } as unknown as ParsedMessage;
 
 const meta: Meta<typeof AccountDetailSlideover> = {
@@ -34,24 +32,14 @@ const meta: Meta<typeof AccountDetailSlideover> = {
         open: true,
     },
     component: AccountDetailSlideover,
-    decorators: [
-        Story => (
-            <ClusterProvider>
-                <MockTokenInfoBatchProvider>
-                    <MockAccountsProvider>
-                        <Story />
-                    </MockAccountsProvider>
-                </MockTokenInfoBatchProvider>
-            </ClusterProvider>
-        ),
-    ],
+    decorators: [withClusterAccountsAndTokenInfo],
     parameters: {
         ...nextjsParameters,
         // Render at mobile viewport to match intended use case
         viewport: { defaultViewport: 'mobile1' },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Transaction/AccountDetailSlideover',
+    title: 'Features/Transaction/AccountDetailSlideover@Media',
 };
 
 export default meta;

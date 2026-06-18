@@ -1,18 +1,18 @@
-import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { Close, Content, Overlay, Portal, Root, Title, Trigger } from '@radix-ui/react-dialog';
 import * as React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-const Slideover = DialogPrimitive.Root;
-const SlideoverTrigger = DialogPrimitive.Trigger;
-const SlideoverClose = DialogPrimitive.Close;
-const SlideoverPortal = DialogPrimitive.Portal;
+const Slideover = Root;
+const SlideoverTrigger = Trigger;
+const SlideoverClose = Close;
+const SlideoverPortal = Portal;
 
 const SlideoverOverlay = React.forwardRef<
-    React.ElementRef<typeof DialogPrimitive.Overlay>,
-    React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+    React.ElementRef<typeof Overlay>,
+    React.ComponentPropsWithoutRef<typeof Overlay>
 >(({ className, ...props }, ref) => (
-    <DialogPrimitive.Overlay
+    <Overlay
         ref={ref}
         className={cn(
             'e-fixed e-inset-0 e-z-50 e-bg-black/60',
@@ -24,15 +24,15 @@ const SlideoverOverlay = React.forwardRef<
         {...props}
     />
 ));
-SlideoverOverlay.displayName = DialogPrimitive.Overlay.displayName;
+SlideoverOverlay.displayName = Overlay.displayName;
 
 const SlideoverContent = React.forwardRef<
-    React.ElementRef<typeof DialogPrimitive.Content>,
-    React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+    React.ElementRef<typeof Content>,
+    React.ComponentPropsWithoutRef<typeof Content>
 >(({ className, children, ...props }, ref) => (
     <SlideoverPortal>
         <SlideoverOverlay />
-        <DialogPrimitive.Content
+        <Content
             ref={ref}
             className={cn(
                 'e-fixed e-inset-x-0 e-bottom-0 e-z-50',
@@ -47,10 +47,10 @@ const SlideoverContent = React.forwardRef<
             {...props}
         >
             {children}
-        </DialogPrimitive.Content>
+        </Content>
     </SlideoverPortal>
 ));
-SlideoverContent.displayName = DialogPrimitive.Content.displayName;
+SlideoverContent.displayName = Content.displayName;
 
 function SlideoverHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     return (
@@ -64,8 +64,8 @@ function SlideoverHeader({ className, ...props }: React.HTMLAttributes<HTMLDivEl
     );
 }
 
-function SlideoverTitle({ className, ...props }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>) {
-    return <DialogPrimitive.Title className={cn('e-text-base e-font-medium e-text-white', className)} {...props} />;
+function SlideoverTitle({ className, ...props }: React.ComponentPropsWithoutRef<typeof Title>) {
+    return <Title className={cn('e-text-base e-font-medium e-text-white', className)} {...props} />;
 }
 
 function SlideoverBody({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {

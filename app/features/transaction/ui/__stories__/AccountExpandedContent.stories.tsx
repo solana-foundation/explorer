@@ -1,9 +1,6 @@
-import { ClusterProvider } from '@providers/cluster';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/react';
-import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
-import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
-import { nextjsParameters } from '@storybook-config/decorators';
+import { nextjsParameters, withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 
 import { AccountExpandedContent } from '../AccountExpandedContent';
@@ -17,17 +14,7 @@ const meta: Meta<typeof AccountExpandedContent> = {
         enabled: true,
     },
     component: AccountExpandedContent,
-    decorators: [
-        Story => (
-            <ClusterProvider>
-                <MockTokenInfoBatchProvider>
-                    <MockAccountsProvider>
-                        <Story />
-                    </MockAccountsProvider>
-                </MockTokenInfoBatchProvider>
-            </ClusterProvider>
-        ),
-    ],
+    decorators: [withClusterAccountsAndTokenInfo],
     parameters: {
         ...nextjsParameters,
     },
