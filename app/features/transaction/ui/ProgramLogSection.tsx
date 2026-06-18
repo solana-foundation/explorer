@@ -60,7 +60,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
             title="Logs"
             actions={chips}
             sectionClassName="xxl:!gap-0"
-            titleClassName="xxl:sticky xxl:top-0 xxl:z-10 xxl:bg-[var(--bs-body-bg)] xxl:pb-3"
+            titleClassName="xxl:sticky xxl:top-0 xxl:z-10 xxl:bg-[var(--background)] xxl:pb-3"
         >
             {prettyLogs !== null && logMessages !== null ? (
                 showRaw ? (
