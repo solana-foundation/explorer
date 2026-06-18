@@ -11,8 +11,8 @@ const inspectorLink = `/tx/inspector?message=${serializedMessage}`;
 const meta: Meta<typeof TxSimulationStatus> = {
     component: TxSimulationStatus,
     globals: { viewport: { value: 'responsive' } },
-    tags: ['autodocs'],
-    title: 'Entities/Program Logs/UI/TxSimulationStatus',
+    tags: ['autodocs', 'test'],
+    title: 'Entities/Program Logs/TxSimulationStatus',
 };
 
 export default meta;

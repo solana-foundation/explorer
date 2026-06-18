@@ -19,10 +19,9 @@ const timestampVariants = cva('whitespace-nowrap text-xs tracking-tight', {
     variants: { theme: themedColor },
 });
 
-const monoTextVariants = cva(
-    'overflow-hidden text-ellipsis whitespace-nowrap font-mono text-sm tracking-tight',
-    { variants: { theme: themedColor } },
-);
+const monoTextVariants = cva('overflow-hidden text-ellipsis whitespace-nowrap font-mono text-sm tracking-tight', {
+    variants: { theme: themedColor },
+});
 
 type StatusBarProps = {
     message?: ReactNode;

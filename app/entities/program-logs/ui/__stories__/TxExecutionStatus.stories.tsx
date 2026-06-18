@@ -10,8 +10,8 @@ const link = `/tx/${signature}`;
 const meta = {
     component: TxExecutionStatus,
     globals: { viewport: { value: 'responsive' } },
-    tags: ['autodocs'],
-    title: 'Entities/Program Logs/UI/TxExecutionStatus',
+    tags: ['autodocs', 'test'],
+    title: 'Entities/Program Logs/TxExecutionStatus',
 } satisfies Meta<typeof TxExecutionStatus>;
 
 export default meta;

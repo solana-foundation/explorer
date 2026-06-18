@@ -6,8 +6,8 @@ import { CopyableMonoText, StatusBar } from '../StatusBar';
 const meta = {
     component: StatusBar,
     globals: { viewport: { value: 'responsive' } },
-    tags: ['autodocs'],
-    title: 'Entities/Program Logs/UI/StatusBar',
+    tags: ['autodocs', 'test'],
+    title: 'Entities/Program Logs/StatusBar',
 } satisfies Meta<typeof StatusBar>;
 
 export default meta;
