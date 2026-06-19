@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { AddressWithContext, createFeePayerValidator, programValidator } from '../AddressWithContext';
 

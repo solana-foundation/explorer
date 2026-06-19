@@ -4,9 +4,10 @@
  * pulled into every story via the main decorators.tsx.
  */
 import { Connection } from '@solana/web3.js';
-import type { Decorator, StoryContext } from '@storybook/react';
 import React from 'react';
 import { INITIAL_VIEWPORTS, type InitialViewportKeys } from 'storybook/viewport';
+
+import type { Decorator, StoryContext } from './types';
 
 const stubbedUndefined = async () => undefined;
 const stubbedNumber = async () => 0;

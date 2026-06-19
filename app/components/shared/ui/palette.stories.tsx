@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import React, { useEffect, useState } from 'react';
 
 import config, { dkColors } from '@/tailwind.config';
@@ -120,6 +120,12 @@ function TypographyPalette() {
 }
 
 const meta: Meta = {
+    parameters: {
+        a11y: { test: 'error' },
+        docs: {
+            canvas: { sourceState: 'none' },
+        },
+    },
     tags: ['autodocs', 'test'],
     title: 'Design System/Palette',
 };

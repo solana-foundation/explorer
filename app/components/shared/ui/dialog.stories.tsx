@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { useState } from 'react';
 import { AlertCircle, Send } from 'react-feather';
 import { expect, userEvent, within } from 'storybook/test';

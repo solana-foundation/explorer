@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { withClipboardMock } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, userEvent, within } from 'storybook/test';
 
 import { CopyLinkShareItem } from '../CopyLinkShareItem';

@@ -1,7 +1,6 @@
 import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
-import type { Decorator, Parameters } from '@storybook/react';
 import React, { useLayoutEffect, useRef } from 'react';
 import { fn } from 'storybook/test';
 
@@ -15,6 +14,7 @@ import { MockStatsProvider } from './__mocks__/MockStatsProvider';
 import { MockSupplyProvider } from './__mocks__/MockSupplyProvider';
 import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
 import { MockTransactionsProvider } from './__mocks__/MockTransactionsProvider';
+import type { Decorator, Parameters } from './types';
 
 const noopFetcher = async () => undefined;
 // MultipleAccountFetcher has private constructor params (nominal-typed) — no structural object matches.

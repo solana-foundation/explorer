@@ -1,6 +1,5 @@
 import { gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import {
     nextjsParameters,
     withCluster,
@@ -8,6 +7,7 @@ import {
     withScrollAnchor,
     withTokenInfoBatch,
 } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SolanaAttestationDetailsCard } from '../SolanaAttestationDetailsCard';
 

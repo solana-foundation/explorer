@@ -1,9 +1,9 @@
 import { ClusterProvider } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { BigNumber } from 'bignumber.js';
 import React from 'react';
 

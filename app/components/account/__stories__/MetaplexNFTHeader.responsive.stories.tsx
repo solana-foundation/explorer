@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { withClusterAndAccounts } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { NFTData } from '@/app/providers/accounts';
 

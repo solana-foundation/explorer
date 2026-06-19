@@ -1,4 +1,3 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { mockAccountHistory, mockConfirmedSignatureInfo } from '@storybook-config/__fixtures__/account-history';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
@@ -6,6 +5,7 @@ import { MockHistoryProvider } from '@storybook-config/__mocks__/MockHistoryProv
 import { MockTransactionsProvider } from '@storybook-config/__mocks__/MockTransactionsProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withMockRpc, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TransactionHistoryCard } from '../TransactionHistoryCard';
 

@@ -1,6 +1,6 @@
 import type { VersionedBlockResponse } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockHistoryCard } from '../BlockHistoryCard';
 

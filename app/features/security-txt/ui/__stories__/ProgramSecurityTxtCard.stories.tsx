@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ProgramSecurityTxtCard } from '../SecurityCard';
 import defaultSecurityTxtMock from './mocks/defaultSecurityTxt.json';

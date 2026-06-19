@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SimulatorCard } from '../SimulationCard';
 

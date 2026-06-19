@@ -1,8 +1,8 @@
 import { DispatchContext as RewardsDispatch, StateContext as RewardsStateCtx } from '@providers/accounts/rewards';
 import { FetchStatus } from '@providers/cache';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
 import { RewardsCard } from '../RewardsCard';

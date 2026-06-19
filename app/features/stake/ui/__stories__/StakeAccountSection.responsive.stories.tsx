@@ -2,7 +2,7 @@ import type { Account } from '@providers/accounts';
 import { address } from '@solana/kit';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 

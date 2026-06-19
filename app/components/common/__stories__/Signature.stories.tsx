@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { createNextjsParameters, withClipboardMock, withCluster } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { Signature } from '../Signature';

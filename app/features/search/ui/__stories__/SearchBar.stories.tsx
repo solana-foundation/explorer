@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, userEvent, within } from 'storybook/test';
 import { fn } from 'storybook/test';
 
@@ -121,7 +121,6 @@ export const SelectResult: Story = {
         open: true,
         value: 'token',
     },
-    name: 'Select Result',
     play: async ({ canvasElement, args }) => {
         const canvas = within(canvasElement);
 
@@ -136,7 +135,6 @@ export const SelectResult: Story = {
 };
 
 export const KeyboardHint: Story = {
-    name: 'Keyboard Hint',
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
@@ -167,7 +165,6 @@ export const MultipleGroups: Story = {
         open: true,
         value: 'sol',
     },
-    name: 'Multiple Groups',
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 

@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ConcurrentMerkleTreeCard } from '../ConcurrentMerkleTreeCard';
 import { buildConcurrentMerkleTreeData } from './mocks/concurrent-merkle-tree';

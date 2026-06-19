@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { toast } from 'sonner';
 import { expect, within } from 'storybook/test';
 

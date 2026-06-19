@@ -1,10 +1,10 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import type { Meta, StoryObj } from '@storybook/react';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 import { expect, within } from 'storybook/test';
 

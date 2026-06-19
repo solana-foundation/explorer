@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { address } from '@solana/kit';
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { Cluster } from '@utils/cluster';
 
 import type { ActivatedFeature } from '../../lib/partition-features';

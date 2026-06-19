@@ -1,11 +1,11 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import {
     nextjsParameters,
     withClusterAndAccounts,
     withScrollAnchor,
     withTokenInfoBatch,
 } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 

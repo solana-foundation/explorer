@@ -76,6 +76,9 @@ export default defineConfig({
                         'vite-plugin-node-polyfills/shims/buffer',
                         'vite-plugin-node-polyfills/shims/global',
                         'vite-plugin-node-polyfills/shims/process',
+                        // Optimize both the renderer and its react-18 runtime up front; lazy mid-run discovery re-runs Vite's optimizer and 504s in-flight dynamic imports.
+                        '@storybook/nextjs-vite',
+                        'react-dom/client',
                     ],
                 },
                 resolve: {
@@ -122,6 +125,18 @@ export default defineConfig({
         ],
         coverage: {
             provider: 'v8',
+            reporter: ['text', 'html', 'lcov'],
+            include: ['app/**'],
+            exclude: [
+                'app/**/*.stories.*',
+                'app/**/__stories__/**',
+                'app/**/__mocks__/**',
+                'app/**/__fixtures__/**',
+                'app/**/__tests__/**',
+                'app/**/__e2e__/**',
+                'app/**/*.{test,spec}.{ts,tsx}',
+                'app/**/*.d.ts',
+            ],
         },
         poolOptions: {
             threads: {

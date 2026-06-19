@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import type { VariantProps } from 'class-variance-authority';
 import { useState } from 'react';
 import { ArrowRight, Check, ChevronDown, Download, ExternalLink, RefreshCw, X } from 'react-feather';

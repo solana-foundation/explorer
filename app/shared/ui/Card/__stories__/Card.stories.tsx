@@ -2,7 +2,7 @@
 // screenshots (keyed off the story id) keep matching during the dashkit migration.
 // TODO: After dashkit removal, rename `title` to `Shared/UI/Card` to match the new FSD location
 // at app/shared/ui/Card, and migrate these stories into BaseCard.stories.tsx.
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import {

@@ -1,10 +1,10 @@
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { type ParsedInstruction, PublicKey, TransactionInstruction, type VersionedMessage } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 

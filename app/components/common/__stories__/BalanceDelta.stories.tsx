@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import BigNumber from 'bignumber.js';
 import BN from 'bn.js';
 
