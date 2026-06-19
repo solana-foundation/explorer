@@ -35,7 +35,7 @@ describe('useProgramMetadataIdl', () => {
         vi.unstubAllEnvs();
     });
 
-    it('should read idls.programMetadata from /api/idl-latest?anchor=0 on a known cluster', async () => {
+    it('should read idls.programMetadata from /api/idl-latest on a known cluster', async () => {
         mocks.fetch.mockResolvedValue({
             json: async () => ({ idls: { programMetadata: { name: 'pmp_idl' } } }),
             ok: true,
@@ -49,7 +49,6 @@ describe('useProgramMetadataIdl', () => {
         await waitFor(() => expect(result.current.programMetadataIdl).toEqual({ name: 'pmp_idl' }));
         const requestedUrl = mocks.fetch.mock.calls[0]?.[0] as string;
         expect(requestedUrl).toContain('/api/idl-latest');
-        expect(requestedUrl).toContain('anchor=0');
         expect(mocks.resolvePmpContentClient).not.toHaveBeenCalled();
     });
 

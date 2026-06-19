@@ -1,5 +1,5 @@
 import { SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, SolanaError } from '@solana/kit';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { IdlVariant } from '@/app/entities/idl/server';
 import { Logger } from '@/app/shared/lib/logger';
@@ -25,14 +25,11 @@ vi.mock('@solana/kit', async () => {
     return { ...actual, createSolanaRpc: vi.fn(() => ({})) };
 });
 
-function resolved(
-    overrides: Partial<Record<'anchorIdl' | 'programMetadataIdl' | 'preferredVariant' | 'rejections', unknown>> = {},
-) {
+function resolved(overrides: Partial<Record<'anchorIdl' | 'programMetadataIdl' | 'preferredVariant', unknown>> = {}) {
     return {
         anchorIdl: undefined,
         preferredVariant: IdlVariant.ProgramMetadata,
         programMetadataIdl: undefined,
-        rejections: [],
         ...overrides,
     };
 }
@@ -42,6 +39,12 @@ describe('GET /api/idl-latest', () => {
         vi.clearAllMocks();
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
         vi.spyOn(Logger, 'panic').mockImplementation(() => {});
+        // PMP feature gate on by default; the off case is exercised explicitly below.
+        vi.stubEnv('NEXT_PUBLIC_PMP_IDL_ENABLED', 'true');
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
     });
 
     it('should return 400 when required params are missing', async () => {
@@ -91,60 +94,33 @@ describe('GET /api/idl-latest', () => {
         expect(res.headers.get('Cache-Control')).toContain('max-age=');
     });
 
-    it('should pass includeAnchor=false when anchor=0', async () => {
+    it('should resolve with includePmp=true when the PMP feature flag is on', async () => {
         mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ programMetadataIdl: { name: 'pmp' } }));
 
         const { GET } = await importRoute();
-        await GET(
-            createRequest({ anchor: '0', cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }),
-        );
+        await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
 
         expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(
             expect.anything(),
             PROGRAM_ADDRESS,
-            expect.objectContaining({ includeAnchor: false, includePmp: true }),
+            expect.objectContaining({ includePmp: true }),
         );
     });
 
-    it('should pass includePmp=false when pmp=0', async () => {
+    it('should resolve with includePmp=false when the PMP feature flag is off', async () => {
+        vi.stubEnv('NEXT_PUBLIC_PMP_IDL_ENABLED', 'false');
         mocks.resolveProgramIdls.mockResolvedValueOnce(
             resolved({ anchorIdl: { name: 'a' }, preferredVariant: IdlVariant.Anchor }),
         );
 
         const { GET } = await importRoute();
-        await GET(createRequest({ cluster: String(Cluster.MainnetBeta), pmp: '0', programAddress: PROGRAM_ADDRESS }));
+        await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
 
         expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(
             expect.anything(),
             PROGRAM_ADDRESS,
-            expect.objectContaining({ includeAnchor: true, includePmp: false }),
+            expect.objectContaining({ includePmp: false }),
         );
-    });
-
-    it('should warn (not page) for a transient partial-failure rejection but still serve 200', async () => {
-        const rejection = new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'boom' });
-        mocks.resolveProgramIdls.mockResolvedValueOnce(
-            resolved({ programMetadataIdl: { name: 'pmp' }, rejections: [rejection] }),
-        );
-
-        const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
-
-        expect(res.status).toBe(200);
-        expect(Logger.warn).toHaveBeenCalled();
-        expect(Logger.panic).not.toHaveBeenCalled();
-    });
-
-    it('should page for a non-transient partial-failure rejection but still serve 200', async () => {
-        mocks.resolveProgramIdls.mockResolvedValueOnce(
-            resolved({ programMetadataIdl: { name: 'pmp' }, rejections: [new Error('misconfig')] }),
-        );
-
-        const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
-
-        expect(res.status).toBe(200);
-        expect(Logger.panic).toHaveBeenCalled();
     });
 
     it('should return a retryable 502 (no page) when the resolver throws a transient RPC error', async () => {

@@ -38,9 +38,9 @@ async function fetchIdlForProgram([, programAddress, cluster, url]: IdlSwrKey): 
             return (idl as Idl) ?? null;
         }
 
-        // Known clusters resolve server-side via @solana/idl. `pmp=0` returns the Anchor IDL only
-        // (no PMP lookup / recency) — the anchor-only slice of /api/idl-latest.
-        const response = await fetch(`/api/idl-latest?programAddress=${programAddress}&cluster=${cluster}&pmp=0`);
+        // Known clusters resolve server-side via @solana/idl; we read the Anchor IDL from the shared
+        // /api/idl-latest payload (the route decides PMP inclusion via the feature flag).
+        const response = await fetch(`/api/idl-latest?programAddress=${programAddress}&cluster=${cluster}`);
         if (!response.ok) {
             Logger.warn('[idl] /api/idl-latest returned non-OK status', {
                 cluster,

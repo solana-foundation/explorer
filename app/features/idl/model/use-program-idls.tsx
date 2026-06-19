@@ -73,9 +73,9 @@ export function useProgramIdls(programId: string, url: string, cluster: Cluster)
 
 async function fetchProgramIdls(programId: string, cluster: Cluster): Promise<ResolvedIdls> {
     try {
-        const response = await fetch(
-            `/api/idl-latest?programAddress=${programId}&cluster=${cluster}&pmp=${PMP_IDL_ENABLED ? 1 : 0}`,
-        );
+        // The PMP feature gate lives in the route now (it reads NEXT_PUBLIC_PMP_IDL_ENABLED), so there's
+        // no flag in the URL — every consumer hits the same cached entry and reads the field it needs.
+        const response = await fetch(`/api/idl-latest?programAddress=${programId}&cluster=${cluster}`);
         if (!response.ok) {
             // Throw instead of returning empties: under useSWRImmutable a returned value is cached as
             // a successful result and never revalidated, so a transient 502 would stick as "no IDLs"

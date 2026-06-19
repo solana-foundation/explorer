@@ -11,10 +11,10 @@ import { IDL_SEED } from '../api/constants';
 import { resolvePmpContentClient } from '../api/resolve-pmp-content-client';
 
 /**
- * The program's PMP IDL (`idl` seed). Known clusters read it from `/api/idl-latest?anchor=0` (the
- * PMP-only slice — no Anchor PDA lookup / recency); custom/localhost resolves it directly via
- * `@solana/idl` against the user's RPC, with the fndn fallback authority so native-program IDLs
- * surface. Gated by the PMP IDL feature flag.
+ * The program's PMP IDL (`idl` seed). Known clusters read `idls.programMetadata` from the shared
+ * `/api/idl-latest` route; custom/localhost resolves it directly via `@solana/idl` against the user's
+ * RPC, with the fndn fallback authority so native-program IDLs surface. Gated by the PMP IDL feature
+ * flag (client-side here; the route applies the same gate for the known-cluster path).
  */
 export function useProgramMetadataIdl(programAddress: string, url: string, cluster: Cluster, useSuspense = false) {
     const enabled = isEnvEnabled(process.env.NEXT_PUBLIC_PMP_IDL_ENABLED);
@@ -40,10 +40,8 @@ export function useProgramMetadataIdl(programAddress: string, url: string, clust
                 }
             }
 
-            // Known clusters: the cached server route. `anchor=0` returns the PMP IDL only.
-            const response = await fetch(
-                `/api/idl-latest?programAddress=${programAddress}&cluster=${cluster}&anchor=0`,
-            );
+            // Known clusters: the cached server route. We read the PMP IDL from the shared payload.
+            const response = await fetch(`/api/idl-latest?programAddress=${programAddress}&cluster=${cluster}`);
             if (!response.ok) {
                 // Throw (don't return) so a transient 502 is retried rather than cached as a
                 // successful "no IDL" under useSWRImmutable (which never revalidates).
