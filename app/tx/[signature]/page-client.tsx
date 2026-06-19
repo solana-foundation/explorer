@@ -8,7 +8,6 @@ import { SignatureContext } from '@components/instruction/SignatureContext';
 import { CUProfilingSection } from '@features/cu-profiling';
 import { Receipt } from '@features/receipt';
 import { isReceiptEnabled } from '@features/receipt';
-import { AutoRefresh } from '@features/transaction';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
@@ -16,7 +15,6 @@ import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
-import useTabVisibility from '@utils/use-tab-visibility';
 import bs58 from 'bs58';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
@@ -26,8 +24,10 @@ import { InstructionsSection } from '@/app/features/transaction/ui/InstructionsS
 import { ProgramLogSection } from '@/app/features/transaction/ui/ProgramLogSection';
 import { SummaryCard } from '@/app/features/transaction/ui/SummaryCard';
 import { generateTokenBalanceRows, TokenBalancesCard } from '@/app/features/transaction/ui/TokenBalancesCard';
+import { AutoRefresh, useAutoRefreshState } from '@/app/shared/lib/use-auto-refresh';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
+import useTabVisibility from '@/app/utils/use-tab-visibility';
 
 const ALL_TRANSACTION_TABS = [
     { path: 'summary', title: 'Summary' },
@@ -59,16 +59,13 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
     const status = useTransactionStatus(signature);
     const clusterStatus = useCluster().status;
     const [zeroConfirmationRetries, setZeroConfirmationRetries] = useState(0);
-    const { visible: isTabVisible } = useTabVisibility();
 
-    let autoRefresh = AutoRefresh.Inactive;
-    if (!isTabVisible) {
-        autoRefresh = AutoRefresh.Inactive;
-    } else if (zeroConfirmationRetries >= ZERO_CONFIRMATION_BAILOUT) {
-        autoRefresh = AutoRefresh.BailedOut;
-    } else if (status?.data?.info && status.data.info.confirmations !== 'max') {
-        autoRefresh = AutoRefresh.Active;
-    }
+    const { visible: isTabVisible } = useTabVisibility();
+    const autoRefresh = useAutoRefreshState({
+        bailedOut: zeroConfirmationRetries >= ZERO_CONFIRMATION_BAILOUT,
+        enabled: Boolean(status?.data?.info && status.data.info.confirmations !== 'max'),
+        isTabVisible,
+    });
 
     useEffect(() => {
         if (status?.status === FetchStatus.Fetched && status.data?.info && status.data.info.confirmations === 0) {
