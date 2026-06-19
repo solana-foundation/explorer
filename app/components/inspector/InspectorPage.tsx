@@ -28,12 +28,10 @@ import { Button } from '@/app/components/shared/ui/button';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
-import { useAutoRefreshInterval, useAutoRefreshState } from '@/app/shared/lib/use-auto-refresh';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { useClusterPath } from '@/app/utils/url';
-import useTabVisibility from '@/app/utils/use-tab-visibility';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -387,8 +385,6 @@ export function TransactionInspectorPage({
     );
 }
 
-export const NOT_FOUND_BAILOUT = 5; // ~10s at the 2s interval
-
 export function PermalinkView({
     signature,
     reset,
@@ -403,49 +399,16 @@ export function PermalinkView({
     const transaction = details?.data?.raw;
 
     // Fetch on load at 'confirmed' (matches providers/transactions/parsed.tsx) so freshly-confirmed txs resolve fast.
-    const fetchConfirmedTx = React.useCallback(() => {
-        fetchTransaction(signature, 'confirmed');
-    }, [fetchTransaction, signature]);
-
-    const [retries, setRetries] = React.useState(0);
-
-    const refreshTransaction = React.useCallback(() => {
-        fetchConfirmedTx();
-        setRetries(r => r + 1);
-    }, [fetchConfirmedTx]);
-
-    // Reset the retry counter if the signature changes without a remount.
     React.useEffect(() => {
-        setRetries(0);
-    }, [signature]);
-
-    React.useEffect(() => {
-        if (!details) fetchConfirmedTx();
-    }, [details, fetchConfirmedTx]);
-
-    // Poll while the fetch succeeded but returned no tx yet, until we bail out.
-    const { visible: isTabVisible } = useTabVisibility();
-    const autoRefresh = useAutoRefreshState({
-        bailedOut: retries >= NOT_FOUND_BAILOUT,
-        enabled: details?.status === FetchStatus.Fetched && !transaction,
-        isTabVisible,
-    });
-    useAutoRefreshInterval(autoRefresh, refreshTransaction);
+        if (!transaction) {
+            fetchTransaction(signature, 'confirmed');
+        }
+    }, [transaction, fetchTransaction, signature]);
 
     if (!details || details.status === FetchStatus.Fetching) {
         return <LoadingCard />;
     } else if (details.status === FetchStatus.FetchFailed) {
-        return (
-            <ErrorCard
-                retry={() => {
-                    setRetries(0);
-                    fetchTransaction(signature, 'confirmed');
-                }}
-                text="Failed to fetch transaction"
-            />
-        );
-    } else if (!transaction && retries < NOT_FOUND_BAILOUT) {
-        return <LoadingCard message="Waiting for transaction to be confirmed..." />;
+        return <ErrorCard text="Failed to fetch transaction" />;
     } else if (!transaction) {
         return <ErrorCard text="Transaction was not found" retry={reset} retryText="Reset" />;
     }
