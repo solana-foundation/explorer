@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { ParsedMessage, ParsedMessageAccount, PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, within } from 'storybook/test';
 
 import { AccountBadges } from '../AccountBadges';
