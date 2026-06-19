@@ -110,7 +110,6 @@ describe('createIdlAnalytics', () => {
             });
         });
 
-
         it('should emit iidl_codama_transaction_simulated', () => {
             analytics.trackTransactionSimulated('prog2', 'transfer');
             expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_codama_transaction_simulated', {
