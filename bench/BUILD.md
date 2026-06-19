@@ -2,11 +2,11 @@
 
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
-| Static | `/` | 130 kB | 1.16 MB |
+| Static | `/` | 130 kB | 1.15 MB |
 | Static | `/_not-found` | 0 B | 1.03 MB |
-| Dynamic | `/address/[address]` | 440 kB | 1.46 MB |
+| Dynamic | `/address/[address]` | 440 kB | 1.45 MB |
 | Dynamic | `/address/[address]/anchor-account` | 390 kB | 1.41 MB |
-| Dynamic | `/address/[address]/anchor-program` | 390 kB | 1.41 MB |
+| Dynamic | `/address/[address]/anchor-program` | 390 kB | 1.40 MB |
 | Dynamic | `/address/[address]/attestation` | 390 kB | 1.41 MB |
 | Dynamic | `/address/[address]/attributes` | 390 kB | 1.41 MB |
 | Dynamic | `/address/[address]/blockhashes` | 390 kB | 1.41 MB |
@@ -14,7 +14,7 @@
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 390 kB | 1.41 MB |
 | Dynamic | `/address/[address]/domains` | 390 kB | 1.41 MB |
 | Dynamic | `/address/[address]/entries` | 390 kB | 1.41 MB |
-| Dynamic | `/address/[address]/feature-gate` | 390 kB | 1.41 MB |
+| Dynamic | `/address/[address]/feature-gate` | 390 kB | 1.40 MB |
 | Dynamic | `/address/[address]/idl` | 530 kB | 1.54 MB |
 | Dynamic | `/address/[address]/instructions` | 440 kB | 1.45 MB |
 | Dynamic | `/address/[address]/metadata` | 390 kB | 1.41 MB |
@@ -53,7 +53,7 @@
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
-| Static | `/tos` | 890 B | 1.03 MB |
+| Static | `/tos` | 880 B | 1.03 MB |
 | Dynamic | `/tx/[signature]` | 600 kB | 1.61 MB |
 | Dynamic | `/tx/[signature]/inspect` | 390 kB | 1.41 MB |
 | Static | `/tx/inspector` | 390 kB | 1.41 MB |
