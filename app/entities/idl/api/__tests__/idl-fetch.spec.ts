@@ -1,29 +1,18 @@
-import {
-    SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND,
-    SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR,
-    SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND,
-    SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR,
-    SolanaError,
-} from '@solana/kit';
+import { SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, SolanaError } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { classifySolanaError, lastWriteSlot, resolveAnchorIdl, resolvePmpIdl } from '../idl-fetch';
+import { lastWriteSlot, resolveAnchorIdl, resolvePmpIdl } from '../idl-fetch';
 
 const mocks = vi.hoisted(() => ({
-    buildPmpIdlLookups: vi.fn(),
     fetchAnchorIdl: vi.fn(),
-    fetchMetadataContent: vi.fn(),
+    fetchPmpIdl: vi.fn(),
 }));
 
 vi.mock('@solana/idl', () => ({
-    buildPmpIdlLookups: mocks.buildPmpIdlLookups,
     fetchAnchorIdl: mocks.fetchAnchorIdl,
-}));
-
-vi.mock('@solana-program/program-metadata', () => ({
-    fetchMetadataContent: mocks.fetchMetadataContent,
+    fetchPmpIdl: mocks.fetchPmpIdl,
 }));
 
 const PROGRAM = 'C7QLEmDz81Usvy2sYa4xZSdA8EwEcYvZo8iuYZMaqXmj' as any;
@@ -38,18 +27,41 @@ beforeEach(() => {
 describe('resolveAnchorIdl', () => {
     it('should return the parsed IDL and account address on valid content', async () => {
         const idl = { instructions: [], metadata: { name: 'x' } };
-        mocks.fetchAnchorIdl.mockResolvedValueOnce({ address: CANONICAL, content: JSON.stringify(idl) });
+        mocks.fetchAnchorIdl.mockResolvedValueOnce({
+            address: CANONICAL,
+            content: JSON.stringify(idl),
+            source: 'anchor',
+            status: 'ok',
+        });
 
         await expect(resolveAnchorIdl({} as any, PROGRAM, {})).resolves.toEqual({ address: CANONICAL, idl });
     });
 
-    it('should return undefined when there is no Anchor IDL account', async () => {
-        mocks.fetchAnchorIdl.mockResolvedValueOnce(null);
+    it('should return undefined when there is no Anchor IDL account (absent)', async () => {
+        mocks.fetchAnchorIdl.mockResolvedValueOnce({ address: CANONICAL, status: 'absent' });
         await expect(resolveAnchorIdl({} as any, PROGRAM, {})).resolves.toBeUndefined();
+        expect(Logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should return undefined (and warn) when the account bytes are corrupt', async () => {
+        mocks.fetchAnchorIdl.mockResolvedValueOnce({
+            address: CANONICAL,
+            reason: 'payload',
+            source: 'anchor',
+            status: 'corrupt',
+        });
+
+        await expect(resolveAnchorIdl({} as any, PROGRAM, {})).resolves.toBeUndefined();
+        expect(Logger.warn).toHaveBeenCalled();
     });
 
     it('should return undefined (and warn) when the content is not valid JSON', async () => {
-        mocks.fetchAnchorIdl.mockResolvedValueOnce({ address: CANONICAL, content: 'not-json{' });
+        mocks.fetchAnchorIdl.mockResolvedValueOnce({
+            address: CANONICAL,
+            content: 'not-json{',
+            source: 'anchor',
+            status: 'ok',
+        });
 
         await expect(resolveAnchorIdl({} as any, PROGRAM, {})).resolves.toBeUndefined();
         expect(Logger.warn).toHaveBeenCalled();
@@ -58,20 +70,19 @@ describe('resolveAnchorIdl', () => {
     it('should return undefined (and warn) when content is valid JSON but not IDL-shaped', async () => {
         // Well-formed JSON object at the IDL PDA, but missing the top-level `instructions` array.
         // The shape guard rejects it so we don't serve/cache garbage as a valid Anchor IDL.
-        mocks.fetchAnchorIdl.mockResolvedValueOnce({ address: CANONICAL, content: JSON.stringify({ hello: 'world' }) });
+        mocks.fetchAnchorIdl.mockResolvedValueOnce({
+            address: CANONICAL,
+            content: JSON.stringify({ hello: 'world' }),
+            source: 'anchor',
+            status: 'ok',
+        });
 
         await expect(resolveAnchorIdl({} as any, PROGRAM, {})).resolves.toBeUndefined();
         expect(Logger.warn).toHaveBeenCalled();
     });
 
-    it('should return undefined (and warn) when fetch throws a non-Solana (decode) error', async () => {
-        mocks.fetchAnchorIdl.mockRejectedValueOnce(new Error('incorrect header check'));
-
-        await expect(resolveAnchorIdl({} as any, PROGRAM, {})).resolves.toBeUndefined();
-        expect(Logger.warn).toHaveBeenCalled();
-    });
-
-    it('should re-throw SolanaErrors so the caller can classify them', async () => {
+    it('should re-throw RPC errors so the caller can classify them', async () => {
+        // `fetchAnchorIdl` throws only on RPC failure; that error must propagate unswallowed.
         const rpcError = new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'boom' });
         mocks.fetchAnchorIdl.mockRejectedValueOnce(rpcError);
 
@@ -81,29 +92,30 @@ describe('resolveAnchorIdl', () => {
 });
 
 describe('resolvePmpIdl', () => {
-    it('should return the canonical content without consulting fallback authorities', async () => {
-        mocks.buildPmpIdlLookups.mockResolvedValueOnce([
-            { address: CANONICAL, authority: null },
-            { address: FALLBACK, authority: FALLBACK },
-        ]);
-        mocks.fetchMetadataContent.mockResolvedValueOnce('canonical-content');
+    it('should map an ok canonical result to the resolved shape', async () => {
+        mocks.fetchPmpIdl.mockResolvedValueOnce({
+            address: CANONICAL,
+            authority: null,
+            content: 'canonical-content',
+            source: 'pmp',
+            status: 'ok',
+        });
 
         await expect(resolvePmpIdl({} as any, PROGRAM, 'idl', true)).resolves.toEqual({
             address: CANONICAL,
             authority: null,
             content: 'canonical-content',
         });
-        expect(mocks.fetchMetadataContent).toHaveBeenCalledTimes(1);
     });
 
-    it('should fall through ACCOUNT_NOT_FOUND to the next fallback authority', async () => {
-        mocks.buildPmpIdlLookups.mockResolvedValueOnce([
-            { address: CANONICAL, authority: null },
-            { address: FALLBACK, authority: FALLBACK },
-        ]);
-        mocks.fetchMetadataContent
-            .mockRejectedValueOnce(new SolanaError(SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, { address: CANONICAL }))
-            .mockResolvedValueOnce('fallback-content');
+    it('should carry the matched fallback authority through', async () => {
+        mocks.fetchPmpIdl.mockResolvedValueOnce({
+            address: FALLBACK,
+            authority: FALLBACK,
+            content: 'fallback-content',
+            source: 'pmp',
+            status: 'ok',
+        });
 
         await expect(resolvePmpIdl({} as any, PROGRAM, 'idl', true)).resolves.toEqual({
             address: FALLBACK,
@@ -112,39 +124,43 @@ describe('resolvePmpIdl', () => {
         });
     });
 
-    it('should return undefined when every authority is ACCOUNT_NOT_FOUND', async () => {
-        mocks.buildPmpIdlLookups.mockResolvedValueOnce([{ address: CANONICAL, authority: null }]);
-        mocks.fetchMetadataContent.mockRejectedValueOnce(
-            new SolanaError(SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, { address: CANONICAL }),
-        );
-
+    it('should return undefined when no metadata is published (absent)', async () => {
+        mocks.fetchPmpIdl.mockResolvedValueOnce({ address: CANONICAL, status: 'absent' });
         await expect(resolvePmpIdl({} as any, PROGRAM, 'idl', true)).resolves.toBeUndefined();
     });
 
-    it('should re-throw non-not-found RPC errors instead of swallowing them', async () => {
+    it('should return undefined when the metadata account is present but corrupt', async () => {
+        mocks.fetchPmpIdl.mockResolvedValueOnce({
+            address: CANONICAL,
+            authority: null,
+            reason: 'payload',
+            source: 'pmp',
+            status: 'corrupt',
+        });
+        await expect(resolvePmpIdl({} as any, PROGRAM, 'idl', true)).resolves.toBeUndefined();
+    });
+
+    it('should re-throw RPC errors instead of swallowing them', async () => {
         const rpcError = new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'boom' });
-        mocks.buildPmpIdlLookups.mockResolvedValueOnce([{ address: CANONICAL, authority: null }]);
-        mocks.fetchMetadataContent.mockRejectedValueOnce(rpcError);
+        mocks.fetchPmpIdl.mockRejectedValueOnce(rpcError);
 
         await expect(resolvePmpIdl({} as any, PROGRAM, 'idl', true)).rejects.toBe(rpcError);
     });
 
     it('should request canonical-only lookups (null authority) when fallbacks are disabled', async () => {
-        mocks.buildPmpIdlLookups.mockResolvedValueOnce([{ address: CANONICAL, authority: null }]);
-        mocks.fetchMetadataContent.mockResolvedValueOnce('');
+        mocks.fetchPmpIdl.mockResolvedValueOnce({ address: CANONICAL, status: 'absent' });
 
         await resolvePmpIdl({} as any, PROGRAM, 'security', false);
 
-        expect(mocks.buildPmpIdlLookups).toHaveBeenCalledWith(PROGRAM, 'security', null);
+        expect(mocks.fetchPmpIdl).toHaveBeenCalledWith({}, PROGRAM, { authority: null, seed: 'security' });
     });
 
     it('should request fallback authorities (undefined authority) when enabled', async () => {
-        mocks.buildPmpIdlLookups.mockResolvedValueOnce([{ address: CANONICAL, authority: null }]);
-        mocks.fetchMetadataContent.mockResolvedValueOnce('');
+        mocks.fetchPmpIdl.mockResolvedValueOnce({ address: CANONICAL, status: 'absent' });
 
         await resolvePmpIdl({} as any, PROGRAM, 'idl', true);
 
-        expect(mocks.buildPmpIdlLookups).toHaveBeenCalledWith(PROGRAM, 'idl', undefined);
+        expect(mocks.fetchPmpIdl).toHaveBeenCalledWith({}, PROGRAM, { authority: undefined, seed: 'idl' });
     });
 });
 
@@ -170,31 +186,5 @@ describe('lastWriteSlot', () => {
             }),
         } as any;
         await expect(lastWriteSlot(rpc, CANONICAL)).resolves.toBeUndefined();
-    });
-});
-
-describe('classifySolanaError', () => {
-    it('should classify known transient JSON-RPC codes as transient', () => {
-        const error = new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'Internal error' });
-        expect(classifySolanaError(error)).toBe('transient');
-    });
-
-    it('should classify transport 5xx / 429 as transient and other 4xx as misconfig', () => {
-        const make = (statusCode: number) =>
-            new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
-                headers: {} as any,
-                message: 'transport error',
-                statusCode,
-            });
-        expect(classifySolanaError(make(503))).toBe('transient');
-        expect(classifySolanaError(make(429))).toBe('transient');
-        expect(classifySolanaError(make(403))).toBe('misconfig');
-    });
-
-    it('should classify unknown codes as misconfig', () => {
-        const error = new SolanaError(SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND, {
-            __serverMessage: 'Method not found',
-        });
-        expect(classifySolanaError(error)).toBe('misconfig');
     });
 });

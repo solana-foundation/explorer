@@ -15,4 +15,5 @@ minimumReleaseAgeExclude:
   - '@solana/idl'
   - codama
   - '@solana-program/token'
+  - '@solana-program/program-metadata'
   - '@solana/kit'

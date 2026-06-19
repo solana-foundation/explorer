@@ -14,9 +14,9 @@ const mocks = vi.hoisted(() => ({
     resolvePmpIdl: vi.fn(),
 }));
 
-// The route delegates per-source fetch + classification to the shared helpers. We mock the three
-// resolve helpers (keeping the real classifySolanaError) to exercise the route's isolation,
-// response shaping, preferred-tab logic, and error handling.
+// The route delegates per-source fetch to the shared helpers and classifies RPC errors with
+// `@solana/idl`'s real `isTransientRpcError`. We mock the three resolve helpers to exercise the
+// route's isolation, response shaping, preferred-tab logic, and error handling.
 vi.mock('@/app/entities/idl/server', async () => {
     const actual = await vi.importActual<typeof import('@/app/entities/idl/server')>('@/app/entities/idl/server');
     return {
@@ -215,6 +215,27 @@ describe('GET /api/idl-latest', () => {
             idls: { anchor: { name: 'a' }, preferred: 'anchor', programMetadata: undefined },
         });
         expect(mocks.resolvePmpIdl).not.toHaveBeenCalled();
+    });
+
+    it('should only fetch the PMP IDL (and prefer it) when anchor=0', async () => {
+        mocks.resolvePmpIdl.mockResolvedValueOnce({
+            address: PMP_ACCOUNT,
+            authority: null,
+            content: JSON.stringify({ name: 'pmp' }),
+        });
+
+        const { GET } = await importRoute();
+        const res = await GET(
+            createRequest({ anchor: '0', cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }),
+        );
+
+        expect(res.status).toBe(200);
+        expect(await res.json()).toEqual({
+            idls: { anchor: undefined, preferred: 'program-metadata', programMetadata: { name: 'pmp' } },
+        });
+        expect(mocks.resolveAnchorIdl).not.toHaveBeenCalled();
+        // Single source → no recency lookups.
+        expect(mocks.lastWriteSlot).not.toHaveBeenCalled();
     });
 
     it('should return a retryable 502 (no page) on a transient RPC error', async () => {

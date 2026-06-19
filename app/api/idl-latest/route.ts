@@ -1,12 +1,14 @@
 import { clusterFromParam } from '@entities/cluster/server';
-import { type Address, address, createSolanaRpc, isSolanaError } from '@solana/kit';
+import { isTransientRpcError } from '@solana/idl';
+import { type Address, address, createSolanaRpc } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
 import {
-    classifySolanaError,
     IdlVariant,
     lastWriteSlot,
     NON_ANCHOR_PROGRAMS,
+    parseIdlContent,
+    pickPreferredVariant,
     resolveAnchorIdl,
     resolvePmpIdl,
 } from '@/app/entities/idl/server';
@@ -27,12 +29,15 @@ type ProgramIdlsPayload = {
 };
 
 /**
- * Single endpoint that resolves every IDL the program IDL card renders for a known cluster: the
- * Anchor IDL and the PMP IDL (`idl` seed, with fndn fallback authority — that's how native program
- * IDLs surface), plus their last-write recency so the card can pick a default tab. The PMP content
- * can be either an Anchor or a Codama IDL — format detection is the client's concern. Collapses
- * what used to be multiple client fetches + a bespoke last-transaction-date comparison into one
- * request. @solana/idl is server-only, hence the route.
+ * The single IDL-resolution endpoint for known clusters, backed by `@solana/idl`: the Anchor IDL
+ * and the PMP IDL (`idl` seed, with fndn fallback authority — that's how native program IDLs
+ * surface), plus their last-write recency so the card can pick a default tab. The PMP content can be
+ * either an Anchor or a Codama IDL — format detection is the client's concern.
+ *
+ * Source selection via query flags: default = both; `pmp=0` = Anchor only (the program IDL card's
+ * Anchor tab, the transaction inspector's `useAnchorProgram`); `anchor=0` = PMP only (program name,
+ * instruction labels via `useProgramMetadataIdl`). Recency lookups run only when *both* sources are
+ * present (the only case where the preferred tab is ambiguous), so single-source requests stay cheap.
  *
  * Each source is resolved independently (`Promise.allSettled`): a source that's absent or
  * undecodable yields `undefined`, and a *genuine RPC error* in one source no longer discards the
@@ -49,9 +54,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const clusterProp = searchParams.get('cluster');
     const programAddress = searchParams.get('programAddress');
-    // The card skips PMP entirely when the feature flag is off; let the client opt out so we
-    // don't spend RPC on PMP lookups it will discard.
+    // Source flags (see header): both default on; `pmp=0` = Anchor only, `anchor=0` = PMP only.
     const includePmp = searchParams.get('pmp') !== '0';
+    const includeAnchor = searchParams.get('anchor') !== '0';
 
     if (!programAddress || !clusterProp) {
         return NextResponse.json({ error: 'Invalid query params' }, { status: 400 });
@@ -72,26 +77,17 @@ export async function GET(request: Request) {
 
     const context = { cluster: clusterProp, programAddress };
 
-    // Native/builtin programs definitionally have no Anchor IDL — never derive + getAccountInfo on
-    // the IDL PDA for them (see the SIMD-296 Sentry-panic note on NON_ANCHOR_PROGRAMS).
-    const skipAnchor = NON_ANCHOR_PROGRAMS.has(programId);
+    // Skip the Anchor PDA lookup when the caller opted out (`anchor=0`) or for native/builtin programs
+    // — they definitionally have no Anchor IDL, and some RPCs (SIMD-296) return transient errors
+    // instead of `null` for the derived PDA (see the Sentry-panic note on NON_ANCHOR_PROGRAMS).
+    const skipAnchor = !includeAnchor || NON_ANCHOR_PROGRAMS.has(programId);
 
     try {
         const rpc = createSolanaRpc(url);
 
-        if (!includePmp) {
-            const anchor = skipAnchor ? undefined : await resolveAnchorIdl(rpc, programId, context);
-            const idls: ProgramIdlsPayload = {
-                anchor: anchor?.idl,
-                preferred: IdlVariant.Anchor,
-                programMetadata: undefined,
-            };
-            return NextResponse.json({ idls }, { headers: CACHE_HEADERS, status: 200 });
-        }
-
         const settled = await Promise.allSettled([
             skipAnchor ? Promise.resolve(undefined) : resolveAnchorIdl(rpc, programId, context),
-            resolvePmpIdl(rpc, programId, IDL_SEED, true),
+            includePmp ? resolvePmpIdl(rpc, programId, IDL_SEED, true) : Promise.resolve(undefined),
         ]);
         const anchor = settled[0].status === 'fulfilled' ? settled[0].value : undefined;
         const pmp = settled[1].status === 'fulfilled' ? settled[1].value : undefined;
@@ -106,7 +102,7 @@ export async function GET(request: Request) {
             // At least one IDL resolved. A single source's RPC failure (transient blip or persistent
             // misconfig) must not hide the sources that did resolve — log/page it but serve what we have.
             for (const { reason } of rejections) {
-                if (isSolanaError(reason) && classifySolanaError(reason) === 'transient') {
+                if (isTransientRpcError(reason)) {
                     Logger.warn('[api:idl-latest] one IDL source had a transient RPC error (served the others)', {
                         ...context,
                         rpcError: reason.message,
@@ -122,15 +118,20 @@ export async function GET(request: Request) {
             }
         }
 
-        // Best-effort recency for the default-tab decision; failures degrade silently to PMP.
-        const [anchorSlot, pmpSlot] = await Promise.all([
-            anchor ? lastWriteSlot(rpc, anchor.address) : undefined,
-            pmp ? lastWriteSlot(rpc, pmp.address) : undefined,
-        ]);
+        // Recency only breaks a tie between two present sources — skip the lookups otherwise (so
+        // single-source `pmp=0` / `anchor=0` requests spend no extra getSignaturesForAddress calls).
+        let anchorSlot: bigint | undefined;
+        let pmpSlot: bigint | undefined;
+        if (anchor && pmp) {
+            [anchorSlot, pmpSlot] = await Promise.all([
+                lastWriteSlot(rpc, anchor.address),
+                lastWriteSlot(rpc, pmp.address),
+            ]);
+        }
 
         const idls: ProgramIdlsPayload = {
             anchor: anchor?.idl,
-            preferred: pickPreferred(Boolean(anchor), Boolean(pmp), anchorSlot, pmpSlot),
+            preferred: pickPreferredVariant(Boolean(anchor), Boolean(pmp), anchorSlot, pmpSlot),
             programMetadata: parseIdlContent(pmp?.content),
         };
         return NextResponse.json({ idls }, { headers: CACHE_HEADERS, status: 200 });
@@ -138,8 +139,11 @@ export async function GET(request: Request) {
         // The resolve helpers swallow "absent" and undecodable outcomes; only genuine RPC failures
         // reach here. Transient blips → retryable 502 (uncached) without paging; persistent
         // misconfiguration / unexpected errors → Sentry page.
-        if (isSolanaError(error) && classifySolanaError(error) === 'transient') {
-            Logger.warn('[api:idl-latest] RPC error resolving program IDLs', { ...context, rpcError: error.message });
+        if (isTransientRpcError(error)) {
+            Logger.warn('[api:idl-latest] RPC error resolving program IDLs', {
+                ...context,
+                rpcError: error instanceof Error ? error.message : String(error),
+            });
             return NextResponse.json({ error: 'Upstream RPC error' }, { status: 502 });
         }
         Logger.panic(new Error('[api:idl-latest] Failed to resolve program IDLs', { cause: error }), {
@@ -147,35 +151,4 @@ export async function GET(request: Request) {
         });
         return NextResponse.json({ error: 'Failed to resolve IDLs' }, { status: 502 });
     }
-}
-
-function parseIdlContent(content?: string): unknown {
-    if (!content) return undefined;
-    try {
-        // `?? undefined` because JSON.parse can yield null (on-chain content "null"); the payload
-        // contract is "absent IDL → key omitted", and NextResponse.json drops undefined keys.
-        return JSON.parse(content) ?? undefined;
-    } catch {
-        return undefined;
-    }
-}
-
-// Prefer whichever source was written to chain more recently; tie / unknown → PMP (newer standard),
-// matching the previous client-side behavior.
-function pickPreferred(
-    hasAnchor: boolean,
-    hasPmp: boolean,
-    anchorSlot: bigint | undefined,
-    pmpSlot: bigint | undefined,
-): IdlVariant {
-    if (hasAnchor && !hasPmp) return IdlVariant.Anchor;
-    if (!hasAnchor) return IdlVariant.ProgramMetadata;
-
-    // Both IDLs exist — mirror the old useIdlLastTransactionDate recency comparison exactly:
-    // both slots known → newer wins (tie → PMP); only the Anchor slot known → Anchor; otherwise PMP.
-    if (anchorSlot !== undefined && pmpSlot !== undefined) {
-        return anchorSlot > pmpSlot ? IdlVariant.Anchor : IdlVariant.ProgramMetadata;
-    }
-    if (anchorSlot !== undefined) return IdlVariant.Anchor;
-    return IdlVariant.ProgramMetadata;
 }

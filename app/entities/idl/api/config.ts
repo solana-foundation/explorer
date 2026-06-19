@@ -7,12 +7,6 @@ import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
 import { LOADER_IDS, ZK_ELGAMAL_PROOF_PROGRAM_ID } from '@/app/utils/programs';
 
-const CACHE_MAX_AGE = 60 * 60; // 60 minutes
-
-export const ANCHOR_CACHE_HEADERS = {
-    'Cache-Control': `public, max-age=${CACHE_MAX_AGE}, s-maxage=${CACHE_MAX_AGE}, stale-while-revalidate=60`,
-};
-
 // Programs that cannot have an Anchor IDL by definition (native runtime / well-known
 // non-Anchor programs). Short-circuit before any RPC call so we never depend on the
 // upstream returning `null` for the derived IDL PDA. Some RPCs have been observed to

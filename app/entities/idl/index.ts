@@ -20,6 +20,11 @@ export {
 export { isIdlProgramIdMismatch, isInteractiveIdlSupported } from './model/interactive-idl';
 export { IdlVariant } from './model/idl-variant';
 
+// Client-side IDL resolver for custom/localhost clusters. Exposed via a lazy loader so `@solana/idl`
+// stays code-split out of the program-page bundle (the type re-export below is erased at build time).
+export { resolveProgramIdlsClient } from './api/load-idl-fetch-client';
+export type { ResolvedClientIdls, ResolveProgramIdlsClientArgs } from './api/idl-fetch-client';
+
 export { getIdlSpecType as getDisplayIdlSpecType } from './model/converters/convert-display-idl';
 export { formatDisplayIdl, formatSerdeIdl, getFormattedIdl } from './model/formatters/format';
 export { useFormatAnchorIdl } from './model/use-format-anchor-idl';

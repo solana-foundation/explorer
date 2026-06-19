@@ -1,12 +1,14 @@
 'use client';
 
-import { AnchorProvider, type Idl, Program } from '@coral-xyz/anchor';
+import { AnchorProvider, type Idl } from '@coral-xyz/anchor';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
-import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import { Connection, Keypair } from '@solana/web3.js';
 import useSWRImmutable from 'swr/immutable';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
+
+import { resolveAnchorIdlClient } from '../api/load-idl-fetch-client';
 
 type IdlSwrKey = readonly ['idl-anchor', string, Cluster, string];
 
@@ -30,20 +32,25 @@ export function getProvider(url: string): AnchorProvider {
 async function fetchIdlForProgram([, programAddress, cluster, url]: IdlSwrKey): Promise<Idl | null> {
     try {
         if (cluster === Cluster.Custom) {
-            return await Program.fetchIdl<Idl>(new PublicKey(programAddress), getProvider(url));
+            // Resolve client-side against the user's RPC via @solana/idl (same resolver as the route).
+            // Lazily loaded so @solana/idl's weight stays out of the bundle for the known-cluster path.
+            const idl = await resolveAnchorIdlClient({ programId: programAddress, url });
+            return (idl as Idl) ?? null;
         }
 
-        const response = await fetch(`/api/anchor?programAddress=${programAddress}&cluster=${cluster}`);
+        // Known clusters resolve server-side via @solana/idl. `pmp=0` returns the Anchor IDL only
+        // (no PMP lookup / recency) — the anchor-only slice of /api/idl-latest.
+        const response = await fetch(`/api/idl-latest?programAddress=${programAddress}&cluster=${cluster}&pmp=0`);
         if (!response.ok) {
-            Logger.warn('[idl] /api/anchor returned non-OK status', {
+            Logger.warn('[idl] /api/idl-latest returned non-OK status', {
                 cluster,
                 programAddress,
                 status: response.status,
             });
             return null;
         }
-        const { idl } = await response.json();
-        return idl ?? null;
+        const { idls } = await response.json();
+        return (idls?.anchor as Idl) ?? null;
     } catch (error) {
         Logger.error(new Error('[idl] Error fetching Anchor IDL', { cause: error }), { cluster, programAddress });
         return null;

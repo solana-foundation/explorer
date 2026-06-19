@@ -10,19 +10,17 @@ import { useProgramIdls } from '../use-program-idls';
 
 const mocks = vi.hoisted(() => ({
     fetch: vi.fn(),
-    fetchIdlAnchor: vi.fn(),
-    useProgramCanonicalMetadata: vi.fn(),
+    resolveProgramIdlsClient: vi.fn(),
 }));
 
 vi.stubGlobal('fetch', mocks.fetch);
 
-vi.mock('@/app/entities/program-metadata/model/use-program-canonical-metadata', () => ({
-    useProgramCanonicalMetadata: mocks.useProgramCanonicalMetadata,
+// Stub the client-side `@solana/idl` resolver used for custom/local clusters, keeping the rest of
+// the entity barrel real (IdlVariant et al.).
+vi.mock('@entities/idl', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/idl')>()),
+    resolveProgramIdlsClient: mocks.resolveProgramIdlsClient,
 }));
-
-// Stub the Anchor client fetch path used for custom/local clusters.
-vi.mock('@coral-xyz/anchor', () => ({ Program: { fetchIdl: mocks.fetchIdlAnchor } }));
-vi.mock('../../../../entities/idl/model/use-idl-from-anchor-program-seed', () => ({ getProvider: vi.fn(() => ({})) }));
 
 const PROGRAM_ID = '11111111111111111111111111111111';
 
@@ -39,10 +37,13 @@ function wrapper({ children }: { children: ReactNode }) {
 describe('useProgramIdls', () => {
     beforeEach(() => {
         mocks.fetch.mockReset();
-        mocks.fetchIdlAnchor.mockReset();
-        mocks.useProgramCanonicalMetadata.mockReset();
-        // Default: the custom-cluster client hooks resolve to no PMP metadata.
-        mocks.useProgramCanonicalMetadata.mockReturnValue({ isLoading: false, programMetadata: undefined });
+        mocks.resolveProgramIdlsClient.mockReset();
+        // Default: the custom-cluster client resolver finds no IDLs.
+        mocks.resolveProgramIdlsClient.mockResolvedValue({
+            anchorIdl: undefined,
+            preferredVariant: IdlVariant.ProgramMetadata,
+            programMetadataIdl: undefined,
+        });
     });
 
     afterEach(() => {
@@ -91,18 +92,41 @@ describe('useProgramIdls', () => {
         });
     });
 
-    describe('custom / local clusters (client fallback)', () => {
-        it('should fetch the Anchor IDL client-side and never call the server route', async () => {
-            mocks.fetchIdlAnchor.mockResolvedValue({ name: 'custom_anchor_idl' });
+    describe('custom / local clusters (client-side @solana/idl resolver)', () => {
+        it('should resolve IDLs client-side against the user RPC and never call the server route', async () => {
+            mocks.resolveProgramIdlsClient.mockResolvedValue({
+                anchorIdl: { name: 'custom_anchor_idl' },
+                preferredVariant: IdlVariant.Anchor,
+                programMetadataIdl: { name: 'custom_pmp_idl' },
+            });
 
             const { result } = renderHook(() => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.Custom), {
                 wrapper,
             });
 
             await waitFor(() => expect(result.current.anchorIdl).toEqual({ name: 'custom_anchor_idl' }));
-            expect(result.current.preferredVariant).toBe(IdlVariant.ProgramMetadata);
-            // The server route is server-only; custom clusters must not hit it.
+            expect(result.current.programMetadataIdl).toEqual({ name: 'custom_pmp_idl' });
+            // Preferred tab comes from the resolver's recency comparison, not a hardcoded default.
+            expect(result.current.preferredVariant).toBe(IdlVariant.Anchor);
+            // The resolver runs against the user-supplied RPC URL (so localhost works end-to-end).
+            expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
+                expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),
+            );
+            // The server route can't reach a user's local validator; custom clusters must not hit it.
             expect(mocks.fetch).not.toHaveBeenCalled();
+        });
+
+        it('should fall back to undefined IDLs + PMP tab when the resolver throws', async () => {
+            mocks.resolveProgramIdlsClient.mockRejectedValue(new Error('connection refused'));
+
+            const { result } = renderHook(() => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.Custom), {
+                wrapper,
+            });
+
+            await waitFor(() => expect(result.current.isLoading).toBe(false));
+            expect(result.current.anchorIdl).toBeUndefined();
+            expect(result.current.programMetadataIdl).toBeUndefined();
+            expect(result.current.preferredVariant).toBe(IdlVariant.ProgramMetadata);
         });
     });
 });

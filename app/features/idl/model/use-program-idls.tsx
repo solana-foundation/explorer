@@ -1,10 +1,8 @@
 'use client';
 
-import { type Idl, Program } from '@coral-xyz/anchor';
 import { shouldUseDirectRpc } from '@entities/cluster';
-import { getProvider, IdlVariant, type SupportedIdl } from '@entities/idl';
-import { IDL_SEED, useProgramCanonicalMetadata } from '@entities/program-metadata';
-import { PublicKey } from '@solana/web3.js';
+import { IdlVariant, resolveProgramIdlsClient, type SupportedIdl } from '@entities/idl';
+import { IDL_SEED } from '@entities/program-metadata';
 import useSWRImmutable from 'swr/immutable';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -26,11 +24,13 @@ type ResolvedIdls = Omit<ProgramIdls, 'isLoading'>;
 /**
  * Resolves every IDL the program IDL card renders (Anchor, PMP `idl` seed) plus the preferred tab.
  *
- * Known public clusters use a single server route (`/api/idl-latest`) backed by `@solana/idl`,
- * which also surfaces native-program IDLs via the fndn fallback authority and decides the preferred
- * tab from last-write slots. Custom / localhost clusters can't use the server route (the package is
- * server-only and the route only knows public RPCs), so they fetch client-side with the existing
- * primitives and default to the PMP tab.
+ * Known public clusters use a single server route (`/api/idl-latest`) backed by `@solana/idl`, which
+ * surfaces native-program IDLs via the fndn fallback authority and decides the preferred tab from
+ * last-write slots. Custom / localhost clusters can't use that route — the server has no route to a
+ * user's local validator — so `resolveProgramIdlsClient` runs the *same* `@solana/idl` resolvers in
+ * the browser against the user-supplied RPC URL, for full parity (fndn fallback + recency-based tab).
+ * That resolver is loaded via dynamic `import()`, so `@solana/idl`'s weight stays out of the bundle
+ * for the common known-cluster path, which never resolves IDLs in the browser.
  */
 export function useProgramIdls(programId: string, url: string, cluster: Cluster): ProgramIdls {
     const isCustom = shouldUseDirectRpc(cluster, url);
@@ -43,26 +43,23 @@ export function useProgramIdls(programId: string, url: string, cluster: Cluster)
         { errorRetryCount: 3 },
     );
 
-    // Custom / local clusters: fetch client-side. `useProgramCanonicalMetadata` gates on `enabled`
-    // and the Anchor SWR key is `false` off-path, so neither runs for known clusters (no double-fetch).
-    const { data: customAnchorIdl, isLoading: customAnchorLoading } = useSWRImmutable(
-        isCustom && (['program-idls-anchor-custom', programId, url] as const),
-        () => fetchAnchorIdlClient(programId, url),
-    );
-    const { programMetadata: customPmpIdl, isLoading: customPmpLoading } = useProgramCanonicalMetadata(
-        programId,
-        IDL_SEED,
-        url,
-        cluster,
-        isCustom && PMP_IDL_ENABLED,
+    // Custom / local clusters: resolve client-side against the user's RPC. Keyed off `url` so a
+    // different endpoint re-resolves; the key is `false` for known clusters so this never runs there
+    // (no double-fetch, and the heavy `@solana/idl` chunk only loads when this branch is taken).
+    const { data: customIdls, isLoading: customLoading } = useSWRImmutable(
+        isCustom && (['program-idls-custom', programId, url] as const),
+        () => resolveProgramIdlsClient({ includePmp: PMP_IDL_ENABLED, programId, seed: IDL_SEED, url }),
+        // resolveProgramIdlsClient re-throws when nothing resolved and a source errored, so cap the
+        // retries (matching the server path) before giving up on a persistently failing local RPC.
+        { errorRetryCount: 3 },
     );
 
     if (isCustom) {
         return {
-            anchorIdl: customAnchorIdl ?? undefined,
-            isLoading: customAnchorLoading || customPmpLoading,
-            preferredVariant: IdlVariant.ProgramMetadata,
-            programMetadataIdl: (customPmpIdl ?? undefined) as SupportedIdl | undefined,
+            anchorIdl: customIdls?.anchorIdl,
+            isLoading: customLoading,
+            preferredVariant: customIdls?.preferredVariant ?? IdlVariant.ProgramMetadata,
+            programMetadataIdl: customIdls?.programMetadataIdl,
         };
     }
 
@@ -100,14 +97,5 @@ async function fetchProgramIdls(programId: string, cluster: Cluster): Promise<Re
             programId,
         });
         throw error;
-    }
-}
-
-async function fetchAnchorIdlClient(programId: string, url: string): Promise<Idl | undefined> {
-    try {
-        return (await Program.fetchIdl<Idl>(new PublicKey(programId), getProvider(url))) ?? undefined;
-    } catch (error) {
-        Logger.error(new Error('[idl] Error fetching Anchor IDL on custom cluster', { cause: error }), { programId });
-        return undefined;
     }
 }
