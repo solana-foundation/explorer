@@ -32,6 +32,7 @@ import { useAutoRefreshInterval, useAutoRefreshState } from '@/app/shared/lib/us
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { BaseTable } from '@/app/shared/ui/Table';
+import { useClusterPath } from '@/app/utils/url';
 import useTabVisibility from '@/app/utils/use-tab-visibility';
 
 import { AccountsCard } from './AccountsCard';
@@ -283,6 +284,7 @@ export function TransactionInspectorPage({
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
     const router = useRouter();
+    const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const [paramString, setParamString] = React.useState<string>();
 
     // Sync message with url search params
@@ -325,7 +327,7 @@ export function TransactionInspectorPage({
         }
     }, [currentPathname, currentSearchParams, prevInspectorData, router, signature, inspectorData]);
 
-    const reset = React.useCallback(() => {
+    const resetParams = React.useCallback(() => {
         const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
         nextQueryParams.delete('message');
         nextQueryParams.delete('signatures');
@@ -333,6 +335,10 @@ export function TransactionInspectorPage({
         const queryString = nextQueryParams?.toString();
         router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
     }, [currentPathname, currentSearchParams, router]);
+
+    const resetToInspectorPage = React.useCallback(() => {
+        router.push(inspectorPath);
+    }, [inspectorPath, router]);
 
     // Decode the message url param whenever it changes
     React.useEffect(() => {
@@ -359,14 +365,18 @@ export function TransactionInspectorPage({
                 </div>
             </div>
             {signature ? (
-                <PermalinkView signature={signature} reset={reset} showTokenBalanceChanges={showTokenBalanceChanges} />
+                <PermalinkView
+                    signature={signature}
+                    reset={resetToInspectorPage}
+                    showTokenBalanceChanges={showTokenBalanceChanges}
+                />
             ) : inspectorData ? (
                 isSquadsProposalAccountData(inspectorData) ? (
-                    <SquadsProposalInspectorCard account={inspectorData.account} onClear={reset} />
+                    <SquadsProposalInspectorCard account={inspectorData.account} onClear={resetParams} />
                 ) : (
                     <LoadedView
                         transaction={inspectorData}
-                        onClear={reset}
+                        onClear={resetParams}
                         showTokenBalanceChanges={showTokenBalanceChanges}
                     />
                 )
