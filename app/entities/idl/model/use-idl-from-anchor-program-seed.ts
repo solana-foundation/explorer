@@ -21,7 +21,9 @@ export function useIdlFromAnchorProgramSeed(
     const swrKey: IdlSwrKey = ['idl-anchor', programAddress, resolvedCluster, url];
     // No suspense: it's rendered without a <Suspense> boundary in the transaction inspector,
     // where a thrown promise rolls back the render tree. Callers use `isLoading` instead.
-    const { data, isLoading } = useSWRImmutable(swrKey, fetchIdlForProgram);
+    // fetchIdlForProgram throws on a failed fetch (rather than caching null), so cap the retries SWR
+    // makes before giving up on a persistently failing endpoint.
+    const { data, isLoading } = useSWRImmutable(swrKey, fetchIdlForProgram, { errorRetryCount: 3 });
     return { idl: data ?? null, isLoading };
 }
 
@@ -42,17 +44,20 @@ async function fetchIdlForProgram([, programAddress, cluster, url]: IdlSwrKey): 
         // /api/idl-latest payload (the route decides PMP inclusion via the feature flag).
         const response = await fetch(`/api/idl-latest?programAddress=${programAddress}&cluster=${cluster}`);
         if (!response.ok) {
-            Logger.warn('[idl] /api/idl-latest returned non-OK status', {
-                cluster,
-                programAddress,
-                status: response.status,
-            });
-            return null;
+            // Throw (don't return null): under useSWRImmutable a returned value — including null — is
+            // cached as a successful "no IDL" for the session and never revalidated, so a transient 502
+            // would permanently suppress the Anchor IDL for every useAnchorProgram consumer. Throwing
+            // lets SWR treat it as an error and retry (see errorRetryCount).
+            throw new Error(`/api/idl-latest returned ${response.status}`);
         }
         const { idls } = await response.json();
         return (idls?.anchor as Idl) ?? null;
     } catch (error) {
-        Logger.error(new Error('[idl] Error fetching Anchor IDL', { cause: error }), { cluster, programAddress });
-        return null;
+        Logger.warn('[idl] Failed to fetch Anchor IDL', {
+            cluster,
+            error: error instanceof Error ? error.message : String(error),
+            programAddress,
+        });
+        throw error;
     }
 }
