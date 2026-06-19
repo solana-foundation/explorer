@@ -1696,7 +1696,7 @@
     "testnet_activation_epoch": 955,
     "devnet_activation_epoch": 1065,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 989,
     "description": "This SIMD will upgrade the Core BPF Stake Program to v5.0.0."
   },
   {
@@ -1884,7 +1884,7 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 971,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1088,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": "Disable deployment of SBPFv0, SBPFv1 and SBPFv2."
