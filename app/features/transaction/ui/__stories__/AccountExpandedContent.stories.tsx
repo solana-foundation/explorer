@@ -1,5 +1,5 @@
 import { PublicKey, SystemProgram } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 import { nextjsParameters, withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
 import { expect, within } from 'storybook/test';
 
