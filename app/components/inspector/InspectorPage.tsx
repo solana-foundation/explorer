@@ -399,16 +399,20 @@ export function PermalinkView({
     const transaction = details?.data?.raw;
 
     // Fetch on load at 'confirmed' (matches providers/transactions/parsed.tsx) so freshly-confirmed txs resolve fast.
+    const fetchConfirmedTx = React.useCallback(() => {
+        fetchTransaction(signature, 'confirmed');
+    }, [fetchTransaction, signature]);
+
     React.useEffect(() => {
         if (!transaction) {
-            fetchTransaction(signature, 'confirmed');
+            fetchConfirmedTx();
         }
-    }, [transaction, fetchTransaction, signature]);
+    }, [transaction, fetchConfirmedTx]);
 
     if (!details || details.status === FetchStatus.Fetching) {
         return <LoadingCard />;
     } else if (details.status === FetchStatus.FetchFailed) {
-        return <ErrorCard text="Failed to fetch transaction" />;
+        return <ErrorCard retry={fetchConfirmedTx} text="Failed to fetch transaction" />;
     } else if (!transaction) {
         return <ErrorCard text="Transaction was not found" retry={reset} retryText="Reset" />;
     }
