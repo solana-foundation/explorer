@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import {
     nextjsParameters,
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
 } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { VoteDetailsCard } from '../instructions/VoteDetailsCard';

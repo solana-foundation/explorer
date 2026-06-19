@@ -1,5 +1,5 @@
 import { KitAddress } from '@components/common/KitAddress';
-import { cn } from '@shared/utils';
+import { cn } from '@components/shared/utils';
 import type { Address } from '@solana/kit';
 import { type ReactNode } from 'react';
 
@@ -14,7 +14,7 @@ export function VoteProgramRow() {
 export function DetailHashRow({ label, hash }: { label: string; hash: string }) {
     return (
         <DetailRow label={label}>
-            <pre className="e-mb-0 e-inline-block e-text-left">{hash}</pre>
+            <pre className="mb-0 inline-block text-left">{hash}</pre>
         </DetailRow>
     );
 }
@@ -26,7 +26,7 @@ export function DetailRow(props: DetailRowProps) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>{props.label}</BaseTable.Cell>
-            <BaseTable.Cell className={cn('e-text-right', monospace && 'e-font-mono')}>
+            <BaseTable.Cell className={cn('text-right', monospace && 'font-mono')}>
                 {'pubkey' in props ? <KitAddress address={props.pubkey} alignRight link /> : props.children}
             </BaseTable.Cell>
         </BaseTable.Row>

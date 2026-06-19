@@ -67,7 +67,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
             {voteAccount.info.blsPubkeyCompressed && (
                 <BaseTable.Row>
                     <BaseTable.Cell>BLS Pubkey</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right e-font-mono">
+                    <BaseTable.Cell className="text-right font-mono">
                         {voteAccount.info.blsPubkeyCompressed}
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -76,7 +76,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
             {voteAccount.info.inflationRewardsCommissionBps !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Inflation Rewards Commission</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         {`${voteAccount.info.inflationRewardsCommissionBps / 100}%`}
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -85,7 +85,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
             {voteAccount.info.inflationRewardsCollector && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Inflation Rewards Collector</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <Address pubkey={voteAccount.info.inflationRewardsCollector} alignRight raw link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -94,7 +94,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
             {voteAccount.info.blockRevenueCommissionBps !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Block Revenue Commission</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         {`${voteAccount.info.blockRevenueCommissionBps / 100}%`}
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -103,7 +103,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
             {voteAccount.info.blockRevenueCollector && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Block Revenue Collector</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <Address pubkey={voteAccount.info.blockRevenueCollector} alignRight raw link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -112,7 +112,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
             {voteAccount.info.pendingDelegatorRewards !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Pending Delegator Rewards (SOL)</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <SolBalance lamports={BigInt(voteAccount.info.pendingDelegatorRewards)} />
                     </BaseTable.Cell>
                 </BaseTable.Row>

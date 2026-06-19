@@ -1,6 +1,6 @@
 import { address } from '@solana/kit';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { DetailRow } from '../instructions/DetailRow';
 import { VOTE_ACCOUNT_ADDRESS } from './fixtures';

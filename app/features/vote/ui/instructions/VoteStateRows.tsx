@@ -30,7 +30,7 @@ export function VoteStateRows({
                 </DetailRow>
             ) : undefined}
             <DetailRow label="Slots (Confirmation Count)" monospace>
-                <pre className="e-mb-0 e-inline-block e-text-left">
+                <pre className="mb-0 inline-block text-left">
                     {voteState.lockouts.map(lockout => `${lockout.slot} (${lockout.confirmation_count})`).join('\n')}
                 </pre>
             </DetailRow>

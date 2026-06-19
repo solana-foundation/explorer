@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCardTableField } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { AuthorityTypeRows } from '../instructions/AuthorityTypeRows';
 
@@ -12,7 +12,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Vote/AuthorityTypeRows/Responsive',
+    title: 'Features/Vote/AuthorityTypeRows@Media',
 } satisfies Meta<typeof AuthorityTypeRows>;
 
 export default meta;

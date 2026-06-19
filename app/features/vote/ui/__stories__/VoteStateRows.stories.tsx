@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCardTableField } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VoteStateRows } from '../instructions/VoteStateRows';
 import { BASE_SLOT, HASH, TIMESTAMP } from './fixtures';

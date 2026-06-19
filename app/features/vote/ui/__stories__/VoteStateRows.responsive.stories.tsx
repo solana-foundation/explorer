@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCardTableField } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VoteStateRows } from '../instructions/VoteStateRows';
 import { BASE_SLOT, HASH, TIMESTAMP } from './fixtures';
@@ -13,7 +13,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Vote/VoteStateRows/Responsive',
+    title: 'Features/Vote/VoteStateRows@Media',
 } satisfies Meta<typeof VoteStateRows>;
 
 export default meta;

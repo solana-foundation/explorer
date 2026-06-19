@@ -1,4 +1,3 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import {
     nextjsParameters,
     withMockTransactions,
@@ -6,6 +5,7 @@ import {
     withTokenInfoBatch,
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VoteDetailsCard } from '../instructions/VoteDetailsCard';
 import {
@@ -27,7 +27,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Vote/VoteDetailsCard/Responsive',
+    title: 'Features/Vote/VoteDetailsCard@Media',
 } satisfies Meta<typeof VoteDetailsCard>;
 
 export default meta;

@@ -37,7 +37,7 @@ export function LegacyVoteDetailsCard({
                 </DetailRow>
             ) : undefined}
             <DetailRow label="Slots" monospace>
-                <pre className="e-mb-0 e-inline-block e-text-left">{info.vote.slots.join('\n')}</pre>
+                <pre className="mb-0 inline-block text-left">{info.vote.slots.join('\n')}</pre>
             </DetailRow>
             {info.hash !== undefined && <DetailHashRow label="Switch Proof Hash" hash={info.hash} />}
         </InstructionCard>
