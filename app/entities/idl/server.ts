@@ -1,5 +1,4 @@
 export { NON_ANCHOR_PROGRAMS } from './api/config';
-export { lastWriteSlot, resolveAnchorIdl, resolvePmpIdl } from './api/idl-fetch';
-export type { ResolvedAnchorIdl, ResolvedPmpIdl } from './api/idl-fetch';
-export { parseIdlContent, pickPreferredVariant } from './lib/idl-payload';
+export { resolveProgramIdls } from './api/resolve-program-idls';
+export type { ResolvedProgramIdls, ResolveProgramIdlsOptions } from './api/resolve-program-idls';
 export { IdlVariant } from './model/idl-variant';

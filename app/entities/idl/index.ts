@@ -22,8 +22,8 @@ export { IdlVariant } from './model/idl-variant';
 
 // Client-side IDL resolver for custom/localhost clusters. Exposed via a lazy loader so `@solana/idl`
 // stays code-split out of the program-page bundle (the type re-export below is erased at build time).
-export { resolveProgramIdlsClient } from './api/load-idl-fetch-client';
-export type { ResolvedClientIdls, ResolveProgramIdlsClientArgs } from './api/idl-fetch-client';
+export { resolveProgramIdlsClient } from './api/load-resolve-program-idls';
+export type { ResolvedClientIdls, ResolveProgramIdlsClientArgs } from './api/load-resolve-program-idls';
 
 export { getIdlSpecType as getDisplayIdlSpecType } from './model/converters/convert-display-idl';
 export { formatDisplayIdl, formatSerdeIdl, getFormattedIdl } from './model/formatters/format';

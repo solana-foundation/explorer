@@ -1,8 +1,7 @@
-import { isTransientRpcError } from '@solana/idl';
+import { fetchPmpIdl, isTransientRpcError, unwrapIdl } from '@solana/idl';
 import { address, createSolanaRpc } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
-import { resolvePmpIdl } from '@/app/entities/idl/server';
 import { errors, getMetadataEndpointUrl, SECURITY_TXT_SEED } from '@/app/entities/program-metadata/server';
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -14,9 +13,9 @@ const CACHE_HEADERS = {
 
 /**
  * Resolve a program's canonical security.txt for a known cluster — the PMP `security` seed, via
- * `@solana/idl`'s `resolvePmpIdl`. Canonical authority only: unlike the IDL seed, security.txt has
- * no Foundation fallback authority. (The IDL seed is served by `/api/idl-latest`; this route is the
- * security.txt counterpart, so neither endpoint conflates the two.)
+ * `@solana/idl`'s `fetchPmpIdl`. Canonical authority only (`authority: null`): unlike the IDL seed,
+ * security.txt has no Foundation fallback authority. (The IDL seed is served by `/api/idl-latest`;
+ * this route is the security.txt counterpart, so neither endpoint conflates the two.)
  */
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -42,27 +41,20 @@ export async function GET(request: Request) {
     const context = { cluster: clusterProp, programAddress, seed: SECURITY_TXT_SEED };
 
     try {
-        // Canonical authority only (no fndn fallback — that's IDL-specific).
-        const pmp = await resolvePmpIdl(createSolanaRpc(url), programId, SECURITY_TXT_SEED, false);
+        const result = await fetchPmpIdl(createSolanaRpc(url), programId, {
+            // eslint-disable-next-line unicorn/no-null -- library API: null = canonical-only lookup (no fndn fallback)
+            authority: null,
+            seed: SECURITY_TXT_SEED,
+        });
+        // `unwrapIdl` folds absent / corrupt / non-JSON-object content to null — the "no security.txt" case.
+        // eslint-disable-next-line unicorn/no-null -- JSON response contract: explicit null = "no security.txt"
+        const programMetadata = unwrapIdl(result)?.idl ?? null;
 
-        let programMetadata: unknown;
-        if (pmp?.content) {
-            try {
-                programMetadata = JSON.parse(pmp.content);
-            } catch {
-                // Account present but content isn't valid JSON — treat as no metadata and cache.
-            }
-        }
-
-        return NextResponse.json(
-            // eslint-disable-next-line unicorn/no-null -- JSON response contract: explicit null = "no security.txt"
-            { programMetadata: programMetadata ?? null },
-            { headers: CACHE_HEADERS, status: 200 },
-        );
+        return NextResponse.json({ programMetadata }, { headers: CACHE_HEADERS, status: 200 });
     } catch (error) {
-        // resolvePmpIdl returns undefined for "no metadata" (absent/corrupt) and only throws on genuine
-        // RPC failures. Transient blips → retryable, *uncached* 502 (no page) so we don't cache a
-        // false-negative `null` for everyone; persistent misconfiguration → Sentry page.
+        // `fetchPmpIdl` surfaces every data outcome as a value and throws only on genuine RPC failure.
+        // Transient blips → retryable, *uncached* 502 (no page) so we don't cache a false-negative
+        // `null` for everyone; persistent misconfiguration → Sentry page.
         if (isTransientRpcError(error)) {
             Logger.warn('[api:security-txt] RPC error fetching metadata', {
                 ...context,

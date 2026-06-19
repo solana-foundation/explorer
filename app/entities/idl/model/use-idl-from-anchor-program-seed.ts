@@ -8,7 +8,7 @@ import useSWRImmutable from 'swr/immutable';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
-import { resolveAnchorIdlClient } from '../api/load-idl-fetch-client';
+import { resolveAnchorIdlClient } from '../api/load-resolve-program-idls';
 
 type IdlSwrKey = readonly ['idl-anchor', string, Cluster, string];
 

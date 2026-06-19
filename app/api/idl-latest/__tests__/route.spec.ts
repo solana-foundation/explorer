@@ -1,47 +1,47 @@
 import { SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, SolanaError } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { IdlVariant } from '@/app/entities/idl/server';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
 const PROGRAM_ADDRESS = 'C7QLEmDz81Usvy2sYa4xZSdA8EwEcYvZo8iuYZMaqXmj';
-const ANCHOR_ACCOUNT = 'BPFLoaderUpgradeab1e11111111111111111111111';
-const PMP_ACCOUNT = 'Stake11111111111111111111111111111111111111';
 
 const mocks = vi.hoisted(() => ({
-    lastWriteSlot: vi.fn(),
-    resolveAnchorIdl: vi.fn(),
-    resolvePmpIdl: vi.fn(),
+    resolveProgramIdls: vi.fn(),
 }));
 
-// The route delegates per-source fetch to the shared helpers and classifies RPC errors with
-// `@solana/idl`'s real `isTransientRpcError`. We mock the three resolve helpers to exercise the
-// route's isolation, response shaping, preferred-tab logic, and error handling.
+// Resolution lives in `resolveProgramIdls` (its own spec). The route is the transport edge, so we
+// mock the resolver and exercise query parsing, response shaping, partial-failure logging, and the
+// error-to-HTTP policy (classified with `@solana/idl`'s real `isTransientRpcError`).
 vi.mock('@/app/entities/idl/server', async () => {
     const actual = await vi.importActual<typeof import('@/app/entities/idl/server')>('@/app/entities/idl/server');
-    return {
-        ...actual,
-        lastWriteSlot: mocks.lastWriteSlot,
-        resolveAnchorIdl: mocks.resolveAnchorIdl,
-        resolvePmpIdl: mocks.resolvePmpIdl,
-    };
+    return { ...actual, resolveProgramIdls: mocks.resolveProgramIdls };
 });
 
 vi.mock('@solana/kit', async () => {
     const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    return {
-        ...actual,
-        // The resolve helpers are mocked and ignore the rpc handle, so a stub is enough.
-        createSolanaRpc: vi.fn(() => ({})),
-    };
+    // The resolver is mocked and ignores the rpc handle, so a stub is enough.
+    return { ...actual, createSolanaRpc: vi.fn(() => ({})) };
 });
+
+function resolved(
+    overrides: Partial<Record<'anchorIdl' | 'programMetadataIdl' | 'preferredVariant' | 'rejections', unknown>> = {},
+) {
+    return {
+        anchorIdl: undefined,
+        preferredVariant: IdlVariant.ProgramMetadata,
+        programMetadataIdl: undefined,
+        rejections: [],
+        ...overrides,
+    };
+}
 
 describe('GET /api/idl-latest', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
         vi.spyOn(Logger, 'panic').mockImplementation(() => {});
-        mocks.lastWriteSlot.mockResolvedValue(undefined);
     });
 
     it('should return 400 when required params are missing', async () => {
@@ -55,6 +55,7 @@ describe('GET /api/idl-latest', () => {
             expect(res.status).toBe(400);
             expect(await res.json()).toEqual({ error: 'Invalid query params' });
         }
+        expect(mocks.resolveProgramIdls).not.toHaveBeenCalled();
     });
 
     it('should return 400 for an invalid cluster value', async () => {
@@ -71,178 +72,85 @@ describe('GET /api/idl-latest', () => {
         expect(await res.json()).toEqual({ error: 'Invalid program address' });
     });
 
-    it('should map both sources and the preferred tab into the payload', async () => {
-        mocks.resolveAnchorIdl.mockResolvedValueOnce({ address: ANCHOR_ACCOUNT, idl: { name: 'anchor_idl' } });
-        mocks.resolvePmpIdl.mockResolvedValueOnce({
-            address: PMP_ACCOUNT,
-            authority: null,
-            content: JSON.stringify({ name: 'pmp' }),
-        });
-        // Anchor written more recently than PMP → anchor preferred.
-        mocks.lastWriteSlot.mockResolvedValueOnce(200n).mockResolvedValueOnce(100n);
+    it('should shape the resolver output into the payload with cache headers', async () => {
+        mocks.resolveProgramIdls.mockResolvedValueOnce(
+            resolved({
+                anchorIdl: { name: 'anchor_idl' },
+                preferredVariant: IdlVariant.Anchor,
+                programMetadataIdl: { name: 'pmp' },
+            }),
+        );
 
         const { GET } = await importRoute();
         const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
 
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({
-            idls: {
-                anchor: { name: 'anchor_idl' },
-                preferred: 'anchor',
-                programMetadata: { name: 'pmp' },
-            },
+            idls: { anchor: { name: 'anchor_idl' }, preferred: 'anchor', programMetadata: { name: 'pmp' } },
         });
         expect(res.headers.get('Cache-Control')).toContain('max-age=');
     });
 
-    it('should prefer program-metadata when PMP was written at least as recently as Anchor', async () => {
-        mocks.resolveAnchorIdl.mockResolvedValueOnce({ address: ANCHOR_ACCOUNT, idl: { name: 'a' } });
-        mocks.resolvePmpIdl.mockResolvedValueOnce({
-            address: PMP_ACCOUNT,
-            authority: null,
-            content: JSON.stringify({ name: 'p' }),
-        });
-        mocks.lastWriteSlot.mockResolvedValueOnce(100n).mockResolvedValueOnce(100n); // tie → PMP
+    it('should pass includeAnchor=false when anchor=0', async () => {
+        mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ programMetadataIdl: { name: 'pmp' } }));
 
         const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
-        const { idls } = await res.json();
-        expect(idls.preferred).toBe('program-metadata');
-    });
-
-    it('should still surface the PMP IDL when the Anchor source is undecodable (isolation)', async () => {
-        // resolveAnchorIdl returns null for a corrupt/undecodable Anchor account (it swallows decode
-        // errors). The PMP IDL must NOT be discarded — the regression this guards against.
-        mocks.resolveAnchorIdl.mockResolvedValueOnce(null);
-        mocks.resolvePmpIdl.mockResolvedValueOnce({
-            address: PMP_ACCOUNT,
-            authority: null,
-            content: JSON.stringify({ name: 'pmp' }),
-        });
-
-        const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
-
-        expect(res.status).toBe(200);
-        const { idls } = await res.json();
-        expect(idls.anchor).toBeUndefined();
-        expect(idls.programMetadata).toEqual({ name: 'pmp' });
-        expect(idls.preferred).toBe('program-metadata');
-    });
-
-    it('should skip the Anchor lookup for native/builtin programs but still resolve PMP IDLs', async () => {
-        // The System program is in NON_ANCHOR_PROGRAMS: it definitionally has no Anchor IDL, and some
-        // RPCs (SIMD-296) return transient errors instead of null for its derived PDA. We must not
-        // call resolveAnchorIdl for it, but its Foundation-published PMP IDL must still surface.
-        const SYSTEM_PROGRAM = '11111111111111111111111111111111';
-        mocks.resolvePmpIdl.mockResolvedValueOnce({
-            address: PMP_ACCOUNT,
-            authority: null,
-            content: JSON.stringify({ name: 'native_idl' }),
-        });
-
-        const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: SYSTEM_PROGRAM }));
-
-        expect(res.status).toBe(200);
-        const { idls } = await res.json();
-        expect(mocks.resolveAnchorIdl).not.toHaveBeenCalled();
-        expect(idls.anchor).toBeUndefined();
-        expect(idls.programMetadata).toEqual({ name: 'native_idl' });
-        expect(idls.preferred).toBe('program-metadata');
-    });
-
-    it('should still serve a resolved PMP IDL when the Anchor lookup hits a transient RPC error', async () => {
-        // A genuine RPC error on ONE source must not discard the sources that resolved. The card
-        // still shows the PMP IDL; the transient failure is logged (warn), not paged, and no 502.
-        mocks.resolveAnchorIdl.mockRejectedValueOnce(
-            new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'Internal error' }),
+        await GET(
+            createRequest({ anchor: '0', cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }),
         );
-        mocks.resolvePmpIdl.mockResolvedValueOnce({
-            address: PMP_ACCOUNT,
-            authority: null,
-            content: JSON.stringify({ name: 'pmp' }),
-        });
+
+        expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(
+            expect.anything(),
+            PROGRAM_ADDRESS,
+            expect.objectContaining({ includeAnchor: false, includePmp: true }),
+        );
+    });
+
+    it('should pass includePmp=false when pmp=0', async () => {
+        mocks.resolveProgramIdls.mockResolvedValueOnce(
+            resolved({ anchorIdl: { name: 'a' }, preferredVariant: IdlVariant.Anchor }),
+        );
+
+        const { GET } = await importRoute();
+        await GET(createRequest({ cluster: String(Cluster.MainnetBeta), pmp: '0', programAddress: PROGRAM_ADDRESS }));
+
+        expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(
+            expect.anything(),
+            PROGRAM_ADDRESS,
+            expect.objectContaining({ includeAnchor: true, includePmp: false }),
+        );
+    });
+
+    it('should warn (not page) for a transient partial-failure rejection but still serve 200', async () => {
+        const rejection = new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'boom' });
+        mocks.resolveProgramIdls.mockResolvedValueOnce(
+            resolved({ programMetadataIdl: { name: 'pmp' }, rejections: [rejection] }),
+        );
 
         const { GET } = await importRoute();
         const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
 
         expect(res.status).toBe(200);
-        const { idls } = await res.json();
-        expect(idls.anchor).toBeUndefined();
-        expect(idls.programMetadata).toEqual({ name: 'pmp' });
-        expect(idls.preferred).toBe('program-metadata');
         expect(Logger.warn).toHaveBeenCalled();
         expect(Logger.panic).not.toHaveBeenCalled();
     });
 
-    it('should prefer Anchor when both IDLs exist but only the Anchor write-slot is known', async () => {
-        mocks.resolveAnchorIdl.mockResolvedValueOnce({ address: ANCHOR_ACCOUNT, idl: { name: 'a' } });
-        mocks.resolvePmpIdl.mockResolvedValueOnce({
-            address: PMP_ACCOUNT,
-            authority: null,
-            content: JSON.stringify({ name: 'p' }),
-        });
-        // Anchor write-slot resolves; the PMP write-slot lookup yields nothing (undefined).
-        mocks.lastWriteSlot.mockResolvedValueOnce(123n).mockResolvedValueOnce(undefined);
+    it('should page for a non-transient partial-failure rejection but still serve 200', async () => {
+        mocks.resolveProgramIdls.mockResolvedValueOnce(
+            resolved({ programMetadataIdl: { name: 'pmp' }, rejections: [new Error('misconfig')] }),
+        );
 
         const { GET } = await importRoute();
         const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
-        const { idls } = await res.json();
-        expect(idls.preferred).toBe('anchor');
-    });
-
-    it('should drop content that is not valid JSON to undefined', async () => {
-        mocks.resolveAnchorIdl.mockResolvedValueOnce(null);
-        mocks.resolvePmpIdl.mockResolvedValueOnce({ address: PMP_ACCOUNT, authority: null, content: 'not-json{' });
-
-        const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
-        const { idls } = await res.json();
-        expect(idls.programMetadata).toBeUndefined();
-    });
-
-    it('should only fetch the Anchor IDL (and prefer it) when pmp=0', async () => {
-        mocks.resolveAnchorIdl.mockResolvedValueOnce({ address: ANCHOR_ACCOUNT, idl: { name: 'a' } });
-
-        const { GET } = await importRoute();
-        const res = await GET(
-            createRequest({ cluster: String(Cluster.MainnetBeta), pmp: '0', programAddress: PROGRAM_ADDRESS }),
-        );
 
         expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({
-            idls: { anchor: { name: 'a' }, preferred: 'anchor', programMetadata: undefined },
-        });
-        expect(mocks.resolvePmpIdl).not.toHaveBeenCalled();
+        expect(Logger.panic).toHaveBeenCalled();
     });
 
-    it('should only fetch the PMP IDL (and prefer it) when anchor=0', async () => {
-        mocks.resolvePmpIdl.mockResolvedValueOnce({
-            address: PMP_ACCOUNT,
-            authority: null,
-            content: JSON.stringify({ name: 'pmp' }),
-        });
-
-        const { GET } = await importRoute();
-        const res = await GET(
-            createRequest({ anchor: '0', cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }),
-        );
-
-        expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({
-            idls: { anchor: undefined, preferred: 'program-metadata', programMetadata: { name: 'pmp' } },
-        });
-        expect(mocks.resolveAnchorIdl).not.toHaveBeenCalled();
-        // Single source → no recency lookups.
-        expect(mocks.lastWriteSlot).not.toHaveBeenCalled();
-    });
-
-    it('should return a retryable 502 (no page) on a transient RPC error', async () => {
-        mocks.resolveAnchorIdl.mockRejectedValueOnce(
+    it('should return a retryable 502 (no page) when the resolver throws a transient RPC error', async () => {
+        mocks.resolveProgramIdls.mockRejectedValueOnce(
             new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'Internal error' }),
         );
-        mocks.resolvePmpIdl.mockResolvedValue(null);
 
         const { GET } = await importRoute();
         const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
@@ -254,8 +162,7 @@ describe('GET /api/idl-latest', () => {
     });
 
     it('should return 502 and escalate on an unexpected (non-RPC) error', async () => {
-        mocks.resolveAnchorIdl.mockRejectedValueOnce(new Error('boom'));
-        mocks.resolvePmpIdl.mockResolvedValue(null);
+        mocks.resolveProgramIdls.mockRejectedValueOnce(new Error('boom'));
 
         const { GET } = await importRoute();
         const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
