@@ -1499,7 +1499,7 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 970,
+    "testnet_activation_epoch": 977,
     "devnet_activation_epoch": 1085,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1859,7 +1859,7 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 968,
+    "testnet_activation_epoch": 977,
     "devnet_activation_epoch": 1084,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1905,8 +1905,8 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": 972,
-    "devnet_activation_epoch": null,
+    "testnet_activation_epoch": 977,
+    "devnet_activation_epoch": 1090,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": "Enforce a minimum extension size of 10,240 bytes (10 KiB) on the ExtendProgram instruction in Loader V3, mitigating the existing denial-of-service vector through economic deterrence while preserving the instruction's permissionless nature."
@@ -1929,7 +1929,7 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 977,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1953,7 +1953,7 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 977,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -2028,7 +2028,7 @@
     "simds": [
       "0340"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 977,
     "title": "SIMD-340: Encompassing check for validate chained block ID"
   }
 ]
