@@ -46,24 +46,16 @@ jobs:
           MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
         run: pnpm exec tsx scripts/update-verified-programs.ts
 
-      - name: Check for changes
-        id: diff
-        run: |
-          git diff --exit-code public/verified-programs.json && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
-
       - name: Create or update pull request
-        if: steps.diff.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          branch="chore/update-verified-programs"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$branch"
-          git add public/verified-programs.json
-          git commit -m "chore: update verified programs list"
-          git push -f origin "$branch"
-          gh pr create \
-            --title "chore: update verified programs list" \
-            --body "Automated daily update of verified programs from OSecure." \
-            --base master 2>/dev/null || echo "PR already exists"
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sign-commits: true
+          commit-message: "chore: update verified programs list"
+          title: "chore: update verified programs list"
+          body: "Automated daily update of verified programs from OSecure."
+          branch: "chore/update-verified-programs"
+          base: master
+          add-paths: public/verified-programs.json
+          maintainer-can-modify: true
+          delete-branch: true
