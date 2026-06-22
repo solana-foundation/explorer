@@ -2,6 +2,7 @@
 
 import { AnchorProvider, type Idl } from '@coral-xyz/anchor';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
+import { shouldUseDirectRpc } from '@entities/cluster/@x/idl';
 import { Connection, Keypair } from '@solana/web3.js';
 import useSWRImmutable from 'swr/immutable';
 
@@ -32,8 +33,10 @@ export function getProvider(url: string): AnchorProvider {
 }
 
 async function fetchIdlForProgram([, programAddress, cluster, url]: IdlSwrKey): Promise<Idl | null> {
-    if (cluster === Cluster.Custom) {
-        // Resolve client-side against the user's RPC via @solana/idl (same resolver as the route).
+    if (shouldUseDirectRpc(cluster, url)) {
+        // Custom — or a known cluster pointing at a local validator the server can't reach — resolves
+        // client-side against the user's RPC via @solana/idl (same resolver, and the same direct-RPC
+        // decision as the IDL card's useProgramIdls, so the decoder and card never diverge).
         // Lazily loaded so @solana/idl's weight stays out of the bundle for the known-cluster path.
         const idl = await resolveAnchorIdlClient({ programId: programAddress, url });
         return (idl as Idl) ?? null;

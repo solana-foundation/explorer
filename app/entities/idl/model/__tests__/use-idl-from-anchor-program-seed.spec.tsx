@@ -83,4 +83,23 @@ describe('useIdlFromAnchorProgramSeed', () => {
         );
         expect(mocks.fetch).not.toHaveBeenCalled();
     });
+
+    it('should resolve client-side when a known cluster points at a localhost RPC', async () => {
+        // shouldUseDirectRpc: a known-cluster session whose RPC URL is localhost can't be reached by
+        // the server route, so it must resolve in the browser — matching the IDL card's useProgramIdls.
+        // Guarding only on Cluster.Custom here would send the decoder to /api/idl-latest while the card
+        // resolved client-side, surfacing mismatched IDLs for the same program.
+        mocks.resolveAnchorIdlClient.mockResolvedValue(ANCHOR_IDL);
+
+        const { result } = renderHook(
+            () => useIdlFromAnchorProgramSeed(PROGRAM, 'http://localhost:8899', Cluster.MainnetBeta),
+            { wrapper },
+        );
+
+        await waitFor(() => expect(result.current.idl).toEqual(ANCHOR_IDL));
+        expect(mocks.resolveAnchorIdlClient).toHaveBeenCalledWith(
+            expect.objectContaining({ programId: PROGRAM, url: 'http://localhost:8899' }),
+        );
+        expect(mocks.fetch).not.toHaveBeenCalled();
+    });
 });
