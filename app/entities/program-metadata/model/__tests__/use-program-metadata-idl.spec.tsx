@@ -9,11 +9,17 @@ import { useProgramMetadataIdl } from '../use-program-metadata-idl';
 
 const mocks = vi.hoisted(() => ({
     fetch: vi.fn(),
-    resolvePmpContentClient: vi.fn(),
+    resolveProgramIdlsClient: vi.fn(),
 }));
 
 vi.stubGlobal('fetch', mocks.fetch);
-vi.mock('../../api/resolve-pmp-content-client', () => ({ resolvePmpContentClient: mocks.resolvePmpContentClient }));
+
+// Known clusters go through the real `fetchProgramIdls` (global fetch, stubbed above); the custom-
+// cluster client resolver is stubbed so the spec asserts the PMP-only call shape without `@solana/idl`.
+vi.mock('@entities/idl/@x/program-metadata', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/idl/@x/program-metadata')>()),
+    resolveProgramIdlsClient: mocks.resolveProgramIdlsClient,
+}));
 
 const PROGRAM = '72RmHgLprptX1iZDJqmMD5vroTqo8N2tJ6YWoFjFNDgj';
 
@@ -49,20 +55,25 @@ describe('useProgramMetadataIdl', () => {
         await waitFor(() => expect(result.current.programMetadataIdl).toEqual({ name: 'pmp_idl' }));
         const requestedUrl = mocks.fetch.mock.calls[0]?.[0] as string;
         expect(requestedUrl).toContain('/api/idl-latest');
-        expect(mocks.resolvePmpContentClient).not.toHaveBeenCalled();
+        expect(mocks.resolveProgramIdlsClient).not.toHaveBeenCalled();
     });
 
-    it('should resolve client-side via @solana/idl on a custom/localhost cluster', async () => {
-        mocks.resolvePmpContentClient.mockResolvedValue({ name: 'local_pmp_idl' });
+    it('should resolve PMP-only client-side via @solana/idl on a custom/localhost cluster', async () => {
+        mocks.resolveProgramIdlsClient.mockResolvedValue({ programMetadataIdl: { name: 'local_pmp_idl' } });
 
         const { result } = renderHook(() => useProgramMetadataIdl(PROGRAM, 'http://localhost:8899', Cluster.Custom), {
             wrapper,
         });
 
         await waitFor(() => expect(result.current.programMetadataIdl).toEqual({ name: 'local_pmp_idl' }));
-        // Custom path uses the fndn fallback authority and never hits the server route.
-        expect(mocks.resolvePmpContentClient).toHaveBeenCalledWith(
-            expect.objectContaining({ programAddress: PROGRAM, seed: 'idl', useFallbackAuthorities: true }),
+        // PMP-only (includeAnchor: false) against the user RPC; never hits the server route.
+        expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
+            expect.objectContaining({
+                includeAnchor: false,
+                includePmp: true,
+                programId: PROGRAM,
+                url: 'http://localhost:8899',
+            }),
         );
         expect(mocks.fetch).not.toHaveBeenCalled();
     });
@@ -79,7 +90,7 @@ describe('useProgramMetadataIdl', () => {
         expect(result.current.programMetadataIdl).toBeUndefined();
     });
 
-    it('should return null and never fetch when the PMP IDL flag is disabled', async () => {
+    it('should return undefined and never fetch when the PMP IDL flag is disabled', async () => {
         vi.stubEnv('NEXT_PUBLIC_PMP_IDL_ENABLED', 'false');
 
         const { result } = renderHook(
@@ -90,6 +101,6 @@ describe('useProgramMetadataIdl', () => {
         await waitFor(() => expect(result.current.isLoading).toBe(false));
         expect(result.current.programMetadataIdl).toBeUndefined();
         expect(mocks.fetch).not.toHaveBeenCalled();
-        expect(mocks.resolvePmpContentClient).not.toHaveBeenCalled();
+        expect(mocks.resolveProgramIdlsClient).not.toHaveBeenCalled();
     });
 });

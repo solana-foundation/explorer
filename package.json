@@ -74,6 +74,7 @@
         "@solana/buffer-layout": "3.0.0",
         "@solana/idl": "0.2.0",
         "@solana/kit": "6.5.0",
+        "@solana/security-txt": "0.1.0",
         "@solana/spl-account-compression": "0.1.8",
         "@solana/spl-token": "0.1.8",
         "@solana/wallet-adapter-base": "0.9.27",

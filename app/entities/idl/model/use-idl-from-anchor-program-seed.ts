@@ -5,9 +5,9 @@ import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { Connection, Keypair } from '@solana/web3.js';
 import useSWRImmutable from 'swr/immutable';
 
-import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
+import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { resolveAnchorIdlClient } from '../api/load-resolve-program-idls';
 
 type IdlSwrKey = readonly ['idl-anchor', string, Cluster, string];
@@ -32,32 +32,15 @@ export function getProvider(url: string): AnchorProvider {
 }
 
 async function fetchIdlForProgram([, programAddress, cluster, url]: IdlSwrKey): Promise<Idl | null> {
-    try {
-        if (cluster === Cluster.Custom) {
-            // Resolve client-side against the user's RPC via @solana/idl (same resolver as the route).
-            // Lazily loaded so @solana/idl's weight stays out of the bundle for the known-cluster path.
-            const idl = await resolveAnchorIdlClient({ programId: programAddress, url });
-            return (idl as Idl) ?? null;
-        }
-
-        // Known clusters resolve server-side via @solana/idl; we read the Anchor IDL from the shared
-        // /api/idl-latest payload (the route decides PMP inclusion via the feature flag).
-        const response = await fetch(`/api/idl-latest?programAddress=${programAddress}&cluster=${cluster}`);
-        if (!response.ok) {
-            // Throw (don't return null): under useSWRImmutable a returned value — including null — is
-            // cached as a successful "no IDL" for the session and never revalidated, so a transient 502
-            // would permanently suppress the Anchor IDL for every useAnchorProgram consumer. Throwing
-            // lets SWR treat it as an error and retry (see errorRetryCount).
-            throw new Error(`/api/idl-latest returned ${response.status}`);
-        }
-        const { idls } = await response.json();
-        return (idls?.anchor as Idl) ?? null;
-    } catch (error) {
-        Logger.warn('[idl] Failed to fetch Anchor IDL', {
-            cluster,
-            error: error instanceof Error ? error.message : String(error),
-            programAddress,
-        });
-        throw error;
+    if (cluster === Cluster.Custom) {
+        // Resolve client-side against the user's RPC via @solana/idl (same resolver as the route).
+        // Lazily loaded so @solana/idl's weight stays out of the bundle for the known-cluster path.
+        const idl = await resolveAnchorIdlClient({ programId: programAddress, url });
+        return (idl as Idl) ?? null;
     }
+    // Known clusters: read the Anchor IDL from the shared, CDN-cached /api/idl-latest payload.
+    // fetchProgramIdls throws on a transient failure (rather than caching null) so SWR retries — see
+    // its doc and this hook's errorRetryCount.
+    const { anchorIdl } = await fetchProgramIdls(programAddress, cluster);
+    return (anchorIdl as Idl) ?? null;
 }

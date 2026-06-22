@@ -7,8 +7,8 @@ export type ResolveProgramIdlsClientArgs = {
     programId: string;
     /** The user-supplied RPC URL (custom cluster or localhost) to resolve directly against. */
     url: string;
-    /** PMP seed (`idl`). */
-    seed: string;
+    /** Resolve the Anchor PDA IDL. Default `true`; pass `false` for the PMP-only path (program-name label). */
+    includeAnchor?: boolean;
     /** Skip the PMP lookup when the PMP IDL feature flag is off. */
     includePmp: boolean;
 };
@@ -33,9 +33,10 @@ export type ResolveAnchorIdlClientArgs = {
  * for the PMP `idl` seed — so a local validator surfaces exactly what a public cluster does
  * (including Foundation-published native IDLs).
  *
- * `resolve-program-idls` statically pulls in `@solana/idl` (~45 KB gzip of yaml/toml/pako + crypto/
- * zlib polyfills), so it's reached only through the dynamic `import()` here — keeping that weight out
- * of the program-page bundle for the common known-cluster path, which resolves on the server.
+ * `resolve-program-idls` statically pulls in `@solana/idl` (~40 KB gzip — pako/yaml/toml — measured as
+ * the First Load JS it adds across the `/address/*` and `/tx/*` routes, since it's reachable from the
+ * broadly-used `useAnchorProgram`), so it's reached only through the dynamic `import()` here — keeping
+ * that weight out of the bundle for the common known-cluster path, which resolves on the server.
  *
  * The resolver throws only on RPC failure, which here propagates so SWR retries rather than caching a
  * false-negative "no IDLs" for the session (e.g. a brief local-validator blip).
@@ -43,14 +44,14 @@ export type ResolveAnchorIdlClientArgs = {
 export async function resolveProgramIdlsClient({
     programId,
     url,
-    seed,
+    includeAnchor = true,
     includePmp,
 }: ResolveProgramIdlsClientArgs): Promise<ResolvedClientIdls> {
     const { resolveProgramIdls } = await import('./resolve-program-idls');
     const { anchorIdl, programMetadataIdl, preferredVariant } = await resolveProgramIdls(
         createSolanaRpc(url),
         address(programId),
-        { includePmp, seed },
+        { includeAnchor, includePmp },
     );
     return {
         anchorIdl: anchorIdl as SupportedIdl | undefined,

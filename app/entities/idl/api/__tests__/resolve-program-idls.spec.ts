@@ -22,11 +22,10 @@ vi.mock('@solana/idl', async () => {
     };
 });
 
-const SEED = 'idl';
 const PROGRAM = 'C7QLEmDz81Usvy2sYa4xZSdA8EwEcYvZo8iuYZMaqXmj' as Address;
 const SYSTEM_PROGRAM = '11111111111111111111111111111111' as Address; // in NON_ANCHOR_PROGRAMS
 
-const both = { includePmp: true, seed: SEED };
+const both = { includePmp: true };
 
 // fetchLatestIdls returns each source as an empty or single-element array of { content }.
 const latest = (anchor?: object, pmp?: object) =>
@@ -47,7 +46,7 @@ describe('resolveProgramIdls', () => {
 
         const result = await resolveProgramIdls(rpc(), PROGRAM, both);
 
-        expect(mocks.fetchLatestIdls).toHaveBeenCalledWith(expect.anything(), PROGRAM, { seed: SEED });
+        expect(mocks.fetchLatestIdls).toHaveBeenCalledWith(expect.anything(), PROGRAM);
         expect(mocks.fetchAnchorIdl).not.toHaveBeenCalled();
         expect(mocks.fetchPmpIdl).not.toHaveBeenCalled();
         expect(result.anchorIdl).toEqual({ instructions: [], name: 'anchor' });
@@ -64,12 +63,16 @@ describe('resolveProgramIdls', () => {
         expect(result.preferredVariant).toBe(IdlVariant.Anchor);
     });
 
-    it('should reject an Anchor account whose JSON is not IDL-shaped (no top-level instructions[])', async () => {
-        mocks.fetchLatestIdls.mockResolvedValueOnce(latest({ hello: 'world' }, undefined));
+    it('should not validate IDL shape — any JSON object passes for both sources (detection is client-side)', async () => {
+        // No `instructions[]` guard: PMP can be Codama (instructions nested under `program`), so the
+        // resolver asserts only "is a JSON object" for both sources; the UI detects the format.
+        mocks.fetchLatestIdls.mockResolvedValueOnce(
+            latest({ hello: 'world' }, { kind: 'rootNode', standard: 'codama' }),
+        );
 
         const result = await resolveProgramIdls(rpc(), PROGRAM, both);
-        expect(result.anchorIdl).toBeUndefined();
-        expect(result.preferredVariant).toBe(IdlVariant.ProgramMetadata);
+        expect(result.anchorIdl).toEqual({ hello: 'world' });
+        expect(result.programMetadataIdl).toEqual({ kind: 'rootNode', standard: 'codama' });
     });
 
     it('should treat both-absent as undefined IDLs', async () => {
@@ -83,11 +86,24 @@ describe('resolveProgramIdls', () => {
     it('should fetch only the Anchor IDL when includePmp is false (inspector / Anchor-only)', async () => {
         mocks.fetchAnchorIdl.mockResolvedValueOnce(ok({ instructions: [] }));
 
-        const result = await resolveProgramIdls(rpc(), PROGRAM, { includePmp: false, seed: SEED });
+        const result = await resolveProgramIdls(rpc(), PROGRAM, { includePmp: false });
         expect(mocks.fetchLatestIdls).not.toHaveBeenCalled();
         expect(mocks.fetchPmpIdl).not.toHaveBeenCalled();
         expect(result.anchorIdl).toEqual({ instructions: [] });
         expect(result.preferredVariant).toBe(IdlVariant.Anchor);
+    });
+
+    it('should fetch only the PMP IDL when includeAnchor is false (PMP-only program-name label)', async () => {
+        mocks.fetchPmpIdl.mockResolvedValueOnce(ok({ name: 'pmp' }));
+
+        const result = await resolveProgramIdls(rpc(), PROGRAM, { includeAnchor: false, includePmp: true });
+        // includeAnchor:false skips the Anchor PDA lookup (and fetchLatestIdls, which would do one).
+        expect(mocks.fetchLatestIdls).not.toHaveBeenCalled();
+        expect(mocks.fetchAnchorIdl).not.toHaveBeenCalled();
+        expect(mocks.fetchPmpIdl).toHaveBeenCalledWith(expect.anything(), PROGRAM);
+        expect(result.anchorIdl).toBeUndefined();
+        expect(result.programMetadataIdl).toEqual({ name: 'pmp' });
+        expect(result.preferredVariant).toBe(IdlVariant.ProgramMetadata);
     });
 
     it('should skip the Anchor leg for native/builtin programs and resolve PMP only', async () => {
@@ -97,7 +113,7 @@ describe('resolveProgramIdls', () => {
         // Native → no Anchor PDA lookup, and no fetchLatestIdls (which would do one).
         expect(mocks.fetchLatestIdls).not.toHaveBeenCalled();
         expect(mocks.fetchAnchorIdl).not.toHaveBeenCalled();
-        expect(mocks.fetchPmpIdl).toHaveBeenCalledWith(expect.anything(), SYSTEM_PROGRAM, { seed: SEED });
+        expect(mocks.fetchPmpIdl).toHaveBeenCalledWith(expect.anything(), SYSTEM_PROGRAM);
         expect(result.anchorIdl).toBeUndefined();
         expect(result.programMetadataIdl).toEqual({ name: 'native' });
         expect(result.preferredVariant).toBe(IdlVariant.ProgramMetadata);
@@ -106,7 +122,7 @@ describe('resolveProgramIdls', () => {
     it('should drop a single source that is absent', async () => {
         mocks.fetchAnchorIdl.mockResolvedValueOnce(absent);
 
-        const result = await resolveProgramIdls(rpc(), PROGRAM, { includePmp: false, seed: SEED });
+        const result = await resolveProgramIdls(rpc(), PROGRAM, { includePmp: false });
         expect(result.anchorIdl).toBeUndefined();
     });
 

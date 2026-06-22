@@ -1,5 +1,5 @@
 import { SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, SolanaError } from '@solana/kit';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
@@ -7,29 +7,35 @@ import { Cluster } from '@/app/utils/cluster';
 const mockAddress = '11111111111111111111111111111111';
 
 const mocks = vi.hoisted(() => ({
-    fetchPmpIdl: vi.fn(),
+    fetchElfSecurityTxt: vi.fn(),
+    fetchSecurityTxt: vi.fn(),
 }));
 
-// The route resolves the `security` seed via `@solana/idl`'s `fetchPmpIdl`. We mock that fetcher
-// (keeping the real `unwrapIdl` / `isTransientRpcError`) to assert canonical-only resolution,
-// response shaping, and error classification.
-vi.mock('@solana/idl', async () => {
-    const actual = await vi.importActual<typeof import('@solana/idl')>('@solana/idl');
-    return { ...actual, fetchPmpIdl: mocks.fetchPmpIdl };
-});
+// The route resolves security.txt via `@solana/security-txt`. We mock those fetchers (keeping the
+// real `isTransientRpcError` from `@solana/idl`) to assert canonical-only resolution, response
+// shaping, the PMP feature gate, and error classification.
+vi.mock('@solana/security-txt', () => ({
+    fetchElfSecurityTxt: mocks.fetchElfSecurityTxt,
+    fetchSecurityTxt: mocks.fetchSecurityTxt,
+}));
 
 vi.mock('@solana/kit', async () => {
     const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
+    // The fetchers are mocked and ignore the rpc handle, so a stub is enough.
     return { ...actual, createSolanaRpc: vi.fn(() => ({})) };
 });
-
-const pmpOk = (content: string) => ({ address: mockAddress, authority: null, content, source: 'pmp', status: 'ok' });
 
 describe('GET /api/security-txt', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.spyOn(Logger, 'panic').mockImplementation(() => {});
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
+        // PMP gate on by default; the off case is exercised explicitly below.
+        vi.stubEnv('NEXT_PUBLIC_PMP_SECURITY_TXT_ENABLED', 'true');
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
     });
 
     it('should return 400 when required params are missing', async () => {
@@ -38,13 +44,12 @@ describe('GET /api/security-txt', () => {
             createRequest(mockAddress, undefined), // missing cluster
             createRequest(undefined, Cluster.Devnet), // missing programAddress
         ];
-
         const responses = await Promise.all(cases.map(r => GET(r)));
         for (const res of responses) {
             expect(res.status).toBe(400);
             expect(await res.json()).toEqual({ error: 'Invalid query params' });
         }
-        expect(mocks.fetchPmpIdl).not.toHaveBeenCalled();
+        expect(mocks.fetchSecurityTxt).not.toHaveBeenCalled();
     });
 
     it('should return 400 for an invalid program address', async () => {
@@ -61,49 +66,56 @@ describe('GET /api/security-txt', () => {
         expect(await res.json()).toEqual({ error: 'Invalid cluster' });
     });
 
-    it('should return parsed security.txt on success', async () => {
-        mocks.fetchPmpIdl.mockResolvedValueOnce(pmpOk(JSON.stringify({ contacts: 'mailto:security@example.com' })));
+    it('should return the resolved security.txt (type + fields) on success', async () => {
+        mocks.fetchSecurityTxt.mockResolvedValueOnce({
+            content: '{}',
+            fields: { contacts: 'mailto:security@example.com' },
+            programId: mockAddress,
+            type: 'pmp',
+        });
 
         const { GET } = await importRoute();
         const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta));
         expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ programMetadata: { contacts: 'mailto:security@example.com' } });
+        expect(await res.json()).toEqual({
+            securityTxt: { fields: { contacts: 'mailto:security@example.com' }, type: 'pmp' },
+        });
         expect(res.headers.get('Cache-Control')).toContain('max-age=');
     });
 
-    it('should return null when no security.txt is published', async () => {
-        mocks.fetchPmpIdl.mockResolvedValueOnce({ address: mockAddress, status: 'absent' });
+    it('should omit securityTxt when none is published', async () => {
+        mocks.fetchSecurityTxt.mockResolvedValueOnce(null);
 
         const { GET } = await importRoute();
         const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta));
         expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ programMetadata: null });
+        expect((await res.json()).securityTxt).toBeUndefined();
     });
 
-    it('should return null when the on-chain content is not valid JSON', async () => {
-        mocks.fetchPmpIdl.mockResolvedValueOnce(pmpOk('not-json{'));
-
-        const { GET } = await importRoute();
-        const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta));
-        expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ programMetadata: null });
-    });
-
-    it('should resolve the security seed canonical-only (no fallback authorities)', async () => {
-        mocks.fetchPmpIdl.mockResolvedValueOnce({ address: mockAddress, status: 'absent' });
+    it('should resolve the PMP leg canonical-only (no fallback authorities)', async () => {
+        mocks.fetchSecurityTxt.mockResolvedValueOnce(null);
 
         const { GET } = await importRoute();
         await GET(createRequest(mockAddress, Cluster.MainnetBeta));
 
         // authority: null → canonical authority only, no fndn fallback lookups.
-        expect(mocks.fetchPmpIdl).toHaveBeenCalledWith(expect.anything(), mockAddress, {
-            authority: null,
-            seed: 'security',
-        });
+        expect(mocks.fetchSecurityTxt).toHaveBeenCalledWith(expect.anything(), mockAddress, { authority: null });
+    });
+
+    it('should read only the ELF section when the PMP gate is off', async () => {
+        vi.stubEnv('NEXT_PUBLIC_PMP_SECURITY_TXT_ENABLED', 'false');
+        mocks.fetchElfSecurityTxt.mockResolvedValueOnce({ address: mockAddress, content: '', fields: { name: 'elf' } });
+
+        const { GET } = await importRoute();
+        const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta));
+        expect(res.status).toBe(200);
+        expect(mocks.fetchSecurityTxt).not.toHaveBeenCalled();
+        expect(mocks.fetchElfSecurityTxt).toHaveBeenCalledWith(expect.anything(), mockAddress);
+        expect(await res.json()).toEqual({ securityTxt: { fields: { name: 'elf' }, type: 'elf' } });
     });
 
     it('should return a retryable 502 (no page) on a transient RPC error', async () => {
-        mocks.fetchPmpIdl.mockRejectedValueOnce(
+        mocks.fetchSecurityTxt.mockRejectedValueOnce(
             new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'Internal error' }),
         );
 
@@ -116,7 +128,7 @@ describe('GET /api/security-txt', () => {
     });
 
     it('should return 502 and escalate when the fetch unexpectedly throws', async () => {
-        mocks.fetchPmpIdl.mockRejectedValueOnce(new Error('RPC connection failed'));
+        mocks.fetchSecurityTxt.mockRejectedValueOnce(new Error('RPC connection failed'));
 
         const { GET } = await importRoute();
         const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta));

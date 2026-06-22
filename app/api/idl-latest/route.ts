@@ -1,12 +1,10 @@
-import { clusterFromParam } from '@entities/cluster/server';
+import { serverClusterUrlFromParam } from '@entities/cluster/server';
+import { resolveProgramIdls } from '@entities/idl/server';
 import { isTransientRpcError } from '@solana/idl';
 import { type Address, address, createSolanaRpc } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
-import { resolveProgramIdls } from '@/app/entities/idl/server';
-import { IDL_SEED } from '@/app/entities/program-metadata/server';
 import { Logger } from '@/app/shared/lib/logger';
-import { serverClusterUrl } from '@/app/utils/cluster';
 import { isEnvEnabled } from '@/app/utils/env';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
@@ -37,8 +35,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid query params' }, { status: 400 });
     }
 
-    const cluster = clusterFromParam(clusterProp);
-    const url = cluster !== undefined ? serverClusterUrl(cluster, '') : undefined;
+    const url = serverClusterUrlFromParam(clusterProp);
     if (!url) {
         return NextResponse.json({ error: 'Invalid cluster' }, { status: 400 });
     }
@@ -56,7 +53,7 @@ export async function GET(request: Request) {
         const { anchorIdl, programMetadataIdl, preferredVariant } = await resolveProgramIdls(
             createSolanaRpc(url),
             programId,
-            { includePmp, seed: IDL_SEED },
+            { includePmp },
         );
 
         const idls = { anchor: anchorIdl, preferred: preferredVariant, programMetadata: programMetadataIdl };

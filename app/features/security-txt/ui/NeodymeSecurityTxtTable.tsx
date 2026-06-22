@@ -1,8 +1,8 @@
 import { TableCardBody } from '@components/common/TableCardBody';
+import type { NeodymeSecurityTxtFields } from '@solana/security-txt';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import type { NeodymeSecurityTXT } from '../lib/types';
 import { CodeCell, ContactInfo, ExternalLinkCell, StringCell } from './common';
 import { isValidLink } from './utils';
 
@@ -17,11 +17,11 @@ enum DisplayType {
 
 type TableRow = {
     display: string;
-    key: keyof NeodymeSecurityTXT;
+    key: keyof NeodymeSecurityTxtFields;
     type: DisplayType;
 };
 
-export function NeodymeSecurityTxtTable({ data }: { data: NeodymeSecurityTXT }) {
+export function NeodymeSecurityTxtTable({ data }: { data: NeodymeSecurityTxtFields }) {
     return (
         <TableCardBody>
             {ROWS.filter(x => x.key in data).map((x, idx) => {
@@ -99,7 +99,13 @@ const ROWS: TableRow[] = [
     },
 ];
 
-function RenderEntry({ value, type }: { value: NeodymeSecurityTXT[keyof NeodymeSecurityTXT]; type: DisplayType }) {
+function RenderEntry({
+    value,
+    type,
+}: {
+    value: NeodymeSecurityTxtFields[keyof NeodymeSecurityTxtFields];
+    type: DisplayType;
+}) {
     if (!value) {
         return <></>;
     }

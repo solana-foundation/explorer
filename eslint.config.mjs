@@ -399,7 +399,6 @@ export default tseslint.config(
             'app/features/idl/formatted-idl/ui/__stories__/CodamaFormattedIdl.stories.tsx',
             'app/features/idl/ui/__stories__/IdlRenderer.stories.tsx',
             'app/features/idl/interactive-idl/model/codama/codama-interpreter.ts',
-            'app/features/idl/model/use-idl-last-transaction-date.tsx',
 
             // app/shared reverse-layer imports
             'app/shared/components/DownloadDropdown.tsx',
@@ -526,10 +525,8 @@ export default tseslint.config(
             'app/tx/[[]signature[]]/page-client.tsx',
 
             // app/api (Next route handlers)
-            'app/api/anchor/route.ts',
             'app/api/domain-info/[[]domain[]]/route.ts',
             'app/api/metadata/proxy/route.ts',
-            'app/api/program-metadata-idl/route.ts',
             'app/api/receipt/price/[[]mintAddress[]]/route.ts',
             'app/api/search/route.ts',
 
@@ -680,7 +677,6 @@ export default tseslint.config(
             'app/features/idl/interactive-idl/ui/BaseConnectWalletButton.tsx',
             'app/features/idl/interactive-idl/ui/InstructionActivity.tsx',
             'app/features/idl/interactive-idl/ui/InteractWithIdl.tsx',
-            'app/features/idl/model/use-idl-last-transaction-date.tsx',
             'app/features/idl/ui/IdlRenderer.tsx',
             'app/features/idl/ui/IdlSection.tsx',
             'app/features/metadata/mocks.ts',

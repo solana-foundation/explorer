@@ -200,6 +200,9 @@ importers:
       '@solana/kit':
         specifier: 6.5.0
         version: 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@solana/security-txt':
+        specifier: 0.1.0
+        version: 0.1.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana/spl-account-compression':
         specifier: 0.1.8
         version: 0.1.8(@solana/web3.js@1.98.4(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10))(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)
@@ -4935,6 +4938,13 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  '@solana/security-txt@0.1.0':
+    resolution: {integrity: sha512-dWYvBjdtVvcSJlXfiSlq9y6CptffUD3oHDyDqPl+XNffOlSmoXcGEVes55V0o1musbvMJG8ecyvSyzAQsyHEOA==}
+    engines: {node: '>=20'}
+    hasBin: true
+    peerDependencies:
+      '@solana/kit': ^6.4.0
 
   '@solana/signers@2.0.0':
     resolution: {integrity: sha512-JEYJS3x/iKkqPV/3b1nLpX9lHib21wQKV3fOuu1aDLQqmX9OYKrnIIITYdnFDhmvGhpEpkkbPnqu7yVaFIBYsQ==}
@@ -16698,6 +16708,12 @@ snapshots:
       typescript: 5.7.3
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+
+  '@solana/security-txt@0.1.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
+    dependencies:
+      '@solana-program/program-metadata': 0.7.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+      '@solana/kit': 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      commander: 13.1.0
 
   '@solana/signers@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)':
     dependencies:

@@ -62,6 +62,7 @@ describe('AccountHeader', () => {
         beforeEach(() => {
             vi.clearAllMocks();
             vi.unstubAllEnvs();
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: undefined });
         });
 
         it('should render with default values when no security.txt is available for non-trusted program', () => {
@@ -104,7 +105,7 @@ describe('AccountHeader', () => {
         it('should render with PMP security.txt data including logo and version for non-trusted program', () => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'false');
             const pmpSecurityTxt = createPmpSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
 
             const nonTrustedAddress = '11111111111111111111111111111112';
             const { account } = setup(nonTrustedAddress);
@@ -129,7 +130,7 @@ describe('AccountHeader', () => {
         it('should render with trusted program name and PMP security.txt logo/version for trusted program', () => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'false');
             const pmpSecurityTxt = createPmpSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
 
             const trustedAddress = '11111111111111111111111111111111';
             const programInfo = PROGRAM_INFO_BY_ID[trustedAddress];
@@ -155,7 +156,7 @@ describe('AccountHeader', () => {
         it('should use proxy for logo if enabled', () => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
             const pmpSecurityTxt = createPmpSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
 
             const nonTrustedAddress = '11111111111111111111111111111112';
             const { account } = setup(nonTrustedAddress);
@@ -174,7 +175,7 @@ describe('AccountHeader', () => {
 
         it('should render with Neodyme security.txt data (no logo or version) for non-trusted program', () => {
             const neodymeSecurityTxt = createNeodymeSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue(neodymeSecurityTxt);
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: neodymeSecurityTxt });
 
             const nonTrustedAddress = '11111111111111111111111111111112';
             const { account } = setup(nonTrustedAddress);
@@ -196,7 +197,7 @@ describe('AccountHeader', () => {
 
         it('should render with trusted program name and Neodyme security.txt data for trusted program', () => {
             const neodymeSecurityTxt = createNeodymeSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue(neodymeSecurityTxt);
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: neodymeSecurityTxt });
 
             const trustedAddress = '11111111111111111111111111111111';
             const programInfo = PROGRAM_INFO_BY_ID[trustedAddress];
@@ -219,7 +220,7 @@ describe('AccountHeader', () => {
 
         it('should render with empty name when securityTxt is present but name is empty string for non-trusted program', () => {
             const pmpSecurityTxt = createPmpSecurityTxt({ name: '' });
-            vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
 
             const nonTrustedAddress = '11111111111111111111111111111112';
             const { account } = setup(nonTrustedAddress);
@@ -238,7 +239,7 @@ describe('AccountHeader', () => {
         it('should render with self-reported warning icon', () => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
             const pmpSecurityTxt = createPmpSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
 
             const nonTrustedAddress = '11111111111111111111111111111112';
             const { account } = setup(nonTrustedAddress);
@@ -262,7 +263,7 @@ describe('AccountHeader', () => {
                     .map(([address, info]) => ({ address, name: info.name })),
             )('should not show self-reported warning for $name even with securityTxt', ({ address }) => {
                 const pmpSecurityTxt = createPmpSecurityTxt();
-                vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+                vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
 
                 const { account } = setup(address);
                 render(
@@ -279,7 +280,7 @@ describe('AccountHeader', () => {
 
             it('should show self-reported warning for non-trusted programs with securityTxt', () => {
                 const pmpSecurityTxt = createPmpSecurityTxt();
-                vi.mocked(useSecurityTxt).mockReturnValue(pmpSecurityTxt);
+                vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
 
                 const nonTrustedAddress = '11111111111111111111111111111112';
                 const { account } = setup(nonTrustedAddress);
