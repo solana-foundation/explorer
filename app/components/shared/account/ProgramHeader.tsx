@@ -7,7 +7,7 @@
 // consumers, then drop these two imports.
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
 import { ProxiedImage } from '@features/metadata';
-import { isPmpSecurityTXT, useSecurityTxt } from '@features/security-txt';
+import { useSecurityTxt } from '@features/security-txt';
 import { type UpgradeableLoaderAccountData } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { PROGRAM_INFO_BY_ID } from '@utils/programs';
@@ -20,12 +20,12 @@ import { AlertCircle } from 'react-feather';
 // trusted internal mapping (PROGRAM_INFO_BY_ID).
 export function ProgramHeader({
     address,
-    parsedData,
 }: {
     address: string;
+    // Accepted for caller compatibility; security.txt now resolves via `useSecurityTxt(address)`.
     parsedData?: UpgradeableLoaderAccountData | undefined;
 }) {
-    const securityTxt = useSecurityTxt(address, parsedData);
+    const { securityTxt } = useSecurityTxt(address);
     const { cluster } = useCluster();
     const { programName, logo, version, selfReported } = ((): {
         programName: string;
@@ -51,14 +51,14 @@ export function ProgramHeader({
         const usingSelfReportedName = !trustedProgramName;
 
         // Handle empty name in security.txt
-        programName = (trustedProgramName ?? securityTxt.name) || namePlaceholder;
+        programName = (trustedProgramName ?? securityTxt.fields.name) || namePlaceholder;
 
-        if (isPmpSecurityTXT(securityTxt)) {
+        if (securityTxt.type === 'pmp') {
             return {
-                logo: securityTxt.logo,
+                logo: securityTxt.fields.logo,
                 programName,
                 selfReported: usingSelfReportedName,
-                version: securityTxt.version,
+                version: securityTxt.fields.version,
             };
         }
         return {

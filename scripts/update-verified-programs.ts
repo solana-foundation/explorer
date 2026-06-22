@@ -210,8 +210,8 @@ async function fetchIdlNames(addresses: string[]): Promise<Map<string, string>> 
         if (i > 0) await sleep(CHUNK_DELAY_MS);
         const settled = await Promise.allSettled(
             chunks[i].map(async addr => {
-                const result = await fetchIdl(rpc, address(addr));
-                return { addr, name: result ? extractIdlName(result.idl) : undefined };
+                const idl = await fetchIdl(rpc, address(addr));
+                return { addr, name: idl ? extractIdlName(idl) : undefined };
             }),
         );
         for (const r of settled) {

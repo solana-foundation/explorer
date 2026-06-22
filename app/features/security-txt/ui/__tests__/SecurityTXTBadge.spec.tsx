@@ -1,75 +1,40 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
-import { useCluster } from '@/app/providers/cluster';
 import { Cluster } from '@/app/utils/cluster';
 
 import { ProgramSecurityTXTBadge } from '../SecurityTXTBadge';
-import { programDataWithoutSecurityTxt, programDataWithSecurityTxt } from './helpers';
+import { createPmpSecurityTxt } from './helpers';
 
+const mocks = vi.hoisted(() => ({ useSecurityTxt: vi.fn() }));
+vi.mock('../../model/useSecurityTxt', () => ({ useSecurityTxt: mocks.useSecurityTxt }));
+// `useClusterPath` (in the badge) reads the cluster context; stub the provider.
 vi.mock('@/app/providers/cluster', () => ({
-    useCluster: vi.fn(),
+    useCluster: vi.fn(() => ({ cluster: Cluster.MainnetBeta, url: '' })),
 }));
-
-vi.mock('@/app/entities/program-metadata', () => ({
-    useProgramMetadataSecurityTxt: vi.fn(),
-}));
-
-const invalidProgramData = {
-    authority: PublicKey.default,
-    data: [''] as unknown as [string, 'base64'],
-    slot: 123,
-};
 
 const mockPubkey = new PublicKey('ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S');
 
-describe('ProgramSecurityTXTBadge (mocked useProgramMetadataSecurityTxt)', () => {
-    beforeEach(() => {
-        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
-    });
+describe('ProgramSecurityTXTBadge', () => {
     afterEach(() => vi.clearAllMocks());
 
-    it('should show error when program doesnt have security.txt', () => {
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: null,
-        });
-        render(<ProgramSecurityTXTBadge programData={programDataWithoutSecurityTxt} programPubkey={mockPubkey} />);
-        expect(screen.getByText(/Program has no security.txt/i)).toBeInTheDocument();
+    it('should show "no security.txt" when none is present', () => {
+        mocks.useSecurityTxt.mockReturnValue({ isLoading: false, securityTxt: undefined });
+        render(<ProgramSecurityTXTBadge programPubkey={mockPubkey} />);
+        expect(screen.getByText(/Program has no security\.txt/i)).toBeInTheDocument();
     });
 
-    it('should show error when program has invalid data', () => {
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: null,
-        });
-        render(<ProgramSecurityTXTBadge programData={invalidProgramData} programPubkey={mockPubkey} />);
-        expect(screen.getByText(/Failed to decode program data/i)).toBeInTheDocument();
-    });
-
-    it('should show Included badge when program has only security.txt from Program Metadata', () => {
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: { name: 'Program security.txt' },
-        });
-        render(<ProgramSecurityTXTBadge programData={invalidProgramData} programPubkey={mockPubkey} />);
+    it('should show the Included badge when a security.txt is present', () => {
+        mocks.useSecurityTxt.mockReturnValue({ isLoading: false, securityTxt: createPmpSecurityTxt() });
+        render(<ProgramSecurityTXTBadge programPubkey={mockPubkey} />);
         expect(screen.getByText(/Included/i)).toBeInTheDocument();
     });
 
-    it('should show Included badge when program has only security.txt from Program Data', () => {
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: undefined,
-        });
-        render(<ProgramSecurityTXTBadge programData={programDataWithSecurityTxt} programPubkey={mockPubkey} />);
-        expect(screen.getByText(/Included/i)).toBeInTheDocument();
-    });
-
-    it('should show Included badge when program has both security.txts', () => {
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: { name: 'Name' },
-        });
-        render(<ProgramSecurityTXTBadge programData={programDataWithSecurityTxt} programPubkey={mockPubkey} />);
-        expect(screen.getByText(/Included/i)).toBeInTheDocument();
+    it('should render nothing while loading', () => {
+        mocks.useSecurityTxt.mockReturnValue({ isLoading: true, securityTxt: undefined });
+        const { container } = render(<ProgramSecurityTXTBadge programPubkey={mockPubkey} />);
+        expect(container).toBeEmptyDOMElement();
     });
 });

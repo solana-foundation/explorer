@@ -12,7 +12,9 @@ const AUTHORITY = new PublicKey('11111111111111111111111111111111');
 const NEODYME_HEADER = '=======BEGIN SECURITY.TXT V1=======\0';
 const NEODYME_FOOTER = '=======END SECURITY.TXT V1=======\0';
 
-// Build the embedded security.txt section that fromProgramData() looks for.
+// Build a legacy Neodyme (ELF) security.txt section. NOTE: SecurityCard now resolves security.txt via
+// `useSecurityTxt` (the `/api/security-txt` route), not by parsing these bytes — to render content in
+// Storybook these stories need a `useSecurityTxt` mock/decorator. `NoProgramData` still works as-is.
 function encodeNeodymeSecurityTxt(fields: Record<string, string>): string {
     const enc = new TextEncoder();
     const body = `${Object.entries(fields)

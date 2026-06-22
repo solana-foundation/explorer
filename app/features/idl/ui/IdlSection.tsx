@@ -12,7 +12,7 @@ import { Dropdown, DropdownMenu, DropdownToggle } from '@components/shared/ui/dr
 import { Input } from '@components/shared/ui/input';
 import { Label } from '@components/shared/ui/label';
 import { Switch } from '@components/shared/ui/switch';
-import type { SupportedIdl } from '@entities/idl';
+import { type IdlVariant, type SupportedIdl } from '@entities/idl';
 import { useMemo, useState } from 'react';
 import { AlertCircle, Code, Download, ExternalLink, Search } from 'react-feather';
 
@@ -20,7 +20,6 @@ import { WalletProvider } from '@/app/providers/wallet-provider';
 import { fromUtf8, toBase64 } from '@/app/shared/lib/bytes';
 import { triggerDownload } from '@/app/shared/lib/triggerDownload';
 
-import { type IdlVariant } from '../model/use-idl-last-transaction-date';
 import { IdlRenderer } from './IdlRenderer';
 
 // FIXME: missing Storybook story — wraps content in WalletProvider.

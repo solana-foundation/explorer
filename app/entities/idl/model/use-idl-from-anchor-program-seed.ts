@@ -1,12 +1,15 @@
 'use client';
 
-import { AnchorProvider, type Idl, Program } from '@coral-xyz/anchor';
+import { AnchorProvider, type Idl } from '@coral-xyz/anchor';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
-import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import { shouldUseDirectRpc } from '@entities/cluster/@x/idl';
+import { Connection, Keypair } from '@solana/web3.js';
 import useSWRImmutable from 'swr/immutable';
 
-import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
+
+import { fetchProgramIdls } from '../api/fetch-program-idls';
+import { resolveAnchorIdlClient } from '../api/load-resolve-program-idls';
 
 type IdlSwrKey = readonly ['idl-anchor', string, Cluster, string];
 
@@ -19,7 +22,9 @@ export function useIdlFromAnchorProgramSeed(
     const swrKey: IdlSwrKey = ['idl-anchor', programAddress, resolvedCluster, url];
     // No suspense: it's rendered without a <Suspense> boundary in the transaction inspector,
     // where a thrown promise rolls back the render tree. Callers use `isLoading` instead.
-    const { data, isLoading } = useSWRImmutable(swrKey, fetchIdlForProgram);
+    // fetchIdlForProgram throws on a failed fetch (rather than caching null), so cap the retries SWR
+    // makes before giving up on a persistently failing endpoint.
+    const { data, isLoading } = useSWRImmutable(swrKey, fetchIdlForProgram, { errorRetryCount: 3 });
     return { idl: data ?? null, isLoading };
 }
 
@@ -28,24 +33,17 @@ export function getProvider(url: string): AnchorProvider {
 }
 
 async function fetchIdlForProgram([, programAddress, cluster, url]: IdlSwrKey): Promise<Idl | null> {
-    try {
-        if (cluster === Cluster.Custom) {
-            return await Program.fetchIdl<Idl>(new PublicKey(programAddress), getProvider(url));
-        }
-
-        const response = await fetch(`/api/anchor?programAddress=${programAddress}&cluster=${cluster}`);
-        if (!response.ok) {
-            Logger.warn('[idl] /api/anchor returned non-OK status', {
-                cluster,
-                programAddress,
-                status: response.status,
-            });
-            return null;
-        }
-        const { idl } = await response.json();
-        return idl ?? null;
-    } catch (error) {
-        Logger.error(new Error('[idl] Error fetching Anchor IDL', { cause: error }), { cluster, programAddress });
-        return null;
+    if (shouldUseDirectRpc(cluster, url)) {
+        // Custom — or a known cluster pointing at a local validator the server can't reach — resolves
+        // client-side against the user's RPC via @solana/idl (same resolver, and the same direct-RPC
+        // decision as the IDL card's useProgramIdls, so the decoder and card never diverge).
+        // Lazily loaded so @solana/idl's weight stays out of the bundle for the known-cluster path.
+        const idl = await resolveAnchorIdlClient({ programId: programAddress, url });
+        return (idl as Idl) ?? null;
     }
+    // Known clusters: read the Anchor IDL from the shared, CDN-cached /api/idl-latest payload.
+    // fetchProgramIdls throws on a transient failure (rather than caching null) so SWR retries — see
+    // its doc and this hook's errorRetryCount.
+    const { anchorIdl } = await fetchProgramIdls(programAddress, cluster);
+    return (anchorIdl as Idl) ?? null;
 }

@@ -151,7 +151,7 @@ export function UpgradeableProgramSection({
                                 <ProgramSecurityTXTLabel programPubkey={account.pubkey} />
                             </BaseTable.Cell>
                             <BaseTable.Cell className="text-right">
-                                <ProgramSecurityTXTBadge programData={programData} programPubkey={account.pubkey} />
+                                <ProgramSecurityTXTBadge programPubkey={account.pubkey} />
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>

@@ -41,7 +41,7 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
             replace: vi.fn(),
         } as unknown as ReturnType<typeof useRouter>);
 
-        // Mock fetch for /api/anchor route
+        // Mock fetch for the /api/idl-latest route (catch-all empty payload — no IDL needed here)
         global.fetch = vi.fn().mockImplementation(() =>
             Promise.resolve(
                 new Response(JSON.stringify({}), {

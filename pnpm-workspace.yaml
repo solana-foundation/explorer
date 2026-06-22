@@ -13,6 +13,8 @@ minimumReleaseAge: 20160
 minimumReleaseAgeExclude:
   - '@codama/*'
   - '@solana/idl'
+  - '@solana/security-txt'
   - codama
   - '@solana-program/token'
+  - '@solana-program/program-metadata'
   - '@solana/kit'

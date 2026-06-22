@@ -1,9 +1,9 @@
+import type { NeodymeSecurityTxtFields } from '@solana/security-txt';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import type { NeodymeSecurityTXT } from '../../lib/types';
 import { NeodymeSecurityTxtTable } from '../NeodymeSecurityTxtTable';
 
-const fullData: NeodymeSecurityTXT = {
+const fullData: NeodymeSecurityTxtFields = {
     acknowledgements: 'https://example.com/security-acknowledgements',
     auditors: 'Audit Firm A, Security Researcher B',
     contacts: 'email:security@example.com,discord:Program#1234,twitter:@Program,link:https://example.com/security',
