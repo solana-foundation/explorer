@@ -6,16 +6,22 @@ import { useBreakpoint } from '../use-breakpoint';
 // Breakpoint pixel values from tailwind.config.ts
 const BP = { lg: 992, md: 768, sm: 576, xl: 1200, xs: 375, xxl: 1400 } as const;
 
-function mockMatchMedia(width: number) {
+function mockMatchMedia(width: number, isLandscape = false) {
     vi.spyOn(globalThis, 'matchMedia').mockImplementation((query: string) => {
-        // eslint-disable-next-line no-restricted-syntax -- need regex to parse CSS media query string from matchMedia
-        const m = query.match(/\(min-width:\s*(\d+)px\)/);
-        const minWidth = m ? parseInt(m[1], 10) : 0;
+        let matches: boolean;
+        if (query.includes('orientation: landscape')) {
+            matches = isLandscape;
+        } else {
+            // eslint-disable-next-line no-restricted-syntax -- need regex to parse CSS media query string from matchMedia
+            const m = query.match(/\(min-width:\s*(\d+)px\)/);
+            const minWidth = m ? parseInt(m[1], 10) : 0;
+            matches = width >= minWidth;
+        }
         return {
             addEventListener: vi.fn(),
             addListener: vi.fn(),
             dispatchEvent: vi.fn(),
-            matches: width >= minWidth,
+            matches,
             media: query,
             onchange: null,
             removeEventListener: vi.fn(),
@@ -33,6 +39,7 @@ describe('useBreakpoint', () => {
         mockMatchMedia(BP.xs - 1);
         const { result } = renderHook(() => useBreakpoint());
         expect(result.current).toEqual({
+            isLandscape: false,
             isLg: false,
             isMd: false,
             isSm: false,
@@ -87,6 +94,7 @@ describe('useBreakpoint', () => {
         mockMatchMedia(BP.xxl);
         const { result } = renderHook(() => useBreakpoint());
         expect(result.current).toEqual({
+            isLandscape: false,
             isLg: true,
             isMd: true,
             isSm: true,
@@ -141,7 +149,7 @@ describe('useBreakpoint', () => {
         const { unmount } = renderHook(() => useBreakpoint());
         unmount();
 
-        // 6 queries (xs, sm, md, lg, xl, 2xl) × 1 removeEventListener each
-        expect(removeEventListener).toHaveBeenCalledTimes(6);
+        // 7 queries (xs, sm, md, lg, xl, 2xl, landscape) × 1 removeEventListener each
+        expect(removeEventListener).toHaveBeenCalledTimes(7);
     });
 });
