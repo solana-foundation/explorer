@@ -27,6 +27,7 @@ import { generateTokenBalanceRows, TokenBalancesCard } from '@/app/features/tran
 import { AutoRefresh, useAutoRefreshState } from '@/app/shared/lib/use-auto-refresh';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
+import { useLogsPanelScrollSync } from '@/app/tx/[signature]/use-logs-scroll-sync';
 import useTabVisibility from '@/app/utils/use-tab-visibility';
 
 const ALL_TRANSACTION_TABS = [
@@ -118,69 +119,10 @@ function DetailsSection({ signature }: SignatureProps) {
     const refreshDetails = () => fetchDetails(signature);
 
     const logsPanelRef = useRef<HTMLDivElement>(null);
-    const isManualScrollRef = useRef(false);
-    const manualScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Sync the sticky logs panel with the active instruction as the page scrolls.
-    // Manual wheel scroll on the panel takes over for 2s before auto-sync resumes.
-    useEffect(() => {
-        if (!isXxl) return;
-        const logsPanel = logsPanelRef.current;
-        if (!logsPanel) return;
-
-        const handleWheel = (e: WheelEvent) => {
-            const { scrollTop, scrollHeight, clientHeight } = logsPanel;
-            const atTop = scrollTop === 0 && e.deltaY < 0;
-            const atBottom = scrollTop + clientHeight >= scrollHeight && e.deltaY > 0;
-            if (atTop || atBottom) return;
-            e.preventDefault();
-            logsPanel.scrollTop += e.deltaY;
-            isManualScrollRef.current = true;
-            if (manualScrollTimeoutRef.current) clearTimeout(manualScrollTimeoutRef.current);
-            manualScrollTimeoutRef.current = setTimeout(() => {
-                isManualScrollRef.current = false;
-            }, 2000);
-        };
-
-        const handlePageScroll = () => {
-            if (isManualScrollRef.current) return;
-            // Top-level ix-N cards only (excludes nested ix-N-M).
-            const cards = Array.from(document.querySelectorAll<HTMLElement>('[id^="ix-"]')).filter(el => {
-                const suffix = el.id.slice(3);
-                return suffix.length > 0 && !suffix.includes('-') && !Number.isNaN(Number(suffix));
-            });
-            if (cards.length === 0) return;
-
-            // Active = last card whose top has crossed the sticky nav threshold.
-            const threshold = 80;
-            let activeIndex = 0;
-            for (let i = 0; i < cards.length; i++) {
-                if (cards[i].getBoundingClientRect().top <= threshold) activeIndex = i;
-                else break;
-            }
-
-            const cardRect = cards[activeIndex].getBoundingClientRect();
-            const progress = Math.max(0, Math.min(1, (threshold - cardRect.top) / cardRect.height));
-
-            const logRow = logsPanel.querySelector<HTMLElement>(`[data-ix-index="${activeIndex}"]`);
-            if (!logRow) return;
-
-            // Use getBoundingClientRect for position independent of current scrollTop.
-            const titleHeight = (logsPanel.querySelector('section > div') as HTMLElement | null)?.offsetHeight ?? 0;
-            const panelRect = logsPanel.getBoundingClientRect();
-            const rowRect = logRow.getBoundingClientRect();
-            const rowAbsoluteTop = rowRect.top - panelRect.top + logsPanel.scrollTop;
-            logsPanel.scrollTop = Math.max(0, rowAbsoluteTop - titleHeight + rowRect.height * progress);
-        };
-
-        logsPanel.addEventListener('wheel', handleWheel, { passive: false });
-        window.addEventListener('scroll', handlePageScroll, { passive: true });
-        return () => {
-            logsPanel.removeEventListener('wheel', handleWheel);
-            window.removeEventListener('scroll', handlePageScroll);
-            if (manualScrollTimeoutRef.current) clearTimeout(manualScrollTimeoutRef.current);
-        };
-    }, [isXxl, transactionWithMeta]);
+    // Manual interaction (wheel, scrollbar, keyboard) takes over for 2s before auto-sync resumes.
+    useLogsPanelScrollSync({ enabled: isXxl, panelRef: logsPanelRef, watchValue: transactionWithMeta });
 
     useEffect(() => {
         if (!details && clusterStatus === ClusterStatus.Connected && status?.status === FetchStatus.Fetched) {

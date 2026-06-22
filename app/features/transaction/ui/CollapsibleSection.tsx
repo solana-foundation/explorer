@@ -31,7 +31,7 @@ export function CollapsibleSection({
 
     return (
         <section id={id} aria-labelledby={headingId} className={cn('flex flex-col gap-3', sectionClassName)}>
-            <div className={cn('flex items-center justify-between', titleClassName)}>
+            <div data-section-title className={cn('flex items-center justify-between', titleClassName)}>
                 <h2 id={headingId} className="m-0 text-lg font-normal text-white">
                     {title}
                 </h2>
