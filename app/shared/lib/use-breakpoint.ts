@@ -32,6 +32,7 @@ export function useBreakpoint() {
     const isLg = useMediaQuery(`(min-width: ${bp('lg')}px)`);
     const isXl = useMediaQuery(`(min-width: ${bp('xl')}px)`);
     const isXxl = useMediaQuery(`(min-width: ${bp('xxl')}px)`);
+    const isLandscape = useMediaQuery('(orientation: landscape)');
 
-    return { isLg, isMd, isSm, isXl, isXs, isXxl };
+    return { isLandscape, isLg, isMd, isSm, isXl, isXs, isXxl };
 }

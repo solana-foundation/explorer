@@ -221,6 +221,7 @@ const config: Config = {
             tablet: getScreenDim('md'),
             laptop: getScreenDim('lg'),
             desktop: getScreenDim('xl'),
+            landscape: { raw: '(orientation: landscape)' },
         },
     },
 };

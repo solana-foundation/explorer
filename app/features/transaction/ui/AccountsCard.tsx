@@ -43,7 +43,8 @@ function TransactionAccountRow({
 }: TransactionAccountRowProps) {
     const [expanded, setExpanded] = useState(false);
     const [slideoverOpen, setSlideoverOpen] = useState(false);
-    const { isLg } = useBreakpoint();
+    const { isLandscape, isLg } = useBreakpoint();
+    const isDesktop = isLg || isLandscape;
 
     const pubkey = account.pubkey;
     const key = pubkey.toBase58();
@@ -57,7 +58,7 @@ function TransactionAccountRow({
         account.source === 'lookupTable';
 
     const handleRowClick = () => {
-        if (isLg) {
+        if (isDesktop) {
             setExpanded(v => !v);
         } else {
             setSlideoverOpen(true);
@@ -71,23 +72,23 @@ function TransactionAccountRow({
                 <div
                     className={cn(
                         'min-h-9 px-3 py-2.5 md:px-4',
-                        'grid items-start gap-x-0 gap-y-0.5 whitespace-nowrap text-sm md:gap-y-0 lg:gap-x-5',
-                        'grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_1.5rem]',
-                        "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance_expand']",
+                        'grid items-start gap-x-0 gap-y-0.5 whitespace-nowrap text-sm md:gap-y-0 lg:gap-x-5 landscape:gap-x-5',
+                        'grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_1.5rem] landscape:grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_1.5rem]',
+                        "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance_expand'] landscape:[grid-template-areas:'number_address_delta_balance_expand']",
                         'cursor-pointer',
                     )}
                     onClick={handleRowClick}
                 >
                     <div className="mr-2 text-outer-space-300 [grid-area:number] lg:mr-0">{index + 1}</div>
                     <div className="[grid-area:address]">
-                        <div className="flex items-center justify-between gap-1 lg:justify-normal">
+                        <div className="flex items-center justify-between gap-1 lg:justify-normal landscape:justify-normal">
                             <Address
-                                className={!isLg ? 'text-[#33a382]' : ''}
+                                className={!isDesktop ? 'text-[#33a382]' : ''}
                                 pubkey={pubkey}
-                                link={isLg}
+                                link={isDesktop}
                                 fetchTokenLabelInfo
-                                noNicknameEditing={!isLg}
-                                noCopy={!isLg}
+                                noNicknameEditing={!isDesktop}
+                                noCopy={!isDesktop}
                             />
                         </div>
                         {hasBadges && (
@@ -104,7 +105,7 @@ function TransactionAccountRow({
                     </div>
 
                     {/* Desktop: expand button */}
-                    <div className="hidden items-center justify-center [grid-area:expand] lg:flex">
+                    <div className="hidden items-center justify-center [grid-area:expand] lg:flex landscape:flex">
                         <Button
                             aria-expanded={expanded}
                             aria-label={expanded ? 'Collapse account details' : 'Expand account details'}
@@ -130,7 +131,7 @@ function TransactionAccountRow({
                 {/* Desktop: animated expanded content */}
                 <div
                     className={cn(
-                        'hidden lg:grid',
+                        'hidden lg:grid landscape:grid',
                         'transition-[grid-template-rows,opacity] duration-200 ease-in-out',
                         expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
                     )}
@@ -209,7 +210,7 @@ export function AccountsCard({ signature }: SignatureProps) {
         <CollapsibleSection id="accounts" title="Accounts &amp; SOL balance">
             <div
                 className={cn(
-                    'hidden px-3 py-1.5 md:px-4 lg:grid',
+                    'hidden px-3 py-1.5 md:px-4 lg:grid landscape:grid',
                     'grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_2rem] gap-5 text-xs uppercase text-outer-space-300',
                     'border-1 border-b border-white/10 [border-bottom-style:solid]',
                 )}

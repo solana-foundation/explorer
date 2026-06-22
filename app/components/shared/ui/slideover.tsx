@@ -15,7 +15,7 @@ const SlideoverOverlay = React.forwardRef<
     <Overlay
         ref={ref}
         className={cn(
-            'fixed inset-0 z-50 bg-black/60',
+            'fixed inset-0 z-[1201] bg-black/60',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             'duration-300',
@@ -35,7 +35,7 @@ const SlideoverContent = React.forwardRef<
         <Content
             ref={ref}
             className={cn(
-                'fixed inset-x-0 bottom-0 z-50',
+                'fixed inset-x-0 bottom-0 z-[1201]',
                 'flex max-h-[85dvh] flex-col',
                 'rounded-t-2xl bg-outer-space-950',
                 'shadow-[0_-4px_32px_rgba(0,0,0,0.6)]',
