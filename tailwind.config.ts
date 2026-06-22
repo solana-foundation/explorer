@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
 
 export const breakpoints = new Map([
     ['xxs', 320],
@@ -57,7 +58,17 @@ export const dkColors = {
 
 const config: Config = {
     content: ['./app/**/*.{ts,tsx}'],
-    plugins: [],
+    plugins: [
+        plugin(({ addUtilities }) => {
+            addUtilities({
+                '.scrollbar-hide': {
+                    'scrollbar-width': 'none',
+                    '-ms-overflow-style': 'none',
+                    '&::-webkit-scrollbar': { display: 'none' },
+                },
+            });
+        }),
+    ],
     theme: {
         extend: {
             boxShadow: {
