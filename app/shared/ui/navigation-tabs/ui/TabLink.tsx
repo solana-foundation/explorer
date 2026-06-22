@@ -7,13 +7,13 @@ import { cn } from '@/app/components/shared/utils';
 import { useNavigationTabsContext } from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
 
 export const tabLinkClassName = cn(
-    'e-appearance-none e-border-solid e-shadow-none e-outline-none',
-    'e-border-b e-border-transparent data-[state=active]:e-border-b-accent',
-    'e-bg-transparent',
-    'e-px-0 e-py-4',
-    'e-shrink-0 e-whitespace-nowrap',
-    'e-text-sm e-font-normal e-text-outer-space-200 data-[state=active]:e-text-white',
-    'e-no-underline',
+    'appearance-none border-solid shadow-none outline-none',
+    'border-b border-transparent data-[state=active]:border-b-accent',
+    'bg-transparent',
+    'px-0 py-4',
+    'shrink-0 whitespace-nowrap',
+    'text-sm font-normal text-outer-space-200 data-[state=active]:text-white',
+    'no-underline',
 );
 
 export function TabLink({ path, title, className }: { path: string; title: string; className?: string }) {

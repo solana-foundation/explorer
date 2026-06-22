@@ -5,9 +5,12 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
+import { Badge } from '@components/shared/ui/badge';
+import { Button } from '@components/shared/ui/button';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
+import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
 import { ViewReceiptButton } from '@features/receipt';
-import { AUTO_REFRESH_INTERVAL, AutoRefresh, AutoRefreshProps } from '@features/transaction';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import {
@@ -16,9 +19,6 @@ import {
     useTransactionDetails,
     useTransactionStatus,
 } from '@providers/transactions';
-import { Button } from '@shared/ui/button';
-import { RefreshButton } from '@shared/ui/refresh-button';
-import { cn } from '@shared/utils';
 import { ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { displayTimestamp } from '@utils/date';
@@ -32,6 +32,8 @@ import { ZoomIn } from 'react-feather';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
+import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
+import { Card } from '@/app/shared/ui/Card';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
 type RowProps = React.HTMLAttributes<HTMLDivElement> & { divider?: boolean };
@@ -39,8 +41,8 @@ export function Row({ children, className, divider, ...props }: RowProps) {
     return (
         <div
             className={cn(
-                'e-grid e-min-h-9 e-grid-cols-[clamp(100px,25%,200px)_1fr] e-items-baseline e-gap-2 e-px-3 e-py-2.5 md:e-px-4',
-                divider && 'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
+                'grid min-h-9 grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2 px-3 py-2.5 md:px-4',
+                divider && 'border-1 border-b border-white/10 [border-bottom-style:solid]',
                 className,
             )}
             {...props}
@@ -53,10 +55,7 @@ export function Row({ children, className, divider, ...props }: RowProps) {
 function Label({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     return (
         <div
-            className={cn(
-                'e-flex e-flex-wrap e-items-center e-gap-1 e-overflow-hidden e-text-sm e-text-outer-space-300',
-                className,
-            )}
+            className={cn('flex flex-wrap items-center gap-1 overflow-hidden text-sm text-outer-space-300', className)}
             {...props}
         >
             {children}
@@ -66,7 +65,7 @@ function Label({ children, className, ...props }: React.HTMLAttributes<HTMLDivEl
 
 function Value({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     return (
-        <div className={cn('e-break-all e-font-mono e-text-sm e-text-white', className)} {...props}>
+        <div className={cn('break-all font-mono text-sm text-white', className)} {...props}>
             {children}
         </div>
     );
@@ -97,7 +96,7 @@ function getTransactionErrorReason(
     return { errorReason: `Unknown Error: "${JSON.stringify(info.result.err)}"` };
 }
 
-export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProps) {
+export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAutoRefreshProp) {
     const fetchStatus = useFetchTransactionStatus();
     const fetchRaw = useFetchRawTransaction();
     const status = useTransactionStatus(signature);
@@ -179,7 +178,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
         );
     })();
 
-    let statusClass = 'success';
+    let statusClass: 'success' | 'warning' = 'success';
     let statusText = 'Success';
     let statusFinality = 'Finalized (MAX Confirmations)';
     let errorReason = undefined;
@@ -202,10 +201,10 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
     }
 
     return (
-        <section id="summary" className="e-flex e-flex-col e-gap-3">
-            <div className="e-flex e-justify-between">
-                <h2 className="e-m-0 e-text-lg e-font-normal e-text-white">Summary</h2>
-                <div className="e-flex e-shrink-0 e-gap-1">
+        <section id="summary" className="flex flex-col gap-3">
+            <div className="flex justify-between">
+                <h2 className="m-0 text-lg font-normal text-white">Summary</h2>
+                <div className="flex shrink-0 gap-1">
                     <ViewReceiptButton
                         signature={signature}
                         transactionWithMeta={transactionWithMeta}
@@ -235,18 +234,22 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                 </div>
             </div>
 
-            <div className="e-card">
+            <Card ui="dashkit">
                 {/* Status */}
                 <Row divider>
                     <Label>Status</Label>
-                    <Value className="e-flex e-flex-wrap e-items-center e-gap-x-3 e-gap-y-2">
-                        <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
+                    <Value className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <Badge ui="dashkit" variant={statusClass}>
+                            {statusText}
+                        </Badge>
                         {errorReason && (
-                            <span
-                                className={`badge bg-${statusClass}-soft e-whitespace-normal e-break-words e-text-left`}
+                            <Badge
+                                ui="dashkit"
+                                variant={statusClass}
+                                className="whitespace-normal break-words text-left"
                             >
                                 {errorLink ? <Link href={errorLink}>{errorReason}</Link> : errorReason}
-                            </span>
+                            </Badge>
                         )}
                     </Value>
                 </Row>
@@ -286,7 +289,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                 {/* Recent Blockhash / Nonce */}
                 {blockhash && (
                     <Row divider>
-                        <Label className="e-overflow-visible">
+                        <Label className="overflow-visible">
                             {isNonce ? (
                                 'Nonce'
                             ) : (
@@ -337,7 +340,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                 {version !== undefined && (
                     <Row divider>
                         <Label>Transaction Version</Label>
-                        <Value className="e-uppercase">{version}</Value>
+                        <Value className="uppercase">{version}</Value>
                     </Row>
                 )}
 
@@ -346,7 +349,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                     <Label>Timestamp</Label>
                     <Value>
                         {info.timestamp !== 'unavailable' ? (
-                            <span className="e-font-mono">{displayTimestamp(info.timestamp * 1000)}</span>
+                            <span className="font-mono">{displayTimestamp(info.timestamp * 1000)}</span>
                         ) : (
                             <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
                                 Unavailable
@@ -354,7 +357,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & AutoRef
                         )}
                     </Value>
                 </Row>
-            </div>
+            </Card>
         </section>
     );
 }

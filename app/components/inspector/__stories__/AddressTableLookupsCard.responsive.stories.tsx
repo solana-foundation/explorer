@@ -1,11 +1,11 @@
 import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { AddressLookupTableProgram, PublicKey } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
@@ -78,7 +78,7 @@ const meta: Meta<typeof AddressTableLookupsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Inspector/AddressTableLookupsCard/Responsive',
+    title: 'Components/Inspector/AddressTableLookupsCard@Media',
 };
 
 export default meta;

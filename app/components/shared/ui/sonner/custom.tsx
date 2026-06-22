@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 'use client';
 
 import React from 'react';
@@ -19,11 +20,11 @@ export function CustomToast(props: CustomToastProps) {
     const icon = (() => {
         switch (type) {
             case 'success':
-                return <CheckCircle className="e-text-green-400" size={12} aria-hidden="true" />;
+                return <CheckCircle className="text-green-400" size={12} aria-hidden="true" />;
             case 'error':
-                return <AlertCircle className="e-text-destructive" size={12} aria-hidden="true" />;
+                return <AlertCircle className="text-destructive" size={12} aria-hidden="true" />;
             case 'info':
-                return <Info className="e-text-green-400" size={12} aria-hidden="true" />;
+                return <Info className="text-green-400" size={12} aria-hidden="true" />;
         }
     })();
 
@@ -40,44 +41,43 @@ export function CustomToast(props: CustomToastProps) {
             aria-labelledby={titleId}
             aria-describedby={descriptionId}
             className={cn(
-                'e-w-full e-rounded-lg e-border e-border-neutral-950 e-bg-neutral-800 e-text-white',
-                'md:e-max-w-80',
+                'w-full rounded-lg border border-transparent bg-neutral-800 text-white shadow-lg',
+                'md:max-w-80',
             )}
         >
-            <div className="e-relative e-flex e-flex-1 e-items-start e-gap-2 e-px-3 e-py-2">
-                <div className="e-text-xs" aria-hidden="true">
+            <div className="relative flex flex-1 items-start gap-2 p-4">
+                <div className="text-xs" aria-hidden="true">
                     {icon}
                 </div>
                 <div>
-                    <p id={titleId} className="e-mb-0 e-pr-3 e-text-sm e-font-medium">
+                    <p id={titleId} className="mb-0 pr-3 text-sm font-medium">
                         {title}
                     </p>
                     {typeof description === 'string' ? (
-                        <p id={descriptionId} className="e-mb-0 e-mt-1 e-text-xs">
+                        <p id={descriptionId} className="mb-0 mt-1 text-xs">
                             {description}
                         </p>
                     ) : (
                         description && (
-                            <div id={descriptionId} className="e-mt-1">
+                            <div id={descriptionId} className="mt-1">
                                 {description}
                             </div>
                         )
                     )}
                 </div>
-                <div className="e-absolute e-right-0 e-top-0 e-h-6 e-w-6">
-                    <button
-                        type="button"
-                        aria-label={`Dismiss ${title} notification`}
-                        className={cn(
-                            'e-h-full e-w-full e-rounded e-border-0 e-border-solid e-bg-transparent e-p-0',
-                            'e-text-neutral-400 hover:e-text-neutral-500',
-                            'focus:e-outline-none focus:e-ring-2 focus:e-ring-neutral-400 focus:e-ring-offset-2',
-                        )}
-                        onClick={() => sonnerToast.dismiss(id)}
-                    >
-                        <X size={12} aria-hidden="true" />
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    aria-label={`Dismiss ${title} notification`}
+                    className={cn(
+                        'absolute right-4 top-2 flex items-center justify-center',
+                        'rounded-sm border-0 bg-transparent p-0 text-neutral-500 opacity-70',
+                        'transition-opacity hover:opacity-100',
+                        'focus:outline-none focus-visible:ring-1 focus-visible:ring-neutral-300',
+                    )}
+                    onClick={() => sonnerToast.dismiss(id)}
+                >
+                    <X size={16} aria-hidden="true" />
+                </button>
             </div>
         </div>
     );

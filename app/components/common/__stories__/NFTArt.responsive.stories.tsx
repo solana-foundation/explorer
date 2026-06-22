@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { NFTImageContent } from '../NFTArt';
 
@@ -11,8 +11,8 @@ const meta = {
     parameters: {
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
-    title: 'Components/Common/NFTArt/Responsive',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Common/NFTArt@Media',
 } satisfies Meta;
 
 export default meta;

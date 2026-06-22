@@ -1,12 +1,12 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { RefreshButton } from './refresh-button';
 
 const meta: Meta<typeof RefreshButton> = {
     component: RefreshButton,
-    tags: ['autodocs'],
-    title: 'Components/Shared/UI/RefreshButton',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Shared/RefreshButton',
 };
 
 export default meta;

@@ -33,8 +33,8 @@ export function LookupTableEntriesCard(
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Index</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Index</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Address</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>
@@ -47,7 +47,7 @@ export function LookupTableEntriesCard(
 
             {lookupTableState.addresses.length === 0 && (
                 <CardFooter ui="dashkit">
-                    <div className="e-text-center e-text-dk-gray-700">No entries found</div>
+                    <div className="text-center text-dk-gray-700">No entries found</div>
                 </CardFooter>
             )}
         </Card>
@@ -57,8 +57,8 @@ export function LookupTableEntriesCard(
 const renderRow = (entry: PublicKey, index: number) => {
     return (
         <BaseTable.Row key={index}>
-            <BaseTable.Cell className="e-w-px e-font-mono">{index}</BaseTable.Cell>
-            <BaseTable.Cell className="e-font-mono">
+            <BaseTable.Cell className="w-px font-mono">{index}</BaseTable.Cell>
+            <BaseTable.Cell className="font-mono">
                 <Address pubkey={entry} link />
             </BaseTable.Cell>
         </BaseTable.Row>

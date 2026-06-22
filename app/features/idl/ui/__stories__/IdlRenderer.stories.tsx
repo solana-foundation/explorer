@@ -1,16 +1,16 @@
 import type { AnchorIdl, CodamaIdl } from '@entities/idl';
 import codamaIdlMock from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { IdlRenderer } from '../IdlRenderer';
 
 const meta: Meta<typeof IdlRenderer> = {
     component: IdlRenderer,
     parameters: nextjsParameters,
-    tags: ['autodocs'],
-    title: 'Features/IDL/UI/IdlRenderer',
+    tags: ['autodocs', 'test'],
+    title: 'Features/IDL/IdlRenderer',
 };
 
 export default meta;

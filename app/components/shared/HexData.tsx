@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Copyable } from '@components/common/Copyable';
 import { cva } from 'class-variance-authority';
 import React from 'react';
@@ -68,11 +69,11 @@ export function groupHexRows(spans: HexSpan[], rowSize = ROW_SIZE, spanSize = SP
     return rows;
 }
 
-const fullContentVariants = cva('e-items-center', {
+const fullContentVariants = cva('items-center', {
     variants: {
         align: {
-            end: 'e-justify-end',
-            start: 'e-justify-start',
+            end: 'justify-end',
+            start: 'justify-start',
         },
     },
 });
@@ -101,8 +102,8 @@ export function HexData({
 }) {
     if (!raw || raw.length === 0) {
         return (
-            <div className={cn('e-p-1.5', fullContentVariants({ align }), className)}>
-                <span className="e-text-sm e-text-outer-space-200">No data</span>
+            <div className={cn('p-1.5', fullContentVariants({ align }), className)}>
+                <span className="text-sm text-outer-space-200">No data</span>
             </div>
         );
     }
@@ -139,11 +140,11 @@ export function HexData({
 const hexSpanVariants = cva('', {
     variants: {
         tone: {
-            primary: 'e-text-white',
-            secondary: 'e-text-gray-500',
+            primary: 'text-white',
+            secondary: 'text-gray-500',
             // Dashkit's text-gray-500 is rgb(171,213,198) — a teal-tinted gray.
             // Keep for backward compat until dashkit is fully removed.
-            'secondary-old': 'e-text-[rgb(171,213,198)]',
+            'secondary-old': 'text-[rgb(171,213,198)]',
         },
     },
 });
@@ -177,13 +178,13 @@ function TruncatedContent({
     const spans = formatHexSpans(truncatedPairs, { inverted }, spanSize);
 
     return (
-        <span className="e-inline-flex e-items-center e-gap-2 e-text-sm">
+        <span className="inline-flex items-center gap-2 text-sm">
             <Copyable text={copyText}>
-                <span className="e-font-mono e-text-xs">
+                <span className="font-mono text-xs">
                     <ColoredSpans spans={spans} />
                 </span>
             </Copyable>
-            {truncated && <span className="e-text-xs e-text-neutral-500">({raw.length} bytes)</span>}
+            {truncated && <span className="text-xs text-neutral-500">({raw.length} bytes)</span>}
         </span>
     );
 }
@@ -222,30 +223,22 @@ function FullContent({
 
     return (
         <>
-            <div className={cn('e-hidden lg:e-flex', fullContentVariants({ align }), className)}>
+            <div className={cn('hidden lg:flex', fullContentVariants({ align }), className)}>
                 {isCopyable ? (
                     <Copyable text={copyText}>
-                        <pre className="e-mb-0 e-inline-block e-bg-heavy-metal-900 e-p-1.5 e-text-left e-text-xs">
-                            {divs}
-                        </pre>
+                        <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
                     </Copyable>
                 ) : (
-                    <pre className="e-mb-0 e-inline-block e-bg-heavy-metal-900 e-p-1.5 e-text-left e-text-xs">
-                        {divs}
-                    </pre>
+                    <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
                 )}
             </div>
-            <div className={cn('e-flex lg:e-hidden', fullContentVariants({ align }), className)}>
+            <div className={cn('flex lg:hidden', fullContentVariants({ align }), className)}>
                 {isCopyable ? (
                     <Copyable text={copyText}>
-                        <pre className="e-mb-0 e-inline-block e-bg-heavy-metal-900 e-p-1.5 e-text-left e-text-xs">
-                            {divs}
-                        </pre>
+                        <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
                     </Copyable>
                 ) : (
-                    <pre className="e-mb-0 e-inline-block e-bg-heavy-metal-900 e-p-1.5 e-text-left e-text-xs">
-                        {divs}
-                    </pre>
+                    <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
                 )}
             </div>
         </>

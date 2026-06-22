@@ -45,7 +45,7 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
             </CardHeader>
 
             {/* .string-value is emitted by the ReactJson library — the arbitrary variant scopes the break-all rule to its descendant nodes only. */}
-            <Card ui="dashkit" className="e-m-6 [&_.string-value]:e-break-all">
+            <Card ui="dashkit" className="m-6 [&_.string-value]:break-all">
                 <ReactJson src={borshSchema['schema']} style={{ padding: 25 }} name={false} />
             </Card>
         </Card>
@@ -81,12 +81,12 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
 
             {decoded ? (
                 // .string-value is emitted by the ReactJson library — the arbitrary variant scopes the break-all rule to its descendant nodes only.
-                <Card ui="dashkit" className="e-m-6 [&_.string-value]:e-break-all">
+                <Card ui="dashkit" className="m-6 [&_.string-value]:break-all">
                     <ReactJson src={decoded} style={{ padding: 25 }} name={false} />
                 </Card>
             ) : (
                 <div
-                    className="e-font-mono"
+                    className="font-mono"
                     style={{
                         fontSize: '0.85rem',
                         lineHeight: '1.2',

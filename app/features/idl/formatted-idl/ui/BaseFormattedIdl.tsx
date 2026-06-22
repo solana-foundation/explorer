@@ -1,7 +1,7 @@
 'use client';
 
+import { cn } from '@components/shared/utils';
 import type { Idl } from '@coral-xyz/anchor';
-import { cn } from '@shared/utils';
 import type { RootNode } from 'codama';
 import { useEffect, useState } from 'react';
 
@@ -31,8 +31,8 @@ export function BaseFormattedIdl({
 
     return (
         <SearchHighlightProvider searchStr={searchStr || ''}>
-            <div className="idl-view">
-                <TabsList className="e-mb-5">
+            <div>
+                <TabsList className="mb-5">
                     {tabs.map((tab, index) => (
                         <TabsTrigger
                             key={tab.id}
@@ -44,7 +44,7 @@ export function BaseFormattedIdl({
                         </TabsTrigger>
                     ))}
                 </TabsList>
-                <div className={cn('e-mb-0 e-min-h-96', activeTab.id !== 'interact' ? 'table-responsive' : '')}>
+                <div className={cn('mb-0 min-h-96', activeTab.id !== 'interact' ? 'overflow-x-auto' : '')}>
                     <ActiveTab activeTab={activeTab} />
                 </div>
             </div>

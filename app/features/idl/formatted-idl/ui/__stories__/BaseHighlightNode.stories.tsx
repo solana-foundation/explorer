@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseHighlightNode } from '../BaseHighlightNode';
 
 const meta = {
     component: BaseHighlightNode,
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/BaseHighlightNode',
+    title: 'Features/IDL/Formatted IDL/BaseHighlightNode',
 } satisfies Meta<typeof BaseHighlightNode>;
 
 export default meta;

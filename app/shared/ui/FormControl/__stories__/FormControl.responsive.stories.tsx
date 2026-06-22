@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { FormControl } from '../FormControl';
 
@@ -11,14 +11,14 @@ const meta: Meta<typeof FormControl> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/FormControl/Responsive',
+    title: 'Shared/FormControl@Media',
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 const args = {
-    children: <textarea rows={3} className="e-font-mono" placeholder="Paste a base64 transaction message..." />,
+    children: <textarea rows={3} className="font-mono" placeholder="Paste a base64 transaction message..." />,
     variant: 'flush-auto' as const,
 };
 

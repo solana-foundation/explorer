@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 
@@ -10,7 +10,7 @@ const meta: Meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/HistoryCardComponents/Responsive',
+    title: 'Components/Account/HistoryCardComponents@Media',
 };
 
 export default meta;

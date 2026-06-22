@@ -1,6 +1,7 @@
+import { gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { UnknownAccountCard } from '../UnknownAccountCard';
 
@@ -20,7 +21,7 @@ const baseAccount = {
     executable: false,
     lamports: 1_000_000_000,
     owner: PublicKey.default,
-    pubkey: PublicKey.unique(),
+    pubkey: gen.publicKey(1),
     space: 165,
 };
 
@@ -32,12 +33,12 @@ export const WithBalance: Story = {
 
 export const ExecutableProgram: Story = {
     args: {
-        account: { ...baseAccount, executable: true, pubkey: PublicKey.unique(), space: undefined },
+        account: { ...baseAccount, executable: true, pubkey: gen.publicKey(2), space: undefined },
     },
 };
 
 export const ZeroBalanceTriggersClusterLookup: Story = {
     args: {
-        account: { ...baseAccount, lamports: 0, pubkey: PublicKey.unique() },
+        account: { ...baseAccount, lamports: 0, pubkey: gen.publicKey(3) },
     },
 };

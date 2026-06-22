@@ -11,7 +11,7 @@ type ExplorerLinkProps = Pick<ComponentProps<'div'>, 'className'> & {
 export const ExplorerLink: FC<ExplorerLinkProps> = ({ path, label, className }) => {
     const { link } = useExplorerLink(path);
     return (
-        <a href={link} target="_blank" rel="noopener noreferrer" className={cn('e-font-mono', className)}>
+        <a href={link} target="_blank" rel="noopener noreferrer" className={cn('font-mono', className)}>
             {label}
         </a>
     );

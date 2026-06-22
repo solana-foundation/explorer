@@ -12,7 +12,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
     }, [error]);
 
     return (
-        <PageContainer className="e-mt-6">
+        <PageContainer className="mt-6">
             <ErrorCard text="Something went wrong" retry={reset} />
         </PageContainer>
     );

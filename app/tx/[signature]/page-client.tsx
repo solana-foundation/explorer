@@ -8,7 +8,6 @@ import { SignatureContext } from '@components/instruction/SignatureContext';
 import { CUProfilingSection } from '@features/cu-profiling';
 import { Receipt } from '@features/receipt';
 import { isReceiptEnabled } from '@features/receipt';
-import { AutoRefresh } from '@features/transaction';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
@@ -16,7 +15,6 @@ import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
-import useTabVisibility from '@utils/use-tab-visibility';
 import bs58 from 'bs58';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
@@ -26,8 +24,10 @@ import { InstructionsSection } from '@/app/features/transaction/ui/InstructionsS
 import { ProgramLogSection } from '@/app/features/transaction/ui/ProgramLogSection';
 import { SummaryCard } from '@/app/features/transaction/ui/SummaryCard';
 import { generateTokenBalanceRows, TokenBalancesCard } from '@/app/features/transaction/ui/TokenBalancesCard';
+import { AutoRefresh, useAutoRefreshState } from '@/app/shared/lib/use-auto-refresh';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
+import useTabVisibility from '@/app/utils/use-tab-visibility';
 
 const ALL_TRANSACTION_TABS = [
     { path: 'summary', title: 'Summary' },
@@ -59,16 +59,13 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
     const status = useTransactionStatus(signature);
     const clusterStatus = useCluster().status;
     const [zeroConfirmationRetries, setZeroConfirmationRetries] = useState(0);
-    const { visible: isTabVisible } = useTabVisibility();
 
-    let autoRefresh = AutoRefresh.Inactive;
-    if (!isTabVisible) {
-        autoRefresh = AutoRefresh.Inactive;
-    } else if (zeroConfirmationRetries >= ZERO_CONFIRMATION_BAILOUT) {
-        autoRefresh = AutoRefresh.BailedOut;
-    } else if (status?.data?.info && status.data.info.confirmations !== 'max') {
-        autoRefresh = AutoRefresh.Active;
-    }
+    const { visible: isTabVisible } = useTabVisibility();
+    const autoRefresh = useAutoRefreshState({
+        bailedOut: zeroConfirmationRetries >= ZERO_CONFIRMATION_BAILOUT,
+        enabled: Boolean(status?.data?.info && status.data.info.confirmations !== 'max'),
+        isTabVisible,
+    });
 
     useEffect(() => {
         if (status?.status === FetchStatus.Fetched && status.data?.info && status.data.info.confirmations === 0) {
@@ -87,12 +84,10 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
     }
 
     return (
-        <div className="transaction-page e-mx-auto e-flex e-max-w-5xl e-flex-col e-space-y-9 e-px-4 e-pt-3 lg:e-space-y-12 lg:e-px-6 lg:e-pt-5">
-            <header className="-e-mb-6 e-flex e-flex-col e-gap-1.5 e-pb-3 e-pt-2 lg:e-mb-0">
-                <span className="e-text-xs e-font-normal e-uppercase e-text-muted">Details</span>
-                <h1 className="e-m-0 e-text-2xl e-font-normal e-leading-none e-text-white md:e-text-3xl">
-                    Transaction
-                </h1>
+        <div className="transaction-page mx-auto flex max-w-5xl flex-col space-y-9 px-4 pt-3 lg:space-y-12 lg:px-6 lg:pt-5">
+            <header className="-mb-6 flex flex-col gap-1.5 pb-3 pt-2 lg:mb-0">
+                <span className="text-xs font-normal uppercase text-muted">Details</span>
+                <h1 className="m-0 text-2xl font-normal leading-none text-white md:text-3xl">Transaction</h1>
             </header>
 
             {signature === undefined ? (
@@ -159,21 +154,18 @@ function DetailsSection({ signature }: SignatureProps) {
                 scrollSpy
                 tabs={tabs}
                 buildHref={path => `#${path}`}
-                wrapperClassName="e-bg-heavy-metal-900"
-                className="e-gap-5"
+                wrapperClassName="bg-heavy-metal-900"
+                className="gap-5"
             />
             <Suspense fallback={<LoadingCard message="Loading accounts" />}>
                 <AccountsCard signature={signature} />
             </Suspense>
             <TokenBalancesCard signature={signature} />
-            <div className="e-flex e-flex-col e-space-y-9 e-pb-10 xxl:e-relative xxl:e-left-1/2 xxl:e-w-screen xxl:-e-translate-x-1/2 xxl:e-flex-row xxl:e-items-start xxl:e-gap-6 xxl:e-space-y-0 xxl:e-px-6">
-                <div className="xxl:e-min-w-0 xxl:e-flex-[1_1_0%] xxl:e-overflow-hidden">
+            <div className="flex flex-col space-y-9 pb-10 xxl:relative xxl:left-1/2 xxl:w-screen xxl:-translate-x-1/2 xxl:flex-row xxl:items-start xxl:gap-6 xxl:space-y-0 xxl:px-6">
+                <div className="xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden">
                     <InstructionsSection signature={signature} />
                 </div>
-                <div
-                    className="xxl:e-sticky xxl:e-top-[70px] xxl:e-min-w-0 xxl:e-flex-[1_1_0%] xxl:e-overflow-hidden"
-                    id="logs"
-                >
+                <div className="xxl:sticky xxl:top-[70px] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden" id="logs">
                     <ProgramLogSection signature={signature} />
                     <CUProfilingSection signature={signature} />
                 </div>

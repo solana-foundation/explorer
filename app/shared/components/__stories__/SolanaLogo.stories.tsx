@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { Logo } from '../SolanaLogo';
@@ -11,7 +11,6 @@ const meta = {
         },
     },
     component: Logo,
-    parameters: { layout: 'padded' },
     tags: ['autodocs', 'test'],
     title: 'Shared/SolanaLogo',
 } satisfies Meta<typeof Logo>;

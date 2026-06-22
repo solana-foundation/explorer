@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { MINIMAL_VIEWPORTS } from 'storybook/viewport';
 
@@ -46,8 +46,8 @@ const meta: Meta<typeof BaseNavigationTabs> = {
     },
     component: BaseNavigationTabs,
     globals: { viewport: { value: 'responsive' } },
-    tags: ['autodocs'],
-    title: 'Components/Shared/UI/NavigationTabs',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Shared/NavigationTabs',
 };
 
 export default meta;

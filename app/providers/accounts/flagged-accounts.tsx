@@ -42,7 +42,7 @@ const INCIDENTS: Record<IncidentId, IncidentDescription> = {
                 Warning! This program&apos;s upgrade key may have been compromised by the FTX hack. Please migrate to
                 the community fork:{' '}
                 <Link
-                    className="e-text-white"
+                    className="text-white"
                     href="https://github.com/openbook-dex/program"
                     style={{ textDecoration: 'underline' }}
                 >

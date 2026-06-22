@@ -26,7 +26,7 @@ type TokenBalanceRow = {
     accountIndex: number;
 };
 
-const GRID_TEMPLATE = 'e-grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)]';
+const GRID_TEMPLATE = 'grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)]';
 
 export function TokenBalancesCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
@@ -78,16 +78,16 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
         <CollapsibleSection id="tokens" title="Tokens">
             <div
                 className={cn(
-                    'e-hidden e-px-3 e-py-1.5 md:e-px-4 lg:e-grid',
-                    'e-gap-5 e-text-xs e-uppercase e-text-outer-space-300',
-                    'e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid]',
+                    'hidden px-3 py-1.5 md:px-4 lg:grid',
+                    'gap-5 text-xs uppercase text-outer-space-300',
+                    'border-1 border-b border-white/10 [border-bottom-style:solid]',
                     GRID_TEMPLATE,
                 )}
             >
                 <div>#</div>
                 <div>Owner / Address / Token</div>
-                <div className="e-text-right">Change</div>
-                <div className="e-text-right">Post Balance</div>
+                <div className="text-right">Change</div>
+                <div className="text-right">Post Balance</div>
             </div>
             {rows.map((row, index) => (
                 <TokenBalanceRow
@@ -129,19 +129,19 @@ function TokenBalanceRow({
     const ownerPubkey = owner ? new PublicKey(owner) : undefined;
 
     return (
-        <div className="e-border-1 e-border-b e-border-white/10 [border-bottom-style:solid] last:e-border-b-0">
+        <div className="border-1 border-b border-white/10 [border-bottom-style:solid] last:border-b-0">
             {/* Mobile layout */}
-            <div className="e-flex e-flex-col e-gap-1 e-px-3 e-py-3 e-text-sm md:e-px-4 lg:e-hidden">
-                <div className="e-flex e-items-center e-justify-between">
-                    <div className="e-flex e-items-center e-gap-2">
-                        <span className="e-w-16 e-shrink-0 e-text-outer-space-300">Change</span>
+            <div className="flex flex-col gap-1 px-3 py-3 text-sm md:px-4 lg:hidden">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="w-16 shrink-0 text-outer-space-300">Change</span>
                         <BalanceDelta delta={scaledDelta} />
                     </div>
-                    <span className="e-text-outer-space-300">{index + 1}</span>
+                    <span className="text-outer-space-300">{index + 1}</span>
                 </div>
-                <div className="e-flex e-items-center e-gap-2">
-                    <span className="e-w-16 e-shrink-0 e-text-outer-space-300">Balance</span>
-                    <span className="e-whitespace-nowrap">
+                <div className="flex items-center gap-2">
+                    <span className="w-16 shrink-0 text-outer-space-300">Balance</span>
+                    <span className="whitespace-nowrap">
                         {scaledBalance} {units}
                         <ScaledUiAmountMultiplierTooltip
                             rawAmount={balance}
@@ -149,18 +149,18 @@ function TokenBalanceRow({
                         />
                     </span>
                 </div>
-                <div className="e-flex e-items-center e-gap-2">
-                    <span className="e-w-16 e-shrink-0 e-text-outer-space-300">Token</span>
+                <div className="flex items-center gap-2">
+                    <span className="w-16 shrink-0 text-outer-space-300">Token</span>
                     <Address pubkey={mintPubkey} link fetchTokenLabelInfo />
                 </div>
                 {ownerPubkey && (
-                    <div className="e-flex e-items-center e-gap-2">
-                        <span className="e-w-16 e-shrink-0 e-text-outer-space-300">Owner</span>
+                    <div className="flex items-center gap-2">
+                        <span className="w-16 shrink-0 text-outer-space-300">Owner</span>
                         <Address pubkey={ownerPubkey} link />
                     </div>
                 )}
-                <div className="e-flex e-items-center e-gap-2">
-                    <span className="e-w-16 e-shrink-0 e-text-outer-space-300">Addr</span>
+                <div className="flex items-center gap-2">
+                    <span className="w-16 shrink-0 text-outer-space-300">Addr</span>
                     <Address pubkey={account} link />
                 </div>
             </div>
@@ -168,33 +168,33 @@ function TokenBalanceRow({
             {/* Desktop layout */}
             <div
                 className={cn(
-                    'e-hidden e-min-h-9 e-px-3 e-py-2.5 md:e-px-4 lg:e-grid',
-                    'e-items-start e-gap-x-5 e-whitespace-nowrap e-text-sm',
+                    'hidden min-h-9 px-3 py-2.5 md:px-4 lg:grid',
+                    'items-start gap-x-5 whitespace-nowrap text-sm',
                     "[grid-template-areas:'number_address_change_balance']",
                     GRID_TEMPLATE,
                 )}
             >
-                <div className="e-text-outer-space-300 [grid-area:number]">{index + 1}</div>
-                <div className="e-flex e-flex-col [grid-area:address]">
+                <div className="text-outer-space-300 [grid-area:number]">{index + 1}</div>
+                <div className="flex flex-col [grid-area:address]">
                     {ownerPubkey && (
-                        <div className="e-flex e-items-center e-gap-3">
-                            <span className="e-min-w-11 e-text-sm e-text-outer-space-300">Owner</span>
+                        <div className="flex items-center gap-3">
+                            <span className="min-w-11 text-sm text-outer-space-300">Owner</span>
                             <Address pubkey={ownerPubkey} link />
                         </div>
                     )}
-                    <div className="e-flex e-items-center e-gap-3">
-                        <span className="e-min-w-11 e-text-sm e-text-outer-space-300">Addr</span>
+                    <div className="flex items-center gap-3">
+                        <span className="min-w-11 text-sm text-outer-space-300">Addr</span>
                         <Address pubkey={account} link />
                     </div>
-                    <div className="e-flex e-items-center e-gap-3">
-                        <span className="e-min-w-11 e-text-sm e-text-outer-space-300">Token</span>
+                    <div className="flex items-center gap-3">
+                        <span className="min-w-11 text-sm text-outer-space-300">Token</span>
                         <Address pubkey={mintPubkey} link fetchTokenLabelInfo />
                     </div>
                 </div>
-                <div className="e-justify-self-end [grid-area:change]">
+                <div className="justify-self-end [grid-area:change]">
                     <BalanceDelta delta={scaledDelta} />
                 </div>
-                <div className="e-justify-self-end [grid-area:balance]">
+                <div className="justify-self-end [grid-area:balance]">
                     {scaledBalance} {units}
                     <ScaledUiAmountMultiplierTooltip
                         rawAmount={balance}

@@ -18,7 +18,6 @@ import {
     VersionedMessage,
 } from '@solana/web3.js';
 import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
-import { useClusterPath } from '@utils/url';
 import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
@@ -32,6 +31,7 @@ import { toBase64 } from '@/app/shared/lib/bytes';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { BaseTable } from '@/app/shared/ui/Table';
+import { useClusterPath } from '@/app/utils/url';
 
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
@@ -282,6 +282,7 @@ export function TransactionInspectorPage({
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
     const router = useRouter();
+    const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const [paramString, setParamString] = React.useState<string>();
 
     // Sync message with url search params
@@ -324,7 +325,7 @@ export function TransactionInspectorPage({
         }
     }, [currentPathname, currentSearchParams, prevInspectorData, router, signature, inspectorData]);
 
-    const reset = React.useCallback(() => {
+    const resetParams = React.useCallback(() => {
         const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
         nextQueryParams.delete('message');
         nextQueryParams.delete('signatures');
@@ -332,6 +333,10 @@ export function TransactionInspectorPage({
         const queryString = nextQueryParams?.toString();
         router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
     }, [currentPathname, currentSearchParams, router]);
+
+    const resetToInspectorPage = React.useCallback(() => {
+        router.push(inspectorPath);
+    }, [inspectorPath, router]);
 
     // Decode the message url param whenever it changes
     React.useEffect(() => {
@@ -351,21 +356,25 @@ export function TransactionInspectorPage({
     }, [currentPathname, currentSearchParams, router]);
 
     return (
-        <PageContainer className="e-mt-6">
-            <div className="e-mb-8">
-                <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
-                    <h2 className="e-mb-0">Transaction Inspector</h2>
+        <PageContainer className="mt-6">
+            <div className="mb-8">
+                <div className="border-0 border-b border-solid border-dk-gray-700-dark py-6">
+                    <h2 className="mb-0">Transaction Inspector</h2>
                 </div>
             </div>
             {signature ? (
-                <PermalinkView signature={signature} reset={reset} showTokenBalanceChanges={showTokenBalanceChanges} />
+                <PermalinkView
+                    signature={signature}
+                    reset={resetToInspectorPage}
+                    showTokenBalanceChanges={showTokenBalanceChanges}
+                />
             ) : inspectorData ? (
                 isSquadsProposalAccountData(inspectorData) ? (
-                    <SquadsProposalInspectorCard account={inspectorData.account} onClear={reset} />
+                    <SquadsProposalInspectorCard account={inspectorData.account} onClear={resetParams} />
                 ) : (
                     <LoadedView
                         transaction={inspectorData}
-                        onClear={reset}
+                        onClear={resetParams}
                         showTokenBalanceChanges={showTokenBalanceChanges}
                     />
                 )
@@ -376,8 +385,9 @@ export function TransactionInspectorPage({
     );
 }
 
-function PermalinkView({
+export function PermalinkView({
     signature,
+    reset,
     showTokenBalanceChanges,
 }: {
     signature: string;
@@ -386,23 +396,23 @@ function PermalinkView({
 }) {
     const details = useRawTransactionDetails(signature);
     const fetchTransaction = useFetchRawTransaction();
-    const refreshTransaction = () => fetchTransaction(signature);
     const transaction = details?.data?.raw;
-    const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
-    const router = useRouter();
-    const reset = React.useCallback(() => {
-        router.push(inspectorPath);
-    }, [inspectorPath, router]);
 
-    // Fetch details on load
+    // Fetch on load at 'confirmed' (matches providers/transactions/parsed.tsx) so freshly-confirmed txs resolve fast.
+    const fetchConfirmedTx = React.useCallback(() => {
+        fetchTransaction(signature, 'confirmed');
+    }, [fetchTransaction, signature]);
+
     React.useEffect(() => {
-        if (!details) fetchTransaction(signature);
-    }, [signature, details, fetchTransaction]);
+        if (!transaction) {
+            fetchConfirmedTx();
+        }
+    }, [transaction, fetchConfirmedTx]);
 
     if (!details || details.status === FetchStatus.Fetching) {
         return <LoadingCard />;
     } else if (details.status === FetchStatus.FetchFailed) {
-        return <ErrorCard retry={refreshTransaction} text="Failed to fetch transaction" />;
+        return <ErrorCard retry={fetchConfirmedTx} text="Failed to fetch transaction" />;
     } else if (!transaction) {
         return <ErrorCard text="Transaction was not found" retry={reset} retryText="Reset" />;
     }
@@ -478,11 +488,11 @@ function OverviewCard({
     return (
         <>
             <Card ui="dashkit">
-                <CardHeader ui="dashkit" className="e-gap-2">
+                <CardHeader ui="dashkit" className="gap-2">
                     <CardTitle as="h3" ui="dashkit">
                         Transaction Overview
                     </CardTitle>
-                    <Button ui="dashkit" variant="white" size="sm" className="e-flex" onClick={onClear}>
+                    <Button ui="dashkit" variant="white" size="sm" className="flex" onClick={onClear}>
                         Clear
                     </Button>
                     <DownloadDropdown filename={signature || 'signature'} data={raw} />
@@ -490,10 +500,14 @@ function OverviewCard({
                 <TableCardBody>
                     <BaseTable.Row>
                         <BaseTable.Cell>Serialized Size</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">
-                            <div className="e-flex e-flex-col e-items-end">
+                        <BaseTable.Cell className="text-right">
+                            <div className="flex flex-col items-end">
                                 {size} bytes
-                                <span className={size <= PACKET_DATA_SIZE ? 'e-text-dk-gray-700' : 'text-warning'}>
+                                <span
+                                    className={
+                                        size <= PACKET_DATA_SIZE ? 'text-dk-gray-700' : 'text-dk-warning-on-dark'
+                                    }
+                                >
                                     Max transaction size is {PACKET_DATA_SIZE} bytes
                                 </span>
                             </div>
@@ -501,10 +515,10 @@ function OverviewCard({
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Fees</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">
-                            <div className="e-flex e-flex-col e-items-end">
+                        <BaseTable.Cell className="text-right">
+                            <div className="flex flex-col items-end">
                                 <SolBalance lamports={fee} />
-                                <span className="e-text-dk-gray-700">
+                                <span className="text-dk-gray-700">
                                     {`Each signature costs ${DEFAULT_FEES.lamportsPerSignature} lamports`}
                                 </span>
                             </div>
@@ -513,19 +527,19 @@ function OverviewCard({
 
                     <BaseTable.Row>
                         <BaseTable.Cell>
-                            <div className="e-flex e-flex-col e-items-start">
+                            <div className="flex flex-col items-start">
                                 Fee payer
-                                <span className="e-mt-[3px]">
-                                    <Badge ui="dashkit" variant="info" className="e-mr-1.5">
+                                <span className="mt-[3px]">
+                                    <Badge ui="dashkit" variant="info" className="mr-1.5">
                                         Signer
                                     </Badge>
-                                    <Badge ui="dashkit" variant="destructive" className="e-mr-1.5">
+                                    <Badge ui="dashkit" variant="destructive" className="mr-1.5">
                                         Writable
                                     </Badge>
                                 </span>
                             </div>
                         </BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">
+                        <BaseTable.Cell className="text-right">
                             {message.staticAccountKeys.length === 0 ? (
                                 'No Fee Payer'
                             ) : (

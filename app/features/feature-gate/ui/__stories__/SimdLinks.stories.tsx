@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SimdLinks } from '../SimdLinks';
 
 const meta: Meta<typeof SimdLinks> = {
     component: SimdLinks,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/SimdLinks',
 };
 

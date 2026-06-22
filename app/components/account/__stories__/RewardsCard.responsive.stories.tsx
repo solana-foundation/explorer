@@ -2,10 +2,10 @@ import { DEFAULT_SLOT, gen } from '@__fixtures__/gen';
 import { DispatchContext as RewardsDispatch, StateContext as RewardsStateCtx } from '@providers/accounts/rewards';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
 import { RewardsCard } from '../RewardsCard';
@@ -64,7 +64,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/RewardsCard/Responsive',
+    title: 'Components/Account/RewardsCard@Media',
 } satisfies Meta<typeof RewardsCard>;
 
 export default meta;

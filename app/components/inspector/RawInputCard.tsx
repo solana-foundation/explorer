@@ -52,7 +52,7 @@ function TabInstructions() {
     const tabs: TabData[] = [
         {
             content: (
-                <div className="e-p-3">
+                <div className="p-3">
                     Use <code>--dump-transaction-message</code> flag
                 </div>
             ),
@@ -61,7 +61,7 @@ function TabInstructions() {
         },
         {
             content: (
-                <div className="e-p-3">
+                <div className="p-3">
                     Add <code>base64</code> crate dependency and{' '}
                     <code>println!(&quot;{}&quot;, base64::encode(&transaction.message_data()));</code>
                 </div>
@@ -71,22 +71,22 @@ function TabInstructions() {
         },
         {
             content: (
-                <div className="e-p-3">
-                    <div className="e-mb-3">
-                        <div className="e-mb-1.5 e-underline">@solana/web3.js &lt; 2.0.0</div>
-                        <div className="e-mb-1.5">
-                            <div className="e-mb-[3px]">Legacy Transaction:</div>
+                <div className="p-3">
+                    <div className="mb-3">
+                        <div className="mb-1.5 underline">@solana/web3.js &lt; 2.0.0</div>
+                        <div className="mb-1.5">
+                            <div className="mb-[3px]">Legacy Transaction:</div>
                             <code>console.log(tx.serializeMessage().toString(&quot;base64&quot;));</code>
                         </div>
                         <div>
-                            <div className="e-mb-[3px]">Versioned Transaction:</div>
+                            <div className="mb-[3px]">Versioned Transaction:</div>
                             <code>console.log(Buffer.from(tx.serialize()).toString(&quot;base64&quot;));</code>
                         </div>
                     </div>
                     <div>
-                        <div className="e-mb-1.5 e-underline">@solana/web3.js &gt;= 2.0.0</div>
+                        <div className="mb-1.5 underline">@solana/web3.js &gt;= 2.0.0</div>
                         <div>
-                            <div className="e-mb-[3px]">Legacy Transaction:</div>
+                            <div className="mb-[3px]">Legacy Transaction:</div>
                             <code>console.log(getBase64EncodedWireTransaction(tx));</code>
                         </div>
                     </div>
@@ -97,7 +97,7 @@ function TabInstructions() {
         },
         {
             content: (
-                <div className="e-p-3">
+                <div className="p-3">
                     Add <code>vault_transaction</code> from{' '}
                     <code>https://app.squads.so/squads/&lt;squad_id&gt;/transactions/&lt;vault_transaction&gt;</code>
                 </div>
@@ -115,7 +115,7 @@ function TabInstructions() {
                         key={tab.id}
                         active={activeTab === tab.id}
                         // master used `me-3 nav-link` (no nav-item margins): 0.75rem trailing gap only
-                        className="e-ml-0 e-mr-3"
+                        className="ml-0 mr-3"
                         onClick={() => setActiveTab(tab.id)}
                     >
                         {tab.label}
@@ -246,7 +246,7 @@ export function RawInput({
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <div className="e-flex e-items-center e-justify-between">
+                <div className="flex items-center justify-between">
                     <CardTitle as="h3" ui="dashkit">
                         Inspector Input
                     </CardTitle>
@@ -256,7 +256,7 @@ export function RawInput({
                 </div>
             </CardHeader>
             <CardBody ui="dashkit">
-                <FormControl variant="flush-auto" className="e-font-mono">
+                <FormControl variant="flush-auto" className="font-mono">
                     <textarea
                         rows={rows}
                         onInput={onInput}
@@ -265,11 +265,11 @@ export function RawInput({
                         name="tx-inspector-input"
                     />
                 </FormControl>
-                <div className="e-flex e-items-center">
+                <div className="flex items-center">
                     {error && (
                         <>
-                            <AlertCircle className="e-mr-1.5 e-text-dk-warning-on-dark" size={14} aria-hidden />
-                            <span className="e-text-dk-warning-on-dark">{error}</span>
+                            <AlertCircle className="mr-1.5 text-dk-warning-on-dark" size={14} aria-hidden />
+                            <span className="text-dk-warning-on-dark">{error}</span>
                         </>
                     )}
                 </div>

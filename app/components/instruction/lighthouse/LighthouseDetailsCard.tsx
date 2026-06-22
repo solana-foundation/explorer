@@ -347,13 +347,13 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
         <>
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right" colSpan={2}>
+                <BaseTable.Cell className="text-right" colSpan={2}>
                     <Address pubkey={programId} alignRight link raw overrideText={programName} />
                 </BaseTable.Cell>
             </BaseTable.Row>
-            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                 <BaseTable.Cell>Account Name</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right" colSpan={2}>
+                <BaseTable.Cell className="text-right" colSpan={2}>
                     Address
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -361,7 +361,7 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
                 return (
                     <BaseTable.Row key={keyIndex} data-testid={`account-row-${keyIndex}`}>
                         <BaseTable.Cell>
-                            <div className="e-mr-1.5 md:e-inline">
+                            <div className="mr-1.5 md:inline">
                                 {parsedIx.accounts
                                     ? keyIndex < parsedAccountsLength
                                         ? `${camelToTitleCase(accountMap.get(address) ?? 'Unknown')}`
@@ -370,18 +370,18 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
                             </div>
                             {role == AccountRole.WRITABLE ||
                                 (role == AccountRole.WRITABLE_SIGNER && (
-                                    <Badge ui="dashkit" variant="destructive" className="e-mr-[3px]">
+                                    <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
                                         Writable
                                     </Badge>
                                 ))}
                             {role == AccountRole.READONLY_SIGNER ||
                                 (role == AccountRole.WRITABLE_SIGNER && (
-                                    <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                                    <Badge ui="dashkit" variant="info" className="mr-[3px]">
                                         Signer
                                     </Badge>
                                 ))}
                         </BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right" colSpan={2}>
+                        <BaseTable.Cell className="text-right" colSpan={2}>
                             <Address pubkey={new PublicKey(address)} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>
@@ -390,10 +390,10 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
 
             {parsedIx.data && (
                 <>
-                    <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                    <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                         <BaseTable.Cell>Argument Name</BaseTable.Cell>
                         <BaseTable.Cell>Type</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">Value</BaseTable.Cell>
+                        <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
                     </BaseTable.Row>
                     {mapCodamaIxArgsToRows(parsedIx.data)}
                 </>

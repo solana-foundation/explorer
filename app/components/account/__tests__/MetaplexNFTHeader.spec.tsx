@@ -24,18 +24,6 @@ vi.mock('@providers/accounts', () => ({
     useMintAccountInfo: vi.fn(() => undefined),
 }));
 
-vi.mock('bootstrap/js/dist/dropdown', () => ({
-    default: class Dropdown {
-        dispose() {}
-    },
-}));
-
-vi.mock('use-async-effect', () => ({
-    default: (_fn: any) => {
-        // Don't run async effects in tests
-    },
-}));
-
 describe('MetaplexNFTHeader', () => {
     it('should render NFT name', () => {
         const nftData = makeNftData({ name: 'Cool NFT #42' });

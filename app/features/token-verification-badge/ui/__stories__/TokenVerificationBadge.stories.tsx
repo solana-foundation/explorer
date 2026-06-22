@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTokenVerificationBadge } from '../BaseTokenVerificationBadge';
 import {
@@ -12,7 +12,7 @@ import {
 
 const meta = {
     component: BaseTokenVerificationBadge,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/TokenVerification/TokenVerificationBadge',
 } satisfies Meta<typeof BaseTokenVerificationBadge>;
 

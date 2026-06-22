@@ -17,19 +17,19 @@ import { cn } from '@/app/components/shared/utils';
 // non-`<table>` implementation (e.g. CSS grid) without changing call sites.
 const tableVariants = cva([], {
     compoundVariants: [
-        { class: 'table-nowrap', nowrap: true, ui: 'dashkit' },
-        { class: '[&_th]:e-whitespace-nowrap [&_td]:e-whitespace-nowrap', nowrap: true, ui: 'tw' },
-        // card variant adds dashkit `.card-table` on top of the base `table table-sm`.
-        { class: 'card-table', ui: 'dashkit', variant: 'card' },
-        // TW equivalent of `.card-table`: zero thead border-top + first/last cell padding to card edges + e-mb-0.
+        { class: '[&_th]:whitespace-nowrap [&_td]:whitespace-nowrap', nowrap: true },
+        // Plain dashkit table — .table{margin-bottom:$spacer} with dashkit $spacer = 1.5rem (24px).
+        { class: 'mb-6', ui: 'dashkit', variant: 'plain' },
+        // TW equivalent of `.card-table`: zero thead border-top + first/last cell padding to card edges + mb-0.
+        // First/last cell padding-x is 1.5rem — compiled dashkit pins `padding-left/right: 1.5rem !important`
+        // on `.card-table` edge cells (verified against the compiled dashkit bundle + live p4 pixels).
         {
             class: [
-                'e-mb-0',
-                '[&_thead_th]:e-border-t-0',
-                '[&_thead_th:first-child]:e-pl-6 [&_thead_th:last-child]:e-pr-6',
-                '[&_tbody_td:first-child]:e-pl-6 [&_tbody_td:last-child]:e-pr-6',
+                'mb-0',
+                '[&_thead_th]:border-t-0',
+                '[&_thead_th:first-child]:pl-6 [&_thead_th:last-child]:pr-6',
+                '[&_tbody_td:first-child]:pl-6 [&_tbody_td:last-child]:pr-6',
             ].join(' '),
-            ui: 'tw',
             variant: 'card',
         },
     ],
@@ -37,17 +37,30 @@ const tableVariants = cva([], {
     variants: {
         nowrap: { false: '', true: '' },
         ui: {
-            dashkit: 'table table-sm',
-            // Mirrors `.table.table-sm` as compiled in .storybook/layout.min.css (Bootstrap 5 + dashkit overrides).
+            // Tailwind translation of compiled `.table.table-sm`; keeps the Dashkit `1.5rem` table margin and the `#1e2423` tbody border that the SCSS late-override pins.
+            dashkit: [
+                // mb-* intentionally omitted — per-variant compounds own bottom margin so the
+                // card variant's mb-0 isn't beaten by a base mb-6 in CSS source order
+                // (cn is clsx — it keeps all classes, so CSS source order decides).
+                'w-full text-dk-sm text-white',
+                '[&_thead_th]:bg-dark-background [&_thead_th]:uppercase [&_thead_th]:text-dk-xs',
+                '[&_thead_th]:font-normal [&_thead_th]:tracking-[0.08em] [&_thead_th]:text-dark-muted-foreground',
+                '[&_thead_th]:text-left [&_th]:align-middle [&_td]:align-middle',
+                '[&_th]:p-4 [&_td]:p-4',
+                '[&_thead_th]:border-t [&_thead_th]:border-solid [&_thead_th]:border-[#282d2b]',
+                // tbody row separator visible against #1e2423 card bg — matches dashkit $card-border-color (#282d2b) on dark.
+                '[&_tbody_td]:border-t [&_tbody_td]:border-solid [&_tbody_td]:border-[#282d2b]',
+            ].join(' '),
+            // Mirrors compiled `.table.table-sm` (Bootstrap 5 + dashkit overrides).
             tw: [
-                'e-w-full e-text-dk-sm e-text-white',
-                '[&_thead_th]:e-bg-dark-background [&_thead_th]:e-uppercase [&_thead_th]:e-text-dk-xs',
-                '[&_thead_th]:e-font-normal [&_thead_th]:e-tracking-[0.08em] [&_thead_th]:e-text-dark-muted-foreground',
-                '[&_thead_th]:e-text-left [&_th]:e-align-middle [&_td]:e-align-middle',
-                '[&_th]:e-p-4 [&_td]:e-p-4',
-                '[&_thead_th]:e-border-b [&_thead_th]:e-border-dk-gray-700-dark',
-                '[&_tbody_td]:e-border-b [&_tbody_td]:e-border-dk-gray-700-dark',
-                '[&_tbody_tr:last-child_td]:e-border-b-0',
+                'w-full text-dk-sm text-white',
+                '[&_thead_th]:bg-dark-background [&_thead_th]:uppercase [&_thead_th]:text-dk-xs',
+                '[&_thead_th]:font-normal [&_thead_th]:tracking-[0.08em] [&_thead_th]:text-dark-muted-foreground',
+                '[&_thead_th]:text-left [&_th]:align-middle [&_td]:align-middle',
+                '[&_th]:p-4 [&_td]:p-4',
+                '[&_thead_th]:border-b [&_thead_th]:border-dk-gray-700-dark',
+                '[&_tbody_td]:border-b [&_tbody_td]:border-dk-gray-700-dark',
+                '[&_tbody_tr:last-child_td]:border-b-0',
             ].join(' '),
         },
         variant: { card: '', plain: '' },
@@ -58,8 +71,8 @@ const wrapperVariants = cva([], {
     defaultVariants: { ui: 'tw' },
     variants: {
         ui: {
-            dashkit: 'table-responsive e-mb-0',
-            tw: 'e-overflow-x-auto e-mb-0',
+            dashkit: 'overflow-x-auto mb-0',
+            tw: 'overflow-x-auto mb-0',
         },
     },
 });

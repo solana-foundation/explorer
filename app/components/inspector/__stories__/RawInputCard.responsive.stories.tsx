@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
 import { RawInput } from '../RawInputCard';
@@ -14,7 +14,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Inspector/RawInputCard/Responsive',
+    title: 'Components/Inspector/RawInputCard@Media',
 } satisfies Meta<typeof RawInput>;
 
 export default meta;

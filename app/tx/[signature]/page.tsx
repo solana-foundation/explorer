@@ -1,4 +1,4 @@
-import '../../styles.css';
+import '../../styles/styles.css';
 
 import { getClusterParam } from '@features/receipt';
 import { isReceiptEnabled, RECEIPT_BASE_URL, RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/env';

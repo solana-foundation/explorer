@@ -1,6 +1,6 @@
 import type { Program } from '@coral-xyz/anchor';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ProgramEventsCard } from '../ProgramEventsCard';
 

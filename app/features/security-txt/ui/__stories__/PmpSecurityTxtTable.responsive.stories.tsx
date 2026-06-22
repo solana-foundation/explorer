@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '../../../../../.storybook/responsive-decorators';
 import { PmpSecurityTxtTable } from '../PmpSecurityTxtTable';
@@ -13,8 +13,8 @@ const meta = {
         nextjs: { appDirectory: true },
         viewport: { options: INITIAL_VIEWPORTS },
     },
-    tags: ['autodocs'],
-    title: 'Components/Account/security/PmpSecurityTxtTable/Responsive',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Account/security/PmpSecurityTxtTable@Media',
 } satisfies Meta<typeof PmpSecurityTxtTable>;
 
 export default meta;

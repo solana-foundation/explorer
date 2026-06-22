@@ -68,30 +68,30 @@ export function BpfLoaderWriteDetailsCard(props: Props<WriteInfo>) {
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={BPF_LOADER_PROGRAM_ID} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Account</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.account} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>
-                    Bytes <span className="e-text-dk-gray-700">(Base 64)</span>
+                    Bytes <span className="text-dk-gray-700">(Base 64)</span>
                 </BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
-                    <pre className="e-mb-0 e-inline-block e-text-left">{bytes}</pre>
+                <BaseTable.Cell className="text-right">
+                    <pre className="mb-0 inline-block text-left">{bytes}</pre>
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Offset</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.offset}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.offset}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );
@@ -111,14 +111,14 @@ export function BpfLoaderFinalizeDetailsCard(props: Props<FinalizeInfo>) {
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={BPF_LOADER_PROGRAM_ID} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Account</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.account} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>

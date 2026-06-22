@@ -1,8 +1,8 @@
+import { Button } from '@components/shared/ui/button';
+import { cn } from '@components/shared/utils';
 import { truncateAddress } from '@entities/address';
 import WalletIcon from '@img/icons/wallet.svg';
 import { Slot } from '@radix-ui/react-slot';
-import { Button } from '@shared/ui/button';
-import { cn } from '@shared/utils';
 import { cva } from 'class-variance-authority';
 import Image from 'next/image';
 import { ReactNode, useMemo } from 'react';
@@ -23,7 +23,7 @@ const LABELS = {
 } as const;
 
 const cardVariants = cva(
-    'e-flex e-w-full e-items-center e-justify-between e-gap-[7px] e-border e-border-[#000000] e-bg-[#282D2B] e-px-3 e-py-2 e-shadow-[3px_12px_24px_0px_rgba(20,24,22,0.5)]',
+    'flex w-full items-center justify-between gap-[7px] border border-[#000000] bg-[#282D2B] px-3 py-2 shadow-[3px_12px_24px_0px_rgba(20,24,22,0.5)]',
     {
         defaultVariants: {
             clickable: false,
@@ -31,10 +31,10 @@ const cardVariants = cva(
         },
         variants: {
             clickable: {
-                true: 'e-cursor-pointer hover:e-bg-[#2A2F2D]',
+                true: 'cursor-pointer hover:bg-[#2A2F2D]',
             },
             disabled: {
-                true: 'e-opacity-50 e-cursor-not-allowed',
+                true: 'opacity-50 cursor-not-allowed',
             },
         },
     },
@@ -84,36 +84,32 @@ export function BaseConnectWallet({
 
     const content = (
         <>
-            <div className="e-flex e-w-full e-items-start e-gap-2">
+            <div className="flex w-full items-start gap-2">
                 {connected ? (
-                    <span className="e-m-0.5 e-flex e-h-4 e-w-4 e-flex-shrink-0 e-items-center e-justify-center e-rounded-full e-bg-accent">
-                        <Check className="e-text-heavy-metal-800" size={10} strokeWidth={3} />
+                    <span className="m-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-accent">
+                        <Check className="text-heavy-metal-800" size={10} strokeWidth={3} />
                     </span>
                 ) : (
-                    <AlertCircle className="e-m-0.5 e-shrink-0 e-text-destructive" size={16} />
+                    <AlertCircle className="m-0.5 shrink-0 text-destructive" size={16} />
                 )}
-                <div className="e-w-full e-grow">
+                <div className="w-full grow">
                     {!connected ? (
                         <>
-                            <div className="e-text-sm e-tracking-tight e-text-neutral-200">Connect wallet</div>
-                            <div className="e-mt-0.5 e-text-xs e-tracking-tight e-text-neutral-400">
-                                Link your wallet
-                            </div>
+                            <div className="text-sm tracking-tight text-neutral-200">Connect wallet</div>
+                            <div className="mt-0.5 text-xs tracking-tight text-neutral-400">Link your wallet</div>
                         </>
                     ) : (
                         <>
-                            <div className="e-text-sm e-tracking-tight e-text-neutral-200">Connect wallet</div>
-                            <div className="e-mt-0.5 e-text-xs e-tracking-tight e-text-neutral-400">
-                                Wallet connected
-                            </div>
+                            <div className="text-sm tracking-tight text-neutral-200">Connect wallet</div>
+                            <div className="mt-0.5 text-xs tracking-tight text-neutral-400">Wallet connected</div>
                         </>
                     )}
                 </div>
-                <div className="e-grow-0">
+                <div className="shrink-0 grow-0">
                     {!connected && (
                         <Button variant="outline" size="sm" onClick={onConnect}>
                             <Image src={WalletIcon} width={12} height={12} alt="" />
-                            <div className="e-whitespace-nowrap">{displayLabel}</div>
+                            <div className="whitespace-nowrap">{displayLabel}</div>
                         </Button>
                     )}
                     {connected && address && (

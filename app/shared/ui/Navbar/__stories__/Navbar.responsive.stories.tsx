@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
 import { NavbarItem, NavbarLink, NavbarList } from '../Navbar';
@@ -11,7 +11,7 @@ const meta: Meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/Navbar/Responsive',
+    title: 'Shared/Navbar@Media',
 };
 
 export default meta;

@@ -22,21 +22,21 @@ export function NonceAccountSection({ account, nonceAccount }: { account: Accoun
 
             <BaseTable.Row>
                 <BaseTable.Cell>Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={nonceAccount.info.authority} alignRight raw link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Blockhash</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <code>{nonceAccount.info.blockhash}</code>
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Fee</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {nonceAccount.info.feeCalculator.lamportsPerSignature} lamports per signature
                 </BaseTable.Cell>
             </BaseTable.Row>

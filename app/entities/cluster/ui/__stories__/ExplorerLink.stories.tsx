@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { DEFAULT_SIGNATURE } from '@storybook-config/__fixtures__/defaults';
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { withCluster } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ExplorerLink } from '../ExplorerLink';
 
 const meta: Meta<typeof ExplorerLink> = {
     component: ExplorerLink,
     decorators: [withCluster],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Entities/Cluster/ExplorerLink',
 };
 
@@ -30,7 +30,7 @@ export const TransactionPath: Story = {
 
 export const WithCustomClass: Story = {
     args: {
-        className: 'e-text-blue-500 e-underline',
+        className: 'text-blue-500 underline',
         label: 'Open',
         path: '/',
     },

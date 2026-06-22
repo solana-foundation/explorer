@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VerifiedBadge } from '../VerifiedBadge';
 
 const meta: Meta<typeof VerifiedBadge> = {
     component: VerifiedBadge,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Search/VerifiedBadge',
 };
 

@@ -28,19 +28,19 @@ export function FreezeLookupTableDetailsCard(props: DetailsProps & { info: Freez
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={AddressLookupTableProgram.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Lookup Table</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.lookupTableAccount} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Lookup Table Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.lookupTableAuthority} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>

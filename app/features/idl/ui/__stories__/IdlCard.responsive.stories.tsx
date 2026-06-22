@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClipboardMock, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { IdlCard } from '../IdlCard';
 
@@ -15,7 +15,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/UI/IdlCard/Responsive',
+    title: 'Features/IDL/IdlCard@Media',
 } satisfies Meta<typeof IdlCard>;
 
 export default meta;

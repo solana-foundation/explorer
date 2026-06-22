@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { BaseConnectWalletButton } from '../BaseConnectWalletButton';
@@ -8,8 +8,8 @@ const meta = {
         onClick: fn(),
     },
     component: BaseConnectWalletButton,
-    tags: ['autodocs'],
-    title: 'Features/IDL/Interactive IDL/UI/BaseConnectWalletButton',
+    tags: ['autodocs', 'test'],
+    title: 'Features/IDL/Interactive IDL/BaseConnectWalletButton',
 } satisfies Meta<typeof BaseConnectWalletButton>;
 
 export default meta;

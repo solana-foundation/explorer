@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { EmptySecurityTxtCard } from '../EmptySecurityTxtCard';
 
 const meta: Meta<typeof EmptySecurityTxtCard> = {
     component: EmptySecurityTxtCard,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/EmptySecurityTxtCard',
 };
 

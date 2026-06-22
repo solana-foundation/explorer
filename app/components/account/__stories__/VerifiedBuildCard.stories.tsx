@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { OsecRegistryInfo } from '@/app/utils/verified-builds';
 import { VerificationStatus } from '@/app/utils/verified-builds';
@@ -51,7 +51,7 @@ const meta = {
     component: BaseVerifiedBuildCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/VerifiedBuildCard',
 } satisfies Meta<typeof BaseVerifiedBuildCard>;
 

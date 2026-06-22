@@ -1,8 +1,8 @@
 import { DEFAULT_BLOCKHASH, gen } from '@__fixtures__/gen';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { CompressedNft, CompressedNftProof } from '@/app/providers/compressed-nft';
 
@@ -40,7 +40,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/CompressedNFTInfoCard/Responsive',
+    title: 'Components/Account/CompressedNFTInfoCard@Media',
 } satisfies Meta<typeof DasCompressionInfoCard>;
 
 export default meta;

@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { InstructionList } from '../InstructionList';
 
 const meta = {
     component: InstructionList,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/TransactionHistory/InstructionList',
 } satisfies Meta<typeof InstructionList>;
 

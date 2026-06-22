@@ -1,7 +1,7 @@
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -19,7 +19,7 @@ const sampleAccount: Account = {
 const meta = {
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/Account',
 } satisfies Meta;
 

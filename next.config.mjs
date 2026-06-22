@@ -19,6 +19,9 @@ const nextConfig = {
             },
         ],
     },
+    // bigint-buffer loads its native .node via `bindings`, which walks up from the module's real
+    // path — bundling it breaks that lookup and forces the pure-JS fallback warning.
+    serverExternalPackages: ['bigint-buffer'],
     async headers() {
         const seoFileHeaders = [
             {

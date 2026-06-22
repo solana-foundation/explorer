@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import ClusterModalDeveloperSettings from '../ClusterModalDeveloperSettings';
 
@@ -7,11 +7,10 @@ const meta = {
     component: ClusterModalDeveloperSettings,
     decorators: [withViewportFromGlobal],
     parameters: {
-        layout: 'padded',
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/ClusterModalDeveloperSettings/Responsive',
+    title: 'Components/ClusterModalDeveloperSettings@Media',
 } satisfies Meta<typeof ClusterModalDeveloperSettings>;
 
 export default meta;

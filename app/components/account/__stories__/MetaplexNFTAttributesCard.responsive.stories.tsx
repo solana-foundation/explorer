@@ -1,6 +1,6 @@
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 
 import { NormalMetaplexNFTAttributesCard } from '../MetaplexNFTAttributesCard';
 
@@ -28,7 +28,7 @@ const meta: Meta<typeof NormalMetaplexNFTAttributesCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/MetaplexNFTAttributesCard/Responsive',
+    title: 'Components/Account/MetaplexNFTAttributesCard@Media',
 };
 
 export default meta;

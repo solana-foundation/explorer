@@ -1,7 +1,7 @@
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { createNextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import { Suspense } from 'react';
 
 import { LoadingCard } from '@/app/components/common/LoadingCard';
@@ -46,7 +46,7 @@ const meta = {
     component: UpgradeableLoaderAccountSection,
     decorators: [withSuspense, withClusterAndAccounts, withTokenInfoBatch],
     parameters: createNextjsParameters({ query: { cluster: 'devnet' } }),
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/UpgradeableLoaderAccountSection',
 } satisfies Meta<typeof UpgradeableLoaderAccountSection>;
 

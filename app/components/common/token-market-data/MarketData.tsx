@@ -4,15 +4,15 @@ import { HelpCircle } from 'react-feather';
 
 import { abbreviatedNumber } from '@/app/utils';
 
-const dynamicVariant = cva('e-text-[10px] e-ml-[3px] e-flex e-items-center e-gap-[0.1rem] e-relative e-top-[-1px]', {
+const dynamicVariant = cva('text-[10px] ml-[3px] flex items-center gap-[0.1rem] relative top-[-1px]', {
     defaultVariants: {
         trend: 'neutral',
     },
     variants: {
         trend: {
-            down: 'e-text-[#F958FC]',
-            neutral: 'e-text-gray-400',
-            up: 'e-text-green-500',
+            down: 'text-[#F958FC]',
+            neutral: 'text-gray-400',
+            up: 'text-green-500',
         },
     },
 });
@@ -29,55 +29,55 @@ export function MarketData({ label, lastUpdatedAt, value, rank }: MarketDataProp
     return (
         <div
             aria-label="market-data"
-            className="e-w-full e-rounded e-border e-border-solid e-border-black e-bg-[#1C2120] e-px-3 e-py-2 e-text-sm md:e-w-[160px]"
+            className="w-full rounded border border-solid border-black bg-[#1C2120] px-3 py-2 text-sm md:w-[160px]"
         >
-            <div className="e-mb-1 e-flex e-items-center e-gap-2">
+            <div className="mb-1 flex items-center gap-2">
                 <span
                     title={lastUpdatedAt ? `Updated at ${displayTimestampWithoutDate(lastUpdatedAt.getTime())}` : label}
-                    className="e-overflow-hidden e-text-ellipsis e-whitespace-nowrap"
+                    className="overflow-hidden text-ellipsis whitespace-nowrap"
                 >
                     {label}
                 </span>
                 {(rank ?? 0) > 0 && (
-                    <span className="e-whitespace-nowrap e-rounded e-bg-[#1ED190] e-px-[5px] e-text-xs e-text-[#1C2120]">
+                    <span className="whitespace-nowrap rounded bg-[#1ED190] px-[5px] text-xs text-[#1C2120]">
                         Rank #{rank}
                     </span>
                 )}
                 {lastUpdatedAt && (
                     <span
                         title={`Updated at ${displayTimestampWithoutDate(lastUpdatedAt.getTime())}`}
-                        className="e-inline-flex"
+                        className="inline-flex"
                     >
-                        <HelpCircle size={12} className="e-text-gray-400" />
+                        <HelpCircle size={12} className="text-gray-400" />
                     </span>
                 )}
             </div>
             <div
                 title={lastUpdatedAt ? `Updated at ${displayTimestampWithoutDate(lastUpdatedAt.getTime())}` : undefined}
-                className="e-flex e-items-baseline e-overflow-hidden e-text-base e-font-medium"
+                className="flex items-baseline overflow-hidden text-base font-medium"
             >
                 {'volume' in value ? (
                     <span
                         title={`${Intl.NumberFormat('en-US', { currency: 'USD', style: 'currency' }).format(
                             value.volume,
                         )}`}
-                        className="e-cursor-help"
+                        className="cursor-help"
                     >
                         ${abbreviatedNumber(value.volume)}
                     </span>
                 ) : (
                     <>
-                        <span title={`$${value.price}`} className="e-cursor-help">
+                        <span title={`$${value.price}`} className="cursor-help">
                             ${value.price.toFixed(value.precision)}
                         </span>
                         <span className={dynamicVariant({ trend })}>
                             {trend === 'up' ? (
                                 <>
-                                    <span className="e-text-[8px]">&uarr;</span> {value.trend?.toFixed(2)}%
+                                    <span className="text-[8px]">&uarr;</span> {value.trend?.toFixed(2)}%
                                 </>
                             ) : trend === 'down' ? (
                                 <>
-                                    <span className="e-text-[8px]">&darr;</span> {value.trend?.toFixed(2)}%
+                                    <span className="text-[8px]">&darr;</span> {value.trend?.toFixed(2)}%
                                 </>
                             ) : (
                                 '0%'
@@ -99,7 +99,7 @@ function getDynamicTrend(dynamic?: number) {
 
 MarketData.Series = function MarketDataSeries({ data }: { data: MarketDataProps[] }) {
     return (
-        <div className="e-flex e-w-full e-flex-col e-gap-1 sm:e-gap-2 md:e-w-auto md:e-flex-row">
+        <div className="flex w-full flex-col gap-1 sm:gap-2 md:w-auto md:flex-row">
             {data.map((props, index) => (
                 <MarketData key={`market-data-${index}`} {...props} />
             ))}

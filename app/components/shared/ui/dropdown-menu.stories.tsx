@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { ChevronDown, Download, Edit, LogOut, Settings, Trash, User } from 'react-feather';
 import { expect, userEvent, within } from 'storybook/test';
 
@@ -23,8 +23,8 @@ import {
 
 const meta: Meta<typeof DropdownMenu> = {
     component: DropdownMenu,
-    tags: ['autodocs'],
-    title: 'Components/Shared/UI/DropdownMenu',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Shared/DropdownMenu',
 };
 
 export default meta;
@@ -128,7 +128,7 @@ export const WithGroups: Story = {
                     <ChevronDown size={14} />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="e-w-56">
+            <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
@@ -253,7 +253,7 @@ export const DisabledItems: Story = {
 
 export const AlignEnd: Story = {
     render: () => (
-        <div className="e-flex e-w-96 e-justify-end">
+        <div className="flex w-96 justify-end">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
@@ -289,6 +289,43 @@ export const OpenByDefault: Story = {
                 <DropdownMenuItem>Option 1</DropdownMenuItem>
                 <DropdownMenuItem>Option 2</DropdownMenuItem>
                 <DropdownMenuItem>Option 3</DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    ),
+};
+
+// inset (pl-8) on items/labels and disabled checkbox/radio items — no other story renders these
+export const InsetAndDisabledSelectionItems: Story = {
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        const trigger = canvas.getByRole('button', { hidden: true, name: /open menu/i });
+        expect(trigger).toHaveAttribute('data-state', 'open');
+    },
+    render: () => (
+        <DropdownMenu defaultOpen>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                    Open Menu
+                    <ChevronDown size={14} />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuLabel inset>Inset label</DropdownMenuLabel>
+                <DropdownMenuItem inset>Inset item</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem checked disabled>
+                    Disabled checked
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem disabled>Disabled unchecked</DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value="selected">
+                    <DropdownMenuRadioItem value="selected" disabled>
+                        Disabled selected
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="other" disabled>
+                        Disabled unselected
+                    </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
             </DropdownMenuContent>
         </DropdownMenu>
     ),

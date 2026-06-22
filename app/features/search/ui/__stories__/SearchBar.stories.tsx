@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, userEvent, within } from 'storybook/test';
 import { fn } from 'storybook/test';
 
@@ -21,7 +21,10 @@ const meta: Meta<typeof BaseSearch> = {
     args: defaultArgs,
     component: BaseSearch,
     parameters: {
-        layout: 'padded',
+        // The results panel is a floating Radix popover; inline it escapes the docs
+        // block and gets clipped. Render each story in its own sized iframe so the
+        // open-state dropdown is contained and visible in full per block.
+        docs: { story: { height: '440px', inline: false } },
     },
     tags: ['autodocs'],
     title: 'Features/Search/BaseSearch',
@@ -118,7 +121,6 @@ export const SelectResult: Story = {
         open: true,
         value: 'token',
     },
-    name: 'Select Result',
     play: async ({ canvasElement, args }) => {
         const canvas = within(canvasElement);
 
@@ -133,7 +135,6 @@ export const SelectResult: Story = {
 };
 
 export const KeyboardHint: Story = {
-    name: 'Keyboard Hint',
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
@@ -164,7 +165,6 @@ export const MultipleGroups: Story = {
         open: true,
         value: 'sol',
     },
-    name: 'Multiple Groups',
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 

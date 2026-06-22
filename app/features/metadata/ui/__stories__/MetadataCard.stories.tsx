@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import {
     getMockAccountWithNFTData,
@@ -21,7 +21,7 @@ const meta = {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Metadata/MetadataCard',
 } satisfies Meta<typeof MetadataCard>;
 

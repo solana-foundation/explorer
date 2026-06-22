@@ -1,11 +1,11 @@
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { type ParsedInstruction, PublicKey, type VersionedMessage } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -48,7 +48,7 @@ const meta: Meta<typeof InspectorInstructionCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/InspectorInstructionCard/Responsive',
+    title: 'Components/Common/InspectorInstructionCard@Media',
 };
 
 export default meta;

@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { createNextjsParameters, withClipboardMock, withCluster } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { Signature } from '../Signature';
@@ -10,7 +10,7 @@ const meta = {
     component: Signature,
     decorators: [withClipboardMock, withCluster],
     parameters: createNextjsParameters(),
-    tags: ['test'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/Signature',
 } satisfies Meta<typeof Signature>;
 

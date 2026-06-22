@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { NFTImageContent } from '../NFTArt';
 
 const meta = {
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/NFTArt',
 } satisfies Meta;
 

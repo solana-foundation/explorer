@@ -26,7 +26,7 @@ export function StatsNotReady({ error }: { error: boolean }) {
 
     if (error || !active) {
         return (
-            <CardBody ui="dashkit" className="e-text-center">
+            <CardBody ui="dashkit" className="text-center">
                 There was a problem loading cluster stats.{' '}
                 <Button
                     ui="dashkit"
@@ -36,7 +36,7 @@ export function StatsNotReady({ error }: { error: boolean }) {
                         retry();
                     }}
                 >
-                    <RefreshCw className="align-text-top e-mr-1.5" size={13} />
+                    <RefreshCw className="mr-1.5 align-text-top" size={13} />
                     Try Again
                 </Button>
             </CardBody>
@@ -44,8 +44,8 @@ export function StatsNotReady({ error }: { error: boolean }) {
     }
 
     return (
-        <CardBody ui="dashkit" className="e-text-center">
-            <span className="align-text-top spinner-grow spinner-grow-sm e-mr-1.5"></span>
+        <CardBody ui="dashkit" className="text-center">
+            <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
             Loading
         </CardBody>
     );

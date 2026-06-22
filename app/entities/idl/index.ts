@@ -14,6 +14,7 @@ export {
     getIdlVersion,
     type AnchorIdl,
     type CodamaIdl,
+    type IdlStandard,
     type SupportedIdl,
 } from './model/idl-version';
 export { isIdlProgramIdMismatch, isInteractiveIdlSupported } from './model/interactive-idl';

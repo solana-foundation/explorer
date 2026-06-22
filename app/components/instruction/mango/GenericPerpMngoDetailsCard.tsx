@@ -40,7 +40,7 @@ export function GenericPerpMngoDetailsCard(props: {
             {mangoPerpMarketConfig !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Perp market</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{mangoPerpMarketConfig.name}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{mangoPerpMarketConfig.name}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 

@@ -26,11 +26,11 @@ export function BlockRewardsCard({ block }: { block: VersionedBlockResponse }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Address</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Type</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Amount</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">New Balance</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Percent Change</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Address</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Type</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Amount</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">New Balance</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Percent Change</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>
@@ -70,7 +70,7 @@ export function BlockRewardsCard({ block }: { block: VersionedBlockResponse }) {
                     <Button
                         ui="dashkit"
                         variant="primary"
-                        className="e-w-full"
+                        className="w-full"
                         onClick={() => setRewardsDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More

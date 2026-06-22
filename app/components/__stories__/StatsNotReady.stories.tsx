@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withStats } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { StatsNotReady } from '../StatsNotReady';
 
@@ -7,7 +7,7 @@ const meta: Meta<typeof StatsNotReady> = {
     component: StatsNotReady,
     decorators: [withStats],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/StatsNotReady',
 };
 

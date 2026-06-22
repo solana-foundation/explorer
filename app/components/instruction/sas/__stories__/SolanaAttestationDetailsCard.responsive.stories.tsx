@@ -1,5 +1,5 @@
+import { gen } from '@__fixtures__/gen';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import {
     nextjsParameters,
     withCluster,
@@ -8,6 +8,7 @@ import {
     withTokenInfoBatch,
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SolanaAttestationDetailsCard } from '../SolanaAttestationDetailsCard';
 
@@ -16,9 +17,9 @@ import { SolanaAttestationDetailsCard } from '../SolanaAttestationDetailsCard';
 const sasIx = {
     data: Buffer.from([0, 0, 0, 0, 0, 0, 0, 0, 0]),
     keys: [
-        { isSigner: true, isWritable: true, pubkey: PublicKey.unique() },
-        { isSigner: false, isWritable: true, pubkey: PublicKey.unique() },
-        { isSigner: true, isWritable: false, pubkey: PublicKey.unique() },
+        { isSigner: true, isWritable: true, pubkey: gen.publicKey(1) },
+        { isSigner: false, isWritable: true, pubkey: gen.publicKey(2) },
+        { isSigner: true, isWritable: false, pubkey: gen.publicKey(3) },
         { isSigner: false, isWritable: false, pubkey: new PublicKey('11111111111111111111111111111111') },
     ],
     programId: new PublicKey('22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG'),
@@ -32,7 +33,7 @@ const meta: Meta<typeof SolanaAttestationDetailsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/SolanaAttestationDetailsCard/Responsive',
+    title: 'Components/Instruction/SolanaAttestationDetailsCard@Media',
 };
 
 export default meta;

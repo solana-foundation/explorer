@@ -1,13 +1,14 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import React from 'react';
 
-import { CardBody } from '@/app/shared/ui/Card';
+import { baseCardVariants, CardBody } from '@/app/shared/ui/Card';
 
-import { cn } from './utils';
+import { cnPrefixed } from './utils';
 
 export function ErrorCard({ className, message }: React.HTMLAttributes<unknown> & { message?: string }) {
     return (
-        <div className={cn('e-card', className)}>
-            <CardBody ui="dashkit" className="!e-p-1 e-text-center">
+        <div className={cnPrefixed(baseCardVariants({ ui: 'dashkit' }), className)}>
+            <CardBody ui="dashkit" className="!p-1 text-center">
                 {message || 'Error'}
             </CardBody>
         </div>

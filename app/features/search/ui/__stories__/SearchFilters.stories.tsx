@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
 import { FILTER_TABS } from '../../lib/filter-tabs';
@@ -10,7 +10,7 @@ const meta: Meta<typeof SearchFilters> = {
         tabs: FILTER_TABS,
     },
     component: SearchFilters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Search/SearchFilters',
 };
 

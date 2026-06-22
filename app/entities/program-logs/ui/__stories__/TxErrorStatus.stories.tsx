@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TxErrorStatus } from '../TxErrorStatus';
 
@@ -18,8 +18,8 @@ const meta = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
-    title: 'Entities/Program Logs/UI/TxErrorStatus',
+    tags: ['autodocs', 'test'],
+    title: 'Entities/Program Logs/TxErrorStatus',
 } satisfies Meta<typeof TxErrorStatus>;
 
 export default meta;

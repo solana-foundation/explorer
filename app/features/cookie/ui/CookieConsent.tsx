@@ -64,14 +64,14 @@ export function CookieConsent() {
     if (isEU) {
         return (
             <CookieCard>
-                <p className="e-m-0 e-text-base e-leading-relaxed e-text-white">
+                <p className="m-0 text-base leading-relaxed text-white">
                     This website uses cookies to offer you a better browsing experience. Find out more on{' '}
                     <PrivacyPolicyLink>how we use cookies</PrivacyPolicyLink>.
                 </p>
 
-                <div className="e-flex e-flex-row e-items-center e-justify-end e-gap-4">
+                <div className="flex flex-row items-center justify-end gap-4">
                     <button
-                        className="e-cursor-pointer e-border-none e-bg-transparent e-p-0 e-text-sm e-font-medium e-tracking-wider e-text-white e-transition-opacity hover:e-opacity-70"
+                        className="cursor-pointer border-none bg-transparent p-0 text-sm font-medium tracking-wider text-white transition-opacity hover:opacity-70"
                         onClick={() => handleConsent(EConsentStatus.Denied)}
                     >
                         OPT-OUT
@@ -79,7 +79,7 @@ export function CookieConsent() {
                     <Button
                         ui="dashkit"
                         variant="white"
-                        className="e-bg-transparent"
+                        className="bg-transparent"
                         onClick={() => handleConsent(EConsentStatus.Granted)}
                     >
                         ACCEPT
@@ -98,7 +98,7 @@ export function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {
             href={PRIVACY_POLICY_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="e-text-white e-underline e-transition-opacity hover:e-text-white hover:e-opacity-70"
+            className="text-white underline transition-opacity hover:text-white hover:opacity-70"
         >
             {children}
         </a>
@@ -109,7 +109,7 @@ export function CookieCard({ children, className }: { children: React.ReactNode;
     return (
         <div
             className={cn(
-                'e-fixed e-bottom-2.5 e-left-2.5 e-right-2.5 e-z-[1200] e-rounded-lg e-border e-border-slate-100 e-bg-black e-p-4 [border-style:solid] md:e-right-auto md:e-max-w-[400px]',
+                'fixed bottom-2.5 left-2.5 right-2.5 z-[1200] rounded-lg border border-slate-100 bg-black p-4 [border-style:solid] md:right-auto md:max-w-[400px]',
                 className,
             )}
         >

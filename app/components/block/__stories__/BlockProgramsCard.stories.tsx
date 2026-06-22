@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockProgramsCard } from '../BlockProgramsCard';
 
@@ -7,7 +7,7 @@ const meta: Meta<typeof BlockProgramsCard> = {
     component: BlockProgramsCard,
     decorators: [withCluster],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Block/BlockProgramsCard',
 };
 

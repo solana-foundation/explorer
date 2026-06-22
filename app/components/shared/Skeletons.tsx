@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { ReactElement } from 'react';
 
 import { Card, CardBody, CardHeader } from '@/app/shared/ui/Card';
@@ -11,7 +12,7 @@ type ColDef = {
 };
 
 export function TableRowSkeleton({
-    cols = [{ skeleton: 'e-h-4 e-w-36', td: 'e-w-full' }, { skeleton: 'e-h-4 e-w-20' }],
+    cols = [{ skeleton: 'h-4 w-36', td: 'w-full' }, { skeleton: 'h-4 w-20' }],
 }: {
     cols?: ColDef[];
 }) {
@@ -30,9 +31,9 @@ export function RichRowSkeleton() {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>
-                <Skeleton className="e-mb-2 e-h-3 e-w-3/5" />
-                <Skeleton className="e-mb-2 e-h-3 e-w-full" />
-                <Skeleton className="e-h-3 e-w-2/5" />
+                <Skeleton className="mb-2 h-3 w-3/5" />
+                <Skeleton className="mb-2 h-3 w-full" />
+                <Skeleton className="h-3 w-2/5" />
             </BaseTable.Cell>
         </BaseTable.Row>
     );
@@ -40,19 +41,19 @@ export function RichRowSkeleton() {
 
 export function SimpleCardSkeleton({ withTitle = false, title }: { withTitle?: boolean; title?: ReactElement }) {
     return (
-        <Card ui="dashkit" className="e-mb-3 e-w-full md:e-mb-6">
+        <Card ui="dashkit" className="mb-3 w-full md:mb-6">
             {withTitle && (
                 <CardHeader ui="dashkit">
-                    {/* Wrapper absorbs CardHeader's [&>:first-child]:e-flex-1 so Skeleton's e-w-40 isn't stretched to full width. */}
+                    {/* Wrapper absorbs CardHeader's [&>:first-child]:flex-1 so Skeleton's w-40 isn't stretched to full width. */}
                     <div>
-                        <Skeleton className="e-h-5 e-w-40" />
+                        <Skeleton className="h-5 w-40" />
                     </div>
                 </CardHeader>
             )}
             <CardBody ui="dashkit">
-                {title || <Skeleton className="e-h-5 e-w-3/5" />}
-                <Skeleton className="e-mb-2.5 e-mt-2 e-h-7 e-w-full" />
-                <Skeleton className="e-h-3 e-w-2/5" />
+                {title || <Skeleton className="h-5 w-3/5" />}
+                <Skeleton className="mb-2.5 mt-2 h-7 w-full" />
+                <Skeleton className="h-3 w-2/5" />
             </CardBody>
         </Card>
     );
@@ -62,9 +63,9 @@ export function RichListSkeleton({ rows = 2 }: { rows?: number }) {
     return (
         <Card ui="dashkit" flex="grow">
             <CardHeader ui="dashkit">
-                {/* Wrapper absorbs CardHeader's [&>:first-child]:e-flex-1 so Skeleton's e-w-40 isn't stretched to full width. */}
+                {/* Wrapper absorbs CardHeader's [&>:first-child]:flex-1 so Skeleton's w-40 isn't stretched to full width. */}
                 <div>
-                    <Skeleton className="e-h-5 e-w-40" />
+                    <Skeleton className="h-5 w-40" />
                 </div>
             </CardHeader>
             <BaseTable ui="dashkit" variant="card" nowrap>
@@ -82,9 +83,9 @@ export function StatsTableSkeleton({ rows = 8 }: { rows?: number }) {
     return (
         <Card ui="dashkit" flex="grow">
             <CardHeader ui="dashkit">
-                {/* Wrapper absorbs CardHeader's [&>:first-child]:e-flex-1 so Skeleton's e-w-40 isn't stretched to full width. */}
+                {/* Wrapper absorbs CardHeader's [&>:first-child]:flex-1 so Skeleton's w-40 isn't stretched to full width. */}
                 <div>
-                    <Skeleton className="e-h-5 e-w-40" />
+                    <Skeleton className="h-5 w-40" />
                 </div>
             </CardHeader>
             <BaseTable ui="dashkit" variant="card" nowrap>
@@ -102,14 +103,14 @@ export function TableCardSkeleton({ cols = 4, rows = 6 }: { cols?: number; rows?
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <Skeleton className="e-h-5 e-w-64" />
+                <Skeleton className="h-5 w-64" />
             </CardHeader>
             <BaseTable ui="dashkit">
                 <BaseTable.Head>
                     <BaseTable.Row>
                         {Array.from({ length: cols }).map((_, i) => (
                             <BaseTable.HeaderCell key={i}>
-                                <Skeleton className="e-h-4 e-w-1/2" />
+                                <Skeleton className="h-4 w-1/2" />
                             </BaseTable.HeaderCell>
                         ))}
                     </BaseTable.Row>
@@ -119,7 +120,7 @@ export function TableCardSkeleton({ cols = 4, rows = 6 }: { cols?: number; rows?
                         <BaseTable.Row key={i}>
                             {Array.from({ length: cols }).map((_, j) => (
                                 <BaseTable.Cell key={j}>
-                                    <Skeleton className="e-h-4 e-w-1/3" />
+                                    <Skeleton className="h-4 w-1/3" />
                                 </BaseTable.Cell>
                             ))}
                         </BaseTable.Row>
@@ -132,11 +133,11 @@ export function TableCardSkeleton({ cols = 4, rows = 6 }: { cols?: number; rows?
 
 function ImageSliderCardSkeleton() {
     return (
-        <div className="e-h-[200px] e-w-[250px] e-min-w-[250px]">
-            <Skeleton className="e-mb-3 e-h-[120px] e-w-full" />
-            <Skeleton className="e-mb-1 e-h-4 e-w-4/5" />
-            <Skeleton className="e-mb-1 e-h-3 e-w-full" />
-            <Skeleton className="e-h-3 e-w-3/4" />
+        <div className="h-[200px] w-[250px] min-w-[250px]">
+            <Skeleton className="mb-3 h-[120px] w-full" />
+            <Skeleton className="mb-1 h-4 w-4/5" />
+            <Skeleton className="mb-1 h-3 w-full" />
+            <Skeleton className="h-3 w-3/4" />
         </div>
     );
 }
@@ -145,11 +146,11 @@ export function ImageSliderSkeleton() {
     return (
         <Card ui="dashkit">
             <CardBody ui="dashkit">
-                <div className="e-mb-3 e-flex e-justify-between e-border-b e-border-gray-300 e-pb-2">
-                    <Skeleton className="e-h-5 e-w-80" />
-                    <Skeleton className="e-h-4 e-w-40" />
+                <div className="mb-3 flex justify-between border-b border-gray-300 pb-2">
+                    <Skeleton className="h-5 w-80" />
+                    <Skeleton className="h-4 w-40" />
                 </div>
-                <div className="e-flex e-gap-4 e-overflow-auto e-pb-3">
+                <div className="flex gap-4 overflow-auto pb-3">
                     <ImageSliderCardSkeleton />
                     <ImageSliderCardSkeleton />
                     <ImageSliderCardSkeleton />

@@ -1,9 +1,11 @@
 import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
-import type { Decorator, Parameters } from '@storybook/react';
 import React, { useLayoutEffect, useRef } from 'react';
 import { fn } from 'storybook/test';
+
+import { Card } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from './__mocks__/MockClusterProvider';
@@ -12,6 +14,7 @@ import { MockStatsProvider } from './__mocks__/MockStatsProvider';
 import { MockSupplyProvider } from './__mocks__/MockSupplyProvider';
 import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
 import { MockTransactionsProvider } from './__mocks__/MockTransactionsProvider';
+import type { Decorator, Parameters } from './types';
 
 const noopFetcher = async () => undefined;
 // MultipleAccountFetcher has private constructor params (nominal-typed) — no structural object matches.
@@ -77,16 +80,13 @@ export function withAccountsState(state: State): Decorator {
 export const withCardTableField: Decorator = Story => (
     <ClusterProvider>
         <MockAccountsProvider>
-            <div className="card">
-                <div className="table-responsive mb-0">
-                    <style>{`.card-table tbody tr:first-child td { border-top: none !important; }`}</style>
-                    <table className="table table-sm table-nowrap card-table">
-                        <tbody>
-                            <Story />
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <Card ui="dashkit">
+                <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
+                    <BaseTable.Body>
+                        <Story />
+                    </BaseTable.Body>
+                </BaseTable>
+            </Card>
         </MockAccountsProvider>
     </ClusterProvider>
 );

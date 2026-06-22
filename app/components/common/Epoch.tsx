@@ -11,7 +11,7 @@ type Props = {
 export function Epoch({ epoch, link }: Props) {
     const epochPath = useClusterPath({ pathname: `/epoch/${epoch}` });
     return (
-        <span className="e-font-mono">
+        <span className="font-mono">
             {link ? (
                 <Copyable text={epoch.toString()}>
                     <Link href={epochPath}>{epoch.toLocaleString('en-US')}</Link>

@@ -39,31 +39,31 @@ const NFTCard = ({ account, nft }: { account: Account; nft: NftokenTypes.NftAcco
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(nft.address)} alignRight raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(nft.authority)} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Holder</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(nft.holder)} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Delegate</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {nft.delegate ? <Address pubkey={new PublicKey(nft.delegate)} alignRight link /> : 'Not Delegated'}
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Collection</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {nft.collection ? (
                         <Address pubkey={new PublicKey(nft.collection)} alignRight link />
                     ) : (
@@ -80,7 +80,7 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
     // on success, and a logo + reason + "View original" link on failure — so there
     // is no need for a separate loading box or visibility toggling here.
     return (
-        <div className="mx-auto e-rounded-dk">
+        <div className="mx-auto rounded-dk">
             <ProxiedImage alt="nft" height={size} showOriginalLink uri={url} width={size} />
         </div>
     );
@@ -98,19 +98,19 @@ const CollectionCard = ({ account, collection }: { account: Account; collection:
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(collection.address)} alignRight raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(collection.authority)} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Number of NFTs</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Suspense fallback={<div>Loading...</div>}>
                         <NumNfts collection={collection.address} />
                     </Suspense>

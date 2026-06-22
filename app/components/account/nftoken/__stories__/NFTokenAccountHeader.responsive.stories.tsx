@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { NFTokenNFTHeader } from '../NFTokenAccountHeader';
 
@@ -20,7 +20,7 @@ const meta: Meta<typeof NFTokenNFTHeader> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/NFToken/NFTokenAccountHeader/Responsive',
+    title: 'Components/Account/NFToken/NFTokenAccountHeader@Media',
 };
 
 export default meta;

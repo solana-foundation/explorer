@@ -39,8 +39,8 @@ export function AddressFromLookupTableWithContext({
     const lookupTable = lookupTableInfo && lookupTableInfo[0];
     if (!lookupTable) {
         return (
-            <span className="e-text-dk-gray-700">
-                <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
+            <span className="text-dk-gray-700">
+                <span className="spinner-grow spinner-grow-sm mr-1.5"></span>
                 Loading
             </span>
         );
@@ -51,7 +51,7 @@ export function AddressFromLookupTableWithContext({
     } else {
         const pubkey = lookupTable.state.addresses[lookupTableIndex];
         return (
-            <div className="e-flex e-flex-col e-items-end">
+            <div className="flex flex-col items-end">
                 <Address pubkey={pubkey} link alignRight />
                 {hideInfo ? null : <AccountInfo pubkey={pubkey} />}
             </div>
@@ -69,7 +69,7 @@ export function AddressWithContext({
     hideInfo?: boolean;
 }) {
     return (
-        <div className="e-flex e-flex-col e-items-end">
+        <div className="flex flex-col items-end">
             <Address pubkey={pubkey} link alignRight />
             {hideInfo ? null : <AccountInfo pubkey={pubkey} validator={validator} />}
         </div>
@@ -92,24 +92,24 @@ function AccountInfo({ pubkey, validator }: { pubkey: PublicKey; validator?: Acc
     const account = info?.data;
     if (!account)
         return (
-            <span className="e-text-dk-gray-700">
-                <span className="spinner-grow spinner-grow-sm e-mr-1.5"></span>
+            <span className="text-dk-gray-700">
+                <span className="spinner-grow spinner-grow-sm mr-1.5"></span>
                 Loading
             </span>
         );
 
     const errorMessage = validator && validator(account);
-    if (errorMessage) return <span className="e-text-dk-warning-on-dark">{errorMessage}</span>;
+    if (errorMessage) return <span className="text-dk-warning-on-dark">{errorMessage}</span>;
 
     if (account.lamports === 0) {
-        return <span className="e-text-dk-gray-700">Account doesn&apos;t exist</span>;
+        return <span className="text-dk-gray-700">Account doesn&apos;t exist</span>;
     }
 
     const ownerAddress = account.owner.toBase58();
     const ownerLabel = addressLabel(ownerAddress, cluster);
 
     return (
-        <span className="e-text-dk-gray-700">
+        <span className="text-dk-gray-700">
             {`Owned by ${ownerLabel || ownerAddress}.`}
             {` Balance is ${lamportsToSolString(account.lamports)} SOL.`}
             {account.space !== undefined && ` Size is ${new Intl.NumberFormat('en-US').format(account.space)} byte(s).`}

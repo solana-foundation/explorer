@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseIdlAccounts } from '../BaseIdlAccounts';
 
@@ -11,7 +11,7 @@ const meta: Meta<typeof BaseIdlAccounts> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/BaseIdlAccounts/Responsive',
+    title: 'Features/IDL/Formatted IDL/BaseIdlAccounts@Media',
 };
 
 export default meta;

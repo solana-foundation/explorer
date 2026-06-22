@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseIdlConstants } from '../BaseIdlConstants';
 import { SearchHighlightProvider } from '../SearchHighlightContext';
@@ -13,7 +13,7 @@ const meta = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/BaseIdlConstants',
+    title: 'Features/IDL/Formatted IDL/BaseIdlConstants',
 } satisfies Meta<typeof BaseIdlConstants>;
 
 export default meta;

@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BottomLine } from '../BottomLine';
 
 const meta: Meta<typeof BottomLine> = {
     component: BottomLine,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Receipt/BottomLine',
 };
 

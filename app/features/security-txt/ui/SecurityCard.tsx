@@ -75,13 +75,13 @@ export function ProgramSecurityTxtCard({
     ) : null;
 
     return (
-        <Card ui="dashkit" className="e-overflow-hidden">
+        <Card ui="dashkit" className="overflow-hidden">
             <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit" className="e-mr-4 e-flex e-items-center e-gap-3">
+                <CardTitle as="h3" ui="dashkit" className="mr-4 flex items-center gap-3">
                     Security.txt
                     <SecurityTxtVersionBadge version={pmpSecurityTxt ? 'pmp' : 'neodyme'} />
                 </CardTitle>
-                <Button ui="dashkit" variant="white" size="sm" className="e-flex" asChild>
+                <Button ui="dashkit" variant="white" size="sm" className="flex" asChild>
                     <div>
                         <DownloadableButton
                             data={downloadData}
@@ -93,15 +93,15 @@ export function ProgramSecurityTxtCard({
                     </div>
                 </Button>
             </CardHeader>
-            <div className="e-px-6 e-py-4">
-                <small className="e-flex e-gap-1 e-text-dk-warning-on-dark">
-                    <AlertCircle size={16} className="e-mt-0.5" />
+            <div className="px-6 py-4">
+                <small className="flex gap-1 text-dk-warning-on-dark">
+                    <AlertCircle size={16} className="mt-0.5" />
                     Note that this is self-reported by the author of the program and might not be accurate
                 </small>
             </div>
             <ErrorBoundary
                 fallback={
-                    <CardBody ui="dashkit" className="e-text-center">
+                    <CardBody ui="dashkit" className="text-center">
                         Invalid security.txt
                     </CardBody>
                 }

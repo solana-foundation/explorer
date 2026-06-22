@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { mockAccountHistory, mockConfirmedSignatureInfo } from '@storybook-config/__fixtures__/account-history';
 import { nextjsParameters, withHistory } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TokenTransfersCard } from '../TokenTransfersCard';
 
@@ -21,7 +21,7 @@ const meta: Meta<typeof TokenTransfersCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/History/TokenTransfersCard/Responsive',
+    title: 'Components/Account/History/TokenTransfersCard@Media',
 };
 
 export default meta;

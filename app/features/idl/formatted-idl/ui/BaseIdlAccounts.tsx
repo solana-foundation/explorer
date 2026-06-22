@@ -11,15 +11,15 @@ export function BaseIdlAccounts({ data }: FormattedIdlDataView<'accounts'>) {
         <BaseTable ui="dashkit" variant="card" nowrap>
             <BaseTable.Head>
                 <BaseTable.Row>
-                    <BaseTable.HeaderCell className="e-text-neutral-500">Name</BaseTable.HeaderCell>
-                    <BaseTable.HeaderCell className="e-text-neutral-500">Fields</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="text-neutral-500">Name</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="text-neutral-500">Fields</BaseTable.HeaderCell>
                 </BaseTable.Row>
             </BaseTable.Head>
-            <BaseTable.Body className="e-font-mono e-text-xs">
+            <BaseTable.Body className="font-mono text-xs">
                 {data.map(acc => (
                     <BaseTable.Row key={acc.name}>
                         <BaseTable.Cell>
-                            <HighlightNode className="e-rounded e-py-0.5">{acc.name}</HighlightNode>
+                            <HighlightNode className="rounded py-0.5">{acc.name}</HighlightNode>
                             <BaseIdlDoc docs={acc.docs} />
                         </BaseTable.Cell>
                         <BaseTable.Cell>

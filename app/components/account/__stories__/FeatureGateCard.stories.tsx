@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { FeatureGateCard } from '../FeatureGateCard';
 
 const meta: Meta<typeof FeatureGateCard> = {
     component: FeatureGateCard,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/FeatureGateCard',
 };
 

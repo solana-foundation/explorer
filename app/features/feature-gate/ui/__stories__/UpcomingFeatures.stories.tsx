@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { UpcomingFeatures } from '../UpcomingFeatures';
 
@@ -7,7 +7,7 @@ const meta = {
     component: UpcomingFeatures,
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/UpcomingFeatures',
 } satisfies Meta<typeof UpcomingFeatures>;
 

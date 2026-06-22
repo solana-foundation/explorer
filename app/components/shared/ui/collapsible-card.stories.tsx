@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -16,11 +16,8 @@ const meta: Meta<typeof CollapsibleCard> = {
         },
     },
     component: CollapsibleCard,
-    parameters: {
-        layout: 'padded',
-    },
-    tags: ['autodocs'],
-    title: 'Components/Shared/UI/CollapsibleCard',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Shared/CollapsibleCard',
 };
 
 export default meta;
@@ -30,22 +27,22 @@ const SampleContent = () => (
     <BaseTable ui="dashkit" variant="card" nowrap>
         <BaseTable.Head>
             <BaseTable.Row>
-                <BaseTable.HeaderCell className="e-text-dk-gray-700">Name</BaseTable.HeaderCell>
-                <BaseTable.HeaderCell className="e-text-dk-gray-700">Value</BaseTable.HeaderCell>
+                <BaseTable.HeaderCell className="text-dk-gray-700">Name</BaseTable.HeaderCell>
+                <BaseTable.HeaderCell className="text-dk-gray-700">Value</BaseTable.HeaderCell>
             </BaseTable.Row>
         </BaseTable.Head>
         <BaseTable.Body>
             <BaseTable.Row>
                 <BaseTable.Cell>Account #1</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">Gzf3…k9Pq</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">Gzf3…k9Pq</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Account #2</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">5xRt…mN7v</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">5xRt…mN7v</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Account #3</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">BqWu…dL2j</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">BqWu…dL2j</BaseTable.Cell>
             </BaseTable.Row>
         </BaseTable.Body>
     </BaseTable>
@@ -75,7 +72,7 @@ export const WithHeaderButtons: Story = {
         <CollapsibleCard
             title="Account Input(s) (3)"
             headerButtons={
-                <Button ui="dashkit" variant="white" size="sm" className="e-mr-1.5 e-flex e-items-center">
+                <Button ui="dashkit" variant="white" size="sm" className="mr-1.5 flex items-center">
                     Raw
                 </Button>
             }
@@ -101,7 +98,7 @@ export const WithBadgeTitle: Story = {
             collapsible
             title={
                 <>
-                    <Badge ui="dashkit" variant="success" className="e-mr-1.5">
+                    <Badge ui="dashkit" variant="success" className="mr-1.5">
                         #1
                     </Badge>
                     Token Program: Transfer

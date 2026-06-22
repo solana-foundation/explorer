@@ -1,7 +1,7 @@
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import type { Meta, StoryObj } from '@storybook/react';
 import { withAutoFocusReleased } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withFixedContainer, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
 import { NicknameEditor } from '../NicknameEditor';
@@ -16,7 +16,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Nicknames/NicknameEditor/Responsive',
+    title: 'Features/Nicknames/NicknameEditor@Media',
 } satisfies Meta<typeof NicknameEditor>;
 
 export default meta;

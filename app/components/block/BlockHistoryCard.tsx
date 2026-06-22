@@ -2,9 +2,9 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
+import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
-import { cn } from '@shared/utils';
 import {
     ConfirmedTransactionMeta,
     PublicKey,
@@ -17,13 +17,12 @@ import { displayAddress } from '@utils/tx';
 import { pickClusterParams } from '@utils/url';
 import Link from 'next/link';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { createRef, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
-import useAsyncEffect from 'use-async-effect';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
-import { Dropdown, DropdownItem, DropdownMenu } from '@/app/components/shared/ui/dropdown';
+import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -218,7 +217,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
             {accountFilter !== null && (
                 <CardBody ui="dashkit">
                     Showing transactions which load account:
-                    <div className="e-ml-1.5 e-inline-block">
+                    <div className="ml-1.5 inline-block">
                         <Address pubkey={accountFilter} link />
                     </div>
                 </CardBody>
@@ -235,7 +234,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                     <BaseTable.Head>
                         <BaseTable.Row>
                             <BaseTable.HeaderCell
-                                className="e-cursor-pointer e-text-dk-gray-700"
+                                className="cursor-pointer text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.delete('sort');
@@ -246,12 +245,12 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             >
                                 #
                             </BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">
                                 Transaction Signature
                             </BaseTable.HeaderCell>
                             <BaseTable.HeaderCell
-                                className="e-cursor-pointer e-text-dk-gray-700"
+                                className="cursor-pointer text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'fee');
@@ -263,7 +262,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 Fee
                             </BaseTable.HeaderCell>
                             <BaseTable.HeaderCell
-                                className="e-cursor-pointer e-text-dk-gray-700"
+                                className="cursor-pointer text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'reservedCUs');
@@ -276,7 +275,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             </BaseTable.HeaderCell>
                             {showComputeUnits && (
                                 <BaseTable.HeaderCell
-                                    className="e-cursor-pointer e-text-dk-gray-700"
+                                    className="cursor-pointer text-dk-gray-700"
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'compute');
@@ -289,7 +288,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 </BaseTable.HeaderCell>
                             )}
                             <BaseTable.HeaderCell
-                                className="e-cursor-pointer e-text-dk-gray-700"
+                                className="cursor-pointer text-dk-gray-700"
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'txnCost');
@@ -300,7 +299,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                             >
                                 Txn Cost
                             </BaseTable.HeaderCell>
-                            <BaseTable.HeaderCell className="e-text-dk-gray-700">Invoked Programs</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Invoked Programs</BaseTable.HeaderCell>
                         </BaseTable.Row>
                     </BaseTable.Head>
                     <BaseTable.Body>
@@ -362,9 +361,9 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                             ? 'NA'
                                             : entries.map(([programId, count], i) => {
                                                   return (
-                                                      <div key={i} className="e-flex e-items-center">
+                                                      <div key={i} className="flex items-center">
                                                           <Address pubkey={new PublicKey(programId)} link />
-                                                          <span className="e-ml-1.5 e-text-dk-gray-700">{`(${count})`}</span>
+                                                          <span className="ml-1.5 text-dk-gray-700">{`(${count})`}</span>
                                                       </div>
                                                   );
                                               })}
@@ -381,7 +380,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                     <Button
                         ui="dashkit"
                         variant="primary"
-                        className="e-w-full"
+                        className="w-full"
                         onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)}
                     >
                         Load More
@@ -445,32 +444,14 @@ const FilterDropdown = ({ filter, invokedPrograms, totalTransactionCount }: Filt
         }
     });
 
-    const dropdownRef = createRef<HTMLButtonElement>();
-    useAsyncEffect(
-        async isMounted => {
-            if (!dropdownRef.current) {
-                return;
-            }
-            const Dropdown = (await import('bootstrap/js/dist/dropdown')).default;
-            if (!isMounted || !dropdownRef.current) {
-                return;
-            }
-            return new Dropdown(dropdownRef.current);
-        },
-        dropdown => {
-            if (dropdown) {
-                dropdown.dispose();
-            }
-        },
-        [dropdownRef],
-    );
-
     return (
-        <Dropdown className="e-mr-1.5">
-            <Button ui="dashkit" variant="white" size="sm" data-bs-toggle="dropdown" type="button" ref={dropdownRef}>
-                {currentFilterOption.name} <ChevronDown className="align-text-top" size={13} />
-            </Button>
-            <DropdownMenu align="end" className="e-max-h-80 e-overflow-y-auto">
+        <Dropdown className="mr-1.5">
+            <DropdownToggle asChild>
+                <Button ui="dashkit" variant="white" size="sm" type="button">
+                    {currentFilterOption.name} <ChevronDown className="align-text-top" size={13} />
+                </Button>
+            </DropdownToggle>
+            <DropdownMenu align="end" className="max-h-80 overflow-y-auto">
                 {filterOptions.map(({ name, programId, transactionCount }) => (
                     <FilterLink
                         currentFilter={filter}

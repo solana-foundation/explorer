@@ -1,12 +1,12 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseCard, BaseCardBody, BaseCardHeader, BaseCardTitle } from '../../Card';
 import { BaseTable } from '../BaseTable';
 
 const meta: Meta<typeof BaseTable> = {
     component: BaseTable,
-    tags: ['autodocs'],
-    title: 'Components/Shared/UI/Table/BaseTable',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Shared/Table/BaseTable',
 };
 
 export default meta;
@@ -120,7 +120,7 @@ export const DashkitCardInsideCard: Story = {
             <BaseCardHeader ui="dashkit">
                 <BaseCardTitle ui="dashkit">Top Accounts</BaseCardTitle>
             </BaseCardHeader>
-            <BaseCardBody ui="dashkit" className="e-p-0">
+            <BaseCardBody ui="dashkit" className="p-0">
                 <BaseTable {...args}>
                     <CardSampleRows />
                 </BaseTable>

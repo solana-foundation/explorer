@@ -1,7 +1,7 @@
+import { gen } from '@__fixtures__/gen';
 import { address } from '@solana/kit';
-import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { Cluster } from '@utils/cluster';
 
 import type { ActivatedFeature } from '../../lib/partition-features';
@@ -24,7 +24,7 @@ const activated: ActivatedFeature[] = [
     {
         ...baseFields,
         clusterActivationEpoch: 850,
-        key: address(PublicKey.unique().toBase58()),
+        key: address(gen.address(1)),
         otherActivations: [{ cluster: Cluster.Devnet, epoch: 700 }],
         simdEntries: [{ link: 'https://github.com/example', simd: '148' }],
         title: 'MoveStake and MoveLamports',
@@ -35,11 +35,10 @@ const meta: Meta<typeof FeatureGateTable<ActivatedFeature>> = {
     component: FeatureGateTable<ActivatedFeature>,
     decorators: [withViewportFromGlobal],
     parameters: {
-        layout: 'padded',
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/FeatureGate/FeatureGateTable/Responsive',
+    title: 'Features/FeatureGate/FeatureGateTable@Media',
 };
 
 export default meta;

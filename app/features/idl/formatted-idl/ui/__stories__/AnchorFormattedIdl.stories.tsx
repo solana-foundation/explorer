@@ -1,6 +1,6 @@
 import type { Idl } from '@coral-xyz/anchor';
 import idlMock from '@entities/idl/mocks/codama/whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc-idl.json';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { AnchorFormattedIdl } from '../AnchorFormattedIdl';
 
@@ -17,7 +17,7 @@ const meta = {
         },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/AnchorFormattedIdl',
+    title: 'Features/IDL/Formatted IDL/AnchorFormattedIdl',
 } satisfies Meta<typeof AnchorFormattedIdl>;
 
 export default meta;

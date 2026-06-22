@@ -1,9 +1,9 @@
 import { Account, type State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withAccountsState } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
@@ -51,7 +51,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/AttestationDataCard/Responsive',
+    title: 'Components/Account/AttestationDataCard@Media',
 } satisfies Meta<typeof AttestationDataCard>;
 
 export default meta;

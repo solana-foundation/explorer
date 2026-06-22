@@ -159,13 +159,13 @@ function FungibleTokenMintAccountCard({
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>{mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply'}</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     <span>
                         {normalizeTokenAmount(
                             Number(mintInfo.supply) * Number(scaledUiAmountMultiplier),
@@ -183,10 +183,10 @@ function FungibleTokenMintAccountCard({
             {tokenInfo?.extensions?.website && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Website</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         <a rel="noopener noreferrer" target="_blank" href={tokenInfo.extensions.website}>
                             {tokenInfo.extensions.website}
-                            <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                            <ExternalLink className="ml-1.5 align-text-top" size={13} />
                         </a>
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -194,7 +194,7 @@ function FungibleTokenMintAccountCard({
             {mintInfo.mintAuthority && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Mint Authority</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         <Address pubkey={mintInfo.mintAuthority} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -202,25 +202,25 @@ function FungibleTokenMintAccountCard({
             {mintInfo.freezeAuthority && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Freeze Authority</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         <Address pubkey={mintInfo.freezeAuthority} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
             )}
             <BaseTable.Row>
                 <BaseTable.Cell>Decimals</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">{mintInfo.decimals}</BaseTable.Cell>
+                <BaseTable.Cell className="md:text-right">{mintInfo.decimals}</BaseTable.Cell>
             </BaseTable.Row>
             {!mintInfo.isInitialized && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Status</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">Uninitialized</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">Uninitialized</BaseTable.Cell>
                 </BaseTable.Row>
             )}
             {tokenInfo?.extensions?.bridgeContract && bridgeContractAddress && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Bridge Contract</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         <Copyable text={bridgeContractAddress}>
                             <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
                                 {bridgeContractAddress}
@@ -232,7 +232,7 @@ function FungibleTokenMintAccountCard({
             {tokenInfo?.extensions?.assetContract && assetContractAddress && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Bridged Asset Contract</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         <Copyable text={assetContractAddress}>
                             <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
                                 {assetContractAddress}
@@ -275,26 +275,26 @@ function NonFungibleTokenMintAccountCard({
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Owner</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     <Address pubkey={account.owner} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             {maxSupply != null && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Max Total Supply</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">{maxSupply === 0 ? 1 : maxSupply}</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">{maxSupply === 0 ? 1 : maxSupply}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
             {nftData?.editionInfo.masterEdition != null && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Current Supply</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         {Number(nftData.editionInfo.masterEdition.supply) === 0
                             ? 1
                             : Number(nftData.editionInfo.masterEdition.supply)}
@@ -304,7 +304,7 @@ function NonFungibleTokenMintAccountCard({
             {collection?.verified && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Verified Collection Address</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         <Address pubkey={new PublicKey(collection.key.toString())} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -312,7 +312,7 @@ function NonFungibleTokenMintAccountCard({
             {mintInfo.mintAuthority && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Mint Authority</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         <Address pubkey={mintInfo.mintAuthority} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -320,24 +320,24 @@ function NonFungibleTokenMintAccountCard({
             {mintInfo.freezeAuthority && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Freeze Authority</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         <Address pubkey={mintInfo.freezeAuthority} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
             )}
             <BaseTable.Row>
                 <BaseTable.Cell>Update Authority</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     <Address pubkey={new PublicKey(nftData.metadata.updateAuthority.toString())} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             {nftData?.json && nftData.json.external_url && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Website</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         <a rel="noopener noreferrer" target="_blank" href={nftData.json.external_url}>
                             {nftData.json.external_url}
-                            <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                            <ExternalLink className="ml-1.5 align-text-top" size={13} />
                         </a>
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -345,7 +345,7 @@ function NonFungibleTokenMintAccountCard({
             {nftData?.metadata && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Seller Fee</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">{`${nftData.metadata.sellerFeeBasisPoints / 100}%`}</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">{`${nftData.metadata.sellerFeeBasisPoints / 100}%`}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
         </AccountCard>
@@ -371,7 +371,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     const balance = info.isNative ? (
         <>
             {'\u25ce'}
-            <span className="e-font-mono">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
+            <span className="font-mono">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
         </>
     ) : (
         <>{info.tokenAmount.uiAmountString}</>
@@ -394,31 +394,31 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
             {label && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Address Label</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">{label}</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">{label}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
             <BaseTable.Row>
                 <BaseTable.Cell>Mint</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     <Address pubkey={info.mint} alignRight link tokenLabelInfo={tokenInfo} />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Owner</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     <Address pubkey={info.owner} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Token balance {typeof symbol === 'string' && `(${symbol})`}</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     {balance}
                     <ScaledUiAmountMultiplierTooltip
                         rawAmount={normalizeTokenAmount(
@@ -431,15 +431,15 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Status</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     <StatusBadge status={info.state} />
                 </BaseTable.Cell>
             </BaseTable.Row>
             {info.rentExemptReserve && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Rent-exempt reserve (SOL)</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
-                        <span className="e-font-mono">
+                    <BaseTable.Cell className="md:text-right">
+                        <span className="font-mono">
                             ◎{new BigNumber(info.rentExemptReserve.uiAmountString).toFormat(9)}
                         </span>
                     </BaseTable.Cell>
@@ -449,17 +449,17 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                 <>
                     <BaseTable.Row>
                         <BaseTable.Cell>Delegate</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             <Address pubkey={info.delegate} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Delegated amount {typeof symbol === 'string' && `(${symbol})`}</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {info.isNative ? (
                                 <>
                                     {'\u25ce'}
-                                    <span className="e-font-mono">
+                                    <span className="font-mono">
                                         {new BigNumber(
                                             info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0',
                                         ).toFormat(9)}
@@ -491,22 +491,22 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">
+                <BaseTable.Cell className="md:text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Required Signers</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">{info.numRequiredSigners}</BaseTable.Cell>
+                <BaseTable.Cell className="md:text-right">{info.numRequiredSigners}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Valid Signers</BaseTable.Cell>
-                <BaseTable.Cell className="text-md-end">{info.numValidSigners}</BaseTable.Cell>
+                <BaseTable.Cell className="md:text-right">{info.numValidSigners}</BaseTable.Cell>
             </BaseTable.Row>
             {info.signers.map(signer => (
                 <BaseTable.Row key={signer.toString()}>
                     <BaseTable.Cell>Signer</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         <Address pubkey={signer} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -514,7 +514,7 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
             {!info.isInitialized && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Status</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">Uninitialized</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">Uninitialized</BaseTable.Cell>
                 </BaseTable.Row>
             )}
         </AccountCard>
@@ -561,7 +561,7 @@ function HHeader({ name }: { name: string }) {
     return (
         <BaseTable.Row>
             {/*use important here as there is rule from .table-sm that affects all the underline elements*/}
-            <BaseTable.HeaderCell colSpan={2} className="e-mb-2 !e-p-4 e-text-[15px] e-font-normal">
+            <BaseTable.HeaderCell colSpan={2} className="mb-2 !p-4 text-[15px] font-normal">
                 {name}
             </BaseTable.HeaderCell>
         </BaseTable.Row>
@@ -587,7 +587,7 @@ export function TokenExtensionRow(
                 return (
                     <BaseTable.Row>
                         <BaseTable.Cell>Close Authority</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             <Address pubkey={extension.closeAuthority} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>
@@ -601,7 +601,7 @@ export function TokenExtensionRow(
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>Withheld Amount {typeof symbol === 'string' && `(${symbol})`}</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         {normalizeTokenAmount(extension.withheldAmount, decimals).toLocaleString('en-US', {
                             maximumFractionDigits: 20,
                         })}
@@ -617,7 +617,7 @@ export function TokenExtensionRow(
                     {extension.transferFeeConfigAuthority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Transfer Fee Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.transferFeeConfigAuthority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -626,14 +626,14 @@ export function TokenExtensionRow(
                         <BaseTable.Cell>
                             {extension.newerTransferFee.epoch > epoch ? 'Current' : 'Previous'} Fee Epoch
                         </BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.olderTransferFee.epoch}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.olderTransferFee.epoch}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>
                             {extension.newerTransferFee.epoch > epoch ? 'Current' : 'Previous'} Maximum Fee{' '}
                             {typeof symbol === 'string' && `(${symbol})`}
                         </BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {normalizeTokenAmount(extension.olderTransferFee.maximumFee, decimals).toLocaleString(
                                 'en-US',
                                 {
@@ -646,20 +646,20 @@ export function TokenExtensionRow(
                         <BaseTable.Cell>
                             {extension.newerTransferFee.epoch > epoch ? 'Current' : 'Previous'} Fee Rate
                         </BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{`${extension.olderTransferFee.transferFeeBasisPoints / 100}%`}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{`${extension.olderTransferFee.transferFeeBasisPoints / 100}%`}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>
                             {extension.newerTransferFee.epoch > epoch ? 'Future' : 'Current'} Fee Epoch
                         </BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.newerTransferFee.epoch}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.newerTransferFee.epoch}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>
                             {extension.newerTransferFee.epoch > epoch ? 'Future' : 'Current'} Maximum Fee{' '}
                             {typeof symbol === 'string' && `(${symbol})`}
                         </BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {normalizeTokenAmount(extension.newerTransferFee.maximumFee, decimals).toLocaleString(
                                 'en-US',
                                 {
@@ -672,19 +672,19 @@ export function TokenExtensionRow(
                         <BaseTable.Cell>
                             {extension.newerTransferFee.epoch > epoch ? 'Future' : 'Current'} Fee Rate
                         </BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{`${extension.newerTransferFee.transferFeeBasisPoints / 100}%`}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{`${extension.newerTransferFee.transferFeeBasisPoints / 100}%`}</BaseTable.Cell>
                     </BaseTable.Row>
                     {extension.withdrawWithheldAuthority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Withdraw Withheld Fees Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.withdrawWithheldAuthority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
                     )}
                     <BaseTable.Row>
                         <BaseTable.Cell>Withheld Amount {typeof symbol === 'string' && `(${symbol})`}</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {normalizeTokenAmount(extension.withheldAmount, decimals).toLocaleString('en-US', {
                                 maximumFractionDigits: 20,
                             })}
@@ -701,7 +701,7 @@ export function TokenExtensionRow(
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.authority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -709,12 +709,12 @@ export function TokenExtensionRow(
                     {extension.auditorElgamalPubkey && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Auditor Elgamal Pubkey</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">{extension.auditorElgamalPubkey}</BaseTable.Cell>
+                            <BaseTable.Cell className="md:text-right">{extension.auditorElgamalPubkey}</BaseTable.Cell>
                         </BaseTable.Row>
                     )}
                     <BaseTable.Row>
                         <BaseTable.Cell>New Account Approval Policy</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {extension.autoApproveNewAccounts ? 'auto' : 'manual'}
                         </BaseTable.Cell>
                     </BaseTable.Row>
@@ -729,7 +729,7 @@ export function TokenExtensionRow(
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.authority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -737,14 +737,14 @@ export function TokenExtensionRow(
                     {extension.withdrawWithheldAuthorityElgamalPubkey && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Auditor Elgamal Pubkey</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 {extension.withdrawWithheldAuthorityElgamalPubkey}
                             </BaseTable.Cell>
                         </BaseTable.Row>
                     )}
                     <BaseTable.Row>
                         <BaseTable.Cell>Harvest to Mint</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {extension.harvestToMintEnabled ? 'enabled' : 'disabled'}
                         </BaseTable.Cell>
                     </BaseTable.Row>
@@ -752,7 +752,7 @@ export function TokenExtensionRow(
                         <BaseTable.Cell>
                             Encrypted Withheld Amount {typeof symbol === 'string' && `(${symbol})`}
                         </BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.withheldAmount}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.withheldAmount}</BaseTable.Cell>
                     </BaseTable.Row>
                 </>
             );
@@ -762,7 +762,7 @@ export function TokenExtensionRow(
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>DefaultAccountState</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">{extension.accountState}</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">{extension.accountState}</BaseTable.Cell>
                 </BaseTable.Row>
             );
         }
@@ -770,7 +770,7 @@ export function TokenExtensionRow(
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>Non-Transferable</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">enabled</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">enabled</BaseTable.Cell>
                 </BaseTable.Row>
             );
         }
@@ -782,28 +782,28 @@ export function TokenExtensionRow(
                     {extension.rateAuthority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.rateAuthority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
                     )}
                     <BaseTable.Row>
                         <BaseTable.Cell>Current Rate</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{`${extension.currentRate / 100}%`}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{`${extension.currentRate / 100}%`}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Pre-Current Average Rate</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{`${extension.preUpdateAverageRate / 100}%`}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{`${extension.preUpdateAverageRate / 100}%`}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Last Update Timestamp</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {displayTimestamp(extension.lastUpdateTimestamp * 1000)}
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Initialization Timestamp</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {displayTimestamp(extension.initializationTimestamp * 1000)}
                         </BaseTable.Cell>
                     </BaseTable.Row>
@@ -818,22 +818,22 @@ export function TokenExtensionRow(
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.authority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
                     )}
                     <BaseTable.Row>
                         <BaseTable.Cell>Multiplier</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.multiplier}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.multiplier}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>New Multiplier</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.newMultiplier}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.newMultiplier}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>New Multiplier Effective Timestamp</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {displayTimestamp(extension.newMultiplierEffectiveTimestamp * 1000)}
                         </BaseTable.Cell>
                     </BaseTable.Row>
@@ -844,7 +844,7 @@ export function TokenExtensionRow(
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>Pausable Account</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">enabled</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">enabled</BaseTable.Cell>
                 </BaseTable.Row>
             );
         }
@@ -857,14 +857,14 @@ export function TokenExtensionRow(
                         {extension.authority && (
                             <BaseTable.Row>
                                 <BaseTable.Cell>Authority</BaseTable.Cell>
-                                <BaseTable.Cell className="text-md-end">
+                                <BaseTable.Cell className="md:text-right">
                                     <Address pubkey={extension.authority} alignRight link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         <BaseTable.Row>
                             <BaseTable.Cell>Paused</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 {extension.paused ? 'paused' : 'not paused'}
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -878,7 +878,7 @@ export function TokenExtensionRow(
                 return (
                     <BaseTable.Row>
                         <BaseTable.Cell>Permanent Delegate</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             <Address pubkey={extension.delegate} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>
@@ -894,7 +894,7 @@ export function TokenExtensionRow(
                     {extension.programId && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Transfer Hook Program Id</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.programId} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -902,7 +902,7 @@ export function TokenExtensionRow(
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Transfer Hook Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.authority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -917,7 +917,7 @@ export function TokenExtensionRow(
                     {extension.metadataAddress && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Metadata</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.metadataAddress} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -925,7 +925,7 @@ export function TokenExtensionRow(
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Metadata Pointer Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.authority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -940,7 +940,7 @@ export function TokenExtensionRow(
                     {extension.groupAddress && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Token Group</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.groupAddress} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -948,7 +948,7 @@ export function TokenExtensionRow(
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Group Pointer Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.authority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -963,7 +963,7 @@ export function TokenExtensionRow(
                     {extension.memberAddress && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Token Group Member</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.memberAddress} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -971,7 +971,7 @@ export function TokenExtensionRow(
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Member Pointer Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.authority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
@@ -986,33 +986,33 @@ export function TokenExtensionRow(
                     {headerStyle === 'header' ? <HHeader name="Metadata" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Mint</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             <Address pubkey={extension.mint} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     {extension.updateAuthority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Update Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.updateAuthority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
                     )}
                     <BaseTable.Row>
                         <BaseTable.Cell>Name</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.name}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.name}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Symbol</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.symbol}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.symbol}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>URI</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {extension.uri.startsWith('http') ? (
                                 <a rel="noopener noreferrer" target="_blank" href={extension.uri}>
                                     {extension.uri}
-                                    <ExternalLink className="align-text-top e-ml-1.5" size={13} />
+                                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
                                 </a>
                             ) : (
                                 extension.uri
@@ -1023,17 +1023,14 @@ export function TokenExtensionRow(
                         <>
                             <BaseTable.Row>
                                 {/*use important here as there is rule from .table-sm that affects all the underline elements*/}
-                                <BaseTable.HeaderCell
-                                    colSpan={2}
-                                    className="e-mb-2 e-h-5 !e-pl-6 e-font-normal e-italic"
-                                >
+                                <BaseTable.HeaderCell colSpan={2} className="mb-2 h-5 !pl-6 font-normal italic">
                                     Additional Metadata
                                 </BaseTable.HeaderCell>
                             </BaseTable.Row>
                             {extension.additionalMetadata?.map(keyValuePair => (
                                 <BaseTable.Row key="{keyValuePair[0]}">
                                     <BaseTable.Cell>{keyValuePair[0]}</BaseTable.Cell>
-                                    <BaseTable.Cell className="text-md-end">{keyValuePair[1]}</BaseTable.Cell>
+                                    <BaseTable.Cell className="md:text-right">{keyValuePair[1]}</BaseTable.Cell>
                                 </BaseTable.Row>
                             ))}
                         </>
@@ -1046,7 +1043,7 @@ export function TokenExtensionRow(
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>CPI Guard</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         {extension.lockCpi ? 'enabled' : 'disabled'}
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -1059,59 +1056,65 @@ export function TokenExtensionRow(
                     {headerStyle === 'header' ? <HHeader name="Confidential Transfer" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Status</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{!extension.approved && 'not '}approved</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">
+                            {!extension.approved && 'not '}approved
+                        </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Elgamal Pubkey</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.elgamalPubkey}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.elgamalPubkey}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Confidential Credits</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {extension.allowConfidentialCredits ? 'enabled' : 'disabled'}
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Non-confidential Credits</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {extension.allowNonConfidentialCredits ? 'enabled' : 'disabled'}
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Available Balance</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.availableBalance}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.availableBalance}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Decryptable Available Balance</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.decryptableAvailableBalance}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">
+                            {extension.decryptableAvailableBalance}
+                        </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Pending Balance, Low Bits</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.pendingBalanceLo}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.pendingBalanceLo}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Pending Balance, High Bits</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.pendingBalanceHi}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.pendingBalanceHi}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Pending Balance Credit Counter</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.pendingBalanceCreditCounter}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">
+                            {extension.pendingBalanceCreditCounter}
+                        </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Expected Pending Balance Credit Counter</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {extension.expectedPendingBalanceCreditCounter}
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Actual Pending Balance Credit Counter</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {extension.actualPendingBalanceCreditCounter}
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Maximum Pending Balance Credit Counter</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             {extension.maximumPendingBalanceCreditCounter}
                         </BaseTable.Cell>
                     </BaseTable.Row>
@@ -1122,7 +1125,7 @@ export function TokenExtensionRow(
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>Immutable Owner</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">enabled</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">enabled</BaseTable.Cell>
                 </BaseTable.Row>
             );
         }
@@ -1131,7 +1134,7 @@ export function TokenExtensionRow(
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>Require Memo on Incoming Transfers</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         {extension.requireIncomingTransferMemos ? 'enabled' : 'disabled'}
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -1142,7 +1145,7 @@ export function TokenExtensionRow(
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>Transfer Hook Status</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">
+                    <BaseTable.Cell className="md:text-right">
                         {!extension.transferring && 'not '}transferring
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -1152,7 +1155,7 @@ export function TokenExtensionRow(
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>Non-Transferable</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">enabled</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">enabled</BaseTable.Cell>
                 </BaseTable.Row>
             );
         }
@@ -1163,7 +1166,7 @@ export function TokenExtensionRow(
                     <BaseTable.Cell>
                         Encrypted Withheld Amount {typeof symbol === 'string' && `(${symbol})`}
                     </BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">{extension.withheldAmount}</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">{extension.withheldAmount}</BaseTable.Cell>
                 </BaseTable.Row>
             );
         }
@@ -1174,25 +1177,25 @@ export function TokenExtensionRow(
                     {headerStyle === 'header' ? <HHeader name="Group" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Mint</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             <Address pubkey={extension.mint} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     {extension.updateAuthority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Update Authority</BaseTable.Cell>
-                            <BaseTable.Cell className="text-md-end">
+                            <BaseTable.Cell className="md:text-right">
                                 <Address pubkey={extension.updateAuthority} alignRight link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
                     )}
                     <BaseTable.Row>
                         <BaseTable.Cell>Current Size</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.size}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.size}</BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Max Size</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.maxSize}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.maxSize}</BaseTable.Cell>
                     </BaseTable.Row>
                 </>
             );
@@ -1204,19 +1207,19 @@ export function TokenExtensionRow(
                     {headerStyle === 'header' ? <HHeader name="Group Member" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Mint</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             <Address pubkey={extension.mint} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Group</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">
+                        <BaseTable.Cell className="md:text-right">
                             <Address pubkey={extension.group} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Member Number</BaseTable.Cell>
-                        <BaseTable.Cell className="text-md-end">{extension.memberNumber}</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">{extension.memberNumber}</BaseTable.Cell>
                     </BaseTable.Row>
                 </>
             );
@@ -1226,7 +1229,7 @@ export function TokenExtensionRow(
             return (
                 <BaseTable.Row>
                     <BaseTable.Cell>Unknown Extension</BaseTable.Cell>
-                    <BaseTable.Cell className="text-md-end">unparseable</BaseTable.Cell>
+                    <BaseTable.Cell className="md:text-right">unparseable</BaseTable.Cell>
                 </BaseTable.Row>
             );
     }

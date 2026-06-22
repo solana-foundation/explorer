@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { VotesCard } from '../VotesCard';
 
@@ -14,7 +14,7 @@ const meta: Meta<typeof VotesCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/VotesCard/Responsive',
+    title: 'Components/Account/VotesCard@Media',
 };
 
 export default meta;

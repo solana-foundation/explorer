@@ -96,7 +96,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={ED25519_PROGRAM_ID} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -122,14 +122,14 @@ export function Ed25519DetailsCard(props: DetailsProps) {
 
                 return (
                     <React.Fragment key={index}>
-                        <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
-                            <BaseTable.Cell colSpan={2} className="text-lg-start" align="left">
+                        <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                            <BaseTable.Cell colSpan={2} className="lg:text-left" align="left">
                                 Signature #{index + 1}
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell>Signature Reference</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 {offset.signatureInstructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX
                                     ? 'This instruction'
                                     : `Instruction ${offset.signatureInstructionIndex}`}
@@ -139,10 +139,10 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell>Signature</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 {signature ? (
                                     <Copyable text={toBase64(signature)}>
-                                        <span className="e-font-mono">{toBase64(signature)}</span>
+                                        <span className="font-mono">{toBase64(signature)}</span>
                                     </Copyable>
                                 ) : (
                                     'Invalid reference'
@@ -151,7 +151,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell>Public Key Reference</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 {offset.publicKeyInstructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX
                                     ? 'This instruction'
                                     : `Instruction ${offset.publicKeyInstructionIndex}`}
@@ -161,7 +161,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell>Public Key</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 {pubkey ? (
                                     <Address pubkey={new PublicKey(pubkey)} alignRight link />
                                 ) : (
@@ -171,7 +171,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                         </BaseTable.Row>
                         <BaseTable.Row>
                             <BaseTable.Cell>Message Reference</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right">
+                            <BaseTable.Cell className="text-right">
                                 {offset.messageInstructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX
                                     ? 'This instruction'
                                     : `Instruction ${offset.messageInstructionIndex}`}
@@ -182,7 +182,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                         <BaseTable.Row>
                             <BaseTable.Cell>Message</BaseTable.Cell>
                             <BaseTable.Cell
-                                className="e-text-right"
+                                className="text-right"
                                 style={{
                                     fontSize: '0.85rem',
                                     lineHeight: '1.2',
@@ -194,7 +194,7 @@ export function Ed25519DetailsCard(props: DetailsProps) {
                             >
                                 {message ? (
                                     <Copyable text={toBase64(message)}>
-                                        <span className="e-font-mono">{toBase64(message)}</span>
+                                        <span className="font-mono">{toBase64(message)}</span>
                                     </Copyable>
                                 ) : (
                                     'Invalid reference'

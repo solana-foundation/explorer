@@ -4,9 +4,10 @@
  * pulled into every story via the main decorators.tsx.
  */
 import { Connection } from '@solana/web3.js';
-import type { Decorator, StoryContext } from '@storybook/react';
 import React from 'react';
 import { INITIAL_VIEWPORTS, type InitialViewportKeys } from 'storybook/viewport';
+
+import type { Decorator, StoryContext } from './types';
 
 const stubbedUndefined = async () => undefined;
 const stubbedNumber = async () => 0;
@@ -93,7 +94,7 @@ export const withFixedContainer: Decorator = (Story, context) => {
     if (context.viewMode !== 'docs') return <Story />;
     const styles = getViewportStyles(context, 'iphonex');
     return (
-        <div className="e-relative e-w-full" style={{ height: styles?.height, transform: 'translateZ(0)' }}>
+        <div className="relative w-full" style={{ height: styles?.height, transform: 'translateZ(0)' }}>
             <Story />
         </div>
     );

@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCardTableField } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -23,7 +23,7 @@ const meta: Meta<typeof BaseRawParsedDetails> = {
     component: BaseRawParsedDetails,
     decorators: [withCardTableField],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/BaseRawParsedDetails',
 };
 
@@ -39,7 +39,7 @@ export const WithChildRow: Story = {
         children: (
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">System</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">System</BaseTable.Cell>
             </BaseTable.Row>
         ),
         ix: sampleIx,

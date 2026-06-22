@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { nextjsParameters, withCluster } from '../../../.storybook/decorators';
 import { Footer } from '../Footer';
@@ -12,7 +12,7 @@ const meta: Meta<typeof Footer> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Layout/Footer/Responsive',
+    title: 'Components/Layout/Footer@Media',
 };
 
 export default meta;

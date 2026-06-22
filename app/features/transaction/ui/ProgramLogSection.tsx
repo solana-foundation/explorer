@@ -8,7 +8,7 @@ import { parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { BaseCardBody } from '@/app/shared/ui/Card';
+import { BaseCardBody, Card } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { CollapsibleSection } from './CollapsibleSection';
@@ -19,7 +19,7 @@ export function Chip({ children, className, active, ...props }: ChipProps) {
         <Button
             variant={active ? 'default' : 'outline'}
             size="sm"
-            className={cn(active && '!e-border-accent', className)}
+            className={cn(active && '!border-accent', className)}
             {...props}
         >
             {children}
@@ -57,7 +57,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
 
     return (
         <CollapsibleSection title="Logs" actions={chips} className="">
-            <div className="e-card">
+            <Card ui="dashkit">
                 {prettyLogs !== null && logMessages !== null ? (
                     showRaw ? (
                         <RawProgramLogs raw={logMessages} />
@@ -65,11 +65,9 @@ export function ProgramLogSection({ signature }: SignatureProps) {
                         <ProgramLogsCardBody message={message} logs={prettyLogs} cluster={cluster} url={url} />
                     )
                 ) : (
-                    <BaseCardBody className="e-text-sm e-text-muted">
-                        Logs not supported for this transaction
-                    </BaseCardBody>
+                    <BaseCardBody className="text-sm text-muted">Logs not supported for this transaction</BaseCardBody>
                 )}
-            </div>
+            </Card>
         </CollapsibleSection>
     );
 }
@@ -79,7 +77,7 @@ const RawProgramLogs = ({ raw }: { raw: string[] }) => {
         <TableCardBody>
             <BaseTable.Row>
                 <BaseTable.Cell>
-                    <pre className="e-text-left">{JSON.stringify(raw, null, 2)}</pre>
+                    <pre className="text-left">{JSON.stringify(raw, null, 2)}</pre>
                 </BaseTable.Cell>
             </BaseTable.Row>
         </TableCardBody>

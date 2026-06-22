@@ -1,8 +1,8 @@
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { AnchorAccountCard } from '../AnchorAccountCard';
 
@@ -23,7 +23,7 @@ const meta: Meta<typeof AnchorAccountCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/AnchorAccountCard/Responsive',
+    title: 'Components/Account/AnchorAccountCard@Media',
 };
 
 export default meta;

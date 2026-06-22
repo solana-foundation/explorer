@@ -64,7 +64,7 @@ export function PlacePerpOrder2DetailsCard(props: {
             {mangoPerpMarketConfig !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Perp market</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{mangoPerpMarketConfig.name}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{mangoPerpMarketConfig.name}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
             <BaseTable.Row>
@@ -76,37 +76,37 @@ export function PlacePerpOrder2DetailsCard(props: {
             {info.clientOrderId !== '0' && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Client order Id</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{info.clientOrderId}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.clientOrderId}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
             <BaseTable.Row>
                 <BaseTable.Cell>Order type</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.orderType}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.orderType}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Side</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.side}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.side}</BaseTable.Cell>
             </BaseTable.Row>
             {orderLotDetails !== null && (
                 <BaseTable.Row>
                     <BaseTable.Cell>price</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{orderLotDetails?.price} USDC</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{orderLotDetails?.price} USDC</BaseTable.Cell>
                 </BaseTable.Row>
             )}
             {orderLotDetails !== null && (
                 <BaseTable.Row>
                     <BaseTable.Cell>quantity</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{orderLotDetails?.size}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{orderLotDetails?.size}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
             <BaseTable.Row>
                 <BaseTable.Cell>Reduce only</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.reduceOnly}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.reduceOnly}</BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Expiry timestamp</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.expiryTimestamp}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.expiryTimestamp}</BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>
     );

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 import { Download } from 'react-feather';
 import { expect, fn, userEvent, within } from 'storybook/test';

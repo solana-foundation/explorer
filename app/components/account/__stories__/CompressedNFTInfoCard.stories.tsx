@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { CompressedNft, CompressedNftProof } from '@/app/providers/compressed-nft';
 
@@ -44,7 +44,7 @@ const meta = {
     component: DasCompressionInfoCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/CompressedNFTInfoCard',
 } satisfies Meta<typeof DasCompressionInfoCard>;
 

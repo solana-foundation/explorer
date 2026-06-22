@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
 import { EVerificationSource, type VerificationSource } from '../../lib/types';
@@ -30,7 +30,7 @@ const rugcheckWarning: VerificationSource = {
 const meta: Meta<typeof TokenVerificationButton> = {
     args: { isOpen: false, onClick: fn() },
     component: TokenVerificationButton,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/TokenVerificationBadge/TokenVerificationButton',
 };
 

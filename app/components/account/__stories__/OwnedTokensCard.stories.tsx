@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import {
     DispatchContext as TokensDispatch,
     type State as TokensState,
@@ -5,10 +6,10 @@ import {
 } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
 import { OwnedTokensCard } from '../OwnedTokensCard';
@@ -68,7 +69,7 @@ const sampleTokensWithLogosEntry = {
                 },
                 // Empty logoURI on one row exercises the placeholder branch alongside the img branch.
                 name: 'Wrapped SOL',
-                pubkey: PublicKey.unique(),
+                pubkey: gen.publicKey(2),
                 symbol: 'wSOL',
             },
         ],

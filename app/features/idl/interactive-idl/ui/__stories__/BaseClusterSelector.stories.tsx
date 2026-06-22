@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
 import { BaseClusterSelector } from '../BaseClusterSelector';
@@ -16,11 +16,8 @@ const meta: Meta<typeof BaseClusterSelector> = {
             </div>
         ),
     ],
-    parameters: {
-        layout: 'padded',
-    },
-    tags: ['autodocs'],
-    title: 'Features/IDL/Interactive IDL/UI/BaseClusterSelector',
+    tags: ['autodocs', 'test'],
+    title: 'Features/IDL/Interactive IDL/BaseClusterSelector',
 };
 
 export default meta;

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -27,8 +27,7 @@ const TableRowDecorator = (Story: () => React.ReactNode) => (
 );
 
 const meta = {
-    parameters: { layout: 'padded' },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/SecurityTxt/Common',
 } satisfies Meta;
 

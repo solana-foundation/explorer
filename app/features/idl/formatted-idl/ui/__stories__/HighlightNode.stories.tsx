@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { HighlightNode } from '../HighlightNode';
 import { SearchHighlightProvider } from '../SearchHighlightContext';
@@ -13,7 +13,7 @@ const meta = {
         ),
     ],
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/HighlightNode',
+    title: 'Features/IDL/Formatted IDL/HighlightNode',
 } satisfies Meta<typeof HighlightNode & { searchStr?: string }>;
 
 export default meta;

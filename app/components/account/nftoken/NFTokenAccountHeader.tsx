@@ -32,8 +32,8 @@ export function NFTokenAccountHeader({ account }: { account: Account }) {
 
     return (
         <>
-            <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Details</h6>
-            <h2 className="e-mb-0">Account</h2>
+            <h6 className="uppercase tracking-[0.08em] text-dk-gray-700">Details</h6>
+            <h2 className="mb-0">Account</h2>
         </>
     );
 }
@@ -42,21 +42,21 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
     const { data: metadata } = useNftokenMetadata(nft.metadata_url);
 
     return (
-        <div className="-e-mx-3 e-flex e-flex-wrap">
-            <div className="e-ml-1.5 e-flex e-flex-none e-items-center e-px-3">
+        <div className="-mx-3 flex flex-wrap">
+            <div className="ml-1.5 flex flex-none items-center px-3">
                 <NFTImageContent uri={metadata?.image.trim()} />
             </div>
 
-            <div className="e-mb-3 e-mt-3 e-min-w-0 e-flex-1 e-px-3">
-                {<h6 className="e-ml-[3px] e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">NFToken NFT</h6>}
-                <div className="e-flex e-items-center">
-                    <h2 className="e-mb-0 e-ml-[3px] e-items-center e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
+            <div className="mb-3 mt-3 min-w-0 flex-1 px-3">
+                {<h6 className="ml-[3px] uppercase tracking-[0.08em] text-dk-gray-700">NFToken NFT</h6>}
+                <div className="flex items-center">
+                    <h2 className="mb-0 ml-[3px] items-center overflow-hidden text-ellipsis whitespace-nowrap">
                         {metadata ? metadata.name || 'No NFT name was found' : 'Loading...'}
                     </h2>
                 </div>
 
                 <div>
-                    <div className="e-mt-1.5 e-inline-flex e-items-center">
+                    <div className="mt-1.5 inline-flex items-center">
                         <Badge ui="dashkit" variant="dark" tone="solid">
                             {nft.authority_can_update ? 'Mutable' : 'Immutable'}
                         </Badge>
@@ -80,21 +80,21 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
     const { data: metadata } = useNftokenMetadata(collection.metadata_url);
 
     return (
-        <div className="-e-mx-3 e-flex e-flex-wrap">
-            <div className="e-ml-1.5 e-flex e-flex-none e-items-center e-px-3">
+        <div className="-mx-3 flex flex-wrap">
+            <div className="ml-1.5 flex flex-none items-center px-3">
                 <NFTImageContent uri={metadata?.image} />
             </div>
 
-            <div className="e-mb-3 e-mt-3 e-min-w-0 e-flex-1 e-px-3">
-                {<h6 className="e-ml-[3px] e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">NFToken Collection</h6>}
-                <div className="e-flex e-items-center">
-                    <h2 className="e-mb-0 e-ml-[3px] e-items-center e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
+            <div className="mb-3 mt-3 min-w-0 flex-1 px-3">
+                {<h6 className="ml-[3px] uppercase tracking-[0.08em] text-dk-gray-700">NFToken Collection</h6>}
+                <div className="flex items-center">
+                    <h2 className="mb-0 ml-[3px] items-center overflow-hidden text-ellipsis whitespace-nowrap">
                         {metadata ? metadata.name || 'No collection name was found' : 'Loading...'}
                     </h2>
                 </div>
 
                 <div>
-                    <div className="e-mt-1.5 e-inline-flex e-items-center">
+                    <div className="mt-1.5 inline-flex items-center">
                         <Badge ui="dashkit" variant="dark" tone="solid">
                             {collection.authority_can_update ? 'Mutable' : 'Immutable'}
                         </Badge>

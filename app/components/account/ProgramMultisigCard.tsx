@@ -50,20 +50,20 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit" className="e-flex e-items-center">
+                <CardTitle as="h3" ui="dashkit" className="flex items-center">
                     Upgrade Authority Multisig Information
                 </CardTitle>
             </CardHeader>
             <TableCardBody>
                 <BaseTable.Row>
                     <BaseTable.Cell>Multisig Program</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         {squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}
                     </BaseTable.Cell>
                 </BaseTable.Row>
                 <BaseTable.Row>
                     <BaseTable.Cell>Multisig Program Id</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         <Address
                             pubkey={
                                 new PublicKey(squadMapInfo?.version === 'v4' ? SQUADS_V4_ADDRESS : SQUADS_V3_ADDRESS)
@@ -75,7 +75,7 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
                 </BaseTable.Row>
                 <BaseTable.Row>
                     <BaseTable.Cell>Multisig Account</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         {squadMapInfo?.isSquad ? (
                             <Address pubkey={new PublicKey(squadMapInfo.multisig)} alignRight link />
                         ) : null}
@@ -83,7 +83,7 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
                 </BaseTable.Row>
                 <BaseTable.Row>
                     <BaseTable.Cell>Multisig Approval Threshold</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">
+                    <BaseTable.Cell className="text-right">
                         {squadInfo?.multisig.threshold}
                         {' of '}
                         {squadInfo?.version === 'v4'
@@ -94,7 +94,7 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
                 {members.map((member, idx) => (
                     <BaseTable.Row key={idx}>
                         <BaseTable.Cell>Multisig Member {idx + 1}</BaseTable.Cell>
-                        <BaseTable.Cell className="e-text-right">
+                        <BaseTable.Cell className="text-right">
                             <Address pubkey={member} alignRight link />
                         </BaseTable.Cell>
                     </BaseTable.Row>

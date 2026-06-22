@@ -6,8 +6,8 @@ import {
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { none, some } from '@metaplex-foundation/umi';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withTokenInfoBatch, withTransactions } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { MetaplexTokenMetadataDetailsCard } from '../MetaplexTokenMetadataDetailsCard';
@@ -36,7 +36,6 @@ const meta = {
     decorators: [withTransactions, withTokenInfoBatch],
     parameters: {
         ...nextjsParameters,
-        layout: 'padded',
     },
     tags: ['autodocs', 'test'],
     title: 'Features/MplTokenMetadata/MetaplexTokenMetadataDetailsCard',

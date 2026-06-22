@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TokenExtensionsCard } from '../TokenExtensionsCard';
 
@@ -9,7 +9,7 @@ const meta = {
     component: TokenExtensionsCard,
     decorators: [withClusterAndAccounts],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/TokenExtensionsCard',
 } satisfies Meta<typeof TokenExtensionsCard>;
 

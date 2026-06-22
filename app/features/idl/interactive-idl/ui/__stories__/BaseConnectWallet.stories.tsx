@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
 import { BaseConnectWallet } from '../BaseConnectWallet';
@@ -20,8 +20,8 @@ const meta = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
-    title: 'Features/IDL/Interactive IDL/UI/BaseConnectWallet',
+    tags: ['autodocs', 'test'],
+    title: 'Features/IDL/Interactive IDL/BaseConnectWallet',
 } satisfies Meta<typeof BaseConnectWallet>;
 
 export default meta;

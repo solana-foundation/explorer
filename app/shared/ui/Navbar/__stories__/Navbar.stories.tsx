@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 import { expect, within } from 'storybook/test';
 
@@ -6,7 +6,7 @@ import { NavbarItem, NavbarLink, NavbarList } from '../Navbar';
 
 const meta: Meta = {
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/Navbar',
+    title: 'Shared/Navbar',
 };
 
 export default meta;

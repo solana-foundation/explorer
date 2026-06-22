@@ -42,8 +42,8 @@ const DEFAULT_RESOURCES: Resource[] = [
 
 export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resources?: Resource[] }) {
     return (
-        <Card ui="dashkit" className="e-mb-3 md:e-mb-6">
-            <div className="e-flex e-justify-between e-border-0 e-border-b e-border-solid e-border-dark-border e-px-dk-4 e-py-3">
+        <Card ui="dashkit" className="mb-3 md:mb-6">
+            <div className="flex justify-between border-0 border-b border-solid border-dark-border px-dk-4 py-3">
                 <div>Kickstart your development journey on Solana</div>
                 <div>
                     Find more on{' '}
@@ -53,7 +53,7 @@ export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resource
                 </div>
             </div>
             <CardBody ui="dashkit">
-                <div className="e-flex e-gap-6 e-overflow-auto e-pb-3">
+                <div className="flex gap-6 overflow-auto pb-3">
                     {resources.map(resource => (
                         <ResourceCard key={resource.link} {...resource} />
                     ))}
@@ -67,10 +67,10 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
     const [loaded, setLoaded] = useState(false);
 
     return (
-        <div className="e-flex e-flex-col" style={{ height: '200px', width: '250px' }}>
-            <div className="e-mb-3 e-w-full">
+        <div className="flex flex-col" style={{ height: '200px', width: '250px' }}>
+            <div className="mb-3 w-full">
                 <a href={link} target="_blank" rel="noopener noreferrer" className="hover:cursor-pointer">
-                    <div className="e-bg-heavy-metal-700" style={{ height: '120px', width: '250px' }}>
+                    <div className="bg-heavy-metal-700" style={{ height: '120px', width: '250px' }}>
                         {image && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -90,9 +90,9 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
                     </div>
                 </a>
             </div>
-            <div className="e-flex e-flex-col">
-                <p className="e-mb-[3px]">{title}</p>
-                <p className="e-mb-1.5 e-line-clamp-3 e-whitespace-normal e-text-dk-gray-700">{description}</p>
+            <div className="flex flex-col">
+                <p className="mb-[3px]">{title}</p>
+                <p className="mb-1.5 line-clamp-3 whitespace-normal text-dk-gray-700">{description}</p>
             </div>
         </div>
     );

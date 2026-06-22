@@ -43,25 +43,25 @@ export function AddressLookupTableAccountSection(
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right e-uppercase">
+                <BaseTable.Cell className="text-right uppercase">
                     <SolBalance lamports={account.lamports} />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Activation Status</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right e-uppercase">
+                <BaseTable.Cell className="text-right uppercase">
                     {lookupTableAccount.isActive() ? 'Active' : 'Deactivated'}
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Last Extended Slot</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {lookupTableAccount.state.lastExtendedSlot === 0 ? (
                         'None (Empty)'
                     ) : (
@@ -71,7 +71,7 @@ export function AddressLookupTableAccountSection(
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {lookupTableAccount.state.authority === undefined ? (
                         'None (Frozen)'
                     ) : (

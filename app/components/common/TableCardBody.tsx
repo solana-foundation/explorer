@@ -5,7 +5,7 @@ import { BaseTable } from '@/app/shared/ui/Table';
 
 // dashkit `.card-table` only zeroes thead th border-top; headless card tables also need the
 // first body row's border-top suppressed or the card gains a 1px rule at the top edge.
-const firstRowBorderFix = '[&_tr:first-child_td]:!e-border-t-0';
+const firstRowBorderFix = '[&_tr:first-child_td]:!border-t-0';
 
 type TableLayout = 'compact' | 'expanded';
 

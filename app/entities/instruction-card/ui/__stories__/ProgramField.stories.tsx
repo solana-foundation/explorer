@@ -1,8 +1,8 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { SystemProgram } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { ProgramField } from '../ProgramField';
@@ -11,8 +11,8 @@ const meta = {
     component: ProgramField,
     decorators: [withCardTableField, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
-    title: 'Entities/Instruction Card/UI/Field/ProgramField',
+    tags: ['autodocs', 'test'],
+    title: 'Entities/Instruction Card/Field/ProgramField',
 } satisfies Meta<typeof ProgramField>;
 
 export default meta;

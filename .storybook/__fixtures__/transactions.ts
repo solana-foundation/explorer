@@ -1,11 +1,10 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import type { CacheEntry } from '@providers/cache';
 import { FetchStatus } from '@providers/cache';
 import type { TransactionStatus } from '@providers/transactions';
 import type { Details as ParsedDetails } from '@providers/transactions/parsed';
 import type { Details as RawDetails } from '@providers/transactions/raw';
 import type { ParsedTransactionWithMeta } from '@solana/web3.js';
-
-import { DEFAULT_SIGNATURE } from './defaults';
 
 // Factories build well-typed CacheEntry<T> objects matching the real provider shapes.
 // Each factory accepts a Partial<...> override so stories can vary specific fields without

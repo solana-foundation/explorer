@@ -54,11 +54,11 @@ export function TransactionSignatures({
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">#</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Signature</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Signer</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Validity</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Details</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">#</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Signature</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Signer</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Validity</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Details</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>{signatureRows}</BaseTable.Body>
@@ -93,7 +93,7 @@ function SignatureRow({
     return (
         <BaseTable.Row>
             <BaseTable.Cell>
-                <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                <Badge ui="dashkit" variant="info" className="mr-[3px]">
                     {index + 1}
                 </Badge>
             </BaseTable.Cell>
@@ -105,18 +105,18 @@ function SignatureRow({
                 {verified === undefined ? (
                     'N/A'
                 ) : verified ? (
-                    <Badge ui="dashkit" variant="success" className="e-mr-[3px]">
+                    <Badge ui="dashkit" variant="success" className="mr-[3px]">
                         Valid
                     </Badge>
                 ) : (
-                    <Badge ui="dashkit" variant="warning" className="e-mr-[3px]">
+                    <Badge ui="dashkit" variant="warning" className="mr-[3px]">
                         Invalid
                     </Badge>
                 )}
             </BaseTable.Cell>
             <BaseTable.Cell>
                 {index === 0 && (
-                    <Badge ui="dashkit" variant="info" className="e-mr-[3px]">
+                    <Badge ui="dashkit" variant="info" className="mr-[3px]">
                         Fee Payer
                     </Badge>
                 )}

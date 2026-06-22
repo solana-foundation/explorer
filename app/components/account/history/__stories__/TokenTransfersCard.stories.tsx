@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { mockAccountHistory, mockConfirmedSignatureInfo } from '@storybook-config/__fixtures__/account-history';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockHistoryProvider } from '@storybook-config/__mocks__/MockHistoryProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TokenTransfersCard } from '../TokenTransfersCard';
 
@@ -12,7 +12,7 @@ const ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const meta: Meta<typeof TokenTransfersCard> = {
     component: TokenTransfersCard,
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/History/TokenTransfersCard',
 };
 

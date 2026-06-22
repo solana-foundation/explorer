@@ -1,5 +1,4 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import {
     nextjsParameters,
     withCluster,
@@ -8,6 +7,7 @@ import {
     withTokenInfoBatch,
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { CodamaInstructionCard } from '../CodamaInstructionDetailsCard';
 
@@ -27,7 +27,7 @@ const meta: Meta<typeof CodamaInstructionCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/CodamaInstructionDetailsCard/Responsive',
+    title: 'Components/Instruction/CodamaInstructionDetailsCard@Media',
 };
 
 export default meta;

@@ -1,10 +1,10 @@
 'use client';
 
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
+import { cn } from '@components/shared/utils';
 import { useTokenMetadata } from '@entities/nft';
 import { useTokenInfo } from '@entities/token-info';
 import { useCluster } from '@providers/cluster';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
-import { cn } from '@shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
@@ -18,14 +18,14 @@ import { useVisibility } from '@/app/shared/lib/visibility';
 import { Copyable } from './Copyable';
 import { useMidTruncation } from './useMidTruncation';
 
-const rowVariants = cva('e-relative e-flex e-w-full e-min-w-0 e-items-baseline', {
+const rowVariants = cva('relative flex w-full min-w-0 items-baseline', {
     defaultVariants: {
         alignRight: false,
     },
     variants: {
         alignRight: {
             false: '',
-            true: 'md:e-justify-end',
+            true: 'md:justify-end',
         },
     },
 });
@@ -110,16 +110,14 @@ export function Address({
 
     const visibleText = isMidTruncated ? midTruncatedText : displayText;
 
-    const innerTextClassName = cn('e-font-mono', !nickname && 'e-truncate', nickname && 'e-block e-min-w-0');
+    const innerTextClassName = cn('font-mono', !nickname && 'truncate', nickname && 'block min-w-0');
 
     // When a nickname is set, render it and the address label as two stacked lines
     // so neither overflows on narrow (mobile) viewports.
     const nicknameDisplay = nickname ? (
-        <span className="e-flex e-min-w-0 e-flex-col">
-            <span className="e-truncate e-font-mono">&quot;{nickname}&quot;</span>
-            <span className="e-truncate e-font-mono e-text-muted">
-                {isMidTruncated ? midTruncatedText : addressLabel}
-            </span>
+        <span className="flex min-w-0 flex-col">
+            <span className="truncate font-mono">&quot;{nickname}&quot;</span>
+            <span className="truncate font-mono text-muted">{isMidTruncated ? midTruncatedText : addressLabel}</span>
         </span>
     ) : undefined;
 
@@ -132,13 +130,13 @@ export function Address({
     );
 
     return (
-        <span ref={visibilityRef} className="e-block e-w-full">
+        <span ref={visibilityRef} className="block w-full">
             <div ref={rowRef} className={rowVariants({ alignRight: Boolean(alignRight) })} aria-label={ariaLabel}>
                 {/* Hidden span for measuring the natural text width — absolutely positioned so it doesn't affect layout */}
                 {isMidTruncateCandidate && (
                     <span
                         ref={hiddenTextRef}
-                        className="e-pointer-events-none e-invisible e-absolute e-whitespace-nowrap e-font-mono"
+                        className="pointer-events-none invisible absolute whitespace-nowrap font-mono"
                         aria-hidden
                     >
                         {addressLabel}
@@ -150,7 +148,7 @@ export function Address({
                             <TooltipTrigger asChild>
                                 <span
                                     data-address={address}
-                                    className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
+                                    className="relative min-w-0 overflow-hidden font-mono"
                                     onMouseEnter={() => handleMouseEnter(address)}
                                     onMouseLeave={() => handleMouseLeave(address)}
                                 >
@@ -159,14 +157,14 @@ export function Address({
                             </TooltipTrigger>
                             {isMidTruncated && (
                                 <TooltipContent>
-                                    <span className="e-font-mono">{address}</span>
+                                    <span className="font-mono">{address}</span>
                                 </TooltipContent>
                             )}
                         </Tooltip>
                     ) : (
                         <span
                             data-address={address}
-                            className="e-relative e-min-w-0 e-overflow-hidden e-font-mono"
+                            className="relative min-w-0 overflow-hidden font-mono"
                             onMouseEnter={() => handleMouseEnter(address)}
                             onMouseLeave={() => handleMouseLeave(address)}
                             title={nickname ? displayText : undefined}
@@ -177,7 +175,7 @@ export function Address({
                 </Copyable>
                 <button
                     ref={editBtnRef}
-                    className="e-ms-1.5 e-flex-none e-shrink-0 e-cursor-pointer e-border-0 e-bg-transparent e-p-0 e-text-muted"
+                    className="ms-1.5 flex-none shrink-0 cursor-pointer border-0 bg-transparent p-0 text-muted"
                     onClick={() => setShowNicknameEditor(true)}
                     title="Edit nickname"
                     style={{ fontSize: '0.875rem', lineHeight: 1 }}

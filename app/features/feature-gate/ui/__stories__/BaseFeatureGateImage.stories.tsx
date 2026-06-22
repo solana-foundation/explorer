@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { IMAGE_SIZE } from '../../constants';
@@ -23,7 +23,7 @@ const meta: Meta<typeof BaseFeatureGateImage> = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/FeatureGate/BaseFeatureGateImage',
 };
 

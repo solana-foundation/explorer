@@ -1,6 +1,6 @@
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { EmptySecurityTxtCard } from '../EmptySecurityTxtCard';
 
@@ -12,7 +12,7 @@ const meta: Meta<typeof EmptySecurityTxtCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/SecurityTxt/EmptySecurityTxtCard/Responsive',
+    title: 'Features/SecurityTxt/EmptySecurityTxtCard@Media',
 };
 
 export default meta;

@@ -5,11 +5,11 @@ import {
 } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
 import { OwnedTokensCard } from '../OwnedTokensCard';
@@ -64,7 +64,7 @@ const meta: Meta<typeof OwnedTokensCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/OwnedTokensCard/Responsive',
+    title: 'Components/Account/OwnedTokensCard@Media',
 };
 
 export default meta;

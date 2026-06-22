@@ -1,5 +1,5 @@
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 
 import { NormalMetaplexNFTAttributesCard } from '../MetaplexNFTAttributesCard';
 
@@ -32,7 +32,7 @@ function makeFetchOverride(body: unknown, ok = true): Decorator {
 const meta = {
     component: NormalMetaplexNFTAttributesCard,
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/MetaplexNFTAttributesCard',
 } satisfies Meta<typeof NormalMetaplexNFTAttributesCard>;
 

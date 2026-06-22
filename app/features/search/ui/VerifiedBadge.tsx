@@ -1,13 +1,13 @@
-import { cn } from '@shared/utils';
+import { cn } from '@components/shared/utils';
 import { Check } from 'react-feather';
 
 export function VerifiedBadge() {
     return (
         <div
             className={cn(
-                'e-flex e-shrink-0 e-items-center',
-                'e-rounded e-border e-border-solid e-border-success-500',
-                'e-p-1 e-text-success-500',
+                'flex shrink-0 items-center',
+                'rounded border border-solid border-success-500',
+                'p-1 text-success-500',
             )}
         >
             <Check size={9} strokeWidth={3} />

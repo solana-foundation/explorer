@@ -35,8 +35,8 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
     );
 
     return (
-        <div className="e-mb-8">
-            <div className="e-flex e-flex-col e-items-start e-gap-4 e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6 lg:e-flex-row lg:e-items-end lg:e-justify-between lg:e-gap-1">
+        <div className="mb-8">
+            <div className="flex flex-col items-start gap-4 border-0 border-b border-solid border-dk-gray-700-dark py-6 lg:flex-row lg:items-end lg:justify-between lg:gap-1">
                 <AccountHeader
                     address={address}
                     account={account}
@@ -44,7 +44,7 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
                     isTokenInfoLoading={isTokenInfoLoading}
                 />
                 {isTokenMint && (
-                    <div className="e-flex e-w-full e-flex-col e-gap-1 sm:e-items-start sm:e-gap-2 md:e-w-auto md:e-flex-row">
+                    <div className="flex w-full flex-col gap-1 sm:items-start sm:gap-2 md:w-auto md:flex-row">
                         <TokenVerificationBadge target={verificationTarget} isTokenInfoLoading={isTokenInfoLoading} />
                         <TokenMarketData coinInfo={coinInfo} />
                     </div>

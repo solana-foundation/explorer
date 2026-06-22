@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
 import { ReceiptView } from '../ReceiptView';
@@ -18,7 +18,7 @@ const meta: Meta<typeof ReceiptView> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Receipt/ReceiptView/Responsive',
+    title: 'Features/Receipt/ReceiptView@Media',
 };
 
 export default meta;

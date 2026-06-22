@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TxSuccessStatus } from '../TxSuccessStatus';
 
@@ -18,8 +18,8 @@ const meta = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
-    title: 'Entities/Program Logs/UI/TxSuccessStatus',
+    tags: ['autodocs', 'test'],
+    title: 'Entities/Program Logs/TxSuccessStatus',
 } satisfies Meta<typeof TxSuccessStatus>;
 
 export default meta;
@@ -35,7 +35,8 @@ export const Default: Story = {
 
 export const Recent: Story = {
     args: {
-        date: new Date(),
+        // fixed instant (component renders an absolute UTC clock) so captures are deterministic
+        date: new Date('2024-06-15T18:45:30Z'),
         link: `/tx/3xK8vJ2mN9pQrS7tUvW5yZ1aBcD4eF6gH8iJ0kL2mN4oP6qR8sT0uV2wX4yZ6aB8cD0eF2gH4iJ6kL8mN0oP2qR`,
         signature: '3xK8vJ2mN9pQrS7tUvW5yZ1aBcD4eF6gH8iJ0kL2mN4oP6qR8sT0uV2wX4yZ6aB8cD0eF2gH4iJ6kL8mN0oP2qR',
     },

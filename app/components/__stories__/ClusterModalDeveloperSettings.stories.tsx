@@ -1,10 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import ClusterModalDeveloperSettings from '../ClusterModalDeveloperSettings';
 
 const meta = {
     component: ClusterModalDeveloperSettings,
-    parameters: { layout: 'padded' },
     tags: ['autodocs', 'test'],
     title: 'Components/ClusterModalDeveloperSettings',
 } satisfies Meta<typeof ClusterModalDeveloperSettings>;

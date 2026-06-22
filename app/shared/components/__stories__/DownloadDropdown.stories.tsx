@@ -1,15 +1,12 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { DownloadDropdown } from '../DownloadDropdown';
 
 const meta: Meta<typeof DownloadDropdown> = {
     component: DownloadDropdown,
-    parameters: {
-        layout: 'padded',
-    },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Shared/DownloadDropdown',
 };
 

@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { SysvarSlotHashesAccount } from '@/app/validators/accounts/sysvar';
 
@@ -16,7 +16,7 @@ const meta: Meta<typeof SlotHashesCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/SlotHashesCard/Responsive',
+    title: 'Components/Account/SlotHashesCard@Media',
 };
 
 export default meta;

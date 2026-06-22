@@ -5,18 +5,18 @@ import { cn } from '@/app/components/shared/utils';
 
 // Tokens match Dashkit-dark `.alert` + `.alert-<color>` at runtime — see app/scss/dashkit/_alert.scss.
 const alertVariants = cva(
-    ['e-relative', 'e-mb-6', 'e-rounded-dk', 'e-border', 'e-border-solid', 'e-px-5', 'e-py-3', 'e-text-dk-base'],
+    ['relative', 'mb-6', 'rounded-dk', 'border', 'border-solid', 'px-5', 'py-3', 'text-dk-base'],
     {
         defaultVariants: { variant: 'default' },
         variants: {
             variant: {
-                danger: 'e-border-dk-danger e-bg-dk-danger e-text-dk-white',
-                default: 'e-border-transparent',
-                info: 'e-border-dk-info e-bg-dk-info e-text-dk-white',
+                danger: 'border-dk-danger bg-dk-danger text-dk-white',
+                default: 'border-transparent',
+                info: 'border-dk-info bg-dk-info text-dk-white',
                 // Louder pure-red override for flagged-account / scam warnings — see app/scss/_solana.scss `.alert-scam`.
-                scam: 'e-border-[red] e-bg-[red] e-text-dk-white',
-                success: 'e-border-dk-success-on-dark e-bg-dk-success-on-dark e-text-dk-gray-900',
-                warning: 'e-border-dk-warning-on-dark e-bg-dk-warning-on-dark e-text-dk-white',
+                scam: 'border-[red] bg-[red] text-dk-white',
+                success: 'border-dk-success-on-dark bg-dk-success-on-dark text-dk-gray-900',
+                warning: 'border-dk-warning-on-dark bg-dk-warning-on-dark text-dk-white',
             },
         },
     },

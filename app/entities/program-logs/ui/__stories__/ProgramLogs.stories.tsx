@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { baseLogs, errorLogs } from '../../model/mocks/logs';
 import { parsedBaseLogs, parsedErrorLogs } from '../../model/mocks/parsedLogs';
@@ -21,8 +21,8 @@ const meta = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
-    title: 'Entities/Program Logs/UI/ProgramLogs',
+    tags: ['autodocs', 'test'],
+    title: 'Entities/Program Logs/ProgramLogs',
 } satisfies Meta<typeof ProgramLogs>;
 
 export default meta;

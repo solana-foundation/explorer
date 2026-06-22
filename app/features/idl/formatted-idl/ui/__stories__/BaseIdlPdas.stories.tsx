@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseIdlPdas } from '../BaseIdlPdas';
 
@@ -10,7 +10,7 @@ const meta = {
         },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/BaseIdlPdas',
+    title: 'Features/IDL/Formatted IDL/BaseIdlPdas',
 } satisfies Meta<typeof BaseIdlPdas>;
 
 export default meta;

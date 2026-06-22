@@ -1,5 +1,4 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import {
     nextjsParameters,
     withClusterAndAccounts,
@@ -7,6 +6,7 @@ import {
     withTokenInfoBatch,
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 
@@ -25,7 +25,7 @@ const meta: Meta<typeof UnknownDetailsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Inspector/UnknownDetailsCard/Responsive',
+    title: 'Components/Inspector/UnknownDetailsCard@Media',
 };
 
 export default meta;

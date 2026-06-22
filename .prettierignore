@@ -10,3 +10,5 @@ build/
 .claude/
 .worktrees/
 storybook-static/
+storybook-static-*/
+public/mockServiceWorker.js

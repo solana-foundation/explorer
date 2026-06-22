@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import type { TransferRow } from '../../types';
@@ -23,7 +23,7 @@ const meta: Meta<typeof BaseReceipt> = {
         },
     },
     component: BaseReceipt,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Receipt/BaseReceipt',
 };
 

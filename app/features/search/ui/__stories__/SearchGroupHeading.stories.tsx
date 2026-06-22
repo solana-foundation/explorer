@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { SearchGroupHeading } from '../SearchGroupHeading';
 
 const meta: Meta<typeof SearchGroupHeading> = {
     component: SearchGroupHeading,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Search/SearchGroupHeading',
 };
 

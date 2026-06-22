@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { BaseReceiptImage, IMAGE_SIZE } from '../BaseReceiptImage';
@@ -33,7 +33,7 @@ const meta: Meta<typeof BaseReceiptImage> = {
             </div>
         ),
     ],
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Receipt/BaseReceiptImage',
 };
 

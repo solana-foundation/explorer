@@ -27,47 +27,47 @@ export function AddPerpMarketDetailsCard(props: {
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Market index</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.marketIndex}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.marketIndex}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Maintenance leverage</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.maintLeverage}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.maintLeverage}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Initial leverage</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.initLeverage}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.initLeverage}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Liquidation fee</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.liquidationFee}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.liquidationFee}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Maker fee</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.makerFee}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.makerFee}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Taker fee</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.takerFee}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.takerFee}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Base lot size</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.baseLotSize}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.baseLotSize}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Quote lot size</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.quoteLotSize}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.quoteLotSize}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Rate</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.rate}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.rate}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Max depth bps</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.maxDepthBps}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.maxDepthBps}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>MNGO per {formatDuration(info.targetPeriodLength, 'seconds')}</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {info.mngoPerPeriod} {}
                 </BaseTable.Cell>
             </BaseTable.Row>

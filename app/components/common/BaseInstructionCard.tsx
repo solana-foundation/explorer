@@ -1,8 +1,9 @@
 import { Address } from '@components/common/Address';
+import { Badge } from '@components/shared/ui/badge';
+import { Button } from '@components/shared/ui/button';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
+import { cn } from '@components/shared/utils';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { Badge } from '@shared/ui/badge';
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
-import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import React from 'react';
@@ -66,44 +67,42 @@ export function BaseInstructionCard({
             ref={scrollAnchorRef}
             collapsible={collapsible}
             title={
-                <span className="e-flex e-min-w-0 e-flex-1 e-items-center">
+                <span className="flex min-w-0 flex-1 items-center">
                     <Badge
                         ui="dashkit"
                         variant={resultClass as 'success' | 'warning' | 'dark'}
-                        className="e-mr-1.5 e-flex-none"
+                        className="mr-1.5 flex-none"
                     >
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </Badge>
-                    <span className="e-min-w-0 e-flex-1 e-overflow-hidden e-text-ellipsis e-whitespace-nowrap">
-                        {title}
-                    </span>
+                    <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{title}</span>
                 </span>
             }
             headerButtons={
-                <div className="e-flex e-items-center e-gap-1.5">
+                <div className="flex items-center gap-1.5">
                     {headerButtons}
-                    <button
+                    <Button
+                        ui="dashkit"
+                        size="sm"
+                        variant={showRaw ? 'black' : 'white'}
+                        active={showRaw}
                         disabled={defaultRaw}
-                        className={cn(
-                            'btn btn-sm e-flex e-items-center',
-                            showRaw ? 'btn-black active' : 'btn-white',
-                            defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed',
-                        )}
+                        className={cn('flex items-center', defaultRaw && '!pointer-events-auto cursor-not-allowed')}
                         onClick={rawClickHandler}
                     >
-                        <Code className="e-mr-1.5" size={13} /> Raw
-                    </button>
+                        <Code className="mr-1.5" size={13} /> Raw
+                    </Button>
                 </div>
             }
         >
-            <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!e-border-t-0">
+            <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
                 <BaseTable.Body>
                     {showRaw ? (
                         <>
                             <BaseTable.Row>
                                 <BaseTable.Cell>Program</BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right">
+                                <BaseTable.Cell className="text-right">
                                     <Address pubkey={ix.programId} alignRight link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
@@ -120,26 +119,24 @@ export function BaseInstructionCard({
                     )}
                     {innerCards && innerCards.length > 0 && (
                         <>
-                            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                                 <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
                             </BaseTable.Row>
                             <BaseTable.Row>
                                 <BaseTable.Cell colSpan={3}>
-                                    {/* !e-m-0 overrides the 1.5rem margin from inner-cards
-                                    so the card aligns with the "Inner Instructions" label above */}
-                                    <div className="inner-cards !e-m-0">{innerCards}</div>
+                                    <div>{innerCards}</div>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         </>
                     )}
                     {eventCards && eventCards.length > 0 && (
                         <>
-                            <BaseTable.Row className="e-bg-dark-background e-text-dk-xs e-font-semibold e-uppercase e-tracking-[0.08em] e-text-dark-muted-foreground">
+                            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                                 <BaseTable.Cell colSpan={3}>Events</BaseTable.Cell>
                             </BaseTable.Row>
                             <BaseTable.Row>
                                 <BaseTable.Cell colSpan={3}>
-                                    <div className="inner-cards">{eventCards}</div>
+                                    <div className="m-6">{eventCards}</div>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         </>

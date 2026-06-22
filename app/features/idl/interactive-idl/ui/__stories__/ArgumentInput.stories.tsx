@@ -1,5 +1,5 @@
 import type { ArgField } from '@entities/idl';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { useState } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 
@@ -7,11 +7,8 @@ import { ArgumentInput } from '../ArgumentInput';
 
 const meta = {
     component: ArgumentInput,
-    parameters: {
-        layout: 'padded',
-    },
-    tags: ['autodocs'],
-    title: 'Features/IDL/Interactive IDL/UI/ArgumentInput',
+    tags: ['autodocs', 'test'],
+    title: 'Features/IDL/Interactive IDL/ArgumentInput',
 } satisfies Meta<typeof ArgumentInput>;
 
 export default meta;

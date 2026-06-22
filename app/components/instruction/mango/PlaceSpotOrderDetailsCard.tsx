@@ -72,7 +72,7 @@ export function PlaceSpotOrderDetailsCard(props: {
             {mangoSpotMarketConfig !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Spot market</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{mangoSpotMarketConfig.name}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{mangoSpotMarketConfig.name}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 
@@ -85,33 +85,33 @@ export function PlaceSpotOrderDetailsCard(props: {
 
             <BaseTable.Row>
                 <BaseTable.Cell>Order type</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.orderType}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.orderType}</BaseTable.Cell>
             </BaseTable.Row>
 
             {info.clientId !== '0' && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Client Id</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{info.clientId}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.clientId}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 
             <BaseTable.Row>
                 <BaseTable.Cell>Side</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{info.side}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.side}</BaseTable.Cell>
             </BaseTable.Row>
 
             {orderLotDetails !== null && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Limit price</BaseTable.Cell>
                     {/* todo fix price */}
-                    <BaseTable.Cell className="e-text-right">{orderLotDetails?.price} USDC</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{orderLotDetails?.price} USDC</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 
             {orderLotDetails !== null && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Size</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{orderLotDetails?.size}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{orderLotDetails?.size}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
         </InstructionCard>

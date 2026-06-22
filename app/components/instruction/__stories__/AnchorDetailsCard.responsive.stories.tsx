@@ -1,8 +1,9 @@
+import { gen } from '@__fixtures__/gen';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withMockTransactions, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
 import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
@@ -25,7 +26,7 @@ const anchorProgram = new Program(anchor030Devi as Idl, mockProvider);
 
 const ix = new TransactionInstruction({
     data: Buffer.from([163, 172, 224, 52, 11, 154, 106, 223]),
-    keys: [{ isSigner: false, isWritable: true, pubkey: PublicKey.unique() }],
+    keys: [{ isSigner: false, isWritable: true, pubkey: gen.publicKey(1) }],
     programId: anchorProgram.programId,
 });
 
@@ -47,7 +48,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/AnchorDetailsCard/Responsive',
+    title: 'Components/Instruction/AnchorDetailsCard@Media',
 } satisfies Meta<typeof AnchorDetailsCard>;
 
 export default meta;

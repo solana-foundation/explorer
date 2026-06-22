@@ -1,7 +1,7 @@
 import type { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -26,7 +26,7 @@ const meta: Meta<typeof BaseAccountCard> = {
     component: BaseAccountCard,
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Account/BaseAccountCard',
 };
 
@@ -42,11 +42,11 @@ export const Default: Story = {
         <BaseAccountCard {...args}>
             <BaseTable.Row>
                 <BaseTable.Cell>Token Balance</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">1,000.00</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">1,000.00</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Mint</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">So11...1112</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">So11...1112</BaseTable.Cell>
             </BaseTable.Row>
         </BaseAccountCard>
     ),
@@ -62,7 +62,7 @@ export const WithRefresh: Story = {
         <BaseAccountCard {...args}>
             <BaseTable.Row>
                 <BaseTable.Cell>Owner</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">System Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">System Program</BaseTable.Cell>
             </BaseTable.Row>
         </BaseAccountCard>
     ),
@@ -78,7 +78,7 @@ export const WithoutRawButton: Story = {
         <BaseAccountCard {...args}>
             <BaseTable.Row>
                 <BaseTable.Cell>Authority</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">4TPT...oH7e</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">4TPT...oH7e</BaseTable.Cell>
             </BaseTable.Row>
         </BaseAccountCard>
     ),
@@ -94,7 +94,7 @@ export const WithRawContent: Story = {
         <BaseAccountCard {...args}>
             <BaseTable.Row>
                 <BaseTable.Cell>Token Balance</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">1,000.00</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">1,000.00</BaseTable.Cell>
             </BaseTable.Row>
         </BaseAccountCard>
     ),

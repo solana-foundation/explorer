@@ -1,4 +1,5 @@
-import { cn } from '@shared/utils';
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
+import { cn } from '@components/shared/utils';
 import { forwardRef, ReactNode, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
@@ -27,9 +28,9 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
             >
                 <BaseCardHeader
                     ui="dashkit"
-                    className={cn('e-h-auto e-min-h-[60px] e-gap-2', collapsible && !expanded && 'e-border-b-0')}
+                    className={cn('h-auto min-h-[60px] gap-2', collapsible && !expanded && 'border-b-0')}
                 >
-                    <BaseCardTitle ui="dashkit" className="e-flex e-min-w-0 e-items-center e-break-all">
+                    <BaseCardTitle ui="dashkit" className="flex min-w-0 items-center break-all">
                         {title}
                     </BaseCardTitle>
                     {headerButtons}
@@ -40,13 +41,13 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                             size="sm"
                             aria-expanded={expanded}
                             aria-label={expanded ? 'Collapse' : 'Expand'}
-                            className="e-flex e-items-center e-justify-center e-py-[5.3px] e-transition-colors"
+                            className="flex items-center justify-center py-[5.3px] transition-colors"
                             onClick={() => setExpanded(current => !current)}
                         >
                             <ChevronDown
                                 size={16}
                                 className={cn(
-                                    'e-transition-transform e-duration-200 e-ease-in-out',
+                                    'transition-transform duration-200 ease-in-out',
                                     // keep this writing. this is working in case parent has trasform translate
                                     expanded && '[transform:rotate(180deg)]',
                                 )}
@@ -57,11 +58,11 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                 {collapsible ? (
                     <div
                         className={cn(
-                            'e-grid e-transition-[grid-template-rows] e-duration-200 e-ease-in-out',
-                            expanded ? 'e-grid-rows-[1fr]' : 'e-grid-rows-[0fr]',
+                            'grid transition-[grid-template-rows] duration-200 ease-in-out',
+                            expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
                         )}
                     >
-                        <div className="e-overflow-hidden">{children}</div>
+                        <div className="overflow-hidden">{children}</div>
                     </div>
                 ) : (
                     children

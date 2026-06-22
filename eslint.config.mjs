@@ -4,6 +4,7 @@ import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import boundaries from 'eslint-plugin-boundaries';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import sortKeysFix from 'eslint-plugin-sort-keys-fix';
+import storybook from 'eslint-plugin-storybook';
 import testingLibrary from 'eslint-plugin-testing-library';
 import unicorn from 'eslint-plugin-unicorn';
 import globals from 'globals';
@@ -27,9 +28,12 @@ export default tseslint.config(
             '.next/**',
             '.next-dev/**',
             'node_modules/**',
+            'coverage/**',
             '.claude/**',
             '.worktrees/**',
             'storybook-static/**',
+            'storybook-static-*/**',
+            'public/mockServiceWorker.js',
             'next-env.d.ts',
         ],
     },
@@ -39,6 +43,9 @@ export default tseslint.config(
 
     // Base configs (after nextCoreWebVitals so tseslint parser takes precedence)
     ...tseslint.configs.recommended,
+
+    // Storybook story-lint rules; self-scoped to story files + .storybook presets.
+    ...storybook.configs['flat/recommended'],
 
     // Main config
     {

@@ -9,11 +9,11 @@ import {
     StateContext as ParsedDetailsStateCtx,
 } from '@providers/transactions/parsed';
 import { PublicKey } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockHistoryProvider } from '@storybook-config/__mocks__/MockHistoryProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
 import { TokenHistoryCard } from '../TokenHistoryCard';
@@ -74,7 +74,7 @@ const meta = {
     component: TokenHistoryCard,
     decorators: [withTokenInfoBatch],
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/TokenHistoryCard',
 } satisfies Meta<typeof TokenHistoryCard>;
 

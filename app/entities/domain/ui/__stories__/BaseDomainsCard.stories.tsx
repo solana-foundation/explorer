@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { BaseDomainsCard } from '../BaseDomainsCard';
@@ -9,7 +9,7 @@ const meta = {
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Entities/Domain/UI/BaseDomainsCard',
+    title: 'Entities/Domain/BaseDomainsCard',
 } satisfies Meta<typeof BaseDomainsCard>;
 
 export default meta;

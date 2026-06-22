@@ -42,7 +42,7 @@ export function SecurityTXTBadge({ error, tabPath }: { error?: string; tabPath: 
 
     return (
         <CardTitle as="h3" ui="dashkit">
-            <Badge ui="dashkit" variant="success" className="e-cursor-pointer" asChild>
+            <Badge ui="dashkit" variant="success" className="cursor-pointer" asChild>
                 <Link href={tabPath}>Included</Link>
             </Badge>
         </CardTitle>

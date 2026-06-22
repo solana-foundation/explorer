@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { withAutoFocusReleased } from '@storybook-config/decorators';
 import { withFixedContainer } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { fn } from 'storybook/test';
 
 import { NicknameEditor } from '../NicknameEditor';
@@ -19,7 +19,7 @@ const meta = {
             appDirectory: true,
         },
     },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Nicknames/NicknameEditor',
 } satisfies Meta<typeof NicknameEditor>;
 
@@ -56,7 +56,7 @@ export const LongAddress: Story = {
 };
 
 // Forces visible truncation by passing an oversized base58-like string. Used to confirm that
-// the text-truncate Bootstrap utility is replaceable with Tailwind's e-truncate without losing
+// the text-truncate Bootstrap utility is replaceable with Tailwind's truncate without losing
 // the ellipsis behaviour for long values.
 export const TruncatedAddress: Story = {
     args: {

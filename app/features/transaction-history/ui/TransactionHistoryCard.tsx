@@ -16,6 +16,7 @@ import { Badge } from '@/app/components/shared/ui/badge';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { useVisibility } from '@/app/shared/lib/visibility';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { Card } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -82,20 +83,18 @@ export function TransactionHistoryCard({ address }: { address: string }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">
                             Transaction Signature
                         </BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Block</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Block</BaseTable.HeaderCell>
                         {hasTimestamps && (
                             <>
-                                <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">Age</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="e-w-px e-text-dk-gray-700">
-                                    Timestamp
-                                </BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Age</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Timestamp</BaseTable.HeaderCell>
                             </>
                         )}
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Result</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="e-text-dk-gray-700">Raw Data</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Raw Data</BaseTable.HeaderCell>
                     </BaseTable.Row>
                 </BaseTable.Head>
                 <BaseTable.Body>{detailsList}</BaseTable.Body>
@@ -115,10 +114,11 @@ type TransactionRowProps = {
 };
 
 function TransactionRow({ signature, slot, blockTime, statusClass, statusText, hasTimestamps }: TransactionRowProps) {
-    const instructionNames = useInstructionNames(signature);
+    const { isVisible, ref } = useVisibility<HTMLTableRowElement>(true);
+    const instructionNames = useInstructionNames(signature, isVisible);
 
     return (
-        <BaseTable.Row>
+        <BaseTable.Row ref={ref}>
             <BaseTable.Cell>
                 <Signature signature={signature} link />
                 {instructionNames !== null && instructionNames.length > 0 ? (
@@ -128,16 +128,16 @@ function TransactionRow({ signature, slot, blockTime, statusClass, statusText, h
                 ) : null}
             </BaseTable.Cell>
 
-            <BaseTable.Cell className="e-w-px">
+            <BaseTable.Cell className="w-px">
                 <Slot slot={slot} link />
             </BaseTable.Cell>
 
             {hasTimestamps && (
                 <>
-                    <BaseTable.Cell className="e-text-dk-gray-700">
+                    <BaseTable.Cell className="text-dk-gray-700">
                         {blockTime ? <RelativeTime date={blockTime * 1000} /> : '---'}
                     </BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-dk-gray-700">
+                    <BaseTable.Cell className="text-dk-gray-700">
                         {blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}
                     </BaseTable.Cell>
                 </>
@@ -169,7 +169,7 @@ function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     }, [transactionData, signature, fetchRaw]);
 
     return (
-        <div className="e-flex e-items-center e-gap-[3px]" onMouseEnter={handleHover}>
+        <div className="flex items-center gap-[3px]" onMouseEnter={handleHover}>
             <Copyable text={transactionData ? toBase64(transactionData) : null}>
                 <DownloadDropdown data={transactionData} loading={loading} filename={signature} />
             </Copyable>

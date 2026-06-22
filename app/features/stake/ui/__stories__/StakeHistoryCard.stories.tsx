@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import type { SysvarStakeHistoryAccount } from '@validators/accounts/sysvar';
 import { expect, within } from 'storybook/test';
 

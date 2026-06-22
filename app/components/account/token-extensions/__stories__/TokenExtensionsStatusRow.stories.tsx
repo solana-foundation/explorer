@@ -1,5 +1,5 @@
-import { Keypair } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
+import { gen } from '@__fixtures__/gen';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
@@ -41,7 +41,7 @@ const extension = {
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
     args: {
-        address: Keypair.generate().publicKey.toString(),
+        address: gen.address(1),
         extensions: new Array(5).fill(null).map(() => extension),
     },
     async play({ canvasElement }) {

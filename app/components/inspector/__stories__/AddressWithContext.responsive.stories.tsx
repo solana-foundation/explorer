@@ -1,7 +1,7 @@
-import { PublicKey } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
+import { gen } from '@__fixtures__/gen';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { AddressWithContext } from '../AddressWithContext';
 
@@ -14,13 +14,13 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Inspector/AddressWithContext/Responsive',
+    title: 'Components/Inspector/AddressWithContext@Media',
 } satisfies Meta<typeof AddressWithContext>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { pubkey: PublicKey.unique() };
+const args = { pubkey: gen.publicKey(1) };
 
 export const Mobile: Story = {
     args,

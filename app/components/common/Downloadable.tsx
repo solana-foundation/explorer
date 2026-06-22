@@ -16,7 +16,7 @@ export function DownloadableIcon({
 
     return (
         <>
-            <Download className="e-mr-1.5 e-cursor-pointer" onClick={handleClick} size={15} />
+            <Download className="mr-1.5 cursor-pointer" onClick={handleClick} size={15} />
             {children}
         </>
     );
@@ -39,7 +39,7 @@ export function DownloadableButton({
 
     return (
         <div onClick={handleDownload} style={{ alignItems: 'center', cursor: 'pointer', display: 'inline-flex' }}>
-            <Icon className="e-mr-1.5" size={15} />
+            <Icon className="mr-1.5" size={15} />
             {children}
         </div>
     );

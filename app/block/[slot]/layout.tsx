@@ -81,7 +81,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                         {IBRL_EXPLORER_URL && (
                             <ExternalLinkWarning href={`${IBRL_EXPLORER_URL}/block/${slotNumber}`}>
                                 <>
-                                    <ExternalLink className="e-me-2 e-align-text-top" size={13} />
+                                    <ExternalLink className="me-2 align-text-top" size={13} />
                                     IBRL Explorer
                                 </>
                             </ExternalLinkWarning>
@@ -89,21 +89,21 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                     </CardHeader>
                     <TableCardBody>
                         <BaseTable.Row>
-                            <BaseTable.Cell className="e-w-full">Blockhash</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">
+                            <BaseTable.Cell className="w-full">Blockhash</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">
                                 <span>{block.blockhash}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
-                            <BaseTable.Cell className="e-w-full">Slot</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">
+                            <BaseTable.Cell className="w-full">Slot</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">
                                 <Slot slot={slotNumber} />
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         {blockLeader !== undefined && (
                             <BaseTable.Row>
-                                <BaseTable.Cell className="e-w-full">Slot Leader</BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right">
+                                <BaseTable.Cell className="w-full">Slot Leader</BaseTable.Cell>
+                                <BaseTable.Cell className="text-right">
                                     <Address pubkey={blockLeader} alignRight link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
@@ -112,16 +112,16 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                             <>
                                 <BaseTable.Row>
                                     <BaseTable.Cell>Timestamp (Local)</BaseTable.Cell>
-                                    <BaseTable.Cell className="e-text-right">
-                                        <span className="e-font-mono">
+                                    <BaseTable.Cell className="text-right">
+                                        <span className="font-mono">
                                             {displayTimestamp(block.blockTime * 1000, true)}
                                         </span>
                                     </BaseTable.Cell>
                                 </BaseTable.Row>
                                 <BaseTable.Row>
                                     <BaseTable.Cell>Timestamp (UTC)</BaseTable.Cell>
-                                    <BaseTable.Cell className="e-text-right">
-                                        <span className="e-font-mono">
+                                    <BaseTable.Cell className="text-right">
+                                        <span className="font-mono">
                                             {displayTimestampUtc(block.blockTime * 1000, true)}
                                         </span>
                                     </BaseTable.Cell>
@@ -129,77 +129,77 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                             </>
                         ) : (
                             <BaseTable.Row>
-                                <BaseTable.Cell className="e-w-full">Timestamp</BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right">Unavailable</BaseTable.Cell>
+                                <BaseTable.Cell className="w-full">Timestamp</BaseTable.Cell>
+                                <BaseTable.Cell className="text-right">Unavailable</BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         {epoch !== undefined && (
                             <BaseTable.Row>
-                                <BaseTable.Cell className="e-w-full">Epoch</BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right e-font-mono">
+                                <BaseTable.Cell className="w-full">Epoch</BaseTable.Cell>
+                                <BaseTable.Cell className="text-right font-mono">
                                     <Epoch epoch={epoch} link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         <BaseTable.Row>
-                            <BaseTable.Cell className="e-w-full">Parent Blockhash</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">
+                            <BaseTable.Cell className="w-full">Parent Blockhash</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">
                                 <span>{block.previousBlockhash}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
-                            <BaseTable.Cell className="e-w-full">Parent Slot</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">
+                            <BaseTable.Cell className="w-full">Parent Slot</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">
                                 <Slot slot={block.parentSlot} link />
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         {parentLeader !== undefined && (
                             <BaseTable.Row>
-                                <BaseTable.Cell className="e-w-full">Parent Slot Leader</BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right">
+                                <BaseTable.Cell className="w-full">Parent Slot Leader</BaseTable.Cell>
+                                <BaseTable.Cell className="text-right">
                                     <Address pubkey={parentLeader} alignRight link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         {childSlot !== undefined && (
                             <BaseTable.Row>
-                                <BaseTable.Cell className="e-w-full">Child Slot</BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right e-font-mono">
+                                <BaseTable.Cell className="w-full">Child Slot</BaseTable.Cell>
+                                <BaseTable.Cell className="text-right font-mono">
                                     <Slot slot={childSlot} link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         {childLeader !== undefined && (
                             <BaseTable.Row>
-                                <BaseTable.Cell className="e-w-full">Child Slot Leader</BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right">
+                                <BaseTable.Cell className="w-full">Child Slot Leader</BaseTable.Cell>
+                                <BaseTable.Cell className="text-right">
                                     <Address pubkey={childLeader} alignRight link />
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         <BaseTable.Row>
-                            <BaseTable.Cell className="e-w-full">Processed Transactions</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">
+                            <BaseTable.Cell className="w-full">Processed Transactions</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">
                                 <span>{block.transactions.length}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         {showSuccessfulCount && (
                             <BaseTable.Row>
-                                <BaseTable.Cell className="e-w-full">Successful Transactions</BaseTable.Cell>
-                                <BaseTable.Cell className="e-text-right e-font-mono">
+                                <BaseTable.Cell className="w-full">Successful Transactions</BaseTable.Cell>
+                                <BaseTable.Cell className="text-right font-mono">
                                     <span>{successfulTxs.length}</span>
                                 </BaseTable.Cell>
                             </BaseTable.Row>
                         )}
                         <BaseTable.Row>
-                            <BaseTable.Cell className="e-w-full">Total Compute Units Consumed</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">
+                            <BaseTable.Cell className="w-full">Total Compute Units Consumed</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">
                                 <span>{totalCUs.toLocaleString()}</span>
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
-                            <BaseTable.Cell className="e-w-full">Transaction Cost Utilization</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">
+                            <BaseTable.Cell className="w-full">Transaction Cost Utilization</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">
                                 <span>
                                     {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
                                     {Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
@@ -207,8 +207,8 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                             </BaseTable.Cell>
                         </BaseTable.Row>
                         <BaseTable.Row>
-                            <BaseTable.Cell className="e-w-full">Reserved Compute Units</BaseTable.Cell>
-                            <BaseTable.Cell className="e-text-right e-font-mono">
+                            <BaseTable.Cell className="w-full">Reserved Compute Units</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right font-mono">
                                 <span>
                                     {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()} (
                                     {Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)
@@ -223,10 +223,10 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
     }
     return (
         <PageContainer variant="pulled-up">
-            <div className="e-mb-8">
-                <div className="e-border-0 e-border-b e-border-solid e-border-dk-gray-700-dark e-py-6">
-                    <h6 className="e-uppercase e-tracking-[0.08em] e-text-dk-gray-700">Details</h6>
-                    <h2 className="e-mb-0">Block</h2>
+            <div className="mb-8">
+                <div className="border-0 border-b border-solid border-dk-gray-700-dark py-6">
+                    <h6 className="uppercase tracking-[0.08em] text-dk-gray-700">Details</h6>
+                    <h2 className="mb-0">Block</h2>
                 </div>
             </div>
             {content}

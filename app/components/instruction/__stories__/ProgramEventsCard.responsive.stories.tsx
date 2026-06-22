@@ -1,7 +1,7 @@
 import type { Program } from '@coral-xyz/anchor';
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ProgramEventsCard } from '../ProgramEventsCard';
 
@@ -54,7 +54,7 @@ const meta: Meta<typeof ProgramEventsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Instruction/ProgramEventsCard/Responsive',
+    title: 'Components/Instruction/ProgramEventsCard@Media',
 };
 
 export default meta;

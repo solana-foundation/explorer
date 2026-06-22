@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseIdlAccounts } from '../BaseIdlAccounts';
 
@@ -10,7 +10,7 @@ const meta = {
         },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/IDL/Formatted IDL/UI/BaseIdlAccounts',
+    title: 'Features/IDL/Formatted IDL/BaseIdlAccounts',
 } satisfies Meta<typeof BaseIdlAccounts>;
 
 export default meta;

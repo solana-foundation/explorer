@@ -22,16 +22,16 @@ export function MobileMoreDropdown({ tabs, onSelectChange }: MobileMoreDropdownP
 
     return (
         <Popover>
-            <div className="e-ml-auto e-flex e-items-center">
-                <div className="e-mr-3 e-h-3/5 e-border-0 e-border-l e-border-solid e-border-neutral-700" />
+            <div className="ml-auto flex items-center">
+                <div className="mr-3 h-3/5 border-0 border-l border-solid border-neutral-700" />
                 <PopoverTrigger
                     data-state={isActive ? 'active' : 'inactive'}
-                    className={cn(tabLinkClassName, 'e-inline-flex e-cursor-pointer e-items-center e-gap-1')}
+                    className={cn(tabLinkClassName, 'inline-flex cursor-pointer items-center gap-1')}
                 >
                     More <ChevronDown size={12} />
                 </PopoverTrigger>
             </div>
-            <PopoverContent align="start" className="e-w-auto e-min-w-[8rem] e-p-1">
+            <PopoverContent align="start" className="w-auto min-w-[8rem] p-1">
                 {tabs.map(tab => (
                     <PopoverPrimitive.Close key={tab.path} asChild>
                         <Link
@@ -40,10 +40,10 @@ export function MobileMoreDropdown({ tabs, onSelectChange }: MobileMoreDropdownP
                             onClick={() => onSelectChange?.(tab.path)}
                             data-state={tab.path === ctx.activeValue ? 'active' : 'inactive'}
                             className={cn(
-                                'e-block e-rounded e-px-3 e-py-2',
-                                'e-text-sm e-no-underline',
-                                'e-text-outer-space-200 data-[state=active]:e-text-accent',
-                                'hover:e-bg-outer-space-800 hover:e-text-white',
+                                'block rounded px-3 py-2',
+                                'text-sm no-underline',
+                                'text-outer-space-200 data-[state=active]:text-accent',
+                                'hover:bg-outer-space-800 hover:text-white',
                             )}
                         >
                             {tab.title}

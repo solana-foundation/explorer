@@ -32,15 +32,15 @@ export function MemoDetailsCard({
         >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={ix.programId} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Data (UTF-8)</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
-                    <pre className="e-mb-0 e-inline-block e-text-left">{data}</pre>
+                <BaseTable.Cell className="text-right">
+                    <pre className="mb-0 inline-block text-left">{data}</pre>
                 </BaseTable.Cell>
             </BaseTable.Row>
         </InstructionCard>

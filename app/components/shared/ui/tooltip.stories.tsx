@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, userEvent, within } from 'storybook/test';
 
 import { Button } from './button';
@@ -8,13 +8,13 @@ const meta: Meta<typeof Tooltip> = {
     component: Tooltip,
     decorators: [
         Story => (
-            <div className="e-flex e-min-h-96 e-items-center e-justify-center">
+            <div className="flex min-h-96 items-center justify-center">
                 <Story />
             </div>
         ),
     ],
-    tags: ['autodocs'],
-    title: 'Components/Shared/UI/Tooltip',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Shared/Tooltip',
 };
 
 export default meta;
@@ -67,7 +67,7 @@ export const LongContent: Story = {
                 <Button>Hover for details</Button>
             </TooltipTrigger>
             <TooltipContent>
-                <p className="e-max-w-xs">
+                <p className="max-w-xs">
                     This tooltip contains longer content to demonstrate how the component handles substantial amounts of
                     text. The tooltip will automatically wrap and adjust its width accordingly.
                 </p>
@@ -81,7 +81,7 @@ export const DifferentPositions: Story = {
         const positions = ['top', 'right', 'bottom', 'left'] as const;
 
         return (
-            <div className="e-grid e-grid-cols-2 e-gap-8 e-p-8">
+            <div className="grid grid-cols-2 gap-8 p-8">
                 {positions.map(position => (
                     <Tooltip key={position}>
                         <TooltipTrigger asChild>
@@ -103,7 +103,7 @@ export const WithCustomStyling: Story = {
             <TooltipTrigger asChild>
                 <Button variant="outline">Custom styled tooltip</Button>
             </TooltipTrigger>
-            <TooltipContent className="e-bg-blue-600 e-text-white">
+            <TooltipContent className="bg-blue-600 text-white">
                 <p>This tooltip has custom styling</p>
             </TooltipContent>
         </Tooltip>

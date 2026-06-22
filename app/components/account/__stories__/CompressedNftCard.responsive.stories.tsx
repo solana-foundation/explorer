@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { withClusterAndAccounts } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { CompressedNft } from '@/app/providers/compressed-nft';
 
@@ -56,7 +56,7 @@ const meta: Meta<typeof CompressedNFTHeader> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/CompressedNFTHeader/Responsive',
+    title: 'Components/Account/CompressedNFTHeader@Media',
 };
 
 export default meta;

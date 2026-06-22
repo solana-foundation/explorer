@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { TimestampToggle } from '../TimestampToggle';
 
@@ -10,7 +10,7 @@ const meta: Meta<typeof TimestampToggle> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/TimestampToggle/Responsive',
+    title: 'Components/Common/TimestampToggle@Media',
 };
 
 export default meta;

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import React, { useState } from 'react';
 import { expect, within } from 'storybook/test';
 
@@ -6,7 +6,7 @@ import { TabsContent, TabsList, TabsTrigger } from '../Tabs';
 
 const meta: Meta = {
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/Tabs',
+    title: 'Shared/Tabs',
 };
 
 export default meta;
@@ -35,7 +35,7 @@ function ControlledTabs({ disabledId, size }: { disabledId?: string; size?: 'sm'
                     </TabsTrigger>
                 ))}
             </TabsList>
-            <div className="e-pt-4">
+            <div className="pt-4">
                 {TABS.map(tab => (
                     <TabsContent key={tab.id} active={active === tab.id}>
                         {tab.content}

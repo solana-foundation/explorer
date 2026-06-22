@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BaseWarningCard } from '../BaseWarningCard';
 
 const meta: Meta<typeof BaseWarningCard> = {
     component: BaseWarningCard,
-    tags: ['autodocs'],
-    title: 'Components/Shared/UI/WarningCard/BaseWarningCard',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Shared/WarningCard/BaseWarningCard',
 };
 
 export default meta;

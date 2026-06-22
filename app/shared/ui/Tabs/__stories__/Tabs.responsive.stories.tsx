@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import React, { useState } from 'react';
 
 import { TabsContent, TabsList, TabsTrigger } from '../Tabs';
@@ -11,7 +11,7 @@ const meta: Meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Shared/UI/Tabs/Responsive',
+    title: 'Shared/Tabs@Media',
 };
 
 export default meta;
@@ -34,7 +34,7 @@ function ControlledTabs() {
                     </TabsTrigger>
                 ))}
             </TabsList>
-            <div className="e-pt-4">
+            <div className="pt-4">
                 {TABS.map(tab => (
                     <TabsContent key={tab.id} active={active === tab.id}>
                         {tab.content}

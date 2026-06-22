@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { JsonViewer, SolarizedJsonViewer } from '../JsonViewer';
 
@@ -13,14 +13,14 @@ const sampleData = {
 
 const meta: Meta<typeof JsonViewer> = {
     component: JsonViewer,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/JsonViewer',
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// e-text-dk-gray-700 is rendered in the dynamic-import loading state; usually only briefly visible.
+// text-dk-gray-700 is rendered in the dynamic-import loading state; usually only briefly visible.
 export const Default: Story = {
     args: { collapsed: 1, name: null, src: sampleData },
 };

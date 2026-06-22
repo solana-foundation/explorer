@@ -1,18 +1,16 @@
-import './scss/theme-dark.scss';
-import './styles.css';
+import './styles/styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';
 import { ClusterStatusButton } from '@components/ClusterStatusButton';
 import { Footer } from '@components/Footer';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
+import { Toaster } from '@components/shared/ui/sonner/toaster';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
-import { Toaster } from '@shared/ui/sonner/toaster';
-import { isEnvEnabled } from '@utils/env';
+import { EXPLORER_BASE_URL, isEnvEnabled } from '@utils/env';
 import { BotIdClient } from 'botid/client';
 import type { Viewport } from 'next';
-import { Rubik } from 'next/font/google';
 import { type Metadata } from 'next/types';
 import { Suspense } from 'react';
 
@@ -21,12 +19,14 @@ import { TokenInfoBatchProvider } from '@/app/entities/token-info';
 import { CookieConsent } from '@/app/features/cookie';
 import { VisibilityProvider } from '@/app/shared/lib/visibility';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+import { rubikFont } from '@/app/styles';
 
 import { botIdProtectedRoutes } from '../proxy';
 
 export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
     manifest: '/manifest.json',
+    metadataBase: new URL(EXPLORER_BASE_URL),
     title: 'Explorer | Solana',
 };
 
@@ -35,13 +35,6 @@ export const viewport: Viewport = {
     maximumScale: 1,
     width: 'device-width',
 };
-
-const rubikFont = Rubik({
-    display: 'swap',
-    subsets: ['latin'],
-    variable: '--explorer-default-font',
-    weight: ['300', '400', '700'],
-});
 
 export default function RootLayout({ analytics, children }: { analytics: React.ReactNode; children: React.ReactNode }) {
     return (
@@ -62,16 +55,16 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                             <VisibilityProvider>
                                 <TokenInfoBatchProvider>
                                     <ClusterModal />
-                                    <div className="e-flex e-min-h-screen e-flex-col">
-                                        <div className="e-min-w-[292px] e-flex-1 e-pb-6">
+                                    <div className="flex min-h-screen flex-col">
+                                        <div className="min-w-[292px] flex-1 pb-6">
                                             <Navbar>
                                                 <SearchBar />
                                             </Navbar>
                                             <MessageBanner />
-                                            <PageContainer className="e-my-3 xl:e-hidden">
+                                            <PageContainer className="my-3 xl:hidden">
                                                 <SearchBar />
                                             </PageContainer>
-                                            <PageContainer className="e-my-3 lg:e-hidden">
+                                            <PageContainer className="my-3 lg:hidden">
                                                 <ClusterStatusButton />
                                             </PageContainer>
                                             {children}

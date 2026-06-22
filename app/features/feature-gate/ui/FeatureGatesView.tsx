@@ -34,13 +34,13 @@ export function FeatureGatesView() {
 
     if (cluster === Cluster.Custom) {
         return (
-            <div className="e-mx-auto e-max-w-screen-xl e-px-4 e-py-4">
-                <h1 className="e-mb-4 e-text-2xl e-font-semibold e-text-dk-white">Feature Gates</h1>
+            <div className="mx-auto max-w-screen-xl px-4 py-4">
+                <h1 className="mb-4 text-2xl font-semibold text-dk-white">Feature Gates</h1>
                 <Card variant="tight">
                     <CardHeader>
                         <CardTitle>Custom cluster</CardTitle>
                     </CardHeader>
-                    <CardContent className="e-text-sm e-text-dark-foreground">
+                    <CardContent className="text-sm text-dark-foreground">
                         Enumeration of feature gates is not available on a custom cluster.
                     </CardContent>
                 </Card>
@@ -58,21 +58,21 @@ export function FeatureGatesView() {
         : undefined;
 
     return (
-        <div className="e-mx-auto e-max-w-screen-xl e-px-4 e-py-4">
-            <div className="e-mb-4 e-flex e-items-baseline e-gap-3">
-                <h1 className="e-text-2xl e-font-semibold e-text-dk-white">Feature Gates</h1>
-                <span className="e-text-sm e-text-dark-foreground">{clusterName(cluster)}</span>
+        <div className="mx-auto max-w-screen-xl px-4 py-4">
+            <div className="mb-4 flex items-baseline gap-3">
+                <h1 className="text-2xl font-semibold text-dk-white">Feature Gates</h1>
+                <span className="text-sm text-dark-foreground">{clusterName(cluster)}</span>
             </div>
 
             <Tabs value={tab} onValueChange={value => setTab(value as TabValue)}>
-                <TabsList className="e-mb-4 e-gap-6 e-border-b e-border-heavy-metal-950">
-                    <TabsTrigger value="activated" className="e-flex e-items-center e-gap-2">
+                <TabsList className="mb-4 gap-6 border-b border-heavy-metal-950">
+                    <TabsTrigger value="activated" className="flex items-center gap-2">
                         Activated
                         <Badge variant="secondary" size="xs">
                             {activated.length}
                         </Badge>
                     </TabsTrigger>
-                    <TabsTrigger value="upcoming" className="e-flex e-items-center e-gap-2">
+                    <TabsTrigger value="upcoming" className="flex items-center gap-2">
                         Upcoming
                         <Badge variant={upcoming.length > 0 ? 'info' : 'secondary'} size="xs">
                             {upcoming.length}
@@ -135,23 +135,23 @@ function ActivationCell({
         <>
             <Link
                 href={`/epoch/${epoch}?cluster=${clusterSlug(cluster)}`}
-                className="e-text-dk-primary-dark hover:e-text-dark-accent"
+                className="text-dk-primary-dark hover:text-dark-accent"
             >
                 {epoch}
             </Link>
-            {countdown && <div className="e-mt-0.5 e-text-dk-xs e-text-dark-muted-foreground">in ~{countdown}</div>}
+            {countdown && <div className="mt-0.5 text-dk-xs text-dark-muted-foreground">in ~{countdown}</div>}
         </>
     );
 }
 
 function OtherActivationsCell({ activations }: { activations: ClusterActivation[] }) {
     return (
-        <div className="e-flex e-flex-col e-gap-0.5 e-whitespace-nowrap e-text-dk-sm">
+        <div className="flex flex-col gap-0.5 whitespace-nowrap text-dk-sm">
             {activations.map(({ cluster, epoch }) => (
                 <Link
                     key={cluster}
                     href={`/epoch/${epoch}?cluster=${clusterSlug(cluster)}`}
-                    className="e-text-dk-primary-dark hover:e-text-dark-accent"
+                    className="text-dk-primary-dark hover:text-dark-accent"
                 >
                     {clusterName(cluster)}: {epoch}
                 </Link>

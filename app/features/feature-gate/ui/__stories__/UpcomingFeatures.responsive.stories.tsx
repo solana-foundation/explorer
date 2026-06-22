@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { UpcomingFeatures } from '../UpcomingFeatures';
 
@@ -13,7 +13,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/FeatureGate/UpcomingFeatures/Responsive',
+    title: 'Features/FeatureGate/UpcomingFeatures@Media',
 } satisfies Meta<typeof UpcomingFeatures>;
 
 export default meta;

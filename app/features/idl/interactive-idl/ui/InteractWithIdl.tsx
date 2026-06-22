@@ -1,6 +1,6 @@
 import { LoadingCard } from '@components/shared/LoadingCard';
+import { useToast } from '@components/shared/ui/sonner/use-toast';
 import type { InstructionData, SupportedIdl } from '@entities/idl';
-import { useToast } from '@shared/ui/sonner/use-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAtomValue } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';
@@ -64,11 +64,7 @@ export function InteractWithIdl({
         (txSignature: string) => {
             toast.custom({
                 description: (
-                    <ExplorerLink
-                        path={`/tx/${txSignature}`}
-                        className="e-shrink-0 e-text-xs"
-                        label="View Transaction"
-                    />
+                    <ExplorerLink path={`/tx/${txSignature}`} className="shrink-0 text-xs" label="View Transaction" />
                 ),
                 title: 'Transaction is sent',
                 type: 'success',

@@ -1,6 +1,6 @@
 import solanaLogo from '@img/logos-solana/low-contrast-solana-logo.svg';
-import type { Meta, StoryObj } from '@storybook/react';
 import { withImageLoadPending } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { Skeleton } from '../../skeleton';
@@ -15,8 +15,8 @@ const SolanaPlaceholder = (
 
 const meta: Meta<typeof ImageWithFallback> = {
     component: ImageWithFallback,
-    tags: ['autodocs'],
-    title: 'Components/Shared/UI/ImageWithFallback',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Shared/ImageWithFallback',
 };
 
 export default meta;

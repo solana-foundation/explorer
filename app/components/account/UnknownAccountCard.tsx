@@ -22,19 +22,19 @@ export function UnknownAccountCard({ account }: { account: Account }) {
         <AccountCard title="Overview" account={account}>
             <BaseTable.Row>
                 <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
             {label && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Address Label</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{label}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{label}</BaseTable.Cell>
                 </BaseTable.Row>
             )}
             <BaseTable.Row>
                 <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     {account.lamports === 0 ? (
                         <AccountNofFound account={account} />
                     ) : (
@@ -46,20 +46,20 @@ export function UnknownAccountCard({ account }: { account: Account }) {
             {account.space !== undefined && (
                 <BaseTable.Row>
                     <BaseTable.Cell>Allocated Data Size</BaseTable.Cell>
-                    <BaseTable.Cell className="e-text-right">{account.space} byte(s)</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{account.space} byte(s)</BaseTable.Cell>
                 </BaseTable.Row>
             )}
 
             <BaseTable.Row>
                 <BaseTable.Cell>Assigned Program Id</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={account.owner} alignRight link />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
             <BaseTable.Row>
                 <BaseTable.Cell>Executable</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">{account.executable ? 'Yes' : 'No'}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{account.executable ? 'Yes' : 'No'}</BaseTable.Cell>
             </BaseTable.Row>
         </AccountCard>
     );
@@ -173,7 +173,7 @@ function AccountNofFound({ account, labels = LABELS }: { account: Account; label
         return (
             <span>
                 <SearchingAddressIndicator searchingCluster={searchingCluster} />
-                <span className="e-align-middle">{labels['not-found']}</span>
+                <span className="align-middle">{labels['not-found']}</span>
             </span>
         );
     }
@@ -183,7 +183,7 @@ function AccountNofFound({ account, labels = LABELS }: { account: Account; label
     return isAddressFoundOnAnotherClsuter ? (
         <span>
             <AdjacentAddressLink address={address} foundCluster={foundCluster} />
-            <span className="e-align-middle">{labels['not-found']}</span>
+            <span className="align-middle">{labels['not-found']}</span>
         </span>
     ) : (
         <span>{labels['not-found']}</span>
@@ -198,7 +198,7 @@ function AdjacentAddressLink({ address, foundCluster }: { address: string; found
     });
 
     return (
-        <a href={foundClusterPath} className="e-align-middle e-text-dk-info" style={{ marginRight: '5px' }}>
+        <a href={foundClusterPath} className="align-middle text-dk-info" style={{ marginRight: '5px' }}>
             Found on {clusterName(foundCluster)}
         </a>
     );
@@ -215,12 +215,9 @@ function SearchingAddressIndicator({ searchingCluster }: { searchingCluster: Clu
                     marginRight: '5px',
                     width: '10px',
                 }}
-                className={`${spinnerCls} e-inline-block e-align-middle`}
+                className={`${spinnerCls} inline-block align-middle`}
             />
-            <span
-                className="e-align-middle e-text-dk-gray-700"
-                style={{ marginRight: '10px', verticalAlign: 'middle' }}
-            >
+            <span className="align-middle text-dk-gray-700" style={{ marginRight: '10px', verticalAlign: 'middle' }}>
                 checking {clusterName(searchingCluster).toLowerCase()}
             </span>
         </>

@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockProgramsCard } from '../BlockProgramsCard';
 
@@ -12,7 +12,7 @@ const meta: Meta<typeof BlockProgramsCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Block/BlockProgramsCard/Responsive',
+    title: 'Components/Block/BlockProgramsCard@Media',
 };
 
 export default meta;

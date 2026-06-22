@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { withImageLoadPending } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, waitFor, within } from 'storybook/test';
 
 import solanaHero from '@/app/components/shared/ui/image/__stories__/solana_hero_generated.jpg';
@@ -11,7 +11,7 @@ import { ProxiedImage } from '../ProxiedImage';
 const meta: Meta<typeof ProxiedImage> = {
     args: { getProxiedUri: (uri: string) => uri },
     component: ProxiedImage,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Metadata/ProxiedImage',
 };
 
@@ -126,7 +126,7 @@ export const FallbackProbing: Story = {
         const canvas = within(canvasElement);
         canvas.getByAltText('nft').dispatchEvent(new Event('error'));
         // The skeleton keeps holding the slot while the reason probe runs…
-        await waitFor(() => expect(canvasElement.querySelector('.e-animate-pulse')).not.toBeNull());
+        await waitFor(() => expect(canvasElement.querySelector('.animate-pulse')).not.toBeNull());
         // …and no failure reason is surfaced yet (no logo fallback with a reason).
         expect(canvas.queryByAltText('Image could not be displayed')).toBeNull();
     },
@@ -164,7 +164,7 @@ export const Loading: Story = {
     args: { alt: 'nft', style: { height: 120, width: 120 }, uri: solanaHero.src },
     decorators: [withImageLoadPending],
     play: async ({ canvasElement }) => {
-        expect(canvasElement.querySelector('.e-animate-pulse')).not.toBeNull();
+        expect(canvasElement.querySelector('.animate-pulse')).not.toBeNull();
     },
 };
 

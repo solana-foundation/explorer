@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import type { SearchItem } from '../../lib/types';
 import { SearchResultItem } from '../SearchResultItem';
 
 const meta: Meta<typeof SearchResultItem> = {
     component: SearchResultItem,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/Search/SearchResultItem',
 };
 

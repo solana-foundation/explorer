@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import type { SysvarStakeHistoryAccount } from '@validators/accounts/sysvar';
 
 import { StakeHistoryCard } from '../StakeHistoryCard';
@@ -18,7 +18,7 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Stake/StakeHistoryCard/Responsive',
+    title: 'Features/Stake/StakeHistoryCard@Media',
 } satisfies Meta<typeof StakeHistoryCard>;
 
 export default meta;

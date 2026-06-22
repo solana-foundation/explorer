@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { EVerificationSource, type VerificationSource } from '../../lib/types';
 import { ERiskLevel } from '../../model/use-rugcheck';
@@ -33,8 +33,7 @@ const blupryntApply: VerificationSource = {
 
 const meta: Meta<typeof TokenVerificationContent> = {
     component: TokenVerificationContent,
-    parameters: { layout: 'padded' },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Features/TokenVerificationBadge/TokenVerificationContent',
 };
 

@@ -1,11 +1,11 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/react';
 import {
     nextjsParameters,
     withClusterAndAccounts,
     withScrollAnchor,
     withTokenInfoBatch,
 } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 
@@ -44,10 +44,10 @@ export const WithInnerCards: Story = {
         // innerCards renders inside a <div> wrapper, so each entry should be a block-level
         // element (typically a nested InstructionCard in real usage).
         innerCards: [
-            <div key="inner-1" className="e-rounded-md e-border e-border-solid e-border-dk-gray-700-dark e-p-3">
+            <div key="inner-1" className="rounded-md border border-solid border-dk-gray-700-dark p-3">
                 Inner instruction 1
             </div>,
-            <div key="inner-2" className="e-mt-2 e-rounded-md e-border e-border-solid e-border-dk-gray-700-dark e-p-3">
+            <div key="inner-2" className="mt-2 rounded-md border border-solid border-dk-gray-700-dark p-3">
                 Inner instruction 2
             </div>,
         ],

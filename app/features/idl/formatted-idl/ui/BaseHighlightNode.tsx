@@ -12,13 +12,13 @@ export const BaseHighlightNode = React.forwardRef<HTMLElement, BaseHighlightNode
         return (
             <mark
                 className={cn(
-                    'e-text-current',
-                    'e-p-0',
-                    'e-outline e-outline-dashed e-outline-1 e-outline-offset-0',
-                    'e-outline-accent',
-                    // TODO: Background color is inline, because e-bg-accent-900/50 is not working
+                    'text-current',
+                    'p-0',
+                    'outline outline-dashed outline-1 outline-offset-0',
+                    'outline-accent',
+                    // TODO: Background color is inline, because bg-accent-900/50 is not working
                     // Update when fixed
-                    'e-bg-[color-mix(in_oklch,theme(colors.accent.900),transparent_50%)]',
+                    'bg-[color-mix(in_oklch,theme(colors.accent.900),transparent_50%)]',
                     className,
                 )}
                 {...props}

@@ -1,8 +1,8 @@
 import type { ClusterState } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { hashProgramData } from '@utils/verified-builds';
 import { SWRConfig } from 'swr';
@@ -61,7 +61,7 @@ const meta: Meta<typeof VerifiedProgramBadge> = {
     args: { programData, pubkey },
     component: VerifiedProgramBadge,
     parameters: nextjsParameters,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Common/VerifiedProgramBadge',
 };
 

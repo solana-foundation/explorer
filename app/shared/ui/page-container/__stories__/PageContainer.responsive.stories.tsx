@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { PageContainer } from '../PageContainer';
 
@@ -10,7 +10,7 @@ const meta: Meta<typeof PageContainer> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Shared/UI/PageContainer/Responsive',
+    title: 'Components/Shared/PageContainer@Media',
 };
 
 export default meta;
@@ -18,7 +18,7 @@ type Story = StoryObj<typeof meta>;
 
 const render = () => (
     <PageContainer>
-        <div className="e-rounded-md e-border e-border-solid e-border-neutral-700 e-bg-neutral-900 e-px-4 e-py-6 e-text-neutral-200">
+        <div className="rounded-md border border-solid border-neutral-700 bg-neutral-900 px-4 py-6 text-neutral-200">
             Page container at current viewport
         </div>
     </PageContainer>

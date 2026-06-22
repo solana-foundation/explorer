@@ -1,11 +1,11 @@
 import { gen } from '@__fixtures__/gen';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockhashesCard } from '../BlockhashesCard';
 
 const meta: Meta<typeof BlockhashesCard> = {
     component: BlockhashesCard,
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Components/Account/BlockhashesCard',
 };
 
