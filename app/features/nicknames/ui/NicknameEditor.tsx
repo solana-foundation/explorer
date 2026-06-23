@@ -9,7 +9,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from '@/app/components/shared/ui/dialog';
+import { Dialog, DialogPortal, DialogTitle } from '@/app/components/shared/ui/dialog';
 import { cn } from '@/app/components/shared/utils';
 import { FormControl } from '@/app/shared/ui/FormControl';
 
@@ -52,10 +52,10 @@ export function NicknameEditor({ address, open, onClose }: Props) {
     return (
         <Dialog open={open} onOpenChange={isOpen => !isOpen && onClose()}>
             <DialogPortal>
-                <DialogOverlay />
+                <DialogPrimitive.Overlay className="fixed inset-0 z-[1203] bg-black/80" />
                 <DialogPrimitive.Content
                     className={cn(
-                        'fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-[500px] -translate-x-1/2 -translate-y-1/2',
+                        'fixed left-1/2 top-1/2 z-[1203] w-[calc(100%-2rem)] max-w-[500px] -translate-x-1/2 -translate-y-1/2',
                         'rounded-lg border border-transparent bg-neutral-800 p-4 shadow-lg',
                         'data-[state=open]:animate-in data-[state=closed]:animate-out',
                         'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
