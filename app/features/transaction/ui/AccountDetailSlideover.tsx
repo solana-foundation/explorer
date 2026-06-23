@@ -44,16 +44,21 @@ export function AccountDetailSlideover({
     const [nicknameOpen, setNicknameOpen] = useState(false);
     const [copyState, copy] = useCopyToClipboard(1500);
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (!nextOpen) setNicknameOpen(false);
+        onOpenChange(nextOpen);
+    };
+    const handleEscapeKeyDown = (event: KeyboardEvent) => {
+        if (!nicknameOpen) return;
+
+        // NicknameEditor uses Escape to cancel editing. Prevent Radix from also
+        // dismissing the parent slideover from its capture-phase document listener.
+        event.preventDefault();
+    };
 
     return (
-        <Slideover
-            open={open}
-            onOpenChange={v => {
-                if (!v) setNicknameOpen(false);
-                onOpenChange(v);
-            }}
-        >
-            <SlideoverContent aria-describedby={undefined}>
+        <Slideover open={open} onOpenChange={handleOpenChange}>
+            <SlideoverContent aria-describedby={undefined} onEscapeKeyDown={handleEscapeKeyDown}>
                 <div className="space-y-2 px-4 pb-3 pt-4">
                     <div className="min-w-0 flex-1">
                         <SlideoverTitle className="mb-1.5 tracking-wide !text-outer-space-300">
