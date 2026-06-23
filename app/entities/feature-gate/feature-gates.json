@@ -1480,7 +1480,7 @@
     "testnet_activation_epoch": 954,
     "devnet_activation_epoch": 1066,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 991,
     "description": "Allow validators to update their commission rate at any time but delay those commission updates for at least one full epoch."
   },
   {
@@ -1977,7 +1977,7 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 978,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -2010,7 +2010,7 @@
   {
     "comms_required": null,
     "description": "Specify the protocol for validating chained block ids under both TowerBFT and Alpenglow.",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1091,
     "key": "vcmrw431aNM8ngQ46derkZXipoTGQdbHkEygBDh12dA",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
@@ -2030,5 +2030,29 @@
     ],
     "testnet_activation_epoch": 977,
     "title": "SIMD-340: Encompassing check for validate chained block ID"
+  },
+  {
+    "comms_required": null,
+    "description": "Before a transaction can be executed, every account it may read from or write to must be loaded, including any programs it may call. The amount of data a transaction is allowed to load is capped, and if it exceeds that limit, loading is aborted. This functionality is already imp\u2026",
+    "devnet_activation_epoch": null,
+    "key": "LTDSzjZKFJMKHYpNycG1FrWwGGTaFFwqEFjB5GGLNVD",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.1.0-beta.1"
+    ],
+    "min_fd_versions": [
+      "v1.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0186-loaded-transaction-data-size-specification.md"
+    ],
+    "simds": [
+      "0186"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0186 Amendment: Define fee-only semantics"
   }
 ]
