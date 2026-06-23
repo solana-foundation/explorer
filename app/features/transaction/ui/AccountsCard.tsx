@@ -82,14 +82,16 @@ function TransactionAccountRow({
                     <div className="mr-2 text-outer-space-300 [grid-area:number] lg:mr-0">{index + 1}</div>
                     <div className="[grid-area:address]">
                         <div className="flex items-center justify-between gap-1 lg:justify-normal landscape:justify-normal">
-                            <Address
-                                className={!isDesktop ? 'text-[#33a382]' : ''}
-                                pubkey={pubkey}
-                                link={isDesktop}
-                                fetchTokenLabelInfo
-                                noNicknameEditing={!isDesktop}
-                                noCopy={!isDesktop}
-                            />
+                            <div onClick={e => isDesktop && e.stopPropagation()}>
+                                <Address
+                                    className={!isDesktop ? 'text-[#33a382]' : ''}
+                                    pubkey={pubkey}
+                                    link={isDesktop}
+                                    fetchTokenLabelInfo
+                                    noNicknameEditing={!isDesktop}
+                                    noCopy={!isDesktop}
+                                />
+                            </div>
                         </div>
                         {hasBadges && (
                             <span className="mt-1 inline-flex flex-wrap gap-1">
