@@ -5,7 +5,7 @@
 | Static | `/` | 130 kB | 1.15 MB |
 | Static | `/_not-found` | 0 B | 1.03 MB |
 | Dynamic | `/address/[address]` | 370 kB | 1.39 MB |
-| Dynamic | `/address/[address]/anchor-account` | 320 kB | 1.34 MB |
+| Dynamic | `/address/[address]/anchor-account` | 330 kB | 1.34 MB |
 | Dynamic | `/address/[address]/anchor-program` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/attestation` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/attributes` | 320 kB | 1.34 MB |
@@ -16,7 +16,7 @@
 | Dynamic | `/address/[address]/entries` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/feature-gate` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/idl` | 470 kB | 1.49 MB |
-| Dynamic | `/address/[address]/instructions` | 370 kB | 1.38 MB |
+| Dynamic | `/address/[address]/instructions` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/metadata` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/program-multisig` | 320 kB | 1.34 MB |
@@ -24,9 +24,9 @@
 | Dynamic | `/address/[address]/security` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/stake-history` | 320 kB | 1.34 MB |
-| Dynamic | `/address/[address]/token-extensions` | 320 kB | 1.34 MB |
+| Dynamic | `/address/[address]/token-extensions` | 330 kB | 1.34 MB |
 | Dynamic | `/address/[address]/tokens` | 460 kB | 1.47 MB |
-| Dynamic | `/address/[address]/transfers` | 370 kB | 1.38 MB |
+| Dynamic | `/address/[address]/transfers` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/verified-build` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/vote-history` | 320 kB | 1.34 MB |
 | Dynamic | `/api/ans-domains/[address]` | — | — |
@@ -49,11 +49,11 @@
 | Dynamic | `/block/[slot]/programs` | 220 kB | 1.24 MB |
 | Dynamic | `/block/[slot]/rewards` | 220 kB | 1.24 MB |
 | Dynamic | `/epoch/[epoch]` | 10 kB | 1.04 MB |
-| Static | `/feature-gates` | 40 kB | 1.07 MB |
+| Static | `/feature-gates` | 50 kB | 1.07 MB |
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
 | Static | `/tos` | 880 B | 1.03 MB |
-| Dynamic | `/tx/[signature]` | 570 kB | 1.59 MB |
-| Dynamic | `/tx/[signature]/inspect` | 350 kB | 1.36 MB |
-| Static | `/tx/inspector` | 350 kB | 1.36 MB |
+| Dynamic | `/tx/[signature]` | 580 kB | 1.59 MB |
+| Dynamic | `/tx/[signature]/inspect` | 350 kB | 1.37 MB |
+| Static | `/tx/inspector` | 350 kB | 1.37 MB |
