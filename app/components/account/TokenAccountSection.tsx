@@ -71,7 +71,7 @@ const getEthAddress = (link?: string) => {
     return address;
 };
 
-const StatusBadge = ({ status }: { status: string }) => (
+export const StatusBadge = ({ status }: { status: string }) => (
     <Badge ui="dashkit" variant={status === 'initialized' ? 'success' : 'warning'}>
         {capitalCase(status)}
     </Badge>

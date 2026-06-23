@@ -25,7 +25,7 @@
 | Dynamic | `/address/[address]/slot-hashes` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/stake-history` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/token-extensions` | 320 kB | 1.34 MB |
-| Dynamic | `/address/[address]/tokens` | 450 kB | 1.47 MB |
+| Dynamic | `/address/[address]/tokens` | 460 kB | 1.47 MB |
 | Dynamic | `/address/[address]/transfers` | 370 kB | 1.38 MB |
 | Dynamic | `/address/[address]/verified-build` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/vote-history` | 320 kB | 1.34 MB |
@@ -54,6 +54,6 @@
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
 | Static | `/tos` | 880 B | 1.03 MB |
-| Dynamic | `/tx/[signature]` | 560 kB | 1.57 MB |
+| Dynamic | `/tx/[signature]` | 570 kB | 1.59 MB |
 | Dynamic | `/tx/[signature]/inspect` | 350 kB | 1.36 MB |
 | Static | `/tx/inspector` | 350 kB | 1.36 MB |

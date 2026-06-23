@@ -1,28 +1,171 @@
+'use client';
+
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { SolBalance } from '@components/common/SolBalance';
-import { RawDataField } from '@components/shared/RawDataField';
-import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
 import { cn } from '@components/shared/utils';
-import { useAccountsInfo } from '@entities/account';
+import { AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
+import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
-import React, { useMemo } from 'react';
-import { Code } from 'react-feather';
+import React, { useMemo, useState } from 'react';
+import { ChevronDown } from 'react-feather';
 
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 
+import { AccountBadges } from './AccountBadges';
+import { AccountDetailSlideover } from './AccountDetailSlideover';
+import { AccountExpandedContent } from './AccountExpandedContent';
 import { CollapsibleSection } from './CollapsibleSection';
+
+type TransactionAccountRowProps = {
+    account: ParsedMessageAccount;
+    accountInfo?: AccountInfo;
+    accountInfoLoading: boolean;
+    index: number;
+    message: ParsedMessage;
+    post: number;
+    pre: number;
+};
+
+function TransactionAccountRow({
+    account,
+    accountInfo,
+    accountInfoLoading,
+    index,
+    message,
+    post,
+    pre,
+}: TransactionAccountRowProps) {
+    const [expanded, setExpanded] = useState(false);
+    const [slideoverOpen, setSlideoverOpen] = useState(false);
+    const { isLandscape, isLg } = useBreakpoint();
+    const isDesktop = isLg || isLandscape;
+
+    const pubkey = account.pubkey;
+    const key = pubkey.toBase58();
+    const delta = new BigNumber(post).minus(new BigNumber(pre));
+
+    const hasBadges =
+        index === 0 ||
+        account.signer ||
+        account.writable ||
+        message.instructions.some(ix => ix.programId.equals(pubkey)) ||
+        account.source === 'lookupTable';
+
+    const handleRowClick = () => {
+        if (isDesktop) {
+            setExpanded(v => !v);
+        } else {
+            setSlideoverOpen(true);
+        }
+    };
+
+    return (
+        <>
+            <div className="border-1 border-b border-white/10 [border-bottom-style:solid] last:border-b-0">
+                {/* Main row */}
+                <div
+                    className={cn(
+                        'min-h-9 px-3 py-2.5 md:px-4',
+                        'grid items-start gap-x-0 gap-y-0.5 whitespace-nowrap text-sm md:gap-y-0 lg:gap-x-5 landscape:gap-x-5',
+                        'grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_1.5rem] landscape:grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_1.5rem]',
+                        "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance_expand'] landscape:[grid-template-areas:'number_address_delta_balance_expand']",
+                        'cursor-pointer',
+                    )}
+                    onClick={handleRowClick}
+                >
+                    <div className="mr-2 text-outer-space-300 [grid-area:number] lg:mr-0">{index + 1}</div>
+                    <div className="[grid-area:address]">
+                        <div className="flex items-center justify-between gap-1 lg:justify-normal landscape:justify-normal">
+                            <div onClick={e => isDesktop && e.stopPropagation()}>
+                                <Address
+                                    className={!isDesktop ? 'text-[#33a382]' : ''}
+                                    pubkey={pubkey}
+                                    link={isDesktop}
+                                    fetchTokenLabelInfo
+                                    noNicknameEditing={!isDesktop}
+                                    noCopy={!isDesktop}
+                                />
+                            </div>
+                        </div>
+                        {hasBadges && (
+                            <span className="mt-1 inline-flex flex-wrap gap-1">
+                                <AccountBadges index={index} message={message} pubkey={pubkey} account={account} />
+                            </span>
+                        )}
+                    </div>
+                    <div className="justify-self-end [grid-area:delta]">
+                        <BalanceDelta delta={delta} isSol />
+                    </div>
+                    <div className="justify-self-end [grid-area:balance]">
+                        <SolBalance lamports={post} />
+                    </div>
+
+                    {/* Desktop: expand button */}
+                    <div className="hidden items-center justify-center [grid-area:expand] lg:flex landscape:flex">
+                        <Button
+                            aria-expanded={expanded}
+                            aria-label={expanded ? 'Collapse account details' : 'Expand account details'}
+                            className="!h-5 w-6"
+                            onClick={e => {
+                                e.stopPropagation();
+                                setExpanded(v => !v);
+                            }}
+                            size="icon"
+                            variant="ghost"
+                        >
+                            <ChevronDown
+                                size={16}
+                                className={cn(
+                                    'text-outer-space-300 transition-transform duration-200 ease-in-out',
+                                    expanded ? 'rotate-0' : 'rotate-90',
+                                )}
+                            />
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Desktop: animated expanded content */}
+                <div
+                    className={cn(
+                        'hidden lg:grid landscape:grid',
+                        'transition-[grid-template-rows,opacity] duration-200 ease-in-out',
+                        expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
+                    )}
+                >
+                    <div className="min-h-0 overflow-hidden">
+                        <AccountExpandedContent
+                            accountInfo={accountInfo}
+                            accountInfoLoading={accountInfoLoading}
+                            address={key}
+                            enabled={expanded}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile: slideover */}
+            <AccountDetailSlideover
+                account={account}
+                accountInfo={accountInfo}
+                accountInfoLoading={accountInfoLoading}
+                index={index}
+                message={message}
+                onOpenChange={setSlideoverOpen}
+                open={slideoverOpen}
+            />
+        </>
+    );
+}
 
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
-    const { isLg } = useBreakpoint();
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const message = transactionWithMeta?.transaction.message;
@@ -50,97 +193,18 @@ export function AccountsCard({ signature }: SignatureProps) {
     }
 
     const accountRows = message.accountKeys.map((account, index) => {
-        const pre = meta.preBalances[index];
-        const post = meta.postBalances[index];
-        const pubkey = account.pubkey;
-        const key = pubkey.toBase58();
-        const delta = new BigNumber(post).minus(new BigNumber(pre));
-        const accountInfo = accounts.get(key);
-
-        const hasBadges =
-            index === 0 ||
-            account.signer ||
-            account.writable ||
-            message.instructions.some(ix => ix.programId.equals(pubkey)) ||
-            account.source === 'lookupTable';
-
-        const badges = (
-            <>
-                {index === 0 && (
-                    <Badge ui="dashkit" variant="success" className="me-1">
-                        Fee Payer
-                    </Badge>
-                )}
-                {account.signer && (
-                    <Badge ui="dashkit" variant="info" className="me-1">
-                        Signer
-                    </Badge>
-                )}
-                {account.writable && (
-                    <Badge ui="dashkit" variant="danger" className="me-1">
-                        Writable
-                    </Badge>
-                )}
-                {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
-                    <Badge ui="dashkit" variant="warning" className="me-1">
-                        Program
-                    </Badge>
-                )}
-                {account.source === 'lookupTable' && (
-                    <Badge ui="dashkit" variant="gray" className="me-1">
-                        Address Table Lookup
-                    </Badge>
-                )}
-            </>
-        );
-
-        const dataCell = loading ? (
-            <span className="text-xs text-outer-space-300">Loading…</span>
-        ) : accountInfo && accountInfo.size > 0 ? (
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button variant="ghost" className="h-auto !px-1 !py-0 text-xs">
-                        <Code size={11} />
-                        <span>{accountInfo.size.toLocaleString('en-US')}</span>
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="mx-4 w-auto !rounded-lg border-none p-0" align="end">
-                    <RawDataField data={accountInfo.data} filename={key} />
-                </PopoverContent>
-            </Popover>
-        ) : null;
-
+        const pubkeyStr = account.pubkey.toBase58();
         return (
-            <div
-                key={key}
-                className={cn(
-                    'min-h-9 px-3 py-2.5 md:px-4',
-                    'grid items-start gap-x-0 gap-y-0.5 whitespace-nowrap text-sm md:gap-y-0 lg:gap-x-5',
-                    'grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)]',
-                    "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance']",
-                    'border-1 border-b border-white/10 [border-bottom-style:solid] last:border-b-0',
-                )}
-            >
-                <div className="mr-2 text-outer-space-300 [grid-area:number] lg:mr-0">{index + 1}</div>
-                <div className="[grid-area:address]">
-                    <div className="flex items-center justify-between gap-1 lg:justify-normal">
-                        <Address pubkey={pubkey} link fetchTokenLabelInfo />
-                    </div>
-                    {hasBadges && (
-                        <span className="mt-1 inline-flex flex-wrap gap-1">
-                            {badges}
-                            {isLg && dataCell}
-                        </span>
-                    )}
-                </div>
-                <div className="justify-self-end [grid-area:delta]">
-                    <BalanceDelta delta={delta} isSol />
-                </div>
-                <div className="justify-self-end [grid-area:balance]">
-                    <SolBalance lamports={post} />
-                </div>
-                {!isLg && <div className="justify-self-end [grid-area:size]">{dataCell}</div>}
-            </div>
+            <TransactionAccountRow
+                key={pubkeyStr}
+                account={account}
+                accountInfo={accounts.get(pubkeyStr)}
+                accountInfoLoading={loading}
+                index={index}
+                message={message}
+                post={meta.postBalances[index]}
+                pre={meta.preBalances[index]}
+            />
         );
     });
 
@@ -148,8 +212,8 @@ export function AccountsCard({ signature }: SignatureProps) {
         <CollapsibleSection id="accounts" title="Accounts &amp; SOL balance">
             <div
                 className={cn(
-                    'hidden px-3 py-1.5 md:px-4 lg:grid',
-                    'grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)] gap-5 text-xs uppercase text-outer-space-300',
+                    'hidden px-3 py-1.5 md:px-4 lg:grid landscape:grid',
+                    'grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_2rem] gap-5 text-xs uppercase text-outer-space-300',
                     'border-1 border-b border-white/10 [border-bottom-style:solid]',
                 )}
             >
@@ -157,6 +221,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                 <div>Address</div>
                 <div className="text-right">Change (SOL)</div>
                 <div className="text-right">Post Balance (SOL)</div>
+                <div />
             </div>
             {accountRows}
             {!loading && totalAccountSize > 0 && (
