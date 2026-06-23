@@ -193,8 +193,12 @@ export function Address({
                         <EditIcon className="-mt-0.5" />
                     </button>
                 )}
-                {!noNicknameEditing && showNicknameEditor && (
-                    <NicknameEditor address={address} onClose={() => setShowNicknameEditor(false)} />
+                {!noNicknameEditing && (
+                    <NicknameEditor
+                        address={address}
+                        open={showNicknameEditor}
+                        onClose={() => setShowNicknameEditor(false)}
+                    />
                 )}
             </div>
         </span>

@@ -6,6 +6,10 @@ import { fn } from 'storybook/test';
 import { NicknameEditor } from '../NicknameEditor';
 
 const meta = {
+    args: {
+        onClose: fn(),
+        open: true,
+    },
     component: NicknameEditor,
     decorators: [withAutoFocusReleased, withFixedContainer],
     parameters: {
@@ -30,14 +34,12 @@ type Story = StoryObj<typeof meta>;
 export const Primary: Story = {
     args: {
         address: 'DXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhY',
-        onClose: fn(),
     },
 };
 
 export const WithExistingNickname: Story = {
     args: {
         address: 'So11111111111111111111111111111111111111112',
-        onClose: fn(),
     },
     beforeEach: () => {
         // Set up a nickname in localStorage for this story
@@ -51,7 +53,6 @@ export const WithExistingNickname: Story = {
 export const LongAddress: Story = {
     args: {
         address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-        onClose: fn(),
     },
 };
 
@@ -61,6 +62,5 @@ export const LongAddress: Story = {
 export const TruncatedAddress: Story = {
     args: {
         address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA-So11111111111111111111111111111111111111112-EXTRA',
-        onClose: fn(),
     },
 };
