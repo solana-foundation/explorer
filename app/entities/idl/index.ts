@@ -30,6 +30,11 @@ export type { ResolvedClientIdls, ResolveProgramIdlsClientArgs } from './api/loa
 export { fetchProgramIdls } from './api/fetch-program-idls';
 export type { FetchedProgramIdls } from './api/fetch-program-idls';
 
+// Per-program instruction-name resolvers built from each program's IDL by discriminator (no Borsh
+// decode) — used to label transaction-history rows that the RPC leaves as "Unknown Instruction".
+export { useInstructionNameResolvers } from './model/use-instruction-name-resolvers';
+export type { InstructionNameResolver } from './model/use-instruction-name-resolvers';
+
 export { getIdlSpecType as getDisplayIdlSpecType } from './model/converters/convert-display-idl';
 export { formatDisplayIdl, formatSerdeIdl, getFormattedIdl } from './model/formatters/format';
 export { useFormatAnchorIdl } from './model/use-format-anchor-idl';

@@ -11,6 +11,7 @@ import { useFetchAccountHistory } from '@providers/accounts/history';
 import { useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { HistoryCardFooter, HistoryCardHeader } from '@shared/ui/HistoryCard';
 import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
@@ -26,7 +27,7 @@ import { Card } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
-import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
+import { getTransactionRows } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
 
 type IndexedTransfer = {

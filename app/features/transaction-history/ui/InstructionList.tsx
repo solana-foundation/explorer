@@ -1,10 +1,11 @@
+import { type InstructionSummary } from '@entities/transaction-data';
+
 import { Skeleton } from '@/app/components/shared/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
-import { TransactionInstructionInfo } from '@/app/utils/instruction';
 
 const INLINE_LIMIT = 3;
 
-export function InstructionList({ instructions }: { instructions: TransactionInstructionInfo[] }) {
+export function InstructionList({ instructions }: { instructions: InstructionSummary[] }) {
     const visible = instructions.slice(0, INLINE_LIMIT);
     const overflow = instructions.slice(INLINE_LIMIT);
 
@@ -18,15 +19,6 @@ export function InstructionList({ instructions }: { instructions: TransactionIns
     );
 }
 
-function InstructionLine({ instruction }: { instruction: TransactionInstructionInfo }) {
-    return (
-        <span className="cursor-default text-xs">
-            <span className="text-muted">{instruction.program}: </span>
-            <span className="text-white">{instruction.name}</span>
-        </span>
-    );
-}
-
 export function InstructionListSkeleton() {
     return (
         <div className="mt-1 flex flex-col gap-1">
@@ -36,7 +28,16 @@ export function InstructionListSkeleton() {
     );
 }
 
-function OverflowLine({ instructions }: { instructions: TransactionInstructionInfo[] }) {
+function InstructionLine({ instruction }: { instruction: InstructionSummary }) {
+    return (
+        <span className="cursor-default text-xs">
+            <span className="text-muted">{instruction.program}: </span>
+            <span className="text-white">{instruction.name}</span>
+        </span>
+    );
+}
+
+function OverflowLine({ instructions }: { instructions: InstructionSummary[] }) {
     return (
         <Tooltip>
             <TooltipTrigger asChild>
