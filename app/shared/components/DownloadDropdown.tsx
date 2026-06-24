@@ -12,6 +12,8 @@ import { type ByteArray, encodeTransactionData as encodeBytes, type EncodingForm
 import React from 'react';
 import { Download } from 'react-feather';
 
+export type DownloadState = 'idle' | 'downloaded';
+
 import { Logger } from '@/app/shared/lib/logger';
 import { triggerDownloadText } from '@/app/shared/lib/triggerDownload';
 
@@ -33,6 +35,7 @@ export function DownloadDropdown({
     filename,
     encodings = DEFAULT_ENCODINGS,
     onOpenChange,
+    onDownload,
     children,
 }: {
     data: ByteArray | undefined;
@@ -42,13 +45,19 @@ export function DownloadDropdown({
     filename: string;
     encodings?: EncodingFormat[];
     onOpenChange?: (open: boolean) => void;
+    onDownload?: () => void;
     children?: React.ReactNode;
 }) {
     if (encodings.length <= 1) {
         const trigger = children ?? <DefaultTrigger disabled={loading || disabled} />;
         if (React.isValidElement(trigger)) {
             return React.cloneElement(trigger as React.ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>>, {
-                onClick: () => data && handleDownload(data, encodings[0], filename),
+                onClick: () => {
+                    if (data) {
+                        handleDownload(data, encodings[0], filename);
+                        onDownload?.();
+                    }
+                },
             });
         }
         return trigger;
@@ -65,7 +74,12 @@ export function DownloadDropdown({
                         <DropdownMenuItem
                             key={encoding}
                             disabled={loading || !data}
-                            onClick={() => data && handleDownload(data, encoding, filename)}
+                            onClick={() => {
+                                if (data) {
+                                    handleDownload(data, encoding, filename);
+                                    onDownload?.();
+                                }
+                            }}
                         >
                             {loading ? `Loading ${encoding}…` : `Download ${encoding}`}
                         </DropdownMenuItem>

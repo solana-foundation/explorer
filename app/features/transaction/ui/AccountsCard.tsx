@@ -82,7 +82,7 @@ function TransactionAccountRow({
                     <div className="mr-2 text-outer-space-300 [grid-area:number] lg:mr-0">{index + 1}</div>
                     <div className="[grid-area:address]">
                         <div className="flex items-center justify-between gap-1 lg:justify-normal landscape:justify-normal">
-                            <div onClick={e => isDesktop && e.stopPropagation()}>
+                            <div className="min-w-0 flex-1" onClick={e => isDesktop && e.stopPropagation()}>
                                 <Address
                                     className={!isDesktop ? 'text-[#33a382]' : ''}
                                     pubkey={pubkey}

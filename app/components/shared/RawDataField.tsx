@@ -5,7 +5,7 @@ import { HexData } from '@components/shared/HexData';
 import { Button } from '@components/shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/tabs';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Check, ChevronDown, Copy } from 'react-feather';
+import { Check, ChevronDown, Copy, Download } from 'react-feather';
 
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { type ByteArray, toBase64, toHex } from '@/app/shared/lib/bytes';
@@ -33,6 +33,14 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     const [tab, setTab] = useState<'hex' | 'base64'>('hex');
     const [expanded, setExpanded] = useState(false);
     const [copyState, copy] = useCopyToClipboard();
+    const [downloadState, setDownloadState] = useState<'idle' | 'downloaded'>('idle');
+
+    useEffect(() => {
+        if (downloadState === 'downloaded') {
+            const t = setTimeout(() => setDownloadState('idle'), 1000);
+            return () => clearTimeout(t);
+        }
+    }, [downloadState]);
 
     useEffect(() => {
         setExpanded(false);
@@ -95,7 +103,15 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                         loading={loading}
                         disabled={!hasData}
                         encodings={[tab]}
-                    />
+                        onDownload={() => setDownloadState('downloaded')}
+                    >
+                        <Button variant="outline" size="sm" aria-label="Download" disabled={!hasData || loading}>
+                            {downloadState === 'downloaded' ? <Check size={12} /> : <Download size={12} />}
+                            <span className="hidden md:inline">
+                                {downloadState === 'downloaded' ? 'Downloaded!' : 'Download'}
+                            </span>
+                        </Button>
+                    </DownloadDropdown>
                 </div>
             </div>
 
