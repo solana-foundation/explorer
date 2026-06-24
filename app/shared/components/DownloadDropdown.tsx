@@ -54,8 +54,8 @@ export function DownloadDropdown({
             return React.cloneElement(trigger as React.ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>>, {
                 onClick: () => {
                     if (data) {
-                        handleDownload(data, encodings[0], filename);
-                        onDownload?.();
+                        const ok = handleDownload(data, encodings[0], filename);
+                        if (ok) onDownload?.();
                     }
                 },
             });
@@ -76,8 +76,8 @@ export function DownloadDropdown({
                             disabled={loading || !data}
                             onClick={() => {
                                 if (data) {
-                                    handleDownload(data, encoding, filename);
-                                    onDownload?.();
+                                    const ok = handleDownload(data, encoding, filename);
+                                    if (ok) onDownload?.();
                                 }
                             }}
                         >
@@ -90,11 +90,13 @@ export function DownloadDropdown({
     );
 }
 
-function handleDownload(data: ByteArray, encoding: EncodingFormat, filename: string) {
+function handleDownload(data: ByteArray, encoding: EncodingFormat, filename: string): boolean {
     try {
         const encoded = encodeBytes(data, encoding);
         triggerDownloadText(encoded, `${filename}_${encoding}.txt`);
+        return true;
     } catch (err) {
         Logger.error(new Error(`Failed to download ${encoding} file`, { cause: err }));
+        return false;
     }
 }

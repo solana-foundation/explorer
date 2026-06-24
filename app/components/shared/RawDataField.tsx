@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/
 import React, { useEffect, useMemo, useState } from 'react';
 import { Check, ChevronDown, Copy, Download } from 'react-feather';
 
-import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
+import { DownloadDropdown, type DownloadState } from '@/app/shared/components/DownloadDropdown';
 import { type ByteArray, toBase64, toHex } from '@/app/shared/lib/bytes';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
@@ -33,7 +33,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     const [tab, setTab] = useState<'hex' | 'base64'>('hex');
     const [expanded, setExpanded] = useState(false);
     const [copyState, copy] = useCopyToClipboard();
-    const [downloadState, setDownloadState] = useState<'idle' | 'downloaded'>('idle');
+    const [downloadState, setDownloadState] = useState<DownloadState>('idle');
 
     useEffect(() => {
         if (downloadState === 'downloaded') {
