@@ -88,7 +88,6 @@ export function NicknameEditor({ address, open, onClose }: Props) {
                                 onKeyDown={handleKeyDown}
                                 placeholder="Enter a memorable name..."
                                 maxLength={MAX_NICKNAME_LENGTH}
-                                autoFocus
                             />
                         </FormControl>
                         <div className="flex justify-between">
