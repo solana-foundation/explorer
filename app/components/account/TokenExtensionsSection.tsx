@@ -175,7 +175,7 @@ function ExtensionListItem({ ext }: { ext: ParsedTokenExtension }) {
             </div>
 
             {/* Description */}
-            <div className="flex-1 text-[0.75rem] text-[#8E9090] underline decoration-[#1e2423] max-lg:hidden">
+            <div className="max-lg:hidden flex-1 text-[0.75rem] text-[#8E9090] underline decoration-[#1e2423]">
                 {ext.description ?? null}
             </div>
         </div>

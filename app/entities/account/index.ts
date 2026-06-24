@@ -1,6 +1,7 @@
 export { toBigNumber } from './lib/toBigNumber';
 export { selectMintDecimals, selectTokenAccountMint } from './model/selectors';
 export { useAccountQuery } from './model/use-account-query';
+export { useAccountExpandedInfo } from './model/use-account-expanded-info';
 export { useAccountsInfo } from './model/use-accounts-info';
 export type { AccountInfo } from './model/use-accounts-info';
 export { useRawAccountData, useRawAccountDataOnMount } from './model/use-raw-account-data';

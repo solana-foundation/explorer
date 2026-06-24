@@ -109,6 +109,17 @@ export const withTokenInfoBatch: Decorator = Story => (
     </MockTokenInfoBatchProvider>
 );
 
+/** Wraps stories with ClusterProvider, MockTokenInfoBatchProvider, and MockAccountsProvider. Usage: `decorators: [withClusterAccountsAndTokenInfo]` */
+export const withClusterAccountsAndTokenInfo: Decorator = Story => (
+    <ClusterProvider>
+        <MockTokenInfoBatchProvider>
+            <MockAccountsProvider>
+                <Story />
+            </MockAccountsProvider>
+        </MockTokenInfoBatchProvider>
+    </ClusterProvider>
+);
+
 /** Wraps stories with ClusterProvider and MockSupplyProvider. Usage: `decorators: [withSupply]` */
 export const withSupply: Decorator = Story => (
     <ClusterProvider>

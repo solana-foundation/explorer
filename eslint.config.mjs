@@ -311,13 +311,15 @@ export default tseslint.config(
         settings: {
             'boundaries/elements': [
                 { type: 'feature', pattern: 'app/features/*', mode: 'folder', capture: ['name'] },
-                { type: 'entity', pattern: 'app/entities/*', mode: 'folder', capture: ['name'] },
+                // Must precede the broader `entity` pattern — element types are matched in
+                // declaration order, so `@x` folders would otherwise be classified as `entity`.
                 {
                     type: 'entity-public-api',
                     pattern: 'app/entities/*/@x/*',
                     mode: 'folder',
                     capture: ['name', 'crossSlice'],
                 },
+                { type: 'entity', pattern: 'app/entities/*', mode: 'folder', capture: ['name'] },
                 { type: 'shared', pattern: 'app/shared', mode: 'folder' },
             ],
         },
@@ -349,6 +351,13 @@ export default tseslint.config(
                             },
                         },
                         {
+                            // `@x` re-export files reach back into their own entity's internals.
+                            from: { type: 'entity-public-api' },
+                            allow: {
+                                to: [{ type: 'shared' }, { type: 'entity', captured: { name: '{{ name }}' } }],
+                            },
+                        },
+                        {
                             from: { type: 'shared' },
                             allow: {
                                 to: { type: 'shared' },
@@ -369,7 +378,6 @@ export default tseslint.config(
         files: [
             // app/entities cross-entity / wrong-direction imports
             'app/entities/nft/lib/get-metadata-json.ts',
-            'app/entities/program-metadata/model/useProgramMetadataCodamaIdl.tsx',
             'app/entities/token-info/index.ts',
             'app/entities/token-info/lib/fetch-token-mints.ts',
             'app/entities/token-info/lib/is-valid-cluster.ts',
@@ -382,6 +390,7 @@ export default tseslint.config(
             'app/features/search/api/discover-with-utl.ts',
             'app/features/search/api/resolve-search-tokens.ts',
             'app/features/stake/ui/StakeAccountSection.tsx',
+            'app/features/transaction/ui/AccountDetailSlideover.tsx',
             'app/features/transaction/ui/InstructionsSection.tsx',
             'app/features/transaction/ui/SummaryCard.tsx',
 
@@ -391,7 +400,6 @@ export default tseslint.config(
             'app/features/idl/formatted-idl/ui/__stories__/CodamaFormattedIdl.stories.tsx',
             'app/features/idl/ui/__stories__/IdlRenderer.stories.tsx',
             'app/features/idl/interactive-idl/model/codama/codama-interpreter.ts',
-            'app/features/idl/model/use-idl-last-transaction-date.tsx',
 
             // app/shared reverse-layer imports
             'app/shared/components/DownloadDropdown.tsx',
@@ -518,10 +526,8 @@ export default tseslint.config(
             'app/tx/[[]signature[]]/page-client.tsx',
 
             // app/api (Next route handlers)
-            'app/api/anchor/route.ts',
             'app/api/domain-info/[[]domain[]]/route.ts',
             'app/api/metadata/proxy/route.ts',
-            'app/api/program-metadata-idl/route.ts',
             'app/api/receipt/price/[[]mintAddress[]]/route.ts',
             'app/api/search/route.ts',
 
@@ -633,8 +639,6 @@ export default tseslint.config(
             'app/entities/idl/model/use-format-codama-idl.ts',
             'app/entities/idl/model/use-idl-from-anchor-program-seed.ts',
             'app/entities/nft/lib/is-metaplex-nft.ts',
-            'app/entities/program-metadata/api/getProgramCanonicalMetadata.ts',
-            'app/entities/program-metadata/model/useProgramCanonicalMetadata.tsx',
             'app/entities/token-info/model/token-info-batch-provider.tsx',
             'app/entities/token-info/model/use-token-info.ts',
 
@@ -674,7 +678,6 @@ export default tseslint.config(
             'app/features/idl/interactive-idl/ui/BaseConnectWalletButton.tsx',
             'app/features/idl/interactive-idl/ui/InstructionActivity.tsx',
             'app/features/idl/interactive-idl/ui/InteractWithIdl.tsx',
-            'app/features/idl/model/use-idl-last-transaction-date.tsx',
             'app/features/idl/ui/IdlRenderer.tsx',
             'app/features/idl/ui/IdlSection.tsx',
             'app/features/metadata/mocks.ts',

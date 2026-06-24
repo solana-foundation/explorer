@@ -1,31 +1,22 @@
 import { PublicKey } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
-import { ProgramDataAccountInfo } from '@validators/accounts/upgradeable-program';
 import Link from 'next/link';
 
 import { Badge } from '@/app/components/shared/ui/badge';
-import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
-import { useCluster } from '@/app/providers/cluster';
 import { CardTitle } from '@/app/shared/ui/Card';
 
-import { fromProgramData } from '../lib/fromProgramData';
+import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
+import { useSecurityTxt } from '../model/useSecurityTxt';
 
-// FIXME: missing Storybook story — needs useProgramMetadataSecurityTxt SWR mock + useCluster (pure SecurityTXTBadge is already covered).
-export function ProgramSecurityTXTBadge({
-    programData,
-    programPubkey,
-}: {
-    programData: ProgramDataAccountInfo;
-    programPubkey: PublicKey;
-}) {
-    const { securityTXT, error } = fromProgramData(programData);
+export function ProgramSecurityTXTBadge({ programPubkey }: { programPubkey: PublicKey }) {
     const securityTabPath = useClusterPath({ pathname: `/address/${programPubkey.toBase58()}/security` });
+    const { securityTxt, isLoading } = useSecurityTxt(programPubkey.toBase58());
 
-    const { url, cluster } = useCluster();
-    const { programMetadataSecurityTxt } = useProgramMetadataSecurityTxt(programPubkey.toBase58(), url, cluster);
+    if (isLoading) {
+        return <></>;
+    }
 
-    const maybeError = securityTXT || programMetadataSecurityTxt ? undefined : error;
-
+    const maybeError = securityTxt ? undefined : NO_SECURITY_TXT_ERROR;
     return <SecurityTXTBadge error={maybeError} tabPath={securityTabPath} />;
 }
 

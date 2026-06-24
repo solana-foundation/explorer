@@ -1,4 +1,6 @@
 import type { Config } from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
+import tailwindcssAnimate from 'tailwindcss-animate';
 
 export const breakpoints = new Map([
     ['xxs', 320],
@@ -57,7 +59,18 @@ export const dkColors = {
 
 const config: Config = {
     content: ['./app/**/*.{ts,tsx}'],
-    plugins: [],
+    plugins: [
+        tailwindcssAnimate,
+        plugin(({ addUtilities }) => {
+            addUtilities({
+                '.scrollbar-hide': {
+                    'scrollbar-width': 'none',
+                    '-ms-overflow-style': 'none',
+                    '&::-webkit-scrollbar': { display: 'none' },
+                },
+            });
+        }),
+    ],
     theme: {
         extend: {
             boxShadow: {
@@ -208,6 +221,7 @@ const config: Config = {
             tablet: getScreenDim('md'),
             laptop: getScreenDim('lg'),
             desktop: getScreenDim('xl'),
+            landscape: { raw: '(orientation: landscape)' },
         },
     },
 };

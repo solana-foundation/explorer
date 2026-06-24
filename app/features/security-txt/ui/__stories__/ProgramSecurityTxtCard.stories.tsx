@@ -1,3 +1,4 @@
+import type { SecurityTxtFields } from '@solana/security-txt';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { ProgramSecurityTxtCard } from '../SecurityCard';
@@ -32,27 +33,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
-export const NoSecurityTxt: Story = {
-    args: {
-        pmpSecurityTxt: undefined,
-        programAddress: '11111111111111111111111111111111',
-        programDataSecurityTxt: undefined,
-    },
-    parameters: {
-        docs: {
-            description: {
-                story: 'Render security.txt empty message',
-            },
-        },
-    },
-};
-
 export const ValidPmpSecurityTxt: Story = {
     args: {
-        pmpSecurityTxt: defaultSecurityTxtMock,
         programAddress: '11111111111111111111111111111111',
-        programDataSecurityTxt: undefined,
+        securityTxt: { fields: defaultSecurityTxtMock as unknown as SecurityTxtFields, type: 'pmp' },
     },
     parameters: {
         docs: {
@@ -63,34 +47,15 @@ export const ValidPmpSecurityTxt: Story = {
     },
 };
 
-export const InvalidPmpSecurityTxt: Story = {
+export const ValidElfSecurityTxt: Story = {
     args: {
-        pmpSecurityTxt: '123',
         programAddress: '11111111111111111111111111111111',
-        programDataSecurityTxt: undefined,
-    },
-    parameters: {
-        docs: {
-            description: {
-                story: 'Render security.txt error message',
-            },
-        },
-        // This story intentionally triggers an ErrorBoundary with invalid data
-        test: {
-            dangerouslyIgnoreUnhandledErrors: true,
-        },
-    },
-};
-
-export const ValidProgramSecurityTxt: Story = {
-    args: {
-        pmpSecurityTxt: undefined,
-        programAddress: '11111111111111111111111111111111',
-        programDataSecurityTxt: {
-            acknowledgements: 'acknowledgements',
-            auditors: 'Auditor 1, https://auditor2.com',
-            contacts: 'link:https://google.com,Discord:#d123,email:test@mail.com,othercontact',
-            encryption: `-----BEGIN PGP PUBLIC KEY BLOCK-----
+        securityTxt: {
+            fields: {
+                acknowledgements: 'acknowledgements',
+                auditors: 'Auditor 1, https://auditor2.com',
+                contacts: 'link:https://google.com,Discord:#d123,email:test@mail.com,othercontact',
+                encryption: `-----BEGIN PGP PUBLIC KEY BLOCK-----
 Comment: Alice's OpenPGP certificate
 Comment: https://www.ietf.org/id/draft-bre-openpgp-samples-01.html
 
@@ -105,20 +70,22 @@ DAAKCRDyMVUMT0fjjlnQAQDFHUs6TIcxrNTtEZFjUFm1M0PJ1Dng/cDW4xN80fsn
 0QEA22Kr7VkCjeAEC08VSTeV+QFsmz55/lntWkwYWhmvOgE=
 =iIGO
 -----END PGP PUBLIC KEY BLOCK-----`,
-            expiry: '2025-12-03',
-            name: 'Test security.txt',
-            policy: 'https://github.com/program/main/SECURITY.md',
-            preferred_languages: 'en, de',
-            project_url: 'https://github.com',
-            source_code: 'https://github.com/123',
-            source_release: 'v0.1.0',
-            source_revision: 'abc',
+                expiry: '2025-12-03',
+                name: 'Test security.txt',
+                policy: 'https://github.com/program/main/SECURITY.md',
+                preferred_languages: 'en, de',
+                project_url: 'https://github.com',
+                source_code: 'https://github.com/123',
+                source_release: 'v0.1.0',
+                source_revision: 'abc',
+            },
+            type: 'elf',
         },
     },
     parameters: {
         docs: {
             description: {
-                story: 'Render valid Program security.txt',
+                story: 'Render legacy Neodyme (ELF) security.txt',
             },
         },
     },

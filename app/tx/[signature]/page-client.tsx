@@ -17,7 +17,7 @@ import { ClusterStatus } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
 import bs58 from 'bs58';
 import { useSearchParams } from 'next/navigation';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 
 import { AccountsCard } from '@/app/features/transaction/ui/AccountsCard';
 import { InstructionsSection } from '@/app/features/transaction/ui/InstructionsSection';
@@ -27,6 +27,7 @@ import { generateTokenBalanceRows, TokenBalancesCard } from '@/app/features/tran
 import { AutoRefresh, useAutoRefreshState } from '@/app/shared/lib/use-auto-refresh';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
+import { useLogsPanelScrollSync } from '@/app/tx/[signature]/use-logs-scroll-sync';
 import useTabVisibility from '@/app/utils/use-tab-visibility';
 
 const ALL_TRANSACTION_TABS = [
@@ -117,6 +118,12 @@ function DetailsSection({ signature }: SignatureProps) {
     const { isXxl } = useBreakpoint();
     const refreshDetails = () => fetchDetails(signature);
 
+    const logsPanelRef = useRef<HTMLDivElement>(null);
+
+    // Sync the sticky logs panel with the active instruction as the page scrolls.
+    // Manual interaction (wheel, scrollbar, keyboard) takes over for 2s before auto-sync resumes.
+    useLogsPanelScrollSync({ enabled: isXxl, panelRef: logsPanelRef, watchValue: transactionWithMeta });
+
     useEffect(() => {
         if (!details && clusterStatus === ClusterStatus.Connected && status?.status === FetchStatus.Fetched) {
             fetchDetails(signature);
@@ -165,7 +172,11 @@ function DetailsSection({ signature }: SignatureProps) {
                 <div className="xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden">
                     <InstructionsSection signature={signature} />
                 </div>
-                <div className="xxl:sticky xxl:top-[70px] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden" id="logs">
+                <div
+                    ref={logsPanelRef}
+                    className="scrollbar-hide xxl:sticky xxl:top-[70px] xxl:max-h-[calc(100vh-90px)] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-y-auto xxl:rounded-b-lg"
+                    id="logs"
+                >
                     <ProgramLogSection signature={signature} />
                     <CUProfilingSection signature={signature} />
                 </div>

@@ -23,4 +23,14 @@ describe('getTransactionAccountKeysSizeBytes', () => {
             ]),
         ).toBe(64);
     });
+
+    test('should count account keys with an undefined source', () => {
+        expect(
+            getTransactionAccountKeysSizeBytes([
+                { source: 'transaction' },
+                {},
+                { source: 'lookupTable' },
+            ]),
+        ).toBe(64);
+    });
 });

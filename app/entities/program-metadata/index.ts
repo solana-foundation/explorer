@@ -1,5 +1,3 @@
-export { useProgramMetadataCodamaIdl } from './model/useProgramMetadataCodamaIdl';
-export { useProgramMetadataIdl } from './model/useProgramMetadataIdl';
-export { useProgramMetadataSecurityTxt } from './model/useProgramMetadataSecurityTxt';
+export { useProgramMetadataIdl } from './model/use-program-metadata-idl';
 
 export { default as ProgramMetadataProgramName } from './ui/program-name';
