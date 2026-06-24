@@ -14,17 +14,18 @@ vi.mock('next/link', () => ({
 }));
 
 vi.mock('@/app/features/nicknames', () => ({
-    NicknameEditor: ({ address, onClose }: { address: string; onClose: () => void }) => (
-        <div>
-            <input
-                aria-label={`Nickname input for ${address}`}
-                autoFocus
-                onKeyDown={event => {
-                    if (event.key === 'Escape') onClose();
-                }}
-            />
-        </div>
-    ),
+    NicknameEditor: ({ address, open, onClose }: { address: string; open: boolean; onClose: () => void }) =>
+        open ? (
+            <div>
+                <input
+                    aria-label={`Nickname input for ${address}`}
+                    autoFocus
+                    onKeyDown={event => {
+                        if (event.key === 'Escape') onClose();
+                    }}
+                />
+            </div>
+        ) : null,
     useNickname: vi.fn(() => null),
 }));
 
