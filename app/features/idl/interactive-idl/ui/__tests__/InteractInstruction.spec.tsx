@@ -7,6 +7,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { InstructionStatus } from '../../model/use-instruction';
 import { InteractInstruction } from '../InteractInstruction';
 
 // jsdom doesn't implement ResizeObserver, which Radix Tooltip relies on once focused.
@@ -42,8 +43,7 @@ describe('InteractInstruction', () => {
         props?: Partial<{
             onExecuteInstruction: ReturnType<typeof vi.fn>;
             onSimulateInstruction: ReturnType<typeof vi.fn>;
-            isExecuting: boolean;
-            isSimulating: boolean;
+            status: InstructionStatus;
         }>,
     ) => {
         return render(
@@ -53,8 +53,7 @@ describe('InteractInstruction', () => {
                     instruction={instruction}
                     onExecuteInstruction={props?.onExecuteInstruction ?? vi.fn()}
                     onSimulateInstruction={props?.onSimulateInstruction ?? vi.fn()}
-                    isExecuting={props?.isExecuting ?? false}
-                    isSimulating={props?.isSimulating ?? false}
+                    status={props?.status ?? 'idle'}
                 />
             </Accordion>,
         );
@@ -249,7 +248,7 @@ describe('InteractInstruction', () => {
         it('should disable both buttons while executing', () => {
             walletMock.connected = true;
             walletMock.publicKey = PublicKey.default;
-            renderInteractInstruction(createInstruction(), { isExecuting: true });
+            renderInteractInstruction(createInstruction(), { status: 'executing' });
 
             expect(screen.getByRole('button', { name: /execute/i })).toBeDisabled();
             expect(screen.getByRole('button', { name: /simulate/i })).toBeDisabled();
@@ -258,7 +257,7 @@ describe('InteractInstruction', () => {
         it('should disable both buttons while simulating', () => {
             walletMock.connected = true;
             walletMock.publicKey = PublicKey.default;
-            renderInteractInstruction(createInstruction(), { isSimulating: true });
+            renderInteractInstruction(createInstruction(), { status: 'simulating' });
 
             expect(screen.getByRole('button', { name: /execute/i })).toBeDisabled();
             expect(screen.getByRole('button', { name: /simulate/i })).toBeDisabled();

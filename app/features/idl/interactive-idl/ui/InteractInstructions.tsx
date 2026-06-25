@@ -2,6 +2,7 @@ import type { InstructionData, SupportedIdl } from '@entities/idl';
 import { type Dispatch, type SetStateAction, useCallback } from 'react';
 
 import type { ExecutionOptions } from '../model/transaction/types';
+import type { InstructionStatus } from '../model/use-instruction';
 import type { InstructionCallParams } from '../model/use-instruction-form';
 import { Accordion } from './Accordion';
 import { InteractInstruction } from './InteractInstruction';
@@ -15,8 +16,7 @@ export function InteractInstructions({
     onExecuteInstruction,
     onSimulateInstruction,
     onSectionsExpanded,
-    isExecuting = false,
-    isSimulating = false,
+    status = 'idle',
 }: {
     idl: SupportedIdl | undefined;
     expandedSections: string[];
@@ -25,8 +25,7 @@ export function InteractInstructions({
     onExecuteInstruction: (data: InstructionData, params: InstructionCallParams, options: ExecutionOptions) => Promise<void>;
     onSimulateInstruction: (data: InstructionData, params: InstructionCallParams) => Promise<void>;
     onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
-    isExecuting?: boolean;
-    isSimulating?: boolean;
+    status?: InstructionStatus;
 }) {
     const handleValueChange = useCallback(
         (value: string[]) => {
@@ -45,8 +44,7 @@ export function InteractInstructions({
                     instruction={instruction}
                     onExecuteInstruction={onExecuteInstruction}
                     onSimulateInstruction={onSimulateInstruction}
-                    isExecuting={isExecuting}
-                    isSimulating={isSimulating}
+                    status={status}
                 />
             ))}
         </Accordion>

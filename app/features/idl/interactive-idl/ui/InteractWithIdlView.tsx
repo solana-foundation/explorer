@@ -10,6 +10,7 @@ import type {
     InstructionExecutionResult,
     InstructionSimulationResult,
 } from '../model/transaction/types';
+import type { InstructionStatus } from '../model/use-instruction';
 import type { InstructionCallParams } from '../model/use-instruction-form';
 import { ClusterSelector } from './ClusterSelector';
 import { ConnectWallet } from './ConnectWallet';
@@ -25,8 +26,7 @@ export function InteractWithIdlView({
     onSectionsExpanded,
     parseLogs,
     parseSimulationLogs,
-    isExecuting,
-    isSimulating,
+    status,
     lastResult,
     lastSimulation,
     lastAction,
@@ -38,8 +38,7 @@ export function InteractWithIdlView({
     onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
     parseLogs: (logs: string[]) => InstructionLogs[];
     parseSimulationLogs: (logs: string[]) => InstructionLogs[];
-    isExecuting?: boolean;
-    isSimulating?: boolean;
+    status?: InstructionStatus;
     lastResult: InstructionExecutionResult | undefined;
     lastSimulation: InstructionSimulationResult | undefined;
     lastAction: 'execute' | 'simulate' | null;
@@ -88,8 +87,7 @@ export function InteractWithIdlView({
                         onExecuteInstruction={onExecuteInstruction}
                         onSimulateInstruction={onSimulateInstruction}
                         onSectionsExpanded={onSectionsExpanded}
-                        isExecuting={isExecuting}
-                        isSimulating={isSimulating}
+                        status={status}
                     />
                 </div>
 

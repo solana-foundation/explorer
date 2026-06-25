@@ -22,6 +22,7 @@ import { usePdaPrefill } from '../model/form-prefill/providers/use-pda-prefill';
 import { createWalletPrefillDependency } from '../model/form-prefill/providers/wallet-prefill-provider';
 import { useFormPrefill } from '../model/form-prefill/use-form-prefill';
 import type { ExecutionOptions } from '../model/transaction/types';
+import type { InstructionStatus } from '../model/use-instruction';
 import {
     type InstructionCallParams,
     type InstructionFormData,
@@ -41,15 +42,13 @@ export function InteractInstruction({
     instruction,
     onExecuteInstruction,
     onSimulateInstruction,
-    isExecuting,
-    isSimulating,
+    status,
 }: {
     idl: SupportedIdl | undefined;
     onExecuteInstruction: (data: InstructionData, params: InstructionCallParams, options: ExecutionOptions) => void;
     onSimulateInstruction: (data: InstructionData, params: InstructionCallParams) => void;
     instruction: InstructionData;
-    isExecuting: boolean;
-    isSimulating: boolean;
+    status: InstructionStatus;
 }) {
     const { connected: walletConnected, publicKey } = useWallet();
     const [simulateBeforeExecute, setSimulateBeforeExecute] = useState(false);
@@ -77,7 +76,7 @@ export function InteractInstruction({
     });
     usePdaPrefill({ fieldNames, form, instruction, pdas });
 
-    const interactionDisabled = !walletConnected || isExecuting || isSimulating;
+    const interactionDisabled = !walletConnected || status !== 'idle';
 
     return (
         <Card variant="tight">
@@ -160,7 +159,7 @@ export function InteractInstruction({
                             <ActionButton
                                 onClick={onSubmit}
                                 disabled={interactionDisabled}
-                                loading={isExecuting}
+                                loading={status === 'executing'}
                                 icon={<Send size={16} />}
                                 label="Execute"
                                 variant="accent"
@@ -169,7 +168,7 @@ export function InteractInstruction({
                             <ActionButton
                                 onClick={onSimulate}
                                 disabled={interactionDisabled}
-                                loading={isSimulating}
+                                loading={status === 'simulating'}
                                 icon={<Play size={16} />}
                                 label="Simulate"
                                 variant="outline"
@@ -182,7 +181,7 @@ export function InteractInstruction({
                                 data-testid="simulate-before-execute-toggle"
                                 checked={simulateBeforeExecute}
                                 onCheckedChange={setSimulateBeforeExecute}
-                                disabled={isExecuting || isSimulating}
+                                disabled={status !== 'idle'}
                             />
                             <Label
                                 htmlFor={`simulate-before-execute-${instruction.name}`}

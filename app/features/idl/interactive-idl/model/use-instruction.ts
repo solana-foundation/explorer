@@ -47,6 +47,8 @@ interface UseInstructionOptions {
     onError?: (error: string, signature?: string) => void;
 }
 
+export type InstructionStatus = 'executing' | 'simulating' | 'programLoading' | 'idle';
+
 interface UseInstructionReturn {
     // Execution
     executeInstruction: (
@@ -64,14 +66,12 @@ interface UseInstructionReturn {
     ) => Promise<void>;
 
     // Status
-    isExecuting: boolean;
-    isSimulating: boolean;
+    status: InstructionStatus;
     lastResult: InstructionExecutionResult | undefined;
     lastSimulation: InstructionSimulationResult | undefined;
     parseLogs: ReturnType<typeof useExecuteTransaction>['parseLogs'];
     parseSimulationLogs: ReturnType<typeof useSimulateTransaction>['parseLogs'];
     initializeProgram: () => void;
-    isProgramLoading: boolean;
     program: UnifiedProgram | undefined;
     initializationError: string | undefined;
 }
@@ -255,20 +255,27 @@ export function useInstruction({
         [simulate, makeTxBuilder],
     );
 
+    const status = deriveStatus(isExecuting, isSimulating, isProgramLoading);
+
     return {
         executeInstruction,
         initializationError,
         initializeProgram,
-        isExecuting,
-        isProgramLoading,
-        isSimulating,
         lastResult,
         lastSimulation,
         parseLogs,
         parseSimulationLogs,
         program,
         simulateInstruction,
+        status,
     };
+}
+
+function deriveStatus(isExecuting: boolean, isSimulating: boolean, isProgramLoading: boolean): InstructionStatus {
+    if (isExecuting) return 'executing';
+    if (isSimulating) return 'simulating';
+    if (isProgramLoading) return 'programLoading';
+    return 'idle';
 }
 
 export const isEnabled = ({

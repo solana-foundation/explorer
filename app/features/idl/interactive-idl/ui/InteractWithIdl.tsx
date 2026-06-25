@@ -97,8 +97,7 @@ export function InteractWithIdl({
         executeInstruction,
         simulateInstruction,
         initializationError,
-        isExecuting,
-        isSimulating,
+        status,
         lastResult,
         lastSimulation,
         parseLogs,
@@ -168,8 +167,7 @@ export function InteractWithIdl({
                 onSectionsExpanded={expandedSections => {
                     onSectionsExpanded?.(progId?.toString(), expandedSections);
                 }}
-                isExecuting={isExecuting}
-                isSimulating={isSimulating}
+                status={status}
                 lastResult={lastResult}
                 lastSimulation={lastSimulation}
                 parseLogs={parseLogs}
