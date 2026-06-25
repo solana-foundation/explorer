@@ -9,6 +9,12 @@ export type AnchorIdl = Idl;
 export type SupportedIdl = CodamaIdl | AnchorIdl;
 export type IdlStandard = 'Anchor' | 'Codama';
 
+/** A program's resolved IDLs side by side: the Anchor PDA IDL and the PMP `idl`-seed IDL. */
+export type ProgramIdlPair = {
+    anchorIdl: SupportedIdl | undefined;
+    programMetadataIdl: SupportedIdl | undefined;
+};
+
 /**
  * Wildcard label used for all modern Anchor IDL versions (>= 0.30.1).
  * This is a label representing the modern Anchor IDL standard, not a specific version.

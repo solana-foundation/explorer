@@ -1,7 +1,6 @@
 import { SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, SolanaError } from '@solana/kit';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { IdlVariant } from '@/app/entities/idl/server';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
@@ -25,10 +24,9 @@ vi.mock('@solana/kit', async () => {
     return { ...actual, createSolanaRpc: vi.fn(() => ({})) };
 });
 
-function resolved(overrides: Partial<Record<'anchorIdl' | 'programMetadataIdl' | 'preferredVariant', unknown>> = {}) {
+function resolved(overrides: Partial<Record<'anchorIdl' | 'programMetadataIdl', unknown>> = {}) {
     return {
         anchorIdl: undefined,
-        preferredVariant: IdlVariant.ProgramMetadata,
         programMetadataIdl: undefined,
         ...overrides,
     };
@@ -39,12 +37,6 @@ describe('GET /api/idl-latest', () => {
         vi.clearAllMocks();
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
         vi.spyOn(Logger, 'panic').mockImplementation(() => {});
-        // PMP feature gate on by default; the off case is exercised explicitly below.
-        vi.stubEnv('NEXT_PUBLIC_PMP_IDL_ENABLED', 'true');
-    });
-
-    afterEach(() => {
-        vi.unstubAllEnvs();
     });
 
     it('should return 400 when required params are missing', async () => {
@@ -77,11 +69,7 @@ describe('GET /api/idl-latest', () => {
 
     it('should shape the resolver output into the payload with cache headers', async () => {
         mocks.resolveProgramIdls.mockResolvedValueOnce(
-            resolved({
-                anchorIdl: { name: 'anchor_idl' },
-                preferredVariant: IdlVariant.Anchor,
-                programMetadataIdl: { name: 'pmp' },
-            }),
+            resolved({ anchorIdl: { name: 'anchor_idl' }, programMetadataIdl: { name: 'pmp' } }),
         );
 
         const { GET } = await importRoute();
@@ -89,38 +77,18 @@ describe('GET /api/idl-latest', () => {
 
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({
-            idls: { anchor: { name: 'anchor_idl' }, preferred: 'anchor', programMetadata: { name: 'pmp' } },
+            idls: { anchor: { name: 'anchor_idl' }, programMetadata: { name: 'pmp' } },
         });
         expect(res.headers.get('Cache-Control')).toContain('max-age=');
     });
 
-    it('should resolve with includePmp=true when the PMP feature flag is on', async () => {
+    it('should resolve IDLs for the program (both sources, no source options)', async () => {
         mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ programMetadataIdl: { name: 'pmp' } }));
 
         const { GET } = await importRoute();
         await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
 
-        expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(
-            expect.anything(),
-            PROGRAM_ADDRESS,
-            expect.objectContaining({ includePmp: true }),
-        );
-    });
-
-    it('should resolve with includePmp=false when the PMP feature flag is off', async () => {
-        vi.stubEnv('NEXT_PUBLIC_PMP_IDL_ENABLED', 'false');
-        mocks.resolveProgramIdls.mockResolvedValueOnce(
-            resolved({ anchorIdl: { name: 'a' }, preferredVariant: IdlVariant.Anchor }),
-        );
-
-        const { GET } = await importRoute();
-        await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
-
-        expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(
-            expect.anything(),
-            PROGRAM_ADDRESS,
-            expect.objectContaining({ includePmp: false }),
-        );
+        expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(expect.anything(), PROGRAM_ADDRESS);
     });
 
     it('should return a retryable 502 (no page) when the resolver keeps throwing a transient RPC error', async () => {

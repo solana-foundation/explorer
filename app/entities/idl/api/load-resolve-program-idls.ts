@@ -1,26 +1,8 @@
 import { address, createSolanaRpc } from '@solana/kit';
 
-import { type IdlVariant } from '../model/idl-variant';
-import { type SupportedIdl } from '../model/idl-version';
+import { type ProgramIdlPair, type SupportedIdl } from '../model/idl-version';
 
 export type ResolveProgramIdlsClientArgs = {
-    programId: string;
-    /** The user-supplied RPC URL (custom cluster or localhost) to resolve directly against. */
-    url: string;
-    /** Resolve the Anchor PDA IDL. Default `true`; pass `false` for the PMP-only path (program-name label). */
-    includeAnchor?: boolean;
-    /** Skip the PMP lookup when the PMP IDL feature flag is off. */
-    includePmp: boolean;
-};
-
-export type ResolvedClientIdls = {
-    anchorIdl: SupportedIdl | undefined;
-    programMetadataIdl: SupportedIdl | undefined;
-    /** Which tab the card should show first (PMP-first when both are present). */
-    preferredVariant: IdlVariant;
-};
-
-export type ResolveAnchorIdlClientArgs = {
     programId: string;
     /** The user-supplied RPC URL (custom cluster or localhost) to resolve directly against. */
     url: string;
@@ -31,7 +13,8 @@ export type ResolveAnchorIdlClientArgs = {
  * custom / localhost clusters the server route can't reach (the server has no route to a user's
  * `localhost:8899`). Same `@solana/idl` resolution as `/api/idl-latest` — the fndn fallback authority
  * for the PMP `idl` seed — so a local validator surfaces exactly what a public cluster does
- * (including Foundation-published native IDLs).
+ * (including Foundation-published native IDLs). Both sources are resolved; consumers read the field
+ * they need (the tx-decoder takes `anchorIdl`, the program-name label takes `programMetadataIdl`).
  *
  * `resolve-program-idls` statically pulls in `@solana/idl` (~40 KB gzip — pako/yaml/toml — measured as
  * the First Load JS it adds across the `/address/*` and `/tx/*` routes, since it's reachable from the
@@ -44,25 +27,11 @@ export type ResolveAnchorIdlClientArgs = {
 export async function resolveProgramIdlsClient({
     programId,
     url,
-    includeAnchor = true,
-    includePmp,
-}: ResolveProgramIdlsClientArgs): Promise<ResolvedClientIdls> {
+}: ResolveProgramIdlsClientArgs): Promise<ProgramIdlPair> {
     const { resolveProgramIdls } = await import('./resolve-program-idls');
-    const { anchorIdl, programMetadataIdl, preferredVariant } = await resolveProgramIdls(
-        createSolanaRpc(url),
-        address(programId),
-        { includeAnchor, includePmp },
-    );
+    const { anchorIdl, programMetadataIdl } = await resolveProgramIdls(createSolanaRpc(url), address(programId));
     return {
         anchorIdl: anchorIdl as SupportedIdl | undefined,
-        preferredVariant,
         programMetadataIdl: programMetadataIdl as SupportedIdl | undefined,
     };
-}
-
-/** Anchor-only client resolver (custom/localhost) — the `includePmp: false` slice of the resolver. */
-export async function resolveAnchorIdlClient({ programId, url }: ResolveAnchorIdlClientArgs): Promise<unknown> {
-    const { resolveProgramIdls } = await import('./resolve-program-idls');
-    const { anchorIdl } = await resolveProgramIdls(createSolanaRpc(url), address(programId), { includePmp: false });
-    return anchorIdl;
 }

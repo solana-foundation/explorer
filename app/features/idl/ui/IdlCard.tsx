@@ -1,81 +1,60 @@
 'use client';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Badge } from '@components/shared/ui/badge';
-import { Button } from '@components/shared/ui/button';
-import { getIdlVersion, IdlVariant, isIdlProgramIdMismatch, type SupportedIdl } from '@entities/idl';
+import { Button, buttonVariants } from '@components/shared/ui/button';
+import { ExternalLink } from '@components/shared/ui/external-link';
+import {
+    getIdlSpec,
+    getIdlStandard,
+    getIdlVersion,
+    IdlVariant,
+    isIdlProgramIdMismatch,
+    type SupportedIdl,
+    useProgramIdls,
+} from '@entities/idl';
 import { useCluster } from '@providers/cluster';
-import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ExternalLink } from 'react-feather';
+import { useState } from 'react';
+import { AlertCircle, AlertTriangle, ExternalLink as ExternalLinkIcon } from 'react-feather';
 
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
+import { cn } from '@/app/components/shared/utils';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { clusterSlug } from '@/app/utils/cluster';
 
-import { useProgramIdls } from '../model/use-program-idls';
 import { IdlInstructionSection } from './IdlInstructionSection';
 import { IdlSection } from './IdlSection';
-
-type IdlTab = {
-    id: IdlVariant;
-    idl: SupportedIdl;
-    title: string;
-    badge: string;
-};
 
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const network = clusterSlug(cluster);
-    const {
-        anchorIdl,
-        programMetadataIdl,
-        preferredVariant,
-        isLoading: isAnyIdlLoading,
-    } = useProgramIdls(programId, url, cluster);
-    const [activeTabIndex, setActiveTabIndex] = useState<number>();
+    const { anchorIdl, programMetadataIdl, isLoading } = useProgramIdls(programId, url, cluster);
     const [searchStr, setSearchStr] = useState<string>('');
 
-    const tabs = useMemo<IdlTab[]>(() => {
-        const idlTabs: IdlTab[] = [];
+    // Link to the standalone IDL explorer (idl.solana.com) — the full history view across every IDL
+    // source for this program; this card surfaces only the single latest IDL.
+    const idlHistoryUrl = `https://idl.solana.com/?${new URLSearchParams({
+        cluster: network,
+        mode: 'history',
+        programId,
+    }).toString()}`;
+    const idlHistoryLink = (
+        <ExternalLink
+            href={idlHistoryUrl}
+            className={cn(buttonVariants({ size: 'sm', ui: 'dashkit', variant: 'white' }), 'whitespace-nowrap')}
+        >
+            IDL history
+            <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+        </ExternalLink>
+    );
 
-        // Add pmpTab first (default)
-        if (programMetadataIdl) {
-            idlTabs.push({
-                badge: 'Program Metadata IDL',
-                id: IdlVariant.ProgramMetadata,
-                idl: programMetadataIdl,
-                title: 'Program Metadata',
-            });
-        }
+    // Single IDL view: show the program-metadata (PMP) IDL, falling back to the Anchor source only
+    // when no PMP IDL exists.
+    const idl: SupportedIdl | undefined = programMetadataIdl ?? anchorIdl;
+    const isFallback = !programMetadataIdl && Boolean(anchorIdl);
 
-        // Optionally add anchor tab
-        if (anchorIdl) {
-            const anchorTab: IdlTab = {
-                badge: 'Anchor IDL',
-                id: IdlVariant.Anchor,
-                idl: anchorIdl,
-                title: 'Anchor',
-            };
-            // If anchor is preferred, put it first
-            if (preferredVariant === IdlVariant.Anchor) {
-                idlTabs.unshift(anchorTab);
-            } else {
-                idlTabs.push(anchorTab);
-            }
-        }
-
-        return idlTabs;
-    }, [anchorIdl, programMetadataIdl, preferredVariant]);
-
-    useEffect(() => {
-        // Activate first tab when tabs are available
-        if (tabs.length > 0 && activeTabIndex === undefined) {
-            setActiveTabIndex(0);
-        }
-    }, [tabs, activeTabIndex]);
-
-    if (tabs.length === 0 || activeTabIndex === undefined) {
-        if (isAnyIdlLoading || tabs.length > 0) {
+    if (!idl) {
+        if (isLoading) {
             return <LoadingCard message="Loading program IDL" />;
         }
         return (
@@ -84,6 +63,7 @@ export function IdlCard({ programId }: { programId: string }) {
                     <CardTitle as="h4" ui="dashkit">
                         Program IDL
                     </CardTitle>
+                    {idlHistoryLink}
                 </CardHeader>
                 <CardBody ui="dashkit">
                     <div className="mb-6 flex items-center gap-2 text-destructive">
@@ -116,7 +96,7 @@ export function IdlCard({ programId }: { programId: string }) {
                                     rel="noopener noreferrer"
                                 >
                                     Full documentation
-                                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
+                                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
                                 </a>
                             </Button>
                         </div>
@@ -126,33 +106,44 @@ export function IdlCard({ programId }: { programId: string }) {
         );
     }
 
-    const activeTab = tabs[activeTabIndex];
-    const isMismatch = isIdlProgramIdMismatch(activeTab.idl, programId);
+    const isMismatch = isIdlProgramIdMismatch(idl, programId);
+    const version = getIdlVersion(idl);
+    const idlSpec = getIdlSpec(idl);
+    // Badge mirrors the interact view's label — IDL standard + version (+ spec when present), in the
+    // dashkit style: the Anchor fallback (no PMP IDL) is "warning" (matching the "Program has no
+    // security.txt" badge) with the adjacent info icon; otherwise (any PMP IDL) it's "success".
+    const badge = (
+        <div className="flex flex-wrap items-center gap-2">
+            <Badge ui="dashkit" variant={isFallback ? 'warning' : 'success'}>
+                {getIdlStandard(idl)}: {version}
+                {idlSpec ? ` (spec: ${idlSpec})` : ''}
+            </Badge>
+            {isFallback && (
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <span
+                            className="inline-flex cursor-help items-center text-[#fa62fc]"
+                            aria-label="Fallback IDL source"
+                        >
+                            <AlertCircle size={14} />
+                        </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-80">
+                        No Program Metadata (PMP) IDL was found, so the Explorer is showing the IDL from the
+                        program&apos;s on-chain Anchor IDL account instead.
+                    </TooltipContent>
+                </Tooltip>
+            )}
+        </div>
+    );
 
     return (
         <Card ui="dashkit">
-            {/* dashkit .card-header-tabs: header height comes from the tabs (not the fixed 60px),
-                negative tab margins cancel the header padding so the active underline (via the
-                trigger's -1px bottom margin) overlays the header border. !important so these win
-                over dashkit's base classes, since cn() (clsx) keeps all classes and stylesheet order
-                would otherwise decide. */}
-            <CardHeader ui="dashkit" className="!h-auto">
-                <TabsList className="!-mb-3 -mt-3 !border-0">
-                    {tabs
-                        .filter(tab => tab.idl)
-                        .map(tab => (
-                            <TabsTrigger
-                                key={tab.title}
-                                active={tab.id === activeTab?.id}
-                                onClick={() => {
-                                    setActiveTabIndex(tabs.findIndex(t => t.id === tab.id));
-                                    setSearchStr('');
-                                }}
-                            >
-                                {tab.title}
-                            </TabsTrigger>
-                        ))}
-                </TabsList>
+            <CardHeader ui="dashkit">
+                <CardTitle as="h4" ui="dashkit">
+                    Program IDL
+                </CardTitle>
+                {idlHistoryLink}
             </CardHeader>
             <CardBody ui="dashkit">
                 {isMismatch ? (
@@ -162,16 +153,9 @@ export function IdlCard({ programId }: { programId: string }) {
                     />
                 ) : (
                     <IdlSection
-                        badge={
-                            <Badge
-                                size="xs"
-                                variant={getIdlVersion(activeTab.idl) === 'Legacy' ? 'destructive' : 'success'}
-                            >
-                                {getIdlVersion(activeTab.idl)} {activeTab.badge}
-                            </Badge>
-                        }
-                        idl={activeTab.idl}
-                        idlSource={activeTab.id}
+                        badge={badge}
+                        idl={idl}
+                        idlSource={isFallback ? IdlVariant.Anchor : IdlVariant.ProgramMetadata}
                         network={network}
                         programId={programId}
                         searchStr={searchStr}

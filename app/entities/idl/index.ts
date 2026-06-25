@@ -15,20 +15,11 @@ export {
     type AnchorIdl,
     type CodamaIdl,
     type IdlStandard,
+    type ProgramIdlPair,
     type SupportedIdl,
 } from './model/idl-version';
 export { isIdlProgramIdMismatch, isInteractiveIdlSupported } from './model/interactive-idl';
 export { IdlVariant } from './model/idl-variant';
-
-// Client-side IDL resolver for custom/localhost clusters. Exposed via a lazy loader so `@solana/idl`
-// stays code-split out of the program-page bundle (the type re-export below is erased at build time).
-export { resolveProgramIdlsClient } from './api/load-resolve-program-idls';
-export type { ResolvedClientIdls, ResolveProgramIdlsClientArgs } from './api/load-resolve-program-idls';
-
-// Known-cluster IDL fetch (shared, CDN-cached `/api/idl-latest`). Light — no `@solana/idl` — so a
-// plain static export, unlike the client resolver above.
-export { fetchProgramIdls } from './api/fetch-program-idls';
-export type { FetchedProgramIdls } from './api/fetch-program-idls';
 
 // Per-program names built from each program's IDL — a display name plus an instruction-name resolver
 // matched by discriminator (no Borsh decode) — used to label transaction-history rows the RPC leaves as
@@ -40,6 +31,6 @@ export { getIdlSpecType as getDisplayIdlSpecType } from './model/converters/conv
 export { formatDisplayIdl, formatSerdeIdl, getFormattedIdl } from './model/formatters/format';
 export { useFormatAnchorIdl } from './model/use-format-anchor-idl';
 export { useAnchorProgram } from './model/use-anchor-program';
-export { getProvider } from './model/use-idl-from-anchor-program-seed';
+export { useProgramIdls, type ProgramIdls } from './model/use-program-idls';
 export { useFormatCodamaIdl } from './model/use-format-codama-idl';
 export { getIdlSpecType } from './model/converters/convert-legacy-idl';
