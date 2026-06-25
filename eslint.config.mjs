@@ -391,8 +391,10 @@ export default tseslint.config(
             'app/features/search/api/resolve-search-tokens.ts',
             'app/features/stake/ui/StakeAccountSection.tsx',
             'app/features/transaction/ui/AccountDetailSlideover.tsx',
+            'app/features/transaction/ui/AccountExpandedSections.tsx',
             'app/features/transaction/ui/InstructionsSection.tsx',
             'app/features/transaction/ui/SummaryCard.tsx',
+            'app/features/vote/ui/VoteAccountSection.tsx',
 
             // app/features deep imports into entities (must go via barrel)
             'app/features/idl/formatted-idl/model/__tests__/search.test.ts',

@@ -1,35 +1,31 @@
-import { gen } from '@__fixtures__/gen';
-import { nextjsParameters, withCluster } from '@storybook-config/decorators';
+import { nextjsParameters, withCardTableField } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { VotesCard } from '../VotesCard';
+import { AuthorityTypeRows } from '../instructions/AuthorityTypeRows';
 
-// Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
-const meta: Meta<typeof VotesCard> = {
-    component: VotesCard,
-    decorators: [withViewportFromGlobal, withCluster],
+const meta = {
+    component: AuthorityTypeRows,
+    decorators: [withViewportFromGlobal, withCardTableField],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/VotesCard@Media',
-};
+    title: 'Features/Vote/AuthorityTypeRows@Media',
+} satisfies Meta<typeof AuthorityTypeRows>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const baseSlot = Number(gen.slot(0));
-const votes = Array.from({ length: 6 }, (_, i) => ({
-    confirmationCount: 31 - i,
-    slot: baseSlot + i,
-}));
-
+// BLS variant is the widest payload — exercises base64-row wrapping at narrow widths.
 const args = {
-    voteAccount: {
-        info: { votes },
-    } as any,
+    authorityType: {
+        VoterWithBLS: {
+            bls_proof_of_possession: new Array(96).fill(7),
+            bls_pubkey: new Array(48).fill(3),
+        },
+    },
 };
 
 export const Mobile: Story = {

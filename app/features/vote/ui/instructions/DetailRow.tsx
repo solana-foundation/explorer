@@ -1,10 +1,23 @@
 import { KitAddress } from '@components/common/KitAddress';
 import { cn } from '@components/shared/utils';
 import type { Address } from '@solana/kit';
-import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
-import React, { type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
+
+import { VOTE_PROGRAM_ADDRESS } from '../../lib/constants';
+
+export function VoteProgramRow() {
+    return <DetailRow label="Program" pubkey={VOTE_PROGRAM_ADDRESS} />;
+}
+
+export function DetailHashRow({ label, hash }: { label: string; hash: string }) {
+    return (
+        <DetailRow label={label}>
+            <pre className="mb-0 inline-block text-left">{hash}</pre>
+        </DetailRow>
+    );
+}
 
 type DetailRowProps = { label: string; pubkey: Address } | { label: string; children: ReactNode; monospace?: boolean };
 
@@ -18,8 +31,4 @@ export function DetailRow(props: DetailRowProps) {
             </BaseTable.Cell>
         </BaseTable.Row>
     );
-}
-
-export function StakeProgramRow() {
-    return <DetailRow label="Program" pubkey={STAKE_PROGRAM_ADDRESS} />;
 }
