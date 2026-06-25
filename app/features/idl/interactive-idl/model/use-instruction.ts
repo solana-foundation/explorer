@@ -45,7 +45,6 @@ interface UseInstructionOptions {
     simulationCommitment?: Commitment;
     onSuccess?: (signature: string) => void;
     onError?: (error: string, signature?: string) => void;
-    onPreExecutionError?: (error: string) => void;
 }
 
 interface UseInstructionReturn {
@@ -67,7 +66,6 @@ interface UseInstructionReturn {
     // Status
     isExecuting: boolean;
     isSimulating: boolean;
-    preExecutionError: string | undefined;
     lastResult: InstructionExecutionResult | undefined;
     lastSimulation: InstructionSimulationResult | undefined;
     parseLogs: ReturnType<typeof useExecuteTransaction>['parseLogs'];
@@ -88,7 +86,6 @@ export function useInstruction({
     simulationCommitment = 'processed',
     onSuccess,
     onError,
-    onPreExecutionError,
 }: UseInstructionOptions): UseInstructionReturn {
     const interpreterName = interpreterNameOverride ?? detectInterpreterName(idl);
     const { publicKey, ...wallet } = useWallet();
@@ -199,12 +196,11 @@ export function useInstruction({
         }
     }, [idl, programId?.toString()]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { executeTx, isExecuting, lastResult, parseLogs, preExecutionError } = useExecuteTransaction({
+    const { executeTx, isExecuting, lastResult, parseLogs } = useExecuteTransaction({
         commitment,
         connection,
         idlErrors: idl?.errors,
         onError,
-        onPreExecutionError,
         onSuccess,
     });
 
@@ -270,7 +266,6 @@ export function useInstruction({
         lastSimulation,
         parseLogs,
         parseSimulationLogs,
-        preExecutionError,
         program,
         simulateInstruction,
     };

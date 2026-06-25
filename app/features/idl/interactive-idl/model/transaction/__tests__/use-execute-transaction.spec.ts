@@ -98,21 +98,25 @@ describe('useExecuteTransaction', () => {
         );
     });
 
-    it('should fire onPreExecutionError when wallet is disconnected and not call signTransaction', async () => {
+    it('should report a pre_broadcast_failed result when wallet is disconnected and not call RPC', async () => {
         mockWallet(false);
         const connection = mockConnection();
-        const onPreExecutionError = vi.fn();
+        const onError = vi.fn();
         const { result } = renderHook(() =>
             useExecuteTransaction({
                 commitment: 'confirmed',
                 connection: connection,
-                onPreExecutionError,
+                onError,
             }),
         );
         await act(async () => {
             await result.current.executeTx(async () => makeTx());
         });
-        expect(onPreExecutionError).toHaveBeenCalledWith('Wallet not connected');
+        await waitFor(() => expect(result.current.lastResult?.status).toBe('error'));
+        const r = result.current.lastResult as PreBroadcastFailedResult;
+        expect(r.phase).toBe('pre_broadcast_failed');
+        expect(r.message).toBe('Wallet not connected');
+        expect(onError).toHaveBeenCalledWith('Wallet not connected', undefined);
         expect(connection.sendRawTransaction).not.toHaveBeenCalled();
     });
 

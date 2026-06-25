@@ -26,11 +26,9 @@ export function useExecuteTransaction(opts: {
     // signature is present for broadcast failures.
     // undefined for pre-broadcast failures (build/sign).
     onError?: (error: string, signature?: string) => void;
-    onPreExecutionError?: (error: string) => void;
 }) {
-    const { connection, commitment, idlErrors, onSuccess, onError, onPreExecutionError } = opts;
+    const { connection, commitment, idlErrors, onSuccess, onError } = opts;
     const { connected, publicKey, signTransaction } = useWallet();
-    const [preExecutionError, setPreExecutionError] = useState<string>();
     const {
         handleBroadcastError,
         handlePreBroadcastError,
@@ -44,17 +42,14 @@ export function useExecuteTransaction(opts: {
 
     const executeTx = useCallback(
         async (buildTx: () => Promise<Transaction>, options?: ExecutionOptions): Promise<void> => {
-            if (!connected || !publicKey || !signTransaction) {
-                const message = 'Wallet not connected';
-                setPreExecutionError(message);
-                onPreExecutionError?.(message);
-                return;
-            }
-            setPreExecutionError(undefined);
             handleTxStart();
             let transaction: Transaction | undefined;
             let signature: string | undefined;
             try {
+                if (!connected || !publicKey || !signTransaction) {
+                    throw new Error('Wallet not connected');
+                }
+
                 // Build transaction
                 transaction = await buildTx();
                 const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
@@ -109,11 +104,10 @@ export function useExecuteTransaction(opts: {
             handleBroadcastError,
             handlePreBroadcastError,
             handleTxEnd,
-            onPreExecutionError,
         ],
     );
 
-    return { executeTx, isExecuting, lastResult, parseLogs, preExecutionError };
+    return { executeTx, isExecuting, lastResult, parseLogs };
 }
 
 function useExecutionState({
