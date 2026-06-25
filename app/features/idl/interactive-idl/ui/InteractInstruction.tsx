@@ -175,7 +175,7 @@ export function InteractInstruction({
                                 tooltipText={!walletConnected ? WALLET_CONNECT_TOOLTIP : ''}
                             />
                         </div>
-                        <div className="mt-3 flex items-center gap-2">
+                        <div className="mt-4 flex items-center gap-2">
                             <Switch
                                 id={`simulate-before-execute-${instruction.name}`}
                                 data-testid="simulate-before-execute-toggle"
