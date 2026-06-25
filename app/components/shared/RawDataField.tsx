@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/
 import React, { useEffect, useMemo, useState } from 'react';
 import { Check, ChevronDown, Copy, Download } from 'react-feather';
 
-import { DownloadDropdown, type DownloadState } from '@/app/shared/components/DownloadDropdown';
+import { DownloadDropdown, DownloadState } from '@/app/shared/components/DownloadDropdown';
 import { type ByteArray, toBase64, toHex } from '@/app/shared/lib/bytes';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
@@ -33,11 +33,11 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     const [tab, setTab] = useState<'hex' | 'base64'>('hex');
     const [expanded, setExpanded] = useState(false);
     const [copyState, copy] = useCopyToClipboard();
-    const [downloadState, setDownloadState] = useState<DownloadState>('idle');
+    const [downloadState, setDownloadState] = useState<DownloadState>(DownloadState.Idle);
 
     useEffect(() => {
-        if (downloadState === 'downloaded') {
-            const t = setTimeout(() => setDownloadState('idle'), 1000);
+        if (downloadState === DownloadState.Downloaded) {
+            const t = setTimeout(() => setDownloadState(DownloadState.Idle), 1000);
             return () => clearTimeout(t);
         }
     }, [downloadState]);
@@ -103,12 +103,12 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                         loading={loading}
                         disabled={!hasData}
                         encodings={[tab]}
-                        onDownload={() => setDownloadState('downloaded')}
+                        onDownload={() => setDownloadState(DownloadState.Downloaded)}
                     >
                         <Button variant="outline" size="sm" aria-label="Download" disabled={!hasData || loading}>
-                            {downloadState === 'downloaded' ? <Check size={12} /> : <Download size={12} />}
+                            {downloadState === DownloadState.Downloaded ? <Check size={12} /> : <Download size={12} />}
                             <span className="hidden md:inline">
-                                {downloadState === 'downloaded' ? 'Downloaded!' : 'Download'}
+                                {downloadState === DownloadState.Downloaded ? 'Downloaded!' : 'Download'}
                             </span>
                         </Button>
                     </DownloadDropdown>

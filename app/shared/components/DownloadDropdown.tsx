@@ -12,7 +12,10 @@ import { type ByteArray, encodeTransactionData as encodeBytes, type EncodingForm
 import React from 'react';
 import { Download } from 'react-feather';
 
-export type DownloadState = 'idle' | 'downloaded';
+export enum DownloadState {
+    Downloaded = 'downloaded',
+    Idle = 'idle',
+}
 
 import { Logger } from '@/app/shared/lib/logger';
 import { triggerDownloadText } from '@/app/shared/lib/triggerDownload';
