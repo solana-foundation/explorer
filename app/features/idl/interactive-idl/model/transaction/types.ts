@@ -1,5 +1,11 @@
 import type { SimulatedTransactionResponse } from '@solana/web3.js';
 
+// Options controlling how an instruction is executed.
+export type ExecutionOptions = {
+    /** When true, run preflight simulation before broadcasting (skipPreflight: false). Defaults to false. */
+    simulate: boolean;
+};
+
 // Instruction Execution
 
 export type InstructionExecutionResult = ExecutionOkResult | ExecutionErrResult;

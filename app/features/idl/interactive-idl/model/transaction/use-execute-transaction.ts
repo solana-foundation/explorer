@@ -16,7 +16,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import type { BaseIdl } from '../unified-program';
 import { formatTransactionError } from './format-transaction-error';
 import { serializeTransactionMessage, toBase64TransactionMessage } from './serialize-transaction-message';
-import type { InstructionExecutionResult } from './types';
+import type { ExecutionOptions, InstructionExecutionResult } from './types';
 
 export function useExecuteTransaction(opts: {
     connection: Connection;
@@ -43,7 +43,7 @@ export function useExecuteTransaction(opts: {
     } = useExecutionState({ onError, onSuccess });
 
     const executeTx = useCallback(
-        async (buildTx: () => Promise<Transaction>): Promise<void> => {
+        async (buildTx: () => Promise<Transaction>, options?: ExecutionOptions): Promise<void> => {
             if (!connected || !publicKey || !signTransaction) {
                 const message = 'Wallet not connected';
                 setPreExecutionError(message);
@@ -64,10 +64,9 @@ export function useExecuteTransaction(opts: {
                 const signed = await signTransaction(transaction);
 
                 // Broadcast to chain.
-                // skipPreflight: true because the UI exposes an explicit Simulate action.
-                // Additional tooltip in ui highlights this.
+                // Preflight simulation is decided by the user via UI. Off by default
                 signature = await connection.sendRawTransaction(signed.serialize(), {
-                    skipPreflight: true,
+                    skipPreflight: !(options?.simulate ?? false),
                 });
 
                 // Confirm and fetch
@@ -174,10 +173,11 @@ function useExecutionState({
     // Local error before broadcast: buildTx threw, wallet rejected sign, or sendRawTransaction threw.
     const handlePreBroadcastError = (error: unknown, transaction: Transaction | undefined) => {
         const signature = undefined;
-        // SendTransactionError.logs is only populated by the preflight path;
-        // With skipPreflight: true today these branches are irrelevant but kept as a safety net.
+        // SendTransactionError.logs is only populated by the preflight path.
+        // Preflight runs when the user enables the Simulation in the UI.
+        // Off by default.
         const logs = error instanceof SendTransactionError ? (error.logs ?? []) : [];
-        const message = error instanceof Error ? error.message : 'Failed to execute instruction';
+        const message = getPreBroadcastErrorMessage(error);
         Logger.error(error, { transaction });
         if (error instanceof SendTransactionError) {
             setTransactionError(error);
@@ -204,6 +204,14 @@ function useExecutionState({
         lastResult,
         parseLogs,
     };
+}
+
+function getPreBroadcastErrorMessage(error: unknown): string {
+    // SendTransactionError.message embeds the full preflight logs.
+    // Prefer the concise transactionError.message so the logs doesn't render in the message.
+    if (error instanceof SendTransactionError) return error.transactionError.message;
+    if (error instanceof Error) return error.message;
+    return 'Failed to execute instruction';
 }
 
 const DEFAULT_BROADCASTED_ERROR_MESSAGE = 'Failed to send transaction';

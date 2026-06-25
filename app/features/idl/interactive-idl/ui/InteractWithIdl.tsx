@@ -9,6 +9,7 @@ import { ExplorerLink } from '@/app/entities/cluster';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 
 import { originalIdlAtom, programIdAtom } from '../model/state-atoms';
+import type { ExecutionOptions } from '../model/transaction/types';
 import { isEnabled, useInstruction } from '../model/use-instruction';
 import type { InstructionCallParams } from '../model/use-instruction-form';
 import { useMainnetConfirmation } from '../model/use-mainnet-confirmation';
@@ -118,7 +119,7 @@ export function InteractWithIdl({
     }>();
 
     const handleExecuteInstruction = useCallback(
-        async (data: InstructionData, params: InstructionCallParams) => {
+        async (data: InstructionData, params: InstructionCallParams, options: ExecutionOptions) => {
             const programIdStr = progId?.toString();
 
             onTransactionExecutionStart?.(programIdStr, data.name);
@@ -128,7 +129,7 @@ export function InteractWithIdl({
                 async () => {
                     setLastAction('execute');
                     setCurrentInstruction({ name: data.name, programId: programIdStr });
-                    await executeInstruction(data.name, data, params);
+                    await executeInstruction(data.name, data, params, options);
                 },
                 { data, params },
             );

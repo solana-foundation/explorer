@@ -5,7 +5,11 @@ import { Label } from '@/app/components/shared/ui/label';
 import { Switch } from '@/app/components/shared/ui/switch';
 import type { InstructionLogs } from '@/app/utils/program-logs';
 
-import type { InstructionExecutionResult, InstructionSimulationResult } from '../model/transaction/types';
+import type {
+    ExecutionOptions,
+    InstructionExecutionResult,
+    InstructionSimulationResult,
+} from '../model/transaction/types';
 import type { InstructionCallParams } from '../model/use-instruction-form';
 import { ClusterSelector } from './ClusterSelector';
 import { ConnectWallet } from './ConnectWallet';
@@ -29,7 +33,7 @@ export function InteractWithIdlView({
 }: {
     instructions: InstructionData[];
     idl: SupportedIdl | undefined;
-    onExecuteInstruction: (data: InstructionData, params: InstructionCallParams) => Promise<void>;
+    onExecuteInstruction: (data: InstructionData, params: InstructionCallParams, options: ExecutionOptions) => Promise<void>;
     onSimulateInstruction: (data: InstructionData, params: InstructionCallParams) => Promise<void>;
     onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
     parseLogs: (logs: string[]) => InstructionLogs[];

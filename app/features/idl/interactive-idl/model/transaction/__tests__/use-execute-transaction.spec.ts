@@ -161,7 +161,7 @@ describe('useExecuteTransaction', () => {
         expect(r.serializedTxMessage).toBeUndefined();
     });
 
-    it('should capture logs from SendTransactionError when sendRawTransaction rejects', async () => {
+    it('should capture logs and logs-free message from SendTransactionError', async () => {
         const preflightLogs = [
             'Program 11111111111111111111111111111111 invoke [1]',
             'Program failed to complete: custom program error: 0x1',
@@ -192,9 +192,11 @@ describe('useExecuteTransaction', () => {
         const r = result.current.lastResult as PreBroadcastFailedResult;
         expect(r.phase).toBe('pre_broadcast_failed');
         expect(r.logs).toEqual(preflightLogs);
-        expect(r.message).toBe(sendError.message);
+        // Ensure logs do not appear in the message during execution with enabled simulation.
+        expect(r.message).toBe(sendError.transactionError.message);
+        expect(r.message).not.toContain('Logs:');
         expect(connection.confirmTransaction).not.toHaveBeenCalled();
-        expect(onError).toHaveBeenCalledWith(sendError.message, undefined);
+        expect(onError).toHaveBeenCalledWith(sendError.transactionError.message, undefined);
     });
 
     it('should set phase broadcast_failed when getTransaction rejects after the tx was broadcast', async () => {
@@ -216,5 +218,33 @@ describe('useExecuteTransaction', () => {
         expect(r.signature).toBe('sig123');
         expect(r.message).toBe('rpc timeout');
         expect(r.serializedTxMessage.length).toBeGreaterThan(0);
+    });
+
+    it('should send with skipPreflight true by default (simulation disabled)', async () => {
+        const connection = mockConnection();
+        const { result } = renderHook(() =>
+            useExecuteTransaction({ commitment: 'confirmed', connection }),
+        );
+        await act(async () => {
+            await result.current.executeTx(async () => makeTx());
+        });
+        await waitFor(() => expect(result.current.lastResult?.status).toBe('success'));
+        expect(connection.sendRawTransaction).toHaveBeenCalledWith(expect.anything(), {
+            skipPreflight: true,
+        });
+    });
+
+    it('should send with skipPreflight false when the simulate option is true', async () => {
+        const connection = mockConnection();
+        const { result } = renderHook(() =>
+            useExecuteTransaction({ commitment: 'confirmed', connection }),
+        );
+        await act(async () => {
+            await result.current.executeTx(async () => makeTx(), { simulate: true });
+        });
+        await waitFor(() => expect(result.current.lastResult?.status).toBe('success'));
+        expect(connection.sendRawTransaction).toHaveBeenCalledWith(expect.anything(), {
+            skipPreflight: false,
+        });
     });
 });

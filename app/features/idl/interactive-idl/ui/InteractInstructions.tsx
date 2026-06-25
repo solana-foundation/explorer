@@ -1,6 +1,7 @@
 import type { InstructionData, SupportedIdl } from '@entities/idl';
 import { type Dispatch, type SetStateAction, useCallback } from 'react';
 
+import type { ExecutionOptions } from '../model/transaction/types';
 import type { InstructionCallParams } from '../model/use-instruction-form';
 import { Accordion } from './Accordion';
 import { InteractInstruction } from './InteractInstruction';
@@ -21,7 +22,7 @@ export function InteractInstructions({
     expandedSections: string[];
     setExpandedSections: Dispatch<SetStateAction<string[]>>;
     instructions: InstructionData[];
-    onExecuteInstruction: (data: InstructionData, params: InstructionCallParams) => Promise<void>;
+    onExecuteInstruction: (data: InstructionData, params: InstructionCallParams, options: ExecutionOptions) => Promise<void>;
     onSimulateInstruction: (data: InstructionData, params: InstructionCallParams) => Promise<void>;
     onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
     isExecuting?: boolean;

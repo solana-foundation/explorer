@@ -21,7 +21,7 @@ import { programAtom } from '../model/state-atoms';
 import { AnchorInterpreter } from './anchor/anchor-interpreter';
 import { CodamaInterpreter } from './codama/codama-interpreter';
 import { IdlExecutor, populateAccounts, populateArguments } from './idl-executor';
-import type { InstructionExecutionResult, InstructionSimulationResult } from './transaction/types';
+import type { ExecutionOptions, InstructionExecutionResult, InstructionSimulationResult } from './transaction/types';
 import { useExecuteTransaction } from './transaction/use-execute-transaction';
 import { useSimulateTransaction } from './transaction/use-simulate-transaction';
 import type { UnifiedProgram, UnifiedWallet } from './unified-program';
@@ -54,6 +54,7 @@ interface UseInstructionReturn {
         instructionName: string,
         instruction: InstructionData,
         params: InstructionParams,
+        options?: ExecutionOptions,
     ) => Promise<void>;
 
     // Simulation
@@ -243,8 +244,12 @@ export function useInstruction({
     );
 
     const executeInstruction = useCallback(
-        (instructionName: string, _instruction: InstructionData, params: InstructionParams): Promise<void> =>
-            executeTx(makeTxBuilder(instructionName, params)),
+        (
+            instructionName: string,
+            _instruction: InstructionData,
+            params: InstructionParams,
+            options?: ExecutionOptions,
+        ): Promise<void> => executeTx(makeTxBuilder(instructionName, params), options),
         [executeTx, makeTxBuilder],
     );
 

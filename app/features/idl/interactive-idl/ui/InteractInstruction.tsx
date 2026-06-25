@@ -1,4 +1,6 @@
 import { Button, type ButtonProps } from '@components/shared/ui/button';
+import { Label } from '@components/shared/ui/label';
+import { Switch } from '@components/shared/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
 import type {
     InstructionAccountData,
@@ -7,7 +9,7 @@ import type {
     SupportedIdl,
 } from '@entities/idl';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Loader, Play, Send } from 'react-feather';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 
@@ -19,6 +21,7 @@ import { createKnownAccountsPrefillDependency } from '../model/form-prefill/prov
 import { usePdaPrefill } from '../model/form-prefill/providers/use-pda-prefill';
 import { createWalletPrefillDependency } from '../model/form-prefill/providers/wallet-prefill-provider';
 import { useFormPrefill } from '../model/form-prefill/use-form-prefill';
+import type { ExecutionOptions } from '../model/transaction/types';
 import {
     type InstructionCallParams,
     type InstructionFormData,
@@ -42,13 +45,14 @@ export function InteractInstruction({
     isSimulating,
 }: {
     idl: SupportedIdl | undefined;
-    onExecuteInstruction: (data: InstructionData, params: InstructionCallParams) => void;
+    onExecuteInstruction: (data: InstructionData, params: InstructionCallParams, options: ExecutionOptions) => void;
     onSimulateInstruction: (data: InstructionData, params: InstructionCallParams) => void;
     instruction: InstructionData;
     isExecuting: boolean;
     isSimulating: boolean;
 }) {
     const { connected: walletConnected, publicKey } = useWallet();
+    const [simulateBeforeExecute, setSimulateBeforeExecute] = useState(false);
 
     const { form, onSubmit, onSimulate, validationRules, fieldNames } = useInstructionForm({
         instruction,
@@ -56,7 +60,7 @@ export function InteractInstruction({
             onSimulateInstruction(instruction, params);
         },
         onSubmit: params => {
-            onExecuteInstruction(instruction, params);
+            onExecuteInstruction(instruction, params, { simulate: simulateBeforeExecute });
         },
     });
 
@@ -172,7 +176,29 @@ export function InteractInstruction({
                                 tooltipText={!walletConnected ? WALLET_CONNECT_TOOLTIP : ''}
                             />
                         </div>
-                        <WarningNote className="mt-2" label="Instruction simulation is skipped during execution" />
+                        <div className="mt-3 flex items-center gap-2">
+                            <Switch
+                                id={`simulate-before-execute-${instruction.name}`}
+                                data-testid="simulate-before-execute-toggle"
+                                checked={simulateBeforeExecute}
+                                onCheckedChange={setSimulateBeforeExecute}
+                                disabled={isExecuting || isSimulating}
+                            />
+                            <Label
+                                htmlFor={`simulate-before-execute-${instruction.name}`}
+                                className="cursor-pointer text-xs text-white"
+                            >
+                                Simulate before executing
+                            </Label>
+                        </div>
+                        {!simulateBeforeExecute && (
+                            <div data-testid="simulate-skipped-warning">
+                                <WarningNote
+                                    className="mt-3"
+                                    label="Instruction simulation is skipped during execution"
+                                />
+                            </div>
+                        )}
                     </div>
                 </AccordionContent>
             </AccordionItem>
