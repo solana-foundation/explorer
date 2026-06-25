@@ -1,7 +1,7 @@
 import { baseLogs, errorLogs } from '@entities/program-logs/model/mocks/logs';
 import { parsedBaseLogs, parsedErrorLogs } from '@entities/program-logs/model/mocks/parsedLogs';
-import type { Meta, StoryObj } from '@storybook/react';
 import { withCluster } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { InstructionExecutionActivity } from '../InstructionActivity';
 
@@ -12,6 +12,9 @@ const LONG_ERROR =
     'Transaction simulation failed: Error processing Instruction 0: custom program error: 0x1771. ' +
     'Program log: AnchorError occurred. Error Code: ConstraintHasOne. Error Number: 2001. ' +
     'Error Message: A has one constraint was violated. The provided account does not match the expected owner.';
+
+const BASE_LOGS = { parsed: parsedBaseLogs, raw: baseLogs };
+const ERROR_LOGS = { parsed: parsedErrorLogs, raw: errorLogs };
 
 const meta = {
     component: InstructionExecutionActivity,
@@ -26,9 +29,7 @@ type Story = StoryObj<typeof meta>;
 
 /** No result yet — only the empty Program logs tab renders. */
 export const Empty: Story = {
-    args: {
-        parseLogs: () => [],
-    },
+    args: {},
 };
 
 /** Successful execution — Success status header with a tx link. */
@@ -36,11 +37,11 @@ export const Success: Story = {
     args: {
         lastResult: {
             finishedAt: FINISHED_AT,
-            logs: baseLogs,
+            kind: 'execution',
+            logs: BASE_LOGS,
             signature: SIGNATURE,
             status: 'success',
         },
-        parseLogs: () => parsedBaseLogs,
     },
 };
 
@@ -49,14 +50,14 @@ export const BroadcastFailed: Story = {
     args: {
         lastResult: {
             finishedAt: FINISHED_AT,
-            logs: errorLogs,
+            kind: 'execution',
+            logs: ERROR_LOGS,
             message: 'AnchorError occurred. Error Code: ConstraintHasOne. Error Number: 2001.',
             phase: 'broadcast_failed',
             serializedTxMessage: SERIALIZED,
             signature: SIGNATURE,
             status: 'error',
         },
-        parseLogs: () => parsedErrorLogs,
     },
 };
 
@@ -64,14 +65,14 @@ export const BroadcastFailedEmptyMessage: Story = {
     args: {
         lastResult: {
             finishedAt: FINISHED_AT,
-            logs: errorLogs,
+            kind: 'execution',
+            logs: ERROR_LOGS,
             message: '',
             phase: 'broadcast_failed',
             serializedTxMessage: SERIALIZED,
             signature: SIGNATURE,
             status: 'error',
         },
-        parseLogs: () => parsedErrorLogs,
     },
 };
 
@@ -80,14 +81,14 @@ export const BroadcastFailedLongError: Story = {
     args: {
         lastResult: {
             finishedAt: FINISHED_AT,
-            logs: errorLogs,
+            kind: 'execution',
+            logs: ERROR_LOGS,
             message: LONG_ERROR,
             phase: 'broadcast_failed',
             serializedTxMessage: SERIALIZED,
             signature: SIGNATURE,
             status: 'error',
         },
-        parseLogs: () => parsedErrorLogs,
     },
 };
 
@@ -96,13 +97,13 @@ export const PreBroadcastFailedWithInspector: Story = {
     args: {
         lastResult: {
             finishedAt: FINISHED_AT,
-            logs: errorLogs,
+            kind: 'execution',
+            logs: ERROR_LOGS,
             message: 'Wallet rejected the transaction',
             phase: 'pre_broadcast_failed',
             serializedTxMessage: SERIALIZED,
             status: 'error',
         },
-        parseLogs: () => parsedErrorLogs,
     },
 };
 
@@ -111,12 +112,12 @@ export const PreBroadcastFailedNoLink: Story = {
     args: {
         lastResult: {
             finishedAt: FINISHED_AT,
-            logs: errorLogs,
+            kind: 'execution',
+            logs: ERROR_LOGS,
             message: 'Failed to build transaction',
             phase: 'pre_broadcast_failed',
             serializedTxMessage: undefined,
             status: 'error',
         },
-        parseLogs: () => parsedErrorLogs,
     },
 };

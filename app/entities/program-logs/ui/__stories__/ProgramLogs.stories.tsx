@@ -16,29 +16,29 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
-        logs: baseLogs,
-        parseLogs: () => parsedBaseLogs,
+        parsedLogs: parsedBaseLogs,
+        rawLogs: baseLogs,
     },
 };
 
 export const WithProgramName: Story = {
     args: {
-        logs: baseLogs,
-        parseLogs: () => parsedBaseLogs,
+        parsedLogs: parsedBaseLogs,
         programName: 'Voting',
+        rawLogs: baseLogs,
     },
 };
 
 export const Error: Story = {
     args: {
-        logs: errorLogs,
-        parseLogs: () => parsedErrorLogs,
+        parsedLogs: parsedErrorLogs,
+        rawLogs: errorLogs,
     },
 };
 
 export const Empty: Story = {
     args: {
-        logs: [],
-        parseLogs: () => [],
+        parsedLogs: [],
+        rawLogs: [],
     },
 };

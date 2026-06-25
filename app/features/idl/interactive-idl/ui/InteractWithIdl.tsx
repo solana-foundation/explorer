@@ -98,10 +98,8 @@ export function InteractWithIdl({
         simulateInstruction,
         initializationError,
         status,
-        lastResult,
-        lastSimulation,
-        parseLogs,
-        parseSimulationLogs,
+        lastExecutionResult,
+        lastSimulationResult,
     } = useInstruction({
         enabled: isEnabled({ connected, idl, programId: progId, publicKey }),
         idl,
@@ -168,10 +166,8 @@ export function InteractWithIdl({
                     onSectionsExpanded?.(progId?.toString(), expandedSections);
                 }}
                 status={status}
-                lastResult={lastResult}
-                lastSimulation={lastSimulation}
-                parseLogs={parseLogs}
-                parseSimulationLogs={parseSimulationLogs}
+                lastExecutionResult={lastExecutionResult}
+                lastSimulationResult={lastSimulationResult}
                 lastAction={lastAction}
             />
             {hasPendingAction && (

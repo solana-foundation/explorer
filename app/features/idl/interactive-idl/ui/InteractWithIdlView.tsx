@@ -3,7 +3,6 @@ import { useState } from 'react';
 
 import { Label } from '@/app/components/shared/ui/label';
 import { Switch } from '@/app/components/shared/ui/switch';
-import type { InstructionLogs } from '@/app/utils/program-logs';
 
 import type {
     ExecutionOptions,
@@ -24,23 +23,23 @@ export function InteractWithIdlView({
     onExecuteInstruction,
     onSimulateInstruction,
     onSectionsExpanded,
-    parseLogs,
-    parseSimulationLogs,
     status,
-    lastResult,
-    lastSimulation,
+    lastExecutionResult,
+    lastSimulationResult,
     lastAction,
 }: {
     instructions: InstructionData[];
     idl: SupportedIdl | undefined;
-    onExecuteInstruction: (data: InstructionData, params: InstructionCallParams, options: ExecutionOptions) => Promise<void>;
+    onExecuteInstruction: (
+        data: InstructionData,
+        params: InstructionCallParams,
+        options: ExecutionOptions,
+    ) => Promise<void>;
     onSimulateInstruction: (data: InstructionData, params: InstructionCallParams) => Promise<void>;
     onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
-    parseLogs: (logs: string[]) => InstructionLogs[];
-    parseSimulationLogs: (logs: string[]) => InstructionLogs[];
     status?: InstructionStatus;
-    lastResult: InstructionExecutionResult | undefined;
-    lastSimulation: InstructionSimulationResult | undefined;
+    lastExecutionResult: InstructionExecutionResult | undefined;
+    lastSimulationResult: InstructionSimulationResult | undefined;
     lastAction: 'execute' | 'simulate' | null;
 }) {
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
@@ -100,12 +99,9 @@ export function InteractWithIdlView({
                             <ConnectWallet />
 
                             {lastAction === 'simulate' ? (
-                                <InstructionSimulationActivity
-                                    lastSimulation={lastSimulation}
-                                    parseLogs={parseSimulationLogs}
-                                />
+                                <InstructionSimulationActivity lastSimulation={lastSimulationResult} />
                             ) : (
-                                <InstructionExecutionActivity lastResult={lastResult} parseLogs={parseLogs} />
+                                <InstructionExecutionActivity lastResult={lastExecutionResult} />
                             )}
                         </div>
                     </div>

@@ -8,13 +8,13 @@ import type { InstructionLogs } from '@/app/utils/program-logs';
 
 export function ProgramLogs({
     header,
-    logs,
-    parseLogs,
+    rawLogs,
+    parsedLogs,
     programName,
 }: {
     header?: React.ReactNode;
-    logs: string[];
-    parseLogs: (logs: string[]) => InstructionLogs[];
+    rawLogs: string[];
+    parsedLogs: InstructionLogs[];
     programName?: string;
 }) {
     const [showRaw, setShowRaw] = useState(false);
@@ -22,7 +22,7 @@ export function ProgramLogs({
     const content = showRaw ? (
         <div className="overflow-hidden rounded-lg">
             <SolarizedJsonViewer
-                src={logs}
+                src={rawLogs}
                 name={false}
                 enableClipboard={true}
                 collapsed={false}
@@ -33,7 +33,7 @@ export function ProgramLogs({
             />
         </div>
     ) : (
-        <ProgramLogRows logs={parseLogs(logs)} programName={programName} />
+        <ProgramLogRows logs={parsedLogs} programName={programName} />
     );
 
     return (

@@ -22,7 +22,11 @@ export function InteractInstructions({
     expandedSections: string[];
     setExpandedSections: Dispatch<SetStateAction<string[]>>;
     instructions: InstructionData[];
-    onExecuteInstruction: (data: InstructionData, params: InstructionCallParams, options: ExecutionOptions) => Promise<void>;
+    onExecuteInstruction: (
+        data: InstructionData,
+        params: InstructionCallParams,
+        options: ExecutionOptions,
+    ) => Promise<void>;
     onSimulateInstruction: (data: InstructionData, params: InstructionCallParams) => Promise<void>;
     onSectionsExpanded?: (expandedSections: string[], programId?: string) => void;
     status?: InstructionStatus;

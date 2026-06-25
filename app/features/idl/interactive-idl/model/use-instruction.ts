@@ -67,10 +67,8 @@ interface UseInstructionReturn {
 
     // Status
     status: InstructionStatus;
-    lastResult: InstructionExecutionResult | undefined;
-    lastSimulation: InstructionSimulationResult | undefined;
-    parseLogs: ReturnType<typeof useExecuteTransaction>['parseLogs'];
-    parseSimulationLogs: ReturnType<typeof useSimulateTransaction>['parseLogs'];
+    lastExecutionResult: InstructionExecutionResult | undefined;
+    lastSimulationResult: InstructionSimulationResult | undefined;
     initializeProgram: () => void;
     program: UnifiedProgram | undefined;
     initializationError: string | undefined;
@@ -196,7 +194,11 @@ export function useInstruction({
         }
     }, [idl, programId?.toString()]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { executeTx, isExecuting, lastResult, parseLogs } = useExecuteTransaction({
+    const {
+        executeTx,
+        isExecuting,
+        lastResult: lastExecutionResult,
+    } = useExecuteTransaction({
         commitment,
         connection,
         idlErrors: idl?.errors,
@@ -206,8 +208,7 @@ export function useInstruction({
 
     const {
         isSimulating,
-        lastSimulation,
-        parseLogs: parseSimulationLogs,
+        lastSimulation: lastSimulationResult,
         simulate,
     } = useSimulateTransaction({
         connection,
@@ -261,10 +262,8 @@ export function useInstruction({
         executeInstruction,
         initializationError,
         initializeProgram,
-        lastResult,
-        lastSimulation,
-        parseLogs,
-        parseSimulationLogs,
+        lastExecutionResult,
+        lastSimulationResult,
         program,
         simulateInstruction,
         status,

@@ -48,7 +48,7 @@ describe('useSimulateTransaction', () => {
             await result.current.simulate(async () => makeTx());
         });
         await waitFor(() => expect(result.current.lastSimulation?.status).toBe('success'));
-        expect((result.current.lastSimulation as SimulationOkResult).logs).toEqual(['l1']);
+        expect((result.current.lastSimulation as SimulationOkResult).logs.raw).toEqual(['l1']);
     });
 
     it('should surface simulation logs before throwing on error path', async () => {
@@ -67,7 +67,7 @@ describe('useSimulateTransaction', () => {
             await result.current.simulate(async () => makeTx());
         });
         await waitFor(() => expect(result.current.lastSimulation?.status).toBe('error'));
-        expect((result.current.lastSimulation as RpcSimulationFailedResult).logs).toEqual(['log-on-err']);
+        expect((result.current.lastSimulation as RpcSimulationFailedResult).logs.raw).toEqual(['log-on-err']);
         expect((result.current.lastSimulation as RpcSimulationFailedResult).message).toContain('AlreadyInitialized');
         expect((result.current.lastSimulation as RpcSimulationFailedResult).phase).toBe('rpc_simulation_failed');
     });

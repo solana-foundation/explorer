@@ -1,6 +1,5 @@
 'use client';
 
-import { useParsedLogs } from '@entities/program-logs';
 import { useWallet } from '@solana/wallet-adapter-react';
 import {
     type Connection,
@@ -11,10 +10,12 @@ import {
 } from '@solana/web3.js';
 import { useCallback, useState } from 'react';
 
+import { useCluster } from '@/app/providers/cluster';
 import { Logger } from '@/app/shared/lib/logger';
 
 import type { BaseIdl } from '../unified-program';
 import { formatTransactionError } from './format-transaction-error';
+import { toResultLogs } from './parse-result-logs';
 import { serializeTransactionMessage, toBase64TransactionMessage } from './serialize-transaction-message';
 import type { ExecutionOptions, InstructionExecutionResult } from './types';
 
@@ -37,7 +38,6 @@ export function useExecuteTransaction(opts: {
         handleTxSuccess,
         isExecuting,
         lastResult,
-        parseLogs,
     } = useExecutionState({ onError, onSuccess });
 
     const executeTx = useCallback(
@@ -107,7 +107,7 @@ export function useExecuteTransaction(opts: {
         ],
     );
 
-    return { executeTx, isExecuting, lastResult, parseLogs };
+    return { executeTx, isExecuting, lastResult };
 }
 
 function useExecutionState({
@@ -117,15 +117,13 @@ function useExecutionState({
     onSuccess?: (signature: string) => void;
     onError?: (error: string, signature?: string) => void;
 }) {
-    const [transactionError, setTransactionError] = useState<TransactionError>();
-    const { parseLogs } = useParsedLogs(transactionError);
+    const { cluster } = useCluster();
     const [isExecuting, setIsExecuting] = useState(false);
     const [lastResult, setLastResult] = useState<InstructionExecutionResult>();
 
     const handleTxStart = () => {
         setIsExecuting(true);
         setLastResult(undefined);
-        setTransactionError(undefined);
     };
 
     const handleTxEnd = () => {
@@ -133,7 +131,14 @@ function useExecutionState({
     };
 
     const handleTxSuccess = (signature: string, finalLogs: string[] | null | undefined) => {
-        setLastResult({ finishedAt: new Date(), logs: finalLogs ?? [], signature, status: 'success' });
+        const logs = finalLogs ?? [];
+        setLastResult({
+            finishedAt: new Date(),
+            kind: 'execution',
+            logs: toResultLogs(logs, undefined, cluster),
+            signature,
+            status: 'success',
+        });
         onSuccess?.(signature);
     };
 
@@ -150,11 +155,14 @@ function useExecutionState({
         const logs = options.logs ?? [];
         const message = getMessageFromBroadcastError(error, options.idlErrors);
         Logger.error(error, { signature: options.signature, transaction });
-        setTransactionError(error instanceof Error ? undefined : (error as TransactionError));
+        // A structured TransactionError annotates the failed instruction in the parsed logs;
+        // a caught Error instance carries no such structure.
+        const txError = error instanceof Error ? undefined : (error as TransactionError);
 
         setLastResult({
             finishedAt: new Date(),
-            logs,
+            kind: 'execution',
+            logs: toResultLogs(logs, txError, cluster),
             message,
             phase: 'broadcast_failed',
             serializedTxMessage: toBase64TransactionMessage(transaction),
@@ -173,12 +181,11 @@ function useExecutionState({
         const logs = error instanceof SendTransactionError ? (error.logs ?? []) : [];
         const message = getPreBroadcastErrorMessage(error);
         Logger.error(error, { transaction });
-        if (error instanceof SendTransactionError) {
-            setTransactionError(error);
-        }
         setLastResult({
             finishedAt: new Date(),
-            logs,
+            kind: 'execution',
+            // No structured on-chain TransactionError before broadcast, so logs are not annotated.
+            logs: toResultLogs(logs, undefined, cluster),
             message,
             phase: 'pre_broadcast_failed',
             serializedTxMessage: serializeTransactionMessage(transaction),
@@ -196,7 +203,6 @@ function useExecutionState({
         handleTxSuccess,
         isExecuting,
         lastResult,
-        parseLogs,
     };
 }
 

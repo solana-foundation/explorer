@@ -70,7 +70,7 @@ describe('useExecuteTransaction', () => {
         });
         await waitFor(() => expect(result.current.lastResult?.status).toBe('success'));
         expect((result.current.lastResult as ExecutionOkResult).signature).toBe('sig123');
-        expect(result.current.lastResult?.logs).toEqual(['final-log']);
+        expect(result.current.lastResult?.logs.raw).toEqual(['final-log']);
         expect(onSuccess).toHaveBeenCalledWith('sig123');
     });
 
@@ -92,7 +92,7 @@ describe('useExecuteTransaction', () => {
             await result.current.executeTx(async () => makeTx());
         });
         await waitFor(() => expect(result.current.lastResult?.status).toBe('error'));
-        expect(result.current.lastResult?.logs).toEqual(['failed-log']);
+        expect(result.current.lastResult?.logs.raw).toEqual(['failed-log']);
         expect((result.current.lastResult as BroadcastFailedResult).message).toContain(
             'Instruction #1 got "AlreadyInitialized"',
         );
@@ -195,7 +195,7 @@ describe('useExecuteTransaction', () => {
         await waitFor(() => expect(result.current.lastResult?.status).toBe('error'));
         const r = result.current.lastResult as PreBroadcastFailedResult;
         expect(r.phase).toBe('pre_broadcast_failed');
-        expect(r.logs).toEqual(preflightLogs);
+        expect(r.logs.raw).toEqual(preflightLogs);
         // Ensure logs do not appear in the message during execution with enabled simulation.
         expect(r.message).toBe(sendError.transactionError.message);
         expect(r.message).not.toContain('Logs:');
@@ -226,9 +226,7 @@ describe('useExecuteTransaction', () => {
 
     it('should send with skipPreflight true by default (simulation disabled)', async () => {
         const connection = mockConnection();
-        const { result } = renderHook(() =>
-            useExecuteTransaction({ commitment: 'confirmed', connection }),
-        );
+        const { result } = renderHook(() => useExecuteTransaction({ commitment: 'confirmed', connection }));
         await act(async () => {
             await result.current.executeTx(async () => makeTx());
         });
@@ -240,9 +238,7 @@ describe('useExecuteTransaction', () => {
 
     it('should send with skipPreflight false when the simulate option is true', async () => {
         const connection = mockConnection();
-        const { result } = renderHook(() =>
-            useExecuteTransaction({ commitment: 'confirmed', connection }),
-        );
+        const { result } = renderHook(() => useExecuteTransaction({ commitment: 'confirmed', connection }));
         await act(async () => {
             await result.current.executeTx(async () => makeTx(), { simulate: true });
         });

@@ -4,23 +4,21 @@ import { ProgramLogs, TxErrorStatus, TxExecutionStatus, TxSimulationStatus } fro
 import { ReactNode } from 'react';
 
 import { Card } from '@/app/shared/ui/Card';
-import type { InstructionLogs } from '@/app/utils/program-logs';
 
 import type { InstructionExecutionResult, InstructionSimulationResult } from '../model/transaction/types';
 
 type InstructionExecutionActivityProps = {
     lastResult?: InstructionExecutionResult;
-    parseLogs: (logs: string[]) => InstructionLogs[];
 };
 
-export function InstructionExecutionActivity({ lastResult, parseLogs }: InstructionExecutionActivityProps) {
+export function InstructionExecutionActivity({ lastResult }: InstructionExecutionActivityProps) {
     const tabs = [
         {
             component: (
                 <ProgramLogs
                     header={lastResult && <InstructionExecutionStatusHeader lastResult={lastResult} />}
-                    logs={lastResult?.logs ?? []}
-                    parseLogs={parseLogs}
+                    rawLogs={lastResult?.logs.raw ?? []}
+                    parsedLogs={lastResult?.logs.parsed ?? []}
                 />
             ),
             id: 'program-logs',
@@ -32,17 +30,17 @@ export function InstructionExecutionActivity({ lastResult, parseLogs }: Instruct
 
 type InstructionSimulationActivityProps = {
     lastSimulation?: InstructionSimulationResult;
-    parseLogs: (logs: string[]) => InstructionLogs[];
 };
 
-export function InstructionSimulationActivity({ lastSimulation, parseLogs }: InstructionSimulationActivityProps) {
+export function InstructionSimulationActivity({ lastSimulation }: InstructionSimulationActivityProps) {
+    const logs = lastSimulation && 'logs' in lastSimulation ? lastSimulation.logs : undefined;
     const tabs = [
         {
             component: (
                 <ProgramLogs
                     header={lastSimulation && <SimulationStatusHeader lastSimulation={lastSimulation} />}
-                    logs={lastSimulation && 'logs' in lastSimulation ? lastSimulation.logs : []}
-                    parseLogs={parseLogs}
+                    rawLogs={logs?.raw ?? []}
+                    parsedLogs={logs?.parsed ?? []}
                 />
             ),
             id: 'program-logs',

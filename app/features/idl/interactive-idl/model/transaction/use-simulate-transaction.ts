@@ -1,19 +1,14 @@
 'use client';
 
-import { useParsedLogs } from '@entities/program-logs';
-import {
-    type Commitment,
-    type Connection,
-    type Transaction,
-    type TransactionError,
-    VersionedTransaction,
-} from '@solana/web3.js';
+import { type Commitment, type Connection, type Transaction, VersionedTransaction } from '@solana/web3.js';
 import { useCallback, useState } from 'react';
 
+import { useCluster } from '@/app/providers/cluster';
 import { Logger } from '@/app/shared/lib/logger';
 
 import type { BaseIdl } from '../unified-program';
 import { formatTransactionError } from './format-transaction-error';
+import { toResultLogs } from './parse-result-logs';
 import { toBase64TransactionMessage } from './serialize-transaction-message';
 import type { InstructionSimulationResult } from './types';
 
@@ -23,8 +18,7 @@ export function useSimulateTransaction(opts: {
     idlErrors?: BaseIdl['errors'];
 }) {
     const { connection, simulationCommitment, idlErrors } = opts;
-    const [transactionError, setTransactionError] = useState<TransactionError>();
-    const { parseLogs } = useParsedLogs(transactionError);
+    const { cluster } = useCluster();
     const [isSimulating, setIsSimulating] = useState(false);
     const [lastSimulation, setLastSimulation] = useState<InstructionSimulationResult>();
 
@@ -32,7 +26,6 @@ export function useSimulateTransaction(opts: {
         async (buildTx: () => Promise<Transaction>): Promise<void> => {
             setIsSimulating(true);
             setLastSimulation(undefined);
-            setTransactionError(undefined);
             let transaction: Transaction | undefined;
             let serializedTxMessage: string | undefined = undefined;
             try {
@@ -57,10 +50,10 @@ export function useSimulateTransaction(opts: {
                 // Handle simulation result
                 const logs = result.value.logs ?? [];
                 if (result.value.err !== null) {
-                    setTransactionError(result.value.err);
                     setLastSimulation({
                         finishedAt: new Date(),
-                        logs,
+                        kind: 'simulation',
+                        logs: toResultLogs(logs, result.value.err, cluster),
                         message: formatTransactionError(result.value.err, idlErrors),
                         phase: 'rpc_simulation_failed',
                         serializedTxMessage,
@@ -70,7 +63,8 @@ export function useSimulateTransaction(opts: {
                 }
                 setLastSimulation({
                     finishedAt: new Date(),
-                    logs,
+                    kind: 'simulation',
+                    logs: toResultLogs(logs, undefined, cluster),
                     returnData: result.value.returnData ?? undefined,
                     serializedTxMessage,
                     status: 'success',
@@ -80,6 +74,7 @@ export function useSimulateTransaction(opts: {
                 Logger.error(e, { transaction });
                 setLastSimulation({
                     finishedAt: new Date(),
+                    kind: 'simulation',
                     message: e instanceof Error ? e.message : 'Simulation failed',
                     phase: 'simulation_execution_failed',
                     serializedTxMessage,
@@ -89,8 +84,8 @@ export function useSimulateTransaction(opts: {
                 setIsSimulating(false);
             }
         },
-        [connection, simulationCommitment, idlErrors],
+        [connection, simulationCommitment, idlErrors, cluster],
     );
 
-    return { isSimulating, lastSimulation, parseLogs, simulate };
+    return { isSimulating, lastSimulation, simulate };
 }
