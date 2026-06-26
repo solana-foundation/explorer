@@ -12,6 +12,11 @@ import { type ByteArray, encodeTransactionData as encodeBytes, type EncodingForm
 import React from 'react';
 import { Download } from 'react-feather';
 
+export enum DownloadState {
+    Downloaded = 'downloaded',
+    Idle = 'idle',
+}
+
 import { Logger } from '@/app/shared/lib/logger';
 import { triggerDownloadText } from '@/app/shared/lib/triggerDownload';
 
@@ -33,6 +38,7 @@ export function DownloadDropdown({
     filename,
     encodings = DEFAULT_ENCODINGS,
     onOpenChange,
+    onDownload,
     children,
 }: {
     data: ByteArray | undefined;
@@ -42,13 +48,19 @@ export function DownloadDropdown({
     filename: string;
     encodings?: EncodingFormat[];
     onOpenChange?: (open: boolean) => void;
+    onDownload?: () => void;
     children?: React.ReactNode;
 }) {
     if (encodings.length <= 1) {
         const trigger = children ?? <DefaultTrigger disabled={loading || disabled} />;
         if (React.isValidElement(trigger)) {
             return React.cloneElement(trigger as React.ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>>, {
-                onClick: () => data && handleDownload(data, encodings[0], filename),
+                onClick: () => {
+                    if (data) {
+                        const ok = handleDownload(data, encodings[0], filename);
+                        if (ok) onDownload?.();
+                    }
+                },
             });
         }
         return trigger;
@@ -65,7 +77,12 @@ export function DownloadDropdown({
                         <DropdownMenuItem
                             key={encoding}
                             disabled={loading || !data}
-                            onClick={() => data && handleDownload(data, encoding, filename)}
+                            onClick={() => {
+                                if (data) {
+                                    const ok = handleDownload(data, encoding, filename);
+                                    if (ok) onDownload?.();
+                                }
+                            }}
                         >
                             {loading ? `Loading ${encoding}…` : `Download ${encoding}`}
                         </DropdownMenuItem>
@@ -76,11 +93,13 @@ export function DownloadDropdown({
     );
 }
 
-function handleDownload(data: ByteArray, encoding: EncodingFormat, filename: string) {
+function handleDownload(data: ByteArray, encoding: EncodingFormat, filename: string): boolean {
     try {
         const encoded = encodeBytes(data, encoding);
         triggerDownloadText(encoded, `${filename}_${encoding}.txt`);
+        return true;
     } catch (err) {
         Logger.error(new Error(`Failed to download ${encoding} file`, { cause: err }));
+        return false;
     }
 }

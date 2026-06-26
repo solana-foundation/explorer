@@ -1,7 +1,5 @@
 'use client';
 
-import '@features/transaction/ui/transaction-page.css';
-
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SignatureContext } from '@components/instruction/SignatureContext';
@@ -85,7 +83,7 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
     }
 
     return (
-        <div className="transaction-page mx-auto flex max-w-5xl flex-col space-y-9 px-4 pt-3 lg:space-y-12 lg:px-6 lg:pt-5">
+        <div className="mx-auto flex max-w-5xl flex-col space-y-9 px-4 pt-3 selection:bg-[#13d89b40] selection:text-inherit lg:space-y-12 lg:px-6 lg:pt-5">
             <header className="-mb-6 flex flex-col gap-1.5 pb-3 pt-2 lg:mb-0">
                 <span className="text-xs font-normal uppercase text-muted">Details</span>
                 <h1 className="m-0 text-2xl font-normal leading-none text-white md:text-3xl">Transaction</h1>
