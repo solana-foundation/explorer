@@ -20,12 +20,15 @@ export function ProgramMetadataIdlInstructionDetailsCard({
     index,
     innerCards,
     idl,
+    signature,
 }: {
     ix: TransactionInstruction;
     result: SignatureResult;
     index: number;
     innerCards?: JSX.Element[];
     idl: any;
+    // Present on the tx page; lets the Anchor fallback decode events from the transaction logs.
+    signature?: string;
 }) {
     const { url } = useCluster();
     const props = {
@@ -71,7 +74,7 @@ export function ProgramMetadataIdlInstructionDetailsCard({
     // lenient, so build a Program from the IDL and reuse the Anchor card before giving up.
     try {
         const program = new Program(getFormattedIdl(formatSerdeIdl, idl, ix.programId.toBase58()), getProvider(url));
-        return <AnchorDetailsCard {...props} anchorProgram={program as Program<Idl>} signature="" />;
+        return <AnchorDetailsCard {...props} anchorProgram={program as Program<Idl>} signature={signature ?? ''} />;
     } catch (error) {
         Logger.debug('[program-metadata-idl] Anchor fallback failed', { error });
     }
