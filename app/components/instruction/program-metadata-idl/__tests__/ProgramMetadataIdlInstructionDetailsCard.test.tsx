@@ -38,7 +38,7 @@ vi.mock('../../UnknownDetailsCard', () => ({
 const ix = new TransactionInstruction({
     data: Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]),
     keys: [],
-    programId: new PublicKey('vELoC1audYbSYVRXn1vPaV8Axoa9oU6BYmNGZZBDZ1P'),
+    programId: PublicKey.unique(),
 });
 const props = { index: 0, ix, result: { err: null } } as any;
 const anchorIdl = { accounts: [], address: ix.programId.toBase58(), instructions: [{ name: 'foo' }] };
