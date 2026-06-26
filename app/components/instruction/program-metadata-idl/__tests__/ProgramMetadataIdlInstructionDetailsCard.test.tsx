@@ -24,7 +24,10 @@ vi.mock('@coral-xyz/anchor', () => ({
         }
     },
 }));
-vi.mock('../../AnchorDetailsCard', () => ({ default: () => <div data-testid="anchor-card">anchor decoded</div> }));
+vi.mock('../../AnchorDetailsCard', () => ({
+    // Surface the signature so the test can assert it's forwarded (needed for event decoding).
+    default: ({ signature }: { signature: string }) => <div data-testid="anchor-card">anchor:{signature}</div>,
+}));
 vi.mock('../../codama/CodamaInstructionDetailsCard', () => ({
     CodamaInstructionCard: () => <div data-testid="codama-card">codama decoded</div>,
 }));
@@ -62,9 +65,12 @@ describe('ProgramMetadataIdlInstructionDetailsCard', () => {
             throw new Error('Argument name [id] is missing from the instruction definition');
         });
 
-        render(<ProgramMetadataIdlInstructionDetailsCard {...props} idl={anchorIdl} />);
+        render(<ProgramMetadataIdlInstructionDetailsCard {...props} idl={anchorIdl} signature="SIG123" />);
 
-        expect(screen.getByTestId('anchor-card')).toBeInTheDocument();
+        const card = screen.getByTestId('anchor-card');
+        expect(card).toBeInTheDocument();
+        // Signature is forwarded so the Anchor card can decode events from the tx logs.
+        expect(card).toHaveTextContent('SIG123');
         expect(screen.queryByTestId('unknown-card')).not.toBeInTheDocument();
     });
 });
