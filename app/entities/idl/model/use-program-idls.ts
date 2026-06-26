@@ -56,14 +56,18 @@ export function useProgramIdls(
     if (isCustom) {
         return {
             anchorIdl: customIdls?.anchorIdl,
+            anchorIdlAddress: customIdls?.anchorIdlAddress,
             isLoading: customLoading,
             programMetadataIdl: customIdls?.programMetadataIdl,
+            programMetadataIdlAddress: customIdls?.programMetadataIdlAddress,
         };
     }
 
     return {
         anchorIdl: serverIdls?.anchorIdl,
+        anchorIdlAddress: serverIdls?.anchorIdlAddress,
         isLoading: serverLoading,
         programMetadataIdl: serverIdls?.programMetadataIdl,
+        programMetadataIdlAddress: serverIdls?.programMetadataIdlAddress,
     };
 }

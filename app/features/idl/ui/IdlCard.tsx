@@ -1,18 +1,19 @@
 'use client';
 import { LoadingCard } from '@components/common/LoadingCard';
+import { AddressLink } from '@components/shared/address';
 import { Badge } from '@components/shared/ui/badge';
 import { Button, buttonVariants } from '@components/shared/ui/button';
 import { ExternalLink } from '@components/shared/ui/external-link';
 import {
-    getIdlSpec,
-    getIdlStandard,
-    getIdlVersion,
+    getIdlBadgeLabel,
+    getIdlProgramVersion,
     IdlVariant,
     isIdlProgramIdMismatch,
     type SupportedIdl,
     useProgramIdls,
 } from '@entities/idl';
 import { useCluster } from '@providers/cluster';
+import { type Address } from '@solana/kit';
 import { useState } from 'react';
 import { AlertCircle, AlertTriangle, ExternalLink as ExternalLinkIcon } from 'react-feather';
 
@@ -28,7 +29,11 @@ import { IdlSection } from './IdlSection';
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const network = clusterSlug(cluster);
-    const { anchorIdl, programMetadataIdl, isLoading } = useProgramIdls(programId, url, cluster);
+    const { anchorIdl, anchorIdlAddress, programMetadataIdl, programMetadataIdlAddress, isLoading } = useProgramIdls(
+        programId,
+        url,
+        cluster,
+    );
     const [searchStr, setSearchStr] = useState<string>('');
 
     // Link to the standalone IDL explorer (idl.solana.com) — the full history view across every IDL
@@ -107,16 +112,14 @@ export function IdlCard({ programId }: { programId: string }) {
     }
 
     const isMismatch = isIdlProgramIdMismatch(idl, programId);
-    const version = getIdlVersion(idl);
-    const idlSpec = getIdlSpec(idl);
-    // Badge mirrors the interact view's label — IDL standard + version (+ spec when present), in the
-    // dashkit style: the Anchor fallback (no PMP IDL) is "warning" (matching the "Program has no
-    // security.txt" badge) with the adjacent info icon; otherwise (any PMP IDL) it's "success".
+    // Single badge: the IDL standard with its version(s) — `Codama (version 1.5.1)` /
+    // `Anchor 0.30.1 (version 0.1.0)` / `Anchor (legacy)`. The program's own semver lives in the info
+    // rows below. Dashkit style: the Anchor fallback (no PMP IDL) is "warning" (matching the "Program
+    // has no security.txt" badge) with the adjacent info icon; otherwise (any PMP IDL) it's "success".
     const badge = (
         <div className="flex flex-wrap items-center gap-2">
             <Badge ui="dashkit" variant={isFallback ? 'warning' : 'success'}>
-                {getIdlStandard(idl)}: {version}
-                {idlSpec ? ` (spec: ${idlSpec})` : ''}
+                {getIdlBadgeLabel(idl)}
             </Badge>
             {isFallback && (
                 <Tooltip>
@@ -137,6 +140,35 @@ export function IdlCard({ programId }: { programId: string }) {
         </div>
     );
 
+    // Metadata shown directly under the badge: the storage account the displayed IDL was read from,
+    // which source it came from, and the program's own version (distinct from the badge's spec label).
+    const idlAddress = isFallback ? anchorIdlAddress : programMetadataIdlAddress;
+    const idlSourceLabel = isFallback ? 'Anchor' : 'PMP';
+    const programVersion = getIdlProgramVersion(idl);
+    const info = (
+        <dl className="flex flex-col gap-1 text-xs">
+            {idlAddress && (
+                <div className="flex items-baseline gap-2">
+                    <dt className="w-32 shrink-0 text-neutral-400">Address</dt>
+                    <dd className="flex min-w-0 items-center gap-1.5 text-white">
+                        <AddressLink address={idlAddress as Address} truncate={{ head: 4, tail: 4 }} />
+                        <span className="text-neutral-500">(PDA)</span>
+                    </dd>
+                </div>
+            )}
+            <div className="flex items-baseline gap-2">
+                <dt className="w-32 shrink-0 text-neutral-400">Source</dt>
+                <dd className="text-white">{idlSourceLabel}</dd>
+            </div>
+            {programVersion && (
+                <div className="flex items-baseline gap-2">
+                    <dt className="w-32 shrink-0 text-neutral-400">Program Version</dt>
+                    <dd className="text-white">{programVersion}</dd>
+                </div>
+            )}
+        </dl>
+    );
+
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
@@ -154,6 +186,7 @@ export function IdlCard({ programId }: { programId: string }) {
                 ) : (
                     <IdlSection
                         badge={badge}
+                        info={info}
                         idl={idl}
                         idlSource={isFallback ? IdlVariant.Anchor : IdlVariant.ProgramMetadata}
                         network={network}

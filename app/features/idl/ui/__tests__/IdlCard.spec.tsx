@@ -57,12 +57,15 @@ vi.mock('@solana/kit', async importOriginal => ({
 }));
 
 const DEFAULT_ADDRESS = PublicKey.default.toBase58();
+const PMP_PDA = 'PMP1111111111111111111111111111111111111111';
 
 function mockProgramIdls(overrides: Partial<ProgramIdls>): void {
     mocks.useProgramIdls.mockReturnValue({
         anchorIdl: undefined,
+        anchorIdlAddress: undefined,
         isLoading: false,
         programMetadataIdl: undefined,
+        programMetadataIdlAddress: undefined,
         ...overrides,
     });
 }
@@ -94,6 +97,7 @@ function createMockProgramMetadataIdl(): SupportedIdl {
             errors: [],
             instructions: [],
             pdas: [],
+            version: '0.4.2',
         },
         standard: 'codama',
         version: '1.2.11',
@@ -161,7 +165,7 @@ describe('IdlCard', () => {
             expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
         });
         // Standard + version badge, not the fallback-source marker; and no per-source tabs.
-        expect(screen.getByText(/Codama:\s*1\.2\.11/)).toBeInTheDocument();
+        expect(screen.getByText('Codama (version 1.2.11)')).toBeInTheDocument();
         expect(screen.queryByLabelText('Fallback IDL source')).not.toBeInTheDocument();
         expectNoSourceTabs();
 
@@ -170,6 +174,51 @@ describe('IdlCard', () => {
         expect(castawayUrl.searchParams.get('program')).toBe(programId);
         expect(castawayUrl.searchParams.get('idlSource')).toBe('program-metadata');
         expect(castawayUrl.searchParams.get('network')).toBe('mainnet-beta');
+    });
+
+    test('should show the IDL metadata (address, source, program version) under the badge', async () => {
+        mockProgramIdls({
+            programMetadataIdl: createMockProgramMetadataIdl(),
+            programMetadataIdlAddress: PMP_PDA,
+        });
+
+        render(
+            <ClusterProvider>
+                <IdlCard programId={programId} />
+            </ClusterProvider>,
+        );
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
+        });
+
+        // Source row reflects the displayed IDL's origin.
+        expect(screen.getByText('Source')).toBeInTheDocument();
+        expect(screen.getByText('PMP')).toBeInTheDocument();
+        // Address row links the storage-account PDA to its account page (via the shared AddressLink,
+        // whose accessible name is "Open address <addr>" and whose visible text is mid-truncated).
+        const addressLink = screen.getByRole('link', { name: `Open address ${PMP_PDA}` });
+        expect(addressLink.getAttribute('href')).toContain(`/address/${PMP_PDA}`);
+        // Program version is the program's own semver (program.version), not the spec/standard label.
+        expect(screen.getByText('Program Version')).toBeInTheDocument();
+        expect(screen.getByText('0.4.2')).toBeInTheDocument();
+    });
+
+    test('should label the source as Anchor when falling back to the Anchor IDL', async () => {
+        mockProgramIdls({ anchorIdl: createMockAnchorIdl(), anchorIdlAddress: DEFAULT_ADDRESS });
+
+        render(
+            <ClusterProvider>
+                <IdlCard programId={programId} />
+            </ClusterProvider>,
+        );
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
+        });
+        // The Source <dd> is exactly "Anchor"; the badge element reads "Anchor: 0.30.1 (spec: 0.1.0)",
+        // so an exact-text query matches only the Source row.
+        expect(screen.getByText('Anchor')).toBeInTheDocument();
     });
 
     test('should fall back to the Anchor IDL with a warning badge + tooltip when no PMP IDL exists', async () => {
@@ -184,8 +233,8 @@ describe('IdlCard', () => {
         await waitFor(() => {
             expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
         });
-        // The version badge stays (standard + version); the fallback info icon is added alongside it.
-        expect(screen.getByText(/Anchor:\s*0\.30\.1/)).toBeInTheDocument();
+        // Single badge: standard + era + spec version; the fallback info icon sits alongside.
+        expect(screen.getByText('Anchor 0.30.1 (version 0.1.0)')).toBeInTheDocument();
         expect(screen.getByLabelText('Fallback IDL source')).toBeInTheDocument();
         expectNoSourceTabs();
 
@@ -206,7 +255,7 @@ describe('IdlCard', () => {
         );
 
         await waitFor(() => {
-            expect(screen.getByText(/Codama:\s*1\.2\.11/)).toBeInTheDocument();
+            expect(screen.getByText('Codama (version 1.2.11)')).toBeInTheDocument();
         });
         // No fallback marker and no Anchor tab — the Anchor source is not reachable from the card.
         expect(screen.queryByLabelText('Fallback IDL source')).not.toBeInTheDocument();

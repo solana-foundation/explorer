@@ -9,6 +9,8 @@ export type {
     NestedInstructionAccountsData,
 } from './model/formatters/formatted-idl';
 export {
+    getIdlBadgeLabel,
+    getIdlProgramVersion,
     getIdlSpec,
     getIdlStandard,
     getIdlVersion,

@@ -9,8 +9,12 @@ type IdlRpc = Rpc<SolanaRpcApi>;
 export type ResolvedProgramIdls = {
     /** Parsed Anchor IDL JSON, or `undefined` when absent / undecodable. */
     anchorIdl: unknown;
+    /** On-chain account the Anchor IDL was read from (the derived Anchor IDL PDA), when present. */
+    anchorIdlAddress: string | undefined;
     /** Parsed PMP IDL JSON, or `undefined` when absent / undecodable. */
     programMetadataIdl: unknown;
+    /** On-chain account the PMP IDL was read from (the PMP metadata account), when present. */
+    programMetadataIdlAddress: string | undefined;
 };
 
 /**
@@ -35,23 +39,36 @@ export async function resolveProgramIdls(rpc: IdlRpc, programId: Address): Promi
 
     let anchorContent: string | undefined;
     let pmpContent: string | undefined;
+    // The IDL storage accounts the content was read from (derived PDAs / resolved PMP account).
+    let anchorAccount: string | undefined;
+    let pmpAccount: string | undefined;
     if (resolveAnchor) {
         // The package's side-by-side resolver (one round trip per source).
-        const { anchor, pmp } = await fetchLatestIdls(rpc, programId);
+        const { anchor, pmp, anchorAddress, pmpAddress } = await fetchLatestIdls(rpc, programId);
         anchorContent = anchor[0]?.content;
         pmpContent = pmp[0]?.content;
+        anchorAccount = anchorAddress;
+        pmpAccount = pmpAddress;
     } else {
         // Native program: PMP only (no Anchor PDA).
         const result = await fetchPmpIdl(rpc, programId);
-        pmpContent = result.status === 'ok' ? result.content : undefined;
+        if (result.status === 'ok') {
+            pmpContent = result.content;
+            pmpAccount = result.address;
+        }
     }
 
     // No IDL-shape check: both sources parse only to a JSON object. PMP content may be Anchor-format or
     // Codama (whose `instructions` nest under `program`), so no single shape holds — format detection is
     // the client's job, and the Anchor tx-decoder (`useAnchorProgram`) guards itself.
+    const anchorIdl = parseContent(anchorContent);
+    const programMetadataIdl = parseContent(pmpContent);
     return {
-        anchorIdl: parseContent(anchorContent),
-        programMetadataIdl: parseContent(pmpContent),
+        anchorIdl,
+        // Only surface a storage account for a source that resolved to a usable (parsed) IDL.
+        anchorIdlAddress: anchorIdl ? anchorAccount : undefined,
+        programMetadataIdl,
+        programMetadataIdlAddress: programMetadataIdl ? pmpAccount : undefined,
     };
 }
 

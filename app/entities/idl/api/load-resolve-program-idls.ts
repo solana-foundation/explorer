@@ -29,9 +29,14 @@ export async function resolveProgramIdlsClient({
     url,
 }: ResolveProgramIdlsClientArgs): Promise<ProgramIdlPair> {
     const { resolveProgramIdls } = await import('./resolve-program-idls');
-    const { anchorIdl, programMetadataIdl } = await resolveProgramIdls(createSolanaRpc(url), address(programId));
+    const { anchorIdl, anchorIdlAddress, programMetadataIdl, programMetadataIdlAddress } = await resolveProgramIdls(
+        createSolanaRpc(url),
+        address(programId),
+    );
     return {
         anchorIdl: anchorIdl as SupportedIdl | undefined,
+        anchorIdlAddress,
         programMetadataIdl: programMetadataIdl as SupportedIdl | undefined,
+        programMetadataIdlAddress,
     };
 }

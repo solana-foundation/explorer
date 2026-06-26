@@ -21,14 +21,19 @@ vi.mock('@solana/idl', async () => {
 
 const PROGRAM = 'C7QLEmDz81Usvy2sYa4xZSdA8EwEcYvZo8iuYZMaqXmj' as Address;
 const SYSTEM_PROGRAM = '11111111111111111111111111111111' as Address; // in NON_ANCHOR_PROGRAMS
+const ANCHOR_PDA = 'AnchrPDA11111111111111111111111111111111111' as Address;
+const PMP_PDA = 'PmpPDA111111111111111111111111111111111111' as Address;
 
-// fetchLatestIdls returns each source as an empty or single-element array of { content }.
+// fetchLatestIdls returns each source as an empty or single-element array of { content }, plus the
+// derived storage-account PDAs at the top level.
 const latest = (anchor?: object, pmp?: object) =>
     ({
         anchor: anchor ? [{ content: JSON.stringify(anchor) }] : [],
+        anchorAddress: ANCHOR_PDA,
         pmp: pmp ? [{ content: JSON.stringify(pmp) }] : [],
+        pmpAddress: PMP_PDA,
     }) as never;
-const ok = (content: object) => ({ content: JSON.stringify(content), status: 'ok' }) as never;
+const ok = (content: object) => ({ address: PMP_PDA, content: JSON.stringify(content), status: 'ok' }) as never;
 
 beforeEach(() => {
     vi.clearAllMocks();
@@ -44,6 +49,9 @@ describe('resolveProgramIdls', () => {
         expect(mocks.fetchPmpIdl).not.toHaveBeenCalled();
         expect(result.anchorIdl).toEqual({ instructions: [], name: 'anchor' });
         expect(result.programMetadataIdl).toEqual({ name: 'pmp' });
+        // Each resolved source surfaces the storage account it was read from.
+        expect(result.anchorIdlAddress).toBe(ANCHOR_PDA);
+        expect(result.programMetadataIdlAddress).toBe(PMP_PDA);
     });
 
     it('should resolve only the Anchor source when PMP is absent', async () => {
@@ -52,6 +60,9 @@ describe('resolveProgramIdls', () => {
         const result = await resolveProgramIdls(rpc(), PROGRAM);
         expect(result.anchorIdl).toEqual({ instructions: [] });
         expect(result.programMetadataIdl).toBeUndefined();
+        // No address for a source that produced no usable IDL.
+        expect(result.anchorIdlAddress).toBe(ANCHOR_PDA);
+        expect(result.programMetadataIdlAddress).toBeUndefined();
     });
 
     it('should not validate IDL shape — any JSON object passes for both sources (detection is client-side)', async () => {
@@ -72,6 +83,8 @@ describe('resolveProgramIdls', () => {
         const result = await resolveProgramIdls(rpc(), PROGRAM);
         expect(result.anchorIdl).toBeUndefined();
         expect(result.programMetadataIdl).toBeUndefined();
+        expect(result.anchorIdlAddress).toBeUndefined();
+        expect(result.programMetadataIdlAddress).toBeUndefined();
     });
 
     it('should skip the Anchor leg for native/builtin programs and resolve PMP only', async () => {
@@ -83,6 +96,9 @@ describe('resolveProgramIdls', () => {
         expect(mocks.fetchPmpIdl).toHaveBeenCalledWith(expect.anything(), SYSTEM_PROGRAM);
         expect(result.anchorIdl).toBeUndefined();
         expect(result.programMetadataIdl).toEqual({ name: 'native' });
+        // The PMP account address comes from the resolved PMP fetch.
+        expect(result.anchorIdlAddress).toBeUndefined();
+        expect(result.programMetadataIdlAddress).toBe(PMP_PDA);
     });
 
     it('should propagate RPC failures (caller decides 502 vs retry)', async () => {

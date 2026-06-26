@@ -24,7 +24,9 @@ export async function fetchProgramIdls(programId: string, cluster: Cluster): Pro
         // already yields `undefined` for missing sources.
         return {
             anchorIdl: idls?.anchor as SupportedIdl | undefined,
+            anchorIdlAddress: idls?.anchorAddress as string | undefined,
             programMetadataIdl: idls?.programMetadata as SupportedIdl | undefined,
+            programMetadataIdlAddress: idls?.programMetadataAddress as string | undefined,
         };
     } catch (error) {
         Logger.warn('[idl] Failed to fetch program IDLs', {

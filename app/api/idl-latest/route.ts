@@ -69,9 +69,15 @@ export async function GET(request: Request) {
     const context = { cluster: clusterProp, programAddress };
 
     try {
-        const { anchorIdl, programMetadataIdl } = await resolveProgramIdlsWithRetry(url, programId);
+        const { anchorIdl, anchorIdlAddress, programMetadataIdl, programMetadataIdlAddress } =
+            await resolveProgramIdlsWithRetry(url, programId);
 
-        const idls = { anchor: anchorIdl, programMetadata: programMetadataIdl };
+        const idls = {
+            anchor: anchorIdl,
+            anchorAddress: anchorIdlAddress,
+            programMetadata: programMetadataIdl,
+            programMetadataAddress: programMetadataIdlAddress,
+        };
         return NextResponse.json({ idls }, { headers: CACHE_HEADERS, status: 200 });
     } catch (error) {
         // `resolveProgramIdls` surfaces absent/undecodable as values and throws only on RPC failure.

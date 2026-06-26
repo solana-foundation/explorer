@@ -24,10 +24,16 @@ vi.mock('@solana/kit', async () => {
     return { ...actual, createSolanaRpc: vi.fn(() => ({})) };
 });
 
-function resolved(overrides: Partial<Record<'anchorIdl' | 'programMetadataIdl', unknown>> = {}) {
+function resolved(
+    overrides: Partial<
+        Record<'anchorIdl' | 'anchorIdlAddress' | 'programMetadataIdl' | 'programMetadataIdlAddress', unknown>
+    > = {},
+) {
     return {
         anchorIdl: undefined,
+        anchorIdlAddress: undefined,
         programMetadataIdl: undefined,
+        programMetadataIdlAddress: undefined,
         ...overrides,
     };
 }
@@ -69,15 +75,26 @@ describe('GET /api/idl-latest', () => {
 
     it('should shape the resolver output into the payload with cache headers', async () => {
         mocks.resolveProgramIdls.mockResolvedValueOnce(
-            resolved({ anchorIdl: { name: 'anchor_idl' }, programMetadataIdl: { name: 'pmp' } }),
+            resolved({
+                anchorIdl: { name: 'anchor_idl' },
+                anchorIdlAddress: 'AnchrPDA11111111111111111111111111111111111',
+                programMetadataIdl: { name: 'pmp' },
+                programMetadataIdlAddress: 'PmpPDA111111111111111111111111111111111111',
+            }),
         );
 
         const { GET } = await importRoute();
         const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
 
         expect(res.status).toBe(200);
+        // Storage accounts are forwarded alongside each IDL (anchorIdlAddress → anchorAddress, etc.).
         expect(await res.json()).toEqual({
-            idls: { anchor: { name: 'anchor_idl' }, programMetadata: { name: 'pmp' } },
+            idls: {
+                anchor: { name: 'anchor_idl' },
+                anchorAddress: 'AnchrPDA11111111111111111111111111111111111',
+                programMetadata: { name: 'pmp' },
+                programMetadataAddress: 'PmpPDA111111111111111111111111111111111111',
+            },
         });
         expect(res.headers.get('Cache-Control')).toContain('max-age=');
     });
