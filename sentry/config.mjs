@@ -52,9 +52,6 @@ export function createSentryConfig(_context) {
  * @returns {import('@sentry/nextjs').SentryBuildOptions} Sentry build configuration options
  */
 export function createSentryBuildConfig() {
-    // Respect the SENTRY_TELEMETRY_DISABLE environment variable
-    const telemetryDisabled = process.env.SENTRY_TELEMETRY_DISABLE === 'true';
-
     return {
         // For all available options, see:
         // https://www.npmjs.com/package/@sentry/webpack-plugin#options
@@ -65,8 +62,8 @@ export function createSentryBuildConfig() {
         // Only print logs for uploading source maps in CI
         silent: !process.env.CI,
 
-        // This will be false in CI (disabled) and true in production (enabled)
-        telemetry: !telemetryDisabled,
+        // Don't send telemetry about the build to Sentry.
+        telemetry: false,
 
         // Webpack plugin options
         webpack: {
@@ -79,8 +76,10 @@ export function createSentryBuildConfig() {
         },
 
         // Previews don't need symbolicated traces — uploading 800+ maps × 3 runtimes added ~90s/build.
+        // ENABLE_SENTRY_SOURCEMAPS_AT_PREVIEW (internal) temporarily opts previews into uploads.
         sourcemaps: {
-            disable: process.env.VERCEL_ENV !== 'production',
+            disable:
+                process.env.VERCEL_ENV !== 'production' && process.env.ENABLE_SENTRY_SOURCEMAPS_AT_PREVIEW !== 'true',
         },
 
         // Off: widening pulls node_modules chunks into the upload.
