@@ -356,7 +356,12 @@ export type TokenProgram = 'spl-token' | 'spl-token-2022';
  * a slice that declares a label not listed here fails to compile — keeping
  * slice labels and the RPC guards they're compared against from drifting.
  */
-export type ParserProgramLabel = TokenProgram | 'mpl-token-metadata' | 'spl-associated-token-account' | 'system';
+export type ParserProgramLabel =
+    | TokenProgram
+    | 'bpf-upgradeable-loader'
+    | 'mpl-token-metadata'
+    | 'spl-associated-token-account'
+    | 'system';
 
 export function assertIsTokenProgram(program: string): asserts program is TokenProgram {
     if (program !== 'spl-token' && program !== 'spl-token-2022')

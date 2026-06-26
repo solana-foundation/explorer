@@ -1,5 +1,11 @@
 import { Address } from '@components/common/Address';
-import { ParsedInstruction, ParsedTransaction, PublicKey, SignatureResult } from '@solana/web3.js';
+import {
+    ParsedInstruction,
+    ParsedTransaction,
+    PublicKey,
+    SignatureResult,
+    TransactionInstruction,
+} from '@solana/web3.js';
 import { camelToTitleCase } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
@@ -15,6 +21,7 @@ import {
     DeployWithMaxDataLenInfo,
     ExtendProgramInfo,
     InitializeBufferInfo,
+    SetAuthorityCheckedInfo,
     SetAuthorityInfo,
     UpgradeInfo,
     WriteInfo,
@@ -27,6 +34,8 @@ type DetailsProps = {
     result: SignatureResult;
     innerCards?: JSX.Element[];
     childIndex?: number;
+    // Raw instruction for the inspector's "Raw" account/hex toggle.
+    raw?: TransactionInstruction;
 };
 
 export function BpfUpgradeableLoaderDetailsCard(props: DetailsProps) {
@@ -47,6 +56,9 @@ export function BpfUpgradeableLoaderDetailsCard(props: DetailsProps) {
             }
             case 'setAuthority': {
                 return renderDetails<SetAuthorityInfo>(props, parsed, SetAuthorityInfo);
+            }
+            case 'setAuthorityChecked': {
+                return renderDetails<SetAuthorityCheckedInfo>(props, parsed, SetAuthorityCheckedInfo);
             }
             case 'close': {
                 return renderDetails<CloseInfo>(props, parsed, CloseInfo);
@@ -81,7 +93,7 @@ function renderDetails<T extends object>(props: DetailsProps, parsed: ParsedInfo
         }
 
         attributes.push(
-            <BaseTable.Row key={key}>
+            <BaseTable.Row key={key} data-testid={`ix-args-${key}`}>
                 <BaseTable.Cell>
                     {camelToTitleCase(key)} {key === 'bytes' && <span className="text-dk-gray-700">(Base 64)</span>}
                 </BaseTable.Cell>

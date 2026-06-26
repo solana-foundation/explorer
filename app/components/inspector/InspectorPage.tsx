@@ -17,7 +17,7 @@ import {
     PublicKey,
     VersionedMessage,
 } from '@solana/web3.js';
-import { generated, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
+import { generated, getBatchTransactionPda, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
 import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
@@ -40,7 +40,32 @@ import { InstructionsSection } from './InstructionsSection';
 import { MIN_MESSAGE_LENGTH, RawInput } from './RawInputCard';
 import { TransactionSignatures } from './SignaturesCard';
 
-const { VaultTransaction } = generated;
+const { Batch, VaultBatchTransaction, VaultTransaction, batchDiscriminator } = generated;
+
+// Convert a Squads VaultTransactionMessage (shared by VaultTransaction and the inner
+// transactions of a Batch) into a web3.js VersionedMessage the inspector can render.
+export function vaultMessageToVersionedMessage(message: typeof VaultTransaction.prototype.message): VersionedMessage {
+    return new MessageV0({
+        addressTableLookups: message.addressTableLookups.map(x => ({
+            ...x,
+            readonlyIndexes: Array.from(x.readonlyIndexes),
+            writableIndexes: Array.from(x.writableIndexes),
+        })),
+        compiledInstructions: message.instructions.map(instruction => ({
+            accountKeyIndexes: Array.from(instruction.accountIndexes),
+            data: instruction.data,
+            programIdIndex: instruction.programIdIndex,
+        })),
+        header: {
+            numReadonlySignedAccounts: message.numSigners - message.numWritableSigners,
+            numReadonlyUnsignedAccounts:
+                message.accountKeys.length - message.numSigners - message.numWritableNonSigners,
+            numRequiredSignatures: message.numSigners,
+        },
+        recentBlockhash: bs58.encode(Uint8Array.from(new Array(32).fill(0))),
+        staticAccountKeys: message.accountKeys,
+    });
+}
 
 export type TransactionData = {
     rawMessage: Uint8Array;
@@ -180,32 +205,65 @@ function decodeUrlParams(
 
 function SquadsProposalInspectorCard({ account, onClear }: { account: string; onClear: () => void }) {
     const { url } = useCluster();
+    const [selected, setSelected] = React.useState(0);
 
-    const fetcher = React.useCallback(async () => {
+    // Reset the selected inner transaction whenever a different account is inspected.
+    React.useEffect(() => {
+        setSelected(0);
+    }, [account]);
+
+    const fetcher = React.useCallback(async (): Promise<(VersionedMessage | undefined)[]> => {
         const connection = new Connection(url);
-        try {
-            // First check if the account exists and is owned by the Squads program
-            const accountInfo = await connection.getAccountInfo(new PublicKey(account), 'confirmed');
+        const pubkey = new PublicKey(account);
 
-            if (!accountInfo) {
-                throw new Error('Account not found');
-            }
-
-            // Check if the account is owned by the Squads program
-            const isSquadsAccount = accountInfo.owner.toString() === SQUADS_V4_PROGRAM_ADDRESS.toString();
-
-            if (!isSquadsAccount) {
-                throw new Error(`Account ${account} is not a valid Squads transaction account`);
-            }
-
-            return await VaultTransaction.fromAccountAddress(connection, new PublicKey(account), 'confirmed');
-        } catch (err) {
-            throw err instanceof Error ? err : new Error('Failed to fetch account data');
+        // First check if the account exists and is owned by the Squads program
+        const accountInfo = await connection.getAccountInfo(pubkey, 'confirmed');
+        if (!accountInfo) {
+            throw new Error('Account not found');
         }
+        if (accountInfo.owner.toString() !== SQUADS_V4_PROGRAM_ADDRESS.toString()) {
+            throw new Error(`Account ${account} is not a valid Squads transaction account`);
+        }
+
+        // The account discriminator (first 8 bytes) distinguishes a Batch — which holds
+        // many inner transactions — from a single VaultTransaction.
+        const discriminator = accountInfo.data.subarray(0, 8);
+        const isBatch = batchDiscriminator.every((byte, i) => byte === discriminator[i]);
+
+        if (isBatch) {
+            const batch = await Batch.fromAccountAddress(connection, pubkey, 'confirmed');
+            const batchIndex = BigInt(batch.index.toString());
+            // Inner VaultBatchTransactions are 1-indexed PDAs derived from the multisig + batch index.
+            // Each fetch is isolated so one unavailable transaction (e.g. a PDA closed after
+            // execution) doesn't sink the whole batch — failed slots become undefined and render
+            // an "unavailable" notice below.
+            const results = await Promise.all(
+                Array.from({ length: batch.size }, async (_unused, i) => {
+                    try {
+                        const [pda] = getBatchTransactionPda({
+                            batchIndex,
+                            multisigPda: batch.multisig,
+                            transactionIndex: i + 1,
+                        });
+                        const vbt = await VaultBatchTransaction.fromAccountAddress(connection, pda, 'confirmed');
+                        return vaultMessageToVersionedMessage(vbt.message);
+                    } catch {
+                        return undefined;
+                    }
+                }),
+            );
+            if (results.every(message => message === undefined)) {
+                throw new Error('None of the batch transactions could be loaded');
+            }
+            return results;
+        }
+
+        const vaultTransaction = await VaultTransaction.fromAccountAddress(connection, pubkey, 'confirmed');
+        return [vaultMessageToVersionedMessage(vaultTransaction.message)];
     }, [account, url]);
 
     const {
-        data: vaultTransaction,
+        data: messages,
         error,
         isLoading,
     } = useSWR(['squads-proposal', account, url], fetcher, {
@@ -218,56 +276,57 @@ function SquadsProposalInspectorCard({ account, onClear }: { account: string; on
         return <LoadingCard message="Loading Squads transaction..." />;
     }
 
-    if (error || !vaultTransaction) {
+    if (error || !messages || messages.length === 0) {
         return (
-            <ErrorCard text={`Error loading vault transaction: ${error?.message}`} retry={onClear} retryText="Clear" />
+            <ErrorCard
+                text={`Error loading Squads transaction: ${error?.message ?? 'no transactions found'}`}
+                retry={onClear}
+                retryText="Clear"
+            />
         );
     }
 
-    // Convert VaultTransactionMessage to a format compatible with Message
-    const convertVaultTransactionToMessage = (vaultTx: typeof VaultTransaction.prototype): VersionedMessage => {
-        const { message } = vaultTx;
-        const accountKeys = message.accountKeys;
-
-        // Create a standard Message object with the necessary fields
-        const solanaMessage = new MessageV0({
-            addressTableLookups: message.addressTableLookups.map(x => ({
-                ...x,
-                readonlyIndexes: Array.from(x.readonlyIndexes),
-                writableIndexes: Array.from(x.writableIndexes),
-            })),
-            compiledInstructions: message.instructions.map(instruction => ({
-                accountKeyIndexes: Array.from(instruction.accountIndexes),
-                data: instruction.data,
-                programIdIndex: instruction.programIdIndex,
-            })),
-            header: {
-                numReadonlySignedAccounts: message.numSigners - message.numWritableSigners,
-                numReadonlyUnsignedAccounts:
-                    message.accountKeys.length - message.numSigners - message.numWritableNonSigners,
-                numRequiredSignatures: message.numSigners,
-            },
-            recentBlockhash: bs58.encode(Uint8Array.from(new Array(32).fill(0))),
-            staticAccountKeys: accountKeys,
-        });
-
-        return solanaMessage;
-    };
-
-    // Create a serialized version of the message for rawMessage
-    const convertedMessage = convertVaultTransactionToMessage(vaultTransaction);
-    const serializedMessage = convertedMessage.serialize();
+    const activeIndex = Math.min(selected, messages.length - 1);
+    const message = messages[activeIndex];
 
     return (
-        <LoadedView
-            transaction={{
-                message: convertedMessage,
-                rawMessage: serializedMessage,
-                signatures: undefined,
-            }}
-            onClear={onClear}
-            showTokenBalanceChanges={false}
-        />
+        <>
+            {messages.length > 1 && (
+                <Card ui="dashkit" className="mb-4">
+                    <CardHeader ui="dashkit" className="flex-wrap gap-2">
+                        <CardTitle as="h3" ui="dashkit">
+                            Batch · {messages.length} transactions
+                        </CardTitle>
+                        <div className="flex flex-wrap gap-2">
+                            {messages.map((_unused, i) => (
+                                <Button
+                                    key={i}
+                                    ui="dashkit"
+                                    size="sm"
+                                    variant={i === activeIndex ? 'primary' : 'white'}
+                                    onClick={() => setSelected(i)}
+                                >
+                                    {i + 1}
+                                </Button>
+                            ))}
+                        </div>
+                    </CardHeader>
+                </Card>
+            )}
+            {message ? (
+                <LoadedView
+                    transaction={{
+                        message,
+                        rawMessage: message.serialize(),
+                        signatures: undefined,
+                    }}
+                    onClear={onClear}
+                    showTokenBalanceChanges={false}
+                />
+            ) : (
+                <ErrorCard text="This batch transaction is unavailable — its account may have been closed after execution." />
+            )}
+        </>
     );
 }
 
@@ -291,14 +350,22 @@ export function TransactionInspectorPage({
         if (signature) return;
         if (inspectorData && inspectorData !== prevInspectorData) {
             if (isSquadsProposalAccountData(inspectorData)) {
-                // Handle Squads proposal URL params
-                const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
-                nextQueryParams.set('squadsTx', inspectorData.account);
-                // Remove any other transaction params that might exist
-                nextQueryParams.delete('message');
-                nextQueryParams.delete('signatures');
-                const queryString = nextQueryParams.toString();
-                router.replace(`${currentPathname}?${queryString}`);
+                // Only rewrite the URL when it doesn't already encode this squadsTx. Without this
+                // guard, router.replace to an identical URL yields a fresh searchParams ref, which
+                // re-runs the decode effect → setInspectorData(new object) → replace → infinite loop.
+                // (Mirrors the guard the raw-message branch below already applies.)
+                const alreadyInSync =
+                    currentSearchParams?.get('squadsTx') === inspectorData.account &&
+                    !currentSearchParams?.get('message') &&
+                    !currentSearchParams?.get('signatures');
+                if (!alreadyInSync) {
+                    const nextQueryParams = new URLSearchParams(currentSearchParams?.toString());
+                    nextQueryParams.set('squadsTx', inspectorData.account);
+                    // Remove any other transaction params that might exist
+                    nextQueryParams.delete('message');
+                    nextQueryParams.delete('signatures');
+                    router.replace(`${currentPathname}?${nextQueryParams.toString()}`);
+                }
                 return;
             }
 

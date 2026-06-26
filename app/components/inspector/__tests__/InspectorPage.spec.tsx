@@ -13,7 +13,7 @@ import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
-import { TransactionInspectorPage } from '../InspectorPage';
+import { TransactionInspectorPage, vaultMessageToVersionedMessage } from '../InspectorPage';
 
 vi.mock('swr', () => ({
     __esModule: true,
@@ -64,7 +64,11 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         (mockSWR.default as unknown as Mock).mockImplementation((key: Key) => {
             if (Array.isArray(key) && key[0] === specificAccountKey[0] && key[1] === specificAccountKey[1]) {
                 return {
-                    data: generated.VaultTransaction.fromAccountInfo(squadsAccountInfo)[0],
+                    data: [
+                        vaultMessageToVersionedMessage(
+                            generated.VaultTransaction.fromAccountInfo(squadsAccountInfo)[0].message,
+                        ),
+                    ],
                     error: null,
                     isLoading: false,
                 };
@@ -102,7 +106,7 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
 
         renderWithContext();
 
-        expect(await screen.findByText(/Error loading vault transaction/i)).toBeInTheDocument();
+        expect(await screen.findByText(/Error loading Squads transaction/i)).toBeInTheDocument();
     });
 
     test('should render Squads transaction with lookup table without crashing', async () => {
@@ -112,7 +116,11 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         (mockSWR.default as unknown as Mock).mockImplementation((key: Key) => {
             if (Array.isArray(key) && key[0] === specificAccountKey[0] && key[1] === specificAccountKey[1]) {
                 return {
-                    data: generated.VaultTransaction.fromAccountInfo(squadsLookupTableAccountInfo)[0],
+                    data: [
+                        vaultMessageToVersionedMessage(
+                            generated.VaultTransaction.fromAccountInfo(squadsLookupTableAccountInfo)[0].message,
+                        ),
+                    ],
                     error: null,
                     isLoading: false,
                 };
