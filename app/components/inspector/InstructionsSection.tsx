@@ -23,6 +23,7 @@ import { ErrorCard } from '../common/ErrorCard';
 import { InspectorInstructionCard as InspectorInstructionCardComponent } from '../common/InspectorInstructionCard';
 import { LoadingCard } from '../common/LoadingCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
+import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
@@ -222,6 +223,21 @@ function InspectorInstructionCard({
                     index={index}
                     result={INSPECTOR_RESULT}
                 />
+            );
+        case 'bpf-upgradeable-loader':
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <BpfUpgradeableLoaderDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        tx={parsedTx}
+                        index={index}
+                        result={INSPECTOR_RESULT}
+                        raw={ix}
+                    />
+                </ErrorBoundary>
             );
         case 'spl-token':
             return (

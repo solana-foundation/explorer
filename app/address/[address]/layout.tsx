@@ -10,6 +10,7 @@ import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/acc
 import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
 import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
 import { NonceAccountSection } from '@components/account/NonceAccountSection';
+import { detectSquadsAccountType, SquadsAccountSection } from '@components/account/squads/SquadsAccountSection';
 import { SysvarAccountSection } from '@components/account/SysvarAccountSection';
 import { TokenAccountSection } from '@components/account/TokenAccountSection';
 import { UnknownAccountCard } from '@components/account/UnknownAccountCard';
@@ -268,6 +269,10 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
     // get feature data from featureGates.json
     const featureInfo = useFeatureInfo({ address: account.pubkey.toBase58() });
 
+    // Squads v4 Batch / VaultTransaction accounts aren't RPC-parsed; detect them by
+    // discriminator so we can surface a direct "Inspect" link to the transaction inspector.
+    const squadsAccountType = rawData ? detectSquadsAccountType(account.owner, rawData) : undefined;
+
     if (parsedData && parsedData.program === 'bpf-upgradeable-loader') {
         return (
             <UpgradeableLoaderAccountSection
@@ -309,6 +314,8 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         return <FeatureAccountSection account={account} />;
     } else if (account.owner.toBase58() === SAS_PROGRAM_ID) {
         return <SolanaAttestationServiceCard account={account} />;
+    } else if (squadsAccountType) {
+        return <SquadsAccountSection account={account} accountType={squadsAccountType} />;
     } else {
         const fallback = <UnknownAccountCard account={account} />;
         return (
