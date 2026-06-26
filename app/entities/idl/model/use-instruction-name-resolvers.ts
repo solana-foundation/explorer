@@ -8,20 +8,21 @@ import { type Cluster } from '@/app/utils/cluster';
 
 import { NON_ANCHOR_PROGRAMS } from '../api/config';
 import { fetchProgramIdls } from '../api/fetch-program-idls';
-import { buildInstructionNameResolver, type InstructionNameResolver } from './instruction-name-table';
+import { buildProgramIdlNames, type InstructionNameResolver, type ProgramIdlNames } from './instruction-name-table';
 
-export type { InstructionNameResolver };
+export type { InstructionNameResolver, ProgramIdlNames };
 
 /**
- * A name resolver per program, built from each program's IDL (matched by discriminator, no Borsh
- * decode). One SWR fetch covers the whole set so the caller can resolve names without any per-row data
- * hooks — the list/line components stay pure. Builtins and custom/localhost clusters resolve to nothing.
+ * Per-program names built from each program's IDL: a display name plus an instruction-name resolver
+ * (matched by discriminator, no Borsh decode). One SWR fetch covers the whole set so the caller can
+ * resolve names without any per-row data hooks — the list/line components stay pure. Builtins and
+ * custom/localhost clusters resolve to nothing.
  */
 export function useInstructionNameResolvers(
     programIds: string[],
     cluster: Cluster,
     url: string,
-): Map<string, InstructionNameResolver> {
+): Map<string, ProgramIdlNames> {
     const resolvable = useMemo(
         () =>
             shouldUseDirectRpc(cluster, url)
@@ -51,11 +52,11 @@ export function useInstructionNameResolvers(
     );
 
     return useMemo(() => {
-        const resolvers = new Map<string, InstructionNameResolver>();
+        const resolvers = new Map<string, ProgramIdlNames>();
         for (const [id, idls] of data ?? []) {
             // Program-metadata IDL is preferred; Anchor only names what program-metadata can't.
-            const resolver = buildInstructionNameResolver([idls.programMetadataIdl, idls.anchorIdl]);
-            if (resolver) resolvers.set(id, resolver);
+            const names = buildProgramIdlNames([idls.programMetadataIdl, idls.anchorIdl]);
+            if (names) resolvers.set(id, names);
         }
         return resolvers;
     }, [data]);

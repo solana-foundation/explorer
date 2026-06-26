@@ -54,15 +54,23 @@ describe('useInstructionNameResolvers', () => {
     it('should build a resolver that names an instruction by discriminator', async () => {
         const { result } = render([VOTING]);
 
-        await waitFor(() => expect(result.current.get(VOTING)?.(VOTE)).toBe('Vote'));
+        await waitFor(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
+    });
+
+    it('should expose the program display name from the IDL metadata', async () => {
+        const { result } = render([VOTING]);
+
+        await waitFor(() => expect(result.current.get(VOTING)?.programName).toBe('Voting'));
     });
 
     it('should resolve every program in the set from one render', async () => {
         const { result } = render([VOTING, SECOND]);
 
         await waitFor(() => expect(result.current.size).toBe(2));
-        expect(result.current.get(VOTING)?.(VOTE)).toBe('Vote');
-        expect(result.current.get(SECOND)?.(FOO)).toBe('Foo');
+        expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote');
+        expect(result.current.get(VOTING)?.programName).toBe('Voting');
+        expect(result.current.get(SECOND)?.resolveInstructionName?.(FOO)).toBe('Foo');
+        expect(result.current.get(SECOND)?.programName).toBe('Second');
     });
 
     it('should still resolve the healthy programs when one program’s IDL fetch fails', async () => {
@@ -77,7 +85,7 @@ describe('useInstructionNameResolvers', () => {
 
         const { result } = render([VOTING, SECOND]);
 
-        await waitFor(() => expect(result.current.get(VOTING)?.(VOTE)).toBe('Vote'));
+        await waitFor(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
         expect(result.current.size).toBe(1);
         expect(result.current.get(SECOND)).toBeUndefined();
     });

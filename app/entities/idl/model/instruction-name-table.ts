@@ -24,9 +24,45 @@ export type InstructionNameTable = readonly InstructionNameEntry[];
 
 export type InstructionNameResolver = (data: Uint8Array) => string | undefined;
 
+// A program's IDL-derived names: its display name plus an instruction-name resolver. Both come from the
+// same fetched IDL set, so they travel together. Either may be absent (an IDL with no metadata name, or
+// one with no usable discriminator table).
+export type ProgramIdlNames = {
+    programName: string | undefined;
+    resolveInstructionName: InstructionNameResolver | undefined;
+};
+
 // ---------------------------------------------------------------------------
 // Resolution: ordered IDLs in, a name resolver out.
 // ---------------------------------------------------------------------------
+
+/**
+ * Build a program's IDL-derived names — display name and instruction-name resolver — from its IDLs in
+ * preference order (program-metadata beats Anchor). Returns undefined when no IDL yields either.
+ */
+export function buildProgramIdlNames(idls: readonly (SupportedIdl | undefined)[]): ProgramIdlNames | undefined {
+    const programName = buildProgramName(idls);
+    const resolveInstructionName = buildInstructionNameResolver(idls);
+    if (programName === undefined && resolveInstructionName === undefined) return undefined;
+    return { programName, resolveInstructionName };
+}
+
+/**
+ * The program's display name from IDL metadata, title-cased — the first IDL in preference order that
+ * carries one wins (program-metadata's `program.name`, else Anchor's `metadata.name`). Undefined when
+ * no IDL names the program.
+ */
+export function buildProgramName(idls: readonly (SupportedIdl | undefined)[]): string | undefined {
+    for (const idl of idls) {
+        const name = idl && idlProgramName(idl);
+        if (name) return titleCase(name);
+    }
+    return undefined;
+}
+
+function idlProgramName(idl: SupportedIdl): string | undefined {
+    return getIdlStandard(idl) === 'Codama' ? (idl as CodamaIdl).program?.name : (idl as AnchorIdl).metadata?.name;
+}
 
 /**
  * Build a name resolver from a program's IDLs in preference order: the first table that names the

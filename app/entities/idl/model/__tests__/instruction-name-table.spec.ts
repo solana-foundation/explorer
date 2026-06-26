@@ -3,6 +3,8 @@ import { type SupportedIdl } from '../idl-version';
 import {
     buildInstructionNameResolver,
     buildInstructionNameTable,
+    buildProgramIdlNames,
+    buildProgramName,
     type InstructionNameTable,
     matchInstructionName,
 } from '../instruction-name-table';
@@ -110,6 +112,52 @@ describe('instruction-name-table', () => {
         it('should return no resolver when no IDL yields a usable table', () => {
             expect(buildInstructionNameResolver([undefined, undefined])).toBeUndefined();
             expect(buildInstructionNameResolver([])).toBeUndefined();
+        });
+    });
+
+    describe('buildProgramName', () => {
+        it('should title-case an Anchor metadata.name', () => {
+            expect(buildProgramName([anchorIdl])).toBe('Voting');
+        });
+
+        it('should title-case a Codama program.name', () => {
+            expect(buildProgramName([codamaPmp as unknown as SupportedIdl])).toBe('Program Metadata');
+        });
+
+        it('should take the first IDL in order that names the program', () => {
+            const unnamed = { instructions: [], metadata: { spec: '0.1.0' } } as unknown as SupportedIdl;
+            expect(buildProgramName([unnamed, anchorIdl])).toBe('Voting');
+        });
+
+        it('should return undefined when no IDL names the program', () => {
+            const unnamed = { instructions: [], metadata: { spec: '0.1.0' } } as unknown as SupportedIdl;
+            expect(buildProgramName([unnamed, undefined])).toBeUndefined();
+            expect(buildProgramName([])).toBeUndefined();
+        });
+    });
+
+    describe('buildProgramIdlNames', () => {
+        it('should bundle the program name with the instruction-name resolver', () => {
+            const names = buildProgramIdlNames([anchorIdl]);
+            expect(names?.programName).toBe('Voting');
+            expect(names?.resolveInstructionName?.(Uint8Array.from([227, 110, 155, 23, 136, 126, 172, 25]))).toBe(
+                'Vote',
+            );
+        });
+
+        it('should still bundle a program name when no instruction table is usable', () => {
+            const nameOnly = {
+                instructions: [],
+                metadata: { name: 'voting', spec: '0.1.0' },
+            } as unknown as SupportedIdl;
+            const names = buildProgramIdlNames([nameOnly]);
+            expect(names?.programName).toBe('Voting');
+            expect(names?.resolveInstructionName).toBeUndefined();
+        });
+
+        it('should return undefined when no IDL yields a name or a table', () => {
+            expect(buildProgramIdlNames([undefined, undefined])).toBeUndefined();
+            expect(buildProgramIdlNames([])).toBeUndefined();
         });
     });
 });

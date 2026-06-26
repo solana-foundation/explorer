@@ -27,11 +27,35 @@ afterEach(() => vi.clearAllMocks());
 describe('useResolvedInstructionSummaries', () => {
     it('should replace the placeholder with the IDL-resolved name', () => {
         useInstructionSummaries.mockReturnValue([unknown('Prog1', 1)]);
-        useInstructionNameResolvers.mockReturnValue(new Map([['Prog1', () => 'Vote']]));
+        useInstructionNameResolvers.mockReturnValue(
+            new Map([['Prog1', { programName: undefined, resolveInstructionName: () => 'Vote' }]]),
+        );
 
         const { result } = renderHook(() => useResolvedInstructionSummaries('sig'));
 
         expect(result.current?.[0].name).toBe('Vote');
+    });
+
+    it('should replace the placeholder program with the IDL program name', () => {
+        useInstructionSummaries.mockReturnValue([unknown('Prog1', 1)]);
+        useInstructionNameResolvers.mockReturnValue(
+            new Map([['Prog1', { programName: 'Voting', resolveInstructionName: () => 'Vote' }]]),
+        );
+
+        const { result } = renderHook(() => useResolvedInstructionSummaries('sig'));
+
+        expect(result.current?.[0]).toMatchObject({ name: 'Vote', program: 'Voting' });
+    });
+
+    it('should name the program even when the instruction discriminator is unresolved', () => {
+        useInstructionSummaries.mockReturnValue([unknown('Prog1', 9)]);
+        useInstructionNameResolvers.mockReturnValue(
+            new Map([['Prog1', { programName: 'Voting', resolveInstructionName: () => undefined }]]),
+        );
+
+        const { result } = renderHook(() => useResolvedInstructionSummaries('sig'));
+
+        expect(result.current?.[0]).toMatchObject({ name: 'Unknown Instruction', program: 'Voting' });
     });
 
     it('should resolve ZK ElGamal names synchronously from the discriminator, without an IDL resolver', () => {
@@ -46,7 +70,9 @@ describe('useResolvedInstructionSummaries', () => {
 
     it('should keep the placeholder when no resolver names it', () => {
         useInstructionSummaries.mockReturnValue([unknown('Prog1', 9)]);
-        useInstructionNameResolvers.mockReturnValue(new Map([['Prog1', () => undefined]]));
+        useInstructionNameResolvers.mockReturnValue(
+            new Map([['Prog1', { programName: undefined, resolveInstructionName: () => undefined }]]),
+        );
 
         const { result } = renderHook(() => useResolvedInstructionSummaries('sig'));
 
