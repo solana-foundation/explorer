@@ -5,10 +5,15 @@ import { fileURLToPath } from 'url';
 import { buildRedirects } from './config/redirects.mjs';
 import { createSentryBuildConfig } from './sentry/config.mjs';
 
+// Pin both file-tracing and Turbopack to the project root; otherwise Next walks up to a parent
+// pnpm-workspace.yaml (e.g. in git worktrees) and the two roots disagree.
+const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     // Use separate build directory for dev server to avoid conflicts with production builds
     distDir: process.env.NODE_ENV === 'production' ? '.next' : '.next-dev',
+    outputFileTracingRoot: projectRoot,
     images: {
         remotePatterns: [
             {
@@ -41,8 +46,7 @@ const nextConfig = {
         return buildRedirects();
     },
     turbopack: {
-        // Pin to project root; otherwise Turbopack walks up to a parent pnpm-workspace.yaml (e.g. in git worktrees).
-        root: fileURLToPath(new URL('.', import.meta.url)),
+        root: projectRoot,
         resolveAlias: {
             // resolve-domain.ts uses deserializeUnchecked, removed in borsh@2 (also installed as borsh2).
             borsh: './node_modules/borsh',
