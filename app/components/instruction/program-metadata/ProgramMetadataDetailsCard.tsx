@@ -1,5 +1,5 @@
 import { Address } from '@components/common/Address';
-import { BaseRawDetails } from '@components/common/BaseRawDetails';
+import { HexData } from '@components/common/HexData';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
     getAllocateInstructionDataDecoder,
@@ -18,6 +18,7 @@ import {
 import { camelToTitleCase } from '@utils/index';
 import React from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
@@ -36,6 +37,21 @@ const DATA_DECODERS: Partial<Record<ProgramMetadataInstruction, () => { decode: 
     [ProgramMetadataInstruction.SetImmutable]: getSetImmutableInstructionDataDecoder,
     [ProgramMetadataInstruction.Trim]: getTrimInstructionDataDecoder,
     [ProgramMetadataInstruction.Write]: getWriteInstructionDataDecoder,
+};
+
+// Account ordering per instruction, taken from the @solana-program/program-metadata instruction
+// builders. Used to label the otherwise-numbered account list; any extra accounts a transaction
+// carries beyond these fall back to "Account #N".
+const ACCOUNT_NAMES: Partial<Record<ProgramMetadataInstruction, string[]>> = {
+    [ProgramMetadataInstruction.Allocate]: ['buffer', 'authority', 'program', 'programData', 'system'],
+    [ProgramMetadataInstruction.Close]: ['account', 'authority', 'program', 'programData', 'destination'],
+    [ProgramMetadataInstruction.Extend]: ['account', 'authority', 'program', 'programData'],
+    [ProgramMetadataInstruction.Initialize]: ['metadata', 'authority', 'program', 'programData', 'system'],
+    [ProgramMetadataInstruction.SetAuthority]: ['account', 'authority', 'program', 'programData', 'newAuthority'],
+    [ProgramMetadataInstruction.SetData]: ['metadata', 'authority', 'buffer', 'program', 'programData'],
+    [ProgramMetadataInstruction.SetImmutable]: ['metadata', 'authority', 'program', 'programData'],
+    [ProgramMetadataInstruction.Trim]: ['account', 'authority', 'program', 'programData', 'destination', 'rent'],
+    [ProgramMetadataInstruction.Write]: ['buffer', 'authority', 'sourceBuffer'],
 };
 
 type DetailsProps = {
@@ -72,6 +88,7 @@ export function ProgramMetadataDetailsCard(props: DetailsProps) {
         const name = ProgramMetadataInstruction[instructionType];
         const decoder = DATA_DECODERS[instructionType];
         const decoded = decoder ? (decoder().decode(ix.data) as Record<string, unknown>) : {};
+        const accountNames = ACCOUNT_NAMES[instructionType] ?? [];
 
         // `discriminator` is the instruction selector, not a meaningful arg — hide it.
         const fields = Object.entries(decoded).filter(([key]) => key !== 'discriminator');
@@ -90,7 +107,36 @@ export function ProgramMetadataDetailsCard(props: DetailsProps) {
                         <BaseTable.Cell className="text-right">{renderValue(value)}</BaseTable.Cell>
                     </BaseTable.Row>
                 ))}
-                <BaseRawDetails ix={ix} />
+                {ix.keys.map(({ pubkey, isWritable, isSigner }, i) => (
+                    <BaseTable.Row key={`account-${i}`} data-testid={`ix-account-${i}`}>
+                        <BaseTable.Cell>
+                            <span className="mr-1.5">
+                                {accountNames[i] ? camelToTitleCase(accountNames[i]) : `Account #${i + 1}`}
+                            </span>
+                            {isWritable && (
+                                <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
+                                    Writable
+                                </Badge>
+                            )}
+                            {isSigner && (
+                                <Badge ui="dashkit" variant="info" className="mr-[3px]">
+                                    Signer
+                                </Badge>
+                            )}
+                        </BaseTable.Cell>
+                        <BaseTable.Cell className="text-right">
+                            <Address pubkey={pubkey} alignRight link />
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
+                ))}
+                <BaseTable.Row>
+                    <BaseTable.Cell>
+                        Instruction Data <span className="text-dk-gray-700">(Hex)</span>
+                    </BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">
+                        <HexData raw={ix.data} />
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             </InstructionCardComponent>
         );
     } catch {
