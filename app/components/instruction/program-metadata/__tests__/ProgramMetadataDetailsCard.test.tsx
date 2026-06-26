@@ -23,21 +23,20 @@ vi.mock('@components/common/Address', () => ({
     Address: ({ pubkey }: { pubkey: PublicKey }) => <div data-testid="address">{pubkey.toBase58()}</div>,
 }));
 
-vi.mock('@components/common/BaseRawDetails', () => ({
-    BaseRawDetails: () => (
-        <tr data-testid="raw-details">
-            <td />
-        </tr>
-    ),
-}));
+vi.mock('@components/common/HexData', () => ({ HexData: () => <span data-testid="hex" /> }));
 
 const PROGRAM_ID = new PublicKey(PROGRAM_METADATA_PROGRAM_ID);
 const defaultProps = { index: 0, result: { err: null } } as any;
 
 describe('ProgramMetadataDetailsCard', () => {
-    it('should decode an Allocate instruction and render its seed', () => {
+    it('should decode an Allocate instruction and render its seed and labeled accounts', () => {
         const data = Buffer.from(getAllocateInstructionDataEncoder().encode({ seed: 'idl' }));
-        const ix = new TransactionInstruction({ data, keys: [], programId: PROGRAM_ID });
+        const keys = Array.from({ length: 5 }, () => ({
+            isSigner: false,
+            isWritable: true,
+            pubkey: PublicKey.unique(),
+        }));
+        const ix = new TransactionInstruction({ data, keys, programId: PROGRAM_ID });
 
         render(<ProgramMetadataDetailsCard ix={ix} {...defaultProps} />);
 
@@ -45,6 +44,12 @@ describe('ProgramMetadataDetailsCard', () => {
         const seedRow = screen.getByTestId('ix-args-seed');
         expect(seedRow).toHaveTextContent('Seed');
         expect(seedRow).toHaveTextContent('idl');
+
+        // Accounts are labeled by role, not just numbered.
+        expect(screen.getByTestId('ix-account-0')).toHaveTextContent('Buffer');
+        expect(screen.getByTestId('ix-account-1')).toHaveTextContent('Authority');
+        expect(screen.getByTestId('ix-account-3')).toHaveTextContent('Program Data');
+        expect(screen.getByTestId('ix-account-4')).toHaveTextContent('System');
     });
 
     it('should decode a SetAuthority instruction', () => {
