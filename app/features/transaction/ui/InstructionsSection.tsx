@@ -291,10 +291,12 @@ function InstructionCard({
             </ErrorBoundary>
         );
     }
+    // Prefer a PMP-published IDL (incl. the PMP's own Codama IDL) over the legacy Anchor IDL below.
+    // Keep this precedence in sync with the inspector: app/components/inspector/InstructionsSection.tsx
     if (programMetadataIdl) {
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
-                <ProgramMetadataIdlInstructionDetailsCard {...props} idl={programMetadataIdl} />
+                <ProgramMetadataIdlInstructionDetailsCard {...props} idl={programMetadataIdl} signature={signature} />
             </ErrorBoundary>
         );
     }

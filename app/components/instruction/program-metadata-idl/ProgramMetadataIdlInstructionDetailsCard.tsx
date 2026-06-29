@@ -1,6 +1,7 @@
 import { decodeInstructionWithIdl } from '@features/decode-instruction-with-idl';
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { useMemo } from 'react';
 
 import AnchorDetailsCard from '../AnchorDetailsCard';
 import { CodamaInstructionCard } from '../codama/CodamaInstructionDetailsCard';
@@ -29,7 +30,8 @@ export function ProgramMetadataIdlInstructionDetailsCard({
     const { url } = useCluster();
     const props = { index, innerCards, ix, result };
 
-    const decoded = decodeInstructionWithIdl(ix, idl, url);
+    // The Anchor fallback constructs a Program (IDL parse + BorshInstructionCoder) — don't redo it per render.
+    const decoded = useMemo(() => decodeInstructionWithIdl(ix, idl, url), [ix, idl, url]);
     switch (decoded.kind) {
         case 'codama':
             return <CodamaInstructionCard {...props} parsedIx={decoded.parsedIx} />;

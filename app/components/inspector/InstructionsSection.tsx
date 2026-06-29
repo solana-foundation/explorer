@@ -125,6 +125,25 @@ function InspectorInstructionCard({
         [ix, message, parsedIx],
     );
 
+    // Prefer a PMP-published IDL (incl. the PMP's own Codama IDL) over the legacy Anchor IDL below.
+    // Keep this precedence in sync with the tx page: app/features/transaction/ui/InstructionsSection.tsx
+    if (programMetadataIdl) {
+        return (
+            <ErrorBoundary
+                fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+            >
+                <ProgramMetadataIdlInstructionDetailsCard
+                    key={index}
+                    ix={ix}
+                    index={index}
+                    result={INSPECTOR_RESULT}
+                    idl={programMetadataIdl}
+                    signature={INSPECTOR_SIGNATURE}
+                />
+            </ErrorBoundary>
+        );
+    }
+
     if (anchorProgram.program) {
         return (
             <ErrorBoundary
@@ -165,23 +184,6 @@ function InspectorInstructionCard({
                 signature={INSPECTOR_SIGNATURE}
                 InstructionCardComponent={BaseInstructionCard}
             />
-        );
-    }
-
-    // Decode via any PMP-published IDL — including the PMP itself, which self-publishes a Codama IDL.
-    if (programMetadataIdl) {
-        return (
-            <ErrorBoundary
-                fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-            >
-                <ProgramMetadataIdlInstructionDetailsCard
-                    key={index}
-                    ix={ix}
-                    index={index}
-                    result={INSPECTOR_RESULT}
-                    idl={programMetadataIdl}
-                />
-            </ErrorBoundary>
         );
     }
 
