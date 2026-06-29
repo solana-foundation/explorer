@@ -19,7 +19,6 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
-import { useAnchorProgram } from '@entities/idl';
 import { SecurityNotification } from '@features/security-txt';
 import { StakeAccountSection } from '@features/stake';
 import { VoteAccountSection } from '@features/vote';
@@ -50,7 +49,6 @@ import useSWRImmutable from 'swr/immutable';
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 import { getFeatureInfo, useFeatureInfo } from '@/app/entities/feature-gate';
-import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 import { hasTokenMetadata } from '@/app/features/metadata';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
@@ -65,6 +63,8 @@ import {
     isRedactedTokenAddress,
 } from '@/app/utils/token-info';
 import { pickClusterParams } from '@/app/utils/url';
+
+import { AccountDataTab } from './AccountDataTab';
 
 const TABS_LOOKUP: Record<string, AddressTab[]> = {
     'address-lookup-table': [{ path: 'entries', title: 'Table Entries' }],
@@ -482,19 +482,4 @@ function ProgramMultisigTab({ authority }: { authority: PublicKey | null | undef
     }
 
     return <NavigationTabLink path="program-multisig" title="Program Multisig" />;
-}
-
-function AccountDataTab({ programId }: { programId: PublicKey }) {
-    const { url, cluster } = useCluster();
-    const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url, cluster);
-    const { programMetadataIdl } = useProgramMetadataIdl(programId.toString(), url, cluster);
-
-    // Show the tab when the program exposes an Anchor-format interface via either the legacy
-    // Anchor IDL or an Anchor-format IDL published through the Program Metadata Program.
-    const hasPmpAccounts = Array.isArray((programMetadataIdl as { accounts?: unknown[] } | undefined)?.accounts);
-    if (!accountAnchorProgram && !hasPmpAccounts) {
-        return null;
-    }
-
-    return <NavigationTabLink path="anchor-account" title="Anchor Data" />;
 }

@@ -25,7 +25,8 @@ export function AnchorAccountCard({ account }: { account: Account }) {
     const idl: Idl | undefined = useMemo(() => {
         if (anchorProgram?.idl) return anchorProgram.idl;
         const pmp = programMetadataIdl as Idl | undefined;
-        return pmp && Array.isArray(pmp.accounts) ? pmp : undefined;
+        // `accounts: []` (Anchor 0.30+ default with no account types) has nothing to decode — treat as absent.
+        return pmp && Array.isArray(pmp.accounts) && pmp.accounts.length > 0 ? pmp : undefined;
     }, [anchorProgram, programMetadataIdl]);
 
     const programName =
