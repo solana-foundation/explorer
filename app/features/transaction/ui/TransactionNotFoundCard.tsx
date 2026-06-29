@@ -101,7 +101,7 @@ function useClusterTransactionSearch(signature: string, currentCluster: Cluster)
             setStatus('searching');
             setFoundCluster(undefined);
 
-            for (const cluster of clusters) {
+            for (const [index, cluster] of clusters.entries()) {
                 if (searchIdRef.current !== currentSearchId) return;
 
                 setSearchingCluster(cluster);
@@ -125,7 +125,8 @@ function useClusterTransactionSearch(signature: string, currentCluster: Cluster)
                         setFoundCluster(cluster);
                         setStatus('found');
                         return;
-                    } else {
+                    } else if (index < clusters.length - 1) {
+                        // Only pace between checks; skip the trailing delay so not-found shows immediately
                         await sleep();
                     }
                 } catch (_error) {
