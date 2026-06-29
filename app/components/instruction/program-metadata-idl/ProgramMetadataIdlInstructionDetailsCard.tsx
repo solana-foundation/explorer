@@ -1,19 +1,15 @@
-import { parseInstruction } from '@codama/dynamic-parsers';
-import { rootNodeFromAnchor } from '@codama/nodes-from-anchor';
-import { Idl, Program } from '@coral-xyz/anchor';
-import { formatSerdeIdl, getFormattedIdl, getProvider } from '@entities/idl';
+import { decodeInstructionWithIdl } from '@features/decode-instruction-with-idl';
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import { type RootNode } from 'codama';
-
-import { Logger } from '@/app/shared/lib/logger';
-import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
 import AnchorDetailsCard from '../AnchorDetailsCard';
 import { CodamaInstructionCard } from '../codama/CodamaInstructionDetailsCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
-import { withSingleInstructionDiscriminator } from './withSingleInstructionDiscriminator';
 
+// TODO(decode-instruction-with-idl): this card is now a thin shim over `decodeInstructionWithIdl` — the
+// decode strategy lives in the feature; the card only matches a decode result to its renderer. The
+// intended end state is for InstructionsSection to call the helper and pick the card directly, retiring
+// this component.
 export function ProgramMetadataIdlInstructionDetailsCard({
     ix,
     result,
@@ -31,53 +27,15 @@ export function ProgramMetadataIdlInstructionDetailsCard({
     signature?: string;
 }) {
     const { url } = useCluster();
-    const props = {
-        index,
-        innerCards,
-        ix,
-        result,
-    };
-    const kitIx = toKitInstruction(ix);
+    const props = { index, innerCards, ix, result };
 
-    const tryParse = (idlRoot: RootNode) => {
-        try {
-            const parsedIx = parseInstruction(idlRoot, kitIx);
-            if (parsedIx) {
-                return <CodamaInstructionCard {...props} parsedIx={parsedIx} />;
-            }
-        } catch {
-            // ignore and fallback
-        }
-        return null;
-    };
-
-    let parsedCard = tryParse(idl as RootNode);
-    if (!parsedCard) {
-        try {
-            parsedCard = tryParse(rootNodeFromAnchor(idl) as unknown as RootNode);
-        } catch {
-            // ignore and fallback
-        }
+    const decoded = decodeInstructionWithIdl(ix, idl, url);
+    switch (decoded.kind) {
+        case 'codama':
+            return <CodamaInstructionCard {...props} parsedIx={decoded.parsedIx} />;
+        case 'anchor':
+            return <AnchorDetailsCard {...props} anchorProgram={decoded.program} signature={signature ?? ''} />;
+        default:
+            return <UnknownDetailsCard {...props} />;
     }
-
-    // Fallback for single-instruction programs without discriminators (e.g. Memo)
-    if (!parsedCard && idl?.kind === 'rootNode') {
-        parsedCard = tryParse(withSingleInstructionDiscriminator(idl));
-    }
-
-    if (parsedCard) {
-        return parsedCard;
-    }
-
-    // Codama couldn't parse it — most commonly an Anchor-format IDL that `@codama/nodes-from-anchor`
-    // rejects (e.g. an instruction with an unnamed arg). Anchor's own BorshInstructionCoder is more
-    // lenient, so build a Program from the IDL and reuse the Anchor card before giving up.
-    try {
-        const program = new Program(getFormattedIdl(formatSerdeIdl, idl, ix.programId.toBase58()), getProvider(url));
-        return <AnchorDetailsCard {...props} anchorProgram={program as Program<Idl>} signature={signature ?? ''} />;
-    } catch (error) {
-        Logger.debug('[program-metadata-idl] Anchor fallback failed', { error });
-    }
-
-    return <UnknownDetailsCard {...props} />;
 }

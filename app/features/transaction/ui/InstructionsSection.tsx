@@ -292,7 +292,11 @@ function InstructionCard({
         );
     }
     if (programMetadataIdl) {
-        return <ProgramMetadataIdlInstructionDetailsCard key={key} {...props} idl={programMetadataIdl} />;
+        return (
+            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                <ProgramMetadataIdlInstructionDetailsCard {...props} idl={programMetadataIdl} />
+            </ErrorBoundary>
+        );
     }
     if (anchorProgram) {
         return (
