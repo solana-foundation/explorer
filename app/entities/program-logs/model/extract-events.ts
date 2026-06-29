@@ -1,9 +1,10 @@
-// A `Program log:` payload that looks like a base64-encoded event (≥ the 8-byte discriminator,
-// padded to a multiple of 4, base64 charset). Plain text logs ("Instruction: Foo", "Price = 1")
-// contain spaces/punctuation and fail this; any false positive is rejected by the event decoder.
+import { isValidBase64 } from '@shared/lib/bytes';
+
+// A `Program log:` payload that looks like a base64-encoded event: at least the 8-byte discriminator
+// (≥12 base64 chars, a multiple of 4) and valid base64. Plain-text logs fail the codec check; any
+// straggler is rejected by the event decoder.
 function isLikelyBase64Event(payload: string): boolean {
-    // eslint-disable-next-line no-restricted-syntax -- base64 shape check
-    return payload.length >= 12 && payload.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(payload);
+    return payload.length >= 12 && payload.length % 4 === 0 && isValidBase64(payload);
 }
 
 /**
