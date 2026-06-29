@@ -51,7 +51,7 @@ export function InteractInstruction({
     status: InstructionStatus;
 }) {
     const { connected: walletConnected, publicKey } = useWallet();
-    const [simulateBeforeExecute, setSimulateBeforeExecute] = useState(false);
+    const [simulateBeforeExecute, setSimulateBeforeExecute] = useState(true);
 
     const { form, onSubmit, onSimulate, validationRules, fieldNames } = useInstructionForm({
         instruction,

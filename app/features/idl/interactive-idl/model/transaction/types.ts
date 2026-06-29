@@ -3,7 +3,7 @@ import type { InstructionLogs } from '@utils/program-logs';
 
 // Options controlling how an instruction is executed.
 export type ExecutionOptions = {
-    /** When true, run preflight simulation before broadcasting (skipPreflight: false). Defaults to false. */
+    /** When true, run preflight simulation before broadcasting (skipPreflight: false). Defaults to true. */
     simulate: boolean;
 };
 

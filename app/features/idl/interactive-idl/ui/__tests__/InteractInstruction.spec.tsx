@@ -278,25 +278,10 @@ describe('InteractInstruction', () => {
             walletMock.publicKey = PublicKey.default;
         });
 
-        it('should show the skipped-simulation warning and execute with simulate=false by default', async () => {
+        it('should hide the skipped-simulation warning and execute with simulate=true by default', async () => {
             const instruction = createInstruction();
             const onExecute = vi.fn();
             renderInteractInstruction(instruction, { onExecuteInstruction: onExecute });
-
-            expect(screen.getByTestId('simulate-skipped-warning')).toBeInTheDocument();
-            expect(screen.getByTestId('simulate-before-execute-toggle')).toHaveAttribute('data-state', 'unchecked');
-
-            fireEvent.click(screen.getByRole('button', { name: /execute/i }));
-            await waitFor(() => expect(onExecute).toHaveBeenCalled());
-            expect(onExecute).toHaveBeenCalledWith(instruction, expect.anything(), { simulate: false });
-        });
-
-        it('should hide the warning and execute with simulate=true after enabling the toggle', async () => {
-            const instruction = createInstruction();
-            const onExecute = vi.fn();
-            renderInteractInstruction(instruction, { onExecuteInstruction: onExecute });
-
-            fireEvent.click(screen.getByTestId('simulate-before-execute-toggle'));
 
             expect(screen.queryByTestId('simulate-skipped-warning')).not.toBeInTheDocument();
             expect(screen.getByTestId('simulate-before-execute-toggle')).toHaveAttribute('data-state', 'checked');
@@ -304,6 +289,21 @@ describe('InteractInstruction', () => {
             fireEvent.click(screen.getByRole('button', { name: /execute/i }));
             await waitFor(() => expect(onExecute).toHaveBeenCalled());
             expect(onExecute).toHaveBeenCalledWith(instruction, expect.anything(), { simulate: true });
+        });
+
+        it('should show the warning and execute with simulate=false after disabling the toggle', async () => {
+            const instruction = createInstruction();
+            const onExecute = vi.fn();
+            renderInteractInstruction(instruction, { onExecuteInstruction: onExecute });
+
+            fireEvent.click(screen.getByTestId('simulate-before-execute-toggle'));
+
+            expect(screen.getByTestId('simulate-skipped-warning')).toBeInTheDocument();
+            expect(screen.getByTestId('simulate-before-execute-toggle')).toHaveAttribute('data-state', 'unchecked');
+
+            fireEvent.click(screen.getByRole('button', { name: /execute/i }));
+            await waitFor(() => expect(onExecute).toHaveBeenCalled());
+            expect(onExecute).toHaveBeenCalledWith(instruction, expect.anything(), { simulate: false });
         });
     });
 });
