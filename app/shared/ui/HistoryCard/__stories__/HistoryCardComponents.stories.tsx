@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
+import { HistoryCardFooter, HistoryCardHeader } from '..';
 
 const meta: Meta = {
     tags: ['autodocs', 'test'],
+    // TODO(storybook): rename to 'Shared/UI/HistoryCard' once the Dashkit migration settles — kept stable for now to avoid churning the Storybook tree mid-migration.
     title: 'Components/Account/HistoryCardComponents',
 };
 

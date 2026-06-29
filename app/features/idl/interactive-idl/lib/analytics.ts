@@ -16,6 +16,7 @@ const IIDL_ACTIONS = {
     TabOpened: 'tab_opened',
     TransactionConfirmed: 'transaction_confirmed',
     TransactionFailed: 'transaction_failed',
+    TransactionSimulated: 'transaction_simulated',
     TransactionSubmitted: 'transaction_submitted',
     WalletConnected: 'wallet_connected',
 } as const;
@@ -34,6 +35,7 @@ export type IdlAnalytics = {
     trackTabOpened(programId?: string): void;
     trackTransactionConfirmed(programId?: string, instructionName?: string, signature?: string): void;
     trackTransactionFailed(programId?: string, instructionName?: string, error?: string): void;
+    trackTransactionSimulated(programId?: string, instructionName?: string): void;
     trackTransactionSubmitted(programId?: string, instructionName?: string): void;
     trackWalletConnected(programId?: string, walletType?: string): void;
 };
@@ -69,6 +71,12 @@ export function createIdlAnalytics(standard: IdlStandard): IdlAnalytics {
         trackTransactionFailed(programId, instructionName, error) {
             trackEvent(eventName(idlType, IIDL_ACTIONS.TransactionFailed), {
                 error_message: error,
+                instruction_name: instructionName,
+                program_id: programId,
+            });
+        },
+        trackTransactionSimulated(programId?: string, instructionName?: string): void {
+            trackEvent(eventName(idlType, IIDL_ACTIONS.TransactionSimulated), {
                 instruction_name: instructionName,
                 program_id: programId,
             });
