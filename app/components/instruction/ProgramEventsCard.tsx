@@ -90,7 +90,7 @@ function EventCard({
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit" className="flex items-center">
                     <Badge ui="dashkit" variant="info" className="mr-1.5">
-                        #{instructionIndex + 1}.{eventIndex + 1}
+                        #{instructionIndex + 1} · event {eventIndex + 1}
                     </Badge>
                     {event ? camelToTitleCase(event.name) : 'Unknown Event'}
                 </CardTitle>
