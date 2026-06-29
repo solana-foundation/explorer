@@ -17,7 +17,7 @@ const meta = {
     decorators: [withClusterAndAccounts, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Features/Instruction Simulation/SolBalanceChangesCard',
+    title: 'Features/InstructionSimulation/SolBalanceChangesCard',
 } satisfies Meta<typeof SolBalanceChangesCard>;
 
 export default meta;

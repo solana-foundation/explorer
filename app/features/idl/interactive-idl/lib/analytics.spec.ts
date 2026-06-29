@@ -50,6 +50,14 @@ describe('createIdlAnalytics', () => {
             });
         });
 
+        it('should emit iidl_anchor_transaction_simulated', () => {
+            analytics.trackTransactionSimulated('prog1', 'initialize');
+            expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_anchor_transaction_simulated', {
+                instruction_name: 'initialize',
+                program_id: 'prog1',
+            });
+        });
+
         it('should emit iidl_anchor_transaction_submitted', () => {
             analytics.trackTransactionSubmitted('prog1', 'initialize');
             expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_anchor_transaction_submitted', {
@@ -97,6 +105,14 @@ describe('createIdlAnalytics', () => {
             analytics.trackTransactionFailed('prog2', 'transfer', 'nope');
             expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_codama_transaction_failed', {
                 error_message: 'nope',
+                instruction_name: 'transfer',
+                program_id: 'prog2',
+            });
+        });
+
+        it('should emit iidl_codama_transaction_simulated', () => {
+            analytics.trackTransactionSimulated('prog2', 'transfer');
+            expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_codama_transaction_simulated', {
                 instruction_name: 'transfer',
                 program_id: 'prog2',
             });

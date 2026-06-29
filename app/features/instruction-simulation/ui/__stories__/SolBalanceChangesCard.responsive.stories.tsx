@@ -29,7 +29,7 @@ const meta: Meta<typeof SolBalanceChangesCard> = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Instruction Simulation/SolBalanceChangesCard@Media',
+    title: 'Features/InstructionSimulation/SolBalanceChangesCard@Media',
 };
 
 export default meta;
