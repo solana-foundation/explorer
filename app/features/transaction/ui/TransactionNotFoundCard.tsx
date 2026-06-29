@@ -1,7 +1,7 @@
 'use client';
 
+import { Button } from '@components/shared/ui/button';
 import { useCluster } from '@providers/cluster';
-import { Button } from '@shared/ui/button';
 import { createSolanaRpc, signature as createSignature } from '@solana/kit';
 import { Cluster, clusterName, clusterSlug, clusterUrl } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
@@ -26,7 +26,7 @@ export function TransactionNotFoundCard({
     if (status === 'searching' && searchingCluster !== undefined) {
         subtext = (
             <span>
-                <span className="e-align-middle">Transaction does not exist</span>
+                <span className="align-middle">Transaction does not exist</span>
                 <br />
                 <SearchingClusterIndicator searchingCluster={searchingCluster} />
             </span>
@@ -34,7 +34,7 @@ export function TransactionNotFoundCard({
     } else if (status === 'found' && foundCluster !== undefined) {
         subtext = (
             <span>
-                <span className="e-align-middle">Transaction does not exist</span>
+                <span className="align-middle">Transaction does not exist</span>
                 <br />
                 <AdjacentTransactionLink signature={signature} foundCluster={foundCluster} />
             </span>
@@ -47,28 +47,22 @@ export function TransactionNotFoundCard({
 
     return (
         <Card ui="dashkit">
-            <CardBody ui="dashkit" className="e-text-center">
+            <CardBody ui="dashkit" className="text-center">
                 Not Found
                 {retry && (
                     <>
-                        <Button
-                            ui="dashkit"
-                            variant="white"
-                            className="e-ml-3 e-hidden md:e-inline"
-                            onClick={retry}
-                            asChild
-                        >
+                        <Button ui="dashkit" variant="white" className="ml-3 hidden md:inline" onClick={retry} asChild>
                             <span>{buttonText}</span>
                         </Button>
-                        <div className="e-mt-6 e-block md:e-hidden">
-                            <Button ui="dashkit" variant="white" className="e-w-full" onClick={retry} asChild>
+                        <div className="mt-6 block md:hidden">
+                            <Button ui="dashkit" variant="white" className="w-full" onClick={retry} asChild>
                                 <span>{buttonText}</span>
                             </Button>
                         </div>
                     </>
                 )}
                 {subtext && (
-                    <div className="e-text-dk-gray-700">
+                    <div className="text-dk-gray-700">
                         <hr />
                         {subtext}
                     </div>
@@ -165,7 +159,7 @@ function AdjacentTransactionLink({ signature, foundCluster }: { signature: strin
     });
 
     return (
-        <a href={foundClusterPath} className="e-align-middle e-text-dk-info" style={{ marginRight: '5px' }}>
+        <a href={foundClusterPath} className="align-middle text-dk-info" style={{ marginRight: '5px' }}>
             Found on {clusterName(foundCluster)}
         </a>
     );
@@ -178,12 +172,9 @@ function SearchingClusterIndicator({ searchingCluster }: { searchingCluster: Clu
         <>
             <span
                 style={{ height: '10px', marginRight: '5px', width: '10px' }}
-                className={`${spinnerCls} e-inline-block e-align-middle`}
+                className={`${spinnerCls} inline-block align-middle`}
             />
-            <span
-                className="e-align-middle e-text-dk-gray-700"
-                style={{ marginRight: '10px', verticalAlign: 'middle' }}
-            >
+            <span className="align-middle text-dk-gray-700" style={{ marginRight: '10px', verticalAlign: 'middle' }}>
                 checking {clusterName(searchingCluster).toLowerCase()}
             </span>
         </>
