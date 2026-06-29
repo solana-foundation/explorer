@@ -22,7 +22,8 @@ vi.mock('next/navigation', () => ({
     useSearchParams: vi.fn(),
 }));
 
-vi.mock('@solana/kit', () => ({
+vi.mock('@solana/kit', async importOriginal => ({
+    ...(await importOriginal<typeof import('@solana/kit')>()),
     address: vi.fn((addr: string) => addr),
     createSolanaRpc: vi.fn(() => ({
         getEpochInfo: vi.fn(() => ({
