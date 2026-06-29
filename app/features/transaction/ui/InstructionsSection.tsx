@@ -13,10 +13,6 @@ import { isLighthouseInstruction } from '@components/instruction/lighthouse/type
 import { isMangoInstruction } from '@components/instruction/mango/types';
 import { MangoDetailsCard } from '@components/instruction/MangoDetails';
 import { MemoDetailsCard } from '@components/instruction/MemoDetailsCard';
-import {
-    PROGRAM_METADATA_PROGRAM_ID,
-    ProgramMetadataDetailsCard,
-} from '@components/instruction/program-metadata/ProgramMetadataDetailsCard';
 import { ProgramMetadataIdlInstructionDetailsCard } from '@components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
 import { PythDetailsCard } from '@components/instruction/pyth/PythDetailsCard';
 import { isPythInstruction } from '@components/instruction/pyth/types';
@@ -292,13 +288,6 @@ function InstructionCard({
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
                 <MetaplexTokenMetadataDetailsCard {...props} />
-            </ErrorBoundary>
-        );
-    }
-    if (transactionIx.programId.toBase58() === PROGRAM_METADATA_PROGRAM_ID) {
-        return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
-                <ProgramMetadataDetailsCard {...props} />
             </ErrorBoundary>
         );
     }

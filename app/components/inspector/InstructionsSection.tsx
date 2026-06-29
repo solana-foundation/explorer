@@ -26,10 +26,6 @@ import { LoadingCard } from '../common/LoadingCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
-import {
-    PROGRAM_METADATA_PROGRAM_ID,
-    ProgramMetadataDetailsCard,
-} from '../instruction/program-metadata/ProgramMetadataDetailsCard';
 import { ProgramMetadataIdlInstructionDetailsCard } from '../instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
@@ -172,24 +168,7 @@ function InspectorInstructionCard({
         );
     }
 
-    if (programId.toBase58() === PROGRAM_METADATA_PROGRAM_ID) {
-        return (
-            <ErrorBoundary
-                fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-            >
-                <ProgramMetadataDetailsCard
-                    key={index}
-                    ix={ix}
-                    index={index}
-                    result={INSPECTOR_RESULT}
-                    InstructionCardComponent={BaseInstructionCard}
-                    raw={ix}
-                />
-            </ErrorBoundary>
-        );
-    }
-
-    // Parse instructions of programs that publish an IDL via the Program Metadata Program.
+    // Decode via any PMP-published IDL — including the PMP itself, which self-publishes a Codama IDL.
     if (programMetadataIdl) {
         return (
             <ErrorBoundary
