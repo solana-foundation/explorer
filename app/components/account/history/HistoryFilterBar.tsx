@@ -130,7 +130,7 @@ function FilterChip({ label, value, onClear }: { label: string; value: string; o
                 type="button"
                 onClick={onClear}
                 aria-label={`Clear ${label.toLowerCase()} filter`}
-                className="inline-flex items-center p-0 leading-none opacity-70 hover:opacity-100"
+                className="inline-flex items-center justify-center border-0 bg-transparent p-0 leading-none text-current opacity-70 hover:opacity-100"
             >
                 <X size={12} />
             </button>
