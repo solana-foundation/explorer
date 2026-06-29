@@ -33,4 +33,24 @@ describe('extractEventsFromLogs', () => {
         // Without programIds, naive invoke-counting misattributes it to #1.
         expect(extractEventsFromLogs(logs, 1)).toHaveLength(1);
     });
+
+    it('should capture a Program data payload whose base64 contains the substring "success"', () => {
+        const logs = ['Program P invoke [1]', 'Program data: success', 'Program P success'];
+        expect(extractEventsFromLogs(logs, 0, ['P'])).toEqual([{ data: 'success', kind: 'data' }]);
+    });
+
+    it('should not let user log text containing "failed" decrement depth and misattribute a later event', () => {
+        const logs = [
+            'Program A invoke [1]',
+            'Program log: request failed',
+            'Program A success',
+            'Program B invoke [1]',
+            'Program data: AAAAAAAAAAAA',
+            'Program B success',
+        ];
+        const programIds = ['A', 'B'];
+
+        expect(extractEventsFromLogs(logs, 1, programIds)).toEqual([{ data: 'AAAAAAAAAAAA', kind: 'data' }]);
+        expect(extractEventsFromLogs(logs, 0, programIds)).toHaveLength(0);
+    });
 });
