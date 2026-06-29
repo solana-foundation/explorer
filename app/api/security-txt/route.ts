@@ -1,6 +1,6 @@
 import { serverClusterUrlFromParam } from '@entities/cluster/server';
 import { errors } from '@entities/program-metadata/server';
-import { isTransientRpcError } from '@solana/idl';
+import { isRetryableError } from '@shared/lib/errors';
 import { type Address, address, createSolanaRpc } from '@solana/kit';
 import {
     fetchElfSecurityTxt,
@@ -69,7 +69,7 @@ export async function GET(request: Request) {
     } catch (error) {
         // `@solana/security-txt` surfaces absent/unparseable as a value and throws only on RPC failure.
         // Transient blips → retryable, *uncached* 502 (no page); persistent misconfiguration → Sentry.
-        if (isTransientRpcError(error)) {
+        if (isRetryableError(error)) {
             Logger.warn('[api:security-txt] RPC error fetching security.txt', {
                 ...context,
                 rpcError: error instanceof Error ? error.message : String(error),

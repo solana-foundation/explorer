@@ -140,7 +140,30 @@ describe('GET /api/idl-latest', () => {
     });
 
     it('should retry past a premature-close fetch error and succeed', async () => {
-        mocks.resolveProgramIdls.mockRejectedValueOnce(new Error('Invalid response body ...: Premature close'));
+        mocks.resolveProgramIdls.mockRejectedValueOnce(
+            Object.assign(new Error('Invalid response body ...: Premature close'), {
+                code: 'ERR_STREAM_PREMATURE_CLOSE',
+            }),
+        );
+        mocks.resolveProgramIdls.mockResolvedValueOnce(
+            resolved({ anchorIdl: { name: 'a' }, preferredVariant: IdlVariant.Anchor }),
+        );
+
+        const { GET } = await importRoute();
+        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
+
+        expect(res.status).toBe(200);
+        expect(mocks.resolveProgramIdls).toHaveBeenCalledTimes(2);
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
+
+    it('should retry when the retryable code is nested in the error cause chain', async () => {
+        // undici wraps the real failure as `cause` under a generic `TypeError: fetch failed`.
+        mocks.resolveProgramIdls.mockRejectedValueOnce(
+            Object.assign(new TypeError('fetch failed'), {
+                cause: Object.assign(new Error('other side closed'), { code: 'UND_ERR_SOCKET' }),
+            }),
+        );
         mocks.resolveProgramIdls.mockResolvedValueOnce(
             resolved({ anchorIdl: { name: 'a' }, preferredVariant: IdlVariant.Anchor }),
         );
