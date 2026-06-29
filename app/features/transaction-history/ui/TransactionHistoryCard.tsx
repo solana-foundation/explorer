@@ -6,12 +6,9 @@ import {
     useClearHistoryFilters,
     useHistoryFilters,
 } from '@components/account/history/HistoryFilterBar';
-import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '@components/account/HistoryCardComponents';
-import { Copyable } from '@components/common/Copyable';
+import { getTransactionRows } from '@components/account/HistoryCardComponents';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { Signature } from '@components/common/Signature';
-import { Slot } from '@components/common/Slot';
 import {
     useAccountHistory,
     useFetchAccountHistory,
@@ -20,20 +17,11 @@ import {
 } from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import { displayTimestampUtc } from '@utils/date';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { Badge } from '@/app/components/shared/ui/badge';
-import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
-import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
-import { toBase64 } from '@/app/shared/lib/bytes';
-import { useVisibility } from '@/app/shared/lib/visibility';
-import { RelativeTime } from '@/app/shared/RelativeTime';
-import { Card } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
-
-import { useInstructionNames } from '../lib/use-instruction-names';
-import { InstructionList, InstructionListSkeleton } from './InstructionList';
+import { BaseTransactionHistoryCard, type TransactionHistoryRowView } from './BaseTransactionHistoryCard';
+import { InstructionsCell } from './InstructionsCell';
+import { TransactionRawDataCell } from './TransactionRawDataCell';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
@@ -45,17 +33,24 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const resetHistory = useResetAccountHistory();
     const filtersSupported = useHistoryFiltersSupported();
     const clearFilters = useClearHistoryFilters();
+
+    // Signatures only — the parsed transactions for instruction names are fetched lazily per row, one at a
+    // time (see InstructionsCell), so the page never batch-hammers the RPC into 429s.
     const refresh = useCallback(() => fetchAccountHistory(pubkey, false, true), [fetchAccountHistory, pubkey]);
     const loadMore = () => fetchAccountHistory(pubkey, false);
 
-    const transactionRows = React.useMemo(() => {
-        if (history?.data?.fetched) {
-            return getTransactionRows(history.data.fetched);
-        }
-        return [];
-    }, [history]);
+    const rows: TransactionHistoryRowView[] = history?.data?.fetched
+        ? getTransactionRows(history.data.fetched).map(row => ({
+              blockTime: row.blockTime,
+              instructionsCell: <InstructionsCell signature={row.signature} />,
+              rawDataCell: <TransactionRawDataCell signature={row.signature} />,
+              signature: row.signature,
+              slot: row.slot,
+              status: row.err ? 'failed' : 'success',
+          }))
+        : [];
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!history) {
             refresh();
         }
@@ -65,8 +60,8 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     // only, so we reset this address's entry (which also supersedes any in-flight
     // request for it) before refetching to avoid mixing pre- and post-filter results
     // in combineFetched.
-    const previousFiltersKey = React.useRef(filtersKey);
-    React.useEffect(() => {
+    const previousFiltersKey = useRef(filtersKey);
+    useEffect(() => {
         if (previousFiltersKey.current !== filtersKey) {
             previousFiltersKey.current = filtersKey;
             resetHistory(address);
@@ -76,143 +71,29 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 
     // If the endpoint turns out not to support filtering, drop any active filters so the
     // (unfiltered) results aren't shown alongside misleading filter chips.
-    React.useEffect(() => {
+    useEffect(() => {
         if (!filtersSupported && hasActiveFilters) {
             clearFilters();
         }
     }, [filtersSupported, hasActiveFilters, clearFilters]);
 
-    if (!history) {
-        return null;
+    if (!history?.data) {
+        return !history || history.status === FetchStatus.Fetching ? (
+            <LoadingCard message="Loading history" />
+        ) : (
+            <ErrorCard retry={refresh} text="Failed to fetch transaction history" />
+        );
     }
 
-    if (history?.data === undefined) {
-        if (history.status === FetchStatus.Fetching) {
-            return <LoadingCard message="Loading history" />;
-        }
-
-        return <ErrorCard retry={refresh} text="Failed to fetch transaction history" />;
-    }
-
-    const hasTimestamps = transactionRows.some(element => element.blockTime);
-    const detailsList: React.ReactNode[] = transactionRows.map(
-        ({ slot, signature, blockTime, statusClass, statusText }) => (
-            <TransactionRow
-                key={signature}
-                signature={signature}
-                slot={slot}
-                blockTime={blockTime}
-                statusClass={statusClass}
-                statusText={statusText}
-                hasTimestamps={hasTimestamps}
-            />
-        ),
-    );
-
-    const fetching = history.status === FetchStatus.Fetching;
     return (
-        <Card ui="dashkit">
-            <HistoryCardHeader
-                fetching={fetching}
-                refresh={() => refresh()}
-                title="Transaction History"
-                analyticsSection="transaction_history_header"
-                actions={<HistoryFilterTrigger {...filters} />}
-                subHeader={hasActiveFilters ? <HistoryFilterChips {...filters} /> : undefined}
-            />
-            <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Head>
-                    <BaseTable.Row>
-                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">
-                            Transaction Signature
-                        </BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Block</BaseTable.HeaderCell>
-                        {hasTimestamps && (
-                            <>
-                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Age</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Timestamp</BaseTable.HeaderCell>
-                            </>
-                        )}
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Raw Data</BaseTable.HeaderCell>
-                    </BaseTable.Row>
-                </BaseTable.Head>
-                <BaseTable.Body>{detailsList}</BaseTable.Body>
-            </BaseTable>
-            <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
-        </Card>
-    );
-}
-
-type TransactionRowProps = {
-    signature: string;
-    slot: number;
-    blockTime: number | null | undefined;
-    statusClass: string;
-    statusText: string;
-    hasTimestamps: boolean;
-};
-
-function TransactionRow({ signature, slot, blockTime, statusClass, statusText, hasTimestamps }: TransactionRowProps) {
-    const { isVisible, ref } = useVisibility<HTMLTableRowElement>(true);
-    const instructionNames = useInstructionNames(signature, isVisible);
-
-    return (
-        <BaseTable.Row ref={ref}>
-            <BaseTable.Cell>
-                <Signature signature={signature} link />
-                {instructionNames !== null && instructionNames.length > 0 ? (
-                    <InstructionList instructions={instructionNames} />
-                ) : instructionNames === null ? (
-                    <InstructionListSkeleton />
-                ) : null}
-            </BaseTable.Cell>
-
-            <BaseTable.Cell className="w-px">
-                <Slot slot={slot} link />
-            </BaseTable.Cell>
-
-            {hasTimestamps && (
-                <>
-                    <BaseTable.Cell className="text-dk-gray-700">
-                        {blockTime ? <RelativeTime date={blockTime * 1000} /> : '---'}
-                    </BaseTable.Cell>
-                    <BaseTable.Cell className="text-dk-gray-700">
-                        {blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}
-                    </BaseTable.Cell>
-                </>
-            )}
-
-            <BaseTable.Cell>
-                <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
-                    {statusText}
-                </Badge>
-            </BaseTable.Cell>
-            <BaseTable.Cell>
-                <TransactionRawDataDownloadField signature={signature} />
-            </BaseTable.Cell>
-        </BaseTable.Row>
-    );
-}
-
-function TransactionRawDataDownloadField({ signature }: { signature: string }) {
-    const fetchRaw = useFetchRawTransaction();
-    const rawDetails = useRawTransactionDetails(signature);
-    const serialized = rawDetails?.data?.raw?.message.serialize();
-    const transactionData = useMemo(() => serialized && new Uint8Array(serialized), [serialized]);
-    const loading = rawDetails?.status === FetchStatus.Fetching;
-
-    const handleHover = useCallback(() => {
-        if (!transactionData) {
-            fetchRaw(signature);
-        }
-    }, [transactionData, signature, fetchRaw]);
-
-    return (
-        <div className="flex items-center gap-[3px]" onMouseEnter={handleHover}>
-            <Copyable text={transactionData ? toBase64(transactionData) : null}>
-                <DownloadDropdown data={transactionData} loading={loading} filename={signature} />
-            </Copyable>
-        </div>
+        <BaseTransactionHistoryCard
+            rows={rows}
+            fetching={history.status === FetchStatus.Fetching}
+            foundOldest={history.data.foundOldest}
+            onRefresh={refresh}
+            onLoadMore={loadMore}
+            headerActions={<HistoryFilterTrigger {...filters} />}
+            headerSubRow={hasActiveFilters ? <HistoryFilterChips {...filters} /> : undefined}
+        />
     );
 }

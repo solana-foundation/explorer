@@ -6,21 +6,7 @@ import { ProgramLogs } from '../ProgramLogs';
 
 const meta = {
     component: ProgramLogs,
-    decorators: [
-        Story => (
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    maxHeight: '600px',
-                    maxWidth: '100%',
-                    width: '800px',
-                }}
-            >
-                <Story />
-            </div>
-        ),
-    ],
+    globals: { viewport: { value: 'responsive' } },
     tags: ['autodocs', 'test'],
     title: 'Entities/Program Logs/ProgramLogs',
 } satisfies Meta<typeof ProgramLogs>;
@@ -30,29 +16,29 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
-        logs: baseLogs,
-        parseLogs: () => parsedBaseLogs,
+        parsedLogs: parsedBaseLogs,
+        rawLogs: baseLogs,
     },
 };
 
 export const WithProgramName: Story = {
     args: {
-        logs: baseLogs,
-        parseLogs: () => parsedBaseLogs,
+        parsedLogs: parsedBaseLogs,
         programName: 'Voting',
+        rawLogs: baseLogs,
     },
 };
 
 export const Error: Story = {
     args: {
-        logs: errorLogs,
-        parseLogs: () => parsedErrorLogs,
+        parsedLogs: parsedErrorLogs,
+        rawLogs: errorLogs,
     },
 };
 
 export const Empty: Story = {
     args: {
-        logs: [],
-        parseLogs: () => [],
+        parsedLogs: [],
+        rawLogs: [],
     },
 };

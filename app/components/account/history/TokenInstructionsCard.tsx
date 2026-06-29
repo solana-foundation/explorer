@@ -7,6 +7,7 @@ import { Signature } from '@components/common/Signature';
 import { useAccountHistory } from '@providers/accounts';
 import { useFetchAccountHistory } from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
+import { HistoryCardFooter, HistoryCardHeader } from '@shared/ui/HistoryCard';
 import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { getTokenInstructionName, InstructionContainer } from '@utils/instruction';
 import React, { useMemo } from 'react';
@@ -16,7 +17,7 @@ import { RelativeTime } from '@/app/shared/RelativeTime';
 import { Card } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
+import { getTransactionRows } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
 
 export function TokenInstructionsCard({ address }: { address: string }) {

@@ -28,20 +28,27 @@ export type InstructionFormFieldNames = {
 export function useInstructionForm({
     instruction,
     onSubmit,
+    onSimulate,
 }: {
     instruction: InstructionData;
     onSubmit: (params: InstructionCallParams) => void;
+    onSimulate?: (params: InstructionCallParams) => void;
 }) {
     const form = useForm<InstructionFormData>({
         defaultValues: createDefaultValues(instruction),
     });
 
+    const toInstructionCallParams = (data: InstructionFormData): InstructionCallParams => ({
+        accounts: flattenNestedRecord(data.accounts),
+        arguments: flattenNestedRecord(data.arguments),
+    });
+
     const onInstructionSubmit: SubmitHandler<InstructionFormData> = data => {
-        const formData = {
-            accounts: flattenNestedRecord(data.accounts),
-            arguments: flattenNestedRecord(data.arguments),
-        };
-        onSubmit(formData);
+        onSubmit(toInstructionCallParams(data));
+    };
+
+    const onInstructionSimulate: SubmitHandler<InstructionFormData> = data => {
+        onSimulate?.(toInstructionCallParams(data));
     };
 
     return {
@@ -57,6 +64,7 @@ export function useInstructionForm({
                 `arguments.${instruction.name}.${arg.name}` as Path<InstructionFormData>,
         },
         form,
+        onSimulate: form.handleSubmit(onInstructionSimulate),
         onSubmit: form.handleSubmit(onInstructionSubmit),
         validationRules: {
             account: (account: InstructionAccountData) => ({

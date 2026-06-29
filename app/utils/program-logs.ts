@@ -19,7 +19,11 @@ export type InstructionLogs = {
     failed: boolean;
 };
 
-export function parseProgramLogs(logs: string[], error: TransactionError | null, cluster: Cluster): InstructionLogs[] {
+export function parseProgramLogs(
+    logs: string[],
+    error: TransactionError | null | undefined,
+    cluster: Cluster,
+): InstructionLogs[] {
     let depth = 0;
     const prettyLogs: InstructionLogs[] = [];
     function prefixBuilder(

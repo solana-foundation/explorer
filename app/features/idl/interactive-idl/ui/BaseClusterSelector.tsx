@@ -3,9 +3,11 @@ import { cn } from '@components/shared/utils';
 import { Slot } from '@radix-ui/react-slot';
 import { cva } from 'class-variance-authority';
 import { ReactNode } from 'react';
-import { AlertCircle, Check, Globe } from 'react-feather';
+import { Check, Globe } from 'react-feather';
 
 import { Card } from '@/app/shared/ui/Card';
+
+import { WarningNote } from './WarningNote';
 
 type BaseClusterSelectorProps = {
     currentCluster: string;
@@ -40,12 +42,7 @@ export function BaseClusterSelector({
                         Use Devnet with test tokens to avoid real costs
                     </div>
                     {showMainnetWarning && (
-                        <div className="mt-1 flex items-center gap-1.5 rounded">
-                            <AlertCircle className="text-destructive" size={14} />
-                            <div className="mt-0.5 text-xs tracking-tight text-destructive">
-                                You are connected to Mainnet, which uses real funds
-                            </div>
-                        </div>
+                        <WarningNote className="mt-1" label="You are connected to Mainnet, which uses real funds" />
                     )}
                 </div>
 

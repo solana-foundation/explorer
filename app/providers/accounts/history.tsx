@@ -3,7 +3,7 @@
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { ConfirmedSignatureInfo, Connection, ParsedTransactionWithMeta, PublicKey } from '@solana/web3.js';
+import { ConfirmedSignatureInfo, Connection, ParsedTransactionWithMeta, PublicKey, TransactionSignature } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { fetchAll } from '@utils/fetch-all';
 import { fetchOnce } from '@utils/fetch-once';
@@ -79,7 +79,7 @@ function mergeFailedTransactionSignatures(
     return new Set([...(current ?? []), ...update]);
 }
 
-function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | undefined) {
+export function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | undefined) {
     if (update?.history === undefined) {
         // Support transactionMap-only updates from background lazy fetches
         if ((update?.transactionMap || update?.failedTransactionSignatures) && history) {
@@ -94,11 +94,21 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
     }
 
     const append = update.append ?? false;
+
+    // A refresh that came back empty is almost always a transient RPC blip, not a real transition to
+    // "zero history" (signatures are immutable). Drop it so a flaky empty can't wipe already-loaded rows
+    // or flip foundOldest into a false "Fetched full history". The first-ever fetch (no existing history)
+    // isn't covered here — fetchSignatures retries that case before it lands.
+    if (!append && update.history.fetched.length === 0 && history?.fetched.length) {
+        return history;
+    }
+
     const { combined, replaced } = combineFetched(update.history.fetched, history?.fetched, append);
 
     // The tail cursor only changes when we extended the tail (append) or replaced
     // the whole list; a refresh that merely prepends new items keeps the old tail.
     const tailFromUpdate = append || replaced;
+
 
     const transactionMap = mergeTransactionMap(history?.transactionMap, update.transactionMap);
     const failedTransactionSignatures = mergeFailedTransactionSignatures(
@@ -195,6 +205,30 @@ async function fetchParsedTransactions(url: string, cluster: Cluster, transactio
     });
 
     return { failedTransactionSignatures, transactionMap };
+}
+
+// A lagging/cold RPC replica can return an empty signatures page for an account that actually has
+// history — indistinguishable from a genuinely empty account, but far more likely on a busy one. The
+// first page is the dangerous one: an empty result there is cached as `foundOldest: true` and rendered
+// as "Fetched full history" until a manual reload. Wrap every attempt in withBackoff (parity with the
+// transaction fetch below), and retry a first-page empty a few times — each attempt is a fresh request,
+// so a load balancer can route us to a healthy node — before trusting it as the real "no history" answer.
+const EMPTY_FIRST_PAGE_RETRIES = 2;
+const EMPTY_FIRST_PAGE_RETRY_DELAY_MS = 300;
+
+export async function fetchSignatures(
+    connection: Connection,
+    pubkey: PublicKey,
+    options: { before?: TransactionSignature; limit: number },
+): Promise<ConfirmedSignatureInfo[]> {
+    const isFirstPage = options.before === undefined;
+    for (let attempt = 0; ; attempt++) {
+        const fetched = await withBackoff(() => connection.getSignaturesForAddress(pubkey, options));
+        if (fetched.length > 0 || !isFirstPage || attempt >= EMPTY_FIRST_PAGE_RETRIES) {
+            return fetched;
+        }
+        await new Promise(resolve => setTimeout(resolve, EMPTY_FIRST_PAGE_RETRY_DELAY_MS));
+    }
 }
 
 // Prunes undefined leaves so the RPC never receives an empty range like `{ slot: {} }`.
@@ -295,12 +329,7 @@ async function fetchViaSignatures(
     options: { limit: number; before?: string },
 ): Promise<AccountHistory> {
     const connection = new Connection(url);
-    const rpcOptions: Record<string, unknown> = { limit: options.limit };
-    if (options.before) rpcOptions.before = options.before;
-    const fetched = await connection.getSignaturesForAddress(
-        pubkey,
-        rpcOptions as Parameters<Connection['getSignaturesForAddress']>[1],
-    );
+    const fetched = await fetchSignatures(connection, pubkey, { before: options.before, limit: options.limit });
     return {
         fetched,
         foundOldest: fetched.length < options.limit,

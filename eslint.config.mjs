@@ -369,6 +369,14 @@ export default tseslint.config(
         },
     },
 
+    // Allow cross-boundary imports in tests and Storybook stories.
+    {
+        files: TEST_AND_STORY_FILES,
+        rules: {
+            'boundaries/dependencies': 'off',
+        },
+    },
+
     // TODO: `boundaries/dependencies` cleanup. Each path below crosses an FSD boundary
     // (cross-feature, cross-entity without `@x`, reverse-layer, or deep import bypassing the
     // barrel). Per-file so any *new* file in these areas is still subject to the rule. Remove a
@@ -383,7 +391,6 @@ export default tseslint.config(
             'app/entities/token-info/lib/is-valid-cluster.ts',
 
             // app/features cross-feature imports
-            'app/features/idl/interactive-idl/model/__tests__/use-mainnet-confirmation.spec.ts',
             'app/features/idl/interactive-idl/model/use-mainnet-confirmation.ts',
             'app/features/instruction-simulation/ui/SimulationCard.tsx',
             'app/features/receipt/receipt-page.tsx',
@@ -397,10 +404,6 @@ export default tseslint.config(
             'app/features/vote/ui/VoteAccountSection.tsx',
 
             // app/features deep imports into entities (must go via barrel)
-            'app/features/idl/formatted-idl/model/__tests__/search.test.ts',
-            'app/features/idl/formatted-idl/ui/__stories__/AnchorFormattedIdl.stories.tsx',
-            'app/features/idl/formatted-idl/ui/__stories__/CodamaFormattedIdl.stories.tsx',
-            'app/features/idl/ui/__stories__/IdlRenderer.stories.tsx',
             'app/features/idl/interactive-idl/model/codama/codama-interpreter.ts',
 
             // app/shared reverse-layer imports
@@ -674,11 +677,9 @@ export default tseslint.config(
             'app/features/idl/interactive-idl/model/pda-generator/registry.ts',
             'app/features/idl/interactive-idl/model/pda-generator/seed-builder.ts',
             'app/features/idl/interactive-idl/model/state-atoms.ts',
-            'app/features/idl/interactive-idl/model/use-instruction.ts',
             'app/features/idl/interactive-idl/model/use-mainnet-confirmation.ts',
             'app/features/idl/interactive-idl/ui/ArgumentInput.tsx',
             'app/features/idl/interactive-idl/ui/BaseConnectWalletButton.tsx',
-            'app/features/idl/interactive-idl/ui/InstructionActivity.tsx',
             'app/features/idl/interactive-idl/ui/InteractWithIdl.tsx',
             'app/features/idl/ui/IdlRenderer.tsx',
             'app/features/idl/ui/IdlSection.tsx',
@@ -804,7 +805,6 @@ export default tseslint.config(
             'app/features/idl/interactive-idl/model/anchor/anchor-program.ts',
             'app/features/idl/interactive-idl/model/anchor/array-parser.ts',
             'app/features/idl/interactive-idl/model/unified-program.d.ts',
-            'app/features/idl/interactive-idl/model/use-instruction.ts',
             'app/features/security-txt/ui/PmpSecurityTxtTable.tsx',
             'app/features/security-txt/ui/SecurityCard.tsx',
             'app/features/security-txt/ui/common.tsx',
