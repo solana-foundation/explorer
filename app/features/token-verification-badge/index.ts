@@ -5,5 +5,4 @@ export type { TokenVerificationResult } from './model/use-verification-sources';
 export { EVerificationSource } from './lib/types';
 export type { VerificationTarget, VerificationSource } from './lib/types';
 export { useCoinGeckoVerification, CoingeckoStatus } from './model/use-coingecko';
-export type { CoinGeckoResult, CoinInfo } from './model/use-coingecko';
 export * from './config';
