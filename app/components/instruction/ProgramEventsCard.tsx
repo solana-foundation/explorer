@@ -22,16 +22,19 @@ export function ProgramEventsCard({
     program: Program;
     instructionIndex: number;
 }) {
+    // Keep each raw payload paired with its decoded event so dropping an undecodable entry (a base64
+    // `Program log:` non-event, or a CPI'd foreign-program payload) can't misalign the Raw view.
     const decodedEvents = eventDataList
-        .map(eventData => {
+        .map(rawEventData => {
             try {
-                return decodeEventFromLog(eventData, program);
+                const event = decodeEventFromLog(rawEventData, program);
+                return event ? { event, rawEventData } : null;
             } catch (error) {
                 Logger.error(error);
                 return null;
             }
         })
-        .filter((event): event is { name: string; data: any } => event !== null);
+        .filter((entry): entry is { event: { name: string; data: any }; rawEventData: string } => entry !== null);
 
     if (decodedEvents.length === 0) {
         return null;
@@ -39,14 +42,14 @@ export function ProgramEventsCard({
 
     return (
         <>
-            {decodedEvents.map((event, eventIndex) => (
+            {decodedEvents.map(({ event, rawEventData }, eventIndex) => (
                 <EventCard
                     key={eventIndex}
                     event={event}
                     eventIndex={eventIndex}
                     instructionIndex={instructionIndex}
                     program={program}
-                    rawEventData={eventDataList[eventIndex]}
+                    rawEventData={rawEventData}
                 />
             ))}
         </>
