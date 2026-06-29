@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { BorshEventCoder, BorshInstructionCoder, Idl, Instruction, Program } from '@coral-xyz/anchor';
 import { IdlEvent, IdlField, IdlInstruction, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
+import { extractEventsFromLogs } from '@entities/program-logs';
 import { useTransactionDetails } from '@providers/transactions';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -14,7 +15,6 @@ import {
     mapIxArgsToRows,
 } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
-import { extractEventsFromLogs } from '@utils/program-logs';
 import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 

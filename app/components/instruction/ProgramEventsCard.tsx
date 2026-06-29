@@ -1,9 +1,9 @@
 import { HexData } from '@components/common/HexData';
 import { Program } from '@coral-xyz/anchor';
 import { IdlField, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
+import type { ProgramEventPayload } from '@entities/program-logs';
 import { decodeEventFromLog, mapIxArgsToRows } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
-import type { ProgramEventPayload } from '@utils/program-logs';
 import React, { useState } from 'react';
 import { Code } from 'react-feather';
 
