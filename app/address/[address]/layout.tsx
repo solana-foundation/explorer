@@ -50,6 +50,7 @@ import useSWRImmutable from 'swr/immutable';
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 import { getFeatureInfo, useFeatureInfo } from '@/app/entities/feature-gate';
+import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 import { hasTokenMetadata } from '@/app/features/metadata';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
@@ -486,8 +487,12 @@ function ProgramMultisigTab({ authority }: { authority: PublicKey | null | undef
 function AccountDataTab({ programId }: { programId: PublicKey }) {
     const { url, cluster } = useCluster();
     const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url, cluster);
+    const { programMetadataIdl } = useProgramMetadataIdl(programId.toString(), url, cluster);
 
-    if (!accountAnchorProgram) {
+    // Show the tab when the program exposes an Anchor-format interface via either the legacy
+    // Anchor IDL or an Anchor-format IDL published through the Program Metadata Program.
+    const hasPmpAccounts = Array.isArray((programMetadataIdl as { accounts?: unknown[] } | undefined)?.accounts);
+    if (!accountAnchorProgram && !hasPmpAccounts) {
         return null;
     }
 

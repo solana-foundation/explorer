@@ -1,10 +1,15 @@
 import { parseInstruction } from '@codama/dynamic-parsers';
 import { rootNodeFromAnchor } from '@codama/nodes-from-anchor';
+import { Idl, Program } from '@coral-xyz/anchor';
+import { formatSerdeIdl, getFormattedIdl, getProvider } from '@entities/idl';
+import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { type RootNode } from 'codama';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
+import AnchorDetailsCard from '../AnchorDetailsCard';
 import { CodamaInstructionCard } from '../codama/CodamaInstructionDetailsCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import { withSingleInstructionDiscriminator } from './withSingleInstructionDiscriminator';
@@ -15,13 +20,17 @@ export function ProgramMetadataIdlInstructionDetailsCard({
     index,
     innerCards,
     idl,
+    signature,
 }: {
     ix: TransactionInstruction;
     result: SignatureResult;
     index: number;
     innerCards?: JSX.Element[];
     idl: any;
+    // Present on the tx page; lets the Anchor fallback decode events from the transaction logs.
+    signature?: string;
 }) {
+    const { url } = useCluster();
     const props = {
         index,
         innerCards,
@@ -56,5 +65,19 @@ export function ProgramMetadataIdlInstructionDetailsCard({
         parsedCard = tryParse(withSingleInstructionDiscriminator(idl));
     }
 
-    return parsedCard ?? <UnknownDetailsCard {...props} />;
+    if (parsedCard) {
+        return parsedCard;
+    }
+
+    // Codama couldn't parse it — most commonly an Anchor-format IDL that `@codama/nodes-from-anchor`
+    // rejects (e.g. an instruction with an unnamed arg). Anchor's own BorshInstructionCoder is more
+    // lenient, so build a Program from the IDL and reuse the Anchor card before giving up.
+    try {
+        const program = new Program(getFormattedIdl(formatSerdeIdl, idl, ix.programId.toBase58()), getProvider(url));
+        return <AnchorDetailsCard {...props} anchorProgram={program as Program<Idl>} signature={signature ?? ''} />;
+    } catch (error) {
+        Logger.debug('[program-metadata-idl] Anchor fallback failed', { error });
+    }
+
+    return <UnknownDetailsCard {...props} />;
 }

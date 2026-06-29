@@ -175,29 +175,54 @@ export function parseProgramLogs(logs: string[], error: TransactionError | null,
     return prettyLogs;
 }
 
+// A `Program log:` payload that looks like a base64-encoded event (≥ the 8-byte discriminator,
+// padded to a multiple of 4, base64 charset). Plain text logs ("Instruction: Foo", "Price = 1")
+// contain spaces/punctuation and fail this; any false positive is rejected by the event decoder.
+function isLikelyBase64Event(payload: string): boolean {
+    // eslint-disable-next-line no-restricted-syntax -- base64 shape check
+    return payload.length >= 12 && payload.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(payload);
+}
+
 /**
  * Extracts event data from transaction logs for a specific instruction.
  * Returns an array of base64-encoded event data strings.
+ *
+ * Handles both event-emission styles: `Program data:` (Anchor `sol_log_data`) and base64 logged via
+ * `Program log:` (e.g. Drift). When `programIds` (the ordered top-level instruction program ids) is
+ * provided, invocations are matched to their instruction by program id so instructions that emit no
+ * `invoke` log — the ed25519/secp256k1 precompiles — don't shift the index. Without it, falls back to
+ * counting top-level invocations.
  */
-export function extractEventsFromLogs(logs: string[], instructionIndex: number): string[] {
+export function extractEventsFromLogs(logs: string[], instructionIndex: number, programIds?: string[]): string[] {
     const events: string[] = [];
     let currentIxIndex = -1;
     let depth = 0;
 
     for (const log of logs) {
-        // Track program invocations to match instruction indices
         // eslint-disable-next-line no-restricted-syntax -- match program invoke pattern
-        if (log.match(/Program \w* invoke \[(\d)\]/)) {
+        const invoke = log.match(/^Program (\w+) invoke \[\d+\]/);
+        if (invoke) {
             if (depth === 0) {
-                currentIxIndex++;
+                if (programIds) {
+                    // Advance to the next top-level instruction using this program, skipping any
+                    // non-logging instructions (precompiles) between the previous one and this.
+                    let i = currentIxIndex + 1;
+                    while (i < programIds.length && programIds[i] !== invoke[1]) i++;
+                    currentIxIndex = i < programIds.length ? i : currentIxIndex + 1;
+                } else {
+                    currentIxIndex++;
+                }
             }
             depth++;
         } else if (log.includes('success') || log.includes('failed')) {
             depth--;
-        } else if (log.startsWith('Program data:') && currentIxIndex === instructionIndex) {
-            // Extract base64-encoded event data for the current instruction
-            const eventData = log.slice('Program data: '.length).trim();
-            events.push(eventData);
+        } else if (currentIxIndex === instructionIndex) {
+            if (log.startsWith('Program data:')) {
+                events.push(log.slice('Program data: '.length).trim());
+            } else if (log.startsWith('Program log:')) {
+                const payload = log.slice('Program log: '.length).trim();
+                if (isLikelyBase64Event(payload)) events.push(payload);
+            }
         }
     }
 

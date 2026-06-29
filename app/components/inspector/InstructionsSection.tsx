@@ -15,6 +15,7 @@ import { getProgramName } from '@utils/tx';
 import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 import { isTokenBatchInstruction, resolveInnerBatchInstructions, TokenBatchCard } from '@/app/features/token-batch';
 import { useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
@@ -25,6 +26,11 @@ import { LoadingCard } from '../common/LoadingCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
+import {
+    PROGRAM_METADATA_PROGRAM_ID,
+    ProgramMetadataDetailsCard,
+} from '../instruction/program-metadata/ProgramMetadataDetailsCard';
+import { ProgramMetadataIdlInstructionDetailsCard } from '../instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
@@ -116,6 +122,7 @@ function InspectorInstructionCard({
     const programId = ix.programId;
     const programName = getProgramName(programId.toBase58(), cluster);
     const anchorProgram = useAnchorProgram(programId.toString(), url, cluster);
+    const { programMetadataIdl } = useProgramMetadataIdl(programId.toString(), url, cluster);
     const parsedIx = useMemo(() => dispatcher.fromTransactionInstruction(ix), [dispatcher, ix]);
     const parsedTx = useMemo(
         () => (isParsedInstruction(parsedIx) ? toParsedTransaction(ix, message, [parsedIx]) : undefined),
@@ -162,6 +169,40 @@ function InspectorInstructionCard({
                 signature={INSPECTOR_SIGNATURE}
                 InstructionCardComponent={BaseInstructionCard}
             />
+        );
+    }
+
+    if (programId.toBase58() === PROGRAM_METADATA_PROGRAM_ID) {
+        return (
+            <ErrorBoundary
+                fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+            >
+                <ProgramMetadataDetailsCard
+                    key={index}
+                    ix={ix}
+                    index={index}
+                    result={INSPECTOR_RESULT}
+                    InstructionCardComponent={BaseInstructionCard}
+                    raw={ix}
+                />
+            </ErrorBoundary>
+        );
+    }
+
+    // Parse instructions of programs that publish an IDL via the Program Metadata Program.
+    if (programMetadataIdl) {
+        return (
+            <ErrorBoundary
+                fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+            >
+                <ProgramMetadataIdlInstructionDetailsCard
+                    key={index}
+                    ix={ix}
+                    index={index}
+                    result={INSPECTOR_RESULT}
+                    idl={programMetadataIdl}
+                />
+            </ErrorBoundary>
         );
     }
 

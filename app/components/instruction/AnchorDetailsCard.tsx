@@ -50,8 +50,12 @@ export default function AnchorDetailsCard(props: {
         const logMessages = transactionWithMeta.meta?.logMessages;
         if (!logMessages) return undefined;
 
+        // Ordered top-level program ids let extractEventsFromLogs map invocations to instruction
+        // indices even when non-logging precompiles (ed25519/secp256k1) sit between them.
+        const programIds = transactionWithMeta.transaction.message.instructions.map(i => i.programId.toBase58());
+
         // Extract event data for this specific instruction
-        const eventDataList = extractEventsFromLogs(logMessages, index);
+        const eventDataList = extractEventsFromLogs(logMessages, index, programIds);
         if (eventDataList.length === 0) return undefined;
 
         // Create event cards

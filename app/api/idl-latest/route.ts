@@ -13,6 +13,42 @@ const CACHE_HEADERS = {
     'Cache-Control': `public, max-age=${CACHE_DURATION}, s-maxage=${CACHE_DURATION}, stale-while-revalidate=60`,
 };
 
+// Connection-level fetch failures (undici "Premature close" / aborted body) that aren't classified as
+// RPC errors but are still transient — large IDL account fetches intermittently hit these. Worth a retry.
+function isRetryableFetchError(error: unknown): boolean {
+    const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
+    return (
+        message.includes('premature close') ||
+        message.includes('terminated') ||
+        message.includes('econnreset') ||
+        message.includes('fetch failed') ||
+        message.includes('other side closed')
+    );
+}
+
+// Resolve IDLs with a few retries. The RPC itself is reliable, but resolving a large IDL through the
+// server runtime occasionally premature-closes the response body; a fresh client per attempt clears it.
+async function resolveProgramIdlsWithRetry(
+    url: string,
+    programId: Address,
+    options: Parameters<typeof resolveProgramIdls>[2],
+    attempts = 3,
+): Promise<Awaited<ReturnType<typeof resolveProgramIdls>>> {
+    let lastError: unknown;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+        try {
+            return await resolveProgramIdls(createSolanaRpc(url), programId, options);
+        } catch (error) {
+            lastError = error;
+            if (attempt < attempts - 1 && (isTransientRpcError(error) || isRetryableFetchError(error))) {
+                continue;
+            }
+            throw error;
+        }
+    }
+    throw lastError;
+}
+
 /**
  * The single IDL-resolution endpoint for known clusters. Resolution lives in `resolveProgramIdls`
  * (shared with the custom/localhost client path); this route is the server transport edge: query
@@ -50,18 +86,16 @@ export async function GET(request: Request) {
     const context = { cluster: clusterProp, programAddress };
 
     try {
-        const { anchorIdl, programMetadataIdl, preferredVariant } = await resolveProgramIdls(
-            createSolanaRpc(url),
-            programId,
-            { includePmp },
-        );
+        const { anchorIdl, programMetadataIdl, preferredVariant } = await resolveProgramIdlsWithRetry(url, programId, {
+            includePmp,
+        });
 
         const idls = { anchor: anchorIdl, preferred: preferredVariant, programMetadata: programMetadataIdl };
         return NextResponse.json({ idls }, { headers: CACHE_HEADERS, status: 200 });
     } catch (error) {
         // `resolveProgramIdls` surfaces absent/undecodable as values and throws only on RPC failure.
         // Transient blips → retryable 502 (uncached) without paging; misconfiguration → Sentry page.
-        if (isTransientRpcError(error)) {
+        if (isTransientRpcError(error) || isRetryableFetchError(error)) {
             Logger.warn('[api:idl-latest] RPC error resolving program IDLs', {
                 ...context,
                 rpcError: error instanceof Error ? error.message : String(error),
