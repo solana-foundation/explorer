@@ -2,49 +2,47 @@ import { Slot } from '@components/common/Slot';
 import { SlotHashEntry, SlotHashesInfo, SysvarAccount } from '@validators/accounts/sysvar';
 import React from 'react';
 
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function SlotHashesCard({ sysvarAccount }: { sysvarAccount: SysvarAccount }) {
     const slotHashes = sysvarAccount.info as SlotHashesInfo;
     return (
-        <div className="card">
-            <div className="card-header">
-                <div className="row align-items-center">
-                    <div className="col">
-                        <h3 className="card-header-title">Slot Hashes</h3>
-                    </div>
-                </div>
-            </div>
+        <Card ui="dashkit">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit">
+                    Slot Hashes
+                </CardTitle>
+            </CardHeader>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Slot</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Hash</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {slotHashes.length > 0 &&
+                        slotHashes.map((entry: SlotHashEntry, index) => {
+                            return renderAccountRow(entry, index);
+                        })}
+                </BaseTable.Body>
+            </BaseTable>
 
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="w-1 text-muted">Slot</th>
-                            <th className="text-muted">Hash</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {slotHashes.length > 0 &&
-                            slotHashes.map((entry: SlotHashEntry, index) => {
-                                return renderAccountRow(entry, index);
-                            })}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="card-footer">
-                <div className="text-muted text-center">{slotHashes.length > 0 ? '' : 'No hashes found'}</div>
-            </div>
-        </div>
+            <CardFooter ui="dashkit">
+                <div className="text-center text-dk-gray-700">{slotHashes.length > 0 ? '' : 'No hashes found'}</div>
+            </CardFooter>
+        </Card>
     );
 }
 
 const renderAccountRow = (entry: SlotHashEntry, index: number) => {
     return (
-        <tr key={index}>
-            <td className="w-1 font-monospace">
+        <BaseTable.Row key={index}>
+            <BaseTable.Cell className="w-px font-mono">
                 <Slot slot={entry.slot} link />
-            </td>
-            <td className="font-monospace">{entry.hash}</td>
-        </tr>
+            </BaseTable.Cell>
+            <BaseTable.Cell className="font-mono">{entry.hash}</BaseTable.Cell>
+        </BaseTable.Row>
     );
 };

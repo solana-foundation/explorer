@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import * as React from 'react';
 import { X } from 'react-feather';
@@ -19,9 +20,9 @@ const DialogOverlay = React.forwardRef<
     <DialogPrimitive.Overlay
         ref={ref}
         className={cn(
-            'e-fixed e-inset-0 e-z-50 e-bg-black/80',
-            'data-[state=open]:e-animate-in data-[state=closed]:e-animate-out',
-            'data-[state=closed]:e-fade-out-0 data-[state=open]:e-fade-in-0',
+            'fixed inset-0 z-50 bg-black/80',
+            'data-[state=open]:animate-in data-[state=closed]:animate-out',
+            'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             className,
         )}
         {...props}
@@ -38,15 +39,15 @@ const DialogContent = React.forwardRef<
         <DialogPrimitive.Content
             ref={ref}
             className={cn(
-                'e-fixed e-left-[50%] e-top-[50%] e-z-50 e-grid e-w-full e-max-w-sm',
-                'e-translate-x-[-50%] e-translate-y-[-50%] e-gap-4',
-                'e-border e-border-neutral-200 e-bg-neutral-800 e-p-4 e-shadow-lg e-duration-200',
-                'data-[state=open]:e-animate-in data-[state=closed]:e-animate-out',
-                'data-[state=closed]:e-fade-out-0 data-[state=open]:e-fade-in-0',
-                'data-[state=closed]:e-zoom-out-95 data-[state=open]:e-zoom-in-95',
-                'data-[state=closed]:e-slide-out-to-left-1/2 data-[state=closed]:e-slide-out-to-top-[48%]',
-                'data-[state=open]:e-slide-in-from-left-1/2 data-[state=open]:e-slide-in-from-top-[48%]',
-                'sm:e-rounded-lg',
+                'fixed left-[50%] top-[50%] z-50 grid w-full max-w-sm',
+                'translate-x-[-50%] translate-y-[-50%] gap-4',
+                'border border-transparent bg-neutral-800 p-4 shadow-lg duration-200',
+                'data-[state=open]:animate-in data-[state=closed]:animate-out',
+                'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+                'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+                'data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]',
+                'data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]',
+                'sm:rounded-lg',
                 className,
             )}
             {...props}
@@ -54,16 +55,18 @@ const DialogContent = React.forwardRef<
             {children}
             <DialogPrimitive.Close
                 className={cn(
-                    'e-border-0 e-bg-transparent e-p-0 e-text-neutral-500',
-                    'e-absolute e-right-4 e-top-2 e-rounded-sm e-opacity-70',
-                    'e-ring-offset-white e-transition-opacity',
-                    'hover:e-opacity-100',
-                    'focus:e-outline-none focus:e-ring-2 focus:e-ring-neutral-950 focus:e-ring-offset-2',
-                    'disabled:e-pointer-events-none',
+                    'border-0 bg-transparent p-0 text-neutral-500',
+                    'flex items-center justify-center',
+                    'absolute right-4 top-2 rounded-sm opacity-70',
+                    'transition-opacity',
+                    'hover:opacity-100',
+                    'focus:outline-none',
+                    'focus-visible:ring-1 focus-visible:ring-neutral-300',
+                    'disabled:pointer-events-none',
                 )}
             >
                 <X size={16} />
-                <span className="e-sr-only">Close</span>
+                <span className="sr-only">Close</span>
             </DialogPrimitive.Close>
         </DialogPrimitive.Content>
     </DialogPortal>
@@ -71,15 +74,12 @@ const DialogContent = React.forwardRef<
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-    <div className={cn('e-flex e-flex-col e-space-y-1', 'e-text-center sm:e-text-left', className)} {...props} />
+    <div className={cn('flex flex-col space-y-1', 'text-center sm:text-left', className)} {...props} />
 );
 DialogHeader.displayName = 'DialogHeader';
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-    <div
-        className={cn('e-flex e-flex-col-reverse', 'sm:e-flex-row sm:e-justify-end sm:e-space-x-1', className)}
-        {...props}
-    />
+    <div className={cn('flex flex-col-reverse', 'sm:flex-row sm:justify-end sm:space-x-1', className)} {...props} />
 );
 DialogFooter.displayName = 'DialogFooter';
 
@@ -89,7 +89,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DialogPrimitive.Title
         ref={ref}
-        className={cn('e-m-0 e-text-base e-font-medium e-text-white', 'e-leading-none e-tracking-tight', className)}
+        className={cn('m-0 text-base font-medium text-white', 'leading-none tracking-tight', className)}
         {...props}
     />
 ));
@@ -99,7 +99,7 @@ const DialogDescription = React.forwardRef<
     React.ElementRef<typeof DialogPrimitive.Description>,
     React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-    <DialogPrimitive.Description ref={ref} className={cn('e-text-sm e-text-neutral-400', className)} {...props} />
+    <DialogPrimitive.Description ref={ref} className={cn('text-sm text-neutral-400', className)} {...props} />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 

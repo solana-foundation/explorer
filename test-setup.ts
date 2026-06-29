@@ -1,5 +1,14 @@
 import '@testing-library/jest-dom';
 
+// ResizeObserver is not available in jsdom
+if (!globalThis.ResizeObserver) {
+    globalThis.ResizeObserver = class ResizeObserver {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+    };
+}
+
 // Needed for @solana/addresses (Solana Kit) which checks isSecureContext before
 // using crypto.subtle for PDA derivation. jsdom does not set this to true.
 if (!globalThis.isSecureContext) {

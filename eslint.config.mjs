@@ -1,23 +1,14 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
 import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
 import vitest from '@vitest/eslint-plugin';
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import boundaries from 'eslint-plugin-boundaries';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import sortKeysFix from 'eslint-plugin-sort-keys-fix';
+import storybook from 'eslint-plugin-storybook';
 import testingLibrary from 'eslint-plugin-testing-library';
 import unicorn from 'eslint-plugin-unicorn';
 import globals from 'globals';
-import { dirname } from 'path';
 import tseslint from 'typescript-eslint';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-});
 
 const TEST_AND_STORY_FILES = [
     '**/__tests__/**/*.[jt]s?(x)',
@@ -37,17 +28,24 @@ export default tseslint.config(
             '.next/**',
             '.next-dev/**',
             'node_modules/**',
+            'coverage/**',
             '.claude/**',
             '.worktrees/**',
+            'storybook-static/**',
+            'storybook-static-*/**',
+            'public/mockServiceWorker.js',
             'next-env.d.ts',
         ],
     },
 
-    // Next.js config via compat (still legacy format in v15)
-    ...compat.extends('next/core-web-vitals'),
+    // Next.js flat config (eslint-config-next v16 ships native flat config)
+    ...nextCoreWebVitals,
 
-    // Base configs (after compat so tseslint parser takes precedence)
+    // Base configs (after nextCoreWebVitals so tseslint parser takes precedence)
     ...tseslint.configs.recommended,
+
+    // Storybook story-lint rules; self-scoped to story files + .storybook presets.
+    ...storybook.configs['flat/recommended'],
 
     // Main config
     {
@@ -123,6 +121,36 @@ export default tseslint.config(
         files: ['**/*.cjs', '**/*.js'],
         rules: {
             '@typescript-eslint/no-require-imports': 'off',
+        },
+    },
+
+    // `eslint-config-next` v16 scopes its `import` plugin to {js,jsx,mjs,ts,tsx,mts,cts}, not `.cjs`.
+    // `.cjs` files are CommonJS (module.exports), so `import/no-default-export` doesn't apply — turn it
+    // off there so the rule isn't referenced for files where the `import` plugin isn't registered.
+    {
+        files: ['**/*.cjs'],
+        rules: {
+            'import/no-default-export': 'off',
+        },
+    },
+
+    // TODO: react-hooks rollout (introduced by the Next.js 16 upgrade). `eslint-config-next` v16
+    // bundles `eslint-plugin-react-hooks` with the React Compiler-era rules below, which flag 225
+    // pre-existing findings across the codebase. They are disabled here so the version bump stays
+    // green and self-contained; re-enable and fix them incrementally (counts at time of upgrade):
+    //   react-hooks/error-boundaries (143), react-hooks/refs (47), react-hooks/set-state-in-effect (26),
+    //   react-hooks/purity (3), react-hooks/static-components (3),
+    //   react-hooks/preserve-manual-memoization (2), react-hooks/immutability (1).
+    {
+        files: ['**/*.[jt]s?(x)'],
+        rules: {
+            'react-hooks/error-boundaries': 'off',
+            'react-hooks/immutability': 'off',
+            'react-hooks/preserve-manual-memoization': 'off',
+            'react-hooks/purity': 'off',
+            'react-hooks/refs': 'off',
+            'react-hooks/set-state-in-effect': 'off',
+            'react-hooks/static-components': 'off',
         },
     },
 
@@ -257,9 +285,10 @@ export default tseslint.config(
 
             // Next.js root files
             'next.config.*',
+            'empty.ts', // Turbopack `resolveAlias` stub for Node built-ins (see next.config.mjs)
             'instrumentation.ts',
             'instrumentation-client.ts',
-            'middleware.ts',
+            'proxy.ts',
             'sentry.*.config.ts',
 
             // Storybook
@@ -282,13 +311,15 @@ export default tseslint.config(
         settings: {
             'boundaries/elements': [
                 { type: 'feature', pattern: 'app/features/*', mode: 'folder', capture: ['name'] },
-                { type: 'entity', pattern: 'app/entities/*', mode: 'folder', capture: ['name'] },
+                // Must precede the broader `entity` pattern — element types are matched in
+                // declaration order, so `@x` folders would otherwise be classified as `entity`.
                 {
                     type: 'entity-public-api',
                     pattern: 'app/entities/*/@x/*',
                     mode: 'folder',
                     capture: ['name', 'crossSlice'],
                 },
+                { type: 'entity', pattern: 'app/entities/*', mode: 'folder', capture: ['name'] },
                 { type: 'shared', pattern: 'app/shared', mode: 'folder' },
             ],
         },
@@ -320,6 +351,13 @@ export default tseslint.config(
                             },
                         },
                         {
+                            // `@x` re-export files reach back into their own entity's internals.
+                            from: { type: 'entity-public-api' },
+                            allow: {
+                                to: [{ type: 'shared' }, { type: 'entity', captured: { name: '{{ name }}' } }],
+                            },
+                        },
+                        {
                             from: { type: 'shared' },
                             allow: {
                                 to: { type: 'shared' },
@@ -340,7 +378,6 @@ export default tseslint.config(
         files: [
             // app/entities cross-entity / wrong-direction imports
             'app/entities/nft/lib/get-metadata-json.ts',
-            'app/entities/program-metadata/model/useProgramMetadataCodamaIdl.tsx',
             'app/entities/token-info/index.ts',
             'app/entities/token-info/lib/fetch-token-mints.ts',
             'app/entities/token-info/lib/is-valid-cluster.ts',
@@ -348,17 +385,23 @@ export default tseslint.config(
             // app/features cross-feature imports
             'app/features/idl/interactive-idl/model/__tests__/use-mainnet-confirmation.spec.ts',
             'app/features/idl/interactive-idl/model/use-mainnet-confirmation.ts',
+            'app/features/instruction-simulation/ui/SimulationCard.tsx',
             'app/features/receipt/receipt-page.tsx',
             'app/features/search/api/discover-with-utl.ts',
             'app/features/search/api/resolve-search-tokens.ts',
             'app/features/stake/ui/StakeAccountSection.tsx',
+            'app/features/transaction/ui/AccountDetailSlideover.tsx',
+            'app/features/transaction/ui/AccountExpandedSections.tsx',
+            'app/features/transaction/ui/InstructionsSection.tsx',
+            'app/features/transaction/ui/SummaryCard.tsx',
+            'app/features/vote/ui/VoteAccountSection.tsx',
 
             // app/features deep imports into entities (must go via barrel)
             'app/features/idl/formatted-idl/model/__tests__/search.test.ts',
-            'app/features/idl/formatted-idl/ui/stories/AnchorFormattedIdl.stories.tsx',
-            'app/features/idl/formatted-idl/ui/stories/CodamaFormattedIdl.stories.tsx',
+            'app/features/idl/formatted-idl/ui/__stories__/AnchorFormattedIdl.stories.tsx',
+            'app/features/idl/formatted-idl/ui/__stories__/CodamaFormattedIdl.stories.tsx',
+            'app/features/idl/ui/__stories__/IdlRenderer.stories.tsx',
             'app/features/idl/interactive-idl/model/codama/codama-interpreter.ts',
-            'app/features/idl/model/use-idl-last-transaction-date.tsx',
 
             // app/shared reverse-layer imports
             'app/shared/components/DownloadDropdown.tsx',
@@ -438,7 +481,6 @@ export default tseslint.config(
             'app/tx/**/*.[jt]s?(x)',
             'app/utils/**/*.[jt]s?(x)',
             'app/validators/**/*.[jt]s?(x)',
-            'app/verified-programs/**/*.[jt]s?(x)',
         ],
         rules: {
             '@typescript-eslint/consistent-type-imports': 'off',
@@ -483,14 +525,11 @@ export default tseslint.config(
             'app/block/[[]slot[]]/page-client.tsx',
             'app/block/[[]slot[]]/programs/page-client.tsx',
             'app/block/[[]slot[]]/rewards/page-client.tsx',
-            'app/supply/page-client.tsx',
             'app/tx/[[]signature[]]/page-client.tsx',
 
             // app/api (Next route handlers)
-            'app/api/anchor/route.ts',
             'app/api/domain-info/[[]domain[]]/route.ts',
             'app/api/metadata/proxy/route.ts',
-            'app/api/program-metadata-idl/route.ts',
             'app/api/receipt/price/[[]mintAddress[]]/route.ts',
             'app/api/search/route.ts',
 
@@ -573,7 +612,6 @@ export default tseslint.config(
             'app/utils/anchor.tsx',
             'app/utils/attestation-service.tsx',
             'app/utils/cluster.ts',
-            'app/utils/feature-gate/UpcomingFeatures.tsx',
             'app/utils/get-readable-title-from-address.ts',
             'app/utils/parseFeatureAccount.ts',
             'app/utils/program-logs.ts',
@@ -603,8 +641,6 @@ export default tseslint.config(
             'app/entities/idl/model/use-format-codama-idl.ts',
             'app/entities/idl/model/use-idl-from-anchor-program-seed.ts',
             'app/entities/nft/lib/is-metaplex-nft.ts',
-            'app/entities/program-metadata/api/getProgramCanonicalMetadata.ts',
-            'app/entities/program-metadata/model/useProgramCanonicalMetadata.tsx',
             'app/entities/token-info/model/token-info-batch-provider.tsx',
             'app/entities/token-info/model/use-token-info.ts',
 
@@ -644,7 +680,6 @@ export default tseslint.config(
             'app/features/idl/interactive-idl/ui/BaseConnectWalletButton.tsx',
             'app/features/idl/interactive-idl/ui/InstructionActivity.tsx',
             'app/features/idl/interactive-idl/ui/InteractWithIdl.tsx',
-            'app/features/idl/model/use-idl-last-transaction-date.tsx',
             'app/features/idl/ui/IdlRenderer.tsx',
             'app/features/idl/ui/IdlSection.tsx',
             'app/features/metadata/mocks.ts',
@@ -692,9 +727,9 @@ export default tseslint.config(
             'app/features/token-verification-badge/ui/VerificationIcon.tsx',
             'app/features/transaction-history/lib/use-instruction-names.ts',
             'app/features/transaction-history/ui/TransactionHistoryCard.tsx',
-            'app/features/verified-programs/api.ts',
-            'app/features/verified-programs/model.ts',
-            'app/features/verified-programs/useVerifiedProgramsPagination.ts',
+            'app/features/transaction/ui/AccountsCard.tsx',
+            'app/features/transaction/ui/ProgramLogSection.tsx',
+            'app/features/transaction/ui/TokenBalancesCard.tsx',
         ],
         rules: {
             'unicorn/no-null': 'off',

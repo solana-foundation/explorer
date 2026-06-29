@@ -9,13 +9,28 @@ import { InstructionLogs } from '@utils/program-logs';
 import { ProgramName } from '@utils/program-name';
 import { programLabel } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
+import { cva } from 'class-variance-authority';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 import { ChevronsUp } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { fromBase64, toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
+import { BaseTable } from '@/app/shared/ui/Table';
+
+// Matches the compiled dashkit `.text-*` colors the legacy `text-${log.style}` template resolved to (dark theme).
+const logTextVariants = cva('', {
+    variants: {
+        variant: {
+            info: 'text-dk-info',
+            muted: 'text-dk-gray-700',
+            success: 'text-dk-success-on-dark',
+            warning: 'text-dk-warning-on-dark',
+        },
+    },
+});
 
 const NATIVE_PROGRAMS_MISSING_INVOKE_LOG: string[] = [
     'AddressLookupTab1e1111111111111111111111111',
@@ -230,11 +245,18 @@ function ProgramLogRow({
     }
 
     return (
-        <tr>
-            <td>
-                <Link className="d-flex align-items-center" href={anchorPath}>
-                    <span className={`badge bg-${badgeColor}-soft me-2`}>#{index + 1}</span>
-                    <span className="program-log-instruction-name">
+        <BaseTable.Row data-ix-index={index}>
+            <BaseTable.Cell>
+                <Link className="flex items-center" href={anchorPath}>
+                    {/* badgeColor='white' falls through to a plain `.badge` (no bg-white-soft is defined in dashkit) — same as legacy. */}
+                    <Badge
+                        ui="dashkit"
+                        variant={badgeColor === 'success' || badgeColor === 'warning' ? badgeColor : 'default'}
+                        className="mr-1.5"
+                    >
+                        #{index + 1}
+                    </Badge>
+                    <span className="text-dk-white">
                         <ProgramNameWithInstruction
                             programId={programId}
                             cluster={cluster}
@@ -243,21 +265,21 @@ function ProgramLogRow({
                             anchorProgram={anchorProgram}
                         />
                     </span>
-                    <ChevronsUp className="c-pointer m-2" size={13} />
+                    <ChevronsUp className="m-1.5 cursor-pointer" size={13} />
                 </Link>
                 {programLogs && (
-                    <div className="d-flex align-items-start flex-column font-monospace p-2 font-size-sm">
+                    <div className="flex flex-col items-start whitespace-pre-wrap break-all p-1.5 font-mono">
                         {programLogs.logs.map((log, key) => {
                             return (
                                 <span key={key}>
-                                    <span className="text-muted">{log.prefix}</span>
-                                    <span className={`text-${log.style}`}>{log.text}</span>
+                                    <span className="text-dk-gray-700">{log.prefix}</span>
+                                    <span className={logTextVariants({ variant: log.style })}>{log.text}</span>
                                 </span>
                             );
                         })}
                     </div>
                 )}
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

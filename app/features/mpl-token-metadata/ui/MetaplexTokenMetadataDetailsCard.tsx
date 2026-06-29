@@ -1,8 +1,11 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
 import { MetaplexInstructionType, parseMetaplexTokenMetadataInstruction } from '@features/mpl-token-metadata';
-import { PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { ParsedInstruction, PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
+
+import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 const IX_TITLES: Record<MetaplexInstructionType, string> = {
     burnEditionNft: 'Burn Edition NFT',
@@ -50,22 +53,22 @@ const IX_TITLES: Record<MetaplexInstructionType, string> = {
 function AccountRow({ label, pubkey }: { label: string; pubkey: unknown }) {
     if (!(pubkey instanceof PublicKey)) return null;
     return (
-        <tr>
-            <td>{label}</td>
-            <td className="text-lg-end">
+        <BaseTable.Row>
+            <BaseTable.Cell>{label}</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">
                 <Address pubkey={pubkey} alignRight link />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
 function DataRow({ label, value }: { label: string; value: unknown }) {
     if (value === null || value === undefined) return null;
     return (
-        <tr>
-            <td>{label}</td>
-            <td className="text-lg-end">{String(value)}</td>
-        </tr>
+        <BaseTable.Row>
+            <BaseTable.Cell>{label}</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">{String(value)}</BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -73,10 +76,10 @@ function RoyaltyRow({ basisPoints }: { basisPoints: unknown }) {
     if (typeof basisPoints !== 'number') return null;
     const pct = basisPoints / 100;
     return (
-        <tr>
-            <td>Royalty</td>
-            <td className="text-lg-end">{pct % 1 === 0 ? `${pct}%` : `${pct.toFixed(2)}%`}</td>
-        </tr>
+        <BaseTable.Row>
+            <BaseTable.Cell>Royalty</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">{pct % 1 === 0 ? `${pct}%` : `${pct.toFixed(2)}%`}</BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -84,12 +87,12 @@ function GenericAccountRows({ ix }: { ix: TransactionInstruction }) {
     return (
         <>
             {ix.keys.map((key, i) => (
-                <tr key={i}>
-                    <td>Account #{i + 1}</td>
-                    <td className="text-lg-end">
+                <BaseTable.Row key={i}>
+                    <BaseTable.Cell>Account #{i + 1}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">
                         <Address pubkey={key.pubkey} alignRight link />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             ))}
         </>
     );
@@ -345,6 +348,7 @@ export function MetaplexTokenMetadataDetailsCard({
     index,
     innerCards,
     ix,
+    parsedIx,
     result,
     InstructionCardComponent = InstructionCard,
 }: {
@@ -352,10 +356,28 @@ export function MetaplexTokenMetadataDetailsCard({
     index: number;
     innerCards?: JSX.Element[];
     ix: TransactionInstruction;
+    /**
+     * Already-parsed slice output from the upstream dispatcher. When provided
+     * and non-empty, skip re-parsing — the dispatcher already did the work.
+     * Tx-page predicate-based callers pass nothing and the card parses itself.
+     */
+    parsedIx?: ParsedInstruction;
     result: SignatureResult;
     InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
 }) {
-    const parsed = parseMetaplexTokenMetadataInstruction(ix);
+    const parsed = React.useMemo(() => {
+        if (parsedIx?.parsed.type) {
+            // Dispatcher already ran the slice parser; reuse its output.
+            // The cast is safe by construction: a non-empty `type` from the MPL
+            // slice is always a MetaplexInstructionType, and the slice contract
+            // is that `info` is `Record<string, unknown>` for this program.
+            return {
+                info: parsedIx.parsed.info as Record<string, unknown>,
+                type: parsedIx.parsed.type as MetaplexInstructionType,
+            };
+        }
+        return parseMetaplexTokenMetadataInstruction(toKitInstruction(ix));
+    }, [ix, parsedIx]);
 
     if (!parsed) {
         return (

@@ -3,6 +3,8 @@ import { Copyable } from '@components/common/Copyable';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { UpdateProductParams } from './program';
 
@@ -26,7 +28,7 @@ export default function UpdateProductDetailsCard({
     function Content() {
         return (
             <Copyable text={attrsJSON}>
-                <pre className="d-inline-block text-start mb-0">{attrsJSON}</pre>
+                <pre className="mb-0 inline-block text-left">{attrsJSON}</pre>
             </Copyable>
         );
     }
@@ -40,40 +42,40 @@ export default function UpdateProductDetailsCard({
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={ix.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Funding Account</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Funding Account</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.fundingPubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Product Account</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Product Account</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.productPubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>
-                    Attributes <span className="text-muted">(JSON)</span>
-                </td>
-                <td className="text-lg-end">
-                    <div className="d-none d-lg-flex align-items-center justify-content-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>
+                    Attributes <span className="text-dk-gray-700">(JSON)</span>
+                </BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
+                    <div className="hidden items-center justify-end lg:flex">
                         <Content />
                     </div>
-                    <div className="d-flex d-lg-none align-items-center">
+                    <div className="flex items-center lg:hidden">
                         <Content />
                     </div>
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

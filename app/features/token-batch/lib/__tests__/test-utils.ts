@@ -1,15 +1,26 @@
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
-import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import { concatBytes, toBuffer, writeU64LE } from '@/app/shared/lib/bytes';
 
 import { BATCH_DISCRIMINATOR } from '../const';
 
+// Deterministic distinct pubkeys (was Keypair.generate(), which made story captures non-deterministic).
+let accountSeq = 0;
+function nextFixedPubkey() {
+    const b = new Uint8Array(32);
+    b[0] = 9;
+    accountSeq += 1;
+    b[1] = accountSeq & 0xff;
+    b[2] = (accountSeq >> 8) & 0xff;
+    return new PublicKey(b);
+}
+
 export function makeAccount(writable = true, signer = false) {
     return {
         isSigner: signer,
         isWritable: writable,
-        pubkey: Keypair.generate().publicKey,
+        pubkey: nextFixedPubkey(),
     };
 }
 

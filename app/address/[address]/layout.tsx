@@ -10,11 +10,11 @@ import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/acc
 import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
 import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
 import { NonceAccountSection } from '@components/account/NonceAccountSection';
+import { detectSquadsAccountType, SquadsAccountSection } from '@components/account/squads/SquadsAccountSection';
 import { SysvarAccountSection } from '@components/account/SysvarAccountSection';
 import { TokenAccountSection } from '@components/account/TokenAccountSection';
 import { UnknownAccountCard } from '@components/account/UnknownAccountCard';
 import { UpgradeableLoaderAccountSection } from '@components/account/UpgradeableLoaderAccountSection';
-import { VoteAccountSection } from '@components/account/VoteAccountSection';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
@@ -22,6 +22,7 @@ import { useRefreshAccount } from '@entities/account';
 import { useAnchorProgram } from '@entities/idl';
 import { SecurityNotification } from '@features/security-txt';
 import { StakeAccountSection } from '@features/stake';
+import { VoteAccountSection } from '@features/vote';
 import {
     Account,
     AccountsProvider,
@@ -48,13 +49,14 @@ import useSWRImmutable from 'swr/immutable';
 
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
+import { getFeatureInfo, useFeatureInfo } from '@/app/entities/feature-gate';
 import { hasTokenMetadata } from '@/app/features/metadata';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
-import { getFeatureInfo, useFeatureInfo } from '@/app/utils/feature-gate/utils';
 import {
     fetchFullTokenInfo,
     FullTokenInfo,
@@ -166,7 +168,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     }, [address, status]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <div className="container mt-n3">
+        <PageContainer variant="pulled-up">
             <Header
                 address={address}
                 account={info?.data}
@@ -186,7 +188,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
                     {children}
                 </DetailsSections>
             )}
-        </div>
+        </PageContainer>
     );
 }
 
@@ -267,6 +269,10 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
     // get feature data from featureGates.json
     const featureInfo = useFeatureInfo({ address: account.pubkey.toBase58() });
 
+    // Squads v4 Batch / VaultTransaction accounts aren't RPC-parsed; detect them by
+    // discriminator so we can surface a direct "Inspect" link to the transaction inspector.
+    const squadsAccountType = rawData ? detectSquadsAccountType(account.owner, rawData) : undefined;
+
     if (parsedData && parsedData.program === 'bpf-upgradeable-loader') {
         return (
             <UpgradeableLoaderAccountSection
@@ -308,6 +314,8 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         return <FeatureAccountSection account={account} />;
     } else if (account.owner.toBase58() === SAS_PROGRAM_ID) {
         return <SolanaAttestationServiceCard account={account} />;
+    } else if (squadsAccountType) {
+        return <SquadsAccountSection account={account} accountType={squadsAccountType} />;
     } else {
         const fallback = <UnknownAccountCard account={account} />;
         return (
@@ -340,11 +348,11 @@ function MoreSection({
     return (
         <>
             <StickyHeader>
-                <div className="container">
+                <PageContainer>
                     <NavigationTabs buildHref={buildHref} tabs={tabs}>
                         {asyncChildren}
                     </NavigationTabs>
-                </div>
+                </PageContainer>
             </StickyHeader>
             {children}
         </>

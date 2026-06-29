@@ -1,0 +1,76 @@
+import { isEnvEnabled } from '@utils/env';
+import { checkBotId } from 'botid/server';
+import { type NextRequest, NextResponse } from 'next/server';
+
+import { Logger } from '@/app/shared/lib/logger';
+
+const BOT_RESPONSE = { body: { error: 'Access denied: request identified as automated bot' }, status: 401 } as const;
+
+// Log runtime once per cold start so any future edge↔node drift is visible without per-request overhead.
+let runtimeLogged = false;
+
+export async function proxy(request: NextRequest) {
+    if (!runtimeLogged) {
+        runtimeLogged = true;
+        Logger.info('[proxy] cold start', {
+            nodeVersion: typeof process !== 'undefined' && process.versions ? process.versions.node : undefined,
+            runtime: 'EdgeRuntime' in globalThis ? 'edge' : 'node',
+        });
+    }
+
+    const { pathname } = request.nextUrl;
+
+    if (!isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_ENABLED)) {
+        return NextResponse.next();
+    }
+
+    // Allow requests without x-is-human header (direct API calls)
+    if (!request.headers.has('x-is-human')) {
+        Logger.info('[proxy] No x-is-human header, allowing', { pathname });
+        return NextResponse.next();
+    }
+
+    // Verify requests with x-is-human header (browser requests via BotIdClient)
+    let verification;
+    try {
+        verification = await checkBotId({
+            developmentOptions: {
+                bypass: isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT) ? 'BAD-BOT' : undefined,
+            },
+        });
+    } catch (error) {
+        // checkBotId can throw SyntaxError when Vercel's bot-protection API
+        // returns a non-JSON response (e.g. 504 with HTML body).
+        Logger.warn('[proxy] BotId verification failed, allowing request', { error, pathname });
+        return NextResponse.next();
+    }
+
+    Logger.info('[proxy] BotId verification', {
+        bypassed: verification.bypassed,
+        isBot: verification.isBot,
+        isHuman: verification.isHuman,
+        isVerifiedBot: verification.isVerifiedBot,
+        pathname,
+    });
+
+    // Block bots only when challenge mode is enabled
+    if (verification.isBot) {
+        Logger.warn('[proxy] Bot detected', { pathname });
+
+        if (isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_CHALLENGE_MODE_ENABLED)) {
+            Logger.error(new Error('[proxy] Challenge mode enabled, blocking'), { pathname });
+            return NextResponse.json(BOT_RESPONSE.body, { status: BOT_RESPONSE.status });
+        }
+    } else {
+        Logger.info('[proxy] Human verified', { pathname });
+    }
+
+    return NextResponse.next();
+}
+
+export const config = {
+    matcher: ['/api/:path*'],
+};
+
+// BotIdClient protected routes - only API routes need protection
+export const botIdProtectedRoutes: { path: string; method: string }[] = [{ method: '*', path: '/api/*' }];

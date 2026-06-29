@@ -8,6 +8,7 @@ import { Cluster } from '@utils/cluster';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 
+import { Card, CardBody } from '@/app/shared/ui/Card';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 import { TokenExtension } from '@/app/validators/accounts/token-extension';
@@ -47,13 +48,13 @@ export function TokenExtensionsCard({
         mintExtensions.find(({ extension }) => extension === 'tokenMetadata')?.state.symbol || tokenInfo?.symbol;
 
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <AccountHeader
                 title="Extensions"
                 analyticsSection="extensions_section"
                 refresh={() => refresh(new PublicKey(address), 'parsed')}
             />
-            <div className="card-body p-0 e-overflow-x-scroll">
+            <CardBody ui="dashkit" className="overflow-x-scroll !p-0">
                 <TokenExtensionsSection
                     address={address}
                     decimals={decimals}
@@ -61,8 +62,8 @@ export function TokenExtensionsCard({
                     parsedExtensions={extensions}
                     symbol={symbol}
                 />
-            </div>
-        </div>
+            </CardBody>
+        </Card>
     );
 }
 

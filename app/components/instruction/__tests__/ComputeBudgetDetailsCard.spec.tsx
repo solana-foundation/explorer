@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { ComputeBudgetProgram, TransactionMessage } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
@@ -22,7 +22,7 @@ useSearchParams.mockReturnValue({
 });
 
 describe('instruction::ComputeBudgetDetailsCard', () => {
-    test('should render "SetComputeUnitPrice"', () => {
+    test('should render "SetComputeUnitPrice"', async () => {
         const index = 0;
         const m = mock.deserializeMessageV0(stubs.computeBudgetMsg);
         const lookups = resolveAddressLookupTables(m.addressTableLookups);
@@ -45,10 +45,13 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/7.187812 lamports per compute unit/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/7.187812 lamports per compute unit/)).toBeInTheDocument();
+        });
     });
 
-    test('should render "SetComputeUnitLimit"', () => {
+    test('should render "SetComputeUnitLimit"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.computeBudgetMsg);
         const lookups = resolveAddressLookupTables(m.addressTableLookups);
@@ -71,6 +74,9 @@ describe('instruction::ComputeBudgetDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/155.666 compute units/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/155.666 compute units/)).toBeInTheDocument();
+        });
     }, 15000);
 });

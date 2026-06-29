@@ -103,7 +103,7 @@ const ITEMS_TITLE_TO_FIELD_GAP = 5;
 const DEFAULT_SVG_DPI_SCALE = 2;
 
 // Inset the AcroForm widget by 1/N of the border-radius so the viewer's
-// rectangular field highlight never overflows the rounded rect corner.
+// rectangular field highlight never overflows the rounded-dk rect corner.
 const FIELD_INSET_DIVISOR = 3;
 
 const DEFAULT_TITLE_BLOCK_SIZES: TitleBlockSizes = {

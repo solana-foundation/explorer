@@ -24,23 +24,39 @@ type NormalizedToken = {
     tokenAddress: string;
 };
 
-export async function resolveSearchTokens(query: string, cluster: Cluster, customUrl = ''): Promise<NormalizedToken[]> {
+export type ResolveSearchTokensOptions = {
+    filterUnverified?: boolean;
+};
+
+export async function resolveSearchTokens(
+    query: string,
+    cluster: Cluster,
+    customUrl = '',
+    options: ResolveSearchTokensOptions = {},
+): Promise<NormalizedToken[]> {
     // --- Discovery (3s budget) ---
     const discoveryController = new AbortController();
     const discoveryTimeout = setTimeout(() => discoveryController.abort(), DISCOVERY_TIMEOUT_MS);
 
     let discovered: DiscoveredToken[];
+    let usedFallback = false;
     try {
         const jupiterResult = await discoverWithJupiter(query, discoveryController.signal);
         if (jupiterResult.ok) {
             discovered = jupiterResult.tokens.slice(0, SEARCH_TOKENS_LIMIT);
         } else {
             // Jupiter unavailable or failed — fall back to UTL (degraded: curated list only, no address search)
+            usedFallback = true;
             const utlResult = await discoverWithUtl(query, discoveryController.signal, SEARCH_TOKENS_LIMIT);
             discovered = utlResult.tokens;
         }
     } finally {
         clearTimeout(discoveryTimeout);
+    }
+
+    // UTL hardcodes isVerified=false; treat fallback hits as trusted and skip the filter.
+    if (options.filterUnverified && !usedFallback) {
+        discovered = discovered.filter(t => t.isVerified);
     }
 
     if (discovered.length === 0) return [];

@@ -2,6 +2,8 @@ import { Address } from '@components/common/Address';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { AddPriceParams, PriceType } from './program';
 
@@ -29,43 +31,43 @@ export default function AddPriceDetailsCard({
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={ix.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Funding Account</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Funding Account</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.fundingPubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Product Account</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Product Account</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.productPubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Price Account</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Price Account</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.pricePubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Exponent</td>
-                <td className="text-lg-end">{info.exponent}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Exponent</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.exponent}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Price Type</td>
-                <td className="text-lg-end">{PriceType[info.priceType]}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Price Type</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{PriceType[info.priceType]}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

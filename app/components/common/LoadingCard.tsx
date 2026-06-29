@@ -1,12 +1,14 @@
 import React from 'react';
 
+import { Card, CardBody } from '@/app/shared/ui/Card';
+
 export function LoadingCard({ message }: { message?: string }) {
     return (
-        <div className="card">
-            <div className="card-body text-center">
-                <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+        <Card ui="dashkit">
+            <CardBody ui="dashkit" className="text-center">
+                <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
                 {message || 'Loading'}
-            </div>
-        </div>
+            </CardBody>
+        </Card>
     );
 }

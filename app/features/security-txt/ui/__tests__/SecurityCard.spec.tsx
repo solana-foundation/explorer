@@ -1,80 +1,51 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
 import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
-import { useCluster } from '@/app/providers/cluster';
-import { Cluster } from '@/app/utils/cluster';
 
 import { SecurityCard } from '../SecurityCard';
-import { programDataWithoutSecurityTxt, programDataWithSecurityTxt } from './helpers';
+import { createNeodymeSecurityTxt, createPmpSecurityTxt, programDataFixture } from './helpers';
 
-vi.mock('@/app/providers/cluster', () => ({
-    useCluster: vi.fn(),
-}));
-
-vi.mock('@/app/entities/program-metadata', () => ({
-    useProgramMetadataSecurityTxt: vi.fn(),
-}));
+const mocks = vi.hoisted(() => ({ useSecurityTxt: vi.fn() }));
+vi.mock('../../model/useSecurityTxt', () => ({ useSecurityTxt: mocks.useSecurityTxt }));
 
 const mockPubkey = new PublicKey('ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S');
+const withData = { programData: programDataFixture } as UpgradeableLoaderAccountData;
 
-function mockAccountData(programData: UpgradeableLoaderAccountData['programData']) {
-    return {
-        programData,
-    } as UpgradeableLoaderAccountData;
-}
-
-describe('SecurityCard (mocked useProgramMetadataSecurityTxt)', () => {
-    beforeEach(() => {
-        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
-    });
+describe('SecurityCard', () => {
+    beforeEach(() => mocks.useSecurityTxt.mockReturnValue({ isLoading: false, securityTxt: undefined }));
     afterEach(() => vi.clearAllMocks());
 
-    it("should show error when account doesn't have programData", () => {
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: null,
-        });
-        render(<SecurityCard data={mockAccountData(undefined)} pubkey={mockPubkey} />);
+    it('should show an error when the account has no program data', () => {
+        render(<SecurityCard data={{ programData: undefined } as UpgradeableLoaderAccountData} pubkey={mockPubkey} />);
         expect(screen.getByText(/Account has no data/i)).toBeInTheDocument();
     });
 
-    it("should show error when account doesn't have any security.txt", async () => {
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: null,
-        });
-        vi.spyOn(await import('../../lib/fromProgramData'), 'fromProgramData').mockReturnValueOnce({
-            error: undefined,
-            securityTXT: undefined,
-        });
-        render(<SecurityCard data={mockAccountData(programDataWithoutSecurityTxt)} pubkey={mockPubkey} />);
+    it("should show the empty card when there's no security.txt", () => {
+        render(<SecurityCard data={withData} pubkey={mockPubkey} />);
         expect(screen.getByText(/Program has no security\.txt/i)).toBeInTheDocument();
-        expect(screen.getByText(/program did not provide Security\.txt information/i)).toBeInTheDocument();
     });
 
-    it('should show Neodyme security.txt', () => {
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: null,
+    it('should render the Neodyme (ELF) table', () => {
+        mocks.useSecurityTxt.mockReturnValue({
+            isLoading: false,
+            securityTxt: createNeodymeSecurityTxt({ name: 'NeodymeSecurityTXT' }),
         });
-        render(<SecurityCard data={mockAccountData(programDataWithSecurityTxt)} pubkey={mockPubkey} />);
+        render(<SecurityCard data={withData} pubkey={mockPubkey} />);
         expect(screen.getByTestId('security-txt-version-badge')).toHaveTextContent(/Neodyme/i);
         expect(screen.getByText('NeodymeSecurityTXT')).toBeInTheDocument();
         expect(screen.getByText(/Download/i)).toBeInTheDocument();
-        expect(screen.queryByText('ProgramMetadataSecurityTXT')).not.toBeInTheDocument();
     });
 
-    it('should show Program Metadata security.txt', () => {
-        const data = { name: 'ProgramMetadataSecurityTXT' };
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: data,
+    it('should render the Program Metadata (PMP) table', () => {
+        mocks.useSecurityTxt.mockReturnValue({
+            isLoading: false,
+            securityTxt: createPmpSecurityTxt({ name: 'ProgramMetadataSecurityTXT' }),
         });
-        render(<SecurityCard data={mockAccountData(programDataWithSecurityTxt)} pubkey={mockPubkey} />);
+        render(<SecurityCard data={withData} pubkey={mockPubkey} />);
         expect(screen.getByTestId('security-txt-version-badge')).toHaveTextContent(/Program Metadata/i);
         expect(screen.getByText('ProgramMetadataSecurityTXT')).toBeInTheDocument();
-        expect(screen.getByText(/Download/i)).toBeInTheDocument();
-        expect(screen.queryByText('NeodymeSecurityTXT')).not.toBeInTheDocument();
     });
 });

@@ -1,35 +1,44 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import * as SwitchPrimitives from '@radix-ui/react-switch';
 import * as React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-const Switch = React.forwardRef<
-    React.ElementRef<typeof SwitchPrimitives.Root>,
-    React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
->(({ className, ...props }, ref) => (
-    <SwitchPrimitives.Root
-        className={cn(
-            'e-peer e-inline-flex e-h-4 e-w-7 e-shrink-0 e-items-center',
-            'e-rounded-full e-border-2 e-border-transparent e-shadow-sm',
-            'e-cursor-pointer e-transition',
-            'focus-visible:e-outline-none focus-visible:e-ring-2 focus-visible:e-ring-accent focus-visible:e-ring-offset-2 focus-visible:e-ring-offset-white',
-            'disabled:e-cursor-not-allowed disabled:e-opacity-50',
-            'data-[state=checked]:e-bg-accent data-[state=unchecked]:e-bg-neutral-300',
-            className,
-        )}
-        {...props}
-        ref={ref}
-    >
-        <SwitchPrimitives.Thumb
-            className={cn(
-                'e-pointer-events-none e-block e-h-3 e-w-3 e-rounded-full',
-                'e-shrink-0 e-bg-white e-shadow-lg e-ring-0',
-                'e-transition',
-                'data-[state=checked]:e-translate-x-1 data-[state=unchecked]:-e-translate-x-1',
-            )}
-        />
-    </SwitchPrimitives.Root>
-));
+const rootVariants = [
+    'peer inline-flex shrink-0 items-center',
+    // p-0 kills the UA button padding (@tailwind base is skipped, so no global reset)
+    'rounded-full border-2 border-transparent p-0 shadow-sm',
+    'cursor-pointer transition',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+    'disabled:cursor-not-allowed disabled:opacity-50',
+    'data-[state=checked]:bg-accent data-[state=unchecked]:bg-neutral-300',
+];
+
+const rootSizeVariants = {
+    default: 'h-4 w-7',
+    // lg mirrors the Bootstrap `.form-switch` footprint: 3rem x 1.5rem track, 18px thumb
+    lg: 'h-6 w-12',
+};
+
+const thumbVariants = ['pointer-events-none block rounded-full', 'shrink-0 bg-white shadow-lg ring-0', 'transition'];
+
+// symmetric thumb inset on both ends: 2px at default size, 3px at lg
+const thumbSizeVariants = {
+    default: 'h-3 w-3 data-[state=checked]:translate-x-3 data-[state=unchecked]:translate-x-0',
+    lg: 'h-[18px] w-[18px] data-[state=checked]:translate-x-[25px] data-[state=unchecked]:translate-x-[1px]',
+};
+
+interface SwitchProps extends React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> {
+    size?: keyof typeof rootSizeVariants;
+}
+
+const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, SwitchProps>(
+    ({ className, size = 'default', ...props }, ref) => (
+        <SwitchPrimitives.Root className={cn(rootVariants, rootSizeVariants[size], className)} {...props} ref={ref}>
+            <SwitchPrimitives.Thumb className={cn(thumbVariants, thumbSizeVariants[size])} />
+        </SwitchPrimitives.Root>
+    ),
+);
 Switch.displayName = SwitchPrimitives.Root.displayName;
 
 export { Switch };

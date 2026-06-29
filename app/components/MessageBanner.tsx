@@ -6,6 +6,8 @@ import { displayTimestamp } from '@utils/date';
 import React from 'react';
 import { AlertCircle } from 'react-feather';
 
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+
 type Announcement = {
     message: string;
     estimate?: string;
@@ -43,22 +45,22 @@ export function MessageBanner() {
     if (estimate || start || end) {
         timeframe = (
             <div>
-                <hr className="text-gray-500 w-100 my-3 opacity-50" />
+                <hr className="my-3 w-full text-dk-gray-500 opacity-50" />
                 {estimate && (
-                    <h5 className="font-sm text-gray-200">
-                        <span className="text-uppercase">Estimated Duration: </span>
+                    <h5 className="text-dk-gray-200">
+                        <span className="uppercase">Estimated Duration: </span>
                         {estimate}
                     </h5>
                 )}
                 {start && (
-                    <h5 className="font-sm text-gray-200">
-                        <span className="text-uppercase">Started at: </span>
+                    <h5 className="text-dk-gray-200">
+                        <span className="uppercase">Started at: </span>
                         {displayTimestamp(start.getTime())}
                     </h5>
                 )}
                 {end && (
-                    <h5 className="font-sm text-gray-200">
-                        <span className="text-uppercase">End: </span>
+                    <h5 className="text-dk-gray-200">
+                        <span className="uppercase">End: </span>
                         {displayTimestamp(end.getTime())}
                     </h5>
                 )}
@@ -67,16 +69,16 @@ export function MessageBanner() {
     }
 
     return (
-        <div className="bg-info">
-            <div className="container">
-                <div className="d-flex flex-column align-items-center justify-content-center text-center py-3">
-                    <h3 className="mb-0 line-height-md">
-                        <AlertCircle className="me-2" size={15} />
+        <div className="bg-dk-info text-white">
+            <PageContainer>
+                <div className="flex flex-col items-center justify-center py-3 text-center">
+                    <h3 className="mb-0 leading-6">
+                        <AlertCircle className="mr-1.5" size={15} />
                         {message}
                     </h3>
                     {timeframe}
                 </div>
-            </div>
+            </PageContainer>
         </div>
     );
 }

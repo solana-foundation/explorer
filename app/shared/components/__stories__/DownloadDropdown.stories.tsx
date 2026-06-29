@@ -1,15 +1,12 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { DownloadDropdown } from '../DownloadDropdown';
 
 const meta: Meta<typeof DownloadDropdown> = {
     component: DownloadDropdown,
-    parameters: {
-        layout: 'padded',
-    },
-    tags: ['autodocs'],
+    tags: ['autodocs', 'test'],
     title: 'Shared/DownloadDropdown',
 };
 
@@ -18,13 +15,11 @@ type Story = StoryObj<typeof meta>;
 
 const SAMPLE_DATA = new Uint8Array([72, 101, 108, 108, 111]);
 
-// Centered default for autodocs preview
 export const Default: Story = {
     args: {
         data: SAMPLE_DATA,
         filename: 'test-transaction',
     },
-    parameters: { layout: 'centered' },
 };
 
 export const WithData: Story = {

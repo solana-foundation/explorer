@@ -2,6 +2,7 @@
 
 import { fetchNftData } from '@entities/nft';
 import { getStakeActivation, StakeAccount } from '@features/stake';
+import { VoteAccount } from '@features/vote/lib/validators'; // deep import on purpose: this provider only needs the account schema, not the vote UI the barrel re-exports
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -27,7 +28,6 @@ import {
     ProgramDataAccountInfo,
     UpgradeableLoaderAccount,
 } from '@validators/accounts/upgradeable-program';
-import { VoteAccount } from '@validators/accounts/vote';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
@@ -160,6 +160,10 @@ class MultipleAccountFetcher {
             }, 100);
         }
     };
+    cancel = () => {
+        clearTimeout(this.fetchTimeout);
+        this.fetchTimeout = undefined;
+    };
 }
 
 export type FetchAccountDataMode = 'parsed' | 'raw' | 'skip';
@@ -174,14 +178,20 @@ export function AccountsProvider({ children }: AccountsProviderProps) {
         skip: new MultipleAccountFetcher(dispatch, cluster, url, 'skip'),
     }));
 
-    // Clear accounts cache whenever cluster is changed
+    // Cancel pending timers on deps-change and unmount so a debounced batch can't fire into a stale tree.
     React.useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
-        setFetchers({
+        const next: Fetchers = {
             parsed: new MultipleAccountFetcher(dispatch, cluster, url, 'parsed'),
             raw: new MultipleAccountFetcher(dispatch, cluster, url, 'raw'),
             skip: new MultipleAccountFetcher(dispatch, cluster, url, 'skip'),
-        });
+        };
+        setFetchers(next);
+        return () => {
+            next.parsed.cancel();
+            next.raw.cancel();
+            next.skip.cancel();
+        };
     }, [dispatch, cluster, url]);
 
     return (

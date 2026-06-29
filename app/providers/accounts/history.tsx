@@ -115,15 +115,13 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
     };
 }
 
-export const StateContext: React.Context<Readonly<State> | undefined> = React.createContext<State | undefined>(
-    undefined,
-);
+export const StateContext: React.Context<State | undefined> = React.createContext<State | undefined>(undefined);
 export const DispatchContext: React.Context<Dispatch | undefined> = React.createContext<Dispatch | undefined>(
     undefined,
 );
-export const InFlightContext: React.Context<Readonly<Set<string>> | undefined> = React.createContext<
-    Set<string> | undefined
->(undefined);
+export const InFlightContext: React.Context<Set<string> | undefined> = React.createContext<Set<string> | undefined>(
+    undefined,
+);
 // Monotonic per-address counter. Bumped whenever a request is superseded (e.g. a
 // filter change) so the in-flight response can be discarded instead of overwriting
 // the freshly-cleared cache. See `useResetAccountHistory`.

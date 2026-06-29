@@ -1,10 +1,10 @@
 import { Address } from '@components/common/Address';
 import { SolarizedJsonViewer as ReactJson } from '@components/common/JsonViewer';
+import { cn } from '@components/shared/utils';
 import { BorshEventCoder, BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useAnchorProgram } from '@entities/idl';
-import { cn } from '@shared/utils';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
@@ -13,6 +13,7 @@ import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 
 import { equals, fromBase64, fromHex, toBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 const ANCHOR_SELF_CPI_TAG = fromHex('1d9acb512ea545e4').reverse();
 const ANCHOR_SELF_CPI_NAME = 'Anchor Self Invocation';
@@ -306,13 +307,13 @@ export function mapIxArgsToRows(ixArgs: any, ixType: IdlInstruction, idl: Idl) {
         } catch (error: any) {
             Logger.debug('[utils:anchor] Error while displaying IDL-based account data', { error });
             return (
-                <tr key={key}>
-                    <td>{key}</td>
-                    <td>{ixType.name}</td>
-                    <td className="metadata-json-viewer m-4">
+                <BaseTable.Row key={key}>
+                    <BaseTable.Cell>{key}</BaseTable.Cell>
+                    <BaseTable.Cell>{ixType.name}</BaseTable.Cell>
+                    <BaseTable.Cell className="m-6 [&_.string-value]:break-all">
                         <ReactJson src={ixArgs} />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             );
         }
     });
@@ -344,13 +345,13 @@ export function mapAccountToRows(accountData: any, accountType: IdlTypeDef, idl:
         } catch (error: any) {
             Logger.debug('[utils:anchor] Error while displaying IDL-based account data', { error });
             return (
-                <tr key={key}>
-                    <td>{key}</td>
-                    <td>{accountType.name}</td>
-                    <td className="metadata-json-viewer m-4">
+                <BaseTable.Row key={key}>
+                    <BaseTable.Cell>{key}</BaseTable.Cell>
+                    <BaseTable.Cell>{accountType.name}</BaseTable.Cell>
+                    <BaseTable.Cell className="m-6 [&_.string-value]:break-all">
                         <ReactJson src={accountData} />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             );
         }
     });
@@ -431,7 +432,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 nestingLevel={nestingLevel}
             >
                 <div
-                    className="text-lg-start"
+                    className="lg:text-left"
                     style={{
                         fontSize: '0.85rem',
                         lineHeight: '1.2',
@@ -579,11 +580,11 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
     } else {
         Logger.debug('[utils:anchor] Impossible type', { type: type as unknown as string });
         return (
-            <tr key={keySuffix ? `${key}-${keySuffix}` : key}>
-                <td>{camelToTitleCase(key)}</td>
-                <td></td>
-                <td className="text-lg-end">???</td>
-            </tr>
+            <BaseTable.Row key={keySuffix ? `${key}-${keySuffix}` : key}>
+                <BaseTable.Cell>{camelToTitleCase(key)}</BaseTable.Cell>
+                <BaseTable.Cell></BaseTable.Cell>
+                <BaseTable.Cell className="text-right">???</BaseTable.Cell>
+            </BaseTable.Row>
         );
     }
 }
@@ -608,16 +609,16 @@ function SimpleRow({
     }
     itemKey = camelToTitleCase(itemKey);
     return (
-        <tr className={cn(nestingLevel > 0 && 'table-nested-account')}>
-            <td>
-                <div className="d-flex flex-row align-items-center">
-                    {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
+        <BaseTable.Row className={cn(nestingLevel > 0 && 'bg-black/20')}>
+            <BaseTable.Cell>
+                <div className="flex flex-row items-center">
+                    {nestingLevel > 0 && <CornerDownRight className="mb-[3px] mr-1.5" size={14} />}
                     <div>{itemKey}</div>
                 </div>
-            </td>
-            <td>{typeDisplayName(type)}</td>
-            <td className="text-lg-end">{children}</td>
-        </tr>
+            </BaseTable.Cell>
+            <BaseTable.Cell>{typeDisplayName(type)}</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">{children}</BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -635,30 +636,30 @@ export function ExpandableRow({
     const [expanded, setExpanded] = useState(false);
     return (
         <>
-            <tr className="table-group-header">
-                <td>
-                    <div className="d-flex flex-row align-items-center">
-                        {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
+            <BaseTable.Row>
+                <BaseTable.Cell>
+                    <div className="flex flex-row items-center">
+                        {nestingLevel > 0 && <CornerDownRight className="mb-[3px] mr-1.5" size={14} />}
                         <div>{fieldName}</div>
                     </div>
-                </td>
-                <td>{fieldType}</td>
-                <td className="text-lg-end" onClick={() => setExpanded(current => !current)}>
-                    <div className="c-pointer">
+                </BaseTable.Cell>
+                <BaseTable.Cell>{fieldType}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right" onClick={() => setExpanded(current => !current)}>
+                    <div className="cursor-pointer">
                         {expanded ? (
                             <>
-                                <span className="text-info me-2">Collapse</span>
+                                <span className="mr-1.5 text-dk-info">Collapse</span>
                                 <ChevronUp size={15} />
                             </>
                         ) : (
                             <>
-                                <span className="text-info me-2">Expand</span>
+                                <span className="mr-1.5 text-dk-info">Expand</span>
                                 <ChevronDown size={15} />
                             </>
                         )}
                     </div>
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {expanded && <>{children}</>}
         </>
     );

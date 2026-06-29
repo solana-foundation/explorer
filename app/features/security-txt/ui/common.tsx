@@ -1,14 +1,17 @@
 import classNames from 'classnames';
 import { ExternalLink } from 'react-feather';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import type { SecurityTxtVersion } from './types';
 import { isValidLink, parseCodeValue } from './utils';
 
 export function CodeCell({ value, alignRight = true }: { value: string; alignRight: boolean }) {
     return (
-        <td className={classNames({ 'text-lg-end': alignRight })}>
-            <RenderCode value={value} />
-        </td>
+        <BaseTable.Cell>
+            <RenderCode value={value} alignRight={alignRight} />
+        </BaseTable.Cell>
     );
 }
 
@@ -17,9 +20,9 @@ export function SecurityTxtVersionBadge({
     className,
 }: React.HTMLAttributes<unknown> & { version: SecurityTxtVersion }) {
     return (
-        <span className={classNames(['badge bg-info-soft', className])} data-testid="security-txt-version-badge">
+        <Badge ui="dashkit" variant="info" className={className} data-testid="security-txt-version-badge">
             <SecurityTxtVersionBadgeTitle version={version} />
-        </span>
+        </Badge>
     );
 }
 
@@ -42,21 +45,21 @@ export function ContactInfo({ type, information }: { type: string; information: 
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`mailto:${information}`}>
                     {information}
-                    <ExternalLink className="align-text-top ms-2" size={13} />
+                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
                 </a>
             );
         case 'telegram':
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`https://t.me/${information}`}>
                     Telegram: {information}
-                    <ExternalLink className="align-text-top ms-2" size={13} />
+                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
                 </a>
             );
         case 'twitter':
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`https://twitter.com/${information}`}>
                     Twitter {information}
-                    <ExternalLink className="align-text-top ms-2" size={13} />
+                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
                 </a>
             );
         case 'link':
@@ -64,7 +67,7 @@ export function ContactInfo({ type, information }: { type: string; information: 
                 return (
                     <a rel="noopener noreferrer" target="_blank" href={`${information}`}>
                         {information}
-                        <ExternalLink className="align-text-top ms-2" size={13} />
+                        <ExternalLink className="ml-1.5 align-text-top" size={13} />
                     </a>
                 );
             }
@@ -81,10 +84,10 @@ export function ContactInfo({ type, information }: { type: string; information: 
 
 export function RenderExternalLink({ url }: { url: string }) {
     return (
-        <span className="font-monospace">
+        <span className="font-mono">
             <a rel="noopener noreferrer" target="_blank" href={url}>
                 {url}
-                <ExternalLink className="align-text-top ms-2" size={13} />
+                <ExternalLink className="ml-1.5 align-text-top" size={13} />
             </a>
         </span>
     );
@@ -92,20 +95,22 @@ export function RenderExternalLink({ url }: { url: string }) {
 
 export function ExternalLinkCell({ url }: { url: string }) {
     return (
-        <td className="text-lg-end">
+        <BaseTable.Cell className="text-right">
             <RenderExternalLink url={url} />
-        </td>
+        </BaseTable.Cell>
     );
 }
 
 export function StringCell({ value }: { value: string }) {
-    return <td className="text-lg-end font-monospace">{value}</td>;
+    return <BaseTable.Cell className="text-right font-mono">{value}</BaseTable.Cell>;
 }
 
-export function RenderCode({ value }: { value: any }) {
+export function RenderCode({ value, alignRight = true }: { value: any; alignRight?: boolean }) {
     return (
-        <div className="d-flex e-items-end">
-            <pre className="e-max-w-[500px] e-overflow-x-auto lg:e-ml-auto">{parseCodeValue(value)}</pre>
+        <div className="flex items-end">
+            <pre className={classNames('max-w-[500px] overflow-x-auto', { 'lg:ml-auto': alignRight })}>
+                {parseCodeValue(value)}
+            </pre>
         </div>
     );
 }

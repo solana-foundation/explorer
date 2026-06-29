@@ -3,6 +3,8 @@ import { Copyable } from '@components/common/Copyable';
 import { ParsedInstruction, SignatureResult, SystemProgram } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { AllocateWithSeedInfo } from './types';
 
@@ -25,47 +27,47 @@ export function AllocateWithSeedDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={SystemProgram.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Account Address</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Account Address</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.account} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Base Address</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Base Address</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.base} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Seed</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Seed</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Copyable text={info.seed}>
                         <code>{info.seed}</code>
                     </Copyable>
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Allocated Data Size</td>
-                <td className="text-lg-end">{info.space} byte(s)</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Allocated Data Size</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.space} byte(s)</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Assigned Program Id</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Assigned Program Id</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.owner} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

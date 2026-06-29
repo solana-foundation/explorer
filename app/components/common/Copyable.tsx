@@ -28,7 +28,7 @@ export function Copyable({ text, children }: { text: string | null; children?: R
 
     const copyStrategy: Record<CopyState | 'loading', JSX.Element> = {
         copied: <CheckCircle className="align-text-top" size={13} />,
-        copy: <Copy className="align-text-top c-pointer" onClick={handleClick} size={13} />,
+        copy: <Copy className="cursor-pointer align-text-top" onClick={handleClick} size={13} />,
         errored: (
             <span title="Please check your browser's copy permissions.">
                 <XCircle className="align-text-top" size={13} />
@@ -43,14 +43,14 @@ export function Copyable({ text, children }: { text: string | null; children?: R
 
     let textColor = '';
     if (state === 'copied' || state === 'loading') {
-        textColor = 'text-info';
+        textColor = 'text-dk-info';
     } else if (state === 'errored') {
-        textColor = 'text-danger';
+        textColor = 'text-dk-danger';
     }
 
     return (
         <>
-            <span className="font-size-tiny me-2" style={{ fontSize: '12px' }}>
+            <span className="mr-1.5" style={{ fontSize: '12px' }}>
                 <span className={textColor}>
                     <CopyIcon />
                 </span>

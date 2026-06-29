@@ -1,30 +1,57 @@
 'use client';
 
-import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
+import { shouldUseDirectRpc } from '@entities/cluster';
+import useSWRImmutable from 'swr/immutable';
+
 import { useCluster } from '@/app/providers/cluster';
-import type { ProgramDataAccountInfo } from '@/app/validators/accounts/upgradeable-program';
+import { type Cluster } from '@/app/utils/cluster';
+import { isEnvEnabled } from '@/app/utils/env';
 
-import { fromProgramData } from '../lib/fromProgramData';
-import type { NeodymeSecurityTXT, PmpSecurityTXT } from '../lib/types';
+import { fetchSecurityTxtClient, type ResolvedSecurityTxt } from '../api/load-fetch-security-txt';
 
-export function useSecurityTxt(
-    address: string,
-    parsedData?: { programData?: ProgramDataAccountInfo },
-): NeodymeSecurityTXT | PmpSecurityTXT | undefined {
+export type { ResolvedSecurityTxt };
+
+const PMP_SECURITY_TXT_ENABLED = isEnvEnabled(process.env.NEXT_PUBLIC_PMP_SECURITY_TXT_ENABLED);
+
+/**
+ * Resolves a program's security.txt via `@solana/security-txt` — the PMP `security` seed (canonical
+ * only) then the legacy Neodyme ELF section. Known clusters use the cached `/api/security-txt` route;
+ * custom / localhost resolve in the browser via `fetchSecurityTxtClient`, whose `@solana/security-txt`
+ * import is dynamic so the package stays out of the bundle for the common known-cluster path.
+ */
+export function useSecurityTxt(programAddress: string): {
+    securityTxt: ResolvedSecurityTxt | undefined;
+    isLoading: boolean;
+} {
     const { url, cluster } = useCluster();
+    const isCustom = shouldUseDirectRpc(cluster, url);
 
-    let securityTXT: NeodymeSecurityTXT | PmpSecurityTXT | undefined;
+    const { data: serverData, isLoading: serverLoading } = useSWRImmutable(
+        !isCustom && (['security-txt', programAddress, cluster] as const),
+        () => fetchFromRoute(programAddress, cluster),
+        // fetchFromRoute throws on failure (rather than caching an empty result), so cap the retries.
+        { errorRetryCount: 3 },
+    );
 
-    const { programMetadataSecurityTxt } = useProgramMetadataSecurityTxt(address, url, cluster);
+    const { data: customData, isLoading: customLoading } = useSWRImmutable(
+        isCustom && (['security-txt-custom', programAddress, url] as const),
+        () => fetchSecurityTxtClient({ includePmp: PMP_SECURITY_TXT_ENABLED, programId: programAddress, url }),
+        { errorRetryCount: 3 },
+    );
 
-    if (programMetadataSecurityTxt) {
-        securityTXT = programMetadataSecurityTxt;
+    return isCustom
+        ? { isLoading: customLoading, securityTxt: customData }
+        : { isLoading: serverLoading, securityTxt: serverData };
+}
+
+async function fetchFromRoute(programAddress: string, cluster: Cluster): Promise<ResolvedSecurityTxt | undefined> {
+    // The PMP feature gate lives in the route (it reads NEXT_PUBLIC_PMP_SECURITY_TXT_ENABLED).
+    const response = await fetch(`/api/security-txt?programAddress=${programAddress}&cluster=${cluster}`);
+    if (!response.ok) {
+        // Throw (don't return) so a transient 502 is retried rather than cached as a successful
+        // "no security.txt" under useSWRImmutable (which never revalidates).
+        throw new Error(`/api/security-txt returned ${response.status}`);
     }
-
-    if (!securityTXT && parsedData?.programData) {
-        const { securityTXT: programDataSecurityTxt } = fromProgramData(parsedData.programData);
-        securityTXT = programDataSecurityTxt;
-    }
-
-    return securityTXT;
+    const { securityTxt } = await response.json();
+    return securityTxt ?? undefined;
 }

@@ -12,7 +12,7 @@
         "moduleResolution": "bundler",
         "resolveJsonModule": true,
         "isolatedModules": true,
-        "jsx": "preserve",
+        "jsx": "react-jsx",
         "incremental": true,
         "plugins": [
             {
@@ -26,10 +26,11 @@
             "@features/*": ["./app/features/*"],
             "@img/*": ["./app/img/*"],
             "@providers/*": ["./app/providers/*"],
-            "@shared/*": ["./app/components/shared/*"],
+            "@shared/*": ["./app/shared/*"],
             "@utils/*": ["./app/utils/*"],
             "@storybook-config/*": ["./.storybook/*"],
-            "@validators/*": ["./app/validators/*"]
+            "@validators/*": ["./app/validators/*"],
+            "@__fixtures__/*": ["./app/__fixtures__/*"]
         }
     },
     "include": [
@@ -38,7 +39,9 @@
         "**/*.tsx",
         ".next/types/**/*.ts",
         ".next-prod/types/**/*.ts",
-        ".next-dev/types/**/*.ts"
+        ".next-dev/types/**/*.ts",
+        ".next/dev/types/**/*.ts",
+        ".next-dev/dev/types/**/*.ts"
     ],
     "exclude": ["node_modules"]
 }

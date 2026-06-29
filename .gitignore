@@ -44,6 +44,8 @@ next-env.d.ts
 
 # Storybook
 *storybook.log
+/storybook-static/
+/storybook-static-*/
 
 # Sentry Config File
 .env.sentry-build-plugin

@@ -2,142 +2,110 @@ import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
 
+import { CACHE_HEADERS, ERROR_CACHE_HEADERS, MAX_SIZE, SECURITY_HEADERS, TIMEOUT, USER_AGENT } from './config';
+import {
+    fetchResource,
+    isHTTPProtocol,
+    matchJsonContent,
+    STATUS_MESSAGES,
+    type StatusCode,
+    StatusError,
+} from './feature';
+
 export const dynamic = 'force-dynamic';
+// Platform backstop. The per-hop fetch timeout (NEXT_PUBLIC_METADATA_TIMEOUT,
+// 10s) bounds each hop, but not DNS resolution or the sum across redirect hops,
+// so cap the whole invocation here — every cache-miss for metadata/image
+// traffic runs through this one function once enabled. Kept inline (not in
+// config.ts): Next reads route segment config only as literal route exports.
+export const maxDuration = 15;
 
-import { fetchResource, matchJsonContent, StatusError } from './feature';
-import { errors } from './feature/errors';
-import { checkURLForPrivateIP, isHTTPProtocol } from './feature/ip';
-
-const USER_AGENT = process.env.NEXT_PUBLIC_METADATA_USER_AGENT ?? 'Solana Explorer';
-const MAX_SIZE = process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE
-    ? Number(process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE)
-    : 1_000_000; // 1 000 000 bytes
-const TIMEOUT = process.env.NEXT_PUBLIC_METADATA_TIMEOUT ? Number(process.env.NEXT_PUBLIC_METADATA_TIMEOUT) : 10_000; // 10s
-
-// Prevent proxied content (e.g. SVG with embedded scripts) from executing
-// anything if the proxy URL is opened directly as a top-level document.
-const SECURITY_HEADERS = {
-    'Content-Security-Policy':
-        "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'",
-    'X-Content-Type-Options': 'nosniff',
-};
-
-/**
- *  Respond with error in a JSON format
- */
-function respondWithError(status: keyof typeof errors, message?: string) {
-    return NextResponse.json({ error: message ?? errors[status].message }, { status });
-}
-
-type Params = { params: Promise<object> };
-
-export async function GET(request: Request, { params: _params }: Params) {
-    const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
-
-    if (!isProxyEnabled) {
+export async function GET(request: Request) {
+    if (process.env.NEXT_PUBLIC_METADATA_ENABLED !== 'true') {
         return respondWithError(404);
     }
 
-    let uriParam: string;
-    try {
-        const url = new URL(request.url);
-        const queryParam = url.searchParams.get('uri');
-
-        if (!queryParam) {
-            throw new Error('Absent URI');
-        }
-
-        uriParam = decodeURIComponent(queryParam);
-
-        const parsedUrl = new URL(uriParam);
-
-        // check that uri has supported protocol despite of any other checks
-        if (!isHTTPProtocol(parsedUrl)) {
-            Logger.error(new Error('[api:metadata-proxy] Unsupported protocol'), { protocol: parsedUrl.protocol });
-            return respondWithError(400);
-        }
-
-        const isPrivate = await checkURLForPrivateIP(parsedUrl);
-        if (isPrivate) {
-            Logger.error(new Error('[api:metadata-proxy] Private IP detected'), { hostname: parsedUrl.hostname });
-            return respondWithError(403);
-        }
-    } catch (error) {
-        Logger.error(error);
+    // searchParams.get() decodes the percent-encoded value — no additional
+    // decodeURIComponent needed. The client encodes once via encodeURIComponent
+    // in getProxiedUri, and this single decode reverses it symmetrically.
+    const uri = new URL(request.url).searchParams.get('uri');
+    const parsedUri = parseUrl(uri);
+    if (!parsedUri) {
         return respondWithError(400);
     }
 
-    const headers = new Headers({
-        'Content-Type': 'application/json; charset=utf-8',
-        'User-Agent': USER_AGENT,
-    });
-
-    let data;
-    let resourceHeaders: Headers;
-
-    try {
-        const response = await fetchResource(uriParam, headers, TIMEOUT, MAX_SIZE);
-
-        data = response.data;
-        resourceHeaders = response.headers;
-    } catch (e) {
-        const status = (e as StatusError)?.status;
-        switch (status) {
-            case 413:
-            case 415:
-            case 500:
-            case 504: {
-                return respondWithError(status);
-            }
-            default:
-                return respondWithError(500);
-        }
+    if (!isHTTPProtocol(parsedUri)) {
+        Logger.error(new Error('[api:metadata-proxy] Unsupported protocol'), { protocol: parsedUri.protocol });
+        return respondWithError(400);
     }
 
-    // preserve original cache-control headers
-    // const contentLength = resourceHeaders.get('content-length');
+    // Note: hostname validation (private-IP, localhost, DNS rebinding) happens
+    // inside fetchResource via the pinned-lookup mechanism — once per hop.
+    // The kernel never sees a hostname that wasn't pre-validated.
+    try {
+        const { data, headers } = await fetchResource(parsedUri.href, {
+            headers: new Headers({ 'Content-Type': 'application/json; charset=utf-8', 'User-Agent': USER_AGENT }),
+            size: MAX_SIZE,
+            timeout: TIMEOUT,
+        });
+        return buildResponse(data, headers);
+    } catch (e) {
+        if (e instanceof StatusError && isKnownStatus(e.status)) {
+            return respondWithError(e.status);
+        }
+        // Defensive: fetchResource is expected to only throw StatusError. Log
+        // anything else so we notice if that invariant breaks.
+        Logger.error(e);
+        return respondWithError(500);
+    }
+}
+
+function parseUrl(maybeUrl: string | null): URL | undefined {
+    if (!maybeUrl) return undefined;
+    try {
+        return new URL(maybeUrl);
+    } catch (error) {
+        Logger.error(new Error('[api:metadata-proxy] Invalid URL', { cause: error }));
+        return undefined;
+    }
+}
+
+// Content-Length is intentionally omitted to avoid browser CORS issues:
+// some upstream servers (e.g. AWS S3/CDNs) return Content-Length, which makes
+// the browser treat the response as "non-simple" CORS, requiring
+// Access-Control-Allow-Origin headers that many upstreams don't provide.
+// Omitting it keeps only safelisted headers, letting the browser accept
+// the response without extra CORS checks.
+function buildResponse(data: unknown, resourceHeaders: Headers): NextResponse {
+    // CACHE_HEADERS sets a browser-only Cache-Control (set on success
+    // only); the upstream's own Cache-Control is not forwarded. The upstream
+    // ETag is dropped too — the route does no conditional revalidation, so a
+    // forwarded validator would be inert (and a placeholder default would risk
+    // false 304 matches across distinct resources).
     const responseHeaders: Record<string, string> = {
         ...SECURITY_HEADERS,
-        'Cache-Control': resourceHeaders.get('cache-control') ?? 'no-cache',
+        ...CACHE_HEADERS,
         'Content-Type': resourceHeaders.get('content-type') ?? 'application/json; charset=utf-8',
-        Etag: resourceHeaders.get('etag') ?? 'no-etag',
     };
 
-    // Skipping Content-Length to avoid browser CORS issues:
-    // - Some upstream metadata servers (e.g. AWS S3/CDNs) return a Content-Length header.
-    // - When we forward it, the browser treats the response as a "non-simple" CORS response,
-    //   requiring proper Access-Control-Allow-Origin headers.
-    // - Since many upstream servers don’t return valid CORS headers, the browser blocks it
-    //   with a misleading CORS or ERR_CONTENT_LENGTH_MISMATCH error, even if status is 200 OK.
-    // - Other servers (like IPFS gateways) don’t include Content-Length and work fine.
-    //
-    // By omitting Content-Length entirely, the proxy response only includes safelisted headers,
-    // allowing the browser to accept it without extra CORS checks. Next.js will handle the
-    // body size automatically, so this is safe.
-
-    // if (contentLength) {
-    //     responseHeaders['Content-Length'] = contentLength;
-    // }
-
-    // Validate that all required headers are present
-    const hasMissingHeaders = Object.values(responseHeaders).some(value => value == null);
-    if (hasMissingHeaders) {
-        return respondWithError(400);
-    }
-
     if (data instanceof ArrayBuffer) {
-        return new NextResponse(data, {
-            headers: responseHeaders,
-        });
+        return new NextResponse(data, { headers: responseHeaders });
     }
 
-    const contentType = resourceHeaders.get('content-type');
-
-    if (matchJsonContent(contentType)) {
-        return NextResponse.json(data, {
-            headers: responseHeaders,
-        });
+    if (matchJsonContent(resourceHeaders.get('content-type'))) {
+        return NextResponse.json(data, { headers: responseHeaders });
     }
 
     return respondWithError(415);
+}
+
+function isKnownStatus(status: number): status is StatusCode {
+    return status in STATUS_MESSAGES;
+}
+
+function respondWithError(status: StatusCode) {
+    // ERROR_CACHE_HEADERS lets the failed `<img>` request prime the browser cache
+    // so ProxiedImage's on-error reason probe re-reads the status from cache
+    // rather than re-invoking the proxy. Browser-only and short-lived by design.
+    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { headers: ERROR_CACHE_HEADERS, status });
 }

@@ -1,5 +1,5 @@
+import { cn } from '@components/shared/utils';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
-import { cn } from '@shared/utils';
 import * as React from 'react';
 import { ChevronDown } from 'react-feather';
 
@@ -29,26 +29,24 @@ function AccordionTrigger({ className, children, ...props }: React.ComponentProp
     }, []);
 
     return (
-        <AccordionPrimitive.Header className="e-mb-0">
+        <AccordionPrimitive.Header className="mb-0">
             <AccordionPrimitive.Trigger
                 ref={triggerRef}
                 data-slot="accordion-trigger"
                 className={cn(
-                    'e-flex e-items-center e-justify-between',
-                    'e-w-full',
-                    'e-m-0',
-                    'border-0 e-appearance-none e-bg-transparent e-shadow-none',
-                    'e-px-6 e-py-4',
+                    'flex items-center justify-between',
+                    'w-full',
+                    'm-0',
+                    'appearance-none border-0 bg-transparent shadow-none',
+                    'px-6 py-4',
                     className,
                 )}
                 {...props}
             >
                 {children}
-                <span className="e-flex e-items-center e-gap-2 e-text-xs e-text-emerald-600">
+                <span className="flex items-center gap-2 text-xs text-emerald-600">
                     {isOpen ? 'Collapse' : 'Expand'}
-                    <ChevronDown
-                        className={cn('e-size-4 e-shrink-0 e-transition-transform', isOpen ? 'e-rotate-180' : '')}
-                    />
+                    <ChevronDown className={cn('size-4 shrink-0 transition-transform', isOpen ? 'rotate-180' : '')} />
                 </span>
             </AccordionPrimitive.Trigger>
         </AccordionPrimitive.Header>

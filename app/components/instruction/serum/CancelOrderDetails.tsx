@@ -1,6 +1,8 @@
 import { Address } from '@components/common/Address';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { CancelOrder, SerumIxDetailsProps } from './types';
 
@@ -16,55 +18,55 @@ export function CancelOrderDetailsCard(props: SerumIxDetailsProps<CancelOrder>) 
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Market</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Market</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.market} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.openOrders} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders Owner</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders Owner</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.openOrdersOwner} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Request Queue</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Request Queue</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.accounts.requestQueue} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Side</td>
-                <td className="text-lg-end">{info.data.side}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Side</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.side}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Open Orders Slot</td>
-                <td className="text-lg-end">{info.data.openOrdersSlot}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Open Orders Slot</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.openOrdersSlot}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Order Id</td>
-                <td className="text-lg-end">{info.data.orderId.toString(10)}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Order Id</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.data.orderId.toString(10)}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

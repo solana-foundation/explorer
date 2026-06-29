@@ -1,11 +1,15 @@
+import { Badge } from '@components/shared/ui/badge';
+import { Button } from '@components/shared/ui/button';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
+import { cn } from '@components/shared/utils';
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
-import { cn } from '@shared/utils';
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import React from 'react';
 import { Code } from 'react-feather';
+
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { BaseRawDetails } from './BaseRawDetails';
 import { BaseRawParsedDetails } from './BaseRawParsedDetails';
@@ -59,57 +63,55 @@ export function InspectorInstructionCard({
             ref={scrollAnchorRef}
             title={
                 <>
-                    <span className={`badge bg-${resultClass}-soft me-2`}>
+                    <Badge ui="dashkit" variant={resultClass as 'success' | 'warning' | 'dark'} className="mr-1.5">
                         #{index + 1}
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
-                    </span>
+                    </Badge>
                     {title}
                 </>
             }
             headerButtons={
-                <button
+                <Button
+                    ui="dashkit"
+                    size="sm"
+                    variant={showRaw ? 'black' : 'white'}
+                    active={showRaw}
                     disabled={defaultRaw}
-                    className={cn(
-                        'btn btn-sm d-flex align-items-center',
-                        showRaw ? 'btn-black active' : 'btn-white',
-                        defaultRaw && '!e-pointer-events-auto e-cursor-not-allowed',
-                    )}
+                    className={cn('flex items-center', defaultRaw && '!pointer-events-auto cursor-not-allowed')}
                     onClick={rawClickHandler}
                 >
-                    <Code className="me-2" size={13} /> Raw
-                </button>
+                    <Code className="mr-1.5" size={13} /> Raw
+                </Button>
             }
         >
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <tbody className="list">
-                        <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
-                        {showRaw ? (
-                            'parsed' in ix ? (
-                                <BaseRawParsedDetails ix={ix}>
-                                    {raw ? <BaseRawDetails ix={raw} /> : null}
-                                </BaseRawParsedDetails>
-                            ) : (
-                                <BaseRawDetails ix={raw || ix} />
-                            )
+            <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
+                <BaseTable.Body>
+                    <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
+                    {showRaw ? (
+                        'parsed' in ix ? (
+                            <BaseRawParsedDetails ix={ix}>
+                                {raw ? <BaseRawDetails ix={raw} /> : null}
+                            </BaseRawParsedDetails>
                         ) : (
-                            children
-                        )}
-                        {innerCards && innerCards.length > 0 && (
-                            <>
-                                <tr className="table-sep">
-                                    <td colSpan={3}>Inner Instructions</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={3}>
-                                        <div className="inner-cards">{innerCards}</div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            <BaseRawDetails ix={raw || ix} />
+                        )
+                    ) : (
+                        children
+                    )}
+                    {innerCards && innerCards.length > 0 && (
+                        <>
+                            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                                <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
+                            </BaseTable.Row>
+                            <BaseTable.Row>
+                                <BaseTable.Cell colSpan={3}>
+                                    <div className="m-6">{innerCards}</div>
+                                </BaseTable.Cell>
+                            </BaseTable.Row>
+                        </>
+                    )}
+                </BaseTable.Body>
+            </BaseTable>
         </CollapsibleCard>
     );
 }

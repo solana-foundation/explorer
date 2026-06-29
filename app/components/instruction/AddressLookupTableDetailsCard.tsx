@@ -1,3 +1,4 @@
+import { InstructionDetailsProps } from '@features/transaction';
 import { useCluster } from '@providers/cluster';
 import React from 'react';
 import { create } from 'superstruct';
@@ -16,7 +17,6 @@ import {
     FreezeLookupTableInfo,
 } from '@/app/components/instruction/address-lookup-table/types';
 import { UnknownDetailsCard } from '@/app/components/instruction/UnknownDetailsCard';
-import { InstructionDetailsProps } from '@/app/components/transaction/InstructionsSection';
 import { Logger } from '@/app/shared/lib/logger';
 
 export function AddressLookupTableDetailsCard(props: InstructionDetailsProps) {

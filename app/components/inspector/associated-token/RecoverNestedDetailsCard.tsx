@@ -2,6 +2,8 @@ import { InspectorInstructionCard } from '@components/common/InspectorInstructio
 import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { AddressWithContext } from '../AddressWithContext';
 
 export function RecoverNestedDetailsCard(props: {
@@ -36,48 +38,48 @@ export function RecoverNestedDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Destination</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Destination</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[2].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>Nested Mint</td>
-                <td className="text-lg-end">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Nested Mint</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[1].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>Nested Owner</td>
-                <td className="text-lg-end">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Nested Owner</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[3].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>Nested Source</td>
-                <td className="text-lg-end">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Nested Source</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[0].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>Owner Mint</td>
-                <td className="text-lg-end">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Owner Mint</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[4].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>Owner</td>
-                <td className="text-lg-end">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Owner</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[5].pubkey} hideInfo />
-                </td>
-            </tr>
-            <tr>
-                <td>Token Program</td>
-                <td className="text-lg-end">
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Token Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <AddressWithContext pubkey={raw.keys[6].pubkey} hideInfo />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCardComponent>
     );
 }

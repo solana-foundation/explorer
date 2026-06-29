@@ -11,6 +11,7 @@ import { BaseDomainsCard } from './BaseDomainsCard';
 // Fetches SNS and ANS domains in parallel because this card displays all domains.
 // This differs from usePrimaryDomain which uses a waterfall (SNS first) to avoid
 // the slower ANS fetch when only one domain name is needed.
+// FIXME: missing Storybook story — needs useUserSnsDomains/useUserANSDomains SWR mocks.
 export function DomainsCard({ address }: { address: string }) {
     const { data: domains, isLoading: domainsLoading, error: domainsError } = useUserSnsDomains(address);
     const { data: domainsANS, isLoading: domainsANSLoading, error: domainsANSError } = useUserANSDomains(address);

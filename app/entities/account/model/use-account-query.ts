@@ -7,7 +7,7 @@ import { PublicKey } from '@solana/web3.js';
 import { useContext, useEffect, useMemo } from 'react';
 
 type UseAccountQueryOptions<TData> = {
-    select: (account: Account) => TData | undefined;
+    select?: (account: Account) => TData | undefined;
     dataMode?: FetchAccountDataMode;
 };
 
@@ -44,7 +44,7 @@ export function useAccountQuery<TData>(
 
     const data = useMemo(() => {
         if (!cacheEntry?.data) return undefined;
-        return select(cacheEntry.data);
+        return select ? select(cacheEntry.data) : (cacheEntry.data as TData);
     }, [cacheEntry?.data, select]);
 
     if (!key) {

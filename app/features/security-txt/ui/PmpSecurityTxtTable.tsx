@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 
 import { TableCardBody } from '@/app/components/common/TableCardBody';
+import { CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { PMP_SECURITY_TXT_KEYS } from '../lib/constants';
 import { CodeCell, ContactInfo, ExternalLinkCell, RenderCode, RenderExternalLink, StringCell } from './common';
-import { isString, isValidLink, tryParseContactString } from './utils';
+import { isString, isValidLink, parseContactList, tryParseContactString } from './utils';
 
 export function PmpSecurityTxtTable({ data }: { data: Record<string, any> }) {
     const entries = useMemo(() => {
@@ -28,10 +29,16 @@ export function PmpSecurityTxtTable({ data }: { data: Record<string, any> }) {
     return (
         <>
             <RenderTable entries={entries.main} />
-            <div className="card-header e-border-0 e-border-t e-border-solid e-border-t-[#282d2b]">
-                <h3 className="card-header-title">Additional:</h3>
-            </div>
-            <RenderTable entries={entries.additional} />
+            {entries.additional.length > 0 && (
+                <>
+                    <CardHeader ui="dashkit" className="!border-b-0 border-t">
+                        <CardTitle as="h3" ui="dashkit">
+                            Additional:
+                        </CardTitle>
+                    </CardHeader>
+                    <RenderTable entries={entries.additional} />
+                </>
+            )}
         </>
     );
 }
@@ -39,10 +46,10 @@ export function PmpSecurityTxtTable({ data }: { data: Record<string, any> }) {
 function RenderTable({ entries }: { entries: [string, any][] }) {
     return (
         <TableCardBody>
-            {entries.map(([entryKey, value], index) => {
+            {entries.map(([entryKey, value]) => {
                 return (
-                    <tr key={index}>
-                        <td className="w-100">{entryKey}</td>
+                    <tr key={entryKey}>
+                        <td className="w-full">{entryKey}</td>
                         <RenderEntry key={entryKey} entryKey={entryKey} value={value} />
                     </tr>
                 );
@@ -57,6 +64,22 @@ function RenderEntry({ entryKey, value }: { entryKey: string; value: any }) {
     } else if (isValidLink(value)) {
         return displayLinkValue(value);
     } else if (isString(value)) {
+        if (entryKey === 'contacts') {
+            const entries = parseContactList(value);
+            return (
+                <td className="font-mono lg:text-right">
+                    {entries.map(entry => (
+                        <div key={entry.kind === 'contact' ? `${entry.type}:${entry.info}` : entry.value}>
+                            {entry.kind === 'contact' ? (
+                                <ContactInfo type={entry.type} information={entry.info} />
+                            ) : (
+                                entry.value
+                            )}
+                        </div>
+                    ))}
+                </td>
+            );
+        }
         return displayStringValue(value);
     } else if (Array.isArray(value)) {
         return displayArrayValue(entryKey, value);
@@ -84,7 +107,7 @@ function displayStringValue(value: string) {
 
 function displayArrayValue(entryKey: string, value: any[]) {
     return (
-        <td className="font-monospace">
+        <td className="text-right font-mono">
             <RenderList entryKey={entryKey} items={value} />
         </td>
     );
@@ -100,7 +123,7 @@ function displayFallbackValue(value: any) {
 
 function RenderList({ entryKey, items }: { entryKey: string; items: any[] }) {
     return (
-        <ul className="text-lg-end security-txt-list e-list-none e-pl-0 [&.security-txt-list]:e-text-left">
+        <ul className="list-none pl-0 text-right">
             {items.map((value, index) => {
                 const elementKey = `${entryKey}-${index}`;
                 if (!value) {

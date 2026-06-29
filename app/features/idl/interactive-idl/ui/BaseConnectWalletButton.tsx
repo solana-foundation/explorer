@@ -1,5 +1,5 @@
+import { Button } from '@components/shared/ui/button';
 import WalletIcon from '@img/icons/wallet.svg';
-import { Button } from '@shared/ui/button';
 import Image from 'next/image';
 
 type BaseConnectWalletButtonProps = {
@@ -16,7 +16,7 @@ export function BaseConnectWalletButton({ displayAddress, onClick, isVisible = t
     return (
         <Button variant="outline" size="sm" onClick={onClick}>
             <Image src={WalletIcon} width={12} height={12} alt="" />
-            <div className="e-whitespace-nowrap">{displayAddress}</div>
+            <div className="whitespace-nowrap">{displayAddress}</div>
         </Button>
     );
 }

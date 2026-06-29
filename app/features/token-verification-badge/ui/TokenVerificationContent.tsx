@@ -10,9 +10,9 @@ import { SourceIcon } from './icons/SourceIcon';
 const riskLevelVariants = cva('', {
     variants: {
         level: {
-            [ERiskLevel.Danger]: 'e-text-red-400',
-            [ERiskLevel.Good]: 'e-text-green-400',
-            [ERiskLevel.Warning]: 'e-text-orange-400',
+            [ERiskLevel.Danger]: 'text-red-400',
+            [ERiskLevel.Good]: 'text-green-400',
+            [ERiskLevel.Warning]: 'text-orange-400',
         },
     },
 });
@@ -28,10 +28,10 @@ function VerificationBadge({ source }: { source: VerificationSource }) {
                 href={source.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="e-flex e-items-center e-gap-1 e-rounded-md e-border e-border-solid e-border-heavy-metal-600 e-bg-heavy-metal-800 e-p-1 hover:e-border-heavy-metal-500 hover:e-bg-heavy-metal-700"
+                className="flex items-center gap-1 rounded-md border border-solid border-heavy-metal-600 bg-heavy-metal-800 p-1 hover:border-heavy-metal-500 hover:bg-heavy-metal-700"
             >
                 <SourceIcon source={source.name} />
-                <span className="e-text-xs e-text-gray-200">
+                <span className="text-xs text-gray-200">
                     {source.name} risk: {source.score}/100 -{' '}
                     <RiskLevelText level={source.level as ERiskLevel}>{source.level}</RiskLevelText>
                 </span>
@@ -44,14 +44,14 @@ function VerificationBadge({ source }: { source: VerificationSource }) {
             href={source.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="e-flex e-items-center e-gap-1 e-rounded-md e-border e-border-solid e-border-heavy-metal-600 e-bg-heavy-metal-800 e-p-1 hover:e-border-heavy-metal-500 hover:e-bg-heavy-metal-700"
+            className="flex items-center gap-1 rounded-md border border-solid border-heavy-metal-600 bg-heavy-metal-800 p-1 hover:border-heavy-metal-500 hover:bg-heavy-metal-700"
         >
             <SourceIcon source={source.name} />
-            <span className="e-text-xs e-text-gray-200">{source.name}</span>
+            <span className="text-xs text-gray-200">{source.name}</span>
             {source.verified ? (
-                <Check className="e-text-green-400" size={16} />
+                <Check className="text-green-400" size={16} />
             ) : (
-                <X className="e-text-red-400" size={16} />
+                <X className="text-red-400" size={16} />
             )}
         </a>
     );
@@ -66,7 +66,7 @@ function ApplyForVerificationLink({ source }: { source: VerificationSource }) {
             href={source.applyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="e-text-xs e-text-white e-underline hover:e-text-gray-400"
+            className="text-xs text-white underline hover:text-gray-400"
         >
             {sourceName}
         </a>
@@ -79,11 +79,11 @@ function RateLimitedBadge({ source }: { source: VerificationSource }) {
             href={source.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="e-flex e-items-center e-gap-1 e-rounded-md e-border e-border-solid e-border-orange-600/50 e-bg-orange-900/20 e-p-1 hover:e-border-orange-500 hover:e-bg-orange-800/50"
+            className="flex items-center gap-1 rounded-md border border-solid border-orange-600/50 bg-orange-900/20 p-1 hover:border-orange-500 hover:bg-orange-800/50"
         >
             <SourceIcon source={source.name} />
-            <span className="e-text-xs e-text-orange-400">{source.name}</span>
-            <AlertCircle className="e-text-orange-400" size={14} />
+            <span className="text-xs text-orange-400">{source.name}</span>
+            <AlertCircle className="text-orange-400" size={14} />
         </a>
     );
 }
@@ -102,12 +102,12 @@ export function TokenVerificationContent({
     const hasVerification = verificationFoundSources.length > 0;
 
     if (isLoading) {
-        return <p className="e-m-0 e-text-base e-font-semibold e-text-gray-200">Checking verifications</p>;
+        return <p className="m-0 text-base font-semibold text-gray-200">Checking verifications</p>;
     }
 
     return (
         <div>
-            <p className="e-mb-1 e-text-base e-font-semibold e-text-gray-200">
+            <p className="mb-1 text-base font-semibold text-gray-200">
                 {hasVerification ? (
                     <>
                         This token is verified
@@ -123,24 +123,24 @@ export function TokenVerificationContent({
                 )}
             </p>
             {hasVerification ? (
-                <div className="e-flex e-flex-wrap e-gap-2">
+                <div className="flex flex-wrap gap-2">
                     {verificationFoundSources.map((source, idx) => (
                         <VerificationBadge key={idx} source={source} />
                     ))}
                 </div>
             ) : (
-                <span className="e-mb-2 e-text-xs e-text-heavy-metal-400">
+                <span className="mb-2 text-xs text-heavy-metal-400">
                     This doesn&apos;t mean it&apos;s a scam, just double-check if it&apos;s what you need.
                 </span>
             )}
 
             {rateLimitedSources.length > 0 && (
-                <div className="e-mt-4">
-                    <p className="e-m-0 e-text-[10px] e-uppercase e-tracking-wider e-text-orange-400">
+                <div className="mt-4">
+                    <p className="m-0 text-[10px] uppercase tracking-wider text-orange-400">
                         Rate limited (try again later)
                     </p>
-                    <p className="e-mb-1 e-text-[10px] e-text-heavy-metal-400">You can check validators manually</p>
-                    <div className="e-flex e-flex-wrap e-gap-2">
+                    <p className="mb-1 text-[10px] text-heavy-metal-400">You can check validators manually</p>
+                    <div className="flex flex-wrap gap-2">
                         {rateLimitedSources.map((source, idx) => (
                             <RateLimitedBadge key={idx} source={source} />
                         ))}
@@ -149,11 +149,11 @@ export function TokenVerificationContent({
             )}
 
             {sourcesToApply.length > 0 && (
-                <div className="e-mt-4">
-                    <p className="e-mb-1 e-text-[10px] e-uppercase e-tracking-wider e-text-heavy-metal-400">
+                <div className="mt-4">
+                    <p className="mb-1 text-[10px] uppercase tracking-wider text-heavy-metal-400">
                         Apply for {hasVerification ? 'extra ' : ''}verification
                     </p>
-                    <div className="e-flex e-flex-wrap e-gap-x-3 e-gap-y-1">
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
                         {sourcesToApply.map((source, idx) => (
                             <ApplyForVerificationLink key={idx} source={source} />
                         ))}

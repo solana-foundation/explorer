@@ -3,6 +3,8 @@ import { ProgramField } from '@entities/instruction-card';
 import { ParsedInstruction, PublicKey, SignatureResult } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 
 export function CreateDetailsCard({
@@ -32,47 +34,47 @@ export function CreateDetailsCard({
         >
             <ProgramField programId={ix.programId} />
 
-            <tr>
-                <td>Source</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Source</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(info.source)} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Account</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Account</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(info.account)} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Mint</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Mint</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(info.mint)} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Wallet</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Wallet</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(info.wallet)} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>System Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>System Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(info.systemProgram)} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Token Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Token Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={new PublicKey(info.tokenProgram)} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCardComponent>
     );
 }

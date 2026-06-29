@@ -5,13 +5,11 @@ import { AlertCircle } from 'react-feather';
 
 import { DownloadableButton } from '@/app/components/common/Downloadable';
 import { ErrorCard } from '@/app/components/common/ErrorCard';
-import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
+import { Button } from '@/app/components/shared/ui/button';
 import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
-import { useCluster } from '@/app/providers/cluster';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
-import { NO_SECURITY_TXT_ERROR } from '../lib/constants';
-import { fromProgramData } from '../lib/fromProgramData';
-import type { NeodymeSecurityTXT } from '../lib/types';
+import { type ResolvedSecurityTxt, useSecurityTxt } from '../model/useSecurityTxt';
 import { SecurityTxtVersionBadge } from './common';
 import { EmptySecurityTxtCard } from './EmptySecurityTxtCard';
 import { NeodymeSecurityTxtTable } from './NeodymeSecurityTxtTable';
@@ -19,85 +17,71 @@ import { PmpSecurityTxtTable } from './PmpSecurityTxtTable';
 import { securityTxtDataToBase64 } from './utils';
 
 export function SecurityCard({ data, pubkey }: { data: UpgradeableLoaderAccountData; pubkey: PublicKey }) {
-    const { url, cluster } = useCluster();
-    const { programMetadataSecurityTxt } = useProgramMetadataSecurityTxt(pubkey.toBase58(), url, cluster);
+    const { securityTxt, isLoading } = useSecurityTxt(pubkey.toBase58());
 
     if (!data.programData) {
         return <ErrorCard text="Account has no data" />;
     }
-
-    const { securityTXT, error } = fromProgramData(data.programData);
-
-    if (!securityTXT && !programMetadataSecurityTxt && error) {
-        if (error === NO_SECURITY_TXT_ERROR) {
-            return <EmptySecurityTxtCard programAddress={pubkey.toString()} />;
-        } else {
-            return <ErrorCard text={error} />;
-        }
+    if (isLoading) {
+        return null;
     }
-    return (
-        <ProgramSecurityTxtCard
-            programAddress={pubkey.toBase58()}
-            programDataSecurityTxt={securityTXT}
-            pmpSecurityTxt={programMetadataSecurityTxt}
-        />
-    );
+    if (!securityTxt) {
+        return <EmptySecurityTxtCard programAddress={pubkey.toString()} />;
+    }
+
+    return <ProgramSecurityTxtCard programAddress={pubkey.toBase58()} securityTxt={securityTxt} />;
 }
 
-// Accepts security.txt from Program Data and Program Metadata json
-// By default renders security.txt json from Program Metadata
-// Fallback to Program Data security.txt
+// Renders a resolved security.txt: the PMP table for PMP-sourced entries, the Neodyme table for
+// ELF-sourced ones.
 export function ProgramSecurityTxtCard({
     programAddress,
-    programDataSecurityTxt,
-    pmpSecurityTxt,
+    securityTxt,
 }: {
     programAddress: string;
-    programDataSecurityTxt: NeodymeSecurityTXT | undefined;
-    pmpSecurityTxt: any;
+    securityTxt: ResolvedSecurityTxt;
 }) {
-    const downloadData = useMemo(() => {
-        if (!pmpSecurityTxt && !programDataSecurityTxt) return '';
-        return securityTxtDataToBase64(pmpSecurityTxt || programDataSecurityTxt);
-    }, [programDataSecurityTxt, pmpSecurityTxt]);
-
-    if (!programDataSecurityTxt && !pmpSecurityTxt) {
-        return <EmptySecurityTxtCard programAddress={programAddress} />;
-    }
-
-    // Determine which table component to render
-    const securityTable = pmpSecurityTxt ? (
-        <PmpSecurityTxtTable data={pmpSecurityTxt} />
-    ) : programDataSecurityTxt ? (
-        <NeodymeSecurityTxtTable data={programDataSecurityTxt} />
-    ) : null;
+    const downloadData = useMemo(() => securityTxtDataToBase64(securityTxt.fields), [securityTxt.fields]);
+    const isPmp = securityTxt.type === 'pmp';
 
     return (
-        <div className="card security-txt e-overflow-hidden">
-            <div className="card-header e-flex e-h-auto e-min-h-[60px] e-items-center">
-                <h3 className="card-header-title mb-0 d-flex align-items-center gap-3 e-mr-4">
+        <Card ui="dashkit" className="overflow-hidden">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit" className="mr-4 flex items-center gap-3">
                     Security.txt
-                    <SecurityTxtVersionBadge version={pmpSecurityTxt ? 'pmp' : 'neodyme'} />
-                </h3>
-                <div className="btn btn-sm btn-white e-flex">
-                    <DownloadableButton
-                        data={downloadData}
-                        filename={`${programAddress}-security-txt.json`}
-                        type="application/json"
-                    >
-                        Download
-                    </DownloadableButton>
-                </div>
-            </div>
-            <div className="e-px-6 e-py-4">
-                <small className="text-warning e-flex e-gap-1">
-                    <AlertCircle size={16} className="e-mt-0.5" />
+                    <SecurityTxtVersionBadge version={isPmp ? 'pmp' : 'neodyme'} />
+                </CardTitle>
+                <Button ui="dashkit" variant="white" size="sm" className="flex" asChild>
+                    <div>
+                        <DownloadableButton
+                            data={downloadData}
+                            filename={`${programAddress}-security-txt.json`}
+                            type="application/json"
+                        >
+                            Download
+                        </DownloadableButton>
+                    </div>
+                </Button>
+            </CardHeader>
+            <div className="px-6 py-4">
+                <small className="flex gap-1 text-dk-warning-on-dark">
+                    <AlertCircle size={16} className="mt-0.5" />
                     Note that this is self-reported by the author of the program and might not be accurate
                 </small>
             </div>
-            <ErrorBoundary fallback={<div className="card-body text-center">Invalid security.txt</div>}>
-                {securityTable}
+            <ErrorBoundary
+                fallback={
+                    <CardBody ui="dashkit" className="text-center">
+                        Invalid security.txt
+                    </CardBody>
+                }
+            >
+                {isPmp ? (
+                    <PmpSecurityTxtTable data={securityTxt.fields} />
+                ) : (
+                    <NeodymeSecurityTxtTable data={securityTxt.fields} />
+                )}
             </ErrorBoundary>
-        </div>
+        </Card>
     );
 }

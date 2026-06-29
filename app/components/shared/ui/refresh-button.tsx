@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import React from 'react';
 import { RefreshCw } from 'react-feather';
 
@@ -26,12 +27,12 @@ export function RefreshButton({ analyticsSection, fetching = false, onClick }: P
             {fetching ? (
                 <>
                     <span className="spinner-grow spinner-grow-sm" />
-                    <span className="e-hidden md:e-inline">Loading</span>
+                    <span className="hidden md:inline">Loading</span>
                 </>
             ) : (
                 <>
                     <RefreshCw size={12} />
-                    <span className="e-hidden md:e-inline">Refresh</span>
+                    <span className="hidden md:inline">Refresh</span>
                 </>
             )}
         </Button>

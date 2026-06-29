@@ -88,6 +88,50 @@ describe('getTransactionInstructionNames', () => {
         });
     });
 
+    describe('ZK ElGamal proof instructions', () => {
+        const ZK_ELGAMAL_PROOF_PROGRAM_ID = new PublicKey('ZkE1Gama1Proof11111111111111111111111111111');
+
+        it('should resolve the instruction name from the discriminator', () => {
+            // discriminator 3 = Verify Ciphertext-Commitment Equality
+            const ix: PartiallyDecodedInstruction = {
+                accounts: [],
+                data: bs58.encode(new Uint8Array([3])),
+                programId: ZK_ELGAMAL_PROOF_PROGRAM_ID,
+            };
+
+            const [result] = getTransactionInstructionNames(makeTx([ix]));
+
+            expect(result).toEqual({
+                name: 'Verify Ciphertext-Commitment Equality',
+                program: 'ZK ElGamal Proof Program',
+            });
+        });
+
+        it('should fall back to Unknown Instruction for an out-of-range discriminator', () => {
+            const ix: PartiallyDecodedInstruction = {
+                accounts: [],
+                data: bs58.encode(new Uint8Array([99])),
+                programId: ZK_ELGAMAL_PROOF_PROGRAM_ID,
+            };
+
+            const [result] = getTransactionInstructionNames(makeTx([ix]));
+
+            expect(result).toEqual({ name: 'Unknown Instruction', program: 'ZK ElGamal Proof Program' });
+        });
+
+        it('should fall back to Unknown Instruction for empty instruction data', () => {
+            const ix: PartiallyDecodedInstruction = {
+                accounts: [],
+                data: bs58.encode(new Uint8Array([])),
+                programId: ZK_ELGAMAL_PROOF_PROGRAM_ID,
+            };
+
+            const [result] = getTransactionInstructionNames(makeTx([ix]));
+
+            expect(result).toEqual({ name: 'Unknown Instruction', program: 'ZK ElGamal Proof Program' });
+        });
+    });
+
     describe('multiple instructions', () => {
         it('should map each instruction in the transaction independently', () => {
             const transfer = {

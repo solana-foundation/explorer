@@ -4,6 +4,8 @@ import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import React from 'react';
 
 import { invariant } from '@/app/shared/lib/invariant';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) {
     const totalTransactions = block.transactions.length;
@@ -60,59 +62,64 @@ export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) 
     const showSuccessRate = block.transactions.every(tx => tx.meta !== null);
     return (
         <>
-            <div className="card">
-                <div className="card-header align-items-center">
-                    <h3 className="card-header-title">Block Program Stats</h3>
-                </div>
+            <Card ui="dashkit">
+                <CardHeader ui="dashkit">
+                    <CardTitle as="h3" ui="dashkit">
+                        Block Program Stats
+                    </CardTitle>
+                </CardHeader>
                 <TableCardBody>
-                    <tr>
-                        <td className="w-100">Unique Programs Count</td>
-                        <td className="text-lg-end font-monospace">{programEntries.length}</td>
-                    </tr>
-                    <tr>
-                        <td className="w-100">Total Instructions</td>
-                        <td className="text-lg-end font-monospace">{totalInstructions}</td>
-                    </tr>
+                    <BaseTable.Row>
+                        <BaseTable.Cell className="w-full">Unique Programs Count</BaseTable.Cell>
+                        <BaseTable.Cell className="text-right font-mono">{programEntries.length}</BaseTable.Cell>
+                    </BaseTable.Row>
+                    <BaseTable.Row>
+                        <BaseTable.Cell className="w-full">Total Instructions</BaseTable.Cell>
+                        <BaseTable.Cell className="text-right font-mono">{totalInstructions}</BaseTable.Cell>
+                    </BaseTable.Row>
                 </TableCardBody>
-            </div>
-            <div className="card">
-                <div className="card-header align-items-center">
-                    <h3 className="card-header-title">Block Programs</h3>
-                </div>
-
-                <div className="table-responsive mb-0">
-                    <table className="table table-sm table-nowrap card-table">
-                        <thead>
-                            <tr>
-                                <th className="text-muted">Program</th>
-                                <th className="text-muted">Transaction Count</th>
-                                <th className="text-muted">% of Total</th>
-                                <th className="text-muted">Instruction Count</th>
-                                <th className="text-muted">% of Total</th>
-                                {showSuccessRate && <th className="text-muted">Success Rate</th>}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {programEntries.map(([programId, txFreq]) => {
-                                const ixFreq = ixFrequency.get(programId) as number;
-                                const successes = txSuccesses.get(programId) || 0;
-                                return (
-                                    <tr key={programId}>
-                                        <td>
-                                            <Address pubkey={new PublicKey(programId)} link />
-                                        </td>
-                                        <td>{txFreq}</td>
-                                        <td>{((100 * txFreq) / totalTransactions).toFixed(2)}%</td>
-                                        <td>{ixFreq}</td>
-                                        <td>{((100 * ixFreq) / totalInstructions).toFixed(2)}%</td>
-                                        {showSuccessRate && <td>{((100 * successes) / txFreq).toFixed(0)}%</td>}
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            </Card>
+            <Card ui="dashkit">
+                <CardHeader ui="dashkit">
+                    <CardTitle as="h3" ui="dashkit">
+                        Block Programs
+                    </CardTitle>
+                </CardHeader>
+                <BaseTable ui="dashkit" variant="card" nowrap>
+                    <BaseTable.Head>
+                        <BaseTable.Row>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Program</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Transaction Count</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">% of Total</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">Instruction Count</BaseTable.HeaderCell>
+                            <BaseTable.HeaderCell className="text-dk-gray-700">% of Total</BaseTable.HeaderCell>
+                            {showSuccessRate && (
+                                <BaseTable.HeaderCell className="text-dk-gray-700">Success Rate</BaseTable.HeaderCell>
+                            )}
+                        </BaseTable.Row>
+                    </BaseTable.Head>
+                    <BaseTable.Body>
+                        {programEntries.map(([programId, txFreq]) => {
+                            const ixFreq = ixFrequency.get(programId) as number;
+                            const successes = txSuccesses.get(programId) || 0;
+                            return (
+                                <BaseTable.Row key={programId}>
+                                    <BaseTable.Cell>
+                                        <Address pubkey={new PublicKey(programId)} link />
+                                    </BaseTable.Cell>
+                                    <BaseTable.Cell>{txFreq}</BaseTable.Cell>
+                                    <BaseTable.Cell>{((100 * txFreq) / totalTransactions).toFixed(2)}%</BaseTable.Cell>
+                                    <BaseTable.Cell>{ixFreq}</BaseTable.Cell>
+                                    <BaseTable.Cell>{((100 * ixFreq) / totalInstructions).toFixed(2)}%</BaseTable.Cell>
+                                    {showSuccessRate && (
+                                        <BaseTable.Cell>{((100 * successes) / txFreq).toFixed(0)}%</BaseTable.Cell>
+                                    )}
+                                </BaseTable.Row>
+                            );
+                        })}
+                    </BaseTable.Body>
+                </BaseTable>
+            </Card>
         </>
     );
 }

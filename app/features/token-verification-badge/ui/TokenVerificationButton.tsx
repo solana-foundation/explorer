@@ -8,20 +8,20 @@ import { ERiskLevel, getRiskLevel } from '../model/use-rugcheck';
 import { SourceIcon } from './icons/SourceIcon';
 import { VerificationIcon } from './VerificationIcon';
 
-const sourceBorderVariants = cva('e-flex e-rounded e-border e-border-solid e-p-px e-opacity-80', {
+const sourceBorderVariants = cva('flex rounded border border-solid p-px opacity-80', {
     variants: {
         tone: {
-            [ERiskLevel.Danger]: 'e-border-red-400',
-            [ERiskLevel.Good]: 'e-border-green-400',
-            [ERiskLevel.Warning]: 'e-border-orange-400',
+            [ERiskLevel.Danger]: 'border-red-400',
+            [ERiskLevel.Good]: 'border-green-400',
+            [ERiskLevel.Warning]: 'border-orange-400',
         },
     },
 });
 
 const buttonVariants = cva(
     [
-        'e-flex e-w-full e-shrink-0 e-items-center e-rounded e-border e-border-solid e-bg-[#1C2120] e-p-2',
-        'md:e-h-[stretch] md:e-max-h-fit md:e-min-h-[69px] md:e-w-[160px] md:e-flex-col md:e-items-start md:e-px-3 md:e-py-2',
+        'flex w-full shrink-0 items-center rounded border border-solid bg-[#1C2120] p-2',
+        'md:h-[stretch] md:max-h-fit md:min-h-[69px] md:w-[160px] md:flex-col md:items-start md:px-3 md:py-2',
     ],
     {
         defaultVariants: {
@@ -30,12 +30,12 @@ const buttonVariants = cva(
         },
         variants: {
             isLoading: {
-                false: 'e-cursor-pointer',
-                true: 'e-cursor-not-allowed',
+                false: 'cursor-pointer',
+                true: 'cursor-not-allowed',
             },
             isOpen: {
-                false: 'e-border-black',
-                true: 'e-border-green-400',
+                false: 'border-black',
+                true: 'border-green-400',
             },
         },
     },
@@ -61,16 +61,16 @@ export const TokenVerificationButton = React.forwardRef<HTMLButtonElement, Token
 
         return (
             <button ref={ref} type="button" className={cn(buttonVariants({ isLoading, isOpen }), className)} {...props}>
-                <div className="e-flex e-w-full e-items-center e-gap-2 md:e-mb-2">
-                    <p className="e-m-0 e-text-sm e-text-white">Verification</p>
+                <div className="flex w-full items-center gap-2 md:mb-2">
+                    <p className="m-0 text-sm text-white">Verification</p>
 
                     <VerificationIcon verificationFoundSources={verificationFoundSources} isLoading={isLoading} />
                 </div>
 
                 {isLoading ? (
-                    <span className="e-spinner-grow e-spinner-grow-sm e-text-white md:e-mb-1" />
+                    <span className="spinner-grow spinner-grow-sm text-white md:mb-1" />
                 ) : (
-                    <div className="e-flex e-flex-shrink-0 e-items-center e-gap-1">
+                    <div className="flex flex-shrink-0 items-center gap-1">
                         {hasVerification ? (
                             verificationFoundSources.map((source, idx) => (
                                 <div key={idx} className={sourceBorderVariants({ tone: getSourceBorderTone(source) })}>
@@ -78,7 +78,7 @@ export const TokenVerificationButton = React.forwardRef<HTMLButtonElement, Token
                                 </div>
                             ))
                         ) : (
-                            <span className="e-font-semibold e-text-heavy-metal-400 md:e-text-base">Not verified</span>
+                            <span className="font-semibold text-heavy-metal-400 md:text-base">Not verified</span>
                         )}
                     </div>
                 )}

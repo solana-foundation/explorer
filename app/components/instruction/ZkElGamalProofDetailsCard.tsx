@@ -1,26 +1,12 @@
 import { Address } from '@components/common/Address';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { ZK_ELGAMAL_PROOF_PROGRAM_ID } from '@utils/programs';
+import { getZkElGamalProofInstructionName } from '@utils/zk-elgamal-proof';
 import React from 'react';
 
-import { InstructionCard } from './InstructionCard';
+import { BaseTable } from '@/app/shared/ui/Table';
 
-// Indexed by the 1-byte discriminator (0..=12).
-const INSTRUCTION_NAMES: readonly string[] = [
-    'Close Context State',
-    'Verify Zero Ciphertext',
-    'Verify Ciphertext-Ciphertext Equality',
-    'Verify Ciphertext-Commitment Equality',
-    'Verify Pubkey Validity',
-    'Verify Percentage With Cap',
-    'Verify Batched Range Proof (U64)',
-    'Verify Batched Range Proof (U128)',
-    'Verify Batched Range Proof (U256)',
-    'Verify Grouped Ciphertext (2 handles)',
-    'Verify Batched Grouped Ciphertext (2 handles)',
-    'Verify Grouped Ciphertext (3 handles)',
-    'Verify Batched Grouped Ciphertext (3 handles)',
-];
+import { InstructionCard } from './InstructionCard';
 
 export function isZkElGamalProofInstruction(ix: TransactionInstruction): boolean {
     return ix.programId.toBase58() === ZK_ELGAMAL_PROOF_PROGRAM_ID;
@@ -46,7 +32,7 @@ export function ZkElGamalProofDetailsCard({
     // empty and the proof lives off-instruction; the row below stays hidden.
     const data = ix.data;
     const discriminator = data.length > 0 ? data[0] : -1;
-    const instructionName = INSTRUCTION_NAMES[discriminator] ?? 'Unknown Instruction';
+    const instructionName = getZkElGamalProofInstructionName(discriminator);
     const isClose = discriminator === 0;
     const proofBytes = data.length > 1 ? data.length - 1 : 0;
     const accountCount = ix.keys.length;
@@ -60,25 +46,25 @@ export function ZkElGamalProofDetailsCard({
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={ix.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {ix.keys.map((meta, i) => (
-                <tr key={i}>
-                    <td>{labelFor(i, isClose, accountCount)}</td>
-                    <td className="text-lg-end">
+                <BaseTable.Row key={i}>
+                    <BaseTable.Cell>{labelFor(i, isClose, accountCount)}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">
                         <Address pubkey={meta.pubkey} alignRight link />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             ))}
             {!isClose && proofBytes > 0 && (
-                <tr>
-                    <td>Proof size</td>
-                    <td className="text-lg-end font-monospace">{proofBytes} bytes</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Proof size</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right font-mono">{proofBytes} bytes</BaseTable.Cell>
+                </BaseTable.Row>
             )}
         </InstructionCardComponent>
     );

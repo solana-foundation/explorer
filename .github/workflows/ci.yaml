@@ -13,6 +13,7 @@ env:
   PW_CACHE_FOLDER: ~/.cache/ms-playwright
   SENTRY_TELEMETRY_DISABLE: true
   STORYBOOK_DISABLE_TELEMETRY: 1
+  OPENSPEC_TELEMETRY: 0
 
 jobs:
   # Job to read Node version from .nvmrc
@@ -84,6 +85,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: OpenSpec
+        run: pnpm openspec:validate
+
       - name: Build
         run: pnpm build
 
@@ -135,7 +139,7 @@ jobs:
   Storybook-Smoke-Tests:
     needs: read-nvmrc
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     continue-on-error: true
 
     strategy:

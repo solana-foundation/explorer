@@ -1,17 +1,18 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 'use client';
 
-import { getProxiedUri } from '@features/metadata';
-import { isPmpSecurityTXT, useSecurityTxt } from '@features/security-txt';
-import ProgramLogoPlaceholder from '@img/logos-solana/low-contrast-solana-logo.svg';
+// TODO(fsd-layering): this shared-layer component imports from `features/*`, which breaks the
+// FSD dependency rule (features → entities → shared; shared must not import upward). Move
+// `ProxiedImage` and the security-txt helpers down into `shared`/`entities`, re-point
+// consumers, then drop these two imports.
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
+import { ProxiedImage } from '@features/metadata';
+import { useSecurityTxt } from '@features/security-txt';
 import { type UpgradeableLoaderAccountData } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { PROGRAM_INFO_BY_ID } from '@utils/programs';
-import Image from 'next/image';
 import React from 'react';
 import { AlertCircle } from 'react-feather';
-
-const IDENTICON_WIDTH = 64;
 
 // The "self-reported" warning indicates that the securityTxt metadata (name, logo, etc.)
 // is self-reported by the program author and may not be accurate. We only show this warning
@@ -19,12 +20,12 @@ const IDENTICON_WIDTH = 64;
 // trusted internal mapping (PROGRAM_INFO_BY_ID).
 export function ProgramHeader({
     address,
-    parsedData,
 }: {
     address: string;
+    // Accepted for caller compatibility; security.txt now resolves via `useSecurityTxt(address)`.
     parsedData?: UpgradeableLoaderAccountData | undefined;
 }) {
-    const securityTxt = useSecurityTxt(address, parsedData);
+    const { securityTxt } = useSecurityTxt(address);
     const { cluster } = useCluster();
     const { programName, logo, version, selfReported } = ((): {
         programName: string;
@@ -50,14 +51,14 @@ export function ProgramHeader({
         const usingSelfReportedName = !trustedProgramName;
 
         // Handle empty name in security.txt
-        programName = (trustedProgramName ?? securityTxt.name) || namePlaceholder;
+        programName = (trustedProgramName ?? securityTxt.fields.name) || namePlaceholder;
 
-        if (isPmpSecurityTXT(securityTxt)) {
+        if (securityTxt.type === 'pmp') {
             return {
-                logo: getProxiedUri(securityTxt.logo),
+                logo: securityTxt.fields.logo,
                 programName,
                 selfReported: usingSelfReportedName,
-                version: securityTxt.version,
+                version: securityTxt.fields.version,
             };
         }
         return {
@@ -71,14 +72,14 @@ export function ProgramHeader({
         const text =
             'Program name and icon are self-reported by the program authority. See program security tab for more details';
         return (
-            <div className="e-ml-2 e-inline-flex e-items-center">
+            <div className="ml-2 inline-flex items-center">
                 <Tooltip>
-                    <TooltipTrigger className="e-border-0 e-bg-transparent e-p-0">
-                        <AlertCircle className="e-size-3 e-text-destructive" aria-label="Self-reported program" />
+                    <TooltipTrigger className="border-0 bg-transparent p-0">
+                        <AlertCircle className="size-3 text-destructive" aria-label="Self-reported program" />
                     </TooltipTrigger>
                     {text && (
                         <TooltipContent>
-                            <div className="e-min-w-36 e-max-w-64">{text}</div>
+                            <div className="min-w-36 max-w-64">{text}</div>
                         </TooltipContent>
                     )}
                 </Tooltip>
@@ -87,37 +88,28 @@ export function ProgramHeader({
     })();
 
     return (
-        <div className="e-inline-flex e-items-center e-gap-2">
+        <div className="inline-flex items-center gap-2">
             <div>
-                <div className="e-relative e-h-10 e-w-10 e-flex-shrink-0 e-overflow-hidden e-rounded sm:e-h-16 sm:e-w-16">
-                    {logo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            alt="Program logo"
-                            className="e-h-full e-w-full e-rounded e-border-4 e-border-current e-object-cover"
-                            height={16}
-                            src={logo}
-                            width={16}
-                        />
-                    ) : (
-                        <Image
-                            src={ProgramLogoPlaceholder}
-                            height={IDENTICON_WIDTH}
-                            width={IDENTICON_WIDTH}
-                            alt="Program logo placeholder"
-                            className="e-h-full e-w-full e-rounded e-border e-border-gray-200 e-object-cover"
-                        />
-                    )}
+                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded sm:h-16 sm:w-16">
+                    <ProxiedImage
+                        alt="Program logo"
+                        className="h-full w-full rounded border-4 border-solid border-dk-black-dark object-cover"
+                        uri={logo}
+                    />
                 </div>
             </div>
 
-            <div className="e-flex-1">
-                <h6 className="header-pretitle">Program account</h6>
-                <div className="e-inline-flex">
-                    <h2 className="header-title">{programName}</h2>
+            <div className="flex-1">
+                <h6 className="uppercase tracking-[0.08em] text-dk-gray-700">Program account</h6>
+                <div className="inline-flex">
+                    <h2 className="mb-0">{programName}</h2>
                     {warningChunk}
                 </div>
-                {version && <div className="header-pretitle no-overflow-with-ellipsis">{version}</div>}
+                {version && (
+                    <div className="overflow-hidden text-ellipsis whitespace-nowrap uppercase tracking-[0.08em] text-dk-gray-700">
+                        {version}
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -3,6 +3,7 @@ import React from 'react';
 import { CornerDownRight } from 'react-feather';
 
 import { Address } from '@/app/components/common/Address';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { ExpandableRow } from '@/app/utils/anchor';
 
 import { Copyable } from '../../common/Copyable';
@@ -61,8 +62,8 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
             displayValue = <Address pubkey={new PublicKey(value as string)} alignRight link />;
         } else if (type === 'string') {
             displayValue = (
-                <td
-                    className="text-lg-end"
+                <BaseTable.Cell
+                    className="text-right"
                     style={{
                         fontSize: '0.85rem',
                         lineHeight: '1.2',
@@ -73,30 +74,30 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
                     }}
                 >
                     <Copyable text={value as string}>
-                        <span className="font-monospace">{value as string}</span>
+                        <span className="font-mono">{value as string}</span>
                     </Copyable>
-                </td>
+                </BaseTable.Cell>
             );
         } else {
             displayValue = <>{String(value)}</>;
         }
 
         return (
-            <tr
+            <BaseTable.Row
                 key={baseKey}
                 data-testid={`ix-args-${baseKey}`}
-                className={nestingLevel > 0 ? 'table-nested-account' : ''}
+                className={nestingLevel > 0 ? 'bg-black/20' : ''}
             >
-                <td>
-                    <div className="d-flex flex-row align-items-center">
-                        {nestingLevel > 0 && <CornerDownRight className="me-2 mb-1" size={14} />}
+                <BaseTable.Cell>
+                    <div className="flex flex-row items-center">
+                        {nestingLevel > 0 && <CornerDownRight className="mb-[3px] mr-1.5" size={14} />}
                         <div>{key}</div>
                     </div>
-                </td>
-                <td>{type}</td>
+                </BaseTable.Cell>
+                <BaseTable.Cell>{type}</BaseTable.Cell>
                 {type === 'string' ? (
-                    <td
-                        className="text-lg-end"
+                    <BaseTable.Cell
+                        className="text-right"
                         style={{
                             fontSize: '0.85rem',
                             lineHeight: '1.2',
@@ -107,13 +108,13 @@ export function mapCodamaIxArgsToRows(data: any, nestingLevel = 0) {
                         }}
                     >
                         <Copyable text={value as string}>
-                            <span className="font-monospace">{value as string}</span>
+                            <span className="font-mono">{value as string}</span>
                         </Copyable>
-                    </td>
+                    </BaseTable.Cell>
                 ) : (
-                    <td className="text-lg-end">{displayValue}</td>
+                    <BaseTable.Cell className="text-right">{displayValue}</BaseTable.Cell>
                 )}
-            </tr>
+            </BaseTable.Row>
         );
     });
 }

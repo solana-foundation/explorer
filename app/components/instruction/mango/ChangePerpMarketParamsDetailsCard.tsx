@@ -1,7 +1,9 @@
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import moment from 'moment';
+import { formatDuration } from '@utils/date';
 import { useEffect, useState } from 'react';
+
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
 import { ChangePerpMarketParams, getPerpMarketFromInstruction, getPerpMarketFromPerpMarketConfig } from './types';
@@ -44,64 +46,63 @@ export function ChangePerpMarketParamsDetailsCard(props: {
             childIndex={childIndex}
         >
             {info.initLeverageOption && (
-                <tr>
-                    <td>Init leverage</td>
-                    <td className="text-lg-end">{info.initLeverage}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Init leverage</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.initLeverage}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.liquidationFeeOption && (
-                <tr>
-                    <td>Liquidation fee</td>
-                    <td className="text-lg-end">{info.liquidationFee}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Liquidation fee</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.liquidationFee}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.maintLeverageOption && (
-                <tr>
-                    <td>Maint leverage</td>
-                    <td className="text-lg-end">{info.maintLeverage}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Maint leverage</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.maintLeverage}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.makerFeeOption && (
-                <tr>
-                    <td>Maker fee</td>
-                    <td className="text-lg-end">{info.makerFee}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Maker fee</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.makerFee}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.mngoPerPeriodOption && (
-                <tr>
-                    <td>
-                        MNGO per{' '}
-                        {targetPeriodLength !== null && moment.duration(targetPeriodLength, 'seconds').humanize()}
-                    </td>
-                    <td className="text-lg-end">
+                <BaseTable.Row>
+                    <BaseTable.Cell>
+                        MNGO per {targetPeriodLength !== null && formatDuration(targetPeriodLength, 'seconds')}
+                    </BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">
                         {info.mngoPerPeriod} {}
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
             {info.maxDepthBpsOption && (
-                <tr>
-                    <td>Max depth bps</td>
-                    <td className="text-lg-end">{info.maxDepthBps}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Max depth bps</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.maxDepthBps}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.rateOption && (
-                <tr>
-                    <td>Rate</td>
-                    <td className="text-lg-end">{info.rate}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Rate</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.rate}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.takerFeeOption && (
-                <tr>
-                    <td>Taker fee</td>
-                    <td className="text-lg-end">{info.takerFee}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Taker fee</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.takerFee}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {info.targetPeriodLengthOption && (
-                <tr>
-                    <td>Target period length</td>
-                    <td className="text-lg-end">{info.targetPeriodLength}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Target period length</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.targetPeriodLength}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
         </InstructionCard>
     );

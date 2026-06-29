@@ -7,11 +7,13 @@ import React from 'react';
 import type { Key } from 'swr';
 import { describe, expect, type Mock, test, vi } from 'vitest';
 
+import { InstructionParserProvider } from '@/app/entities/instruction-parser';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
+import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
-import { TransactionInspectorPage } from '../InspectorPage';
+import { TransactionInspectorPage, vaultMessageToVersionedMessage } from '../InspectorPage';
 
 vi.mock('swr', () => ({
     __esModule: true,
@@ -39,7 +41,7 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
             replace: vi.fn(),
         } as unknown as ReturnType<typeof useRouter>);
 
-        // Mock fetch for /api/anchor route
+        // Mock fetch for the /api/idl-latest route (catch-all empty payload — no IDL needed here)
         global.fetch = vi.fn().mockImplementation(() =>
             Promise.resolve(
                 new Response(JSON.stringify({}), {
@@ -62,7 +64,11 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         (mockSWR.default as unknown as Mock).mockImplementation((key: Key) => {
             if (Array.isArray(key) && key[0] === specificAccountKey[0] && key[1] === specificAccountKey[1]) {
                 return {
-                    data: generated.VaultTransaction.fromAccountInfo(squadsAccountInfo)[0],
+                    data: [
+                        vaultMessageToVersionedMessage(
+                            generated.VaultTransaction.fromAccountInfo(squadsAccountInfo)[0].message,
+                        ),
+                    ],
                     error: null,
                     isLoading: false,
                 };
@@ -78,7 +84,9 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         expect(screen.queryByText(/Inspector Input/i)).toBeNull();
 
         expect(screen.getByText(/Account List \(8\)/i)).not.toBeNull();
-        expect(screen.getByText(/BPF Upgradeable Loader Instruction/i)).not.toBeNull();
+        // The card title splits programName and "Instruction" into separate spans so the
+        // programName can truncate independently on mobile; multiple matches are expected.
+        expect(screen.getAllByText(/BPF Upgradeable Loader/i).length).toBeGreaterThan(0);
     });
 
     test('should render when account loading fails', async () => {
@@ -98,7 +106,7 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
 
         renderWithContext();
 
-        expect(await screen.findByText(/Error loading vault transaction/i)).toBeInTheDocument();
+        expect(await screen.findByText(/Error loading Squads transaction/i)).toBeInTheDocument();
     });
 
     test('should render Squads transaction with lookup table without crashing', async () => {
@@ -108,7 +116,11 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
         (mockSWR.default as unknown as Mock).mockImplementation((key: Key) => {
             if (Array.isArray(key) && key[0] === specificAccountKey[0] && key[1] === specificAccountKey[1]) {
                 return {
-                    data: generated.VaultTransaction.fromAccountInfo(squadsLookupTableAccountInfo)[0],
+                    data: [
+                        vaultMessageToVersionedMessage(
+                            generated.VaultTransaction.fromAccountInfo(squadsLookupTableAccountInfo)[0].message,
+                        ),
+                    ],
                     error: null,
                     isLoading: false,
                 };
@@ -135,7 +147,9 @@ function setup() {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <TransactionInspectorPage showTokenBalanceChanges={false} />
+                        <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                            <TransactionInspectorPage showTokenBalanceChanges={false} />
+                        </InstructionParserProvider>
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,

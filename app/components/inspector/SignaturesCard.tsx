@@ -5,6 +5,10 @@ import bs58 from 'bs58';
 import React from 'react';
 import * as nacl from 'tweetnacl';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function TransactionSignatures({
     signatures,
     message,
@@ -41,25 +45,25 @@ export function TransactionSignatures({
     }, [signatures, message, rawMessage]);
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title">Signatures</h3>
-            </div>
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">#</th>
-                            <th className="text-muted">Signature</th>
-                            <th className="text-muted">Signer</th>
-                            <th className="text-muted">Validity</th>
-                            <th className="text-muted">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">{signatureRows}</tbody>
-                </table>
-            </div>
-        </div>
+        <Card ui="dashkit">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit">
+                    Signatures
+                </CardTitle>
+            </CardHeader>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">#</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Signature</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Signer</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Validity</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Details</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>{signatureRows}</BaseTable.Body>
+            </BaseTable>
+        </Card>
     );
 }
 
@@ -87,24 +91,36 @@ function SignatureRow({
     index: number;
 }) {
     return (
-        <tr>
-            <td>
-                <span className="badge bg-info-soft me-1">{index + 1}</span>
-            </td>
-            <td>{signature ? <Signature signature={signature} truncateChars={40} /> : 'Missing Signature'}</td>
-            <td>
+        <BaseTable.Row>
+            <BaseTable.Cell>
+                <Badge ui="dashkit" variant="info" className="mr-[3px]">
+                    {index + 1}
+                </Badge>
+            </BaseTable.Cell>
+            <BaseTable.Cell>{signature ? <Signature signature={signature} /> : 'Missing Signature'}</BaseTable.Cell>
+            <BaseTable.Cell>
                 <Address pubkey={signer} link />
-            </td>
-            <td>
+            </BaseTable.Cell>
+            <BaseTable.Cell>
                 {verified === undefined ? (
                     'N/A'
                 ) : verified ? (
-                    <span className="badge bg-success-soft me-1">Valid</span>
+                    <Badge ui="dashkit" variant="success" className="mr-[3px]">
+                        Valid
+                    </Badge>
                 ) : (
-                    <span className="badge bg-warning-soft me-1">Invalid</span>
+                    <Badge ui="dashkit" variant="warning" className="mr-[3px]">
+                        Invalid
+                    </Badge>
                 )}
-            </td>
-            <td>{index === 0 && <span className="badge bg-info-soft me-1">Fee Payer</span>}</td>
-        </tr>
+            </BaseTable.Cell>
+            <BaseTable.Cell>
+                {index === 0 && (
+                    <Badge ui="dashkit" variant="info" className="mr-[3px]">
+                        Fee Payer
+                    </Badge>
+                )}
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

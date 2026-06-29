@@ -42,30 +42,33 @@ export const domainSearchProvider: SearchProvider = {
 
             if (!is(domainInfo, ResolvedDomainInfoSchema) || !domainInfo) return [];
 
+            const canonical = query.toLowerCase();
             return [
                 {
                     label: SearchGroup.DomainOwners,
                     options: [
                         {
-                            label: domainInfo.owner,
+                            label: canonical,
                             pathname: `/address/${domainInfo.owner}`,
+                            sublabel: domainInfo.owner,
                             type: 'address',
-                            value: [query],
+                            value: [canonical, domainInfo.owner],
                         },
                     ],
                 },
-                {
-                    label: SearchGroup.NameServiceAccounts,
-                    options: [
-                        {
-                            label: query,
-                            pathname: `/address/${domainInfo.address}`,
-                            sublabel: domainInfo.address,
-                            type: 'address',
-                            value: [query],
-                        },
-                    ],
-                },
+                // Temporarily hidden — restore to surface the SNS name account itself.
+                // {
+                //     label: SearchGroup.NameServiceAccounts,
+                //     options: [
+                //         {
+                //             label: query,
+                //             pathname: `/address/${domainInfo.address}`,
+                //             sublabel: domainInfo.address,
+                //             type: 'address',
+                //             value: [query],
+                //         },
+                //     ],
+                // },
             ];
         } catch (error) {
             Logger.error(new Error('Domain search request failed', { cause: error }), { query, sentry: true });

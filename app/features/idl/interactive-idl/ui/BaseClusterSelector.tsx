@@ -1,10 +1,11 @@
+import { Button } from '@components/shared/ui/button';
+import { cn } from '@components/shared/utils';
 import { Slot } from '@radix-ui/react-slot';
-import { Button } from '@shared/ui/button';
-import { Card } from '@shared/ui/card';
-import { cn } from '@shared/utils';
 import { cva } from 'class-variance-authority';
 import { ReactNode } from 'react';
 import { AlertCircle, Check, Globe } from 'react-feather';
+
+import { Card } from '@/app/shared/ui/Card';
 
 type BaseClusterSelectorProps = {
     currentCluster: string;
@@ -28,20 +29,20 @@ export function BaseClusterSelector({
 
     const content = (
         <>
-            <div className="e-flex e-w-full e-items-start e-gap-2">
-                <span className="e-m-0.5 e-flex e-h-4 e-w-4 e-flex-shrink-0 e-items-center e-justify-center e-rounded-full e-bg-accent">
-                    <Check className="e-text-heavy-metal-800" size={10} strokeWidth={3} />
+            <div className="flex w-full items-start gap-2">
+                <span className="m-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-accent">
+                    <Check className="text-heavy-metal-800" size={10} strokeWidth={3} />
                 </span>
 
-                <div className="e-w-full e-grow">
-                    <div className="e-text-sm e-tracking-tight e-text-neutral-200">Select cluster</div>
-                    <div className="e-mt-0.5 e-text-xs e-tracking-tight e-text-neutral-400">
+                <div className="w-full grow">
+                    <div className="text-sm tracking-tight text-neutral-200">Select cluster</div>
+                    <div className="mt-0.5 text-xs tracking-tight text-neutral-400">
                         Use Devnet with test tokens to avoid real costs
                     </div>
                     {showMainnetWarning && (
-                        <div className="e-mt-1 e-flex e-items-center e-gap-1.5 e-rounded">
-                            <AlertCircle className="e-text-destructive" size={14} />
-                            <div className="e-mt-0.5 e-text-xs e-tracking-tight e-text-destructive">
+                        <div className="mt-1 flex items-center gap-1.5 rounded">
+                            <AlertCircle className="text-destructive" size={14} />
+                            <div className="mt-0.5 text-xs tracking-tight text-destructive">
                                 You are connected to Mainnet, which uses real funds
                             </div>
                         </div>
@@ -49,8 +50,8 @@ export function BaseClusterSelector({
                 </div>
 
                 <Button variant="outline" size="sm" onClick={onClusterChange}>
-                    <Globe className="e-h-3 e-w-3 e-text-neutral-200" size={12} />
-                    <div className="e-whitespace-nowrap">{currentCluster}</div>
+                    <Globe className="h-3 w-3 text-neutral-200" size={12} />
+                    <div className="whitespace-nowrap">{currentCluster}</div>
                 </Button>
             </div>
         </>
@@ -73,16 +74,13 @@ export function BaseClusterSelector({
     );
 }
 
-const cardVariants = cva(
-    'e-flex e-w-full e-flex-col e-gap-[7px] e-border e-border-heavy-metal-950 e-bg-heavy-metal-800 e-px-3 e-py-2',
-    {
-        defaultVariants: {
-            disabled: false,
-        },
-        variants: {
-            disabled: {
-                true: 'e-opacity-50 e-cursor-not-allowed',
-            },
+const cardVariants = cva('flex w-full flex-col gap-[7px] border border-heavy-metal-950 bg-heavy-metal-800 px-3 py-2', {
+    defaultVariants: {
+        disabled: false,
+    },
+    variants: {
+        disabled: {
+            true: 'opacity-50 cursor-not-allowed',
         },
     },
-);
+});

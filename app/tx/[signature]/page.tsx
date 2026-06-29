@@ -1,4 +1,4 @@
-import '../../styles.css';
+import '../../styles/styles.css';
 
 import { getClusterParam } from '@features/receipt';
 import { isReceiptEnabled, RECEIPT_BASE_URL, RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/env';
@@ -8,7 +8,7 @@ import { SignatureProps } from '@utils/index';
 import { Metadata } from 'next/types';
 import React from 'react';
 
-import TransactionDetailsPageClient from './page-client';
+import { TransactionDetailsPageClient } from './page-client';
 
 type Props = Readonly<{
     params: Promise<SignatureProps>;

@@ -1,5 +1,5 @@
+import { Badge } from '@components/shared/ui/badge';
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
-import { cn } from '@shared/utils';
 import { ConcurrentMerkleTreeAccount, MerkleTree } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
@@ -12,6 +12,8 @@ import {
     useCompressedNftProof,
 } from '@/app/providers/compressed-nft';
 import { toBuffer } from '@/app/shared/lib/bytes';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { Address } from '../common/Address';
 import { TableCardBody } from '../common/TableCardBody';
@@ -27,7 +29,13 @@ export function CompressedNFTInfoCard({ account, onNotFound }: { account?: Accou
     return onNotFound();
 }
 
-function DasCompressionInfoCard({ proof, compressedNft }: { proof: CompressedNftProof; compressedNft: CompressedNft }) {
+export function DasCompressionInfoCard({
+    proof,
+    compressedNft,
+}: {
+    proof: CompressedNftProof;
+    compressedNft: CompressedNft;
+}) {
     const compressedInfo = compressedNft.compression;
     const fetchAccountInfo = useFetchAccountInfo();
     const treeAccountInfo = useAccountInfo(compressedInfo.tree);
@@ -50,84 +58,95 @@ function DasCompressionInfoCard({ proof, compressedNft }: { proof: CompressedNft
             : 0;
     const proofSize = proof.proof.length - canopyDepth;
     return (
-        <div className="card">
-            <div className="card-header align-items-center">
-                <h3 className="card-header-title">Compression Info</h3>
-            </div>
+        <Card ui="dashkit">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit">
+                    Compression Info
+                </CardTitle>
+            </CardHeader>
 
             <TableCardBody>
-                <tr>
-                    <td>Concurrent Merkle Tree</td>
-                    <td>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Concurrent Merkle Tree</BaseTable.Cell>
+                    <BaseTable.Cell>
                         <Address pubkey={treeAddress} alignRight link raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Current Tree Root {getVerifiedProofPill(proofVerified)}</td>
-                    <td>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Current Tree Root {getVerifiedProofPill(proofVerified)}</BaseTable.Cell>
+                    <BaseTable.Cell>
                         <Address pubkey={root} alignRight raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Proof Size {getProofSizePill(proofSize)}</td>
-                    <td className="text-lg-end">{proofSize}</td>
-                </tr>
-                <tr>
-                    <td>Leaf Number</td>
-                    <td className="text-lg-end">{compressedInfo.leaf_id}</td>
-                </tr>
-                <tr>
-                    <td>Sequence Number of Last Update</td>
-                    <td className="text-lg-end">{compressedInfo.seq}</td>
-                </tr>
-                <tr>
-                    <td>Compressed Nft Hash</td>
-                    <td>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Proof Size {getProofSizePill(proofSize)}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{proofSize}</BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Leaf Number</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{compressedInfo.leaf_id}</BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Sequence Number of Last Update</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{compressedInfo.seq}</BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Compressed Nft Hash</BaseTable.Cell>
+                    <BaseTable.Cell>
                         <Address pubkey={new PublicKey(compressedInfo.asset_hash)} alignRight raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Creators Hash</td>
-                    <td>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Creators Hash</BaseTable.Cell>
+                    <BaseTable.Cell>
                         <Address pubkey={new PublicKey(compressedInfo.creator_hash)} alignRight raw />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Metadata Hash</td>
-                    <td>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Metadata Hash</BaseTable.Cell>
+                    <BaseTable.Cell>
                         <Address pubkey={new PublicKey(compressedInfo.data_hash)} alignRight raw />
-                    </td>
-                </tr>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
             </TableCardBody>
-        </div>
+        </Card>
     );
 }
 
 function getVerifiedProofPill(verified: boolean) {
     return (
-        <div className={'d-inline-flex align-items-center ms-2'}>
-            <span className={cn('badge badge-pill bg-dark', !verified && 'bg-danger-soft')}>{`Proof ${
-                verified ? '' : 'Not'
-            } Verified`}</span>
+        <div className="ml-1.5 inline-flex items-center">
+            {verified ? (
+                <Badge ui="dashkit" variant="dark" tone="solid">
+                    Proof Verified
+                </Badge>
+            ) : (
+                <Badge ui="dashkit" variant="danger">
+                    Proof Not Verified
+                </Badge>
+            )}
         </div>
     );
 }
 
 function getProofSizePill(proofSize: number) {
-    let text: string;
-    let color = 'bg-dark';
-    if (proofSize == 0) {
-        text = 'No Proof Required';
-    } else if (proofSize > 8) {
-        text = `Composability Hazard`;
-        color = 'bg-danger-soft';
-    } else {
-        return <div />;
+    if (proofSize === 0) {
+        return (
+            <div className="ml-1.5 inline-flex items-center">
+                <Badge ui="dashkit" variant="dark" tone="solid">
+                    No Proof Required
+                </Badge>
+            </div>
+        );
     }
-
-    return (
-        <div className={'d-inline-flex align-items-center ms-2'}>
-            <span className={`badge badge-pill ${color}`}>{text}</span>
-        </div>
-    );
+    if (proofSize > 8) {
+        return (
+            <div className="ml-1.5 inline-flex items-center">
+                <Badge ui="dashkit" variant="danger">
+                    Composability Hazard
+                </Badge>
+            </div>
+        );
+    }
+    return <div />;
 }

@@ -22,11 +22,15 @@ import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc } from '@utils/date';
 import React, { useCallback, useMemo } from 'react';
-import Moment from 'react-moment';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import { useVisibility } from '@/app/shared/lib/visibility';
+import { RelativeTime } from '@/app/shared/RelativeTime';
+import { Card } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { useInstructionNames } from '../lib/use-instruction-names';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
@@ -107,7 +111,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 
     const fetching = history.status === FetchStatus.Fetching;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <HistoryCardHeader
                 fetching={fetching}
                 refresh={() => refresh()}
@@ -116,27 +120,27 @@ export function TransactionHistoryCard({ address }: { address: string }) {
                 actions={<HistoryFilterTrigger {...filters} />}
                 subHeader={hasActiveFilters ? <HistoryFilterChips {...filters} /> : undefined}
             />
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted w-1">Transaction Signature</th>
-                            <th className="text-muted w-1">Block</th>
-                            {hasTimestamps && (
-                                <>
-                                    <th className="text-muted w-1">Age</th>
-                                    <th className="text-muted w-1">Timestamp</th>
-                                </>
-                            )}
-                            <th className="text-muted">Result</th>
-                            <th className="text-muted">Raw Data</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">{detailsList}</tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">
+                            Transaction Signature
+                        </BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Block</BaseTable.HeaderCell>
+                        {hasTimestamps && (
+                            <>
+                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Age</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Timestamp</BaseTable.HeaderCell>
+                            </>
+                        )}
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Raw Data</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>{detailsList}</BaseTable.Body>
+            </BaseTable>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
-        </div>
+        </Card>
     );
 }
 
@@ -150,37 +154,44 @@ type TransactionRowProps = {
 };
 
 function TransactionRow({ signature, slot, blockTime, statusClass, statusText, hasTimestamps }: TransactionRowProps) {
-    const instructionNames = useInstructionNames(signature);
+    const { isVisible, ref } = useVisibility<HTMLTableRowElement>(true);
+    const instructionNames = useInstructionNames(signature, isVisible);
 
     return (
-        <tr>
-            <td>
-                <Signature signature={signature} link truncateChars={40} />
+        <BaseTable.Row ref={ref}>
+            <BaseTable.Cell>
+                <Signature signature={signature} link />
                 {instructionNames !== null && instructionNames.length > 0 ? (
                     <InstructionList instructions={instructionNames} />
                 ) : instructionNames === null ? (
                     <InstructionListSkeleton />
                 ) : null}
-            </td>
+            </BaseTable.Cell>
 
-            <td className="w-1">
+            <BaseTable.Cell className="w-px">
                 <Slot slot={slot} link />
-            </td>
+            </BaseTable.Cell>
 
             {hasTimestamps && (
                 <>
-                    <td className="text-muted">{blockTime ? <Moment date={blockTime * 1000} fromNow /> : '---'}</td>
-                    <td className="text-muted">{blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}</td>
+                    <BaseTable.Cell className="text-dk-gray-700">
+                        {blockTime ? <RelativeTime date={blockTime * 1000} /> : '---'}
+                    </BaseTable.Cell>
+                    <BaseTable.Cell className="text-dk-gray-700">
+                        {blockTime ? displayTimestampUtc(blockTime * 1000, true) : '---'}
+                    </BaseTable.Cell>
                 </>
             )}
 
-            <td>
-                <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
-            </td>
-            <td>
+            <BaseTable.Cell>
+                <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
+                    {statusText}
+                </Badge>
+            </BaseTable.Cell>
+            <BaseTable.Cell>
                 <TransactionRawDataDownloadField signature={signature} />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -198,7 +209,7 @@ function TransactionRawDataDownloadField({ signature }: { signature: string }) {
     }, [transactionData, signature, fetchRaw]);
 
     return (
-        <div className="d-flex align-items-center gap-1" onMouseEnter={handleHover}>
+        <div className="flex items-center gap-[3px]" onMouseEnter={handleHover}>
             <Copyable text={transactionData ? toBase64(transactionData) : null}>
                 <DownloadDropdown data={transactionData} loading={loading} filename={signature} />
             </Copyable>

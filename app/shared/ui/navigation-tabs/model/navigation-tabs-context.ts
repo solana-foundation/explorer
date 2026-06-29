@@ -7,6 +7,7 @@ import { type NavigationTab } from './types';
 export type NavigationTabsContextValue = {
     activeValue: string;
     buildHref: (path: string) => string;
+    onTabClick?: (path: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
     registerTab: (tab: NavigationTab) => void;
     renderTabLink: boolean;
     staticPaths: Set<string>;

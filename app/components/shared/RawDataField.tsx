@@ -1,12 +1,13 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 'use client';
 
-import { HexData } from '@shared/HexData';
-import { Button } from '@shared/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
+import { HexData } from '@components/shared/HexData';
+import { Button } from '@components/shared/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/tabs';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, Copy } from 'react-feather';
+import { Check, ChevronDown, Copy, Download } from 'react-feather';
 
-import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
+import { DownloadDropdown, DownloadState } from '@/app/shared/components/DownloadDropdown';
 import { type ByteArray, toBase64, toHex } from '@/app/shared/lib/bytes';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
@@ -32,6 +33,14 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     const [tab, setTab] = useState<'hex' | 'base64'>('hex');
     const [expanded, setExpanded] = useState(false);
     const [copyState, copy] = useCopyToClipboard();
+    const [downloadState, setDownloadState] = useState<DownloadState>(DownloadState.Idle);
+
+    useEffect(() => {
+        if (downloadState === DownloadState.Downloaded) {
+            const t = setTimeout(() => setDownloadState(DownloadState.Idle), 1000);
+            return () => clearTimeout(t);
+        }
+    }, [downloadState]);
 
     useEffect(() => {
         setExpanded(false);
@@ -40,11 +49,8 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
     const hasData = data !== undefined && data.length > 0;
     const tooLarge = data !== undefined && data.length > MAX_INLINE_BYTES;
 
-    const hexString = useMemo(() => (data && data.length > 0 && !tooLarge ? toHex(data) : ''), [data, tooLarge]);
-    const base64String = useMemo(
-        () => (data && data.length > 0 && !tooLarge ? toBase64(new Uint8Array(data)) : ''),
-        [data, tooLarge],
-    );
+    const hexString = useMemo(() => (data && data.length > 0 ? toHex(data) : ''), [data]);
+    const base64String = useMemo(() => (data && data.length > 0 ? toBase64(new Uint8Array(data)) : ''), [data]);
 
     const hasMoreHex = data !== undefined && data.length > VISIBLE_ROWS * HEX_ROW_BYTES;
     const visibleData = !expanded && hasMoreHex ? data.subarray(0, VISIBLE_ROWS * HEX_ROW_BYTES) : data;
@@ -65,32 +71,31 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
         <Tabs
             value={tab}
             onValueChange={handleTabChange}
-            className="e-max-w-[540px] e-overflow-hidden e-rounded-lg e-border e-border-solid e-border-outer-space-800 e-bg-heavy-metal-900"
+            // we need to do -32px because this is padding for left and right 16px
+            className="max-w-[calc(100vw-32px)] overflow-hidden rounded-lg border border-solid border-outer-space-800 bg-heavy-metal-900 lg:max-w-[540px]"
         >
-            <div className="e-flex e-flex-wrap e-justify-between e-gap-8 e-border-b e-border-outer-space-800 e-px-3 [border-bottom-style:solid]">
+            <div className="flex flex-wrap justify-between gap-8 border-b border-outer-space-800 px-3 [border-bottom-style:solid]">
                 <TabsList>
-                    <TabsTrigger className="!e-py-2 e-text-xs" value="hex">
+                    <TabsTrigger className="!py-2 text-xs" value="hex">
                         Hex
                     </TabsTrigger>
-                    <TabsTrigger className="!e-py-2 e-text-xs" value="base64">
+                    <TabsTrigger className="!py-2 text-xs" value="base64">
                         Base64
                     </TabsTrigger>
                 </TabsList>
-                <div className="e-flex e-items-center e-gap-2">
+                <div className="flex items-center gap-2">
                     {data !== undefined && !loading && (
-                        <span className="e-whitespace-nowrap e-text-xs e-text-outer-space-300">
-                            {data.length} bytes
-                        </span>
+                        <span className="whitespace-nowrap text-xs text-outer-space-300">{data.length} bytes</span>
                     )}
                     <Button
                         variant="outline"
                         size="sm"
                         aria-label="Copy"
-                        disabled={!hasData || loading || tooLarge}
+                        disabled={!hasData || loading}
                         onClick={() => copy(tab === 'base64' ? base64String : hexString)}
                     >
-                        <Copy size={12} />
-                        <span className="e-hidden md:e-inline">{copyState === 'copied' ? 'Copied!' : 'Copy'}</span>
+                        {copyState === 'copied' ? <Check size={12} /> : <Copy size={12} />}
+                        <span className="hidden md:inline">{copyState === 'copied' ? 'Copied!' : 'Copy'}</span>
                     </Button>
                     <DownloadDropdown
                         filename={filename}
@@ -98,16 +103,29 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                         loading={loading}
                         disabled={!hasData}
                         encodings={[tab]}
-                    />
+                        onDownload={() => setDownloadState(DownloadState.Downloaded)}
+                    >
+                        <Button variant="outline" size="sm" aria-label="Download" disabled={!hasData || loading}>
+                            {downloadState === DownloadState.Downloaded ? <Check size={12} /> : <Download size={12} />}
+                            <span className="hidden md:inline">
+                                {downloadState === DownloadState.Downloaded ? 'Downloaded!' : 'Download'}
+                            </span>
+                        </Button>
+                    </DownloadDropdown>
                 </div>
             </div>
 
-            <TabsContent value="hex" className={cn('e-text-start', loading ? 'e-p-3' : 'e-p-1.5')}>
+            <TabsContent
+                value="hex"
+                className={cn('max-h-80 overflow-y-auto p-1.5 text-start', loading && 'p-3', tooLarge && 'px-3 py-2')}
+            >
                 {loading ? (
                     <span className="spinner-grow spinner-grow-sm" />
+                ) : tooLarge ? (
+                    <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>
                 ) : (
                     <HexData
-                        className="e-w-full"
+                        className="w-full"
                         raw={visibleData ?? new Uint8Array(0)}
                         isCopyable={false}
                         rowSize={HEX_ROW_BYTES}
@@ -116,33 +134,36 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                 )}
             </TabsContent>
 
-            <TabsContent value="base64" className={cn('e-p-3 e-text-start', !loading && data?.length && 'e-py-2')}>
+            <TabsContent
+                value="base64"
+                className={cn('max-h-80 overflow-y-auto p-3 text-start', !loading && data?.length && 'py-2')}
+            >
                 {loading ? (
                     <span className="spinner-grow spinner-grow-sm" />
                 ) : !hasData ? (
-                    <span className="e-text-sm e-text-outer-space-200">No data</span>
+                    <span className="text-sm text-outer-space-200">No data</span>
                 ) : tooLarge ? (
-                    <span className="e-text-sm e-text-outer-space-200">Too large to display — use download.</span>
+                    <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>
                 ) : (
-                    <span className="e-text-wrap e-break-all e-font-mono e-text-xs e-text-white">
+                    <span className="text-wrap break-all font-mono text-xs text-white">
                         {visibleBase64}
                         {!expanded && hasMoreBase64 && '…'}
                     </span>
                 )}
             </TabsContent>
 
-            {hasMore && !loading && hasData && (
-                <div className="e-mt-1 e-flex e-justify-center e-border-t e-border-outer-space-800 [border-top-style:solid]">
+            {hasMore && !tooLarge && !loading && hasData && (
+                <div className="mt-1 flex justify-center border-t border-outer-space-800 [border-top-style:solid]">
                     <Button
                         variant="ghost"
-                        className="hover:!e-bg-transparent"
+                        className="hover:!bg-transparent"
                         size="sm"
                         onClick={() => setExpanded(e => !e)}
                     >
-                        <span className="e-text-xs e-text-outer-space-300">{expanded ? 'Show less' : 'Show more'}</span>
+                        <span className="text-xs text-outer-space-300">{expanded ? 'Show less' : 'Show more'}</span>
                         <ChevronDown
                             size={14}
-                            className={expanded ? 'e-rotate-180 e-transition-transform' : 'e-transition-transform'}
+                            className={expanded ? 'rotate-180 transition-transform' : 'transition-transform'}
                         />
                     </Button>
                 </div>

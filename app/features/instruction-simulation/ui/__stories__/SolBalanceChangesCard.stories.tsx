@@ -1,0 +1,95 @@
+import { gen } from '@__fixtures__/gen';
+import { PublicKey } from '@solana/web3.js';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
+import BN from 'bn.js';
+import { expect, within } from 'storybook/test';
+
+import type { SolBalanceChange } from '../../lib/types';
+import { SolBalanceChangesCard } from '../SolBalanceChangesCard';
+
+const ALICE = gen.publicKey(1).toBase58();
+
+const meta = {
+    component: SolBalanceChangesCard,
+    decorators: [withClusterAndAccounts, withTokenInfoBatch],
+    parameters: nextjsParameters,
+    tags: ['autodocs', 'test'],
+    title: 'Features/Instruction Simulation/SolBalanceChangesCard',
+} satisfies Meta<typeof SolBalanceChangesCard>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+/**
+ * Single account with a positive SOL balance change (e.g. received SOL).
+ */
+export const SinglePositiveChange: Story = {
+    args: {
+        balanceChanges: [change(ALICE, '1000000000', '2000000000', '3000000000')],
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+
+        await expect(canvas.getByText('SOL Balance Changes')).toBeInTheDocument();
+        await expect(canvas.getByText('1')).toBeInTheDocument();
+
+        // Should show the positive badge
+        const badge = canvas.getByText('+', { exact: false });
+        await expect(badge).toHaveAttribute('data-variant', 'success');
+    },
+};
+
+/**
+ * Single account with a negative SOL balance change (e.g. sent SOL).
+ */
+export const SingleNegativeChange: Story = {
+    args: {
+        balanceChanges: [change(ALICE, '-500000000', '2000000000', '1500000000')],
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+
+        // Should show the negative badge
+        const badge = canvas.getByText('-', { exact: false });
+        await expect(badge).toHaveAttribute('data-variant', 'warning');
+    },
+};
+
+/**
+ * Multiple accounts with mixed positive and negative balance changes.
+ */
+export const MultipleChanges: Story = {
+    args: {
+        balanceChanges: [
+            change(ALICE, '-2000000000', '5000000000', '3000000000'),
+            change(TOKEN_PROGRAM_ADDRESS, '1500000000', '1000000000', '2500000000'),
+            change(SYSTEM_PROGRAM_ADDRESS, '500000000', '0', '500000000'),
+        ],
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+
+        // Should render correct row numbering
+        await expect(canvas.getByText('1')).toBeInTheDocument();
+        await expect(canvas.getByText('2')).toBeInTheDocument();
+        await expect(canvas.getByText('3')).toBeInTheDocument();
+
+        // Should render all table headers
+        await expect(canvas.getByText('#')).toBeInTheDocument();
+        await expect(canvas.getByText('Address')).toBeInTheDocument();
+        await expect(canvas.getByText('Change (SOL)')).toBeInTheDocument();
+        await expect(canvas.getByText('Post Balance (SOL)')).toBeInTheDocument();
+    },
+};
+
+function change(pubkey: string, delta: string, preBalance: string, postBalance: string): SolBalanceChange {
+    return {
+        delta: new BN(delta),
+        postBalance: new BN(postBalance),
+        preBalance: new BN(preBalance),
+        pubkey: new PublicKey(pubkey),
+    };
+}

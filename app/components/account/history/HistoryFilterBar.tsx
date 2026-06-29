@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { Input } from '@components/shared/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
@@ -121,7 +122,7 @@ function localInputToUnix(raw: string): number | undefined {
 
 function FilterChip({ label, value, onClear }: { label: string; value: string; onClear: () => void }) {
     return (
-        <span className="badge bg-info-soft d-inline-flex align-items-center gap-1">
+        <Badge ui="dashkit" variant="info" className="inline-flex items-center gap-1">
             <span>
                 {label}: {value}
             </span>
@@ -129,12 +130,11 @@ function FilterChip({ label, value, onClear }: { label: string; value: string; o
                 type="button"
                 onClick={onClear}
                 aria-label={`Clear ${label.toLowerCase()} filter`}
-                className="btn btn-link btn-sm p-0 text-muted d-inline-flex align-items-center"
-                style={{ lineHeight: 0 }}
+                className="inline-flex items-center p-0 leading-none opacity-70 hover:opacity-100"
             >
                 <X size={12} />
             </button>
-        </span>
+        </Badge>
     );
 }
 
@@ -185,7 +185,7 @@ export function HistoryFilterChips(filters: HistoryFilters) {
 }
 
 const SELECT_CLASS =
-    'e-w-full e-rounded-md e-border e-border-neutral-700 e-bg-neutral-900 e-px-2 e-py-1.5 e-text-sm e-text-neutral-100';
+    'w-full rounded-md border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm text-neutral-100';
 
 export function HistoryFilterTrigger(filters: HistoryFilters) {
     const { slot, blockTime, status } = filters;
@@ -264,7 +264,7 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                 title="Transaction filtering requires a Triton- or Helius-compatible RPC endpoint"
             >
                 <Filter />
-                <span className="e-hidden md:e-inline">Filters</span>
+                <span className="hidden md:inline">Filters</span>
             </Button>
         );
     }
@@ -274,19 +274,19 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
             <PopoverTrigger asChild>
                 <Button size="sm" variant="outline" aria-label={triggerLabel}>
                     <Filter />
-                    <span className="e-hidden md:e-inline">{triggerLabel}</span>
+                    <span className="hidden md:inline">{triggerLabel}</span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="e-w-80 e-p-3">
+            <PopoverContent align="end" className="w-80 p-3">
                 <form
                     onSubmit={e => {
                         e.preventDefault();
                         apply();
                     }}
-                    className="e-flex e-flex-col e-gap-3"
+                    className="flex flex-col gap-3"
                 >
-                    <div className="e-flex e-flex-col e-gap-1">
-                        <label className="e-text-xs e-text-neutral-300">Slot ≥</label>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs text-neutral-300">Slot ≥</label>
                         <Input
                             autoFocus
                             variant="dark"
@@ -298,8 +298,8 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                             onChange={e => setSlotGteDraft(e.target.value)}
                         />
                     </div>
-                    <div className="e-flex e-flex-col e-gap-1">
-                        <label className="e-text-xs e-text-neutral-300">Slot ≤</label>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs text-neutral-300">Slot ≤</label>
                         <Input
                             variant="dark"
                             inputMode="numeric"
@@ -310,10 +310,10 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                             onChange={e => setSlotLteDraft(e.target.value)}
                         />
                     </div>
-                    {slotRangeInvalid && <div className="e-text-xs e-text-red-400">Slot ≥ must be ≤ slot ≤.</div>}
+                    {slotRangeInvalid && <div className="text-xs text-red-400">Slot ≥ must be ≤ slot ≤.</div>}
 
-                    <div className="e-flex e-flex-col e-gap-1">
-                        <label className="e-text-xs e-text-neutral-300" htmlFor="history-status-filter">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs text-neutral-300" htmlFor="history-status-filter">
                             Status
                         </label>
                         <select
@@ -329,8 +329,8 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                         </select>
                     </div>
 
-                    <div className="e-flex e-flex-col e-gap-1">
-                        <label className="e-text-xs e-text-neutral-300">Block time ≥</label>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs text-neutral-300">Block time ≥</label>
                         <Input
                             type="datetime-local"
                             variant="dark"
@@ -339,8 +339,8 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                             onChange={e => setBlockTimeGteDraft(e.target.value)}
                         />
                     </div>
-                    <div className="e-flex e-flex-col e-gap-1">
-                        <label className="e-text-xs e-text-neutral-300">Block time ≤</label>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs text-neutral-300">Block time ≤</label>
                         <Input
                             type="datetime-local"
                             variant="dark"
@@ -350,10 +350,10 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                         />
                     </div>
                     {timeRangeInvalid && (
-                        <div className="e-text-xs e-text-red-400">Block time ≥ must be on or before block time ≤.</div>
+                        <div className="text-xs text-red-400">Block time ≥ must be on or before block time ≤.</div>
                     )}
 
-                    <div className="e-flex e-justify-end e-gap-2 e-pt-1">
+                    <div className="flex justify-end gap-2 pt-1">
                         {activeCount > 0 && (
                             <Button type="button" size="sm" variant="ghost" onClick={clearAll}>
                                 Clear all

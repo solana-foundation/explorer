@@ -18,8 +18,10 @@ import {
     SolanaAttestationServiceInstruction,
 } from 'sas-lib';
 
+import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { Address } from '../../common/Address';
-import { upcastTransactionInstruction } from '../../inspector/into-parsed-data';
 import { mapCodamaIxArgsToRows } from '../codama/codamaUtils';
 import { InstructionCard } from '../InstructionCard';
 
@@ -40,93 +42,93 @@ export function SolanaAttestationDetailsCard({
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const _ix = upcastTransactionInstruction(ix);
+    const kitIx = toKitInstruction(ix);
     const ixType = identifySolanaAttestationServiceInstruction(ix);
     let title = 'Unknown';
     let parsed: any;
     switch (ixType) {
         case SolanaAttestationServiceInstruction.CreateCredential:
             title = 'Create Credential';
-            parsed = parseCreateCredentialInstruction(_ix);
+            parsed = parseCreateCredentialInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.CreateSchema:
             title = 'Create Schema';
-            parsed = parseCreateSchemaInstruction(_ix);
+            parsed = parseCreateSchemaInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.ChangeSchemaStatus:
             title = 'Change Schema Status';
-            parsed = parseChangeSchemaStatusInstruction(_ix);
+            parsed = parseChangeSchemaStatusInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.ChangeAuthorizedSigners:
             title = 'Change Authorized Signers';
-            parsed = parseChangeAuthorizedSignersInstruction(_ix);
+            parsed = parseChangeAuthorizedSignersInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.ChangeSchemaDescription:
             title = 'Change Schema Description';
-            parsed = parseChangeSchemaDescriptionInstruction(_ix);
+            parsed = parseChangeSchemaDescriptionInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.ChangeSchemaVersion:
             title = 'Change Schema Version';
-            parsed = parseChangeSchemaVersionInstruction(_ix);
+            parsed = parseChangeSchemaVersionInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.CreateAttestation:
             title = 'Create Attestation';
-            parsed = parseCreateAttestationInstruction(_ix);
+            parsed = parseCreateAttestationInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.CloseAttestation:
             title = 'Close Attestation';
-            parsed = parseCloseAttestationInstruction(_ix);
+            parsed = parseCloseAttestationInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.EmitEvent:
             title = 'Emit Event';
-            parsed = parseEmitEventInstruction(_ix);
+            parsed = parseEmitEventInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.TokenizeSchema:
             title = 'Tokenize Schema';
-            parsed = parseTokenizeSchemaInstruction(_ix);
+            parsed = parseTokenizeSchemaInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.CreateTokenizedAttestation:
             title = 'Create Tokenized Attestation';
-            parsed = parseCreateTokenizedAttestationInstruction(_ix);
+            parsed = parseCreateTokenizedAttestationInstruction(kitIx);
             break;
         case SolanaAttestationServiceInstruction.CloseTokenizedAttestation:
             title = 'Close Tokenized Attestation';
-            parsed = parseCloseTokenizedAttestationInstruction(_ix);
+            parsed = parseCloseTokenizedAttestationInstruction(kitIx);
             break;
     }
     return (
         <InstructionCard title={`Solana Attestation: ${title}`} {...{ childIndex, index, innerCards, ix, result }}>
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end" colSpan={2}>
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right" colSpan={2}>
                     <Address pubkey={new PublicKey(SAS_PROGRAM_ID)} alignRight link raw />
-                </td>
-            </tr>
-            <tr className="table-sep">
-                <td>Account Name</td>
-                <td className="text-lg-end" colSpan={2}>
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                <BaseTable.Cell>Account Name</BaseTable.Cell>
+                <BaseTable.Cell className="text-right" colSpan={2}>
                     Address
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {parsed &&
                 parsed.accounts &&
                 Object.entries(parsed.accounts as Record<string, AccountMeta>).map(([key, value], idx: number) => (
-                    <tr key={idx}>
-                        <td>{key.charAt(0).toUpperCase() + key.slice(1)}</td>
-                        <td className="text-lg-end" colSpan={2}>
+                    <BaseTable.Row key={idx}>
+                        <BaseTable.Cell>{key.charAt(0).toUpperCase() + key.slice(1)}</BaseTable.Cell>
+                        <BaseTable.Cell className="text-right" colSpan={2}>
                             <Address pubkey={new PublicKey(value.address)} alignRight link />
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 ))}
 
             {/* Need to make sure there's one other field besides the discriminator */}
             {parsed.data && Object.keys(parsed.data).length > 2 && (
                 <>
-                    <tr className="table-sep">
-                        <td>Argument Name</td>
-                        <td>Type</td>
-                        <td className="text-lg-end">Value</td>
-                    </tr>
+                    <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                        <BaseTable.Cell>Argument Name</BaseTable.Cell>
+                        <BaseTable.Cell>Type</BaseTable.Cell>
+                        <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
+                    </BaseTable.Row>
                     {mapCodamaIxArgsToRows(parsed.data)}
                 </>
             )}

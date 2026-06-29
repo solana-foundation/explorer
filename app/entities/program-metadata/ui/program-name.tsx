@@ -5,8 +5,9 @@ import { RootNode } from 'codama';
 
 import { AnchorProgramName } from '@/app/utils/anchor';
 
-import { useProgramMetadataIdl } from '../model/useProgramMetadataIdl';
+import { useProgramMetadataIdl } from '../model/use-program-metadata-idl';
 
+// FIXME: missing Storybook story — needs useProgramMetadataIdl SWR mock.
 export default function ProgramName({
     programId,
     url,
@@ -24,9 +25,15 @@ export default function ProgramName({
     }
 
     try {
-        return <>{programNameFromIdl(programMetadataIdl)}</>;
+        // PMP content may already be Codama (a RootNode) — read the program name directly.
+        return <>{programNameFromIdl(programMetadataIdl as RootNode)}</>;
     } catch {
-        return <>{programNameFromIdl(rootNodeFromAnchor(programMetadataIdl) as unknown as RootNode)}</>;
+        // Otherwise it's Anchor-format: convert to a Codama RootNode first. (`rootNodeFromAnchor`'s
+        // node types are version-skewed from our `codama` import, hence the bridge casts.)
+        const rootNode = rootNodeFromAnchor(
+            programMetadataIdl as unknown as Parameters<typeof rootNodeFromAnchor>[0],
+        ) as unknown as RootNode;
+        return <>{programNameFromIdl(rootNode)}</>;
     }
 }
 

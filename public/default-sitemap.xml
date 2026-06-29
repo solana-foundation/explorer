@@ -13,11 +13,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://explorer.solana.com/supply</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://explorer.solana.com/tos</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -26,10 +21,5 @@
     <loc>https://explorer.solana.com/tx/inspector</loc>
     <changefreq>weekly</changefreq>
     <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://explorer.solana.com/verified-programs</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
   </url>
 </urlset>

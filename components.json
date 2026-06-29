@@ -3,10 +3,10 @@
     "style": "new-york",
     "tailwind": {
         "config": "tailwind.config.ts",
-        "css": "app/styles.css",
+        "css": "app/styles/styles.css",
         "baseColor": "neutral",
         "cssVariables": false,
-        "prefix": "e-",
+        "prefix": "",
         "version": "v3"
     },
     "rsc": false,

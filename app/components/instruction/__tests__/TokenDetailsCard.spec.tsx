@@ -1,10 +1,17 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import { intoParsedInstruction, intoParsedTransaction } from '@components/inspector/into-parsed-data';
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
-import { ParsedInstruction, PublicKey, TransactionMessage } from '@solana/web3.js';
+import {
+    createInstructionParserDispatcher,
+    isParsedInstruction,
+    toParsedTransaction,
+} from '@entities/instruction-parser';
+import { tokenInstructionParser } from '@features/decode-instruction-token';
+import { PublicKey, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
+
+const dispatcher = createInstructionParserDispatcher([tokenInstructionParser]);
 
 vi.mock('next/navigation', () => ({
     usePathname: vi.fn(),
@@ -23,7 +30,8 @@ import { TokenDetailsCard } from '../token/TokenDetailsCard';
 
 describe('instruction::TokenDetailsCard', () => {
     beforeEach(() => {
-        vi.useFakeTimers();
+        // shouldAdvanceTime keeps waitFor's polling alive while the original setTimeout fix stays in place
+        vi.useFakeTimers({ shouldAdvanceTime: true });
     });
 
     afterEach(() => {
@@ -34,8 +42,8 @@ describe('instruction::TokenDetailsCard', () => {
         const m = mock.deserializeMessageV0(stubs.tokenTransferMsg);
         const ti = intoTransactionInstructionFromVersionedMessage(m.compiledInstructions[index], m);
 
-        const parsedIx = intoParsedInstruction(ti);
-        const tx = intoParsedTransaction(ti, m, [parsedIx]);
+        const parsedIx = dispatchOrThrow(ti);
+        const tx = toParsedTransaction(ti, m, [parsedIx]);
 
         expect(ti.programId.equals(new PublicKey(TOKEN_PROGRAM_ADDRESS))).toBeTruthy();
 
@@ -47,7 +55,7 @@ describe('instruction::TokenDetailsCard', () => {
                         <TokenDetailsCard
                             index={index}
                             InstructionCardComponent={InspectorInstructionCard}
-                            ix={parsedIx as ParsedInstruction}
+                            ix={parsedIx}
                             message={m}
                             raw={ti}
                             result={{ err: null }}
@@ -57,7 +65,10 @@ describe('instruction::TokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/Token Program: Transfer/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Token Program: Transfer/)).toBeInTheDocument();
+        });
     });
 
     test('should render Token::TransferChecked instruction', async () => {
@@ -65,8 +76,8 @@ describe('instruction::TokenDetailsCard', () => {
         const m = mock.deserializeMessage(stubs.tokenTransferCheckedMsg);
         const ti = TransactionMessage.decompile(m, { addressLookupTableAccounts: [] }).instructions[index];
 
-        const parsedIx = intoParsedInstruction(ti);
-        const tx = intoParsedTransaction(ti, m, [parsedIx]);
+        const parsedIx = dispatchOrThrow(ti);
+        const tx = toParsedTransaction(ti, m, [parsedIx]);
 
         expect(ti.programId.equals(new PublicKey(TOKEN_PROGRAM_ADDRESS))).toBeTruthy();
 
@@ -78,7 +89,7 @@ describe('instruction::TokenDetailsCard', () => {
                         <TokenDetailsCard
                             index={index}
                             InstructionCardComponent={InspectorInstructionCard}
-                            ix={parsedIx as ParsedInstruction}
+                            ix={parsedIx}
                             message={m}
                             raw={ti}
                             result={{ err: null }}
@@ -88,6 +99,15 @@ describe('instruction::TokenDetailsCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        expect(screen.getByText(/Token Program: Transfer \(Checked\)/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Token Program: Transfer \(Checked\)/)).toBeInTheDocument();
+        });
     });
 });
+
+function dispatchOrThrow(ti: TransactionInstruction) {
+    const parsedIx = dispatcher.fromTransactionInstruction(ti);
+    if (!isParsedInstruction(parsedIx)) throw new Error('Token slice did not recognise fixture');
+    return parsedIx;
+}

@@ -1,5 +1,6 @@
 import { array, boolean, is, nullable, number, optional, string, type } from 'superstruct';
 
+import { fetchUpstream } from '@/app/api/verification/upstream';
 import { matchAbortError } from '@/app/shared/lib/errors';
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -27,7 +28,7 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
 
     try {
         const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(query)}`;
-        const response = await fetch(url, {
+        const response = await fetchUpstream(url, {
             headers: {
                 Accept: 'application/json',
                 'x-api-key': jupiterApiKey,
@@ -74,7 +75,11 @@ export async function discoverWithJupiter(query: string, signal: AbortSignal): P
     }
 }
 
-const JUPITER_IMAGES_CACHE_REVALIDATE_S = 30;
+// In-memory cache for logo lookups — replaces Next.js fetch cache (unavailable when passing signal).
+const logoCache = new Map<string, { expiresAt: number; logo: string }>();
+const LOGO_CACHE_TTL_MS = 30_000;
+
+export const clearLogoCacheForTests = () => logoCache.clear();
 
 // Fetches logo URIs for tokens whose discovery response didn't include one.
 // Searches by symbol (not address) because Jupiter strips the logo field from address-based queries.
@@ -82,28 +87,36 @@ export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: Abor
     const jupiterApiKey = getJupiterApiKey();
     if (!jupiterApiKey) return new Map();
 
-    const missing = tokens.filter(t => !t.logoUri);
-    if (missing.length === 0) return new Map();
-
+    const now = Date.now();
     const results = new Map<string, string>();
+    const missing: DiscoveredToken[] = [];
 
-    const abortPromise = new Promise<never>((_, reject) => {
-        if (signal.aborted) {
-            reject(signal.reason);
+    for (const t of tokens) {
+        if (t.logoUri) continue;
+        const cached = logoCache.get(t.address);
+        if (cached) {
+            if (cached.expiresAt > now) {
+                results.set(t.address, cached.logo);
+            } else {
+                logoCache.delete(t.address);
+                missing.push(t);
+            }
         } else {
-            signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+            missing.push(t);
         }
-    });
+    }
+
+    if (missing.length === 0) return results;
 
     await Promise.allSettled(
         missing.map(async token => {
             try {
                 const url = `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(token.symbol)}`;
-                const fetchPromise = fetch(url, {
+
+                const response = await fetchUpstream(url, {
                     headers: { Accept: 'application/json', 'x-api-key': jupiterApiKey },
-                    next: { revalidate: JUPITER_IMAGES_CACHE_REVALIDATE_S },
+                    signal,
                 });
-                const response = await Promise.race([fetchPromise, abortPromise]);
                 if (!response.ok) {
                     Logger.warn(`[jupiter-images] ${response.status} for ${token.address}`);
                     return;
@@ -117,6 +130,7 @@ export async function fetchJupiterImages(tokens: DiscoveredToken[], signal: Abor
                 const logo = match?.icon ?? match?.logoURI;
                 if (logo) {
                     results.set(token.address, logo);
+                    logoCache.set(token.address, { expiresAt: Date.now() + LOGO_CACHE_TTL_MS, logo });
                 } else if (!match) {
                     Logger.warn(`[jupiter-images] no match for ${token.symbol} in ${data.length} results`);
                 }

@@ -1,0 +1,66 @@
+import { withAutoFocusReleased } from '@storybook-config/decorators';
+import { withFixedContainer } from '@storybook-config/responsive-decorators';
+import type { Meta, StoryObj } from '@storybook-config/types';
+import { fn } from 'storybook/test';
+
+import { NicknameEditor } from '../NicknameEditor';
+
+const meta = {
+    args: {
+        onClose: fn(),
+        open: true,
+    },
+    component: NicknameEditor,
+    decorators: [withAutoFocusReleased, withFixedContainer],
+    parameters: {
+        docs: {
+            description: {
+                story: 'Modal for editing wallet address nicknames stored in localStorage',
+            },
+        },
+        layout: 'fullscreen', // NicknameEditor renders as a position:fixed overlay; fullscreen removes the canvas padding so it anchors to the iframe viewport.
+        nextjs: {
+            appDirectory: true,
+        },
+    },
+    tags: ['autodocs', 'test'],
+    title: 'Features/Nicknames/NicknameEditor',
+} satisfies Meta<typeof NicknameEditor>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+// More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
+export const Primary: Story = {
+    args: {
+        address: 'DXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhYDXhY',
+    },
+};
+
+export const WithExistingNickname: Story = {
+    args: {
+        address: 'So11111111111111111111111111111111111111112',
+    },
+    beforeEach: () => {
+        // Set up a nickname in localStorage for this story
+        if (typeof window !== 'undefined') {
+            const nicknames = { So11111111111111111111111111111111111111112: 'SOL Token' };
+            localStorage.setItem('solana-explorer-nicknames', JSON.stringify(nicknames));
+        }
+    },
+};
+
+export const LongAddress: Story = {
+    args: {
+        address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+    },
+};
+
+// Forces visible truncation by passing an oversized base58-like string. Used to confirm that
+// the text-truncate Bootstrap utility is replaceable with Tailwind's truncate without losing
+// the ellipsis behaviour for long values.
+export const TruncatedAddress: Story = {
+    args: {
+        address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA-So11111111111111111111111111111111111111112-EXTRA',
+    },
+};

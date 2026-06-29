@@ -22,7 +22,11 @@ export async function resolveDomain(
     domain: string,
     connection: Connection = new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), 'confirmed'),
 ): Promise<ResolvedDomainInfo> {
-    return domain.endsWith('.sol') ? resolveSnsDomain(domain, connection) : resolveAnsDomain(domain, connection);
+    // SNS/ANS registries store names hashed in lowercase; mixed-case input must be normalized.
+    const normalized = domain.toLowerCase();
+    return normalized.endsWith('.sol')
+        ? resolveSnsDomain(normalized, connection)
+        : resolveAnsDomain(normalized, connection);
 }
 
 async function resolveSnsDomain(domain: string, connection: Connection): Promise<ResolvedDomainInfo> {
