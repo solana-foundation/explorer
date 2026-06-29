@@ -61,9 +61,11 @@ export function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluste
     return DEFAULT_CLUSTER;
 }
 
-const ModalContext = createContext<[boolean, SetShowModal] | undefined>(undefined);
-const StateContext = createContext<State | undefined>(undefined);
-const DispatchContext = createContext<Dispatch | undefined>(undefined);
+export type { State as ClusterState };
+
+export const ModalContext = createContext<[boolean, SetShowModal] | undefined>(undefined);
+export const StateContext = createContext<State | undefined>(undefined);
+export const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 const WHITELISTED_RPCS = [
     // Used for solana.com live code example

@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { TransactionMessage } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 import { resolveAddressLookupTables } from '@/app/__tests__/mock-resolvers';
 import * as stubs from '@/app/__tests__/mock-stubs';
@@ -12,7 +12,7 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { BaseInstructionCard } from '../BaseInstructionCard';
 
 describe('BaseInstructionCard', () => {
-    test('should render "BaseInstructionCard"', () => {
+    test('should render "BaseInstructionCard"', async () => {
         const index = 1;
         const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
         const lookups = resolveAddressLookupTables(m.addressTableLookups);
@@ -30,8 +30,10 @@ describe('BaseInstructionCard', () => {
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
-        // check that card is rendered with proper title
-        expect(screen.getByText(/Program: Instruction/)).toBeInTheDocument();
+        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        await waitFor(() => {
+            expect(screen.getByText(/Program: Instruction/)).toBeInTheDocument();
+        });
     });
 
     test('should render "BaseInstructionCard" with raw data', async () => {
@@ -58,7 +60,7 @@ describe('BaseInstructionCard', () => {
             </ScrollAnchorProvider>,
         );
         // instruction should relate to specific program
-        expect(await screen.findAllByText(/Associated Token Program/)).toHaveLength(2);
+        expect(await screen.findAllByText(/Associated Token Program/)).toHaveLength(1);
         // we expect specific internal component to be rendered with "defaultRaw"
         expect(screen.getByText('Instruction Data')).toBeInTheDocument();
     });

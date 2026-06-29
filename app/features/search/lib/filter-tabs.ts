@@ -17,6 +17,7 @@ export enum SearchGroup {
     NameServiceAccounts = 'Name Service Accounts',
     ProgramLoaders = 'Program Loaders',
     Programs = 'Programs',
+    VerifiedPrograms = 'Source Verified Programs',
     Sysvars = 'Sysvars',
     Tokens = 'Tokens',
     Transactions = 'Transactions',
@@ -25,7 +26,11 @@ export enum SearchGroup {
 export const FILTER_TABS: FilterTab[] = [
     { groups: null, id: 'all', label: 'All' },
     { groups: [SearchGroup.Tokens], id: 'tokens', label: 'Tokens' },
-    { groups: [SearchGroup.Programs, SearchGroup.ProgramLoaders], id: 'programs', label: 'Programs' },
+    {
+        groups: [SearchGroup.Programs, SearchGroup.VerifiedPrograms, SearchGroup.ProgramLoaders],
+        id: 'programs',
+        label: 'Programs',
+    },
     { groups: [SearchGroup.FeatureGates], id: 'feature-gates', label: 'Feature Gates' },
     {
         groups: [
@@ -82,6 +87,10 @@ export function computeFilterArgs(results: SearchOptions[], activeFilter: Filter
     // Tokens first
     const tokensIdx = reordered.findIndex(g => g.label === SearchGroup.Tokens);
     if (tokensIdx > 0) reordered.unshift(reordered.splice(tokensIdx, 1)[0]);
+
+    // Domain Owners above Tokens (provider only fires for .sol queries)
+    const domainsIdx = reordered.findIndex(g => g.label === SearchGroup.DomainOwners);
+    if (domainsIdx > 0) reordered.unshift(reordered.splice(domainsIdx, 1)[0]);
 
     // Feature Gates last
     const fgIndex = reordered.findIndex(g => g.label === SearchGroup.FeatureGates);

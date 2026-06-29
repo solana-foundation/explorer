@@ -1,12 +1,16 @@
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+
 export function FeatureGateCard({ children }: { children: React.ReactNode }) {
     return (
-        <div className="card">
-            <div className="card-header align-items-center">
-                <h3 className="card-header-title">Feature Information</h3>
-            </div>
-            <div className="card-footer">
-                <div className="text-muted">{children}</div>
-            </div>
-        </div>
+        <Card ui="dashkit">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit">
+                    Feature Information
+                </CardTitle>
+            </CardHeader>
+            <CardFooter ui="dashkit" className="border-t-0">
+                <div className="text-dk-gray-700">{children}</div>
+            </CardFooter>
+        </Card>
     );
 }

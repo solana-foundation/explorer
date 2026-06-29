@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook-config/types';
 import { toast as sonnerToast } from 'sonner';
 import { expect, fn, within } from 'storybook/test';
 
@@ -18,10 +18,11 @@ const meta = {
         ),
     ],
     parameters: {
+        // Centers the trigger button + inline preview in the canvas so they're immediately visible.
         layout: 'centered',
     },
-    tags: ['autodocs'],
-    title: 'Components/Shared/UI/Sonner/CustomToast',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Shared/Sonner/CustomToast',
 } satisfies Meta<typeof CustomToast>;
 
 export default meta;
@@ -47,7 +48,7 @@ export const Success: Story = {
         expect(closeButton.length).toBeGreaterThan(0);
     },
     render: args => (
-        <div className="e-flex e-flex-col e-items-center e-gap-4">
+        <div className="flex flex-col items-center gap-4">
             <CustomToast {...args} />
             <Button
                 size="sm"
@@ -82,7 +83,7 @@ export const Error: Story = {
         expect(closeButton.length).toBeGreaterThan(0);
     },
     render: args => (
-        <div className="e-flex e-flex-col e-items-center e-gap-4">
+        <div className="flex flex-col items-center gap-4">
             <CustomToast {...args} />
             <Button
                 size="sm"
@@ -117,7 +118,7 @@ export const Info: Story = {
         expect(closeButton.length).toBeGreaterThan(0);
     },
     render: args => (
-        <div className="e-flex e-flex-col e-items-center e-gap-4">
+        <div className="flex flex-col items-center gap-4">
             <CustomToast {...args} />
             <Button
                 size="sm"
@@ -153,7 +154,7 @@ export const WithLongTitle: Story = {
         expect(closeButton.length).toBeGreaterThan(0);
     },
     render: args => (
-        <div className="e-flex e-flex-col e-items-center e-gap-4">
+        <div className="flex flex-col items-center gap-4">
             <CustomToast {...args} />
             <Button
                 size="sm"
@@ -184,7 +185,7 @@ export const WithoutDescription: Story = {
         expect(closeButton.length).toBeGreaterThan(0);
     },
     render: args => (
-        <div className="e-flex e-flex-col e-items-center e-gap-4">
+        <div className="flex flex-col items-center gap-4">
             <CustomToast {...args} />
             <Button
                 size="sm"
@@ -224,11 +225,11 @@ export const WithCustomDescription: Story = {
     render: args => {
         const onViewTransaction = fn();
         const description = (
-            <div className="e-text-xs e-text-neutral-300">
-                <p className="e-mb-1">Transaction signature: 5X5s...GnDZ</p>
+            <div className="text-xs text-neutral-300">
+                <p className="mb-1">Transaction signature: 5X5s...GnDZ</p>
                 <a
                     href="#"
-                    className="e-text-indigo-400 e-underline hover:e-text-indigo-300"
+                    className="text-indigo-400 underline hover:text-indigo-300"
                     onClick={e => {
                         e.preventDefault();
                         onViewTransaction();
@@ -240,7 +241,7 @@ export const WithCustomDescription: Story = {
         );
 
         return (
-            <div className="e-flex e-flex-col e-items-center e-gap-4">
+            <div className="flex flex-col items-center gap-4">
                 <CustomToast {...args} description={description} />
                 <Button
                     size="sm"

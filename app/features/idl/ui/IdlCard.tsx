@@ -1,16 +1,18 @@
 'use client';
-import { getIdlVersion, isIdlProgramIdMismatch, type SupportedIdl, useAnchorProgram } from '@entities/idl';
-import { useProgramMetadataCodamaIdl, useProgramMetadataIdl } from '@entities/program-metadata';
+import { LoadingCard } from '@components/common/LoadingCard';
+import { Badge } from '@components/shared/ui/badge';
+import { Button } from '@components/shared/ui/button';
+import { getIdlVersion, IdlVariant, isIdlProgramIdMismatch, type SupportedIdl } from '@entities/idl';
 import { useCluster } from '@providers/cluster';
-import { Badge } from '@shared/ui/badge';
-import { cn } from '@shared/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'react-feather';
 
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
+import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 import { clusterSlug } from '@/app/utils/cluster';
 
-import { BaseWarningCard } from '../interactive-idl/ui/BaseWarningCard';
-import { IdlVariant, useIdlLastTransactionDate } from '../model/use-idl-last-transaction-date';
+import { useProgramIdls } from '../model/use-program-idls';
 import { IdlInstructionSection } from './IdlInstructionSection';
 import { IdlSection } from './IdlSection';
 
@@ -24,13 +26,14 @@ type IdlTab = {
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const network = clusterSlug(cluster);
-    const { idl } = useAnchorProgram(programId, url, cluster);
-    const { programMetadataIdl } = useProgramMetadataIdl(programId, url, cluster);
-    const { codamaIdl } = useProgramMetadataCodamaIdl(programId, url, cluster);
+    const {
+        anchorIdl,
+        programMetadataIdl,
+        preferredVariant,
+        isLoading: isAnyIdlLoading,
+    } = useProgramIdls(programId, url, cluster);
     const [activeTabIndex, setActiveTabIndex] = useState<number>();
     const [searchStr, setSearchStr] = useState<string>('');
-
-    const preferredIdlVariant = useIdlLastTransactionDate(programId, Boolean(idl), Boolean(programMetadataIdl));
 
     const tabs = useMemo<IdlTab[]>(() => {
         const idlTabs: IdlTab[] = [];
@@ -46,33 +49,23 @@ export function IdlCard({ programId }: { programId: string }) {
         }
 
         // Optionally add anchor tab
-        if (idl) {
+        if (anchorIdl) {
             const anchorTab: IdlTab = {
                 badge: 'Anchor IDL',
                 id: IdlVariant.Anchor,
-                idl: idl,
+                idl: anchorIdl,
                 title: 'Anchor',
             };
             // If anchor is preferred, put it first
-            if (preferredIdlVariant === IdlVariant.Anchor) {
+            if (preferredVariant === IdlVariant.Anchor) {
                 idlTabs.unshift(anchorTab);
             } else {
                 idlTabs.push(anchorTab);
             }
         }
 
-        // Optionally add codama tab
-        if (codamaIdl) {
-            idlTabs.push({
-                badge: 'Codama IDL',
-                id: IdlVariant.Codama,
-                idl: codamaIdl,
-                title: 'Codama',
-            });
-        }
-
         return idlTabs;
-    }, [idl, programMetadataIdl, codamaIdl, preferredIdlVariant]);
+    }, [anchorIdl, programMetadataIdl, preferredVariant]);
 
     useEffect(() => {
         // Activate first tab when tabs are available
@@ -82,13 +75,18 @@ export function IdlCard({ programId }: { programId: string }) {
     }, [tabs, activeTabIndex]);
 
     if (tabs.length === 0 || activeTabIndex === undefined) {
+        if (isAnyIdlLoading || tabs.length > 0) {
+            return <LoadingCard message="Loading program IDL" />;
+        }
         return (
-            <div className="card">
-                <div className="card-header">
-                    <h4 className="card-header-title">Program IDL</h4>
-                </div>
-                <div className="card-body">
-                    <div className="e-mb-6 e-flex e-items-center e-gap-2 e-text-destructive">
+            <Card ui="dashkit">
+                <CardHeader ui="dashkit">
+                    <CardTitle as="h4" ui="dashkit">
+                        Program IDL
+                    </CardTitle>
+                </CardHeader>
+                <CardBody ui="dashkit">
+                    <div className="mb-6 flex items-center gap-2 text-destructive">
                         <AlertTriangle size={16} />
                         <span>
                             This program doesn&apos;t have an IDL yet. If you&apos;re the developer, upload it using the
@@ -96,28 +94,35 @@ export function IdlCard({ programId }: { programId: string }) {
                         </span>
                     </div>
 
-                    <div className="e-space-y-6">
+                    <div className="space-y-6">
                         <IdlInstructionSection
                             title="Upload IDL"
                             description="Use this command to upload generated idl in JSON format"
                             commands={['npx @solana-program/program-metadata@latest write idl $PROGRAM_ID ./idl.json']}
                         />
 
-                        <div className="e-flex e-items-center e-justify-between">
+                        <div className="flex items-center justify-between">
                             <span>In case you want to upload IDL with a multisig, follow the documentation.</span>
-                            <a
-                                href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-outline-primary btn-sm e-whitespace-nowrap"
+                            <Button
+                                ui="dashkit"
+                                variant="outline-primary"
+                                size="sm"
+                                className="whitespace-nowrap"
+                                asChild
                             >
-                                Full documentation
-                                <ExternalLink className="align-text-top ms-2" size={13} />
-                            </a>
+                                <a
+                                    href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Full documentation
+                                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
+                                </a>
+                            </Button>
                         </div>
                     </div>
-                </div>
-            </div>
+                </CardBody>
+            </Card>
         );
     }
 
@@ -125,28 +130,31 @@ export function IdlCard({ programId }: { programId: string }) {
     const isMismatch = isIdlProgramIdMismatch(activeTab.idl, programId);
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <div className="nav nav-tabs e-border-0" role="tablist">
+        <Card ui="dashkit">
+            {/* dashkit .card-header-tabs: header height comes from the tabs (not the fixed 60px),
+                negative tab margins cancel the header padding so the active underline (via the
+                trigger's -1px bottom margin) overlays the header border. !important so these win
+                over dashkit's base classes, since cn() (clsx) keeps all classes and stylesheet order
+                would otherwise decide. */}
+            <CardHeader ui="dashkit" className="!h-auto">
+                <TabsList className="!-mb-3 -mt-3 !border-0">
                     {tabs
                         .filter(tab => tab.idl)
                         .map(tab => (
-                            <button
+                            <TabsTrigger
                                 key={tab.title}
-                                className={cn('nav-item nav-link', {
-                                    active: tab.id === activeTab?.id,
-                                })}
+                                active={tab.id === activeTab?.id}
                                 onClick={() => {
                                     setActiveTabIndex(tabs.findIndex(t => t.id === tab.id));
                                     setSearchStr('');
                                 }}
                             >
                                 {tab.title}
-                            </button>
+                            </TabsTrigger>
                         ))}
-                </div>
-            </div>
-            <div className="card-body">
+                </TabsList>
+            </CardHeader>
+            <CardBody ui="dashkit">
                 {isMismatch ? (
                     <BaseWarningCard
                         message="IDL Program ID Mismatch"
@@ -170,7 +178,7 @@ export function IdlCard({ programId }: { programId: string }) {
                         onSearchChange={setSearchStr}
                     />
                 )}
-            </div>
-        </div>
+            </CardBody>
+        </Card>
     );
 }

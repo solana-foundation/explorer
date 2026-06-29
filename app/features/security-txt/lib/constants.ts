@@ -1,4 +1,4 @@
-import type { PmpSecurityTXT } from './types';
+import type { SecurityTxtFields } from '@solana/security-txt';
 
 export const NO_SECURITY_TXT_ERROR = 'Program has no security.txt';
 
@@ -7,7 +7,7 @@ export const PMP_SECURITY_TXT_DOC_LINK =
 
 export const NEODYME_SECURITY_TXT_DOC_LINK = 'https://github.com/neodyme-labs/solana-security-txt';
 
-export const PMP_SECURITY_TXT_KEYS: (keyof PmpSecurityTXT)[] = [
+export const PMP_SECURITY_TXT_KEYS: (keyof SecurityTxtFields)[] = [
     'name',
     'logo',
     'description',

@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import {
     type ParsedInnerInstruction,
     type ParsedInstruction,
@@ -12,7 +13,6 @@ const SYSTEM_PROGRAM = SystemProgram.programId;
 const TOKEN_PROGRAM = new PublicKey(TOKEN_PROGRAM_ADDRESS);
 
 const DEFAULT_BLOCKHASH = 'AHK7TnmvzPAk4WsmWqVgL7v6YccGkANoWUmrSY7aQDzw';
-const DEFAULT_SIGNATURE = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9MvhLtc4h99sC9XxLEAjhrXyfKezdMkZFV';
 
 export function buildSolTransferIx(opts: {
     source: PublicKey;

@@ -6,6 +6,7 @@ import React from 'react';
 import { create } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
 import { UnknownDetailsCard } from '../UnknownDetailsCard';
@@ -65,33 +66,33 @@ export function BpfLoaderWriteDetailsCard(props: Props<WriteInfo>) {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={BPF_LOADER_PROGRAM_ID} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Account</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Account</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.account} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>
-                    Bytes <span className="text-muted">(Base 64)</span>
-                </td>
-                <td className="text-lg-end">
-                    <pre className="d-inline-block text-start mb-0">{bytes}</pre>
-                </td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>
+                    Bytes <span className="text-dk-gray-700">(Base 64)</span>
+                </BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
+                    <pre className="mb-0 inline-block text-left">{bytes}</pre>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Offset</td>
-                <td className="text-lg-end">{info.offset}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Offset</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.offset}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }
@@ -108,19 +109,19 @@ export function BpfLoaderFinalizeDetailsCard(props: Props<FinalizeInfo>) {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={BPF_LOADER_PROGRAM_ID} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Account</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Account</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.account} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

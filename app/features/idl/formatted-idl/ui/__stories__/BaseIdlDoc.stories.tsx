@@ -1,0 +1,97 @@
+import type { Meta, StoryObj } from '@storybook-config/types';
+
+import { Badge } from '@/app/components/shared/ui/badge';
+
+import { BaseIdlDoc, IdlDocTooltip } from '../BaseIdlDoc';
+
+const meta = {
+    component: BaseIdlDoc,
+    tags: ['autodocs', 'test'],
+    title: 'Features/IDL/Formatted IDL/BaseIdlDoc',
+} satisfies Meta<typeof BaseIdlDoc>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const SingleLineDoc: Story = {
+    args: {
+        docs: ['This is a simple documentation line.'],
+    },
+};
+
+export const MultiLineDoc: Story = {
+    args: {
+        docs: [
+            'This is the first line of documentation.',
+            'This is the second line.',
+            'And this is the third line with more detailed explanation.',
+        ],
+    },
+};
+
+export const LongDocumentation: Story = {
+    args: {
+        docs: [
+            'This is a much longer documentation that explains a complex component or instruction in great detail.',
+            'It contains multiple paragraphs to properly document all the functionality.',
+            'Parameters need to be carefully set according to the program requirements.',
+            'See the technical specification for more details on implementation.',
+        ],
+    },
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used only in typeof for StoryObj generics
+const tooltipMeta = {
+    component: IdlDocTooltip,
+    decorators: [
+        Story => (
+            <div className="flex items-center justify-center p-10">
+                <Story />
+            </div>
+        ),
+    ],
+    tags: ['autodocs', 'test'],
+    title: 'Features/IDL/Formatted IDL/IdlDocTooltip',
+} satisfies Meta<typeof IdlDocTooltip>;
+
+export const Tooltip: StoryObj<typeof tooltipMeta> = {
+    args: {
+        children: (
+            <Badge ui="dashkit" variant="success">
+                Hover over me
+            </Badge>
+        ),
+        docs: ['This documentation appears in a tooltip when hovering.'],
+    },
+    render: args => <IdlDocTooltip {...args} />,
+};
+
+export const TooltipWithoutDocs: StoryObj<typeof tooltipMeta> = {
+    args: {
+        children: (
+            <Badge ui="dashkit" variant="warning">
+                No tooltip on hover
+            </Badge>
+        ),
+        docs: [],
+    },
+    render: args => <IdlDocTooltip {...args} />,
+};
+
+export const TooltipWithMultilineDoc: StoryObj<typeof tooltipMeta> = {
+    args: {
+        children: (
+            <Badge ui="dashkit" variant="info">
+                Hover for detailed docs
+            </Badge>
+        ),
+        docs: ['First line of documentation.', 'Second line with more details.', 'Third line explaining edge cases.'],
+    },
+    render: args => <IdlDocTooltip {...args} />,
+};
+
+export const NoDocumentation: Story = {
+    args: {
+        docs: [],
+    },
+};

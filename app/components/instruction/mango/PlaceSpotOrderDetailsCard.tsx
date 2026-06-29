@@ -4,6 +4,8 @@ import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import BN from 'bn.js';
 import { useEffect, useState } from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import {
     getSpotMarketFromInstruction,
@@ -59,58 +61,58 @@ export function PlaceSpotOrderDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Mango account</td>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>Mango account</BaseTable.Cell>
+                <BaseTable.Cell>
                     {' '}
                     <Address pubkey={mangoAccount.pubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
             {mangoSpotMarketConfig !== undefined && (
-                <tr>
-                    <td>Spot market</td>
-                    <td className="text-lg-end">{mangoSpotMarketConfig.name}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Spot market</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{mangoSpotMarketConfig.name}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
-            <tr>
-                <td>Spot market address</td>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>Spot market address</BaseTable.Cell>
+                <BaseTable.Cell>
                     <Address pubkey={spotMarketAccountMeta.pubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Order type</td>
-                <td className="text-lg-end">{info.orderType}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Order type</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.orderType}</BaseTable.Cell>
+            </BaseTable.Row>
 
             {info.clientId !== '0' && (
-                <tr>
-                    <td>Client Id</td>
-                    <td className="text-lg-end">{info.clientId}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Client Id</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.clientId}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
-            <tr>
-                <td>Side</td>
-                <td className="text-lg-end">{info.side}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Side</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.side}</BaseTable.Cell>
+            </BaseTable.Row>
 
             {orderLotDetails !== null && (
-                <tr>
-                    <td>Limit price</td>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Limit price</BaseTable.Cell>
                     {/* todo fix price */}
-                    <td className="text-lg-end">{orderLotDetails?.price} USDC</td>
-                </tr>
+                    <BaseTable.Cell className="text-right">{orderLotDetails?.price} USDC</BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
             {orderLotDetails !== null && (
-                <tr>
-                    <td>Size</td>
-                    <td className="text-lg-end">{orderLotDetails?.size}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Size</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{orderLotDetails?.size}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
         </InstructionCard>
     );

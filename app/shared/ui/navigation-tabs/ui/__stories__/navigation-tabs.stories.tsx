@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from 'storybook/test';
+import type { Meta, StoryObj } from '@storybook-config/types';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { MINIMAL_VIEWPORTS } from 'storybook/viewport';
 
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
@@ -46,8 +46,8 @@ const meta: Meta<typeof BaseNavigationTabs> = {
     },
     component: BaseNavigationTabs,
     globals: { viewport: { value: 'responsive' } },
-    tags: ['autodocs'],
-    title: 'Components/Shared/UI/NavigationTabs',
+    tags: ['autodocs', 'test'],
+    title: 'Components/Shared/NavigationTabs',
 };
 
 export default meta;
@@ -116,6 +116,24 @@ export const WithChildren: Story = {
             <NavigationTabLink path="extra-2" title="Async Tab 2" />
         </BaseNavigationTabs>
     ),
+};
+
+export const WithOnTabClick: Story = {
+    args: {
+        activeValue: '',
+        onTabClick: fn(),
+        tabs: BLOCK_TABS,
+    },
+    play: async ({ args, canvasElement }) => {
+        const canvas = within(canvasElement);
+        const tablist = canvas.getByRole('tablist', { hidden: true });
+        const tabs = within(tablist).getAllByRole('tab', { hidden: true });
+
+        await userEvent.click(tabs[1]);
+
+        expect(args.onTabClick).toHaveBeenCalledOnce();
+        expect(args.onTabClick).toHaveBeenCalledWith('rewards', expect.any(Object));
+    },
 };
 
 export const OverlappingAsyncTabs: Story = {

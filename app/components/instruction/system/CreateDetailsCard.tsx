@@ -3,6 +3,8 @@ import { SolBalance } from '@components/common/SolBalance';
 import { ParsedInstruction, SignatureResult, SystemProgram } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { CreateAccountInfo } from './types';
 
@@ -25,45 +27,45 @@ export function CreateDetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={SystemProgram.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>From Address</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>From Address</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.source} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>New Address</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>New Address</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.newAccount} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Transfer Amount (SOL)</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Transfer Amount (SOL)</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <SolBalance lamports={info.lamports} />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Allocated Data Size</td>
-                <td className="text-lg-end">{info.space} byte(s)</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Allocated Data Size</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.space} byte(s)</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Assigned Program Id</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Assigned Program Id</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.owner} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

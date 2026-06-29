@@ -5,7 +5,7 @@ import { ComponentProps } from 'react';
 
 // Dynamically import @microlink/react-json-view with SSR disabled
 const ReactJsonView = dynamic(() => import('@microlink/react-json-view'), {
-    loading: () => <div className="text-muted">Loading JSON viewer...</div>,
+    loading: () => <div className="text-dk-gray-700">Loading JSON viewer...</div>,
     ssr: false,
 });
 

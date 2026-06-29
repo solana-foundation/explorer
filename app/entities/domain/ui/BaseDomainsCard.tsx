@@ -4,6 +4,9 @@ import { Address } from '@components/common/Address';
 import { PublicKey } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { DomainInfo } from '../model/types';
 
 export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
@@ -16,31 +19,31 @@ export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
     );
 
     return (
-        <div className="card">
-            <div className="card-header align-items-center">
-                <h3 className="card-header-title">Owned Domain Names</h3>
-            </div>
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Domain Name</th>
-                            <th className="text-muted">Name Service Account</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {validDomains.map(domain => (
-                            <tr key={domain.address}>
-                                <td>{domain.name}</td>
-                                <td>
-                                    <Address pubkey={domain.pubkey} link />
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <Card ui="dashkit">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit">
+                    Owned Domain Names
+                </CardTitle>
+            </CardHeader>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Domain Name</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Name Service Account</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {validDomains.map(domain => (
+                        <BaseTable.Row key={domain.address}>
+                            <BaseTable.Cell>{domain.name}</BaseTable.Cell>
+                            <BaseTable.Cell>
+                                <Address pubkey={domain.pubkey} link />
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
+        </Card>
     );
 }
 

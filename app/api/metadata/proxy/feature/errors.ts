@@ -1,34 +1,38 @@
+// `status` is a separate field (not `cause`) so that `cause` retains its
+// standard Error-chaining semantics and error reporters can walk the chain.
 export class StatusError extends Error {
     status: number;
-    constructor(message: string, options: ErrorOptions & { cause: number }) {
-        super(message);
-        this.status = options.cause;
+    constructor(message: string, options: ErrorOptions & { status: number }) {
+        super(message, options);
+        this.name = 'StatusError';
+        this.status = options.status;
     }
 }
 
-export const invalidRequestError = new StatusError('Invalid Request', { cause: 400 });
+// Canonical HTTP status text used for the proxy response body. Kept separate
+// from thrown errors on purpose — each throw site constructs a fresh
+// StatusError with a site-specific message (so Sentry/Logger can distinguish
+// "too many redirects" from "redirect loop" from "non-2xx upstream"), while
+// the client always sees the canonical text below.
+export const STATUS_MESSAGES = {
+    400: 'Invalid Request',
+    403: 'Access Denied',
+    404: 'Resource Not Found',
+    413: 'Max Content Size Exceeded',
+    415: 'Unsupported Media Type',
+    500: 'General Error',
+    502: 'Bad Gateway',
+    504: 'Gateway Timeout',
+} as const satisfies Record<number, string>;
 
-export const accessDeniedError = new StatusError('Access Denied', { cause: 403 });
+export type StatusCode = keyof typeof STATUS_MESSAGES;
 
-export const resourceNotFoundError = new StatusError('Resource Not Found', { cause: 404 });
-
-export const maxSizeError = new StatusError('Max Content Size Exceeded', { cause: 413 });
-
-export const unsupportedMediaError = new StatusError('Unsupported Media Type', { cause: 415 });
-
-export const generalError = new StatusError('General Error', { cause: 500 });
-
-export const gatewayTimeoutError = new StatusError('Gateway Timeout', { cause: 504 });
-
-export const errors = {
-    400: invalidRequestError,
-    403: accessDeniedError,
-    404: resourceNotFoundError,
-    413: maxSizeError,
-    415: unsupportedMediaError,
-    500: generalError,
-    504: gatewayTimeoutError,
-};
+// Factory — fresh stack trace per call, optional `cause` for chaining.
+// Use `message` to describe what went wrong at this throw site (logged +
+// preserved in the Error chain); the response body comes from STATUS_MESSAGES.
+export function statusError(status: StatusCode, message: string, options?: ErrorOptions): StatusError {
+    return new StatusError(message, { ...options, status });
+}
 
 export function matchMaxSizeError(error: unknown): error is Error {
     // eslint-disable-next-line no-restricted-syntax -- pattern matching for error message detection

@@ -1,9 +1,11 @@
 import { TableCardBody } from '@components/common/TableCardBody';
+import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { CollapsibleCard } from '@shared/ui/collapsible-card';
 import { TransactionInstruction } from '@solana/web3.js';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { BaseTable } from '@/app/shared/ui/Table';
 import getInstructionCardScrollAnchorId from '@/app/utils/get-instruction-card-scroll-anchor-id';
 
 import { BaseRawDetails } from '../common/BaseRawDetails';
@@ -26,10 +28,15 @@ export function UnknownDetailsCard({
             ref={scrollAnchorRef}
             defaultExpanded={false}
             title={
-                <>
-                    <span className="badge bg-info-soft me-2">#{index + 1}</span>
-                    {programName} Instruction
-                </>
+                <span className="flex min-w-0 flex-1 items-center">
+                    <Badge ui="dashkit" variant="info" className="mr-1.5 flex-none">
+                        #{index + 1}
+                    </Badge>
+                    <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                        {programName}
+                    </span>
+                    <span className="ml-1.5 flex-none">Instruction</span>
+                </span>
             }
         >
             <TableCardBody>
@@ -37,14 +44,14 @@ export function UnknownDetailsCard({
                 <BaseRawDetails ix={ix} />
                 {innerCards && innerCards.length > 0 && (
                     <>
-                        <tr className="table-sep">
-                            <td colSpan={3}>Inner Instructions</td>
-                        </tr>
-                        <tr>
-                            <td colSpan={3}>
-                                <div className="inner-cards !e-m-0">{innerCards}</div>
-                            </td>
-                        </tr>
+                        <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                            <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
+                        </BaseTable.Row>
+                        <BaseTable.Row>
+                            <BaseTable.Cell colSpan={3}>
+                                <div>{innerCards}</div>
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
                     </>
                 )}
             </TableCardBody>

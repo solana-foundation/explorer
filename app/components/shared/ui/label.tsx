@@ -1,12 +1,11 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-const labelVariants = cva(
-    'e-text-sm e-font-medium e-leading-none peer-disabled:e-cursor-not-allowed peer-disabled:e-opacity-70',
-);
+const labelVariants = cva('text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70');
 
 const Label = React.forwardRef<
     React.ElementRef<typeof LabelPrimitive.Root>,

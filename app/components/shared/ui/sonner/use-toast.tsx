@@ -1,3 +1,4 @@
+// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { ExternalToast, toast } from 'sonner';
 
 import { CustomToast, type CustomToastProps } from './custom';

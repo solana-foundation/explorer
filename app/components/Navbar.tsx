@@ -1,13 +1,16 @@
 'use client';
 
+import { cn } from '@components/shared/utils';
 import Logo from '@img/logos-solana/dark-explorer-logo.svg';
 import { useDisclosure } from '@mantine/hooks';
-import { cn } from '@shared/utils';
 import { useClusterPath } from '@utils/url';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSelectedLayoutSegment, useSelectedLayoutSegments } from 'next/navigation';
 import React, { ReactNode } from 'react';
+import { Menu } from 'react-feather';
+
+import { NavbarItem, NavbarLink, NavbarList } from '@/app/shared/ui/Navbar';
 
 import { ClusterStatusButton } from './ClusterStatusButton';
 
@@ -19,70 +22,56 @@ export function Navbar({ children }: INavbarProps) {
     const [navOpened, navHandlers] = useDisclosure(false);
     const homePath = useClusterPath({ pathname: '/' });
     const featureGatesPath = useClusterPath({ pathname: '/feature-gates' });
-    const supplyPath = useClusterPath({ pathname: '/supply' });
-    const programsPath = useClusterPath({ pathname: '/verified-programs' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const selectedLayoutSegments = useSelectedLayoutSegments();
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-light">
-            <div className="container navbar-container">
+        <nav className="flex flex-wrap items-center bg-dk-gray-800-dark py-3 text-dk-white">
+            <div
+                // Per-breakpoint max-widths mirror Bootstrap `.container` (sm 540 / md 720 / lg 960 / xl 1140 / xxl 1320) so logo + links land in the same gutter as before the shell migration.
+                className="mx-auto flex w-full flex-wrap items-center justify-between px-6 sm:max-w-[540px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1140px] xxl:max-w-[1320px]"
+            >
                 <Link href={homePath}>
                     <Image alt="Solana Explorer" height={22} src={Logo} width={214} priority />
                 </Link>
 
-                <button className="navbar-toggler" type="button" onClick={navHandlers.toggle}>
-                    <span className="navbar-toggler-icon"></span>
+                <button
+                    type="button"
+                    aria-label="Toggle navigation"
+                    onClick={navHandlers.toggle}
+                    className="rounded-dk border border-solid border-transparent bg-transparent px-0 py-1 text-dk-gray-700 lg:hidden"
+                >
+                    <Menu size={24} aria-hidden />
                 </button>
 
-                <div
-                    className="navbar-children d-flex align-items-center flex-grow-1 h-100 d-none d-xl-block"
-                    style={{ minWidth: 0 }}
-                >
+                <div className="flex hidden h-full grow items-center pl-6 pr-2 xl:block" style={{ minWidth: 0 }}>
                     {children}
                 </div>
 
-                <div className={cn('collapse navbar-collapse ms-auto', navOpened && 'show', 'flex-shrink-0')}>
-                    <ul className="navbar-nav me-auto">
-                        <li className="nav-item">
-                            <Link
-                                className={cn('nav-link', selectedLayoutSegment === 'feature-gates' && 'active')}
-                                href={featureGatesPath}
+                <div
+                    className={cn(
+                        'ml-auto shrink-0',
+                        navOpened ? 'flex w-full flex-col' : 'hidden lg:flex lg:w-auto lg:flex-row lg:items-center',
+                    )}
+                >
+                    <NavbarList className="mr-auto flex-col lg:flex-row">
+                        <NavbarItem>
+                            <NavbarLink asChild active={selectedLayoutSegment === 'feature-gates'}>
+                                <Link href={featureGatesPath}>Feature Gates</Link>
+                            </NavbarLink>
+                        </NavbarItem>
+                        <NavbarItem>
+                            <NavbarLink
+                                asChild
+                                active={
+                                    selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(inspector)'
+                                }
                             >
-                                Feature Gates
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link
-                                className={cn('nav-link', selectedLayoutSegment === 'supply' && 'active')}
-                                href={supplyPath}
-                            >
-                                Supply
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link
-                                className={cn('nav-link', selectedLayoutSegment === 'verified-programs' && 'active')}
-                                href={programsPath}
-                            >
-                                Programs
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link
-                                className={cn(
-                                    'nav-link',
-                                    selectedLayoutSegments[0] === 'tx' &&
-                                        selectedLayoutSegments[1] === '(inspector)' &&
-                                        'active',
-                                )}
-                                href={inspectorPath}
-                            >
-                                Inspector
-                            </Link>
-                        </li>
-                        <li className="nav-item align-items-center justify-content-center pt-2">
+                                <Link href={inspectorPath}>Inspector</Link>
+                            </NavbarLink>
+                        </NavbarItem>
+                        <NavbarItem className="flex items-center justify-center">
                             <a
                                 aria-label="GitHub Repository"
                                 href="https://github.com/solana-foundation/explorer"
@@ -99,11 +88,11 @@ export function Navbar({ children }: INavbarProps) {
                                     />
                                 </svg>
                             </a>
-                        </li>
-                    </ul>
+                        </NavbarItem>
+                    </NavbarList>
                 </div>
 
-                <div className="d-none d-lg-block flex-shrink-0 ms-1">
+                <div className="ml-[3px] hidden shrink-0 lg:block">
                     <ClusterStatusButton />
                 </div>
             </div>

@@ -10,13 +10,15 @@ import {
     type Instruction,
     type InstructionWithAccounts,
     type InstructionWithData,
-    type ReadonlyUint8Array,
 } from '@solana/kit';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 
-type KitInstruction = Instruction<string> &
+// `data` is `Uint8Array` (mutable) rather than `ReadonlyUint8Array` because
+// some downstream kit-shape parsers (e.g. lighthouse) require the mutable type.
+// `@solana-program/*` parsers accept either, so this is the least-common-denominator.
+export type KitInstruction = Instruction<string> &
     InstructionWithAccounts<AccountMeta[]> &
-    InstructionWithData<ReadonlyUint8Array>;
+    InstructionWithData<Uint8Array>;
 
 export function toKitInstruction(ix: TransactionInstruction): KitInstruction {
     return {

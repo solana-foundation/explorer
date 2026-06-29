@@ -1,32 +1,34 @@
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { HighlightNode } from './HighlightNode';
 import type { FormattedIdlDataView } from './types';
 
 export function BaseIdlErrors({ data }: FormattedIdlDataView<'errors'>) {
     if (!data) return null;
     return (
-        <table className="table table-sm table-nowrap card-table">
-            <thead>
-                <tr>
-                    <th className="e-text-neutral-500">Code</th>
-                    <th className="e-text-neutral-500">Name</th>
-                    <th className="e-text-neutral-500">Message</th>
-                </tr>
-            </thead>
-            <tbody className="list e-font-mono e-text-xs">
+        <BaseTable ui="dashkit" variant="card" nowrap>
+            <BaseTable.Head>
+                <BaseTable.Row>
+                    <BaseTable.HeaderCell className="text-neutral-500">Code</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="text-neutral-500">Name</BaseTable.HeaderCell>
+                    <BaseTable.HeaderCell className="text-neutral-500">Message</BaseTable.HeaderCell>
+                </BaseTable.Row>
+            </BaseTable.Head>
+            <BaseTable.Body className="font-mono text-xs">
                 {data.map(err => (
-                    <tr key={err.code}>
-                        <td className="e-text-neutral-500">
-                            <HighlightNode className="e-rounded">{err.code}</HighlightNode>
-                        </td>
-                        <td>
-                            <HighlightNode className="e-rounded e-py-0.5">{err.name}</HighlightNode>
-                        </td>
-                        <td>
-                            <HighlightNode className="e-rounded e-py-0.5">{err.message}</HighlightNode>
-                        </td>
-                    </tr>
+                    <BaseTable.Row key={err.code}>
+                        <BaseTable.Cell className="text-neutral-500">
+                            <HighlightNode className="rounded">{err.code}</HighlightNode>
+                        </BaseTable.Cell>
+                        <BaseTable.Cell>
+                            <HighlightNode className="rounded py-0.5">{err.name}</HighlightNode>
+                        </BaseTable.Cell>
+                        <BaseTable.Cell>
+                            <HighlightNode className="rounded py-0.5">{err.message}</HighlightNode>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 ))}
-            </tbody>
-        </table>
+            </BaseTable.Body>
+        </BaseTable>
     );
 }

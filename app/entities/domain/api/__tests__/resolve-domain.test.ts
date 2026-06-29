@@ -64,6 +64,17 @@ describe('resolveDomain', () => {
 
             await expect(resolveDomain('test.sol', connection)).rejects.toThrow('RPC failure');
         });
+
+        it('should resolve mixed-case .sol domains the same as lowercase', async () => {
+            const upper = mockConnection(createSnsAccountData(KNOWN_OWNER));
+            const lower = mockConnection(createSnsAccountData(KNOWN_OWNER));
+
+            const result1 = await resolveDomain('Toly.sol', upper);
+            const result2 = await resolveDomain('toly.sol', lower);
+
+            expect(result1?.address).toBe(result2?.address);
+            expect(result1?.owner).toBe(result2?.owner);
+        });
     });
 
     describe('ANS domains (non-.sol)', () => {

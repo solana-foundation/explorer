@@ -20,7 +20,7 @@ import { getReceiptAmount, getReceiptMint } from '@/app/entities/token-receipt';
 import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { Logger } from '@/app/shared/lib/logger';
-import { AUTO_REFRESH_INTERVAL, AutoRefresh, type AutoRefreshProps } from '@/app/tx/[signature]/page-client';
+import { AutoRefresh, useAutoRefreshInterval, type WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 
 import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
@@ -36,7 +36,7 @@ interface ReceiptProps {
     signature: TransactionSignature;
 }
 
-export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshProps) {
+export function Receipt({ signature, autoRefresh }: ReceiptProps & WithAutoRefreshProp) {
     const fetchStatus = useFetchTransactionStatus();
     const fetchDetails = useFetchTransactionDetails();
     const status = useTransactionStatus(signature);
@@ -64,15 +64,8 @@ export function Receipt({ signature, autoRefresh }: ReceiptProps & AutoRefreshPr
         }
     }, [signature, clusterStatus, status, fetchDetails, details]); // eslint-disable-line react-hooks/exhaustive-deps -- fetchStatus is intentionally omitted to prevent re-fetch loops
 
-    useEffect(() => {
-        if (autoRefresh === AutoRefresh.Active) {
-            const intervalHandle: NodeJS.Timeout = setInterval(() => fetchStatus(signature), AUTO_REFRESH_INTERVAL);
-
-            return () => {
-                clearInterval(intervalHandle);
-            };
-        }
-    }, [autoRefresh, fetchStatus, signature]);
+    const onRefresh = useCallback(() => fetchStatus(signature), [fetchStatus, signature]);
+    useAutoRefreshInterval(autoRefresh, onRefresh);
 
     const isStatusLoading = !status || (status.status === FetchStatus.Fetching && autoRefresh === AutoRefresh.Inactive);
     const isStatusFailed = status?.status === FetchStatus.FetchFailed;
@@ -132,7 +125,10 @@ function messageForReason(reason: ReceiptUnavailabilityReason | undefined): stri
     switch (reason) {
         case 'mixed-mint':
             return 'Receipts are only available when all token transfers in a transaction use the same mint. This transaction transfers multiple different tokens.';
+        case 'inner-transfers':
+            return 'Receipts are only available for simple transfers. This transaction contains inner program instructions.';
         case 'no-transfers':
+            return 'No transfer instructions found. Receipts are only available for SOL and token transfers.';
         case undefined:
             return undefined;
     }

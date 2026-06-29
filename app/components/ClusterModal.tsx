@@ -17,23 +17,28 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { Trash2 } from 'react-feather';
 
+import { Alert } from '../shared/ui/Alert';
+import { FormControl } from '../shared/ui/FormControl';
 import { Overlay } from './common/Overlay';
+import { Button, buttonVariants } from './shared/ui/button';
 import { cn } from './shared/utils';
 
 const ClusterModalDeveloperSettings = dynamic(() => import('./ClusterModalDeveloperSettings'), { ssr: false });
 
-const clusterButtonVariants = cva('btn col-12', {
+// Base = dashkit Button base + full width (legacy `btn col-12`); active states keep the transparent
+// base bg with the status color on border+text (legacy `border-* text-*` utilities).
+const clusterButtonVariants = cva(cn(buttonVariants({ size: 'default', ui: 'dashkit' }), 'w-full'), {
     compoundVariants: [
-        { active: true, className: 'border-primary text-primary', status: ClusterStatus.Connected },
-        { active: true, className: 'border-warning text-warning', status: ClusterStatus.Connecting },
-        { active: true, className: 'border-danger text-danger', status: ClusterStatus.Failure },
+        { active: true, className: 'border-[#1dd79b] text-[#1dd79b]', status: ClusterStatus.Connected },
+        { active: true, className: 'border-[#fa62fc] text-[#fa62fc]', status: ClusterStatus.Connecting },
+        { active: true, className: 'border-[#b45be1] text-[#b45be1]', status: ClusterStatus.Failure },
     ],
     defaultVariants: {
         active: false,
     },
     variants: {
         active: {
-            false: 'btn-white',
+            false: 'bg-[#1e2423] border-[#343a37] text-white hover:bg-[#1a1f1e] hover:border-[#2a2e2c]',
             true: '',
         },
         status: {
@@ -50,13 +55,18 @@ export function ClusterModal() {
 
     return (
         <>
-            <div className={cn('offcanvas offcanvas-end', show && 'show')}>
-                <div className="modal-body" onClick={e => e.stopPropagation()}>
-                    <span className="c-pointer" onClick={onClose}>
+            <div
+                className={cn(
+                    'fixed bottom-0 right-0 top-0 z-[1060] flex w-[350px] max-w-full flex-col border-0 border-l border-solid border-dk-black bg-dk-gray-800-dark transition-[transform,visibility] duration-300 ease-in-out',
+                    show ? 'visible translate-x-0' : 'invisible translate-x-full',
+                )}
+            >
+                <div className="relative flex-auto p-6" onClick={e => e.stopPropagation()}>
+                    <span className="cursor-pointer" onClick={onClose}>
                         &times;
                     </span>
 
-                    <h2 className="text-center mb-4 mt-4">Choose a Cluster</h2>
+                    <h2 className="mb-6 mt-6 text-center">Choose a Cluster</h2>
                     <ClusterToggle />
                     <ClusterModalDeveloperSettings />
                 </div>
@@ -130,51 +140,58 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
             </Link>
             {active && (
                 <>
-                    <input
-                        type="url"
-                        value={localUrl}
-                        aria-label="Custom RPC URL"
-                        className={cn('form-control', !editing && 'text-muted')}
-                        onFocus={() => setEditing(true)}
-                        onBlur={() => setEditing(false)}
-                        onChange={e => {
-                            setLocalUrl(e.target.value);
-                            onUrlInput(e.target.value);
-                        }}
-                    />
+                    <FormControl>
+                        <input
+                            type="url"
+                            value={localUrl}
+                            aria-label="Custom RPC URL"
+                            className={cn(!editing && 'text-dk-gray-700')}
+                            onFocus={() => setEditing(true)}
+                            onBlur={() => setEditing(false)}
+                            onChange={e => {
+                                setLocalUrl(e.target.value);
+                                onUrlInput(e.target.value);
+                            }}
+                        />
+                    </FormControl>
                     {saving ? (
-                        <div className="col-12 mt-2 mb-3" data-testid="save-cluster-form">
-                            <input
-                                type="text"
-                                className="form-control mb-2"
-                                aria-label="Cluster name"
-                                placeholder="Cluster name"
-                                value={savedName}
-                                onChange={e => setSavedName(e.target.value)}
-                                data-testid="cluster-name-input"
-                                autoFocus
-                            />
+                        <div className="mb-3 mt-1.5 w-full" data-testid="save-cluster-form">
+                            <FormControl className="mb-1.5">
+                                <input
+                                    type="text"
+                                    aria-label="Cluster name"
+                                    placeholder="Cluster name"
+                                    value={savedName}
+                                    onChange={e => setSavedName(e.target.value)}
+                                    data-testid="cluster-name-input"
+                                    autoFocus
+                                />
+                            </FormControl>
                             {savedName.trim() === '' && (
-                                <small className="text-muted" data-testid="name-required-hint">
+                                <small className="text-dk-gray-700" data-testid="name-required-hint">
                                     Name is required
                                 </small>
                             )}
                             {saveError && (
-                                <div className="alert alert-danger mt-2 mb-0 py-2" data-testid="save-cluster-error">
+                                <Alert variant="danger" className="mb-0 mt-1.5 py-1.5" data-testid="save-cluster-error">
                                     {saveError.message}
-                                </div>
+                                </Alert>
                             )}
-                            <div className="d-flex gap-2 mt-1">
-                                <button
-                                    className="btn btn-primary flex-grow-1"
+                            <div className="mt-[3px] flex gap-1.5">
+                                <Button
+                                    ui="dashkit"
+                                    variant="primary"
+                                    className="grow"
                                     onClick={handleSave}
                                     disabled={!savedName.trim()}
                                     data-testid="confirm-save-cluster-btn"
                                 >
                                     Save
-                                </button>
-                                <button
-                                    className="btn btn-white flex-grow-1"
+                                </Button>
+                                <Button
+                                    ui="dashkit"
+                                    variant="white"
+                                    className="grow"
                                     onClick={() => {
                                         setSaving(false);
                                         setSavedName('');
@@ -182,17 +199,20 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
                                     }}
                                 >
                                     Cancel
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     ) : !savedClusters.some(sc => sc.url === localUrl) ? (
-                        <button
-                            className="btn btn-sm btn-white col-12 mt-2 mb-3"
+                        <Button
+                            ui="dashkit"
+                            variant="white"
+                            size="sm"
+                            className="mb-3 mt-1.5 w-full"
                             onClick={() => setSaving(true)}
                             data-testid="save-custom-cluster-btn"
                         >
                             Save this cluster
-                        </button>
+                        </Button>
                     ) : null}
                 </>
             )}
@@ -221,12 +241,14 @@ function SavedClusterItem({
     const clusterUrl = `${pathname}?${nextQueryString}`;
 
     return (
-        <div className="position-relative col-12 mb-3" data-testid={`saved-cluster-${cluster.name}`}>
+        <div className="relative mb-3 w-full" data-testid={`saved-cluster-${cluster.name}`}>
             <Link className={cn(clusterButtonVariants({ active: isActive, status }), 'text-center')} href={clusterUrl}>
                 {cluster.name}
             </Link>
-            <button
-                className="btn btn-sm position-absolute e-right-1 e-top-1/2 -e-translate-y-1/2"
+            <Button
+                ui="dashkit"
+                size="sm"
+                className="absolute right-1 top-1/2 -translate-y-1/2"
                 onClick={e => {
                     e.stopPropagation();
                     onDelete(cluster.name);
@@ -235,7 +257,7 @@ function SavedClusterItem({
                 aria-label={`Delete ${cluster.name}`}
             >
                 <Trash2 size={14} />
-            </button>
+            </Button>
         </div>
     );
 }
@@ -259,9 +281,9 @@ function SavedClustersSection({ status, savedClusters }: { status: ClusterStatus
     if (savedClusters.length === 0) return null;
 
     return (
-        <div className="w-100" data-testid="saved-clusters-section">
+        <div className="w-full" data-testid="saved-clusters-section">
             <hr />
-            <h3 className="text-center mb-3">Saved Clusters</h3>
+            <h3 className="mb-3 text-center">Saved Clusters</h3>
             {savedClusters.map(sc => (
                 <SavedClusterItem
                     key={sc.name}
@@ -281,7 +303,7 @@ function ClusterToggle() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     return (
-        <div className="btn-group-toggle d-flex flex-wrap mb-4">
+        <div className="mb-6 flex flex-wrap">
             {CLUSTERS.map((net, index) => {
                 const active = net === cluster;
                 if (net === Cluster.Custom)

@@ -1,8 +1,11 @@
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
-import { generateTokenBalanceRows, TokenBalancesCardInner } from '@components/transaction/TokenBalancesCard';
+import { generateTokenBalanceRows, TokenBalancesCardInner } from '@features/transaction';
 import { useCluster } from '@providers/cluster';
 import type { VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
+
+import { Button } from '@/app/components/shared/ui/button';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { useSimulation } from '../model/use-simulation';
 import { SimulatorCUProfilingCard } from './SimulatorCUProfilingCard';
@@ -37,10 +40,10 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
     if (simulation.status === 'simulating') {
         return (
             <SimulationCardShell>
-                <div className="card-body e-text-center">
-                    <span className="spinner-grow spinner-grow-sm e-mr-2"></span>
+                <CardBody ui="dashkit" className="text-center">
+                    <span className="spinner-grow spinner-grow-sm mr-2"></span>
                     Simulating
-                </div>
+                </CardBody>
             </SimulationCardShell>
         );
     }
@@ -48,12 +51,12 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
     if (simulation.status === 'error') {
         return (
             <SimulationCardShell action={<SimulateButton label="Retry" onClick={simulation.simulate} />}>
-                <div className="card-body">
+                <CardBody ui="dashkit">
                     <div>
                         Simulation Failure:
-                        <span className="e-ml-2 e-text-yellow-500">{simulation.error}</span>
+                        <span className="ml-2 text-yellow-500">{simulation.error}</span>
                     </div>
-                </div>
+                </CardBody>
             </SimulationCardShell>
         );
     }
@@ -61,14 +64,14 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
     if (simulation.status === 'idle') {
         return (
             <SimulationCardShell action={<SimulateButton label="Simulate" onClick={simulation.simulate} />}>
-                <div className="card-body">
-                    <ul className="e-list-disc e-space-y-2 e-pl-5 e-text-neutral-500">
+                <CardBody ui="dashkit">
+                    <ul className="list-disc space-y-2 pl-5 text-neutral-500">
                         <li>
                             Simulation is free and will run this transaction against the latest confirmed ledger state.
                         </li>
                         <li>No state changes will be persisted and all signature checks will be disabled.</li>
                     </ul>
-                </div>
+                </CardBody>
             </SimulationCardShell>
         );
     }
@@ -83,12 +86,12 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
             <SimulationCardShell action={<SimulateButton label="Retry" onClick={simulation.simulate} />}>
                 {hasLogs && <ProgramLogsCardBody message={message} logs={logs} cluster={cluster} url={url} />}
                 {hasErrorWithoutLogs && (
-                    <div className="card-body">
+                    <CardBody ui="dashkit">
                         <div>
                             Simulation Failure:
-                            <span className="e-ml-2 e-text-yellow-500">{error}</span>
+                            <span className="ml-2 text-yellow-500">{error}</span>
                         </div>
-                    </div>
+                    </CardBody>
                 )}
             </SimulationCardShell>
             {logs && (
@@ -110,20 +113,22 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
 
 function SimulateButton({ label, onClick }: { label: string; onClick: () => void }) {
     return (
-        <button className="btn btn-sm d-flex btn-white" onClick={onClick}>
+        <Button ui="dashkit" variant="white" size="sm" className="flex" onClick={onClick}>
             {label}
-        </button>
+        </Button>
     );
 }
 
 function SimulationCardShell({ action, children }: { action?: React.ReactNode; children: React.ReactNode }) {
     return (
-        <div className="card">
-            <div className="card-header">
-                <h3 className="card-header-title">Transaction Simulation</h3>
+        <Card ui="dashkit">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit">
+                    Transaction Simulation
+                </CardTitle>
                 {action}
-            </div>
+            </CardHeader>
             {children}
-        </div>
+        </Card>
     );
 }

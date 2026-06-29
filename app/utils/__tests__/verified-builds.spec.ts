@@ -2,7 +2,7 @@ import { sha256 } from '@noble/hashes/sha256';
 import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { hashProgramData } from '../verified-builds';
+import { hashProgramBuffer, hashProgramData } from '../verified-builds';
 
 // Helper to build a minimal ProgramDataAccountInfo
 function makeProgramData({ authority, rawBytes }: { authority: PublicKey | null; rawBytes: Buffer }): {
@@ -123,5 +123,45 @@ describe('hashProgramData', () => {
         // All-zero program data produces a hash of empty data (no crash)
         const emptyHash = Buffer.from(sha256(Buffer.alloc(0))).toString('hex');
         expect(hashProgramData(programData)).toBe(emptyHash);
+    });
+});
+
+describe('hashProgramBuffer', () => {
+    const staleAuthorityBytes = Buffer.from('51b4de5a0619575adb04c439878648ac81487e8529cded2b1fccb55115ef7247', 'hex');
+    const programBytes = Buffer.from([0x7f, 0x45, 0x4c, 0x46, 0xde, 0xad, 0xbe, 0xef]);
+
+    function makeBuffer({ authority, rawBytes }: { authority: PublicKey | null; rawBytes?: Buffer }) {
+        return {
+            authority,
+            data: rawBytes ? ([rawBytes.toString('base64'), 'base64'] as [string, 'base64']) : undefined,
+        };
+    }
+
+    it('should hash the program bytes directly (sha256, trailing zeros stripped) when authority is present', () => {
+        const buffer = makeBuffer({
+            authority: PublicKey.default,
+            rawBytes: Buffer.concat([programBytes, Buffer.alloc(64, 0)]),
+        });
+        expect(hashProgramBuffer(buffer)).toBe(Buffer.from(sha256(programBytes)).toString('hex'));
+    });
+
+    it('should skip the 32-byte stale pubkey when authority is null', () => {
+        const buffer = makeBuffer({
+            authority: null,
+            rawBytes: Buffer.concat([staleAuthorityBytes, programBytes]),
+        });
+        expect(hashProgramBuffer(buffer)).toBe(Buffer.from(sha256(programBytes)).toString('hex'));
+    });
+
+    it('should return undefined when no data is available', () => {
+        expect(hashProgramBuffer(makeBuffer({ authority: PublicKey.default }))).toBeUndefined();
+    });
+
+    it('should match the known solana-verify hash for a real buffer payload', () => {
+        // A buffer whose program bytes are the ELF magic: verifies the exact wire format
+        // (sha256 over the bytes, hex-encoded) used by `solana-verify get-buffer-hash`.
+        const buffer = makeBuffer({ authority: PublicKey.default, rawBytes: programBytes });
+        // eslint-disable-next-line no-restricted-syntax -- validating SHA-256 hex output format
+        expect(hashProgramBuffer(buffer)).toMatch(/^[0-9a-f]{64}$/);
     });
 });

@@ -3,6 +3,9 @@ import { AddressLookupTableAccount, PublicKey } from '@solana/web3.js';
 import { AddressLookupTableAccountInfo } from '@validators/accounts/address-lookup-table';
 import React from 'react';
 
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function LookupTableEntriesCard(
     params:
         | {
@@ -21,48 +24,43 @@ export function LookupTableEntriesCard(
     }, [params]);
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <div className="row align-items-center">
-                    <div className="col">
-                        <h3 className="card-header-title">Lookup Table Entries</h3>
-                    </div>
-                </div>
-            </div>
-
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="w-1 text-muted">Index</th>
-                            <th className="text-muted">Address</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {lookupTableState.addresses.length > 0 &&
-                            lookupTableState.addresses.map((entry: PublicKey, index) => {
-                                return renderRow(entry, index);
-                            })}
-                    </tbody>
-                </table>
-            </div>
+        <Card ui="dashkit">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit">
+                    Lookup Table Entries
+                </CardTitle>
+            </CardHeader>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Index</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Address</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {lookupTableState.addresses.length > 0 &&
+                        lookupTableState.addresses.map((entry: PublicKey, index) => {
+                            return renderRow(entry, index);
+                        })}
+                </BaseTable.Body>
+            </BaseTable>
 
             {lookupTableState.addresses.length === 0 && (
-                <div className="card-footer">
-                    <div className="text-muted text-center">No entries found</div>
-                </div>
+                <CardFooter ui="dashkit">
+                    <div className="text-center text-dk-gray-700">No entries found</div>
+                </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }
 
 const renderRow = (entry: PublicKey, index: number) => {
     return (
-        <tr key={index}>
-            <td className="w-1 font-monospace">{index}</td>
-            <td className="font-monospace">
+        <BaseTable.Row key={index}>
+            <BaseTable.Cell className="w-px font-mono">{index}</BaseTable.Cell>
+            <BaseTable.Cell className="font-mono">
                 <Address pubkey={entry} link />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 };

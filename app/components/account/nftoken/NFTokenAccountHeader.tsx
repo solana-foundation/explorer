@@ -4,6 +4,8 @@ import { NFTImageContent } from '@components/common/NFTArt';
 import { Account } from '@providers/accounts';
 import React, { Suspense } from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+
 import { parseNFTokenCollectionAccount, parseNFTokenNFTAccount } from './isNFTokenAccount';
 import { useNftokenMetadata } from './nftoken-hooks';
 import { NftokenTypes } from './nftoken-types';
@@ -30,8 +32,8 @@ export function NFTokenAccountHeader({ account }: { account: Account }) {
 
     return (
         <>
-            <h6 className="header-pretitle">Details</h6>
-            <h2 className="header-title">Account</h2>
+            <h6 className="uppercase tracking-[0.08em] text-dk-gray-700">Details</h6>
+            <h2 className="mb-0">Account</h2>
         </>
     );
 }
@@ -40,24 +42,24 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
     const { data: metadata } = useNftokenMetadata(nft.metadata_url);
 
     return (
-        <div className="row">
-            <div className="col-auto ms-2 d-flex align-items-center">
+        <div className="-mx-3 flex flex-wrap">
+            <div className="ml-1.5 flex flex-none items-center px-3">
                 <NFTImageContent uri={metadata?.image.trim()} />
             </div>
 
-            <div className="col mb-3 ms-0.5 mt-3">
-                {<h6 className="header-pretitle ms-1">NFToken NFT</h6>}
-                <div className="d-flex align-items-center">
-                    <h2 className="header-title ms-1 align-items-center no-overflow-with-ellipsis">
+            <div className="mb-3 mt-3 min-w-0 flex-1 px-3">
+                {<h6 className="ml-[3px] uppercase tracking-[0.08em] text-dk-gray-700">NFToken NFT</h6>}
+                <div className="flex items-center">
+                    <h2 className="mb-0 ml-[3px] items-center overflow-hidden text-ellipsis whitespace-nowrap">
                         {metadata ? metadata.name || 'No NFT name was found' : 'Loading...'}
                     </h2>
                 </div>
 
                 <div>
-                    <div className={'d-inline-flex align-items-center mt-2'}>
-                        <span className="badge badge-pill bg-dark">{`${
-                            nft.authority_can_update ? 'Mutable' : 'Immutable'
-                        }`}</span>
+                    <div className="mt-1.5 inline-flex items-center">
+                        <Badge ui="dashkit" variant="dark" tone="solid">
+                            {nft.authority_can_update ? 'Mutable' : 'Immutable'}
+                        </Badge>
 
                         <InfoTooltip
                             bottom
@@ -78,24 +80,24 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
     const { data: metadata } = useNftokenMetadata(collection.metadata_url);
 
     return (
-        <div className="row">
-            <div className="col-auto ms-2 d-flex align-items-center">
+        <div className="-mx-3 flex flex-wrap">
+            <div className="ml-1.5 flex flex-none items-center px-3">
                 <NFTImageContent uri={metadata?.image} />
             </div>
 
-            <div className="col mb-3 ms-0.5 mt-3">
-                {<h6 className="header-pretitle ms-1">NFToken Collection</h6>}
-                <div className="d-flex align-items-center">
-                    <h2 className="header-title ms-1 align-items-center no-overflow-with-ellipsis">
+            <div className="mb-3 mt-3 min-w-0 flex-1 px-3">
+                {<h6 className="ml-[3px] uppercase tracking-[0.08em] text-dk-gray-700">NFToken Collection</h6>}
+                <div className="flex items-center">
+                    <h2 className="mb-0 ml-[3px] items-center overflow-hidden text-ellipsis whitespace-nowrap">
                         {metadata ? metadata.name || 'No collection name was found' : 'Loading...'}
                     </h2>
                 </div>
 
                 <div>
-                    <div className={'d-inline-flex align-items-center mt-2'}>
-                        <span className="badge badge-pill bg-dark">{`${
-                            collection.authority_can_update ? 'Mutable' : 'Immutable'
-                        }`}</span>
+                    <div className="mt-1.5 inline-flex items-center">
+                        <Badge ui="dashkit" variant="dark" tone="solid">
+                            {collection.authority_can_update ? 'Mutable' : 'Immutable'}
+                        </Badge>
 
                         <InfoTooltip
                             bottom

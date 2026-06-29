@@ -3,6 +3,8 @@ import { ParsedInstruction, SignatureResult } from '@solana/web3.js';
 import { wrap } from '@utils/index';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from './InstructionCard';
 
 export function MemoDetailsCard({
@@ -28,19 +30,19 @@ export function MemoDetailsCard({
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={ix.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Data (UTF-8)</td>
-                <td className="text-lg-end">
-                    <pre className="d-inline-block text-start mb-0">{data}</pre>
-                </td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Data (UTF-8)</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
+                    <pre className="mb-0 inline-block text-left">{data}</pre>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

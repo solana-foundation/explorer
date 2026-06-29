@@ -1,6 +1,9 @@
-import { RefreshButton } from '@shared/ui/refresh-button';
+import { Button } from '@components/shared/ui/button';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { ConfirmedSignatureInfo, TransactionError } from '@solana/web3.js';
 import React from 'react';
+
+import { CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export type TransactionRow = {
     slot: number;
@@ -28,18 +31,16 @@ export function HistoryCardHeader({
     subHeader?: React.ReactNode;
 }) {
     return (
-        <div className="card-header h-auto py-3" style={{ minHeight: '3.5rem' }}>
-            <div className="d-flex flex-column gap-2 w-100">
-                <div className="d-flex align-items-center gap-2">
-                    <h3 className="card-header-title mb-0 me-auto">{title}</h3>
-                    <div className="d-flex align-items-center gap-2">
-                        {actions}
-                        <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
-                    </div>
-                </div>
-                {subHeader && <div className="d-flex flex-wrap gap-2">{subHeader}</div>}
+        <CardHeader ui="dashkit" className={subHeader ? 'h-auto flex-col items-stretch gap-2 py-3' : ''}>
+            <div className="flex flex-1 items-center gap-2">
+                <CardTitle as="h3" ui="dashkit" className="flex-1">
+                    {title}
+                </CardTitle>
+                {actions}
+                <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
             </div>
-        </div>
+            {subHeader && <div className="flex flex-wrap gap-2">{subHeader}</div>}
+        </CardHeader>
     );
 }
 
@@ -53,22 +54,28 @@ export function HistoryCardFooter({
     loadMore: () => void;
 }) {
     return (
-        <div className="card-footer">
+        <CardFooter ui="dashkit">
             {foundOldest ? (
-                <div className="text-muted text-center">Fetched full history</div>
+                <div className="text-center text-dk-gray-700">Fetched full history</div>
             ) : (
-                <button className="btn btn-primary w-100" onClick={() => loadMore()} disabled={fetching}>
+                <Button
+                    ui="dashkit"
+                    variant="primary"
+                    className="w-full"
+                    onClick={() => loadMore()}
+                    disabled={fetching}
+                >
                     {fetching ? (
                         <>
-                            <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+                            <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
                             Loading
                         </>
                     ) : (
                         'Load More'
                     )}
-                </button>
+                </Button>
             )}
-        </div>
+        </CardFooter>
     );
 }
 

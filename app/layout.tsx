@@ -1,18 +1,16 @@
-import './scss/theme-dark.scss';
-import './styles.css';
+import './styles/styles.css';
 
 import { ClusterModal } from '@components/ClusterModal';
 import { ClusterStatusButton } from '@components/ClusterStatusButton';
 import { Footer } from '@components/Footer';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
+import { Toaster } from '@components/shared/ui/sonner/toaster';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
-import { Toaster } from '@shared/ui/sonner/toaster';
-import { isEnvEnabled } from '@utils/env';
+import { EXPLORER_BASE_URL, isEnvEnabled } from '@utils/env';
 import { BotIdClient } from 'botid/client';
 import type { Viewport } from 'next';
-import { Rubik } from 'next/font/google';
 import { type Metadata } from 'next/types';
 import { Suspense } from 'react';
 
@@ -20,12 +18,15 @@ import { SearchBar } from '@/app/components/SearchBarLoader';
 import { TokenInfoBatchProvider } from '@/app/entities/token-info';
 import { CookieConsent } from '@/app/features/cookie';
 import { VisibilityProvider } from '@/app/shared/lib/visibility';
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+import { rubikFont } from '@/app/styles';
 
-import { botIdProtectedRoutes } from '../middleware';
+import { botIdProtectedRoutes } from '../proxy';
 
 export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
     manifest: '/manifest.json',
+    metadataBase: new URL(EXPLORER_BASE_URL),
     title: 'Explorer | Solana',
 };
 
@@ -34,13 +35,6 @@ export const viewport: Viewport = {
     maximumScale: 1,
     width: 'device-width',
 };
-
-const rubikFont = Rubik({
-    display: 'swap',
-    subsets: ['latin'],
-    variable: '--explorer-default-font',
-    weight: ['300', '400', '700'],
-});
 
 export default function RootLayout({ analytics, children }: { analytics: React.ReactNode; children: React.ReactNode }) {
     return (
@@ -53,25 +47,26 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                     protect={isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_ENABLED) ? botIdProtectedRoutes : []}
                 />
             </head>
-            <body>
+            {/* suppressHydrationWarning: browser extensions (e.g. wallet adapters, password managers) may inject attributes onto <body>, causing a mismatch */}
+            <body suppressHydrationWarning>
                 <Suspense fallback={null}>
                     <ScrollAnchorProvider>
                         <ClusterProvider>
                             <VisibilityProvider>
                                 <TokenInfoBatchProvider>
                                     <ClusterModal />
-                                    <div className="e-flex e-min-h-screen e-flex-col">
-                                        <div className="main-content pb-4 e-flex-1">
+                                    <div className="flex min-h-screen flex-col">
+                                        <div className="min-w-[292px] flex-1 pb-6">
                                             <Navbar>
                                                 <SearchBar />
                                             </Navbar>
                                             <MessageBanner />
-                                            <div className="container my-3 d-xl-none">
+                                            <PageContainer className="my-3 xl:hidden">
                                                 <SearchBar />
-                                            </div>
-                                            <div className="container my-3 d-lg-none">
+                                            </PageContainer>
+                                            <PageContainer className="my-3 lg:hidden">
                                                 <ClusterStatusButton />
-                                            </div>
+                                            </PageContainer>
                                             {children}
                                         </div>
                                         <Footer />

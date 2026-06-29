@@ -24,8 +24,8 @@ export function TokenMarketData({ coinInfo }: { coinInfo?: CoinGeckoResult }) {
             {isLoadingFromCoingecko && (
                 <LoadingCard
                     className={cn(
-                        'e-m-0 e-grid e-w-full e-place-items-center e-rounded e-border e-border-solid e-border-black e-bg-[#1C2120] e-px-2 e-py-1 e-text-sm',
-                        'md:e-min-h-[69px]',
+                        'm-0 grid w-full place-items-center rounded border border-solid border-black bg-[#1C2120] px-2 py-1 text-sm',
+                        'md:min-h-[69px]',
                     )}
                     message="Loading token price data"
                 />

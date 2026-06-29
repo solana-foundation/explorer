@@ -1,6 +1,8 @@
-import '@/app/styles.css';
+import '@/app/styles/styles.css';
 
 import { Metadata } from 'next/types';
+
+import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 export const metadata: Metadata = {
     description: 'Terms of Service for Solana Explorer',
@@ -9,32 +11,32 @@ export const metadata: Metadata = {
 
 export default function TermsOfServicePage() {
     return (
-        <div className="container e-my-8 e-max-w-4xl">
-            <h1 className="e-mb-8 e-text-4xl e-font-bold e-text-white">Terms of Service</h1>
+        <PageContainer className="my-8 max-w-4xl">
+            <h1 className="mb-8 text-4xl font-bold text-white">Terms of Service</h1>
 
-            <div className="e-max-w-none">
-                <p className="e-mb-6 e-text-gray-400">
+            <div className="max-w-none">
+                <p className="mb-6 text-gray-400">
                     Please read these terms carefully and keep a copy of them for your reference. Please also note that
                     there may be specific terms or conditions applicable to you as a user in a given jurisdiction, as
                     detailed below.
                 </p>
 
-                <p className="e-mb-8 e-text-gray-400">
+                <p className="mb-8 text-gray-400">
                     Please refer to our Privacy Policy, available at{' '}
                     <a
                         href="https://solana.com/privacy-policy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="e-text-accent e-underline hover:e-text-accent-600"
+                        className="text-accent underline hover:text-accent-600"
                     >
                         link
                     </a>
                     , for information about how we collect, use, share and otherwise process information about you.
                 </p>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">AGREEMENT TO TERMS</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">AGREEMENT TO TERMS</h2>
+                    <p className="mb-4 text-gray-400">
                         This End User License Agreement and Terms of Service (&quot;<strong>EULA</strong>&quot; or
                         &quot;
                         <strong>Terms</strong>&quot;) is a binding contract between you, an individual user or site
@@ -51,7 +53,7 @@ export default function TermsOfServicePage() {
                             href="https://www.solana.com"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="e-text-accent e-underline hover:e-text-accent-600"
+                            className="text-accent underline hover:text-accent-600"
                         >
                             www.solana.com
                         </a>{' '}
@@ -63,11 +65,11 @@ export default function TermsOfServicePage() {
                         open-source protocol that is maintained and processed by Solana Network validators across the
                         globe.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         BY ACCESSING OR USING THE SERVICE, YOU AGREE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE
                         BOUND BY THE EULA. IF YOU DO NOT AGREE, PLEASE DO NOT USE THE SERVICE OR SITE.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         Supplemental terms and conditions or documents that may be posted on the Site from time to time
                         are hereby expressly incorporated herein by reference. We reserve the right, in our sole
                         discretion, to make changes or modifications to this EULA at any time and for any reason. We
@@ -77,7 +79,7 @@ export default function TermsOfServicePage() {
                         deemed to have been made aware of and to have accepted, the changes in any revised EULA by your
                         continued use of the Service after the date such revised EULA is posted.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         The information provided on the Site is not intended for distribution to or use by any person or
                         entity in any jurisdiction or country where such distribution or use would be contrary to law or
                         regulation or which would subject us to any registration requirement within such jurisdiction or
@@ -85,7 +87,7 @@ export default function TermsOfServicePage() {
                         their own initiative and are solely responsible for compliance with local laws, if and to the
                         extent local laws are applicable.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         The Service is intended for users who are at least 18 years old. You agree that by using the
                         Site and the Service you are at least 18 years of age, or accessing the Service under the
                         supervision of a parent or guardian, and you are legally able to enter into a contract. If you
@@ -97,7 +99,7 @@ export default function TermsOfServicePage() {
                         in the event you or the person or entity violates these Terms, the person or entity agrees to be
                         responsible to us.
                     </p>
-                    <p className="e-mb-4 e-font-bold e-text-white">
+                    <p className="mb-4 font-bold text-white">
                         PLEASE NOTE: THE &quot;DISPUTE RESOLUTION&quot; SECTION OF THIS EULA CONTAINS AN ARBITRATION
                         CLAUSE THAT REQUIRES DISPUTES TO BE ARBITRATED ON AN INDIVIDUAL BASIS, AND PROHIBITS CLASS
                         ACTION CLAIMS. IT AFFECTS HOW DISPUTES BETWEEN YOU AND THE FOUNDATION ARE RESOLVED. BY ACCEPTING
@@ -105,15 +107,15 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">SCOPE OF LICENSE TO USERS</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">SCOPE OF LICENSE TO USERS</h2>
+                    <p className="mb-4 text-gray-400">
                         The Service is licensed, not sold, to you for use only under the terms of the EULA, subject to
                         your complete and ongoing compliance with the terms and conditions of the EULA. The Foundation
                         hereby grants you a personal, limited, revocable, non-transferable license to access and use the
                         Service solely for your own use.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         You may not modify, alter, reproduce, or distribute the Service. You may not directly rent,
                         lease, lend, sell, redistribute or sublicense the Service. You may not copy, decompile, reverse
                         engineer, disassemble, attempt to derive the source code of, modify, or create derivative works
@@ -125,7 +127,7 @@ export default function TermsOfServicePage() {
                         damages, as well as liability for infringement of intellectual property rights, and denial of
                         access to the Service.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         WITHOUT LIMITING ANY OTHER PROVISION OF THIS EULA, WE RESERVE THE RIGHT TO, IN OUR SOLE
                         DISCRETION AND WITHOUT NOTICE OR LIABILITY, DENY ACCESS TO AND USE OF THE SERVICE (INCLUDING
                         BLOCKING CERTAIN IP ADDRESSES), TO ANY PERSON FOR ANY REASON OR FOR NO REASON, INCLUDING WITHOUT
@@ -140,15 +142,15 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">PROHIBITED ACTIVITIES</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">PROHIBITED ACTIVITIES</h2>
+                    <p className="mb-4 text-gray-400">
                         You may not access or use the Service for any purpose other than that for which we make the
                         Service available. The Service may not be used in connection with any commercial endeavors
                         except those that are specifically endorsed or approved by us.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">As a user of the Service, you agree not to:</p>
-                    <ol className="e-mb-4 e-ml-4 e-list-inside e-list-decimal e-space-y-2 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">As a user of the Service, you agree not to:</p>
+                    <ol className="mb-4 ml-4 list-inside list-decimal space-y-2 text-gray-400">
                         <li>
                             Systematically retrieve data or other content from the Service to create or compile,
                             directly or indirectly, a collection, compilation, database, or directory without written
@@ -246,9 +248,9 @@ export default function TermsOfServicePage() {
                     </ol>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">SITE MANAGEMENT</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">SITE MANAGEMENT</h2>
+                    <p className="mb-4 text-gray-400">
                         We reserve the right, but not the obligation, to: (1) monitor the Site for violations of this
                         EULA; (2) take appropriate legal action against anyone who, in our sole discretion, violates the
                         law or this EULA, including without limitation, reporting such user to law enforcement
@@ -259,15 +261,15 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">TRADEMARKS</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">TRADEMARKS</h2>
+                    <p className="mb-4 text-gray-400">
                         &quot;Solana&quot; and our logos, our product or service names, our slogans and the look and
                         feel of the Service are trademarks of the Foundation and may not be copied, imitated or used, in
                         whole or in part, without our prior written permission, which may be obtained by emailing{' '}
                         <a
                             href="mailto:operations@solana.foundation"
-                            className="e-text-accent e-underline hover:e-text-accent-600"
+                            className="text-accent underline hover:text-accent-600"
                         >
                             operations@solana.foundation
                         </a>
@@ -278,28 +280,28 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">Repeat Infringer Policy</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">Repeat Infringer Policy</h2>
+                    <p className="mb-4 text-gray-400">
                         The Foundation maintains a policy to suspend or terminate user accounts that repeatedly infringe
                         the intellectual property rights of others.
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">
                         Copyright Infringement Notice – Framework and Requirements
                     </h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         The Foundation complies with the Digital Millennium Copyright Act (&quot;<strong>DMCA</strong>
                         &quot;) and responds to notices alleging copyright infringement in accordance with Section 512
                         of the DMCA. This section also establishes procedures for counter-notifications in cases where a
                         user disputes the removal of content.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         To submit a DMCA takedown notice, please provide the following information:
                     </p>
-                    <ol className="e-mb-4 e-ml-4 e-list-inside e-list-decimal e-space-y-2 e-text-gray-400">
+                    <ol className="mb-4 ml-4 list-inside list-decimal space-y-2 text-gray-400">
                         <li>
                             <strong>Your electronic or physical signature</strong> (typing your full name in an email or
                             webform is sufficient);
@@ -325,44 +327,44 @@ export default function TermsOfServicePage() {
                             accurate and that you are the copyright owner or authorized to act on behalf of the owner.
                         </li>
                     </ol>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         Please submit your notice to the Foundation&apos;s designated copyright agent:
                     </p>
-                    <div className="e-mb-4 e-ml-4 e-text-gray-400">
-                        <p className="e-mb-2">
+                    <div className="mb-4 ml-4 text-gray-400">
+                        <p className="mb-2">
                             <strong>Solana Foundation</strong>
                         </p>
-                        <p className="e-mb-2">Attn: Copyright Agent</p>
-                        <p className="e-mb-2">16 Dammstrasse, 6300 Zug Switzerland</p>
-                        <p className="e-mb-2">
+                        <p className="mb-2">Attn: Copyright Agent</p>
+                        <p className="mb-2">16 Dammstrasse, 6300 Zug Switzerland</p>
+                        <p className="mb-2">
                             Email:{' '}
                             <a
                                 href="mailto:dmcaagent@solana.org"
-                                className="e-text-accent e-underline hover:e-text-accent-600"
+                                className="text-accent underline hover:text-accent-600"
                             >
                                 dmcaagent@solana.org
                             </a>
                         </p>
-                        <p className="e-mb-2">+41 41 562 73 63</p>
+                        <p className="mb-2">+41 41 562 73 63</p>
                     </div>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         By submitting a notice, you acknowledge that the Foundation may share the information you
                         provide with the individual who posted the allegedly infringing content.
                     </p>
-                    <p className="e-mb-4 e-font-bold e-text-white">
+                    <p className="mb-4 font-bold text-white">
                         <strong>Important Legal Notice:</strong> Copyright law requires that you consider applicable
                         defenses such as fair use before submitting a takedown request. If you are unsure whether the
                         material infringes your copyright, you should seek legal advice. Submitting false claims may
                         result in liability under <strong>17 U.S.C. § 512(f)</strong>, including damages, costs, and
                         attorneys&apos; fees.
                     </p>
-                    <h3 className="e-mb-4 e-mt-6 e-text-xl e-font-bold e-text-white">Submitting a Counter-Notice</h3>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <h3 className="mb-4 mt-6 text-xl font-bold text-white">Submitting a Counter-Notice</h3>
+                    <p className="mb-4 text-gray-400">
                         If your content has been removed or disabled as a result of a DMCA notice and you believe it was
                         wrongly removed, you may submit a counter-notice to the Foundation&apos;s copyright agent.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">A valid counter-notice must include:</p>
-                    <ol className="e-mb-4 e-ml-4 e-list-inside e-list-decimal e-space-y-2 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">A valid counter-notice must include:</p>
+                    <ol className="mb-4 ml-4 list-inside list-decimal space-y-2 text-gray-400">
                         <li>Your physical or electronic signature;</li>
                         <li>
                             Identification of the material that was removed or disabled and the location where it
@@ -380,7 +382,7 @@ export default function TermsOfServicePage() {
                             original DMCA notice.
                         </li>
                     </ol>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         Upon receipt of a valid counter-notice, the Foundation may forward it to the party who submitted
                         the original infringement notice. If that party does not file a court action within{' '}
                         <strong>ten business days</strong>, the Foundation may, at its discretion, restore the removed
@@ -388,22 +390,22 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">DISPUTE RESOLUTION</h2>
-                    <p className="e-mb-4 e-font-bold e-text-white">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">DISPUTE RESOLUTION</h2>
+                    <p className="mb-4 font-bold text-white">
                         Please read the following section carefully because it requires you to arbitrate certain
                         disputes and claims with the Foundation and limits the manner in which you can seek relief from
                         us, unless you opt out of arbitration by following the instructions set forth below. No class or
                         representative actions or arbitrations are allowed under this arbitration provision. In
                         addition, arbitration precludes you from suing in court or having a jury trial.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         (a) <strong>No Representative Actions.</strong> You and the Foundation agree that any dispute
                         arising out of or related to this EULA or the Service is personal to you and the Foundation and
                         that any dispute will be resolved solely through individual action, and will not be brought as a
                         class arbitration, class action or any other type of representative proceeding.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         (b) <strong>Arbitration of Disputes.</strong> You and the Foundation waive your rights to a jury
                         trial and to have any other dispute arising out of or related to this EULA and the Service,
                         including claims related to privacy and data security, (collectively, &quot;
@@ -413,7 +415,7 @@ export default function TermsOfServicePage() {
                         written notice of your claim (&quot;<strong>Notice</strong>&quot;) to the Foundation by email at{' '}
                         <a
                             href="mailto:operations@solana.foundation"
-                            className="e-text-accent e-underline hover:e-text-accent-600"
+                            className="text-accent underline hover:text-accent-600"
                         >
                             operations@solana.foundation
                         </a>{' '}
@@ -432,7 +434,7 @@ export default function TermsOfServicePage() {
                             href="https://www.jamsadr.com/rules-streamlined-arbitration"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="e-text-accent e-underline hover:e-text-accent-600"
+                            className="text-accent underline hover:text-accent-600"
                         >
                             JAMS website
                         </a>{' '}
@@ -440,7 +442,7 @@ export default function TermsOfServicePage() {
                         and understand the JAMS Rules or waive your opportunity to read the JAMS Rules and waive any
                         claim that the JAMS Rules are unfair or should not apply for any reason.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         (c) You and the Foundation agree that these Terms affect interstate commerce and that the
                         enforceability of this Section will be substantively and procedurally governed by the Federal
                         Arbitration Act, 9 U.S.C. § 1, <em>et seq</em>. (the &quot;<strong>FAA</strong>&quot;), to the
@@ -452,7 +454,7 @@ export default function TermsOfServicePage() {
                         claims, preside over any type of class or representative proceeding or preside over any
                         proceeding involving more than one individual.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         (d) The arbitration will allow for the discovery or exchange of non-privileged information
                         relevant to the Dispute. The arbitrator, the Foundation, and you will maintain the
                         confidentiality of any arbitration proceedings, judgments and awards, including information
@@ -464,14 +466,14 @@ export default function TermsOfServicePage() {
                         connection with a judicial challenge to an arbitration award or its enforcement, or to the
                         extent that disclosure is otherwise required by law or judicial decision.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         (e) You and the Foundation agree that for any arbitration you initiate, you will pay the filing
                         fee (up to a maximum of $250 if you are a consumer), and the Foundation will pay the remaining
                         JAMS fees and costs. For any arbitration initiated by the Foundation, the Foundation will pay
                         all JAMS fees and costs. You and the Foundation agree that the Kanton of Zug shall have
                         exclusive jurisdiction over any appeals and the enforcement of an arbitration award.
                     </p>
-                    <p className="e-mb-4 e-font-bold">
+                    <p className="mb-4 font-bold">
                         (f){' '}
                         <strong>
                             Any Dispute must be filed within one year after the relevant claim arose; otherwise, the
@@ -479,7 +481,7 @@ export default function TermsOfServicePage() {
                             right to assert the claim.
                         </strong>
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         (g){' '}
                         <strong>
                             You have the right to opt out of binding arbitration within 30 days of the date you first
@@ -491,7 +493,7 @@ export default function TermsOfServicePage() {
                         you are agreeing to resolve Disputes in accordance with the governing law and venue terms of
                         this EULA.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         (h) If any portion of this Section is found to be unenforceable or unlawful for any reason, (a)
                         the unenforceable or unlawful provision shall be severed from these Terms; (b) severance of the
                         unenforceable or unlawful provision shall have no impact whatsoever on the remainder of this
@@ -507,18 +509,18 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">GOVERNING LAW AND VENUE</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">GOVERNING LAW AND VENUE</h2>
+                    <p className="mb-4 text-gray-400">
                         Any dispute arising from these Terms and your use of the Service will be governed by and
                         construed and enforced in accordance with the laws of Switzerland. Any dispute between the
                         parties that is not subject to arbitration will be resolved in Zug, Switzerland.
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">CORRECTIONS</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">CORRECTIONS</h2>
+                    <p className="mb-4 text-gray-400">
                         There may be information on the Site that contains typographical errors, inaccuracies, or
                         omissions, including descriptions, pricing, availability, and various other information. We
                         reserve the right to correct any errors, inaccuracies, or omissions and to change or update the
@@ -528,9 +530,9 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">DISCLAIMER</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">DISCLAIMER</h2>
+                    <p className="mb-4 text-gray-400">
                         THE SITE AND SERVICE IS PROVIDED ON AN &quot;AS-IS&quot; AND &quot;AS-AVAILABLE&quot; BASIS. TO
                         THE MAXIMUM EXTENT PERMITTED BY LAW, THE FOUNDATION WILL NOT BE LIABLE FOR ANY DAMAGES OF ANY
                         KIND ARISING FROM THE USE OF THE SITE OR SERVICE, INCLUDING, BUT NOT LIMITED TO INDIRECT,
@@ -553,19 +555,19 @@ export default function TermsOfServicePage() {
                         CONTENT AND MATERIALS OR FOR ANY LOSS OR DAMAGE OF ANY KIND INCURRED AS A RESULT OF THE USE OF
                         ANY CONTENT POSTED, TRANSMITTED, OR OTHERWISE MADE AVAILABLE VIA THE SITE.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         IF YOU ARE DISSATISFIED WITH THE SERVICE, YOU AGREE THAT YOUR SOLE AND EXCLUSIVE REMEDY SHALL BE
                         FOR YOU TO DISCONTINUE YOUR USE OF THE SERVICE. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR
                         LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THE ABOVE LIMITATION AND EXCLUSIONS MAY
                         NOT APPLY TO YOU.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         The Foundation may link to products and services offered by third parties through the Service.
                         These third-party products and services are not offered by the Foundation and the Foundation is
                         not responsible for any damages or losses that you might incur as a result of your use or
                         purchase of these products and services.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         You shall and hereby do waive California Civil Code Section 1542 or any other similar law of any
                         jurisdiction, which says in substance: &quot;A general release does not extend to claims which
                         the creditor does not know or suspect to exist in his favor at the time of executing the
@@ -576,9 +578,9 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">INDEMNIFICATION</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">INDEMNIFICATION</h2>
+                    <p className="mb-4 text-gray-400">
                         You hereby agree to defend, indemnify, and hold the Foundation harmless from and against any
                         loss, damage, liability, claim, or demand, including reasonable attorneys&apos; fees and
                         expenses, made by any third party due to or arising out of: (1) use of the Service; (2) breach
@@ -594,20 +596,18 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">
-                        MODIFYING AND TERMINATING OUR SERVICE
-                    </h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">MODIFYING AND TERMINATING OUR SERVICE</h2>
+                    <p className="mb-4 text-gray-400">
                         We reserve the right to modify our Service or to suspend or stop providing all or portions of
                         our Service at any time. You also have the right to stop using our Service at any time. We are
                         not responsible for any loss or harm related to your inability to access or use our Service.
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">USER DATA</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">USER DATA</h2>
+                    <p className="mb-4 text-gray-400">
                         We will maintain certain data that you transmit to the Site for the purpose of managing the
                         performance of the Site, as well as data relating to your use of the Site. Although we perform
                         regular routine backups of data, you are solely responsible for all data that you transmit or
@@ -617,27 +617,27 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">
                         ELECTRONIC COMMUNICATIONS, TRANSACTIONS, AND SIGNATURES
                     </h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         You agree and consent to receive disclosures and communications from us regarding our services (
                         &quot;<strong>Communications</strong>&quot;), including, but not limited to:
                     </p>
-                    <ul className="e-mb-4 e-ml-4 e-list-inside e-list-disc e-space-y-2 e-text-gray-400">
+                    <ul className="mb-4 ml-4 list-inside list-disc space-y-2 text-gray-400">
                         <li>Terms and conditions of service, and amendments thereto;</li>
                         <li>Privacy policies and notices, and amendments thereto;</li>
                         <li>Client agreements and receipts;</li>
                         <li>Legal and regulatory disclosures and communications; and</li>
                         <li>Customer service communications.</li>
                     </ul>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         We may provide Communications to you by email or by making them accessible on the Site or
                         through email (including via &quot;hyperlinks&quot; provided online and in emails). We may
                         always, in our sole discretion, provide you with any Communication via paper.
                     </p>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <p className="mb-4 text-gray-400">
                         Visiting the Site, sending us emails, and completing online forms constitute Communications. You
                         consent to receive Communications, and you agree that all agreements, notices, disclosures, and
                         other communications we provide to you electronically, via email and on the Site, satisfy any
@@ -649,12 +649,12 @@ export default function TermsOfServicePage() {
                         non-electronic records, or to payments or the granting of credits by any means other than
                         electronic means.
                     </p>
-                    <h3 className="e-mb-4 e-mt-6 e-text-xl e-font-bold e-text-white">Withdrawal of Consent</h3>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <h3 className="mb-4 mt-6 text-xl font-bold text-white">Withdrawal of Consent</h3>
+                    <p className="mb-4 text-gray-400">
                         You may withdraw your consent to receive Communications under this EULA by contacting us at{' '}
                         <a
                             href="mailto:operations@solana.foundation"
-                            className="e-text-accent e-underline hover:e-text-accent-600"
+                            className="text-accent underline hover:text-accent-600"
                         >
                             operations@solana.foundation
                         </a>
@@ -662,20 +662,20 @@ export default function TermsOfServicePage() {
                         a reasonable time. After we process your request, your access and use of the Service will
                         terminate.
                     </p>
-                    <h3 className="e-mb-4 e-mt-6 e-text-xl e-font-bold e-text-white">Requesting Paper Copies</h3>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <h3 className="mb-4 mt-6 text-xl font-bold text-white">Requesting Paper Copies</h3>
+                    <p className="mb-4 text-gray-400">
                         You may request that we mail a paper copy of any electronic Communication by contacting us at{' '}
                         <a
                             href="mailto:operations@solana.foundation"
-                            className="e-text-accent e-underline hover:e-text-accent-600"
+                            className="text-accent underline hover:text-accent-600"
                         >
                             operations@solana.foundation
                         </a>
                         . We may charge you fees associated with processing and mailing your request. We will send a
                         copy of the Communication to you within a reasonable timeframe.
                     </p>
-                    <h3 className="e-mb-4 e-mt-6 e-text-xl e-font-bold e-text-white">Termination and Changes</h3>
-                    <p className="e-mb-4 e-text-gray-400">
+                    <h3 className="mb-4 mt-6 text-xl font-bold text-white">Termination and Changes</h3>
+                    <p className="mb-4 text-gray-400">
                         We reserve the right, in our sole discretion, to discontinue the provision of your
                         Communications, or to terminate or change the terms and conditions on which we provide
                         Communications. We will provide you with notice of any such termination or change as required by
@@ -683,9 +683,9 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">CALIFORNIA USERS AND RESIDENTS</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">CALIFORNIA USERS AND RESIDENTS</h2>
+                    <p className="mb-4 text-gray-400">
                         If any complaint with us is not satisfactorily resolved, you can contact the Complaint
                         Assistance Unit of the Division of Consumer Services of the California Department of Consumer
                         Affairs in writing at 1625 North Market Blvd., Suite N 112, Sacramento, California 95834 or by
@@ -693,9 +693,9 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">MISCELLANEOUS</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">MISCELLANEOUS</h2>
+                    <p className="mb-4 text-gray-400">
                         This EULA and any policies or operating rules posted by us on the Site or in respect to the
                         Service constitute the entire agreement and understanding between you and us. Our failure to
                         exercise or enforce any right or provision of this EULA shall not operate as a waiver of such
@@ -713,14 +713,14 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
 
-                <section className="e-mb-8">
-                    <h2 className="e-mb-4 e-text-2xl e-font-bold e-text-white">CONTACT US</h2>
-                    <p className="e-mb-4 e-text-gray-400">
+                <section className="mb-8">
+                    <h2 className="mb-4 text-2xl font-bold text-white">CONTACT US</h2>
+                    <p className="mb-4 text-gray-400">
                         In order to resolve a complaint regarding the Site or to receive further information regarding
                         use of the Service, please contact us at:{' '}
                         <a
                             href="mailto:operations@solana.foundation"
-                            className="e-text-accent e-underline hover:e-text-accent-600"
+                            className="text-accent underline hover:text-accent-600"
                         >
                             operations@solana.foundation
                         </a>
@@ -728,6 +728,6 @@ export default function TermsOfServicePage() {
                     </p>
                 </section>
             </div>
-        </div>
+        </PageContainer>
     );
 }

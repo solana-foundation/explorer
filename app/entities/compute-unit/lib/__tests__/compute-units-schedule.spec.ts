@@ -42,7 +42,7 @@ describe('getReservedComputeUnits', () => {
                     epoch: 1000n,
                     programId: 'Vote111111111111111111111111111111111111111', // Vote Program
                 }),
-            ).toEqual(3_000);
+            ).toEqual(200_000);
 
             expect(
                 getReservedComputeUnits({

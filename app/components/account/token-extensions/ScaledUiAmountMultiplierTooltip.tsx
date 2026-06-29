@@ -14,11 +14,11 @@ function ScaledUiAmountMultiplierTooltip({
 
     return (
         <Tooltip>
-            <TooltipTrigger className="e-border-0 e-bg-transparent e-p-0">
-                <Info color="white" size={13} className="ms-2" style={{ transform: 'translate(-2px, -1px)' }} />
+            <TooltipTrigger className="border-0 bg-transparent p-0">
+                <Info color="white" size={13} className="ml-1.5" style={{ transform: 'translate(-2px, -1px)' }} />
             </TooltipTrigger>
             <TooltipContent>
-                <div className="e-min-w-36 e-max-w-16">
+                <div className="min-w-36 max-w-16">
                     Scaled {rawAmount ? `${rawAmount} ` : ''}by {scaledUiAmountMultiplier} due to the scaled ui amount
                     extension on the mint
                 </div>

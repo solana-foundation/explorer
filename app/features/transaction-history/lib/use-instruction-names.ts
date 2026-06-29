@@ -9,10 +9,10 @@ import { fetchParsedTransactionSequential } from './transaction-queue';
  * Uses a global sequential queue to avoid rate-limit (429) errors.
  * Returns null while loading, empty array if no instructions found.
  */
-export function useInstructionNames(signature: string): TransactionInstructionInfo[] | null {
+export function useInstructionNames(signature: string, enabled = true): TransactionInstructionInfo[] | null {
     const { url } = useCluster();
     const { data } = useSWR(
-        `instruction-names:${url}:${signature}`,
+        enabled ? `instruction-names:${url}:${signature}` : null,
         async () => {
             const tx = await fetchParsedTransactionSequential(signature, url);
             return tx ? getTransactionInstructionNames(tx) : [];

@@ -1,0 +1,53 @@
+# Proposal: Rebuild the feature-gate pipeline around a single TS schema
+
+## Context
+
+- **Two-language toolchain.** Feature-gate data was produced by two Python scripts (`scripts/fetch_mainnet_activations.py`, `scripts/parse_feature_gates.py`) and consumed by TypeScript in `app/utils/feature-gate/`. The wiki scraper, the on-chain epoch lookups, and the SIMD description back-fill each ran as standalone Python passes against the on-disk JSON. The contract between writer and reader was implicit — the producer wrote whatever it wrote, and the UI hand-rolled `parseInt(String(feature.x ?? '0'))`-style coercions to compensate.
+- **Failure mode that motivated this rework.** PR #1006 (fbb1a868) fixed an off-by-one in the on-chain epoch derivation. The bug had survived because the Python writer and the TS reader disagreed about what the JSON meant and no test loaded the file through a shared definition. The same class of drift — a wiki column rename, a `null` where the UI expected a number, a missing key — would land in master via the daily cron and only surface as a UI regression.
+- **UI was glued onto `app/utils/feature-gate/`.** The standalone Feature Gates page rendered a single Bootstrap table with no separation of activation status; the feature-gate data was also consumed from `app/components/account/FeatureAccountSection.tsx`, the OG image route at `app/og/feature-gate/[address]/route.tsx`, the address layout, and the search provider — i.e., it is genuinely cross-cutting domain data, not page-local state.
+- **FSD precedent.** The repo already follows Feature-Sliced Design with `app/entities/<noun>/` for shared domain data (`account/`, `idl/`, `cluster/`, `domain/`, …). `feature-gate` predated that convention and stayed under `utils/`.
+
+## Why
+
+We want the JSON the cron job writes and the JSON the UI reads to be governed by **one definition in one language**, so the next wiki-shape change or schema drift fails loudly at a known seam instead of silently corrupting downstream rendering.
+
+Four principles drove the choices:
+
+- **One contract, both sides.** The cron-generated file is the boundary between two processes; a typed runtime schema there is the cheapest way to catch drift on either side.
+- **One language across the pipeline.** A second runtime (Python) buys nothing the repo's existing TS toolchain (`@solana/kit`, `superstruct`, `tsx`, `vitest`) cannot do, and costs the project a second dependency surface, a second CI install step, and a second mental model for contributors.
+- **Domain data belongs in `entities/`.** When data is read by more than one feature, the FSD answer is an entity — not a `utils/` directory the rest of the app reaches into.
+- **Keep the UI rewrite scoped to follow-on, not driving.** The activation/upcoming split, the tabbed view, the shadcn table — these are downstream of having clean enriched data; they are not the reason we rewrote the pipeline.
+
+Alternatives considered:
+
+- **Keep the Python scripts; add a schema check only on the TS side.** Cheapest. Rejected: it would catch corruption after the cron PR is opened, but the writer would still have no typed view of what it's producing, and the off-by-one class of bug (interpreting `bytes[1..9]` as activation slot, not epoch) is exactly the kind of error a typed writer-side definition prevents at authoring time. It would also leave the two-language toolchain in place permanently.
+- **TS rewrite, but skip the runtime schema and rely on TypeScript types alone.** Tempting because the writer is now TS. Rejected: the JSON is loaded at runtime by both Next.js and the updater script; TS types vanish at the JSON boundary. Without `assert(FEATURES, FeatureGatesArraySchema)` in a test, a writer change that adds a `null` to a non-nullable column would pass typecheck (the writer's type can drift) and only fail at render time on the affected row.
+- **Use `zod` instead of `superstruct` for the schema.** Equivalent capability. Rejected: `superstruct` is already in the repo (used elsewhere for runtime validation); introducing a second validator would split conventions for no gain.
+- **Leave `app/utils/feature-gate/` in place and just rewire the page.** Smaller diff. Rejected: feature-gate data is read by at least five call sites outside the page (account section, OG route, address layout, search provider, the standalone page itself). Promoting it to `app/entities/feature-gate/` aligns it with how the rest of the codebase organises shared domain data, and gives the schema a natural home next to the JSON it validates.
+- **Skip the UI rewrite; keep the existing Bootstrap table on top of the new pipeline.** Possible. Rejected because the same pipeline rework also exposes "activated on N other clusters" data that the old single-table view had no place to render; the tabbed Activated/Upcoming split is the minimum UI change that surfaces what the new pipeline now knows.
+
+## What Changes
+
+- **Single TS pipeline replaces the Python scripts.** `scripts/update-feature-gates.ts` runs the full update as one in-process pipeline (wiki scrape → SIMD-link back-fill → devnet/testnet/mainnet epoch refresh in parallel → SIMD description back-fill), reading the JSON once and writing once. Stages are pure `FeatureGateDraft[] → FeatureGateDraft[]` functions applied as a sequence of `await` steps in `main()` (the three cluster epoch passes run concurrently via `Promise.all`); `writeFeatureGates` validates and brands the draft rows into the read-side `FeatureGate` type at the end via `create()`. Helpers live under `scripts/feature-gates/lib/` (`wiki.ts`, `simd-proposals.ts`, `simd-summary.ts`, `rpc.ts`, `http.ts`, `feature-store.ts`) with unit tests + frozen fixtures for the wiki and SIMD parsers.
+- **`scripts/fetch_mainnet_activations.py` and `scripts/parse_feature_gates.py` are deleted.** The Python toolchain is no longer required by the daily cron.
+- **`.github/workflows/update-feature-gates.yml`** drops the Python setup steps and runs `pnpm exec tsx scripts/update-feature-gates.ts` in their place.
+- **`app/entities/feature-gate/` is introduced** as the canonical home for feature-gate domain data:
+  - `feature-gates.json` is moved here from `app/utils/feature-gate/`.
+  - `lib/feature-gates-schema.ts` defines `FeatureGateSchema` (and `FeatureGatesArraySchema`) in `superstruct`; the inferred `FeatureGate` type — with `key` validated and branded to a base58 `Address` — is the read contract every reader imports, while the writer (`scripts/update-feature-gates.ts`) builds rows as the sibling `FeatureGateDraft` (plain-string `key`) that the schema brands at `create()`.
+  - `lib/__tests__/feature-gates-schema.spec.ts` asserts the committed JSON against the schema, so any drift between cron output and UI expectation fails CI rather than the browser.
+  - `lib/get-feature-info.ts` + `model/use-feature-info.ts` provide entity-level accessors; `server.ts` keeps server-only consumers off the React tree.
+- **`app/utils/feature-gate/` is removed.** Its `types.ts` and `utils.ts` content is folded into the entity layer; the relocated `UpcomingFeatures.tsx` lives under `app/features/feature-gate/ui/`.
+- **Feature Gates page UI is rewritten** under `app/features/feature-gate/ui/` (`FeatureGatesView`, `FeatureGateTable`, `ExpandInfoButton`, `SimdLinks`). The page splits into **Activated** / **Upcoming** tabs (driven by the new `lib/partition-features.ts`) — both rendered by the single `FeatureGateTable` component — and uses the shadcn `table` primitive (new at `app/components/shared/ui/table.tsx`), surfaces a per-row epoch countdown computed by `lib/epoch-countdown.ts`, and shows other-cluster activation status for upcoming features.
+- **Shared `AddressLink`** is added at `app/components/shared/address/` (with a Storybook story) and used by the new tables in place of the heavier `Address` component. `@solana/kit`'s `Address` type is used at the boundary; the on-chain script side also uses `@solana/kit` (`createSolanaRpc`, `getAccountInfo`) instead of `web3.js`.
+- **Filenames touched in this change use hyphens.** Existing camelCase files (`fetchFeatureGateInformation.ts`, `getFeatureGateOpenGraph.ts`, `isFeatureActivated.ts`) are renamed to match the repo convention while their imports were already changing.
+
+## Impact
+
+- **Affected runtime surfaces:** the standalone `/feature-gates` page, `FeatureAccountSection` on account pages, `app/address/[address]/feature-gate`, the OG image route, and the feature-gate search provider — all switch to `@/app/entities/feature-gate` imports. Behaviour is preserved except where the proposal explicitly changes the UI.
+- **CI / cron.** `update-feature-gates.yml` no longer installs Python; the daily PR is now produced by `tsx scripts/update-feature-gates.ts`. The job's network footprint (Agave wiki, SIMD GitHub repo, three Solana RPCs) is unchanged.
+- **Tests added:** schema-validation against the committed JSON; `epoch-countdown.spec.ts` for the new countdown helper; wiki/SIMD parser tests against frozen fixtures (`scripts/feature-gates/lib/__tests__/`); a `refresh-test-fixtures.ts` utility for regenerating those fixtures from live sources.
+- **Dependencies.** No new TS dependencies — `superstruct`, `@solana/kit`, `tsx` were already in the repo. The Python toolchain becomes unused by the project.
+- **Accepted risk (cron-side regressions).** A bug in the new TS updater that produces a schema-conformant but semantically wrong JSON (e.g. wrong epoch number) will still ship via the daily auto-PR. Mitigation: the activation-epoch decoder is now exercised by `feature-gate.spec.ts` and the schema test guards shape, but value-level correctness still relies on human review of the cron PR diff.
+- **Accepted risk (wiki shape changes).** The wiki parser selects tables by section heading ("Pending …"), not table position, so an added or reordered table cannot silently shift which rows we pick up. A column rename will still break parsing — by design, since the alternative is silently importing wrong data.
+- **Brownfield surface left alone.** Existing `web3.js` usage elsewhere is not touched; only the new cron-side code and the new `AddressLink` adopt `@solana/kit`, consistent with the project rule that new code prefers `@solana/kit` while existing code paths stay on `web3.js`.
+- **Companion artifacts.** [`specs/feature-gate-data/spec.md`](./specs/feature-gate-data/spec.md) carries the normative refresh policy (which fields update, which freeze, and when). [`design.md`](./design.md) carries the prose walkthrough of the pipeline, with a mermaid diagram of the stages and external data sources, so reviewers can audit the data-flow without reading the script first.

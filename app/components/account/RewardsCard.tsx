@@ -11,6 +11,10 @@ import { PublicKey } from '@solana/web3.js';
 import { lamportsToSolString } from '@utils/index';
 import React from 'react';
 
+import { Button } from '@/app/components/shared/ui/button';
+import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 const U64_MAX = BigInt('0xffffffffffffffff');
 
 export function RewardsCard({ address }: { address: string }) {
@@ -56,16 +60,16 @@ export function RewardsCard({ address }: { address: string }) {
         }
 
         return (
-            <tr key={reward.epoch}>
-                <td>
+            <BaseTable.Row key={reward.epoch}>
+                <BaseTable.Cell>
                     <Epoch epoch={reward.epoch} link />
-                </td>
-                <td>
+                </BaseTable.Cell>
+                <BaseTable.Cell>
                     <Slot slot={reward.effectiveSlot} link />
-                </td>
-                <td>{lamportsToSolString(reward.amount)}</td>
-                <td>{lamportsToSolString(reward.postBalance)}</td>
-            </tr>
+                </BaseTable.Cell>
+                <BaseTable.Cell>{lamportsToSolString(reward.amount)}</BaseTable.Cell>
+                <BaseTable.Cell>{lamportsToSolString(reward.postBalance)}</BaseTable.Cell>
+            </BaseTable.Row>
         );
     });
     const rewardsFound = rewardsList.some(r => r);
@@ -74,52 +78,54 @@ export function RewardsCard({ address }: { address: string }) {
 
     return (
         <>
-            <div className="card">
-                <div className="card-header">
-                    <div className="row align-items-center">
-                        <div className="col">
-                            <h3 className="card-header-title">Rewards</h3>
-                        </div>
-                    </div>
-                </div>
+            <Card ui="dashkit">
+                <CardHeader ui="dashkit">
+                    <CardTitle as="h3" ui="dashkit">
+                        Rewards
+                    </CardTitle>
+                </CardHeader>
 
                 {rewardsFound ? (
-                    <div className="table-responsive mb-0">
-                        <table className="table table-sm table-nowrap card-table">
-                            <thead>
-                                <tr>
-                                    <th className="w-1 text-muted">Epoch</th>
-                                    <th className="text-muted">Effective Slot</th>
-                                    <th className="text-muted">Reward Amount</th>
-                                    <th className="text-muted">Post Balance</th>
-                                </tr>
-                            </thead>
-                            <tbody className="list">{rewardsList}</tbody>
-                        </table>
-                    </div>
+                    <BaseTable ui="dashkit" variant="card" nowrap>
+                        <BaseTable.Head>
+                            <BaseTable.Row>
+                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Epoch</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="text-dk-gray-700">Effective Slot</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="text-dk-gray-700">Reward Amount</BaseTable.HeaderCell>
+                                <BaseTable.HeaderCell className="text-dk-gray-700">Post Balance</BaseTable.HeaderCell>
+                            </BaseTable.Row>
+                        </BaseTable.Head>
+                        <BaseTable.Body>{rewardsList}</BaseTable.Body>
+                    </BaseTable>
                 ) : (
-                    <div className="card-body">
+                    <CardBody ui="dashkit">
                         No rewards issued between epochs {lowestFetchedEpoch} and {highestFetchedEpoch}
-                    </div>
+                    </CardBody>
                 )}
 
-                <div className="card-footer">
+                <CardFooter ui="dashkit">
                     {foundOldest ? (
-                        <div className="text-muted text-center">Fetched full reward history</div>
+                        <div className="text-center text-dk-gray-700">Fetched full reward history</div>
                     ) : (
-                        <button className="btn btn-primary w-100" onClick={() => loadMore()} disabled={fetching}>
+                        <Button
+                            ui="dashkit"
+                            variant="primary"
+                            className="w-full"
+                            onClick={() => loadMore()}
+                            disabled={fetching}
+                        >
                             {fetching ? (
                                 <>
-                                    <span className="align-text-top spinner-grow-sm me-2"></span>
+                                    <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
                                     Loading
                                 </>
                             ) : (
                                 'Load More'
                             )}
-                        </button>
+                        </Button>
                     )}
-                </div>
-            </div>
+                </CardFooter>
+            </Card>
         </>
     );
 }

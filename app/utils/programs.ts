@@ -343,6 +343,26 @@ export const TOKEN_IDS: { [key: string]: string } = {
 } as const;
 
 export type TokenProgram = 'spl-token' | 'spl-token-2022';
+
+/**
+ * The set of `programLabel` values a decoder slice (`InstructionParser`) may
+ * declare. For programs the RPC pre-parses this is the RPC `parsed.program`
+ * discriminator used to guard `fromParsed` (e.g. `'spl-token'`); for programs
+ * the RPC does not pre-parse (MPL Token Metadata) it is a stable synthetic
+ * label carried in `UnparsedInstruction` for program-aware fallback cards.
+ *
+ * This is deliberately NOT `PROGRAM_NAMES` (those are display titles like
+ * `'Token Program'`). Adding a slice for a new program extends this union, so
+ * a slice that declares a label not listed here fails to compile — keeping
+ * slice labels and the RPC guards they're compared against from drifting.
+ */
+export type ParserProgramLabel =
+    | TokenProgram
+    | 'bpf-upgradeable-loader'
+    | 'mpl-token-metadata'
+    | 'spl-associated-token-account'
+    | 'system';
+
 export function assertIsTokenProgram(program: string): asserts program is TokenProgram {
     if (program !== 'spl-token' && program !== 'spl-token-2022')
         throw new Error('Expected token program name of `spl-token` or `spl-token-2022`');

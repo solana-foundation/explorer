@@ -1,9 +1,11 @@
 'use client';
 
+import { cn } from '@components/shared/utils';
 import type { Idl } from '@coral-xyz/anchor';
-import { cn } from '@shared/utils';
 import type { RootNode } from 'codama';
 import { useEffect, useState } from 'react';
+
+import { TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
 
 import { useTabs } from '../../model/use-tabs';
 import { SearchHighlightProvider } from './SearchHighlightContext';
@@ -29,23 +31,20 @@ export function BaseFormattedIdl({
 
     return (
         <SearchHighlightProvider searchStr={searchStr || ''}>
-            <div className="idl-view">
-                <div className="nav nav-tabs e-mb-5">
+            <div>
+                <TabsList className="mb-5">
                     {tabs.map((tab, index) => (
-                        <button
+                        <TabsTrigger
                             key={tab.id}
-                            className={cn('nav-item nav-link', {
-                                active: index === activeTabIndex,
-                                'e-opacity-50': tab.disabled,
-                            })}
+                            active={index === activeTabIndex}
                             disabled={tab.disabled}
                             onClick={() => setActiveTabIndex(index)}
                         >
                             {tab.title}
-                        </button>
+                        </TabsTrigger>
                     ))}
-                </div>
-                <div className={cn('e-mb-0 e-min-h-96', activeTab.id !== 'interact' ? 'table-responsive' : '')}>
+                </TabsList>
+                <div className={cn('mb-0 min-h-96', activeTab.id !== 'interact' ? 'overflow-x-auto' : '')}>
                     <ActiveTab activeTab={activeTab} />
                 </div>
             </div>

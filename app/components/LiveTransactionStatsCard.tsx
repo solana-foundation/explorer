@@ -5,10 +5,14 @@ import { StatsNotReady } from '@components/StatsNotReady';
 import { ClusterStatsStatus, PERF_UPDATE_SEC, usePerformanceInfo } from '@providers/stats/solanaClusterStats';
 import { PerformanceInfo } from '@providers/stats/solanaPerformanceInfo';
 import { BarElement, CategoryScale, Chart, ChartData, ChartOptions, LinearScale, Tooltip } from 'chart.js';
-import classNames from 'classnames';
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
+
+import { Button } from '@/app/components/shared/ui/button';
+import { useReducedMotion } from '@/app/shared/lib/use-reduced-motion';
+import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -33,12 +37,14 @@ const SERIES_INFO = {
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
     return (
-        <div className="card flex-grow-1 d-flex flex-column">
-            <div className="card-header">
-                <h4 className="card-header-title">Live Transaction Stats</h4>
-            </div>
+        <Card ui="dashkit" className="mb-3 flex grow flex-col md:mb-6">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h4" ui="dashkit">
+                    Live Transaction Stats
+                </CardTitle>
+            </CardHeader>
             <TpsCardBody series={series} setSeries={setSeries} />
-        </div>
+        </Card>
     );
 }
 
@@ -156,6 +162,10 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     const seriesData = perfHistory[series];
     const chartOptions = React.useMemo<ChartOptions<'bar'>>(() => TPS_CHART_OPTIONS(historyMaxTps), [historyMaxTps]);
 
+    // The external tooltip div is appended to document.body, outside React; without mouseout (e.g. keyboard
+    // navigation) it would otherwise linger after the chart unmounts.
+    React.useEffect(() => () => document.getElementById('chartjs-tooltip')?.remove(), []);
+
     const seriesLength = seriesData.length;
     const chartData: ChartData<'bar'> = {
         datasets: [
@@ -172,44 +182,46 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
     };
 
     return (
-        <div className="d-flex flex-column flex-grow-1">
-            <TableCardBody>
-                <tr>
-                    <td className="w-100">Transaction count</td>
-                    <td className="text-lg-end font-monospace">{transactionCount} </td>
-                </tr>
-                <tr>
-                    <td className="w-100">Transactions per second (TPS)</td>
-                    <td className="text-lg-end font-monospace">{averageTps} </td>
-                </tr>
+        <div className="flex grow flex-col">
+            <TableCardBody layout="expanded" className="[&_td:first-child]:!w-2/5 md:[&_td:first-child]:!w-auto">
+                <BaseTable.Row>
+                    <BaseTable.Cell className="w-full">Transaction count</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right font-mono">{transactionCount} </BaseTable.Cell>
+                </BaseTable.Row>
+                <BaseTable.Row>
+                    <BaseTable.Cell className="w-full">Transactions per second (TPS)</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right font-mono">{averageTps} </BaseTable.Cell>
+                </BaseTable.Row>
             </TableCardBody>
 
             <hr className="my-0" />
 
-            <div className="card-body py-3 d-flex flex-column flex-grow-1">
-                <div className="d-flex justify-content-between w-100">
-                    <span className="mb-0 font-size-sm">TPS history</span>
+            <CardBody ui="dashkit" className="flex grow flex-col py-3">
+                <div className="flex w-full justify-between">
+                    <span className="mb-0">TPS history</span>
 
-                    <div className="font-size-sm">
+                    <div>
                         {SERIES.map(key => (
-                            <button
+                            <Button
                                 key={key}
+                                ui="dashkit"
+                                variant="white"
+                                size="sm"
+                                active={series === key}
+                                className="ml-1.5"
                                 onClick={() => setSeries(key)}
-                                className={classNames('btn btn-sm btn-white ms-2', {
-                                    active: series === key,
-                                })}
                             >
                                 {SERIES_INFO[key].interval}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                 </div>
 
-                <div id="perf-history" className="mt-3 flex-grow-1" style={{ minHeight: '200px' }}>
+                <div id="perf-history" className="mt-3 grow" style={{ minHeight: '200px' }}>
                     <Bar data={chartData} options={chartOptions} style={{ height: '100%' }} />
                 </div>
 
-                <div className="text-center text-muted mt-3">
+                <div className="mt-3 text-center text-dk-gray-700">
                     <p className="mb-0">
                         For transaction confirmation time statistics, please visit{' '}
                         <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">
@@ -221,18 +233,22 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                         </a>
                     </p>
                 </div>
-            </div>
+            </CardBody>
         </div>
     );
 }
 
 function AnimatedTransactionCount({ info }: { info: PerformanceInfo }) {
+    const reducedMotion = useReducedMotion();
     const txCountRef = React.useRef(0);
     const countUpRef = React.useRef({ lastUpdate: 0, period: 0, start: 0 });
     const countUp = countUpRef.current;
 
     const { transactionCount, avgTps } = info;
     const txCount = Number(transactionCount);
+
+    // Skip the running count-up animation under reduced motion — render the settled value directly.
+    if (reducedMotion) return <>{txCount.toLocaleString('en-US')}</>;
 
     // Track last tx count to reset count up options
     if (txCount !== txCountRef.current) {

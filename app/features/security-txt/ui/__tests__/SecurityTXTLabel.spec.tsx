@@ -1,43 +1,27 @@
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { vi } from 'vitest';
-
-import { useProgramMetadataSecurityTxt } from '@/app/entities/program-metadata';
-import { useCluster } from '@/app/providers/cluster';
-import { Cluster } from '@/app/utils/cluster';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { NEODYME_SECURITY_TXT_DOC_LINK, PMP_SECURITY_TXT_DOC_LINK } from '../../lib/constants';
 import { ProgramSecurityTXTLabel } from '../SecurityTXTLabel';
+import { createPmpSecurityTxt } from './helpers';
 
-vi.mock('@/app/providers/cluster', () => ({
-    useCluster: vi.fn(),
-}));
-
-vi.mock('@/app/entities/program-metadata', () => ({
-    useProgramMetadataSecurityTxt: vi.fn(),
-}));
+const mocks = vi.hoisted(() => ({ useSecurityTxt: vi.fn() }));
+vi.mock('../../model/useSecurityTxt', () => ({ useSecurityTxt: mocks.useSecurityTxt }));
 
 const mockPubkey = new PublicKey('ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S');
 
-describe('ProgramSecurityTXTLabel (mocked useProgramMetadataSecurityTxt)', () => {
-    beforeEach(() => {
-        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
-    });
+describe('ProgramSecurityTXTLabel', () => {
     afterEach(() => vi.clearAllMocks());
 
-    it('should show Neodyme link to security.txt by default', () => {
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: null,
-        });
+    it('should link to the Neodyme doc by default', () => {
+        mocks.useSecurityTxt.mockReturnValue({ isLoading: false, securityTxt: undefined });
         render(<ProgramSecurityTXTLabel programPubkey={mockPubkey} />);
         expect(screen.getByRole('link')).toHaveAttribute('href', NEODYME_SECURITY_TXT_DOC_LINK);
     });
 
-    it('should show Program Metadata link to security.txt', () => {
-        (useProgramMetadataSecurityTxt as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-            programMetadataSecurityTxt: { name: 'Program security.txt' },
-        });
+    it('should link to the Program Metadata doc when PMP is the source', () => {
+        mocks.useSecurityTxt.mockReturnValue({ isLoading: false, securityTxt: createPmpSecurityTxt() });
         render(<ProgramSecurityTXTLabel programPubkey={mockPubkey} />);
         expect(screen.getByRole('link')).toHaveAttribute('href', PMP_SECURITY_TXT_DOC_LINK);
     });

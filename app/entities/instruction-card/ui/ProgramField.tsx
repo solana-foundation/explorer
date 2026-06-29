@@ -2,6 +2,8 @@ import { Address } from '@components/common/Address';
 import { AddressWithContext, programValidator } from '@components/inspector/AddressWithContext';
 import { PublicKey } from '@solana/web3.js';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 type ProgramFieldProps = {
     programId: PublicKey;
     showExtendedInfo?: boolean;
@@ -9,15 +11,15 @@ type ProgramFieldProps = {
 
 export function ProgramField({ programId, showExtendedInfo = false }: ProgramFieldProps) {
     return (
-        <tr>
-            <td>Program</td>
-            <td className="text-lg-end">
+        <BaseTable.Row>
+            <BaseTable.Cell>Program</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">
                 {showExtendedInfo ? (
                     <AddressWithContext pubkey={programId} validator={programValidator} />
                 ) : (
                     <Address pubkey={programId} alignRight link />
                 )}
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

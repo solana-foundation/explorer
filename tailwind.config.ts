@@ -1,6 +1,8 @@
 import type { Config } from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
+import tailwindcssAnimate from 'tailwindcss-animate';
 
-const breakpoints = new Map([
+export const breakpoints = new Map([
     ['xxs', 320],
     ['xs', 375],
     ['sm', 576],
@@ -18,7 +20,7 @@ const breakpoints = new Map([
 // When a real light theme lands, rename these to their light-theme equivalents (e.g. `gray-100` →
 // `light-gray-100` or move under a `light` namespace) and drop this note.
 const dkSpacer = '1.5rem';
-const dkColors = {
+export const dkColors = {
     white: '#ffffff',
     black: '#232323',
     'black-dark': '#141816',
@@ -55,28 +57,20 @@ const dkColors = {
     'input-placeholder-dark': '#ccc',
 };
 
-// Phase-2 refactor map — Bootstrap class → Tailwind utilities. Append to this table when you
-// convert a new class family; delete entries as they go to zero usage.
-//
-//   .btn-white / .btn-light (dark theme, in app/scss/dashkit/dark/_overrides-dark.scss)
-//     background-color : idle → e-bg-dk-gray-800-dark      active/hover → e-bg-dk-black-dark
-//     border-color     : idle → e-border-dk-gray-600-dark  active/hover → e-border-dk-gray-700-dark
-//     color            : e-text-dk-white
-//
-//   .btn-black.active  → e-shadow-active   (= 0 0 0 0.15rem #33a382, already declared above)
-//
-//   .card              → e-bg-dk-gray-800-dark e-border-dk-gray-700-dark e-rounded-dk-lg e-shadow-dk-card
-//   .card-header       → e-px-dk-4 e-py-4  (cap padding; consider adding dk-cap-py later)
-//   .card-body         → e-px-dk-4 e-py-dk-4
-//
-//   .text-muted        → e-text-dk-gray-600              (light theme)  /  e-text-dk-gray-700 (dark)
-//   .text-rainbow-N    → e-text-dk-rainbow-{1..5}
-//   .bg-rainbow-N      → e-bg-dk-rainbow-{1..5}
-
 const config: Config = {
     content: ['./app/**/*.{ts,tsx}'],
-    plugins: [],
-    prefix: 'e-',
+    plugins: [
+        tailwindcssAnimate,
+        plugin(({ addUtilities }) => {
+            addUtilities({
+                '.scrollbar-hide': {
+                    'scrollbar-width': 'none',
+                    '-ms-overflow-style': 'none',
+                    '&::-webkit-scrollbar': { display: 'none' },
+                },
+            });
+        }),
+    ],
     theme: {
         extend: {
             boxShadow: {
@@ -117,7 +111,15 @@ const config: Config = {
             },
             colors: {
                 dk: dkColors,
-                // TODO: replace with e-text-neutral-400
+                // TODO: replace hex with OKLCH.
+                dark: {
+                    accent: '#1dd79b',
+                    background: '#141816',
+                    border: '#282d2b',
+                    foreground: '#e5ebe9',
+                    'muted-foreground': '#698582',
+                },
+                // TODO: replace with text-neutral-400
                 muted: 'oklch(0.6406 0.0038 174.41)', // #8a8d8c
                 'heavy-metal': {
                     DEFAULT: 'oklch(21.275% 0.00721 164.22)',
@@ -194,6 +196,15 @@ const config: Config = {
                 // Grid template for TokenExtensions
                 '12-ext': 'repeat(12, minmax(0, 1fr))',
             },
+            keyframes: {
+                'dropdown-menu': {
+                    from: { opacity: '0' },
+                    to: { opacity: '1' },
+                },
+            },
+            animation: {
+                'dropdown-menu': 'dropdown-menu 0.15s',
+            },
         },
 
         screens: {
@@ -210,6 +221,7 @@ const config: Config = {
             tablet: getScreenDim('md'),
             laptop: getScreenDim('lg'),
             desktop: getScreenDim('xl'),
+            landscape: { raw: '(orientation: landscape)' },
         },
     },
 };

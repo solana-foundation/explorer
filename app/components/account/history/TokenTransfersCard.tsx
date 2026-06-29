@@ -16,11 +16,14 @@ import { Cluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
 import React, { useMemo } from 'react';
-import Moment from 'react-moment';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
+import { Badge } from '@/app/components/shared/ui/badge';
 import { Logger } from '@/app/shared/lib/logger';
+import { RelativeTime } from '@/app/shared/RelativeTime';
+import { Card } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
@@ -64,33 +67,39 @@ function TransferRow({
     );
 
     return (
-        <tr key={signature + index + (childIndex || '')}>
-            <td>
-                <Signature signature={signature} link truncateChars={24} />
-            </td>
+        <BaseTable.Row key={signature + index + (childIndex || '')}>
+            <BaseTable.Cell>
+                <Signature signature={signature} link />
+            </BaseTable.Cell>
 
-            {hasTimestamps && <td className="text-muted">{blockTime && <Moment date={blockTime * 1000} fromNow />}</td>}
+            {hasTimestamps && (
+                <BaseTable.Cell className="text-dk-gray-700">
+                    {blockTime && <RelativeTime date={blockTime * 1000} />}
+                </BaseTable.Cell>
+            )}
 
-            <td>
-                <Address pubkey={transfer.source} link truncateChars={16} />
-            </td>
+            <BaseTable.Cell>
+                <Address pubkey={transfer.source} link />
+            </BaseTable.Cell>
 
-            <td>
-                <Address pubkey={transfer.destination} link truncateChars={16} />
-            </td>
+            <BaseTable.Cell>
+                <Address pubkey={transfer.destination} link />
+            </BaseTable.Cell>
 
-            <td>
+            <BaseTable.Cell>
                 {amountWithScaledUiAmountMultiplier} {units}
                 <ScaledUiAmountMultiplierTooltip
                     rawAmount={amountString}
                     scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                 />
-            </td>
+            </BaseTable.Cell>
 
-            <td>
-                <span className={`badge bg-${statusClass}-soft`}>{statusText}</span>
-            </td>
-        </tr>
+            <BaseTable.Cell>
+                <Badge ui="dashkit" variant={statusClass as 'success' | 'warning'}>
+                    {statusText}
+                </Badge>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
@@ -236,39 +245,37 @@ export function TokenTransfersCard({ address }: { address: string }) {
 
     const fetching = history.status === FetchStatus.Fetching;
     return (
-        <div className="card">
+        <Card ui="dashkit">
             <HistoryCardHeader
                 fetching={fetching}
                 refresh={() => refresh()}
                 title="Token Transfers"
                 analyticsSection="token_transfers_header"
             />
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Transaction Signature</th>
-                            {hasTimestamps && <th className="text-muted">Age</th>}
-                            <th className="text-muted">Source</th>
-                            <th className="text-muted">Destination</th>
-                            <th className="text-muted">Amount</th>
-                            <th className="text-muted">Result</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {allTransfers.map(transferData => (
-                            <TransferRow
-                                key={transferData.signature + transferData.index + (transferData.childIndex || '')}
-                                data={transferData}
-                                hasTimestamps={hasTimestamps}
-                                tokenAddress={pubkey.toBase58()}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Transaction Signature</BaseTable.HeaderCell>
+                        {hasTimestamps && <BaseTable.HeaderCell className="text-dk-gray-700">Age</BaseTable.HeaderCell>}
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Source</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Destination</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Amount</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {allTransfers.map(transferData => (
+                        <TransferRow
+                            key={transferData.signature + transferData.index + (transferData.childIndex || '')}
+                            data={transferData}
+                            hasTimestamps={hasTimestamps}
+                            tokenAddress={pubkey.toBase58()}
+                        />
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
             <HistoryCardFooter fetching={fetching} foundOldest={history.data.foundOldest} loadMore={() => loadMore()} />
-        </div>
+        </Card>
     );
 }
 

@@ -2,6 +2,8 @@ import { Address } from '@components/common/Address';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import { BasePublisherOperationParams } from './program';
 
@@ -31,26 +33,26 @@ export default function BasePublisherOperationCard({
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={ix.programId} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Price Account</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Price Account</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.pricePubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Publisher</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Publisher</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={info.publisherPubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

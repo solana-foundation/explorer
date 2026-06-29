@@ -26,10 +26,12 @@ import {
 } from 'lighthouse-sdk';
 import React from 'react';
 
+import { Badge } from '@/app/components/shared/ui/badge';
+import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
+import { BaseTable } from '@/app/shared/ui/Table';
 import { camelToTitleCase } from '@/app/utils';
 
 import { Address } from '../../common/Address';
-import { upcastTransactionInstruction } from '../../inspector/into-parsed-data';
 import { mapCodamaIxArgsToRows } from '../codama/codamaUtils';
 import { InstructionCard } from '../InstructionCard';
 import { LIGHTHOUSE_ADDRESS } from './types';
@@ -55,17 +57,17 @@ export function LighthouseDetailsCard({
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const _ix = upcastTransactionInstruction(ix);
-    const { title, info } = parseLighthouseInstruction(_ix);
+    const kitIx = toKitInstruction(ix);
+    const { title, info } = parseLighthouseInstruction(kitIx);
 
     return (
         <InstructionCard title={`Lighthouse: ${title}`} {...{ childIndex, index, innerCards, ix, result }}>
-            <CodamaCard ix={_ix} parsedIx={info} />
+            <CodamaCard ix={kitIx} parsedIx={info} />
         </InstructionCard>
     );
 }
 
-function parseLighthouseInstruction(ix: ReturnType<typeof upcastTransactionInstruction>) {
+function parseLighthouseInstruction(ix: ReturnType<typeof toKitInstruction>) {
     let title = 'Unknown';
     let info: ParsedCodamaInstruction;
     const subEnum = (pix: ParsedCodamaInstruction, key: string, array = false) => {
@@ -343,23 +345,23 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
         : new Map();
     return (
         <>
-            <tr>
-                <td>Program</td>
-                <td className="text-lg-end" colSpan={2}>
+            <BaseTable.Row>
+                <BaseTable.Cell>Program</BaseTable.Cell>
+                <BaseTable.Cell className="text-right" colSpan={2}>
                     <Address pubkey={programId} alignRight link raw overrideText={programName} />
-                </td>
-            </tr>
-            <tr className="table-sep">
-                <td>Account Name</td>
-                <td className="text-lg-end" colSpan={2}>
+                </BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                <BaseTable.Cell>Account Name</BaseTable.Cell>
+                <BaseTable.Cell className="text-right" colSpan={2}>
                     Address
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {ix.accounts?.map(({ address, role }, keyIndex) => {
                 return (
-                    <tr key={keyIndex} data-testid={`account-row-${keyIndex}`}>
-                        <td>
-                            <div className="me-2 d-md-inline">
+                    <BaseTable.Row key={keyIndex} data-testid={`account-row-${keyIndex}`}>
+                        <BaseTable.Cell>
+                            <div className="mr-1.5 md:inline">
                                 {parsedIx.accounts
                                     ? keyIndex < parsedAccountsLength
                                         ? `${camelToTitleCase(accountMap.get(address) ?? 'Unknown')}`
@@ -368,27 +370,31 @@ function CodamaCard({ ix, parsedIx }: { ix: Instruction; parsedIx: ParsedCodamaI
                             </div>
                             {role == AccountRole.WRITABLE ||
                                 (role == AccountRole.WRITABLE_SIGNER && (
-                                    <span className="badge bg-danger-soft me-1">Writable</span>
+                                    <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
+                                        Writable
+                                    </Badge>
                                 ))}
                             {role == AccountRole.READONLY_SIGNER ||
                                 (role == AccountRole.WRITABLE_SIGNER && (
-                                    <span className="badge bg-info-soft me-1">Signer</span>
+                                    <Badge ui="dashkit" variant="info" className="mr-[3px]">
+                                        Signer
+                                    </Badge>
                                 ))}
-                        </td>
-                        <td className="text-lg-end" colSpan={2}>
+                        </BaseTable.Cell>
+                        <BaseTable.Cell className="text-right" colSpan={2}>
                             <Address pubkey={new PublicKey(address)} alignRight link />
-                        </td>
-                    </tr>
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
                 );
             })}
 
             {parsedIx.data && (
                 <>
-                    <tr className="table-sep">
-                        <td>Argument Name</td>
-                        <td>Type</td>
-                        <td className="text-lg-end">Value</td>
-                    </tr>
+                    <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                        <BaseTable.Cell>Argument Name</BaseTable.Cell>
+                        <BaseTable.Cell>Type</BaseTable.Cell>
+                        <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
+                    </BaseTable.Row>
                     {mapCodamaIxArgsToRows(parsedIx.data)}
                 </>
             )}

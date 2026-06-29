@@ -3,60 +3,59 @@ import { SolBalance } from '@components/common/SolBalance';
 import type { StakeHistoryEntry, SysvarStakeHistoryAccount } from '@validators/accounts/sysvar';
 import React from 'react';
 
+import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function StakeHistoryCard({ sysvarAccount }: { sysvarAccount: SysvarStakeHistoryAccount }) {
     const stakeHistory = sysvarAccount.info;
     return (
-        <div className="card">
-            <div className="card-header">
-                <div className="row align-items-center">
-                    <div className="col">
-                        <h3 className="card-header-title">Stake History</h3>
-                    </div>
-                </div>
-            </div>
+        <Card ui="dashkit">
+            <CardHeader ui="dashkit">
+                <CardTitle as="h3" ui="dashkit">
+                    Stake History
+                </CardTitle>
+            </CardHeader>
 
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="w-1 text-muted">Epoch</th>
-                            <th className="text-muted">Effective (SOL)</th>
-                            <th className="text-muted">Activating (SOL)</th>
-                            <th className="text-muted">Deactivating (SOL)</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">
-                        {stakeHistory.map(entry => (
-                            <HistoryEntryRow key={entry.epoch} entry={entry} />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <BaseTable ui="dashkit" variant="card" nowrap>
+                <BaseTable.Head>
+                    <BaseTable.Row>
+                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Epoch</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Effective (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Activating (SOL)</BaseTable.HeaderCell>
+                        <BaseTable.HeaderCell className="text-dk-gray-700">Deactivating (SOL)</BaseTable.HeaderCell>
+                    </BaseTable.Row>
+                </BaseTable.Head>
+                <BaseTable.Body>
+                    {stakeHistory.map(entry => (
+                        <HistoryEntryRow key={entry.epoch} entry={entry} />
+                    ))}
+                </BaseTable.Body>
+            </BaseTable>
 
             {stakeHistory.length === 0 && (
-                <div className="card-footer">
-                    <div className="text-muted text-center">No stake history found</div>
-                </div>
+                <CardFooter ui="dashkit">
+                    <div className="text-center text-dk-gray-700">No stake history found</div>
+                </CardFooter>
             )}
-        </div>
+        </Card>
     );
 }
 
 function HistoryEntryRow({ entry }: { entry: StakeHistoryEntry }) {
     return (
-        <tr>
-            <td className="w-1 font-monospace">
+        <BaseTable.Row>
+            <BaseTable.Cell className="w-px font-mono">
                 <Epoch epoch={entry.epoch} link />
-            </td>
-            <td className="font-monospace">
+            </BaseTable.Cell>
+            <BaseTable.Cell className="font-mono">
                 <SolBalance lamports={entry.stakeHistory.effective} />
-            </td>
-            <td className="font-monospace">
+            </BaseTable.Cell>
+            <BaseTable.Cell className="font-mono">
                 <SolBalance lamports={entry.stakeHistory.activating} />
-            </td>
-            <td className="font-monospace">
+            </BaseTable.Cell>
+            <BaseTable.Cell className="font-mono">
                 <SolBalance lamports={entry.stakeHistory.deactivating} />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

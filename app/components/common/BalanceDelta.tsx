@@ -1,16 +1,12 @@
 import { SolBalance } from '@components/common/SolBalance';
+import { toBigNumber } from '@entities/account';
 import { BigNumber } from 'bignumber.js';
 import BN from 'bn.js';
 import React from 'react';
 
-type DeltaValue = BigNumber | BN;
+import { Badge } from '@/app/components/shared/ui/badge';
 
-function toBigNumber(delta: DeltaValue): BigNumber {
-    if (BN.isBN(delta)) {
-        return new BigNumber(delta.toString());
-    }
-    return delta;
-}
+type DeltaValue = BigNumber | BN;
 
 export function BalanceDelta({ delta, isSol = false }: { delta: DeltaValue; isSol?: boolean }) {
     const deltaValue = toBigNumber(delta);
@@ -22,10 +18,22 @@ export function BalanceDelta({ delta, isSol = false }: { delta: DeltaValue; isSo
     }
 
     if (deltaValue.gt(0)) {
-        return <span className="badge bg-success-soft">+{isSol ? sols : deltaValue.toString()}</span>;
+        return (
+            <Badge ui="dashkit" variant="success">
+                +{isSol ? sols : deltaValue.toString()}
+            </Badge>
+        );
     } else if (deltaValue.lt(0)) {
-        return <span className="badge bg-warning-soft">{isSol ? <>-{sols}</> : deltaValue.toString()}</span>;
+        return (
+            <Badge ui="dashkit" variant="warning">
+                {isSol ? <>-{sols}</> : deltaValue.toString()}
+            </Badge>
+        );
     }
 
-    return <span className="badge bg-secondary-soft">0</span>;
+    return (
+        <Badge ui="dashkit" variant="secondary" className="font-mono">
+            +0
+        </Badge>
+    );
 }

@@ -12,53 +12,55 @@ import { useClusterPath } from '@utils/url';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 export function UnknownAccountCard({ account }: { account: Account }) {
     const { cluster } = useCluster();
 
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     return (
         <AccountCard title="Overview" account={account}>
-            <tr>
-                <td>Address</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Address</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={account.pubkey} alignRight raw />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {label && (
-                <tr>
-                    <td>Address Label</td>
-                    <td className="text-lg-end">{label}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Address Label</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{label}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
-            <tr>
-                <td>Balance (SOL)</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     {account.lamports === 0 ? (
                         <AccountNofFound account={account} />
                     ) : (
                         <SolBalance lamports={account.lamports} />
                     )}
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
             {account.space !== undefined && (
-                <tr>
-                    <td>Allocated Data Size</td>
-                    <td className="text-lg-end">{account.space} byte(s)</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Allocated Data Size</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{account.space} byte(s)</BaseTable.Cell>
+                </BaseTable.Row>
             )}
 
-            <tr>
-                <td>Assigned Program Id</td>
-                <td className="text-lg-end">
+            <BaseTable.Row>
+                <BaseTable.Cell>Assigned Program Id</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">
                     <Address pubkey={account.owner} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Executable</td>
-                <td className="text-lg-end">{account.executable ? 'Yes' : 'No'}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Executable</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{account.executable ? 'Yes' : 'No'}</BaseTable.Cell>
+            </BaseTable.Row>
         </AccountCard>
     );
 }
@@ -196,7 +198,7 @@ function AdjacentAddressLink({ address, foundCluster }: { address: string; found
     });
 
     return (
-        <a href={foundClusterPath} className="text-info align-middle" style={{ marginRight: '5px' }}>
+        <a href={foundClusterPath} className="align-middle text-dk-info" style={{ marginRight: '5px' }}>
             Found on {clusterName(foundCluster)}
         </a>
     );
@@ -213,9 +215,9 @@ function SearchingAddressIndicator({ searchingCluster }: { searchingCluster: Clu
                     marginRight: '5px',
                     width: '10px',
                 }}
-                className={`${spinnerCls} align-middle d-inline-block`}
+                className={`${spinnerCls} inline-block align-middle`}
             />
-            <span className="text-muted align-middle" style={{ marginRight: '10px', verticalAlign: 'middle' }}>
+            <span className="align-middle text-dk-gray-700" style={{ marginRight: '10px', verticalAlign: 'middle' }}>
                 checking {clusterName(searchingCluster).toLowerCase()}
             </span>
         </>

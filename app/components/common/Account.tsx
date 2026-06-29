@@ -1,7 +1,10 @@
 import { SolBalance } from '@components/common/SolBalance';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { Account } from '@providers/accounts';
-import { RefreshButton } from '@shared/ui/refresh-button';
 import React from 'react';
+
+import { CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { Address } from './Address';
 
@@ -17,32 +20,34 @@ type AccountProps = {
 
 export function AccountHeader({ title, analyticsSection, refresh }: AccountHeaderProps) {
     return (
-        <div className="card-header align-items-center">
-            <h3 className="card-header-title">{title}</h3>
+        <CardHeader ui="dashkit">
+            <CardTitle as="h3" ui="dashkit">
+                {title}
+            </CardTitle>
             <RefreshButton analyticsSection={analyticsSection} onClick={refresh} />
-        </div>
+        </CardHeader>
     );
 }
 
 export function AccountAddressRow({ account }: AccountProps) {
     return (
-        <tr>
-            <td>Address</td>
-            <td className="text-lg-end">
+        <BaseTable.Row>
+            <BaseTable.Cell>Address</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">
                 <Address pubkey={account.pubkey} alignRight raw />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }
 
 export function AccountBalanceRow({ account }: AccountProps) {
     const { lamports } = account;
     return (
-        <tr>
-            <td>Balance (SOL)</td>
-            <td className="text-lg-end text-uppercase">
+        <BaseTable.Row>
+            <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
+            <BaseTable.Cell className="text-right uppercase">
                 <SolBalance lamports={lamports} />
-            </td>
-        </tr>
+            </BaseTable.Cell>
+        </BaseTable.Row>
     );
 }

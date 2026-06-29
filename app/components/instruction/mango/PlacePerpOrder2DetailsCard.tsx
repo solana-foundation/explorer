@@ -4,6 +4,8 @@ import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import BN from 'bn.js';
 import { useEffect, useState } from 'react';
 
+import { BaseTable } from '@/app/shared/ui/Table';
+
 import { InstructionCard } from '../InstructionCard';
 import {
     getPerpMarketFromInstruction,
@@ -52,60 +54,60 @@ export function PlacePerpOrder2DetailsCard(props: {
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            <tr>
-                <td>Mango account</td>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>Mango account</BaseTable.Cell>
+                <BaseTable.Cell>
                     {' '}
                     <Address pubkey={mangoAccount.pubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {mangoPerpMarketConfig !== undefined && (
-                <tr>
-                    <td>Perp market</td>
-                    <td className="text-lg-end">{mangoPerpMarketConfig.name}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Perp market</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{mangoPerpMarketConfig.name}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
-            <tr>
-                <td>Perp market address</td>
-                <td>
+            <BaseTable.Row>
+                <BaseTable.Cell>Perp market address</BaseTable.Cell>
+                <BaseTable.Cell>
                     <Address pubkey={perpMarketAccountMeta.pubkey} alignRight link />
-                </td>
-            </tr>
+                </BaseTable.Cell>
+            </BaseTable.Row>
             {info.clientOrderId !== '0' && (
-                <tr>
-                    <td>Client order Id</td>
-                    <td className="text-lg-end">{info.clientOrderId}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>Client order Id</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{info.clientOrderId}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
-            <tr>
-                <td>Order type</td>
-                <td className="text-lg-end">{info.orderType}</td>
-            </tr>
-            <tr>
-                <td>Side</td>
-                <td className="text-lg-end">{info.side}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Order type</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.orderType}</BaseTable.Cell>
+            </BaseTable.Row>
+            <BaseTable.Row>
+                <BaseTable.Cell>Side</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.side}</BaseTable.Cell>
+            </BaseTable.Row>
             {orderLotDetails !== null && (
-                <tr>
-                    <td>price</td>
-                    <td className="text-lg-end">{orderLotDetails?.price} USDC</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>price</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{orderLotDetails?.price} USDC</BaseTable.Cell>
+                </BaseTable.Row>
             )}
             {orderLotDetails !== null && (
-                <tr>
-                    <td>quantity</td>
-                    <td className="text-lg-end">{orderLotDetails?.size}</td>
-                </tr>
+                <BaseTable.Row>
+                    <BaseTable.Cell>quantity</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right">{orderLotDetails?.size}</BaseTable.Cell>
+                </BaseTable.Row>
             )}
-            <tr>
-                <td>Reduce only</td>
-                <td className="text-lg-end">{info.reduceOnly}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Reduce only</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.reduceOnly}</BaseTable.Cell>
+            </BaseTable.Row>
 
-            <tr>
-                <td>Expiry timestamp</td>
-                <td className="text-lg-end">{info.expiryTimestamp}</td>
-            </tr>
+            <BaseTable.Row>
+                <BaseTable.Cell>Expiry timestamp</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{info.expiryTimestamp}</BaseTable.Cell>
+            </BaseTable.Row>
         </InstructionCard>
     );
 }

@@ -9,3 +9,6 @@ build/
 .pnpm-store/
 .claude/
 .worktrees/
+storybook-static/
+storybook-static-*/
+public/mockServiceWorker.js
