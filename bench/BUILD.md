@@ -9,10 +9,10 @@
 | Dynamic | `/address/[address]/anchor-program` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/attestation` | 330 kB | 1.34 MB |
 | Dynamic | `/address/[address]/attributes` | 330 kB | 1.34 MB |
-| Dynamic | `/address/[address]/blockhashes` | 320 kB | 1.34 MB |
+| Dynamic | `/address/[address]/blockhashes` | 330 kB | 1.34 MB |
 | Dynamic | `/address/[address]/compression` | 330 kB | 1.34 MB |
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 330 kB | 1.34 MB |
-| Dynamic | `/address/[address]/domains` | 320 kB | 1.34 MB |
+| Dynamic | `/address/[address]/domains` | 330 kB | 1.34 MB |
 | Dynamic | `/address/[address]/entries` | 330 kB | 1.34 MB |
 | Dynamic | `/address/[address]/feature-gate` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/idl` | 480 kB | 1.49 MB |
@@ -20,9 +20,9 @@
 | Dynamic | `/address/[address]/metadata` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/program-multisig` | 330 kB | 1.34 MB |
-| Dynamic | `/address/[address]/rewards` | 320 kB | 1.34 MB |
+| Dynamic | `/address/[address]/rewards` | 330 kB | 1.34 MB |
 | Dynamic | `/address/[address]/security` | 330 kB | 1.35 MB |
-| Dynamic | `/address/[address]/slot-hashes` | 320 kB | 1.34 MB |
+| Dynamic | `/address/[address]/slot-hashes` | 330 kB | 1.34 MB |
 | Dynamic | `/address/[address]/stake-history` | 320 kB | 1.34 MB |
 | Dynamic | `/address/[address]/token-extensions` | 330 kB | 1.35 MB |
 | Dynamic | `/address/[address]/tokens` | 460 kB | 1.48 MB |
@@ -40,6 +40,7 @@
 | Dynamic | `/api/security-txt` | — | — |
 | Dynamic | `/api/sns-domains/[address]` | — | — |
 | Dynamic | `/api/token-info` | — | — |
+| Dynamic | `/api/token-market-data/[address]` | — | — |
 | Dynamic | `/api/verification/bluprynt/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |

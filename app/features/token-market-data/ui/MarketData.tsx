@@ -17,7 +17,7 @@ const dynamicVariant = cva('text-[10px] ml-[3px] flex items-center gap-[0.1rem] 
     },
 });
 
-type MarketDataProps = {
+export type MarketDataProps = {
     label: string;
     lastUpdatedAt?: Date;
     rank?: number;
@@ -29,7 +29,7 @@ export function MarketData({ label, lastUpdatedAt, value, rank }: MarketDataProp
     return (
         <div
             aria-label="market-data"
-            className="w-full rounded border border-solid border-black bg-[#1C2120] px-3 py-2 text-sm md:w-[160px]"
+            className="w-full rounded border border-solid border-black bg-outer-space-900 px-3 py-2 text-sm md:w-[160px]"
         >
             <div className="mb-1 flex items-center gap-2">
                 <span
@@ -39,7 +39,7 @@ export function MarketData({ label, lastUpdatedAt, value, rank }: MarketDataProp
                     {label}
                 </span>
                 {(rank ?? 0) > 0 && (
-                    <span className="whitespace-nowrap rounded bg-[#1ED190] px-[5px] text-xs text-[#1C2120]">
+                    <span className="whitespace-nowrap rounded bg-accent-600 px-[5px] text-xs text-outer-space-900">
                         Rank #{rank}
                     </span>
                 )}

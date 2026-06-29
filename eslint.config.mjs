@@ -619,7 +619,6 @@ export default tseslint.config(
             'app/utils/verified-builds.tsx',
 
             // app/shared (FSD shared)
-            'app/shared/lib/http-utils.ts',
             'app/shared/lib/triggerDownload.ts',
             'app/shared/lib/visibility.tsx',
             'app/shared/ui/navigation-tabs/ui/NavigationTabLink.tsx',
@@ -721,7 +720,6 @@ export default tseslint.config(
             'app/features/stake/lib/stake-activation-math.ts',
             'app/features/stake/ui/StakeAccountSection.tsx',
             'app/features/token-verification-badge/model/use-bluprynt.ts',
-            'app/features/token-verification-badge/model/use-coingecko.ts',
             'app/features/token-verification-badge/model/use-jupiter.ts',
             'app/features/token-verification-badge/model/use-rugcheck.ts',
             'app/features/token-verification-badge/ui/VerificationIcon.tsx',

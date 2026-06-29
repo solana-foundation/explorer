@@ -22,12 +22,18 @@ export function useTokenVerification({
     const rugCheckInfo = useRugCheckVerification(address);
 
     const blupryntVerified = blupryntInfo?.status === BlupryntStatus.Success && blupryntInfo.verified;
-    const coingeckoVerified = coinInfo?.status === CoingeckoStatus.Success;
+    const coingeckoVerified = coinInfo?.status === CoingeckoStatus.Success && coinInfo.verified;
     const jupiterVerified = jupiterInfo?.status === JupiterStatus.Success && jupiterInfo.verified;
     const rugCheckVerified = rugCheckInfo?.status === RugCheckStatus.Success && rugCheckInfo.verified;
 
     const rugCheckScore = rugCheckInfo?.status === RugCheckStatus.Success ? rugCheckInfo.score : undefined;
     const rugCheckLevel = rugCheckScore !== undefined ? getRiskLevel(rugCheckScore) : undefined;
+
+    // CoinGecko web pages are keyed by coin id (e.g. /en/coins/usd-coin). The
+    // legacy /coins/solana/contract/<address> path 404s on the website. When the
+    // token isn't listed on coingecko.com there is no coin id, so fall back to the
+    // GeckoTerminal token page — the actual source of the gt_verified signal.
+    const coinGeckoId = coinInfo?.status === CoingeckoStatus.Success ? coinInfo.coinGeckoId : undefined;
 
     const sources: VerificationSource[] = [
         {
@@ -44,7 +50,9 @@ export function useTokenVerification({
             isRateLimited: coinInfo?.status === CoingeckoStatus.RateLimited,
             isVerificationFound: coinInfo?.status === CoingeckoStatus.Success,
             name: EVerificationSource.CoinGecko,
-            url: `https://www.coingecko.com/en/coins/solana/contract/${address}`,
+            url: coinGeckoId
+                ? `https://www.coingecko.com/en/coins/${coinGeckoId}`
+                : `https://www.geckoterminal.com/solana/tokens/${address}`,
             verified: coingeckoVerified,
         },
         {
