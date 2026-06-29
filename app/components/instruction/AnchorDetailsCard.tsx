@@ -54,15 +54,15 @@ export default function AnchorDetailsCard(props: {
         // indices even when non-logging precompiles (ed25519/secp256k1) sit between them.
         const programIds = transactionWithMeta.transaction.message.instructions.map(i => i.programId.toBase58());
 
-        // Extract event data for this specific instruction
-        const eventDataList = extractEventsFromLogs(logMessages, index, programIds);
-        if (eventDataList.length === 0) return undefined;
+        // Extract event payloads for this specific instruction
+        const eventPayloads = extractEventsFromLogs(logMessages, index, programIds);
+        if (eventPayloads.length === 0) return undefined;
 
         // Create event cards
         return [
             <ProgramEventsCard
                 key="events"
-                eventDataList={eventDataList}
+                eventPayloads={eventPayloads}
                 program={anchorProgram}
                 instructionIndex={index}
             />,

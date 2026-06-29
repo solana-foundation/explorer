@@ -188,17 +188,27 @@ function isLikelyBase64Event(payload: string): boolean {
 }
 
 /**
- * Extracts event data from transaction logs for a specific instruction.
- * Returns an array of base64-encoded event data strings.
- *
- * Handles both event-emission styles: `Program data:` (Anchor `sol_log_data`) and base64 logged via
- * `Program log:` (e.g. Drift). When `programIds` (the ordered top-level instruction program ids) is
- * provided, invocations are matched to their instruction by program id so instructions that emit no
- * `invoke` log — the ed25519/secp256k1 precompiles — don't shift the index. Without it, falls back to
- * counting top-level invocations.
+ * A base64-encoded event payload tagged by emission style: `data` = `Program data:` (Anchor
+ * `sol_log_data`, definitively structured), `log` = base64 logged via `Program log:` (a heuristic
+ * guess). The tag lets callers treat an undecodable `data` payload as an "Unknown Event" while dropping
+ * an undecodable `log` payload (likely a non-event base64 log).
  */
-export function extractEventsFromLogs(logs: string[], instructionIndex: number, programIds?: string[]): string[] {
-    const events: string[] = [];
+export type ProgramEventPayload = { data: string; kind: 'data' | 'log' };
+
+/**
+ * Extracts event payloads from transaction logs for a specific instruction.
+ *
+ * Handles both event-emission styles (see {@link ProgramEventPayload}). When `programIds` (the ordered
+ * top-level instruction program ids) is provided, invocations are matched to their instruction by
+ * program id so instructions that emit no `invoke` log — the ed25519/secp256k1 precompiles — don't
+ * shift the index. Without it, falls back to counting top-level invocations.
+ */
+export function extractEventsFromLogs(
+    logs: string[],
+    instructionIndex: number,
+    programIds?: string[],
+): ProgramEventPayload[] {
+    const events: ProgramEventPayload[] = [];
     let currentIxIndex = -1;
     let depth = 0;
 
@@ -222,10 +232,10 @@ export function extractEventsFromLogs(logs: string[], instructionIndex: number, 
             depth--;
         } else if (currentIxIndex === instructionIndex) {
             if (log.startsWith('Program data:')) {
-                events.push(log.slice('Program data: '.length).trim());
+                events.push({ data: log.slice('Program data: '.length).trim(), kind: 'data' });
             } else if (log.startsWith('Program log:')) {
                 const payload = log.slice('Program log: '.length).trim();
-                if (isLikelyBase64Event(payload)) events.push(payload);
+                if (isLikelyBase64Event(payload)) events.push({ data: payload, kind: 'log' });
             }
         }
     }

@@ -61,7 +61,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const args = {
-    eventDataList: [sampleEventBytes.toString('base64')],
+    eventPayloads: [{ data: sampleEventBytes.toString('base64'), kind: 'data' as const }],
     instructionIndex: 0,
     program: sampleProgram,
 };
