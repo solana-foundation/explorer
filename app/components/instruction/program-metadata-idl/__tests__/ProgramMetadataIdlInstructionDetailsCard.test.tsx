@@ -4,32 +4,21 @@ import { vi } from 'vitest';
 
 import { ProgramMetadataIdlInstructionDetailsCard } from '../ProgramMetadataIdlInstructionDetailsCard';
 
-const parseInstruction = vi.fn();
-const rootNodeFromAnchor = vi.fn();
+// The card is a thin shim: it delegates the decode strategy to `decodeInstructionWithIdl` (tested in the
+// feature) and only maps the result's `kind` to a renderer. So mock the feature boundary, not its
+// internals, and assert the mapping + that inputs are forwarded.
+const decodeInstructionWithIdl = vi.fn();
 
-vi.mock('@codama/dynamic-parsers', () => ({ parseInstruction: (...a: unknown[]) => parseInstruction(...a) }));
-vi.mock('@codama/nodes-from-anchor', () => ({ rootNodeFromAnchor: (...a: unknown[]) => rootNodeFromAnchor(...a) }));
+vi.mock('@features/decode-instruction-with-idl', () => ({
+    decodeInstructionWithIdl: (...a: unknown[]) => decodeInstructionWithIdl(...a),
+}));
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ url: 'http://localhost' }) }));
-vi.mock('@entities/idl', () => ({
-    formatSerdeIdl: 'formatSerdeIdl',
-    getFormattedIdl: (_fmt: unknown, idl: unknown) => idl,
-    getProvider: () => ({}),
-}));
-vi.mock('@coral-xyz/anchor', () => ({
-    // A Program built from the IDL — its existence is enough for the fallback path.
-    Program: class {
-        idl: unknown;
-        constructor(idl: unknown) {
-            this.idl = idl;
-        }
-    },
-}));
 vi.mock('../../AnchorDetailsCard', () => ({
     // Surface the signature so the test can assert it's forwarded (needed for event decoding).
     default: ({ signature }: { signature: string }) => <div data-testid="anchor-card">anchor:{signature}</div>,
 }));
 vi.mock('../../codama/CodamaInstructionDetailsCard', () => ({
-    CodamaInstructionCard: () => <div data-testid="codama-card">codama decoded</div>,
+    CodamaInstructionCard: () => <div data-testid="codama-card">codama</div>,
 }));
 vi.mock('../../UnknownDetailsCard', () => ({
     UnknownDetailsCard: () => <div data-testid="unknown-card">unknown</div>,
@@ -40,37 +29,36 @@ const ix = new TransactionInstruction({
     keys: [],
     programId: PublicKey.unique(),
 });
-const props = { index: 0, ix, result: { err: null } } as any;
-const anchorIdl = { accounts: [], address: ix.programId.toBase58(), instructions: [{ name: 'foo' }] };
+const idl = { kind: 'rootNode' };
+const props = { idl, index: 0, ix, result: { err: null } } as any;
 
 describe('ProgramMetadataIdlInstructionDetailsCard', () => {
-    beforeEach(() => {
-        parseInstruction.mockReset();
-        rootNodeFromAnchor.mockReset();
-    });
+    beforeEach(() => decodeInstructionWithIdl.mockReset());
 
-    it('should render the Codama card when the Codama parser succeeds', () => {
-        parseInstruction.mockReturnValue({ accounts: [], path: [] });
-        render(<ProgramMetadataIdlInstructionDetailsCard {...props} idl={anchorIdl} />);
+    it('should render the Codama card for a codama decode and forward ix/idl/url to the decoder', () => {
+        decodeInstructionWithIdl.mockReturnValue({ kind: 'codama', parsedIx: { accounts: [], path: [] } });
+
+        render(<ProgramMetadataIdlInstructionDetailsCard {...props} />);
+
         expect(screen.getByTestId('codama-card')).toBeInTheDocument();
+        expect(decodeInstructionWithIdl).toHaveBeenCalledWith(ix, idl, 'http://localhost');
     });
 
-    it('should fall back to the Anchor card when Codama cannot parse the IDL', () => {
-        // Mirror the real failure: parseInstruction throws and the anchor->codama conversion rejects
-        // the IDL (e.g. an unnamed instruction arg).
-        parseInstruction.mockImplementation(() => {
-            throw new Error('not a root node');
-        });
-        rootNodeFromAnchor.mockImplementation(() => {
-            throw new Error('Argument name [id] is missing from the instruction definition');
-        });
+    it('should render the Anchor card and forward the signature for an anchor decode', () => {
+        decodeInstructionWithIdl.mockReturnValue({ kind: 'anchor', program: {} });
 
-        render(<ProgramMetadataIdlInstructionDetailsCard {...props} idl={anchorIdl} signature="SIG123" />);
+        render(<ProgramMetadataIdlInstructionDetailsCard {...props} signature="SIG123" />);
 
         const card = screen.getByTestId('anchor-card');
         expect(card).toBeInTheDocument();
-        // Signature is forwarded so the Anchor card can decode events from the tx logs.
         expect(card).toHaveTextContent('SIG123');
-        expect(screen.queryByTestId('unknown-card')).not.toBeInTheDocument();
+    });
+
+    it('should render the Unknown card for an unknown decode', () => {
+        decodeInstructionWithIdl.mockReturnValue({ kind: 'unknown' });
+
+        render(<ProgramMetadataIdlInstructionDetailsCard {...props} />);
+
+        expect(screen.getByTestId('unknown-card')).toBeInTheDocument();
     });
 });
