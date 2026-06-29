@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@components/shared/ui/button';
 import { useCluster } from '@providers/cluster';
 import { createSolanaRpc, signature as createSignature } from '@solana/kit';
 import { Cluster, clusterName, clusterSlug, clusterUrl } from '@utils/cluster';
@@ -8,7 +7,7 @@ import { useClusterPath } from '@utils/url';
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { Card, CardBody } from '@/app/shared/ui/Card';
+import { BaseTransactionNotFoundCard } from './BaseTransactionNotFoundCard';
 
 export function TransactionNotFoundCard({
     signature,
@@ -43,33 +42,7 @@ export function TransactionNotFoundCard({
         subtext = `Note: Transactions processed before block ${firstAvailableBlock} are not available at this time`;
     }
 
-    const buttonText = 'Try Again';
-
-    return (
-        <Card ui="dashkit">
-            <CardBody ui="dashkit" className="text-center">
-                Not Found
-                {retry && (
-                    <>
-                        <Button ui="dashkit" variant="white" className="ml-3 hidden md:inline" onClick={retry} asChild>
-                            <span>{buttonText}</span>
-                        </Button>
-                        <div className="mt-6 block md:hidden">
-                            <Button ui="dashkit" variant="white" className="w-full" onClick={retry} asChild>
-                                <span>{buttonText}</span>
-                            </Button>
-                        </div>
-                    </>
-                )}
-                {subtext && (
-                    <div className="text-dk-gray-700">
-                        <hr />
-                        {subtext}
-                    </div>
-                )}
-            </CardBody>
-        </Card>
-    );
+    return <BaseTransactionNotFoundCard retry={retry} subtext={subtext} />;
 }
 
 type SearchStatus = 'idle' | 'searching' | 'found' | 'not-found';
