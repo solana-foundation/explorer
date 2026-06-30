@@ -130,9 +130,7 @@ describe('GET /api/idl-latest', () => {
                 code: 'ERR_STREAM_PREMATURE_CLOSE',
             }),
         );
-        mocks.resolveProgramIdls.mockResolvedValueOnce(
-            resolved({ anchorIdl: { name: 'a' }, preferredVariant: IdlVariant.Anchor }),
-        );
+        mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ anchorIdl: { name: 'a' } }));
 
         const { GET } = await importRoute();
         const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
@@ -149,9 +147,7 @@ describe('GET /api/idl-latest', () => {
                 cause: Object.assign(new Error('other side closed'), { code: 'UND_ERR_SOCKET' }),
             }),
         );
-        mocks.resolveProgramIdls.mockResolvedValueOnce(
-            resolved({ anchorIdl: { name: 'a' }, preferredVariant: IdlVariant.Anchor }),
-        );
+        mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ anchorIdl: { name: 'a' } }));
 
         const { GET } = await importRoute();
         const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
