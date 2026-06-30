@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { BorshEventCoder, BorshInstructionCoder, Idl, Instruction, Program } from '@coral-xyz/anchor';
 import { IdlEvent, IdlField, IdlInstruction, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
+import { extractEventsFromLogs } from '@entities/program-logs';
 import { useTransactionDetails } from '@providers/transactions';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -14,7 +15,6 @@ import {
     mapIxArgsToRows,
 } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
-import { extractEventsFromLogs } from '@utils/program-logs';
 import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 
@@ -50,15 +50,19 @@ export default function AnchorDetailsCard(props: {
         const logMessages = transactionWithMeta.meta?.logMessages;
         if (!logMessages) return undefined;
 
-        // Extract event data for this specific instruction
-        const eventDataList = extractEventsFromLogs(logMessages, index);
-        if (eventDataList.length === 0) return undefined;
+        // Ordered top-level program ids let extractEventsFromLogs map invocations to instruction
+        // indices even when non-logging precompiles (ed25519/secp256k1) sit between them.
+        const programIds = transactionWithMeta.transaction.message.instructions.map(i => i.programId.toBase58());
+
+        // Extract event payloads for this specific instruction
+        const eventPayloads = extractEventsFromLogs(logMessages, index, programIds);
+        if (eventPayloads.length === 0) return undefined;
 
         // Create event cards
         return [
             <ProgramEventsCard
                 key="events"
-                eventDataList={eventDataList}
+                eventPayloads={eventPayloads}
                 program={anchorProgram}
                 instructionIndex={index}
             />,
