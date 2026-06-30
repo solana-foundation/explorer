@@ -6,6 +6,7 @@
 // `ProxiedImage` and the security-txt helpers down into `shared`/`entities`, re-point
 // consumers, then drop these two imports.
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
+import { buildProgramName, useProgramIdls } from '@entities/idl';
 import { ProxiedImage } from '@features/metadata';
 import { useSecurityTxt } from '@features/security-txt';
 import { type UpgradeableLoaderAccountData } from '@providers/accounts';
@@ -26,7 +27,10 @@ export function ProgramHeader({
     parsedData?: UpgradeableLoaderAccountData | undefined;
 }) {
     const { securityTxt } = useSecurityTxt(address);
-    const { cluster } = useCluster();
+    const { url, cluster } = useCluster();
+    const { anchorIdl, programMetadataIdl } = useProgramIdls(address, url, cluster);
+    // Codama / modern Anchor names only; legacy Anchor top-level name is intentionally not shown.
+    const idlProgramName = buildProgramName([programMetadataIdl, anchorIdl]);
     const { programName, logo, version, selfReported } = ((): {
         programName: string;
         logo?: string;
@@ -38,32 +42,24 @@ export function ProgramHeader({
         const trustedProgramName = isTrustedProgram ? programInfo.name : undefined;
         const namePlaceholder = 'Program Account';
 
-        let programName = trustedProgramName ?? namePlaceholder;
+        // Self-reported name fallbacks, in order: security.txt, then the program's own IDL.
+        // `||` (not `??`) so an empty security.txt name falls through to the IDL name.
+        const selfReportedName = securityTxt?.fields.name || idlProgramName;
+        const programName = trustedProgramName ?? selfReportedName ?? namePlaceholder;
+        // Warn only when the displayed name is self-reported (no trusted-registry entry).
+        const selfReported = !trustedProgramName && Boolean(selfReportedName);
 
-        if (!securityTxt) {
-            return {
-                programName,
-                selfReported: false,
-            };
-        }
-
-        // Only show warning if we're actually using self-reported data
-        const usingSelfReportedName = !trustedProgramName;
-
-        // Handle empty name in security.txt
-        programName = (trustedProgramName ?? securityTxt.fields.name) || namePlaceholder;
-
-        if (securityTxt.type === 'pmp') {
+        if (securityTxt?.type === 'pmp') {
             return {
                 logo: securityTxt.fields.logo,
                 programName,
-                selfReported: usingSelfReportedName,
+                selfReported,
                 version: securityTxt.fields.version,
             };
         }
         return {
             programName,
-            selfReported: usingSelfReportedName,
+            selfReported,
         };
     })();
 

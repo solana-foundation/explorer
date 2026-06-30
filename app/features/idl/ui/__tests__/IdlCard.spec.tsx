@@ -205,6 +205,25 @@ describe('IdlCard', () => {
         expect(screen.getByText('0.4.2')).toBeInTheDocument();
     });
 
+    test('should show the program name (title-cased) under the badge when the IDL names the program', async () => {
+        const idl = createMockProgramMetadataIdl();
+        (idl as unknown as { program: { name: string } }).program.name = 'crypto_primitives';
+        mockProgramIdls({ programMetadataIdl: idl, programMetadataIdlAddress: PMP_PDA });
+
+        render(
+            <ClusterProvider>
+                <IdlCard programId={programId} />
+            </ClusterProvider>,
+        );
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
+        });
+        // Scope to the info-block <dt>; the rendered instruction table also has a "Name" column header.
+        expect(screen.getByText('Name', { selector: 'dt' })).toBeInTheDocument();
+        expect(screen.getByText('Crypto Primitives')).toBeInTheDocument();
+    });
+
     test('should label the source as Anchor when falling back to the Anchor IDL', async () => {
         mockProgramIdls({ anchorIdl: createMockAnchorIdl(), anchorIdlAddress: DEFAULT_ADDRESS });
 
