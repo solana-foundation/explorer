@@ -26,6 +26,7 @@ import {
     type WithdrawNonceInfo,
     WithdrawNonceInfo as WithdrawNonceInfoStruct,
 } from '@components/instruction/system/types';
+import type { ParserProgramLabel } from '@entities/instruction-parser';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import {
     getCreateAccountWithSeedInstructionDataDecoder,
@@ -47,7 +48,6 @@ import {
 import { create } from 'superstruct';
 
 import type { KitInstruction } from '@/app/shared/lib/web3js-compat';
-import type { ParserProgramLabel } from '@/app/utils/programs';
 
 /** RPC `parsed.program` discriminator for the System program; also the slice's `programLabel`. */
 export const SYSTEM_PROGRAM_LABEL = 'system' satisfies ParserProgramLabel;

@@ -1,5 +1,6 @@
 import { type InstructionSummary } from '@entities/transaction-data';
 import { renderHook } from '@testing-library/react';
+import { LIGHTHOUSE_PROGRAM_ADDRESS } from 'lighthouse-sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { useInstructionSummaries, useInstructionNameResolvers } = vi.hoisted(() => ({
@@ -66,6 +67,16 @@ describe('useResolvedInstructionSummaries', () => {
 
         // discriminator 3 = Verify Ciphertext-Commitment Equality
         expect(result.current?.[0].name).toBe('Verify Ciphertext-Commitment Equality');
+    });
+
+    it('should resolve Lighthouse names synchronously from the discriminator, without an IDL resolver', () => {
+        useInstructionSummaries.mockReturnValue([unknown(LIGHTHOUSE_PROGRAM_ADDRESS, 15)]);
+        useInstructionNameResolvers.mockReturnValue(new Map());
+
+        const { result } = renderHook(() => useResolvedInstructionSummaries('sig'));
+
+        // discriminator 15 = Assert Sysvar Clock
+        expect(result.current?.[0].name).toBe('Assert Sysvar Clock');
     });
 
     it('should keep the placeholder when no resolver names it', () => {

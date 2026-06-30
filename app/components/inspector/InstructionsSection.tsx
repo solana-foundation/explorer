@@ -1,6 +1,7 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { useAnchorProgram } from '@entities/idl';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
+import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
 import {
@@ -308,6 +309,14 @@ function InspectorInstructionCard({
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={BaseInstructionCard}
                     />
+                </ErrorBoundary>
+            );
+        case 'lighthouse':
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <LighthouseDetailsCard key={index} ix={parsedIx} raw={ix} index={index} result={INSPECTOR_RESULT} />
                 </ErrorBoundary>
             );
     }

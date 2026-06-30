@@ -1,4 +1,5 @@
 import { type ProgramIdlNames, useInstructionNameResolvers } from '@entities/idl';
+import { resolveLighthouseInstructionName } from '@entities/lighthouse';
 import { type InstructionNameLookup, type InstructionSummary } from '@entities/transaction-data';
 import { resolveZkElGamalProofName } from '@entities/zk-elgamal-proof';
 import { useCluster } from '@providers/cluster';
@@ -45,6 +46,7 @@ type NameSource = (lookup: InstructionNameLookup, idlNames: Map<string, ProgramI
  */
 const NAME_SOURCES: NameSource[] = [
     ({ programId, discriminator }) => resolveZkElGamalProofName(programId, discriminator),
+    ({ programId, discriminator }) => resolveLighthouseInstructionName(programId, discriminator),
     ({ programId, discriminator }, idlNames) => idlNames.get(programId)?.resolveInstructionName?.(discriminator),
 ];
 

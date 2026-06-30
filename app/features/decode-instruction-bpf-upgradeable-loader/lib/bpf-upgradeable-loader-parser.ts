@@ -8,11 +8,11 @@ import {
     UpgradeInfo,
     WriteInfo,
 } from '@components/instruction/bpf-upgradeable-loader/types';
+import type { ParserProgramLabel } from '@entities/instruction-parser';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { create } from 'superstruct';
 
 import type { KitInstruction } from '@/app/shared/lib/web3js-compat';
-import type { ParserProgramLabel } from '@/app/utils/programs';
 
 /** On-chain id of the upgradeable BPF loader; also the RPC `parsed.program` discriminator. */
 export const BPF_UPGRADEABLE_LOADER_PROGRAM_ID = 'BPFLoaderUpgradeab1e11111111111111111111111';
