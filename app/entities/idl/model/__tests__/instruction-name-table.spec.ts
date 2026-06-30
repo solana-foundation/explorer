@@ -1,5 +1,5 @@
+import { type SupportedIdl } from '../../lib/types';
 import codamaPmp from '../../mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
-import { type SupportedIdl } from '../idl-version';
 import {
     buildInstructionNameResolver,
     buildInstructionNameTable,

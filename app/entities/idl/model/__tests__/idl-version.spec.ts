@@ -1,6 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
-import { getIdlBadgeLabel, getIdlFormatVersion, getIdlVersion, type SupportedIdl } from '../idl-version';
+import { type SupportedIdl } from '../../lib/types';
+import { getIdlBadgeLabel, getIdlFormatVersion, getIdlVersion } from '../idl-version';
 import { isIdlProgramIdMismatch, isInteractiveIdlSupported } from '../interactive-idl';
 
 const DEFAULT_PUBKEY = PublicKey.default.toString();

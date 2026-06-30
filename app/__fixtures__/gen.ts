@@ -43,6 +43,25 @@ export const gen = {
     /** Unix seconds; deterministic when seed provided so story fixtures stay pixel-stable. */
     timestamp: (seed?: number) =>
         seed === undefined ? Math.floor(Math.random() * 2_000_000_000) : 1_700_000_000 + seed * 86_400,
+    /**
+     * A readable, self-documenting test address with a recognizable base58 prefix — e.g.
+     * `gen.vanityAddress('PMP')` → `PMP1111…` — for fixtures that want a legible placeholder instead of
+     * an opaque key. Right-pads the prefix with base58 `1`s until it forms a valid 32-byte address.
+     * Throws if `prefix` isn't valid base58 (it excludes `0`, `O`, `I`, `l`) or can't pad to 32 bytes.
+     */
+    vanityAddress: (prefix: string) => {
+        for (let pad = 0; pad <= 44; pad++) {
+            const candidate = prefix + '1'.repeat(pad);
+            let bytes: Uint8Array;
+            try {
+                bytes = bs58.decode(candidate);
+            } catch {
+                break; // a non-base58 character in `prefix` — more padding won't help
+            }
+            if (bytes.length === 32) return candidate;
+        }
+        throw new Error(`gen.vanityAddress: "${prefix}" is not a base58 prefix that pads to a 32-byte address`);
+    },
 };
 
 /** Stable single-placeholder address (base58, 32 bytes). */

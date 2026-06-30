@@ -2,20 +2,16 @@ import { fetchLatestIdls, fetchPmpIdl, parseIdl } from '@solana/idl';
 import { type Address, type Rpc, type SolanaRpcApi } from '@solana/kit';
 
 import { NON_ANCHOR_PROGRAMS } from './config';
+import { type ProgramIdlSources } from './types';
 
 // `createSolanaRpc(url)` produces this; the @solana/idl helpers accept its narrower `SolanaRpcClient`.
 type IdlRpc = Rpc<SolanaRpcApi>;
 
-export type ResolvedProgramIdls = {
-    /** Parsed Anchor IDL JSON, or `undefined` when absent / undecodable. */
-    anchorIdl: unknown;
-    /** On-chain account the Anchor IDL was read from (the derived Anchor IDL PDA), when present. */
-    anchorIdlAddress: string | undefined;
-    /** Parsed PMP IDL JSON, or `undefined` when absent / undecodable. */
-    programMetadataIdl: unknown;
-    /** On-chain account the PMP IDL was read from (the PMP metadata account), when present. */
-    programMetadataIdlAddress: string | undefined;
-};
+/**
+ * Resolver output: both IDL sources as parsed-but-not-yet-standard-narrowed JSON (`unknown`), each with
+ * its on-chain storage account. Consumers narrow to `SupportedIdl` downstream (`ProgramIdlPair`).
+ */
+export type ResolvedProgramIdls = ProgramIdlSources<unknown>;
 
 /**
  * Resolve a program's Anchor + PMP `idl`-seed IDLs, backed by `@solana/idl`. Shared by the

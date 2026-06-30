@@ -1,6 +1,7 @@
 import { address, createSolanaRpc } from '@solana/kit';
 
-import { type ProgramIdlPair, type SupportedIdl } from '../model/idl-version';
+import { type SupportedIdl } from '../lib/types';
+import { type ProgramIdlPair } from './types';
 
 export type ResolveProgramIdlsClientArgs = {
     programId: string;

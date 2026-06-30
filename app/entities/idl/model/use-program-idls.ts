@@ -7,7 +7,7 @@ import { type Cluster } from '@/app/utils/cluster';
 
 import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { resolveProgramIdlsClient } from '../api/load-resolve-program-idls';
-import { type ProgramIdlPair } from './idl-version';
+import { type ProgramIdlPair } from '../api/types';
 
 export type ProgramIdls = ProgramIdlPair & { isLoading: boolean };
 

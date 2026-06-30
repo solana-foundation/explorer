@@ -637,12 +637,11 @@ export default tseslint.config(
             'app/entities/domain/model/use-user-ans-domains.ts',
             'app/entities/domain/model/use-user-sns-domains.ts',
             'app/entities/domain/ui/BaseDomainsCard.tsx',
+            'app/entities/idl/model/anchor/use-anchor-program.ts',
+            'app/entities/idl/model/anchor/use-format-anchor-idl.ts',
             'app/entities/idl/model/converters/type-handlers/tuple-type-handlers.ts',
             'app/entities/idl/model/idl-version.ts',
-            'app/entities/idl/model/use-anchor-program.ts',
-            'app/entities/idl/model/use-format-anchor-idl.ts',
             'app/entities/idl/model/use-format-codama-idl.ts',
-            'app/entities/idl/model/use-idl-from-anchor-program-seed.ts',
             'app/entities/nft/lib/is-metaplex-nft.ts',
             'app/entities/token-info/model/token-info-batch-provider.tsx',
             'app/entities/token-info/model/use-token-info.ts',
@@ -792,12 +791,12 @@ export default tseslint.config(
 
             // app/entities (FSD entities)
             'app/entities/idl/lib/utils.ts',
+            'app/entities/idl/model/anchor/use-format-anchor-idl.ts',
             'app/entities/idl/model/converters/convert-display-idl.ts',
             'app/entities/idl/model/converters/convert-legacy-idl.ts',
             'app/entities/idl/model/converters/type-handlers/leaf-tuple-type-handler.ts',
             'app/entities/idl/model/formatters/format.ts',
             'app/entities/idl/model/formatters/formatted-idl.d.ts',
-            'app/entities/idl/model/use-format-anchor-idl.ts',
             'app/entities/nft/lib/get-metadata-json.ts',
 
             // app/features (FSD features)

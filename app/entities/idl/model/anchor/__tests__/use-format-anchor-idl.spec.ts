@@ -8,7 +8,7 @@ import type {
     StructFieldType,
     TypeFieldType,
     UnknownFieldType,
-} from '../formatters/formatted-idl';
+} from '../../formatters/formatted-idl';
 import { useFormatAnchorIdl } from '../use-format-anchor-idl';
 
 // Mock byte to hex utility since we don't need actual conversion in tests

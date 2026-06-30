@@ -3,13 +3,13 @@ import { clusterApiUrl, PublicKey } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, vi } from 'vitest';
 
-import anchor029Devi from '../../mocks/anchor/anchor-0.29.0-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
-import anchor030devi from '../../mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
-import anchorLegacy094ShankWave from '../../mocks/anchor/anchor-legacy-0.9.4-shank-waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF.json';
+import anchor029Devi from '../../../mocks/anchor/anchor-0.29.0-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
+import anchor030devi from '../../../mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
+import anchorLegacy094ShankWave from '../../../mocks/anchor/anchor-legacy-0.9.4-shank-waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF.json';
+import { formatSerdeIdl, getFormattedIdl } from '../../formatters/format';
+import { useProgramIdls } from '../../use-program-idls';
 import { getProvider } from '../anchor-provider';
-import { formatSerdeIdl, getFormattedIdl } from '../formatters/format';
 import { useAnchorProgram } from '../use-anchor-program';
-import { useProgramIdls } from '../use-program-idls';
 
 // Create a mock provider that matches Anchor's expected structure
 const createMockProvider = (mockUrl: string, mockProgramAddress: string) => ({
@@ -29,7 +29,7 @@ const createMockProvider = (mockUrl: string, mockProgramAddress: string) => ({
 
 // Mock only the dependencies we need to control: the throwaway provider (no real RPC connection) and
 // the shared IDL resolver (so the hook gets a fixed IDL without fetching).
-vi.mock('@entities/idl/model/anchor-provider', () => ({ getProvider: vi.fn() }));
+vi.mock('@entities/idl/model/anchor/anchor-provider', () => ({ getProvider: vi.fn() }));
 vi.mock('@entities/idl/model/use-program-idls', () => ({ useProgramIdls: vi.fn() }));
 
 describe('Create program instance from legacy idl', () => {

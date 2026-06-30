@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+import { gen } from '@__fixtures__/gen';
 import type { Idl } from '@coral-xyz/anchor';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -57,7 +58,7 @@ vi.mock('@solana/kit', async importOriginal => ({
 }));
 
 const DEFAULT_ADDRESS = PublicKey.default.toBase58();
-const PMP_PDA = 'PMP1111111111111111111111111111111111111111';
+const PMP_PDA = gen.vanityAddress('PMP');
 
 function mockProgramIdls(overrides: Partial<ProgramIdls>): void {
     mocks.useProgramIdls.mockReturnValue({

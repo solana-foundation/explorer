@@ -1,23 +1,8 @@
 import type { Idl } from '@coral-xyz/anchor';
 import type { RootNode } from 'codama';
 
+import { type IdlStandard, type IdlVersion, type SupportedIdl } from '../lib/types';
 import { getIdlSpecType as getSerdeIdlSpecType } from './converters/convert-legacy-idl';
-
-export type IdlVersion = 'Legacy' | '0.30.1' | RootNode['version'];
-export type CodamaIdl = RootNode;
-export type AnchorIdl = Idl;
-export type SupportedIdl = CodamaIdl | AnchorIdl;
-export type IdlStandard = 'Anchor' | 'Codama';
-
-/** A program's resolved IDLs side by side: the Anchor PDA IDL and the PMP `idl`-seed IDL. */
-export type ProgramIdlPair = {
-    anchorIdl: SupportedIdl | undefined;
-    /** On-chain account the Anchor IDL was read from (the derived Anchor IDL PDA), when present. */
-    anchorIdlAddress: string | undefined;
-    programMetadataIdl: SupportedIdl | undefined;
-    /** On-chain account the PMP IDL was read from (the PMP metadata account), when present. */
-    programMetadataIdlAddress: string | undefined;
-};
 
 /**
  * Wildcard label used for all modern Anchor IDL versions (>= 0.30.1).

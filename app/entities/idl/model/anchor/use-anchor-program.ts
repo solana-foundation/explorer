@@ -6,9 +6,9 @@ import { useMemo } from 'react';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
+import { formatSerdeIdl, getFormattedIdl } from '../formatters/format';
+import { useProgramIdls } from '../use-program-idls';
 import { getProvider } from './anchor-provider';
-import { formatSerdeIdl, getFormattedIdl } from './formatters/format';
-import { useProgramIdls } from './use-program-idls';
 
 export function useAnchorProgram(
     programAddress: string,

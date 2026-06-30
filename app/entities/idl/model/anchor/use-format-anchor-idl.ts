@@ -21,8 +21,8 @@ import { array, Infer, literal, nullable, object, optional, string, union, valid
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { safeJsonParse } from '../lib/utils';
-import type { FieldType, FormattedIdl, PdaData, StructField } from './formatters/formatted-idl';
+import { safeJsonParse } from '../../lib/utils';
+import type { FieldType, FormattedIdl, PdaData, StructField } from '../formatters/formatted-idl';
 
 function parseStructFields(fields: IdlDefinedFields): StructField[] | null {
     // Handle struct with named fields or tuple fields

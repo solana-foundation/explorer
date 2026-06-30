@@ -1,7 +1,8 @@
 import { Logger } from '@/app/shared/lib/logger';
 import { type Cluster } from '@/app/utils/cluster';
 
-import { type ProgramIdlPair, type SupportedIdl } from '../model/idl-version';
+import { type SupportedIdl } from '../lib/types';
+import { type ProgramIdlPair } from './types';
 
 /**
  * Fetch a program's resolved IDLs from the shared, CDN-cached `/api/idl-latest` route — the single

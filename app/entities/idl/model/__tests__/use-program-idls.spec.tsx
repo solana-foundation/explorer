@@ -116,4 +116,29 @@ describe('useProgramIdls', () => {
             expect(result.current.programMetadataIdl).toBeUndefined();
         });
     });
+
+    // A known cluster can still point at a local validator (e.g. MainnetBeta + http://localhost:8899).
+    // `shouldUseDirectRpc` returns true for that combination, so resolution must run client-side against
+    // the localhost RPC — loading from the local validator, never from real mainnet via the server route.
+    describe('known cluster pointed at a local validator', () => {
+        it('should resolve client-side against localhost for MainnetBeta + http://localhost:8899', async () => {
+            mocks.resolveProgramIdlsClient.mockResolvedValue({
+                anchorIdl: { name: 'local_anchor_idl' },
+                programMetadataIdl: undefined,
+            });
+
+            const { result } = renderHook(
+                () => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.MainnetBeta),
+                { wrapper },
+            );
+
+            await waitFor(() => expect(result.current.anchorIdl).toEqual({ name: 'local_anchor_idl' }));
+            // Resolved against the user's local RPC URL (the correct network)...
+            expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
+                expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),
+            );
+            // ...and the mainnet server route was never queried, so we never read mainnet for a local URL.
+            expect(mocks.fetch).not.toHaveBeenCalled();
+        });
+    });
 });
