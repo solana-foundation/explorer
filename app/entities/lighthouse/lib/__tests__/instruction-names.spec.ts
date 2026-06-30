@@ -16,7 +16,9 @@ describe('resolveLighthouseInstructionName', () => {
     });
 
     test('should return undefined for a non-Lighthouse program', () => {
-        expect(resolveLighthouseInstructionName('11111111111111111111111111111111', Uint8Array.from([15]))).toBeUndefined();
+        expect(
+            resolveLighthouseInstructionName('11111111111111111111111111111111', Uint8Array.from([15])),
+        ).toBeUndefined();
     });
 
     test('should return undefined for an unrecognized discriminator', () => {

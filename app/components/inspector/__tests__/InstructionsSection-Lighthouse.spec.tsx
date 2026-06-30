@@ -18,7 +18,13 @@ import { InstructionsSection } from '../InstructionsSection';
 // stub it to "no IDL" so the byte instruction falls through to the dispatcher.
 vi.mock('swr', () => ({
     __esModule: true,
-    default: vi.fn(() => ({ data: undefined, error: undefined, isLoading: false, isValidating: false, mutate: vi.fn() })),
+    default: vi.fn(() => ({
+        data: undefined,
+        error: undefined,
+        isLoading: false,
+        isValidating: false,
+        mutate: vi.fn(),
+    })),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -93,7 +99,9 @@ function findTableRowWithMatches(
     const match = Array.from(rows).find(row => {
         // eslint-disable-next-line testing-library/no-node-access -- assert on raw table cells
         const cells = row.querySelectorAll('td');
-        return matchers.every(m => m.columnIndex < cells.length && m.regex.test(cells[m.columnIndex].textContent || ''));
+        return matchers.every(
+            m => m.columnIndex < cells.length && m.regex.test(cells[m.columnIndex].textContent || ''),
+        );
     });
     return (match as HTMLElement) || null;
 }
