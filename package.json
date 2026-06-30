@@ -105,7 +105,7 @@
         "ipaddr.js": "2.2.0",
         "jotai": "2.15.1",
         "jspdf": "4.2.1",
-        "lighthouse-sdk": "2.0.1",
+        "lighthouse-sdk": "2.1.0",
         "micromatch": "4.0.8",
         "multiformats": "13.4.2",
         "next": "16.2.6",

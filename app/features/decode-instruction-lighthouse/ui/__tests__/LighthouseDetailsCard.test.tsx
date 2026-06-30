@@ -1,24 +1,20 @@
-import { PublicKey } from '@solana/web3.js';
+import { toParsedInstruction } from '@entities/instruction-parser';
+import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 
 import { invariant } from '@/app/shared/lib/invariant';
+import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
+import { LIGHTHOUSE_ADDRESS, LIGHTHOUSE_PROGRAM_LABEL } from '../../lib/constants';
+import { parseLighthouseInstruction } from '../../lib/lighthouse-parser';
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
-
-function nextSibling(el: Element | null): Element {
-    invariant(el, 'expected current element to be non-null');
-    // eslint-disable-next-line testing-library/no-node-access -- tests walk the DOM by sibling index
-    const sibling = el.nextElementSibling;
-    invariant(sibling, 'expected nextElementSibling to exist');
-    return sibling;
-}
 
 vi.mock('react-feather', () => ({
     CornerDownRight: () => <div data-testid="corner-down-right" />,
 }));
 
-vi.mock('../../InstructionCard', () => ({
+vi.mock('@/app/components/instruction/InstructionCard', () => ({
     InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-testid="instruction-card" className="card">
             <div className="card-header">
@@ -33,11 +29,11 @@ vi.mock('../../InstructionCard', () => ({
     ),
 }));
 
-vi.mock('../../../common/Address', () => ({
+vi.mock('@/app/components/common/Address', () => ({
     Address: ({ pubkey }: { pubkey: PublicKey }) => <div data-testid="address">{pubkey.toBase58()}</div>,
 }));
 
-vi.mock('../../../common/Copyable', () => ({
+vi.mock('@/app/components/common/Copyable', () => ({
     Copyable: ({ text, children }: { text: string; children: React.ReactNode }) => (
         <div data-testid="copyable" data-text={text}>
             {children}
@@ -45,7 +41,7 @@ vi.mock('../../../common/Copyable', () => ({
     ),
 }));
 
-vi.mock('../../../../utils/anchor', () => ({
+vi.mock('@/app/utils/anchor', () => ({
     ExpandableRow: ({
         fieldName,
         fieldType,
@@ -69,28 +65,17 @@ vi.mock('../../../../utils/anchor', () => ({
     ),
 }));
 
-vi.mock('change-case', () => ({
-    split: jest.fn(() => 'mocked-split'),
-}));
-
 describe('LighthouseDetailsCard', () => {
-    const defaultProps = {
-        childIndex: undefined,
-        index: 0,
-        innerCards: undefined,
-        result: { err: null },
-    };
-
     describe('Assert Instructions', () => {
         it('should render Assert Sysvar Clock instruction', () => {
             // 5dakXwp5QTySbvc6P1Wp9MLZubnnG4R1Dh6cWSgNv6w1xt2JMsTp7EZvWEUxk9YLbJZHG97TT3jMVJ4yMTXKjM2L
             const ix = {
                 data: Buffer.from([15, 0, 0, 166, 238, 134, 18, 0, 0, 0, 0, 3]),
                 keys: [],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Assert Sysvar Clock')).toBeInTheDocument();
 
@@ -125,10 +110,10 @@ describe('LighthouseDetailsCard', () => {
                         pubkey: new PublicKey('AUuYypaXez7kXWWWYecmsb89prMCnba6g2tBWm3BxKQV'),
                     },
                 ],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Assert Account Info')).toBeInTheDocument();
 
@@ -167,10 +152,10 @@ describe('LighthouseDetailsCard', () => {
                         pubkey: new PublicKey('5bjPLjnXeCfVPa3khXYzdiHaUYrW6zwveZywNJydaumJ'),
                     },
                 ],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Assert Token Account')).toBeInTheDocument();
 
@@ -212,10 +197,10 @@ describe('LighthouseDetailsCard', () => {
                         pubkey: new PublicKey('FMPNEcpSDsAskMHGtB6b6vh4CipN9NNdhWtHKTDqZ9oS'),
                     },
                 ],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Assert Bubblegum Tree Config Account')).toBeInTheDocument();
 
@@ -257,10 +242,10 @@ describe('LighthouseDetailsCard', () => {
                         pubkey: new PublicKey('DatucYgNGQn1qtsAJ7LDzt3n2mZstbTuLqyXDGbEwZDP'),
                     },
                 ],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Assert Upgradeable Loader Account')).toBeInTheDocument();
 
@@ -318,10 +303,10 @@ describe('LighthouseDetailsCard', () => {
                         pubkey: new PublicKey('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u'),
                     },
                 ],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Assert Account Delta')).toBeInTheDocument();
 
@@ -369,7 +354,7 @@ describe('LighthouseDetailsCard', () => {
                     {
                         isSigner: false,
                         isWritable: false,
-                        pubkey: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                        pubkey: new PublicKey(LIGHTHOUSE_ADDRESS),
                     },
                     { isSigner: false, isWritable: false, pubkey: new PublicKey('11111111111111111111111111111111') },
                     {
@@ -388,16 +373,16 @@ describe('LighthouseDetailsCard', () => {
                         pubkey: new PublicKey('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u'),
                     },
                 ],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Memory Write')).toBeInTheDocument();
 
             const accountRow = screen.getByTestId('account-row-0');
             expect(accountRow).toHaveTextContent('Program Id');
-            expect(accountRow).toHaveTextContent('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95');
+            expect(accountRow).toHaveTextContent(LIGHTHOUSE_ADDRESS);
 
             const accountRow1 = screen.getByTestId('account-row-1');
             expect(accountRow1).toHaveTextContent('System Program');
@@ -452,7 +437,7 @@ describe('LighthouseDetailsCard', () => {
                     {
                         isSigner: false,
                         isWritable: false,
-                        pubkey: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                        pubkey: new PublicKey(LIGHTHOUSE_ADDRESS),
                     },
                     {
                         isSigner: false,
@@ -465,16 +450,16 @@ describe('LighthouseDetailsCard', () => {
                         pubkey: new PublicKey('14gyJnETr2upBHRoCVFfvqcaGGEZuJT1vYXzWCJGJ45h'),
                     },
                 ],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Memory Close')).toBeInTheDocument();
 
             const accountRow = screen.getByTestId('account-row-0');
             expect(accountRow).toHaveTextContent('Program Id');
-            expect(accountRow).toHaveTextContent('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95');
+            expect(accountRow).toHaveTextContent(LIGHTHOUSE_ADDRESS);
 
             const accountRow1 = screen.getByTestId('account-row-1');
             expect(accountRow1).toHaveTextContent('Payer');
@@ -511,10 +496,10 @@ describe('LighthouseDetailsCard', () => {
                         pubkey: new PublicKey('BasxJXmna7VWFdcrBSgmkPnfGaRmxU5iVQpRUoyNpX5Y'),
                     },
                 ],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Assert Token Account Multi')).toBeInTheDocument();
         });
@@ -530,10 +515,10 @@ describe('LighthouseDetailsCard', () => {
                         pubkey: new PublicKey('FZLY576gVwyD6rEosP72pRUC9TAe7LhgvoSepk3F63PY'),
                     },
                 ],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Assert Account Info Multi')).toBeInTheDocument();
 
@@ -613,10 +598,10 @@ describe('LighthouseDetailsCard', () => {
                         pubkey: new PublicKey('2mWhJDFtX2LGKggEPVhznvs8cPzy5HM8HhsVPj5YxqA8'),
                     },
                 ],
-                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
             };
 
-            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+            renderLighthouse(ix);
 
             expect(screen.getByText('Lighthouse: Assert Stake Account Multi')).toBeInTheDocument();
 
@@ -709,4 +694,73 @@ describe('LighthouseDetailsCard', () => {
             expect(next).toHaveTextContent('>=');
         });
     });
+
+    // Guards the account-role badges in the shared CodamaInstructionBody. The
+    // writable-non-signer and readonly-signer cases regressed historically to no
+    // badge at all (an `||`/`&&` precedence bug that only rendered for
+    // writable-signers); these assert each role surfaces the right badge.
+    describe('account role badges', () => {
+        // Assert Account Info, single target account — only the account role varies.
+        const assertAccountInfo = (isSigner: boolean, isWritable: boolean) => ({
+            data: Buffer.from([5, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+            keys: [{ isSigner, isWritable, pubkey: new PublicKey('AUuYypaXez7kXWWWYecmsb89prMCnba6g2tBWm3BxKQV') }],
+            programId: new PublicKey(LIGHTHOUSE_ADDRESS),
+        });
+
+        it('should badge a writable, non-signer account as Writable only', () => {
+            renderLighthouse(assertAccountInfo(false, true));
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Writable');
+            expect(accountRow).not.toHaveTextContent('Signer');
+        });
+
+        it('should badge a readonly signer account as Signer only', () => {
+            renderLighthouse(assertAccountInfo(true, false));
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Signer');
+            expect(accountRow).not.toHaveTextContent('Writable');
+        });
+
+        it('should badge a writable signer account as both Writable and Signer', () => {
+            renderLighthouse(assertAccountInfo(true, true));
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Writable');
+            expect(accountRow).toHaveTextContent('Signer');
+        });
+
+        it('should show no role badge for a readonly, non-signer account', () => {
+            renderLighthouse(assertAccountInfo(false, false));
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).not.toHaveTextContent('Writable');
+            expect(accountRow).not.toHaveTextContent('Signer');
+        });
+    });
 });
+
+// Decode the fixture through the real parser + dispatcher wrapper so the card is
+// exercised exactly as in production (canonical `{ type, info }` + raw ix).
+function renderLighthouse(raw: { data: Buffer; keys: unknown[]; programId: PublicKey }) {
+    const parsed = parseLighthouseInstruction(toKitInstruction(raw as unknown as TransactionInstruction));
+    invariant(parsed, 'expected fixture to parse as a Lighthouse instruction');
+    const ix = toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId);
+    return render(
+        <LighthouseDetailsCard
+            ix={ix}
+            raw={raw as unknown as TransactionInstruction}
+            index={0}
+            result={{ err: null }}
+        />,
+    );
+}
+
+function nextSibling(el: Element | null): Element {
+    invariant(el, 'expected current element to be non-null');
+    // eslint-disable-next-line testing-library/no-node-access -- tests walk the DOM by sibling index
+    const sibling = el.nextElementSibling;
+    invariant(sibling, 'expected nextElementSibling to exist');
+    return sibling;
+}

@@ -8,8 +8,6 @@ import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upg
 import { ComputeBudgetDetailsCard } from '@components/instruction/ComputeBudgetDetailsCard';
 import { Ed25519DetailsCard } from '@components/instruction/ed25519/Ed25519DetailsCard';
 import { isEd25519Instruction } from '@components/instruction/ed25519/types';
-import { LighthouseDetailsCard } from '@components/instruction/lighthouse/LighthouseDetailsCard';
-import { isLighthouseInstruction } from '@components/instruction/lighthouse/types';
 import { isMangoInstruction } from '@components/instruction/mango/types';
 import { MangoDetailsCard } from '@components/instruction/MangoDetails';
 import { MemoDetailsCard } from '@components/instruction/MemoDetailsCard';
@@ -33,8 +31,9 @@ import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProofDetailsCard';
 import { useAnchorProgram } from '@entities/idl';
-import { useInstructionParser } from '@entities/instruction-parser';
+import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
+import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
@@ -265,7 +264,21 @@ function InstructionCard({
         return <ZkElGamalProofDetailsCard key={key} {...props} />;
     }
     if (isLighthouseInstruction(transactionIx)) {
-        return <LighthouseDetailsCard key={key} {...props} />;
+        const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
+        if (isParsedInstruction(dispatched)) {
+            return (
+                <LighthouseDetailsCard
+                    key={key}
+                    ix={dispatched}
+                    raw={transactionIx}
+                    index={index}
+                    result={result}
+                    innerCards={innerCards}
+                    childIndex={childIndex}
+                />
+            );
+        }
+        return <UnknownDetailsCard key={key} {...props} />;
     }
     if (isStakeInstruction(transactionIx)) {
         return <RawStakeDetailsCard key={key} {...props} />;

@@ -1,4 +1,5 @@
-import { PublicKey } from '@solana/web3.js';
+import { toParsedInstruction } from '@entities/instruction-parser';
+import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
     withCluster,
@@ -9,9 +10,13 @@ import {
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
+import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
+
+import { LIGHTHOUSE_ADDRESS, LIGHTHOUSE_PROGRAM_LABEL } from '../../lib/constants';
+import { parseLighthouseInstruction } from '../../lib/lighthouse-parser';
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
 
-const ix = {
+const raw = {
     data: Buffer.from([5, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
     keys: [
         {
@@ -20,7 +25,19 @@ const ix = {
             pubkey: new PublicKey('AUuYypaXez7kXWWWYecmsb89prMCnba6g2tBWm3BxKQV'),
         },
     ],
-    programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+    programId: new PublicKey(LIGHTHOUSE_ADDRESS),
+} as unknown as TransactionInstruction;
+
+const parsed = parseLighthouseInstruction(toKitInstruction(raw));
+if (!parsed) throw new Error('fixture failed to parse as a Lighthouse instruction');
+
+const args = {
+    childIndex: undefined,
+    index: 0,
+    innerCards: undefined,
+    ix: toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId),
+    raw,
+    result: { err: null },
 };
 
 const meta: Meta<typeof LighthouseDetailsCard> = {
@@ -36,8 +53,6 @@ const meta: Meta<typeof LighthouseDetailsCard> = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-const args = { childIndex: undefined, index: 0, innerCards: undefined, ix, result: { err: null } };
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

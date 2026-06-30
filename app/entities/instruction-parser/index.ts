@@ -7,5 +7,6 @@ export type {
     InstructionParser,
     InstructionParserDispatcher,
     ParsedInstructionInfo,
+    ParserProgramLabel,
     UnparsedInstruction,
 } from './model/types';
