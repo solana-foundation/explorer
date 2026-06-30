@@ -2,6 +2,7 @@
 // If generators proliferate, consider replacing with `fast-check` arbitraries
 // (e.g. fc.bigInt(), fc.sample()) for composability and shrinking support.
 
+import type { SecurityTxtFields, SecurityTxtSource } from '@solana/security-txt';
 import { PublicKey } from '@solana/web3.js';
 import bs58 from 'bs58';
 
@@ -27,6 +28,8 @@ export const gen = {
     epoch: () => gen.bigint(1_000n),
     /** Same as `address` but returns a `PublicKey` so callers needn't wrap it. */
     publicKey: (seed?: number) => new PublicKey(gen.address(seed)),
+    /** Bare resolved security.txt for hook mocks; pass `fields` (e.g. name, version) for the case at hand. */
+    securityTxt: (fields: SecurityTxtFields = {}, type: SecurityTxtSource = 'pmp') => ({ fields, type }),
     /** Deterministic when seed provided (same seed → same value) so story fixtures stay pixel-stable. */
     signature: (seed?: number) => {
         const bytes = new Uint8Array(64);

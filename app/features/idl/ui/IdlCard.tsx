@@ -5,6 +5,7 @@ import { Badge } from '@components/shared/ui/badge';
 import { Button, buttonVariants } from '@components/shared/ui/button';
 import { ExternalLink } from '@components/shared/ui/external-link';
 import {
+    buildProgramName,
     getIdlBadgeLabel,
     getIdlProgramVersion,
     IdlVariant,
@@ -145,6 +146,8 @@ export function IdlCard({ programId }: { programId: string }) {
     const idlAddress = isFallback ? anchorIdlAddress : programMetadataIdlAddress;
     const idlSourceLabel = isFallback ? 'Anchor' : 'PMP';
     const programVersion = getIdlProgramVersion(idl);
+    // Codama / modern Anchor names only; legacy Anchor top-level name is intentionally not shown.
+    const programName = buildProgramName([idl]);
     const info = (
         <dl className="flex flex-col gap-1 text-xs">
             {idlAddress && (
@@ -154,6 +157,12 @@ export function IdlCard({ programId }: { programId: string }) {
                         <AddressLink address={idlAddress as Address} truncate={{ head: 4, tail: 4 }} />
                         <span className="text-neutral-500">(PDA)</span>
                     </dd>
+                </div>
+            )}
+            {programName && (
+                <div className="flex items-baseline gap-2">
+                    <dt className="w-32 shrink-0 text-neutral-400">Name</dt>
+                    <dd className="text-white">{programName}</dd>
                 </div>
             )}
             <div className="flex items-baseline gap-2">

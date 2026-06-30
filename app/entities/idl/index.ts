@@ -19,6 +19,7 @@ export { IdlVariant } from './model/idl-variant';
 // "Unknown Program" / "Unknown Instruction".
 export { useInstructionNameResolvers } from './model/use-instruction-name-resolvers';
 export type { InstructionNameResolver, ProgramIdlNames } from './model/use-instruction-name-resolvers';
+export { buildProgramName } from './model/instruction-name-table';
 
 export { getIdlSpecType as getDisplayIdlSpecType } from './model/converters/convert-display-idl';
 export { formatDisplayIdl, formatSerdeIdl, getFormattedIdl } from './model/formatters/format';
