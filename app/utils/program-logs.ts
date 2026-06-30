@@ -19,7 +19,11 @@ export type InstructionLogs = {
     failed: boolean;
 };
 
-export function parseProgramLogs(logs: string[], error: TransactionError | null, cluster: Cluster): InstructionLogs[] {
+export function parseProgramLogs(
+    logs: string[],
+    error: TransactionError | null | undefined,
+    cluster: Cluster,
+): InstructionLogs[] {
     let depth = 0;
     const prettyLogs: InstructionLogs[] = [];
     function prefixBuilder(
@@ -173,33 +177,4 @@ export function parseProgramLogs(logs: string[], error: TransactionError | null,
     }
 
     return prettyLogs;
-}
-
-/**
- * Extracts event data from transaction logs for a specific instruction.
- * Returns an array of base64-encoded event data strings.
- */
-export function extractEventsFromLogs(logs: string[], instructionIndex: number): string[] {
-    const events: string[] = [];
-    let currentIxIndex = -1;
-    let depth = 0;
-
-    for (const log of logs) {
-        // Track program invocations to match instruction indices
-        // eslint-disable-next-line no-restricted-syntax -- match program invoke pattern
-        if (log.match(/Program \w* invoke \[(\d)\]/)) {
-            if (depth === 0) {
-                currentIxIndex++;
-            }
-            depth++;
-        } else if (log.includes('success') || log.includes('failed')) {
-            depth--;
-        } else if (log.startsWith('Program data:') && currentIxIndex === instructionIndex) {
-            // Extract base64-encoded event data for the current instruction
-            const eventData = log.slice('Program data: '.length).trim();
-            events.push(eventData);
-        }
-    }
-
-    return events;
 }

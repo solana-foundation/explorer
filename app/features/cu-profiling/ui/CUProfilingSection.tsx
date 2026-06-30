@@ -44,7 +44,7 @@ export function CUProfilingSection({ signature }: SignatureProps) {
 
 function formatTransactionLogs(transactionWithMeta: ParsedTransactionWithMeta | null | undefined, cluster: Cluster) {
     const logMessages = transactionWithMeta?.meta?.logMessages || null;
-    const err = transactionWithMeta?.meta?.err || null;
+    const err = transactionWithMeta?.meta?.err || undefined;
 
     return logMessages ? parseProgramLogs(logMessages, err, cluster) : [];
 }

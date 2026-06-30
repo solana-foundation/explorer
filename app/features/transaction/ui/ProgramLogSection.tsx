@@ -37,7 +37,7 @@ export function ProgramLogSection({ signature }: SignatureProps) {
     const message = transactionWithMeta.transaction.message;
 
     const logMessages = transactionWithMeta.meta?.logMessages || null;
-    const err = transactionWithMeta.meta?.err || null;
+    const err = transactionWithMeta.meta?.err || undefined;
 
     let prettyLogs = null;
     if (logMessages !== null) {

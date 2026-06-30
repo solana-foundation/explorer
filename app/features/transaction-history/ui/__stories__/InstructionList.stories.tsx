@@ -26,6 +26,7 @@ export const FewInstructions: Story = {
     },
 };
 
+// Exactly the inline limit (3) — all rendered inline, no overflow line.
 export const ExactlyThree: Story = {
     args: {
         instructions: [
@@ -36,6 +37,7 @@ export const ExactlyThree: Story = {
     },
 };
 
+// Beyond the inline limit — the first 3 render inline, the rest collapse into a "+N more" tooltip.
 export const ManyInstructions: Story = {
     args: {
         instructions: [

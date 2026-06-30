@@ -31,12 +31,10 @@ import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCa
 import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
-import {
-    isZkElGamalProofInstruction,
-    ZkElGamalProofDetailsCard,
-} from '@components/instruction/ZkElGamalProofDetailsCard';
+import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProofDetailsCard';
 import { useAnchorProgram } from '@entities/idl';
 import { useInstructionParser } from '@entities/instruction-parser';
+import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
@@ -293,8 +291,14 @@ function InstructionCard({
             </ErrorBoundary>
         );
     }
+    // Prefer a PMP-published IDL (incl. the PMP's own Codama IDL) over the legacy Anchor IDL below.
+    // Keep this precedence in sync with the inspector: app/components/inspector/InstructionsSection.tsx
     if (programMetadataIdl) {
-        return <ProgramMetadataIdlInstructionDetailsCard key={key} {...props} idl={programMetadataIdl} />;
+        return (
+            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                <ProgramMetadataIdlInstructionDetailsCard {...props} idl={programMetadataIdl} signature={signature} />
+            </ErrorBoundary>
+        );
     }
     if (anchorProgram) {
         return (

@@ -74,7 +74,7 @@ function mergeFailedTransactionSignatures(
     return new Set([...(current ?? []), ...update]);
 }
 
-function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | undefined) {
+export function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | undefined) {
     if (update?.history === undefined) {
         // Support transactionMap-only updates from background lazy fetches
         if ((update?.transactionMap || update?.failedTransactionSignatures) && history) {
@@ -85,6 +85,14 @@ function reconcile(history: AccountHistory | undefined, update: HistoryUpdate | 
             );
             return { ...history, failedTransactionSignatures, transactionMap };
         }
+        return history;
+    }
+
+    // A refresh (before === undefined) that came back empty is almost always a transient RPC blip, not a
+    // real transition to "zero history" (signatures are immutable). Drop it so a flaky empty can't wipe
+    // already-loaded rows or flip foundOldest into a false "Fetched full history". The first-ever fetch
+    // (no existing history) isn't covered here — fetchSignatures retries that case before it lands.
+    if (update.before === undefined && update.history.fetched.length === 0 && history?.fetched.length) {
         return history;
     }
 
@@ -163,6 +171,30 @@ async function fetchParsedTransactions(url: string, cluster: Cluster, transactio
     return { failedTransactionSignatures, transactionMap };
 }
 
+// A lagging/cold RPC replica can return an empty signatures page for an account that actually has
+// history — indistinguishable from a genuinely empty account, but far more likely on a busy one. The
+// first page is the dangerous one: an empty result there is cached as `foundOldest: true` and rendered
+// as "Fetched full history" until a manual reload. Wrap every attempt in withBackoff (parity with the
+// transaction fetch below), and retry a first-page empty a few times — each attempt is a fresh request,
+// so a load balancer can route us to a healthy node — before trusting it as the real "no history" answer.
+const EMPTY_FIRST_PAGE_RETRIES = 2;
+const EMPTY_FIRST_PAGE_RETRY_DELAY_MS = 300;
+
+export async function fetchSignatures(
+    connection: Connection,
+    pubkey: PublicKey,
+    options: { before?: TransactionSignature; limit: number },
+): Promise<ConfirmedSignatureInfo[]> {
+    const isFirstPage = options.before === undefined;
+    for (let attempt = 0; ; attempt++) {
+        const fetched = await withBackoff(() => connection.getSignaturesForAddress(pubkey, options));
+        if (fetched.length > 0 || !isFirstPage || attempt >= EMPTY_FIRST_PAGE_RETRIES) {
+            return fetched;
+        }
+        await new Promise(resolve => setTimeout(resolve, EMPTY_FIRST_PAGE_RETRY_DELAY_MS));
+    }
+}
+
 async function fetchAccountHistory(
     dispatch: Dispatch,
     pubkey: PublicKey,
@@ -186,7 +218,7 @@ async function fetchAccountHistory(
     let history;
     try {
         const connection = new Connection(url);
-        const fetched = await connection.getSignaturesForAddress(pubkey, options);
+        const fetched = await fetchSignatures(connection, pubkey, options);
         history = {
             fetched,
             foundOldest: fetched.length < options.limit,

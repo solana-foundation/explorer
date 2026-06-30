@@ -8,7 +8,7 @@ import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { useCluster } from '../providers/cluster';
-import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
+import { ProgramBufferAccountInfo, ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
 import { Cluster } from './cluster';
 import { composeOnchainRepoUrl, normalizeRepoUrl, safeRepoUrl } from './verified-builds-url';
 
@@ -314,6 +314,26 @@ function isMainnet(currentCluster: Cluster): boolean {
 }
 
 // Helper function to hash program data
+/**
+ * Compute the solana-verify-style hash of an upgradeable BPF loader buffer account,
+ * matching `solana-verify get-buffer-hash` / `get_binary_hash`: sha256 of the program
+ * bytes with trailing zero padding removed. The RPC's jsonParsed buffer `data` is already
+ * the bytes past the 37-byte buffer header. Returns undefined when `data` is unavailable.
+ */
+export function hashProgramBuffer(buffer: ProgramBufferAccountInfo): string | undefined {
+    if (!buffer.data) return undefined;
+    const bytes = fromBase64(buffer.data[0]);
+    // Same RPC quirk as hashProgramData: when authority is None the parsed `data` carries the
+    // 32-byte pubkey from the (Option) header, so skip it to match solana-verify's raw offset.
+    const offset = buffer.authority === null ? 32 : 0;
+    const data = bytes.slice(offset);
+    let truncatedBytes = 0;
+    while (truncatedBytes < data.length && data[data.length - 1 - truncatedBytes] === 0) {
+        truncatedBytes++;
+    }
+    return toHex(sha256(data.slice(0, data.length - truncatedBytes)));
+}
+
 export function hashProgramData(programData: ProgramDataAccountInfo): string {
     const buffer = fromBase64(programData.data[0]);
     // The jsonParsed RPC response includes the 32-byte pubkey field from the raw

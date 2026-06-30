@@ -19,9 +19,11 @@ import {
     readUint8,
     readUint16LE,
     readUint32LE,
+    startsWith,
     toBase64,
     toBuffer,
     toHex,
+    toLeBytes,
     toUint8Array,
     toUtf8,
     writeU64LE,
@@ -977,5 +979,71 @@ describe('toBuffer', () => {
         const result = toBuffer(view);
         expect(result.length).toBe(3);
         expect([...result]).toEqual([0xaa, 0xbb, 0xcc]);
+    });
+});
+
+describe('toLeBytes', () => {
+    const cases: { expected: number[]; size: number; value: number }[] = [
+        { expected: [0], size: 1, value: 0 },
+        { expected: [255], size: 1, value: 255 },
+        { expected: [0, 1], size: 2, value: 256 },
+        { expected: [0x34, 0x12], size: 2, value: 0x1234 },
+        { expected: [224, 147, 4, 0], size: 4, value: 300000 },
+        { expected: [5, 4, 3, 2, 1, 0, 0, 0], size: 8, value: 0x0102030405 },
+    ];
+
+    it.each(cases)('should encode $value (size $size) as little-endian', ({ value, size, expected }) => {
+        expect(Array.from(toLeBytes(value, size))).toEqual(expected);
+    });
+
+    it('should return a Uint8Array of the requested size', () => {
+        const result = toLeBytes(1, 4);
+        expect(result).toBeInstanceOf(Uint8Array);
+        expect(result.length).toBe(4);
+    });
+
+    it('should return an empty array for size 0', () => {
+        expect(toLeBytes(123, 0).length).toBe(0);
+    });
+
+    it('should drop bytes that overflow the requested size', () => {
+        expect(Array.from(toLeBytes(0x1234, 1))).toEqual([0x34]);
+        expect(Array.from(toLeBytes(256, 1))).toEqual([0]);
+    });
+
+    it('should match bnToBytes little-endian output', () => {
+        for (const { value, size } of cases) {
+            const expected = bnToBytes(new BN(value), 'le', size);
+            expect(Array.from(toLeBytes(value, size))).toEqual(Array.from(expected));
+        }
+    });
+});
+
+describe('startsWith', () => {
+    it('should return true when data begins with the prefix', () => {
+        expect(startsWith(new Uint8Array([1, 2, 3, 4]), new Uint8Array([1, 2]))).toBe(true);
+    });
+
+    it('should return true when the prefix equals the data', () => {
+        expect(startsWith(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3]))).toBe(true);
+    });
+
+    it('should return false when a prefix byte differs', () => {
+        expect(startsWith(new Uint8Array([1, 2, 3]), new Uint8Array([1, 9]))).toBe(false);
+        expect(startsWith(new Uint8Array([9, 2, 3]), new Uint8Array([1, 2, 3]))).toBe(false);
+    });
+
+    it('should return false when the prefix is longer than the data', () => {
+        expect(startsWith(new Uint8Array([1, 2]), new Uint8Array([1, 2, 3]))).toBe(false);
+    });
+
+    it('should return true for an empty prefix', () => {
+        expect(startsWith(new Uint8Array([1, 2]), new Uint8Array([]))).toBe(true);
+        expect(startsWith(new Uint8Array([]), new Uint8Array([]))).toBe(true);
+    });
+
+    it('should match a single-byte prefix only at the start', () => {
+        expect(startsWith(new Uint8Array([0, 1, 2]), new Uint8Array([0]))).toBe(true);
+        expect(startsWith(new Uint8Array([5]), new Uint8Array([0]))).toBe(false);
     });
 });

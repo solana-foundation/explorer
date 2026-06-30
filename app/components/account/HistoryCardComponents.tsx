@@ -1,9 +1,4 @@
-import { Button } from '@components/shared/ui/button';
-import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { ConfirmedSignatureInfo, TransactionError } from '@solana/web3.js';
-import React from 'react';
-
-import { CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 export type TransactionRow = {
     slot: number;
@@ -14,62 +9,6 @@ export type TransactionRow = {
     statusText: string;
     signatureInfo: ConfirmedSignatureInfo;
 };
-
-export function HistoryCardHeader({
-    title,
-    analyticsSection,
-    refresh,
-    fetching,
-}: {
-    title: string;
-    analyticsSection: string;
-    refresh: () => void;
-    fetching: boolean;
-}) {
-    return (
-        <CardHeader ui="dashkit">
-            <CardTitle as="h3" ui="dashkit">
-                {title}
-            </CardTitle>
-            <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
-        </CardHeader>
-    );
-}
-
-export function HistoryCardFooter({
-    fetching,
-    foundOldest,
-    loadMore,
-}: {
-    fetching: boolean;
-    foundOldest: boolean;
-    loadMore: () => void;
-}) {
-    return (
-        <CardFooter ui="dashkit">
-            {foundOldest ? (
-                <div className="text-center text-dk-gray-700">Fetched full history</div>
-            ) : (
-                <Button
-                    ui="dashkit"
-                    variant="primary"
-                    className="w-full"
-                    onClick={() => loadMore()}
-                    disabled={fetching}
-                >
-                    {fetching ? (
-                        <>
-                            <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
-                            Loading
-                        </>
-                    ) : (
-                        'Load More'
-                    )}
-                </Button>
-            )}
-        </CardFooter>
-    );
-}
 
 export function getTransactionRows(transactions: ConfirmedSignatureInfo[]): TransactionRow[] {
     const transactionRows: TransactionRow[] = [];
