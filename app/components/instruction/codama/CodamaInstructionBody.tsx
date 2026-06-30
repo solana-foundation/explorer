@@ -30,10 +30,12 @@ export function CodamaInstructionBody({
     namedAccounts?: Record<string, AccountMeta<string>>;
     data?: Record<string, unknown>;
 }) {
-    const namedAccountsLength = namedAccounts ? Object.keys(namedAccounts).length : 0;
-    const accountMap = namedAccounts
-        ? new Map(Object.entries(namedAccounts).map(([key, value]) => [value.address, key]))
-        : new Map<string, string>();
+    // Codama emits `namedAccounts` in instruction-account order, so the Nth
+    // entry names the Nth row. Index by position rather than reversing to a
+    // name-by-address map: two accounts can share the same address (e.g.
+    // MemoryWrite's payer and sourceAccount), which would collapse in a map and
+    // mislabel one of the rows.
+    const namedAccountNames = namedAccounts ? Object.keys(namedAccounts) : [];
 
     return (
         <>
@@ -55,9 +57,9 @@ export function CodamaInstructionBody({
                         <BaseTable.Cell>
                             <div className="mr-1.5 md:inline">
                                 {namedAccounts
-                                    ? keyIndex < namedAccountsLength
-                                        ? `${camelToTitleCase(accountMap.get(address) ?? 'Unknown')}`
-                                        : `Remaining Account #${keyIndex + 1 - namedAccountsLength}`
+                                    ? keyIndex < namedAccountNames.length
+                                        ? camelToTitleCase(namedAccountNames[keyIndex])
+                                        : `Remaining Account #${keyIndex + 1 - namedAccountNames.length}`
                                     : `Account #${keyIndex + 1}`}
                             </div>
                             {isWritableRole(role) && (

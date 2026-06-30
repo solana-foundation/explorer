@@ -9,7 +9,11 @@ export type { LighthouseInstructionType };
 export interface LighthouseInfo {
     /** Named accounts from the lighthouse-sdk parser (name → meta), used to label the account table. */
     accounts?: Record<string, AccountMeta<string>>;
-    /** Decoded instruction data with assertion operators already humanized. */
+    /**
+     * Decoded instruction data with assertion operators kept as raw numeric
+     * enums — the decode is faithful. Call `withFormattedOperators` at the
+     * render boundary to humanize them into comparison symbols (the card does).
+     */
     data: Record<string, unknown>;
 }
 

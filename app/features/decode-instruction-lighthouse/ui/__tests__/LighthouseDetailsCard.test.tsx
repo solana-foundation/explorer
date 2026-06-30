@@ -388,8 +388,10 @@ describe('LighthouseDetailsCard', () => {
             expect(accountRow1).toHaveTextContent('System Program');
             expect(accountRow1).toHaveTextContent('11111111111111111111111111111111');
 
+            // payer and sourceAccount share this address; each row must still
+            // get its own positional name (not a single address-collapsed label).
             const accountRow2 = screen.getByTestId('account-row-2');
-            expect(accountRow2).toHaveTextContent('Source Account');
+            expect(accountRow2).toHaveTextContent('Payer');
             expect(accountRow2).toHaveTextContent('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u');
 
             const accountRow3 = screen.getByTestId('account-row-3');
