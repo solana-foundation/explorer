@@ -2,9 +2,9 @@
 
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
-| Static | `/` | 130 kB | 1.16 MB |
+| Static | `/` | 130 kB | 1.15 MB |
 | Static | `/_not-found` | 0 B | 1.03 MB |
-| Dynamic | `/address/[address]` | 380 kB | 1.39 MB |
+| Dynamic | `/address/[address]` | 380 kB | 1.40 MB |
 | Dynamic | `/address/[address]/anchor-account` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/anchor-program` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/attestation` | 370 kB | 1.39 MB |
@@ -47,13 +47,13 @@
 | Dynamic | `/block/[slot]` | 230 kB | 1.25 MB |
 | Dynamic | `/block/[slot]/accounts` | 230 kB | 1.25 MB |
 | Dynamic | `/block/[slot]/programs` | 230 kB | 1.25 MB |
-| Dynamic | `/block/[slot]/rewards` | 230 kB | 1.25 MB |
+| Dynamic | `/block/[slot]/rewards` | 230 kB | 1.24 MB |
 | Dynamic | `/epoch/[epoch]` | 10 kB | 1.04 MB |
 | Static | `/feature-gates` | 50 kB | 1.07 MB |
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
-| Static | `/tos` | 880 B | 1.03 MB |
-| Dynamic | `/tx/[signature]` | 580 kB | 1.59 MB |
-| Dynamic | `/tx/[signature]/inspect` | 350 kB | 1.36 MB |
-| Static | `/tx/inspector` | 350 kB | 1.36 MB |
+| Static | `/tos` | 890 B | 1.03 MB |
+| Dynamic | `/tx/[signature]` | 590 kB | 1.60 MB |
+| Dynamic | `/tx/[signature]/inspect` | 370 kB | 1.39 MB |
+| Static | `/tx/inspector` | 370 kB | 1.39 MB |
