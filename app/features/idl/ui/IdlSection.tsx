@@ -26,6 +26,7 @@ import { IdlRenderer } from './IdlRenderer';
 export function IdlSection({
     idl,
     badge,
+    info,
     programId,
     idlSource,
     network,
@@ -34,6 +35,8 @@ export function IdlSection({
 }: {
     idl: SupportedIdl;
     badge: React.ReactNode;
+    /** Metadata rows (address, source, program version) rendered directly under the badge row. */
+    info?: React.ReactNode;
     programId: string;
     idlSource: IdlVariant;
     network: string;
@@ -140,6 +143,8 @@ export function IdlSection({
                     </div>
                 </div>
             </div>
+
+            {info && <div className="mt-3">{info}</div>}
 
             <div className="mt-4 min-h-48">
                 <WalletProvider skipToast autoConnect>

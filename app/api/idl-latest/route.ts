@@ -5,7 +5,6 @@ import { type Address, address, createSolanaRpc } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { isEnvEnabled } from '@/app/utils/env';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
 
@@ -18,13 +17,12 @@ const CACHE_HEADERS = {
 async function resolveProgramIdlsWithRetry(
     url: string,
     programId: Address,
-    options: Parameters<typeof resolveProgramIdls>[2],
     attempts = 3,
 ): Promise<Awaited<ReturnType<typeof resolveProgramIdls>>> {
     let lastError: unknown;
     for (let attempt = 0; attempt < attempts; attempt++) {
         try {
-            return await resolveProgramIdls(createSolanaRpc(url), programId, options);
+            return await resolveProgramIdls(createSolanaRpc(url), programId);
         } catch (error) {
             lastError = error;
             if (attempt < attempts - 1 && isRetryableError(error)) {
@@ -39,9 +37,9 @@ async function resolveProgramIdlsWithRetry(
 /**
  * The single IDL-resolution endpoint for known clusters. Resolution lives in `resolveProgramIdls`
  * (shared with the custom/localhost client path); this route is the server transport edge: query
- * parsing, the PMP feature gate, CDN cache headers, and the error-to-HTTP policy. It always resolves
- * the Anchor IDL (unless the program is native) and includes the PMP `idl` IDL when the feature flag
- * is on — consumers read the field they need (`idls.anchor` / `idls.programMetadata`).
+ * parsing, CDN cache headers, and the error-to-HTTP policy. It always resolves the Anchor IDL (unless
+ * the program is native) and the PMP `idl` IDL — consumers read the field they need (`idls.anchor` /
+ * `idls.programMetadata`).
  *
  * Error policy: `resolveProgramIdls` throws only on RPC failure — transient blips → retryable,
  * *uncached* 502 (no page); persistent misconfiguration → Sentry page. We never cache a
@@ -51,8 +49,6 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const clusterProp = searchParams.get('cluster');
     const programAddress = searchParams.get('programAddress');
-    // The PMP IDL feature gate lives server-side: include the PMP `idl` IDL only when the flag is on.
-    const includePmp = isEnvEnabled(process.env.NEXT_PUBLIC_PMP_IDL_ENABLED);
 
     if (!programAddress || !clusterProp) {
         return NextResponse.json({ error: 'Invalid query params' }, { status: 400 });
@@ -73,11 +69,15 @@ export async function GET(request: Request) {
     const context = { cluster: clusterProp, programAddress };
 
     try {
-        const { anchorIdl, programMetadataIdl, preferredVariant } = await resolveProgramIdlsWithRetry(url, programId, {
-            includePmp,
-        });
+        const { anchorIdl, anchorIdlAddress, programMetadataIdl, programMetadataIdlAddress } =
+            await resolveProgramIdlsWithRetry(url, programId);
 
-        const idls = { anchor: anchorIdl, preferred: preferredVariant, programMetadata: programMetadataIdl };
+        const idls = {
+            anchor: anchorIdl,
+            anchorAddress: anchorIdlAddress,
+            programMetadata: programMetadataIdl,
+            programMetadataAddress: programMetadataIdlAddress,
+        };
         return NextResponse.json({ idls }, { headers: CACHE_HEADERS, status: 200 });
     } catch (error) {
         // `resolveProgramIdls` surfaces absent/undecodable as values and throws only on RPC failure.

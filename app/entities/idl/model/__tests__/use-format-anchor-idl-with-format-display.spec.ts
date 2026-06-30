@@ -3,7 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
 import anchorLegacyAccountComp from '../../mocks/anchor/anchor-legacy-account_compression-compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq.json';
-import { useFormatAnchorIdl } from '../use-format-anchor-idl';
+import { useFormatAnchorIdl } from '../anchor/use-format-anchor-idl';
 
 // Mock byte to hex utility since we don't need actual conversion in tests
 vi.mock('@noble/hashes/utils', async importOriginal => {

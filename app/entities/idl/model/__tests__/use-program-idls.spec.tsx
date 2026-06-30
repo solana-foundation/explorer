@@ -1,4 +1,3 @@
-import { IdlVariant } from '@entities/idl';
 import { renderHook, waitFor } from '@testing-library/react';
 import { type ReactNode } from 'react';
 import { SWRConfig } from 'swr';
@@ -15,10 +14,9 @@ const mocks = vi.hoisted(() => ({
 
 vi.stubGlobal('fetch', mocks.fetch);
 
-// Stub the client-side `@solana/idl` resolver used for custom/local clusters, keeping the rest of
-// the entity barrel real (IdlVariant et al.).
-vi.mock('@entities/idl', async importOriginal => ({
-    ...(await importOriginal<typeof import('@entities/idl')>()),
+// Known clusters go through the real `fetchProgramIdls` (global fetch, stubbed above); the custom-
+// cluster client resolver is stubbed so the spec asserts behavior without pulling in `@solana/idl`.
+vi.mock('../../api/load-resolve-program-idls', () => ({
     resolveProgramIdlsClient: mocks.resolveProgramIdlsClient,
 }));
 
@@ -41,7 +39,6 @@ describe('useProgramIdls', () => {
         // Default: the custom-cluster client resolver finds no IDLs.
         mocks.resolveProgramIdlsClient.mockResolvedValue({
             anchorIdl: undefined,
-            preferredVariant: IdlVariant.ProgramMetadata,
             programMetadataIdl: undefined,
         });
     });
@@ -51,14 +48,10 @@ describe('useProgramIdls', () => {
     });
 
     describe('known clusters (server route)', () => {
-        it('should map the /api/idl-latest payload into the IDL slots + preferred variant', async () => {
+        it('should map the /api/idl-latest payload into the IDL slots', async () => {
             mocks.fetch.mockResolvedValue({
                 json: async () => ({
-                    idls: {
-                        anchor: { name: 'anchor_idl' },
-                        preferred: 'anchor',
-                        programMetadata: { name: 'pmp_idl' },
-                    },
+                    idls: { anchor: { name: 'anchor_idl' }, programMetadata: { name: 'pmp_idl' } },
                 }),
                 ok: true,
             });
@@ -70,7 +63,6 @@ describe('useProgramIdls', () => {
 
             await waitFor(() => expect(result.current.anchorIdl).toEqual({ name: 'anchor_idl' }));
             expect(result.current.programMetadataIdl).toEqual({ name: 'pmp_idl' });
-            expect(result.current.preferredVariant).toBe(IdlVariant.Anchor);
 
             const requestedUrl = mocks.fetch.mock.calls[0]?.[0] as string;
             expect(requestedUrl).toContain('/api/idl-latest');
@@ -88,7 +80,6 @@ describe('useProgramIdls', () => {
             await waitFor(() => expect(result.current.isLoading).toBe(false));
             expect(result.current.anchorIdl).toBeUndefined();
             expect(result.current.programMetadataIdl).toBeUndefined();
-            expect(result.current.preferredVariant).toBe(IdlVariant.ProgramMetadata);
         });
     });
 
@@ -96,7 +87,6 @@ describe('useProgramIdls', () => {
         it('should resolve IDLs client-side against the user RPC and never call the server route', async () => {
             mocks.resolveProgramIdlsClient.mockResolvedValue({
                 anchorIdl: { name: 'custom_anchor_idl' },
-                preferredVariant: IdlVariant.Anchor,
                 programMetadataIdl: { name: 'custom_pmp_idl' },
             });
 
@@ -106,8 +96,6 @@ describe('useProgramIdls', () => {
 
             await waitFor(() => expect(result.current.anchorIdl).toEqual({ name: 'custom_anchor_idl' }));
             expect(result.current.programMetadataIdl).toEqual({ name: 'custom_pmp_idl' });
-            // Preferred tab comes from the resolver's recency comparison, not a hardcoded default.
-            expect(result.current.preferredVariant).toBe(IdlVariant.Anchor);
             // The resolver runs against the user-supplied RPC URL (so localhost works end-to-end).
             expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
                 expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),
@@ -116,7 +104,7 @@ describe('useProgramIdls', () => {
             expect(mocks.fetch).not.toHaveBeenCalled();
         });
 
-        it('should fall back to undefined IDLs + PMP tab when the resolver throws', async () => {
+        it('should fall back to undefined IDLs when the resolver throws', async () => {
             mocks.resolveProgramIdlsClient.mockRejectedValue(new Error('connection refused'));
 
             const { result } = renderHook(() => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.Custom), {
@@ -126,7 +114,31 @@ describe('useProgramIdls', () => {
             await waitFor(() => expect(result.current.isLoading).toBe(false));
             expect(result.current.anchorIdl).toBeUndefined();
             expect(result.current.programMetadataIdl).toBeUndefined();
-            expect(result.current.preferredVariant).toBe(IdlVariant.ProgramMetadata);
+        });
+    });
+
+    // A known cluster can still point at a local validator (e.g. MainnetBeta + http://localhost:8899).
+    // `shouldUseDirectRpc` returns true for that combination, so resolution must run client-side against
+    // the localhost RPC — loading from the local validator, never from real mainnet via the server route.
+    describe('known cluster pointed at a local validator', () => {
+        it('should resolve client-side against localhost for MainnetBeta + http://localhost:8899', async () => {
+            mocks.resolveProgramIdlsClient.mockResolvedValue({
+                anchorIdl: { name: 'local_anchor_idl' },
+                programMetadataIdl: undefined,
+            });
+
+            const { result } = renderHook(
+                () => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.MainnetBeta),
+                { wrapper },
+            );
+
+            await waitFor(() => expect(result.current.anchorIdl).toEqual({ name: 'local_anchor_idl' }));
+            // Resolved against the user's local RPC URL (the correct network)...
+            expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
+                expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),
+            );
+            // ...and the mainnet server route was never queried, so we never read mainnet for a local URL.
+            expect(mocks.fetch).not.toHaveBeenCalled();
         });
     });
 });

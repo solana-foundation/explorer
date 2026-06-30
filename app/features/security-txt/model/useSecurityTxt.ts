@@ -5,13 +5,10 @@ import useSWRImmutable from 'swr/immutable';
 
 import { useCluster } from '@/app/providers/cluster';
 import { type Cluster } from '@/app/utils/cluster';
-import { isEnvEnabled } from '@/app/utils/env';
 
 import { fetchSecurityTxtClient, type ResolvedSecurityTxt } from '../api/load-fetch-security-txt';
 
 export type { ResolvedSecurityTxt };
-
-const PMP_SECURITY_TXT_ENABLED = isEnvEnabled(process.env.NEXT_PUBLIC_PMP_SECURITY_TXT_ENABLED);
 
 /**
  * Resolves a program's security.txt via `@solana/security-txt` — the PMP `security` seed (canonical
@@ -35,7 +32,7 @@ export function useSecurityTxt(programAddress: string): {
 
     const { data: customData, isLoading: customLoading } = useSWRImmutable(
         isCustom && (['security-txt-custom', programAddress, url] as const),
-        () => fetchSecurityTxtClient({ includePmp: PMP_SECURITY_TXT_ENABLED, programId: programAddress, url }),
+        () => fetchSecurityTxtClient({ programId: programAddress, url }),
         { errorRetryCount: 3 },
     );
 
@@ -45,7 +42,6 @@ export function useSecurityTxt(programAddress: string): {
 }
 
 async function fetchFromRoute(programAddress: string, cluster: Cluster): Promise<ResolvedSecurityTxt | undefined> {
-    // The PMP feature gate lives in the route (it reads NEXT_PUBLIC_PMP_SECURITY_TXT_ENABLED).
     const response = await fetch(`/api/security-txt?programAddress=${programAddress}&cluster=${cluster}`);
     if (!response.ok) {
         // Throw (don't return) so a transient 502 is retried rather than cached as a successful

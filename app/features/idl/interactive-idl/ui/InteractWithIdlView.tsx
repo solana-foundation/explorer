@@ -1,4 +1,4 @@
-import { getIdlSpec, getIdlStandard, getIdlVersion, type InstructionData, type SupportedIdl } from '@entities/idl';
+import { type InstructionData, type SupportedIdl } from '@entities/idl';
 import { useState } from 'react';
 
 import { Label } from '@/app/components/shared/ui/label';
@@ -60,14 +60,8 @@ export function InteractWithIdlView({
         <div className="container mx-auto px-4">
             {/* Main Grid Layout - responsive */}
             <div className="grid gap-6 md:grid-cols-12">
-                {/* Interact Header */}
-                <div className="flex items-center justify-between md:col-span-12">
-                    {idl && (
-                        <p className="mb-0 text-sm text-neutral-400">
-                            {getIdlStandard(idl)}: {getIdlVersion(idl)}
-                            {getIdlSpec(idl) ? ` (spec: ${getIdlSpec(idl)})` : ''}
-                        </p>
-                    )}
+                {/* Interact Header — the IDL standard / version label now lives in the card's badge. */}
+                <div className="flex items-center justify-end md:col-span-12">
                     <div className="flex items-center gap-3">
                         <Switch id="expand-all" checked={areAllExpanded} onCheckedChange={handleExpandAllToggle} />
                         <Label htmlFor="expand-all" className="cursor-pointer text-xs text-white">
