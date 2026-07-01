@@ -30,6 +30,7 @@ const ExtensionType = enums([
     'scaledUiAmountConfig',
     'pausableAccount',
     'pausableConfig',
+    'permissionedBurnConfig',
     'unparseableExtension',
 ]);
 
@@ -174,4 +175,8 @@ export const ScaledUiAmountConfig = type({
 export const PausableConfig = type({
     authority: nullable(PublicKeyFromString),
     paused: boolean(),
+});
+
+export const PermissionedBurnConfig = type({
+    authority: nullable(PublicKeyFromString),
 });

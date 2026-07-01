@@ -301,6 +301,49 @@ describe('TokenExtensionRow', () => {
         expect(screen.getByText('paused')).toBeInTheDocument();
     });
 
+    test('should render permissionedBurnConfig extension', async () => {
+        const data = {
+            extension: 'permissionedBurnConfig',
+            state: {
+                authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+            },
+        } as TokenExtension;
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AccountsProvider>
+                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
+                    </AccountsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        expect(await screen.findByText('Permissioned Burn Authority')).toBeInTheDocument();
+        expect(screen.queryAllByText(new RegExp(`${data.state.authority.toString()}`))).toHaveLength(1);
+    });
+
+    test('should render nothing for permissionedBurnConfig extension without an authority', async () => {
+        const data = {
+            extension: 'permissionedBurnConfig',
+            state: {
+                authority: null,
+            },
+        } as TokenExtension;
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AccountsProvider>
+                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
+                    </AccountsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        expect(screen.queryByText('Permissioned Burn Authority')).not.toBeInTheDocument();
+    });
+
     test('should render permanentDelegate extension', async () => {
         const data = {
             extension: 'permanentDelegate',
