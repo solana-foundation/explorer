@@ -255,6 +255,22 @@ export function populatePartialParsedTokenExtension(
                 tooltip: description,
             };
         }
+        case 'permissionedBurnConfig': {
+            const description =
+                'Restricts burning tokens to a designated burn authority instead of allowing any token holder to burn';
+            return {
+                description,
+                externalLinks: [
+                    {
+                        label: 'Docs',
+                        url: 'https://www.solana-program.com/docs/token-2022/extensions#permissioned-burn',
+                    },
+                ],
+                name: 'Permissioned Burn',
+                status: 'active',
+                tooltip: description,
+            };
+        }
         case 'unparseableExtension':
         default:
             return {
