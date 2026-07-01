@@ -6,6 +6,7 @@
         "build": "next build",
         "build:info": "node scripts/update-build-info.js",
         "build-sb": "storybook build",
+        "design-sb": "storybook dev -p 6007 --config-dir storybook-design/.storybook",
         "coverage": "vitest --coverage",
         "dev": "next dev",
         "eslint:lint": "eslint",
