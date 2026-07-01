@@ -2,7 +2,7 @@ name: Update Verified Programs
 
 on:
   schedule:
-    - cron: '0 8 * * *' # Daily at 8 AM UTC
+    - cron: "0 8 * * *" # Daily at 8 AM UTC
   workflow_dispatch:
 
 permissions:
@@ -35,7 +35,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ steps.nvmrc.outputs.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
@@ -47,7 +47,7 @@ jobs:
         run: pnpm exec tsx scripts/update-verified-programs.ts
 
       - name: Create or update pull request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           sign-commits: true
