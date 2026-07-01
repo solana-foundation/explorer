@@ -1,7 +1,6 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { AddressLookupTableDetailsCard } from '@components/instruction/AddressLookupTableDetailsCard';
-import AnchorDetailsCard from '@components/instruction/AnchorDetailsCard';
 import { AssociatedTokenDetailsCard } from '@components/instruction/associated-token/AssociatedTokenDetailsCard';
 import { BpfLoaderDetailsCard } from '@components/instruction/bpf-loader/BpfLoaderDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
@@ -11,7 +10,6 @@ import { isEd25519Instruction } from '@components/instruction/ed25519/types';
 import { isMangoInstruction } from '@components/instruction/mango/types';
 import { MangoDetailsCard } from '@components/instruction/MangoDetails';
 import { MemoDetailsCard } from '@components/instruction/MemoDetailsCard';
-import { ProgramMetadataIdlInstructionDetailsCard } from '@components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
 import { PythDetailsCard } from '@components/instruction/pyth/PythDetailsCard';
 import { isPythInstruction } from '@components/instruction/pyth/types';
 import {
@@ -30,10 +28,14 @@ import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProofDetailsCard';
-import { useAnchorProgram } from '@entities/idl';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
+import {
+    IdlInstructionCard,
+    safeDecodeInstructionWithIdl,
+    useResolvedProgramIdl,
+} from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
@@ -57,8 +59,6 @@ import { intoTransactionInstruction } from '@utils/tx';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
-
 import { CollapsibleSection } from './CollapsibleSection';
 
 export type InstructionDetailsProps = {
@@ -73,7 +73,7 @@ export type InstructionDetailsProps = {
 export function InstructionsSection({ signature }: SignatureProps) {
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
-    const { cluster, url } = useCluster();
+    const { cluster } = useCluster();
     const fetchDetails = useFetchTransactionDetails();
     const refreshDetails = () => fetchDetails(signature);
 
@@ -124,8 +124,6 @@ export function InstructionsSection({ signature }: SignatureProps) {
                                     signature={signature}
                                     tx={transaction}
                                     childIndex={childIndex}
-                                    url={url}
-                                    cluster={cluster}
                                 />
                             );
                             innerCards.push(res);
@@ -141,8 +139,6 @@ export function InstructionsSection({ signature }: SignatureProps) {
                             signature={signature}
                             tx={transaction}
                             innerCards={innerCards}
-                            url={url}
-                            cluster={cluster}
                         />
                     );
                 })}
@@ -159,8 +155,6 @@ function InstructionCard({
     signature,
     innerCards,
     childIndex,
-    url,
-    cluster,
 }: {
     ix: ParsedInstruction | PartiallyDecodedInstruction;
     tx: ParsedTransaction;
@@ -169,18 +163,23 @@ function InstructionCard({
     signature: TransactionSignature;
     innerCards?: JSX.Element[];
     childIndex?: number;
-    url: string;
-    cluster: Cluster;
 }) {
     const key = `${index}-${childIndex}`;
-    const { program: anchorProgram } = useAnchorProgram(ix.programId.toString(), url, cluster);
-    const { programMetadataIdl } = useProgramMetadataIdl(ix.programId.toString(), url, cluster);
     const dispatcher = useInstructionParser();
 
     const parsedIx = React.useMemo(
         () => ('parsed' in ix ? dispatcher.fromParsedInstruction(ix) : undefined),
         [dispatcher, ix],
     );
+
+    // Raw form is needed by both the native tiers below and the dynamic IDL tier; `intoTransactionInstruction`
+    // returns undefined for RPC-pre-parsed instructions. Lifted above the early returns so the hooks order
+    // stays stable.
+    const transactionIx = React.useMemo(() => intoTransactionInstruction(tx, ix), [tx, ix]);
+    // Dynamic IDL tier — shared with the inspector. See app/components/inspector/InstructionsSection.tsx.
+    // Resolve the IDL up front (a hook), but decode lazily at the tier below so we don't pay the decode
+    // for instructions an earlier native tier already handles.
+    const { idl: resolvedIdl, url: idlUrl } = useResolvedProgramIdl({ programId: ix.programId.toString() });
 
     if ('parsed' in ix && parsedIx) {
         const props = {
@@ -220,8 +219,6 @@ function InstructionCard({
                 return <UnknownDetailsCard {...props} key={key} />;
         }
     }
-
-    const transactionIx = intoTransactionInstruction(tx, ix);
 
     if (!transactionIx) {
         return <ErrorCard key={key} text="Could not display this instruction, please report" />;
@@ -304,20 +301,13 @@ function InstructionCard({
             </ErrorBoundary>
         );
     }
-    // Prefer a PMP-published IDL (incl. the PMP's own Codama IDL) over the legacy Anchor IDL below.
-    // Keep this precedence in sync with the inspector: app/components/inspector/InstructionsSection.tsx
-    if (programMetadataIdl) {
+    if (resolvedIdl) {
         return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
-                <ProgramMetadataIdlInstructionDetailsCard {...props} idl={programMetadataIdl} signature={signature} />
-            </ErrorBoundary>
-        );
-    }
-    if (anchorProgram) {
-        return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
-                <AnchorDetailsCard anchorProgram={anchorProgram} {...props} />
-            </ErrorBoundary>
+            <IdlInstructionCard
+                key={key}
+                decoded={safeDecodeInstructionWithIdl(transactionIx, resolvedIdl, idlUrl)}
+                {...props}
+            />
         );
     }
 
