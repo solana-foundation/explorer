@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('next/og', () => ({
-    ImageResponse: vi.fn(() => {
+    ImageResponse: vi.fn(function () {
         return new Response('mock-image-response', {
             headers: {
                 'Content-Type': 'image/png',
