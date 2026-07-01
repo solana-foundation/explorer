@@ -22,6 +22,12 @@ import { AccountDetailSlideover } from './AccountDetailSlideover';
 import { AccountExpandedContent } from './AccountExpandedContent';
 import { CollapsibleSection } from './CollapsibleSection';
 
+const ACCOUNT_KEY_SIZE_BYTES = 32;
+
+export function getTransactionAccountKeysSizeBytes(accountKeys: Array<{ source?: string }>) {
+    return accountKeys.filter(account => account.source !== 'lookupTable').length * ACCOUNT_KEY_SIZE_BYTES;
+}
+
 type TransactionAccountRowProps = {
     account: ParsedMessageAccount;
     accountInfo?: AccountInfo;
@@ -175,9 +181,9 @@ export function AccountsCard({ signature }: SignatureProps) {
 
     const { accounts, error, loading } = useAccountsInfo(pubkeys, url);
 
-    const totalAccountSize = useMemo(
-        () => Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0),
-        [accounts],
+    const totalAccountKeysSize = useMemo(
+        () => getTransactionAccountKeysSizeBytes(message?.accountKeys ?? []),
+        [message],
     );
 
     if (!transactionWithMeta) {
@@ -224,13 +230,13 @@ export function AccountsCard({ signature }: SignatureProps) {
                 <div />
             </div>
             {accountRows}
-            {!loading && totalAccountSize > 0 && (
+            {totalAccountKeysSize > 0 && (
                 <div className="ml-7 flex items-baseline gap-2 px-3 py-2 text-sm text-outer-space-300 md:px-4 lg:ml-10">
                     <div className="flex flex-col">
-                        <span className="text-sm uppercase leading-none">Total Account Size:</span>
-                        <span className="text-[10px] leading-none">reflects current state</span>
+                        <span className="text-sm uppercase leading-none">Total Account Keys Size:</span>
+                        <span className="text-[10px] leading-none">excludes address lookup tables</span>
                     </div>
-                    <span className="text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
+                    <span className="text-white">{totalAccountKeysSize.toLocaleString('en-US')} bytes</span>
                 </div>
             )}
         </CollapsibleSection>
