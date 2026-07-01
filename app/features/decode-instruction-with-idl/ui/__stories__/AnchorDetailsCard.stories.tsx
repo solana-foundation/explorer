@@ -5,10 +5,11 @@ import { nextjsParameters, withMockTransactions, withTokenInfoBatch } from '@sto
 import type { Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
+import { SignatureContext } from '@/app/components/instruction/SignatureContext';
 import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 
-import AnchorDetailsCard from '../AnchorDetailsCard';
-import { SignatureContext } from '../SignatureContext';
+import { decodeAnchorInstruction } from '../../lib/decode-anchor-instruction';
+import { AnchorDetailsCard } from '../AnchorDetailsCard';
 
 // Construct a real Anchor Program instance from the bundled amm_v3 IDL fixture; the AccountInfo
 // fetches inside the card no-op because the storybook accounts fetcher is a noop, but the BorshInstructionCoder
@@ -49,28 +50,34 @@ const meta = {
     ],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
+    // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
+    // the Dashkit layout lands; kept stable here to avoid churning the tree mid-move.
     title: 'Components/Instruction/AnchorDetailsCard',
 } satisfies Meta<typeof AnchorDetailsCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const updateRewardInfosIx = buildInstruction(UPDATE_REWARD_INFOS_DISCRIMINATOR, [gen.publicKey(1)]);
 export const UpdateRewardInfos: Story = {
     args: {
-        anchorProgram,
+        decoded: decodeAnchorInstruction(anchorProgram, updateRewardInfosIx),
         index: 0,
-        ix: buildInstruction(UPDATE_REWARD_INFOS_DISCRIMINATOR, [gen.publicKey(1)]),
+        ix: updateRewardInfosIx,
+        program: anchorProgram,
         result: { err: null },
         signature: '',
     },
 };
 
-// Synthetic data won't match any known discriminator → AnchorDetails renders the "Failed to decode" fallback.
+// Synthetic data won't match any known discriminator → AnchorInstructionBody renders the "Failed to decode" fallback.
+const failedToDecodeIx = buildInstruction(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]), [gen.publicKey(2)]);
 export const FailedToDecode: Story = {
     args: {
-        anchorProgram,
+        decoded: decodeAnchorInstruction(anchorProgram, failedToDecodeIx),
         index: 1,
-        ix: buildInstruction(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]), [gen.publicKey(2)]),
+        ix: failedToDecodeIx,
+        program: anchorProgram,
         result: { err: null },
         signature: '',
     },
