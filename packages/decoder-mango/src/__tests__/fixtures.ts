@@ -2,12 +2,16 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 export { MANGO_PROGRAM_IDS } from '../program-ids';
 
-/** Create a TransactionInstruction from raw data and a program ID */
-export function makeInstruction(data: Buffer, programId: PublicKey, keys: PublicKey[] = []): TransactionInstruction {
+/** Create a TransactionInstruction from raw data and a program ID (base58 string or PublicKey). */
+export function makeInstruction(
+    data: Buffer,
+    programId: PublicKey | string,
+    keys: PublicKey[] = [],
+): TransactionInstruction {
     return new TransactionInstruction({
         data,
         keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
-        programId,
+        programId: new PublicKey(programId),
     });
 }
 

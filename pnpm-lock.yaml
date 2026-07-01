@@ -578,6 +578,9 @@ importers:
 
   packages/decoder-mango:
     dependencies:
+      '@solana/kit':
+        specifier: ^6.5.0
+        version: 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
       '@solana/web3.js':
         specifier: ^1.98.0
         version: 1.98.4(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)

@@ -1,4 +1,4 @@
-import { MANGO_V3_PROGRAM_LABEL } from '@explorer/decoder-mango';
+import { MANGO_PROGRAM_IDS, MANGO_V3_PROGRAM_LABEL } from '@explorer/decoder-mango';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
@@ -116,7 +116,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.WORMHOLE_CORE,
     },
-    '4skJ85cdxQAFVKbcGgfun8iZPL7BadVYXG3kGEGkufqA': {
+    [MANGO_PROGRAM_IDS.devnet]: {
         deployments: [Cluster.Devnet],
         name: MANGO_V3_PROGRAM_LABEL,
     },
@@ -142,7 +142,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ADDRESS_LOOKUP_TABLE,
     },
-    BXhdkETgbHrr5QmVBT1xbz3JrMM28u5djbVtmTUfmFTH: {
+    [MANGO_PROGRAM_IDS.testnet]: {
         deployments: [Cluster.Testnet],
         name: MANGO_V3_PROGRAM_LABEL,
     },
@@ -302,7 +302,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.TOKEN_METADATA,
     },
-    mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68: {
+    [MANGO_PROGRAM_IDS.mainnet]: {
         deployments: [Cluster.MainnetBeta],
         name: MANGO_V3_PROGRAM_LABEL,
     },

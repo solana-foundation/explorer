@@ -66,7 +66,7 @@ describe('resolveMangoInstructionName', () => {
         'should resolve discriminator %i to "%s"',
         (discriminator, name) => {
             const data = new Uint8Array(makeRawInstructionData(discriminator));
-            expect(resolveMangoInstructionName(MANGO_PROGRAM_IDS.mainnet.toBase58(), data)).toBe(name);
+            expect(resolveMangoInstructionName(MANGO_PROGRAM_IDS.mainnet, data)).toBe(name);
         },
     );
 
@@ -77,13 +77,11 @@ describe('resolveMangoInstructionName', () => {
 
     it('should return undefined for an unknown discriminator', () => {
         const data = new Uint8Array(makeRawInstructionData(9999));
-        expect(resolveMangoInstructionName(MANGO_PROGRAM_IDS.mainnet.toBase58(), data)).toBeUndefined();
+        expect(resolveMangoInstructionName(MANGO_PROGRAM_IDS.mainnet, data)).toBeUndefined();
     });
 
     it('should return undefined when data is shorter than the discriminator', () => {
-        expect(
-            resolveMangoInstructionName(MANGO_PROGRAM_IDS.mainnet.toBase58(), new Uint8Array([0, 0])),
-        ).toBeUndefined();
+        expect(resolveMangoInstructionName(MANGO_PROGRAM_IDS.mainnet, new Uint8Array([0, 0]))).toBeUndefined();
     });
 });
 
