@@ -6,11 +6,13 @@
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
         },
         "./detection": {
             "types": "./dist/detection.d.ts",
-            "import": "./dist/detection.js"
+            "import": "./dist/detection.js",
+            "default": "./dist/detection.js"
         }
     },
     "files": [
