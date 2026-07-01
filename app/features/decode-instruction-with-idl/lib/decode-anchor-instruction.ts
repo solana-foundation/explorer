@@ -60,12 +60,16 @@ export function decodeAnchorInstruction(
         // an undefined event definition.
         if (ixEventDef) {
             const ixEventFields = anchorProgram.idl.types?.find(type => type.name === ixEventDef.name);
+            // `events` and `types` can be out of sync; if the event's type is missing (or isn't a struct),
+            // optional-chain to empty args rather than dereferencing `.fields` on undefined (the trailing
+            // `?? []` only guards a null `.fields`, not a missing type entry).
+            const eventStruct = ixEventFields?.type as IdlTypeDefTyStruct | undefined;
 
             // Remap the event definition to an instruction definition by force casting to struct fields
             ixDef = {
                 ...ixEventDef,
                 accounts: [],
-                args: ((ixEventFields?.type as IdlTypeDefTyStruct).fields as IdlField[]) ?? [],
+                args: (eventStruct?.fields as IdlField[] | undefined) ?? [],
             };
 
             // Self-CPI instructions have 1 account called the eventAuthority
