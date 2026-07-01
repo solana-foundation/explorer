@@ -1,16 +1,13 @@
 import { parseInstruction } from '@codama/dynamic-parsers';
 import { isSignerRole, isWritableRole } from '@solana/kit';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { SignatureResult } from '@solana/web3.js';
-import React from 'react';
+import { PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 
+import { Address } from '@/app/components/common/Address';
+import { mapCodamaIxArgsToRows } from '@/app/components/instruction/codama/codamaUtils';
+import { InstructionCard } from '@/app/components/instruction/InstructionCard';
+import { UnknownDetailsCard } from '@/app/components/instruction/UnknownDetailsCard';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { BaseTable } from '@/app/shared/ui/Table';
-
-import { Address } from '../../common/Address';
-import { InstructionCard } from '../InstructionCard';
-import { UnknownDetailsCard } from '../UnknownDetailsCard';
-import { mapCodamaIxArgsToRows } from './codamaUtils';
 
 export function CodamaInstructionCard({
     ix,
@@ -93,7 +90,7 @@ export function CodamaInstructionCard({
                 </BaseTable.Row>
             )}
             {accountDetails}
-            {hasArgs ? (
+            {hasArgs && (
                 <>
                     <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
                         <BaseTable.Cell>Argument Name</BaseTable.Cell>
@@ -102,7 +99,7 @@ export function CodamaInstructionCard({
                     </BaseTable.Row>
                     {argRows}
                 </>
-            ) : null}
+            )}
         </InstructionCard>
     );
 }

@@ -6,10 +6,11 @@ import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/res
 import type { Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 
+import { SignatureContext } from '@/app/components/instruction/SignatureContext';
 import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 
-import AnchorDetailsCard from '../AnchorDetailsCard';
-import { SignatureContext } from '../SignatureContext';
+import { decodeAnchorInstruction } from '../../lib/decode-anchor-instruction';
+import { AnchorDetailsCard } from '../AnchorDetailsCard';
 
 const url = 'https://api.devnet.solana.com';
 const noopWallet = {
@@ -48,6 +49,8 @@ const meta = {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
+    // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
+    // the Dashkit layout lands; kept stable here to avoid churning the tree mid-move.
     title: 'Components/Instruction/AnchorDetailsCard@Media',
 } satisfies Meta<typeof AnchorDetailsCard>;
 
@@ -55,9 +58,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const args = {
-    anchorProgram,
+    decoded: decodeAnchorInstruction(anchorProgram, ix),
     index: 0,
     ix,
+    program: anchorProgram,
     result: { err: null },
     signature: '',
 };
