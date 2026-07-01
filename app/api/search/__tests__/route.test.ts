@@ -238,16 +238,8 @@ describe('GET /api/search', () => {
             mockFetch(200, [makeJupiterToken({ logoURI: null })]);
             getAssetBatchMock.mockResolvedValueOnce([
                 {
-                    burnt: false,
-                    content: {
-                        $schema: '',
-                        json_uri: '',
-                        links: { image: 'https://das.example.com/sol.png' },
-                        metadata: {},
-                    },
+                    content: { links: { image: 'https://das.example.com/sol.png' } },
                     id: VALID_ADDRESS,
-                    interface: 'FungibleToken',
-                    mutable: true,
                 },
             ]);
 
@@ -260,16 +252,8 @@ describe('GET /api/search', () => {
             mockFetch(200, [makeJupiterToken({ logoURI: 'https://original.com/sol.png' })]);
             getAssetBatchMock.mockResolvedValueOnce([
                 {
-                    burnt: false,
-                    content: {
-                        $schema: '',
-                        json_uri: '',
-                        links: { image: 'https://das.example.com/sol.png' },
-                        metadata: {},
-                    },
+                    content: { links: { image: 'https://das.example.com/sol.png' } },
                     id: VALID_ADDRESS,
-                    interface: 'FungibleToken',
-                    mutable: true,
                 },
             ]);
 

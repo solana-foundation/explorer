@@ -5,7 +5,7 @@
  * module fetches them from the cluster's DAS API as a best-effort fallback.
  */
 
-import { is } from 'superstruct';
+import { validate } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -67,12 +67,18 @@ export async function getAssetBatch(
 
         const data = await response.json();
 
-        if (!is(data, GetAssetBatchResponseSchema)) {
-            Logger.warn('[das] getAssets invalid response', { sentry: true });
+        if (data?.error) {
+            Logger.warn(`[das] getAssets RPC error: ${data.error?.message ?? 'unknown'}`);
             return undefined;
         }
 
-        return data.result;
+        const [validationError, validData] = validate(data, GetAssetBatchResponseSchema);
+        if (validationError) {
+            Logger.warn(`[das] getAssets invalid response: ${validationError.message}`, { sentry: true });
+            return undefined;
+        }
+
+        return validData.result.filter((item): item is DigitalAsset => item !== null);
     } catch (error) {
         Logger.error(error instanceof Error ? error : new Error('[das] getAssets failed'), {
             sentry: true,

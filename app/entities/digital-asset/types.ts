@@ -1,54 +1,22 @@
-import { array, boolean, Infer, number, optional, string, type } from 'superstruct';
+import { array, Infer, nullable, optional, string, type } from 'superstruct';
 
 export const DigitalAssetSchema = type({
-    burnt: boolean(),
-    content: type({
-        $schema: string(),
-        files: optional(
-            array(
-                type({
-                    cdn_uri: optional(string()),
-                    mime: optional(string()),
-                    uri: optional(string()),
-                }),
-            ),
-        ),
-        json_uri: string(),
-        links: optional(
-            type({
-                external_url: optional(string()),
-                image: optional(string()),
-            }),
-        ),
-        metadata: type({
-            description: optional(string()),
-            name: optional(string()),
-            symbol: optional(string()),
-            token_standard: optional(string()),
-        }),
-    }),
-    id: string(),
-    interface: string(),
-    mutable: boolean(),
-    token_info: optional(
+    content: nullable(
         type({
-            decimals: optional(number()),
-            mint_authority: optional(string()),
-            price_info: optional(
-                type({
-                    currency: optional(string()),
-                    price_per_token: optional(number()),
-                }),
+            links: nullable(
+                optional(
+                    type({
+                        image: nullable(optional(string())),
+                    }),
+                ),
             ),
-            supply: optional(number()),
-            symbol: optional(string()),
-            token_program: optional(string()),
         }),
     ),
+    id: string(),
 });
 
 export const GetAssetBatchResponseSchema = type({
-    result: array(DigitalAssetSchema),
+    result: array(nullable(DigitalAssetSchema)),
 });
 
 export type DigitalAsset = Infer<typeof DigitalAssetSchema>;
