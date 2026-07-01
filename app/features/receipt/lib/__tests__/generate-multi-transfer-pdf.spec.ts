@@ -15,6 +15,7 @@ import {
     PDF_OPTS,
     SIGNATURE,
     SOL_RECEIPT as RECEIPT,
+    stubSvgRasterizationUnsupported,
 } from './__fixtures__/pdf-mocks';
 
 vi.mock('jspdf', () => ({ jsPDF: mockJsPDF }));
@@ -39,6 +40,7 @@ describe('generateMultiTransferPdf', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        stubSvgRasterizationUnsupported();
     });
 
     it('should create jsPDF instance with A4 format', async () => {

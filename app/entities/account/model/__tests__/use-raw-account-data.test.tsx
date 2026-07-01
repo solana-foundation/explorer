@@ -17,9 +17,11 @@ vi.mock('@solana/web3.js', async () => {
     const actual = await vi.importActual<typeof import('@solana/web3.js')>('@solana/web3.js');
     return {
         ...actual,
-        Connection: vi.fn().mockImplementation(() => ({
-            getAccountInfo: vi.fn(),
-        })),
+        Connection: vi.fn().mockImplementation(function () {
+            return {
+                getAccountInfo: vi.fn(),
+            };
+        }),
     };
 });
 
@@ -47,9 +49,9 @@ describe('useRawAccountData', () => {
     it('should fetch raw data and return it when mutate is called', async () => {
         const mockData = new Uint8Array([4, 5, 6]);
 
-        vi.mocked(Connection).mockImplementation(
-            () => ({ getAccountInfo: vi.fn().mockResolvedValue({ data: mockData }) }) as unknown as Connection,
-        );
+        vi.mocked(Connection).mockImplementation(function () {
+            return { getAccountInfo: vi.fn().mockResolvedValue({ data: mockData }) } as unknown as Connection;
+        });
 
         const { result } = renderHook(() => useRawAccountData(MOCK_ADDRESS), { wrapper });
 
@@ -72,9 +74,9 @@ describe('useRawAccountData', () => {
             .mockResolvedValueOnce({ data: mockData1 })
             .mockResolvedValueOnce({ data: mockData2 });
 
-        vi.mocked(Connection).mockImplementation(
-            () => ({ getAccountInfo: mockGetAccountInfo }) as unknown as Connection,
-        );
+        vi.mocked(Connection).mockImplementation(function () {
+            return { getAccountInfo: mockGetAccountInfo } as unknown as Connection;
+        });
 
         const { result } = renderHook(() => useRawAccountData(MOCK_ADDRESS), { wrapper });
 

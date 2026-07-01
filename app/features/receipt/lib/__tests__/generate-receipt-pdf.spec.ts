@@ -8,6 +8,7 @@ import {
     mockToDataURL,
     PDF_OPTS,
     SOL_RECEIPT,
+    stubSvgRasterizationUnsupported,
 } from './__fixtures__/pdf-mocks';
 
 vi.mock('jspdf', () => ({ jsPDF: mockJsPDF }));
@@ -32,6 +33,7 @@ describe('generateReceiptPdf (dispatcher)', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        stubSvgRasterizationUnsupported();
     });
 
     it('should route a single-transfer receipt to the single-transfer renderer', async () => {

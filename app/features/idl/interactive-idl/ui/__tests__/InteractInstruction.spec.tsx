@@ -5,6 +5,7 @@ import { Accordion } from '@radix-ui/react-accordion';
 import { PublicKey } from '@solana/web3.js';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { type ComponentProps } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { InstructionStatus } from '../../model/use-instruction';
@@ -51,8 +52,16 @@ describe('InteractInstruction', () => {
                 <InteractInstruction
                     idl={undefined}
                     instruction={instruction}
-                    onExecuteInstruction={props?.onExecuteInstruction ?? vi.fn()}
-                    onSimulateInstruction={props?.onSimulateInstruction ?? vi.fn()}
+                    onExecuteInstruction={
+                        (props?.onExecuteInstruction ?? vi.fn()) as ComponentProps<
+                            typeof InteractInstruction
+                        >['onExecuteInstruction']
+                    }
+                    onSimulateInstruction={
+                        (props?.onSimulateInstruction ?? vi.fn()) as ComponentProps<
+                            typeof InteractInstruction
+                        >['onSimulateInstruction']
+                    }
                     status={props?.status ?? 'idle'}
                 />
             </Accordion>,

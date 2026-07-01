@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import react from '@vitejs/plugin-react';
+import { playwright } from '@vitest/browser-playwright';
 import path from 'path';
 import { defineConfig } from 'vitest/config';
 
@@ -109,7 +110,7 @@ export default defineConfig({
                             .map(b => b.trim())
                             .filter(Boolean)
                             .map(browser => ({ browser })),
-                        provider: 'playwright',
+                        provider: playwright(),
                         isolate: true,
                         connectTimeout: 30000,
                     },
@@ -137,11 +138,6 @@ export default defineConfig({
                 'app/**/*.{test,spec}.{ts,tsx}',
                 'app/**/*.d.ts',
             ],
-        },
-        poolOptions: {
-            threads: {
-                useAtomics: true,
-            },
         },
         ...specWorkspace(),
     },

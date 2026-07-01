@@ -13,7 +13,9 @@ vi.mock('@solana/web3.js', async () => {
     const actual = await vi.importActual('@solana/web3.js');
     return {
         ...actual,
-        VersionedTransaction: vi.fn().mockImplementation((msg: unknown) => ({ message: msg })),
+        VersionedTransaction: vi.fn().mockImplementation(function (msg: unknown) {
+            return { message: msg };
+        }),
     };
 });
 

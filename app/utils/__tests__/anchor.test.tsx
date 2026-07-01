@@ -173,6 +173,9 @@ describe('anchor utilities - number overflow handling', () => {
         });
 
         afterEach(() => {
+            // Vitest 4: restoreAllMocks no longer clears call history, so clear it
+            // explicitly; restore then detaches the Logger.debug spy after the block.
+            vi.clearAllMocks();
             vi.restoreAllMocks();
         });
 

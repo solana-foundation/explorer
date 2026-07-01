@@ -10,6 +10,7 @@ import {
     PDF_OPTS,
     SIGNATURE,
     SOL_RECEIPT,
+    stubSvgRasterizationUnsupported,
     USDC_RECEIPT,
 } from './__fixtures__/pdf-mocks';
 
@@ -35,6 +36,7 @@ describe('generateSingleTransferPdf', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        stubSvgRasterizationUnsupported();
     });
 
     it('should render the Solana Payment Receipt title and Transaction details section', async () => {

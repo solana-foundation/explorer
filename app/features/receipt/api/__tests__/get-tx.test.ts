@@ -35,7 +35,9 @@ describe('getTx', () => {
             getSignatureStatus: vi.fn(),
         };
 
-        vi.mocked(Connection).mockImplementation(() => mockConnection as unknown as Connection);
+        vi.mocked(Connection).mockImplementation(function () {
+            return mockConnection as unknown as Connection;
+        });
     });
 
     describe('successful cases', () => {
