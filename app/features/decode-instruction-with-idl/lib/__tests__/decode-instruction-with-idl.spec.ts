@@ -1,5 +1,5 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -45,12 +45,6 @@ const anchorIdl = { accounts: [], address: ix.programId.toBase58(), instructions
 // A Codama-native root node (as a PMP IDL is) — routed through Codama, never the Anchor Program.
 const codamaIdl = { kind: 'rootNode', program: { publicKey: ix.programId.toBase58() } };
 
-// The two describes below each spy on the shared `Logger.panic`; restore between tests so a spy's call
-// count can't carry over (otherwise the second panic assertion sees the first test's call too).
-afterEach(() => {
-    vi.restoreAllMocks();
-});
-
 describe('decodeInstructionWithIdl', () => {
     beforeEach(() => {
         parseInstruction.mockReset();
@@ -93,6 +87,9 @@ describe('decodeInstructionWithIdl', () => {
 
     it('should panic and throw when the IDL program does not match the instruction program', () => {
         const panic = vi.spyOn(Logger, 'panic').mockImplementation(() => {});
+        // `vi.spyOn` can hand back a spy already installed by another test/file; clear it so the count
+        // below reflects only this decode, not any inherited calls.
+        panic.mockClear();
         const mismatchedIdl = { ...anchorIdl, address: PublicKey.unique().toBase58() };
 
         expect(() => decodeInstructionWithIdl(ix, mismatchedIdl, 'http://localhost')).toThrow('does not match');
@@ -110,6 +107,8 @@ describe('safeDecodeInstructionWithIdl', () => {
 
     it('should degrade a program-mismatch panic to an unknown decode instead of throwing', () => {
         const panic = vi.spyOn(Logger, 'panic').mockImplementation(() => {});
+        // See note above: clear any inherited spy calls so the count reflects only this decode.
+        panic.mockClear();
         const mismatchedIdl = { ...anchorIdl, address: PublicKey.unique().toBase58() };
 
         expect(safeDecodeInstructionWithIdl(ix, mismatchedIdl, 'http://localhost')).toEqual({ kind: 'unknown' });
