@@ -1,5 +1,5 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -44,6 +44,12 @@ const ix = new TransactionInstruction({
 const anchorIdl = { accounts: [], address: ix.programId.toBase58(), instructions: [{ name: 'foo' }] };
 // A Codama-native root node (as a PMP IDL is) — routed through Codama, never the Anchor Program.
 const codamaIdl = { kind: 'rootNode', program: { publicKey: ix.programId.toBase58() } };
+
+// The two describes below each spy on the shared `Logger.panic`; restore between tests so a spy's call
+// count can't carry over (otherwise the second panic assertion sees the first test's call too).
+afterEach(() => {
+    vi.restoreAllMocks();
+});
 
 describe('decodeInstructionWithIdl', () => {
     beforeEach(() => {
