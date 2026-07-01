@@ -22,10 +22,6 @@
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit"
     },
-    "dependencies": {
-        "@blockworks-foundation/mango-client": "3.6.7",
-        "@project-serum/serum": "0.13.61"
-    },
     "devDependencies": {
         "typescript": "catalog:",
         "vitest": "catalog:"

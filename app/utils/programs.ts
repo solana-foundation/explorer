@@ -61,6 +61,9 @@ export enum PROGRAM_NAMES {
     WORMHOLE_NFT = 'Wormhole NFT Bridge',
     OPENBOOK_DEX = 'OpenBook Dex',
 
+    // Mango (dead protocol; recognized but no longer decoded)
+    MANGO = 'Mango (deprecated)',
+
     // ZK Compression
     ZK_LIGHT_SYSTEM_PROGRAM = 'Light System Program',
     ZK_COMPRESSED_TOKEN_PROGRAM = 'ZK Compressed Token Program',
@@ -115,6 +118,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.WORMHOLE_CORE,
     },
+    '4skJ85cdxQAFVKbcGgfun8iZPL7BadVYXG3kGEGkufqA': {
+        deployments: [Cluster.Devnet],
+        name: PROGRAM_NAMES.MANGO,
+    },
     '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8': {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.RAYDIUM_AMM,
@@ -136,6 +143,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     AddressLookupTab1e1111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ADDRESS_LOOKUP_TABLE,
+    },
+    BXhdkETgbHrr5QmVBT1xbz3JrMM28u5djbVtmTUfmFTH: {
+        deployments: [Cluster.Testnet],
+        name: PROGRAM_NAMES.MANGO,
     },
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -292,6 +303,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s: {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.TOKEN_METADATA,
+    },
+    mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68: {
+        deployments: [Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.MANGO,
     },
     namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX: {
         deployments: LIVE_CLUSTERS,

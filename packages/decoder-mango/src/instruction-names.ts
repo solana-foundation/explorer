@@ -1,4 +1,4 @@
-// Mango v3 instruction index → name (frozen protocol), hardcoded so parseMangoInstructionTitle stays free of @blockworks-foundation/mango-client; cross-checked against the real layout registry in detection.spec.ts.
+// Mango v3 instruction index → name (frozen protocol), hardcoded so parseMangoInstructionTitle stays free of @blockworks-foundation/mango-client.
 export const MANGO_INSTRUCTION_NAMES = new Map<number, string>([
     [0, 'InitMangoGroup'],
     [1, 'InitMangoAccount'],

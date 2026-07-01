@@ -1,10 +1,9 @@
-import { MangoInstructionLayout } from '@blockworks-foundation/mango-client';
 import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { isMangoInstruction, parseMangoInstructionTitle } from '../detection';
 import { MANGO_INSTRUCTION_NAMES } from '../instruction-names';
-import { ENCODED_INSTRUCTIONS, makeInstruction, MANGO_PROGRAM_IDS } from './fixtures';
+import { makeInstruction, makeRawInstructionData, MANGO_PROGRAM_IDS } from './fixtures';
 
 describe('isMangoInstruction', () => {
     it.each([
@@ -12,7 +11,7 @@ describe('isMangoInstruction', () => {
         ['devnet', MANGO_PROGRAM_IDS.devnet],
         ['testnet', MANGO_PROGRAM_IDS.testnet],
     ] as const)('should return true for %s mango program ID', (_network, programId) => {
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS.Deposit, programId);
+        const ix = makeInstruction(makeRawInstructionData(0), programId);
         expect(isMangoInstruction(ix)).toBe(true);
     });
 
@@ -27,7 +26,7 @@ describe('isMangoInstruction', () => {
 
     it('should return false for unknown program ID', () => {
         const ix = makeInstruction(
-            ENCODED_INSTRUCTIONS.Deposit,
+            makeRawInstructionData(0),
             new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
         );
         expect(isMangoInstruction(ix)).toBe(false);
@@ -35,28 +34,13 @@ describe('isMangoInstruction', () => {
 });
 
 describe('parseMangoInstructionTitle', () => {
-    it.each([
-        'Deposit',
-        'Withdraw',
-        'AddToBasket',
-        'PlaceSpotOrder',
-        'CancelSpotOrder',
-        'PlacePerpOrder',
-        'PlacePerpOrder2',
-        'CancelPerpOrder',
-        'AddSpotMarket',
-        'AddPerpMarket',
-        'ChangePerpMarketParams',
-    ] as const)('should parse %s instruction', title => {
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS[title], MANGO_PROGRAM_IDS.mainnet);
-        expect(parseMangoInstructionTitle(ix)).toBe(title);
+    it.each([...MANGO_INSTRUCTION_NAMES.entries()])('should parse discriminator %i to "%s"', (discriminator, name) => {
+        const ix = makeInstruction(makeRawInstructionData(discriminator), MANGO_PROGRAM_IDS.mainnet);
+        expect(parseMangoInstructionTitle(ix)).toBe(name);
     });
 
-    it('should match the layout registry exactly', () => {
-        const { registry } = MangoInstructionLayout as unknown as {
-            registry: Record<string, { property: string }>;
-        };
-        const expected = new Map(Object.entries(registry).map(([index, variant]) => [Number(index), variant.property]));
-        expect(MANGO_INSTRUCTION_NAMES).toEqual(expected);
+    it('should throw for an unknown discriminator', () => {
+        const ix = makeInstruction(makeRawInstructionData(9999), MANGO_PROGRAM_IDS.mainnet);
+        expect(() => parseMangoInstructionTitle(ix)).toThrow();
     });
 });
