@@ -7,7 +7,7 @@ import { MarketData } from '../MarketData';
 const meta = {
     component: MarketData,
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/TokenMarketData/MarketData',
+    title: 'Features/TokenMarketData/MarketData',
 } satisfies Meta<typeof MarketData>;
 
 export default meta;

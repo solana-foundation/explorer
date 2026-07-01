@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ifNoneMatchMatches, notModifiedResponse } from '../http-utils';
+import { ifNoneMatchMatches, isTimeoutError, notModifiedResponse } from '../http-utils';
 
 describe('ifNoneMatchMatches', () => {
     it('should return false when If-None-Match header is missing', () => {
@@ -103,5 +103,16 @@ describe('notModifiedResponse', () => {
             etag: '"x"',
         });
         expect(res.body).toBeNull();
+    });
+});
+
+describe('isTimeoutError', () => {
+    it('should be true for a TimeoutError DOMException', () => {
+        expect(isTimeoutError(new DOMException('Signal timed out.', 'TimeoutError'))).toBe(true);
+    });
+
+    it('should be false for other errors', () => {
+        expect(isTimeoutError(new Error('nope'))).toBe(false);
+        expect(isTimeoutError(new DOMException('aborted', 'AbortError'))).toBe(false);
     });
 });

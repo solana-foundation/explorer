@@ -2,11 +2,14 @@ import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 import { is, number, type } from 'superstruct';
 
-import { NO_STORE_HEADERS } from '@/app/shared/lib/http-utils';
+import {
+    CACHE_HEADERS,
+    ERROR_CACHE_HEADERS,
+    fetchUpstream,
+    isTimeoutError,
+    NO_STORE_HEADERS,
+} from '@/app/shared/lib/http-utils';
 import { Logger } from '@/app/shared/lib/logger';
-
-import { CACHE_HEADERS, ERROR_CACHE_HEADERS } from '../../config';
-import { fetchUpstream, isTimeoutError } from '../../upstream';
 
 const RugCheckResponseSchema = type({
     score_normalised: number(),
@@ -67,6 +70,7 @@ export async function GET(_request: Request, props: Params) {
         const data = await response.json();
 
         if (!is(data, RugCheckResponseSchema)) {
+            Logger.warn('[api:rugcheck] Invalid response schema', { mintAddress, sentry: true });
             return NextResponse.json(
                 { error: 'Invalid response from rugcheck API' },
                 { headers: NO_STORE_HEADERS, status: 502 },
