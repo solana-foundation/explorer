@@ -23,6 +23,7 @@
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
+        "@solana-program/token": "0.13.0",
         "typescript": "catalog:",
         "vitest": "catalog:"
     },

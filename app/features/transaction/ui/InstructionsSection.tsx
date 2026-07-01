@@ -31,7 +31,7 @@ import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProo
 import { useAnchorProgram } from '@entities/idl';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
-import { isMangoInstruction } from '@explorer/decoder-mango/detection';
+import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
@@ -53,18 +53,13 @@ import {
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT, SignatureProps } from '@utils/index';
 import { intoTransactionInstruction } from '@utils/tx';
-import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 
 import { CollapsibleSection } from './CollapsibleSection';
-
-const MangoDetailsCard = dynamic(
-    () => import('@features/instruction-program-mango').then(mod => mod.MangoDetailsCard),
-    { ssr: false },
-);
+import { CommonInstructionDetailsCard } from './CommonInstructionDetailsCard';
 
 export type InstructionDetailsProps = {
     tx: ParsedTransaction;
@@ -245,7 +240,13 @@ function InstructionCard({
         return <Ed25519DetailsCard key={key} {...props} tx={tx} />;
     }
     if (isMangoInstruction(transactionIx)) {
-        return <MangoDetailsCard key={key} {...props} />;
+        return (
+            <CommonInstructionDetailsCard
+                key={key}
+                {...props}
+                instructionName={getMangoInstructionLabel(transactionIx)}
+            />
+        );
     }
     if (isSerumInstruction(transactionIx)) {
         return <SerumDetailsCard key={key} {...props} />;

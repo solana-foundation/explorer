@@ -6,3 +6,6 @@ export const MANGO_PROGRAM_IDS = {
     mainnet: new PublicKey('mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68'),
     testnet: new PublicKey('BXhdkETgbHrr5QmVBT1xbz3JrMM28u5djbVtmTUfmFTH'),
 };
+
+// Program display name for the app registry; v3 is a dead protocol, so it's marked deprecated.
+export const MANGO_V3_PROGRAM_LABEL = 'Mango v3 (deprecated)';

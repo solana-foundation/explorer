@@ -1,3 +1,4 @@
+import { MANGO_V3_PROGRAM_LABEL } from '@explorer/decoder-mango';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
@@ -61,9 +62,6 @@ export enum PROGRAM_NAMES {
     WORMHOLE_NFT = 'Wormhole NFT Bridge',
     OPENBOOK_DEX = 'OpenBook Dex',
 
-    // Mango (dead protocol; recognized but no longer decoded)
-    MANGO = 'Mango (deprecated)',
-
     // ZK Compression
     ZK_LIGHT_SYSTEM_PROGRAM = 'Light System Program',
     ZK_COMPRESSED_TOKEN_PROGRAM = 'ZK Compressed Token Program',
@@ -120,7 +118,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     },
     '4skJ85cdxQAFVKbcGgfun8iZPL7BadVYXG3kGEGkufqA': {
         deployments: [Cluster.Devnet],
-        name: PROGRAM_NAMES.MANGO,
+        name: MANGO_V3_PROGRAM_LABEL,
     },
     '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8': {
         deployments: [Cluster.MainnetBeta],
@@ -146,7 +144,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     },
     BXhdkETgbHrr5QmVBT1xbz3JrMM28u5djbVtmTUfmFTH: {
         deployments: [Cluster.Testnet],
-        name: PROGRAM_NAMES.MANGO,
+        name: MANGO_V3_PROGRAM_LABEL,
     },
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -306,7 +304,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     },
     mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68: {
         deployments: [Cluster.MainnetBeta],
-        name: PROGRAM_NAMES.MANGO,
+        name: MANGO_V3_PROGRAM_LABEL,
     },
     namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX: {
         deployments: LIVE_CLUSTERS,
