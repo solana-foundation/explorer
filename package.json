@@ -194,7 +194,7 @@
         "tailwindcss": "3.4.17",
         "tailwindcss-animate": "^1.0.7",
         "tsx": "4.21.0",
-        "typescript": "catalog:",
+        "typescript": "catalog:tooling",
         "typescript-eslint": "8.57.1",
         "vite-plugin-node-polyfills": "0.23.0",
         "vitest": "catalog:vitest"

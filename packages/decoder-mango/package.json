@@ -26,8 +26,8 @@
     },
     "devDependencies": {
         "@solana-program/token": "0.13.0",
-        "typescript": "catalog:",
-        "vitest": "catalog:"
+        "typescript": "catalog:tooling",
+        "vitest": "catalog:vitest"
     },
     "peerDependencies": {
         "@solana/kit": "^6.5.0",

@@ -9,6 +9,8 @@ catalogs:
     '@storybook/react': 10.2.6
     eslint-plugin-storybook: 10.2.6
     storybook: 10.2.6
+  tooling:
+    typescript: '5.7.3'
   vitest:
     '@vitest/browser': 4.1.8
     '@vitest/browser-playwright': 4.1.8
@@ -25,6 +27,3 @@ minimumReleaseAgeExclude:
   - '@solana-program/token'
   - '@solana-program/program-metadata'
   - '@solana/kit'
-catalog:
-  typescript: '5.7.3'
-  vitest: '4.1.8'
