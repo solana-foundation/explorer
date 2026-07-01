@@ -31,11 +31,7 @@ import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProo
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
-import {
-    IdlInstructionCard,
-    safeDecodeInstructionWithIdl,
-    useResolvedProgramIdl,
-} from '@features/decode-instruction-with-idl';
+import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
@@ -177,9 +173,8 @@ function InstructionCard({
     // stays stable.
     const transactionIx = React.useMemo(() => intoTransactionInstruction(tx, ix), [tx, ix]);
     // Dynamic IDL tier — shared with the inspector. See app/components/inspector/InstructionsSection.tsx.
-    // Resolve the IDL up front (a hook), but decode lazily at the tier below so we don't pay the decode
-    // for instructions an earlier native tier already handles.
-    const { idl: resolvedIdl, url: idlUrl } = useResolvedProgramIdl({ programId: ix.programId.toString() });
+    // Memoized so the Anchor Program / Borsh coder isn't rebuilt on every re-render.
+    const idlDecode = useIdlInstructionDecode({ programId: ix.programId.toString(), raw: transactionIx });
 
     if ('parsed' in ix && parsedIx) {
         const props = {
@@ -301,14 +296,8 @@ function InstructionCard({
             </ErrorBoundary>
         );
     }
-    if (resolvedIdl) {
-        return (
-            <IdlInstructionCard
-                key={key}
-                decoded={safeDecodeInstructionWithIdl(transactionIx, resolvedIdl, idlUrl)}
-                {...props}
-            />
-        );
+    if (idlDecode) {
+        return <IdlInstructionCard key={key} decoded={idlDecode} {...props} />;
     }
 
     return <UnknownDetailsCard key={key} {...props} />;
