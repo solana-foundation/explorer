@@ -46,7 +46,7 @@
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
 | Dynamic | `/block/[slot]` | 230 kB | 1.25 MB |
 | Dynamic | `/block/[slot]/accounts` | 230 kB | 1.25 MB |
-| Dynamic | `/block/[slot]/programs` | 230 kB | 1.25 MB |
+| Dynamic | `/block/[slot]/programs` | 230 kB | 1.24 MB |
 | Dynamic | `/block/[slot]/rewards` | 230 kB | 1.24 MB |
 | Dynamic | `/epoch/[epoch]` | 10 kB | 1.04 MB |
 | Static | `/feature-gates` | 50 kB | 1.07 MB |

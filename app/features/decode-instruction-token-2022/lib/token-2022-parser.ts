@@ -5,31 +5,38 @@ import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import {
     identifyToken2022Instruction,
     parseCloseAccountInstruction,
-    parseEmitTokenMetadataInstruction,
     parseInitializeAccountInstruction,
     parseInitializeGroupMemberPointerInstruction,
     parseInitializeGroupPointerInstruction,
     parseInitializeMetadataPointerInstruction,
-    parseInitializeTokenGroupInstruction,
     parseInitializeTokenGroupMemberInstruction,
-    parseInitializeTokenMetadataInstruction,
-    parseRemoveTokenMetadataKeyInstruction,
     parseSyncNativeInstruction,
     parseTransferCheckedInstruction,
     parseTransferInstruction,
     parseUpdateGroupMemberPointerInstruction,
     parseUpdateGroupPointerInstruction,
     parseUpdateMetadataPointerInstruction,
-    parseUpdateTokenGroupMaxSizeInstruction,
-    parseUpdateTokenGroupUpdateAuthorityInstruction,
-    parseUpdateTokenMetadataFieldInstruction,
-    parseUpdateTokenMetadataUpdateAuthorityInstruction,
     Token2022Instruction,
 } from '@solana-program/token-2022';
 import { normalizeTokenAmount } from '@utils/index';
 import { create } from 'superstruct';
 
 import type { KitInstruction } from '@/app/shared/lib/web3js-compat';
+
+// The upstream Codama decoders for the SPL Token Metadata / Token Group interface
+// instructions declare their 8-byte discriminator as an unbounded bytes field,
+// which swallows the whole buffer and breaks every downstream field. These local
+// parsers bound the discriminator so the instructions decode correctly.
+import {
+    parseEmitTokenMetadataInstruction,
+    parseInitializeTokenGroupInstruction,
+    parseInitializeTokenMetadataInstruction,
+    parseRemoveTokenMetadataKeyInstruction,
+    parseUpdateTokenGroupMaxSizeInstruction,
+    parseUpdateTokenGroupUpdateAuthorityInstruction,
+    parseUpdateTokenMetadataFieldInstruction,
+    parseUpdateTokenMetadataUpdateAuthorityInstruction,
+} from './token-2022-interface-parsers';
 
 /** RPC `parsed.program` discriminator for the Token-2022 program; also the slice's `programLabel`. */
 export const TOKEN_2022_PROGRAM_LABEL = 'spl-token-2022' satisfies ParserProgramLabel;
@@ -152,10 +159,11 @@ export function parseToken2022Instruction(ix: KitInstruction): Token2022Parsed |
             }
             case Token2022Instruction.UpdateTokenMetadataUpdateAuthority: {
                 const parsed = parseUpdateTokenMetadataUpdateAuthorityInstruction(ix);
+                const newUpdateAuthority = unwrapOption(parsed.data.newUpdateAuthority);
                 return {
                     info: {
                         metadata: new PublicKey(parsed.accounts.metadata.address),
-                        newUpdateAuthority: new PublicKey(parsed.data.newUpdateAuthority),
+                        newUpdateAuthority: newUpdateAuthority !== null ? new PublicKey(newUpdateAuthority) : undefined,
                         updateAuthority: new PublicKey(parsed.accounts.updateAuthority.address),
                     },
                     type: 'updateTokenMetadataUpdateAuthority',
@@ -251,13 +259,14 @@ export function parseToken2022Instruction(ix: KitInstruction): Token2022Parsed |
             }
             case Token2022Instruction.InitializeTokenGroup: {
                 const parsed = parseInitializeTokenGroupInstruction(ix);
+                const updateAuthority = unwrapOption(parsed.data.updateAuthority);
                 return {
                     info: {
                         group: new PublicKey(parsed.accounts.group.address),
                         maxSize: parsed.data.maxSize,
                         mint: new PublicKey(parsed.accounts.mint.address),
                         mintAuthority: new PublicKey(parsed.accounts.mintAuthority.address),
-                        updateAuthority: new PublicKey(parsed.data.updateAuthority),
+                        updateAuthority: updateAuthority !== null ? new PublicKey(updateAuthority) : undefined,
                     },
                     type: 'initializeTokenGroup',
                 };
@@ -275,10 +284,11 @@ export function parseToken2022Instruction(ix: KitInstruction): Token2022Parsed |
             }
             case Token2022Instruction.UpdateTokenGroupUpdateAuthority: {
                 const parsed = parseUpdateTokenGroupUpdateAuthorityInstruction(ix);
+                const newUpdateAuthority = unwrapOption(parsed.data.newUpdateAuthority);
                 return {
                     info: {
                         group: new PublicKey(parsed.accounts.group.address),
-                        newUpdateAuthority: new PublicKey(parsed.data.newUpdateAuthority),
+                        newUpdateAuthority: newUpdateAuthority !== null ? new PublicKey(newUpdateAuthority) : undefined,
                         updateAuthority: new PublicKey(parsed.accounts.updateAuthority.address),
                     },
                     type: 'updateTokenGroupUpdateAuthority',
