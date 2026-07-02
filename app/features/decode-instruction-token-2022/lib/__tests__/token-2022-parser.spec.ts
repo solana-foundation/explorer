@@ -1,6 +1,7 @@
 import { address, type ReadonlyUint8Array } from '@solana/kit';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import {
+    getEmitTokenMetadataInstructionDataEncoder,
     getInitializeTokenGroupInstructionDataEncoder,
     getInitializeTokenMetadataInstructionDataEncoder,
     getRemoveTokenMetadataKeyInstructionDataEncoder,
@@ -8,6 +9,7 @@ import {
     getUpdateTokenGroupUpdateAuthorityInstructionDataEncoder,
     getUpdateTokenMetadataFieldInstructionDataDecoder,
     getUpdateTokenMetadataFieldInstructionDataEncoder,
+    getUpdateTokenMetadataUpdateAuthorityInstructionDataEncoder,
     TOKEN_2022_PROGRAM_ADDRESS,
 } from '@solana-program/token-2022';
 import { describe, expect, test } from 'vitest';
@@ -96,6 +98,45 @@ describe('parseToken2022Instruction — SPL interface instructions', () => {
         const data = getUpdateTokenGroupUpdateAuthorityInstructionDataEncoder().encode({ newUpdateAuthority: null });
         const info = parse(data, [METADATA, AUTHORITY])?.info as { newUpdateAuthority?: PublicKey };
         expect(info.newUpdateAuthority).toBeUndefined();
+    });
+
+    test('should decode UpdateTokenMetadataUpdateAuthority with a new authority', () => {
+        const data = getUpdateTokenMetadataUpdateAuthorityInstructionDataEncoder().encode({
+            newUpdateAuthority: address(MINT),
+        });
+        const parsed = parse(data, [METADATA, AUTHORITY]);
+        expect(parsed?.type).toBe('updateTokenMetadataUpdateAuthority');
+        const info = parsed?.info as {
+            metadata: PublicKey;
+            newUpdateAuthority?: PublicKey;
+            updateAuthority: PublicKey;
+        };
+        expect(info.metadata.toBase58()).toBe(METADATA);
+        expect(info.updateAuthority.toBase58()).toBe(AUTHORITY);
+        expect(info.newUpdateAuthority?.toBase58()).toBe(MINT);
+    });
+
+    test('should render a removed (None) metadata update authority as undefined', () => {
+        const data = getUpdateTokenMetadataUpdateAuthorityInstructionDataEncoder().encode({ newUpdateAuthority: null });
+        const info = parse(data, [METADATA, AUTHORITY])?.info as { newUpdateAuthority?: PublicKey };
+        expect(info.newUpdateAuthority).toBeUndefined();
+    });
+
+    test('should decode EmitTokenMetadata with a byte range', () => {
+        const data = getEmitTokenMetadataInstructionDataEncoder().encode({ end: 32n, start: 4n });
+        const parsed = parse(data, [METADATA]);
+        expect(parsed?.type).toBe('emitTokenMetadata');
+        const info = parsed?.info as { end?: number; metadata: PublicKey; start?: number };
+        expect(info.start).toBe(4);
+        expect(info.end).toBe(32);
+        expect(info.metadata.toBase58()).toBe(METADATA);
+    });
+
+    test('should decode EmitTokenMetadata with no byte range', () => {
+        const data = getEmitTokenMetadataInstructionDataEncoder().encode({ end: null, start: null });
+        const info = parse(data, [METADATA])?.info as { end?: number; start?: number };
+        expect(info.start).toBeUndefined();
+        expect(info.end).toBeUndefined();
     });
 
     test('should return undefined for an unrecognised instruction', () => {
