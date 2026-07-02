@@ -1115,7 +1115,7 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 983,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1674,7 +1674,7 @@
     "testnet_activation_epoch": 954,
     "devnet_activation_epoch": 1067,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 992,
     "description": "Specify the protocol for validating chained block ids under both TowerBFT and Alpenglow."
   },
   {
@@ -1720,7 +1720,7 @@
     "testnet_activation_epoch": 956,
     "devnet_activation_epoch": 1070,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 995,
     "description": "Syscall parameter related changes split off from SIMD-0219: Removing pitfalls and foot-guns from the ABI (including syscalls) and runtime."
   },
   {
@@ -1785,7 +1785,7 @@
     "min_fd_versions": [],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 979,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -1816,7 +1816,7 @@
     "testnet_activation_epoch": 954,
     "devnet_activation_epoch": 1069,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 993,
     "description": "This SIMD introduces static syscalls, using the eBPF call instruction encoding, to remove runtime relocations while keeping compatibility with the eBPF encoding."
   },
   {
@@ -1930,7 +1930,7 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 977,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1092,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": "Introduce a sol_sha512 syscall with an identical interface to sol_sha256, producing SHA-512 hashes and outputting the 64-byte result."
@@ -1954,7 +1954,7 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 977,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1093,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": "Allow validators to update their inflations reward commission rate with basis points and update commission calculation."
@@ -1978,7 +1978,7 @@
     "min_jito_versions": [],
     "planned_testnet_order": null,
     "testnet_activation_epoch": 978,
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1095,
     "comms_required": null,
     "mainnet_activation_epoch": null,
     "description": "We propose augmenting BlockMarkerV1, introduced in SIMD-0307, to include BlockHeader and UpdateParent variants. BlockHeader, placed at the beginning of a block, indicates the parent of the block. UpdateParent signals that the intended parent is different from what was initially\u2026"
@@ -2001,7 +2001,7 @@
     ],
     "min_jito_versions": [],
     "planned_testnet_order": null,
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 981,
     "devnet_activation_epoch": null,
     "comms_required": null,
     "mainnet_activation_epoch": null,
@@ -2012,7 +2012,7 @@
     "description": "Specify the protocol for validating chained block ids under both TowerBFT and Alpenglow.",
     "devnet_activation_epoch": 1091,
     "key": "vcmrw431aNM8ngQ46derkZXipoTGQdbHkEygBDh12dA",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 992,
     "min_agave_versions": [
       "v4.0.2 / v4.1.0-beta.3"
     ],
@@ -2052,7 +2052,7 @@
     "simds": [
       "0186"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 980,
     "title": "SIMD-0186 Amendment: Define fee-only semantics"
   }
 ]
