@@ -61,4 +61,16 @@ export const getSerumInstructionLabel = (instruction: TransactionInstruction): s
     resolveSerumInstructionName(instruction.programId.toBase58(), instruction.data) ??
     (instruction.data.length === 0 ? 'No data' : 'Unknown');
 
-export { DEPRECATED_SERUM_PROGRAM_IDS, OPEN_BOOK_PROGRAM_IDS, SERUM_PROGRAM_IDS } from './program-ids';
+export {
+    DEPRECATED_SERUM_PROGRAM_IDS,
+    OPEN_BOOK_PROGRAM_IDS,
+    OPENBOOK_DEX_PROGRAM_LABEL,
+    SERUM_DEX_V1_PROGRAM_IDS,
+    SERUM_DEX_V1_PROGRAM_LABEL,
+    SERUM_DEX_V1B_PROGRAM_IDS,
+    SERUM_DEX_V2_PROGRAM_IDS,
+    SERUM_DEX_V2_PROGRAM_LABEL,
+    SERUM_DEX_V3_PROGRAM_IDS,
+    SERUM_DEX_V3_PROGRAM_LABEL,
+    SERUM_PROGRAM_IDS,
+} from './program-ids';

@@ -33,6 +33,11 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://explorer.solana.com/address/9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://explorer.solana.com/address/ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
@@ -64,6 +69,11 @@
   </url>
   <url>
     <loc>https://explorer.solana.com/address/DtmE9D2CSB4L5D6A15mraeEjrGMm6auWVzgaD8hK2tZM</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://explorer.solana.com/address/EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>
@@ -133,27 +143,12 @@
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://explorer.solana.com/address/srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
     <loc>https://explorer.solana.com/address/ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://explorer.solana.com/address/RVKd61ztZW9GUwhRbbLoYVRE5Xf1B2tVscKqwZqXgEr</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://explorer.solana.com/address/EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://explorer.solana.com/address/9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>
@@ -259,6 +254,11 @@
   </url>
   <url>
     <loc>https://explorer.solana.com/address/oreV2ZymfyeXgNgBdqMkumTqqAprVqgBWQfoYkrtKWQ</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://explorer.solana.com/address/srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>

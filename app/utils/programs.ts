@@ -9,7 +9,7 @@ import {
     SERUM_DEX_V2_PROGRAM_LABEL,
     SERUM_DEX_V3_PROGRAM_IDS,
     SERUM_DEX_V3_PROGRAM_LABEL,
-} from '@explorer/decoder-serum';
+} from '@explorer/decoder-serum/detection';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
