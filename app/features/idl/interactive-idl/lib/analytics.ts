@@ -12,6 +12,7 @@ const IDL_TYPE_LABELS: Record<IdlStandard, IdlTypeLabel> = {
 // Interactive IDL actions are the same for IdlStandards.
 // This generates both the `iidl_anchor_*` and `iidl_codama_*` variants.
 const IIDL_ACTIONS = {
+    IdlViewed: 'idl_viewed',
     SectionsExpanded: 'sections_expanded',
     TabOpened: 'tab_opened',
     TransactionConfirmed: 'transaction_confirmed',
@@ -39,6 +40,18 @@ export type IdlAnalytics = {
     trackTransactionSubmitted(programId?: string, instructionName?: string): void;
     trackWalletConnected(programId?: string, walletType?: string): void;
 };
+
+/**
+ * Fires a `idl_viewed` event when an IDL is displayed to the user.
+ * Includes `idl_type` to differentiate between anchor and codama IDLs.
+ * This is the top-of-funnel event for IDL engagement analytics.
+ */
+export function trackIdlViewed(standard: IdlStandard, programId?: string): void {
+    const idlType = IDL_TYPE_LABELS[standard];
+    trackEvent(eventName(idlType, IIDL_ACTIONS.IdlViewed), {
+        program_id: programId,
+    });
+}
 
 /**
  * Builds an Interactive IDL analytics tracker.

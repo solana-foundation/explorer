@@ -2,13 +2,33 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { trackEvent } from '@/app/shared/lib/analytics';
 
-import { createIdlAnalytics } from './analytics';
+import { createIdlAnalytics, trackIdlViewed } from './analytics';
 
 vi.mock('@/app/shared/lib/analytics', () => ({
     trackEvent: vi.fn(),
 }));
 
 const mockedTrackEvent = vi.mocked(trackEvent);
+
+describe('trackIdlViewed', () => {
+    afterEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should emit iidl_anchor_idl_viewed for Anchor standard', () => {
+        trackIdlViewed('Anchor', 'prog1');
+        expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_anchor_idl_viewed', {
+            program_id: 'prog1',
+        });
+    });
+
+    it('should emit iidl_codama_idl_viewed for Codama standard', () => {
+        trackIdlViewed('Codama', 'prog2');
+        expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_codama_idl_viewed', {
+            program_id: 'prog2',
+        });
+    });
+});
 
 describe('createIdlAnalytics', () => {
     afterEach(() => {
