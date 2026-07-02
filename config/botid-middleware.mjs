@@ -8,7 +8,7 @@ const BOT_RESPONSE = { body: { error: 'Access denied: request identified as auto
 
 /**
  * BotIdClient protected routes — only API routes need protection.
- * Must mirror `proxy.ts` matcher in BotID's glob format.
+ * Must mirror `proxy.ts`'s `config.matcher`, expressed in BotID's glob format.
  *
  * @type {Array<{ path: string; method: string }>}
  */
