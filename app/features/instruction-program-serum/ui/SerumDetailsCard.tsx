@@ -13,8 +13,8 @@ import React from 'react';
 import { Logger } from '@/app/shared/lib/logger';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-// e.g. `openOrdersOwner` → "Open Orders Owner"
 const isUpperCase = (letter: string): boolean => letter !== letter.toLowerCase();
+// e.g. `openOrdersOwner` → "Open Orders Owner"
 const fieldLabel = (field: string): string => {
     const spaced = [...field].map(letter => (isUpperCase(letter) ? ` ${letter}` : letter)).join('');
     return spaced.charAt(0).toUpperCase() + spaced.slice(1);
@@ -72,7 +72,7 @@ export function SerumDetailsCard(props: {
     try {
         decoded = decodeSerumInstruction(ix);
     } catch (error) {
-        Logger.error(error, { signature, url });
+        Logger.error(error, { index, sentry: true, signature, url });
     }
 
     return (

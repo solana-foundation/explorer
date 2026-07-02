@@ -56,7 +56,7 @@ export const parseSerumInstructionTitle = (instruction: TransactionInstruction):
     return title;
 };
 
-// Guaranteed-string label for the deprecated card; the resolver returns undefined when there's no readable code.
+// Guaranteed-string label for card titles; the resolver returns undefined when there's no readable code.
 export const getSerumInstructionLabel = (instruction: TransactionInstruction): string =>
     resolveSerumInstructionName(instruction.programId.toBase58(), instruction.data) ??
     (instruction.data.length === 0 ? 'No data' : 'Unknown');

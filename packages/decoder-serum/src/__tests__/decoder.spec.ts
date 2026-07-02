@@ -8,7 +8,6 @@ import {
     decodeCloseOpenOrders,
     decodeConsumeEvents,
     decodeConsumeEventsPermissioned,
-    decodeDisableMarket,
     decodeInitializeMarket,
     decodeInitOpenOrders,
     decodeMatchOrders,
@@ -17,7 +16,6 @@ import {
     decodePrune,
     decodeSerumInstruction,
     decodeSettleFunds,
-    decodeSweepFees,
     parseSerumInstructionKey,
 } from '../decoder';
 import {
@@ -70,6 +68,27 @@ describe('decodeNewOrderV3', () => {
         expect(result.data.selfTradeBehavior).toBe('decrementTake');
         expect(result.data.side).toBe('sell');
     });
+
+    it('should map account refs in on-wire order', () => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.newOrderV3, programId);
+        const result = decodeNewOrderV3(ix);
+        expect(result.accounts.market).toEqual(TEST_KEYS[0]);
+        expect(result.accounts.openOrders).toEqual(TEST_KEYS[1]);
+        expect(result.accounts.requestQueue).toEqual(TEST_KEYS[2]);
+        expect(result.accounts.eventQueue).toEqual(TEST_KEYS[3]);
+        expect(result.accounts.bids).toEqual(TEST_KEYS[4]);
+        expect(result.accounts.asks).toEqual(TEST_KEYS[5]);
+        expect(result.accounts.payer).toEqual(TEST_KEYS[6]);
+        expect(result.accounts.openOrdersOwner).toEqual(TEST_KEYS[7]);
+        expect(result.accounts.baseVault).toEqual(TEST_KEYS[8]);
+        expect(result.accounts.quoteVault).toEqual(TEST_KEYS[9]);
+        expect(result.accounts.feeDiscountPubkey).toEqual(TEST_KEYS[12]);
+    });
+
+    it('should omit feeDiscountPubkey when only 12 keys are provided', () => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.newOrderV3, programId, TEST_KEYS.slice(0, 12));
+        expect(decodeNewOrderV3(ix).accounts.feeDiscountPubkey).toBeUndefined();
+    });
 });
 
 describe('decodeCancelOrder', () => {
@@ -120,7 +139,7 @@ describe('decodeSerumInstruction', () => {
     });
 
     it('should throw on data the instruction layout cannot decode', () => {
-        expect(() => decodeSerumInstruction(makeInstruction(makeRawInstructionData(13), programId))).toThrow();
+        expect(() => decodeSerumInstruction(makeInstruction(makeRawInstructionData(13), programId))).toThrow(TypeError);
     });
 });
 
@@ -245,26 +264,5 @@ describe('decodeInitOpenOrders', () => {
         const ix = makeInstruction(ENCODED_INSTRUCTIONS.initOpenOrders, programId, TEST_KEYS.slice(0, 4));
         const result = decodeInitOpenOrders(ix);
         expect(result.accounts.openOrdersMarketAuthority).toBeUndefined();
-    });
-});
-
-describe('decodeDisableMarket', () => {
-    it('should extract market and disable authority refs', () => {
-        const ix = makeInstruction(makeRawInstructionData(7), programId);
-        const result = decodeDisableMarket(ix);
-        expect(result.accounts.market).toEqual(TEST_KEYS[0]);
-        expect(result.accounts.disableAuthority).toEqual(TEST_KEYS[1]);
-    });
-});
-
-describe('decodeSweepFees', () => {
-    it('should extract account refs', () => {
-        const ix = makeInstruction(makeRawInstructionData(8), programId);
-        const result = decodeSweepFees(ix);
-        expect(result.accounts.market).toEqual(TEST_KEYS[0]);
-        expect(result.accounts.quoteVault).toEqual(TEST_KEYS[1]);
-        expect(result.accounts.feeSweepingAuthority).toEqual(TEST_KEYS[2]);
-        expect(result.accounts.quoteFeeReceiver).toEqual(TEST_KEYS[3]);
-        expect(result.accounts.vaultSigner).toEqual(TEST_KEYS[4]);
     });
 });

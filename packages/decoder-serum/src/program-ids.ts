@@ -29,7 +29,7 @@ export const DEPRECATED_SERUM_PROGRAM_IDS = [
 
 export const SERUM_PROGRAM_IDS = [...DEPRECATED_SERUM_PROGRAM_IDS, ...Object.values(OPEN_BOOK_PROGRAM_IDS)];
 
-// Program display names for the app registry; the package is their source of truth.
+// Program display names for the app registry.
 export const OPENBOOK_DEX_PROGRAM_LABEL = 'OpenBook Dex';
 export const SERUM_DEX_V1_PROGRAM_LABEL = 'Serum Dex v1 (deprecated)';
 export const SERUM_DEX_V2_PROGRAM_LABEL = 'Serum Dex v2 (deprecated)';

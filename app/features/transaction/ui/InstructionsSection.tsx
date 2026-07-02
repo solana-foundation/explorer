@@ -260,7 +260,11 @@ function InstructionCard({
                 />
             );
         }
-        return <SerumDetailsCard key={key} {...props} />;
+        return (
+            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                <SerumDetailsCard {...props} />
+            </ErrorBoundary>
+        );
     }
     if (isTokenSwapInstruction(transactionIx)) {
         return <TokenSwapDetailsCard key={key} {...props} />;

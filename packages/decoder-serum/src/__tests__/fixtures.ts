@@ -1,6 +1,4 @@
-// @project-serum/serum's deeper module path exposes encodeInstruction, which
-// the package root does not re-export. We reach in here so test fixtures can
-// build authentic instruction buffers.
+// encodeInstruction isn't re-exported from the package root; reach into lib/instructions.js for authentic fixtures.
 import { encodeInstruction } from '@project-serum/serum/lib/instructions.js';
 import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import BN from 'bn.js';
@@ -13,11 +11,6 @@ import {
     SERUM_DEX_V3_PROGRAM_IDS,
 } from '../program-ids';
 
-/**
- * Known Serum/OpenBook program IDs. `dexV1`/`dexV1b`/`dexV2`/`dexV3` are the
- * historical Serum deployments; `openBook` is the post-fork program ID. All
- * are recognised by isSerumInstruction via SERUM_PROGRAM_IDS.
- */
 export const SERUM_PROGRAM_IDS_BY_NAME = {
     dexV1: new PublicKey(SERUM_DEX_V1_PROGRAM_IDS.mainnet),
     dexV1b: new PublicKey(SERUM_DEX_V1B_PROGRAM_IDS.mainnet),
@@ -26,14 +19,7 @@ export const SERUM_PROGRAM_IDS_BY_NAME = {
     openBook: new PublicKey(OPEN_BOOK_PROGRAM_IDS.mainnet),
 } as const;
 
-/**
- * Pre-encoded instruction data for each Serum instruction variant supported
- * by INSTRUCTION_LAYOUT in @project-serum/serum.
- *
- * Variants 7 (DisableMarket), 8 (SweepFees), 9 (NewOrderV2), 13 (SendTake)
- * are not encoded by the library — fixtures for those are raw buffers built
- * via makeRawInstructionData(code).
- */
+// Variants 7/8/9/13 are absent from the library's INSTRUCTION_LAYOUT — use makeRawInstructionData for those.
 export const ENCODED_INSTRUCTIONS = {
     cancelOrder: encodeInstruction({
         cancelOrder: {
@@ -93,12 +79,7 @@ export const ENCODED_INSTRUCTIONS = {
     settleFunds: encodeInstruction({ settleFunds: {} }) as Buffer,
 } as const;
 
-/**
- * Build a raw instruction buffer with only the version byte (0) and the
- * 4-byte little-endian instruction code. Used for variants the library does
- * not encode (disableMarket=7, sweepFees=8, newOrderV2=9, sendTake=13) when
- * the test only needs to exercise parseSerumInstructionTitle/parseSerumInstructionCode.
- */
+// Version byte 0 + u32 LE code only — for the variants encodeInstruction can't build (7/8/9/13).
 export function makeRawInstructionData(code: number): Buffer {
     const buf = Buffer.alloc(5);
     buf[0] = 0;
@@ -106,7 +87,7 @@ export function makeRawInstructionData(code: number): Buffer {
     return buf;
 }
 
-/** 14 deterministic keys — enough for the largest decoder (initializeMarket: keys[0..12]). */
+/** 14 keys — enough for the largest decoder (initializeMarket reads keys[0..12]). */
 export const TEST_KEYS: PublicKey[] = Array.from({ length: 14 }, () => Keypair.generate().publicKey);
 
 export function makeInstruction(

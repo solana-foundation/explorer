@@ -1,4 +1,4 @@
-/* eslint-disable sort-keys-fix/sort-keys-fix -- `accounts` literals and data schemas mirror the on-wire field order so the UI renders fields in instruction order */
+/* eslint-disable sort-keys-fix/sort-keys-fix -- `accounts` literal order drives UI row order (Object.entries); data schemas are kept in wire order only to mirror the layout */
 import { decodeInstruction } from '@project-serum/serum';
 import { type AccountMeta, type PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import { enums, type Infer, mask, number, object } from 'superstruct';
@@ -256,48 +256,6 @@ export function decodeCancelOrderByClientId(ix: TransactionInstruction): CancelO
     };
 }
 
-export type DisableMarket = {
-    programId: PublicKey;
-    accounts: {
-        market: PublicKey;
-        disableAuthority: PublicKey;
-    };
-};
-
-export function decodeDisableMarket(ix: TransactionInstruction): DisableMarket {
-    return {
-        accounts: {
-            market: ix.keys[0].pubkey,
-            disableAuthority: ix.keys[1].pubkey,
-        },
-        programId: ix.programId,
-    };
-}
-
-export type SweepFees = {
-    programId: PublicKey;
-    accounts: {
-        market: PublicKey;
-        quoteVault: PublicKey;
-        feeSweepingAuthority: PublicKey;
-        quoteFeeReceiver: PublicKey;
-        vaultSigner: PublicKey;
-    };
-};
-
-export function decodeSweepFees(ix: TransactionInstruction): SweepFees {
-    return {
-        accounts: {
-            market: ix.keys[0].pubkey,
-            quoteVault: ix.keys[1].pubkey,
-            feeSweepingAuthority: ix.keys[2].pubkey,
-            quoteFeeReceiver: ix.keys[3].pubkey,
-            vaultSigner: ix.keys[4].pubkey,
-        },
-        programId: ix.programId,
-    };
-}
-
 export type NewOrderV3 = {
     programId: PublicKey;
     data: Infer<typeof NewOrderV3Instruction>;
@@ -529,6 +487,9 @@ export function parseSerumInstructionKey(instruction: TransactionInstruction): s
     return keys[0];
 }
 
+// Codes 7/8/9/13 (disableMarket, sweepFees, newOrderV2, sendTake) are absent from the serum lib's
+// INSTRUCTION_LAYOUT, so parseSerumInstructionKey throws for them and they can never be dispatched —
+// the card renders them as raw data with a name-table title.
 export type DecodedSerumInstruction =
     | { key: 'cancelOrder'; info: CancelOrder }
     | { key: 'cancelOrderByClientId'; info: CancelOrderByClientId }
@@ -537,53 +498,50 @@ export type DecodedSerumInstruction =
     | { key: 'closeOpenOrders'; info: CloseOpenOrders }
     | { key: 'consumeEvents'; info: ConsumeEvents }
     | { key: 'consumeEventsPermissioned'; info: ConsumeEventsPermissioned }
-    | { key: 'disableMarket'; info: DisableMarket }
     | { key: 'initializeMarket'; info: InitializeMarket }
     | { key: 'initOpenOrders'; info: InitOpenOrders }
     | { key: 'matchOrders'; info: MatchOrders }
     | { key: 'newOrder'; info: NewOrder }
     | { key: 'newOrderV3'; info: NewOrderV3 }
     | { key: 'prune'; info: Prune }
-    | { key: 'settleFunds'; info: SettleFunds }
-    | { key: 'sweepFees'; info: SweepFees };
+    | { key: 'settleFunds'; info: SettleFunds };
+
+export type SerumInstructionKey = DecodedSerumInstruction['key'];
+
+// Record over SerumInstructionKey so adding a union variant without a decoder entry fails to compile.
+const DECODERS: Record<SerumInstructionKey, (instruction: TransactionInstruction) => DecodedSerumInstruction> = {
+    cancelOrder: instruction => ({ info: decodeCancelOrder(instruction), key: 'cancelOrder' }),
+    cancelOrderByClientId: instruction => ({
+        info: decodeCancelOrderByClientId(instruction),
+        key: 'cancelOrderByClientId',
+    }),
+    cancelOrderByClientIdV2: instruction => ({
+        info: decodeCancelOrderByClientIdV2(instruction),
+        key: 'cancelOrderByClientIdV2',
+    }),
+    cancelOrderV2: instruction => ({ info: decodeCancelOrderV2(instruction), key: 'cancelOrderV2' }),
+    closeOpenOrders: instruction => ({ info: decodeCloseOpenOrders(instruction), key: 'closeOpenOrders' }),
+    consumeEvents: instruction => ({ info: decodeConsumeEvents(instruction), key: 'consumeEvents' }),
+    consumeEventsPermissioned: instruction => ({
+        info: decodeConsumeEventsPermissioned(instruction),
+        key: 'consumeEventsPermissioned',
+    }),
+    initializeMarket: instruction => ({ info: decodeInitializeMarket(instruction), key: 'initializeMarket' }),
+    initOpenOrders: instruction => ({ info: decodeInitOpenOrders(instruction), key: 'initOpenOrders' }),
+    matchOrders: instruction => ({ info: decodeMatchOrders(instruction), key: 'matchOrders' }),
+    newOrder: instruction => ({ info: decodeNewOrder(instruction), key: 'newOrder' }),
+    newOrderV3: instruction => ({ info: decodeNewOrderV3(instruction), key: 'newOrderV3' }),
+    prune: instruction => ({ info: decodePrune(instruction), key: 'prune' }),
+    settleFunds: instruction => ({ info: decodeSettleFunds(instruction), key: 'settleFunds' }),
+};
+
+const isDecodableKey = (key: string): key is SerumInstructionKey => key in DECODERS;
 
 // Single decode entry point so representation code never dispatches on instruction internals itself.
 export function decodeSerumInstruction(instruction: TransactionInstruction): DecodedSerumInstruction {
     const key = parseSerumInstructionKey(instruction);
-    switch (key) {
-        case 'cancelOrder':
-            return { info: decodeCancelOrder(instruction), key };
-        case 'cancelOrderByClientId':
-            return { info: decodeCancelOrderByClientId(instruction), key };
-        case 'cancelOrderByClientIdV2':
-            return { info: decodeCancelOrderByClientIdV2(instruction), key };
-        case 'cancelOrderV2':
-            return { info: decodeCancelOrderV2(instruction), key };
-        case 'closeOpenOrders':
-            return { info: decodeCloseOpenOrders(instruction), key };
-        case 'consumeEvents':
-            return { info: decodeConsumeEvents(instruction), key };
-        case 'consumeEventsPermissioned':
-            return { info: decodeConsumeEventsPermissioned(instruction), key };
-        case 'disableMarket':
-            return { info: decodeDisableMarket(instruction), key };
-        case 'initializeMarket':
-            return { info: decodeInitializeMarket(instruction), key };
-        case 'initOpenOrders':
-            return { info: decodeInitOpenOrders(instruction), key };
-        case 'matchOrders':
-            return { info: decodeMatchOrders(instruction), key };
-        case 'newOrder':
-            return { info: decodeNewOrder(instruction), key };
-        case 'newOrderV3':
-            return { info: decodeNewOrderV3(instruction), key };
-        case 'prune':
-            return { info: decodePrune(instruction), key };
-        case 'settleFunds':
-            return { info: decodeSettleFunds(instruction), key };
-        case 'sweepFees':
-            return { info: decodeSweepFees(instruction), key };
-        default:
-            throw new Error(`Unsupported Serum instruction key: ${key}`);
+    if (!isDecodableKey(key)) {
+        throw new Error(`Unsupported Serum instruction key: ${key}`);
     }
+    return DECODERS[key](instruction);
 }

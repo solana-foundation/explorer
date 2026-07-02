@@ -28,7 +28,6 @@ export {
     decodeCloseOpenOrders,
     decodeConsumeEvents,
     decodeConsumeEventsPermissioned,
-    decodeDisableMarket,
     decodeInitializeMarket,
     decodeInitOpenOrders,
     decodeMatchOrders,
@@ -36,7 +35,6 @@ export {
     decodeNewOrderV3,
     decodePrune,
     decodeSettleFunds,
-    decodeSweepFees,
     parseSerumInstructionKey,
 } from './decoder';
 export type {
@@ -48,7 +46,7 @@ export type {
     ConsumeEvents,
     ConsumeEventsPermissioned,
     DecodedSerumInstruction,
-    DisableMarket,
+    SerumInstructionKey,
     InitializeMarket,
     InitOpenOrders,
     MatchOrders,
@@ -59,5 +57,4 @@ export type {
     SelfTradeBehavior,
     SettleFunds,
     Side,
-    SweepFees,
 } from './decoder';

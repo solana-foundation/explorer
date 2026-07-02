@@ -15,7 +15,7 @@ import { SerumDetailsCard } from '../SerumDetailsCard';
 
 // New Order v3 data from mainnet tx 2fHxffhsx9pJ… (sell, ioc, limit price 50000); the card decodes it itself.
 const NEW_ORDER_V3_DATA =
-    '000a000000010000000050c30000000000000400000000000000400d030000000000000000010000000000000000000000ffff';
+    '000a0000000100000050c30000000000000400000000000000400d03000000000000000000010000000000000000000000ffff';
 
 const args = {
     childIndex: undefined,
