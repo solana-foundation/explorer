@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { ConsumeEventsPermissioned } from '@explorer/decoder-serum';
+import { ConsumeEventsPermissioned, getSerumInstructionLabel } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -15,7 +15,7 @@ export function ConsumeEventsPermissionedDetailsCard(props: SerumIxDetailsProps<
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Consume Events Permissioned`}
+            title={`${programName} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
         >

@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { MatchOrders } from '@explorer/decoder-serum';
+import { getSerumInstructionLabel, MatchOrders } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -15,7 +15,7 @@ export function MatchOrdersDetailsCard(props: SerumIxDetailsProps<MatchOrders>) 
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Match Orders`}
+            title={`${programName} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
         >

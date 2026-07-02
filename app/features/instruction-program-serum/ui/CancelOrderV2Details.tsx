@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { CancelOrderV2 } from '@explorer/decoder-serum';
+import { CancelOrderV2, getSerumInstructionLabel } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -15,7 +15,7 @@ export function CancelOrderV2DetailsCard(props: SerumIxDetailsProps<CancelOrderV
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Cancel Order v2`}
+            title={`${programName} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
         >

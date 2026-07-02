@@ -16,9 +16,9 @@ import {
     decodePrune,
     decodeSettleFunds,
     decodeSweepFees,
+    getSerumInstructionLabel,
     OPENBOOK_DEX_PROGRAM_LABEL,
     parseSerumInstructionKey,
-    parseSerumInstructionTitle,
 } from '@explorer/decoder-serum';
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
@@ -58,9 +58,7 @@ export function SerumDetailsCard(initialProps: {
 
     const { url } = useCluster();
 
-    let title;
     try {
-        title = parseSerumInstructionTitle(ix);
         switch (parseSerumInstructionKey(ix)) {
             case 'initializeMarket':
                 return <InitializeMarketDetailsCard info={decodeInitializeMarket(ix)} {...props} />;
@@ -107,7 +105,7 @@ export function SerumDetailsCard(initialProps: {
             ix={ix}
             index={index}
             result={result}
-            title={`${props.programName} Program: ${title || 'Unknown'}`}
+            title={`${props.programName} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
             defaultRaw

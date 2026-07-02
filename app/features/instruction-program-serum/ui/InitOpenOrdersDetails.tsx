@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { InitOpenOrders } from '@explorer/decoder-serum';
+import { getSerumInstructionLabel, InitOpenOrders } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -15,7 +15,7 @@ export function InitOpenOrdersDetailsCard(props: SerumIxDetailsProps<InitOpenOrd
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Init Open Orders`}
+            title={`${programName} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
         >

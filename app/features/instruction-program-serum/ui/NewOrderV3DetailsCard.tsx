@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { NewOrderV3 } from '@explorer/decoder-serum';
+import { getSerumInstructionLabel, NewOrderV3 } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -15,7 +15,7 @@ export function NewOrderV3DetailsCard(props: SerumIxDetailsProps<NewOrderV3>) {
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: New Order v3`}
+            title={`${programName} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
         >

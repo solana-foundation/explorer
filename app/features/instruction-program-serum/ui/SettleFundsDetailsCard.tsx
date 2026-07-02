@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { SettleFunds } from '@explorer/decoder-serum';
+import { getSerumInstructionLabel, SettleFunds } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -15,7 +15,7 @@ export function SettleFundsDetailsCard(props: SerumIxDetailsProps<SettleFunds>) 
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Settle Funds`}
+            title={`${programName} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
         >

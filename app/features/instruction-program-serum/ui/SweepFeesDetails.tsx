@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { SweepFees } from '@explorer/decoder-serum';
+import { getSerumInstructionLabel, SweepFees } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -15,7 +15,7 @@ export function SweepFeesDetailsCard(props: SerumIxDetailsProps<SweepFees>) {
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Sweep Fees`}
+            title={`${programName} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
         >

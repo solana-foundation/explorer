@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { DisableMarket } from '@explorer/decoder-serum';
+import { DisableMarket, getSerumInstructionLabel } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -15,7 +15,7 @@ export function DisableMarketDetailsCard(props: SerumIxDetailsProps<DisableMarke
             ix={ix}
             index={index}
             result={result}
-            title={`${programName} Program: Disable Market`}
+            title={`${programName} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
         >

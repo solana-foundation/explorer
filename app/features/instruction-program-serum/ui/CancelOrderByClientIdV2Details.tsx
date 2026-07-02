@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { CancelOrderByClientIdV2 } from '@explorer/decoder-serum';
+import { CancelOrderByClientIdV2, getSerumInstructionLabel } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -8,14 +8,14 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import { SerumIxDetailsProps } from './types';
 
 export function CancelOrderByClientIdV2DetailsCard(props: SerumIxDetailsProps<CancelOrderByClientIdV2>) {
-    const { ix, index, result, info, innerCards, childIndex } = props;
+    const { ix, index, result, programName, info, innerCards, childIndex } = props;
 
     return (
         <InstructionCard
             ix={ix}
             index={index}
             result={result}
-            title="Serum Program: Cancel Order By Client Id v2"
+            title={`${programName} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
         >
