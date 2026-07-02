@@ -42,8 +42,8 @@ export type IdlAnalytics = {
 };
 
 /**
- * Fires a `idl_viewed` event when an IDL is displayed to the user.
- * Includes `idl_type` to differentiate between anchor and codama IDLs.
+ * Fires an `idl_viewed` event when an IDL is displayed to the user.
+ * The IDL standard is encoded in the event name (`iidl_anchor_idl_viewed` vs `iidl_codama_idl_viewed`).
  * This is the top-of-funnel event for IDL engagement analytics.
  */
 export function trackIdlViewed(standard: IdlStandard, programId?: string): void {

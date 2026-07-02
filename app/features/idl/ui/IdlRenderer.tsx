@@ -2,7 +2,7 @@ import { type AnchorIdl, CodamaIdl, getDisplayIdlSpecType, getIdlStandard, type 
 import ReactJson from '@microlink/react-json-view';
 import { PublicKey } from '@solana/web3.js';
 import { useSetAtom } from 'jotai';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { AnchorFormattedIdl } from '../formatted-idl/ui/AnchorFormattedIdl';
@@ -32,13 +32,14 @@ export function IdlRenderer({
         setProgramId(new PublicKey(programId));
     }, [idl, programId, setOriginalIdl, setProgramId]);
 
-    const [hasTrackedView, setHasTrackedView] = useState(false);
+    const trackedKey = useRef<string | null>(null);
     useEffect(() => {
-        if (!hasTrackedView) {
+        const key = `${programId}:${getIdlStandard(idl)}`;
+        if (trackedKey.current !== key) {
+            trackedKey.current = key;
             trackIdlViewed(getIdlStandard(idl), programId);
-            setHasTrackedView(true);
         }
-    }, [hasTrackedView, idl, programId]);
+    }, [idl, programId]);
 
     if (raw) {
         return <IdlJson idl={idl} collapsed={collapsed} />;
