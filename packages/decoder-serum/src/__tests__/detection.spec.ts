@@ -9,7 +9,7 @@ import {
     parseSerumInstructionTitle,
     resolveSerumInstructionName,
 } from '../detection';
-import { OPEN_BOOK_PROGRAM_ID } from '../program-ids';
+import { OPEN_BOOK_PROGRAM_IDS } from '../program-ids';
 import { ENCODED_INSTRUCTIONS, makeInstruction, makeRawInstructionData, SERUM_PROGRAM_IDS_BY_NAME } from './fixtures';
 
 describe('isSerumInstruction', () => {
@@ -53,7 +53,7 @@ describe('isDeprecatedSerumProgram', () => {
     });
 
     it('should return false for OpenBook', () => {
-        expect(isDeprecatedSerumProgram(OPEN_BOOK_PROGRAM_ID)).toBe(false);
+        expect(isDeprecatedSerumProgram(OPEN_BOOK_PROGRAM_IDS.mainnet)).toBe(false);
     });
 
     it('should return false for an unrelated program id', () => {
@@ -85,7 +85,9 @@ describe('parseSerumInstructionCode', () => {
 
 describe('resolveSerumInstructionName', () => {
     it('should resolve the instruction name from a program id and discriminator', () => {
-        expect(resolveSerumInstructionName(OPEN_BOOK_PROGRAM_ID, makeRawInstructionData(2))).toBe('Match Orders');
+        expect(resolveSerumInstructionName(OPEN_BOOK_PROGRAM_IDS.mainnet, makeRawInstructionData(2))).toBe(
+            'Match Orders',
+        );
     });
 
     it('should resolve for deprecated serum program ids', () => {
@@ -101,11 +103,11 @@ describe('resolveSerumInstructionName', () => {
     });
 
     it('should return undefined when the discriminator is shorter than 5 bytes', () => {
-        expect(resolveSerumInstructionName(OPEN_BOOK_PROGRAM_ID, new Uint8Array([0, 2]))).toBeUndefined();
+        expect(resolveSerumInstructionName(OPEN_BOOK_PROGRAM_IDS.mainnet, new Uint8Array([0, 2]))).toBeUndefined();
     });
 
     it('should return undefined for an unknown instruction code', () => {
-        expect(resolveSerumInstructionName(OPEN_BOOK_PROGRAM_ID, makeRawInstructionData(255))).toBeUndefined();
+        expect(resolveSerumInstructionName(OPEN_BOOK_PROGRAM_IDS.mainnet, makeRawInstructionData(255))).toBeUndefined();
     });
 });
 

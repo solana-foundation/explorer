@@ -8,18 +8,20 @@ export {
 } from './detection';
 export {
     DEPRECATED_SERUM_PROGRAM_IDS,
-    OPEN_BOOK_PROGRAM_ID,
+    OPEN_BOOK_PROGRAM_IDS,
     OPENBOOK_DEX_PROGRAM_LABEL,
-    SERUM_DEX_V1_PROGRAM_IDS,
     SERUM_DEX_V1_PROGRAM_LABEL,
-    SERUM_DEX_V2_PROGRAM_ID,
+    SERUM_DEX_V1_PROGRAM_IDS,
+    SERUM_DEX_V1B_PROGRAM_IDS,
+    SERUM_DEX_V2_PROGRAM_IDS,
     SERUM_DEX_V2_PROGRAM_LABEL,
-    SERUM_DEX_V3_PROGRAM_ID,
+    SERUM_DEX_V3_PROGRAM_IDS,
     SERUM_DEX_V3_PROGRAM_LABEL,
     SERUM_PROGRAM_IDS,
 } from './program-ids';
 export {
     decodeCancelOrder,
+    decodeSerumInstruction,
     decodeCancelOrderByClientId,
     decodeCancelOrderByClientIdV2,
     decodeCancelOrderV2,
@@ -45,6 +47,7 @@ export type {
     CloseOpenOrders,
     ConsumeEvents,
     ConsumeEventsPermissioned,
+    DecodedSerumInstruction,
     DisableMarket,
     InitializeMarket,
     InitOpenOrders,

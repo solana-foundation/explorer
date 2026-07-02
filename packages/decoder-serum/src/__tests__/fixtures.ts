@@ -6,10 +6,11 @@ import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import BN from 'bn.js';
 
 import {
-    OPEN_BOOK_PROGRAM_ID,
+    OPEN_BOOK_PROGRAM_IDS,
     SERUM_DEX_V1_PROGRAM_IDS,
-    SERUM_DEX_V2_PROGRAM_ID,
-    SERUM_DEX_V3_PROGRAM_ID,
+    SERUM_DEX_V1B_PROGRAM_IDS,
+    SERUM_DEX_V2_PROGRAM_IDS,
+    SERUM_DEX_V3_PROGRAM_IDS,
 } from '../program-ids';
 
 /**
@@ -18,11 +19,11 @@ import {
  * are recognised by isSerumInstruction via SERUM_PROGRAM_IDS.
  */
 export const SERUM_PROGRAM_IDS_BY_NAME = {
-    dexV1: new PublicKey(SERUM_DEX_V1_PROGRAM_IDS[0]),
-    dexV1b: new PublicKey(SERUM_DEX_V1_PROGRAM_IDS[1]),
-    dexV2: new PublicKey(SERUM_DEX_V2_PROGRAM_ID),
-    dexV3: new PublicKey(SERUM_DEX_V3_PROGRAM_ID),
-    openBook: new PublicKey(OPEN_BOOK_PROGRAM_ID),
+    dexV1: new PublicKey(SERUM_DEX_V1_PROGRAM_IDS.mainnet),
+    dexV1b: new PublicKey(SERUM_DEX_V1B_PROGRAM_IDS.mainnet),
+    dexV2: new PublicKey(SERUM_DEX_V2_PROGRAM_IDS.mainnet),
+    dexV3: new PublicKey(SERUM_DEX_V3_PROGRAM_IDS.mainnet),
+    openBook: new PublicKey(OPEN_BOOK_PROGRAM_IDS.mainnet),
 } as const;
 
 /**

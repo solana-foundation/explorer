@@ -1,49 +1,63 @@
+import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
 import {
-    decodeCancelOrder,
-    decodeCancelOrderByClientId,
-    decodeCancelOrderByClientIdV2,
-    decodeCancelOrderV2,
-    decodeCloseOpenOrders,
-    decodeConsumeEvents,
-    decodeConsumeEventsPermissioned,
-    decodeDisableMarket,
-    decodeInitializeMarket,
-    decodeInitOpenOrders,
-    decodeMatchOrders,
-    decodeNewOrder,
-    decodeNewOrderV3,
-    decodePrune,
-    decodeSettleFunds,
-    decodeSweepFees,
+    type DecodedSerumInstruction,
+    decodeSerumInstruction,
     getSerumInstructionLabel,
     OPENBOOK_DEX_PROGRAM_LABEL,
-    parseSerumInstructionKey,
 } from '@explorer/decoder-serum';
 import { useCluster } from '@providers/cluster';
-import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { type PublicKey, type SignatureResult, type TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { BaseTable } from '@/app/shared/ui/Table';
 
-import { CancelOrderByClientIdDetailsCard } from './CancelOrderByClientIdDetails';
-import { CancelOrderByClientIdV2DetailsCard } from './CancelOrderByClientIdV2Details';
-import { CancelOrderDetailsCard } from './CancelOrderDetails';
-import { CancelOrderV2DetailsCard } from './CancelOrderV2Details';
-import { CloseOpenOrdersDetailsCard } from './CloseOpenOrdersDetails';
-import { ConsumeEventsDetailsCard } from './ConsumeEventsDetails';
-import { ConsumeEventsPermissionedDetailsCard } from './ConsumeEventsPermissionedDetails';
-import { DisableMarketDetailsCard } from './DisableMarketDetails';
-import { InitializeMarketDetailsCard } from './InitializeMarketDetailsCard';
-import { InitOpenOrdersDetailsCard } from './InitOpenOrdersDetails';
-import { MatchOrdersDetailsCard } from './MatchOrdersDetailsCard';
-import { NewOrderDetailsCard } from './NewOrderDetailsCard';
-import { NewOrderV3DetailsCard } from './NewOrderV3DetailsCard';
-import { PruneDetailsCard } from './PruneDetails';
-import { SettleFundsDetailsCard } from './SettleFundsDetailsCard';
-import { SweepFeesDetailsCard } from './SweepFeesDetails';
+// e.g. `openOrdersOwner` → "Open Orders Owner"
+const isUpperCase = (letter: string): boolean => letter !== letter.toLowerCase();
+const fieldLabel = (field: string): string => {
+    const spaced = [...field].map(letter => (isUpperCase(letter) ? ` ${letter}` : letter)).join('');
+    return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+};
 
-export function SerumDetailsCard(initialProps: {
+function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+    return (
+        <BaseTable.Row>
+            <BaseTable.Cell>{label}</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">{children}</BaseTable.Cell>
+        </BaseTable.Row>
+    );
+}
+
+function AccountRows({ accounts }: { accounts: Record<string, PublicKey | PublicKey[] | undefined> }) {
+    return (
+        <>
+            {Object.entries(accounts)
+                .filter((entry): entry is [string, PublicKey | PublicKey[]] => entry[1] !== undefined)
+                .map(([field, value]) => (
+                    <FieldRow key={field} label={fieldLabel(field)}>
+                        {(Array.isArray(value) ? value : [value]).map((pubkey, i) => (
+                            <Address key={i} pubkey={pubkey} alignRight link />
+                        ))}
+                    </FieldRow>
+                ))}
+        </>
+    );
+}
+
+function DataRows({ data }: { data: Record<string, string | number | bigint> }) {
+    return (
+        <>
+            {Object.entries(data).map(([field, value]) => (
+                <FieldRow key={field} label={fieldLabel(field)}>
+                    {field === 'side' ? String(value).toUpperCase() : String(value)}
+                </FieldRow>
+            ))}
+        </>
+    );
+}
+
+export function SerumDetailsCard(props: {
     ix: TransactionInstruction;
     index: number;
     result: SignatureResult;
@@ -51,53 +65,14 @@ export function SerumDetailsCard(initialProps: {
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const { ix, index, result, signature, innerCards, childIndex } = initialProps;
-
-    // Deprecated Serum deployments never reach this card (they render the generic name-only card), so OpenBook is the only program left.
-    const props = React.useMemo(() => ({ ...initialProps, programName: OPENBOOK_DEX_PROGRAM_LABEL }), [initialProps]);
-
+    const { ix, index, result, signature, innerCards, childIndex } = props;
     const { url } = useCluster();
 
+    let decoded: DecodedSerumInstruction | undefined;
     try {
-        switch (parseSerumInstructionKey(ix)) {
-            case 'initializeMarket':
-                return <InitializeMarketDetailsCard info={decodeInitializeMarket(ix)} {...props} />;
-            case 'newOrder':
-                return <NewOrderDetailsCard info={decodeNewOrder(ix)} {...props} />;
-            case 'matchOrders':
-                return <MatchOrdersDetailsCard info={decodeMatchOrders(ix)} {...props} />;
-            case 'consumeEvents':
-                return <ConsumeEventsDetailsCard info={decodeConsumeEvents(ix)} {...props} />;
-            case 'cancelOrder':
-                return <CancelOrderDetailsCard info={decodeCancelOrder(ix)} {...props} />;
-            case 'settleFunds':
-                return <SettleFundsDetailsCard info={decodeSettleFunds(ix)} {...props} />;
-            case 'cancelOrderByClientId':
-                return <CancelOrderByClientIdDetailsCard info={decodeCancelOrderByClientId(ix)} {...props} />;
-            case 'disableMarket':
-                return <DisableMarketDetailsCard info={decodeDisableMarket(ix)} {...props} />;
-            case 'sweepFees':
-                return <SweepFeesDetailsCard info={decodeSweepFees(ix)} {...props} />;
-            case 'newOrderV3':
-                return <NewOrderV3DetailsCard info={decodeNewOrderV3(ix)} {...props} />;
-            case 'cancelOrderV2':
-                return <CancelOrderV2DetailsCard info={decodeCancelOrderV2(ix)} {...props} />;
-            case 'cancelOrderByClientIdV2':
-                return <CancelOrderByClientIdV2DetailsCard info={decodeCancelOrderByClientIdV2(ix)} {...props} />;
-            case 'closeOpenOrders':
-                return <CloseOpenOrdersDetailsCard info={decodeCloseOpenOrders(ix)} {...props} />;
-            case 'initOpenOrders':
-                return <InitOpenOrdersDetailsCard info={decodeInitOpenOrders(ix)} {...props} />;
-            case 'prune':
-                return <PruneDetailsCard info={decodePrune(ix)} {...props} />;
-            case 'consumeEventsPermissioned':
-                return <ConsumeEventsPermissionedDetailsCard info={decodeConsumeEventsPermissioned(ix)} {...props} />;
-        }
+        decoded = decodeSerumInstruction(ix);
     } catch (error) {
-        Logger.error(error, {
-            signature,
-            url,
-        });
+        Logger.error(error, { signature, url });
     }
 
     return (
@@ -105,10 +80,20 @@ export function SerumDetailsCard(initialProps: {
             ix={ix}
             index={index}
             result={result}
-            title={`${props.programName} Program: ${getSerumInstructionLabel(ix)}`}
+            title={`${OPENBOOK_DEX_PROGRAM_LABEL} Program: ${getSerumInstructionLabel(ix)}`}
             innerCards={innerCards}
             childIndex={childIndex}
-            defaultRaw
-        />
+            defaultRaw={decoded === undefined}
+        >
+            {decoded && (
+                <>
+                    <FieldRow label="Program">
+                        <Address pubkey={decoded.info.programId} alignRight link />
+                    </FieldRow>
+                    <AccountRows accounts={decoded.info.accounts} />
+                    {'data' in decoded.info && <DataRows data={decoded.info.data} />}
+                </>
+            )}
+        </InstructionCard>
     );
 }

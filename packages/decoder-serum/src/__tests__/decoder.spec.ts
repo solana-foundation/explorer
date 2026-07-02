@@ -15,6 +15,7 @@ import {
     decodeNewOrder,
     decodeNewOrderV3,
     decodePrune,
+    decodeSerumInstruction,
     decodeSettleFunds,
     decodeSweepFees,
     parseSerumInstructionKey,
@@ -79,6 +80,12 @@ describe('decodeCancelOrder', () => {
         expect(result.data.orderId).toBe(170141183460469231731687303715884105727n);
         expect(result.data.side).toBe('sell');
     });
+
+    it('should strip layout fields absent from the schema', () => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.cancelOrder, programId);
+        // the wire layout embeds an `openOrders` pubkey inside the data; only schema fields may reach the UI
+        expect(Object.keys(decodeCancelOrder(ix).data)).toEqual(['side', 'orderId', 'openOrdersSlot']);
+    });
 });
 
 describe('decodeCancelOrderV2', () => {
@@ -101,6 +108,19 @@ describe('decodeCancelOrderByClientIdV2', () => {
     it('should decode the client id', () => {
         const ix = makeInstruction(ENCODED_INSTRUCTIONS.cancelOrderByClientIdV2, programId);
         expect(decodeCancelOrderByClientIdV2(ix).data.clientId).toBe(123n);
+    });
+});
+
+describe('decodeSerumInstruction', () => {
+    it.each(Object.keys(ENCODED_INSTRUCTIONS).map(key => [key]))('should dispatch %s to its decoder', key => {
+        const data = ENCODED_INSTRUCTIONS[key as keyof typeof ENCODED_INSTRUCTIONS];
+        const decoded = decodeSerumInstruction(makeInstruction(data, programId));
+        expect(decoded.key).toBe(key);
+        expect(decoded.info.programId.equals(programId)).toBe(true);
+    });
+
+    it('should throw on data the instruction layout cannot decode', () => {
+        expect(() => decodeSerumInstruction(makeInstruction(makeRawInstructionData(13), programId))).toThrow();
     });
 });
 
