@@ -18,6 +18,11 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://explorer.solana.com/address/4ckmDgGdxQoPDLUkDT3vHgSAkzA3QRdNq5ywwY4sUSJn</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://explorer.solana.com/address/675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
@@ -39,6 +44,11 @@
   </url>
   <url>
     <loc>https://explorer.solana.com/address/ComputeBudget111111111111111111111111111111</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://explorer.solana.com/address/BJ3jrUzddfuSrZHXSCxMUUQsjKEyLmuuyZebkcaFp2fg</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>
@@ -123,12 +133,27 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://explorer.solana.com/address/srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://explorer.solana.com/address/ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://explorer.solana.com/address/RVKd61ztZW9GUwhRbbLoYVRE5Xf1B2tVscKqwZqXgEr</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://explorer.solana.com/address/EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://explorer.solana.com/address/9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>
@@ -218,12 +243,12 @@
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://explorer.solana.com/address/metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s</loc>
+    <loc>https://explorer.solana.com/address/mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://explorer.solana.com/address/mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68</loc>
+    <loc>https://explorer.solana.com/address/metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>
@@ -234,11 +259,6 @@
   </url>
   <url>
     <loc>https://explorer.solana.com/address/oreV2ZymfyeXgNgBdqMkumTqqAprVqgBWQfoYkrtKWQ</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://explorer.solana.com/address/srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>

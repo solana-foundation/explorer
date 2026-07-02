@@ -1,10 +1,10 @@
 import { Address } from '@components/common/Address';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { CancelOrderByClientId } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import { CancelOrderByClientId } from '@explorer/decoder-serum';
 import { SerumIxDetailsProps } from './types';
 
 export function CancelOrderByClientIdDetailsCard(props: SerumIxDetailsProps<CancelOrderByClientId>) {

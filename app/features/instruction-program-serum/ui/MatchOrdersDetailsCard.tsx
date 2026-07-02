@@ -1,10 +1,10 @@
 import { Address } from '@components/common/Address';
+import { InstructionCard } from '@components/instruction/InstructionCard';
+import { MatchOrders } from '@explorer/decoder-serum';
 import React from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import { MatchOrders } from '@explorer/decoder-serum';
 import { SerumIxDetailsProps } from './types';
 
 export function MatchOrdersDetailsCard(props: SerumIxDetailsProps<MatchOrders>) {

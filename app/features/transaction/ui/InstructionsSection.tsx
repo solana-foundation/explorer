@@ -27,7 +27,11 @@ import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProo
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
 import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
-import { isSerumInstruction } from '@explorer/decoder-serum/detection';
+import {
+    getSerumInstructionLabel,
+    isDeprecatedSerumProgram,
+    isSerumInstruction,
+} from '@explorer/decoder-serum/detection';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
@@ -246,6 +250,16 @@ function InstructionCard({
         );
     }
     if (isSerumInstruction(transactionIx)) {
+        // Dead Serum DEX deployments get the generic name-only card; the active OpenBook fork keeps full decoding.
+        if (isDeprecatedSerumProgram(transactionIx.programId.toBase58())) {
+            return (
+                <CommonInstructionDetailsCard
+                    key={key}
+                    {...props}
+                    instructionName={getSerumInstructionLabel(transactionIx)}
+                />
+            );
+        }
         return <SerumDetailsCard key={key} {...props} />;
     }
     if (isTokenSwapInstruction(transactionIx)) {

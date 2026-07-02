@@ -1,11 +1,23 @@
-export { DEPRECATED_SERUM_PROGRAM_IDS, OPEN_BOOK_PROGRAM_ID, SERUM_DECODED_MAX, SERUM_PROGRAM_IDS } from './config';
 export {
+    getSerumInstructionLabel,
     isDeprecatedSerumProgram,
     isSerumInstruction,
     parseSerumInstructionCode,
-    parseSerumInstructionKey,
     parseSerumInstructionTitle,
+    resolveSerumInstructionName,
 } from './detection';
+export {
+    DEPRECATED_SERUM_PROGRAM_IDS,
+    OPEN_BOOK_PROGRAM_ID,
+    OPENBOOK_DEX_PROGRAM_LABEL,
+    SERUM_DEX_V1_PROGRAM_IDS,
+    SERUM_DEX_V1_PROGRAM_LABEL,
+    SERUM_DEX_V2_PROGRAM_ID,
+    SERUM_DEX_V2_PROGRAM_LABEL,
+    SERUM_DEX_V3_PROGRAM_ID,
+    SERUM_DEX_V3_PROGRAM_LABEL,
+    SERUM_PROGRAM_IDS,
+} from './program-ids';
 export {
     decodeCancelOrder,
     decodeCancelOrderByClientId,
@@ -23,6 +35,7 @@ export {
     decodePrune,
     decodeSettleFunds,
     decodeSweepFees,
+    parseSerumInstructionKey,
 } from './decoder';
 export type {
     CancelOrder,

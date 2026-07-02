@@ -145,9 +145,6 @@ importers:
       '@onsol/tldparser':
         specifier: 0.6.5
         version: 0.6.5(@solana/web3.js@1.98.4(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10))(bn.js@5.2.1)(borsh@0.7.0)(buffer@6.0.3)(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)
-      '@project-serum/serum':
-        specifier: 0.13.61
-        version: 0.13.61(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)
       '@radix-ui/react-accordion':
         specifier: 1.2.3
         version: 1.2.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -600,19 +597,28 @@ importers:
       '@project-serum/serum':
         specifier: 0.13.61
         version: 0.13.61(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@solana/kit':
+        specifier: ^6.5.0
+        version: 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
       '@solana/web3.js':
         specifier: ^1.98.0
         version: 1.98.4(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      bn.js:
+        specifier: 5.2.1
+        version: 5.2.1
       superstruct:
         specifier: 0.15.3
         version: 0.15.3
     devDependencies:
+      '@types/bn.js':
+        specifier: 5.1.0
+        version: 5.1.0
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:tooling
         version: 5.7.3
       vitest:
-        specifier: 'catalog:'
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.3)(@vitest/browser@3.2.4)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.7)(utf-8-validate@5.0.10))(lightningcss@1.29.2)(msw@2.7.5(@types/node@22.15.3)(typescript@5.7.3))(sass@1.53.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)
+        specifier: catalog:vitest
+        version: 4.1.8(@opentelemetry/api@1.9.0)(@types/node@22.15.3)(@vitest/browser-playwright@4.1.8)(@vitest/coverage-v8@4.1.8)(jsdom@26.0.0(bufferutil@4.0.7)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.15.3)(typescript@5.7.3))(vite@6.3.6(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
 
 packages:
 

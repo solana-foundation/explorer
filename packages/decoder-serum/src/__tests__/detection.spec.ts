@@ -1,37 +1,30 @@
-import { MARKETS } from '@project-serum/serum';
 import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { OPEN_BOOK_PROGRAM_ID } from '../config';
 import {
+    getSerumInstructionLabel,
     isDeprecatedSerumProgram,
     isSerumInstruction,
     parseSerumInstructionCode,
-    parseSerumInstructionKey,
     parseSerumInstructionTitle,
+    resolveSerumInstructionName,
 } from '../detection';
+import { OPEN_BOOK_PROGRAM_ID } from '../program-ids';
 import { ENCODED_INSTRUCTIONS, makeInstruction, makeRawInstructionData, SERUM_PROGRAM_IDS_BY_NAME } from './fixtures';
 
 describe('isSerumInstruction', () => {
     it.each([
-        ['legacyV1', SERUM_PROGRAM_IDS_BY_NAME.legacyV1],
-        ['legacyV2', SERUM_PROGRAM_IDS_BY_NAME.legacyV2],
+        ['dexV1', SERUM_PROGRAM_IDS_BY_NAME.dexV1],
+        ['dexV1b', SERUM_PROGRAM_IDS_BY_NAME.dexV1b],
+        ['dexV2', SERUM_PROGRAM_IDS_BY_NAME.dexV2],
+        ['dexV3', SERUM_PROGRAM_IDS_BY_NAME.dexV3],
         ['openBook', SERUM_PROGRAM_IDS_BY_NAME.openBook],
-    ] as const)('returns true for the %s program id', (_name, programId) => {
+    ] as const)('should return true for the %s program id', (_name, programId) => {
         const ix = makeInstruction(ENCODED_INSTRUCTIONS.matchOrders, programId);
         expect(isSerumInstruction(ix)).toBe(true);
     });
 
-    it('returns true for any program id present in MARKETS', () => {
-        const marketProgramId = MARKETS.map(m => m.programId).find(Boolean);
-        if (!marketProgramId) {
-            throw new Error('MARKETS list unexpectedly contains no programIds');
-        }
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS.matchOrders, marketProgramId);
-        expect(isSerumInstruction(ix)).toBe(true);
-    });
-
-    it('returns false for the System Program', () => {
+    it('should return false for the System Program', () => {
         const ix = new TransactionInstruction({
             data: Buffer.alloc(5),
             keys: [],
@@ -40,7 +33,7 @@ describe('isSerumInstruction', () => {
         expect(isSerumInstruction(ix)).toBe(false);
     });
 
-    it('returns false for an unrelated SPL program id', () => {
+    it('should return false for an unrelated SPL program id', () => {
         const ix = makeInstruction(
             ENCODED_INSTRUCTIONS.matchOrders,
             new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
@@ -51,8 +44,10 @@ describe('isSerumInstruction', () => {
 
 describe('isDeprecatedSerumProgram', () => {
     it.each([
-        ['legacyV1', SERUM_PROGRAM_IDS_BY_NAME.legacyV1],
-        ['legacyV2', SERUM_PROGRAM_IDS_BY_NAME.legacyV2],
+        ['dexV1', SERUM_PROGRAM_IDS_BY_NAME.dexV1],
+        ['dexV1b', SERUM_PROGRAM_IDS_BY_NAME.dexV1b],
+        ['dexV2', SERUM_PROGRAM_IDS_BY_NAME.dexV2],
+        ['dexV3', SERUM_PROGRAM_IDS_BY_NAME.dexV3],
     ] as const)('should return true for the deprecated %s program id', (_name, programId) => {
         expect(isDeprecatedSerumProgram(programId.toBase58())).toBe(true);
     });
@@ -82,9 +77,35 @@ describe('parseSerumInstructionCode', () => {
         ['initOpenOrders', 15],
         ['prune', 16],
         ['consumeEventsPermissioned', 17],
-    ] as const)('returns %i for %s', (key, expected) => {
+    ] as const)('should return %i for %s', (key, expected) => {
         const ix = makeInstruction(ENCODED_INSTRUCTIONS[key], SERUM_PROGRAM_IDS_BY_NAME.openBook);
         expect(parseSerumInstructionCode(ix)).toBe(expected);
+    });
+});
+
+describe('resolveSerumInstructionName', () => {
+    it('should resolve the instruction name from a program id and discriminator', () => {
+        expect(resolveSerumInstructionName(OPEN_BOOK_PROGRAM_ID, makeRawInstructionData(2))).toBe('Match Orders');
+    });
+
+    it('should resolve for deprecated serum program ids', () => {
+        expect(
+            resolveSerumInstructionName(SERUM_PROGRAM_IDS_BY_NAME.dexV3.toBase58(), makeRawInstructionData(10)),
+        ).toBe('New Order v3');
+    });
+
+    it('should return undefined for an unrelated program id', () => {
+        expect(
+            resolveSerumInstructionName('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', makeRawInstructionData(2)),
+        ).toBeUndefined();
+    });
+
+    it('should return undefined when the discriminator is shorter than 5 bytes', () => {
+        expect(resolveSerumInstructionName(OPEN_BOOK_PROGRAM_ID, new Uint8Array([0, 2]))).toBeUndefined();
+    });
+
+    it('should return undefined for an unknown instruction code', () => {
+        expect(resolveSerumInstructionName(OPEN_BOOK_PROGRAM_ID, makeRawInstructionData(255))).toBeUndefined();
     });
 });
 
@@ -108,35 +129,35 @@ describe('parseSerumInstructionTitle', () => {
         [15, 'Init Open Orders'],
         [16, 'Prune'],
         [17, 'Consume Events Permissioned'],
-    ] as const)('maps code %i to "%s"', (code, expected) => {
+    ] as const)('should map code %i to "%s"', (code, expected) => {
         const ix = makeInstruction(makeRawInstructionData(code), SERUM_PROGRAM_IDS_BY_NAME.openBook);
         expect(parseSerumInstructionTitle(ix)).toBe(expected);
     });
 
-    it('throws on an unknown instruction code', () => {
+    it('should throw on an unknown instruction code', () => {
         const ix = makeInstruction(makeRawInstructionData(255), SERUM_PROGRAM_IDS_BY_NAME.openBook);
         expect(() => parseSerumInstructionTitle(ix)).toThrow('Unrecognized Serum instruction code: 255');
     });
+
+    it('should throw on data too short to hold an instruction code', () => {
+        const ix = makeInstruction(Buffer.from([0, 2]), SERUM_PROGRAM_IDS_BY_NAME.openBook);
+        expect(() => parseSerumInstructionTitle(ix)).toThrow('Serum instruction data too short (2 bytes)');
+    });
 });
 
-describe('parseSerumInstructionKey', () => {
-    it.each([
-        ['initializeMarket'],
-        ['newOrder'],
-        ['matchOrders'],
-        ['consumeEvents'],
-        ['cancelOrder'],
-        ['settleFunds'],
-        ['cancelOrderByClientId'],
-        ['newOrderV3'],
-        ['cancelOrderV2'],
-        ['cancelOrderByClientIdV2'],
-        ['closeOpenOrders'],
-        ['initOpenOrders'],
-        ['prune'],
-        ['consumeEventsPermissioned'],
-    ] as const)('returns %s for an encoded %s instruction', key => {
-        const ix = makeInstruction(ENCODED_INSTRUCTIONS[key], SERUM_PROGRAM_IDS_BY_NAME.openBook);
-        expect(parseSerumInstructionKey(ix)).toBe(key);
+describe('getSerumInstructionLabel', () => {
+    it('should return the instruction name when resolvable', () => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.newOrderV3, SERUM_PROGRAM_IDS_BY_NAME.dexV3);
+        expect(getSerumInstructionLabel(ix)).toBe('New Order v3');
+    });
+
+    it('should return "No data" for an empty instruction', () => {
+        const ix = makeInstruction(Buffer.alloc(0), SERUM_PROGRAM_IDS_BY_NAME.dexV1);
+        expect(getSerumInstructionLabel(ix)).toBe('No data');
+    });
+
+    it('should return "Unknown" for an unresolvable non-empty instruction', () => {
+        const ix = makeInstruction(makeRawInstructionData(255), SERUM_PROGRAM_IDS_BY_NAME.dexV1);
+        expect(getSerumInstructionLabel(ix)).toBe('Unknown');
     });
 });

@@ -16,7 +16,7 @@ import {
     decodePrune,
     decodeSettleFunds,
     decodeSweepFees,
-    isDeprecatedSerumProgram,
+    OPENBOOK_DEX_PROGRAM_LABEL,
     parseSerumInstructionKey,
     parseSerumInstructionTitle,
 } from '@explorer/decoder-serum';
@@ -53,12 +53,8 @@ export function SerumDetailsCard(initialProps: {
 }) {
     const { ix, index, result, signature, innerCards, childIndex } = initialProps;
 
-    const props = React.useMemo(() => {
-        const programName = isDeprecatedSerumProgram(initialProps.ix.programId.toBase58())
-            ? 'Serum (deprecated)'
-            : 'OpenBook';
-        return { ...initialProps, programName };
-    }, [initialProps]);
+    // Deprecated Serum deployments never reach this card (they render the generic name-only card), so OpenBook is the only program left.
+    const props = React.useMemo(() => ({ ...initialProps, programName: OPENBOOK_DEX_PROGRAM_LABEL }), [initialProps]);
 
     const { url } = useCluster();
 

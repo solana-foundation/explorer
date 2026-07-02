@@ -1,6 +1,6 @@
 import { decodeInstruction } from '@project-serum/serum';
-import { AccountMeta, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { create, enums, Infer, number, type } from 'superstruct';
+import { type AccountMeta, type PublicKey, type TransactionInstruction } from '@solana/web3.js';
+import { create, enums, type Infer, number, type } from 'superstruct';
 
 import { BigIntFromString } from './superstructHelpers';
 
@@ -515,4 +515,15 @@ export function decodeConsumeEventsPermissioned(ix: TransactionInstruction): Con
         data: create(decodeInstruction(ix.data).consumeEventsPermissioned, ConsumeEventsPermissionedInstruction),
         programId: ix.programId,
     };
+}
+
+export function parseSerumInstructionKey(instruction: TransactionInstruction): string {
+    const decoded = decodeInstruction(instruction.data);
+    const keys = Object.keys(decoded);
+
+    if (keys.length < 1) {
+        throw new Error('Serum instruction key not decoded');
+    }
+
+    return keys[0];
 }

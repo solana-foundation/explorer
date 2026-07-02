@@ -1,4 +1,14 @@
 import { MANGO_PROGRAM_IDS, MANGO_V3_PROGRAM_LABEL } from '@explorer/decoder-mango';
+import {
+    OPEN_BOOK_PROGRAM_ID,
+    OPENBOOK_DEX_PROGRAM_LABEL,
+    SERUM_DEX_V1_PROGRAM_IDS,
+    SERUM_DEX_V1_PROGRAM_LABEL,
+    SERUM_DEX_V2_PROGRAM_ID,
+    SERUM_DEX_V2_PROGRAM_LABEL,
+    SERUM_DEX_V3_PROGRAM_ID,
+    SERUM_DEX_V3_PROGRAM_LABEL,
+} from '@explorer/decoder-serum';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
@@ -60,7 +70,6 @@ export enum PROGRAM_NAMES {
     WORMHOLE_CORE = 'Wormhole Core Bridge',
     WORMHOLE_TOKEN = 'Wormhole Token Bridge',
     WORMHOLE_NFT = 'Wormhole NFT Bridge',
-    OPENBOOK_DEX = 'OpenBook Dex',
 
     // ZK Compression
     ZK_LIGHT_SYSTEM_PROGRAM = 'Light System Program',
@@ -116,6 +125,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.WORMHOLE_CORE,
     },
+    [SERUM_DEX_V1_PROGRAM_IDS[0]]: {
+        deployments: [Cluster.MainnetBeta],
+        name: SERUM_DEX_V1_PROGRAM_LABEL,
+    },
     [MANGO_PROGRAM_IDS.devnet]: {
         deployments: [Cluster.Devnet],
         name: MANGO_V3_PROGRAM_LABEL,
@@ -137,18 +150,24 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ASSOCIATED_TOKEN,
     },
+
     // native built-ins
     AddressLookupTab1e1111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ADDRESS_LOOKUP_TABLE,
     },
-    [MANGO_PROGRAM_IDS.testnet]: {
-        deployments: [Cluster.Testnet],
-        name: MANGO_V3_PROGRAM_LABEL,
-    },
+
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.COMPUTE_BUDGET,
+    },
+    [SERUM_DEX_V1_PROGRAM_IDS[1]]: {
+        deployments: [Cluster.MainnetBeta],
+        name: SERUM_DEX_V1_PROGRAM_LABEL,
+    },
+    [MANGO_PROGRAM_IDS.testnet]: {
+        deployments: [Cluster.Testnet],
+        name: MANGO_V3_PROGRAM_LABEL,
     },
     Config1111111111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -218,6 +237,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.MEMO,
     },
+    [OPEN_BOOK_PROGRAM_ID]: {
+        deployments: [Cluster.MainnetBeta],
+        name: OPENBOOK_DEX_PROGRAM_LABEL,
+    },
     ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.PROGRAM_METADATA,
@@ -225,6 +248,14 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     RVKd61ztZW9GUwhRbbLoYVRE5Xf1B2tVscKqwZqXgEr: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.RAYDIUM_LP_1,
+    },
+    [SERUM_DEX_V2_PROGRAM_ID]: {
+        deployments: [Cluster.MainnetBeta],
+        name: SERUM_DEX_V2_PROGRAM_LABEL,
+    },
+    [SERUM_DEX_V3_PROGRAM_ID]: {
+        deployments: [Cluster.MainnetBeta],
+        name: SERUM_DEX_V3_PROGRAM_LABEL,
     },
     SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy: {
         deployments: LIVE_CLUSTERS,
@@ -298,13 +329,13 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.PYTH_DEVNET,
     },
-    metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s: {
-        deployments: LIVE_CLUSTERS,
-        name: PROGRAM_NAMES.TOKEN_METADATA,
-    },
     [MANGO_PROGRAM_IDS.mainnet]: {
         deployments: [Cluster.MainnetBeta],
         name: MANGO_V3_PROGRAM_LABEL,
+    },
+    metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s: {
+        deployments: LIVE_CLUSTERS,
+        name: PROGRAM_NAMES.TOKEN_METADATA,
     },
     namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX: {
         deployments: LIVE_CLUSTERS,
@@ -313,10 +344,6 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     oreV2ZymfyeXgNgBdqMkumTqqAprVqgBWQfoYkrtKWQ: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.ORE,
-    },
-    srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX: {
-        deployments: [Cluster.MainnetBeta],
-        name: PROGRAM_NAMES.OPENBOOK_DEX,
     },
     vau1zxA2LbssAUEF7Gpw91zMM1LvXrvpzJtmZ58rPsn: {
         deployments: LIVE_CLUSTERS,

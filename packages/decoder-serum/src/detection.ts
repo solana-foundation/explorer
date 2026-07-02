@@ -1,29 +1,14 @@
-import { decodeInstruction, MARKETS } from '@project-serum/serum';
-import { TransactionInstruction } from '@solana/web3.js';
+import { type TransactionInstruction } from '@solana/web3.js';
 
-import { DEPRECATED_SERUM_PROGRAM_IDS, SERUM_PROGRAM_IDS } from './config';
+import { DEPRECATED_SERUM_PROGRAM_IDS, SERUM_PROGRAM_IDS } from './program-ids';
 
-export function isSerumInstruction(instruction: TransactionInstruction): boolean {
-    return (
-        SERUM_PROGRAM_IDS.includes(instruction.programId.toBase58()) ||
-        MARKETS.some(market => market.programId && market.programId.equals(instruction.programId))
-    );
-}
+const programIds = new Set<string>(SERUM_PROGRAM_IDS);
+const deprecatedProgramIds = new Set<string>(DEPRECATED_SERUM_PROGRAM_IDS);
 
-export function isDeprecatedSerumProgram(programId: string): boolean {
-    return DEPRECATED_SERUM_PROGRAM_IDS.includes(programId);
-}
+export const isSerumInstruction = (instruction: TransactionInstruction): boolean =>
+    programIds.has(instruction.programId.toBase58());
 
-export function parseSerumInstructionKey(instruction: TransactionInstruction): string {
-    const decoded = decodeInstruction(instruction.data);
-    const keys = Object.keys(decoded);
-
-    if (keys.length < 1) {
-        throw new Error('Serum instruction key not decoded');
-    }
-
-    return keys[0];
-}
+export const isDeprecatedSerumProgram = (programId: string): boolean => deprecatedProgramIds.has(programId);
 
 const SERUM_CODE_LOOKUP: { [key: number]: string } = {
     0: 'Initialize Market',
@@ -46,21 +31,34 @@ const SERUM_CODE_LOOKUP: { [key: number]: string } = {
     9: 'New Order v2',
 };
 
-function readUint32LE(bytes: Uint8Array, offset: number): number {
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    return view.getUint32(offset, true);
-}
+// Serum keys its instructions by a version byte followed by a u32 LE instruction code.
+const readInstructionCode = (data: Uint8Array): number =>
+    new DataView(data.buffer, data.byteOffset, data.byteLength).getUint32(1, true);
 
-export function parseSerumInstructionCode(instruction: TransactionInstruction): number {
-    return readUint32LE(instruction.data.slice(1, 5), 0);
-}
+export const parseSerumInstructionCode = (instruction: TransactionInstruction): number =>
+    readInstructionCode(instruction.data);
 
-export function parseSerumInstructionTitle(instruction: TransactionInstruction): string {
-    const code = parseSerumInstructionCode(instruction);
+// Name-only resolver for the NAME_SOURCES chain: program-id-gated and never throws, so it composes with other resolvers.
+export const resolveSerumInstructionName = (programId: string, discriminator: Uint8Array): string | undefined => {
+    if (!programIds.has(programId) || discriminator.byteLength < 5) return undefined;
+    return SERUM_CODE_LOOKUP[readInstructionCode(discriminator)];
+};
 
-    if (!(code in SERUM_CODE_LOOKUP)) {
-        throw new Error(`Unrecognized Serum instruction code: ${code}`);
+export const parseSerumInstructionTitle = (instruction: TransactionInstruction): string => {
+    const title = resolveSerumInstructionName(instruction.programId.toBase58(), instruction.data);
+    if (title === undefined) {
+        throw new Error(
+            instruction.data.byteLength < 5
+                ? `Serum instruction data too short (${instruction.data.byteLength} bytes)`
+                : `Unrecognized Serum instruction code: ${readInstructionCode(instruction.data)}`,
+        );
     }
+    return title;
+};
 
-    return SERUM_CODE_LOOKUP[code];
-}
+// Guaranteed-string label for the deprecated card; the resolver returns undefined when there's no readable code.
+export const getSerumInstructionLabel = (instruction: TransactionInstruction): string =>
+    resolveSerumInstructionName(instruction.programId.toBase58(), instruction.data) ??
+    (instruction.data.length === 0 ? 'No data' : 'Unknown');
+
+export { DEPRECATED_SERUM_PROGRAM_IDS, OPEN_BOOK_PROGRAM_ID, SERUM_PROGRAM_IDS } from './program-ids';
