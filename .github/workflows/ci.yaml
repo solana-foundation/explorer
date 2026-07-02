@@ -150,9 +150,25 @@ jobs:
       matrix:
         node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '24.x']
 
+    # The browser-mode sweep has repeatedly died on a full root partition ("No space left on device").
+    # Browsers live on the runner's ~65 GB /mnt scratch disk (PLAYWRIGHT_BROWSERS_PATH is what playwright
+    # actually honors); the pnpm store stays on / so node_modules keeps hardlinking, with `pnpm store prune`
+    # stopping the restore-keys snowball. Job-own cache affixes keep old archives out.
+    env:
+      PNPM_CACHE_AFFIX: pnpm-sb
+      PW_CACHE_FOLDER: /mnt/cache/ms-playwright
+      PW_CACHE_AFFIX: pw-mnt
+      PLAYWRIGHT_BROWSERS_PATH: /mnt/cache/ms-playwright
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Prepare browser cache dir on the scratch disk
+        run: |
+          sudo mkdir -p /mnt/cache/ms-playwright
+          sudo chown -R "$(id -u):$(id -g)" /mnt/cache
+          df -h / /mnt
 
       - name: Install package manager
         uses: pnpm/action-setup@v4
@@ -186,6 +202,10 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # Drops store packages no longer referenced by the lockfile so the restored-then-saved cache stays bounded.
+      - name: Prune pnpm store
+        run: pnpm store prune
 
       - name: Install Playwright browsers
         if: steps.pw_cache.outputs.cache-hit != 'true'
