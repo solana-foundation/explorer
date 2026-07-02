@@ -39,7 +39,7 @@ export async function botIdMiddleware(request) {
     try {
         verification = await checkBotId({
             developmentOptions: {
-                bypass: isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT) ? 'BAD-BOT' : undefined,
+                bypass: isEnvEnabled(process.env.NEXT_PUBLIC_BOTID_DEV_SIMULATE_BOT) ? 'BAD-BOT' : undefined,
             },
         });
     } catch (error) {

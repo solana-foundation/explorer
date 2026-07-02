@@ -214,7 +214,7 @@ describe('botIdMiddleware', () => {
     describe('simulate bot mode', () => {
         it('should pass through when simulate bot mode is enabled but challenge mode is disabled', async () => {
             process.env.NEXT_PUBLIC_BOTID_ENABLED = 'true';
-            process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT = 'true';
+            process.env.NEXT_PUBLIC_BOTID_DEV_SIMULATE_BOT = 'true';
 
             vi.mocked(checkBotId).mockResolvedValue({
                 bypassed: true,
@@ -235,7 +235,7 @@ describe('botIdMiddleware', () => {
 
         it('should block request when both simulate bot mode and challenge mode are enabled', async () => {
             process.env.NEXT_PUBLIC_BOTID_ENABLED = 'true';
-            process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT = 'true';
+            process.env.NEXT_PUBLIC_BOTID_DEV_SIMULATE_BOT = 'true';
             process.env.NEXT_PUBLIC_BOTID_CHALLENGE_MODE_ENABLED = 'true';
 
             vi.mocked(checkBotId).mockResolvedValue({
