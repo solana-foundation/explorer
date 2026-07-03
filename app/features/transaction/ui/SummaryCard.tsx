@@ -12,7 +12,7 @@ import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
 import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
-import { useCluster } from '@providers/cluster';
+import { useCluster, useClusterInfo } from '@providers/cluster';
 import {
     TransactionStatusInfo,
     useFetchTransactionStatus,
@@ -102,7 +102,8 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
     const rawDetails = useRawTransactionDetails(signature);
-    const { cluster, clusterInfo, name: clusterName, status: clusterStatus, url: clusterUrl } = useCluster();
+    const { cluster, name: clusterName, status: clusterStatus, url: clusterUrl } = useCluster();
+    const clusterInfo = useClusterInfo();
     const inspectPath = useClusterPath({ pathname: `/tx/${signature}/inspect` });
     const receiptPath = useClusterPath({
         additionalParams: new URLSearchParams({ view: 'receipt' }),

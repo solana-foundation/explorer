@@ -1,7 +1,8 @@
 'use client';
 
-import { useCluster, useClusterModal } from '@providers/cluster';
+import { clusterModalOpenAtom, useCluster } from '@providers/cluster';
 import { Cluster, ClusterStatus } from '@utils/cluster';
+import { useSetAtom } from 'jotai';
 import React, { useCallback } from 'react';
 import { AlertCircle, CheckCircle } from 'react-feather';
 
@@ -21,7 +22,7 @@ function getCustomUrlClusterName(customUrl: string) {
 
 export const ClusterStatusButton = () => {
     const { status, cluster, name, customUrl } = useCluster();
-    const [, setShow] = useClusterModal();
+    const setShow = useSetAtom(clusterModalOpenAtom);
 
     const onClickHandler = useCallback(() => setShow(true), [setShow]);
     const statusName = cluster !== Cluster.Custom ? `${name}` : getCustomUrlClusterName(customUrl);

@@ -137,7 +137,7 @@ type InnerProps = PropsWithChildren<{ params: AddressParams }>;
 
 function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const fetchAccount = useFetchAccountInfo();
-    const { status, cluster, url, clusterInfo } = useCluster();
+    const { status, cluster, url, genesisHash } = useCluster();
     const info = useAccountInfo(address);
 
     let pubkey: PublicKey | undefined;
@@ -154,7 +154,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const shouldFetchTokenInfo =
         infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey;
     const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
-        shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, clusterInfo?.genesisHash) : null,
+        shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, genesisHash) : null,
         fetchFullTokenInfo,
     );
 

@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/shared/ui/tabs';
-import { useCluster } from '@/app/providers/cluster';
+import { useCluster, useClusterInfo } from '@/app/providers/cluster';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { Cluster, clusterName, clusterSlug } from '@/app/utils/cluster';
 
@@ -28,7 +28,8 @@ type EpochScheduleInfo = {
 };
 
 export function FeatureGatesView() {
-    const { cluster, clusterInfo } = useCluster();
+    const { cluster } = useCluster();
+    const clusterInfo = useClusterInfo();
     const { activated, upcoming } = useMemo(() => partitionFeatures(cluster), [cluster]);
     const [tab, setTab] = useState<TabValue>('activated');
 
