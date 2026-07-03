@@ -94,6 +94,7 @@ export function getTokenInstructionName(
 
     if (transactionInstruction) {
         try {
+            // Mango is intentionally absent: its resolver lives in the modern NAME_SOURCES chain; consolidating this legacy resolver is a follow-up.
             if (isSerumInstruction(transactionInstruction)) {
                 return parseSerumInstructionTitle(transactionInstruction);
             } else if (isTokenSwapInstruction(transactionInstruction)) {

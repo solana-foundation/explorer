@@ -20,10 +20,11 @@ const TEST_AND_STORY_FILES = [
 ];
 
 export default tseslint.config(
-    // Global ignores
+    // Global ignores.
+    // packages/* are intentionally not ignored: root `eslint .` (like prettier's `**/*.ts` glob) lints their source with this shared config — only built output is excluded.
     {
         ignores: [
-            'dist/**',
+            '**/dist/**',
             'lib/**',
             '.next/**',
             '.next-dev/**',
@@ -295,8 +296,8 @@ export default tseslint.config(
             '.storybook/**',
             '**/*.stories.[jt]s?(x)',
 
-            // Generic config files
-            '*.config.{ts,mts,js,mjs,cjs}',
+            // Generic config files (including nested ones, e.g. packages/*/vitest.config.ts)
+            '**/*.config.{ts,mts,js,mjs,cjs}',
         ],
         rules: {
             'import/no-default-export': 'off',
@@ -585,10 +586,6 @@ export default tseslint.config(
             'app/components/instruction/codama/CodamaInstructionDetailsCard.tsx',
             'app/components/instruction/codama/codamaUtils.tsx',
             'app/components/instruction/ed25519/Ed25519DetailsCard.tsx',
-            'app/components/instruction/mango/ChangePerpMarketParamsDetailsCard.tsx',
-            'app/components/instruction/mango/PlacePerpOrder2DetailsCard.tsx',
-            'app/components/instruction/mango/PlacePerpOrderDetailsCard.tsx',
-            'app/components/instruction/mango/PlaceSpotOrderDetailsCard.tsx',
             'app/components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard.tsx',
             'app/components/instruction/pyth/UpdateProductDetailsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',

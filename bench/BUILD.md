@@ -2,7 +2,7 @@
 
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
-| Static | `/` | 130 kB | 1.16 MB |
+| Static | `/` | 130 kB | 1.15 MB |
 | Static | `/_not-found` | 0 B | 1.03 MB |
 | Dynamic | `/address/[address]` | 380 kB | 1.40 MB |
 | Dynamic | `/address/[address]/anchor-account` | 370 kB | 1.39 MB |
@@ -15,7 +15,7 @@
 | Dynamic | `/address/[address]/domains` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/entries` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/feature-gate` | 370 kB | 1.39 MB |
-| Dynamic | `/address/[address]/idl` | 510 kB | 1.52 MB |
+| Dynamic | `/address/[address]/idl` | 510 kB | 1.53 MB |
 | Dynamic | `/address/[address]/instructions` | 420 kB | 1.44 MB |
 | Dynamic | `/address/[address]/metadata` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 370 kB | 1.39 MB |
@@ -25,7 +25,7 @@
 | Dynamic | `/address/[address]/slot-hashes` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/stake-history` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/token-extensions` | 380 kB | 1.39 MB |
-| Dynamic | `/address/[address]/tokens` | 510 kB | 1.52 MB |
+| Dynamic | `/address/[address]/tokens` | 430 kB | 1.44 MB |
 | Dynamic | `/address/[address]/transfers` | 420 kB | 1.44 MB |
 | Dynamic | `/address/[address]/verified-build` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/vote-history` | 370 kB | 1.39 MB |
@@ -53,7 +53,7 @@
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
-| Static | `/tos` | 880 B | 1.03 MB |
-| Dynamic | `/tx/[signature]` | 580 kB | 1.60 MB |
+| Static | `/tos` | 890 B | 1.03 MB |
+| Dynamic | `/tx/[signature]` | 500 kB | 1.51 MB |
 | Dynamic | `/tx/[signature]/inspect` | 370 kB | 1.39 MB |
 | Static | `/tx/inspector` | 370 kB | 1.39 MB |

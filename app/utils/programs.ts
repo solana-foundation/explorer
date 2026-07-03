@@ -1,3 +1,4 @@
+import { MANGO_PROGRAM_IDS, MANGO_V3_PROGRAM_LABEL } from '@explorer/decoder-mango';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
@@ -115,6 +116,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.WORMHOLE_CORE,
     },
+    [MANGO_PROGRAM_IDS.devnet]: {
+        deployments: [Cluster.Devnet],
+        name: MANGO_V3_PROGRAM_LABEL,
+    },
     '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8': {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.RAYDIUM_AMM,
@@ -136,6 +141,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     AddressLookupTab1e1111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ADDRESS_LOOKUP_TABLE,
+    },
+    [MANGO_PROGRAM_IDS.testnet]: {
+        deployments: [Cluster.Testnet],
+        name: MANGO_V3_PROGRAM_LABEL,
     },
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -292,6 +301,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s: {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.TOKEN_METADATA,
+    },
+    [MANGO_PROGRAM_IDS.mainnet]: {
+        deployments: [Cluster.MainnetBeta],
+        name: MANGO_V3_PROGRAM_LABEL,
     },
     namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX: {
         deployments: LIVE_CLUSTERS,
