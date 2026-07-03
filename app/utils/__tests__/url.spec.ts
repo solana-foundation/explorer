@@ -26,10 +26,10 @@ describe('pickClusterParams', () => {
             expect(result).toBe('/address/abc123?cluster=devnet');
         });
 
-        it('should preserve customUrl param from current search', () => {
+        it('should not preserve customUrl param when cluster is not custom', () => {
             const currentParams = new URLSearchParams('customUrl=http://localhost:8899');
             const result = pickClusterParams('/address/abc123', currentParams);
-            expect(result).toBe('/address/abc123?customUrl=http%3A%2F%2Flocalhost%3A8899');
+            expect(result).toBe('/address/abc123');
         });
 
         it('should preserve both cluster and customUrl params', () => {
@@ -58,11 +58,11 @@ describe('pickClusterParams', () => {
             expect(result).toBe('/address/abc123?cluster=testnet');
         });
 
-        it('should merge additional params with current params', () => {
+        it('should merge additional params with current params, stripping customUrl when not on custom cluster', () => {
             const currentParams = new URLSearchParams('cluster=devnet');
             const additionalParams = new URLSearchParams('customUrl=http://test.com');
             const result = pickClusterParams('/address/abc123', currentParams, additionalParams);
-            expect(result).toBe('/address/abc123?cluster=devnet&customUrl=http%3A%2F%2Ftest.com');
+            expect(result).toBe('/address/abc123?cluster=devnet');
         });
 
         it('should prioritize additional params over current params for cluster', () => {
@@ -72,10 +72,10 @@ describe('pickClusterParams', () => {
             expect(result).toBe('/address/abc123?cluster=testnet');
         });
 
-        it('should handle multiple params in additional params', () => {
+        it('should handle multiple params in additional params, stripping customUrl when cluster is not custom', () => {
             const additionalParams = new URLSearchParams('cluster=testnet&customUrl=http://test.com');
             const result = pickClusterParams('/address/abc123', undefined, additionalParams);
-            expect(result).toBe('/address/abc123?cluster=testnet&customUrl=http%3A%2F%2Ftest.com');
+            expect(result).toBe('/address/abc123?cluster=testnet');
         });
 
         it('should prioritize additional params over current params for cluster, but keep other search params', () => {
@@ -125,10 +125,10 @@ describe('pickClusterParams', () => {
             expect(result).toBe('/address/abc123');
         });
 
-        it('should preserve customUrl when cluster is mainnet-beta', () => {
+        it('should not preserve customUrl when cluster is mainnet-beta', () => {
             const currentParams = new URLSearchParams('cluster=mainnet-beta&customUrl=http://test.com');
             const result = pickClusterParams('/address/abc123', currentParams);
-            expect(result).toBe('/address/abc123?customUrl=http%3A%2F%2Ftest.com');
+            expect(result).toBe('/address/abc123');
         });
 
         it('should switch from mainnet-beta to other cluster correctly', () => {
@@ -200,7 +200,7 @@ describe('useClusterPath', () => {
             expect(result.current).toBe('/address/abc?cluster=testnet#def#ghi');
         });
 
-        it('should handle additional params with hash', () => {
+        it('should handle additional params with hash, stripping customUrl when not on custom cluster', () => {
             vi.mocked(useSearchParams).mockReturnValue(mockUseSearchParams({ cluster: 'devnet' }) as any);
 
             const additionalParams = new URLSearchParams('customUrl=http://test.com');
@@ -208,7 +208,7 @@ describe('useClusterPath', () => {
                 useClusterPath({ additionalParams, pathname: '/address/abc123#tokens' }),
             );
 
-            expect(result.current).toBe('/address/abc123?cluster=devnet&customUrl=http%3A%2F%2Ftest.com#tokens');
+            expect(result.current).toBe('/address/abc123?cluster=devnet#tokens');
         });
     });
 
