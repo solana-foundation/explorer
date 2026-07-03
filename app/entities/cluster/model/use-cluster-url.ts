@@ -37,14 +37,16 @@ export function useClusterUrl({ cluster, searchParams, onReplaceSearchParams }: 
         }
     }, [paramCustomUrl, rememberedCustomUrl, setRememberedCustomUrl]);
 
-    // Strip the customUrl param when custom URLs aren't allowed.
+    // Strip the customUrl param when custom URLs aren't allowed — including when a later client-side
+    // navigation re-introduces the param while the flag is already off (hence searchParams in the deps).
+    // Stripping clears the param, so the guard is false on the re-run: no loop.
     useEffect(() => {
         if (!enableCustomUrl && searchParams?.has('customUrl')) {
             const nextSearchParams = new URLSearchParams(searchParams.toString());
             nextSearchParams.delete('customUrl');
             onReplaceSearchParams(nextSearchParams);
         }
-    }, [enableCustomUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [enableCustomUrl, searchParams, onReplaceSearchParams]);
 
     return { customUrl, url: clusterUrl(cluster, customUrl) };
 }

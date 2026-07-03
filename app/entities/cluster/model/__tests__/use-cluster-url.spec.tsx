@@ -74,4 +74,31 @@ describe('useClusterUrl', () => {
 
         expect(store.get(rememberedCustomUrlAtom)).toBe('http://remembered:1');
     });
+
+    it('should strip a customUrl param introduced by a later navigation while the flag is off', () => {
+        const store = createStore();
+        const onReplaceSearchParams = vi.fn();
+        const wrapper = ({ children }: { children: ReactNode }) => createElement(Provider, { store }, children);
+        const { rerender } = renderHook(
+            ({ search }: { search: string }) =>
+                useClusterUrl({
+                    cluster: Cluster.Devnet,
+                    onReplaceSearchParams,
+                    searchParams: new URLSearchParams(search),
+                }),
+            { initialProps: { search: 'cluster=devnet' }, wrapper },
+        );
+
+        // Nothing to strip on first render.
+        expect(onReplaceSearchParams).not.toHaveBeenCalled();
+
+        // A later client-side navigation adds ?customUrl while the dev flag is still off. The strip effect
+        // depends on searchParams (not just the flag), so it must fire here and remove the param.
+        rerender({ search: 'cluster=devnet&customUrl=http://evil.com' });
+
+        expect(onReplaceSearchParams).toHaveBeenCalledTimes(1);
+        const stripped = onReplaceSearchParams.mock.calls[0][0] as URLSearchParams;
+        expect(stripped.has('customUrl')).toBe(false);
+        expect(stripped.get('cluster')).toBe('devnet');
+    });
 });
