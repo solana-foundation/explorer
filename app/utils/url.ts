@@ -28,6 +28,7 @@ export function useClusterPath({ additionalParams, pathname }: Config) {
 }
 
 const MAINNET_MONIKER = clusterSlug(Cluster.MainnetBeta);
+const CUSTOM_MONIKER = clusterSlug(Cluster.Custom);
 export function pickClusterParams(
     pathname: string,
     currentSearchParams?: { toString(): string; get(key: string): string | null },
@@ -46,6 +47,10 @@ export function pickClusterParams(
                 if (existingValue) {
                     // Skip mainnet-beta cluster as it's the default
                     if (paramName === 'cluster' && existingValue === MAINNET_MONIKER) {
+                        return;
+                    }
+                    // Only preserve customUrl when cluster is 'custom'
+                    if (paramName === 'customUrl' && currentSearchParams.get('cluster') !== CUSTOM_MONIKER) {
                         return;
                     }
                     nextSearchParams ||= new URLSearchParams();
@@ -68,6 +73,10 @@ export function pickClusterParams(
             }
             params.set(key, value); // Override current with additional
         });
+        // Remove customUrl when not on custom cluster
+        if (params.get('cluster') !== CUSTOM_MONIKER) {
+            params.delete('customUrl');
+        }
     }
     const queryString = nextSearchParams?.toString();
     return `${pathname}${queryString ? `?${queryString}` : ''}`;
