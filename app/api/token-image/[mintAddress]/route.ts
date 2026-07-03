@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 import { getAssetBatch } from '@/app/entities/digital-asset/server';
 import { NO_STORE_HEADERS } from '@/app/shared/lib/http-utils';
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterFromSlug, clusterSlug, serverClusterUrl } from '@/app/utils/cluster';
 
 const IMAGE_CACHE_HEADERS = {
@@ -38,13 +39,19 @@ export async function GET(request: Request, props: Params) {
     }
 
     const rpcUrl = serverClusterUrl(cluster, '');
+    Logger.info(`[token-image] rpcUrl: ${rpcUrl} | mintAddress: ${mintAddress} | cluster: ${cluster}`);
+
     const assets = await getAssetBatch([mintAddress], rpcUrl);
+    Logger.info(`[token-image] getAssetBatch result: ${JSON.stringify(assets)}`);
 
     if (!assets) {
+        Logger.info('[token-image] No assets returned — responding with no-store');
         return NextResponse.json({ image: undefined }, { headers: NO_STORE_HEADERS });
     }
 
     const asset = assets.find(a => a.id === mintAddress);
+    Logger.info(`[token-image] matched asset: ${JSON.stringify(asset)}`);
     const image = asset?.content?.links?.image;
+    Logger.info(`[token-image] image value: ${image}`);
     return NextResponse.json({ image }, { headers: IMAGE_CACHE_HEADERS });
 }

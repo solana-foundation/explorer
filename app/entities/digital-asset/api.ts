@@ -58,6 +58,7 @@ export async function getAssetBatch(
               })
             : null;
 
+        Logger.info(`[das] calling getAssets on ${url} for ids: ${JSON.stringify(ids)}`);
         const response = await (abortPromise ? Promise.race([fetchPromise, abortPromise]) : fetchPromise);
 
         if (!response.ok) {
@@ -66,6 +67,7 @@ export async function getAssetBatch(
         }
 
         const data = await response.json();
+        Logger.info(`[das] raw response: ${JSON.stringify(data)}`);
 
         if (data?.error) {
             Logger.warn(`[das] getAssets RPC error: ${data.error?.message ?? 'unknown'}`);
@@ -74,10 +76,13 @@ export async function getAssetBatch(
 
         const [validationError, validData] = validate(data, GetAssetBatchResponseSchema);
         if (validationError) {
-            Logger.warn(`[das] getAssets invalid response: ${validationError.message}`, { sentry: true });
+            Logger.warn(
+                `[das] getAssets schema validation failed: ${validationError.message} | path: ${validationError.path.join('.')}`,
+            );
             return undefined;
         }
 
+        Logger.info(`[das] validated result count: ${validData.result.length}`);
         return validData.result.filter((item): item is DigitalAsset => item !== null);
     } catch (error) {
         Logger.error(error instanceof Error ? error : new Error('[das] getAssets failed'), {
