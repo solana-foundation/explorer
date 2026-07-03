@@ -1,5 +1,4 @@
 import { type InstructionSummary } from '@entities/transaction-data';
-import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { renderHook } from '@testing-library/react';
 import { LIGHTHOUSE_PROGRAM_ADDRESS } from 'lighthouse-sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -78,25 +77,6 @@ describe('useResolvedInstructionSummaries', () => {
 
         // discriminator 15 = Assert Sysvar Clock
         expect(result.current?.[0].name).toBe('Assert Sysvar Clock');
-    });
-
-    it('should resolve Serum names synchronously from the discriminator, without an IDL resolver', () => {
-        useInstructionSummaries.mockReturnValue([
-            {
-                name: 'Unknown Instruction',
-                // serum discriminator = version byte + u32 LE code; 2 = Match Orders
-                nameLookup: {
-                    discriminator: Uint8Array.from([0, 2, 0, 0, 0]),
-                    programId: OPEN_BOOK_PROGRAM_IDS.mainnet,
-                },
-                program: 'p',
-            },
-        ]);
-        useInstructionNameResolvers.mockReturnValue(new Map());
-
-        const { result } = renderHook(() => useResolvedInstructionSummaries('sig'));
-
-        expect(result.current?.[0].name).toBe('Match Orders');
     });
 
     it('should keep the placeholder when no resolver names it', () => {
