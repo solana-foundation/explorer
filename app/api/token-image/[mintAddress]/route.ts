@@ -41,6 +41,31 @@ export async function GET(request: Request, props: Params) {
     const rpcUrl = serverClusterUrl(cluster, '');
     Logger.info(`[token-image] rpcUrl: ${rpcUrl} | mintAddress: ${mintAddress} | cluster: ${cluster}`);
 
+    // --- FORMAT PROBE: try every common DAS variant in parallel, log each raw result ---
+    const probeVariants: { label: string; method: string; params: unknown }[] = [
+        { label: 'getAsset (singular, {id})', method: 'getAsset', params: { id: mintAddress } },
+        { label: 'getAssets ({ids:[]})', method: 'getAssets', params: { ids: [mintAddress] } },
+        { label: 'getAssetBatch ({ids:[]})', method: 'getAssetBatch', params: { ids: [mintAddress] } },
+        { label: 'getAssets (array params)', method: 'getAssets', params: [mintAddress] },
+        { label: 'getAssetBatch (array params)', method: 'getAssetBatch', params: [mintAddress] },
+    ];
+    await Promise.all(
+        probeVariants.map(async ({ label, method, params }) => {
+            try {
+                const res = await fetch(rpcUrl, {
+                    body: JSON.stringify({ id: 'probe', jsonrpc: '2.0', method, params }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                });
+                const json = await res.json();
+                Logger.info(`[das-probe] ${label}: ${JSON.stringify(json)}`);
+            } catch (err) {
+                Logger.warn(`[das-probe] ${label} threw: ${String(err)}`);
+            }
+        }),
+    );
+    // --- END FORMAT PROBE ---
+
     const assets = await getAssetBatch([mintAddress], rpcUrl);
     Logger.info(`[token-image] getAssetBatch result: ${JSON.stringify(assets)}`);
 
