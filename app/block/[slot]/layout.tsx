@@ -9,7 +9,7 @@ import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
 import { BlockProvider, FetchStatus, useBlock, useFetchBlock } from '@providers/block';
-import { useCluster } from '@providers/cluster';
+import { useCluster, useClusterInfo } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
@@ -36,7 +36,8 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
     }
     const confirmedBlock = useBlock(slotNumber);
     const fetchBlock = useFetchBlock();
-    const { clusterInfo, status, cluster } = useCluster();
+    const { status, cluster } = useCluster();
+    const clusterInfo = useClusterInfo();
     const refresh = () => fetchBlock(slotNumber);
 
     // Fetch block on load

@@ -1,13 +1,12 @@
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useCluster } from '@/app/providers/cluster';
-import { Cluster } from '@/app/utils/cluster';
-
+import { Cluster } from '../../lib/cluster';
+import { useCluster } from '../use-cluster';
 import { buildExplorerLink, useExplorerLink } from '../use-explorer-link';
 
-// Mock only the useCluster hook from the cluster provider
-vi.mock('@/app/providers/cluster', () => ({
+// Mock only the useCluster hook, which useExplorerLink reads for the active cluster.
+vi.mock('../use-cluster', () => ({
     useCluster: vi.fn(),
 }));
 
@@ -194,7 +193,6 @@ describe('useExplorerLink', () => {
 
             expect(result.current.link).toBe('https://explorer.solana.com/address/123');
 
-            // Change cluster to Testnet
             vi.mocked(useCluster).mockReturnValue({
                 cluster: Cluster.Testnet,
                 customUrl: undefined,
@@ -234,7 +232,6 @@ describe('useExplorerLink', () => {
                 'https://explorer.solana.com/address/123?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899',
             );
 
-            // Change customUrl
             vi.mocked(useCluster).mockReturnValue({
                 cluster: Cluster.Custom,
                 customUrl: 'http://localhost:9999',

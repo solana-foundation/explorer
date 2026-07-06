@@ -2,7 +2,7 @@
 
 import { BlockHistoryCard } from '@components/block/BlockHistoryCard';
 import { useBlock, useFetchBlock } from '@providers/block';
-import { useCluster } from '@providers/cluster';
+import { useCluster, useClusterInfo } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { getEpochForSlot } from '@utils/epoch-schedule';
 import { notFound } from 'next/navigation';
@@ -17,7 +17,8 @@ export default function BlockTransactionsTabClient({ params: { slot } }: Props) 
     }
     const confirmedBlock = useBlock(slotNumber);
     const fetchBlock = useFetchBlock();
-    const { status, clusterInfo } = useCluster();
+    const { status } = useCluster();
+    const clusterInfo = useClusterInfo();
 
     // Calculate epoch from slot
     const epoch = React.useMemo(() => {

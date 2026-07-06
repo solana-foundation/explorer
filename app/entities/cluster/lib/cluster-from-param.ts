@@ -1,4 +1,4 @@
-import { Cluster, CLUSTERS, serverClusterUrl } from '@/app/utils/cluster';
+import { Cluster, CLUSTERS, serverClusterUrl } from './cluster';
 
 // Parse a cluster from a numeric query-param string (e.g. "0" → Cluster.MainnetBeta).
 // Avoids `n in Cluster` checks, which depend on the enum's reverse mapping and behave

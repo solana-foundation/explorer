@@ -18,6 +18,7 @@ import {
     VersionedMessage,
 } from '@solana/web3.js';
 import { generated, getBatchTransactionPda, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
+import { ClusterStatus } from '@utils/cluster';
 import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
@@ -463,6 +464,7 @@ export function PermalinkView({
 }) {
     const details = useRawTransactionDetails(signature);
     const fetchTransaction = useFetchRawTransaction();
+    const { status } = useCluster();
     const transaction = details?.data?.raw;
 
     // Fetch on load at 'confirmed' (matches providers/transactions/parsed.tsx) so freshly-confirmed txs resolve fast.
@@ -470,11 +472,13 @@ export function PermalinkView({
         fetchTransaction(signature, 'confirmed');
     }, [fetchTransaction, signature]);
 
+    // Wait for the cluster to connect before fetching — otherwise the first render fetches against the
+    // default (mainnet) URL before the ?cluster= param settles, wasting a request on the wrong cluster.
     React.useEffect(() => {
-        if (!transaction) {
+        if (!transaction && status === ClusterStatus.Connected) {
             fetchConfirmedTx();
         }
-    }, [transaction, fetchConfirmedTx]);
+    }, [transaction, fetchConfirmedTx, status]);
 
     if (!details || details.status === FetchStatus.Fetching) {
         return <LoadingCard />;
