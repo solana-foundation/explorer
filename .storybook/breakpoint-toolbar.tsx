@@ -1,7 +1,7 @@
 // Registers a Bootstrap 5 breakpoint quick-select toolbar in the Storybook manager.
 // Viewport keys must match the `viewport.options` keys in preview.tsx.
+import { useCallback } from 'react';
 import { addons, types, useGlobals } from 'storybook/manager-api';
-import React, { useCallback } from 'react';
 
 const ADDON_ID = 'explorer/breakpoint-toolbar';
 const TOOL_ID = `${ADDON_ID}/tool`;
@@ -18,8 +18,7 @@ export const BREAKPOINTS = [
 
 function BreakpointTool() {
     const [globals, updateGlobals] = useGlobals();
-    const currentKey =
-        typeof globals?.viewport === 'object' ? (globals.viewport as { value?: string })?.value : globals?.viewport;
+    const currentKey = typeof globals?.viewport === 'object' ? globals.viewport?.value : globals?.viewport;
 
     const setViewport = useCallback(
         (key: string) => {

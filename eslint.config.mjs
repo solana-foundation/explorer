@@ -33,7 +33,6 @@ export default tseslint.config(
             '.worktrees/**',
             'storybook-static/**',
             'storybook-static-*/**',
-            'storybook-design/**',
             'public/mockServiceWorker.js',
             'next-env.d.ts',
         ],
@@ -217,7 +216,15 @@ export default tseslint.config(
 
     // Relax sort-keys in config/tooling files (not linted by next lint before)
     {
-        files: ['*.config.*', '**/*.mjs', '**/*.cjs', '.storybook/**', 'scripts/**', '.prettierrc.cjs'],
+        files: [
+            '*.config.*',
+            '**/*.mjs',
+            '**/*.cjs',
+            '.storybook/**',
+            'storybook-design/.storybook/**',
+            'scripts/**',
+            '.prettierrc.cjs',
+        ],
         rules: {
             'sort-keys-fix/sort-keys-fix': 'off',
         },
@@ -294,6 +301,7 @@ export default tseslint.config(
 
             // Storybook
             '.storybook/**',
+            'storybook-design/.storybook/**',
             '**/*.stories.[jt]s?(x)',
 
             // Generic config files
