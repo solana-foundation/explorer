@@ -26,7 +26,7 @@ export async function GET(request: Request, props: Params) {
     const clusterParam = searchParams.get('cluster') ?? clusterSlug(Cluster.MainnetBeta);
 
     const cluster = clusterFromSlug(clusterParam);
-    if (cluster === null) {
+    if (cluster == undefined) {
         return NextResponse.json({ error: 'Invalid cluster' }, { headers: NO_STORE_HEADERS, status: 400 });
     }
 
@@ -46,5 +46,6 @@ export async function GET(request: Request, props: Params) {
 
     const asset = assets.find(a => a.id === mintAddress);
     const image = asset?.content?.links?.image;
-    return NextResponse.json({ image }, { headers: IMAGE_CACHE_HEADERS });
+    const headers = image ? IMAGE_CACHE_HEADERS : NO_STORE_HEADERS;
+    return NextResponse.json({ image }, { headers });
 }
