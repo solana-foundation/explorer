@@ -15,6 +15,10 @@ export const DigitalAssetSchema = type({
     id: string(),
 });
 
+export const GetAssetResponseSchema = type({
+    result: nullable(DigitalAssetSchema),
+});
+
 export const GetAssetBatchResponseSchema = type({
     result: array(nullable(DigitalAssetSchema)),
 });
