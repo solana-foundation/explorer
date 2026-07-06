@@ -1,6 +1,8 @@
 // Registers a Bootstrap 5 breakpoint quick-select toolbar in the Storybook manager.
+// Uses React.createElement (no JSX) so this file is safe to import from both the
+// production Storybook manager and the design-sb manager, which has no JSX transform.
 // Viewport keys must match the `viewport.options` keys in preview.tsx.
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { addons, types, useGlobals } from 'storybook/manager-api';
 
 const ADDON_ID = 'explorer/breakpoint-toolbar';
@@ -45,35 +47,32 @@ function BreakpointTool() {
         padding: '3px 6px',
     });
 
-    return (
-        <div
-            style={{
-                alignItems: 'center',
-                display: 'flex',
-                gap: 2,
-                padding: '0 4px',
-            }}
-        >
-            <button onClick={resetViewport} title="Reset to Auto viewport" style={btnStyle(isAuto)}>
-                Auto
-            </button>
-            {BREAKPOINTS.map(({ key, label }) => (
-                <button
-                    key={key}
-                    onClick={() => setViewport(key)}
-                    title={`Switch to ${label} viewport`}
-                    style={btnStyle(currentKey === key)}
-                >
-                    {label}
-                </button>
-            ))}
-        </div>
+    return React.createElement(
+        'div',
+        { style: { alignItems: 'center', display: 'flex', gap: 2, padding: '0 4px' } },
+        React.createElement(
+            'button',
+            { onClick: resetViewport, style: btnStyle(isAuto), title: 'Reset to Auto viewport' },
+            'Auto',
+        ),
+        ...BREAKPOINTS.map(({ key, label }) =>
+            React.createElement(
+                'button',
+                {
+                    key,
+                    onClick: () => setViewport(key),
+                    style: btnStyle(currentKey === key),
+                    title: `Switch to ${label} viewport`,
+                },
+                label,
+            ),
+        ),
     );
 }
 
 addons.register(ADDON_ID, () => {
     addons.add(TOOL_ID, {
-        render: () => <BreakpointTool />,
+        render: BreakpointTool,
         title: 'Bootstrap Breakpoints',
         type: types.TOOL,
     });
