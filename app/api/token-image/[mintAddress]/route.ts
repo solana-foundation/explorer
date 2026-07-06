@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 
 import { getAssetBatch } from '@/app/entities/digital-asset/server';
 import { NO_STORE_HEADERS } from '@/app/shared/lib/http-utils';
-import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterFromSlug, clusterSlug, serverClusterUrl } from '@/app/utils/cluster';
 
 const IMAGE_CACHE_HEADERS = {
@@ -16,6 +15,7 @@ type Params = {
     }>;
 };
 
+/* eslint-disable no-console */
 export async function GET(request: Request, props: Params) {
     const { mintAddress } = await props.params;
 
@@ -39,7 +39,7 @@ export async function GET(request: Request, props: Params) {
     }
 
     const rpcUrl = serverClusterUrl(cluster, '');
-    Logger.info(`[token-image] rpcUrl: ${rpcUrl} | mintAddress: ${mintAddress} | cluster: ${cluster}`);
+    console.log('[token-image] rpcUrl:', rpcUrl, '| mint:', mintAddress, '| cluster:', cluster);
 
     // --- FORMAT PROBE: try every common DAS variant in parallel, log each raw result ---
     const probeVariants: { label: string; method: string; params: unknown }[] = [
@@ -58,25 +58,26 @@ export async function GET(request: Request, props: Params) {
                     method: 'POST',
                 });
                 const json = await res.json();
-                Logger.info(`[das-probe] ${label}: ${JSON.stringify(json)}`);
+                console.log(`[das-probe] ${label}:`, JSON.stringify(json));
             } catch (err) {
-                Logger.warn(`[das-probe] ${label} threw: ${String(err)}`);
+                console.log(`[das-probe] ${label} threw:`, String(err));
             }
         }),
     );
     // --- END FORMAT PROBE ---
 
     const assets = await getAssetBatch([mintAddress], rpcUrl);
-    Logger.info(`[token-image] getAssetBatch result: ${JSON.stringify(assets)}`);
+    console.log('[token-image] getAssetBatch result:', JSON.stringify(assets));
 
     if (!assets) {
-        Logger.info('[token-image] No assets returned — responding with no-store');
+        console.log('[token-image] no assets returned');
         return NextResponse.json({ image: undefined }, { headers: NO_STORE_HEADERS });
     }
 
     const asset = assets.find(a => a.id === mintAddress);
-    Logger.info(`[token-image] matched asset: ${JSON.stringify(asset)}`);
+    console.log('[token-image] matched asset:', JSON.stringify(asset));
     const image = asset?.content?.links?.image;
-    Logger.info(`[token-image] image value: ${image}`);
+    console.log('[token-image] image value:', image);
     return NextResponse.json({ image }, { headers: IMAGE_CACHE_HEADERS });
 }
+/* eslint-enable no-console */
