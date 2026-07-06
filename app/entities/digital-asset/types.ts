@@ -1,4 +1,4 @@
-import { array, Infer, nullable, optional, string, type } from 'superstruct';
+import { Infer, nullable, optional, string, type } from 'superstruct';
 
 export const DigitalAssetSchema = type({
     content: nullable(
@@ -17,10 +17,6 @@ export const DigitalAssetSchema = type({
 
 export const GetAssetResponseSchema = type({
     result: nullable(DigitalAssetSchema),
-});
-
-export const GetAssetBatchResponseSchema = type({
-    result: array(nullable(DigitalAssetSchema)),
 });
 
 export type DigitalAsset = Infer<typeof DigitalAssetSchema>;

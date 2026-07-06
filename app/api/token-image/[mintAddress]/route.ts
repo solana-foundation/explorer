@@ -15,7 +15,6 @@ type Params = {
     }>;
 };
 
-/* eslint-disable no-console */
 export async function GET(request: Request, props: Params) {
     const { mintAddress } = await props.params;
 
@@ -39,45 +38,13 @@ export async function GET(request: Request, props: Params) {
     }
 
     const rpcUrl = serverClusterUrl(cluster, '');
-    console.log('[token-image] rpcUrl:', rpcUrl, '| mint:', mintAddress, '| cluster:', cluster);
-
-    // --- FORMAT PROBE: try every common DAS variant in parallel, log each raw result ---
-    const probeVariants: { label: string; method: string; params: unknown }[] = [
-        { label: 'getAsset (singular, {id})', method: 'getAsset', params: { id: mintAddress } },
-        { label: 'getAssets ({ids:[]})', method: 'getAssets', params: { ids: [mintAddress] } },
-        { label: 'getAssetBatch ({ids:[]})', method: 'getAssetBatch', params: { ids: [mintAddress] } },
-        { label: 'getAssets (array params)', method: 'getAssets', params: [mintAddress] },
-        { label: 'getAssetBatch (array params)', method: 'getAssetBatch', params: [mintAddress] },
-    ];
-    await Promise.all(
-        probeVariants.map(async ({ label, method, params }) => {
-            try {
-                const res = await fetch(rpcUrl, {
-                    body: JSON.stringify({ id: 'probe', jsonrpc: '2.0', method, params }),
-                    headers: { 'Content-Type': 'application/json' },
-                    method: 'POST',
-                });
-                const json = await res.json();
-                console.log(`[das-probe] ${label}:`, JSON.stringify(json));
-            } catch (err) {
-                console.log(`[das-probe] ${label} threw:`, String(err));
-            }
-        }),
-    );
-    // --- END FORMAT PROBE ---
-
     const assets = await getAssetBatch([mintAddress], rpcUrl);
-    console.log('[token-image] getAssetBatch result:', JSON.stringify(assets));
 
     if (!assets) {
-        console.log('[token-image] no assets returned');
         return NextResponse.json({ image: undefined }, { headers: NO_STORE_HEADERS });
     }
 
     const asset = assets.find(a => a.id === mintAddress);
-    console.log('[token-image] matched asset:', JSON.stringify(asset));
     const image = asset?.content?.links?.image;
-    console.log('[token-image] image value:', image);
     return NextResponse.json({ image }, { headers: IMAGE_CACHE_HEADERS });
 }
-/* eslint-enable no-console */
