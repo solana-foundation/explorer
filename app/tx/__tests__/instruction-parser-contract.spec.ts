@@ -7,6 +7,7 @@ import {
     isParsedInstruction,
 } from '@entities/instruction-parser';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token';
+import { LIGHTHOUSE_ADDRESS, lighthouseInstructionParser } from '@features/decode-instruction-lighthouse';
 import { systemInstructionParser } from '@features/decode-instruction-system';
 import { tokenInstructionParser } from '@features/decode-instruction-token';
 import { token2022InstructionParser } from '@features/decode-instruction-token-2022';
@@ -153,6 +154,80 @@ describe('instruction-parser contract', () => {
 
         // The load-bearing fields agree across both paths. (uiAmountString is a
         // display-formatting field whose RPC spelling may differ; not asserted.)
+        if (!byteInfo.authority || !rpcInfo.authority) throw new Error('TransferChecked authority must be present');
+        expect(byteInfo.source.equals(rpcInfo.source)).toBe(true);
+        expect(byteInfo.destination.equals(rpcInfo.destination)).toBe(true);
+        expect(byteInfo.mint.equals(rpcInfo.mint)).toBe(true);
+        expect(byteInfo.authority.equals(rpcInfo.authority)).toBe(true);
+        expect(byteInfo.tokenAmount.amount).toBe(rpcInfo.tokenAmount.amount);
+        expect(byteInfo.tokenAmount.decimals).toBe(rpcInfo.tokenAmount.decimals);
+
+        expect(byteInfo.tokenAmount.amount).toBe(amount.toString());
+        expect(byteInfo.tokenAmount.decimals).toBe(decimals);
+        expect(byteInfo.source.equals(source)).toBe(true);
+        expect(byteInfo.authority.equals(authority)).toBe(true);
+    });
+
+    test('should produce equivalent info for byte-parsed and RPC-parsed Token-2022 TransferChecked paths', () => {
+        const dispatcher = createInstructionParserDispatcher([token2022InstructionParser]);
+
+        const source = Keypair.generate().publicKey;
+        const mint = Keypair.generate().publicKey;
+        const destination = Keypair.generate().publicKey;
+        const authority = Keypair.generate().publicKey;
+        const amount = 1_000n;
+        const decimals = 6;
+        const programId = new PublicKey(TOKEN_2022_PROGRAM_ADDRESS);
+
+        // TransferChecked wire layout is identical to SPL Token:
+        // [discriminator=12, amount u64 LE, decimals u8].
+        const data = Buffer.alloc(10);
+        data.writeUInt8(12, 0);
+        data.writeBigUInt64LE(amount, 1);
+        data.writeUInt8(decimals, 9);
+        const rawIx = new TransactionInstruction({
+            data,
+            keys: [
+                { isSigner: false, isWritable: true, pubkey: source },
+                { isSigner: false, isWritable: false, pubkey: mint },
+                { isSigner: false, isWritable: true, pubkey: destination },
+                { isSigner: true, isWritable: false, pubkey: authority },
+            ],
+            programId,
+        });
+
+        // Byte-parsed path (Inspector): raw TransactionInstruction -> ParsedInstruction.
+        const byteParsed = dispatcher.fromTransactionInstruction(rawIx);
+
+        // RPC-pre-parsed path (tx page): RPC's transferChecked shape -> dispatcher.
+        const rpcInput: ParsedInstruction = {
+            parsed: {
+                info: {
+                    authority: authority.toBase58(),
+                    destination: destination.toBase58(),
+                    mint: mint.toBase58(),
+                    source: source.toBase58(),
+                    tokenAmount: { amount: amount.toString(), decimals, uiAmountString: '0.001' },
+                },
+                type: 'transferChecked',
+            },
+            program: 'spl-token-2022',
+            programId,
+        };
+        const rpcParsed = dispatcher.fromParsedInstruction(rpcInput);
+
+        if (!isParsedInstruction(byteParsed)) {
+            throw new Error('byte-parsed Token-2022 TransferChecked should be recognised');
+        }
+
+        expect(byteParsed.program).toBe('spl-token-2022');
+        expect(rpcParsed.program).toBe('spl-token-2022');
+        expect(byteParsed.parsed.type).toBe('transferChecked');
+        expect(rpcParsed.parsed.type).toBe('transferChecked');
+
+        const byteInfo = create(byteParsed.parsed.info, TransferChecked);
+        const rpcInfo = create(rpcParsed.parsed.info, TransferChecked);
+
         if (!byteInfo.authority || !rpcInfo.authority) throw new Error('TransferChecked authority must be present');
         expect(byteInfo.source.equals(rpcInfo.source)).toBe(true);
         expect(byteInfo.destination.equals(rpcInfo.destination)).toBe(true);
@@ -352,6 +427,24 @@ describe('instruction-parser contract', () => {
         expect(() => createInstructionParserDispatcher([systemInstructionParser, systemInstructionParser])).toThrow(
             'duplicate parser',
         );
+    });
+
+    test('should decode a Lighthouse instruction via the byte path (no fromParsed)', () => {
+        const dispatcher = createInstructionParserDispatcher([lighthouseInstructionParser]);
+        // Bytes encode "Assert Sysvar Clock". Source: lighthouse card fixtures.
+        const rawIx = new TransactionInstruction({
+            data: Buffer.from([15, 0, 0, 166, 238, 134, 18, 0, 0, 0, 0, 3]),
+            keys: [],
+            programId: new PublicKey(LIGHTHOUSE_ADDRESS),
+        });
+
+        const byteParsed = dispatcher.fromTransactionInstruction(rawIx);
+        if (!isParsedInstruction(byteParsed)) throw new Error('expected a ParsedInstruction');
+        expect(byteParsed.program).toBe('lighthouse');
+        expect(byteParsed.parsed.type).toBe('Assert Sysvar Clock');
+
+        // Lighthouse is never RPC-pre-parsed, so the slice declares no fromParsed.
+        expect(lighthouseInstructionParser.fromParsed).toBeUndefined();
     });
 });
 

@@ -284,7 +284,6 @@ describe('useMainnetConfirmation', () => {
 function setup(cluster: Cluster = Cluster.MainnetBeta) {
     vi.mocked(useCluster).mockReturnValue({
         cluster,
-        clusterInfo: undefined,
         customUrl: '',
         name: clusterName(cluster),
         status: ClusterStatus.Connected,

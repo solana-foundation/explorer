@@ -43,10 +43,12 @@ describe('triggerDownload', () => {
             writable: true,
         });
 
-        global.URL.createObjectURL = mockCreateObjectURL;
-        global.URL.revokeObjectURL = mockRevokeObjectURL;
+        // Vitest 4 widens vi.fn()'s type to include a construct signature, so cast to the
+        // DOM signatures when assigning these mocks onto URL.
+        global.URL.createObjectURL = mockCreateObjectURL as unknown as typeof URL.createObjectURL;
+        global.URL.revokeObjectURL = mockRevokeObjectURL as unknown as typeof URL.revokeObjectURL;
 
-        global.Blob = vi.fn((parts, options) => {
+        global.Blob = vi.fn(function (parts, options) {
             return {
                 size: parts[0]?.length || 0,
                 type: options?.type || '',

@@ -1,11 +1,10 @@
+import { KitAddress } from '@components/common/KitAddress';
 import { cn } from '@components/shared/utils';
 import type { Address } from '@solana/kit';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import React, { type ReactNode } from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
-
-import { KitAddress } from '../KitAddress';
 
 type DetailRowProps = { label: string; pubkey: Address } | { label: string; children: ReactNode; monospace?: boolean };
 

@@ -10,18 +10,18 @@ import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/acc
 import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
 import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
 import { NonceAccountSection } from '@components/account/NonceAccountSection';
+import { detectSquadsAccountType, SquadsAccountSection } from '@components/account/squads/SquadsAccountSection';
 import { SysvarAccountSection } from '@components/account/SysvarAccountSection';
 import { TokenAccountSection } from '@components/account/TokenAccountSection';
 import { UnknownAccountCard } from '@components/account/UnknownAccountCard';
 import { UpgradeableLoaderAccountSection } from '@components/account/UpgradeableLoaderAccountSection';
-import { VoteAccountSection } from '@components/account/VoteAccountSection';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
-import { useAnchorProgram } from '@entities/idl';
 import { SecurityNotification } from '@features/security-txt';
 import { StakeAccountSection } from '@features/stake';
+import { VoteAccountSection } from '@features/vote';
 import {
     Account,
     AccountsProvider,
@@ -63,6 +63,8 @@ import {
     isRedactedTokenAddress,
 } from '@/app/utils/token-info';
 import { pickClusterParams } from '@/app/utils/url';
+
+import { AccountDataTab } from './AccountDataTab';
 
 const TABS_LOOKUP: Record<string, AddressTab[]> = {
     'address-lookup-table': [{ path: 'entries', title: 'Table Entries' }],
@@ -135,7 +137,7 @@ type InnerProps = PropsWithChildren<{ params: AddressParams }>;
 
 function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const fetchAccount = useFetchAccountInfo();
-    const { status, cluster, url, clusterInfo } = useCluster();
+    const { status, cluster, url, genesisHash } = useCluster();
     const info = useAccountInfo(address);
 
     let pubkey: PublicKey | undefined;
@@ -152,7 +154,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const shouldFetchTokenInfo =
         infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey;
     const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
-        shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, clusterInfo?.genesisHash) : null,
+        shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, genesisHash) : null,
         fetchFullTokenInfo,
     );
 
@@ -268,6 +270,10 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
     // get feature data from featureGates.json
     const featureInfo = useFeatureInfo({ address: account.pubkey.toBase58() });
 
+    // Squads v4 Batch / VaultTransaction accounts aren't RPC-parsed; detect them by
+    // discriminator so we can surface a direct "Inspect" link to the transaction inspector.
+    const squadsAccountType = rawData ? detectSquadsAccountType(account.owner, rawData) : undefined;
+
     if (parsedData && parsedData.program === 'bpf-upgradeable-loader') {
         return (
             <UpgradeableLoaderAccountSection
@@ -309,6 +315,8 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         return <FeatureAccountSection account={account} />;
     } else if (account.owner.toBase58() === SAS_PROGRAM_ID) {
         return <SolanaAttestationServiceCard account={account} />;
+    } else if (squadsAccountType) {
+        return <SquadsAccountSection account={account} accountType={squadsAccountType} />;
     } else {
         const fallback = <UnknownAccountCard account={account} />;
         return (
@@ -474,15 +482,4 @@ function ProgramMultisigTab({ authority }: { authority: PublicKey | null | undef
     }
 
     return <NavigationTabLink path="program-multisig" title="Program Multisig" />;
-}
-
-function AccountDataTab({ programId }: { programId: PublicKey }) {
-    const { url, cluster } = useCluster();
-    const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url, cluster);
-
-    if (!accountAnchorProgram) {
-        return null;
-    }
-
-    return <NavigationTabLink path="anchor-account" title="Anchor Data" />;
 }

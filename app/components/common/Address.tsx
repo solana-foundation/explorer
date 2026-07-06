@@ -62,7 +62,7 @@ export function Address({
     noNicknameEditing,
 }: Props) {
     const address = pubkey.toBase58();
-    const { cluster, clusterInfo } = useCluster();
+    const { cluster, genesisHash } = useCluster();
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
     const [showNicknameEditor, setShowNicknameEditor] = useState(false);
     const nickname = useNickname(address);
@@ -78,7 +78,7 @@ export function Address({
     }
 
     const shouldFetchTokenInfo = fetchTokenLabelInfo && isVisible;
-    const tokenInfo = useTokenInfo(shouldFetchTokenInfo, address, cluster, clusterInfo?.genesisHash);
+    const tokenInfo = useTokenInfo(shouldFetchTokenInfo, address, cluster, genesisHash);
     if (tokenInfo) {
         addressLabel = displayAddress(address, cluster, tokenInfo);
     }
@@ -193,8 +193,12 @@ export function Address({
                         <EditIcon className="-mt-0.5" />
                     </button>
                 )}
-                {!noNicknameEditing && showNicknameEditor && (
-                    <NicknameEditor address={address} onClose={() => setShowNicknameEditor(false)} />
+                {!noNicknameEditing && (
+                    <NicknameEditor
+                        address={address}
+                        open={showNicknameEditor}
+                        onClose={() => setShowNicknameEditor(false)}
+                    />
                 )}
             </div>
         </span>

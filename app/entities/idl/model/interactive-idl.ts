@@ -2,8 +2,9 @@ import type { Idl } from '@coral-xyz/anchor';
 import { PublicKey } from '@solana/web3.js';
 import type { RootNode } from 'codama';
 
+import { type SupportedIdl } from '../lib/types';
 import { getIdlSpecType as getSerdeIdlSpecType } from './converters/convert-legacy-idl';
-import { getIdlVersion, MODERN_ANCHOR_IDL_WILDCARD, type SupportedIdl } from './idl-version';
+import { getIdlVersion, MODERN_ANCHOR_IDL_WILDCARD } from './idl-version';
 
 /**
  * Checks if the IDL version is supported for interactive features.

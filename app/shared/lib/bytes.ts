@@ -38,6 +38,20 @@ export function readU8(data: Uint8Array, offset: number): number {
 }
 
 /**
+ * Encode an integer as little-endian bytes of the given size.
+ * Uses BigInt internally so sizes beyond 32 bits are exact; bytes above `size` are dropped.
+ */
+export function toLeBytes(value: number, size: number): Uint8Array {
+    const bytes = new Uint8Array(size);
+    let remaining = BigInt(value);
+    for (let i = 0; i < size; i++) {
+        bytes[i] = Number(remaining & 0xffn);
+        remaining >>= 8n;
+    }
+    return bytes;
+}
+
+/**
  * Convert a character to its byte value (0-255).
  * Used for decoding binary strings from atob().
  */
@@ -244,6 +258,24 @@ export function equals(a: Uint8Array, b: Uint8Array): boolean {
 
     for (let i = 0; i < a.byteLength; i++) {
         if (a[i] !== b[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Check whether `data` begins with `prefix`.
+ * An empty prefix matches any input; a prefix longer than `data` never matches.
+ */
+export function startsWith(data: Uint8Array, prefix: Uint8Array): boolean {
+    if (prefix.length > data.length) {
+        return false;
+    }
+
+    for (let i = 0; i < prefix.length; i++) {
+        if (data[i] !== prefix[i]) {
             return false;
         }
     }

@@ -25,6 +25,7 @@ type Story = StoryObj<typeof meta>;
 const args = {
     address: TOKEN_PROGRAM_ID.toBase58(),
     onClose: fn(),
+    open: true,
 };
 
 export const Mobile: Story = {

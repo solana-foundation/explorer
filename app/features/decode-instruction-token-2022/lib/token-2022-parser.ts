@@ -1,9 +1,12 @@
 import { getTokenIxValidator } from '@components/instruction/token/types';
+import type { ParserProgramLabel } from '@entities/instruction-parser';
 import { unwrapOption } from '@solana/kit';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import {
     identifyToken2022Instruction,
+    parseCloseAccountInstruction,
     parseEmitTokenMetadataInstruction,
+    parseInitializeAccountInstruction,
     parseInitializeGroupMemberPointerInstruction,
     parseInitializeGroupPointerInstruction,
     parseInitializeMetadataPointerInstruction,
@@ -11,6 +14,9 @@ import {
     parseInitializeTokenGroupMemberInstruction,
     parseInitializeTokenMetadataInstruction,
     parseRemoveTokenMetadataKeyInstruction,
+    parseSyncNativeInstruction,
+    parseTransferCheckedInstruction,
+    parseTransferInstruction,
     parseUpdateGroupMemberPointerInstruction,
     parseUpdateGroupPointerInstruction,
     parseUpdateMetadataPointerInstruction,
@@ -20,10 +26,10 @@ import {
     parseUpdateTokenMetadataUpdateAuthorityInstruction,
     Token2022Instruction,
 } from '@solana-program/token-2022';
+import { normalizeTokenAmount } from '@utils/index';
 import { create } from 'superstruct';
 
 import type { KitInstruction } from '@/app/shared/lib/web3js-compat';
-import type { ParserProgramLabel } from '@/app/utils/programs';
 
 /** RPC `parsed.program` discriminator for the Token-2022 program; also the slice's `programLabel`. */
 export const TOKEN_2022_PROGRAM_LABEL = 'spl-token-2022' satisfies ParserProgramLabel;
@@ -41,6 +47,70 @@ export function parseToken2022Instruction(ix: KitInstruction): Token2022Parsed |
         const instructionType = identifyToken2022Instruction(ix.data);
 
         switch (instructionType) {
+            // Core SPL Token instructions that Token-2022 shares byte-for-byte.
+            // These mirror the SPL Token slice's `parseTokenInstruction`; without
+            // them the inspector renders Token-2022 transfers/etc. as raw hex.
+            case Token2022Instruction.CloseAccount: {
+                const parsed = parseCloseAccountInstruction(ix);
+                return {
+                    info: {
+                        account: new PublicKey(parsed.accounts.account.address),
+                        destination: new PublicKey(parsed.accounts.destination.address),
+                        owner: new PublicKey(parsed.accounts.owner.address),
+                    },
+                    type: 'closeAccount',
+                };
+            }
+            case Token2022Instruction.InitializeAccount: {
+                const parsed = parseInitializeAccountInstruction(ix);
+                return {
+                    info: {
+                        account: new PublicKey(parsed.accounts.account.address),
+                        mint: new PublicKey(parsed.accounts.mint.address),
+                        owner: new PublicKey(parsed.accounts.owner.address),
+                        rentSysvar: new PublicKey(parsed.accounts.rent.address),
+                    },
+                    type: 'initializeAccount',
+                };
+            }
+            case Token2022Instruction.SyncNative: {
+                const parsed = parseSyncNativeInstruction(ix);
+                return {
+                    info: { account: new PublicKey(parsed.accounts.account.address) },
+                    type: 'syncNative',
+                };
+            }
+            case Token2022Instruction.Transfer: {
+                const parsed = parseTransferInstruction(ix);
+                return {
+                    info: {
+                        amount: parsed.data.amount.toString(),
+                        authority: new PublicKey(parsed.accounts.authority.address),
+                        destination: new PublicKey(parsed.accounts.destination.address),
+                        source: new PublicKey(parsed.accounts.source.address),
+                    },
+                    type: 'transfer',
+                };
+            }
+            case Token2022Instruction.TransferChecked: {
+                const parsed = parseTransferCheckedInstruction(ix);
+                const amount = parsed.data.amount.toString();
+                const decimals = parsed.data.decimals;
+                return {
+                    info: {
+                        authority: new PublicKey(parsed.accounts.authority.address),
+                        destination: new PublicKey(parsed.accounts.destination.address),
+                        mint: new PublicKey(parsed.accounts.mint.address),
+                        source: new PublicKey(parsed.accounts.source.address),
+                        tokenAmount: {
+                            amount,
+                            decimals,
+                            uiAmountString: normalizeTokenAmount(amount, decimals).toString(),
+                        },
+                    },
+                    type: 'transferChecked',
+                };
+            }
             case Token2022Instruction.InitializeTokenMetadata: {
                 const parsed = parseInitializeTokenMetadataInstruction(ix);
                 return {

@@ -43,6 +43,7 @@ export function matchTimeoutError(error: unknown): error is Error {
     return Boolean(error instanceof Error && error.name === 'TimeoutError');
 }
 
+// TODO: duplicates `matchAbortError` in @shared/lib/errors — consolidate onto the shared one.
 export function matchAbortError(error: unknown): error is Error {
     return Boolean(error instanceof Error && error.name === 'AbortError');
 }

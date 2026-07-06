@@ -223,6 +223,11 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://explorer.solana.com/address/mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://explorer.solana.com/address/namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>

@@ -1,4 +1,5 @@
 import { getTokenIxValidator } from '@components/instruction/token/types';
+import type { ParserProgramLabel } from '@entities/instruction-parser';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import {
     identifyTokenInstruction,
@@ -13,7 +14,6 @@ import { normalizeTokenAmount } from '@utils/index';
 import { create } from 'superstruct';
 
 import type { KitInstruction } from '@/app/shared/lib/web3js-compat';
-import type { ParserProgramLabel } from '@/app/utils/programs';
 
 /** RPC `parsed.program` discriminator for the SPL Token program; also the slice's `programLabel`. */
 export const TOKEN_PROGRAM_LABEL = 'spl-token' satisfies ParserProgramLabel;

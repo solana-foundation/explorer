@@ -9,6 +9,7 @@ import { ExplorerLink } from '@/app/entities/cluster';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 
 import { originalIdlAtom, programIdAtom } from '../model/state-atoms';
+import type { ExecutionOptions } from '../model/transaction/types';
 import { isEnabled, useInstruction } from '../model/use-instruction';
 import type { InstructionCallParams } from '../model/use-instruction-form';
 import { useMainnetConfirmation } from '../model/use-mainnet-confirmation';
@@ -20,7 +21,8 @@ export interface InteractWithIdlAnalyticsCallbacks {
     onTabOpened?: (programId?: string) => void;
     onTransactionConfirmed?: (programId?: string, instructionName?: string, signature?: string) => void;
     onTransactionFailed?: (programId?: string, instructionName?: string, error?: string) => void;
-    onTransactionSubmitted?: (programId?: string, instructionName?: string) => void;
+    onTransactionSimulationStart?: (programId?: string, instructionName?: string) => void;
+    onTransactionExecutionStart?: (programId?: string, instructionName?: string) => void;
     onWalletConnected?: (programId?: string, walletType?: string) => void;
 }
 
@@ -31,7 +33,8 @@ export function InteractWithIdl({
     onTabOpened,
     onTransactionConfirmed,
     onTransactionFailed,
-    onTransactionSubmitted,
+    onTransactionSimulationStart,
+    onTransactionExecutionStart,
     onWalletConnected,
 }: {
     data?: InstructionData[];
@@ -79,7 +82,7 @@ export function InteractWithIdl({
     );
 
     const handleTransactionError = useCallback(
-        (error: string) => {
+        (error: string, _signature?: string) => {
             toast.custom({ description: error, title: 'Transaction Failed', type: 'error' });
 
             if (currentInstruction) {
@@ -90,7 +93,14 @@ export function InteractWithIdl({
         [toast, currentInstruction, onTransactionFailed],
     );
 
-    const { invokeInstruction, initializationError, isExecuting, lastResult, parseLogs } = useInstruction({
+    const {
+        executeInstruction,
+        simulateInstruction,
+        initializationError,
+        status,
+        lastExecutionResult,
+        lastSimulationResult,
+    } = useInstruction({
         enabled: isEnabled({ connected, idl, programId: progId, publicKey }),
         idl,
         onError: handleTransactionError,
@@ -98,27 +108,40 @@ export function InteractWithIdl({
         programId: progId?.toString(),
     });
 
+    const [lastAction, setLastAction] = useState<'execute' | 'simulate' | null>(null);
+
     const { requireConfirmation, confirm, cancel, isOpen, hasPendingAction } = useMainnetConfirmation<{
         data: InstructionData;
         params: InstructionCallParams;
     }>();
 
     const handleExecuteInstruction = useCallback(
-        async (data: InstructionData, params: InstructionCallParams) => {
+        async (data: InstructionData, params: InstructionCallParams, options: ExecutionOptions) => {
             const programIdStr = progId?.toString();
 
-            onTransactionSubmitted?.(programIdStr, data.name);
+            onTransactionExecutionStart?.(programIdStr, data.name);
 
-            setCurrentInstruction({ name: data.name, programId: programIdStr });
-
+            // On mainnet, requireConfirmation opens a dialog and only then runs this callback once the user accepts.
             await requireConfirmation(
                 async () => {
-                    await invokeInstruction(data.name, data, params);
+                    setLastAction('execute');
+                    setCurrentInstruction({ name: data.name, programId: programIdStr });
+                    await executeInstruction(data.name, data, params, options);
                 },
                 { data, params },
             );
         },
-        [invokeInstruction, requireConfirmation, progId, onTransactionSubmitted],
+        [executeInstruction, requireConfirmation, progId, onTransactionExecutionStart],
+    );
+
+    const handleSimulateInstruction = useCallback(
+        async (data: InstructionData, params: InstructionCallParams) => {
+            const programIdStr = progId?.toString();
+            setLastAction('simulate');
+            onTransactionSimulationStart?.(programIdStr, data.name);
+            await simulateInstruction(data.name, data, params);
+        },
+        [simulateInstruction, progId, onTransactionSimulationStart],
     );
 
     if (initializationError) {
@@ -138,12 +161,14 @@ export function InteractWithIdl({
                 instructions={instructions || []}
                 idl={idl as SupportedIdl}
                 onExecuteInstruction={handleExecuteInstruction}
+                onSimulateInstruction={handleSimulateInstruction}
                 onSectionsExpanded={expandedSections => {
                     onSectionsExpanded?.(progId?.toString(), expandedSections);
                 }}
-                isExecuting={isExecuting}
-                lastResult={lastResult}
-                parseLogs={parseLogs}
+                status={status}
+                lastExecutionResult={lastExecutionResult}
+                lastSimulationResult={lastSimulationResult}
+                lastAction={lastAction}
             />
             {hasPendingAction && (
                 <MainnetWarningDialog

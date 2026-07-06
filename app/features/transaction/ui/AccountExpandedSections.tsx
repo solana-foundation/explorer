@@ -1,3 +1,4 @@
+import { VoteAccount } from '@features/vote/lib/validators'; // deep import on purpose: this section only needs the account schema, not the vote UI the barrel re-exports
 import {
     isTokenProgramData,
     isUpgradeableLoaderAccountData,
@@ -9,7 +10,6 @@ import { ParsedAddressLookupTableAccount } from '@validators/accounts/address-lo
 import { NonceAccount } from '@validators/accounts/nonce';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccountInfo } from '@validators/accounts/token';
 import { ProgramAccountInfo } from '@validators/accounts/upgradeable-program';
-import { VoteAccount } from '@validators/accounts/vote';
 import { capitalCase } from 'change-case';
 import React from 'react';
 

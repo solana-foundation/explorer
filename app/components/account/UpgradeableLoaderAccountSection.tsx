@@ -11,6 +11,7 @@ import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { addressLabel } from '@utils/tx';
+import { hashProgramBuffer } from '@utils/verified-builds';
 import {
     ProgramAccountInfo,
     ProgramBufferAccountInfo,
@@ -32,6 +33,7 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
 
+import { Copyable } from '../common/Copyable';
 import { VerifiedProgramBadge } from '../common/VerifiedProgramBadge';
 
 export function UpgradeableLoaderAccountSection({
@@ -290,6 +292,7 @@ export function UpgradeableProgramBufferSection({
     programBuffer: ProgramBufferAccountInfo;
 }) {
     const refresh = useRefreshAccount();
+    const bufferHash = React.useMemo(() => hashProgramBuffer(programBuffer), [programBuffer]);
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
@@ -327,6 +330,22 @@ export function UpgradeableProgramBufferSection({
                     <BaseTable.Row>
                         <BaseTable.Cell>Data Size (Bytes)</BaseTable.Cell>
                         <BaseTable.Cell className="text-right">{account.space}</BaseTable.Cell>
+                    </BaseTable.Row>
+                )}
+                {bufferHash && (
+                    <BaseTable.Row>
+                        <BaseTable.Cell>
+                            <InfoTooltip text="sha256 of the buffer's program bytes with trailing zero padding removed — the same hash as `solana-verify get-buffer-hash`. Compare it against the build hash you expect to deploy.">
+                                <span className="text-dk-white">Buffer Hash</span>
+                            </InfoTooltip>
+                        </BaseTable.Cell>
+                        <BaseTable.Cell className="text-right">
+                            <div className="flex items-center justify-end">
+                                <Copyable text={bufferHash}>
+                                    <span className="break-all font-mono">{bufferHash}</span>
+                                </Copyable>
+                            </div>
+                        </BaseTable.Cell>
                     </BaseTable.Row>
                 )}
                 {programBuffer.authority !== null && (

@@ -11,7 +11,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
-import { ClusterInfo, useCluster } from '@/app/providers/cluster';
+import { ClusterInfo, useCluster, useClusterInfo } from '@/app/providers/cluster';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
@@ -76,7 +76,8 @@ const BaseFeatureCard = ({
     featureInfo?: FeatureInfoType;
     isPending?: boolean;
 }) => {
-    const { cluster, clusterInfo } = useCluster();
+    const { cluster } = useCluster();
+    const clusterInfo = useClusterInfo();
 
     let activatedAtSlot;
     let simdLink;

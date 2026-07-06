@@ -1,7 +1,6 @@
 import { SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, SolanaError } from '@solana/kit';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { IdlVariant } from '@/app/entities/idl/server';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
@@ -25,11 +24,16 @@ vi.mock('@solana/kit', async () => {
     return { ...actual, createSolanaRpc: vi.fn(() => ({})) };
 });
 
-function resolved(overrides: Partial<Record<'anchorIdl' | 'programMetadataIdl' | 'preferredVariant', unknown>> = {}) {
+function resolved(
+    overrides: Partial<
+        Record<'anchorIdl' | 'anchorIdlAddress' | 'programMetadataIdl' | 'programMetadataIdlAddress', unknown>
+    > = {},
+) {
     return {
         anchorIdl: undefined,
-        preferredVariant: IdlVariant.ProgramMetadata,
+        anchorIdlAddress: undefined,
         programMetadataIdl: undefined,
+        programMetadataIdlAddress: undefined,
         ...overrides,
     };
 }
@@ -39,12 +43,6 @@ describe('GET /api/idl-latest', () => {
         vi.clearAllMocks();
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
         vi.spyOn(Logger, 'panic').mockImplementation(() => {});
-        // PMP feature gate on by default; the off case is exercised explicitly below.
-        vi.stubEnv('NEXT_PUBLIC_PMP_IDL_ENABLED', 'true');
-    });
-
-    afterEach(() => {
-        vi.unstubAllEnvs();
     });
 
     it('should return 400 when required params are missing', async () => {
@@ -79,8 +77,9 @@ describe('GET /api/idl-latest', () => {
         mocks.resolveProgramIdls.mockResolvedValueOnce(
             resolved({
                 anchorIdl: { name: 'anchor_idl' },
-                preferredVariant: IdlVariant.Anchor,
+                anchorIdlAddress: 'AnchrPDA11111111111111111111111111111111111',
                 programMetadataIdl: { name: 'pmp' },
+                programMetadataIdlAddress: 'PmpPDA111111111111111111111111111111111111',
             }),
         );
 
@@ -88,43 +87,29 @@ describe('GET /api/idl-latest', () => {
         const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
 
         expect(res.status).toBe(200);
+        // Storage accounts are forwarded alongside each IDL (anchorIdlAddress → anchorAddress, etc.).
         expect(await res.json()).toEqual({
-            idls: { anchor: { name: 'anchor_idl' }, preferred: 'anchor', programMetadata: { name: 'pmp' } },
+            idls: {
+                anchor: { name: 'anchor_idl' },
+                anchorAddress: 'AnchrPDA11111111111111111111111111111111111',
+                programMetadata: { name: 'pmp' },
+                programMetadataAddress: 'PmpPDA111111111111111111111111111111111111',
+            },
         });
         expect(res.headers.get('Cache-Control')).toContain('max-age=');
     });
 
-    it('should resolve with includePmp=true when the PMP feature flag is on', async () => {
+    it('should resolve IDLs for the program (both sources, no source options)', async () => {
         mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ programMetadataIdl: { name: 'pmp' } }));
 
         const { GET } = await importRoute();
         await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
 
-        expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(
-            expect.anything(),
-            PROGRAM_ADDRESS,
-            expect.objectContaining({ includePmp: true }),
-        );
+        expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(expect.anything(), PROGRAM_ADDRESS);
     });
 
-    it('should resolve with includePmp=false when the PMP feature flag is off', async () => {
-        vi.stubEnv('NEXT_PUBLIC_PMP_IDL_ENABLED', 'false');
-        mocks.resolveProgramIdls.mockResolvedValueOnce(
-            resolved({ anchorIdl: { name: 'a' }, preferredVariant: IdlVariant.Anchor }),
-        );
-
-        const { GET } = await importRoute();
-        await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
-
-        expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(
-            expect.anything(),
-            PROGRAM_ADDRESS,
-            expect.objectContaining({ includePmp: false }),
-        );
-    });
-
-    it('should return a retryable 502 (no page) when the resolver throws a transient RPC error', async () => {
-        mocks.resolveProgramIdls.mockRejectedValueOnce(
+    it('should return a retryable 502 (no page) when the resolver keeps throwing a transient RPC error', async () => {
+        mocks.resolveProgramIdls.mockRejectedValue(
             new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, { __serverMessage: 'Internal error' }),
         );
 
@@ -133,7 +118,42 @@ describe('GET /api/idl-latest', () => {
 
         expect(res.status).toBe(502);
         expect(await res.json()).toEqual({ error: 'Upstream RPC error' });
+        // Transient errors are retried before giving up.
+        expect(mocks.resolveProgramIdls).toHaveBeenCalledTimes(3);
         expect(Logger.warn).toHaveBeenCalled();
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
+
+    it('should retry past a premature-close fetch error and succeed', async () => {
+        mocks.resolveProgramIdls.mockRejectedValueOnce(
+            Object.assign(new Error('Invalid response body ...: Premature close'), {
+                code: 'ERR_STREAM_PREMATURE_CLOSE',
+            }),
+        );
+        mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ anchorIdl: { name: 'a' } }));
+
+        const { GET } = await importRoute();
+        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
+
+        expect(res.status).toBe(200);
+        expect(mocks.resolveProgramIdls).toHaveBeenCalledTimes(2);
+        expect(Logger.panic).not.toHaveBeenCalled();
+    });
+
+    it('should retry when the retryable code is nested in the error cause chain', async () => {
+        // undici wraps the real failure as `cause` under a generic `TypeError: fetch failed`.
+        mocks.resolveProgramIdls.mockRejectedValueOnce(
+            Object.assign(new TypeError('fetch failed'), {
+                cause: Object.assign(new Error('other side closed'), { code: 'UND_ERR_SOCKET' }),
+            }),
+        );
+        mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ anchorIdl: { name: 'a' } }));
+
+        const { GET } = await importRoute();
+        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
+
+        expect(res.status).toBe(200);
+        expect(mocks.resolveProgramIdls).toHaveBeenCalledTimes(2);
         expect(Logger.panic).not.toHaveBeenCalled();
     });
 

@@ -17,7 +17,7 @@ beforeEach(() => {
 
     vi.stubGlobal(
         'IntersectionObserver',
-        vi.fn((callback: IntersectionObserverCallback) => {
+        vi.fn(function (callback: IntersectionObserverCallback) {
             const instance = {
                 disconnect: mockDisconnect,
                 observe: mockObserve.mockImplementation((el: Element) => {

@@ -1,5 +1,5 @@
 import { CUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
-import { useCluster } from '@providers/cluster';
+import { useCluster, useClusterInfo } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import type { ParsedTransactionWithMeta } from '@solana/web3.js';
 import type { Cluster } from '@utils/cluster';
@@ -11,7 +11,8 @@ import React from 'react';
 // FIXME: missing Storybook story — needs useTransactionDetails provider + ParsedTransactionWithMeta fixture.
 export function CUProfilingSection({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
-    const { cluster, clusterInfo } = useCluster();
+    const { cluster } = useCluster();
+    const clusterInfo = useClusterInfo();
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const logMessages = transactionWithMeta?.meta?.logMessages || null;
@@ -44,7 +45,7 @@ export function CUProfilingSection({ signature }: SignatureProps) {
 
 function formatTransactionLogs(transactionWithMeta: ParsedTransactionWithMeta | null | undefined, cluster: Cluster) {
     const logMessages = transactionWithMeta?.meta?.logMessages || null;
-    const err = transactionWithMeta?.meta?.err || null;
+    const err = transactionWithMeta?.meta?.err || undefined;
 
     return logMessages ? parseProgramLogs(logMessages, err, cluster) : [];
 }

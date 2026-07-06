@@ -1,4 +1,5 @@
 import { CreateIdempotentInfo, RecoverNestedInfo } from '@components/instruction/associated-token/types';
+import type { ParserProgramLabel } from '@entities/instruction-parser';
 import { type ParsedInstruction } from '@solana/web3.js';
 import {
     AssociatedTokenInstruction,
@@ -12,7 +13,6 @@ import { create } from 'superstruct';
 
 import { bytes } from '@/app/shared/lib/bytes';
 import type { KitInstruction } from '@/app/shared/lib/web3js-compat';
-import type { ParserProgramLabel } from '@/app/utils/programs';
 
 /** RPC `parsed.program` discriminator for the Associated Token program; also the slice's `programLabel`. */
 export const ASSOCIATED_TOKEN_PROGRAM_LABEL = 'spl-associated-token-account' satisfies ParserProgramLabel;

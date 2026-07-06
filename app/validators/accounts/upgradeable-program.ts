@@ -1,6 +1,19 @@
 import { ParsedInfo } from '@validators/index';
 import { PublicKeyFromString } from '@validators/pubkey';
-import { any, coerce, create, Infer, literal, nullable, number, string, tuple, type, union } from 'superstruct';
+import {
+    any,
+    coerce,
+    create,
+    Infer,
+    literal,
+    nullable,
+    number,
+    optional,
+    string,
+    tuple,
+    type,
+    union,
+} from 'superstruct';
 
 export type ProgramAccountInfo = Infer<typeof ProgramAccountInfo>;
 export const ProgramAccountInfo = type({
@@ -29,7 +42,10 @@ export const ProgramDataAccount = type({
 export type ProgramBufferAccountInfo = Infer<typeof ProgramBufferAccountInfo>;
 export const ProgramBufferAccountInfo = type({
     authority: nullable(PublicKeyFromString),
-    // don't care about data yet
+    // The RPC's jsonParsed buffer `data` is the base64 of the program bytes past the
+    // 37-byte buffer header — i.e. exactly what solana-verify hashes. Optional so a
+    // response that omits it still parses.
+    data: optional(tuple([string(), literal('base64')])),
 });
 
 export type ProgramBufferAccount = Infer<typeof ProgramBufferAccount>;

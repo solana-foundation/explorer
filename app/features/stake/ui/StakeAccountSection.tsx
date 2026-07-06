@@ -1,4 +1,5 @@
 import { Epoch } from '@components/common/Epoch';
+import { KitAddress } from '@components/common/KitAddress';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
@@ -15,7 +16,6 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import type { StakeActivationStatus } from '../api/stake-activation';
 import { EPOCH_NEVER_SET } from '../lib/constants';
 import type { StakeAccountInfo, StakeAccountType, StakeMeta } from '../lib/validators';
-import { KitAddress } from './KitAddress';
 
 type StakeActivationData = {
     state: StakeActivationStatus;
