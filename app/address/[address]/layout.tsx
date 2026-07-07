@@ -50,7 +50,7 @@ import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 import { getFeatureInfo, useFeatureInfo } from '@/app/entities/feature-gate';
 import { hasTokenMetadata } from '@/app/features/metadata';
-import { isSubscriptionsAccount, SubscriptionsAccountCard } from '@/app/features/subscriptions';
+import { isSubscriptionsAccount, SubscriptionsAccountCard, useWalletSubscriptions } from '@/app/features/subscriptions';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
@@ -130,7 +130,8 @@ export type AddressTabPath =
     | 'feature-gate'
     | 'token-extensions'
     | 'attestation'
-    | 'subscription';
+    | 'subscription'
+    | 'subscriptions';
 
 type AddressTab = NavigationTab<AddressTabPath>;
 
@@ -248,6 +249,9 @@ function DetailsSections({
             )}
             <Suspense fallback={null}>
                 <ProgramMultisigTab authority={authority} />
+            </Suspense>
+            <Suspense fallback={null}>
+                <WalletSubscriptionsTab walletAddress={address} />
             </Suspense>
             <Suspense fallback={null}>
                 <AccountDataTab programId={account.owner} />
@@ -499,4 +503,11 @@ function ProgramMultisigTab({ authority }: { authority: PublicKey | null | undef
     }
 
     return <NavigationTabLink path="program-multisig" title="Program Multisig" />;
+}
+
+function WalletSubscriptionsTab({ walletAddress }: { walletAddress: string }) {
+    const { data } = useWalletSubscriptions(walletAddress);
+    const hasAny = (data?.delegations.length ?? 0) > 0 || (data?.plans.length ?? 0) > 0;
+    if (!hasAny) return null;
+    return <NavigationTabLink path="subscriptions" title="Subscriptions" />;
 }

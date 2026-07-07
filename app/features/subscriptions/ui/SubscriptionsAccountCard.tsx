@@ -25,7 +25,7 @@ function tsToMs(ts: bigint): number {
 
 function formatExpiry(ts: bigint): string {
     if (ts === 0n) return 'Never';
-    return displayTimestampUtc(tsToMs(ts));
+    return displayTimestampUtc(tsToMs(ts), true);
 }
 
 function formatPlanStatus(status: number): string {
@@ -45,7 +45,7 @@ function ValueRow({ children, label }: { children: React.ReactNode; label: strin
 function AddressRow({ address, label }: { address: Address; label: string }) {
     return (
         <ValueRow label={label}>
-            <KitAddress address={address} alignRight raw />
+            <KitAddress address={address} raw link />
         </ValueRow>
     );
 }
@@ -102,7 +102,7 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
             <ValueRow label="Amount per Period">{terms.amount.toString()}</ValueRow>
             <ValueRow label="Period">{terms.periodHours.toString()} hours</ValueRow>
             {terms.createdAt !== 0n && (
-                <ValueRow label="Created At">{displayTimestampUtc(tsToMs(terms.createdAt))}</ValueRow>
+                <ValueRow label="Created At">{displayTimestampUtc(tsToMs(terms.createdAt), true)}</ValueRow>
             )}
             <ValueRow label="Expires At">{formatExpiry(endTs)}</ValueRow>
             {metadataUri && (
@@ -177,7 +177,9 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
             <AddressRow address={mint} label="Token Mint" />
             <ValueRow label="Period Length">{periodLengthS.toString()} seconds</ValueRow>
             {currentPeriodStartTs !== 0n && (
-                <ValueRow label="Current Period Start">{displayTimestampUtc(tsToMs(currentPeriodStartTs))}</ValueRow>
+                <ValueRow label="Current Period Start">
+                    {displayTimestampUtc(tsToMs(currentPeriodStartTs), true)}
+                </ValueRow>
             )}
             <ValueRow label="Expires At">{formatExpiry(expiryTs)}</ValueRow>
             <AddressRow address={subscriptionAuthority} label="Subscription Authority" />
@@ -201,7 +203,9 @@ function SubscriptionDelegationCard({ account, data }: { account: Account; data:
             <ValueRow label="Period">{terms.periodHours.toString()} hours</ValueRow>
             <ValueRow label="Amount Pulled (this period)">{amountPulledInPeriod.toString()}</ValueRow>
             {currentPeriodStartTs !== 0n && (
-                <ValueRow label="Current Period Start">{displayTimestampUtc(tsToMs(currentPeriodStartTs))}</ValueRow>
+                <ValueRow label="Current Period Start">
+                    {displayTimestampUtc(tsToMs(currentPeriodStartTs), true)}
+                </ValueRow>
             )}
             <ValueRow label="Expires At">{formatExpiry(expiresAtTs)}</ValueRow>
             <AddressRow address={header.payer} label="Payer" />
