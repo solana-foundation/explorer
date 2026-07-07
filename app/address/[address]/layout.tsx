@@ -50,6 +50,7 @@ import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 import { getFeatureInfo, useFeatureInfo } from '@/app/entities/feature-gate';
 import { hasTokenMetadata } from '@/app/features/metadata';
+import { isSubscriptionsAccount, SubscriptionsAccountCard } from '@/app/features/subscriptions';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
@@ -91,6 +92,7 @@ const TABS_LOOKUP: Record<string, AddressTab[]> = {
         { path: 'attributes', title: 'Attributes' },
     ],
     stake: [{ path: 'rewards', title: 'Rewards' }],
+    subscription: [{ path: 'subscription', title: 'Subscription' }],
     'sysvar:recentBlockhashes': [{ path: 'blockhashes', title: 'Blockhashes' }],
     'sysvar:slotHashes': [{ path: 'slot-hashes', title: 'Slot Hashes' }],
     'sysvar:stakeHistory': [{ path: 'stake-history', title: 'Stake History' }],
@@ -127,7 +129,8 @@ export type AddressTabPath =
     | 'program-multisig'
     | 'feature-gate'
     | 'token-extensions'
-    | 'attestation';
+    | 'attestation'
+    | 'subscription';
 
 type AddressTab = NavigationTab<AddressTabPath>;
 
@@ -316,6 +319,15 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         return <FeatureAccountSection account={account} />;
     } else if (account.owner.toBase58() === SAS_PROGRAM_ID) {
         return <SolanaAttestationServiceCard account={account} />;
+    } else if (isSubscriptionsAccount(account)) {
+        return (
+            <SubscriptionsAccountCard
+                account={account}
+                onNotFound={() => {
+                    throw new Error('not found');
+                }}
+            />
+        );
     } else if (squadsAccountType) {
         return <SquadsAccountSection account={account} accountType={squadsAccountType} />;
     } else {
@@ -428,6 +440,10 @@ function getNavigationTabs(pubkey: PublicKey, account: Account): AddressTab[] {
 
     if (isAttestationAccount(account)) {
         tabs.push(...TABS_LOOKUP['attestation']);
+    }
+
+    if (isSubscriptionsAccount(account)) {
+        tabs.push(...TABS_LOOKUP['subscription']);
     }
 
     if (isRedactedTokenAddress(address)) {

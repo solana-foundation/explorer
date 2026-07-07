@@ -83,6 +83,7 @@
         "@solana/security-txt": "0.1.0",
         "@solana/spl-account-compression": "0.1.8",
         "@solana/spl-token": "0.1.8",
+        "@solana/subscriptions": "0.3.0",
         "@solana/wallet-adapter-base": "0.9.27",
         "@solana/wallet-adapter-base-ui": "0.1.6",
         "@solana/wallet-adapter-react": "0.15.39",

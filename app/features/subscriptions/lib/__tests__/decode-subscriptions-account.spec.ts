@@ -1,0 +1,162 @@
+import { address } from '@solana/kit';
+import {
+    AccountDiscriminator,
+    getFixedDelegationEncoder,
+    getPlanEncoder,
+    getRecurringDelegationEncoder,
+    getSubscriptionAuthorityEncoder,
+    getSubscriptionDelegationEncoder,
+    PlanStatus,
+} from '@solana/subscriptions';
+import { describe, expect, it } from 'vitest';
+
+import { decodeSubscriptionsAccount } from '../decode-subscriptions-account';
+
+// A valid Solana address used as placeholder for all address fields in fixtures.
+const ZERO = address('11111111111111111111111111111111');
+
+// ─── Fixtures built with the SDK's own encoders ────────────────────────────────
+// Using the same codecs for encoding and decoding is the canonical way to
+// produce valid byte sequences without hand-crafting binary layouts.
+// The SDK's FixedSizeEncoder.encode() returns ReadonlyUint8Array at the type
+// level but a regular Uint8Array at runtime; the cast makes the types line up.
+function encode<T>(encoder: { encode: (v: T) => unknown }, value: T): Uint8Array {
+    return encoder.encode(value) as unknown as Uint8Array;
+}
+
+const PLAN_BYTES = encode(getPlanEncoder(), {
+    bump: 255,
+    data: {
+        destinations: [ZERO, ZERO, ZERO, ZERO],
+        endTs: 0n,
+        metadataUri: '',
+        mint: ZERO,
+        planId: 42n,
+        pullers: [ZERO, ZERO, ZERO, ZERO],
+        terms: { amount: 1_000n, createdAt: 0n, periodHours: 24n },
+    },
+    discriminator: AccountDiscriminator.Plan,
+    owner: ZERO,
+    status: PlanStatus.Active,
+});
+
+const FIXED_DELEGATION_BYTES = encode(getFixedDelegationEncoder(), {
+    amount: 500n,
+    expiryTs: 1_999_999_999n,
+    header: {
+        bump: 253,
+        delegatee: ZERO,
+        delegator: ZERO,
+        discriminator: AccountDiscriminator.FixedDelegation,
+        initId: 1n,
+        payer: ZERO,
+        version: 1,
+    },
+    mint: ZERO,
+    subscriptionAuthority: ZERO,
+});
+
+const RECURRING_DELEGATION_BYTES = encode(getRecurringDelegationEncoder(), {
+    amountPerPeriod: 100n,
+    amountPulledInPeriod: 0n,
+    currentPeriodStartTs: 0n,
+    expiryTs: 1_999_999_999n,
+    header: {
+        bump: 252,
+        delegatee: ZERO,
+        delegator: ZERO,
+        discriminator: AccountDiscriminator.RecurringDelegation,
+        initId: 2n,
+        payer: ZERO,
+        version: 1,
+    },
+    mint: ZERO,
+    periodLengthS: 86_400n,
+    subscriptionAuthority: ZERO,
+});
+
+const SUBSCRIPTION_DELEGATION_BYTES = encode(getSubscriptionDelegationEncoder(), {
+    amountPulledInPeriod: 0n,
+    currentPeriodStartTs: 0n,
+    expiresAtTs: 1_999_999_999n,
+    header: {
+        bump: 251,
+        delegatee: ZERO,
+        delegator: ZERO,
+        discriminator: AccountDiscriminator.SubscriptionDelegation,
+        initId: 3n,
+        payer: ZERO,
+        version: 1,
+    },
+    terms: { amount: 200n, createdAt: 0n, periodHours: 48n },
+});
+
+const SUBSCRIPTION_AUTHORITY_BYTES = encode(getSubscriptionAuthorityEncoder(), {
+    bump: 254,
+    discriminator: AccountDiscriminator.SubscriptionAuthority,
+    initId: 1n,
+    payer: ZERO,
+    tokenMint: ZERO,
+    user: ZERO,
+});
+
+describe('decodeSubscriptionsAccount', () => {
+    it('should decode a Plan account and expose its fields', () => {
+        const result = decodeSubscriptionsAccount('addr', PLAN_BYTES);
+        expect(result?.type).toBe('Plan');
+        if (result?.type !== 'Plan') return;
+        expect(result.data.data.planId).toBe(42n);
+        expect(result.data.data.terms.amount).toBe(1_000n);
+        expect(result.data.data.terms.periodHours).toBe(24n);
+        expect(result.data.owner).toBe(ZERO);
+    });
+
+    it('should decode a FixedDelegation account and expose its fields', () => {
+        const result = decodeSubscriptionsAccount('addr', FIXED_DELEGATION_BYTES);
+        expect(result?.type).toBe('FixedDelegation');
+        if (result?.type !== 'FixedDelegation') return;
+        expect(result.data.amount).toBe(500n);
+        expect(result.data.expiryTs).toBe(1_999_999_999n);
+        expect(result.data.header.discriminator).toBe(AccountDiscriminator.FixedDelegation);
+    });
+
+    it('should decode a RecurringDelegation account and expose its fields', () => {
+        const result = decodeSubscriptionsAccount('addr', RECURRING_DELEGATION_BYTES);
+        expect(result?.type).toBe('RecurringDelegation');
+        if (result?.type !== 'RecurringDelegation') return;
+        expect(result.data.amountPerPeriod).toBe(100n);
+        expect(result.data.periodLengthS).toBe(86_400n);
+        expect(result.data.header.discriminator).toBe(AccountDiscriminator.RecurringDelegation);
+    });
+
+    it('should decode a SubscriptionDelegation account and expose its fields', () => {
+        const result = decodeSubscriptionsAccount('addr', SUBSCRIPTION_DELEGATION_BYTES);
+        expect(result?.type).toBe('SubscriptionDelegation');
+        if (result?.type !== 'SubscriptionDelegation') return;
+        expect(result.data.terms.amount).toBe(200n);
+        expect(result.data.terms.periodHours).toBe(48n);
+        expect(result.data.header.discriminator).toBe(AccountDiscriminator.SubscriptionDelegation);
+    });
+
+    it('should decode a SubscriptionAuthority account and expose its fields', () => {
+        const result = decodeSubscriptionsAccount('addr', SUBSCRIPTION_AUTHORITY_BYTES);
+        expect(result?.type).toBe('SubscriptionAuthority');
+        if (result?.type !== 'SubscriptionAuthority') return;
+        expect(result.data.user).toBe(ZERO);
+        expect(result.data.bump).toBe(254);
+    });
+
+    it('should return undefined for an empty buffer', () => {
+        expect(decodeSubscriptionsAccount('addr', new Uint8Array())).toBeUndefined();
+    });
+
+    it('should return undefined for an unknown discriminator byte', () => {
+        expect(decodeSubscriptionsAccount('addr', new Uint8Array([255, 0, 0, 0]))).toBeUndefined();
+    });
+
+    it('should return undefined when data is too short for the declared type', () => {
+        // Valid Plan discriminator but only a handful of bytes — codec will throw
+        // and the function must swallow it and return undefined.
+        expect(decodeSubscriptionsAccount('addr', new Uint8Array([AccountDiscriminator.Plan, 0, 1]))).toBeUndefined();
+    });
+});
