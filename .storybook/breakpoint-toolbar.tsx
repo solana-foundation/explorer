@@ -1,4 +1,4 @@
-// Registers a Bootstrap 5 breakpoint quick-select toolbar in the Storybook manager.
+// Registers a Tailwind breakpoint quick-select toolbar in the Storybook manager.
 // Uses React.createElement (no JSX) so this file is safe to import from both the
 // production Storybook manager and the design-sb manager, which has no JSX transform.
 // Viewport keys must match the `viewport.options` keys in preview.tsx.
@@ -73,7 +73,7 @@ function BreakpointTool() {
 addons.register(ADDON_ID, () => {
     addons.add(TOOL_ID, {
         render: BreakpointTool,
-        title: 'Bootstrap Breakpoints',
+        title: 'Tailwind Breakpoints',
         type: types.TOOL,
     });
 });
