@@ -7,6 +7,7 @@
         "build:info": "node scripts/update-build-info.js",
         "build:packages": "pnpm -r --filter './packages/**' run build",
         "build-sb": "storybook build",
+        "design-sb": "storybook dev -p 6007 --config-dir storybook-design/.storybook",
         "coverage": "vitest --coverage",
         "dev": "pnpm build:packages && next dev",
         "eslint:lint": "eslint",
