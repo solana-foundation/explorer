@@ -25,13 +25,14 @@ const IIDL_ACTIONS = {
 type IidlAction = (typeof IIDL_ACTIONS)[keyof typeof IIDL_ACTIONS];
 type IidlEventName = `iidl_${IdlTypeLabel}_${IidlAction}`;
 
-// Single compile-time guard for ALL generated names (2 standards × 6 actions).
+// Single compile-time guard for ALL generated names (2 standards × 8 actions).
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- forces a compile error if any generated name exceeds GA4's 40-char limit
 const _assertGA4Length: IidlEventName extends GA4EventName<IidlEventName> ? true : never = true;
 
 const eventName = (idlType: IdlTypeLabel, action: IidlAction): IidlEventName => `iidl_${idlType}_${action}`;
 
 export type IdlAnalytics = {
+    trackIdlViewed(programId?: string): void;
     trackSectionsExpanded(programId?: string, expandedSections?: string[]): void;
     trackTabOpened(programId?: string): void;
     trackTransactionConfirmed(programId?: string, instructionName?: string, signature?: string): void;
@@ -42,18 +43,6 @@ export type IdlAnalytics = {
 };
 
 /**
- * Fires an `idl_viewed` event when an IDL is displayed to the user.
- * The IDL standard is encoded in the event name (`iidl_anchor_idl_viewed` vs `iidl_codama_idl_viewed`).
- * This is the top-of-funnel event for IDL engagement analytics.
- */
-export function trackIdlViewed(standard: IdlStandard, programId?: string): void {
-    const idlType = IDL_TYPE_LABELS[standard];
-    trackEvent(eventName(idlType, IIDL_ACTIONS.IdlViewed), {
-        program_id: programId,
-    });
-}
-
-/**
  * Builds an Interactive IDL analytics tracker.
  * GA event names are scoped to the IDL standard:
  * - 'Anchor' -> iidl_anchor_*
@@ -62,6 +51,11 @@ export function trackIdlViewed(standard: IdlStandard, programId?: string): void 
 export function createIdlAnalytics(standard: IdlStandard): IdlAnalytics {
     const idlType = IDL_TYPE_LABELS[standard];
     return {
+        trackIdlViewed(programId) {
+            trackEvent(eventName(idlType, IIDL_ACTIONS.IdlViewed), {
+                program_id: programId,
+            });
+        },
         trackSectionsExpanded(programId, expandedSections) {
             trackEvent(eventName(idlType, IIDL_ACTIONS.SectionsExpanded), {
                 expanded_sections: expandedSections?.join(','),

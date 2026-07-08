@@ -7,7 +7,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { AnchorFormattedIdl } from '../formatted-idl/ui/AnchorFormattedIdl';
 import { CodamaFormattedIdl } from '../formatted-idl/ui/CodamaFormattedIdl';
-import { trackIdlViewed } from '../interactive-idl/lib/analytics';
+import { createIdlAnalytics } from '../interactive-idl/lib/analytics';
 import { originalIdlAtom, programIdAtom } from '../interactive-idl/model/state-atoms';
 import type { BaseIdl } from '../interactive-idl/model/unified-program';
 
@@ -37,7 +37,7 @@ export function IdlRenderer({
         const key = `${programId}:${getIdlStandard(idl)}`;
         if (trackedKey.current !== key) {
             trackedKey.current = key;
-            trackIdlViewed(getIdlStandard(idl), programId);
+            createIdlAnalytics(getIdlStandard(idl)).trackIdlViewed(programId);
         }
     }, [idl, programId]);
 

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { trackEvent } from '@/app/shared/lib/analytics';
 
-import { createIdlAnalytics, trackIdlViewed } from './analytics';
+import { createIdlAnalytics } from './analytics';
 
 vi.mock('@/app/shared/lib/analytics', () => ({
     trackEvent: vi.fn(),
@@ -16,14 +16,14 @@ describe('trackIdlViewed', () => {
     });
 
     it('should emit iidl_anchor_idl_viewed for Anchor standard', () => {
-        trackIdlViewed('Anchor', 'prog1');
+        createIdlAnalytics('Anchor').trackIdlViewed('prog1');
         expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_anchor_idl_viewed', {
             program_id: 'prog1',
         });
     });
 
     it('should emit iidl_codama_idl_viewed for Codama standard', () => {
-        trackIdlViewed('Codama', 'prog2');
+        createIdlAnalytics('Codama').trackIdlViewed('prog2');
         expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_codama_idl_viewed', {
             program_id: 'prog2',
         });
