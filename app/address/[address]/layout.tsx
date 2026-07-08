@@ -92,7 +92,6 @@ const TABS_LOOKUP: Record<string, AddressTab[]> = {
         { path: 'attributes', title: 'Attributes' },
     ],
     stake: [{ path: 'rewards', title: 'Rewards' }],
-    subscription: [{ path: 'subscription', title: 'Subscription' }],
     'sysvar:recentBlockhashes': [{ path: 'blockhashes', title: 'Blockhashes' }],
     'sysvar:slotHashes': [{ path: 'slot-hashes', title: 'Slot Hashes' }],
     'sysvar:stakeHistory': [{ path: 'stake-history', title: 'Stake History' }],
@@ -130,7 +129,6 @@ export type AddressTabPath =
     | 'feature-gate'
     | 'token-extensions'
     | 'attestation'
-    | 'subscription'
     | 'subscriptions';
 
 type AddressTab = NavigationTab<AddressTabPath>;
@@ -444,10 +442,6 @@ function getNavigationTabs(pubkey: PublicKey, account: Account): AddressTab[] {
 
     if (isAttestationAccount(account)) {
         tabs.push(...TABS_LOOKUP['attestation']);
-    }
-
-    if (isSubscriptionsAccount(account)) {
-        tabs.push(...TABS_LOOKUP['subscription']);
     }
 
     if (isRedactedTokenAddress(address)) {
