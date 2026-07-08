@@ -41,14 +41,14 @@ describe('useDasImage', () => {
 
     it('should pass correct SWR key including cluster slug and customUrl', () => {
         vi.mocked(useCluster).mockReturnValue({
-            cluster: Cluster.Devnet,
+            cluster: Cluster.Custom,
             customUrl: 'https://custom.rpc',
         } as ReturnType<typeof useCluster>);
 
         renderHook(() => useDasImage('SomeMintAddress'));
 
         expect(useSWR).toHaveBeenCalledWith(
-            ['das-image', 'SomeMintAddress', clusterSlug(Cluster.Devnet), 'https://custom.rpc'],
+            ['das-image', 'SomeMintAddress', clusterSlug(Cluster.Custom), 'https://custom.rpc'],
             expect.any(Function),
             expect.any(Object),
         );

@@ -5,6 +5,8 @@ import { getAssetBatch } from '@/app/entities/digital-asset/api';
 import { clearLogoCacheForTests } from '@/app/features/search/api/discover-with-jupiter';
 
 import { GET } from '../route';
+import { makeDasAsset } from './__fixtures__/das';
+import { makeJupiterToken, VALID_ADDRESS } from './__fixtures__/jupiter';
 
 vi.mock('@/app/entities/digital-asset/api', () => ({
     getAssetBatch: vi.fn(),
@@ -13,20 +15,6 @@ vi.mock('@/app/entities/digital-asset/api', () => ({
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
 const getAssetBatchMock = vi.mocked(getAssetBatch);
-
-const VALID_ADDRESS = 'So11111111111111111111111111111111111111112';
-
-function makeJupiterToken(overrides: Record<string, unknown> = {}) {
-    return {
-        decimals: 9,
-        id: VALID_ADDRESS,
-        isVerified: true,
-        logoURI: 'https://example.com/sol.png',
-        name: 'Wrapped SOL',
-        symbol: 'SOL',
-        ...overrides,
-    };
-}
 
 function mockFetch(status: number, body: unknown) {
     const ok = status >= 200 && status < 300;
@@ -236,12 +224,7 @@ describe('GET /api/search', () => {
     describe('DAS icon enrichment', () => {
         it('should enrich icon from DAS when logoUri is null', async () => {
             mockFetch(200, [makeJupiterToken({ logoURI: null })]);
-            getAssetBatchMock.mockResolvedValueOnce([
-                {
-                    content: { links: { image: 'https://das.example.com/sol.png' } },
-                    id: VALID_ADDRESS,
-                },
-            ]);
+            getAssetBatchMock.mockResolvedValueOnce([makeDasAsset(VALID_ADDRESS, 'https://das.example.com/sol.png')]);
 
             const res = await GET(makeRequest('sol'));
             const data = await res.json();
@@ -250,12 +233,7 @@ describe('GET /api/search', () => {
 
         it('should prefer logoUri over DAS image when both present', async () => {
             mockFetch(200, [makeJupiterToken({ logoURI: 'https://original.com/sol.png' })]);
-            getAssetBatchMock.mockResolvedValueOnce([
-                {
-                    content: { links: { image: 'https://das.example.com/sol.png' } },
-                    id: VALID_ADDRESS,
-                },
-            ]);
+            getAssetBatchMock.mockResolvedValueOnce([makeDasAsset(VALID_ADDRESS, 'https://das.example.com/sol.png')]);
 
             const res = await GET(makeRequest('sol'));
             const data = await res.json();

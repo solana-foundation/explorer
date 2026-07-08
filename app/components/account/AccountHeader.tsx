@@ -18,6 +18,7 @@ import React, { Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
 
+import { dasImageAddress } from '@/app/components/account/das-image-address';
 import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { ProxiedImage } from '@/app/features/metadata';
 import { getProxiedUri } from '@/app/features/metadata/utils';
@@ -113,11 +114,7 @@ function TokenMintHeader({
     const metadataPointerExtension = mintInfo?.extensions?.find(
         ({ extension }: { extension: string }) => extension === 'metadataPointer',
     );
-    // Skip DAS fetch when a definitive image is already available. Token-2022 is excluded:
-    // its image comes from an async metadata URI fetch, so DAS still serves as a useful fallback.
-    const dasImage = useDasImage(
-        tokenInfo?.logoURI || isRedactedTokenAddress(address) || parsedData?.nftData?.json?.image ? undefined : address,
-    );
+    const dasImage = useDasImage(dasImageAddress(address, tokenInfo, parsedData));
 
     const defaultCard = useMemo(() => {
         const logoURI = tokenInfo?.logoURI ?? dasImage;
