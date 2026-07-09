@@ -9,8 +9,8 @@ env:
   # cache affixes and folders
   PNPM_CACHE_AFFIX: pnpm
   PNPM_CACHE_FOLDER: ~/.pnpm-store
-  PW_CACHE_AFFIX: pw
-  PW_CACHE_FOLDER: ~/.cache/ms-playwright
+  PLAYWRIGHT_CACHE_AFFIX: pw
+  PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
   SENTRY_TELEMETRY_DISABLE: true
   STORYBOOK_DISABLE_TELEMETRY: 1
   OPENSPEC_TELEMETRY: 0
@@ -66,7 +66,7 @@ jobs:
         with:
           path: |
             ${{ env.PNPM_CACHE_FOLDER }}
-            ${{ env.PW_CACHE_FOLDER }}
+            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
             ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
           restore-keys: |
@@ -156,8 +156,7 @@ jobs:
     # stopping the restore-keys snowball. Job-own cache affixes keep old archives out.
     env:
       PNPM_CACHE_AFFIX: pnpm-sb
-      PW_CACHE_FOLDER: /mnt/cache/ms-playwright
-      PW_CACHE_AFFIX: pw-mnt
+      PLAYWRIGHT_CACHE_AFFIX: pw-mnt
       PLAYWRIGHT_BROWSERS_PATH: /mnt/cache/ms-playwright
 
     steps:
@@ -166,9 +165,8 @@ jobs:
 
       - name: Prepare browser cache dir on the scratch disk
         run: |
-          sudo mkdir -p /mnt/cache/ms-playwright
-          sudo chown -R "$(id -u):$(id -g)" /mnt/cache
-          df -h / /mnt
+          sudo mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"
+          sudo chown -R "$(id -u):$(id -g)" "$PLAYWRIGHT_BROWSERS_PATH"
 
       - name: Install package manager
         uses: pnpm/action-setup@v4
@@ -193,12 +191,12 @@ jobs:
 
       - name: Cache Playwright browsers
         uses: actions/cache@v5
-        id: pw_cache
+        id: playwright_cache
         with:
-          path: ${{ env.PW_CACHE_FOLDER }}
-          key: ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: ${{ runner.os }}-${{ env.PLAYWRIGHT_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.PW_CACHE_AFFIX }}-
+            ${{ runner.os }}-${{ env.PLAYWRIGHT_CACHE_AFFIX }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -208,11 +206,11 @@ jobs:
         run: pnpm store prune
 
       - name: Install Playwright browsers
-        if: steps.pw_cache.outputs.cache-hit != 'true'
+        if: steps.playwright_cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Install Playwright system deps only
-        if: steps.pw_cache.outputs.cache-hit == 'true'
+        if: steps.playwright_cache.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
 
       - name: Run Storybook smoke tests
