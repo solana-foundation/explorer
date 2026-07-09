@@ -1,19 +1,9 @@
-import { decodeInstruction, MARKETS } from '@project-serum/serum';
-import { AccountMeta, PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import { BigIntFromString } from '@validators/number';
-import { create, enums, Infer, number, type } from 'superstruct';
+/* eslint-disable sort-keys-fix/sort-keys-fix -- `accounts` literal order drives UI row order (Object.entries); data schemas are kept in wire order only to mirror the layout */
+import { decodeInstruction } from '@project-serum/serum';
+import { type AccountMeta, type PublicKey, type TransactionInstruction } from '@solana/web3.js';
+import { enums, type Infer, mask, number, object } from 'superstruct';
 
-import { readUint32LE } from '@/app/shared/lib/bytes';
-
-export const OPEN_BOOK_PROGRAM_ID = 'srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX';
-
-const SERUM_PROGRAM_IDS = [
-    '4ckmDgGdxQoPDLUkDT3vHgSAkzA3QRdNq5ywwY4sUSJn',
-    '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin',
-    OPEN_BOOK_PROGRAM_ID,
-];
-
-export const SERUM_DECODED_MAX = 6;
+import { BigIntFromString } from './superstructHelpers';
 
 export type Side = Infer<typeof Side>;
 export const Side = enums(['buy', 'sell']);
@@ -51,31 +41,31 @@ export type InitializeMarket = {
     };
 };
 
-export const InitializeMarketInstruction = type({
+export const InitializeMarketInstruction = object({
     baseLotSize: BigIntFromString,
-    feeRateBps: number(),
-    quoteDustThreshold: BigIntFromString,
     quoteLotSize: BigIntFromString,
+    feeRateBps: number(),
     vaultSignerNonce: BigIntFromString,
+    quoteDustThreshold: BigIntFromString,
 });
 
 export function decodeInitializeMarket(ix: TransactionInstruction): InitializeMarket {
     return {
         accounts: {
-            asks: ix.keys[4].pubkey,
-            baseMint: ix.keys[7].pubkey,
-            baseVault: ix.keys[5].pubkey,
-            bids: ix.keys[3].pubkey,
-            crankAuthority: getOptionalKey(ix.keys, 12),
-            eventQueue: ix.keys[2].pubkey,
             market: ix.keys[0].pubkey,
+            requestQueue: ix.keys[1].pubkey,
+            eventQueue: ix.keys[2].pubkey,
+            bids: ix.keys[3].pubkey,
+            asks: ix.keys[4].pubkey,
+            baseVault: ix.keys[5].pubkey,
+            quoteVault: ix.keys[6].pubkey,
+            baseMint: ix.keys[7].pubkey,
+            quoteMint: ix.keys[8].pubkey,
             openOrdersMarketAuthority: getOptionalKey(ix.keys, 10),
             pruneAuthority: getOptionalKey(ix.keys, 11),
-            quoteMint: ix.keys[8].pubkey,
-            quoteVault: ix.keys[6].pubkey,
-            requestQueue: ix.keys[1].pubkey,
+            crankAuthority: getOptionalKey(ix.keys, 12),
         },
-        data: create(decodeInstruction(ix.data).initializeMarket, InitializeMarketInstruction),
+        data: mask(decodeInstruction(ix.data).initializeMarket, InitializeMarketInstruction),
         programId: ix.programId,
     };
 }
@@ -95,27 +85,27 @@ export type NewOrder = {
     };
 };
 
-export const NewOrderInstruction = type({
-    clientId: BigIntFromString,
+export const NewOrderInstruction = object({
+    side: Side,
     limitPrice: BigIntFromString,
     maxQuantity: BigIntFromString,
     orderType: OrderType,
-    side: Side,
+    clientId: BigIntFromString,
 });
 
 export function decodeNewOrder(ix: TransactionInstruction): NewOrder {
     return {
         accounts: {
-            baseVault: ix.keys[5].pubkey,
-            feeDiscountPubkey: getOptionalKey(ix.keys, 9),
             market: ix.keys[0].pubkey,
             openOrders: ix.keys[1].pubkey,
-            openOrdersOwner: ix.keys[4].pubkey,
-            payer: ix.keys[3].pubkey,
-            quoteVault: ix.keys[6].pubkey,
             requestQueue: ix.keys[2].pubkey,
+            payer: ix.keys[3].pubkey,
+            openOrdersOwner: ix.keys[4].pubkey,
+            baseVault: ix.keys[5].pubkey,
+            quoteVault: ix.keys[6].pubkey,
+            feeDiscountPubkey: getOptionalKey(ix.keys, 9),
         },
-        data: create(decodeInstruction(ix.data).newOrder, NewOrderInstruction),
+        data: mask(decodeInstruction(ix.data).newOrder, NewOrderInstruction),
         programId: ix.programId,
     };
 }
@@ -132,20 +122,20 @@ export type MatchOrders = {
     };
 };
 
-export const MatchOrdersInstruction = type({
+export const MatchOrdersInstruction = object({
     limit: number(),
 });
 
 export function decodeMatchOrders(ix: TransactionInstruction): MatchOrders {
     return {
         accounts: {
-            asks: ix.keys[4].pubkey,
-            bids: ix.keys[3].pubkey,
-            eventQueue: ix.keys[2].pubkey,
             market: ix.keys[0].pubkey,
             requestQueue: ix.keys[1].pubkey,
+            eventQueue: ix.keys[2].pubkey,
+            bids: ix.keys[3].pubkey,
+            asks: ix.keys[4].pubkey,
         },
-        data: create(decodeInstruction(ix.data).matchOrders, MatchOrdersInstruction),
+        data: mask(decodeInstruction(ix.data).matchOrders, MatchOrdersInstruction),
         programId: ix.programId,
     };
 }
@@ -160,18 +150,18 @@ export type ConsumeEvents = {
     };
 };
 
-export const ConsumeEventsInstruction = type({
+export const ConsumeEventsInstruction = object({
     limit: number(),
 });
 
 export function decodeConsumeEvents(ix: TransactionInstruction): ConsumeEvents {
     return {
         accounts: {
-            eventQueue: ix.keys[ix.keys.length - 3].pubkey,
-            market: ix.keys[ix.keys.length - 4].pubkey,
             openOrders: ix.keys.slice(0, -4).map(k => k.pubkey),
+            market: ix.keys[ix.keys.length - 4].pubkey,
+            eventQueue: ix.keys[ix.keys.length - 3].pubkey,
         },
-        data: create(decodeInstruction(ix.data).consumeEvents, ConsumeEventsInstruction),
+        data: mask(decodeInstruction(ix.data).consumeEvents, ConsumeEventsInstruction),
         programId: ix.programId,
     };
 }
@@ -187,10 +177,10 @@ export type CancelOrder = {
     };
 };
 
-export const CancelOrderInstruction = type({
-    openOrdersSlot: number(),
-    orderId: BigIntFromString,
+export const CancelOrderInstruction = object({
     side: Side,
+    orderId: BigIntFromString,
+    openOrdersSlot: number(),
 });
 
 export function decodeCancelOrder(ix: TransactionInstruction): CancelOrder {
@@ -198,10 +188,10 @@ export function decodeCancelOrder(ix: TransactionInstruction): CancelOrder {
         accounts: {
             market: ix.keys[0].pubkey,
             openOrders: ix.keys[1].pubkey,
-            openOrdersOwner: ix.keys[3].pubkey,
             requestQueue: ix.keys[2].pubkey,
+            openOrdersOwner: ix.keys[3].pubkey,
         },
-        data: create(decodeInstruction(ix.data).cancelOrder, CancelOrderInstruction),
+        data: mask(decodeInstruction(ix.data).cancelOrder, CancelOrderInstruction),
         programId: ix.programId,
     };
 }
@@ -224,15 +214,15 @@ export type SettleFunds = {
 export function decodeSettleFunds(ix: TransactionInstruction): SettleFunds {
     return {
         accounts: {
-            baseVault: ix.keys[3].pubkey,
-            baseWallet: ix.keys[5].pubkey,
             market: ix.keys[0].pubkey,
             openOrders: ix.keys[1].pubkey,
             openOrdersOwner: ix.keys[2].pubkey,
+            baseVault: ix.keys[3].pubkey,
             quoteVault: ix.keys[4].pubkey,
+            baseWallet: ix.keys[5].pubkey,
             quoteWallet: ix.keys[6].pubkey,
-            referrerQuoteWallet: getOptionalKey(ix.keys, 9),
             vaultSigner: ix.keys[7].pubkey,
+            referrerQuoteWallet: getOptionalKey(ix.keys, 9),
         },
         programId: ix.programId,
     };
@@ -249,7 +239,7 @@ export type CancelOrderByClientId = {
     };
 };
 
-export const CancelOrderByClientIdInstruction = type({
+export const CancelOrderByClientIdInstruction = object({
     clientId: BigIntFromString,
 });
 
@@ -258,52 +248,10 @@ export function decodeCancelOrderByClientId(ix: TransactionInstruction): CancelO
         accounts: {
             market: ix.keys[0].pubkey,
             openOrders: ix.keys[1].pubkey,
-            openOrdersOwner: ix.keys[3].pubkey,
             requestQueue: ix.keys[2].pubkey,
+            openOrdersOwner: ix.keys[3].pubkey,
         },
-        data: create(decodeInstruction(ix.data).cancelOrderByClientId, CancelOrderByClientIdInstruction),
-        programId: ix.programId,
-    };
-}
-
-export type DisableMarket = {
-    programId: PublicKey;
-    accounts: {
-        market: PublicKey;
-        disableAuthority: PublicKey;
-    };
-};
-
-export function decodeDisableMarket(ix: TransactionInstruction): DisableMarket {
-    return {
-        accounts: {
-            disableAuthority: ix.keys[1].pubkey,
-            market: ix.keys[0].pubkey,
-        },
-        programId: ix.programId,
-    };
-}
-
-export type SweepFees = {
-    programId: PublicKey;
-    accounts: {
-        market: PublicKey;
-        quoteVault: PublicKey;
-        feeSweepingAuthority: PublicKey;
-        quoteFeeReceiver: PublicKey;
-        vaultSigner: PublicKey;
-    };
-};
-
-export function decodeSweepFees(ix: TransactionInstruction): SweepFees {
-    return {
-        accounts: {
-            feeSweepingAuthority: ix.keys[2].pubkey,
-            market: ix.keys[0].pubkey,
-            quoteFeeReceiver: ix.keys[3].pubkey,
-            quoteVault: ix.keys[1].pubkey,
-            vaultSigner: ix.keys[4].pubkey,
-        },
+        data: mask(decodeInstruction(ix.data).cancelOrderByClientId, CancelOrderByClientIdInstruction),
         programId: ix.programId,
     };
 }
@@ -326,33 +274,33 @@ export type NewOrderV3 = {
     };
 };
 
-export const NewOrderV3Instruction = type({
-    clientId: BigIntFromString,
-    limit: number(),
+export const NewOrderV3Instruction = object({
+    side: Side,
     limitPrice: BigIntFromString,
     maxBaseQuantity: BigIntFromString,
     maxQuoteQuantity: BigIntFromString,
-    orderType: OrderType,
     selfTradeBehavior: SelfTradeBehavior,
-    side: Side,
+    orderType: OrderType,
+    clientId: BigIntFromString,
+    limit: number(),
 });
 
 export function decodeNewOrderV3(ix: TransactionInstruction): NewOrderV3 {
     return {
         accounts: {
-            asks: ix.keys[5].pubkey,
-            baseVault: ix.keys[8].pubkey,
-            bids: ix.keys[4].pubkey,
-            eventQueue: ix.keys[3].pubkey,
-            feeDiscountPubkey: getOptionalKey(ix.keys, 12),
             market: ix.keys[0].pubkey,
             openOrders: ix.keys[1].pubkey,
-            openOrdersOwner: ix.keys[7].pubkey,
-            payer: ix.keys[6].pubkey,
-            quoteVault: ix.keys[9].pubkey,
             requestQueue: ix.keys[2].pubkey,
+            eventQueue: ix.keys[3].pubkey,
+            bids: ix.keys[4].pubkey,
+            asks: ix.keys[5].pubkey,
+            payer: ix.keys[6].pubkey,
+            openOrdersOwner: ix.keys[7].pubkey,
+            baseVault: ix.keys[8].pubkey,
+            quoteVault: ix.keys[9].pubkey,
+            feeDiscountPubkey: getOptionalKey(ix.keys, 12),
         },
-        data: create(decodeInstruction(ix.data).newOrderV3, NewOrderV3Instruction),
+        data: mask(decodeInstruction(ix.data).newOrderV3, NewOrderV3Instruction),
         programId: ix.programId,
     };
 }
@@ -370,22 +318,22 @@ export type CancelOrderV2 = {
     };
 };
 
-export const CancelOrderV2Instruction = type({
-    orderId: BigIntFromString,
+export const CancelOrderV2Instruction = object({
     side: Side,
+    orderId: BigIntFromString,
 });
 
 export function decodeCancelOrderV2(ix: TransactionInstruction): CancelOrderV2 {
     return {
         accounts: {
-            asks: ix.keys[2].pubkey,
-            bids: ix.keys[1].pubkey,
-            eventQueue: ix.keys[5].pubkey,
             market: ix.keys[0].pubkey,
+            bids: ix.keys[1].pubkey,
+            asks: ix.keys[2].pubkey,
             openOrders: ix.keys[3].pubkey,
             openOrdersOwner: ix.keys[4].pubkey,
+            eventQueue: ix.keys[5].pubkey,
         },
-        data: create(decodeInstruction(ix.data).cancelOrderV2, CancelOrderV2Instruction),
+        data: mask(decodeInstruction(ix.data).cancelOrderV2, CancelOrderV2Instruction),
         programId: ix.programId,
     };
 }
@@ -403,21 +351,21 @@ export type CancelOrderByClientIdV2 = {
     };
 };
 
-export const CancelOrderByClientIdV2Instruction = type({
+export const CancelOrderByClientIdV2Instruction = object({
     clientId: BigIntFromString,
 });
 
 export function decodeCancelOrderByClientIdV2(ix: TransactionInstruction): CancelOrderByClientIdV2 {
     return {
         accounts: {
-            asks: ix.keys[2].pubkey,
-            bids: ix.keys[1].pubkey,
-            eventQueue: ix.keys[5].pubkey,
             market: ix.keys[0].pubkey,
+            bids: ix.keys[1].pubkey,
+            asks: ix.keys[2].pubkey,
             openOrders: ix.keys[3].pubkey,
             openOrdersOwner: ix.keys[4].pubkey,
+            eventQueue: ix.keys[5].pubkey,
         },
-        data: create(decodeInstruction(ix.data).cancelOrderByClientIdV2, CancelOrderByClientIdV2Instruction),
+        data: mask(decodeInstruction(ix.data).cancelOrderByClientIdV2, CancelOrderByClientIdV2Instruction),
         programId: ix.programId,
     };
 }
@@ -435,10 +383,10 @@ export type CloseOpenOrders = {
 export function decodeCloseOpenOrders(ix: TransactionInstruction): CloseOpenOrders {
     return {
         accounts: {
-            market: ix.keys[3].pubkey,
             openOrders: ix.keys[0].pubkey,
             openOrdersOwner: ix.keys[1].pubkey,
             rentReceiver: ix.keys[2].pubkey,
+            market: ix.keys[3].pubkey,
         },
         programId: ix.programId,
     };
@@ -457,10 +405,10 @@ export type InitOpenOrders = {
 export function decodeInitOpenOrders(ix: TransactionInstruction): InitOpenOrders {
     return {
         accounts: {
-            market: ix.keys[2].pubkey,
             openOrders: ix.keys[0].pubkey,
-            openOrdersMarketAuthority: ix.keys[4]?.pubkey,
             openOrdersOwner: ix.keys[1].pubkey,
+            market: ix.keys[2].pubkey,
+            openOrdersMarketAuthority: getOptionalKey(ix.keys, 4),
         },
         programId: ix.programId,
     };
@@ -480,22 +428,22 @@ export type Prune = {
     };
 };
 
-export const PruneInstruction = type({
+export const PruneInstruction = object({
     limit: number(),
 });
 
 export function decodePrune(ix: TransactionInstruction): Prune {
     return {
         accounts: {
-            asks: ix.keys[2].pubkey,
-            bids: ix.keys[1].pubkey,
-            eventQueue: ix.keys[6].pubkey,
             market: ix.keys[0].pubkey,
+            bids: ix.keys[1].pubkey,
+            asks: ix.keys[2].pubkey,
+            pruneAuthority: ix.keys[3].pubkey,
             openOrders: ix.keys[4].pubkey,
             openOrdersOwner: ix.keys[5].pubkey,
-            pruneAuthority: ix.keys[3].pubkey,
+            eventQueue: ix.keys[6].pubkey,
         },
-        data: create(decodeInstruction(ix.data).prune, PruneInstruction),
+        data: mask(decodeInstruction(ix.data).prune, PruneInstruction),
         programId: ix.programId,
     };
 }
@@ -511,28 +459,21 @@ export type ConsumeEventsPermissioned = {
     };
 };
 
-export const ConsumeEventsPermissionedInstruction = type({
+export const ConsumeEventsPermissionedInstruction = object({
     limit: number(),
 });
 
 export function decodeConsumeEventsPermissioned(ix: TransactionInstruction): ConsumeEventsPermissioned {
     return {
         accounts: {
-            crankAuthority: ix.keys[ix.keys.length - 1].pubkey,
-            eventQueue: ix.keys[ix.keys.length - 2].pubkey,
-            market: ix.keys[ix.keys.length - 3].pubkey,
             openOrders: ix.keys.slice(0, -3).map(k => k.pubkey),
+            market: ix.keys[ix.keys.length - 3].pubkey,
+            eventQueue: ix.keys[ix.keys.length - 2].pubkey,
+            crankAuthority: ix.keys[ix.keys.length - 1].pubkey,
         },
-        data: create(decodeInstruction(ix.data).consumeEventsPermissioned, ConsumeEventsPermissionedInstruction),
+        data: mask(decodeInstruction(ix.data).consumeEventsPermissioned, ConsumeEventsPermissionedInstruction),
         programId: ix.programId,
     };
-}
-
-export function isSerumInstruction(instruction: TransactionInstruction) {
-    return (
-        SERUM_PROGRAM_IDS.includes(instruction.programId.toBase58()) ||
-        MARKETS.some(market => market.programId && market.programId.equals(instruction.programId))
-    );
 }
 
 export function parseSerumInstructionKey(instruction: TransactionInstruction): string {
@@ -546,47 +487,61 @@ export function parseSerumInstructionKey(instruction: TransactionInstruction): s
     return keys[0];
 }
 
-const SERUM_CODE_LOOKUP: { [key: number]: string } = {
-    0: 'Initialize Market',
-    1: 'New Order',
-    10: 'New Order v3',
-    11: 'Cancel Order v2',
-    12: 'Cancel Order by Client Id v2',
-    13: 'Send Take',
-    14: 'Close Open Orders',
-    15: 'Init Open Orders',
-    16: 'Prune',
-    17: 'Consume Events Permissioned',
-    2: 'Match Orders',
-    3: 'Consume Events',
-    4: 'Cancel Order',
-    5: 'Settle Funds',
-    6: 'Cancel Order by Client Id',
-    7: 'Disable Market',
-    8: 'Sweep Fees',
-    9: 'New Order v2',
+// Codes 7/8/9/13 (disableMarket, sweepFees, newOrderV2, sendTake) are absent from the serum lib's
+// INSTRUCTION_LAYOUT, so parseSerumInstructionKey throws for them and they can never be dispatched —
+// the card renders them as raw data with a name-table title.
+export type DecodedSerumInstruction =
+    | { key: 'cancelOrder'; info: CancelOrder }
+    | { key: 'cancelOrderByClientId'; info: CancelOrderByClientId }
+    | { key: 'cancelOrderByClientIdV2'; info: CancelOrderByClientIdV2 }
+    | { key: 'cancelOrderV2'; info: CancelOrderV2 }
+    | { key: 'closeOpenOrders'; info: CloseOpenOrders }
+    | { key: 'consumeEvents'; info: ConsumeEvents }
+    | { key: 'consumeEventsPermissioned'; info: ConsumeEventsPermissioned }
+    | { key: 'initializeMarket'; info: InitializeMarket }
+    | { key: 'initOpenOrders'; info: InitOpenOrders }
+    | { key: 'matchOrders'; info: MatchOrders }
+    | { key: 'newOrder'; info: NewOrder }
+    | { key: 'newOrderV3'; info: NewOrderV3 }
+    | { key: 'prune'; info: Prune }
+    | { key: 'settleFunds'; info: SettleFunds };
+
+export type SerumInstructionKey = DecodedSerumInstruction['key'];
+
+// Record over SerumInstructionKey so adding a union variant without a decoder entry fails to compile.
+const DECODERS: Record<SerumInstructionKey, (instruction: TransactionInstruction) => DecodedSerumInstruction> = {
+    cancelOrder: instruction => ({ info: decodeCancelOrder(instruction), key: 'cancelOrder' }),
+    cancelOrderByClientId: instruction => ({
+        info: decodeCancelOrderByClientId(instruction),
+        key: 'cancelOrderByClientId',
+    }),
+    cancelOrderByClientIdV2: instruction => ({
+        info: decodeCancelOrderByClientIdV2(instruction),
+        key: 'cancelOrderByClientIdV2',
+    }),
+    cancelOrderV2: instruction => ({ info: decodeCancelOrderV2(instruction), key: 'cancelOrderV2' }),
+    closeOpenOrders: instruction => ({ info: decodeCloseOpenOrders(instruction), key: 'closeOpenOrders' }),
+    consumeEvents: instruction => ({ info: decodeConsumeEvents(instruction), key: 'consumeEvents' }),
+    consumeEventsPermissioned: instruction => ({
+        info: decodeConsumeEventsPermissioned(instruction),
+        key: 'consumeEventsPermissioned',
+    }),
+    initializeMarket: instruction => ({ info: decodeInitializeMarket(instruction), key: 'initializeMarket' }),
+    initOpenOrders: instruction => ({ info: decodeInitOpenOrders(instruction), key: 'initOpenOrders' }),
+    matchOrders: instruction => ({ info: decodeMatchOrders(instruction), key: 'matchOrders' }),
+    newOrder: instruction => ({ info: decodeNewOrder(instruction), key: 'newOrder' }),
+    newOrderV3: instruction => ({ info: decodeNewOrderV3(instruction), key: 'newOrderV3' }),
+    prune: instruction => ({ info: decodePrune(instruction), key: 'prune' }),
+    settleFunds: instruction => ({ info: decodeSettleFunds(instruction), key: 'settleFunds' }),
 };
 
-export function parseSerumInstructionCode(instruction: TransactionInstruction) {
-    return readUint32LE(instruction.data.slice(1, 5), 0);
-}
+const isDecodableKey = (key: string): key is SerumInstructionKey => key in DECODERS;
 
-export function parseSerumInstructionTitle(instruction: TransactionInstruction): string {
-    const code = parseSerumInstructionCode(instruction);
-
-    if (!(code in SERUM_CODE_LOOKUP)) {
-        throw new Error(`Unrecognized Serum instruction code: ${code}`);
+// Single decode entry point so representation code never dispatches on instruction internals itself.
+export function decodeSerumInstruction(instruction: TransactionInstruction): DecodedSerumInstruction {
+    const key = parseSerumInstructionKey(instruction);
+    if (!isDecodableKey(key)) {
+        throw new Error(`Unsupported Serum instruction key: ${key}`);
     }
-
-    return SERUM_CODE_LOOKUP[code];
+    return DECODERS[key](instruction);
 }
-
-export type SerumIxDetailsProps<T> = {
-    ix: TransactionInstruction;
-    index: number;
-    result: SignatureResult;
-    info: T;
-    programName: string;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-};

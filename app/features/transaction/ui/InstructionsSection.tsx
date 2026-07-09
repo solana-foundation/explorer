@@ -14,8 +14,6 @@ import {
     isSolanaAttestationInstruction,
     SolanaAttestationDetailsCard,
 } from '@components/instruction/sas/SolanaAttestationDetailsCard';
-import { isSerumInstruction } from '@components/instruction/serum/types';
-import { SerumDetailsCard } from '@components/instruction/SerumDetailsCard';
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { isTokenLendingInstruction } from '@components/instruction/token-lending/types';
@@ -29,6 +27,11 @@ import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProo
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
 import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
+import {
+    getSerumInstructionLabel,
+    isDeprecatedSerumProgram,
+    isSerumInstruction,
+} from '@explorer/decoder-serum/detection';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
@@ -51,11 +54,17 @@ import {
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT, SignatureProps } from '@utils/index';
 import { intoTransactionInstruction } from '@utils/tx';
+import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { CollapsibleSection } from './CollapsibleSection';
 import { CommonInstructionDetailsCard } from './CommonInstructionDetailsCard';
+
+const SerumDetailsCard = dynamic(
+    () => import('@features/instruction-program-serum').then(mod => mod.SerumDetailsCard),
+    { ssr: false },
+);
 
 export type InstructionDetailsProps = {
     tx: ParsedTransaction;
@@ -241,7 +250,21 @@ function InstructionCard({
         );
     }
     if (isSerumInstruction(transactionIx)) {
-        return <SerumDetailsCard key={key} {...props} />;
+        // Dead Serum DEX deployments get the generic name-only card; the active OpenBook fork keeps full decoding.
+        if (isDeprecatedSerumProgram(transactionIx.programId.toBase58())) {
+            return (
+                <CommonInstructionDetailsCard
+                    key={key}
+                    {...props}
+                    instructionName={getSerumInstructionLabel(transactionIx)}
+                />
+            );
+        }
+        return (
+            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                <SerumDetailsCard {...props} />
+            </ErrorBoundary>
+        );
     }
     if (isTokenSwapInstruction(transactionIx)) {
         return <TokenSwapDetailsCard key={key} {...props} />;
