@@ -14,8 +14,6 @@ import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '..
 import { withMockRpc } from '../../../../../.storybook/responsive-decorators';
 import { WalletSubscriptionsView } from '../WalletSubscriptionsCard';
 
-// ─── Shared constants ─────────────────────────────────────────────────────────
-
 const ZERO = address('11111111111111111111111111111111');
 const PLAN_ACCOUNT = address('5ASxtmcPKDeD8NoE5QpskizPokqDdX1qHFiqZb1spLdo');
 const SUB_ACCOUNT = address('7NKXbdLz6dSzUqnKSCGE8DXDYM5cGGnMDamU1MNjBvz');
@@ -24,8 +22,6 @@ const RECURRING_ACCOUNT = address('BkBm9VkHR7ZdCT5SKhT5MJXDVNmNRmhzWB8FTJNMpqrX'
 const USER = address('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8');
 const MINT = address('4TPTXRKCbL39nMkWAtRDMRB4gQkUfrfCMvwKS4AYoH7e');
 const DELEGATEE = address('3MRBUAxwx7gWoGvAtzxLtzmhzwPDGAEqStKWb8cJnYQX');
-
-// ─── Fixture data ─────────────────────────────────────────────────────────────
 
 const HEADER_BASE = {
     delegatee: DELEGATEE,
@@ -77,8 +73,6 @@ const RECURRING_DELEGATION: RecurringDelegation = {
     subscriptionAuthority: ZERO,
 };
 
-// ─── Mock WalletSubscriptionsData ─────────────────────────────────────────────
-
 const ALL_DATA = {
     delegations: [
         { address: SUB_ACCOUNT, data: SUB_DELEGATION, kind: 'subscription' as const },
@@ -87,8 +81,6 @@ const ALL_DATA = {
     ],
     plans: [{ address: PLAN_ACCOUNT, data: PLAN }],
 };
-
-// ─── Meta ─────────────────────────────────────────────────────────────────────
 
 const meta = {
     component: WalletSubscriptionsView,
@@ -100,8 +92,6 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-// ─── Stories ──────────────────────────────────────────────────────────────────
 
 export const AllSections: Story = {
     args: { data: ALL_DATA },
