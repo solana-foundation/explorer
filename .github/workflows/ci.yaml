@@ -167,6 +167,7 @@ jobs:
         run: |
           sudo mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"
           sudo chown -R "$(id -u):$(id -g)" "$PLAYWRIGHT_BROWSERS_PATH"
+          df -h / /mnt
 
       - name: Install package manager
         uses: pnpm/action-setup@v4
