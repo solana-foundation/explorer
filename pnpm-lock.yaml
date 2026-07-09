@@ -89,6 +89,9 @@ overrides:
 pnpmfileChecksum: sha256-BfkWczcQHe8lZlLbAuHsrj1b6UroZcYpYDwSzrgMhb8=
 
 patchedDependencies:
+  '@codama/dynamic-parsers@1.1.30':
+    hash: 532d6df4cb0aa1bc506bb4224f04645d04b80e0dafc3c252042ebe2bd70cca68
+    path: patches/@codama__dynamic-parsers@1.1.30.patch
   '@solana-developers/helpers@2.8.1':
     hash: 3404536e2e71cf96a8aa5675d9b2c17a94f209253305827d7d8dca7686d0c388
     path: patches/@solana-developers__helpers@2.8.1.patch
@@ -105,7 +108,7 @@ importers:
         version: 0.1.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       '@codama/dynamic-parsers':
         specifier: 1.1.30
-        version: 1.1.30(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
+        version: 1.1.30(patch_hash=532d6df4cb0aa1bc506bb4224f04645d04b80e0dafc3c252042ebe2bd70cca68)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       '@codama/nodes-from-anchor':
         specifier: 1.3.8
         version: 1.3.8(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
@@ -12045,7 +12048,7 @@ snapshots:
       - fastestsmallesttextencoderdecoder
       - typescript
 
-  '@codama/dynamic-parsers@1.1.30(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)':
+  '@codama/dynamic-parsers@1.1.30(patch_hash=532d6df4cb0aa1bc506bb4224f04645d04b80e0dafc3c252042ebe2bd70cca68)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)':
     dependencies:
       '@codama/dynamic-codecs': 1.1.30(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       '@codama/errors': 1.5.0

@@ -9,7 +9,6 @@ import { Logger } from '@/app/shared/lib/logger';
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
 import { type AnchorInstructionDecoded, decodeAnchorInstruction } from './decode-anchor-instruction';
-import { withSingleInstructionDiscriminator } from './with-single-instruction-discriminator';
 
 type CodamaParsedInstruction = NonNullable<ReturnType<typeof parseInstruction>>;
 
@@ -56,8 +55,7 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
 
     // Codama-native IDLs (PMP and any stored Codama root node) decode through Codama directly.
     if ((idl as { kind?: string })?.kind === 'rootNode') {
-        // Single-instruction programs without discriminators (e.g. Memo): inject a catch-all.
-        const parsedIx = tryCodama(idl as RootNode) ?? tryCodama(withSingleInstructionDiscriminator(idl as RootNode));
+        const parsedIx = tryCodama(idl as RootNode);
         return parsedIx ? { kind: 'codama', parsedIx } : { kind: 'unknown' };
     }
 
