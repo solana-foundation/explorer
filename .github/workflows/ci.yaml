@@ -168,7 +168,6 @@ jobs:
         run: |
           sudo mkdir -p "$PLAYWRIGHT_BROWSERS_PATH" "$VITE_CACHE_PATH"
           sudo chown -R "$(id -u):$(id -g)" "$PLAYWRIGHT_BROWSERS_PATH" "$VITE_CACHE_PATH"
-          df -h / /mnt
 
       - name: Install package manager
         uses: pnpm/action-setup@v4
@@ -218,6 +217,4 @@ jobs:
       - name: Run Storybook smoke tests
         env:
           STORYBOOK_DISABLE_TELEMETRY: ${{ env.STORYBOOK_DISABLE_TELEMETRY }}
-        run: |
-          df -h / /mnt
-          pnpm test:sb
+        run: pnpm test:sb

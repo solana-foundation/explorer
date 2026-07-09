@@ -104,7 +104,9 @@ export default defineConfig({
                 ],
                 test: {
                     name: 'storybook',
-                    isolate: true,
+                    // Default off — both race on the CI runner and drop dynamic imports; opt in locally via SB_ISOLATE / SB_PARALLEL for speed.
+                    isolate: process.env.SB_ISOLATE === 'true',
+                    fileParallelism: process.env.SB_PARALLEL === 'true',
                     browser: {
                         enabled: true,
                         headless: true,
