@@ -63,6 +63,11 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://explorer.solana.com/address/De1egAFMkMWZSN5rYXRj9CAdheBamobVNubTsi9avR44</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://explorer.solana.com/address/DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
