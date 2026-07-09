@@ -41,7 +41,7 @@
     "dependencies": {
         "@bonfida/spl-name-service": "0.1.30",
         "@codama/dynamic-client": "0.1.0",
-        "@codama/dynamic-parsers": "1.1.30",
+        "@codama/dynamic-parsers": "1.2.3",
         "@codama/nodes-from-anchor": "1.3.8",
         "@coral-xyz/anchor": "0.30.1",
         "@explorer/decoder-mango": "workspace:*",
