@@ -45,12 +45,17 @@ export async function fetchCoinGeckoVerification([, address]: CoinGeckoSwrKey): 
 
         const data = await response.json();
         if (!is(data, CoinGeckoResultSchema)) {
-            Logger.error(new Error('CoinGecko schema validation failed'), { address, sentry: true });
+            Logger.error(new Error('[coingecko-verification] CoinGecko schema validation failed'), {
+                address,
+                sentry: true,
+            });
             return { status: CoingeckoStatus.FetchFailed, verified: false };
         }
 
         return { coinGeckoId: data.coinGeckoId, status: CoingeckoStatus.Success, verified: data.verified };
-    } catch {
+    } catch (error) {
+        // Logged locally only (not sentry).
+        Logger.error(new Error('[coingecko-verification] Fetch failed', { cause: error }), { address });
         return { status: CoingeckoStatus.FetchFailed, verified: false };
     }
 }

@@ -42,7 +42,10 @@ export async function fetchTokenMarketData([, address]: SwrKey): Promise<TokenMa
 
         const data = await response.json();
         if (!is(data, TokenMarketDataSchema)) {
-            Logger.error(new Error('Market data schema validation failed'), { address, sentry: true });
+            Logger.error(new Error('[token-market-data] Market data schema validation failed'), {
+                address,
+                sentry: true,
+            });
             return { status: TokenMarketDataStatus.FetchFailed };
         }
 
@@ -57,7 +60,9 @@ export async function fetchTokenMarketData([, address]: SwrKey): Promise<TokenMa
             },
             status: TokenMarketDataStatus.Success,
         };
-    } catch {
+    } catch (error) {
+        // Logged locally only (not sentry).
+        Logger.error(new Error('[token-market-data] Fetch failed', { cause: error }), { address });
         return { status: TokenMarketDataStatus.FetchFailed };
     }
 }
