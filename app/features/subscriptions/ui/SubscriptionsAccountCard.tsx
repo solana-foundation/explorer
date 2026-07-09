@@ -19,15 +19,7 @@ import { pluralUnits } from '@utils/index';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { decodeSubscriptionsAccount } from '../lib/decode-subscriptions-account';
-
-function tsToMs(ts: bigint): number {
-    return Number(ts * 1000n);
-}
-
-function formatExpiry(ts: bigint): string {
-    if (ts === 0n) return 'Never';
-    return displayTimestampUtc(tsToMs(ts), true);
-}
+import { formatExpiry, tsToMs } from '../lib/format';
 
 function formatPlanStatus(status: number): string {
     if (status === PlanStatus.Active) return 'Active';

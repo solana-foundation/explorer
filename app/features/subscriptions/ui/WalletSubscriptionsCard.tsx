@@ -8,24 +8,13 @@ import type {
     RecurringDelegation,
     SubscriptionDelegation,
 } from '@solana/subscriptions';
-import { displayTimestampUtc } from '@utils/date';
 import { pluralUnits } from '@utils/index';
-import { useClusterPath } from '@utils/url';
-import Link from 'next/link';
 
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
+import { formatExpiry } from '../lib/format';
 import { useWalletSubscriptions, type WalletSubscriptionsData } from '../model/useWalletSubscriptions';
-
-function tsToMs(ts: bigint): number {
-    return Number(ts * 1000n);
-}
-
-function formatExpiry(ts: bigint): string {
-    if (ts === 0n) return 'Never';
-    return displayTimestampUtc(tsToMs(ts), true);
-}
 
 function TableSection({ children, headers, title }: { children: React.ReactNode; headers: string[]; title: string }) {
     return (
@@ -52,15 +41,12 @@ function TableSection({ children, headers, title }: { children: React.ReactNode;
 }
 
 function PlanRow({ address, data }: PlanWithAddress) {
-    const planPath = useClusterPath({ pathname: `/address/${data.owner}` });
     return (
         <BaseTable.Row>
             <BaseTable.Cell>
                 <KitAddress address={address} raw link />
             </BaseTable.Cell>
-            <BaseTable.Cell>
-                <Link href={planPath}>{data.data.planId.toString()}</Link>
-            </BaseTable.Cell>
+            <BaseTable.Cell>{data.data.planId.toString()}</BaseTable.Cell>
             <BaseTable.Cell>
                 <KitAddress address={data.data.mint} raw link />
             </BaseTable.Cell>
