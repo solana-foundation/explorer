@@ -62,6 +62,9 @@ describe('@features/instruction-program-serum', () => {
             expect(screen.getByText('Open Orders Owner')).toBeInTheDocument();
             expect(screen.getByText('Side')).toBeInTheDocument();
             expect(screen.getByText('SELL')).toBeInTheDocument();
+            // enum values are humanized like labels, unlike `side`'s uppercase convention
+            expect(screen.getByText('Self Trade Behavior')).toBeInTheDocument();
+            expect(screen.getByText('Decrement Take')).toBeInTheDocument();
             expect(screen.getByText('Limit Price')).toBeInTheDocument();
             expect(screen.getByText('50000')).toBeInTheDocument();
             // the optional 13th account is absent, so its row must not render

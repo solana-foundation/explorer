@@ -4,6 +4,7 @@ import {
     type DecodedSerumInstruction,
     decodeSerumInstruction,
     getSerumInstructionLabel,
+    isKnownUndecodableSerumInstruction,
     OPENBOOK_DEX_PROGRAM_LABEL,
 } from '@explorer/decoder-serum';
 import { useCluster } from '@providers/cluster';
@@ -45,12 +46,18 @@ function AccountRows({ accounts }: { accounts: Record<string, PublicKey | Public
     );
 }
 
+// Enums decode to lowerCamelCase strings (numeric fields stay number/bigint); humanize them like labels, keeping `side`'s BUY/SELL convention.
+function formatDataValue(field: string, value: string | number | bigint): string {
+    if (typeof value !== 'string') return String(value);
+    return field === 'side' ? value.toUpperCase() : fieldLabel(value);
+}
+
 function DataRows({ data }: { data: Record<string, string | number | bigint> }) {
     return (
         <>
             {Object.entries(data).map(([field, value]) => (
                 <FieldRow key={field} label={fieldLabel(field)}>
-                    {field === 'side' ? String(value).toUpperCase() : String(value)}
+                    {formatDataValue(field, value)}
                 </FieldRow>
             ))}
         </>
@@ -72,7 +79,10 @@ export function SerumDetailsCard(props: {
     try {
         decoded = decodeSerumInstruction(ix);
     } catch (error) {
-        Logger.error(error, { index, sentry: true, signature, url });
+        // Codes 7/8/9/13 have no serum-lib layout and always throw here — telemetry only for unexpected failures.
+        if (!isKnownUndecodableSerumInstruction(ix)) {
+            Logger.error(error, { index, sentry: true, signature, url });
+        }
     }
 
     return (

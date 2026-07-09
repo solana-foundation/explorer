@@ -38,6 +38,14 @@ const readInstructionCode = (data: Uint8Array): number =>
 export const parseSerumInstructionCode = (instruction: TransactionInstruction): number =>
     readInstructionCode(instruction.data);
 
+// Codes 7/8/9/13 (disableMarket, sweepFees, newOrderV2, sendTake) are absent from the serum lib's INSTRUCTION_LAYOUT, so decodeSerumInstruction always throws for them.
+const UNDECODABLE_SERUM_CODES = new Set([7, 8, 9, 13]);
+
+export const isKnownUndecodableSerumInstruction = (instruction: TransactionInstruction): boolean =>
+    isSerumInstruction(instruction) &&
+    instruction.data.byteLength >= 5 &&
+    UNDECODABLE_SERUM_CODES.has(parseSerumInstructionCode(instruction));
+
 // Name-only resolver for the NAME_SOURCES chain: program-id-gated and never throws, so it composes with other resolvers.
 export const resolveSerumInstructionName = (programId: string, discriminator: Uint8Array): string | undefined => {
     if (!programIds.has(programId) || discriminator.byteLength < 5) return undefined;

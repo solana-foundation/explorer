@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
     getSerumInstructionLabel,
     isDeprecatedSerumProgram,
+    isKnownUndecodableSerumInstruction,
     isSerumInstruction,
     parseSerumInstructionCode,
     parseSerumInstructionTitle,
@@ -80,6 +81,31 @@ describe('parseSerumInstructionCode', () => {
     ] as const)('should return %i for %s', (key, expected) => {
         const ix = makeInstruction(ENCODED_INSTRUCTIONS[key], SERUM_PROGRAM_IDS_BY_NAME.openBook);
         expect(parseSerumInstructionCode(ix)).toBe(expected);
+    });
+});
+
+describe('isKnownUndecodableSerumInstruction', () => {
+    it.each([[7], [8], [9], [13]] as const)('should return true for undecodable code %i', code => {
+        const ix = makeInstruction(makeRawInstructionData(code), SERUM_PROGRAM_IDS_BY_NAME.openBook);
+        expect(isKnownUndecodableSerumInstruction(ix)).toBe(true);
+    });
+
+    it('should return false for a decodable code', () => {
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.newOrderV3, SERUM_PROGRAM_IDS_BY_NAME.openBook);
+        expect(isKnownUndecodableSerumInstruction(ix)).toBe(false);
+    });
+
+    it('should return false for a non-serum program id', () => {
+        const ix = makeInstruction(
+            makeRawInstructionData(7),
+            new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+        );
+        expect(isKnownUndecodableSerumInstruction(ix)).toBe(false);
+    });
+
+    it('should return false for data too short to hold an instruction code', () => {
+        const ix = makeInstruction(Buffer.from([0, 2]), SERUM_PROGRAM_IDS_BY_NAME.openBook);
+        expect(isKnownUndecodableSerumInstruction(ix)).toBe(false);
     });
 });
 

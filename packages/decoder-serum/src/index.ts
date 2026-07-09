@@ -1,6 +1,7 @@
 export {
     getSerumInstructionLabel,
     isDeprecatedSerumProgram,
+    isKnownUndecodableSerumInstruction,
     isSerumInstruction,
     parseSerumInstructionCode,
     parseSerumInstructionTitle,
