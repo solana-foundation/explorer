@@ -80,6 +80,8 @@ export default defineConfig({
                         // Optimize both the renderer and its react-18 runtime up front; lazy mid-run discovery re-runs Vite's optimizer and 504s in-flight dynamic imports.
                         '@storybook/nextjs-vite',
                         'react-dom/client',
+                        // Heavy legacy CJS dep reachable only via serum stories; pre-bundle so lazy discovery doesn't re-run the optimizer mid-sweep.
+                        '@project-serum/serum',
                     ],
                 },
                 resolve: {
@@ -100,6 +102,7 @@ export default defineConfig({
                 ],
                 test: {
                     name: 'storybook',
+                    isolate: true,
                     browser: {
                         enabled: true,
                         headless: true,
@@ -111,7 +114,6 @@ export default defineConfig({
                             .filter(Boolean)
                             .map(browser => ({ browser })),
                         provider: playwright(),
-                        isolate: true,
                         connectTimeout: 30000,
                     },
                     setupFiles: ['./test-setup.ts', './.storybook/vitest.setup.ts'],
