@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { Cluster } from '@/app/utils/cluster';
-
+import { Cluster } from '../cluster';
 import { clusterFromParam, serverClusterUrlFromParam } from '../cluster-from-param';
 
 describe('clusterFromParam', () => {

@@ -1,7 +1,7 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
-import { useAnchorProgram } from '@entities/idl';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
 import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
+import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
 import {
@@ -16,7 +16,6 @@ import { getProgramName } from '@utils/tx';
 import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
 import { isTokenBatchInstruction, resolveInnerBatchInstructions, TokenBatchCard } from '@/app/features/token-batch';
 import { useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
@@ -24,10 +23,8 @@ import { FetchStatus } from '@/app/providers/cache';
 import { ErrorCard } from '../common/ErrorCard';
 import { InspectorInstructionCard as InspectorInstructionCardComponent } from '../common/InspectorInstructionCard';
 import { LoadingCard } from '../common/LoadingCard';
-import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
-import { ProgramMetadataIdlInstructionDetailsCard } from '../instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
@@ -113,52 +110,28 @@ function InspectorInstructionCard({
     index: number;
     innerCards?: React.ReactNode[];
 }) {
-    const { cluster, url } = useCluster();
+    const { cluster } = useCluster();
     const dispatcher = useInstructionParser();
 
     const programId = ix.programId;
     const programName = getProgramName(programId.toBase58(), cluster);
-    const anchorProgram = useAnchorProgram(programId.toString(), url, cluster);
-    const { programMetadataIdl } = useProgramMetadataIdl(programId.toString(), url, cluster);
     const parsedIx = useMemo(() => dispatcher.fromTransactionInstruction(ix), [dispatcher, ix]);
     const parsedTx = useMemo(
         () => (isParsedInstruction(parsedIx) ? toParsedTransaction(ix, message, [parsedIx]) : undefined),
         [ix, message, parsedIx],
     );
 
-    // Prefer a PMP-published IDL (incl. the PMP's own Codama IDL) over the legacy Anchor IDL below.
-    // Keep this precedence in sync with the tx page: app/features/transaction/ui/InstructionsSection.tsx
-    if (programMetadataIdl) {
+    // Dynamic IDL tier — shared with the tx page. See app/features/transaction/ui/InstructionsSection.tsx.
+    const idlDecode = useIdlInstructionDecode({ programId: programId.toString(), raw: ix });
+    if (idlDecode) {
         return (
-            <ErrorBoundary
-                fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-            >
-                <ProgramMetadataIdlInstructionDetailsCard
-                    key={index}
-                    ix={ix}
-                    index={index}
-                    result={INSPECTOR_RESULT}
-                    idl={programMetadataIdl}
-                    signature={INSPECTOR_SIGNATURE}
-                />
-            </ErrorBoundary>
-        );
-    }
-
-    if (anchorProgram.program) {
-        return (
-            <ErrorBoundary
-                fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName="Unknown Program" />}
-            >
-                <AnchorDetailsCard
-                    anchorProgram={anchorProgram.program}
-                    index={index}
-                    innerCards={undefined}
-                    ix={ix}
-                    result={INSPECTOR_RESULT}
-                    signature={INSPECTOR_SIGNATURE}
-                />
-            </ErrorBoundary>
+            <IdlInstructionCard
+                decoded={idlDecode}
+                ix={ix}
+                index={index}
+                result={INSPECTOR_RESULT}
+                signature={INSPECTOR_SIGNATURE}
+            />
         );
     }
 

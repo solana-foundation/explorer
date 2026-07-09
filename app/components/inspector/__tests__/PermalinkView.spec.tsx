@@ -1,15 +1,21 @@
 import { FetchStatus } from '@providers/cache';
 import { render, screen } from '@testing-library/react';
+import { ClusterStatus } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PermalinkView } from '../InspectorPage';
 
 const fetchTransaction = vi.fn();
 let cacheEntry: ReturnType<typeof makeEntry> | undefined;
+let clusterStatus: ClusterStatus = ClusterStatus.Connected;
 
 vi.mock('@providers/transactions/raw', () => ({
     useFetchRawTransaction: () => fetchTransaction,
     useRawTransactionDetails: () => cacheEntry,
+}));
+// PermalinkView gates its fetch on the cluster being connected; drive that status per test.
+vi.mock('@/app/providers/cluster', () => ({
+    useCluster: () => ({ status: clusterStatus }),
 }));
 // InspectorPage imports router/search-param/pathname hooks from next/navigation at module scope;
 // stub them so importing PermalinkView from it doesn't blow up.
@@ -27,6 +33,7 @@ function makeEntry(raw: unknown, status = FetchStatus.Fetched) {
 beforeEach(() => {
     fetchTransaction.mockReset();
     cacheEntry = undefined;
+    clusterStatus = ClusterStatus.Connected;
 });
 afterEach(() => {
     vi.restoreAllMocks();
@@ -39,6 +46,13 @@ describe('PermalinkView', () => {
     it('should fetch at confirmed commitment on mount', () => {
         renderView();
         expect(fetchTransaction).toHaveBeenCalledWith('sig', 'confirmed');
+    });
+
+    it('should not fetch until the cluster is connected', () => {
+        // Guards against fetching before the ?cluster= param settles, which would hit the default cluster.
+        clusterStatus = ClusterStatus.Connecting;
+        renderView();
+        expect(fetchTransaction).not.toHaveBeenCalled();
     });
 
     it('should show "Transaction was not found" when the fetch returns no transaction', () => {

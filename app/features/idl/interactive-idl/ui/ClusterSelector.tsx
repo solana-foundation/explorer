@@ -1,12 +1,14 @@
-import { useCluster, useClusterModal } from '@/app/providers/cluster';
+import { useSetAtom } from 'jotai';
+
+import { clusterModalOpenAtom, useCluster } from '@/app/providers/cluster';
 import { Cluster } from '@/app/utils/cluster';
 
 import { BaseClusterSelector } from './BaseClusterSelector';
 
-// FIXME: missing Storybook story — uses useCluster + useClusterModal; pure BaseClusterSelector is already covered.
+// FIXME: missing Storybook story — uses useCluster + the cluster modal atom; pure BaseClusterSelector is already covered.
 export function ClusterSelector() {
     const { cluster, name } = useCluster();
-    const [, setClusterModalShow] = useClusterModal();
+    const setClusterModalShow = useSetAtom(clusterModalOpenAtom);
 
     const handleClusterChange = () => {
         setClusterModalShow(true);

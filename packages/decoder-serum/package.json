@@ -1,0 +1,41 @@
+{
+    "name": "@explorer/decoder-serum",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        },
+        "./detection": {
+            "types": "./dist/detection.d.ts",
+            "import": "./dist/detection.js",
+            "default": "./dist/detection.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@project-serum/serum": "0.13.61",
+        "bn.js": "5.2.1",
+        "superstruct": "0.15.3"
+    },
+    "devDependencies": {
+        "@types/bn.js": "5.1.0",
+        "typescript": "catalog:tooling",
+        "vitest": "catalog:vitest"
+    },
+    "peerDependencies": {
+        "@solana/kit": "^6.5.0",
+        "@solana/web3.js": "^1.98.0"
+    }
+}

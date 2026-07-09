@@ -1,7 +1,7 @@
 import { EXPLORER_BASE_URL as baseUrl } from '@utils/env';
 
-import { useCluster } from '@/app/providers/cluster';
-import { Cluster, clusterSlug } from '@/app/utils/cluster';
+import { Cluster, clusterSlug } from '../lib/cluster';
+import { useCluster } from './use-cluster';
 
 export function buildExplorerLink(cluster: Cluster, customUrl: string | undefined, path: string): string {
     let url: string;
@@ -11,7 +11,6 @@ export function buildExplorerLink(cluster: Cluster, customUrl: string | undefine
         url = `${baseUrl}${path}`;
     }
 
-    // Add cluster query parameter for non-mainnet clusters
     const params = new URLSearchParams();
     switch (cluster) {
         case Cluster.Testnet:
@@ -29,7 +28,6 @@ export function buildExplorerLink(cluster: Cluster, customUrl: string | undefine
             break;
     }
 
-    // Add query parameters if any
     const queryString = params.toString();
     if (queryString) {
         if (url.indexOf('?') === -1) {

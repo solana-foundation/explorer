@@ -1,10 +1,20 @@
-import { describe, expect, it, vi } from 'vitest';
+import { useCluster, useClusterInfo } from '@providers/cluster';
+import { renderHook } from '@testing-library/react';
+import useSWR from 'swr';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { Cluster, ClusterStatus } from '@/app/utils/cluster';
 
 import type { SearchContext, SearchOptions, SearchProvider, SearchProviderRegistry } from '../../lib/types';
-import { resolveProviders, search } from '../use-search';
+import { resolveProviders, search, useSearch } from '../use-search';
 import { createSearchContext } from './provider-test-utils';
+
+vi.mock('@providers/cluster', () => ({
+    useCluster: vi.fn(),
+    useClusterInfo: vi.fn(),
+}));
+vi.mock('swr', () => ({ default: vi.fn() }));
 
 const ctx = createSearchContext();
 
@@ -214,6 +224,56 @@ describe('search', () => {
         expect(errorSpy).toHaveBeenCalledTimes(3);
 
         errorSpy.mockRestore();
+    });
+});
+
+describe('useSearch', () => {
+    const clusterState = {
+        cluster: Cluster.MainnetBeta,
+        customUrl: '',
+        genesisHash: 'genesis-hash',
+        name: 'Mainnet Beta',
+        status: ClusterStatus.Connected,
+        url: 'https://rpc.example',
+    };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(useCluster).mockReturnValue(clusterState);
+        vi.mocked(useClusterInfo).mockReturnValue(undefined);
+    });
+
+    it('should not fetch cluster info for a non-numeric query', () => {
+        renderHook(() => useSearch('So11111111111111111111111111111111111111112'));
+
+        // Only numeric epoch searches need the epoch bound, so address/signature searches skip the fetch.
+        expect(useClusterInfo).toHaveBeenCalledWith({ enabled: false });
+    });
+
+    it('should fetch cluster info for a numeric epoch query', () => {
+        renderHook(() => useSearch('600'));
+
+        expect(useClusterInfo).toHaveBeenCalledWith({ enabled: true });
+    });
+
+    it('should omit the epoch from the SWR key for a non-numeric query', () => {
+        renderHook(() => useSearch('someaddress'));
+
+        const [key] = vi.mocked(useSWR).mock.calls[0];
+        expect(key).toEqual(['search', 'someaddress', Cluster.MainnetBeta, 'genesis-hash', undefined]);
+    });
+
+    it('should include the current epoch in the SWR key for a numeric query', () => {
+        vi.mocked(useClusterInfo).mockReturnValue({
+            epochInfo: { absoluteSlot: 0n, blockHeight: 0n, epoch: 500n, slotIndex: 0n, slotsInEpoch: 432_000n },
+            epochSchedule: { firstNormalEpoch: 0n, firstNormalSlot: 0n, slotsPerEpoch: 432_000n },
+            firstAvailableBlock: 0n,
+        });
+
+        renderHook(() => useSearch('600'));
+
+        const [key] = vi.mocked(useSWR).mock.calls[0];
+        expect(key).toEqual(['search', '600', Cluster.MainnetBeta, 'genesis-hash', '500']);
     });
 });
 

@@ -2,6 +2,8 @@ import { type ProgramIdlNames, useInstructionNameResolvers } from '@entities/idl
 import { resolveLighthouseInstructionName } from '@entities/lighthouse';
 import { type InstructionNameLookup, type InstructionSummary } from '@entities/transaction-data';
 import { resolveZkElGamalProofName } from '@entities/zk-elgamal-proof';
+import { resolveMangoInstructionName } from '@explorer/decoder-mango/detection';
+import { resolveSerumInstructionName } from '@explorer/decoder-serum/detection';
 import { useCluster } from '@providers/cluster';
 import { useMemo } from 'react';
 
@@ -47,6 +49,8 @@ type NameSource = (lookup: InstructionNameLookup, idlNames: Map<string, ProgramI
 const NAME_SOURCES: NameSource[] = [
     ({ programId, discriminator }) => resolveZkElGamalProofName(programId, discriminator),
     ({ programId, discriminator }) => resolveLighthouseInstructionName(programId, discriminator),
+    ({ programId, discriminator }) => resolveMangoInstructionName(programId, discriminator),
+    ({ programId, discriminator }) => resolveSerumInstructionName(programId, discriminator),
     ({ programId, discriminator }, idlNames) => idlNames.get(programId)?.resolveInstructionName?.(discriminator),
 ];
 

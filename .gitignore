@@ -39,6 +39,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# workspace package build artifacts
+packages/*/dist
+
 # Speedy Web Compiler
 .swc/
 

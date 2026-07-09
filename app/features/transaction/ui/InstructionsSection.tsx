@@ -1,25 +1,19 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { AddressLookupTableDetailsCard } from '@components/instruction/AddressLookupTableDetailsCard';
-import AnchorDetailsCard from '@components/instruction/AnchorDetailsCard';
 import { AssociatedTokenDetailsCard } from '@components/instruction/associated-token/AssociatedTokenDetailsCard';
 import { BpfLoaderDetailsCard } from '@components/instruction/bpf-loader/BpfLoaderDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { ComputeBudgetDetailsCard } from '@components/instruction/ComputeBudgetDetailsCard';
 import { Ed25519DetailsCard } from '@components/instruction/ed25519/Ed25519DetailsCard';
 import { isEd25519Instruction } from '@components/instruction/ed25519/types';
-import { isMangoInstruction } from '@components/instruction/mango/types';
-import { MangoDetailsCard } from '@components/instruction/MangoDetails';
 import { MemoDetailsCard } from '@components/instruction/MemoDetailsCard';
-import { ProgramMetadataIdlInstructionDetailsCard } from '@components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard';
 import { PythDetailsCard } from '@components/instruction/pyth/PythDetailsCard';
 import { isPythInstruction } from '@components/instruction/pyth/types';
 import {
     isSolanaAttestationInstruction,
     SolanaAttestationDetailsCard,
 } from '@components/instruction/sas/SolanaAttestationDetailsCard';
-import { isSerumInstruction } from '@components/instruction/serum/types';
-import { SerumDetailsCard } from '@components/instruction/SerumDetailsCard';
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { isTokenLendingInstruction } from '@components/instruction/token-lending/types';
@@ -30,10 +24,16 @@ import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProofDetailsCard';
-import { useAnchorProgram } from '@entities/idl';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
+import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
+import {
+    getSerumInstructionLabel,
+    isDeprecatedSerumProgram,
+    isSerumInstruction,
+} from '@explorer/decoder-serum/detection';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
+import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
 import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
@@ -54,12 +54,17 @@ import {
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT, SignatureProps } from '@utils/index';
 import { intoTransactionInstruction } from '@utils/tx';
+import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { useProgramMetadataIdl } from '@/app/entities/program-metadata';
-
 import { CollapsibleSection } from './CollapsibleSection';
+import { CommonInstructionDetailsCard } from './CommonInstructionDetailsCard';
+
+const SerumDetailsCard = dynamic(
+    () => import('@features/instruction-program-serum').then(mod => mod.SerumDetailsCard),
+    { ssr: false },
+);
 
 export type InstructionDetailsProps = {
     tx: ParsedTransaction;
@@ -73,7 +78,7 @@ export type InstructionDetailsProps = {
 export function InstructionsSection({ signature }: SignatureProps) {
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
-    const { cluster, url } = useCluster();
+    const { cluster } = useCluster();
     const fetchDetails = useFetchTransactionDetails();
     const refreshDetails = () => fetchDetails(signature);
 
@@ -124,8 +129,6 @@ export function InstructionsSection({ signature }: SignatureProps) {
                                     signature={signature}
                                     tx={transaction}
                                     childIndex={childIndex}
-                                    url={url}
-                                    cluster={cluster}
                                 />
                             );
                             innerCards.push(res);
@@ -141,8 +144,6 @@ export function InstructionsSection({ signature }: SignatureProps) {
                             signature={signature}
                             tx={transaction}
                             innerCards={innerCards}
-                            url={url}
-                            cluster={cluster}
                         />
                     );
                 })}
@@ -159,8 +160,6 @@ function InstructionCard({
     signature,
     innerCards,
     childIndex,
-    url,
-    cluster,
 }: {
     ix: ParsedInstruction | PartiallyDecodedInstruction;
     tx: ParsedTransaction;
@@ -169,18 +168,22 @@ function InstructionCard({
     signature: TransactionSignature;
     innerCards?: JSX.Element[];
     childIndex?: number;
-    url: string;
-    cluster: Cluster;
 }) {
     const key = `${index}-${childIndex}`;
-    const { program: anchorProgram } = useAnchorProgram(ix.programId.toString(), url, cluster);
-    const { programMetadataIdl } = useProgramMetadataIdl(ix.programId.toString(), url, cluster);
     const dispatcher = useInstructionParser();
 
     const parsedIx = React.useMemo(
         () => ('parsed' in ix ? dispatcher.fromParsedInstruction(ix) : undefined),
         [dispatcher, ix],
     );
+
+    // Raw form is needed by both the native tiers below and the dynamic IDL tier; `intoTransactionInstruction`
+    // returns undefined for RPC-pre-parsed instructions. Lifted above the early returns so the hooks order
+    // stays stable.
+    const transactionIx = React.useMemo(() => intoTransactionInstruction(tx, ix), [tx, ix]);
+    // Dynamic IDL tier — shared with the inspector. See app/components/inspector/InstructionsSection.tsx.
+    // Memoized so the Anchor Program / Borsh coder isn't rebuilt on every re-render.
+    const idlDecode = useIdlInstructionDecode({ programId: ix.programId.toString(), raw: transactionIx });
 
     if ('parsed' in ix && parsedIx) {
         const props = {
@@ -221,8 +224,6 @@ function InstructionCard({
         }
     }
 
-    const transactionIx = intoTransactionInstruction(tx, ix);
-
     if (!transactionIx) {
         return <ErrorCard key={key} text="Could not display this instruction, please report" />;
     }
@@ -240,10 +241,30 @@ function InstructionCard({
         return <Ed25519DetailsCard key={key} {...props} tx={tx} />;
     }
     if (isMangoInstruction(transactionIx)) {
-        return <MangoDetailsCard key={key} {...props} />;
+        return (
+            <CommonInstructionDetailsCard
+                key={key}
+                {...props}
+                instructionName={getMangoInstructionLabel(transactionIx)}
+            />
+        );
     }
     if (isSerumInstruction(transactionIx)) {
-        return <SerumDetailsCard key={key} {...props} />;
+        // Dead Serum DEX deployments get the generic name-only card; the active OpenBook fork keeps full decoding.
+        if (isDeprecatedSerumProgram(transactionIx.programId.toBase58())) {
+            return (
+                <CommonInstructionDetailsCard
+                    key={key}
+                    {...props}
+                    instructionName={getSerumInstructionLabel(transactionIx)}
+                />
+            );
+        }
+        return (
+            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                <SerumDetailsCard {...props} />
+            </ErrorBoundary>
+        );
     }
     if (isTokenSwapInstruction(transactionIx)) {
         return <TokenSwapDetailsCard key={key} {...props} />;
@@ -304,21 +325,8 @@ function InstructionCard({
             </ErrorBoundary>
         );
     }
-    // Prefer a PMP-published IDL (incl. the PMP's own Codama IDL) over the legacy Anchor IDL below.
-    // Keep this precedence in sync with the inspector: app/components/inspector/InstructionsSection.tsx
-    if (programMetadataIdl) {
-        return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
-                <ProgramMetadataIdlInstructionDetailsCard {...props} idl={programMetadataIdl} signature={signature} />
-            </ErrorBoundary>
-        );
-    }
-    if (anchorProgram) {
-        return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
-                <AnchorDetailsCard anchorProgram={anchorProgram} {...props} />
-            </ErrorBoundary>
-        );
+    if (idlDecode) {
+        return <IdlInstructionCard key={key} decoded={idlDecode} {...props} />;
     }
 
     return <UnknownDetailsCard key={key} {...props} />;

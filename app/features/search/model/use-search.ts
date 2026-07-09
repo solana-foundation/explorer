@@ -1,23 +1,29 @@
-import { useCluster } from '@providers/cluster';
+import { useCluster, useClusterInfo } from '@providers/cluster';
 import useSWR from 'swr';
 
 import { Logger } from '@/app/shared/lib/logger';
 
+import { parseNaturalNumber } from '../lib/parse-natural-number';
 import type { SearchContext, SearchOptions, SearchProvider, SearchProviderRegistry } from '../lib/types';
 import { searchProviders } from './registry';
 
 export function useSearch(query: string) {
-    const { cluster, clusterInfo } = useCluster();
+    const { cluster, genesisHash } = useCluster();
     const trimmed = query.trim();
 
-    const genesisHash = clusterInfo?.genesisHash;
+    // currentEpoch only bounds numeric epoch-number searches (see epoch-search-provider), so fetch it
+    // lazily and only for a numeric query: address/signature searches never pull cluster info, and the
+    // search never re-runs when epoch info resolves. When disabled, currentEpoch stays undefined and
+    // drops out of the SWR key below.
+    const isNumericQuery = parseNaturalNumber(trimmed) !== undefined;
+    const currentEpoch = useClusterInfo({ enabled: isNumericQuery })?.epochInfo.epoch;
 
     return useSWR(
-        trimmed.length > 0 ? ['search', trimmed, cluster, genesisHash] : null,
+        trimmed.length > 0 ? ['search', trimmed, cluster, genesisHash, currentEpoch?.toString()] : null,
         () =>
             search(searchProviders, trimmed, {
                 cluster,
-                currentEpoch: clusterInfo?.epochInfo.epoch,
+                currentEpoch,
                 genesisHash,
             }),
         {
