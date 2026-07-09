@@ -31,6 +31,8 @@ const specWorkspace = (name = 'specs') => ({
 });
 
 export default defineConfig({
+    // CI routes the dep-optimize cache off the cramped root partition onto /mnt; unset locally falls back to node_modules/.vite.
+    cacheDir: process.env.VITE_CACHE_PATH || undefined,
     plugins: [react()],
     resolve: {
         alias: {

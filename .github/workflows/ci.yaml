@@ -151,22 +151,23 @@ jobs:
         node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '24.x']
 
     # The browser-mode sweep has repeatedly died on a full root partition ("No space left on device").
-    # Browsers live on the runner's ~65 GB /mnt scratch disk (PLAYWRIGHT_BROWSERS_PATH is what playwright
-    # actually honors); the pnpm store stays on / so node_modules keeps hardlinking, with `pnpm store prune`
-    # stopping the restore-keys snowball. Job-own cache affixes keep old archives out.
+    # Browsers and the Vite dep-optimize cache live on the runner's ~65 GB /mnt scratch disk
+    # (PLAYWRIGHT_BROWSERS_PATH / VITE_CACHE_PATH); the pnpm store stays on / so node_modules keeps hardlinking,
+    # with `pnpm store prune` stopping the restore-keys snowball. Job-own cache affixes keep old archives out.
     env:
       PNPM_CACHE_AFFIX: pnpm-sb
       PLAYWRIGHT_CACHE_AFFIX: pw-mnt
       PLAYWRIGHT_BROWSERS_PATH: /mnt/cache/ms-playwright
+      VITE_CACHE_PATH: /mnt/cache/vite
 
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Prepare browser cache dir on the scratch disk
+      - name: Prepare cache dirs on the scratch disk
         run: |
-          sudo mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"
-          sudo chown -R "$(id -u):$(id -g)" "$PLAYWRIGHT_BROWSERS_PATH"
+          sudo mkdir -p "$PLAYWRIGHT_BROWSERS_PATH" "$VITE_CACHE_PATH"
+          sudo chown -R "$(id -u):$(id -g)" "$PLAYWRIGHT_BROWSERS_PATH" "$VITE_CACHE_PATH"
           df -h / /mnt
 
       - name: Install package manager
@@ -217,4 +218,6 @@ jobs:
       - name: Run Storybook smoke tests
         env:
           STORYBOOK_DISABLE_TELEMETRY: ${{ env.STORYBOOK_DISABLE_TELEMETRY }}
-        run: pnpm test:sb
+        run: |
+          df -h / /mnt
+          pnpm test:sb
