@@ -9,6 +9,8 @@ import type {
     SubscriptionDelegation,
 } from '@solana/subscriptions';
 import { displayTimestampUtc } from '@utils/date';
+import { useClusterPath } from '@utils/url';
+import Link from 'next/link';
 
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -49,12 +51,15 @@ function TableSection({ children, headers, title }: { children: React.ReactNode;
 }
 
 function PlanRow({ address, data }: PlanWithAddress) {
+    const planPath = useClusterPath({ pathname: `/address/${data.owner}` });
     return (
         <BaseTable.Row>
             <BaseTable.Cell>
                 <KitAddress address={address} raw link />
             </BaseTable.Cell>
-            <BaseTable.Cell>{data.data.planId.toString()}</BaseTable.Cell>
+            <BaseTable.Cell>
+                <Link href={planPath}>{data.data.planId.toString()}</Link>
+            </BaseTable.Cell>
             <BaseTable.Cell>
                 <KitAddress address={data.data.mint} raw link />
             </BaseTable.Cell>
