@@ -40,7 +40,7 @@ import { PublicKey } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
-import { useSearchParams } from 'next/navigation';
+import { redirect, RedirectType, useSearchParams } from 'next/navigation';
 import React, { PropsWithChildren, Suspense, use } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
@@ -63,7 +63,7 @@ import {
     getFullTokenInfoSwrKey,
     isRedactedTokenAddress,
 } from '@/app/utils/token-info';
-import { pickClusterParams } from '@/app/utils/url';
+import { pickClusterParams, useClusterPath } from '@/app/utils/url';
 
 import { AccountDataTab } from './AccountDataTab';
 
@@ -249,7 +249,7 @@ function DetailsSections({
                 <ProgramMultisigTab authority={authority} />
             </Suspense>
             <Suspense fallback={null}>
-                <WalletSubscriptionsTab walletAddress={address} />
+                <WalletSubscriptionsTab walletAddress={account.executable ? null : address} />
             </Suspense>
             <Suspense fallback={null}>
                 <AccountDataTab programId={account.owner} />
@@ -272,6 +272,7 @@ function DetailsSections({
 function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: FullTokenInfo }) {
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
+    const addressPath = useClusterPath({ pathname: `/address/${account.pubkey.toBase58()}` });
 
     // get feature data from featureGates.json
     const featureInfo = useFeatureInfo({ address: account.pubkey.toBase58() });
@@ -325,9 +326,7 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         return (
             <SubscriptionsAccountCard
                 account={account}
-                onNotFound={() => {
-                    throw new Error('not found');
-                }}
+                onNotFound={() => redirect(addressPath, RedirectType.replace)}
             />
         );
     } else if (squadsAccountType) {
@@ -499,7 +498,7 @@ function ProgramMultisigTab({ authority }: { authority: PublicKey | null | undef
     return <NavigationTabLink path="program-multisig" title="Program Multisig" />;
 }
 
-function WalletSubscriptionsTab({ walletAddress }: { walletAddress: string }) {
+function WalletSubscriptionsTab({ walletAddress }: { walletAddress: string | null }) {
     const { data } = useWalletSubscriptions(walletAddress);
     const hasAny = (data?.delegations.length ?? 0) > 0 || (data?.plans.length ?? 0) > 0;
     if (!hasAny) return null;

@@ -18,12 +18,13 @@ export type WalletSubscriptionsData = {
 
 const ENABLED_CLUSTERS = new Set([Cluster.MainnetBeta, Cluster.Devnet, Cluster.Custom]);
 
-export function useWalletSubscriptions(walletAddress: string) {
+export function useWalletSubscriptions(walletAddress: string | null) {
     const { cluster, url } = useCluster();
-    const enabled = ENABLED_CLUSTERS.has(cluster);
 
     return useSWRImmutable(
-        enabled ? (['wallet-subscriptions', walletAddress, url] as const) : undefined,
+        walletAddress !== null && ENABLED_CLUSTERS.has(cluster)
+            ? (['wallet-subscriptions', walletAddress, url] as const)
+            : undefined,
         async ([_prefix, addr, rpcUrl]) => {
             const rpc = createSolanaRpc(rpcUrl);
             const kitAddr = address(addr);

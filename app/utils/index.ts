@@ -136,6 +136,11 @@ export function abbreviatedNumber(value: number, fixed = 1) {
     if (value >= 1e12) return `${+(value / 1e12).toFixed(fixed)}T`;
 }
 
+export function pluralUnits(n: number | bigint, unit: string): string {
+    const isOne = typeof n === 'bigint' ? n === 1n : n === 1;
+    return `${n.toString()} ${isOne ? unit : `${unit}s`}`;
+}
+
 export const pubkeyToString = (key: PublicKey | string = '') => {
     return typeof key === 'string' ? key : key.toBase58();
 };

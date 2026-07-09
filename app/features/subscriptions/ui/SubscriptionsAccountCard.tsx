@@ -14,13 +14,14 @@ import type {
 } from '@solana/subscriptions';
 import { PlanStatus } from '@solana/subscriptions';
 import { displayTimestampUtc } from '@utils/date';
+import { pluralUnits } from '@utils/index';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { decodeSubscriptionsAccount } from '../lib/decode-subscriptions-account';
 
 function tsToMs(ts: bigint): number {
-    return Number(ts) * 1000;
+    return Number(ts * 1000n);
 }
 
 function formatExpiry(ts: bigint): string {
@@ -100,7 +101,7 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
             <AddressRow address={owner} label="Owner" />
             <AddressRow address={mint} label="Token Mint" />
             <ValueRow label="Amount per Period">{terms.amount.toString()}</ValueRow>
-            <ValueRow label="Period">{terms.periodHours.toString()} hours</ValueRow>
+            <ValueRow label="Period">{pluralUnits(terms.periodHours, 'hour')}</ValueRow>
             {terms.createdAt !== 0n && (
                 <ValueRow label="Created At">{displayTimestampUtc(tsToMs(terms.createdAt), true)}</ValueRow>
             )}
@@ -175,7 +176,7 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
             <ValueRow label="Amount per Period">{amountPerPeriod.toString()}</ValueRow>
             <ValueRow label="Amount Pulled (this period)">{amountPulledInPeriod.toString()}</ValueRow>
             <AddressRow address={mint} label="Token Mint" />
-            <ValueRow label="Period Length">{periodLengthS.toString()} seconds</ValueRow>
+            <ValueRow label="Period Length">{pluralUnits(periodLengthS, 'second')}</ValueRow>
             {currentPeriodStartTs !== 0n && (
                 <ValueRow label="Current Period Start">
                     {displayTimestampUtc(tsToMs(currentPeriodStartTs), true)}
@@ -200,7 +201,7 @@ function SubscriptionDelegationCard({ account, data }: { account: Account; data:
         >
             <DelegationHeaderRows header={header} />
             <ValueRow label="Amount">{terms.amount.toString()}</ValueRow>
-            <ValueRow label="Period">{terms.periodHours.toString()} hours</ValueRow>
+            <ValueRow label="Period">{pluralUnits(terms.periodHours, 'hour')}</ValueRow>
             <ValueRow label="Amount Pulled (this period)">{amountPulledInPeriod.toString()}</ValueRow>
             {currentPeriodStartTs !== 0n && (
                 <ValueRow label="Current Period Start">

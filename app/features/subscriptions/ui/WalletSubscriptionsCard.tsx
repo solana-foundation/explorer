@@ -9,6 +9,7 @@ import type {
     SubscriptionDelegation,
 } from '@solana/subscriptions';
 import { displayTimestampUtc } from '@utils/date';
+import { pluralUnits } from '@utils/index';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 
@@ -18,7 +19,7 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import { useWalletSubscriptions, type WalletSubscriptionsData } from '../model/useWalletSubscriptions';
 
 function tsToMs(ts: bigint): number {
-    return Number(ts) * 1000;
+    return Number(ts * 1000n);
 }
 
 function formatExpiry(ts: bigint): string {
@@ -64,7 +65,7 @@ function PlanRow({ address, data }: PlanWithAddress) {
                 <KitAddress address={data.data.mint} raw link />
             </BaseTable.Cell>
             <BaseTable.Cell>{data.data.terms.amount.toString()}</BaseTable.Cell>
-            <BaseTable.Cell>{data.data.terms.periodHours.toString()} hours</BaseTable.Cell>
+            <BaseTable.Cell>{pluralUnits(data.data.terms.periodHours, 'hour')}</BaseTable.Cell>
             <BaseTable.Cell>{formatExpiry(data.data.endTs)}</BaseTable.Cell>
         </BaseTable.Row>
     );
@@ -93,7 +94,7 @@ function SubscriptionRow({ address, data }: { address: Address; data: Subscripti
                 <KitAddress address={data.header.delegatee} raw link />
             </BaseTable.Cell>
             <BaseTable.Cell>{data.terms.amount.toString()}</BaseTable.Cell>
-            <BaseTable.Cell>{data.terms.periodHours.toString()} hours</BaseTable.Cell>
+            <BaseTable.Cell>{pluralUnits(data.terms.periodHours, 'hour')}</BaseTable.Cell>
             <BaseTable.Cell>{formatExpiry(data.expiresAtTs)}</BaseTable.Cell>
         </BaseTable.Row>
     );
@@ -155,6 +156,10 @@ export function WalletSubscriptionsView({ data }: { data: WalletSubscriptionsDat
     const standalone = delegations.filter(
         (d): d is StandaloneDelegation => d.kind === 'fixed' || d.kind === 'recurring',
     );
+
+    if (plans.length === 0 && subscriptions.length === 0 && standalone.length === 0) {
+        return <div className="e-p-4 e-text-center e-text-muted">No subscriptions found for this address.</div>;
+    }
 
     return (
         <>
