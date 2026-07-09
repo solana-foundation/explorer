@@ -14,7 +14,10 @@ export interface TokenMarketStats {
     lastUpdated?: Date;
 }
 
-export type TokenMarketDataResult = {
-    stats?: TokenMarketStats;
-    status: TokenMarketDataStatus;
-};
+// Discriminated union so `stats` exists only on Success - other statuses cannot carry stats.
+export type TokenMarketDataResult =
+    | { status: TokenMarketDataStatus.Success; stats: TokenMarketStats }
+    | {
+          status: TokenMarketDataStatus.Loading | TokenMarketDataStatus.FetchFailed | TokenMarketDataStatus.RateLimited;
+          stats?: never;
+      };
