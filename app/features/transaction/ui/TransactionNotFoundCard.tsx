@@ -1,12 +1,11 @@
 'use client';
 
 import { useCluster } from '@providers/cluster';
-import { createSolanaRpc, signature as createSignature } from '@solana/kit';
-import { Cluster, clusterName, clusterSlug, clusterUrl } from '@utils/cluster';
+import { Cluster, clusterName, clusterSlug } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
-import { useSearchParams } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
+import { useClusterTransactionSearch } from '../model/use-cluster-transaction-search';
 import { BaseTransactionNotFoundCard } from './BaseTransactionNotFoundCard';
 
 export function TransactionNotFoundCard({
@@ -43,86 +42,6 @@ export function TransactionNotFoundCard({
     }
 
     return <BaseTransactionNotFoundCard retry={retry} subtext={subtext} />;
-}
-
-type SearchStatus = 'idle' | 'searching' | 'found' | 'not-found';
-
-function useClusterTransactionSearch(signature: string, currentCluster: Cluster) {
-    const searchParams = useSearchParams();
-    const [status, setStatus] = useState<SearchStatus>('idle');
-    const [searchingCluster, setSearchingCluster] = useState<Cluster | undefined>(undefined);
-    const [foundCluster, setFoundCluster] = useState<Cluster | undefined>(undefined);
-    const searchIdRef = useRef(0);
-
-    const sleep = () => new Promise(res => setTimeout(res, 700));
-
-    const customUrl = searchParams?.get('customUrl');
-
-    useEffect(() => {
-        const currentSearchId = ++searchIdRef.current;
-
-        const clusters = [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet].filter(c => c !== currentCluster);
-        const hasCustomUrlEnabled = Boolean(customUrl);
-
-        if (hasCustomUrlEnabled) {
-            clusters.push(Cluster.Custom);
-        }
-
-        const searchClusters = async () => {
-            if (searchIdRef.current !== currentSearchId) return;
-
-            setStatus('searching');
-            setFoundCluster(undefined);
-
-            for (const [index, cluster] of clusters.entries()) {
-                if (searchIdRef.current !== currentSearchId) return;
-
-                setSearchingCluster(cluster);
-
-                try {
-                    let url = clusterUrl(cluster, '');
-
-                    if (customUrl && cluster === Cluster.Custom) {
-                        url = customUrl;
-                    }
-
-                    const rpc = createSolanaRpc(url);
-                    const statusRes = await rpc
-                        .getSignatureStatuses([createSignature(signature)], { searchTransactionHistory: true })
-                        .send();
-
-                    if (searchIdRef.current !== currentSearchId) return;
-
-                    // RPC returns literal null for missing signatures per JSON-RPC spec
-                    if (statusRes.value[0] !== null) {
-                        setFoundCluster(cluster);
-                        setStatus('found');
-                        return;
-                    } else if (index < clusters.length - 1) {
-                        // Only pace between checks; skip the trailing delay so not-found shows immediately
-                        await sleep();
-                    }
-                } catch (_error) {
-                    if (searchIdRef.current !== currentSearchId) return;
-                }
-            }
-
-            if (searchIdRef.current === currentSearchId) {
-                setStatus('not-found');
-                setSearchingCluster(undefined);
-            }
-        };
-
-        searchClusters();
-
-        return () => {
-            if (searchIdRef.current === currentSearchId) {
-                searchIdRef.current += 1;
-            }
-        };
-    }, [signature, currentCluster, customUrl]);
-
-    return { foundCluster, searchingCluster, status };
 }
 
 function AdjacentTransactionLink({ signature, foundCluster }: { signature: string; foundCluster: Cluster }) {
