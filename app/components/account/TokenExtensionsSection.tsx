@@ -1,5 +1,5 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@components/shared/ui/accordion';
-import { SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Code, ExternalLink } from 'react-feather';
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
@@ -30,41 +30,32 @@ export function TokenExtensionsSection({
     parsedExtensions: ParsedTokenExtension[];
     symbol?: string;
 }) {
-    const { activeExtension: selectedExtension, setActiveExtension: setSelectedExtension } =
-        useTokenExtensionNavigation({ uriComponent: `/address/${address}` });
+    const { activeExtension: selectedExtension, navigateToExtension } = useTokenExtensionNavigation({
+        uriComponent: `/address/${address}`,
+    });
 
     const onSelect = useCallback(
         (id: string) => {
-            setSelectedExtension(id === selectedExtension ? undefined : id);
+            navigateToExtension(id);
         },
-        [selectedExtension, setSelectedExtension],
-    );
-
-    // handle accordion item click to change the selected extension
-    const handleSelect = useCallback(
-        (e: SyntheticEvent<HTMLDivElement>) => {
-            const selectedValue = e.currentTarget.dataset.value;
-            if (selectedValue === selectedExtension) {
-                setSelectedExtension(undefined);
-            }
-        },
-        [selectedExtension, setSelectedExtension],
+        [navigateToExtension],
     );
 
     return (
-        <Accordion type="single" value={selectedExtension} collapsible className="px-0">
+        <Accordion
+            type="single"
+            value={selectedExtension ?? ''}
+            collapsible
+            className="px-0"
+            onValueChange={value => navigateToExtension(value || undefined)}
+        >
             {parsedExtensions.map(ext => {
                 const extension = extensions.find(({ extension }) => {
                     return extension === ext.extension;
                 });
 
                 return (
-                    <AccordionItem
-                        id={getAnchorId(ext)}
-                        key={ext.extension}
-                        value={ext.extension}
-                        onClick={handleSelect}
-                    >
+                    <AccordionItem id={getAnchorId(ext)} key={ext.extension} value={ext.extension}>
                         {extension && (
                             <TokenExtensionAccordionItem
                                 decimals={decimals}
