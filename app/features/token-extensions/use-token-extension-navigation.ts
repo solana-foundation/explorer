@@ -92,7 +92,8 @@ export function useTokenExtensionNavigation({ uriComponent }: { uriComponent: st
         if (!isOnDesiredPage()) return;
         const base = `${globalThis.location.pathname}${globalThis.location.search}`;
         const url = activeExtension ? `${base}#${activeExtension}` : base;
-        globalThis.history.replaceState(undefined, '', url);
+        // eslint-disable-next-line unicorn/no-null -- history.replaceState expects null as the no-state sentinel per HTML spec
+        globalThis.history.replaceState(null, '', url);
     }, [activeExtension]);
 
     return {
