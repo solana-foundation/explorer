@@ -1,5 +1,10 @@
+import { checkBotId } from 'botid/server';
 import { NextRequest } from 'next/server';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { Logger } from '@/app/shared/lib/logger';
+
+import { botIdMiddleware } from '../botid-middleware.mjs';
 
 // Set default log level for this test to avoid flaky tests if .env changes
 const TEST_LOG_LEVEL = '0';
@@ -8,18 +13,12 @@ vi.mock('botid/server', () => ({
     checkBotId: vi.fn(),
 }));
 
-import { checkBotId } from 'botid/server';
-
-import { Logger } from '@/app/shared/lib/logger';
-
-import { proxy } from '../proxy';
-
 function createRequest(pathname: string, headers: Record<string, string> = {}): NextRequest {
     const url = new URL(pathname, 'http://localhost');
     return new NextRequest(url, { headers });
 }
 
-describe('Next.js proxy', () => {
+describe('botIdMiddleware', () => {
     const originalEnv = { ...process.env };
 
     let loggerInfoSpy: ReturnType<typeof vi.spyOn>;
@@ -57,11 +56,11 @@ describe('Next.js proxy', () => {
         it.each<{ headers: Record<string, string>; description: string }>([
             { description: 'with x-is-human header', headers: { 'x-is-human': 'true' } },
             { description: 'without x-is-human header', headers: {} },
-        ])('should allow request to pass through $description', async ({ headers }) => {
+        ])('should pass through $description', async ({ headers }) => {
             const request = createRequest('/api/test', headers);
-            const response = await proxy(request);
+            const response = await botIdMiddleware(request);
 
-            expect(response.status).toBe(200);
+            expect(response).toBeUndefined();
             expect(checkBotId).not.toHaveBeenCalled();
         });
     });
@@ -72,36 +71,36 @@ describe('Next.js proxy', () => {
         });
 
         describe('without x-is-human header', () => {
-            it('should allow request without verification and log info', async () => {
+            it('should pass through without verification and log info', async () => {
                 const request = createRequest('/api/test');
-                const response = await proxy(request);
+                const response = await botIdMiddleware(request);
 
-                expect(response.status).toBe(200);
+                expect(response).toBeUndefined();
                 expect(checkBotId).not.toHaveBeenCalled();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    '[proxy] No x-is-human header, allowing',
+                    '[botid] No x-is-human header, allowing',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
         });
 
         describe('when checkBotId throws', () => {
-            it('should allow request and log warning when verification fails', async () => {
+            it('should pass through and log warning when verification fails', async () => {
                 vi.mocked(checkBotId).mockRejectedValue(new SyntaxError('Unexpected token < in JSON'));
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await proxy(request);
+                const response = await botIdMiddleware(request);
 
-                expect(response.status).toBe(200);
+                expect(response).toBeUndefined();
                 expect(loggerWarnSpy).toHaveBeenCalledWith(
-                    '[proxy] BotId verification failed, allowing request',
+                    '[botid] BotId verification failed, allowing request',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
         });
 
         describe('with x-is-human header', () => {
-            it('should allow human requests and log verification info', async () => {
+            it('should pass through human requests and log verification info', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
                     bypassed: false,
                     isBot: false,
@@ -110,21 +109,21 @@ describe('Next.js proxy', () => {
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await proxy(request);
+                const response = await botIdMiddleware(request);
 
-                expect(response.status).toBe(200);
+                expect(response).toBeUndefined();
                 expect(checkBotId).toHaveBeenCalled();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    '[proxy] BotId verification',
+                    '[botid] BotId verification',
                     expect.objectContaining({ isHuman: true }),
                 );
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    '[proxy] Human verified',
+                    '[botid] Human verified',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
 
-            it('should allow bot requests when challenge mode is disabled and log warning', async () => {
+            it('should pass through bot requests when challenge mode is disabled and log warning', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
                     bypassed: false,
                     isBot: true,
@@ -133,11 +132,11 @@ describe('Next.js proxy', () => {
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await proxy(request);
+                const response = await botIdMiddleware(request);
 
-                expect(response.status).toBe(200);
+                expect(response).toBeUndefined();
                 expect(loggerWarnSpy).toHaveBeenCalledWith(
-                    '[proxy] Bot detected',
+                    '[botid] Bot detected',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
@@ -157,17 +156,18 @@ describe('Next.js proxy', () => {
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await proxy(request);
+                const response = await botIdMiddleware(request);
 
+                if (!response) throw new Error('expected NextResponse from middleware');
                 expect(response.status).toBe(401);
                 const body = await response.json();
                 expect(body).toEqual({ error: 'Access denied: request identified as automated bot' });
                 expect(loggerWarnSpy).toHaveBeenCalledWith(
-                    '[proxy] Bot detected',
+                    '[botid] Bot detected',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    new Error('[proxy] Challenge mode enabled, blocking'),
+                    new Error('[botid] Challenge mode enabled, blocking'),
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
@@ -181,16 +181,17 @@ describe('Next.js proxy', () => {
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await proxy(request);
+                const response = await botIdMiddleware(request);
 
+                if (!response) throw new Error('expected NextResponse from middleware');
                 expect(response.status).toBe(401);
                 expect(loggerErrorSpy).toHaveBeenCalledWith(
-                    new Error('[proxy] Challenge mode enabled, blocking'),
+                    new Error('[botid] Challenge mode enabled, blocking'),
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
 
-            it('should allow human requests and log info', async () => {
+            it('should pass through human requests and log info', async () => {
                 vi.mocked(checkBotId).mockResolvedValue({
                     bypassed: false,
                     isBot: false,
@@ -199,11 +200,11 @@ describe('Next.js proxy', () => {
                 });
 
                 const request = createRequest('/api/test', { 'x-is-human': 'true' });
-                const response = await proxy(request);
+                const response = await botIdMiddleware(request);
 
-                expect(response.status).toBe(200);
+                expect(response).toBeUndefined();
                 expect(loggerInfoSpy).toHaveBeenCalledWith(
-                    '[proxy] Human verified',
+                    '[botid] Human verified',
                     expect.objectContaining({ pathname: '/api/test' }),
                 );
             });
@@ -211,9 +212,9 @@ describe('Next.js proxy', () => {
     });
 
     describe('simulate bot mode', () => {
-        it('should allow request when simulate bot mode is enabled but challenge mode is disabled', async () => {
+        it('should pass through when simulate bot mode is enabled but challenge mode is disabled', async () => {
             process.env.NEXT_PUBLIC_BOTID_ENABLED = 'true';
-            process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT = 'true';
+            process.env.NEXT_PUBLIC_BOTID_DEV_SIMULATE_BOT = 'true';
 
             vi.mocked(checkBotId).mockResolvedValue({
                 bypassed: true,
@@ -223,18 +224,18 @@ describe('Next.js proxy', () => {
             });
 
             const request = createRequest('/api/test', { 'x-is-human': 'true' });
-            const response = await proxy(request);
+            const response = await botIdMiddleware(request);
 
-            expect(response.status).toBe(200);
+            expect(response).toBeUndefined();
             expect(loggerWarnSpy).toHaveBeenCalledWith(
-                '[proxy] Bot detected',
+                '[botid] Bot detected',
                 expect.objectContaining({ pathname: '/api/test' }),
             );
         });
 
         it('should block request when both simulate bot mode and challenge mode are enabled', async () => {
             process.env.NEXT_PUBLIC_BOTID_ENABLED = 'true';
-            process.env.NEXT_PUBLIC_BOTID_SIMULATE_BOT = 'true';
+            process.env.NEXT_PUBLIC_BOTID_DEV_SIMULATE_BOT = 'true';
             process.env.NEXT_PUBLIC_BOTID_CHALLENGE_MODE_ENABLED = 'true';
 
             vi.mocked(checkBotId).mockResolvedValue({
@@ -245,11 +246,12 @@ describe('Next.js proxy', () => {
             });
 
             const request = createRequest('/api/test', { 'x-is-human': 'true' });
-            const response = await proxy(request);
+            const response = await botIdMiddleware(request);
 
+            if (!response) throw new Error('expected NextResponse from middleware');
             expect(response.status).toBe(401);
             expect(loggerErrorSpy).toHaveBeenCalledWith(
-                new Error('[proxy] Challenge mode enabled, blocking'),
+                new Error('[botid] Challenge mode enabled, blocking'),
                 expect.objectContaining({ pathname: '/api/test' }),
             );
         });
