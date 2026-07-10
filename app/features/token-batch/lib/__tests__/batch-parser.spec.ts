@@ -15,10 +15,15 @@ import {
     makeBatchIx,
     makeBatchIxWithKeys,
     makeBurnCheckedData,
+    makeInitializeAccount2Data,
+    makeInitializeAccountData,
+    makeInitializeMintData,
     makeMintToCheckedData,
     makeSetAuthorityData,
+    makeSyncNativeData,
     makeTransferCheckedData,
     makeTransferData,
+    makeWithdrawExcessLamportsData,
 } from './test-utils';
 
 describe('isTokenBatchInstruction', () => {
@@ -308,5 +313,91 @@ describe('formatParsedInstruction', () => {
         ]);
         expect(decoded?.accounts[3].isSigner).toBe(true);
         expect(decoded?.accounts[4].isSigner).toBe(true);
+    });
+
+    it('should format InitializeMint with freeze authority', () => {
+        const mintAuth = Keypair.generate().publicKey;
+        const freezeAuth = Keypair.generate().publicKey;
+        const ix = makeBatchIxWithKeys(
+            [{ data: makeInitializeMintData(9, mintAuth, freezeAuth), numAccounts: 2 }],
+            [makeAccount(), makeAccount(false, false)],
+        );
+        const { instructions } = parseBatchInstruction(ix);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
+
+        expect(decoded).toBeDefined();
+        expect(decoded?.fields).toEqual([
+            { label: 'Decimals', value: '9' },
+            { isAddress: true, label: 'Mint Authority', value: mintAuth.toBase58() },
+            { isAddress: true, label: 'Freeze Authority', value: freezeAuth.toBase58() },
+        ]);
+        expect(decoded?.accounts.map(a => a.label)).toEqual(['Mint', 'Rent Sysvar']);
+    });
+
+    it('should format InitializeMint without freeze authority', () => {
+        const mintAuth = Keypair.generate().publicKey;
+        const ix = makeBatchIxWithKeys(
+            [{ data: makeInitializeMintData(6, mintAuth), numAccounts: 2 }],
+            [makeAccount(), makeAccount(false, false)],
+        );
+        const { instructions } = parseBatchInstruction(ix);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
+
+        expect(decoded).toBeDefined();
+        expect(decoded?.fields).toEqual([
+            { label: 'Decimals', value: '6' },
+            { isAddress: true, label: 'Mint Authority', value: mintAuth.toBase58() },
+            { label: 'Freeze Authority', value: '(none)' },
+        ]);
+    });
+
+    it('should format InitializeAccount v1', () => {
+        const ix = makeBatchIxWithKeys(
+            [{ data: makeInitializeAccountData(), numAccounts: 4 }],
+            [makeAccount(), makeAccount(false, false), makeAccount(false, true), makeAccount(false, false)],
+        );
+        const { instructions } = parseBatchInstruction(ix);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
+
+        expect(decoded).toBeDefined();
+        expect(decoded?.fields).toEqual([]);
+        expect(decoded?.accounts.map(a => a.label)).toEqual(['Account', 'Mint', 'Owner', 'Rent Sysvar']);
+    });
+
+    it('should format InitializeAccount2 with owner in data', () => {
+        const owner = Keypair.generate().publicKey;
+        const ix = makeBatchIxWithKeys(
+            [{ data: makeInitializeAccount2Data(owner), numAccounts: 3 }],
+            [makeAccount(), makeAccount(false, false), makeAccount(false, false)],
+        );
+        const { instructions } = parseBatchInstruction(ix);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
+
+        expect(decoded).toBeDefined();
+        expect(decoded?.fields).toEqual([{ isAddress: true, label: 'Owner', value: owner.toBase58() }]);
+        expect(decoded?.accounts.map(a => a.label)).toEqual(['Account', 'Mint', 'Rent Sysvar']);
+    });
+
+    it('should format SyncNative', () => {
+        const ix = makeBatchIxWithKeys([{ data: makeSyncNativeData(), numAccounts: 1 }], [makeAccount()]);
+        const { instructions } = parseBatchInstruction(ix);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
+
+        expect(decoded).toBeDefined();
+        expect(decoded?.fields).toEqual([]);
+        expect(decoded?.accounts.map(a => a.label)).toEqual(['Account']);
+    });
+
+    it('should format WithdrawExcessLamports', () => {
+        const ix = makeBatchIxWithKeys(
+            [{ data: makeWithdrawExcessLamportsData(), numAccounts: 3 }],
+            [makeAccount(), makeAccount(), makeAccount(false, true)],
+        );
+        const { instructions } = parseBatchInstruction(ix);
+        const decoded = formatParsedInstruction(instructions[0].parsed);
+
+        expect(decoded).toBeDefined();
+        expect(decoded?.fields).toEqual([]);
+        expect(decoded?.accounts.map(a => a.label)).toEqual(['Source', 'Destination', 'Authority']);
     });
 });
