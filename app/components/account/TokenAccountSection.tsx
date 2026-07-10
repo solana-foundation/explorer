@@ -30,6 +30,7 @@ import {
     MintCloseAuthority,
     PausableConfig,
     PermanentDelegate,
+    PermissionedBurnConfig,
     ScaledUiAmountConfig,
     TokenExtension,
     TokenExtensionType,
@@ -534,6 +535,7 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
         'cpiGuard',
         'pausableAccount',
         'permanentDelegate',
+        'permissionedBurnConfig',
         'transferHook',
         'transferHookAccount',
         'metadataPointer',
@@ -871,6 +873,21 @@ export function TokenExtensionRow(
                     </>
                 </>
             );
+        }
+        case 'permissionedBurnConfig': {
+            const extension = create(tokenExtension.state, PermissionedBurnConfig);
+            if (extension.authority) {
+                return (
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Permissioned Burn Authority</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">
+                            <Address pubkey={extension.authority} alignRight link />
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
+                );
+            } else {
+                return <></>;
+            }
         }
         case 'permanentDelegate': {
             const extension = create(tokenExtension.state, PermanentDelegate);
