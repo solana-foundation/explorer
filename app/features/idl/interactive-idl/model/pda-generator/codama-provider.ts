@@ -277,6 +277,7 @@ function expectedConditionValueAsString(valueNode: NonNullable<ConditionalValueN
             return valueNode.value ? expectedConditionValueAsString(valueNode.value) : null;
         case 'arrayValueNode':
         case 'bytesValueNode':
+        case 'injectedValueNode':
         case 'mapValueNode':
         case 'noneValueNode':
         case 'setValueNode':
