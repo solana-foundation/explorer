@@ -92,12 +92,11 @@ export function useTokenExtensionNavigation({ uriComponent }: { uriComponent: st
         if (!isOnDesiredPage()) return;
         const base = `${globalThis.location.pathname}${globalThis.location.search}`;
         const url = activeExtension ? `${base}#${activeExtension}` : base;
-        globalThis.history.replaceState(null, '', url);
+        globalThis.history.replaceState(undefined, '', url);
     }, [activeExtension]);
 
     return {
         activeExtension,
         navigateToExtension,
-        setActiveExtension,
     };
 }
