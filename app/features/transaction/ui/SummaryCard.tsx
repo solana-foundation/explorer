@@ -36,6 +36,8 @@ import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/s
 import { Card } from '@/app/shared/ui/Card';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
+import { TransactionNotFoundCard } from './TransactionNotFoundCard';
+
 type RowProps = React.HTMLAttributes<HTMLDivElement> & { divider?: boolean };
 export function Row({ children, className, divider, ...props }: RowProps) {
     return (
@@ -139,16 +141,17 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     } else if (status.status === FetchStatus.FetchFailed) {
         return <ErrorCard retry={() => fetchStatus(signature)} text="Fetch Failed" />;
     } else if (!status.data?.info) {
-        if (clusterInfo && clusterInfo.firstAvailableBlock > 0) {
-            return (
-                <ErrorCard
-                    retry={() => fetchStatus(signature)}
-                    text="Not Found"
-                    subtext={`Note: Transactions processed before block ${clusterInfo.firstAvailableBlock} are not available at this time`}
-                />
-            );
-        }
-        return <ErrorCard retry={() => fetchStatus(signature)} text="Not Found" />;
+        return (
+            <TransactionNotFoundCard
+                signature={signature}
+                retry={() => fetchStatus(signature)}
+                firstAvailableBlock={
+                    clusterInfo?.firstAvailableBlock && clusterInfo.firstAvailableBlock > 0n
+                        ? clusterInfo.firstAvailableBlock
+                        : undefined
+                }
+            />
+        );
     }
 
     const { info } = status.data;
