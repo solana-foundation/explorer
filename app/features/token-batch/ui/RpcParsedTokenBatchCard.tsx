@@ -13,7 +13,7 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import type { DecodedParams } from '../lib/types';
 import { SubInstructionRowView } from './SubInstructionRow';
 
-type RpcSubInstruction = { type: string; info: Record<string, string> };
+type RpcSubInstruction = { type: string; info: Record<string, unknown> };
 
 function isValidPublicKey(value: string): boolean {
     try {
@@ -24,14 +24,19 @@ function isValidPublicKey(value: string): boolean {
     }
 }
 
-function rpcInfoToDecodedParams(info: Record<string, string>): DecodedParams {
+function stringifyValue(value: unknown): string {
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'bigint' || typeof value === 'boolean') return String(value);
+    return JSON.stringify(value);
+}
+
+function rpcInfoToDecodedParams(info: Record<string, unknown>): DecodedParams {
     return {
         accounts: [],
-        fields: Object.entries(info).map(([key, value]) => ({
-            isAddress: isValidPublicKey(value),
-            label: capitalCase(key),
-            value,
-        })),
+        fields: Object.entries(info).map(([key, value]) => {
+            const str = stringifyValue(value);
+            return { isAddress: isValidPublicKey(str), label: capitalCase(key), value: str };
+        }),
     };
 }
 
