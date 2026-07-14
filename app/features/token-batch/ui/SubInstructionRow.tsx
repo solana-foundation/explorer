@@ -23,6 +23,18 @@ export function SubInstructionRow({
     const decoded = formatParsedInstruction(parsed, mintInfo, extraSigners);
     const typeName = TokenInstruction[parsed.instructionType] ?? 'Unknown';
 
+    return <SubInstructionRowView decoded={decoded ?? undefined} index={index} typeName={typeName} />;
+}
+
+export function SubInstructionRowView({
+    index,
+    typeName,
+    decoded,
+}: {
+    index: number;
+    typeName: string;
+    decoded?: DecodedParams;
+}) {
     return (
         <div className="border-b border-neutral-700 py-3 last:border-b-0" data-testid={`sub-ix-${index}`}>
             <div className="mb-2 flex items-center gap-2">
