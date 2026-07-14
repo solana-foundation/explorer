@@ -6,6 +6,7 @@
 import { InstructionCard } from '@components/instruction/InstructionCard';
 import { ParsedInstruction, PublicKey, SignatureResult } from '@solana/web3.js';
 import { capitalCase } from 'change-case';
+import type { ReactNode } from 'react';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -44,7 +45,7 @@ export function RpcParsedTokenBatchCard({
     ix: ParsedInstruction;
     index: number;
     result: SignatureResult;
-    innerCards?: JSX.Element[];
+    innerCards?: ReactNode[];
     childIndex?: number;
 }) {
     // ix.parsed is string | ParsedInfo; for batch it's always ParsedInfo
