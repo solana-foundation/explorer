@@ -126,7 +126,7 @@ describe('TokenExtensionRow', () => {
             </ScrollAnchorProvider>,
         );
 
-        expect(await screen.findByText('Confidential Transfer')).toBeInTheDocument();
+        expect(await screen.findByText('Confidential Transfer Mint')).toBeInTheDocument();
         expect(screen.getByText(/Authority/)).toBeInTheDocument();
         expect(screen.getByText(/Auditor Elgamal Pubkey/)).toBeInTheDocument();
         expect(screen.getByText('test-pubkey')).toBeInTheDocument();
@@ -253,7 +253,7 @@ describe('TokenExtensionRow', () => {
             </ScrollAnchorProvider>,
         );
 
-        expect(await screen.findByText('Scaled UI Amount')).toBeInTheDocument();
+        expect(await screen.findByText('Scaled UI Amount Config')).toBeInTheDocument();
         expect(screen.getByText('2')).toBeInTheDocument();
         expect(screen.getByText('4.22')).toBeInTheDocument();
     });
@@ -297,7 +297,7 @@ describe('TokenExtensionRow', () => {
             </ScrollAnchorProvider>,
         );
 
-        expect(await screen.findByText('Pausable')).toBeInTheDocument();
+        expect(await screen.findByText('Pausable Config')).toBeInTheDocument();
         expect(screen.getByText('paused')).toBeInTheDocument();
     });
 
@@ -498,7 +498,7 @@ describe('TokenExtensionRow', () => {
             </ScrollAnchorProvider>,
         );
 
-        expect(await screen.findByText('Confidential Transfer')).toBeInTheDocument();
+        expect(await screen.findByText('Confidential Transfer Account')).toBeInTheDocument();
         expect(screen.getByText('approved')).toBeInTheDocument();
         expect(screen.getByText('test-pubkey')).toBeInTheDocument();
         expect(screen.getByText(/Confidential Credits/)).toBeInTheDocument();
