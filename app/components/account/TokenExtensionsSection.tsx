@@ -55,7 +55,12 @@ export function TokenExtensionsSection({
                 });
 
                 return (
-                    <AccordionItem id={getAnchorId(ext)} key={ext.extension} value={ext.extension}>
+                    <AccordionItem
+                        id={getAnchorId(ext)}
+                        key={ext.extension}
+                        value={ext.extension}
+                        style={{ scrollMarginTop: 'var(--sticky-header-height, 0px)' }}
+                    >
                         {extension && (
                             <TokenExtensionAccordionItem
                                 decimals={decimals}
