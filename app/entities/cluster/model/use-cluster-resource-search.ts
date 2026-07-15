@@ -57,7 +57,10 @@ export function useClusterResourceSearch({
         const clusters = getClustersToProbe(currentCluster, customUrl);
 
         async function searchClusters() {
+            // Reset every output up front so a re-fired search never surfaces stale state, instead
+            // of relying on React batching the synchronous setSearchingCluster below into the same flush.
             setStatus('searching');
+            setSearchingCluster(undefined);
             setFoundCluster(undefined);
 
             for (const [index, cluster] of clusters.entries()) {
