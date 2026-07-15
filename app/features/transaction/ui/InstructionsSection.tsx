@@ -151,6 +151,10 @@ export function InstructionsSection({ signature }: SignatureProps) {
     );
 }
 
+function isBatchInstruction(parsed: unknown): boolean {
+    return typeof parsed !== 'string' && (parsed as { type?: string } | null)?.type === 'batch';
+}
+
 function InstructionCard({
     ix,
     tx,
@@ -198,7 +202,7 @@ function InstructionCard({
                 // The RPC parses batch instructions (disc 0xff) as ParsedInstruction
                 // with type "batch". Route them to the batch card before TokenDetailsCard
                 // throws on the unrecognised type.
-                if (typeof ix.parsed !== 'string' && ix.parsed.type === 'batch') {
+                if (isBatchInstruction(ix.parsed)) {
                     return (
                         <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
                             <RpcParsedTokenBatchCard

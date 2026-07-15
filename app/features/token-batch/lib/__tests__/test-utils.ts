@@ -99,6 +99,48 @@ export function makeWithdrawExcessLamportsData(): Uint8Array {
     return new Uint8Array([38]);
 }
 
+// MintTo: [discriminator(7), amount(u64_le)]
+export function makeMintToData(amount: bigint): Uint8Array {
+    return concatBytes(new Uint8Array([7]), writeU64LE(amount));
+}
+
+// FreezeAccount: [discriminator(10)]
+export function makeFreezeAccountData(): Uint8Array {
+    return new Uint8Array([10]);
+}
+
+// ThawAccount: [discriminator(11)]
+export function makeThawAccountData(): Uint8Array {
+    return new Uint8Array([11]);
+}
+
+// Revoke: [discriminator(5)]
+export function makeRevokeData(): Uint8Array {
+    return new Uint8Array([5]);
+}
+
+// InitializeMint2: [discriminator(20), decimals(u8), mintAuthority(32), option_tag(u8), ?freezeAuthority(32)]
+export function makeInitializeMint2Data(
+    decimals: number,
+    mintAuthority: PublicKey,
+    freezeAuthority?: PublicKey,
+): Uint8Array {
+    if (freezeAuthority) {
+        return concatBytes(
+            new Uint8Array([20, decimals]),
+            mintAuthority.toBytes(),
+            new Uint8Array([1]),
+            freezeAuthority.toBytes(),
+        );
+    }
+    return concatBytes(new Uint8Array([20, decimals]), mintAuthority.toBytes(), new Uint8Array([0]));
+}
+
+// InitializeAccount3: [discriminator(18), owner(32)]
+export function makeInitializeAccount3Data(owner: PublicKey): Uint8Array {
+    return concatBytes(new Uint8Array([18]), owner.toBytes());
+}
+
 // SetAuthority: [discriminator(6), authority_type(u8), option_tag(u8), ?new_authority(32)]
 export function makeSetAuthorityData(authorityType: number, newAuthority?: PublicKey): Uint8Array {
     if (newAuthority) {

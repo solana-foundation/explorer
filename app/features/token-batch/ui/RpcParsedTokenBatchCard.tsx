@@ -27,7 +27,7 @@ function isValidPublicKey(value: string): boolean {
 function stringifyValue(value: unknown): string {
     if (typeof value === 'string') return value;
     if (typeof value === 'number' || typeof value === 'bigint' || typeof value === 'boolean') return String(value);
-    return JSON.stringify(value);
+    return JSON.stringify(value) ?? '';
 }
 
 function rpcInfoToDecodedParams(info: Record<string, unknown>): DecodedParams {
