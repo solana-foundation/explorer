@@ -9,6 +9,7 @@ import {
 } from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
 import { useTabOverflow } from '@/app/shared/ui/navigation-tabs/model/useTabOverflow';
+import { useStickyHeaderHeight } from '@/app/shared/ui/sticky-header/useStickyHeaderHeight';
 
 import { MobileMoreDropdown } from './MobileMoreDropdown';
 import { TabLink } from './TabLink';
@@ -99,24 +100,7 @@ export function BaseNavigationTabs({
         return () => observer.disconnect();
     }, [scrollSpy]);
 
-    useEffect(() => {
-        if (!scrollSpy) return;
-        const el = wrapperRef.current ?? tablistRef.current;
-        if (!el) return;
-        const update = () => {
-            document.documentElement.style.setProperty(
-                '--sticky-header-height',
-                `${el.getBoundingClientRect().height}px`,
-            );
-        };
-        update();
-        const resizeObserver = new ResizeObserver(update);
-        resizeObserver.observe(el);
-        return () => {
-            resizeObserver.disconnect();
-            document.documentElement.style.removeProperty('--sticky-header-height');
-        };
-    }, [scrollSpy, tablistRef]);
+    useStickyHeaderHeight(wrapperRef, !!scrollSpy);
 
     useEffect(() => {
         if (!scrollSpy) return;

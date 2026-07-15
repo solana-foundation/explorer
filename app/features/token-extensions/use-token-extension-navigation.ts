@@ -1,5 +1,5 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { type AddressTabPath } from '@/app/address/[address]/layout';
 import { ParsedTokenExtension } from '@/app/components/account/types';
@@ -48,9 +48,6 @@ export function useTokenExtensionNavigation({ uriComponent }: { uriComponent: st
         // That's because badges with extensions are displayed at the root component and any tab might be active below
         if (!isOnDesiredPage() && extensionName) {
             router.push(populateUri(uriComponent, TOKEN_EXTENSIONS, searchParams, extensionName));
-        } else {
-            // Just update the hash if already on the page
-            globalThis.location.hash = extensionName ?? '';
         }
 
         setActiveExtension(extensionName);
@@ -83,9 +80,24 @@ export function useTokenExtensionNavigation({ uriComponent }: { uriComponent: st
         }
     }, [activeExtension]);
 
+    // Sync URL hash after React commits the state change, so Next.js router interception
+    // cannot race against the state update (calling replaceState inline in the event handler
+    // triggers Next.js navigation processing before setActiveExtension can take effect).
+    const skipFirstUrlSync = useRef(true);
+    useEffect(() => {
+        if (skipFirstUrlSync.current) {
+            skipFirstUrlSync.current = false;
+            return;
+        }
+        if (!isOnDesiredPage()) return;
+        const base = `${globalThis.location.pathname}${globalThis.location.search}`;
+        const url = activeExtension ? `${base}#${activeExtension}` : base;
+        // eslint-disable-next-line unicorn/no-null -- history.replaceState expects null as the no-state sentinel per HTML spec
+        globalThis.history.replaceState(null, '', url);
+    }, [activeExtension]);
+
     return {
         activeExtension,
         navigateToExtension,
-        setActiveExtension,
     };
 }
