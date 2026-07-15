@@ -106,4 +106,22 @@ describe('useClusterResourceSearch', () => {
         // First probe (Devnet) rejects, second probe (Testnet) resolves as found
         expect(result.current.foundCluster).toBe(Cluster.Testnet);
     });
+
+    it('should report not-found when every cluster probe throws', async () => {
+        const probe = vi.fn().mockRejectedValue(new Error('RPC unreachable'));
+
+        const { result } = renderHook(() =>
+            useClusterResourceSearch({ currentCluster: Cluster.MainnetBeta, probe, resourceId: RESOURCE_ID }),
+        );
+
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(3000);
+        });
+
+        await waitFor(() => expect(result.current.status).toBe('not-found'));
+        expect(result.current.foundCluster).toBeUndefined();
+        expect(result.current.searchingCluster).toBeUndefined();
+        // Every non-current public cluster was attempted before falling through to not-found
+        expect(probe).toHaveBeenCalledTimes(2);
+    });
 });
