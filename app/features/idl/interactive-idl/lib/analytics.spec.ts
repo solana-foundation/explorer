@@ -10,6 +10,26 @@ vi.mock('@/app/shared/lib/analytics', () => ({
 
 const mockedTrackEvent = vi.mocked(trackEvent);
 
+describe('trackIdlViewed', () => {
+    afterEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should emit iidl_anchor_idl_viewed for Anchor standard', () => {
+        createIdlAnalytics('Anchor').trackIdlViewed('prog1');
+        expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_anchor_idl_viewed', {
+            program_id: 'prog1',
+        });
+    });
+
+    it('should emit iidl_codama_idl_viewed for Codama standard', () => {
+        createIdlAnalytics('Codama').trackIdlViewed('prog2');
+        expect(mockedTrackEvent).toHaveBeenCalledWith('iidl_codama_idl_viewed', {
+            program_id: 'prog2',
+        });
+    });
+});
+
 describe('createIdlAnalytics', () => {
     afterEach(() => {
         vi.clearAllMocks();
