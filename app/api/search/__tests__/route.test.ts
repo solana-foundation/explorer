@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GENESIS_HASHES } from '@/app/entities/chain-id/lib/const';
 import { getAssetBatch } from '@/app/entities/digital-asset/api';
+import { gen } from '@/app/__fixtures__/gen';
 import { clearLogoCacheForTests } from '@/app/features/search/api/discover-with-jupiter';
 
 import { GET } from '../route';
@@ -251,7 +252,7 @@ describe('GET /api/search', () => {
     });
 
     describe('NEXT_PUBLIC_SEARCH_DISABLE_UNVERIFIED_TOKENS', () => {
-        const OTHER_ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+        const OTHER_ADDRESS = gen.address(1);
 
         beforeEach(() => {
             process.env.NEXT_PUBLIC_SEARCH_DISABLE_UNVERIFIED_TOKENS = 'true';

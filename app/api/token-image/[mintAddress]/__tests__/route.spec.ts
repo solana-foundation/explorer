@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { DEFAULT_ADDRESS } from '@/app/__fixtures__/gen';
+
 import { GET } from '../route';
 
 vi.mock('@/app/entities/digital-asset/server', () => ({
     getAssetBatch: vi.fn(),
 }));
 
-const VALID_MINT = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const VALID_MINT = DEFAULT_ADDRESS;
 const BASE_URL = `http://localhost:3000/api/token-image/${VALID_MINT}`;
 
 function makeRequest(url = BASE_URL) {
