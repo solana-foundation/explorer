@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { gen } from '@/app/__fixtures__/gen';
 import { GENESIS_HASHES } from '@/app/entities/chain-id/lib/const';
 import { getAssetBatch } from '@/app/entities/digital-asset/api';
-import { gen } from '@/app/__fixtures__/gen';
 import { clearLogoCacheForTests } from '@/app/features/search/api/discover-with-jupiter';
 
 import { GET } from '../route';
