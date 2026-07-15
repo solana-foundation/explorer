@@ -5,5 +5,13 @@ export { customUrlEnabledAtom, rememberedCustomUrlAtom } from './model/cluster-s
 export { useCluster, useUpdateCustomUrl } from './model/use-cluster';
 export { useClusterInfo } from './model/use-cluster-info';
 export { clusterModalOpenAtom, useClusterModal } from './model/use-cluster-modal';
+export {
+    type ClusterResourceProbe,
+    type ClusterResourceSearch,
+    type ClusterSearchStatus,
+    useClusterResourceSearch,
+} from './model/use-cluster-resource-search';
 export { buildExplorerLink, useExplorerLink } from './model/use-explorer-link';
+export { AdjacentClusterLink } from './ui/AdjacentClusterLink';
 export { ExplorerLink } from './ui/ExplorerLink';
+export { SearchingClusterIndicator } from './ui/SearchingClusterIndicator';

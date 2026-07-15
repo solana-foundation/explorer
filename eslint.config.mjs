@@ -559,7 +559,6 @@ export default tseslint.config(
             'app/components/account/TokenAccountSection.tsx',
             'app/components/account/TokenExtensionsSection.tsx',
             'app/components/account/TokenHistoryCard.tsx',
-            'app/components/account/UnknownAccountCard.tsx',
             'app/components/account/UpgradeableLoaderAccountSection.tsx',
             'app/components/account/VerifiedBuildCard.tsx',
             'app/components/account/history/TokenInstructionsCard.tsx',
