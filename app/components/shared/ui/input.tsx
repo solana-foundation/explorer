@@ -23,7 +23,7 @@ const inputVariants = cva(
         },
         variants: {
             variant: {
-                dark: 'border-outer-space-950 bg-heavy-metal-900 text-neutral-200 placeholder:text-neutral-400 focus-visible:ring-neutral-300 focus-visible:ring-offset-neutral-900',
+                dark: '[color-scheme:dark] border-outer-space-950 bg-heavy-metal-900 text-neutral-200 placeholder:text-neutral-400 focus-visible:ring-accent focus-visible:ring-offset-neutral-900',
                 default:
                     'border-neutral-200 bg-transparent text-neutral-200 placeholder:text-neutral-300 focus-visible:ring-neutral-300 focus-visible:ring-offset-neutral-900',
             },
