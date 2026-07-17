@@ -7,6 +7,7 @@ import { Input } from '@components/shared/ui/input';
 import { Label } from '@components/shared/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
 import { HistoryFilters, useHistoryFiltersSupported } from '@providers/accounts/history';
+import { format } from 'date-fns';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { ChevronDown, Filter, X } from 'react-feather';
@@ -110,10 +111,7 @@ function unixToLocalInput(sec: number | undefined): string {
     if (sec === undefined) return '';
     const d = new Date(sec * 1000);
     if (Number.isNaN(d.getTime())) return '';
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(
-        d.getMinutes(),
-    )}`;
+    return format(d, "yyyy-MM-dd'T'HH:mm");
 }
 
 function localInputToUnix(raw: string): number | undefined {
@@ -192,6 +190,7 @@ const SELECT_CLASS =
 export function HistoryFilterTrigger(filters: HistoryFilters) {
     const { slot, blockTime, status } = filters;
     const updateFilters = useUpdateHistoryFilters();
+    const clearFilters = useClearHistoryFilters();
     const supported = useHistoryFiltersSupported();
     const [open, setOpen] = React.useState(false);
 
@@ -236,13 +235,7 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
     };
 
     const clearAll = () => {
-        updateFilters({
-            [BLOCK_TIME_GTE_PARAM]: undefined,
-            [BLOCK_TIME_LTE_PARAM]: undefined,
-            [SLOT_GTE_PARAM]: undefined,
-            [SLOT_LTE_PARAM]: undefined,
-            [STATUS_PARAM]: undefined,
-        });
+        clearFilters();
         setOpen(false);
     };
 
