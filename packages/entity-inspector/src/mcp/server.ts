@@ -1,7 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { z } from 'zod';
 
-const pingInputSchema = z.object({}).strict().optional().default({});
+import { pingInputSchema } from './schemas.js';
 
 export function createMcpServer(): McpServer {
     const server = new McpServer({
@@ -14,7 +13,7 @@ export function createMcpServer(): McpServer {
         'ping',
         {
             description: 'Basic scaffold health tool',
-            inputSchema: pingInputSchema,
+            inputSchema: pingInputSchema(),
         },
         async () => ({
             content: [

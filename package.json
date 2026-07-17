@@ -14,7 +14,7 @@
         "format": "pnpm pretty:format '**/*.{ts,tsx,mts,mjs,cjs}' '*.json'",
         "format:ci": "pnpm format",
         "gen": "pnpx shadcn@^2.4.0 add",
-        "lint": "pnpm eslint:lint .",
+        "lint": "pnpm eslint:lint . && pnpm -r --filter './packages/**' run lint",
         "openspec:validate": "openspec validate --all --strict --no-interactive",
         "pretty:format": "prettier --config .prettierrc.cjs --check",
         "sb": "storybook dev -p 6006",

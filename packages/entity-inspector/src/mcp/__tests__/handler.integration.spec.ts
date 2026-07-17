@@ -1,5 +1,8 @@
 // @vitest-environment node
-import { describe, expect, it } from 'vitest';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
+import { LATEST_PROTOCOL_VERSION } from '@modelcontextprotocol/sdk/types.js';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { EntityInspectorConfig } from '../../types.js';
 import { createMcpRequestHandler } from '../handler.js';
@@ -13,8 +16,6 @@ const TEST_CONFIG: EntityInspectorConfig = {
     },
 };
 
-const PROTOCOL_VERSION = '2025-11-05';
-
 const MCP_HEADERS = {
     accept: 'application/json, text/event-stream',
     'content-type': 'application/json',
@@ -26,7 +27,7 @@ function initializeRequest(id: number): Request {
         {
             capabilities: {},
             clientInfo: { name: 'vitest-client', version: '0.1.0' },
-            protocolVersion: PROTOCOL_VERSION,
+            protocolVersion: LATEST_PROTOCOL_VERSION,
         },
         id,
     );
@@ -60,7 +61,7 @@ async function negotiatedToolRequest(
     });
 }
 
-describe('createMcpRequestHandler', () => {
+describe('createMcpRequestHandler — real MCP SDK transport', () => {
     const handler = createMcpRequestHandler(TEST_CONFIG);
 
     it('should respond to initialize with the server identity', async () => {
@@ -93,5 +94,31 @@ describe('createMcpRequestHandler', () => {
             jsonrpc: '2.0',
             result: { content: [{ text: 'pong', type: 'text' }] },
         });
+    });
+});
+
+// Real SDK, but transport/server close is spied to reject — so these stay in the same file as the
+// round-trip cases above (a whole-module vi.mock would break those; a targeted spy does not).
+describe('createMcpRequestHandler — real MCP SDK transport, close failures', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it('should log both close failures via the injected logger and still return the response', async () => {
+        vi.spyOn(WebStandardStreamableHTTPServerTransport.prototype, 'close').mockRejectedValue(
+            new Error('transport boom'),
+        );
+        vi.spyOn(McpServer.prototype, 'close').mockRejectedValue(new Error('server boom'));
+        const warn = vi.fn();
+        const handler = createMcpRequestHandler({
+            logger: { debug: vi.fn(), info: vi.fn(), warn },
+            rpcEndpoints: TEST_CONFIG.rpcEndpoints,
+        });
+
+        const response = await handler(initializeRequest(1));
+
+        expect(response.status).toBe(200);
+        expect(warn).toHaveBeenCalledWith('[entity-inspector] transport close failed', { error: expect.any(Error) });
+        expect(warn).toHaveBeenCalledWith('[entity-inspector] server close failed', { error: expect.any(Error) });
     });
 });
