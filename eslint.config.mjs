@@ -209,7 +209,13 @@ export default tseslint.config(
 
     // Allow console in logger, scripts, standalone files, pnpmfile
     {
-        files: ['app/shared/lib/logger.ts', 'scripts/**', '**/*.mjs', '**/*.cjs'],
+        files: [
+            'app/shared/lib/logger.ts',
+            'packages/entity-inspector/src/logger.ts',
+            'scripts/**',
+            '**/*.mjs',
+            '**/*.cjs',
+        ],
         rules: {
             'no-console': 'off',
         },
