@@ -5,13 +5,12 @@ import { Logger } from '@/app/shared/lib/logger';
 
 const logger: EntityInspectorConfig['logger'] = {
     debug: (message, context) => Logger.debug(message, context),
+    error: (message, context) => Logger.error(message, context),
     info: (message, context) => Logger.info(message, context),
     warn: (message, context) => Logger.warn(message, context),
 };
 
-// Dedicated MCP RPC endpoints — separate quota/provider from the app's RPC; public endpoints as fallback.
-// Resolved at request time (not module scope) so the key-bearing URLs are read from the Vercel runtime
-// env and never baked into a build artifact.
+// Resolved per-request (not at module scope) so key-bearing URLs come from runtime env, never a build artifact.
 function resolveRpcEndpoints(): EntityInspectorConfig['rpcEndpoints'] {
     return {
         devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || clusterApiUrl('devnet'),
@@ -24,9 +23,15 @@ function resolveRpcEndpoints(): EntityInspectorConfig['rpcEndpoints'] {
 
 let handlerPromise: Promise<McpRequestHandler> | undefined;
 
-/** Imports the MCP package lazily so a disabled endpoint never loads it. */
+/** Lazy so a disabled endpoint never loads the MCP package. */
 export function getMcpRequestHandler(): Promise<McpRequestHandler> {
-    handlerPromise = handlerPromise ?? importRequestHandler();
+    if (!handlerPromise) {
+        handlerPromise = importRequestHandler().catch(error => {
+            // Clear the cache on failure so a transient import error isn't stuck until redeploy.
+            handlerPromise = undefined;
+            throw error;
+        });
+    }
     return handlerPromise;
 }
 

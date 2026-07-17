@@ -35,8 +35,14 @@ async function handleMcpRequest(request: Request): Promise<Response> {
     if (!isAuthorized(request)) {
         return jsonError(401, 'Unauthorized');
     }
-    const handler = await getMcpRequestHandler();
-    return withCorsHeaders(await handler(request));
+    try {
+        const handler = await getMcpRequestHandler();
+        return withCorsHeaders(await handler(request));
+    } catch (error) {
+        // Controlled, CORS-consistent 500 (Next's default 500 omits CORS); also reports to Sentry.
+        Logger.error(error, { sentry: true });
+        return jsonError(500, 'Internal error');
+    }
 }
 
 export { handleMcpRequest as DELETE, handleMcpRequest as GET, handleMcpRequest as POST };

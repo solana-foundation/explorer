@@ -55,19 +55,48 @@ describe('POST /mcp', () => {
         await expect(response.json()).resolves.toEqual({ error: 'MCP endpoint is disabled' });
     });
 
-    it('should return 401 when the Authorization header is missing', async () => {
+    it('should return 403 for a blacklisted IP even when the endpoint is disabled', async () => {
+        vi.stubEnv('MCP_ENDPOINT_ENABLED', 'false');
+
+        const response = await POST(makeRequest({ authorization: 'Bearer test-key', ip: '203.0.113.7' }));
+
+        expect(response.status).toBe(403);
+        expect(handlerMock).not.toHaveBeenCalled();
+    });
+
+    it('should return 401 with CORS headers when the Authorization header is missing', async () => {
         const response = await POST(makeRequest());
 
         expect(response.status).toBe(401);
         expect(handlerMock).not.toHaveBeenCalled();
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
         await expect(response.json()).resolves.toEqual({ error: 'Unauthorized' });
     });
 
-    it('should return 401 for a key outside the allow-list', async () => {
-        const response = await POST(makeRequest({ authorization: 'Bearer wrong-key' }));
+    it('should return 401 for a non-Bearer Authorization scheme', async () => {
+        const response = await POST(makeRequest({ authorization: 'Basic dGVzdC1rZXk=' }));
 
         expect(response.status).toBe(401);
         expect(handlerMock).not.toHaveBeenCalled();
+    });
+
+    it('should return 401 for a same-length key that is not in the allow-list', async () => {
+        // spore-key matches spare-key's length, forcing the timingSafeEqual (not the length short-circuit) path.
+        const response = await POST(makeRequest({ authorization: 'Bearer spore-key' }));
+
+        expect(response.status).toBe(401);
+        expect(handlerMock).not.toHaveBeenCalled();
+    });
+
+    it('should return 500 with CORS when the MCP handler throws', async () => {
+        handlerMock.mockRejectedValue(new Error('handler boom'));
+
+        const response = await POST(makeRequest({ authorization: 'Bearer test-key' }));
+
+        expect(response.status).toBe(500);
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+        expect(vi.mocked(Logger.error)).toHaveBeenCalledWith(expect.any(Error), { sentry: true });
+        await expect(response.json()).resolves.toEqual({ error: 'Internal error' });
     });
 
     it('should delegate to the MCP handler and append CORS headers for a valid key', async () => {
