@@ -1,4 +1,4 @@
-import type { Address, EncodedAccount } from '@solana/kit';
+import type { Address, EncodedAccount, ReadonlyUint8Array } from '@solana/kit';
 import {
     AccountDiscriminator,
     decodeFixedDelegation,
@@ -14,12 +14,14 @@ import {
     type SubscriptionDelegation,
 } from '@solana/subscriptions';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 export type SubscriptionsAccountData =
-    | { data: FixedDelegation; type: 'FixedDelegation' }
-    | { data: Plan; type: 'Plan' }
-    | { data: RecurringDelegation; type: 'RecurringDelegation' }
-    | { data: SubscriptionAuthority; type: 'SubscriptionAuthority' }
-    | { data: SubscriptionDelegation; type: 'SubscriptionDelegation' };
+    | { parsed: FixedDelegation; program: 'FixedDelegation' }
+    | { parsed: Plan; program: 'Plan' }
+    | { parsed: RecurringDelegation; program: 'RecurringDelegation' }
+    | { parsed: SubscriptionAuthority; program: 'SubscriptionAuthority' }
+    | { parsed: SubscriptionDelegation; program: 'SubscriptionDelegation' };
 
 /**
  * Decode raw account bytes into the appropriate Subscriptions protocol account type.
@@ -29,7 +31,7 @@ export type SubscriptionsAccountData =
  * - the discriminator byte is not one of the five known account types
  * - the codec rejects the bytes (e.g. length mismatch, corrupt data)
  */
-export function decodeSubscriptionsAccount(address: string, data: Uint8Array): SubscriptionsAccountData | undefined {
+export function decodeSubscriptionsAccount(address: string, data: ReadonlyUint8Array): SubscriptionsAccountData | undefined {
     if (data.length === 0) return undefined;
 
     const discriminator = data[DISCRIMINATOR_OFFSET];
@@ -38,19 +40,20 @@ export function decodeSubscriptionsAccount(address: string, data: Uint8Array): S
     try {
         switch (discriminator) {
             case AccountDiscriminator.FixedDelegation:
-                return { data: decodeFixedDelegation(encoded).data, type: 'FixedDelegation' };
+                return { parsed: decodeFixedDelegation(encoded).data, program: 'FixedDelegation' };
             case AccountDiscriminator.Plan:
-                return { data: decodePlan(encoded).data, type: 'Plan' };
+                return { parsed: decodePlan(encoded).data, program: 'Plan' };
             case AccountDiscriminator.RecurringDelegation:
-                return { data: decodeRecurringDelegation(encoded).data, type: 'RecurringDelegation' };
+                return { parsed: decodeRecurringDelegation(encoded).data, program: 'RecurringDelegation' };
             case AccountDiscriminator.SubscriptionAuthority:
-                return { data: decodeSubscriptionAuthority(encoded).data, type: 'SubscriptionAuthority' };
+                return { parsed: decodeSubscriptionAuthority(encoded).data, program: 'SubscriptionAuthority' };
             case AccountDiscriminator.SubscriptionDelegation:
-                return { data: decodeSubscriptionDelegation(encoded).data, type: 'SubscriptionDelegation' };
+                return { parsed: decodeSubscriptionDelegation(encoded).data, program: 'SubscriptionDelegation' };
             default:
                 return undefined;
         }
-    } catch {
+    } catch (e) {
+        Logger.error(e);
         return undefined;
     }
 }
@@ -60,6 +63,6 @@ export function decodeSubscriptionsAccount(address: string, data: Uint8Array): S
  * required by Codama decoders. Only `data` is consumed during decode; the
  * remaining fields are carried through to the returned `Account<T>` unchanged.
  */
-function toEncodedAccount(addr: string, data: Uint8Array): EncodedAccount<string> {
+function toEncodedAccount(addr: string, data: ReadonlyUint8Array): EncodedAccount<string> {
     return { address: addr as Address, data } as unknown as EncodedAccount<string>;
 }

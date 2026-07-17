@@ -12,7 +12,7 @@ import type {
     SubscriptionDelegation,
 } from '@solana/subscriptions';
 import { PlanStatus } from '@solana/subscriptions';
-import { displayTimestampUtc } from '@utils/date';
+import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { pluralUnits } from '@utils/index';
 
 import { BaseAccountCard, type BaseAccountCardProps } from '@/app/shared/ui/BaseAccountCard';
@@ -20,9 +20,9 @@ import { BaseRawAccountRows } from '@/app/shared/ui/BaseRawAccountRows';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { decodeSubscriptionsAccount } from '../lib/decode-subscriptions-account';
-import { formatExpiry, tsToMs } from '../lib/format';
+import { displayExpiry } from '../lib/format';
 
-function formatPlanStatus(status: number): string {
+function displayPlanStatus(status: number): string {
     if (status === PlanStatus.Active) return 'Active';
     return `Unknown (${status})`;
 }
@@ -79,17 +79,17 @@ export function SubscriptionsAccountCard({ account, onNotFound }: { account?: Ac
     const decoded = decodeSubscriptionsAccount(account.pubkey.toBase58(), raw);
     if (!decoded) return onNotFound();
 
-    switch (decoded.type) {
+    switch (decoded.program) {
         case 'Plan':
-            return <PlanCard account={account} data={decoded.data} />;
+            return <PlanCard account={account} data={decoded.parsed} />;
         case 'FixedDelegation':
-            return <FixedDelegationCard account={account} data={decoded.data} />;
+            return <FixedDelegationCard account={account} data={decoded.parsed} />;
         case 'RecurringDelegation':
-            return <RecurringDelegationCard account={account} data={decoded.data} />;
+            return <RecurringDelegationCard account={account} data={decoded.parsed} />;
         case 'SubscriptionDelegation':
-            return <SubscriptionDelegationCard account={account} data={decoded.data} />;
+            return <SubscriptionDelegationCard account={account} data={decoded.parsed} />;
         case 'SubscriptionAuthority':
-            return <SubscriptionAuthorityCard account={account} data={decoded.data} />;
+            return <SubscriptionAuthorityCard account={account} data={decoded.parsed} />;
     }
 }
 
@@ -105,15 +105,15 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
             <ValueRow label="Plan ID">{planId.toString()}</ValueRow>
-            <ValueRow label="Status">{formatPlanStatus(status)}</ValueRow>
+            <ValueRow label="Status">{displayPlanStatus(status)}</ValueRow>
             <AddressRow address={owner} label="Owner" />
             <AddressRow address={mint} label="Token Mint" />
             <ValueRow label="Amount per Period">{terms.amount.toString()}</ValueRow>
             <ValueRow label="Period">{pluralUnits(terms.periodHours, 'hour')}</ValueRow>
             {terms.createdAt !== 0n && (
-                <ValueRow label="Created At">{displayTimestampUtc(tsToMs(terms.createdAt), true)}</ValueRow>
+                <ValueRow label="Created At">{displayTimestampUtc(unixTimestampToMs(Number(terms.createdAt)), true)}</ValueRow>
             )}
-            <ValueRow label="Expires At">{formatExpiry(endTs)}</ValueRow>
+            <ValueRow label="Expires At">{displayExpiry(endTs)}</ValueRow>
             {metadataUri && (
                 <ValueRow label="Metadata URI">
                     <span className="e-font-mono">{metadataUri}</span>
@@ -155,7 +155,7 @@ function FixedDelegationCard({ account, data }: { account: Account; data: FixedD
             <ValueRow label="Amount">{amount.toString()}</ValueRow>
             <AddressRow address={mint} label="Token Mint" />
             <AddressRow address={subscriptionAuthority} label="Subscription Authority" />
-            <ValueRow label="Expires At">{formatExpiry(expiryTs)}</ValueRow>
+            <ValueRow label="Expires At">{displayExpiry(expiryTs)}</ValueRow>
             <AddressRow address={header.payer} label="Payer" />
         </SubscriptionCard>
     );
@@ -187,10 +187,10 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
             <ValueRow label="Period Length">{pluralUnits(periodLengthS, 'second')}</ValueRow>
             {currentPeriodStartTs !== 0n && (
                 <ValueRow label="Current Period Start">
-                    {displayTimestampUtc(tsToMs(currentPeriodStartTs), true)}
+                    {displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true)}
                 </ValueRow>
             )}
-            <ValueRow label="Expires At">{formatExpiry(expiryTs)}</ValueRow>
+            <ValueRow label="Expires At">{displayExpiry(expiryTs)}</ValueRow>
             <AddressRow address={subscriptionAuthority} label="Subscription Authority" />
             <AddressRow address={header.payer} label="Payer" />
         </SubscriptionCard>
@@ -213,10 +213,10 @@ function SubscriptionDelegationCard({ account, data }: { account: Account; data:
             <ValueRow label="Amount Pulled (this period)">{amountPulledInPeriod.toString()}</ValueRow>
             {currentPeriodStartTs !== 0n && (
                 <ValueRow label="Current Period Start">
-                    {displayTimestampUtc(tsToMs(currentPeriodStartTs), true)}
+                    {displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true)}
                 </ValueRow>
             )}
-            <ValueRow label="Expires At">{formatExpiry(expiresAtTs)}</ValueRow>
+            <ValueRow label="Expires At">{displayExpiry(expiresAtTs)}</ValueRow>
             <AddressRow address={header.payer} label="Payer" />
         </SubscriptionCard>
     );

@@ -10,10 +10,12 @@ import {
 } from '@solana/subscriptions';
 import { describe, expect, it } from 'vitest';
 
+import { gen } from '@__fixtures__/gen';
+
 import { decodeSubscriptionsAccount } from '../decode-subscriptions-account';
 
 // A valid Solana address used as placeholder for all address fields in fixtures.
-const ZERO = address('11111111111111111111111111111111');
+const ZERO = address(gen.address(0));
 
 // ─── Fixtures built with the SDK's own encoders ────────────────────────────────
 // Using the same codecs for encoding and decoding is the canonical way to
@@ -103,47 +105,47 @@ const SUBSCRIPTION_AUTHORITY_BYTES = encode(getSubscriptionAuthorityEncoder(), {
 describe('decodeSubscriptionsAccount', () => {
     it('should decode a Plan account and expose its fields', () => {
         const result = decodeSubscriptionsAccount('addr', PLAN_BYTES);
-        expect(result?.type).toBe('Plan');
-        if (result?.type !== 'Plan') return;
-        expect(result.data.data.planId).toBe(42n);
-        expect(result.data.data.terms.amount).toBe(1_000n);
-        expect(result.data.data.terms.periodHours).toBe(24n);
-        expect(result.data.owner).toBe(ZERO);
+        expect(result?.program).toBe('Plan');
+        if (result?.program !== 'Plan') return;
+        expect(result.parsed.data.planId).toBe(42n);
+        expect(result.parsed.data.terms.amount).toBe(1_000n);
+        expect(result.parsed.data.terms.periodHours).toBe(24n);
+        expect(result.parsed.owner).toBe(ZERO);
     });
 
     it('should decode a FixedDelegation account and expose its fields', () => {
         const result = decodeSubscriptionsAccount('addr', FIXED_DELEGATION_BYTES);
-        expect(result?.type).toBe('FixedDelegation');
-        if (result?.type !== 'FixedDelegation') return;
-        expect(result.data.amount).toBe(500n);
-        expect(result.data.expiryTs).toBe(1_999_999_999n);
-        expect(result.data.header.discriminator).toBe(AccountDiscriminator.FixedDelegation);
+        expect(result?.program).toBe('FixedDelegation');
+        if (result?.program !== 'FixedDelegation') return;
+        expect(result.parsed.amount).toBe(500n);
+        expect(result.parsed.expiryTs).toBe(1_999_999_999n);
+        expect(result.parsed.header.discriminator).toBe(AccountDiscriminator.FixedDelegation);
     });
 
     it('should decode a RecurringDelegation account and expose its fields', () => {
         const result = decodeSubscriptionsAccount('addr', RECURRING_DELEGATION_BYTES);
-        expect(result?.type).toBe('RecurringDelegation');
-        if (result?.type !== 'RecurringDelegation') return;
-        expect(result.data.amountPerPeriod).toBe(100n);
-        expect(result.data.periodLengthS).toBe(86_400n);
-        expect(result.data.header.discriminator).toBe(AccountDiscriminator.RecurringDelegation);
+        expect(result?.program).toBe('RecurringDelegation');
+        if (result?.program !== 'RecurringDelegation') return;
+        expect(result.parsed.amountPerPeriod).toBe(100n);
+        expect(result.parsed.periodLengthS).toBe(86_400n);
+        expect(result.parsed.header.discriminator).toBe(AccountDiscriminator.RecurringDelegation);
     });
 
     it('should decode a SubscriptionDelegation account and expose its fields', () => {
         const result = decodeSubscriptionsAccount('addr', SUBSCRIPTION_DELEGATION_BYTES);
-        expect(result?.type).toBe('SubscriptionDelegation');
-        if (result?.type !== 'SubscriptionDelegation') return;
-        expect(result.data.terms.amount).toBe(200n);
-        expect(result.data.terms.periodHours).toBe(48n);
-        expect(result.data.header.discriminator).toBe(AccountDiscriminator.SubscriptionDelegation);
+        expect(result?.program).toBe('SubscriptionDelegation');
+        if (result?.program !== 'SubscriptionDelegation') return;
+        expect(result.parsed.terms.amount).toBe(200n);
+        expect(result.parsed.terms.periodHours).toBe(48n);
+        expect(result.parsed.header.discriminator).toBe(AccountDiscriminator.SubscriptionDelegation);
     });
 
     it('should decode a SubscriptionAuthority account and expose its fields', () => {
         const result = decodeSubscriptionsAccount('addr', SUBSCRIPTION_AUTHORITY_BYTES);
-        expect(result?.type).toBe('SubscriptionAuthority');
-        if (result?.type !== 'SubscriptionAuthority') return;
-        expect(result.data.user).toBe(ZERO);
-        expect(result.data.bump).toBe(254);
+        expect(result?.program).toBe('SubscriptionAuthority');
+        if (result?.program !== 'SubscriptionAuthority') return;
+        expect(result.parsed.user).toBe(ZERO);
+        expect(result.parsed.bump).toBe(254);
     });
 
     it('should return undefined for an empty buffer', () => {

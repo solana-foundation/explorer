@@ -13,7 +13,7 @@ import { pluralUnits } from '@utils/index';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { formatExpiry } from '../lib/format';
+import { displayExpiry } from '../lib/format';
 import { useWalletSubscriptions, type WalletSubscriptionsData } from '../model/useWalletSubscriptions';
 
 function TableSection({ children, headers, title }: { children: React.ReactNode; headers: string[]; title: string }) {
@@ -52,7 +52,7 @@ function PlanRow({ address, data }: PlanWithAddress) {
             </BaseTable.Cell>
             <BaseTable.Cell>{data.data.terms.amount.toString()}</BaseTable.Cell>
             <BaseTable.Cell>{pluralUnits(data.data.terms.periodHours, 'hour')}</BaseTable.Cell>
-            <BaseTable.Cell>{formatExpiry(data.data.endTs)}</BaseTable.Cell>
+            <BaseTable.Cell>{displayExpiry(data.data.endTs)}</BaseTable.Cell>
         </BaseTable.Row>
     );
 }
@@ -81,7 +81,7 @@ function SubscriptionRow({ address, data }: { address: Address; data: Subscripti
             </BaseTable.Cell>
             <BaseTable.Cell>{data.terms.amount.toString()}</BaseTable.Cell>
             <BaseTable.Cell>{pluralUnits(data.terms.periodHours, 'hour')}</BaseTable.Cell>
-            <BaseTable.Cell>{formatExpiry(data.expiresAtTs)}</BaseTable.Cell>
+            <BaseTable.Cell>{displayExpiry(data.expiresAtTs)}</BaseTable.Cell>
         </BaseTable.Row>
     );
 }
@@ -119,7 +119,7 @@ function DelegationRow({ d }: { d: StandaloneDelegation }) {
                 <KitAddress address={d.data.header.delegatee} raw link />
             </BaseTable.Cell>
             <BaseTable.Cell>{amount.toString()}</BaseTable.Cell>
-            <BaseTable.Cell>{formatExpiry(d.data.expiryTs)}</BaseTable.Cell>
+            <BaseTable.Cell>{displayExpiry(d.data.expiryTs)}</BaseTable.Cell>
         </BaseTable.Row>
     );
 }
