@@ -16,7 +16,7 @@
     },
     "scripts": {
         "prebuild": "rm -rf dist",
-        "build": "tsc",
+        "build": "tsc -p tsconfig.build.json",
         "format": "oxfmt --check .",
         "format:fix": "oxfmt .",
         "lint": "oxlint && oxfmt --check .",
