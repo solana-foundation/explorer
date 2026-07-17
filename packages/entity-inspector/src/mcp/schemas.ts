@@ -1,9 +1,7 @@
 import { z } from 'zod';
 
-// All MCP tool input schemas live here so the validation library is confined to one module.
-// @modelcontextprotocol/sdk requires Zod for `inputSchema`, so these stay Zod-based while we're on
-// the SDK; swapping to another validator is a change scoped to this file.
-// Factories (not module-scope constants) keep importing the package side-effect-free / tree-shakeable.
+// Zod confined here: the MCP SDK requires it for inputSchema; a swap-out stays local to this file.
+// Factory (not a module-scope const) keeps importing the package side-effect-free for tree-shaking.
 export function pingInputSchema() {
     return z.object({}).strict().optional().default({});
 }

@@ -97,8 +97,7 @@ describe('createMcpRequestHandler — real MCP SDK transport', () => {
     });
 });
 
-// Real SDK, but transport/server close is spied to reject — so these stay in the same file as the
-// round-trip cases above (a whole-module vi.mock would break those; a targeted spy does not).
+// Spy (not vi.mock) so these close-failure cases can share a file with the round-trips above.
 describe('createMcpRequestHandler — real MCP SDK transport, close failures', () => {
     afterEach(() => {
         vi.restoreAllMocks();
@@ -111,7 +110,7 @@ describe('createMcpRequestHandler — real MCP SDK transport, close failures', (
         vi.spyOn(McpServer.prototype, 'close').mockRejectedValue(new Error('server boom'));
         const warn = vi.fn();
         const handler = createMcpRequestHandler({
-            logger: { debug: vi.fn(), info: vi.fn(), warn },
+            logger: { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn },
             rpcEndpoints: TEST_CONFIG.rpcEndpoints,
         });
 

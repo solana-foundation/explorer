@@ -10,11 +10,14 @@ describe('consoleLogger', () => {
 
     it('should forward to the matching console method, passing context only when provided', () => {
         const debug = vi.spyOn(console, 'debug').mockImplementation(() => {});
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
         const info = vi.spyOn(console, 'info').mockImplementation(() => {});
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
         consoleLogger.debug('debug with', { a: 1 });
         consoleLogger.debug('debug without');
+        consoleLogger.error('error with', { d: 4 });
+        consoleLogger.error('error without');
         consoleLogger.info('info with', { b: 2 });
         consoleLogger.info('info without');
         consoleLogger.warn('warn with', { c: 3 });
@@ -22,6 +25,8 @@ describe('consoleLogger', () => {
 
         expect(debug).toHaveBeenNthCalledWith(1, 'debug with', { a: 1 });
         expect(debug).toHaveBeenNthCalledWith(2, 'debug without');
+        expect(error).toHaveBeenNthCalledWith(1, 'error with', { d: 4 });
+        expect(error).toHaveBeenNthCalledWith(2, 'error without');
         expect(info).toHaveBeenNthCalledWith(1, 'info with', { b: 2 });
         expect(info).toHaveBeenNthCalledWith(2, 'info without');
         expect(warn).toHaveBeenNthCalledWith(1, 'warn with', { c: 3 });
