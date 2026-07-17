@@ -12,9 +12,9 @@ import {
     type FixedDelegation,
     type Plan,
     type RecurringDelegation,
-    SubscriptionsAccount,
     type SubscriptionAuthority,
     type SubscriptionDelegation,
+    SubscriptionsAccount,
 } from '@solana/subscriptions';
 
 import { Logger } from '@/app/shared/lib/logger';

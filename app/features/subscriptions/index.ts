@@ -3,4 +3,9 @@ export { decodeSubscriptionsAccount, type SubscriptionsAccountData } from './lib
 export { isSubscriptionsAccount } from './lib/is-subscriptions-account';
 export { SubscriptionsAccountCard } from './ui/SubscriptionsAccountCard';
 export { WalletSubscriptionsCard, WalletSubscriptionsView } from './ui/WalletSubscriptionsCard';
-export { type WalletSubscriptionsData, useWalletSubscriptions } from './model/useWalletSubscriptions';
+export {
+    type WalletDelegationsData,
+    type WalletPlansData,
+    useWalletDelegations,
+    useWalletPlans,
+} from './model/useWalletSubscriptions';

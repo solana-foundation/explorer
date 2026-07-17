@@ -74,14 +74,13 @@ const RECURRING_DELEGATION: RecurringDelegation = {
 };
 
 const args = {
-    data: {
-        delegations: [
-            { address: SUB_ACCOUNT, data: SUB_DELEGATION, kind: 'subscription' as const },
-            { address: FIXED_ACCOUNT, data: FIXED_DELEGATION, kind: 'fixed' as const },
-            { address: RECURRING_ACCOUNT, data: RECURRING_DELEGATION, kind: 'recurring' as const },
-        ],
-        plans: [{ address: PLAN_ACCOUNT, data: PLAN }],
-    },
+    delegations: [
+        { address: SUB_ACCOUNT, data: SUB_DELEGATION, kind: 'subscription' as const },
+        { address: FIXED_ACCOUNT, data: FIXED_DELEGATION, kind: 'fixed' as const },
+        { address: RECURRING_ACCOUNT, data: RECURRING_DELEGATION, kind: 'recurring' as const },
+    ],
+    delegationsReceived: [],
+    plans: [{ address: PLAN_ACCOUNT, data: PLAN }],
 };
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.

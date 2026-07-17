@@ -50,7 +50,12 @@ import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 import { getFeatureInfo, useFeatureInfo } from '@/app/entities/feature-gate';
 import { hasTokenMetadata } from '@/app/features/metadata';
-import { isSubscriptionsAccount, SubscriptionsAccountCard, useWalletSubscriptions } from '@/app/features/subscriptions';
+import {
+    isSubscriptionsAccount,
+    SubscriptionsAccountCard,
+    useWalletDelegations,
+    useWalletPlans,
+} from '@/app/features/subscriptions';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
@@ -499,8 +504,12 @@ function ProgramMultisigTab({ authority }: { authority: PublicKey | null | undef
 }
 
 function WalletSubscriptionsTab({ walletAddress }: { walletAddress: string | null }) {
-    const { data } = useWalletSubscriptions(walletAddress);
-    const hasAny = (data?.delegations.length ?? 0) > 0 || (data?.plans.length ?? 0) > 0;
+    const { data: delegationsData } = useWalletDelegations(walletAddress);
+    const { data: plansData } = useWalletPlans(walletAddress);
+    const hasAny =
+        (delegationsData?.delegations.length ?? 0) > 0 ||
+        (delegationsData?.delegationsReceived.length ?? 0) > 0 ||
+        (plansData?.plans.length ?? 0) > 0;
     if (!hasAny) return null;
     return <NavigationTabLink path="subscriptions" title="Subscriptions" />;
 }

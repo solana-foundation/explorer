@@ -80,6 +80,7 @@ const ALL_DATA = {
         { address: FIXED_ACCOUNT, data: FIXED_DELEGATION, kind: 'fixed' as const },
         { address: RECURRING_ACCOUNT, data: RECURRING_DELEGATION, kind: 'recurring' as const },
     ],
+    delegationsReceived: [],
     plans: [{ address: PLAN_ACCOUNT, data: PLAN }],
 };
 
@@ -95,7 +96,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const AllSections: Story = {
-    args: { data: ALL_DATA },
+    args: ALL_DATA,
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         expect(canvas.getByText('Plans')).toBeInTheDocument();
@@ -110,7 +111,7 @@ export const AllSections: Story = {
 };
 
 export const PlansOnly: Story = {
-    args: { data: { delegations: [], plans: ALL_DATA.plans } },
+    args: { delegations: [], delegationsReceived: [], plans: ALL_DATA.plans },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         expect(canvas.getByText('Plans')).toBeInTheDocument();
@@ -121,10 +122,9 @@ export const PlansOnly: Story = {
 
 export const SubscriptionsOnly: Story = {
     args: {
-        data: {
-            delegations: [{ address: SUB_ACCOUNT, data: SUB_DELEGATION, kind: 'subscription' as const }],
-            plans: [],
-        },
+        delegations: [{ address: SUB_ACCOUNT, data: SUB_DELEGATION, kind: 'subscription' as const }],
+        delegationsReceived: [],
+        plans: [],
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -136,13 +136,12 @@ export const SubscriptionsOnly: Story = {
 
 export const DelegationsOnly: Story = {
     args: {
-        data: {
-            delegations: [
-                { address: FIXED_ACCOUNT, data: FIXED_DELEGATION, kind: 'fixed' as const },
-                { address: RECURRING_ACCOUNT, data: RECURRING_DELEGATION, kind: 'recurring' as const },
-            ],
-            plans: [],
-        },
+        delegations: [
+            { address: FIXED_ACCOUNT, data: FIXED_DELEGATION, kind: 'fixed' as const },
+            { address: RECURRING_ACCOUNT, data: RECURRING_DELEGATION, kind: 'recurring' as const },
+        ],
+        delegationsReceived: [],
+        plans: [],
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);

@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { address } from '@solana/kit';
 import {
     AccountDiscriminator,
@@ -9,8 +10,6 @@ import {
     PlanStatus,
 } from '@solana/subscriptions';
 import { describe, expect, it } from 'vitest';
-
-import { gen } from '@__fixtures__/gen';
 
 import { decodeSubscriptionsAccount } from '../decode-subscriptions-account';
 
