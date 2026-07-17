@@ -1,8 +1,7 @@
 'use client';
 
 import { KitAddress } from '@components/common/KitAddress';
-import { useRefreshAccount } from '@entities/account';
-import { AccountCard } from '@features/account';
+import { useRawAccountDataOnMount, useRefreshAccount } from '@entities/account';
 import type { Account } from '@providers/accounts';
 import type { Address } from '@solana/kit';
 import type {
@@ -16,6 +15,8 @@ import { PlanStatus } from '@solana/subscriptions';
 import { displayTimestampUtc } from '@utils/date';
 import { pluralUnits } from '@utils/index';
 
+import { BaseAccountCard, type BaseAccountCardProps } from '@/app/shared/ui/BaseAccountCard';
+import { BaseRawAccountRows } from '@/app/shared/ui/BaseRawAccountRows';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { decodeSubscriptionsAccount } from '../lib/decode-subscriptions-account';
@@ -55,6 +56,21 @@ function DelegationHeaderRows({ header }: { header: DelegationHeader }) {
     );
 }
 
+// Card shell for all subscriptions account types — wires up raw data view automatically.
+type SubscriptionCardProps = Omit<BaseAccountCardProps, 'rawContent'> & { account: Account };
+
+function SubscriptionCard({ account, children, ...rest }: SubscriptionCardProps) {
+    const { data, isLoading } = useRawAccountDataOnMount(account.pubkey);
+    return (
+        <BaseAccountCard
+            rawContent={<BaseRawAccountRows account={account} rawData={data} isLoading={isLoading} />}
+            {...rest}
+        >
+            {children}
+        </BaseAccountCard>
+    );
+}
+
 export function SubscriptionsAccountCard({ account, onNotFound }: { account?: Account; onNotFound: () => never }) {
     if (!account) return onNotFound();
     const raw = account.data.raw;
@@ -82,7 +98,7 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
     const { data: planData, owner, status } = data;
     const { endTs, metadataUri, mint, planId, terms } = planData;
     return (
-        <AccountCard
+        <SubscriptionCard
             title="Subscription Plan"
             account={account}
             analyticsSection="subscriptions_plan_card"
@@ -103,7 +119,7 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
                     <span className="e-font-mono">{metadataUri}</span>
                 </ValueRow>
             )}
-        </AccountCard>
+        </SubscriptionCard>
     );
 }
 
@@ -111,7 +127,7 @@ function SubscriptionAuthorityCard({ account, data }: { account: Account; data: 
     const refresh = useRefreshAccount();
     const { initId, payer, tokenMint, user } = data;
     return (
-        <AccountCard
+        <SubscriptionCard
             title="Subscription Authority"
             account={account}
             analyticsSection="subscriptions_authority_card"
@@ -121,7 +137,7 @@ function SubscriptionAuthorityCard({ account, data }: { account: Account; data: 
             <AddressRow address={tokenMint} label="Token Mint" />
             <AddressRow address={payer} label="Payer" />
             <ValueRow label="Init ID">{initId.toString()}</ValueRow>
-        </AccountCard>
+        </SubscriptionCard>
     );
 }
 
@@ -129,7 +145,7 @@ function FixedDelegationCard({ account, data }: { account: Account; data: FixedD
     const refresh = useRefreshAccount();
     const { amount, expiryTs, header, mint, subscriptionAuthority } = data;
     return (
-        <AccountCard
+        <SubscriptionCard
             title="Fixed Delegation"
             account={account}
             analyticsSection="subscriptions_fixed_delegation_card"
@@ -141,7 +157,7 @@ function FixedDelegationCard({ account, data }: { account: Account; data: FixedD
             <AddressRow address={subscriptionAuthority} label="Subscription Authority" />
             <ValueRow label="Expires At">{formatExpiry(expiryTs)}</ValueRow>
             <AddressRow address={header.payer} label="Payer" />
-        </AccountCard>
+        </SubscriptionCard>
     );
 }
 
@@ -158,7 +174,7 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
         subscriptionAuthority,
     } = data;
     return (
-        <AccountCard
+        <SubscriptionCard
             title="Recurring Delegation"
             account={account}
             analyticsSection="subscriptions_recurring_delegation_card"
@@ -177,7 +193,7 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
             <ValueRow label="Expires At">{formatExpiry(expiryTs)}</ValueRow>
             <AddressRow address={subscriptionAuthority} label="Subscription Authority" />
             <AddressRow address={header.payer} label="Payer" />
-        </AccountCard>
+        </SubscriptionCard>
     );
 }
 
@@ -185,7 +201,7 @@ function SubscriptionDelegationCard({ account, data }: { account: Account; data:
     const refresh = useRefreshAccount();
     const { amountPulledInPeriod, currentPeriodStartTs, expiresAtTs, header, terms } = data;
     return (
-        <AccountCard
+        <SubscriptionCard
             title="Subscription Delegation"
             account={account}
             analyticsSection="subscriptions_delegation_card"
@@ -202,6 +218,6 @@ function SubscriptionDelegationCard({ account, data }: { account: Account; data:
             )}
             <ValueRow label="Expires At">{formatExpiry(expiresAtTs)}</ValueRow>
             <AddressRow address={header.payer} label="Payer" />
-        </AccountCard>
+        </SubscriptionCard>
     );
 }

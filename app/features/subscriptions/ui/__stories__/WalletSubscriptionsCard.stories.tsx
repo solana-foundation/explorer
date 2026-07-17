@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { address } from '@solana/kit';
 import {
     AccountDiscriminator,
@@ -7,21 +8,21 @@ import {
     type RecurringDelegation,
     type SubscriptionDelegation,
 } from '@solana/subscriptions';
+import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withMockRpc } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
-import { withMockRpc } from '../../../../../.storybook/responsive-decorators';
 import { WalletSubscriptionsView } from '../WalletSubscriptionsCard';
 
 const ZERO = address('11111111111111111111111111111111');
-const PLAN_ACCOUNT = address('5ASxtmcPKDeD8NoE5QpskizPokqDdX1qHFiqZb1spLdo');
-const SUB_ACCOUNT = address('7NKXbdLz6dSzUqnKSCGE8DXDYM5cGGnMDamU1MNjBvz');
-const FIXED_ACCOUNT = address('9VHSuHkxAoMT1Pxb3VqDWvbPGbmT6AMz5rNEYGcqKh4');
-const RECURRING_ACCOUNT = address('BkBm9VkHR7ZdCT5SKhT5MJXDVNmNRmhzWB8FTJNMpqrX');
-const USER = address('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8');
-const MINT = address('4TPTXRKCbL39nMkWAtRDMRB4gQkUfrfCMvwKS4AYoH7e');
-const DELEGATEE = address('3MRBUAxwx7gWoGvAtzxLtzmhzwPDGAEqStKWb8cJnYQX');
+const PLAN_ACCOUNT = address(gen.address(0));
+const SUB_ACCOUNT = address(gen.address(1));
+const FIXED_ACCOUNT = address(gen.address(2));
+const RECURRING_ACCOUNT = address(gen.address(3));
+const USER = address(gen.address(4));
+const MINT = address(gen.address(5));
+const DELEGATEE = address(gen.address(6));
 
 const HEADER_BASE = {
     delegatee: DELEGATEE,

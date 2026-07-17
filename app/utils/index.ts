@@ -136,7 +136,7 @@ export function abbreviatedNumber(value: number, fixed = 1) {
     if (value >= 1e12) return `${+(value / 1e12).toFixed(fixed)}T`;
 }
 
-export function pluralUnits(n: number | bigint, unit: string): string {
+export function pluralUnits(n: number | bigint, unit: 'hour' | 'second'): string {
     const isOne = typeof n === 'bigint' ? n === 1n : n === 1;
     return `${n.toString()} ${isOne ? unit : `${unit}s`}`;
 }

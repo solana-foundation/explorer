@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import type { Account } from '@providers/accounts';
 import { address } from '@solana/kit';
 import {
@@ -10,21 +11,21 @@ import {
     PlanStatus,
     SUBSCRIPTIONS_PROGRAM_ADDRESS,
 } from '@solana/subscriptions';
+import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
+import { withMockRpc } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
-import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
-import { withMockRpc } from '../../../../../.storybook/responsive-decorators';
 import { SubscriptionsAccountCard } from '../SubscriptionsAccountCard';
 
 const ZERO = address('11111111111111111111111111111111');
 const PROGRAM_OWNER = toLegacyPublicKey(address(SUBSCRIPTIONS_PROGRAM_ADDRESS));
-const ACCOUNT_ADDRESS = toLegacyPublicKey(address('5ASxtmcPKDeD8NoE5QpskizPokqDdX1qHFiqZb1spLdo'));
-const USER = address('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8');
-const MINT = address('4TPTXRKCbL39nMkWAtRDMRB4gQkUfrfCMvwKS4AYoH7e');
-const DELEGATEE = address('3MRBUAxwx7gWoGvAtzxLtzmhzwPDGAEqStKWb8cJnYQX');
+const ACCOUNT_ADDRESS = gen.publicKey(0);
+const USER = address(gen.address(1));
+const MINT = address(gen.address(2));
+const DELEGATEE = address(gen.address(3));
 
 function encode<T>(encoder: { encode: (v: T) => unknown }, value: T): Uint8Array {
     return encoder.encode(value) as unknown as Uint8Array;
