@@ -1,15 +1,18 @@
 import type { Address, EncodedAccount, ReadonlyUint8Array } from '@solana/kit';
 import {
     AccountDiscriminator,
+    decodeEventAuthority,
     decodeFixedDelegation,
     decodePlan,
     decodeRecurringDelegation,
     decodeSubscriptionAuthority,
     decodeSubscriptionDelegation,
     DISCRIMINATOR_OFFSET,
+    type EventAuthority,
     type FixedDelegation,
     type Plan,
     type RecurringDelegation,
+    SubscriptionsAccount,
     type SubscriptionAuthority,
     type SubscriptionDelegation,
 } from '@solana/subscriptions';
@@ -17,6 +20,7 @@ import {
 import { Logger } from '@/app/shared/lib/logger';
 
 export type SubscriptionsAccountData =
+    | { parsed: EventAuthority; program: 'EventAuthority' }
     | { parsed: FixedDelegation; program: 'FixedDelegation' }
     | { parsed: Plan; program: 'Plan' }
     | { parsed: RecurringDelegation; program: 'RecurringDelegation' }
@@ -28,10 +32,13 @@ export type SubscriptionsAccountData =
  *
  * Returns `undefined` when:
  * - `data` is empty
- * - the discriminator byte is not one of the five known account types
+ * - the discriminator byte is not one of the six known account types
  * - the codec rejects the bytes (e.g. length mismatch, corrupt data)
  */
-export function decodeSubscriptionsAccount(address: string, data: ReadonlyUint8Array): SubscriptionsAccountData | undefined {
+export function decodeSubscriptionsAccount(
+    address: string,
+    data: ReadonlyUint8Array,
+): SubscriptionsAccountData | undefined {
     if (data.length === 0) return undefined;
 
     const discriminator = data[DISCRIMINATOR_OFFSET];
@@ -49,6 +56,8 @@ export function decodeSubscriptionsAccount(address: string, data: ReadonlyUint8A
                 return { parsed: decodeSubscriptionAuthority(encoded).data, program: 'SubscriptionAuthority' };
             case AccountDiscriminator.SubscriptionDelegation:
                 return { parsed: decodeSubscriptionDelegation(encoded).data, program: 'SubscriptionDelegation' };
+            case SubscriptionsAccount.EventAuthority:
+                return { parsed: decodeEventAuthority(encoded).data, program: 'EventAuthority' };
             default:
                 return undefined;
         }

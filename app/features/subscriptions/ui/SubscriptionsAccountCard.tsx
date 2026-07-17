@@ -5,6 +5,7 @@ import { useRawAccountDataOnMount, useRefreshAccount } from '@entities/account';
 import type { Account } from '@providers/accounts';
 import type { Address } from '@solana/kit';
 import type {
+    EventAuthority,
     FixedDelegation,
     Plan,
     RecurringDelegation,
@@ -24,6 +25,7 @@ import { displayExpiry } from '../lib/format';
 
 function displayPlanStatus(status: number): string {
     if (status === PlanStatus.Active) return 'Active';
+    if (status === PlanStatus.Sunset) return 'Sunset';
     return `Unknown (${status})`;
 }
 
@@ -90,6 +92,8 @@ export function SubscriptionsAccountCard({ account, onNotFound }: { account?: Ac
             return <SubscriptionDelegationCard account={account} data={decoded.parsed} />;
         case 'SubscriptionAuthority':
             return <SubscriptionAuthorityCard account={account} data={decoded.parsed} />;
+        case 'EventAuthority':
+            return <EventAuthorityCard account={account} data={decoded.parsed} />;
     }
 }
 
@@ -111,7 +115,9 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
             <ValueRow label="Amount per Period">{terms.amount.toString()}</ValueRow>
             <ValueRow label="Period">{pluralUnits(terms.periodHours, 'hour')}</ValueRow>
             {terms.createdAt !== 0n && (
-                <ValueRow label="Created At">{displayTimestampUtc(unixTimestampToMs(Number(terms.createdAt)), true)}</ValueRow>
+                <ValueRow label="Created At">
+                    {displayTimestampUtc(unixTimestampToMs(Number(terms.createdAt)), true)}
+                </ValueRow>
             )}
             <ValueRow label="Expires At">{displayExpiry(endTs)}</ValueRow>
             {metadataUri && (
@@ -120,6 +126,18 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
                 </ValueRow>
             )}
         </SubscriptionCard>
+    );
+}
+
+function EventAuthorityCard({ account, data: _ }: { account: Account; data: EventAuthority }) {
+    const refresh = useRefreshAccount();
+    return (
+        <SubscriptionCard
+            title="Event Authority"
+            account={account}
+            analyticsSection="subscriptions_event_authority_card"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        />
     );
 }
 

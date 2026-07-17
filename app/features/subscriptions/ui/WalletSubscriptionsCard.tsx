@@ -14,7 +14,12 @@ import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { displayExpiry } from '../lib/format';
-import { useWalletSubscriptions, type WalletSubscriptionsData } from '../model/useWalletSubscriptions';
+import {
+    useWalletDelegations,
+    useWalletPlans,
+    type WalletDelegationsData,
+    type WalletPlansData,
+} from '../model/useWalletSubscriptions';
 
 function TableSection({ children, headers, title }: { children: React.ReactNode; headers: string[]; title: string }) {
     return (
@@ -134,16 +139,54 @@ function DelegationsSection({ delegations }: { delegations: StandaloneDelegation
     );
 }
 
-export function WalletSubscriptionsView({ data }: { data: WalletSubscriptionsData }) {
-    const { delegations, plans } = data;
+function ReceivedDelegationRow({ d }: { d: StandaloneDelegation }) {
+    const amount = d.kind === 'fixed' ? d.data.amount : d.data.amountPerPeriod;
+    return (
+        <BaseTable.Row>
+            <BaseTable.Cell>
+                <KitAddress address={d.address} raw link />
+            </BaseTable.Cell>
+            <BaseTable.Cell>{d.kind === 'fixed' ? 'Fixed' : 'Recurring'}</BaseTable.Cell>
+            <BaseTable.Cell>
+                <KitAddress address={d.data.header.delegator} raw link />
+            </BaseTable.Cell>
+            <BaseTable.Cell>{amount.toString()}</BaseTable.Cell>
+            <BaseTable.Cell>{displayExpiry(d.data.expiryTs)}</BaseTable.Cell>
+        </BaseTable.Row>
+    );
+}
+
+function ReceivedDelegationsSection({ delegations }: { delegations: StandaloneDelegation[] }) {
+    return (
+        <TableSection headers={['Account', 'Type', 'Delegator', 'Amount', 'Expires']} title="Received Delegations">
+            {delegations.map(d => (
+                <ReceivedDelegationRow key={d.address} d={d} />
+            ))}
+        </TableSection>
+    );
+}
+
+export function WalletSubscriptionsView({
+    delegations,
+    delegationsReceived,
+    plans,
+}: WalletDelegationsData & WalletPlansData) {
     const subscriptions = delegations.filter(
         (d): d is { address: Address; data: SubscriptionDelegation; kind: 'subscription' } => d.kind === 'subscription',
     );
     const standalone = delegations.filter(
         (d): d is StandaloneDelegation => d.kind === 'fixed' || d.kind === 'recurring',
     );
+    const standaloneReceived = delegationsReceived.filter(
+        (d): d is StandaloneDelegation => d.kind === 'fixed' || d.kind === 'recurring',
+    );
 
-    if (plans.length === 0 && subscriptions.length === 0 && standalone.length === 0) {
+    if (
+        plans.length === 0 &&
+        subscriptions.length === 0 &&
+        standalone.length === 0 &&
+        standaloneReceived.length === 0
+    ) {
         return <div className="e-p-4 e-text-center e-text-muted">No subscriptions found for this address.</div>;
     }
 
@@ -152,14 +195,16 @@ export function WalletSubscriptionsView({ data }: { data: WalletSubscriptionsDat
             {plans.length > 0 && <PlansSection plans={plans} />}
             {subscriptions.length > 0 && <SubscriptionsSection delegations={subscriptions} />}
             {standalone.length > 0 && <DelegationsSection delegations={standalone} />}
+            {standaloneReceived.length > 0 && <ReceivedDelegationsSection delegations={standaloneReceived} />}
         </>
     );
 }
 
 export function WalletSubscriptionsCard({ address }: { address: string }) {
-    const { data } = useWalletSubscriptions(address);
+    const { data: delegationsData } = useWalletDelegations(address);
+    const { data: plansData } = useWalletPlans(address);
 
-    if (!data) return;
+    if (!delegationsData || !plansData) return;
 
-    return <WalletSubscriptionsView data={data} />;
+    return <WalletSubscriptionsView {...delegationsData} {...plansData} />;
 }

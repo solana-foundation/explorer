@@ -1,7 +1,9 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
+import { ErrorCard } from '@/app/components/common/ErrorCard';
 import { LoadingCard } from '@/app/components/common/LoadingCard';
 import { WalletSubscriptionsCard } from '@/app/features/subscriptions';
 
@@ -13,8 +15,10 @@ type Props = Readonly<{
 
 export default function SubscriptionsPageClient({ params: { address } }: Props) {
     return (
-        <Suspense fallback={<LoadingCard />}>
-            <WalletSubscriptionsCard address={address} />
-        </Suspense>
+        <ErrorBoundary fallback={<ErrorCard text="Failed to load subscriptions." />}>
+            <Suspense fallback={<LoadingCard />}>
+                <WalletSubscriptionsCard address={address} />
+            </Suspense>
+        </ErrorBoundary>
     );
 }
