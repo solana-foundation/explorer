@@ -22,6 +22,7 @@ const TEST_AND_STORY_FILES = [
 export default tseslint.config(
     // Global ignores.
     // packages/* are intentionally not ignored: root `eslint .` (like prettier's `**/*.ts` glob) lints their source with this shared config — only built output is excluded.
+    // Exception: packages/entity-inspector lints itself with oxlint (see its .oxlintrc.json), wired into root `pnpm lint`.
     {
         ignores: [
             '**/dist/**',
@@ -32,6 +33,7 @@ export default tseslint.config(
             'coverage/**',
             '.claude/**',
             '.worktrees/**',
+            'packages/entity-inspector/**',
             'storybook-static/**',
             'storybook-static-*/**',
             'public/mockServiceWorker.js',
@@ -209,7 +211,13 @@ export default tseslint.config(
 
     // Allow console in logger, scripts, standalone files, pnpmfile
     {
-        files: ['app/shared/lib/logger.ts', 'scripts/**', '**/*.mjs', '**/*.cjs'],
+        files: [
+            'app/shared/lib/logger.ts',
+            'packages/entity-inspector/src/logger.ts',
+            'scripts/**',
+            '**/*.mjs',
+            '**/*.cjs',
+        ],
         rules: {
             'no-console': 'off',
         },

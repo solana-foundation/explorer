@@ -1,0 +1,44 @@
+{
+    "name": "@explorer/entity-inspector",
+    "version": "0.0.0",
+    "private": true,
+    "files": [
+        "dist"
+    ],
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "prebuild": "rm -rf dist",
+        "build": "tsc -p tsconfig.build.json",
+        "format": "oxfmt --check .",
+        "format:fix": "oxfmt .",
+        "lint": "oxlint && oxfmt --check .",
+        "lint:fix": "oxlint --fix",
+        "pretest": "pnpm run build",
+        "test": "pnpm run typecheck && vitest run && pnpm run test:treeshakability && pnpm run test:node-esm && pnpm run test:coverage",
+        "test:coverage": "vitest run --config vitest.coverage.config.ts",
+        "test:node-esm": "for entry in dist/index.js; do node --input-type=module -e \"import('./$entry')\" || exit 1; done",
+        "test:treeshakability": "for file in dist/index.js; do agadoo $file || exit 1; done",
+        "test:watch": "vitest",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "1.27.1",
+        "zod": "4.3.6"
+    },
+    "devDependencies": {
+        "@vitest/coverage-v8": "catalog:vitest",
+        "agadoo": "^3.0.0",
+        "oxfmt": "^0.56.0",
+        "oxlint": "^1.71.0",
+        "typescript": "catalog:tooling",
+        "vitest": "catalog:vitest"
+    }
+}
