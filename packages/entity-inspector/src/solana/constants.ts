@@ -1,0 +1,14 @@
+export const NFTOKEN_ADDRESS = 'nftokf9qcHSYkVSP3P2gUMmV6d4AwjMueXgUu43HyLL';
+
+export const BPF_UPGRADEABLE_LOADER_PROGRAM_ID = 'BPFLoaderUpgradeab1e11111111111111111111111';
+export const TOKEN_PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+export const TOKEN_2022_PROGRAM_ID = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+export const FEATURE_PROGRAM_ID = 'Feature111111111111111111111111111111111111';
+export const ADDRESS_LOOKUP_TABLE_PROGRAM_ID = 'AddressLookupTab1e1111111111111111111111111';
+export const SOLANA_ATTESTATION_SERVICE_PROGRAM_ID = '22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG';
+export const SQUADS_V3_ADDRESS = 'SMPLecH534NA9acpos4G6x7uf3LWbCAwZQE9e8ZekMu';
+export const SQUADS_V4_ADDRESS = 'SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf';
+export const SQUADS_LAMBDA_URL = 'https://4fnetmviidiqkjzenwxe66vgoa0soerr.lambda-url.us-east-1.on.aws/isSquadV2';
+
+export const RPC_REQUEST_TIMEOUT_MS = 5000;
+export const DAS_REQUEST_TIMEOUT_MS = 3000;
