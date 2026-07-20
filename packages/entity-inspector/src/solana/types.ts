@@ -116,5 +116,89 @@ export type DasClassificationOutcome = {
     tree?: string;
 };
 
+// Enrichment result shapes live here, not in resolver modules like the source — types are the contract; Step-7 resolvers import them.
+
+export type VerificationEvidence = {
+    signer: string;
+    signer_label: string | null;
+    on_chain_hash: string;
+    executable_hash: string;
+    last_verified_at: string | null;
+    repo_url: string | null;
+    is_frozen: boolean;
+    message: string;
+};
+
+export type VerificationResult =
+    | { status: 'verified'; evidence: VerificationEvidence }
+    | { status: 'unverified' }
+    | { status: 'unknown'; reason: 'source_unavailable' | 'verification_invalid' };
+
+export type SecurityTxtFields = {
+    name: string;
+    project_url: string;
+    contacts: string;
+    policy: string;
+    preferred_languages: string | null;
+    encryption: string | null;
+    source_code: string | null;
+    source_release: string | null;
+    source_revision: string | null;
+    auditors: string | null;
+    acknowledgements: string | null;
+    expiry: string | null;
+    logo?: string | null;
+    description?: string | null;
+    notification?: string | null;
+    sdk?: string | null;
+    version?: string | null;
+};
+
+export type SecurityMetadataResult =
+    | {
+          status: 'present';
+          data: SecurityTxtFields;
+          source_type: 'pmp_canonical' | 'embedded_security_txt';
+          security_expired?: true;
+      }
+    | { status: 'missing' }
+    | { status: 'unknown'; reason: 'source_unavailable' | 'security_invalid' };
+
+export type MultisigReferenceResult =
+    | {
+          status: 'is_multisig';
+          version: 'v3' | 'v4' | 'spl-token' | 'spl-token-2022';
+          multisig_address: string | null;
+          threshold: SafeNumeric;
+          members: string[] | null;
+      }
+    | { status: 'not_multisig' }
+    | { status: 'unknown'; reason: 'source_unavailable' };
+
+export type IdlType = 'anchor' | 'anchor_legacy' | 'codama' | 'shank';
+
+export type IdlDiscoveryResult =
+    | {
+          status: 'found';
+          idl_type: IdlType;
+          source_type: 'pmp_canonical' | 'anchor_on_chain';
+          program_name: string | null;
+          data: Record<string, unknown>;
+      }
+    | { status: 'not_found' }
+    | { status: 'unknown'; reason: 'source_unavailable' | 'idl_invalid' | 'address_unverified' };
+
+export type AccountPayloadContext = {
+    kind: AccountEntityKind;
+    account: NormalizedAccountInfo;
+    dasOutcome?: DasClassificationOutcome;
+    verificationResult?: VerificationResult;
+    securityMetadataResult?: SecurityMetadataResult;
+    multisigReferenceResult?: MultisigReferenceResult;
+    idlDiscoveryResult?: IdlDiscoveryResult;
+    // Injected label lookup (app registry wired in Step 5) — replaces the source's hardcoded PROGRAM_ADDRESS_LABELS map.
+    resolveProgramName?: (address: string) => string | undefined;
+};
+
 /** A numeric value represented as a decimal string when it exceeds Number.MAX_SAFE_INTEGER — String(bigint) is exact, no precision loss. */
 export type SafeNumeric = number | string | null;
