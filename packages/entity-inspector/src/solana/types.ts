@@ -1,3 +1,5 @@
+import type { ReadonlyUint8Array } from '@solana/kit';
+
 export type IdentifierKind = 'account' | 'transaction' | 'invalid';
 
 export type AccountProbeEnvelope = {
@@ -97,7 +99,7 @@ export type NormalizedAccountInfo = {
     owner: string | null;
     parsedProgram: string | null;
     parsedData: unknown;
-    rawDataBytes: Uint8Array | null;
+    rawDataBytes: ReadonlyUint8Array | null;
     address?: string;
     lamports?: SafeNumeric;
     executable?: boolean | null;
@@ -114,5 +116,5 @@ export type DasClassificationOutcome = {
     tree?: string;
 };
 
-/** A numeric value that may be represented as a decimal string when it exceeds Number.MAX_SAFE_INTEGER. */
+/** A numeric value represented as a decimal string when it exceeds Number.MAX_SAFE_INTEGER — String(bigint) is exact, no precision loss. */
 export type SafeNumeric = number | string | null;

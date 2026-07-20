@@ -1,23 +1,18 @@
+import { getBase64Encoder, type ReadonlyUint8Array } from '@solana/kit';
+
 import type { SupportedCluster } from '../config.js';
 import { consoleLogger, type InspectorLogger } from '../logger.js';
 import { asRecord, asSafeNumeric, asString } from './parse-helpers.js';
 import { isSourceUnavailableError } from './rpc.js';
 import type { AccountProbeEnvelope, NormalizedAccountInfo, NormalizedProgramDataInfo } from './types.js';
 
-// atob instead of Buffer — the package tsconfig has no node types (lib: es2020 + dom).
-function base64ToBytes(encoded: string): Uint8Array {
-    const binary = atob(encoded);
-    const bytes = new Uint8Array(binary.length);
-    for (let index = 0; index < binary.length; index += 1) {
-        bytes[index] = binary.charCodeAt(index);
-    }
-    return bytes;
-}
+// Throws on invalid input (assertValidBaseString), so the catch below still yields warn + null.
+const base64Encoder = getBase64Encoder();
 
 export function extractRawDataBytesFromAccountData(
     data: unknown,
     logger: InspectorLogger = consoleLogger,
-): Uint8Array | null {
+): ReadonlyUint8Array | null {
     if (!Array.isArray(data) || data.length < 2) {
         return null;
     }
@@ -28,7 +23,7 @@ export function extractRawDataBytesFromAccountData(
     }
 
     try {
-        return base64ToBytes(encodedData);
+        return base64Encoder.encode(encodedData);
     } catch (error) {
         logger.warn('[entity-inspector] base64 decode of account data failed', { error });
         return null;
@@ -77,6 +72,7 @@ export function extractProgramDataInfo(parsedData: unknown): NormalizedProgramDa
     return { authority, slot };
 }
 
+// Deliberately NOT kit's parseJsonRpcAccount/MaybeAccount — payload parity with explorer-mcp requires the NormalizedAccountInfo contract.
 export function normalizeAccountProbe(address: string, envelope: AccountProbeEnvelope): NormalizedAccountInfo | null {
     const accountValue = envelope.value;
     if (accountValue === null) {

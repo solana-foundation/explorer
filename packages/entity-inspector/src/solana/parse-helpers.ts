@@ -1,3 +1,4 @@
+// No kit equivalent — jsonParsed payloads are `unknown` by design; these narrow without asserting.
 import type { SafeNumeric } from './types.js';
 
 function isRecord(value: unknown): value is Record<string, unknown> {

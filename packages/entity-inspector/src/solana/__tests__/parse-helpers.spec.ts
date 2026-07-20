@@ -31,6 +31,8 @@ describe('parse helpers', () => {
         expect(asSafeNumeric(BigInt(Number.MAX_SAFE_INTEGER))).toBe(Number.MAX_SAFE_INTEGER);
         // unsafe bigint → string
         expect(asSafeNumeric(BigInt(Number.MAX_SAFE_INTEGER) + 1n)).toBe('9007199254740992');
+        // u64 max stays exact — String(bigint) never rounds
+        expect(asSafeNumeric(18_446_744_073_709_551_615n)).toBe('18446744073709551615');
         // unsafe finite number → string
         expect(asSafeNumeric(Number.MAX_SAFE_INTEGER + 1)).toBe(String(Number.MAX_SAFE_INTEGER + 1));
         // non-integer finite number → string
