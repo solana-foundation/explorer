@@ -1,7 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { InspectorLogger } from '../../logger.js';
-import { FEATURE_PROGRAM_ID, NFTOKEN_ADDRESS, SOLANA_ATTESTATION_SERVICE_PROGRAM_ID } from '../constants.js';
+import {
+    ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
+    BPF_LOADER_2_PROGRAM_ID,
+    BPF_LOADER_PROGRAM_ID,
+    FEATURE_PROGRAM_ID,
+    LOADER_V4_PROGRAM_ID,
+    NFTOKEN_ADDRESS,
+    SOLANA_ATTESTATION_SERVICE_PROGRAM_ID,
+} from '../constants.js';
 import {
     classifyAccountKindBase,
     decodeBase58,
@@ -79,6 +87,35 @@ describe('inspect-entity classifier', () => {
         ).toBe('stake');
     });
 
+    it('should classify legacy and v4 loader programs by owner', () => {
+        expect(
+            classifyAccountKindBase({
+                owner: BPF_LOADER_PROGRAM_ID,
+                parsedData: null,
+                parsedProgram: null,
+                rawDataBytes: null,
+            }),
+        ).toBe('bpf-loader');
+
+        expect(
+            classifyAccountKindBase({
+                owner: BPF_LOADER_2_PROGRAM_ID,
+                parsedData: null,
+                parsedProgram: null,
+                rawDataBytes: null,
+            }),
+        ).toBe('bpf-loader-2');
+
+        expect(
+            classifyAccountKindBase({
+                owner: LOADER_V4_PROGRAM_ID,
+                parsedData: null,
+                parsedProgram: null,
+                rawDataBytes: null,
+            }),
+        ).toBe('loader-v4');
+    });
+
     it('should prioritize nftoken owner check before token parser classification', () => {
         const kind = classifyAccountKindBase({
             owner: NFTOKEN_ADDRESS,
@@ -101,31 +138,48 @@ describe('inspect-entity classifier', () => {
         ).toBe('unknown');
     });
 
-    it('should support address-lookup-table fallback from same-response raw bytes', () => {
+    it('should support address-lookup-table fallback from raw bytes only under the ALT program owner', () => {
         const kind = classifyAccountKindBase({
-            owner: 'SomeOwner',
+            owner: ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
             parsedData: null,
             parsedProgram: null,
             rawDataBytes: new Uint8Array(56),
         });
 
         const unknownKind = classifyAccountKindBase({
-            owner: 'SomeOwner',
+            owner: ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
             parsedData: null,
             parsedProgram: null,
             rawDataBytes: new Uint8Array(57),
         });
 
         const shortKind = classifyAccountKindBase({
-            owner: 'SomeOwner',
+            owner: ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
             parsedData: null,
             parsedProgram: null,
             rawDataBytes: new Uint8Array(10),
         });
 
+        // The layout heuristic alone must not classify foreign-owned accounts as ALTs.
+        const foreignOwnerKind = classifyAccountKindBase({
+            owner: 'SomeOwner',
+            parsedData: null,
+            parsedProgram: null,
+            rawDataBytes: new Uint8Array(56),
+        });
+
+        const noRawBytesKind = classifyAccountKindBase({
+            owner: ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
+            parsedData: null,
+            parsedProgram: null,
+            rawDataBytes: null,
+        });
+
         expect(kind).toBe('address-lookup-table');
         expect(unknownKind).toBe('unknown');
         expect(shortKind).toBe('unknown');
+        expect(foreignOwnerKind).toBe('unknown');
+        expect(noRawBytesKind).toBe('unknown');
     });
 
     it('should classify address-lookup-table from parsed program directly', () => {

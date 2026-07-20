@@ -7,6 +7,15 @@ export function assertUnreachable(kind: never): never {
     throw new Error(`Unhandled account entity kind: ${String(kind)}`);
 }
 
+// Injected via context (app registry lands in Step 5) — the source hardcoded a label map instead.
+export function resolveProgramAddressLabel(context: AccountPayloadContext): string | null {
+    const address = context.account.address;
+    if (!address) {
+        return null;
+    }
+    return context.resolveProgramName?.(address) ?? null;
+}
+
 export function unknownMarker(reason: string): UnknownMarker {
     return {
         reason,

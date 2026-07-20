@@ -20,8 +20,11 @@ import type { AccountEntityKind, AccountPayloadContext } from './types.js';
 
 function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
     switch (kind) {
+        // Full loader builders exist (account-kinds/{bpf-upgradeable-loader,bpf-loader,loader}.ts) but their verification/security/idl/multisig enrichments need @explorer/idl-decode — routed as unsupported until that PR lands.
         case 'bpf-upgradeable-loader':
-            // Full builder exists (see account-kinds/bpf-upgradeable-loader.ts) but its verification/security/idl/multisig enrichments need the idl-parser — routed as unsupported until that PR lands.
+        case 'bpf-loader':
+        case 'bpf-loader-2':
+        case 'loader-v4':
             return buildUnsupportedKindPayload;
         case 'stake':
             return buildStakePayload;

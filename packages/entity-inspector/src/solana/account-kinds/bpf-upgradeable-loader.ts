@@ -1,15 +1,6 @@
 import { BPF_UPGRADEABLE_LOADER_PROGRAM_ID } from '../constants.js';
 import type { AccountPayloadContext } from '../types.js';
-import { type AccountKindBuilder, unknownMarker } from './shared.js';
-
-// Injected via context (app registry lands in Step 5) — the source hardcoded a two-entry label map here.
-function resolveProgramAddressLabel(context: AccountPayloadContext): string | null {
-    const address = context.account.address;
-    if (!address) {
-        return null;
-    }
-    return context.resolveProgramName?.(address) ?? null;
-}
+import { type AccountKindBuilder, resolveProgramAddressLabel, unknownMarker } from './shared.js';
 
 function buildUpgradeableLoaderOverviewFields(context: AccountPayloadContext): Record<string, unknown> {
     const account = context.account;
@@ -42,7 +33,7 @@ function buildUpgradeableLoaderOverviewFields(context: AccountPayloadContext): R
     return fields;
 }
 
-// Not routed yet — the router serves buildUnsupportedKindPayload for this kind until the idl-parser PR wires the enrichments.
+// Not routed yet — the router serves buildUnsupportedKindPayload for this kind until the @explorer/idl-decode PR wires the enrichments.
 export const buildBpfUpgradeableLoaderPayload: AccountKindBuilder = context => {
     const entity: Record<string, unknown> = {
         kind: context.kind,

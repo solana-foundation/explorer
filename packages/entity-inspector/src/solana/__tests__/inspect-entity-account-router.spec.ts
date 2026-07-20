@@ -7,6 +7,9 @@ import type { AccountEntityKind, AccountPayloadContext } from '../types.js';
 
 const ALL_ACCOUNT_KINDS = [
     'bpf-upgradeable-loader',
+    'bpf-loader',
+    'bpf-loader-2',
+    'loader-v4',
     'stake',
     'nftoken',
     'spl-token:mint',
@@ -124,13 +127,15 @@ describe('inspect-entity account router', () => {
         }
     });
 
-    it('should report bpf-upgradeable-loader accounts as unsupported until enrichments land', () => {
-        const payload = buildAccountPayloadWithRouter(contextForKind('bpf-upgradeable-loader'));
+    it('should report loader accounts as unsupported until enrichments land', () => {
+        const loaderKinds = ['bpf-upgradeable-loader', 'bpf-loader', 'bpf-loader-2', 'loader-v4'] as const;
 
-        expect(payload).toEqual({
-            entity: { kind: 'bpf-upgradeable-loader' },
-            errors: ['bpf-upgradeable-loader accounts are not supported yet'],
-        });
+        for (const kind of loaderKinds) {
+            expect(buildAccountPayloadWithRouter(contextForKind(kind))).toEqual({
+                entity: { kind },
+                errors: [`${kind} accounts are not supported yet`],
+            });
+        }
     });
 
     it('should build compressed-nft payload from DAS outcome', () => {

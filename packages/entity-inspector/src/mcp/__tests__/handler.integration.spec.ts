@@ -100,12 +100,12 @@ describe('createMcpRequestHandler — real MCP SDK transport', () => {
         });
     });
 
-    it('should list the ping tool', async () => {
+    it('should list the inspect_entity and ping tools', async () => {
         const response = await handler(await negotiatedToolRequest(handler, 'tools/list', {}, 2));
 
         expect(response.status).toBe(200);
         const payload = await response.json();
-        expect(payload.result.tools).toMatchObject([{ name: 'ping' }]);
+        expect(payload.result.tools).toMatchObject([{ name: 'inspect_entity' }, { name: 'ping' }]);
     });
 
     it('should answer a ping tool call with pong', async () => {
@@ -118,6 +118,52 @@ describe('createMcpRequestHandler — real MCP SDK transport', () => {
             id: 3,
             jsonrpc: '2.0',
             result: { content: [{ text: 'pong', type: 'text' }] },
+        });
+    });
+
+    // '111' is valid base58 but 3 bytes — rejected before any RPC call, so the round-trip needs no network.
+    it('should serve inspect_entity end to end for an invalid identifier', async () => {
+        const response = await handler(
+            await negotiatedToolRequest(
+                handler,
+                'tools/call',
+                { arguments: { identifier: '111' }, name: 'inspect_entity' },
+                4,
+            ),
+        );
+
+        expect(response.status).toBe(200);
+        await expect(response.json()).resolves.toMatchObject({
+            id: 4,
+            jsonrpc: '2.0',
+            result: {
+                isError: true,
+                structuredContent: {
+                    errors: [{ code: 'INVALID_ARGUMENT' }],
+                    payload: {},
+                },
+            },
+        });
+    });
+
+    it('should accept a config with a program name resolver', async () => {
+        const handlerWithResolver = createMcpRequestHandler({
+            ...TEST_CONFIG,
+            resolveProgramName: () => undefined,
+        });
+        const response = await handlerWithResolver(
+            await negotiatedToolRequest(
+                handlerWithResolver,
+                'tools/call',
+                { arguments: { identifier: '111' }, name: 'inspect_entity' },
+                5,
+            ),
+        );
+
+        expect(response.status).toBe(200);
+        await expect(response.json()).resolves.toMatchObject({
+            id: 5,
+            result: { isError: true },
         });
     });
 });

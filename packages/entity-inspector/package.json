@@ -31,6 +31,8 @@
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "1.27.1",
+        "@solana-program/address-lookup-table": "0.11.0",
+        "@solana-program/loader-v3": "0.3.0",
         "@solana-program/token": "0.13.0",
         "@solana-program/token-2022": "0.9.0",
         "@solana/kit": "6.5.0",

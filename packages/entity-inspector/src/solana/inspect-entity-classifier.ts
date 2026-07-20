@@ -1,7 +1,16 @@
-import { getBase58Encoder, type ReadonlyUint8Array } from '@solana/kit';
+import type { ReadonlyUint8Array } from '@solana/kit';
 
 import { consoleLogger, type InspectorLogger } from '../logger.js';
-import { FEATURE_PROGRAM_ID, NFTOKEN_ADDRESS, SOLANA_ATTESTATION_SERVICE_PROGRAM_ID } from './constants.js';
+import { base58Encoder } from './codecs.js';
+import {
+    ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
+    BPF_LOADER_2_PROGRAM_ID,
+    BPF_LOADER_PROGRAM_ID,
+    FEATURE_PROGRAM_ID,
+    LOADER_V4_PROGRAM_ID,
+    NFTOKEN_ADDRESS,
+    SOLANA_ATTESTATION_SERVICE_PROGRAM_ID,
+} from './constants.js';
 import { asRecord, asString } from './parse-helpers.js';
 import type {
     AccountEntityKind,
@@ -12,9 +21,6 @@ import type {
     TokenSubtype,
 } from './types.js';
 
-// Throws on invalid input (assertValidBaseString), so the catch below still yields warn + null.
-const base58Encoder = getBase58Encoder();
-
 const ADDRESS_LOOKUP_TABLE_META_BYTES = 56;
 const PUBKEY_BYTES = 32;
 
@@ -24,7 +30,7 @@ export function decodeBase58(value: string, logger: InspectorLogger = consoleLog
     }
 
     try {
-        return base58Encoder.encode(value);
+        return base58Encoder().encode(value);
     } catch (error) {
         logger.warn('[entity-inspector] base58 decode of identifier failed', { error, value });
         return null;
@@ -74,6 +80,16 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
     if (parsedProgram === 'bpf-upgradeable-loader') {
         return 'bpf-upgradeable-loader';
     }
+    // Legacy/v4 loader programs are not jsonParsed by the RPC — classified by owner instead.
+    if (account.owner === BPF_LOADER_PROGRAM_ID) {
+        return 'bpf-loader';
+    }
+    if (account.owner === BPF_LOADER_2_PROGRAM_ID) {
+        return 'bpf-loader-2';
+    }
+    if (account.owner === LOADER_V4_PROGRAM_ID) {
+        return 'loader-v4';
+    }
     if (parsedProgram === 'stake') {
         return 'stake';
     }
@@ -101,7 +117,11 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
     if (parsedProgram === 'config') {
         return 'config';
     }
-    if (parsedProgram === 'address-lookup-table' || hasAddressLookupTableLayout(account.rawDataBytes)) {
+    // Layout heuristic alone false-positives on any account sized 56+n·32 — only trust it under the ALT program's ownership.
+    if (
+        parsedProgram === 'address-lookup-table' ||
+        (account.owner === ADDRESS_LOOKUP_TABLE_PROGRAM_ID && hasAddressLookupTableLayout(account.rawDataBytes))
+    ) {
         return 'address-lookup-table';
     }
     if (account.owner === FEATURE_PROGRAM_ID) {

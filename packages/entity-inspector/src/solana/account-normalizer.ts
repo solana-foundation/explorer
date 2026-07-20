@@ -1,13 +1,11 @@
-import { getBase64Encoder, type ReadonlyUint8Array } from '@solana/kit';
+import type { ReadonlyUint8Array } from '@solana/kit';
 
 import type { SupportedCluster } from '../config.js';
 import { consoleLogger, type InspectorLogger } from '../logger.js';
+import { base64Encoder } from './codecs.js';
 import { asRecord, asSafeNumeric, asString } from './parse-helpers.js';
 import { isSourceUnavailableError } from './rpc.js';
 import type { AccountProbeEnvelope, NormalizedAccountInfo, NormalizedProgramDataInfo } from './types.js';
-
-// Throws on invalid input (assertValidBaseString), so the catch below still yields warn + null.
-const base64Encoder = getBase64Encoder();
 
 export function extractRawDataBytesFromAccountData(
     data: unknown,
@@ -23,7 +21,7 @@ export function extractRawDataBytesFromAccountData(
     }
 
     try {
-        return base64Encoder.encode(encodedData);
+        return base64Encoder().encode(encodedData);
     } catch (error) {
         logger.warn('[entity-inspector] base64 decode of account data failed', { error });
         return null;
