@@ -1,6 +1,7 @@
 'use client';
 
 import { useDebouncedValue } from '@mantine/hooks';
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 
 import { searchAnalytics } from '@/app/shared/lib/analytics';
@@ -15,8 +16,10 @@ import { BaseSearch } from './BaseSearch';
 export const SEARCH_DEBOUNCE_MS = 500;
 
 export function SearchBar() {
-    const [search, setSearch] = useState('');
-    const [open, setOpen] = useState(false);
+    const searchParams = useSearchParams();
+    const initialSearch = searchParams.get('q') ?? '';
+    const [search, setSearch] = useState(initialSearch);
+    const [open, setOpen] = useState(initialSearch.trim().length > 0);
     const [activeFilter, setActiveFilter] = useState<FilterId>('all');
     const [debouncedSearch] = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
 
