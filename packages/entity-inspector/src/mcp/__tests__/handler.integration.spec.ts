@@ -46,7 +46,32 @@ function mcpRequest(
     });
 }
 
-// Stateless transport: negotiate the protocol version once, then send it with every tool request.
+/**
+ * Stateless transport: the client negotiates the protocol version via `initialize`, then sends it
+ * as `mcp-protocol-version` with every tool request. MCP clients do this automatically once per
+ * connection — the two-step flow below is only spelled out for sessionless clients like curl.
+ *
+ * @example Smoke test a deployment — initialize first (auth headers per `app/mcp/README.md`)
+ * ```sh
+ * curl -X POST https://<deployment>/mcp \
+ *   -H 'Content-Type: application/json' \
+ *   -H 'Accept: application/json, text/event-stream' \
+ *   -H 'Authorization: Bearer <key>' \
+ *   -H 'x-vercel-protection-bypass: <secret>' \
+ *   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl","version":"0.0.0"}}}'
+ * ```
+ *
+ * @example Then call a tool with the `protocolVersion` from the response — expect `pong`
+ * ```sh
+ * curl -X POST https://<deployment>/mcp \
+ *   -H 'Content-Type: application/json' \
+ *   -H 'Accept: application/json, text/event-stream' \
+ *   -H 'Authorization: Bearer <key>' \
+ *   -H 'x-vercel-protection-bypass: <secret>' \
+ *   -H 'mcp-protocol-version: <negotiated-version>' \
+ *   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"ping","arguments":{}}}'
+ * ```
+ */
 async function negotiatedToolRequest(
     handler: ReturnType<typeof createMcpRequestHandler>,
     method: string,
