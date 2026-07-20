@@ -1,13 +1,9 @@
 import { AccountHeader } from '@components/account/AccountHeader';
-import { TokenMarketData } from '@components/common/TokenMarketData';
 import { isTokenProgramData } from '@providers/accounts';
 import { type ComponentProps, useMemo } from 'react';
 
-import {
-    TokenVerificationBadge,
-    useCoinGeckoVerification,
-    type VerificationTarget,
-} from '@/app/features/token-verification-badge';
+import { TokenMarketData, useTokenMarketData } from '@/app/features/token-market-data';
+import { TokenVerificationBadge, type VerificationTarget } from '@/app/features/token-verification-badge';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { isNativeMint, isTokenMintByOwner } from '@/app/shared/model/token-program';
 
@@ -23,7 +19,7 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
         parsedData?.parsed.type === 'mint' &&
         isTokenMintByOwner(toKitAddress(account.owner), account.data.raw);
 
-    const coinInfo = useCoinGeckoVerification(address, !!isTokenMint);
+    const marketData = useTokenMarketData(address, !!isTokenMint);
 
     const verificationTarget: VerificationTarget = useMemo(
         () => ({
@@ -46,7 +42,7 @@ export function Header({ address, account, tokenInfo, isTokenInfoLoading }: Head
                 {isTokenMint && (
                     <div className="flex w-full flex-col gap-1 sm:items-start sm:gap-2 md:w-auto md:flex-row">
                         <TokenVerificationBadge target={verificationTarget} isTokenInfoLoading={isTokenInfoLoading} />
-                        <TokenMarketData coinInfo={coinInfo} />
+                        <TokenMarketData marketData={marketData} />
                     </div>
                 )}
             </div>

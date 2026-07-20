@@ -100,9 +100,10 @@ describe('useTokenVerification', () => {
     });
 
     describe('CoinGecko verification', () => {
-        it('should mark as verified when status is Success', () => {
+        it('should mark as verified when status is Success and gt_verified is true', () => {
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.Success,
+                verified: true,
             });
 
             const { result } = renderHook(() => useTokenVerification(baseTarget));
@@ -112,9 +113,48 @@ describe('useTokenVerification', () => {
             expect(coingecko?.isVerificationFound).toBe(true);
         });
 
+        it('should link to the CoinGecko coin page when a coinGeckoId is present', () => {
+            vi.mocked(useCoinGeckoVerification).mockReturnValue({
+                coinGeckoId: 'usd-coin',
+                status: CoingeckoStatus.Success,
+                verified: true,
+            });
+
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
+            const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
+
+            expect(coingecko?.url).toBe('https://www.coingecko.com/en/coins/usd-coin');
+        });
+
+        it('should fall back to the GeckoTerminal token page when no coinGeckoId exists', () => {
+            vi.mocked(useCoinGeckoVerification).mockReturnValue({
+                status: CoingeckoStatus.Success,
+                verified: true,
+            });
+
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
+            const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
+
+            expect(coingecko?.url).toBe(`https://www.geckoterminal.com/solana/tokens/${baseTarget.address}`);
+        });
+
+        it('should mark as found but not verified when status is Success but gt_verified is false', () => {
+            vi.mocked(useCoinGeckoVerification).mockReturnValue({
+                status: CoingeckoStatus.Success,
+                verified: false,
+            });
+
+            const { result } = renderHook(() => useTokenVerification(baseTarget));
+            const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
+
+            expect(coingecko?.verified).toBe(false);
+            expect(coingecko?.isVerificationFound).toBe(true);
+        });
+
         it('should mark as not verified when status is FetchFailed', () => {
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.FetchFailed,
+                verified: false,
             });
 
             const { result } = renderHook(() => useTokenVerification(baseTarget));
@@ -127,6 +167,7 @@ describe('useTokenVerification', () => {
         it('should mark as rate limited when status is RateLimited', () => {
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.RateLimited,
+                verified: false,
             });
 
             const { result } = renderHook(() => useTokenVerification(baseTarget));
@@ -295,6 +336,7 @@ describe('useTokenVerification', () => {
             });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.Success,
+                verified: true,
             });
             vi.mocked(useJupiterVerification).mockReturnValue({
                 status: JupiterStatus.Success,
@@ -325,6 +367,7 @@ describe('useTokenVerification', () => {
             });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.FetchFailed,
+                verified: false,
             });
             vi.mocked(useJupiterVerification).mockReturnValue({
                 status: JupiterStatus.FetchFailed,
@@ -351,6 +394,7 @@ describe('useTokenVerification', () => {
             });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.FetchFailed,
+                verified: false,
             });
             vi.mocked(useJupiterVerification).mockReturnValue({
                 status: JupiterStatus.FetchFailed,
@@ -381,6 +425,7 @@ describe('useTokenVerification', () => {
             });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.RateLimited,
+                verified: false,
             });
             vi.mocked(useJupiterVerification).mockReturnValue({
                 status: JupiterStatus.RateLimited,
@@ -406,6 +451,7 @@ describe('useTokenVerification', () => {
             });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.FetchFailed,
+                verified: false,
             });
             vi.mocked(useJupiterVerification).mockReturnValue({
                 status: JupiterStatus.FetchFailed,
@@ -430,6 +476,7 @@ describe('useTokenVerification', () => {
             });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.Success,
+                verified: true,
             });
             vi.mocked(useJupiterVerification).mockReturnValue({
                 status: JupiterStatus.Success,
@@ -462,6 +509,7 @@ describe('useTokenVerification', () => {
             });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.RateLimited,
+                verified: false,
             });
             vi.mocked(useJupiterVerification).mockReturnValue({
                 status: JupiterStatus.Success,

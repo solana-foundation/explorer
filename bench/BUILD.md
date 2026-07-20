@@ -41,6 +41,7 @@
 | Dynamic | `/api/sns-domains/[address]` | — | — |
 | Dynamic | `/api/token-image/[mintAddress]` | — | — |
 | Dynamic | `/api/token-info` | — | — |
+| Dynamic | `/api/token-market-data/[address]` | — | — |
 | Dynamic | `/api/verification/bluprynt/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
