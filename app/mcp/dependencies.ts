@@ -5,12 +5,13 @@ import { Logger } from '@/app/shared/lib/logger';
 
 const logger: EntityInspectorConfig['logger'] = {
     debug: (message, context) => Logger.debug(message, context),
-    error: (message, context) => Logger.error(message, context),
+    // Wrap in Error: Logger.error replaces a bare string with a sentinel, losing the message in Sentry.
+    error: (message, context) => Logger.error(new Error(message), context),
     info: (message, context) => Logger.info(message, context),
     warn: (message, context) => Logger.warn(message, context),
 };
 
-// Resolved per-request (not at module scope) so key-bearing URLs come from runtime env, never a build artifact.
+// Resolved at handler init (cold start), not module scope, so key-bearing URLs come from runtime env, never a build artifact.
 function resolveRpcEndpoints(): EntityInspectorConfig['rpcEndpoints'] {
     return {
         devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || clusterApiUrl('devnet'),
