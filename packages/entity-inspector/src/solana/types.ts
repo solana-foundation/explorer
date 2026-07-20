@@ -1,5 +1,3 @@
-// Error types are not ported yet — SourceUnavailableError lives in rpc.ts and lands with the RPC layer (plan Step 3).
-
 export type IdentifierKind = 'account' | 'transaction' | 'invalid';
 
 export type AccountProbeEnvelope = {

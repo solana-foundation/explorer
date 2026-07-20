@@ -9,10 +9,10 @@ import { createMcpRequestHandler } from '../handler.js';
 
 const TEST_CONFIG: EntityInspectorConfig = {
     rpcEndpoints: {
-        devnet: 'https://api.devnet.solana.com',
-        'mainnet-beta': 'https://api.mainnet-beta.solana.com',
-        simd296: 'https://simd-0296.surfnet.dev:8899',
-        testnet: 'https://api.testnet.solana.com',
+        devnet: 'https://devnet.rpc.address',
+        'mainnet-beta': 'https://mainnet-beta.rpc.address',
+        simd296: 'https://simd296.rpc.address',
+        testnet: 'https://testnet.rpc.address',
     },
 };
 
