@@ -32,6 +32,13 @@ const VERIFIED_FIXTURE: OsecRegistryInfo = {
         'solana-verify verify-from-repo -um --program-id TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA https://github.com/example/verified-program --commit-hash abc1234',
 };
 
+// A verified program whose on-chain Otter Verify PDA couldn't be resolved still renders as
+// verified, falling back to the OSEC-reported repo URL and a placeholder verify command.
+const VERIFIED_WITHOUT_PDA_FIXTURE: OsecRegistryInfo = {
+    ...VERIFIED_FIXTURE,
+    verify_command: 'Program does not have a verify PDA uploaded.',
+};
+
 const NOT_VERIFIED_FIXTURE: OsecRegistryInfo = {
     ...VERIFIED_FIXTURE,
     is_verified: false,
@@ -87,6 +94,14 @@ export const Verified: Story = {
         data: PROGRAM_DATA,
         isLoading: false,
         registryInfo: VERIFIED_FIXTURE,
+    },
+};
+
+export const VerifiedWithoutPda: Story = {
+    args: {
+        data: PROGRAM_DATA,
+        isLoading: false,
+        registryInfo: VERIFIED_WITHOUT_PDA_FIXTURE,
     },
 };
 

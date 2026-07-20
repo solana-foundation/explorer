@@ -45,6 +45,13 @@ export type OsecInfo = {
     is_frozen: boolean;
 };
 
+// Decoded subset of the Otter Verify `BuildParams` account used to compose the verify command / repo URL.
+type OtterVerifyBuildParams = {
+    gitUrl: string;
+    commit: string;
+    args?: string[];
+};
+
 function parsePublicKey(value: string | undefined): PublicKey | null {
     if (!value) return null;
     try {
@@ -174,7 +181,7 @@ export function useVerifiedProgram({
     options?: { suspense: boolean };
     programData?: ProgramDataAccountInfo;
 }) {
-    const { data: orderedVerifiedEntries } = useVerifiedProgramRegistry({
+    const { data: orderedVerifiedEntries, isLoading: isRegistryLoading } = useVerifiedProgramRegistry({
         options,
         programAuthority,
         programData,
@@ -184,7 +191,11 @@ export function useVerifiedProgram({
     // Get the first verified entry
     const verifiedData = orderedVerifiedEntries?.find(entry => entry.is_verified);
 
-    return useEnrichedOsecInfo({ options, osecInfo: verifiedData, programAuthority, programId });
+    const enriched = useEnrichedOsecInfo({ options, osecInfo: verifiedData, programAuthority, programId });
+
+    // Keep surfacing the loading state while the registry (`/status-all`) is still in flight, so the card
+    // renders a spinner instead of prematurely falling through to the "not uploaded" empty state.
+    return { ...enriched, isLoading: isRegistryLoading || enriched.isLoading };
 }
 
 // Internal method to enrich the osec info with the verify command (requires fetching the on-chain PDA)
@@ -202,7 +213,10 @@ function useEnrichedOsecInfo({
     const { url: clusterUrl, cluster: cluster } = useCluster();
     const connection = new Connection(clusterUrl);
 
-    const { program: accountAnchorProgram } = useAnchorProgram(VERIFY_PROGRAM_ID, connection.rpcEndpoint);
+    const { program: accountAnchorProgram, isLoading: isIdlLoading } = useAnchorProgram(
+        VERIFY_PROGRAM_ID,
+        connection.rpcEndpoint,
+    );
     const signerAuthorities = useMemo(
         () =>
             Array.from(
@@ -255,46 +269,73 @@ function useEnrichedOsecInfo({
         { suspense: options?.suspense },
     );
 
-    if (!osecInfo || pdaError) {
-        return { data: null, error: pdaError, isLoading: isPdaLoading };
-    }
-    if (!pdaData || isPdaLoading) {
-        return { data: null, isLoading: isPdaLoading };
+    // No verified entry from the registry — surface nothing so the card shows the empty state.
+    if (!osecInfo) {
+        return { data: null, isLoading: false };
     }
 
-    const message = TRUSTED_SIGNERS[osecInfo?.signer || '']
+    // The Otter Verify PDA — and the verify-program IDL needed to decode it — only enrich the card with
+    // the verify command and on-chain repo URL; they are NOT required to know the program is verified
+    // (OSEC + the on-chain hash re-check already establish that). Stay in the loading state while that
+    // resolution is in flight so a verified program never flashes the "not uploaded" empty state, then
+    // render from OSEC data whether or not the PDA resolved. A `pdaError` means every signer
+    // candidate failed to fetch, which is the same "no PDA" degrade path.
+    if (isIdlLoading || isPdaLoading) {
+        return { data: null, isLoading: true };
+    }
+
+    return {
+        data: buildEnrichedOsecInfo({ cluster, osecInfo, pdaData: pdaError ? null : (pdaData ?? null), programId }),
+        isLoading: false,
+    };
+}
+
+// Build the display model from the OSEC registry entry, enriching with the on-chain Otter Verify PDA
+// when available. The PDA supplies the verify command and on-chain repo URL; without it we fall back to
+// the OSEC-reported repo URL and a placeholder command so a verified program still renders its status.
+export function buildEnrichedOsecInfo({
+    cluster,
+    programId,
+    osecInfo,
+    pdaData,
+}: {
+    cluster: Cluster;
+    programId: PublicKey;
+    osecInfo: OsecInfo;
+    pdaData: OtterVerifyBuildParams | null;
+}): OsecRegistryInfo {
+    const message = TRUSTED_SIGNERS[osecInfo.signer]
         ? 'Verification information provided by a trusted signer.'
         : osecInfo.is_frozen
           ? 'Verification information provided by the program deployer.'
           : 'Verification information provided by the program authority.';
 
     const { repo_url, signer, is_verified, ...rest } = osecInfo;
-    const enrichedOsecInfo: OsecRegistryInfo = {
+    const osecRepoUrl = safeRepoUrl(normalizeRepoUrl(repo_url)) ?? '';
+
+    return {
         ...rest,
         is_verified,
         message,
-        onchain_repo_url: composeOnchainRepoUrl(pdaData.gitUrl, pdaData.commit) ?? '',
-        repo_url: safeRepoUrl(normalizeRepoUrl(repo_url)) ?? '',
+        onchain_repo_url: pdaData
+            ? (composeOnchainRepoUrl(pdaData.gitUrl, pdaData.commit) ?? osecRepoUrl)
+            : osecRepoUrl,
+        repo_url: osecRepoUrl,
         signer: signer || '',
         verification_status: is_verified
             ? VerificationStatus.Verified
             : pdaData
               ? VerificationStatus.PdaUploaded
               : VerificationStatus.NotVerified,
-        verify_command: '',
+        verify_command: pdaData
+            ? coalesceCommandFromPda(programId, pdaData)
+            : isMainnet(cluster)
+              ? 'Program does not have a verify PDA uploaded.'
+              : 'Verify command only available on mainnet.',
     };
-    if (pdaData) {
-        // Create command from the args of the verified build PDA
-        enrichedOsecInfo.verify_command = coalesceCommandFromPda(programId, pdaData);
-    } else {
-        enrichedOsecInfo.verify_command = isMainnet(cluster)
-            ? 'Program does not have a verify PDA uploaded.'
-            : 'Verify command only available on mainnet.';
-    }
-    return { data: enrichedOsecInfo, isLoading: isPdaLoading };
 }
 
-function coalesceCommandFromPda(programId: PublicKey, pdaData: any) {
+function coalesceCommandFromPda(programId: PublicKey, pdaData: OtterVerifyBuildParams) {
     let verify_command = `solana-verify verify-from-repo -um --program-id ${programId.toBase58()} ${pdaData.gitUrl}`;
 
     if (pdaData.commit) {
