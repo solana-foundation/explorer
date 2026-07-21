@@ -254,6 +254,21 @@ function formatByType(
                 ],
             };
 
+        case TokenInstruction.InitializeMint:
+            return {
+                accounts: labelMetas([
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Rent Sysvar', meta: parsed.accounts.rent },
+                ]),
+                fields: [
+                    { label: 'Decimals', value: parsed.data.decimals.toString() },
+                    { isAddress: true, label: 'Mint Authority', value: parsed.data.mintAuthority },
+                    ...(isSome(parsed.data.freezeAuthority)
+                        ? [{ isAddress: true, label: 'Freeze Authority', value: parsed.data.freezeAuthority.value }]
+                        : [{ label: 'Freeze Authority', value: '(none)' }]),
+                ],
+            };
+
         case TokenInstruction.InitializeMint2:
             return {
                 accounts: labelMetas([{ label: 'Mint', meta: parsed.accounts.mint }]),
@@ -266,6 +281,27 @@ function formatByType(
                 ],
             };
 
+        case TokenInstruction.InitializeAccount:
+            return {
+                accounts: labelMetas([
+                    { label: 'Account', meta: parsed.accounts.account },
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Owner', meta: parsed.accounts.owner },
+                    { label: 'Rent Sysvar', meta: parsed.accounts.rent },
+                ]),
+                fields: [],
+            };
+
+        case TokenInstruction.InitializeAccount2:
+            return {
+                accounts: labelMetas([
+                    { label: 'Account', meta: parsed.accounts.account },
+                    { label: 'Mint', meta: parsed.accounts.mint },
+                    { label: 'Rent Sysvar', meta: parsed.accounts.rent },
+                ]),
+                fields: [{ isAddress: true, label: 'Owner', value: parsed.data.owner }],
+            };
+
         case TokenInstruction.InitializeAccount3:
             return {
                 accounts: labelMetas([
@@ -273,6 +309,26 @@ function formatByType(
                     { label: 'Mint', meta: parsed.accounts.mint },
                 ]),
                 fields: [{ isAddress: true, label: 'Owner', value: parsed.data.owner }],
+            };
+
+        case TokenInstruction.SyncNative: {
+            const entries: { label: string; meta: AccountMeta<string> }[] = [
+                { label: 'Account', meta: parsed.accounts.account },
+            ];
+            if (parsed.accounts.rent) {
+                entries.push({ label: 'Rent Sysvar', meta: parsed.accounts.rent });
+            }
+            return { accounts: labelMetas(entries), fields: [] };
+        }
+
+        case TokenInstruction.WithdrawExcessLamports:
+            return {
+                accounts: labelMetas([
+                    { label: 'Source', meta: parsed.accounts.source },
+                    { label: 'Destination', meta: parsed.accounts.destination },
+                    { label: 'Authority', meta: parsed.accounts.authority },
+                ]),
+                fields: [],
             };
 
         default:
