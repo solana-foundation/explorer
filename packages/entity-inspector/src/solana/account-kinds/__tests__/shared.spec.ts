@@ -1,12 +1,42 @@
 import { describe, expect, it } from 'vitest';
 
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../../constants.js';
-import { assertUnreachable, buildMintOverviewFields, buildTokenEntityFields, unknownMarker } from '../shared.js';
+import {
+    assertUnreachable,
+    buildMintOverviewFields,
+    buildTokenEntityFields,
+    resolveProgramAddressLabel,
+    unknownMarker,
+} from '../shared.js';
 
 describe('account kind shared helpers', () => {
     it('should throw for unreachable account kinds', () => {
         // oxlint-disable-next-line typescript/consistent-type-assertions -- `never` param is uncallable without a cast
         expect(() => assertUnreachable('impossible' as never)).toThrow('Unhandled account entity kind');
+    });
+
+    it('should resolve labels via the injected resolver, then the built-in map, then null', () => {
+        const account = { owner: null, parsedData: null, parsedProgram: null, rawDataBytes: null };
+
+        // Injected resolver wins over the built-in map
+        expect(
+            resolveProgramAddressLabel({
+                account: { ...account, address: TOKEN_PROGRAM_ID },
+                kind: 'unknown',
+                resolveProgramName: () => 'Custom Label',
+            }),
+        ).toBe('Custom Label');
+
+        // Built-in map covers well-known programs without a resolver
+        expect(
+            resolveProgramAddressLabel({ account: { ...account, address: TOKEN_PROGRAM_ID }, kind: 'unknown' }),
+        ).toBe('Token Program');
+
+        // Unknown address and missing address both yield null
+        expect(
+            resolveProgramAddressLabel({ account: { ...account, address: 'Unknown111' }, kind: 'unknown' }),
+        ).toBeNull();
+        expect(resolveProgramAddressLabel({ account, kind: 'unknown' })).toBeNull();
     });
 
     it('should build deterministic unknown markers', () => {

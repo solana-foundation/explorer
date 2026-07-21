@@ -141,7 +141,7 @@ describe('bpf-upgradeable-loader account kind payload', () => {
         });
     });
 
-    it('should return null address_label when no resolver is injected', () => {
+    it('should fall back to the built-in label map when no resolver is injected', () => {
         const executableDataAddress = 'PdataAddr111111111111111111111111111111111';
         const result = buildBpfUpgradeableLoaderPayload({
             account: {
@@ -159,7 +159,7 @@ describe('bpf-upgradeable-loader account kind payload', () => {
             kind: 'bpf-upgradeable-loader',
         });
 
-        expect(entityOf(result).address_label).toBeNull();
+        expect(entityOf(result).address_label).toBe('Token-2022 Program');
     });
 
     it('should pass verificationResult through to entity when present in context', () => {

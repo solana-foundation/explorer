@@ -1,4 +1,5 @@
 import { asBoolean, asRecord, asSafeNumeric, asString } from '../parse-helpers.js';
+import { lookupProgramLabel } from '../program-labels.js';
 import type { AccountEntityKind, AccountPayloadContext, NormalizedAccountInfo, UnknownMarker } from '../types.js';
 
 export type AccountKindBuilder = (context: AccountPayloadContext) => Record<string, unknown>;
@@ -7,13 +8,13 @@ export function assertUnreachable(kind: never): never {
     throw new Error(`Unhandled account entity kind: ${String(kind)}`);
 }
 
-// Injected via context (app registry lands in Step 5) — the source hardcoded a label map instead.
+// The injected resolver (host-app registry) wins; the package's built-in map covers well-known programs for standalone consumers.
 export function resolveProgramAddressLabel(context: AccountPayloadContext): string | null {
     const address = context.account.address;
     if (!address) {
         return null;
     }
-    return context.resolveProgramName?.(address) ?? null;
+    return context.resolveProgramName?.(address) ?? lookupProgramLabel(address) ?? null;
 }
 
 export function unknownMarker(reason: string): UnknownMarker {
