@@ -1,7 +1,7 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { ZodError } from 'zod';
 
 import { asRecord } from '../solana/parse-helpers.js';
+import { formatSchemaValidationError } from './schemas.js';
 
 export const MCP_TOOL_ERROR_CODES = [
     'INVALID_ARGUMENT',
@@ -56,13 +56,8 @@ export function sanitizeToolError(error: unknown): McpToolError {
         return error;
     }
 
-    if (error instanceof ZodError) {
-        const details = error.issues
-            .map(issue => {
-                const field = issue.path.join('.');
-                return field ? `${field}: ${issue.message}` : issue.message;
-            })
-            .join('; ');
+    const details = formatSchemaValidationError(error);
+    if (details !== undefined) {
         return invalidArgument(details || DEFAULT_INVALID_ARGUMENT_MESSAGE);
     }
 

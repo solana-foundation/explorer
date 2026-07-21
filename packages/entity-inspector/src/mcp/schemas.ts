@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 
 import { SUPPORTED_CLUSTERS } from '../config.js';
 
@@ -15,4 +15,17 @@ export function inspectEntityInputSchema() {
             identifier: z.string().min(1).max(128),
         })
         .strict();
+}
+
+/** Flattens a schema validation failure into a "field: message" summary; undefined when the error is not one. */
+export function formatSchemaValidationError(error: unknown): string | undefined {
+    if (!(error instanceof ZodError)) {
+        return undefined;
+    }
+    return error.issues
+        .map(issue => {
+            const field = issue.path.join('.');
+            return field ? `${field}: ${issue.message}` : issue.message;
+        })
+        .join('; ');
 }
