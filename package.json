@@ -135,7 +135,7 @@
         "swr": "2.2.0",
         "tailwind-merge": "2.6.1",
         "tweetnacl": "1.0.3",
-        "undici": "6.25.0",
+        "undici": "6.27.0",
         "use-async-effect": "2.2.7"
     },
     "devDependencies": {
