@@ -85,7 +85,7 @@
         "vitest": "catalog:vitest"
     },
     "peerDependencies": {
-        "@coral-xyz/anchor": "^0.30.1",
+        "@coral-xyz/anchor": "=0.30.1",
         "@solana-program/program-metadata": "^0.7.0",
         "@solana/kit": "^6.5.0",
         "codama": "^1.5.0"
