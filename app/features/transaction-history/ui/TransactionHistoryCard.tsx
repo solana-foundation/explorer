@@ -37,7 +37,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     // Signatures only — the parsed transactions for instruction names are fetched lazily per row, one at a
     // time (see InstructionsCell), so the page never batch-hammers the RPC into 429s.
     const refresh = useCallback(() => fetchAccountHistory(pubkey, false, true), [fetchAccountHistory, pubkey]);
-    const loadMore = () => fetchAccountHistory(pubkey, false);
+    const loadMore = useCallback(() => fetchAccountHistory(pubkey, false), [fetchAccountHistory, pubkey]);
 
     const rows: TransactionHistoryRowView[] = history?.data?.fetched
         ? getTransactionRows(history.data.fetched).map(row => ({

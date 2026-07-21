@@ -200,13 +200,17 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
     const [blockTimeGteDraft, setBlockTimeGteDraft] = React.useState('');
     const [blockTimeLteDraft, setBlockTimeLteDraft] = React.useState('');
 
+    // Depend on the scalar range bounds, not the `slot`/`blockTime` objects: `toRange`
+    // allocates a fresh object on every render, so keying on the objects would re-run
+    // this effect on unrelated parent re-renders (e.g. lazy per-row fetches) and silently
+    // reset a draft the user is still editing before they click Apply.
     React.useEffect(() => {
         setSlotGteDraft(slot?.gte !== undefined ? String(slot.gte) : '');
         setSlotLteDraft(slot?.lte !== undefined ? String(slot.lte) : '');
         setStatusDraft(status ?? '');
         setBlockTimeGteDraft(unixToLocalInput(blockTime?.gte));
         setBlockTimeLteDraft(unixToLocalInput(blockTime?.lte));
-    }, [slot, blockTime, status, open]);
+    }, [slot?.gte, slot?.lte, blockTime?.gte, blockTime?.lte, status, open]);
 
     const slotGteValue = slotDraftToValue(slotGteDraft);
     const slotLteValue = slotDraftToValue(slotLteDraft);

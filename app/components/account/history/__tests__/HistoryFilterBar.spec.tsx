@@ -100,8 +100,8 @@ describe('HistoryFilterBar', () => {
         render(<HistoryFilterBar />);
 
         fireEvent.click(screen.getByRole('button', { name: /^Filters$/ }));
-        fireEvent.change(screen.getByPlaceholderText(/lower bound/), { target: { value: '100' } });
-        fireEvent.change(screen.getByPlaceholderText(/upper bound/), { target: { value: '500' } });
+        fireEvent.change(screen.getByPlaceholderText(/lower bound/i), { target: { value: '100' } });
+        fireEvent.change(screen.getByPlaceholderText(/upper bound/i), { target: { value: '500' } });
         fireEvent.click(screen.getByRole('button', { name: /^Apply$/ }));
 
         expect(replaceMock).toHaveBeenCalledTimes(1);
@@ -124,8 +124,8 @@ describe('HistoryFilterBar', () => {
         render(<HistoryFilterBar />);
 
         fireEvent.click(screen.getByRole('button', { name: /^Filters$/ }));
-        fireEvent.change(screen.getByPlaceholderText(/lower bound/), { target: { value: '500' } });
-        fireEvent.change(screen.getByPlaceholderText(/upper bound/), { target: { value: '100' } });
+        fireEvent.change(screen.getByPlaceholderText(/lower bound/i), { target: { value: '500' } });
+        fireEvent.change(screen.getByPlaceholderText(/upper bound/i), { target: { value: '100' } });
 
         const apply = screen.getByRole('button', { name: /^Apply$/ });
         expect(apply).toBeDisabled();
