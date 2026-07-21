@@ -2,6 +2,10 @@ import type { EntityInspectorConfig, McpRequestHandler } from '@explorer/entity-
 import { clusterApiUrl } from '@solana/web3.js';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { LOADER_IDS, PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
+
+const resolveProgramName: EntityInspectorConfig['resolveProgramName'] = address =>
+    PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address];
 
 const logger: EntityInspectorConfig['logger'] = {
     debug: (message, context) => Logger.debug(message, context),
@@ -38,5 +42,5 @@ export function getMcpRequestHandler(): Promise<McpRequestHandler> {
 
 async function importRequestHandler(): Promise<McpRequestHandler> {
     const { createMcpRequestHandler } = await import('@explorer/entity-inspector');
-    return createMcpRequestHandler({ logger, rpcEndpoints: resolveRpcEndpoints() });
+    return createMcpRequestHandler({ logger, resolveProgramName, rpcEndpoints: resolveRpcEndpoints() });
 }

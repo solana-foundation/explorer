@@ -9,10 +9,10 @@ import { createMcpRequestHandler } from '../handler.js';
 
 const TEST_CONFIG: EntityInspectorConfig = {
     rpcEndpoints: {
-        devnet: 'https://api.devnet.solana.com',
-        'mainnet-beta': 'https://api.mainnet-beta.solana.com',
-        simd296: 'https://simd-0296.surfnet.dev:8899',
-        testnet: 'https://api.testnet.solana.com',
+        devnet: 'https://devnet.rpc.address',
+        'mainnet-beta': 'https://mainnet-beta.rpc.address',
+        simd296: 'https://simd296.rpc.address',
+        testnet: 'https://testnet.rpc.address',
     },
 };
 
@@ -46,7 +46,32 @@ function mcpRequest(
     });
 }
 
-// Stateless transport: negotiate the protocol version once, then send it with every tool request.
+/**
+ * Stateless transport: the client negotiates the protocol version via `initialize`, then sends it
+ * as `mcp-protocol-version` with every tool request. MCP clients do this automatically once per
+ * connection — the two-step flow below is only spelled out for sessionless clients like curl.
+ *
+ * @example Smoke test a deployment — initialize first (auth headers per `app/mcp/README.md`)
+ * ```sh
+ * curl -X POST https://<deployment>/mcp \
+ *   -H 'Content-Type: application/json' \
+ *   -H 'Accept: application/json, text/event-stream' \
+ *   -H 'Authorization: Bearer <key>' \
+ *   -H 'x-vercel-protection-bypass: <secret>' \
+ *   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl","version":"0.0.0"}}}'
+ * ```
+ *
+ * @example Then call a tool with the `protocolVersion` from the response — expect `pong`
+ * ```sh
+ * curl -X POST https://<deployment>/mcp \
+ *   -H 'Content-Type: application/json' \
+ *   -H 'Accept: application/json, text/event-stream' \
+ *   -H 'Authorization: Bearer <key>' \
+ *   -H 'x-vercel-protection-bypass: <secret>' \
+ *   -H 'mcp-protocol-version: <negotiated-version>' \
+ *   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"ping","arguments":{}}}'
+ * ```
+ */
 async function negotiatedToolRequest(
     handler: ReturnType<typeof createMcpRequestHandler>,
     method: string,
@@ -75,12 +100,12 @@ describe('createMcpRequestHandler — real MCP SDK transport', () => {
         });
     });
 
-    it('should list the ping tool', async () => {
+    it('should list the inspect_entity and ping tools', async () => {
         const response = await handler(await negotiatedToolRequest(handler, 'tools/list', {}, 2));
 
         expect(response.status).toBe(200);
         const payload = await response.json();
-        expect(payload.result.tools).toMatchObject([{ name: 'ping' }]);
+        expect(payload.result.tools).toMatchObject([{ name: 'inspect_entity' }, { name: 'ping' }]);
     });
 
     it('should answer a ping tool call with pong', async () => {
@@ -93,6 +118,52 @@ describe('createMcpRequestHandler — real MCP SDK transport', () => {
             id: 3,
             jsonrpc: '2.0',
             result: { content: [{ text: 'pong', type: 'text' }] },
+        });
+    });
+
+    // '111' is valid base58 but 3 bytes — rejected before any RPC call, so the round-trip needs no network.
+    it('should serve inspect_entity end to end for an invalid identifier', async () => {
+        const response = await handler(
+            await negotiatedToolRequest(
+                handler,
+                'tools/call',
+                { arguments: { identifier: '111' }, name: 'inspect_entity' },
+                4,
+            ),
+        );
+
+        expect(response.status).toBe(200);
+        await expect(response.json()).resolves.toMatchObject({
+            id: 4,
+            jsonrpc: '2.0',
+            result: {
+                isError: true,
+                structuredContent: {
+                    errors: [{ code: 'INVALID_ARGUMENT' }],
+                    payload: {},
+                },
+            },
+        });
+    });
+
+    it('should accept a config with a program name resolver', async () => {
+        const handlerWithResolver = createMcpRequestHandler({
+            ...TEST_CONFIG,
+            resolveProgramName: () => undefined,
+        });
+        const response = await handlerWithResolver(
+            await negotiatedToolRequest(
+                handlerWithResolver,
+                'tools/call',
+                { arguments: { identifier: '111' }, name: 'inspect_entity' },
+                5,
+            ),
+        );
+
+        expect(response.status).toBe(200);
+        await expect(response.json()).resolves.toMatchObject({
+            id: 5,
+            result: { isError: true },
         });
     });
 });
