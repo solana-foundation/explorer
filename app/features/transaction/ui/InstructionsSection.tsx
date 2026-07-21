@@ -36,7 +36,12 @@ import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
-import { isTokenBatchInstruction, RpcParsedTokenBatchCard, TokenBatchCard } from '@features/token-batch';
+import {
+    isRpcParsedBatchInstruction,
+    isTokenBatchInstruction,
+    RpcParsedTokenBatchCard,
+    TokenBatchCard,
+} from '@features/token-batch';
 import { VoteDetailsCard } from '@features/vote';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
@@ -151,10 +156,6 @@ export function InstructionsSection({ signature }: SignatureProps) {
     );
 }
 
-function isBatchInstruction(parsed: unknown): boolean {
-    return typeof parsed !== 'string' && (parsed as { type?: string } | null)?.type === 'batch';
-}
-
 function InstructionCard({
     ix,
     tx,
@@ -202,7 +203,7 @@ function InstructionCard({
                 // The RPC parses batch instructions (disc 0xff) as ParsedInstruction
                 // with type "batch". Route them to the batch card before TokenDetailsCard
                 // throws on the unrecognised type.
-                if (isBatchInstruction(ix.parsed)) {
+                if (isRpcParsedBatchInstruction(ix.parsed)) {
                     return (
                         <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
                             <RpcParsedTokenBatchCard
