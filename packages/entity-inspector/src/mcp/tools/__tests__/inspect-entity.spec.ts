@@ -415,4 +415,13 @@ describe('splitBuilderErrors', () => {
         expect(errors).toEqual([{ code: 'CURRENTLY_UNSUPPORTED', message: 'not supported' }]);
         expect(payload).toEqual({ entity: { kind: 'bpf-upgradeable-loader' } });
     });
+
+    it('should strip a malformed non-array errors value from the payload', () => {
+        expect(
+            splitBuilderErrors({
+                entity: { kind: 'unknown' },
+                errors: 'boom',
+            }),
+        ).toEqual({ errors: [], payload: { entity: { kind: 'unknown' } } });
+    });
 });

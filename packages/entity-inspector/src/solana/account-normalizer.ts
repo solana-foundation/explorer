@@ -72,6 +72,8 @@ export function extractProgramDataInfo(parsedData: unknown): NormalizedProgramDa
 
 // Deliberately NOT kit's parseJsonRpcAccount/MaybeAccount — payload parity with explorer-mcp requires the NormalizedAccountInfo contract.
 export function normalizeAccountProbe(address: string, envelope: AccountProbeEnvelope): NormalizedAccountInfo | null {
+    // Strict null on purpose: null means "account not found"; a malformed envelope (value undefined) must
+    // throw on the property access below so the caller reports INTERNAL_ERROR, not NOT_FOUND.
     const accountValue = envelope.value;
     if (accountValue === null) {
         return null;

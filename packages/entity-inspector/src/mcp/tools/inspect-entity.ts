@@ -57,7 +57,7 @@ export function splitBuilderErrors(routedPayload: Record<string, unknown>): {
 } {
     const { errors: rawErrors, ...payload } = routedPayload;
     if (!Array.isArray(rawErrors)) {
-        return { errors: [], payload: routedPayload };
+        return { errors: [], payload };
     }
     const errors = rawErrors.flatMap(entry => {
         const message = asString(entry);

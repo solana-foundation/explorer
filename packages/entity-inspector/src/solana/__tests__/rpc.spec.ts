@@ -163,16 +163,16 @@ describe('solana rpc adapter', () => {
         expect(fetchMock).toHaveBeenCalledWith(RPC_ENDPOINTS.devnet, expect.objectContaining({ method: 'POST' }));
     });
 
-    it('should map DAS endpoint errors to SourceUnavailableError', async () => {
+    it('should resolve null for DAS JSON-RPC errors such as asset-not-found', async () => {
         const fetchMock = vi.fn().mockResolvedValue(
-            new Response(JSON.stringify({ error: { code: -32601 } }), {
+            new Response(JSON.stringify({ error: { code: -32000, message: 'Asset Not Found' } }), {
                 headers: { 'content-type': 'application/json' },
                 status: 200,
             }),
         );
         vi.stubGlobal('fetch', fetchMock);
 
-        await expect(client.fetchAsset('asset-id', 'devnet')).rejects.toBeInstanceOf(SourceUnavailableError);
+        await expect(client.fetchAsset('asset-id', 'devnet')).resolves.toBeNull();
     });
 
     it('should map non-OK DAS HTTP responses to SourceUnavailableError', async () => {

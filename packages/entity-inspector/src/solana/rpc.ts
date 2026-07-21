@@ -148,8 +148,10 @@ export function createRpcClient(rpcEndpoints: Record<SupportedCluster, string>):
                 throw new SourceUnavailableError('DAS endpoint is unavailable.');
             }
             const payload: { result?: unknown; error?: unknown } = await response.json();
+            // JSON-RPC-level errors (asset not found, method unsupported) are the normal outcome for
+            // non-NFT accounts — null, not a throw, keeps warn logs for genuine transport failures.
             if (payload.error !== undefined) {
-                throw new SourceUnavailableError('DAS method is unavailable.');
+                return null;
             }
             return payload.result;
         } catch (error) {
