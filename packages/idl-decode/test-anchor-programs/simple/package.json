@@ -1,0 +1,16 @@
+{
+    "name": "@explorer/test-idl-program-simple",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Buildable minimal Anchor program (anchor-lang 1.1.2): one account, one instruction argument, one error, one event — committed IDL and companion-type snapshots",
+    "exports": {
+        ".": "./target/idl/simple.json",
+        "./idl": "./simple.idl.json",
+        "./types": "./target/types/simple.ts",
+        "./generated-types": "./simple.ts"
+    },
+    "scripts": {
+        "build:anchor": "anchor build",
+        "copy:artifacts": "node ../copy-anchor-artifacts.mjs @explorer/test-idl-program-simple"
+    }
+}

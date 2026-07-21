@@ -256,7 +256,8 @@
             "ws@>=7.0.0 <7.5.10": "7.5.10"
         },
         "patchedDependencies": {
-            "@solana-developers/helpers@2.8.1": "patches/@solana-developers__helpers@2.8.1.patch"
+            "@solana-developers/helpers@2.8.1": "patches/@solana-developers__helpers@2.8.1.patch",
+            "@codama/nodes-from-anchor@1.3.8": "packages/idl-decode/patches/@codama__nodes-from-anchor@1.3.8.patch"
         },
         "ignoredBuiltDependencies": [
             "@fission-ai/openspec",

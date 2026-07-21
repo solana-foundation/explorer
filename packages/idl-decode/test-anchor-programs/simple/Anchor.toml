@@ -1,0 +1,18 @@
+[toolchain]
+anchor_version = "1.1.2"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+simple = "7u9qtZPjJcQ1jZsZxAGyRM4aGLNXqK5pzawpULopWFqB"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[hooks]

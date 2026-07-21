@@ -13,3 +13,4 @@ build/
 storybook-static/
 storybook-static-*/
 public/mockServiceWorker.js
+packages/idl-decode/

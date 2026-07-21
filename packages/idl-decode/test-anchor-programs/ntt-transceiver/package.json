@@ -1,0 +1,32 @@
+{
+    "name": "@explorer/test-idl-program-ntt-transceiver",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Legacy (pre-0.30) Anchor IDLs of the wormhole NTT 3.0.0 transceiver — two snapshots (9- and 6-instruction variants)",
+    "homepage": "https://github.com/wormhole-foundation/native-token-transfers/tree/main/solana/ts/idl/3_0_0",
+    "exports": {
+        ".": "./ntt-transceiver.idl.json",
+        "./idl": "./ntt-transceiver.idl.json",
+        "./legacy-idl": "./ntt-transceiver-legacy.idl.json",
+        "./generated-types": "./ntt-transceiver.ts"
+    },
+    "scripts": {
+        "download:idl": "node ../download-idl.mjs"
+    },
+    "explorer": {
+        "vendoredIdl": [
+            {
+                "source": "https://raw.githubusercontent.com/wormhole-foundation/native-token-transfers/main/solana/ts/idl/3_0_0/json/ntt_transceiver.json",
+                "target": "./ntt-transceiver.idl.json"
+            },
+            {
+                "source": "https://raw.githubusercontent.com/wormhole-foundation/native-token-transfers/main/solana/ts/idl/3_0_0/json/ntt_transceiver_legacy.json",
+                "target": "./ntt-transceiver-legacy.idl.json"
+            },
+            {
+                "source": "https://raw.githubusercontent.com/wormhole-foundation/native-token-transfers/main/solana/ts/idl/3_0_0/ts/ntt_transceiver.ts",
+                "target": "./ntt-transceiver.ts"
+            }
+        ]
+    }
+}
