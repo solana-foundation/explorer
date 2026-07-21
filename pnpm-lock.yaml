@@ -628,6 +628,24 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: 1.27.1
         version: 1.27.1(zod@4.3.6)
+      '@solana-program/address-lookup-table':
+        specifier: 0.11.0
+        version: 0.11.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+      '@solana-program/loader-v3':
+        specifier: 0.3.0
+        version: 0.3.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+      '@solana-program/token':
+        specifier: 0.13.0
+        version: 0.13.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+      '@solana-program/token-2022':
+        specifier: 0.9.0
+        version: 0.9.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))(@solana/sysvars@6.5.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3))
+      '@solana/kit':
+        specifier: 6.5.0
+        version: 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      sas-lib:
+        specifier: 1.0.8
+        version: 1.0.8(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(ws@8.21.0(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -4361,10 +4379,20 @@ packages:
   '@solana-mobile/wallet-standard-mobile@0.4.4':
     resolution: {integrity: sha512-LMvqkS5/aEH+EiDje9Dk351go6wO3POysgmobM4qm8RsG5s6rDAW3U0zA+5f2coGCTyRx8BKE1I/9nHlwtBuow==}
 
+  '@solana-program/address-lookup-table@0.11.0':
+    resolution: {integrity: sha512-loC6VTEhmhYSq2ElZrv+V9uHp/Te6A7rllLIArk9c3A5+5V7sRhVsxZvsPGcv/WMXLgqmXR+Vl7WF7QSV3tXNQ==}
+    peerDependencies:
+      '@solana/kit': ^6.0
+
   '@solana-program/compute-budget@0.15.0':
     resolution: {integrity: sha512-toejNdIkzpUTqLSIzP0Nofr/EFel8QpPWuTtIKzfCcjn+mXpkThHxPJaNesk251rSTiWaxDZ3WxG7RxYwTWTqA==}
     peerDependencies:
       '@solana/kit': ^6.3.0
+
+  '@solana-program/loader-v3@0.3.0':
+    resolution: {integrity: sha512-xEMQ+JOTKCInROozoTmHJk+atFxYSuLQ+KevKxpib+2uZzXV/Z58LqF9nYLKQpZMi8sk06CUeSsa9N0Hdiha1g==}
+    peerDependencies:
+      '@solana/kit': ^6.0.0
 
   '@solana-program/memo@0.11.0':
     resolution: {integrity: sha512-/WVM2y76hL5zWJJwaHsbvMREeIUzhKDHU+ftMXTf4aLPJFDKG6am4X5RID3CHsI3oYNEMywgVvsFdnorwgEuwA==}
@@ -10972,9 +11000,6 @@ packages:
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
-  undici-types@7.12.0:
-    resolution: {integrity: sha512-goOacqME2GYyOZZfb5Lgtu+1IDmAlAEu5xnD3+xTzS10hT0vzpf0SPjkXwAw9Jm+4n/mQGDP3LO8CPbYROeBfQ==}
-
   undici-types@7.25.0:
     resolution: {integrity: sha512-AXNgS1Byr27fTI+2bsPEkV9CxkT8H6xNyRI68b3TatlZo3RkzlqQBLL+w7SmGPVpokjHbcuNVQUWE7FRTg+LRA==}
 
@@ -15884,7 +15909,15 @@ snapshots:
       - react-native
       - typescript
 
+  '@solana-program/address-lookup-table@0.11.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
+    dependencies:
+      '@solana/kit': 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
+
   '@solana-program/compute-budget@0.15.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
+    dependencies:
+      '@solana/kit': 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
+
+  '@solana-program/loader-v3@0.3.0(@solana/kit@6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/kit': 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
 
@@ -16696,7 +16729,7 @@ snapshots:
       '@solana/rpc-spec': 2.3.0(typescript@5.7.3)
       '@solana/rpc-spec-types': 2.3.0(typescript@5.7.3)
       typescript: 5.7.3
-      undici-types: 7.12.0
+      undici-types: 7.25.0
 
   '@solana/rpc-transport-http@6.5.0(typescript@5.7.3)':
     dependencies:
@@ -24356,8 +24389,6 @@ snapshots:
       which-boxed-primitive: 1.1.1
 
   undici-types@6.21.0: {}
-
-  undici-types@7.12.0: {}
 
   undici-types@7.25.0: {}
 
