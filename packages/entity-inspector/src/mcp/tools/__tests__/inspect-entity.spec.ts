@@ -2,6 +2,15 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { InspectorLogger } from '../../../logger.js';
+import {
+    addressLookupTableRawProbe,
+    compressedNftDasAsset,
+    notFoundAccountProbe,
+    parsedAccountProbe,
+    unknownProgramAccountProbe,
+    upgradeableProgramDataProbe,
+    upgradeableProgramProbe,
+} from '../../../solana/__tests__/account-probe-fixtures.js';
 import { asRecord } from '../../../solana/parse-helpers.js';
 import { SourceUnavailableError } from '../../../solana/rpc.js';
 import { handleInspectEntity, type InspectEntityDependencies, splitBuilderErrors } from '../inspect-entity.js';
@@ -16,7 +25,7 @@ function createLoggerMock(): InspectorLogger {
 
 function createDependencies(overrides: Partial<InspectEntityDependencies> = {}): InspectEntityDependencies {
     return {
-        fetchAccountInfo: vi.fn().mockResolvedValue({ value: null }),
+        fetchAccountInfo: vi.fn().mockResolvedValue(notFoundAccountProbe()),
         fetchAsset: vi.fn().mockResolvedValue(null),
         logger: createLoggerMock(),
         ...overrides,
@@ -107,7 +116,7 @@ describe('inspect_entity handler', () => {
 
     it('should return NOT_FOUND for account probes with explicit null', async () => {
         const dependencies = createDependencies({
-            fetchAccountInfo: vi.fn().mockResolvedValue({ value: null }),
+            fetchAccountInfo: vi.fn().mockResolvedValue(notFoundAccountProbe()),
         });
 
         const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
@@ -174,14 +183,13 @@ describe('inspect_entity handler', () => {
     it('should skip DAS lookup when base account kind is already known', async () => {
         const fetchAsset = vi.fn();
         const dependencies = createDependencies({
-            fetchAccountInfo: vi.fn().mockResolvedValue({
-                value: {
-                    data: { parsed: {}, program: 'stake' },
-                    executable: false,
-                    lamports: 0,
+            fetchAccountInfo: vi.fn().mockResolvedValue(
+                parsedAccountProbe({
                     owner: 'Stake11111111111111111111111111111111111111',
-                },
-            }),
+                    parsed: {},
+                    program: 'stake',
+                }),
+            ),
             fetchAsset,
         });
 
@@ -195,35 +203,13 @@ describe('inspect_entity handler', () => {
         const executableDataAddress = 'DoU57AYuPfu2QU514RktNPG220AhpEjnKxnBcu4HDTY';
         const fetchAccountInfo = vi
             .fn()
-            .mockResolvedValueOnce({
-                value: {
-                    data: {
-                        parsed: { info: { programData: executableDataAddress }, type: 'program' },
-                        program: 'bpf-upgradeable-loader',
-                    },
-                    executable: true,
-                    lamports: 567591537,
-                    owner: 'BPFLoaderUpgradeab1e11111111111111111111111',
-                },
-            })
-            .mockResolvedValueOnce({
-                value: {
-                    data: {
-                        parsed: {
-                            info: {
-                                authority: 'AeLnXCBPaQHGWRLr2saFsEVfnMNuKixRAbWCT9P5twgZ',
-                                data: [btoa(String.fromCharCode(0)), 'base64'],
-                                slot: 395847597,
-                            },
-                            type: 'programData',
-                        },
-                        program: 'bpf-upgradeable-loader',
-                    },
-                    executable: false,
-                    lamports: 0,
-                    owner: 'BPFLoaderUpgradeab1e11111111111111111111111',
-                },
-            });
+            .mockResolvedValueOnce(upgradeableProgramProbe(executableDataAddress))
+            .mockResolvedValueOnce(
+                upgradeableProgramDataProbe({
+                    authority: 'AeLnXCBPaQHGWRLr2saFsEVfnMNuKixRAbWCT9P5twgZ',
+                    slot: 395847597,
+                }),
+            );
         const dependencies = createDependencies({ fetchAccountInfo });
 
         const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
@@ -245,20 +231,7 @@ describe('inspect_entity handler', () => {
     it('should keep the unsupported bpf payload when the second programData probe is unavailable', async () => {
         const fetchAccountInfo = vi
             .fn()
-            .mockResolvedValueOnce({
-                value: {
-                    data: {
-                        parsed: {
-                            info: { programData: 'DoU57AYuPfu2QU514RktNPG220AhpEjnKxnBcu4HDTY' },
-                            type: 'program',
-                        },
-                        program: 'bpf-upgradeable-loader',
-                    },
-                    executable: true,
-                    lamports: 567591537,
-                    owner: 'BPFLoaderUpgradeab1e11111111111111111111111',
-                },
-            })
+            .mockResolvedValueOnce(upgradeableProgramProbe('DoU57AYuPfu2QU514RktNPG220AhpEjnKxnBcu4HDTY'))
             .mockRejectedValueOnce(new SourceUnavailableError('probe timeout'));
         const dependencies = createDependencies({ fetchAccountInfo });
 
@@ -272,20 +245,9 @@ describe('inspect_entity handler', () => {
     });
 
     it('should promote unknown account to compressed-nft via DAS', async () => {
-        const fetchAsset = vi.fn().mockResolvedValue({
-            compression: { compressed: true, tree: 'tree-id' },
-            id: 'asset-id',
-            ownership: { owner: 'owner-id' },
-        });
+        const fetchAsset = vi.fn().mockResolvedValue(compressedNftDasAsset());
         const dependencies = createDependencies({
-            fetchAccountInfo: vi.fn().mockResolvedValue({
-                value: {
-                    data: { parsed: { type: 'other' }, program: 'unknown-program' },
-                    executable: false,
-                    lamports: 0,
-                    owner: 'UnknownOwner',
-                },
-            }),
+            fetchAccountInfo: vi.fn().mockResolvedValue(unknownProgramAccountProbe()),
             fetchAsset,
         });
 
@@ -303,14 +265,7 @@ describe('inspect_entity handler', () => {
     it('should fall back to unknown kind when DAS lookup fails', async () => {
         const logger = createLoggerMock();
         const dependencies = createDependencies({
-            fetchAccountInfo: vi.fn().mockResolvedValue({
-                value: {
-                    data: { parsed: { type: 'other' }, program: 'unknown-program' },
-                    executable: false,
-                    lamports: 0,
-                    owner: 'UnknownOwner',
-                },
-            }),
+            fetchAccountInfo: vi.fn().mockResolvedValue(unknownProgramAccountProbe()),
             fetchAsset: vi.fn().mockRejectedValue(new Error('das unavailable')),
             logger,
         });
@@ -332,14 +287,7 @@ describe('inspect_entity handler', () => {
     it('should warn through the console logger by default when DAS lookup fails', async () => {
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
         const dependencies = createDependencies({
-            fetchAccountInfo: vi.fn().mockResolvedValue({
-                value: {
-                    data: { parsed: { type: 'other' }, program: 'unknown-program' },
-                    executable: false,
-                    lamports: 0,
-                    owner: 'UnknownOwner',
-                },
-            }),
+            fetchAccountInfo: vi.fn().mockResolvedValue(unknownProgramAccountProbe()),
             fetchAsset: vi.fn().mockRejectedValue(new Error('das unavailable')),
             logger: undefined,
         });
@@ -354,16 +302,8 @@ describe('inspect_entity handler', () => {
 
     it('should classify ALT from raw bytes without DAS lookup', async () => {
         const fetchAsset = vi.fn();
-        const altBytes = btoa(String.fromCharCode(...new Uint8Array(56)));
         const dependencies = createDependencies({
-            fetchAccountInfo: vi.fn().mockResolvedValue({
-                value: {
-                    data: [altBytes, 'base64'],
-                    executable: false,
-                    lamports: 0,
-                    owner: 'AddressLookupTab1e1111111111111111111111111',
-                },
-            }),
+            fetchAccountInfo: vi.fn().mockResolvedValue(addressLookupTableRawProbe()),
             fetchAsset,
         });
 
@@ -380,14 +320,13 @@ describe('inspect_entity handler', () => {
     it('should thread resolveProgramName from dependencies into the payload context', async () => {
         const resolveProgramName = vi.fn().mockReturnValue('Token Program');
         const dependencies = createDependencies({
-            fetchAccountInfo: vi.fn().mockResolvedValue({
-                value: {
-                    data: { parsed: { type: 'mint' }, program: 'spl-token' },
-                    executable: false,
-                    lamports: 0,
+            fetchAccountInfo: vi.fn().mockResolvedValue(
+                parsedAccountProbe({
                     owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-                },
-            }),
+                    parsed: { type: 'mint' },
+                    program: 'spl-token',
+                }),
+            ),
             resolveProgramName,
         });
 
