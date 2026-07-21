@@ -27,9 +27,15 @@ export function RpcParsedTokenBatchCard({
 
     return (
         <BatchInstructionCard {...{ childIndex, index, innerCards, ix, result }} count={instructions.length}>
-            {instructions.map((sub, i) => (
-                <SubInstructionRowView key={i} index={i} typeName={sub.typeName} decoded={sub.decoded} />
-            ))}
+            {instructions.length === 0 ? (
+                <div className="text-sm text-neutral-500" data-testid="batch-empty">
+                    No sub-instructions found
+                </div>
+            ) : (
+                instructions.map((sub, i) => (
+                    <SubInstructionRowView key={i} index={i} typeName={sub.typeName} decoded={sub.decoded} />
+                ))
+            )}
         </BatchInstructionCard>
     );
 }
