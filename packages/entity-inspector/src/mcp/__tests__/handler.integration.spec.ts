@@ -146,9 +146,10 @@ describe('createMcpRequestHandler — real MCP SDK transport', () => {
         });
     });
 
-    it('should accept a config with a program name resolver', async () => {
+    it('should accept a config with a program name resolver and an instruction decode fallback', async () => {
         const handlerWithResolver = createMcpRequestHandler({
             ...TEST_CONFIG,
+            decodeInstructionFallback: () => undefined,
             resolveProgramName: () => undefined,
         });
         const response = await handlerWithResolver(

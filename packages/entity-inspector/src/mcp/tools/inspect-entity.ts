@@ -13,7 +13,10 @@ import {
 } from '../../solana/inspect-entity-classifier.js';
 import { asString } from '../../solana/parse-helpers.js';
 import { isSourceUnavailableError, type RpcClient } from '../../solana/rpc.js';
-import type { DasClassificationOutcome } from '../../solana/types.js';
+import { buildTransactionPayload } from '../../solana/transaction/build-payload.js';
+import { decodeTransactionInstructions } from '../../solana/transaction/decode-instructions.js';
+import { normalizeTransactionProbe } from '../../solana/transaction/normalizer.js';
+import type { DasClassificationOutcome, DecodeInstructionFallback } from '../../solana/types.js';
 import {
     currentlyUnsupported,
     internalError,
@@ -27,8 +30,11 @@ import { inspectEntityInputSchema } from '../schemas.js';
 
 // The source's resolver deps (verification/security/multisig/idl) return with the @explorer/idl-decode PR.
 export type InspectEntityDependencies = {
+    decodeInstructionFallback?: DecodeInstructionFallback;
     fetchAccountInfo: RpcClient['fetchAccountInfo'];
     fetchAsset: RpcClient['fetchAsset'];
+    fetchSignatureStatus: RpcClient['fetchSignatureStatus'];
+    fetchTransaction: RpcClient['fetchTransaction'];
     logger?: InspectorLogger;
     resolveProgramName?: (address: string) => string | undefined;
 };
@@ -129,6 +135,61 @@ async function resolveAccount(
     }
 }
 
+async function resolveTransaction(
+    identifier: string,
+    cluster: SupportedCluster,
+    dependencies: InspectEntityDependencies,
+): Promise<CallToolResult> {
+    const logger = dependencies.logger ?? consoleLogger;
+    try {
+        const [transactionProbe, signatureStatus] = await Promise.all([
+            dependencies.fetchTransaction(identifier, cluster),
+            // Confirmation detail is best-effort — its outage must not take down the whole lookup.
+            dependencies.fetchSignatureStatus(identifier, cluster).catch(error => {
+                logger.warn('[entity-inspector] inspect_entity signature status fetch failed', {
+                    error,
+                    identifier,
+                });
+                return null;
+            }),
+        ]);
+
+        const transactionContext = normalizeTransactionProbe(identifier, transactionProbe, signatureStatus, logger);
+        if (transactionContext === null) {
+            return toToolResult({
+                errors: [notFound()],
+                payload: toNotFoundPayload('transaction'),
+            });
+        }
+
+        const instructions = decodeTransactionInstructions(transactionContext, {
+            logger,
+            ...(dependencies.decodeInstructionFallback
+                ? { decodeInstructionFallback: dependencies.decodeInstructionFallback }
+                : {}),
+        });
+
+        return toToolResult({
+            errors: [],
+            payload: buildTransactionPayload(transactionContext, instructions),
+        });
+    } catch (error) {
+        logger.error('[entity-inspector] inspect_entity transaction resolution failed', { error, identifier });
+
+        if (isSourceUnavailableError(error)) {
+            return toToolResult({
+                errors: [internalError()],
+                payload: toSourceUnavailablePayload('transaction'),
+            });
+        }
+
+        return toToolResult({
+            errors: [internalError()],
+            payload: {},
+        });
+    }
+}
+
 export async function handleInspectEntity(
     rawInput: unknown,
     dependencies: InspectEntityDependencies,
@@ -155,9 +216,5 @@ export async function handleInspectEntity(
         return resolveAccount(input.identifier, input.cluster, dependencies);
     }
 
-    // Transaction path lands with plan Step 6 (normalizer + ALT + decode cascade).
-    return toToolResult({
-        errors: [currentlyUnsupported('transaction inspection is not supported yet')],
-        payload: { entity: { kind: 'transaction' } },
-    });
+    return resolveTransaction(input.identifier, input.cluster, dependencies);
 }

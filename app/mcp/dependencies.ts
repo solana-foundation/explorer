@@ -1,11 +1,38 @@
+// Deep import: the entity barrel re-exports the 'use client' provider, which this server-side module must not pull in.
+import { isParsedInstruction } from '@entities/instruction-parser/model/types';
 import type { EntityInspectorConfig, McpRequestHandler } from '@explorer/entity-inspector';
-import { clusterApiUrl } from '@solana/web3.js';
+import { getBase58Encoder } from '@solana/kit';
+import { clusterApiUrl, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 import { LOADER_IDS, PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
 
 const resolveProgramName: EntityInspectorConfig['resolveProgramName'] = address =>
     PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address];
+
+const decodeInstructionFallback: EntityInspectorConfig['decodeInstructionFallback'] = instruction => {
+    const dispatched = instructionParserDispatcher.fromTransactionInstruction(
+        new TransactionInstruction({
+            data: Buffer.from(getBase58Encoder().encode(instruction.data)),
+            keys: instruction.accounts.map(account => ({
+                isSigner: account.signer,
+                isWritable: account.writable,
+                pubkey: new PublicKey(account.address),
+            })),
+            programId: new PublicKey(instruction.programId),
+        }),
+    );
+    if (!isParsedInstruction(dispatched)) {
+        return undefined;
+    }
+    // Parser info carries PublicKey/BN instances; the wire format needs their JSON forms.
+    return {
+        info: JSON.parse(JSON.stringify(dispatched.parsed.info)),
+        program: dispatched.program,
+        type: dispatched.parsed.type,
+    };
+};
 
 const logger: EntityInspectorConfig['logger'] = {
     debug: (message, context) => Logger.debug(message, context),
@@ -42,5 +69,10 @@ export function getMcpRequestHandler(): Promise<McpRequestHandler> {
 
 async function importRequestHandler(): Promise<McpRequestHandler> {
     const { createMcpRequestHandler } = await import('@explorer/entity-inspector');
-    return createMcpRequestHandler({ logger, resolveProgramName, rpcEndpoints: resolveRpcEndpoints() });
+    return createMcpRequestHandler({
+        decodeInstructionFallback,
+        logger,
+        resolveProgramName,
+        rpcEndpoints: resolveRpcEndpoints(),
+    });
 }

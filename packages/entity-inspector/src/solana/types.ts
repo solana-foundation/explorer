@@ -22,16 +22,37 @@ export type CompiledInnerInstruction = {
     instructions: readonly CompiledInstruction[];
 };
 
+export type TransactionVersion = 'legacy' | 0 | null;
+
+export type ResolvedAccount = {
+    address: string;
+    signer: boolean;
+    writable: boolean;
+    source: 'static' | 'lookupTable';
+    lookupTableAddress?: string;
+};
+
+export type AddressTableLookup = {
+    accountKey: string;
+    writableIndexes: readonly number[];
+    readonlyIndexes: readonly number[];
+};
+
 export type TransactionProbeEnvelope = {
     slot: number | bigint;
     blockTime: number | bigint | null;
-    version?: 'legacy' | 0 | null;
+    // kit may deliver the numeric version as bigint; the normalizer narrows it to TransactionVersion.
+    version?: 'legacy' | number | bigint | null;
     meta: {
         err: unknown;
         fee: number | bigint;
         computeUnitsConsumed?: number | bigint | null;
         logMessages?: readonly string[] | null;
         innerInstructions?: readonly CompiledInnerInstruction[] | null;
+        loadedAddresses?: {
+            readonly writable: readonly string[];
+            readonly readonly: readonly string[];
+        } | null;
     } | null;
     transaction: {
         message: {
@@ -43,6 +64,7 @@ export type TransactionProbeEnvelope = {
             accountKeys: readonly (string | { pubkey: string })[];
             recentBlockhash?: string;
             instructions: readonly CompiledInstruction[];
+            addressTableLookups?: readonly AddressTableLookup[];
         };
     };
 } | null;
@@ -205,3 +227,98 @@ export type AccountPayloadContext = {
 
 /** A numeric value represented as a decimal string when it exceeds Number.MAX_SAFE_INTEGER — String(bigint) is exact, no precision loss. */
 export type SafeNumeric = number | string | null;
+
+type TransactionPayloadContextBase = {
+    signature: string;
+    slot: number;
+    blockTime: SafeNumeric;
+    feeLamports: SafeNumeric;
+    version: TransactionVersion;
+    computeUnitsConsumed: SafeNumeric;
+    logMessages: readonly string[] | null;
+    recentBlockhash: string | null;
+    confirmationStatus: ConfirmationStatus | null;
+    confirmations: number | 'max' | null;
+    accountKeys: string[];
+    resolvedAccounts: ResolvedAccount[];
+    numRequiredSignatures: number;
+    numReadonlySignedAccounts: number;
+    numReadonlyUnsignedAccounts: number;
+    instructions: readonly CompiledInstruction[];
+    innerInstructions: readonly CompiledInnerInstruction[] | null;
+};
+
+export type TransactionPayloadContext =
+    | (TransactionPayloadContextBase & { status: 'success'; err: null })
+    | (TransactionPayloadContextBase & {
+          status: 'failed';
+          /** Raw error from the RPC response. */
+          err: Record<string, unknown> | string | unknown[] | null;
+      })
+    | (TransactionPayloadContextBase & { status: 'unknown'; err: null });
+
+// 'idl' joins the union when @explorer/idl-decode is wired into the cascade.
+export type DecodedInstructionSource = 'bundled' | 'raw';
+
+export type DecodedInstructionInfo = {
+    /** Decoder-declared program label (e.g. 'spl-token'); omitted when the decoder has none. */
+    program?: string;
+    type: string;
+    info: unknown;
+};
+
+type TransactionInstructionEntryBase = {
+    program_id: string;
+    accounts: string[];
+    /** base58-encoded instruction data, as delivered by json-encoded getTransaction. */
+    data: string;
+    source: DecodedInstructionSource;
+    decoded?: DecodedInstructionInfo;
+};
+
+export type TransactionInstructionEntry = TransactionInstructionEntryBase & {
+    inner_instructions: TransactionInstructionEntryBase[];
+};
+
+export type FallbackInstructionAccount = {
+    address: string;
+    signer: boolean;
+    writable: boolean;
+};
+
+export type FallbackInstruction = {
+    programId: string;
+    accounts: FallbackInstructionAccount[];
+    /** base58-encoded instruction data. */
+    data: string;
+};
+
+/** Host-app decoder for programs the package has no built-in support for — `undefined` means "cannot decode". */
+export type DecodeInstructionFallback = (instruction: FallbackInstruction) => DecodedInstructionInfo | undefined;
+
+type TransactionPayloadEntityBase = {
+    kind: 'transaction';
+    signature: string;
+    slot: number;
+    block_time: SafeNumeric;
+    fee_lamports: SafeNumeric;
+    signers: string[];
+    transaction_version: TransactionVersion;
+    recent_blockhash: string | null;
+    compute_units_consumed: SafeNumeric;
+    confirmation_status: ConfirmationStatus | null;
+    confirmations: number | 'max' | null;
+    log_messages: readonly string[] | null;
+    accounts: ResolvedAccount[];
+    instructions: TransactionInstructionEntry[];
+};
+
+export type TransactionPayloadOutput = {
+    entity:
+        | (TransactionPayloadEntityBase & { status: 'success'; error: null })
+        | (TransactionPayloadEntityBase & {
+              status: 'failed';
+              error: Record<string, unknown> | string | unknown[] | null;
+          })
+        | (TransactionPayloadEntityBase & { status: 'unknown'; error: null });
+};

@@ -20,7 +20,7 @@ const INSPECT_ENTITY_DESCRIPTION = [
     '- "bpf-upgradeable-loader" / "bpf-loader" / "bpf-loader-2" / "loader-v4": Executable programs — currently unsupported; return a CURRENTLY_UNSUPPORTED error until IDL-based enrichment lands.',
     '- "unknown": Unrecognized account type.',
     '',
-    'TRANSACTIONS: not supported yet — 64-byte signatures return a CURRENTLY_UNSUPPORTED error.',
+    'TRANSACTIONS: 64-byte signatures return entity.kind "transaction" — slot, block time, fee, status, error, signers, accounts (v0 lookup-table addresses attributed via source/lookupTableAddress), and instructions with inner instructions. Recognized instructions (token batch and host-app-supported programs) carry a "decoded" object with source "bundled"; the rest stay base58 with source "raw".',
     '',
     'OUTPUT: Responses use { payload: { entity: { kind, ...fields } }, errors: [] }. Unresolvable fields return explicit unknown markers instead of being silently omitted.',
 ].join('\n');

@@ -15,7 +15,10 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
     const dependencies: InspectEntityDependencies = {
         fetchAccountInfo: rpcClient.fetchAccountInfo,
         fetchAsset: rpcClient.fetchAsset,
+        fetchSignatureStatus: rpcClient.fetchSignatureStatus,
+        fetchTransaction: rpcClient.fetchTransaction,
         logger,
+        ...(config.decodeInstructionFallback ? { decodeInstructionFallback: config.decodeInstructionFallback } : {}),
         ...(config.resolveProgramName ? { resolveProgramName: config.resolveProgramName } : {}),
     };
     return async request => {
