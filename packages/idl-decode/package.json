@@ -90,6 +90,11 @@
         "@solana/kit": "^6.5.0",
         "codama": "^1.5.0"
     },
+    "peerDependenciesMeta": {
+        "@solana-program/program-metadata": {
+            "optional": true
+        }
+    },
     "engines": {
         "node": ">=18"
     }
