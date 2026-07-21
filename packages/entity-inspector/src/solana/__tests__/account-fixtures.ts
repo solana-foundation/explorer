@@ -1,7 +1,7 @@
 import { ADDRESS_LOOKUP_TABLE_PROGRAM_ID, BPF_UPGRADEABLE_LOADER_PROGRAM_ID } from '../constants.js';
-import type { AccountProbeEnvelope } from '../types.js';
+import type { AccountProbeEnvelope, NormalizedAccountInfo } from '../types.js';
 
-// Constructors for RPC account-probe envelopes so specs assert behavior instead of hand-building raw response shapes.
+// Constructors for account fixtures (RPC probe envelopes + normalized accounts) so specs assert behavior instead of hand-building raw shapes.
 
 export function notFoundAccountProbe(): AccountProbeEnvelope {
     return { value: null };
@@ -32,12 +32,20 @@ export function parsedAccountProbe({
     };
 }
 
-export function rawAccountProbe({ bytes, owner }: { bytes: Uint8Array; owner: string }): AccountProbeEnvelope {
+export function rawAccountProbe({
+    bytes,
+    owner,
+    lamports = 0,
+}: {
+    bytes: Uint8Array;
+    owner: string;
+    lamports?: number | bigint;
+}): AccountProbeEnvelope {
     return {
         value: {
             data: [btoa(String.fromCharCode(...bytes)), 'base64'],
             executable: false,
-            lamports: 0,
+            lamports,
             owner,
         },
     };
@@ -58,18 +66,37 @@ export function upgradeableProgramProbe(programDataAddress: string): AccountProb
 export function upgradeableProgramDataProbe({
     authority,
     slot,
+    dataBase64 = btoa(String.fromCharCode(0)),
 }: {
     authority: string | null;
     slot: number;
+    dataBase64?: string;
 }): AccountProbeEnvelope {
     return parsedAccountProbe({
         owner: BPF_UPGRADEABLE_LOADER_PROGRAM_ID,
         parsed: {
-            info: { authority, data: [btoa(String.fromCharCode(0)), 'base64'], slot },
+            info: { authority, data: [dataBase64, 'base64'], slot },
             type: 'programData',
         },
         program: 'bpf-upgradeable-loader',
     });
+}
+
+/** A normalized upgradeable-program account awaiting its programData enrichment. */
+export function upgradeableProgramAccount(overrides?: Partial<NormalizedAccountInfo>): NormalizedAccountInfo {
+    return {
+        owner: BPF_UPGRADEABLE_LOADER_PROGRAM_ID,
+        parsedData: {
+            info: { programData: 'ProgramData111111111111111111111111111111111' },
+            type: 'program',
+        },
+        parsedProgram: 'bpf-upgradeable-loader',
+        programData: null,
+        programDataAddress: 'ProgramData111111111111111111111111111111111',
+        programDataStatus: 'missing',
+        rawDataBytes: null,
+        ...overrides,
+    };
 }
 
 export function unknownProgramAccountProbe(): AccountProbeEnvelope {

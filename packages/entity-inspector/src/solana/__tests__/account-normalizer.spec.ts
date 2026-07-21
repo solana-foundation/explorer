@@ -9,28 +9,18 @@ import {
     normalizeAccountProbe,
 } from '../account-normalizer.js';
 import { SourceUnavailableError } from '../rpc.js';
-import type { AccountProbeEnvelope, NormalizedAccountInfo } from '../types.js';
+import {
+    notFoundAccountProbe,
+    parsedAccountProbe,
+    rawAccountProbe,
+    upgradeableProgramAccount,
+    upgradeableProgramDataProbe,
+} from './account-fixtures.js';
 
 const BASE64_BYTES = btoa(String.fromCharCode(1, 2, 3, 4));
 
 function createLoggerMock(): InspectorLogger {
     return { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() };
-}
-
-function createUpgradeableProgramAccount(overrides?: Partial<NormalizedAccountInfo>): NormalizedAccountInfo {
-    return {
-        owner: 'BPFLoaderUpgradeab1e11111111111111111111111',
-        parsedData: {
-            info: { programData: 'ProgramData111111111111111111111111111111111' },
-            type: 'program',
-        },
-        parsedProgram: 'bpf-upgradeable-loader',
-        programData: null,
-        programDataAddress: 'ProgramData111111111111111111111111111111111',
-        programDataStatus: 'missing',
-        rawDataBytes: null,
-        ...overrides,
-    };
 }
 
 describe('inspect-entity account normalizer', () => {
@@ -67,24 +57,20 @@ describe('inspect-entity account normalizer', () => {
     });
 
     it('should return null when envelope value is null', () => {
-        expect(normalizeAccountProbe('addr', { value: null })).toBeNull();
+        expect(normalizeAccountProbe('addr', notFoundAccountProbe())).toBeNull();
     });
 
     it('should normalize account probes with parsed and raw fields', () => {
-        const parsedEnvelope: AccountProbeEnvelope = {
-            value: {
-                data: {
-                    parsed: {
-                        info: { programData: 'ProgramData1111111111111111111111111111111111' },
-                        type: 'program',
-                    },
-                    program: 'bpf-upgradeable-loader',
-                },
-                executable: true,
-                lamports: 99,
-                owner: 'Owner111111111111111111111111111111111111',
+        const parsedEnvelope = parsedAccountProbe({
+            executable: true,
+            lamports: 99,
+            owner: 'Owner111111111111111111111111111111111111',
+            parsed: {
+                info: { programData: 'ProgramData1111111111111111111111111111111111' },
+                type: 'program',
             },
-        };
+            program: 'bpf-upgradeable-loader',
+        });
 
         expect(normalizeAccountProbe('addr', parsedEnvelope)).toMatchObject({
             address: 'addr',
@@ -96,14 +82,10 @@ describe('inspect-entity account normalizer', () => {
             programDataStatus: 'missing',
         });
 
-        const rawEnvelope: AccountProbeEnvelope = {
-            value: {
-                data: [BASE64_BYTES, 'base64'],
-                executable: false,
-                lamports: 0,
-                owner: 'Owner111111111111111111111111111111111111',
-            },
-        };
+        const rawEnvelope = rawAccountProbe({
+            bytes: new Uint8Array([1, 2, 3, 4]),
+            owner: 'Owner111111111111111111111111111111111111',
+        });
 
         expect(normalizeAccountProbe('addr', rawEnvelope)).toMatchObject({
             rawDataBytes: new Uint8Array([1, 2, 3, 4]),
@@ -111,14 +93,11 @@ describe('inspect-entity account normalizer', () => {
     });
 
     it('should preserve large BigInt lamports as string', () => {
-        const envelope: AccountProbeEnvelope = {
-            value: {
-                data: ['', 'base64'],
-                executable: false,
-                lamports: 9_007_199_254_740_993n,
-                owner: 'Owner111111111111111111111111111111111111',
-            },
-        };
+        const envelope = rawAccountProbe({
+            bytes: new Uint8Array(0),
+            lamports: 9_007_199_254_740_993n,
+            owner: 'Owner111111111111111111111111111111111111',
+        });
 
         const result = normalizeAccountProbe('addr', envelope);
         expect(result?.lamports).toBe('9007199254740993');
@@ -169,7 +148,7 @@ describe('inspect-entity account normalizer', () => {
     });
 
     it('should pass through accounts that are not upgradeable programs', async () => {
-        const account = createUpgradeableProgramAccount({ parsedProgram: 'spl-token' });
+        const account = upgradeableProgramAccount({ parsedProgram: 'spl-token' });
         const fetchAccount = vi.fn();
 
         const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
@@ -179,7 +158,7 @@ describe('inspect-entity account normalizer', () => {
     });
 
     it('should mark accounts with already-parsed programData as resolved without fetching', async () => {
-        const account = createUpgradeableProgramAccount({
+        const account = upgradeableProgramAccount({
             programData: { authority: null, slot: 5 },
         });
         const fetchAccount = vi.fn();
@@ -191,7 +170,7 @@ describe('inspect-entity account normalizer', () => {
     });
 
     it('should mark accounts without a programData address as missing', async () => {
-        const account = createUpgradeableProgramAccount({ programDataAddress: null });
+        const account = upgradeableProgramAccount({ programDataAddress: null });
 
         const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', vi.fn());
 
@@ -199,25 +178,14 @@ describe('inspect-entity account normalizer', () => {
     });
 
     it('should preserve programDataRawBase64 when enriching upgradeable program data', async () => {
-        const account = createUpgradeableProgramAccount();
-        const fetchAccount = vi.fn().mockResolvedValue({
-            value: {
-                data: {
-                    parsed: {
-                        info: {
-                            authority: 'Auth11111111111111111111111111111111111111111',
-                            data: [BASE64_BYTES, 'base64'],
-                            slot: 100,
-                        },
-                        type: 'programData',
-                    },
-                    program: 'bpf-upgradeable-loader',
-                },
-                executable: false,
-                lamports: 0,
-                owner: 'BPFLoaderUpgradeab1e11111111111111111111111',
-            },
-        } satisfies AccountProbeEnvelope);
+        const account = upgradeableProgramAccount();
+        const fetchAccount = vi.fn().mockResolvedValue(
+            upgradeableProgramDataProbe({
+                authority: 'Auth11111111111111111111111111111111111111111',
+                dataBase64: BASE64_BYTES,
+                slot: 100,
+            }),
+        );
 
         const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
 
@@ -226,8 +194,8 @@ describe('inspect-entity account normalizer', () => {
     });
 
     it('should mark programData as missing when the fetched account does not exist', async () => {
-        const account = createUpgradeableProgramAccount();
-        const fetchAccount = vi.fn().mockResolvedValue({ value: null } satisfies AccountProbeEnvelope);
+        const account = upgradeableProgramAccount();
+        const fetchAccount = vi.fn().mockResolvedValue(notFoundAccountProbe());
 
         const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
 
@@ -235,15 +203,14 @@ describe('inspect-entity account normalizer', () => {
     });
 
     it('should mark programData as missing when the fetched account is not owned by the loader', async () => {
-        const account = createUpgradeableProgramAccount();
-        const fetchAccount = vi.fn().mockResolvedValue({
-            value: {
-                data: { parsed: { info: {}, type: 'programData' }, program: 'spl-token' },
-                executable: false,
-                lamports: 0,
+        const account = upgradeableProgramAccount();
+        const fetchAccount = vi.fn().mockResolvedValue(
+            parsedAccountProbe({
                 owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-            },
-        } satisfies AccountProbeEnvelope);
+                parsed: { info: {}, type: 'programData' },
+                program: 'spl-token',
+            }),
+        );
 
         const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
 
@@ -251,18 +218,14 @@ describe('inspect-entity account normalizer', () => {
     });
 
     it('should mark programData as missing when the fetched payload is incomplete', async () => {
-        const account = createUpgradeableProgramAccount();
-        const fetchAccount = vi.fn().mockResolvedValue({
-            value: {
-                data: {
-                    parsed: { info: { authority: null }, type: 'programData' },
-                    program: 'bpf-upgradeable-loader',
-                },
-                executable: false,
-                lamports: 0,
+        const account = upgradeableProgramAccount();
+        const fetchAccount = vi.fn().mockResolvedValue(
+            parsedAccountProbe({
                 owner: 'BPFLoaderUpgradeab1e11111111111111111111111',
-            },
-        } satisfies AccountProbeEnvelope);
+                parsed: { info: { authority: null }, type: 'programData' },
+                program: 'bpf-upgradeable-loader',
+            }),
+        );
 
         const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
 
@@ -271,7 +234,7 @@ describe('inspect-entity account normalizer', () => {
 
     it('should log a warning when fetchAccount throws SourceUnavailableError', async () => {
         const logger = createLoggerMock();
-        const account = createUpgradeableProgramAccount({
+        const account = upgradeableProgramAccount({
             address: 'Program111111111111111111111111111111111111',
         });
         const rpcError = new SourceUnavailableError('RPC down');
@@ -288,7 +251,7 @@ describe('inspect-entity account normalizer', () => {
 
     it('should return source_unavailable when fetchAccount throws non-SourceUnavailableError', async () => {
         const logger = createLoggerMock();
-        const account = createUpgradeableProgramAccount();
+        const account = upgradeableProgramAccount();
         const fetchAccount = vi.fn().mockRejectedValue(new TypeError('unexpected shape'));
 
         const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount, logger);

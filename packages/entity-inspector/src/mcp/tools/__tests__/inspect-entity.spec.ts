@@ -10,7 +10,7 @@ import {
     unknownProgramAccountProbe,
     upgradeableProgramDataProbe,
     upgradeableProgramProbe,
-} from '../../../solana/__tests__/account-probe-fixtures.js';
+} from '../../../solana/__tests__/account-fixtures.js';
 import { asRecord } from '../../../solana/parse-helpers.js';
 import { SourceUnavailableError } from '../../../solana/rpc.js';
 import { handleInspectEntity, type InspectEntityDependencies, splitBuilderErrors } from '../inspect-entity.js';
