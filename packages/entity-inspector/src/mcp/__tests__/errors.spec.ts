@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { z, ZodError } from 'zod';
 
 import {
     currentlyUnsupported,
@@ -14,6 +13,7 @@ import {
     sanitizeToolError,
     toToolResult,
 } from '../errors.js';
+import { emptyValidationError, fieldIssueValidationError, pathlessIssueValidationError } from './zod-fixtures.js';
 
 describe('MCP error taxonomy', () => {
     it('should define the supported tool error codes', () => {
@@ -26,34 +26,23 @@ describe('MCP error taxonomy', () => {
     });
 
     it('should map zod validation errors to INVALID_ARGUMENT', () => {
-        const schema = z.object({ id: z.string() });
-        const parseResult = schema.safeParse({ id: 123 });
-
-        if (parseResult.success) {
-            throw new Error('Expected schema parsing to fail for invalid input.');
-        }
-
-        expect(sanitizeToolError(parseResult.error)).toEqual({
+        expect(sanitizeToolError(fieldIssueValidationError())).toEqual({
             code: 'INVALID_ARGUMENT',
             message: expect.stringContaining('id:'),
         });
     });
 
     it('should keep the bare zod message when the issue has no path', () => {
-        const parseResult = z.string().safeParse(1);
+        const { error, issueMessage } = pathlessIssueValidationError();
 
-        if (parseResult.success) {
-            throw new Error('Expected schema parsing to fail for invalid input.');
-        }
-
-        const sanitized = sanitizeToolError(parseResult.error);
+        const sanitized = sanitizeToolError(error);
         expect(sanitized.code).toBe('INVALID_ARGUMENT');
         // No path → the issue message passes through without a "field:" prefix.
-        expect(sanitized.message).toBe(parseResult.error.issues[0]?.message);
+        expect(sanitized.message).toBe(issueMessage);
     });
 
     it('should fall back to the default message for zod errors without issues', () => {
-        expect(sanitizeToolError(new ZodError([]))).toEqual({
+        expect(sanitizeToolError(emptyValidationError())).toEqual({
             code: 'INVALID_ARGUMENT',
             message: DEFAULT_INVALID_ARGUMENT_MESSAGE,
         });
