@@ -1,0 +1,9 @@
+{
+    "name": "@explorer/test-idl-program-tokenkeg",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Full Codama root of the SPL Token (tokenkeg) program's PMP-published IDL (mainnet snapshot)",
+    "exports": {
+        "./idl": "./tokenkeg.pmp.idl.json"
+    }
+}

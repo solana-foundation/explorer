@@ -1,0 +1,27 @@
+{
+    "name": "@explorer/test-idl-program-dummy-transfer-hook",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Legacy (pre-0.30) Anchor IDL of the wormhole NTT 3.0.0 dummy transfer-hook example program",
+    "homepage": "https://github.com/wormhole-foundation/native-token-transfers/tree/main/solana/ts/idl/3_0_0",
+    "exports": {
+        ".": "./dummy-transfer-hook.idl.json",
+        "./idl": "./dummy-transfer-hook.idl.json",
+        "./generated-types": "./dummy-transfer-hook.ts"
+    },
+    "scripts": {
+        "download:idl": "node ../download-idl.mjs"
+    },
+    "explorer": {
+        "vendoredIdl": [
+            {
+                "source": "https://raw.githubusercontent.com/wormhole-foundation/native-token-transfers/main/solana/ts/idl/3_0_0/json/dummy_transfer_hook.json",
+                "target": "./dummy-transfer-hook.idl.json"
+            },
+            {
+                "source": "https://raw.githubusercontent.com/wormhole-foundation/native-token-transfers/main/solana/ts/idl/3_0_0/ts/dummy_transfer_hook.ts",
+                "target": "./dummy-transfer-hook.ts"
+            }
+        ]
+    }
+}

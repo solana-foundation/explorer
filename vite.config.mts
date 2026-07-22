@@ -60,7 +60,9 @@ export default defineConfig({
         conditions: ['browser', 'default'],
     },
     test: {
-        exclude: ['**/node_modules/**', '.claude/**', '.worktrees/**'],
+        // packages/** self-test via `pnpm test:packages` (own configs/environments) — the root sweep
+        // would double-run them under the app's jsdom env.
+        exclude: ['**/node_modules/**', '.claude/**', '.worktrees/**', 'packages/**'],
         projects: [
             {
                 extends: true,

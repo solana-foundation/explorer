@@ -1,0 +1,35 @@
+{
+    "name": "@explorer/test-idl-program-example-native-token-transfers",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Legacy (pre-0.30) Anchor IDL of wormhole NTT 3.0.0 (mainnet), plus its anchor companion type and a generated Codama literal",
+    "homepage": "https://github.com/wormhole-foundation/native-token-transfers/tree/main/solana/ts/idl/3_0_0",
+    "exports": {
+        ".": "./example-native-token-transfers.idl.json",
+        "./idl": "./example-native-token-transfers.idl.json",
+        "./generated-types": "./example-native-token-transfers.ts",
+        "./codama": "./example-native-token-transfers.codama.ts"
+    },
+    "scripts": {
+        "download:idl": "node ../download-idl.mjs",
+        "generate:codama": "node ../generate-codama.mjs"
+    },
+    "explorer": {
+        "codamaFromAnchor": {
+            "source": "./example-native-token-transfers.idl.json",
+            "target": "./example-native-token-transfers.codama.ts",
+            "exportName": "exampleNativeTokenTransfersIdl",
+            "programAddress": "nttiK1SepaQt6sZ4WGW5whvc9tEnGXGxuKeptcQPCcS"
+        },
+        "vendoredIdl": [
+            {
+                "source": "https://raw.githubusercontent.com/wormhole-foundation/native-token-transfers/main/solana/ts/idl/3_0_0/json/example_native_token_transfers.json",
+                "target": "./example-native-token-transfers.idl.json"
+            },
+            {
+                "source": "https://raw.githubusercontent.com/wormhole-foundation/native-token-transfers/main/solana/ts/idl/3_0_0/ts/example_native_token_transfers.ts",
+                "target": "./example-native-token-transfers.ts"
+            }
+        ]
+    }
+}

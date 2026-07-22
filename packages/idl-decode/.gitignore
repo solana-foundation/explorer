@@ -1,0 +1,8 @@
+node_modules
+/coverage
+/dist
+.anchor/
+target/
+test-ledger/
+# emitted from the codama-fixtures pin by scripts/generate-codama-types.mjs
+/__tests__/generated/

@@ -1,0 +1,10 @@
+{
+    "name": "@explorer/test-idl-program-vault",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Synthetic hand-authored Codama root for tests (one instruction, one size-identified account) — no real program behind it",
+    "exports": {
+        ".": "./vault.ts",
+        "./idl": "./vault.idl.json"
+    }
+}
