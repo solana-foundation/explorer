@@ -1,4 +1,10 @@
-// Façade — the System instruction schemas moved to @explorer/parsers with the decoder; app import paths stay stable.
+export { systemInstructionParser } from './client.js';
+export {
+    parseSystemInstruction,
+    parseSystemRpcInstruction,
+    SYSTEM_PROGRAM_LABEL,
+    type SystemParsed,
+} from './parser.js';
 export {
     AdvanceNonceInfo,
     AllocateInfo,
@@ -14,4 +20,4 @@ export {
     TransferWithSeedInfo,
     UpgradeNonceInfo,
     WithdrawNonceInfo,
-} from '@explorer/parsers/programs/system';
+} from './validators.js';

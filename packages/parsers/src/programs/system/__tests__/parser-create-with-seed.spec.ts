@@ -3,11 +3,16 @@ import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.j
 import { getCreateAccountWithSeedInstructionDataEncoder } from '@solana-program/system';
 import { describe, expect, test } from 'vitest';
 
-import type { CreateAccountWithSeedInfo } from '@/app/components/instruction/system/types';
-import { invariant } from '@/app/shared/lib/invariant';
-import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
+import { toKitInstruction } from '../../../compat/web3js.js';
+import { parseSystemInstruction } from '../parser.js';
+import type { CreateAccountWithSeedInfo } from '../validators.js';
 
-import { parseSystemInstruction } from '../lib/system-parser';
+// Local copy of the app's invariant helper — the package carries no app imports.
+function invariant(condition: unknown, message: string): asserts condition {
+    if (!condition) {
+        throw new Error(message);
+    }
+}
 
 function createCreateAccountWithSeedData(params: {
     base: PublicKey;

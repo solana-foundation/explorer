@@ -1,10 +1,10 @@
 // Token batch (discriminator 0xff) decodes in-package: the host app's fallback dispatcher does not
 // handle it (the app routes batch at UI level), so relying on the fallback would drop batch to raw.
-import { AccountRole, type AccountMeta, address as assertAddress, getBase58Encoder } from '@solana/kit';
 import { parseBatchInstruction, TOKEN_PROGRAM_ADDRESS, TokenInstruction } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
 import type { DecodedInstructionInfo, FallbackInstruction, FallbackInstructionAccount } from '../types.js';
+import { toKitInstruction } from './to-kit-instruction.js';
 
 export const TOKEN_BATCH_DISCRIMINATOR = 0xff;
 
@@ -25,17 +25,6 @@ function tokenBatchProgramLabel(programId: string): string | undefined {
     return undefined;
 }
 
-function toAccountMeta(account: FallbackInstructionAccount): AccountMeta {
-    const role = account.signer
-        ? account.writable
-            ? AccountRole.WRITABLE_SIGNER
-            : AccountRole.READONLY_SIGNER
-        : account.writable
-          ? AccountRole.WRITABLE
-          : AccountRole.READONLY;
-    return { address: assertAddress(account.address), role };
-}
-
 /**
  * Decodes an SPL Token / Token-2022 batch instruction into its sub-instructions. `undefined` means
  * "not a batch instruction" (cascade continues); malformed batch data throws.
@@ -49,16 +38,12 @@ export function decodeTokenBatchInstruction(instruction: FallbackInstruction): D
         return undefined;
     }
 
-    const data = getBase58Encoder().encode(instruction.data);
-    if (data.length < 1 || data[0] !== TOKEN_BATCH_DISCRIMINATOR) {
+    const kitInstruction = toKitInstruction(instruction);
+    if (kitInstruction.data.length < 1 || kitInstruction.data[0] !== TOKEN_BATCH_DISCRIMINATOR) {
         return undefined;
     }
 
-    const parsed = parseBatchInstruction({
-        accounts: instruction.accounts.map(toAccountMeta),
-        data,
-        programAddress: assertAddress(instruction.programId),
-    });
+    const parsed = parseBatchInstruction(kitInstruction);
 
     const accountOffsets = parsed.data.data.reduce<number[]>(
         (offsets, entry, i) => [...offsets, offsets[i] + entry.numberOfAccounts],

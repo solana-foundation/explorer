@@ -1,8 +1,8 @@
 import { type Address, isAddress } from '@solana/kit';
-import { PublicKey } from '@solana/web3.js';
-import { coerce, define, instance, string } from 'superstruct';
+import { define } from 'superstruct';
 
-export const PublicKeyFromString = coerce(instance(PublicKey), string(), value => new PublicKey(value));
+// Moved to the package's transitional web3.js layer alongside the schemas that consume it.
+export { PublicKeyFromString } from '@explorer/parsers/compat';
 
 // Kit-native counterpart: validates and brands a base58 string into a kit `Address` without
 // constructing a heavy web3.js `PublicKey`. Prefer this for new code.

@@ -233,6 +233,62 @@ describe('decodeTransactionInstructions', () => {
         });
     });
 
+    it('should fall past an unrecognized system discriminator to the fallback', () => {
+        const SYSTEM_PROGRAM = '11111111111111111111111111111111';
+        const accounts = [
+            staticAccount('So11111111111111111111111111111111111111112', { signer: true, writable: true }),
+            staticAccount(SYSTEM_PROGRAM),
+        ];
+        const decodeInstructionFallback = vi.fn().mockReturnValue({ info: {}, type: 'opaque' });
+
+        const entries = decodeTransactionInstructions(
+            makeContext({
+                accountKeys: accounts.map(account => account.address),
+                instructions: [
+                    {
+                        accounts: [0],
+                        data: getBase58Decoder().decode(new Uint8Array([250, 0, 0, 0])),
+                        programIdIndex: 1,
+                    },
+                ],
+                resolvedAccounts: accounts,
+            }),
+            { decodeInstructionFallback, logger },
+        );
+
+        expect(decodeInstructionFallback).toHaveBeenCalledTimes(1);
+        expect(entries[0]).toMatchObject({ decoded: { info: {}, type: 'opaque' }, source: 'bundled' });
+    });
+
+    it('should warn and continue when the bundled decoder cannot rebuild the instruction', () => {
+        const SYSTEM_PROGRAM = '11111111111111111111111111111111';
+        const accounts = [
+            staticAccount('not-a-valid-address', { signer: true, writable: true }),
+            staticAccount(SYSTEM_PROGRAM),
+        ];
+
+        const entries = decodeTransactionInstructions(
+            makeContext({
+                accountKeys: accounts.map(account => account.address),
+                instructions: [
+                    {
+                        accounts: [0],
+                        data: getBase58Decoder().decode(new Uint8Array([2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0])),
+                        programIdIndex: 1,
+                    },
+                ],
+                resolvedAccounts: accounts,
+            }),
+            { logger },
+        );
+
+        expect(logger.warn).toHaveBeenCalledWith(
+            '[entity-inspector] bundled instruction decode failed',
+            expect.objectContaining({ programId: SYSTEM_PROGRAM }),
+        );
+        expect(entries[0].source).toBe('raw');
+    });
+
     it('should fall past a malformed token batch to the fallback and warn', () => {
         const accounts = [
             staticAccount('So11111111111111111111111111111111111111112', { signer: true, writable: true }),

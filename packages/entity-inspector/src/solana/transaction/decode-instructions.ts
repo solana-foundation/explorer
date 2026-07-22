@@ -1,5 +1,6 @@
-// The per-instruction decode cascade (D7): in-package token batch → injected host-app fallback →
-// raw, with source attribution. The IDL rung lands with the @explorer/idl-decode wiring.
+// The per-instruction decode cascade (D7): in-package token batch → bundled @explorer/parsers
+// decoders → injected host-app fallback → raw, with source attribution. The IDL rung lands with the
+// @explorer/idl-decode wiring.
 import type { InspectorLogger } from '../../logger.js';
 import type {
     CompiledInstruction,
@@ -10,6 +11,7 @@ import type {
     TransactionInstructionEntry,
     TransactionPayloadContext,
 } from '../types.js';
+import { decodeBundledInstruction } from './bundled-parsers.js';
 import { decodeTokenBatchInstruction } from './token-batch.js';
 
 export type DecodeInstructionsDependencies = {
@@ -41,6 +43,18 @@ function runDecodeCascade(
         }
     } catch (error) {
         dependencies.logger.warn('[entity-inspector] token batch instruction decode failed', {
+            error,
+            programId: instruction.programId,
+        });
+    }
+
+    try {
+        const bundledDecoded = decodeBundledInstruction(instruction);
+        if (bundledDecoded) {
+            return { decoded: bundledDecoded, source: 'bundled' };
+        }
+    } catch (error) {
+        dependencies.logger.warn('[entity-inspector] bundled instruction decode failed', {
             error,
             programId: instruction.programId,
         });
