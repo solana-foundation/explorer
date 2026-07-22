@@ -83,7 +83,9 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(Connection).mockImplementation(() => mockConnection as unknown as Connection);
+    vi.mocked(Connection).mockImplementation(function () {
+        return mockConnection as unknown as Connection;
+    });
     vi.stubGlobal('fetch', fetchMock);
     // Fallback response; tests queue page-specific results with mockResult (once).
     fetchMock.mockResolvedValue({
