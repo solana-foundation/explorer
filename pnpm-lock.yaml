@@ -124,6 +124,9 @@ importers:
       '@explorer/entity-inspector':
         specifier: workspace:*
         version: link:packages/entity-inspector
+      '@explorer/parsers':
+        specifier: workspace:*
+        version: link:packages/parsers
       '@fast-csv/format':
         specifier: 5.0.5
         version: 5.0.5
@@ -796,6 +799,34 @@ importers:
   packages/idl-decode/test-codama-programs/tokenkeg: {}
 
   packages/idl-decode/test-codama-programs/vault: {}
+
+  packages/parsers:
+    dependencies:
+      '@solana/kit':
+        specifier: 6.5.0
+        version: 6.5.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@solana/web3.js':
+        specifier: 1.98.4
+        version: 1.98.4(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)
+    devDependencies:
+      '@vitest/coverage-v8':
+        specifier: catalog:vitest
+        version: 4.1.8(@vitest/browser@4.1.8)(vitest@4.1.8)
+      agadoo:
+        specifier: ^3.0.0
+        version: 3.0.0
+      oxfmt:
+        specifier: ^0.56.0
+        version: 0.56.0
+      oxlint:
+        specifier: ^1.71.0
+        version: 1.72.0
+      typescript:
+        specifier: catalog:tooling
+        version: 5.7.3
+      vitest:
+        specifier: catalog:vitest
+        version: 4.1.8(@opentelemetry/api@1.9.0)(@types/node@22.15.3)(@vitest/browser-playwright@4.1.8)(@vitest/coverage-v8@4.1.8)(jsdom@26.0.0(bufferutil@4.0.7)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.15.3)(typescript@5.7.3))(vite@6.3.6(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
 
 packages:
 

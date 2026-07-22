@@ -1,0 +1,23 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["import", "oxc", "typescript", "unicorn"],
+    "categories": {
+        "correctness": "error",
+        "suspicious": "error"
+    },
+    "rules": {
+        "typescript/consistent-type-assertions": ["error", { "assertionStyle": "never" }],
+        "typescript/no-explicit-any": "error",
+        "typescript/no-non-null-assertion": "error"
+    },
+    "overrides": [
+        {
+            "files": ["**/__tests__/**/*.ts"],
+            "rules": {
+                "no-new": "off",
+                "typescript/consistent-type-assertions": "off"
+            }
+        }
+    ],
+    "ignorePatterns": ["dist/**", "node_modules/**"]
+}

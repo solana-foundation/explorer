@@ -1,7 +1,7 @@
-// Deep lib/model imports throughout: the slice barrels also export 'use client' UI cards (and the
-// entity barrel the React provider), which server consumers of this dispatcher (the /mcp route)
-// must not pull in.
-import { createInstructionParserDispatcher } from '@entities/instruction-parser/model/dispatcher';
+// Deep lib imports for the slices: their barrels also export 'use client' UI cards, which server
+// consumers of this dispatcher (the /mcp route) must not pull in. The contract itself is React-free
+// in @explorer/parsers.
+import { createInstructionParserDispatcher } from '@explorer/parsers';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token/lib/associated-token-client';
 import { bpfUpgradeableLoaderInstructionParser } from '@features/decode-instruction-bpf-upgradeable-loader/lib/bpf-upgradeable-loader-client';
 import { lighthouseInstructionParser } from '@features/decode-instruction-lighthouse/lib/lighthouse-client';

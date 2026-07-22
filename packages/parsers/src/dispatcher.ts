@@ -1,7 +1,6 @@
-import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
-
-import { toParsedInstruction } from './compat';
-import type { InstructionParser, InstructionParserDispatcher } from './types';
+import { toParsedInstruction } from './compat/to-parsed.js';
+import { toKitInstruction } from './compat/web3js.js';
+import type { InstructionParser, InstructionParserDispatcher } from './types.js';
 
 /**
  * Build a dispatcher that routes TransactionInstructions and pre-parsed
@@ -55,7 +54,11 @@ export function createInstructionParserDispatcher(parsers: readonly InstructionP
             // Legacy -> kit conversion happens once per dispatch.
             const sliceParsed = parser.fromTransaction(toKitInstruction(ix));
             if (!sliceParsed) {
-                return { programId: ix.programId, programLabel: parser.programLabel, unknown: true };
+                return {
+                    programId: ix.programId,
+                    programLabel: parser.programLabel,
+                    unknown: true,
+                };
             }
             return toParsedInstruction(sliceParsed, parser.programLabel, ix.programId);
         },

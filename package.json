@@ -47,6 +47,7 @@
         "@explorer/decoder-mango": "workspace:*",
         "@explorer/decoder-serum": "workspace:*",
         "@explorer/entity-inspector": "workspace:*",
+        "@explorer/parsers": "workspace:*",
         "@fast-csv/format": "5.0.5",
         "@mantine/hooks": "7.17.3",
         "@metaplex-foundation/mpl-token-metadata": "3.4.0",

@@ -1,6 +1,5 @@
-// Deep import: the entity barrel re-exports the 'use client' provider, which this server-side module must not pull in.
-import { isParsedInstruction } from '@entities/instruction-parser/model/types';
 import type { EntityInspectorConfig, McpRequestHandler } from '@explorer/entity-inspector';
+import { isParsedInstruction } from '@explorer/parsers';
 import { getBase58Encoder } from '@solana/kit';
 import { clusterApiUrl, PublicKey, TransactionInstruction } from '@solana/web3.js';
 

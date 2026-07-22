@@ -1,8 +1,7 @@
 'use client';
 
+import type { InstructionParserDispatcher } from '@explorer/parsers';
 import React, { createContext, useContext } from 'react';
-
-import type { InstructionParserDispatcher } from './types';
 
 const InstructionParserContext = createContext<InstructionParserDispatcher | undefined>(undefined);
 

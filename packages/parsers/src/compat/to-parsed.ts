@@ -9,7 +9,7 @@ import {
     type VersionedMessage,
 } from '@solana/web3.js';
 
-import type { ParsedInstructionInfo } from './types';
+import type { ParsedInstructionInfo } from '../types.js';
 
 // Compat shims that let inspector input flow through cards designed for the
 // tx-page's `ParsedTransaction` / `ParsedInstruction` prop shape. Phase 5

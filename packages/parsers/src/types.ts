@@ -1,6 +1,6 @@
 import type { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
-import type { KitInstruction } from '@/app/shared/lib/web3js-compat';
+import type { KitInstruction } from './kit-instruction.js';
 
 /**
  * The set of `programLabel` values a decoder slice (`InstructionParser`) may
