@@ -6,8 +6,6 @@ import { InstructionDetails } from '@components/common/InstructionDetails';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
-import { isMangoInstruction, parseMangoInstructionTitle } from '@components/instruction/mango/types';
-import { isSerumInstruction, parseSerumInstructionTitle } from '@components/instruction/serum/types';
 import {
     isTokenLendingInstruction,
     parseTokenLendingInstructionTitle,
@@ -15,6 +13,8 @@ import {
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
+import { isMangoInstruction, parseMangoInstructionTitle } from '@explorer/decoder-mango/detection';
+import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
 import { isTokenProgramData } from '@providers/accounts';
 import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts/history';
 import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';

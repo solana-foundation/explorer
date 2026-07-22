@@ -6,7 +6,7 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { FetchStatus } from '@providers/cache';
-import { useCluster } from '@providers/cluster';
+import { useCluster, useClusterInfo } from '@providers/cluster';
 import { useEpoch, useFetchEpoch } from '@providers/epoch';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestampUtc } from '@utils/date';
@@ -46,7 +46,8 @@ export default function EpochDetailsPageClient({ params: { epoch } }: Props) {
 type OverviewProps = { epoch: number };
 
 function EpochOverviewCard({ epoch }: OverviewProps) {
-    const { status, clusterInfo } = useCluster();
+    const { status } = useCluster();
+    const clusterInfo = useClusterInfo();
 
     const epochState = useEpoch(epoch);
     const fetchEpoch = useFetchEpoch();

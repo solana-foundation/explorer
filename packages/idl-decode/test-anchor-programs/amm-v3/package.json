@@ -1,0 +1,11 @@
+{
+    "name": "@explorer/test-idl-program-amm-v3",
+    "version": "0.0.0",
+    "private": true,
+    "description": "amm_v3 IDL in Anchor v0.1 shape — the app's legacy conversion of the on-chain 0.29 IDL; its spec-correct alias typedef pins the nodes-from-anchor patch",
+    "exports": {
+        ".": "./amm-v3.idl.json",
+        "./idl": "./amm-v3.idl.json",
+        "./generated-types": "./amm-v3.ts"
+    }
+}

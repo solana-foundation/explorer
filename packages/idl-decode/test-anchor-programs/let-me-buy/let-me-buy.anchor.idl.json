@@ -1,0 +1,839 @@
+{
+  "address": "BUYuxRfhCMWavaUWxhGtPP3ksKEDZxCD5gzknk3JfAya",
+  "metadata": {
+    "name": "let_me_buy",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Setup any store and let people pay via Qr Codes on letmebuy.app"
+  },
+  "instructions": [
+    {
+      "name": "add_product",
+      "discriminator": [
+        0,
+        219,
+        137,
+        36,
+        105,
+        180,
+        164,
+        93
+      ],
+      "accounts": [
+        {
+          "name": "receipts",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "store_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "store_name",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "delete_product",
+      "discriminator": [
+        173,
+        212,
+        141,
+        230,
+        33,
+        82,
+        166,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "receipts",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "store_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "store_name",
+          "type": "string"
+        },
+        {
+          "name": "product_name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "delete_store",
+      "discriminator": [
+        150,
+        83,
+        75,
+        192,
+        195,
+        29,
+        178,
+        183
+      ],
+      "accounts": [
+        {
+          "name": "receipts",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "store_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "store_name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "receipts",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "store_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "store_name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "make_purchase",
+      "discriminator": [
+        193,
+        62,
+        227,
+        136,
+        105,
+        212,
+        201,
+        20
+      ],
+      "accounts": [
+        {
+          "name": "receipts",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "store_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "authority",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "sender_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "signer"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "recipient_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "authority"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
+        {
+          "name": "store_name",
+          "type": "string"
+        },
+        {
+          "name": "product_name",
+          "type": "string"
+        },
+        {
+          "name": "table_number",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "mark_as_delivered",
+      "discriminator": [
+        112,
+        46,
+        230,
+        68,
+        152,
+        97,
+        194,
+        62
+      ],
+      "accounts": [
+        {
+          "name": "receipts",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "store_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "_store_name",
+          "type": "string"
+        },
+        {
+          "name": "receipt_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "update_details",
+      "discriminator": [
+        245,
+        102,
+        156,
+        21,
+        212,
+        18,
+        54,
+        13
+      ],
+      "accounts": [
+        {
+          "name": "receipts",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "store_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "store_name",
+          "type": "string"
+        },
+        {
+          "name": "details",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "update_telegram_channel",
+      "discriminator": [
+        125,
+        26,
+        242,
+        114,
+        17,
+        12,
+        103,
+        200
+      ],
+      "accounts": [
+        {
+          "name": "receipts",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "store_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "store_name",
+          "type": "string"
+        },
+        {
+          "name": "telegram_channel_id",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Receipts",
+      "discriminator": [
+        222,
+        245,
+        237,
+        64,
+        59,
+        49,
+        29,
+        246
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "PurchaseMade",
+      "discriminator": [
+        73,
+        37,
+        99,
+        22,
+        201,
+        228,
+        56,
+        21
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidTreasury",
+      "msg": "InvalidTreasury"
+    },
+    {
+      "code": 6001,
+      "name": "ProductAlreadyExists",
+      "msg": "ProductAlreadyExists"
+    },
+    {
+      "code": 6002,
+      "name": "ProductNotFound",
+      "msg": "ProductNotFound"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidMint",
+      "msg": "InvalidMint"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidAuthority",
+      "msg": "InvalidAuthority"
+    },
+    {
+      "code": 6005,
+      "name": "StoreNotEmpty",
+      "msg": "StoreNotEmpty"
+    },
+    {
+      "code": 6006,
+      "name": "ProductNameEmpty",
+      "msg": "ProductNameEmpty"
+    },
+    {
+      "code": 6007,
+      "name": "StringTooLong",
+      "msg": "StringTooLong"
+    },
+    {
+      "code": 6008,
+      "name": "VectorLimitReached",
+      "msg": "VectorLimitReached"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidStoreName",
+      "msg": "InvalidStoreName"
+    }
+  ],
+  "types": [
+    {
+      "name": "Products",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "price",
+            "type": "u64"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PurchaseMade",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "product_name",
+            "type": "string"
+          },
+          {
+            "name": "price",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "table_number",
+            "type": "u8"
+          },
+          {
+            "name": "receipt_id",
+            "type": "u64"
+          },
+          {
+            "name": "telegram_channel_id",
+            "type": "string"
+          },
+          {
+            "name": "store_name",
+            "type": "string"
+          },
+          {
+            "name": "receipts_account",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Receipt",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "receipt_id",
+            "type": "u64"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "was_delivered",
+            "type": "bool"
+          },
+          {
+            "name": "price",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "table_number",
+            "type": "u8"
+          },
+          {
+            "name": "product_name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Receipts",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "receipts",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Receipt"
+                }
+              }
+            }
+          },
+          {
+            "name": "total_purchases",
+            "type": "u64"
+          },
+          {
+            "name": "store_name",
+            "type": "string"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "products",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Products"
+                }
+              }
+            }
+          },
+          {
+            "name": "telegram_channel_id",
+            "type": "string"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "details",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}

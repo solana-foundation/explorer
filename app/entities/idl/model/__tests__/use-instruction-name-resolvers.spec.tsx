@@ -49,7 +49,9 @@ describe('useInstructionNameResolvers', () => {
             });
         }),
     );
-    afterEach(() => vi.restoreAllMocks());
+    // Vitest 4: vi.restoreAllMocks() no longer clears call history, so clear the
+    // shared fetch mock between tests to keep toHaveBeenCalledWith assertions scoped.
+    afterEach(() => vi.clearAllMocks());
 
     it('should build a resolver that names an instruction by discriminator', async () => {
         const { result } = render([VOTING]);

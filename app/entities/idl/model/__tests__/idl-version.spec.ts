@@ -1,6 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
-import { getIdlVersion, type SupportedIdl } from '../idl-version';
+import { type SupportedIdl } from '../../lib/types';
+import { getIdlBadgeLabel, getIdlFormatVersion, getIdlVersion } from '../idl-version';
 import { isIdlProgramIdMismatch, isInteractiveIdlSupported } from '../interactive-idl';
 
 const DEFAULT_PUBKEY = PublicKey.default.toString();
@@ -51,6 +52,35 @@ describe('getIdlVersion', () => {
     it('should return codama version for Codama IDL', () => {
         const idl = createMockIdl('codama', '1.2.3');
         expect(getIdlVersion(idl)).toBe('1.2.3');
+    });
+});
+
+describe('getIdlFormatVersion', () => {
+    it('should return the root version for Codama IDL', () => {
+        expect(getIdlFormatVersion(createMockIdl('codama', '1.2.3'))).toBe('1.2.3');
+    });
+
+    it('should return metadata.spec for modern Anchor IDL', () => {
+        expect(getIdlFormatVersion(createMockIdl('anchor', '0.1.0'))).toBe('0.1.0');
+    });
+
+    it('should return null for legacy Anchor IDL (no spec)', () => {
+        expect(getIdlFormatVersion(createMockIdl('legacy'))).toBeNull();
+        expect(getIdlFormatVersion(createAnchorIdlWithoutSpec())).toBeNull();
+    });
+});
+
+describe('getIdlBadgeLabel', () => {
+    it('should render "Codama (version X)" for Codama IDL', () => {
+        expect(getIdlBadgeLabel(createMockIdl('codama', '1.5.1'))).toBe('Codama (version 1.5.1)');
+    });
+
+    it('should render "Anchor 0.30.1 (version X)" for modern Anchor IDL', () => {
+        expect(getIdlBadgeLabel(createMockIdl('anchor', '0.1.0'))).toBe('Anchor 0.30.1 (version 0.1.0)');
+    });
+
+    it('should render "Anchor (legacy)" for legacy Anchor IDL', () => {
+        expect(getIdlBadgeLabel(createMockIdl('legacy'))).toBe('Anchor (legacy)');
     });
 });
 

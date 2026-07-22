@@ -22,9 +22,9 @@ vi.mock('@solana/web3.js', async () => {
     const actual = await vi.importActual<typeof import('@solana/web3.js')>('@solana/web3.js');
     return {
         ...actual,
-        Connection: vi
-            .fn()
-            .mockImplementation(() => ({ getTransaction: (...args: unknown[]) => getTransaction(...args) })),
+        Connection: vi.fn().mockImplementation(function () {
+            return { getTransaction: (...args: unknown[]) => getTransaction(...args) };
+        }),
     };
 });
 

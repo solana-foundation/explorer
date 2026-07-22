@@ -1,6 +1,7 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
-import { useAnchorProgram } from '@entities/idl';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
+import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
+import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
 import {
@@ -22,7 +23,6 @@ import { FetchStatus } from '@/app/providers/cache';
 import { ErrorCard } from '../common/ErrorCard';
 import { InspectorInstructionCard as InspectorInstructionCardComponent } from '../common/InspectorInstructionCard';
 import { LoadingCard } from '../common/LoadingCard';
-import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
@@ -110,32 +110,28 @@ function InspectorInstructionCard({
     index: number;
     innerCards?: React.ReactNode[];
 }) {
-    const { cluster, url } = useCluster();
+    const { cluster } = useCluster();
     const dispatcher = useInstructionParser();
 
     const programId = ix.programId;
     const programName = getProgramName(programId.toBase58(), cluster);
-    const anchorProgram = useAnchorProgram(programId.toString(), url, cluster);
     const parsedIx = useMemo(() => dispatcher.fromTransactionInstruction(ix), [dispatcher, ix]);
     const parsedTx = useMemo(
         () => (isParsedInstruction(parsedIx) ? toParsedTransaction(ix, message, [parsedIx]) : undefined),
         [ix, message, parsedIx],
     );
 
-    if (anchorProgram.program) {
+    // Dynamic IDL tier — shared with the tx page. See app/features/transaction/ui/InstructionsSection.tsx.
+    const idlDecode = useIdlInstructionDecode({ programId: programId.toString(), raw: ix });
+    if (idlDecode) {
         return (
-            <ErrorBoundary
-                fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName="Unknown Program" />}
-            >
-                <AnchorDetailsCard
-                    anchorProgram={anchorProgram.program}
-                    index={index}
-                    innerCards={undefined}
-                    ix={ix}
-                    result={INSPECTOR_RESULT}
-                    signature={INSPECTOR_SIGNATURE}
-                />
-            </ErrorBoundary>
+            <IdlInstructionCard
+                decoded={idlDecode}
+                ix={ix}
+                index={index}
+                result={INSPECTOR_RESULT}
+                signature={INSPECTOR_SIGNATURE}
+            />
         );
     }
 
@@ -286,6 +282,14 @@ function InspectorInstructionCard({
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={BaseInstructionCard}
                     />
+                </ErrorBoundary>
+            );
+        case 'lighthouse':
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <LighthouseDetailsCard key={index} ix={parsedIx} raw={ix} index={index} result={INSPECTOR_RESULT} />
                 </ErrorBoundary>
             );
     }

@@ -15,7 +15,7 @@ function AccordionItem({ className, ...props }: React.ComponentProps<typeof Acco
             data-slot="accordion-item"
             data-value={props.value}
             className={cn(
-                'border-b border-l-0 border-r-0 border-t-0 border-solid border-neutral-700 px-4 last:border-b-0',
+                'border-b border-l-0 border-r-0 border-t-0 border-solid border-neutral-700 px-4 [outline:none] last:border-b-0',
                 className,
             )}
             {...props}
@@ -34,9 +34,9 @@ const AccordionTrigger = React.forwardRef<
                 data-slot="accordion-trigger"
                 className={cn(
                     'flex flex-1 items-start gap-4 rounded-md border-0 bg-transparent py-4',
-                    'text-left text-sm font-medium text-neutral-200 outline-none transition-all',
+                    'appearance-none text-left text-sm font-medium text-neutral-200 [outline:none]',
                     'hover:underline',
-                    'focus-visible:border-neutral-950 focus-visible:ring-2 focus-visible:ring-neutral-950/50',
+                    'focus-visible:ring-1 focus-visible:ring-neutral-600 focus-visible:ring-offset-0',
                     'disabled:pointer-events-none disabled:opacity-50',
                     '[&[data-state=open]>svg]:rotate-90',
                     className,
@@ -59,7 +59,7 @@ const AccordionContent = React.forwardRef<
         <AccordionPrimitive.Content
             ref={ref}
             data-slot="accordion-content"
-            className="[data-state=closed]:animate-accordion-up [data-state=open]:animate-accordion-down overflow-hidden text-sm"
+            className="[data-state=closed]:animate-accordion-up [data-state=open]:animate-accordion-down overflow-hidden text-sm [outline:none]"
             {...props}
         >
             <div className={cn('pb-4 pt-0', className)}>{children}</div>

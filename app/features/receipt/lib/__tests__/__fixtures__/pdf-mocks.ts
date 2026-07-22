@@ -2,16 +2,18 @@ import { vi } from 'vitest';
 
 import type { FormattedReceipt } from '../../../types';
 
-export const mockTextField = vi.fn(() => ({
-    defaultValue: '',
-    fieldName: '',
-    fontSize: 0,
-    height: 0,
-    value: '',
-    width: 0,
-    x: 0,
-    y: 0,
-}));
+export const mockTextField = vi.fn(function () {
+    return {
+        defaultValue: '',
+        fieldName: '',
+        fontSize: 0,
+        height: 0,
+        value: '',
+        width: 0,
+        x: 0,
+        y: 0,
+    };
+});
 export const mockSave = vi.fn();
 export const mockAddField = vi.fn();
 export const mockText = vi.fn();
@@ -38,8 +40,22 @@ export const mockDoc = {
     splitTextToSize: vi.fn((text: string, _maxWidth: number) => [text]),
     text: mockText,
 };
-export const mockJsPDF = vi.fn(() => mockDoc);
+export const mockJsPDF = vi.fn(function () {
+    return mockDoc;
+});
 export const mockToDataURL = vi.fn().mockResolvedValue('data:image/png;base64,qrcode');
+
+// jsdom cannot rasterize SVGs, and Vitest 4's jsdom environment now returns a working
+// URL.createObjectURL (it threw in Vitest 3). Without this, svgToDataUrl would await an
+// Image.onload that never fires under jsdom and the test would hang. Force createObjectURL
+// to throw so the PDF renderers take their graceful SVG-conversion-failure fallback.
+export function stubSvgRasterizationUnsupported(): void {
+    // Restore any prior createObjectURL spy before re-spying so layers don't stack.
+    vi.restoreAllMocks();
+    vi.spyOn(URL, 'createObjectURL').mockImplementation(() => {
+        throw new Error('createObjectURL is not supported in the test environment');
+    });
+}
 
 export const SIGNATURE = '5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef';
 export const RECEIPT_URL = 'https://explorer.solana.com/receipt/5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef';

@@ -126,7 +126,7 @@ describe('TokenExtensionRow', () => {
             </ScrollAnchorProvider>,
         );
 
-        expect(await screen.findByText('Confidential Transfer')).toBeInTheDocument();
+        expect(await screen.findByText('Confidential Transfer Mint')).toBeInTheDocument();
         expect(screen.getByText(/Authority/)).toBeInTheDocument();
         expect(screen.getByText(/Auditor Elgamal Pubkey/)).toBeInTheDocument();
         expect(screen.getByText('test-pubkey')).toBeInTheDocument();
@@ -253,7 +253,7 @@ describe('TokenExtensionRow', () => {
             </ScrollAnchorProvider>,
         );
 
-        expect(await screen.findByText('Scaled UI Amount')).toBeInTheDocument();
+        expect(await screen.findByText('Scaled UI Amount Config')).toBeInTheDocument();
         expect(screen.getByText('2')).toBeInTheDocument();
         expect(screen.getByText('4.22')).toBeInTheDocument();
     });
@@ -297,8 +297,51 @@ describe('TokenExtensionRow', () => {
             </ScrollAnchorProvider>,
         );
 
-        expect(await screen.findByText('Pausable')).toBeInTheDocument();
+        expect(await screen.findByText('Pausable Config')).toBeInTheDocument();
         expect(screen.getByText('paused')).toBeInTheDocument();
+    });
+
+    test('should render permissionedBurnConfig extension', async () => {
+        const data = {
+            extension: 'permissionedBurnConfig',
+            state: {
+                authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+            },
+        } as TokenExtension;
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AccountsProvider>
+                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
+                    </AccountsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        expect(await screen.findByText('Permissioned Burn Authority')).toBeInTheDocument();
+        expect(screen.queryAllByText(new RegExp(`${data.state.authority.toString()}`))).toHaveLength(1);
+    });
+
+    test('should render nothing for permissionedBurnConfig extension without an authority', async () => {
+        const data = {
+            extension: 'permissionedBurnConfig',
+            state: {
+                authority: null,
+            },
+        } as TokenExtension;
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <AccountsProvider>
+                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
+                    </AccountsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        expect(screen.queryByText('Permissioned Burn Authority')).not.toBeInTheDocument();
     });
 
     test('should render permanentDelegate extension', async () => {
@@ -498,7 +541,7 @@ describe('TokenExtensionRow', () => {
             </ScrollAnchorProvider>,
         );
 
-        expect(await screen.findByText('Confidential Transfer')).toBeInTheDocument();
+        expect(await screen.findByText('Confidential Transfer Account')).toBeInTheDocument();
         expect(screen.getByText('approved')).toBeInTheDocument();
         expect(screen.getByText('test-pubkey')).toBeInTheDocument();
         expect(screen.getByText(/Confidential Credits/)).toBeInTheDocument();

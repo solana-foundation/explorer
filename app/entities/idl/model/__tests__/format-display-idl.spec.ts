@@ -5,8 +5,8 @@ import anchor029Devi from '../../mocks/anchor/anchor-0.29.0-devi51mZmdwUJGU9hjN2
 import anchor030devi from '../../mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import anchorLegacy094ShankWave from '../../mocks/anchor/anchor-legacy-0.9.4-shank-waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF.json';
 import anchorLegacyAccountComp from '../../mocks/anchor/anchor-legacy-account_compression-compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq.json';
+import { useFormatAnchorIdl } from '../../model/anchor/use-format-anchor-idl';
 import { formatDisplayIdl, getFormattedIdl } from '../../model/formatters/format';
-import { useFormatAnchorIdl } from '../../model/use-format-anchor-idl';
 
 function toLengths(result: any) {
     return Object.keys(result ?? {}).map(field => {

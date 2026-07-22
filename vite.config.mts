@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import react from '@vitejs/plugin-react';
+import { playwright } from '@vitest/browser-playwright';
 import path from 'path';
 import { defineConfig } from 'vitest/config';
 
@@ -30,6 +31,8 @@ const specWorkspace = (name = 'specs') => ({
 });
 
 export default defineConfig({
+    // CI routes the dep-optimize cache off the cramped root partition onto /mnt; unset locally falls back to node_modules/.vite.
+    cacheDir: process.env.VITE_CACHE_PATH || undefined,
     plugins: [react()],
     resolve: {
         alias: {
@@ -57,7 +60,9 @@ export default defineConfig({
         conditions: ['browser', 'default'],
     },
     test: {
-        exclude: ['**/node_modules/**', '.claude/**', '.worktrees/**'],
+        // packages/** self-test via `pnpm test:packages` (own configs/environments) — the root sweep
+        // would double-run them under the app's jsdom env.
+        exclude: ['**/node_modules/**', '.claude/**', '.worktrees/**', 'packages/**'],
         projects: [
             {
                 extends: true,
@@ -79,6 +84,8 @@ export default defineConfig({
                         // Optimize both the renderer and its react-18 runtime up front; lazy mid-run discovery re-runs Vite's optimizer and 504s in-flight dynamic imports.
                         '@storybook/nextjs-vite',
                         'react-dom/client',
+                        // Not hoisted to root; reach it via its parent workspace pkg so Vite can resolve and pre-bundle this CJS dep.
+                        '@explorer/decoder-serum > @project-serum/serum',
                     ],
                 },
                 resolve: {
@@ -99,6 +106,9 @@ export default defineConfig({
                 ],
                 test: {
                     name: 'storybook',
+                    // Default off — both race on the CI runner and drop dynamic imports; opt in locally via SB_ISOLATE / SB_PARALLEL for speed.
+                    isolate: process.env.SB_ISOLATE === 'true',
+                    fileParallelism: process.env.SB_PARALLEL === 'true',
                     browser: {
                         enabled: true,
                         headless: true,
@@ -109,8 +119,7 @@ export default defineConfig({
                             .map(b => b.trim())
                             .filter(Boolean)
                             .map(browser => ({ browser })),
-                        provider: 'playwright',
-                        isolate: true,
+                        provider: playwright(),
                         connectTimeout: 30000,
                     },
                     setupFiles: ['./test-setup.ts', './.storybook/vitest.setup.ts'],
@@ -137,11 +146,6 @@ export default defineConfig({
                 'app/**/*.{test,spec}.{ts,tsx}',
                 'app/**/*.d.ts',
             ],
-        },
-        poolOptions: {
-            threads: {
-                useAtomics: true,
-            },
         },
         ...specWorkspace(),
     },

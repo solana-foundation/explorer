@@ -1,0 +1,12 @@
+{
+    "name": "@explorer/test-idl-program-let-me-buy",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Real mainnet Anchor (>= 0.30) IDL of let_me_buy, snapshotted from both publication legs — the Anchor IDL PDA and PMP",
+    "exports": {
+        ".": "./let-me-buy.anchor.idl.json",
+        "./idl": "./let-me-buy.anchor.idl.json",
+        "./pmp-idl": "./let-me-buy.pmp.idl.json",
+        "./generated-types": "./let-me-buy.ts"
+    }
+}

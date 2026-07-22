@@ -1,0 +1,27 @@
+{
+    "name": "@explorer/test-idl-program-wormhole-governance",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Legacy (pre-0.30) Anchor IDL of the wormhole governance program (single instruction)",
+    "homepage": "https://github.com/wormhole-foundation/native-token-transfers/tree/main/solana/ts/idl/3_0_0",
+    "exports": {
+        ".": "./wormhole-governance.idl.json",
+        "./idl": "./wormhole-governance.idl.json",
+        "./generated-types": "./wormhole-governance.ts"
+    },
+    "scripts": {
+        "download:idl": "node ../download-idl.mjs"
+    },
+    "explorer": {
+        "vendoredIdl": [
+            {
+                "source": "https://raw.githubusercontent.com/wormhole-foundation/native-token-transfers/main/solana/ts/idl/3_0_0/json/wormhole_governance.json",
+                "target": "./wormhole-governance.idl.json"
+            },
+            {
+                "source": "https://raw.githubusercontent.com/wormhole-foundation/native-token-transfers/main/solana/ts/idl/3_0_0/ts/wormhole_governance.ts",
+                "target": "./wormhole-governance.ts"
+            }
+        ]
+    }
+}

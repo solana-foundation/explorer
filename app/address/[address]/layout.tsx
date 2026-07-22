@@ -19,7 +19,6 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
-import { useAnchorProgram } from '@entities/idl';
 import { SecurityNotification } from '@features/security-txt';
 import { StakeAccountSection } from '@features/stake';
 import { VoteAccountSection } from '@features/vote';
@@ -64,6 +63,8 @@ import {
     isRedactedTokenAddress,
 } from '@/app/utils/token-info';
 import { pickClusterParams } from '@/app/utils/url';
+
+import { AccountDataTab } from './AccountDataTab';
 
 const TABS_LOOKUP: Record<string, AddressTab[]> = {
     'address-lookup-table': [{ path: 'entries', title: 'Table Entries' }],
@@ -136,7 +137,7 @@ type InnerProps = PropsWithChildren<{ params: AddressParams }>;
 
 function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const fetchAccount = useFetchAccountInfo();
-    const { status, cluster, url, clusterInfo } = useCluster();
+    const { status, cluster, url, genesisHash } = useCluster();
     const info = useAccountInfo(address);
 
     let pubkey: PublicKey | undefined;
@@ -153,7 +154,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const shouldFetchTokenInfo =
         infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey;
     const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
-        shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, clusterInfo?.genesisHash) : null,
+        shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, genesisHash) : null,
         fetchFullTokenInfo,
     );
 
@@ -481,15 +482,4 @@ function ProgramMultisigTab({ authority }: { authority: PublicKey | null | undef
     }
 
     return <NavigationTabLink path="program-multisig" title="Program Multisig" />;
-}
-
-function AccountDataTab({ programId }: { programId: PublicKey }) {
-    const { url, cluster } = useCluster();
-    const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url, cluster);
-
-    if (!accountAnchorProgram) {
-        return null;
-    }
-
-    return <NavigationTabLink path="anchor-account" title="Anchor Data" />;
 }

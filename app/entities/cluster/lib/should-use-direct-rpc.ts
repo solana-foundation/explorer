@@ -1,4 +1,4 @@
-import { Cluster } from '@/app/utils/cluster';
+import { Cluster } from './cluster';
 
 /** Whether `url` points at a local RPC endpoint (localhost / 127.0.0.1). */
 export function isLocalRpcUrl(url: string): boolean {

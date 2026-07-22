@@ -1,0 +1,75 @@
+diff --git a/dist/index.browser.cjs b/dist/index.browser.cjs
+index 768a01b1c661b7a845d1bec79d14756c57868bae..954755612baf4dd619e8fbeb5362764377788601 100644
+--- a/dist/index.browser.cjs
++++ b/dist/index.browser.cjs
+@@ -556,6 +556,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
+   if ("kind" in idlType && idlType.kind === "alias" && "value" in idlType) {
+     return typeNodeFromAnchorV01(idlType.value, generics);
+   }
++  // PATCH(@hoodieshq): anchor >= 0.30 serializes type aliases as { kind: "type", alias } — drop once upstream ships the fix (.github/nodes-from-anchor-v01-alias-typedef.task.md)
++  if ("kind" in idlType && idlType.kind === "type" && "alias" in idlType) {
++    return typeNodeFromAnchorV01(idlType.alias, generics);
++  }
+   if ("option" in idlType) {
+     return optionTypeNodeFromAnchorV01(idlType, generics);
+   }
+diff --git a/dist/index.browser.mjs b/dist/index.browser.mjs
+index 4e20eb9e9cbee76cd6beccf6126661ea05c9bb97..51220104a68a7cc7a77e88c7725bdf3a0b0f6a82 100644
+--- a/dist/index.browser.mjs
++++ b/dist/index.browser.mjs
+@@ -554,6 +554,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
+   if ("kind" in idlType && idlType.kind === "alias" && "value" in idlType) {
+     return typeNodeFromAnchorV01(idlType.value, generics);
+   }
++  // PATCH(@hoodieshq): anchor >= 0.30 serializes type aliases as { kind: "type", alias } — drop once upstream ships the fix (.github/nodes-from-anchor-v01-alias-typedef.task.md)
++  if ("kind" in idlType && idlType.kind === "type" && "alias" in idlType) {
++    return typeNodeFromAnchorV01(idlType.alias, generics);
++  }
+   if ("option" in idlType) {
+     return optionTypeNodeFromAnchorV01(idlType, generics);
+   }
+diff --git a/dist/index.node.cjs b/dist/index.node.cjs
+index ef2c5e19e99703eefd9ea689a6c4f939d68823b5..d2fa674cff529b4fd9387af85ca2d7b68a5a2831 100644
+--- a/dist/index.node.cjs
++++ b/dist/index.node.cjs
+@@ -556,6 +556,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
+   if ("kind" in idlType && idlType.kind === "alias" && "value" in idlType) {
+     return typeNodeFromAnchorV01(idlType.value, generics);
+   }
++  // PATCH(@hoodieshq): anchor >= 0.30 serializes type aliases as { kind: "type", alias } — drop once upstream ships the fix (.github/nodes-from-anchor-v01-alias-typedef.task.md)
++  if ("kind" in idlType && idlType.kind === "type" && "alias" in idlType) {
++    return typeNodeFromAnchorV01(idlType.alias, generics);
++  }
+   if ("option" in idlType) {
+     return optionTypeNodeFromAnchorV01(idlType, generics);
+   }
+diff --git a/dist/index.node.mjs b/dist/index.node.mjs
+index 07f75ecba73390af1512bed6b1d03577f27518c5..576b41d69f30bed9759b9111de13f49567c14b50 100644
+--- a/dist/index.node.mjs
++++ b/dist/index.node.mjs
+@@ -554,6 +554,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
+   if ("kind" in idlType && idlType.kind === "alias" && "value" in idlType) {
+     return typeNodeFromAnchorV01(idlType.value, generics);
+   }
++  // PATCH(@hoodieshq): anchor >= 0.30 serializes type aliases as { kind: "type", alias } — drop once upstream ships the fix (.github/nodes-from-anchor-v01-alias-typedef.task.md)
++  if ("kind" in idlType && idlType.kind === "type" && "alias" in idlType) {
++    return typeNodeFromAnchorV01(idlType.alias, generics);
++  }
+   if ("option" in idlType) {
+     return optionTypeNodeFromAnchorV01(idlType, generics);
+   }
+diff --git a/dist/index.react-native.mjs b/dist/index.react-native.mjs
+index 43bf56892c9b1c35d280b39536147b3a2cae0efe..9dffdd47c7c3b1b5eb5e53a1e46aaa2ea78fda2e 100644
+--- a/dist/index.react-native.mjs
++++ b/dist/index.react-native.mjs
+@@ -554,6 +554,10 @@ var typeNodeFromAnchorV01 = (idlType, generics) => {
+   if ("kind" in idlType && idlType.kind === "alias" && "value" in idlType) {
+     return typeNodeFromAnchorV01(idlType.value, generics);
+   }
++  // PATCH(@hoodieshq): anchor >= 0.30 serializes type aliases as { kind: "type", alias } — drop once upstream ships the fix (.github/nodes-from-anchor-v01-alias-typedef.task.md)
++  if ("kind" in idlType && idlType.kind === "type" && "alias" in idlType) {
++    return typeNodeFromAnchorV01(idlType.alias, generics);
++  }
+   if ("option" in idlType) {
+     return optionTypeNodeFromAnchorV01(idlType, generics);
+   }

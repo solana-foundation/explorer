@@ -1,5 +1,5 @@
 import { SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, SolanaError } from '@solana/kit';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
@@ -7,15 +7,13 @@ import { Cluster } from '@/app/utils/cluster';
 const mockAddress = '11111111111111111111111111111111';
 
 const mocks = vi.hoisted(() => ({
-    fetchElfSecurityTxt: vi.fn(),
     fetchSecurityTxt: vi.fn(),
 }));
 
-// The route resolves security.txt via `@solana/security-txt`. We mock those fetchers (keeping the
-// real `isTransientRpcError` from `@solana/idl`) to assert canonical-only resolution, response
-// shaping, the PMP feature gate, and error classification.
+// The route resolves security.txt via `@solana/security-txt`. We mock the fetcher (keeping the real
+// `isTransientRpcError` from `@solana/idl`) to assert canonical-only resolution, response shaping,
+// and error classification.
 vi.mock('@solana/security-txt', () => ({
-    fetchElfSecurityTxt: mocks.fetchElfSecurityTxt,
     fetchSecurityTxt: mocks.fetchSecurityTxt,
 }));
 
@@ -30,12 +28,6 @@ describe('GET /api/security-txt', () => {
         vi.clearAllMocks();
         vi.spyOn(Logger, 'panic').mockImplementation(() => {});
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
-        // PMP gate on by default; the off case is exercised explicitly below.
-        vi.stubEnv('NEXT_PUBLIC_PMP_SECURITY_TXT_ENABLED', 'true');
-    });
-
-    afterEach(() => {
-        vi.unstubAllEnvs();
     });
 
     it('should return 400 when required params are missing', async () => {
@@ -100,18 +92,6 @@ describe('GET /api/security-txt', () => {
 
         // authority: null → canonical authority only, no fndn fallback lookups.
         expect(mocks.fetchSecurityTxt).toHaveBeenCalledWith(expect.anything(), mockAddress, { authority: null });
-    });
-
-    it('should read only the ELF section when the PMP gate is off', async () => {
-        vi.stubEnv('NEXT_PUBLIC_PMP_SECURITY_TXT_ENABLED', 'false');
-        mocks.fetchElfSecurityTxt.mockResolvedValueOnce({ address: mockAddress, content: '', fields: { name: 'elf' } });
-
-        const { GET } = await importRoute();
-        const res = await GET(createRequest(mockAddress, Cluster.MainnetBeta));
-        expect(res.status).toBe(200);
-        expect(mocks.fetchSecurityTxt).not.toHaveBeenCalled();
-        expect(mocks.fetchElfSecurityTxt).toHaveBeenCalledWith(expect.anything(), mockAddress);
-        expect(await res.json()).toEqual({ securityTxt: { fields: { name: 'elf' }, type: 'elf' } });
     });
 
     it('should return a retryable 502 (no page) on a transient RPC error', async () => {

@@ -12,7 +12,7 @@ import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
 import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
-import { useCluster } from '@providers/cluster';
+import { useCluster, useClusterInfo } from '@providers/cluster';
 import {
     TransactionStatusInfo,
     useFetchTransactionStatus,
@@ -35,6 +35,8 @@ import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 import { Card } from '@/app/shared/ui/Card';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
+
+import { TransactionNotFoundCard } from './TransactionNotFoundCard';
 
 type RowProps = React.HTMLAttributes<HTMLDivElement> & { divider?: boolean };
 export function Row({ children, className, divider, ...props }: RowProps) {
@@ -102,7 +104,8 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
     const rawDetails = useRawTransactionDetails(signature);
-    const { cluster, clusterInfo, name: clusterName, status: clusterStatus, url: clusterUrl } = useCluster();
+    const { cluster, name: clusterName, status: clusterStatus, url: clusterUrl } = useCluster();
+    const clusterInfo = useClusterInfo();
     const inspectPath = useClusterPath({ pathname: `/tx/${signature}/inspect` });
     const receiptPath = useClusterPath({
         additionalParams: new URLSearchParams({ view: 'receipt' }),
@@ -138,16 +141,17 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     } else if (status.status === FetchStatus.FetchFailed) {
         return <ErrorCard retry={() => fetchStatus(signature)} text="Fetch Failed" />;
     } else if (!status.data?.info) {
-        if (clusterInfo && clusterInfo.firstAvailableBlock > 0) {
-            return (
-                <ErrorCard
-                    retry={() => fetchStatus(signature)}
-                    text="Not Found"
-                    subtext={`Note: Transactions processed before block ${clusterInfo.firstAvailableBlock} are not available at this time`}
-                />
-            );
-        }
-        return <ErrorCard retry={() => fetchStatus(signature)} text="Not Found" />;
+        return (
+            <TransactionNotFoundCard
+                signature={signature}
+                retry={() => fetchStatus(signature)}
+                firstAvailableBlock={
+                    clusterInfo?.firstAvailableBlock && clusterInfo.firstAvailableBlock > 0n
+                        ? clusterInfo.firstAvailableBlock
+                        : undefined
+                }
+            />
+        );
     }
 
     const { info } = status.data;

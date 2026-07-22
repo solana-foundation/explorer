@@ -30,6 +30,7 @@ import {
     MintCloseAuthority,
     PausableConfig,
     PermanentDelegate,
+    PermissionedBurnConfig,
     ScaledUiAmountConfig,
     TokenExtension,
     TokenExtensionType,
@@ -534,6 +535,7 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
         'cpiGuard',
         'pausableAccount',
         'permanentDelegate',
+        'permissionedBurnConfig',
         'transferHook',
         'transferHookAccount',
         'metadataPointer',
@@ -697,7 +699,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ConfidentialTransferMint);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Confidential Transfer" /> : null}
+                    {headerStyle === 'header' ? <HHeader name="Confidential Transfer Mint" /> : null}
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Authority</BaseTable.Cell>
@@ -814,7 +816,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ScaledUiAmountConfig);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Scaled UI Amount" /> : null}
+                    {headerStyle === 'header' ? <HHeader name="Scaled UI Amount Config" /> : null}
                     {extension.authority && (
                         <BaseTable.Row>
                             <BaseTable.Cell>Authority</BaseTable.Cell>
@@ -852,7 +854,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, PausableConfig);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Pausable" /> : null}
+                    {headerStyle === 'header' ? <HHeader name="Pausable Config" /> : null}
                     <>
                         {extension.authority && (
                             <BaseTable.Row>
@@ -871,6 +873,21 @@ export function TokenExtensionRow(
                     </>
                 </>
             );
+        }
+        case 'permissionedBurnConfig': {
+            const extension = create(tokenExtension.state, PermissionedBurnConfig);
+            if (extension.authority) {
+                return (
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Permissioned Burn Authority</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">
+                            <Address pubkey={extension.authority} alignRight link />
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
+                );
+            } else {
+                return <></>;
+            }
         }
         case 'permanentDelegate': {
             const extension = create(tokenExtension.state, PermanentDelegate);
@@ -1053,7 +1070,7 @@ export function TokenExtensionRow(
             const extension = create(tokenExtension.state, ConfidentialTransferAccount);
             return (
                 <>
-                    {headerStyle === 'header' ? <HHeader name="Confidential Transfer" /> : null}
+                    {headerStyle === 'header' ? <HHeader name="Confidential Transfer Account" /> : null}
                     <BaseTable.Row>
                         <BaseTable.Cell>Status</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">

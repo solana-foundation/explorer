@@ -20,10 +20,13 @@ const TEST_AND_STORY_FILES = [
 ];
 
 export default tseslint.config(
-    // Global ignores
+    // Global ignores.
+    // packages/* are intentionally not ignored: root `eslint .` (like prettier's `**/*.ts` glob) lints their source with this shared config — only built output is excluded.
+    // Exception: packages/idl-decode and packages/entity-inspector lint themselves with oxlint (see their .oxlintrc.json), wired into root `pnpm lint`.
     {
         ignores: [
-            'dist/**',
+            '**/dist/**',
+            'packages/idl-decode/**',
             'lib/**',
             '.next/**',
             '.next-dev/**',
@@ -31,6 +34,7 @@ export default tseslint.config(
             'coverage/**',
             '.claude/**',
             '.worktrees/**',
+            'packages/entity-inspector/**',
             'storybook-static/**',
             'storybook-static-*/**',
             'public/mockServiceWorker.js',
@@ -208,7 +212,13 @@ export default tseslint.config(
 
     // Allow console in logger, scripts, standalone files, pnpmfile
     {
-        files: ['app/shared/lib/logger.ts', 'scripts/**', '**/*.mjs', '**/*.cjs'],
+        files: [
+            'app/shared/lib/logger.ts',
+            'packages/entity-inspector/src/logger.ts',
+            'scripts/**',
+            '**/*.mjs',
+            '**/*.cjs',
+        ],
         rules: {
             'no-console': 'off',
         },
@@ -216,7 +226,15 @@ export default tseslint.config(
 
     // Relax sort-keys in config/tooling files (not linted by next lint before)
     {
-        files: ['*.config.*', '**/*.mjs', '**/*.cjs', '.storybook/**', 'scripts/**', '.prettierrc.cjs'],
+        files: [
+            '*.config.*',
+            '**/*.mjs',
+            '**/*.cjs',
+            '.storybook/**',
+            'storybook-design/.storybook/**',
+            'scripts/**',
+            '.prettierrc.cjs',
+        ],
         rules: {
             'sort-keys-fix/sort-keys-fix': 'off',
         },
@@ -230,8 +248,6 @@ export default tseslint.config(
             // app/components (pre-FSD legacy)
             'app/components/ClusterModalDeveloperSettings.tsx',
             'app/components/account/token-extensions/ScaledUiAmountMultiplierTooltip.tsx',
-            'app/components/common/token-market-data/stories/MarketData.s.tsx',
-            'app/components/common/token-market-data/stories/MarketDataSeries.s.tsx',
             'app/components/instruction/AnchorDetailsCard.tsx',
             'app/components/instruction/pyth/AddMappingDetailsCard.tsx',
             'app/components/instruction/pyth/AddPriceDetailsCard.tsx',
@@ -293,10 +309,11 @@ export default tseslint.config(
 
             // Storybook
             '.storybook/**',
+            'storybook-design/.storybook/**',
             '**/*.stories.[jt]s?(x)',
 
-            // Generic config files
-            '*.config.{ts,mts,js,mjs,cjs}',
+            // Generic config files (including nested ones, e.g. packages/*/vitest.config.ts)
+            '**/*.config.{ts,mts,js,mjs,cjs}',
         ],
         rules: {
             'import/no-default-export': 'off',
@@ -541,7 +558,6 @@ export default tseslint.config(
             'app/components/ClusterModalDeveloperSettings.tsx',
             'app/components/LiveTransactionStatsCard.tsx',
             'app/components/MessageBanner.tsx',
-            'app/components/TopAccountsCard.tsx',
             'app/components/account/AnchorAccountCard.tsx',
             'app/components/account/CompressedNftCard.tsx',
             'app/components/account/FeatureAccountSection.tsx',
@@ -549,7 +565,6 @@ export default tseslint.config(
             'app/components/account/OwnedTokensCard.tsx',
             'app/components/account/ProgramMultisigCard.tsx',
             'app/components/account/RewardsCard.tsx',
-            'app/components/account/StakeAccountSection.tsx',
             'app/components/account/TokenAccountSection.tsx',
             'app/components/account/TokenExtensionsSection.tsx',
             'app/components/account/TokenHistoryCard.tsx',
@@ -577,32 +592,21 @@ export default tseslint.config(
             'app/components/inspector/AddressTableLookupsCard.tsx',
             'app/components/inspector/AddressWithContext.tsx',
             'app/components/inspector/InstructionsSection.tsx',
-            'app/components/inspector/instruction-parsers/spl-token.parser.ts',
-            'app/components/inspector/instruction-parsers/system-program.parser.ts',
-            'app/components/inspector/instruction-parsers/token-2022-program.parser.ts',
             'app/components/instruction/AnchorDetailsCard.tsx',
             'app/components/instruction/ProgramEventsCard.tsx',
             'app/components/instruction/codama/CodamaInstructionDetailsCard.tsx',
             'app/components/instruction/codama/codamaUtils.tsx',
             'app/components/instruction/ed25519/Ed25519DetailsCard.tsx',
-            'app/components/instruction/mango/ChangePerpMarketParamsDetailsCard.tsx',
-            'app/components/instruction/mango/PlacePerpOrder2DetailsCard.tsx',
-            'app/components/instruction/mango/PlacePerpOrderDetailsCard.tsx',
-            'app/components/instruction/mango/PlaceSpotOrderDetailsCard.tsx',
             'app/components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard.tsx',
             'app/components/instruction/pyth/UpdateProductDetailsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
             'app/components/shared/StatusBadge.tsx',
             'app/components/shared/account/ProgramHeader.tsx',
             'app/components/shared/ui/autocomplete.tsx',
-            'app/components/transaction/AccountsCard.tsx',
-            'app/components/transaction/ProgramLogSection.tsx',
-            'app/components/transaction/TokenBalancesCard.tsx',
 
             // app/providers (pre-FSD legacy)
             'app/providers/accounts/history.tsx',
             'app/providers/accounts/rewards.tsx',
-            'app/providers/accounts/utils/stake.ts',
             'app/providers/compressed-nft.tsx',
             'app/providers/epoch.tsx',
             'app/providers/squadsMultisig.tsx',
@@ -622,7 +626,6 @@ export default tseslint.config(
             'app/utils/verified-builds.tsx',
 
             // app/shared (FSD shared)
-            'app/shared/lib/http-utils.ts',
             'app/shared/lib/triggerDownload.ts',
             'app/shared/lib/visibility.tsx',
             'app/shared/ui/navigation-tabs/ui/NavigationTabLink.tsx',
@@ -637,12 +640,11 @@ export default tseslint.config(
             'app/entities/domain/model/use-user-ans-domains.ts',
             'app/entities/domain/model/use-user-sns-domains.ts',
             'app/entities/domain/ui/BaseDomainsCard.tsx',
+            'app/entities/idl/model/anchor/use-anchor-program.ts',
+            'app/entities/idl/model/anchor/use-format-anchor-idl.ts',
             'app/entities/idl/model/converters/type-handlers/tuple-type-handlers.ts',
             'app/entities/idl/model/idl-version.ts',
-            'app/entities/idl/model/use-anchor-program.ts',
-            'app/entities/idl/model/use-format-anchor-idl.ts',
             'app/entities/idl/model/use-format-codama-idl.ts',
-            'app/entities/idl/model/use-idl-from-anchor-program-seed.ts',
             'app/entities/nft/lib/is-metaplex-nft.ts',
             'app/entities/token-info/model/token-info-batch-provider.tsx',
             'app/entities/token-info/model/use-token-info.ts',
@@ -685,7 +687,6 @@ export default tseslint.config(
             'app/features/idl/ui/IdlSection.tsx',
             'app/features/metadata/mocks.ts',
             'app/features/metadata/model/useOffChainMetadata.ts',
-            'app/features/mpl-token-metadata/lib/metaplex-token-metadata.parser.ts',
             'app/features/mpl-token-metadata/ui/MetaplexTokenMetadataDetailsCard.tsx',
             'app/features/nicknames/lib/nicknames.ts',
             'app/features/nicknames/model/use-nickname.ts',
@@ -722,11 +723,9 @@ export default tseslint.config(
             'app/features/stake/lib/stake-activation-math.ts',
             'app/features/stake/ui/StakeAccountSection.tsx',
             'app/features/token-verification-badge/model/use-bluprynt.ts',
-            'app/features/token-verification-badge/model/use-coingecko.ts',
             'app/features/token-verification-badge/model/use-jupiter.ts',
             'app/features/token-verification-badge/model/use-rugcheck.ts',
             'app/features/token-verification-badge/ui/VerificationIcon.tsx',
-            'app/features/transaction-history/lib/use-instruction-names.ts',
             'app/features/transaction-history/ui/TransactionHistoryCard.tsx',
             'app/features/transaction/ui/AccountsCard.tsx',
             'app/features/transaction/ui/ProgramLogSection.tsx',
@@ -765,22 +764,17 @@ export default tseslint.config(
             'app/components/common/BaseInstructionCard.tsx',
             'app/components/common/InspectorInstructionCard.tsx',
             'app/components/inspector/InstructionsSection.tsx',
-            'app/components/inspector/instruction-parsers/token-2022-program.parser.ts',
-            'app/components/inspector/into-parsed-data.ts',
             'app/components/instruction/AnchorDetailsCard.tsx',
             'app/components/instruction/ProgramEventsCard.tsx',
             'app/components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard.tsx',
             'app/components/instruction/codama/codamaUtils.tsx',
-            'app/components/instruction/lighthouse/LighthouseDetailsCard.tsx',
             'app/components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard.tsx',
             'app/components/instruction/pyth/program.ts',
             'app/components/instruction/sas/SolanaAttestationDetailsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
-            'app/components/instruction/vote/VoteDetailsCard.tsx',
 
             // app/providers (pre-FSD legacy)
             'app/providers/accounts/index.tsx',
-            'app/providers/accounts/utils/stake.ts',
             'app/providers/squadsMultisig.tsx',
 
             // app/utils (pre-FSD legacy)
@@ -792,12 +786,12 @@ export default tseslint.config(
 
             // app/entities (FSD entities)
             'app/entities/idl/lib/utils.ts',
+            'app/entities/idl/model/anchor/use-format-anchor-idl.ts',
             'app/entities/idl/model/converters/convert-display-idl.ts',
             'app/entities/idl/model/converters/convert-legacy-idl.ts',
             'app/entities/idl/model/converters/type-handlers/leaf-tuple-type-handler.ts',
             'app/entities/idl/model/formatters/format.ts',
             'app/entities/idl/model/formatters/formatted-idl.d.ts',
-            'app/entities/idl/model/use-format-anchor-idl.ts',
             'app/entities/nft/lib/get-metadata-json.ts',
 
             // app/features (FSD features)

@@ -11,7 +11,8 @@ import { type InstructionNode, isNode, titleCase } from 'codama';
 
 import { startsWith } from '@/app/shared/lib/bytes';
 
-import { type AnchorIdl, type CodamaIdl, getIdlStandard, type SupportedIdl } from './idl-version';
+import { type AnchorIdl, type CodamaIdl, type SupportedIdl } from '../lib/types';
+import { getIdlStandard } from './idl-version';
 
 export type InstructionNameEntry = {
     discriminator: Uint8Array;

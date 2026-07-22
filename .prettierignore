@@ -5,6 +5,7 @@ cache/
 coverage/
 node_modules/
 dist/
+packages/entity-inspector/
 build/
 .pnpm-store/
 .claude/
@@ -12,3 +13,4 @@ build/
 storybook-static/
 storybook-static-*/
 public/mockServiceWorker.js
+packages/idl-decode/

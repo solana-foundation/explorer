@@ -11,6 +11,7 @@ export const programDataFixture = {
     slot: 123,
 };
 
+// TODO: rebuild these on `gen.securityTxt` (@__fixtures__/gen) so there's one security.txt fixture source.
 export function createPmpSecurityTxt(fields: Partial<SecurityTxtFields> = {}): ResolvedSecurityTxt {
     return {
         fields: {

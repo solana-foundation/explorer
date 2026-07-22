@@ -71,7 +71,8 @@ type Story = StoryObj<typeof meta>;
 
 export const NoDecodedEvents: Story = {
     args: {
-        eventDataList: ['aGVsbG8='],
+        // A base64 `Program log:` payload that doesn't decode is dropped → renders nothing.
+        eventPayloads: [{ data: 'aGVsbG8=', kind: 'log' }],
         instructionIndex: 0,
         program: emptyProgram,
     },
@@ -79,7 +80,7 @@ export const NoDecodedEvents: Story = {
 
 export const WithDecodedEvent: Story = {
     args: {
-        eventDataList: [sampleEventBytes.toString('base64')],
+        eventPayloads: [{ data: sampleEventBytes.toString('base64'), kind: 'data' }],
         instructionIndex: 0,
         program: sampleProgram,
     },
@@ -87,8 +88,20 @@ export const WithDecodedEvent: Story = {
 
 export const WithMultipleEvents: Story = {
     args: {
-        eventDataList: [sampleEventBytes.toString('base64'), sampleEventBytes.toString('base64')],
+        eventPayloads: [
+            { data: sampleEventBytes.toString('base64'), kind: 'data' },
+            { data: sampleEventBytes.toString('base64'), kind: 'data' },
+        ],
         instructionIndex: 2,
+        program: sampleProgram,
+    },
+};
+
+export const UnknownEvent: Story = {
+    args: {
+        // An undecodable `Program data:` payload renders as a raw "Unknown Event".
+        eventPayloads: [{ data: Buffer.from([9, 9, 9, 9, 9, 9, 9, 9, 0, 0, 0, 0]).toString('base64'), kind: 'data' }],
+        instructionIndex: 0,
         program: sampleProgram,
     },
 };

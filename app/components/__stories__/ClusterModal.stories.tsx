@@ -21,8 +21,8 @@ function ClusterModalWithReopen() {
 }
 
 // ClusterModal reads `useClusterModal` to decide visibility — the `withClusterModalOpen` decorator
-// (see .storybook/decorators.tsx) seeds the ModalContext with `[true, setShow]` so the modal renders.
-// A fresh jotai store per story keeps savedClusters state isolated.
+// (see .storybook/decorators.tsx) seeds the cluster-modal atom to `true` so the modal renders.
+// A fresh jotai store per story keeps that (and savedClusters) state isolated.
 // Docs canvas height uses ipad portrait so the full modal fits without scrolling.
 const meta = {
     component: ClusterModal,

@@ -47,7 +47,7 @@ export async function GET(request: Request) {
 
     const cluster = clusterFromSlug(clusterParam || clusterSlug(Cluster.MainnetBeta));
 
-    if (cluster === null) {
+    if (cluster === undefined) {
         return NextResponse.json(
             { error: 'Invalid cluster', success: false },
             { headers: NO_STORE_HEADERS, status: 400 },

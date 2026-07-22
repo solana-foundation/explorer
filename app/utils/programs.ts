@@ -1,3 +1,15 @@
+import { MANGO_PROGRAM_IDS, MANGO_V3_PROGRAM_LABEL } from '@explorer/decoder-mango';
+import {
+    OPEN_BOOK_PROGRAM_IDS,
+    OPENBOOK_DEX_PROGRAM_LABEL,
+    SERUM_DEX_V1_PROGRAM_IDS,
+    SERUM_DEX_V1_PROGRAM_LABEL,
+    SERUM_DEX_V1B_PROGRAM_IDS,
+    SERUM_DEX_V2_PROGRAM_IDS,
+    SERUM_DEX_V2_PROGRAM_LABEL,
+    SERUM_DEX_V3_PROGRAM_IDS,
+    SERUM_DEX_V3_PROGRAM_LABEL,
+} from '@explorer/decoder-serum/detection';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
@@ -59,7 +71,6 @@ export enum PROGRAM_NAMES {
     WORMHOLE_CORE = 'Wormhole Core Bridge',
     WORMHOLE_TOKEN = 'Wormhole Token Bridge',
     WORMHOLE_NFT = 'Wormhole NFT Bridge',
-    OPENBOOK_DEX = 'OpenBook Dex',
 
     // ZK Compression
     ZK_LIGHT_SYSTEM_PROGRAM = 'Light System Program',
@@ -115,6 +126,14 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.WORMHOLE_CORE,
     },
+    [SERUM_DEX_V1_PROGRAM_IDS.mainnet]: {
+        deployments: [Cluster.MainnetBeta],
+        name: SERUM_DEX_V1_PROGRAM_LABEL,
+    },
+    [MANGO_PROGRAM_IDS.devnet]: {
+        deployments: [Cluster.Devnet],
+        name: MANGO_V3_PROGRAM_LABEL,
+    },
     '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8': {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.RAYDIUM_AMM,
@@ -127,19 +146,33 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.ORCA_SWAP_2,
     },
+    [SERUM_DEX_V3_PROGRAM_IDS.mainnet]: {
+        deployments: [Cluster.MainnetBeta],
+        name: SERUM_DEX_V3_PROGRAM_LABEL,
+    },
     // spl
     ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ASSOCIATED_TOKEN,
     },
+
     // native built-ins
     AddressLookupTab1e1111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ADDRESS_LOOKUP_TABLE,
     },
+
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.COMPUTE_BUDGET,
+    },
+    [SERUM_DEX_V1B_PROGRAM_IDS.mainnet]: {
+        deployments: [Cluster.MainnetBeta],
+        name: SERUM_DEX_V1_PROGRAM_LABEL,
+    },
+    [MANGO_PROGRAM_IDS.testnet]: {
+        deployments: [Cluster.Testnet],
+        name: MANGO_V3_PROGRAM_LABEL,
     },
     Config1111111111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -156,6 +189,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     DtmE9D2CSB4L5D6A15mraeEjrGMm6auWVzgaD8hK2tZM: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SWITCHBOARD,
+    },
+    [SERUM_DEX_V2_PROGRAM_IDS.mainnet]: {
+        deployments: [Cluster.MainnetBeta],
+        name: SERUM_DEX_V2_PROGRAM_LABEL,
     },
     Ed25519SigVerify111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -289,6 +326,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.PYTH_DEVNET,
     },
+    [MANGO_PROGRAM_IDS.mainnet]: {
+        deployments: [Cluster.MainnetBeta],
+        name: MANGO_V3_PROGRAM_LABEL,
+    },
     metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s: {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.TOKEN_METADATA,
@@ -301,9 +342,9 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.ORE,
     },
-    srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX: {
+    [OPEN_BOOK_PROGRAM_IDS.mainnet]: {
         deployments: [Cluster.MainnetBeta],
-        name: PROGRAM_NAMES.OPENBOOK_DEX,
+        name: OPENBOOK_DEX_PROGRAM_LABEL,
     },
     vau1zxA2LbssAUEF7Gpw91zMM1LvXrvpzJtmZ58rPsn: {
         deployments: LIVE_CLUSTERS,
@@ -343,25 +384,6 @@ export const TOKEN_IDS: { [key: string]: string } = {
 } as const;
 
 export type TokenProgram = 'spl-token' | 'spl-token-2022';
-
-/**
- * The set of `programLabel` values a decoder slice (`InstructionParser`) may
- * declare. For programs the RPC pre-parses this is the RPC `parsed.program`
- * discriminator used to guard `fromParsed` (e.g. `'spl-token'`); for programs
- * the RPC does not pre-parse (MPL Token Metadata) it is a stable synthetic
- * label carried in `UnparsedInstruction` for program-aware fallback cards.
- *
- * This is deliberately NOT `PROGRAM_NAMES` (those are display titles like
- * `'Token Program'`). Adding a slice for a new program extends this union, so
- * a slice that declares a label not listed here fails to compile — keeping
- * slice labels and the RPC guards they're compared against from drifting.
- */
-export type ParserProgramLabel =
-    | TokenProgram
-    | 'bpf-upgradeable-loader'
-    | 'mpl-token-metadata'
-    | 'spl-associated-token-account'
-    | 'system';
 
 export function assertIsTokenProgram(program: string): asserts program is TokenProgram {
     if (program !== 'spl-token' && program !== 'spl-token-2022')

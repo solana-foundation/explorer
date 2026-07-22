@@ -29,7 +29,7 @@ describe('useMidTruncation', () => {
     beforeEach(() => {
         triggerResize = () => {};
         // jsdom does not implement ResizeObserver — assign a vi.fn stub directly
-        global.ResizeObserver = vi.fn(cb => {
+        global.ResizeObserver = vi.fn(function (cb: ResizeObserverCallback) {
             triggerResize = () => act(() => cb([], {} as ResizeObserver));
             return { disconnect: vi.fn(), observe: vi.fn(), unobserve: vi.fn() };
         }) as unknown as typeof ResizeObserver;
@@ -105,11 +105,13 @@ describe('useMidTruncation', () => {
 
     it('should disconnect the ResizeObserver on unmount', () => {
         const disconnect = vi.fn();
-        global.ResizeObserver = vi.fn(() => ({
-            disconnect,
-            observe: vi.fn(),
-            unobserve: vi.fn(),
-        })) as unknown as typeof ResizeObserver;
+        global.ResizeObserver = vi.fn(function () {
+            return {
+                disconnect,
+                observe: vi.fn(),
+                unobserve: vi.fn(),
+            };
+        }) as unknown as typeof ResizeObserver;
 
         const { unmount } = render(<Harness enabled text="abc" />);
         unmount();

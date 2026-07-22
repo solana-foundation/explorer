@@ -1,7 +1,31 @@
 import type { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import type { KitInstruction } from '@/app/shared/lib/web3js-compat';
-import type { ParserProgramLabel } from '@/app/utils/programs';
+
+/**
+ * The set of `programLabel` values a decoder slice (`InstructionParser`) may
+ * declare. For programs the RPC pre-parses this is the RPC `parsed.program`
+ * discriminator used to guard `fromParsed` (e.g. `'spl-token'`); for programs
+ * the RPC does not pre-parse (MPL Token Metadata) it is a stable synthetic
+ * label carried in `UnparsedInstruction` for program-aware fallback cards.
+ *
+ * The two token labels intentionally mirror `TokenProgram` in
+ * `app/utils/programs.ts`. They are inlined here rather than imported so this
+ * entity carries no dependency on pre-FSD utils; they are RPC-stable strings,
+ * so the small duplication is safe. Adding a slice for a new program extends
+ * this union, so a slice that declares a label not listed here fails to
+ * compile — keeping slice labels and the RPC guards they are compared against
+ * from drifting.
+ */
+export type ParserProgramLabel =
+    | 'bpf-upgradeable-loader'
+    | 'lighthouse'
+    | 'mpl-token-metadata'
+    | 'spl-associated-token-account'
+    // 'spl-token' | 'spl-token-2022' mirror `TokenProgram` (see note above).
+    | 'spl-token'
+    | 'spl-token-2022'
+    | 'system';
 
 export interface ParsedInstructionInfo<T extends string = string, I = unknown> {
     type: T;

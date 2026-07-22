@@ -59,7 +59,7 @@ export function populatePartialParsedTokenExtension(
             return {
                 description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('required-memo')),
-                name: 'Required Memo',
+                name: 'Memo Transfer',
                 status: 'active',
                 tooltip: description,
             };
@@ -67,14 +67,14 @@ export function populatePartialParsedTokenExtension(
         case 'nonTransferable': {
             return {
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('non-transferable-token')),
-                name: 'Non-Transferable Token',
+                name: 'Non-Transferable',
                 status: 'active',
             };
         }
         case 'nonTransferableAccount': {
             return {
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('non-transferable-token')),
-                name: 'Non-Transferable Token Account',
+                name: 'Non-Transferable Account',
                 status: 'active',
             };
         }
@@ -113,7 +113,7 @@ export function populatePartialParsedTokenExtension(
             return {
                 description: "This is only set to 'transferring' inside the transferHook CPI",
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('transfer-hook')),
-                name: 'Transfer Hook Account Info',
+                name: 'Transfer Hook Account',
                 status: 'active',
             };
         }
@@ -146,7 +146,7 @@ export function populatePartialParsedTokenExtension(
             return {
                 description,
                 externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
-                name: 'Confidential Transfer Token Info',
+                name: 'Confidential Transfer Account',
                 status: 'active',
                 tooltip: description,
             };
@@ -171,7 +171,7 @@ export function populatePartialParsedTokenExtension(
             return {
                 description,
                 externalLinks: populateExternalLinks('https://spl.solana.com/confidential-token/quickstart'),
-                name: 'Confidential Transfer',
+                name: 'Confidential Transfer Mint',
                 status: 'active',
                 tooltip: description,
             };
@@ -181,7 +181,7 @@ export function populatePartialParsedTokenExtension(
             return {
                 description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('interest-bearing-token')),
-                name: 'Interest Bearing Token Configuration',
+                name: 'Interest Bearing Config',
                 status: 'active',
                 tooltip: description,
             };
@@ -192,7 +192,7 @@ export function populatePartialParsedTokenExtension(
             return {
                 description,
                 externalLinks: populateExternalLinks(populateSolanaDevelopersLink('transfer-fee')),
-                name: 'Transfer Fee',
+                name: 'Transfer Fee Config',
                 status: 'active',
                 tooltip: description,
             };
@@ -227,7 +227,7 @@ export function populatePartialParsedTokenExtension(
             return {
                 description,
                 externalLinks: [{ label: 'Docs', url: 'https://solana.com/docs/tokens/extensions/scaled-ui-amount' }],
-                name: 'Scaled UI Amount',
+                name: 'Scaled UI Amount Config',
                 status: 'active',
                 tooltip: description,
             };
@@ -250,7 +250,23 @@ export function populatePartialParsedTokenExtension(
                 externalLinks: [
                     { label: 'Docs', url: 'https://www.solana-program.com/docs/token-2022/extensions#pausable' },
                 ],
-                name: 'Pausable',
+                name: 'Pausable Config',
+                status: 'active',
+                tooltip: description,
+            };
+        }
+        case 'permissionedBurnConfig': {
+            const description =
+                'Restricts burning tokens to a designated burn authority instead of allowing any token holder to burn';
+            return {
+                description,
+                externalLinks: [
+                    {
+                        label: 'Docs',
+                        url: 'https://www.solana-program.com/docs/token-2022/extensions#permissioned-burn',
+                    },
+                ],
+                name: 'Permissioned Burn',
                 status: 'active',
                 tooltip: description,
             };

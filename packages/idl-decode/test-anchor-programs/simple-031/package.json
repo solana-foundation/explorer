@@ -1,0 +1,16 @@
+{
+    "name": "@explorer/test-idl-program-simple-031",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Buildable twin of the simple program on anchor-lang 0.31.1 — IDLs directly comparable across Anchor versions",
+    "exports": {
+        ".": "./target/idl/simple_031.json",
+        "./idl": "./simple_031.idl.json",
+        "./types": "./target/types/simple_031.ts",
+        "./generated-types": "./simple_031.ts"
+    },
+    "scripts": {
+        "build:anchor": "anchor build",
+        "copy:artifacts": "node ../copy-anchor-artifacts.mjs @explorer/test-idl-program-simple-031"
+    }
+}

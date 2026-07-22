@@ -1,7 +1,7 @@
 import { array, boolean, is, nullable, number, optional, string, type } from 'superstruct';
 
-import { fetchUpstream } from '@/app/api/verification/upstream';
 import { matchAbortError } from '@/app/shared/lib/errors';
+import { fetchUpstream } from '@/app/shared/lib/http-utils';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { getJupiterApiKey } from '../config';
