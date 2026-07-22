@@ -1,4 +1,5 @@
 import type { InstructionParser } from '../../types.js';
+// TODO(kit-native): take SYSTEM_PROGRAM_ADDRESS from @solana-program/system instead of deriving it via web3.js.
 import { SystemProgram } from '@solana/web3.js';
 
 import {

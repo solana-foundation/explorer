@@ -27,6 +27,9 @@ import {
     WithdrawNonceInfo as WithdrawNonceInfoStruct,
 } from './validators.js';
 import type { ParserProgramLabel } from '../../types.js';
+// TODO(kit-native): drop web3.js — emit kit Address strings from the byte path (pubkey-parameterized
+// validator factories give the app its PublicKey flavor) and take a structural RPC-parsed input
+// instead of web3.js ParsedInstruction.
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import {
     getCreateAccountWithSeedInstructionDataDecoder,
