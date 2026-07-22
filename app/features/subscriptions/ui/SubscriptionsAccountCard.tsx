@@ -5,7 +5,6 @@ import { useRawAccountDataOnMount, useRefreshAccount } from '@entities/account';
 import type { Account } from '@providers/accounts';
 import type { Address } from '@solana/kit';
 import type {
-    EventAuthority,
     FixedDelegation,
     Plan,
     RecurringDelegation,
@@ -22,56 +21,6 @@ import { BaseTable } from '@/app/shared/ui/Table';
 
 import { decodeSubscriptionsAccount } from '../lib/decode-subscriptions-account';
 import { displayExpiry } from '../lib/format';
-
-function displayPlanStatus(status: number): string {
-    if (status === PlanStatus.Active) return 'Active';
-    if (status === PlanStatus.Sunset) return 'Sunset';
-    return `Unknown (${status})`;
-}
-
-function ValueRow({ children, label }: { children: React.ReactNode; label: string }) {
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">{children}</BaseTable.Cell>
-        </BaseTable.Row>
-    );
-}
-
-function AddressRow({ address, label }: { address: Address; label: string }) {
-    return (
-        <ValueRow label={label}>
-            <KitAddress address={address} raw link />
-        </ValueRow>
-    );
-}
-
-// Delegator + Delegatee rows shared by all three delegation account types.
-type DelegationHeader = { delegatee: Address; delegator: Address; payer: Address };
-
-function DelegationHeaderRows({ header }: { header: DelegationHeader }) {
-    return (
-        <>
-            <AddressRow address={header.delegator} label="Delegator" />
-            <AddressRow address={header.delegatee} label="Delegatee" />
-        </>
-    );
-}
-
-// Card shell for all subscriptions account types — wires up raw data view automatically.
-type SubscriptionCardProps = Omit<BaseAccountCardProps, 'rawContent'> & { account: Account };
-
-function SubscriptionCard({ account, children, ...rest }: SubscriptionCardProps) {
-    const { data, isLoading } = useRawAccountDataOnMount(account.pubkey);
-    return (
-        <BaseAccountCard
-            rawContent={<BaseRawAccountRows account={account} rawData={data} isLoading={isLoading} />}
-            {...rest}
-        >
-            {children}
-        </BaseAccountCard>
-    );
-}
 
 export function SubscriptionsAccountCard({ account, onNotFound }: { account?: Account; onNotFound: () => never }) {
     if (!account) return onNotFound();
@@ -92,8 +41,6 @@ export function SubscriptionsAccountCard({ account, onNotFound }: { account?: Ac
             return <SubscriptionDelegationCard account={account} data={decoded.parsed} />;
         case 'SubscriptionAuthority':
             return <SubscriptionAuthorityCard account={account} data={decoded.parsed} />;
-        case 'EventAuthority':
-            return <EventAuthorityCard account={account} data={decoded.parsed} />;
     }
 }
 
@@ -125,36 +72,6 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
                     <span className="e-font-mono">{metadataUri}</span>
                 </ValueRow>
             )}
-        </SubscriptionCard>
-    );
-}
-
-function EventAuthorityCard({ account, data: _ }: { account: Account; data: EventAuthority }) {
-    const refresh = useRefreshAccount();
-    return (
-        <SubscriptionCard
-            title="Event Authority"
-            account={account}
-            analyticsSection="subscriptions_event_authority_card"
-            refresh={() => refresh(account.pubkey, 'parsed')}
-        />
-    );
-}
-
-function SubscriptionAuthorityCard({ account, data }: { account: Account; data: SubscriptionAuthority }) {
-    const refresh = useRefreshAccount();
-    const { initId, payer, tokenMint, user } = data;
-    return (
-        <SubscriptionCard
-            title="Subscription Authority"
-            account={account}
-            analyticsSection="subscriptions_authority_card"
-            refresh={() => refresh(account.pubkey, 'parsed')}
-        >
-            <AddressRow address={user} label="User" />
-            <AddressRow address={tokenMint} label="Token Mint" />
-            <AddressRow address={payer} label="Payer" />
-            <ValueRow label="Init ID">{initId.toString()}</ValueRow>
         </SubscriptionCard>
     );
 }
@@ -238,4 +155,72 @@ function SubscriptionDelegationCard({ account, data }: { account: Account; data:
             <AddressRow address={header.payer} label="Payer" />
         </SubscriptionCard>
     );
+}
+
+function SubscriptionAuthorityCard({ account, data }: { account: Account; data: SubscriptionAuthority }) {
+    const refresh = useRefreshAccount();
+    const { initId, payer, tokenMint, user } = data;
+    return (
+        <SubscriptionCard
+            title="Subscription Authority"
+            account={account}
+            analyticsSection="subscriptions_authority_card"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
+            <AddressRow address={user} label="User" />
+            <AddressRow address={tokenMint} label="Token Mint" />
+            <AddressRow address={payer} label="Payer" />
+            <ValueRow label="Init ID">{initId.toString()}</ValueRow>
+        </SubscriptionCard>
+    );
+}
+
+// Card shell for all subscriptions account types — wires up raw data view automatically.
+type SubscriptionCardProps = Omit<BaseAccountCardProps, 'rawContent'> & { account: Account };
+
+function SubscriptionCard({ account, children, ...rest }: SubscriptionCardProps) {
+    const { data, isLoading } = useRawAccountDataOnMount(account.pubkey);
+    return (
+        <BaseAccountCard
+            rawContent={<BaseRawAccountRows account={account} rawData={data} isLoading={isLoading} />}
+            {...rest}
+        >
+            {children}
+        </BaseAccountCard>
+    );
+}
+
+// Delegator + Delegatee rows shared by all three delegation account types.
+type DelegationHeader = { delegatee: Address; delegator: Address; payer: Address };
+
+function DelegationHeaderRows({ header }: { header: DelegationHeader }) {
+    return (
+        <>
+            <AddressRow address={header.delegator} label="Delegator" />
+            <AddressRow address={header.delegatee} label="Delegatee" />
+        </>
+    );
+}
+
+function AddressRow({ address, label }: { address: Address; label: string }) {
+    return (
+        <ValueRow label={label}>
+            <KitAddress address={address} raw link />
+        </ValueRow>
+    );
+}
+
+function ValueRow({ children, label }: { children: React.ReactNode; label: string }) {
+    return (
+        <BaseTable.Row>
+            <BaseTable.Cell>{label}</BaseTable.Cell>
+            <BaseTable.Cell className="e-text-right">{children}</BaseTable.Cell>
+        </BaseTable.Row>
+    );
+}
+
+function displayPlanStatus(status: number): string {
+    if (status === PlanStatus.Active) return 'Active';
+    if (status === PlanStatus.Sunset) return 'Sunset';
+    return `Unknown (${status})`;
 }

@@ -23,6 +23,8 @@ const RECURRING_ACCOUNT = address(gen.address(3));
 const USER = address(gen.address(4));
 const MINT = address(gen.address(5));
 const DELEGATEE = address(gen.address(6));
+const RECV_SUB_ACCOUNT = address(gen.address(7));
+const RECV_FIXED_ACCOUNT = address(gen.address(8));
 
 const HEADER_BASE = {
     delegatee: DELEGATEE,
@@ -80,7 +82,10 @@ const ALL_DATA = {
         { address: FIXED_ACCOUNT, data: FIXED_DELEGATION, kind: 'fixed' as const },
         { address: RECURRING_ACCOUNT, data: RECURRING_DELEGATION, kind: 'recurring' as const },
     ],
-    delegationsReceived: [],
+    delegationsReceived: [
+        { address: RECV_SUB_ACCOUNT, data: SUB_DELEGATION, kind: 'subscription' as const },
+        { address: RECV_FIXED_ACCOUNT, data: FIXED_DELEGATION, kind: 'fixed' as const },
+    ],
     plans: [{ address: PLAN_ACCOUNT, data: PLAN }],
 };
 
@@ -102,11 +107,28 @@ export const AllSections: Story = {
         expect(canvas.getByText('Plans')).toBeInTheDocument();
         expect(canvas.getByText('Subscriptions')).toBeInTheDocument();
         expect(canvas.getByText('Delegations')).toBeInTheDocument();
+        expect(canvas.getByText('Received Subscriptions')).toBeInTheDocument();
+        expect(canvas.getByText('Received Delegations')).toBeInTheDocument();
+        // Plan id / amount are unique to the Plans section; 'Recurring' only appears in own
+        // Delegations. (Amounts like 200000/500000 repeat across own + received rows.)
         expect(canvas.getByText('42')).toBeInTheDocument();
         expect(canvas.getByText('1000000')).toBeInTheDocument();
-        expect(canvas.getByText('200000')).toBeInTheDocument();
-        expect(canvas.getByText('Fixed')).toBeInTheDocument();
         expect(canvas.getByText('Recurring')).toBeInTheDocument();
+    },
+};
+
+export const ReceivedSubscriptionsOnly: Story = {
+    args: {
+        delegations: [],
+        delegationsReceived: [{ address: RECV_SUB_ACCOUNT, data: SUB_DELEGATION, kind: 'subscription' as const }],
+        plans: [],
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        // Regression: a wallet with only received subscription-kind delegations must render
+        // content, not the "No subscriptions found" empty state (tab/page mismatch).
+        expect(canvas.getByText('Received Subscriptions')).toBeInTheDocument();
+        expect(canvas.queryByText('No subscriptions found for this address.')).not.toBeInTheDocument();
     },
 };
 
@@ -152,5 +174,13 @@ export const DelegationsOnly: Story = {
         expect(canvas.getByText('Recurring')).toBeInTheDocument();
         expect(canvas.getByText('500000')).toBeInTheDocument();
         expect(canvas.getByText('100000')).toBeInTheDocument();
+    },
+};
+
+export const Empty: Story = {
+    args: { delegations: [], delegationsReceived: [], plans: [] },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        expect(canvas.getByText('No subscriptions found for this address.')).toBeInTheDocument();
     },
 };

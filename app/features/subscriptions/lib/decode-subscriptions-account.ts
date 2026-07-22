@@ -1,26 +1,22 @@
 import type { Address, EncodedAccount, ReadonlyUint8Array } from '@solana/kit';
 import {
     AccountDiscriminator,
-    decodeEventAuthority,
     decodeFixedDelegation,
     decodePlan,
     decodeRecurringDelegation,
     decodeSubscriptionAuthority,
     decodeSubscriptionDelegation,
     DISCRIMINATOR_OFFSET,
-    type EventAuthority,
     type FixedDelegation,
     type Plan,
     type RecurringDelegation,
     type SubscriptionAuthority,
     type SubscriptionDelegation,
-    SubscriptionsAccount,
 } from '@solana/subscriptions';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 export type SubscriptionsAccountData =
-    | { parsed: EventAuthority; program: 'EventAuthority' }
     | { parsed: FixedDelegation; program: 'FixedDelegation' }
     | { parsed: Plan; program: 'Plan' }
     | { parsed: RecurringDelegation; program: 'RecurringDelegation' }
@@ -30,9 +26,14 @@ export type SubscriptionsAccountData =
 /**
  * Decode raw account bytes into the appropriate Subscriptions protocol account type.
  *
+ * Handles the five discriminator-bearing account types. The protocol's sixth account,
+ * EventAuthority, is intentionally not handled here: it is an empty (0-byte) account
+ * identified by PDA derivation (`findEventAuthorityPda`), not by a discriminator byte,
+ * so it cannot be recognised from raw data alone.
+ *
  * Returns `undefined` when:
  * - `data` is empty
- * - the discriminator byte is not one of the six known account types
+ * - the discriminator byte is not one of the five known account types
  * - the codec rejects the bytes (e.g. length mismatch, corrupt data)
  */
 export function decodeSubscriptionsAccount(
@@ -56,8 +57,6 @@ export function decodeSubscriptionsAccount(
                 return { parsed: decodeSubscriptionAuthority(encoded).data, program: 'SubscriptionAuthority' };
             case AccountDiscriminator.SubscriptionDelegation:
                 return { parsed: decodeSubscriptionDelegation(encoded).data, program: 'SubscriptionDelegation' };
-            case SubscriptionsAccount.EventAuthority:
-                return { parsed: decodeEventAuthority(encoded).data, program: 'EventAuthority' };
             default:
                 return undefined;
         }

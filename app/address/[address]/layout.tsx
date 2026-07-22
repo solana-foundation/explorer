@@ -53,6 +53,8 @@ import { hasTokenMetadata } from '@/app/features/metadata';
 import {
     isSubscriptionsAccount,
     SubscriptionsAccountCard,
+    SubscriptionsEventAuthorityCard,
+    useIsEventAuthority,
     useWalletDelegations,
     useWalletPlans,
 } from '@/app/features/subscriptions';
@@ -282,6 +284,10 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
     // get feature data from featureGates.json
     const featureInfo = useFeatureInfo({ address: account.pubkey.toBase58() });
 
+    // The Subscriptions event authority is a signer-only PDA with no account data, so it
+    // is recognised by its derived address rather than by decoding bytes.
+    const isEventAuthority = useIsEventAuthority(account.pubkey.toBase58());
+
     // Squads v4 Batch / VaultTransaction accounts aren't RPC-parsed; detect them by
     // discriminator so we can surface a direct "Inspect" link to the transaction inspector.
     const squadsAccountType = rawData ? detectSquadsAccountType(account.owner, rawData) : undefined;
@@ -327,6 +333,8 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         return <FeatureAccountSection account={account} />;
     } else if (account.owner.toBase58() === SAS_PROGRAM_ID) {
         return <SolanaAttestationServiceCard account={account} />;
+    } else if (isEventAuthority) {
+        return <SubscriptionsEventAuthorityCard account={account} />;
     } else if (isSubscriptionsAccount(account)) {
         return (
             <SubscriptionsAccountCard
@@ -504,8 +512,14 @@ function ProgramMultisigTab({ authority }: { authority: PublicKey | null | undef
 }
 
 function WalletSubscriptionsTab({ walletAddress }: { walletAddress: string | null }) {
-    const { data: delegationsData } = useWalletDelegations(walletAddress);
-    const { data: plansData } = useWalletPlans(walletAddress);
+    // Non-suspense: this fires on every non-executable account page, so a failing RPC
+    // (e.g. getProgramAccounts disabled/rate-limited) must hide the tab, not throw and
+    // take down the whole account page. Mirrors ProgramMultisigTab's error handling.
+    const { data: delegationsData, error: delegationsError } = useWalletDelegations(walletAddress, {
+        suspense: false,
+    });
+    const { data: plansData, error: plansError } = useWalletPlans(walletAddress, { suspense: false });
+    if (delegationsError || plansError) return null;
     const hasAny =
         (delegationsData?.delegations.length ?? 0) > 0 ||
         (delegationsData?.delegationsReceived.length ?? 0) > 0 ||
