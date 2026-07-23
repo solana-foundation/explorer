@@ -9,13 +9,13 @@ describe('reconcile', () => {
     it('should ignore an empty refresh so a flaky RPC response cannot wipe loaded history or flip foundOldest', () => {
         const history = { fetched: [sig('a'), sig('b')], foundOldest: false };
 
-        const result = reconcile(history, { before: undefined, history: { fetched: [], foundOldest: true } });
+        const result = reconcile(history, { append: false, history: { fetched: [], foundOldest: true } });
 
         expect(result).toBe(history);
     });
 
     it('should still record an empty result on the first load (a genuinely empty account)', () => {
-        const result = reconcile(undefined, { before: undefined, history: { fetched: [], foundOldest: true } });
+        const result = reconcile(undefined, { append: false, history: { fetched: [], foundOldest: true } });
 
         expect(result?.fetched).toEqual([]);
         expect(result?.foundOldest).toBe(true);
@@ -25,17 +25,17 @@ describe('reconcile', () => {
         const history = { fetched: [sig('a')], foundOldest: false };
 
         const result = reconcile(history, {
-            before: undefined,
+            append: false,
             history: { fetched: [sig('b'), sig('a')], foundOldest: false },
         });
 
         expect(result?.fetched.map(s => s.signature)).toEqual(['b', 'a']);
     });
 
-    it('should keep the end-of-history signal when load-more (before set) returns empty', () => {
+    it('should keep the end-of-history signal when load-more (append) returns empty', () => {
         const history = { fetched: [sig('a')], foundOldest: false };
 
-        const result = reconcile(history, { before: 'a', history: { fetched: [], foundOldest: true } });
+        const result = reconcile(history, { append: true, history: { fetched: [], foundOldest: true } });
 
         expect(result?.fetched.map(s => s.signature)).toEqual(['a']);
         expect(result?.foundOldest).toBe(true);

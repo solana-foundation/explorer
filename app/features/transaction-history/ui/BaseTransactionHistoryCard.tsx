@@ -28,6 +28,8 @@ export type BaseTransactionHistoryCardProps = {
     foundOldest: boolean;
     onRefresh: () => void;
     onLoadMore: () => void;
+    headerActions?: ReactNode;
+    headerSubRow?: ReactNode;
 };
 
 export function BaseTransactionHistoryCard({
@@ -36,6 +38,8 @@ export function BaseTransactionHistoryCard({
     foundOldest,
     onRefresh,
     onLoadMore,
+    headerActions,
+    headerSubRow,
 }: BaseTransactionHistoryCardProps) {
     const hasTimestamps = rows.some(row => row.blockTime);
 
@@ -46,6 +50,8 @@ export function BaseTransactionHistoryCard({
                 analyticsSection="transaction_history_header"
                 refresh={onRefresh}
                 fetching={fetching}
+                actions={headerActions}
+                subHeader={headerSubRow}
             />
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>

@@ -161,12 +161,13 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const isAccountLoading = !info || info.status === FetchStatus.Fetching;
     const isTokenInfoLoading = isAccountLoading || isFullTokenInfoLoading;
 
-    // Fetch account on load
+    // Fetch account on load. `info` is in the deps so the fetch re-arms if the cache entry is
+    // cleared from under us (e.g. a dev-mode segment remount wiping provider state mid-fetch).
     React.useEffect(() => {
         if (!info && status === ClusterStatus.Connected && pubkey) {
             fetchAccount(pubkey, 'parsed');
         }
-    }, [address, status]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [address, status, info]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <PageContainer variant="pulled-up">

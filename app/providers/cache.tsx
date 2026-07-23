@@ -34,6 +34,8 @@ export type Update<T> = {
 export type Clear = {
     type: ActionType.Clear;
     url: string;
+    // When provided, clears only this entry; otherwise clears the whole cache.
+    key?: string | number;
 };
 
 export type Action<T> = Update<T> | Clear;
@@ -74,6 +76,13 @@ export function useCustomReducer<T, U>(url: string, reconciler: Reconciler<T, U>
 
 export function reducer<T, U>(state: State<T>, action: Action<U>, reconciler: Reconciler<T, U>): State<T> {
     if (action.type === ActionType.Clear) {
+        // Per-key clear: drop just one entry, leaving sibling addresses intact.
+        if (action.key !== undefined) {
+            if (action.url !== state.url) return state;
+            const entries = { ...state.entries };
+            delete entries[action.key];
+            return { ...state, entries };
+        }
         return { entries: {}, url: action.url };
     } else if (action.url !== state.url) {
         return state;
