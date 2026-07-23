@@ -19,17 +19,17 @@ export function SubscriptionsEventAuthorityCard({ account }: { account: Account 
         <BaseAccountCard title="Subscriptions Event Authority" showRawButton={false}>
             <BaseTable.Row>
                 <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <KitAddress address={account.pubkey.toBase58() as Address} raw />
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Account Type</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">Event Authority (signer PDA)</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">Event Authority (signer PDA)</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="e-text-right">
+                <BaseTable.Cell className="text-right">
                     <KitAddress address={SUBSCRIPTIONS_ADDRESS as Address} raw link />
                 </BaseTable.Cell>
             </BaseTable.Row>

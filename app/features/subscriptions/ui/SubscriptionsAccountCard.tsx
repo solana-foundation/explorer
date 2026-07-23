@@ -69,7 +69,7 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
             <ValueRow label="Expires At">{displayExpiry(endTs)}</ValueRow>
             {metadataUri && (
                 <ValueRow label="Metadata URI">
-                    <span className="e-font-mono">{metadataUri}</span>
+                    <span className="font-mono">{metadataUri}</span>
                 </ValueRow>
             )}
         </SubscriptionCard>
@@ -214,7 +214,7 @@ function ValueRow({ children, label }: { children: React.ReactNode; label: strin
     return (
         <BaseTable.Row>
             <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell className="e-text-right">{children}</BaseTable.Cell>
+            <BaseTable.Cell className="text-right">{children}</BaseTable.Cell>
         </BaseTable.Row>
     );
 }

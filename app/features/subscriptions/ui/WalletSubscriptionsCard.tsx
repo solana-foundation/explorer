@@ -1,6 +1,7 @@
 'use client';
 
 import { KitAddress } from '@components/common/KitAddress';
+import { ExternalLink } from '@components/shared/ui/external-link';
 import type { Address } from '@solana/kit';
 import type {
     FixedDelegation,
@@ -9,10 +10,12 @@ import type {
     SubscriptionDelegation,
 } from '@solana/subscriptions';
 import { pluralUnits } from '@utils/index';
+import { ExternalLink as ExternalLinkIcon, Info } from 'react-feather';
 
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
+import { SUBSCRIPTIONS_REPO_URL } from '../lib/constants';
 import { displayExpiry } from '../lib/format';
 import {
     useWalletDelegations,
@@ -51,17 +54,43 @@ export function WalletSubscriptionsView({
         receivedSubscriptions.length === 0 &&
         standaloneReceived.length === 0
     ) {
-        return <div className="e-p-4 e-text-center e-text-muted">No subscriptions found for this address.</div>;
+        return (
+            <>
+                <SubscriptionsHint />
+                <div className="p-4 text-center text-muted">No subscriptions found for this address.</div>
+            </>
+        );
     }
 
     return (
         <>
+            <SubscriptionsHint />
             {plans.length > 0 && <PlansSection plans={plans} />}
             {subscriptions.length > 0 && <SubscriptionsSection delegations={subscriptions} />}
             {standalone.length > 0 && <DelegationsSection delegations={standalone} />}
             {receivedSubscriptions.length > 0 && <ReceivedSubscriptionsSection delegations={receivedSubscriptions} />}
             {standaloneReceived.length > 0 && <ReceivedDelegationsSection delegations={standaloneReceived} />}
         </>
+    );
+}
+
+// A subtle info note explaining what this tab lists, with a link to the program's source.
+function SubscriptionsHint() {
+    return (
+        <div className="mb-4 flex items-start gap-2 rounded-dk border border-solid border-dk-gray-700-dark bg-dk-gray-800-dark px-4 py-3 text-dk-sm text-muted">
+            <Info aria-hidden className="mt-0.5 shrink-0 text-dk-info" size={15} />
+            <span>
+                Here you can see all subscriptions handled by the{' '}
+                <ExternalLink
+                    className="whitespace-nowrap text-dk-primary-dark hover:underline"
+                    href={SUBSCRIPTIONS_REPO_URL}
+                >
+                    Subscriptions program
+                    <ExternalLinkIcon className="ml-1 inline align-text-top" size={12} />
+                </ExternalLink>
+                .
+            </span>
+        </div>
     );
 }
 
