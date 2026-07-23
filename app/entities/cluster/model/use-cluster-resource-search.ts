@@ -69,7 +69,7 @@ export function useClusterResourceSearch({
 
                 let found: boolean;
                 try {
-                    found = await probeRef.current(resolveClusterUrl(cluster, customUrl), resourceId);
+                    found = await probeRef.current(clusterUrl(cluster, customUrl ?? ''), resourceId);
                 } catch {
                     // Ignore probe errors (unreachable RPC, etc.) and try the next cluster
                     continue;
@@ -110,14 +110,6 @@ function getClustersToProbe(currentCluster: Cluster, customUrl: string | null | 
         clusters.push(Cluster.Custom);
     }
     return clusters;
-}
-
-function resolveClusterUrl(cluster: Cluster, customUrl: string | null | undefined): string {
-    // clusterUrl has no entry for a custom RPC, so resolve the custom URL explicitly.
-    if (customUrl && cluster === Cluster.Custom) {
-        return customUrl;
-    }
-    return clusterUrl(cluster, '');
 }
 
 function sleep(ms: number): Promise<void> {
