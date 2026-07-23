@@ -187,7 +187,7 @@
         "msw": "2.14.6",
         "msw-storybook-addon": "2.0.7",
         "playwright": "1.57.0",
-        "postcss": "8.5.10",
+        "postcss": "8.5.12",
         "postcss-import": "16.1.0",
         "prettier": "3.5.3",
         "prettier-plugin-tailwindcss": "0.7.2",
