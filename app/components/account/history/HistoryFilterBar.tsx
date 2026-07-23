@@ -2,12 +2,15 @@
 
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
+import { DateTimePicker } from '@components/shared/ui/date-time-picker';
 import { Input } from '@components/shared/ui/input';
+import { Label } from '@components/shared/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
 import { HistoryFilters, useHistoryFiltersSupported } from '@providers/accounts/history';
+import { format } from 'date-fns';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
-import { Filter, X } from 'react-feather';
+import { ChevronDown, Filter, X } from 'react-feather';
 
 // URL params map one-to-one onto the Triton `getTransactionsForAddress` filter paths.
 export const SLOT_GTE_PARAM = 'slot.gte';
@@ -108,10 +111,7 @@ function unixToLocalInput(sec: number | undefined): string {
     if (sec === undefined) return '';
     const d = new Date(sec * 1000);
     if (Number.isNaN(d.getTime())) return '';
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(
-        d.getMinutes(),
-    )}`;
+    return format(d, "yyyy-MM-dd'T'HH:mm");
 }
 
 function localInputToUnix(raw: string): number | undefined {
@@ -122,7 +122,7 @@ function localInputToUnix(raw: string): number | undefined {
 
 function FilterChip({ label, value, onClear }: { label: string; value: string; onClear: () => void }) {
     return (
-        <Badge ui="dashkit" variant="info" className="inline-flex items-center gap-1">
+        <Badge ui="tw" variant="info">
             <span>
                 {label}: {value}
             </span>
@@ -130,7 +130,7 @@ function FilterChip({ label, value, onClear }: { label: string; value: string; o
                 type="button"
                 onClick={onClear}
                 aria-label={`Clear ${label.toLowerCase()} filter`}
-                className="inline-flex items-center justify-center border-0 bg-transparent p-0 leading-none text-current opacity-70 hover:opacity-100"
+                className="flex items-center justify-center border-none bg-transparent p-0 text-current opacity-70 hover:opacity-100"
             >
                 <X size={12} />
             </button>
@@ -184,11 +184,13 @@ export function HistoryFilterChips(filters: HistoryFilters) {
     );
 }
 
-const SELECT_CLASS = 'w-full rounded-md border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm text-neutral-100';
+const SELECT_CLASS =
+    'h-9 w-full appearance-none rounded border border-outer-space-950 bg-heavy-metal-900 px-3 pr-8 font-mono text-xs text-neutral-200 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900';
 
 export function HistoryFilterTrigger(filters: HistoryFilters) {
     const { slot, blockTime, status } = filters;
     const updateFilters = useUpdateHistoryFilters();
+    const clearFilters = useClearHistoryFilters();
     const supported = useHistoryFiltersSupported();
     const [open, setOpen] = React.useState(false);
 
@@ -198,13 +200,17 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
     const [blockTimeGteDraft, setBlockTimeGteDraft] = React.useState('');
     const [blockTimeLteDraft, setBlockTimeLteDraft] = React.useState('');
 
+    // Depend on the scalar range bounds, not the `slot`/`blockTime` objects: `toRange`
+    // allocates a fresh object on every render, so keying on the objects would re-run
+    // this effect on unrelated parent re-renders (e.g. lazy per-row fetches) and silently
+    // reset a draft the user is still editing before they click Apply.
     React.useEffect(() => {
         setSlotGteDraft(slot?.gte !== undefined ? String(slot.gte) : '');
         setSlotLteDraft(slot?.lte !== undefined ? String(slot.lte) : '');
         setStatusDraft(status ?? '');
         setBlockTimeGteDraft(unixToLocalInput(blockTime?.gte));
         setBlockTimeLteDraft(unixToLocalInput(blockTime?.lte));
-    }, [slot, blockTime, status, open]);
+    }, [slot?.gte, slot?.lte, blockTime?.gte, blockTime?.lte, status, open]);
 
     const slotGteValue = slotDraftToValue(slotGteDraft);
     const slotLteValue = slotDraftToValue(slotLteDraft);
@@ -233,13 +239,7 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
     };
 
     const clearAll = () => {
-        updateFilters({
-            [BLOCK_TIME_GTE_PARAM]: undefined,
-            [BLOCK_TIME_LTE_PARAM]: undefined,
-            [SLOT_GTE_PARAM]: undefined,
-            [SLOT_LTE_PARAM]: undefined,
-            [STATUS_PARAM]: undefined,
-        });
+        clearFilters();
         setOpen(false);
     };
 
@@ -276,7 +276,7 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                     <span className="hidden md:inline">{triggerLabel}</span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-80 p-3">
+            <PopoverContent align="end" className="w-80 p-4">
                 <form
                     onSubmit={e => {
                         e.preventDefault();
@@ -285,71 +285,73 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                     className="flex flex-col gap-3"
                 >
                     <div className="flex flex-col gap-1">
-                        <label className="text-xs text-neutral-300">Slot ≥</label>
+                        <label className="text-xs font-medium text-neutral-400">Slot ≥</label>
                         <Input
                             autoFocus
                             variant="dark"
                             inputMode="numeric"
                             pattern="[0-9]*"
-                            placeholder="lower bound (optional)"
+                            placeholder="Lower bound (optional)"
                             value={slotGteDraft}
                             aria-invalid={slotGteInvalid || slotRangeInvalid}
                             onChange={e => setSlotGteDraft(e.target.value)}
                         />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label className="text-xs text-neutral-300">Slot ≤</label>
+                        <label className="text-xs font-medium text-neutral-400">Slot ≤</label>
                         <Input
                             variant="dark"
                             inputMode="numeric"
                             pattern="[0-9]*"
-                            placeholder="upper bound (optional)"
+                            placeholder="Upper bound (optional)"
                             value={slotLteDraft}
                             aria-invalid={slotLteInvalid || slotRangeInvalid}
                             onChange={e => setSlotLteDraft(e.target.value)}
                         />
                     </div>
-                    {slotRangeInvalid && <div className="text-xs text-red-400">Slot ≥ must be ≤ slot ≤.</div>}
+                    {slotRangeInvalid && <div className="text-xs text-destructive">Slot ≥ must be ≤ slot ≤.</div>}
 
                     <div className="flex flex-col gap-1">
-                        <label className="text-xs text-neutral-300" htmlFor="history-status-filter">
+                        <Label className="text-xs font-medium text-neutral-400" htmlFor="history-status-filter">
                             Status
-                        </label>
-                        <select
-                            id="history-status-filter"
-                            aria-label="Status"
-                            className={SELECT_CLASS}
-                            value={statusDraft}
-                            onChange={e => setStatusDraft(e.target.value)}
-                        >
-                            <option value="">Any</option>
-                            <option value="succeeded">Succeeded</option>
-                            <option value="failed">Failed</option>
-                        </select>
+                        </Label>
+                        <div className="relative">
+                            <select
+                                id="history-status-filter"
+                                aria-label="Status"
+                                className={SELECT_CLASS}
+                                value={statusDraft}
+                                onChange={e => setStatusDraft(e.target.value)}
+                            >
+                                <option value="">Any</option>
+                                <option value="succeeded">Succeeded</option>
+                                <option value="failed">Failed</option>
+                            </select>
+                            <ChevronDown
+                                size={14}
+                                className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400"
+                            />
+                        </div>
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <label className="text-xs text-neutral-300">Block time ≥</label>
-                        <Input
-                            type="datetime-local"
-                            variant="dark"
+                        <label className="text-xs font-medium text-neutral-400">Block time ≥</label>
+                        <DateTimePicker
                             value={blockTimeGteDraft}
                             aria-invalid={timeRangeInvalid}
-                            onChange={e => setBlockTimeGteDraft(e.target.value)}
+                            onChange={setBlockTimeGteDraft}
                         />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label className="text-xs text-neutral-300">Block time ≤</label>
-                        <Input
-                            type="datetime-local"
-                            variant="dark"
+                        <label className="text-xs font-medium text-neutral-400">Block time ≤</label>
+                        <DateTimePicker
                             value={blockTimeLteDraft}
                             aria-invalid={timeRangeInvalid}
-                            onChange={e => setBlockTimeLteDraft(e.target.value)}
+                            onChange={setBlockTimeLteDraft}
                         />
                     </div>
                     {timeRangeInvalid && (
-                        <div className="text-xs text-red-400">Block time ≥ must be on or before block time ≤.</div>
+                        <div className="text-xs text-destructive">Block time ≥ must be on or before block time ≤.</div>
                     )}
 
                     <div className="flex justify-end gap-2 pt-1">
@@ -371,7 +373,7 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
 // Combined bar kept for tests / any consumer that wants chips + trigger inline.
 export function HistoryFilterBar(props: HistoryFilters) {
     return (
-        <div className="d-flex align-items-center flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
             <HistoryFilterChips {...props} />
             <HistoryFilterTrigger {...props} />
         </div>
