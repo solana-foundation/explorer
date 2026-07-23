@@ -184,8 +184,7 @@ export function HistoryFilterChips(filters: HistoryFilters) {
     );
 }
 
-const SELECT_CLASS =
-    'w-full rounded-md border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm text-neutral-100';
+const SELECT_CLASS = 'w-full rounded-md border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm text-neutral-100';
 
 export function HistoryFilterTrigger(filters: HistoryFilters) {
     const { slot, blockTime, status } = filters;
@@ -372,7 +371,7 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
 // Combined bar kept for tests / any consumer that wants chips + trigger inline.
 export function HistoryFilterBar(props: HistoryFilters) {
     return (
-        <div className="d-flex align-items-center gap-2 flex-wrap">
+        <div className="d-flex align-items-center flex-wrap gap-2">
             <HistoryFilterChips {...props} />
             <HistoryFilterTrigger {...props} />
         </div>

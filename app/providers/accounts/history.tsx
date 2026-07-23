@@ -3,7 +3,13 @@
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { ConfirmedSignatureInfo, Connection, ParsedTransactionWithMeta, PublicKey, TransactionSignature } from '@solana/web3.js';
+import {
+    ConfirmedSignatureInfo,
+    Connection,
+    ParsedTransactionWithMeta,
+    PublicKey,
+    TransactionSignature,
+} from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { fetchAll } from '@utils/fetch-all';
 import { fetchOnce } from '@utils/fetch-once';
@@ -109,7 +115,6 @@ export function reconcile(history: AccountHistory | undefined, update: HistoryUp
     // the whole list; a refresh that merely prepends new items keeps the old tail.
     const tailFromUpdate = append || replaced;
 
-
     const transactionMap = mergeTransactionMap(history?.transactionMap, update.transactionMap);
     const failedTransactionSignatures = mergeFailedTransactionSignatures(
         append ? history?.failedTransactionSignatures : undefined,
@@ -135,13 +140,17 @@ export const InFlightContext: React.Context<Set<string> | undefined> = React.cre
 // Monotonic per-address counter. Bumped whenever a request is superseded (e.g. a
 // filter change) so the in-flight response can be discarded instead of overwriting
 // the freshly-cleared cache. See `useResetAccountHistory`.
-const GenerationContext = React.createContext<Map<string, number> | undefined>(undefined);
+export const GenerationContext: React.Context<Map<string, number> | undefined> = React.createContext<
+    Map<string, number> | undefined
+>(undefined);
 
 // Whether the current endpoint supports getTransactionsForAddress. Flips to false the
 // first time the method is not found, so the UI can disable filtering (the
 // getSignaturesForAddress fallback can't honour any of the filters).
-type MethodSupport = { supported: boolean; markUnsupported: () => void };
-const MethodSupportContext = React.createContext<MethodSupport | undefined>(undefined);
+export type MethodSupport = { supported: boolean; markUnsupported: () => void };
+export const MethodSupportContext: React.Context<MethodSupport | undefined> = React.createContext<
+    MethodSupport | undefined
+>(undefined);
 
 type HistoryProviderProps = { children: React.ReactNode };
 export function HistoryProvider({ children }: HistoryProviderProps) {
