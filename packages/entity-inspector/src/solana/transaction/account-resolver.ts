@@ -23,6 +23,8 @@ export type AccountResolutionParams = {
 export type AccountResolutionResult = {
     accountKeys: string[];
     resolvedAccounts: ResolvedAccount[];
+    /** Set when `addressTableLookups` index counts do not cover `loadedAddresses` — attribution is partial. */
+    lookupCountsMismatch?: true;
 };
 
 type TransactionAccountResolver = (params: AccountResolutionParams) => AccountResolutionResult;
@@ -103,9 +105,14 @@ export function resolveV0Accounts(params: AccountResolutionParams): AccountResol
         ...(readonlyMap[i] != null && { lookupTableAddress: readonlyMap[i] }),
     }));
 
+    const lookupCountsMismatch =
+        addressTableLookups !== undefined &&
+        (writableMap.length !== loadedWritable.length || readonlyMap.length !== loadedReadonly.length);
+
     return {
         accountKeys: [...staticKeys, ...loadedWritable, ...loadedReadonly],
         resolvedAccounts: [...staticAccounts, ...loadedWritableAccounts, ...loadedReadonlyAccounts],
+        ...(lookupCountsMismatch ? { lookupCountsMismatch: true } : {}),
     };
 }
 

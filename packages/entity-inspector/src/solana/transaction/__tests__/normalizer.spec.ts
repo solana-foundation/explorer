@@ -638,6 +638,36 @@ describe('transaction normalizer', () => {
         );
     });
 
+    it('should warn when the lookup indexes do not cover the loaded addresses', () => {
+        mustNormalize(
+            makeFullEnvelope({
+                meta: {
+                    err: null,
+                    fee: 5000,
+                    loadedAddresses: { readonly: [], writable: ['alt-w1', 'alt-w2'] },
+                },
+                transaction: {
+                    message: {
+                        accountKeys: ['signer'],
+                        addressTableLookups: [{ accountKey: 'ALT-A', readonlyIndexes: [], writableIndexes: [0] }],
+                        header: {
+                            numReadonlySignedAccounts: 0,
+                            numReadonlyUnsignedAccounts: 0,
+                            numRequiredSignatures: 1,
+                        },
+                        instructions: [{ accounts: [0], data: '3Bxs', programIdIndex: 0 }],
+                    },
+                },
+                version: 0,
+            }),
+        );
+
+        expect(logger.warn).toHaveBeenCalledWith(
+            '[entity-inspector] address table lookup counts do not cover the loaded addresses',
+            { signature: 'sig' },
+        );
+    });
+
     it('should validate v0 instruction indices against the merged key range', () => {
         const envelope = (instructions: unknown, loadedAddresses: unknown) =>
             makeFullEnvelope({

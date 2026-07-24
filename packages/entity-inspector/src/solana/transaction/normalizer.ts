@@ -184,12 +184,19 @@ export function normalizeTransactionProbe(
 
     const version = normalizeVersion(envelope.version);
     const resolver = selectAccountResolver(version);
-    const { accountKeys: allKeys, resolvedAccounts } = resolver({
+    const {
+        accountKeys: allKeys,
+        lookupCountsMismatch,
+        resolvedAccounts,
+    } = resolver({
         addressTableLookups: envelope.transaction.message.addressTableLookups,
         header,
         loadedAddresses: meta?.loadedAddresses,
         staticKeys,
     });
+    if (lookupCountsMismatch) {
+        logger.warn(ns('address table lookup counts do not cover the loaded addresses'), { signature });
+    }
 
     validateInstructionIntegrity(instructions, innerInstructions, allKeys.length);
 

@@ -130,6 +130,39 @@ describe('resolveV0Accounts', () => {
         ]);
     });
 
+    it('should flag a mismatch when the lookup indexes do not cover the loaded writable addresses', () => {
+        const result = resolveV0Accounts({
+            addressTableLookups: [{ accountKey: 'ALT-A', readonlyIndexes: [0], writableIndexes: [0] }],
+            header: { numReadonlySignedAccounts: 0, numReadonlyUnsignedAccounts: 0, numRequiredSignatures: 1 },
+            loadedAddresses: { readonly: ['alt-r1'], writable: ['alt-w1', 'alt-w2'] },
+            staticKeys: ['signer'],
+        });
+
+        expect(result.lookupCountsMismatch).toBe(true);
+    });
+
+    it('should flag a mismatch when the lookup indexes do not cover the loaded readonly addresses', () => {
+        const result = resolveV0Accounts({
+            addressTableLookups: [{ accountKey: 'ALT-A', readonlyIndexes: [], writableIndexes: [0] }],
+            header: { numReadonlySignedAccounts: 0, numReadonlyUnsignedAccounts: 0, numRequiredSignatures: 1 },
+            loadedAddresses: { readonly: ['alt-r1'], writable: ['alt-w1'] },
+            staticKeys: ['signer'],
+        });
+
+        expect(result.lookupCountsMismatch).toBe(true);
+    });
+
+    it('should not flag a mismatch when the lookup indexes match the loaded addresses', () => {
+        const result = resolveV0Accounts({
+            addressTableLookups: [{ accountKey: 'ALT-A', readonlyIndexes: [1], writableIndexes: [0] }],
+            header: { numReadonlySignedAccounts: 0, numReadonlyUnsignedAccounts: 0, numRequiredSignatures: 1 },
+            loadedAddresses: { readonly: ['alt-r1'], writable: ['alt-w1'] },
+            staticKeys: ['signer'],
+        });
+
+        expect(result.lookupCountsMismatch).toBeUndefined();
+    });
+
     it('should omit lookupTableAddress when addressTableLookups is not provided', () => {
         const result = resolveV0Accounts({
             header: { numReadonlySignedAccounts: 0, numReadonlyUnsignedAccounts: 0, numRequiredSignatures: 1 },
