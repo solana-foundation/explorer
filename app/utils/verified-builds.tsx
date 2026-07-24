@@ -1,7 +1,7 @@
 import { useAnchorProgram } from '@entities/idl';
 import { sha256 } from '@noble/hashes/sha256';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
 import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
@@ -269,6 +269,15 @@ function useEnrichedOsecInfo({
         { suspense: options?.suspense },
     );
 
+    // A propagated `pdaError` means the PDA fetch threw unexpectedly — the expected "no matching PDA"
+    // case is caught per-candidate inside the fetcher and returns `null`. Log it so the degrade to
+    // OSEC-only data isn't silent before we coalesce it away to `null` below.
+    useEffect(() => {
+        if (pdaError) {
+            Logger.error(pdaError, { programId: programId.toBase58() });
+        }
+    }, [pdaError, programId]);
+
     // No verified entry from the registry — surface nothing so the card shows the empty state.
     if (!osecInfo) {
         return { data: null, isLoading: false };
@@ -278,8 +287,8 @@ function useEnrichedOsecInfo({
     // the verify command and on-chain repo URL; they are NOT required to know the program is verified
     // (OSEC + the on-chain hash re-check already establish that). Stay in the loading state while that
     // resolution is in flight so a verified program never flashes the "not uploaded" empty state, then
-    // render from OSEC data whether or not the PDA resolved. A `pdaError` means every signer
-    // candidate failed to fetch, which is the same "no PDA" degrade path.
+    // render from OSEC data whether or not the PDA resolved. A `pdaError` (logged above) degrades to the
+    // same "no PDA" render path.
     if (isIdlLoading || isPdaLoading) {
         return { data: null, isLoading: true };
     }
