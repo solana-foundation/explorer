@@ -9,7 +9,6 @@ import { formatParsedInstruction } from '../lib/format-sub-instruction';
 import type { DecodedField, DecodedParams, LabeledAccount } from '../lib/types';
 import { useSubInstructionMintInfo } from '../model/use-sub-instruction-mint-info';
 
-// FIXME: missing Storybook story — needs useSubInstructionMintInfo (useAccountQuery chain) mocked.
 export function SubInstructionRow({
     parsed,
     extraSigners,
@@ -23,6 +22,18 @@ export function SubInstructionRow({
     const decoded = formatParsedInstruction(parsed, mintInfo, extraSigners);
     const typeName = TokenInstruction[parsed.instructionType] ?? 'Unknown';
 
+    return <SubInstructionRowView decoded={decoded ?? undefined} index={index} typeName={typeName} />;
+}
+
+export function SubInstructionRowView({
+    index,
+    typeName,
+    decoded,
+}: {
+    index: number;
+    typeName: string;
+    decoded?: DecodedParams;
+}) {
     return (
         <div className="border-b border-neutral-700 py-3 last:border-b-0" data-testid={`sub-ix-${index}`}>
             <div className="mb-2 flex items-center gap-2">

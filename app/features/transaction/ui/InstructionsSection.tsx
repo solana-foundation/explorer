@@ -36,7 +36,12 @@ import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
-import { isTokenBatchInstruction, TokenBatchCard } from '@features/token-batch';
+import {
+    isRpcParsedBatchInstruction,
+    isTokenBatchInstruction,
+    RpcParsedTokenBatchCard,
+    TokenBatchCard,
+} from '@features/token-batch';
 import { VoteDetailsCard } from '@features/vote';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
@@ -197,12 +202,29 @@ function InstructionCard({
 
         switch (ix.program) {
             case 'spl-token':
-            case 'spl-token-2022':
+            case 'spl-token-2022': {
+                // The RPC parses batch instructions (disc 0xff) as ParsedInstruction
+                // with type "batch". Route them to the batch card before TokenDetailsCard
+                // throws on the unrecognised type.
+                if (isRpcParsedBatchInstruction(ix.parsed)) {
+                    return (
+                        <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                            <RpcParsedTokenBatchCard
+                                ix={ix}
+                                index={index}
+                                result={result}
+                                innerCards={innerCards}
+                                childIndex={childIndex}
+                            />
+                        </ErrorBoundary>
+                    );
+                }
                 return (
                     <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
                         <TokenDetailsCard {...props} key={key} />
                     </ErrorBoundary>
                 );
+            }
             case 'bpf-loader':
                 return <BpfLoaderDetailsCard {...props} key={key} />;
             case 'bpf-upgradeable-loader':

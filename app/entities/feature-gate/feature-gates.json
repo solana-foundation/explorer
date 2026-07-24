@@ -1502,7 +1502,7 @@
     "testnet_activation_epoch": 977,
     "devnet_activation_epoch": 1085,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1000,
     "description": "This SIMD imposes a hard restriction on the maximum number of account references that an instruction may declare. There is already a limit of 255 account references imposed during serialization in ABI v0 and v1, but it does not currently apply to builtin invocations or precompil\u2026"
   },
   {
@@ -1788,7 +1788,7 @@
     "testnet_activation_epoch": 979,
     "devnet_activation_epoch": 1096,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1006,
     "description": "This SIMD describes how the validator admission ticket (VAT) collection described in [SIMD 326](https://github.com/solana-foundation/solana-improvement-documents/pull/326) will be implemented. Specifically, how it affects validator operation procedures."
   },
   {
@@ -1908,7 +1908,7 @@
     "testnet_activation_epoch": 977,
     "devnet_activation_epoch": 1090,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1002,
     "description": "Enforce a minimum extension size of 10,240 bytes (10 KiB) on the ExtendProgram instruction in Loader V3, mitigating the existing denial-of-service vector through economic deterrence while preserving the instruction's permissionless nature."
   },
   {
@@ -1956,7 +1956,7 @@
     "testnet_activation_epoch": 977,
     "devnet_activation_epoch": 1093,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1003,
     "description": "Allow validators to update their inflations reward commission rate with basis points and update commission calculation."
   },
   {
@@ -1980,7 +1980,7 @@
     "testnet_activation_epoch": 978,
     "devnet_activation_epoch": 1095,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1005,
     "description": "We propose augmenting BlockMarkerV1, introduced in SIMD-0307, to include BlockHeader and UpdateParent variants. BlockHeader, placed at the beginning of a block, indicates the parent of the block. UpdateParent signals that the intended parent is different from what was initially\u2026"
   },
   {
@@ -2054,5 +2054,101 @@
     ],
     "testnet_activation_epoch": 980,
     "title": "SIMD-0186 Amendment: Define fee-only semantics"
+  },
+  {
+    "comms_required": null,
+    "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
+    "devnet_activation_epoch": null,
+    "key": "iBRL5RuWhw4yqaAZu96RUULHckHTZAoe2b77qaV38JZ",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.2.0-beta.1"
+    ],
+    "min_fd_versions": [
+      "v1.1.1"
+    ],
+    "min_jito_versions": [],
+    "owners": [],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0525-reduce-slot-times.md"
+    ],
+    "simds": [
+      "0525"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0525: Reduce Slot Time to 350ms"
+  },
+  {
+    "comms_required": null,
+    "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
+    "devnet_activation_epoch": null,
+    "key": "iBRLL3k18HST852F1Mf3Lv83waTNQmmqvKDxvYGwQFL",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.2.0-beta.1"
+    ],
+    "min_fd_versions": [
+      "v1.1.1"
+    ],
+    "min_jito_versions": [],
+    "owners": [],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0525-reduce-slot-times.md"
+    ],
+    "simds": [
+      "0525"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0525: Reduce Slot Time to 300ms"
+  },
+  {
+    "comms_required": null,
+    "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
+    "devnet_activation_epoch": null,
+    "key": "iBRLMc81UjRa8fn8A6eE8bJTnRbgQoPTynM51akENCV",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.2.0-beta.1"
+    ],
+    "min_fd_versions": [
+      "v1.1.1"
+    ],
+    "min_jito_versions": [],
+    "owners": [],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0525-reduce-slot-times.md"
+    ],
+    "simds": [
+      "0525"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0525: Reduce Slot Time to 250ms"
+  },
+  {
+    "comms_required": null,
+    "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
+    "devnet_activation_epoch": null,
+    "key": "iBRLjhJnkmDZgNoZRDMW11d8ZV7HvsL3vAyRjZB5npW",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.2.0-beta.1"
+    ],
+    "min_fd_versions": [
+      "v1.1.1"
+    ],
+    "min_jito_versions": [],
+    "owners": [],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0525-reduce-slot-times.md"
+    ],
+    "simds": [
+      "0525"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0525: Reduce Slot Time to 200ms"
   }
 ]

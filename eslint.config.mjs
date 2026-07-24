@@ -22,9 +22,11 @@ const TEST_AND_STORY_FILES = [
 export default tseslint.config(
     // Global ignores.
     // packages/* are intentionally not ignored: root `eslint .` (like prettier's `**/*.ts` glob) lints their source with this shared config — only built output is excluded.
+    // Exception: packages/idl-decode and packages/entity-inspector lint themselves with oxlint (see their .oxlintrc.json), wired into root `pnpm lint`.
     {
         ignores: [
             '**/dist/**',
+            'packages/idl-decode/**',
             'lib/**',
             '.next/**',
             '.next-dev/**',
@@ -32,6 +34,7 @@ export default tseslint.config(
             'coverage/**',
             '.claude/**',
             '.worktrees/**',
+            'packages/entity-inspector/**',
             'storybook-static/**',
             'storybook-static-*/**',
             'public/mockServiceWorker.js',
@@ -209,7 +212,13 @@ export default tseslint.config(
 
     // Allow console in logger, scripts, standalone files, pnpmfile
     {
-        files: ['app/shared/lib/logger.ts', 'scripts/**', '**/*.mjs', '**/*.cjs'],
+        files: [
+            'app/shared/lib/logger.ts',
+            'packages/entity-inspector/src/logger.ts',
+            'scripts/**',
+            '**/*.mjs',
+            '**/*.cjs',
+        ],
         rules: {
             'no-console': 'off',
         },
@@ -617,7 +626,6 @@ export default tseslint.config(
             'app/utils/verified-builds.tsx',
 
             // app/shared (FSD shared)
-            'app/shared/lib/http-utils.ts',
             'app/shared/lib/triggerDownload.ts',
             'app/shared/lib/visibility.tsx',
             'app/shared/ui/navigation-tabs/ui/NavigationTabLink.tsx',
@@ -715,7 +723,6 @@ export default tseslint.config(
             'app/features/stake/lib/stake-activation-math.ts',
             'app/features/stake/ui/StakeAccountSection.tsx',
             'app/features/token-verification-badge/model/use-bluprynt.ts',
-            'app/features/token-verification-badge/model/use-coingecko.ts',
             'app/features/token-verification-badge/model/use-jupiter.ts',
             'app/features/token-verification-badge/model/use-rugcheck.ts',
             'app/features/token-verification-badge/ui/VerificationIcon.tsx',
