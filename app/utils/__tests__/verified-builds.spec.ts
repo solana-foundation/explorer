@@ -2,7 +2,14 @@ import { sha256 } from '@noble/hashes/sha256';
 import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { hashProgramBuffer, hashProgramData } from '../verified-builds';
+import { Cluster } from '../cluster';
+import {
+    buildEnrichedOsecInfo,
+    hashProgramBuffer,
+    hashProgramData,
+    type OsecInfo,
+    VerificationStatus,
+} from '../verified-builds';
 
 // Helper to build a minimal ProgramDataAccountInfo
 function makeProgramData({ authority, rawBytes }: { authority: PublicKey | null; rawBytes: Buffer }): {
@@ -163,5 +170,105 @@ describe('hashProgramBuffer', () => {
         const buffer = makeBuffer({ authority: PublicKey.default, rawBytes: programBytes });
         // eslint-disable-next-line no-restricted-syntax -- validating SHA-256 hex output format
         expect(hashProgramBuffer(buffer)).toMatch(/^[0-9a-f]{64}$/);
+    });
+});
+
+describe('buildEnrichedOsecInfo', () => {
+    const PROGRAM_ID = new PublicKey('BUYuxRfhCMWavaUWxhGtPP3ksKEDZxCD5gzknk3JfAya');
+    const FOUNDATION_SIGNER = '5vJwnLeyjV8uNJSp1zn7VLW8GwiQbcsQbGaVSwRmkE4r';
+    const HASH = '6122072454d9763f71b04106e79a9e670c695d500f104e31e4c2e4177f0cd736';
+    const REPO_URL = 'https://github.com/Woody4618/bar/tree/07e3f708df2b9483426515bf3bcd8065c57f7a79';
+
+    function makeOsecInfo(overrides: Partial<OsecInfo> = {}): OsecInfo {
+        return {
+            commit: '07e3f708df2b9483426515bf3bcd8065c57f7a79',
+            executable_hash: HASH,
+            is_frozen: false,
+            is_verified: true,
+            last_verified_at: '2025-05-18T02:10:44.412143',
+            on_chain_hash: HASH,
+            repo_url: REPO_URL,
+            signer: FOUNDATION_SIGNER,
+            ...overrides,
+        };
+    }
+
+    const PDA = {
+        args: ['--library-name', 'let_me_buy'],
+        commit: '07e3f708df2b9483426515bf3bcd8065c57f7a79',
+        gitUrl: 'https://github.com/Woody4618/bar',
+    };
+
+    it('should enrich the verified card from the on-chain PDA when available', () => {
+        const info = buildEnrichedOsecInfo({
+            cluster: Cluster.MainnetBeta,
+            osecInfo: makeOsecInfo(),
+            pdaData: PDA,
+            programId: PROGRAM_ID,
+        });
+        expect(info.is_verified).toBe(true);
+        expect(info.verification_status).toBe(VerificationStatus.Verified);
+        expect(info.message).toBe('Verification information provided by a trusted signer.');
+        expect(info.onchain_repo_url).toBe(REPO_URL);
+        expect(info.verify_command).toBe(
+            'solana-verify verify-from-repo -um --program-id BUYuxRfhCMWavaUWxhGtPP3ksKEDZxCD5gzknk3JfAya https://github.com/Woody4618/bar --commit-hash 07e3f708df2b9483426515bf3bcd8065c57f7a79 --library-name let_me_buy',
+        );
+    });
+
+    // A verified program must still render its status when the Otter Verify PDA can't be
+    // resolved (e.g. the verify-program IDL failed to load, or it was verified via the deprecated API).
+    it('should still render the verified card when the PDA is unavailable, falling back to OSEC data', () => {
+        const info = buildEnrichedOsecInfo({
+            cluster: Cluster.MainnetBeta,
+            osecInfo: makeOsecInfo(),
+            pdaData: null,
+            programId: PROGRAM_ID,
+        });
+        expect(info.is_verified).toBe(true);
+        expect(info.verification_status).toBe(VerificationStatus.Verified);
+        expect(info.onchain_repo_url).toBe(REPO_URL);
+        expect(info.repo_url).toBe(REPO_URL);
+        expect(info.verify_command).toBe('Program does not have a verify PDA uploaded.');
+    });
+
+    it('should note the verify command is mainnet-only off mainnet when the PDA is unavailable', () => {
+        const info = buildEnrichedOsecInfo({
+            cluster: Cluster.Devnet,
+            osecInfo: makeOsecInfo(),
+            pdaData: null,
+            programId: PROGRAM_ID,
+        });
+        expect(info.verify_command).toBe('Verify command only available on mainnet.');
+    });
+
+    it('should label a frozen, non-trusted signer as the program deployer', () => {
+        const info = buildEnrichedOsecInfo({
+            cluster: Cluster.MainnetBeta,
+            osecInfo: makeOsecInfo({ is_frozen: true, signer: PROGRAM_ID.toBase58() }),
+            pdaData: null,
+            programId: PROGRAM_ID,
+        });
+        expect(info.message).toBe('Verification information provided by the program deployer.');
+    });
+
+    it('should label a mutable, non-trusted signer as the program authority', () => {
+        const info = buildEnrichedOsecInfo({
+            cluster: Cluster.MainnetBeta,
+            osecInfo: makeOsecInfo({ is_frozen: false, signer: PROGRAM_ID.toBase58() }),
+            pdaData: null,
+            programId: PROGRAM_ID,
+        });
+        expect(info.message).toBe('Verification information provided by the program authority.');
+    });
+
+    it('should drop a non-https repo url from the OSEC fallback', () => {
+        const info = buildEnrichedOsecInfo({
+            cluster: Cluster.MainnetBeta,
+            osecInfo: makeOsecInfo({ repo_url: 'http://insecure.example/repo' }),
+            pdaData: null,
+            programId: PROGRAM_ID,
+        });
+        expect(info.repo_url).toBe('');
+        expect(info.onchain_repo_url).toBe('');
     });
 });
