@@ -23,19 +23,19 @@ export type PriceResult =
     | { status: PriceStatus.RateLimited; price: null }
     | { status: PriceStatus.Success; price: number | null };
 
-type PriceSwrKey = ['receipt-price', string];
+type PriceSwrKey = ['token-price', string];
 
 function getPriceSwrKey(cluster: Cluster, mintAddress?: string): PriceSwrKey | null {
     if (!mintAddress || cluster !== Cluster.MainnetBeta) {
         return null;
     }
 
-    return ['receipt-price', mintAddress];
+    return ['token-price', mintAddress];
 }
 
 async function fetchPrice([, mintAddress]: PriceSwrKey): Promise<PriceResult> {
     try {
-        const response = await fetch(`/api/receipt/price/${mintAddress}`);
+        const response = await fetch(`/api/token-price/${mintAddress}`);
 
         if (!response.ok) {
             if (response.status === 429) {

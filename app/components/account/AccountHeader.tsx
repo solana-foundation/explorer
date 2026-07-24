@@ -43,12 +43,7 @@ export function AccountHeader({
     const isProgram = parsedData && isUpgradeableLoaderAccountData(parsedData) && parsedData?.parsed.type === 'program';
     const isNativeProgram = Boolean(account?.executable);
 
-    const fallback = (
-        <div className="flex flex-col justify-center gap-1 md:min-h-[69px]">
-            <h6 className="uppercase tracking-[0.08em] text-dk-gray-700">Details</h6>
-            <h2 className="mb-0">Account</h2>
-        </div>
-    );
+    const fallback = <AccountDetailsHeader title="Account" />;
 
     // Headers derived purely from on-chain account data (NFTs, programs) don't
     // depend on the async token-info (UTL) fetch, so resolve them before the
@@ -73,6 +68,13 @@ export function AccountHeader({
         return <ProgramHeader address={address} />;
     }
 
+    // Stake accounts have a stable parsed type that doesn't depend on the token-info (UTL) fetch,
+    // so resolve their header before the isTokenInfoLoading gate and render the correct title
+    // ("Stake Account") instead of the generic "Account" fallback.
+    if (parsedData?.program === 'stake') {
+        return <AccountDetailsHeader title="Stake Account" />;
+    }
+
     // The token-mint header consumes the token-info fetch, so wait for it.
     if (isTokenInfoLoading) return fallback;
 
@@ -95,6 +97,15 @@ export function AccountHeader({
         );
     }
     return fallback;
+}
+
+function AccountDetailsHeader({ title }: { title: string }) {
+    return (
+        <div className="flex flex-col justify-center gap-1 md:min-h-[69px]">
+            <h6 className="uppercase tracking-[0.08em] text-dk-gray-700">Details</h6>
+            <h2 className="mb-0">{title}</h2>
+        </div>
+    );
 }
 
 function TokenMintHeader({
