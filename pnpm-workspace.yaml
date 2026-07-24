@@ -17,7 +17,7 @@ catalogs:
   tooling:
     typescript: 5.7.3
   vitest:
-    '@vitest/browser': 4.1.8
+    '@vitest/browser': 4.1.10
     '@vitest/browser-playwright': 4.1.8
     '@vitest/coverage-v8': 4.1.8
     vitest: 4.1.8
