@@ -1,4 +1,5 @@
 import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
+import type { ClusterState } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
 import React, { useLayoutEffect, useRef } from 'react';
@@ -38,6 +39,20 @@ export const withClusterModalOpen: Decorator = Story => (
         <Story />
     </ClusterProvider>
 );
+
+/**
+ * Factory: seeds ClusterProvider with an explicit cluster `state` (cluster, customUrl, status) so consumers of
+ * `useCluster()` render a specific cluster/status. Usage: `decorators: [withClusterState({ cluster, customUrl, status })]`
+ */
+export function withClusterState(state: ClusterState): Decorator {
+    return function WithClusterState(Story) {
+        return (
+            <ClusterProvider state={state}>
+                <Story />
+            </ClusterProvider>
+        );
+    };
+}
 
 /** Wraps stories with the real ScrollAnchorProvider. Usage: `decorators: [withScrollAnchor]` */
 export const withScrollAnchor: Decorator = Story => (
