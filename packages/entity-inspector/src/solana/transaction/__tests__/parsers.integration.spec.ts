@@ -8,7 +8,7 @@ import { decodeTransactionInstructions } from '../decode-instructions.js';
 // End-to-end through the real @explorer/parsers decoder: raw instruction bytes in, decoded fields
 // out, no host-app fallback involved. Field-level decode branches are covered in the parsers package.
 describe('@explorer/parsers integration', () => {
-    it('should decode a system transfer from raw bytes without the host-app fallback', () => {
+    it('should decode a system transfer from raw bytes without the host-app fallback', async () => {
         const SYSTEM_PROGRAM = '11111111111111111111111111111111';
         const SOURCE = 'So11111111111111111111111111111111111111112';
         const DESTINATION = 'SysvarRent111111111111111111111111111111111';
@@ -42,7 +42,7 @@ describe('@explorer/parsers integration', () => {
             version: 'legacy',
         };
 
-        const entries = decodeTransactionInstructions(context, { logger });
+        const entries = await decodeTransactionInstructions(context, { logger });
 
         expect(entries[0]).toMatchObject({
             decoded: { program: 'system', type: 'transfer' },

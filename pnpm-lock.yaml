@@ -640,6 +640,9 @@ importers:
 
   packages/entity-inspector:
     dependencies:
+      '@explorer/idl-decode':
+        specifier: workspace:*
+        version: link:../idl-decode
       '@explorer/parsers':
         specifier: workspace:*
         version: link:../parsers

@@ -1,3 +1,4 @@
+import type { IdlStandard } from '@explorer/idl-decode';
 import type { ReadonlyUint8Array } from '@solana/kit';
 
 export type IdentifierKind = 'account' | 'transaction' | 'invalid';
@@ -200,7 +201,9 @@ export type MultisigReferenceResult =
     | { status: 'not_multisig' }
     | { status: 'unknown'; reason: 'source_unavailable' };
 
-export type IdlType = 'anchor' | 'anchor_legacy' | 'codama' | 'shank';
+// Derived from @explorer/idl-decode's detection vocabulary; the extra members are the source
+// explorer-mcp's wider wire vocabulary (legacy converts to codama at client creation; shank is undetectable).
+export type IdlType = `${IdlStandard}` | 'anchor_legacy' | 'shank';
 
 export type IdlDiscoveryResult =
     | {
@@ -208,7 +211,8 @@ export type IdlDiscoveryResult =
           idl_type: IdlType;
           source_type: 'pmp_canonical' | 'anchor_on_chain';
           program_name: string | null;
-          data: Record<string, unknown>;
+          // The source shipped the whole IDL json here; deliberately omitted — detection + name serve the tool.
+          data?: Record<string, unknown>;
       }
     | { status: 'not_found' }
     | { status: 'unknown'; reason: 'source_unavailable' | 'idl_invalid' | 'address_unverified' };

@@ -1,4 +1,5 @@
 import { buildAddressLookupTablePayload } from './account-kinds/address-lookup-table.js';
+import { buildBpfUpgradeableLoaderPayload } from './account-kinds/bpf-upgradeable-loader.js';
 import { buildCompressedNftPayload } from './account-kinds/compressed-nft.js';
 import { buildConfigPayload } from './account-kinds/config.js';
 import { buildFeaturePayload } from './account-kinds/feature.js';
@@ -20,8 +21,9 @@ import type { AccountEntityKind, AccountPayloadContext } from './types.js';
 
 function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
     switch (kind) {
-        // Full loader builders exist (account-kinds/{bpf-upgradeable-loader,bpf-loader,loader}.ts) but their verification/security/idl/multisig enrichments need @explorer/idl-decode — routed as unsupported until that PR lands.
         case 'bpf-upgradeable-loader':
+            return buildBpfUpgradeableLoaderPayload;
+        // Full builders exist (account-kinds/{bpf-loader,loader}.ts) but their verification/security/multisig enrichments arrive with plan Step 7 — routed as unsupported until then.
         case 'bpf-loader':
         case 'bpf-loader-2':
         case 'loader-v4':

@@ -1,6 +1,7 @@
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 
-import { consoleLogger } from '../logger.js';
+import { consoleLogger, ns } from '../logger.js';
+import { createIdlClientResolver, createProgramIdlDiscovery } from '../solana/idl-clients.js';
 import { createRpcClient } from '../solana/rpc.js';
 import type { EntityInspectorConfig } from '../types.js';
 import { createMcpServer } from './server.js';
@@ -13,11 +14,13 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
     const logger = config.logger ?? consoleLogger;
     const rpcClient = createRpcClient(config.rpcEndpoints);
     const dependencies: InspectEntityDependencies = {
+        discoverProgramIdl: createProgramIdlDiscovery(config.rpcEndpoints, logger),
         fetchAccountInfo: rpcClient.fetchAccountInfo,
         fetchAsset: rpcClient.fetchAsset,
         fetchSignatureStatus: rpcClient.fetchSignatureStatus,
         fetchTransaction: rpcClient.fetchTransaction,
         logger,
+        resolveIdlClient: createIdlClientResolver(config.rpcEndpoints, logger),
         ...(config.decodeInstructionFallback ? { decodeInstructionFallback: config.decodeInstructionFallback } : {}),
         ...(config.resolveProgramName ? { resolveProgramName: config.resolveProgramName } : {}),
     };
@@ -28,8 +31,8 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
             await server.connect(transport);
             return await transport.handleRequest(request);
         } finally {
-            await transport.close().catch(error => logger.warn('[entity-inspector] transport close failed', { error }));
-            await server.close().catch(error => logger.warn('[entity-inspector] server close failed', { error }));
+            await transport.close().catch(error => logger.warn(ns('transport close failed'), { error }));
+            await server.close().catch(error => logger.warn(ns('server close failed'), { error }));
         }
     };
 }

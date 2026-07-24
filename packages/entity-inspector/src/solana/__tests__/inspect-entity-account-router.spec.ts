@@ -127,8 +127,8 @@ describe('inspect-entity account router', () => {
         }
     });
 
-    it('should report loader accounts as unsupported until enrichments land', () => {
-        const loaderKinds = ['bpf-upgradeable-loader', 'bpf-loader', 'bpf-loader-2', 'loader-v4'] as const;
+    it('should report legacy-loader accounts as unsupported until Step 7 enrichments land', () => {
+        const loaderKinds = ['bpf-loader', 'bpf-loader-2', 'loader-v4'] as const;
 
         for (const kind of loaderKinds) {
             expect(buildAccountPayloadWithRouter(contextForKind(kind))).toEqual({
@@ -136,6 +136,18 @@ describe('inspect-entity account router', () => {
                 errors: [`${kind} accounts are not supported yet`],
             });
         }
+    });
+
+    it('should route bpf-upgradeable-loader accounts to the real builder', () => {
+        const payload = buildAccountPayloadWithRouter(contextForKind('bpf-upgradeable-loader'));
+
+        expect(payload).toMatchObject({
+            entity: {
+                idl: { reason: 'source_unavailable', status: 'unknown', value: null },
+                kind: 'bpf-upgradeable-loader',
+            },
+        });
+        expect(payload).not.toHaveProperty('errors');
     });
 
     it('should build compressed-nft payload from DAS outcome', () => {

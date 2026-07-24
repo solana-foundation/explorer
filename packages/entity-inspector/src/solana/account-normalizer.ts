@@ -1,7 +1,7 @@
 import type { ReadonlyUint8Array } from '@solana/kit';
 
 import type { SupportedCluster } from '../config.js';
-import { consoleLogger, type InspectorLogger } from '../logger.js';
+import { consoleLogger, type InspectorLogger, ns } from '../logger.js';
 import { base64Encoder } from './codecs.js';
 import { asRecord, asSafeNumeric, asString } from './parse-helpers.js';
 import { isSourceUnavailableError } from './rpc.js';
@@ -23,7 +23,7 @@ export function extractRawDataBytesFromAccountData(
     try {
         return base64Encoder().encode(encodedData);
     } catch (error) {
-        logger.warn('[entity-inspector] base64 decode of account data failed', { error });
+        logger.warn(ns('base64 decode of account data failed'), { error });
         return null;
     }
 }
@@ -143,14 +143,14 @@ export async function enrichUpgradeableProgramData(
         };
     } catch (error) {
         if (isSourceUnavailableError(error)) {
-            logger.warn('[entity-inspector] program data enrichment source unavailable', {
+            logger.warn(ns('program data enrichment source unavailable'), {
                 error,
                 programAddress: account.address,
             });
             return { ...account, programDataStatus: 'source_unavailable' };
         }
 
-        logger.warn('[entity-inspector] program data enrichment failed', {
+        logger.warn(ns('program data enrichment failed'), {
             error,
             programAddress: account.address,
         });

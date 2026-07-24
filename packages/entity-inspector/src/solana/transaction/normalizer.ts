@@ -1,6 +1,6 @@
 // Ported from the solana-mcp-official fork (feat/account-resolver) — validates the probe's message
 // integrity before index resolution so a malformed RPC response fails loudly, not with wrong data.
-import type { InspectorLogger } from '../../logger.js';
+import { type InspectorLogger, ns } from '../../logger.js';
 import { asRecord, asSafeNumeric } from '../parse-helpers.js';
 import type {
     CompiledInnerInstruction,
@@ -116,7 +116,7 @@ function normalizeConfirmation(
     const statusValue = signatureStatus?.value ?? null;
     const rawStatus = statusValue?.confirmationStatus ?? null;
     if (rawStatus !== null && !isKnownConfirmationStatus(rawStatus)) {
-        logger.warn('[entity-inspector] transaction normalizer: unknown confirmation status', {
+        logger.warn(ns('transaction normalizer: unknown confirmation status'), {
             signature,
             value: rawStatus,
         });
@@ -152,7 +152,7 @@ function normalizeTransactionError(
     if (record) {
         return record;
     }
-    logger.warn('[entity-inspector] transaction normalizer: unrecognized err shape', {
+    logger.warn(ns('transaction normalizer: unrecognized err shape'), {
         signature,
         value: String(rawErr),
     });

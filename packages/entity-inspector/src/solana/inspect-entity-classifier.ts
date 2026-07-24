@@ -1,6 +1,6 @@
 import type { ReadonlyUint8Array } from '@solana/kit';
 
-import { consoleLogger, type InspectorLogger } from '../logger.js';
+import { consoleLogger, type InspectorLogger, ns } from '../logger.js';
 import { base58Encoder } from './codecs.js';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
@@ -32,7 +32,7 @@ export function decodeBase58(value: string, logger: InspectorLogger = consoleLog
     try {
         return base58Encoder().encode(value);
     } catch (error) {
-        logger.warn('[entity-inspector] base58 decode of identifier failed', { error, value });
+        logger.warn(ns('base58 decode of identifier failed'), { error, value });
         return null;
     }
 }

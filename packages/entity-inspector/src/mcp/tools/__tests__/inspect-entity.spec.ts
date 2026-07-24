@@ -7,6 +7,7 @@ import {
     compressedNftDasAsset,
     notFoundAccountProbe,
     parsedAccountProbe,
+    rawAccountProbe,
     unknownProgramAccountProbe,
     upgradeableProgramDataProbe,
     upgradeableProgramProbe,
@@ -365,7 +366,7 @@ describe('inspect_entity handler', () => {
         expect(fetchAsset).not.toHaveBeenCalled();
     });
 
-    it('should issue a second RPC probe for upgradeable programData and report the kind unsupported', async () => {
+    it('should build the upgradeable-program payload from the second programData probe', async () => {
         const executableDataAddress = 'DoU57AYuPfu2QU514RktNPG220AhpEjnKxnBcu4HDTY';
         const fetchAccountInfo = vi
             .fn()
@@ -381,20 +382,61 @@ describe('inspect_entity handler', () => {
         const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
         const envelope = parseEnvelope(result);
 
-        expect(result.isError).toBe(true);
+        expect(result.isError).toBe(false);
         expect(fetchAccountInfo).toHaveBeenCalledTimes(2);
-        expect(envelope).toEqual({
-            errors: [
-                {
-                    code: 'CURRENTLY_UNSUPPORTED',
-                    message: 'bpf-upgradeable-loader accounts are not supported yet',
+        expect(envelope).toMatchObject({
+            errors: [],
+            payload: {
+                entity: {
+                    executable_data: executableDataAddress,
+                    // No discoverProgramIdl injected — the enrichment reports its absence explicitly.
+                    idl: { reason: 'source_unavailable', status: 'unknown', value: null },
+                    kind: 'bpf-upgradeable-loader',
+                    last_deployed_slot: 395847597,
+                    upgradeable: true,
+                    upgrade_authority: 'AeLnXCBPaQHGWRLr2saFsEVfnMNuKixRAbWCT9P5twgZ',
                 },
-            ],
-            payload: { entity: { kind: 'bpf-upgradeable-loader' } },
+            },
         });
     });
 
-    it('should keep the unsupported bpf payload when the second programData probe is unavailable', async () => {
+    it('should attach the program-IDL discovery to the upgradeable-program payload', async () => {
+        const discoverProgramIdl = vi.fn().mockResolvedValue({
+            client: null,
+            discovery: {
+                idl_type: 'anchor',
+                program_name: 'My Program',
+                source_type: 'anchor_on_chain',
+                status: 'found',
+            },
+        });
+        const fetchAccountInfo = vi
+            .fn()
+            .mockResolvedValueOnce(upgradeableProgramProbe('DoU57AYuPfu2QU514RktNPG220AhpEjnKxnBcu4HDTY'))
+            .mockResolvedValueOnce(upgradeableProgramDataProbe({ authority: null, slot: 1 }));
+        const dependencies = createDependencies({ discoverProgramIdl, fetchAccountInfo });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(discoverProgramIdl).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, 'mainnet-beta');
+        expect(envelope).toMatchObject({
+            payload: {
+                entity: {
+                    idl: {
+                        idl_type: 'anchor',
+                        program_name: 'My Program',
+                        source_type: 'anchor_on_chain',
+                        status: 'found',
+                    },
+                    kind: 'bpf-upgradeable-loader',
+                    upgradeable: false,
+                },
+            },
+        });
+    });
+
+    it('should mark the upgradeable fields unknown when the programData probe is unavailable', async () => {
         const fetchAccountInfo = vi
             .fn()
             .mockResolvedValueOnce(upgradeableProgramProbe('DoU57AYuPfu2QU514RktNPG220AhpEjnKxnBcu4HDTY'))
@@ -405,8 +447,14 @@ describe('inspect_entity handler', () => {
         const envelope = parseEnvelope(result);
 
         expect(envelope).toMatchObject({
-            errors: [{ code: 'CURRENTLY_UNSUPPORTED' }],
-            payload: { entity: { kind: 'bpf-upgradeable-loader' } },
+            errors: [],
+            payload: {
+                entity: {
+                    kind: 'bpf-upgradeable-loader',
+                    upgrade_authority: { reason: 'source_unavailable', status: 'unknown', value: null },
+                    upgradeable: { reason: 'source_unavailable', status: 'unknown', value: null },
+                },
+            },
         });
     });
 
@@ -448,6 +496,124 @@ describe('inspect_entity handler', () => {
             errors: [],
             payload: { entity: { kind: 'unknown' } },
         });
+    });
+
+    it('should decode unknown raw accounts through the owner program IDL', async () => {
+        const resolveIdlClient = vi.fn().mockResolvedValue({
+            decodeAccountData: vi.fn().mockReturnValue([undefined, { authority: 'abc' }]),
+            programName: vi.fn().mockReturnValue('My Program'),
+        });
+        const dependencies = createDependencies({
+            fetchAccountInfo: vi
+                .fn()
+                .mockResolvedValue(rawAccountProbe({ bytes: new Uint8Array([1, 2, 3]), owner: 'UnknownOwner' })),
+            resolveIdlClient,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(resolveIdlClient).toHaveBeenCalledWith('UnknownOwner', 'mainnet-beta');
+        expect(envelope).toMatchObject({
+            errors: [],
+            payload: {
+                entity: {
+                    decoded: { info: { authority: 'abc' }, program: 'My Program', source: 'idl' },
+                    kind: 'unknown',
+                },
+            },
+        });
+    });
+
+    it('should omit the program key when the resolved IDL declares no name', async () => {
+        const resolveIdlClient = vi.fn().mockResolvedValue({
+            decodeAccountData: vi.fn().mockReturnValue([undefined, { authority: 'abc' }]),
+            programName: vi.fn().mockReturnValue(undefined),
+        });
+        const dependencies = createDependencies({
+            fetchAccountInfo: vi
+                .fn()
+                .mockResolvedValue(rawAccountProbe({ bytes: new Uint8Array([1, 2, 3]), owner: 'UnknownOwner' })),
+            resolveIdlClient,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+        const entity = (envelope.payload as { entity: { decoded: Record<string, unknown> } }).entity;
+
+        expect(entity.decoded).toEqual({ info: { authority: 'abc' }, source: 'idl' });
+    });
+
+    it('should keep the kind-only unknown payload when no IDL resolves', async () => {
+        const resolveIdlClient = vi.fn().mockResolvedValue(null);
+        const dependencies = createDependencies({
+            fetchAccountInfo: vi
+                .fn()
+                .mockResolvedValue(rawAccountProbe({ bytes: new Uint8Array([1, 2, 3]), owner: 'UnknownOwner' })),
+            resolveIdlClient,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(envelope).toMatchObject({ payload: { entity: { kind: 'unknown' } } });
+        expect((envelope.payload as { entity: Record<string, unknown> }).entity).not.toHaveProperty('decoded');
+    });
+
+    it('should keep the kind-only unknown payload when the IDL decode fails', async () => {
+        const resolveIdlClient = vi.fn().mockResolvedValue({
+            decodeAccountData: vi.fn().mockReturnValue([{ code: 'IDL_ERROR__ACCOUNT_DECODE_FAILED' }, undefined]),
+            programName: vi.fn().mockReturnValue('My Program'),
+        });
+        const dependencies = createDependencies({
+            fetchAccountInfo: vi
+                .fn()
+                .mockResolvedValue(rawAccountProbe({ bytes: new Uint8Array([1, 2, 3]), owner: 'UnknownOwner' })),
+            resolveIdlClient,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect((envelope.payload as { entity: Record<string, unknown> }).entity).not.toHaveProperty('decoded');
+    });
+
+    it('should skip the IDL decode for unknown accounts without raw bytes', async () => {
+        const resolveIdlClient = vi.fn();
+        const dependencies = createDependencies({
+            fetchAccountInfo: vi.fn().mockResolvedValue(unknownProgramAccountProbe()),
+            resolveIdlClient,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+
+        expect(result.isError).toBe(false);
+        expect(resolveIdlClient).not.toHaveBeenCalled();
+    });
+
+    it('should skip the IDL decode when the probe carries no owner', async () => {
+        const resolveIdlClient = vi.fn();
+        const dependencies = createDependencies({
+            fetchAccountInfo: vi.fn().mockResolvedValue({
+                // owner deliberately malformed — the normalizer nulls it and the decode guard skips
+                value: { data: ['AQID', 'base64'], executable: false, lamports: 1, owner: 123 },
+            }),
+            resolveIdlClient,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+
+        expect(result.isError).toBe(false);
+        expect(resolveIdlClient).not.toHaveBeenCalled();
+    });
+
+    it('should bind the cluster onto the IDL resolver for the transaction cascade', async () => {
+        const resolveIdlClient = vi.fn().mockResolvedValue(null);
+        const dependencies = createDependencies({ resolveIdlClient });
+
+        await handleInspectEntity({ cluster: 'devnet', identifier: TRANSACTION_IDENTIFIER }, dependencies);
+
+        expect(resolveIdlClient).toHaveBeenCalledWith('program-address', 'devnet');
     });
 
     it('should warn through the console logger by default when DAS lookup fails', async () => {

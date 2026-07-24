@@ -57,8 +57,8 @@ describe('decodeTransactionInstructions', () => {
         vi.clearAllMocks();
     });
 
-    it('should resolve instruction program_id and accounts to addresses and default to raw', () => {
-        const entries = decodeTransactionInstructions(makeContext(), { logger });
+    it('should resolve instruction program_id and accounts to addresses and default to raw', async () => {
+        const entries = await decodeTransactionInstructions(makeContext(), { logger });
 
         expect(entries).toEqual([
             {
@@ -71,8 +71,8 @@ describe('decodeTransactionInstructions', () => {
         ]);
     });
 
-    it('should nest inner instructions under their parent', () => {
-        const entries = decodeTransactionInstructions(
+    it('should nest inner instructions under their parent', async () => {
+        const entries = await decodeTransactionInstructions(
             makeContext({
                 innerInstructions: [{ index: 0, instructions: [{ accounts: [0], data: 'def', programIdIndex: 2 }] }],
             }),
@@ -84,14 +84,14 @@ describe('decodeTransactionInstructions', () => {
         ]);
     });
 
-    it('should map non-contiguous inner instruction groups to the correct parents', () => {
+    it('should map non-contiguous inner instruction groups to the correct parents', async () => {
         const accounts = [
             staticAccount('signer', { signer: true, writable: true }),
             staticAccount('prog-a'),
             staticAccount('prog-b'),
             staticAccount('prog-c'),
         ];
-        const entries = decodeTransactionInstructions(
+        const entries = await decodeTransactionInstructions(
             makeContext({
                 accountKeys: accounts.map(account => account.address),
                 innerInstructions: [
@@ -114,8 +114,8 @@ describe('decodeTransactionInstructions', () => {
         expect(entries[2].inner_instructions).toMatchObject([{ data: 'cpi2', program_id: 'prog-a' }]);
     });
 
-    it('should concatenate inner instructions when multiple groups share the same parent index', () => {
-        const entries = decodeTransactionInstructions(
+    it('should concatenate inner instructions when multiple groups share the same parent index', async () => {
+        const entries = await decodeTransactionInstructions(
             makeContext({
                 innerInstructions: [
                     { index: 0, instructions: [{ accounts: [0], data: 'cpi-a', programIdIndex: 2 }] },
@@ -131,25 +131,25 @@ describe('decodeTransactionInstructions', () => {
         ]);
     });
 
-    it('should throw when an instruction index is out of bounds', () => {
-        expect(() =>
+    it('should reject when an instruction index is out of bounds', async () => {
+        await expect(
             decodeTransactionInstructions(
                 makeContext({ instructions: [{ accounts: [0], data: 'abc', programIdIndex: 9 }] }),
                 { logger },
             ),
-        ).toThrow('account index 9 out of bounds for 3 keys');
-        expect(() =>
+        ).rejects.toThrow('account index 9 out of bounds for 3 keys');
+        await expect(
             decodeTransactionInstructions(
                 makeContext({ instructions: [{ accounts: [9], data: 'abc', programIdIndex: 2 }] }),
                 { logger },
             ),
-        ).toThrow('account index 9 out of bounds for 3 keys');
+        ).rejects.toThrow('account index 9 out of bounds for 3 keys');
     });
 
-    it('should route instructions through the injected fallback with roles attached', () => {
+    it('should route instructions through the injected fallback with roles attached', async () => {
         const decodeInstructionFallback = vi.fn().mockReturnValue({ info: {}, program: 'system', type: 'transfer' });
 
-        const entries = decodeTransactionInstructions(makeContext(), { decodeInstructionFallback, logger });
+        const entries = await decodeTransactionInstructions(makeContext(), { decodeInstructionFallback, logger });
 
         expect(decodeInstructionFallback).toHaveBeenCalledWith({
             accounts: [
@@ -165,21 +165,21 @@ describe('decodeTransactionInstructions', () => {
         });
     });
 
-    it('should stay raw when the fallback cannot decode', () => {
+    it('should stay raw when the fallback cannot decode', async () => {
         const decodeInstructionFallback = vi.fn().mockReturnValue(undefined);
 
-        const entries = decodeTransactionInstructions(makeContext(), { decodeInstructionFallback, logger });
+        const entries = await decodeTransactionInstructions(makeContext(), { decodeInstructionFallback, logger });
 
         expect(entries[0].source).toBe('raw');
         expect(entries[0]).not.toHaveProperty('decoded');
     });
 
-    it('should tolerate a throwing fallback and warn', () => {
+    it('should tolerate a throwing fallback and warn', async () => {
         const decodeInstructionFallback = vi.fn().mockImplementation(() => {
             throw new Error('fallback exploded');
         });
 
-        const entries = decodeTransactionInstructions(makeContext(), { decodeInstructionFallback, logger });
+        const entries = await decodeTransactionInstructions(makeContext(), { decodeInstructionFallback, logger });
 
         expect(entries[0].source).toBe('raw');
         expect(logger.warn).toHaveBeenCalledWith(
@@ -188,7 +188,7 @@ describe('decodeTransactionInstructions', () => {
         );
     });
 
-    it('should decode token batch instructions in-package before consulting the fallback', () => {
+    it('should decode token batch instructions in-package before consulting the fallback', async () => {
         const transfer = getTransferInstruction({
             amount: 7n,
             authority: address('SysvarC1ock11111111111111111111111111111111'),
@@ -207,7 +207,7 @@ describe('decodeTransactionInstructions', () => {
         ];
         const decodeInstructionFallback = vi.fn();
 
-        const entries = decodeTransactionInstructions(
+        const entries = await decodeTransactionInstructions(
             makeContext({
                 accountKeys: accounts.map(account => account.address),
                 instructions: [
@@ -233,7 +233,127 @@ describe('decodeTransactionInstructions', () => {
         });
     });
 
-    it('should fall past an unrecognized system discriminator to the fallback', () => {
+    it('should decode through a resolved IDL client before every other rung', async () => {
+        const SOURCE = 'So11111111111111111111111111111111111111112';
+        const PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+        const accounts = [staticAccount(SOURCE, { signer: true, writable: true }), staticAccount(PROGRAM)];
+        const idlClient = {
+            decodeInstructionData: vi.fn().mockReturnValue([undefined, { amount: 42n }]),
+            instructionName: vi.fn().mockReturnValue('buy'),
+            programName: vi.fn().mockReturnValue('pump'),
+        } as never;
+        const resolveIdlClient = vi.fn().mockResolvedValue(idlClient);
+        const decodeInstructionFallback = vi.fn();
+
+        const entries = await decodeTransactionInstructions(
+            makeContext({
+                accountKeys: accounts.map(account => account.address),
+                instructions: [{ accounts: [0], data: 'abc', programIdIndex: 1 }],
+                resolvedAccounts: accounts,
+            }),
+            { decodeInstructionFallback, logger, resolveIdlClient },
+        );
+
+        expect(resolveIdlClient).toHaveBeenCalledExactlyOnceWith(PROGRAM);
+        expect(decodeInstructionFallback).not.toHaveBeenCalled();
+        expect(entries[0]).toMatchObject({
+            decoded: { info: { amount: 42n }, program: 'pump', type: 'buy' },
+            source: 'idl',
+        });
+    });
+
+    it('should resolve each unique program once across outer and inner instructions', async () => {
+        const SOURCE = 'So11111111111111111111111111111111111111112';
+        const PROGRAM_A = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+        const PROGRAM_B = 'Vote111111111111111111111111111111111111111';
+        const accounts = [
+            staticAccount(SOURCE, { signer: true, writable: true }),
+            staticAccount(PROGRAM_A),
+            staticAccount(PROGRAM_B),
+        ];
+        const resolveIdlClient = vi.fn().mockResolvedValue(null);
+
+        await decodeTransactionInstructions(
+            makeContext({
+                accountKeys: accounts.map(account => account.address),
+                innerInstructions: [{ index: 0, instructions: [{ accounts: [0], data: 'cpi', programIdIndex: 2 }] }],
+                instructions: [
+                    { accounts: [0], data: 'a', programIdIndex: 1 },
+                    { accounts: [0], data: 'b', programIdIndex: 1 },
+                ],
+                resolvedAccounts: accounts,
+            }),
+            { logger, resolveIdlClient },
+        );
+
+        expect(resolveIdlClient).toHaveBeenCalledTimes(2);
+        expect(resolveIdlClient).toHaveBeenCalledWith(PROGRAM_A);
+        expect(resolveIdlClient).toHaveBeenCalledWith(PROGRAM_B);
+    });
+
+    it('should fall past the IDL rung when the client cannot decode or lacks a name', async () => {
+        const SOURCE = 'So11111111111111111111111111111111111111112';
+        const PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+        const accounts = [staticAccount(SOURCE, { signer: true, writable: true }), staticAccount(PROGRAM)];
+        const decodeError = { code: 'IDL_ERROR__INSTRUCTION_DECODE_FAILED' };
+        const idlClient = {
+            decodeInstructionData: vi
+                .fn()
+                .mockReturnValueOnce([decodeError, undefined])
+                .mockReturnValueOnce([undefined, { ok: true }]),
+            instructionName: vi.fn().mockReturnValue(undefined),
+            programName: vi.fn().mockReturnValue(undefined),
+        } as never;
+        const resolveIdlClient = vi.fn().mockResolvedValue(idlClient);
+
+        const entries = await decodeTransactionInstructions(
+            makeContext({
+                accountKeys: accounts.map(account => account.address),
+                instructions: [
+                    { accounts: [0], data: 'a', programIdIndex: 1 },
+                    { accounts: [0], data: 'b', programIdIndex: 1 },
+                ],
+                resolvedAccounts: accounts,
+            }),
+            { logger, resolveIdlClient },
+        );
+
+        expect(entries[0].source).toBe('raw');
+        expect(entries[1]).toMatchObject({
+            decoded: { info: { ok: true }, type: 'unknown' },
+            source: 'idl',
+        });
+        expect(entries[1].decoded).not.toHaveProperty('program');
+    });
+
+    it('should warn and continue when the IDL client throws', async () => {
+        const SOURCE = 'So11111111111111111111111111111111111111112';
+        const PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+        const accounts = [staticAccount(SOURCE, { signer: true, writable: true }), staticAccount(PROGRAM)];
+        const idlClient = {
+            decodeInstructionData: vi.fn().mockImplementation(() => {
+                throw new Error('client exploded');
+            }),
+        } as never;
+        const resolveIdlClient = vi.fn().mockResolvedValue(idlClient);
+
+        const entries = await decodeTransactionInstructions(
+            makeContext({
+                accountKeys: accounts.map(account => account.address),
+                instructions: [{ accounts: [0], data: 'a', programIdIndex: 1 }],
+                resolvedAccounts: accounts,
+            }),
+            { logger, resolveIdlClient },
+        );
+
+        expect(logger.warn).toHaveBeenCalledWith(
+            '[entity-inspector] idl instruction decode failed',
+            expect.objectContaining({ programId: PROGRAM }),
+        );
+        expect(entries[0].source).toBe('raw');
+    });
+
+    it('should fall past an unrecognized system discriminator to the fallback', async () => {
         const SYSTEM_PROGRAM = '11111111111111111111111111111111';
         const accounts = [
             staticAccount('So11111111111111111111111111111111111111112', { signer: true, writable: true }),
@@ -241,7 +361,7 @@ describe('decodeTransactionInstructions', () => {
         ];
         const decodeInstructionFallback = vi.fn().mockReturnValue({ info: {}, type: 'opaque' });
 
-        const entries = decodeTransactionInstructions(
+        const entries = await decodeTransactionInstructions(
             makeContext({
                 accountKeys: accounts.map(account => account.address),
                 instructions: [
@@ -260,14 +380,14 @@ describe('decodeTransactionInstructions', () => {
         expect(entries[0]).toMatchObject({ decoded: { info: {}, type: 'opaque' }, source: 'bundled' });
     });
 
-    it('should warn and continue when the bundled decoder cannot rebuild the instruction', () => {
+    it('should warn and continue when the bundled decoder cannot rebuild the instruction', async () => {
         const SYSTEM_PROGRAM = '11111111111111111111111111111111';
         const accounts = [
             staticAccount('not-a-valid-address', { signer: true, writable: true }),
             staticAccount(SYSTEM_PROGRAM),
         ];
 
-        const entries = decodeTransactionInstructions(
+        const entries = await decodeTransactionInstructions(
             makeContext({
                 accountKeys: accounts.map(account => account.address),
                 instructions: [
@@ -289,14 +409,14 @@ describe('decodeTransactionInstructions', () => {
         expect(entries[0].source).toBe('raw');
     });
 
-    it('should fall past a malformed token batch to the fallback and warn', () => {
+    it('should fall past a malformed token batch to the fallback and warn', async () => {
         const accounts = [
             staticAccount('So11111111111111111111111111111111111111112', { signer: true, writable: true }),
             staticAccount(TOKEN_PROGRAM_ADDRESS),
         ];
         const decodeInstructionFallback = vi.fn().mockReturnValue({ info: {}, type: 'opaque' });
 
-        const entries = decodeTransactionInstructions(
+        const entries = await decodeTransactionInstructions(
             makeContext({
                 accountKeys: accounts.map(account => account.address),
                 instructions: [
