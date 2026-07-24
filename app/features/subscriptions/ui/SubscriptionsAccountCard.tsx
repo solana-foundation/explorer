@@ -1,6 +1,7 @@
 'use client';
 
 import { KitAddress } from '@components/common/KitAddress';
+import { cn } from '@components/shared/utils';
 import { useRawAccountDataOnMount, useRefreshAccount } from '@entities/account';
 import type { Account } from '@providers/accounts';
 import type { Address } from '@solana/kit';
@@ -68,7 +69,7 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
             )}
             <ValueRow label="Expires At">{displayExpiry(endTs)}</ValueRow>
             {metadataUri && (
-                <ValueRow label="Metadata URI">
+                <ValueRow label="Metadata URI" wrap>
                     <span className="font-mono">{metadataUri}</span>
                 </ValueRow>
             )}
@@ -205,16 +206,20 @@ function DelegationHeaderRows({ header }: { header: DelegationHeader }) {
 function AddressRow({ address, label }: { address: Address; label: string }) {
     return (
         <ValueRow label={label}>
-            <KitAddress address={address} raw link />
+            <KitAddress address={address} raw link alignRight />
         </ValueRow>
     );
 }
 
-function ValueRow({ children, label }: { children: React.ReactNode; label: string }) {
+function ValueRow({ children, label, wrap }: { children: React.ReactNode; label: string; wrap?: boolean }) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell className="text-right">{children}</BaseTable.Cell>
+            {/* The card table is `nowrap`; `wrap` lets long free-text values (e.g. a metadata URI)
+                break onto multiple lines instead of forcing the whole card to scroll on mobile. */}
+            <BaseTable.Cell className={cn('md:text-right', wrap && '!whitespace-normal [overflow-wrap:anywhere]')}>
+                {children}
+            </BaseTable.Cell>
         </BaseTable.Row>
     );
 }

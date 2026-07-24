@@ -4,7 +4,7 @@
 |------|-------|------|---------------|
 | Static | `/` | 130 kB | 1.16 MB |
 | Static | `/_not-found` | 0 B | 1.03 MB |
-| Dynamic | `/address/[address]` | 370 kB | 1.39 MB |
+| Dynamic | `/address/[address]` | 400 kB | 1.42 MB |
 | Dynamic | `/address/[address]/anchor-account` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/anchor-program` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/attestation` | 370 kB | 1.39 MB |
@@ -15,8 +15,8 @@
 | Dynamic | `/address/[address]/domains` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/entries` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/feature-gate` | 370 kB | 1.39 MB |
-| Dynamic | `/address/[address]/idl` | 510 kB | 1.52 MB |
-| Dynamic | `/address/[address]/instructions` | 370 kB | 1.39 MB |
+| Dynamic | `/address/[address]/idl` | 510 kB | 1.53 MB |
+| Dynamic | `/address/[address]/instructions` | 370 kB | 1.40 MB |
 | Dynamic | `/address/[address]/metadata` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/program-multisig` | 370 kB | 1.39 MB |
@@ -27,7 +27,7 @@
 | Dynamic | `/address/[address]/subscriptions` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/token-extensions` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/tokens` | 380 kB | 1.40 MB |
-| Dynamic | `/address/[address]/transfers` | 370 kB | 1.39 MB |
+| Dynamic | `/address/[address]/transfers` | 370 kB | 1.40 MB |
 | Dynamic | `/address/[address]/verified-build` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/vote-history` | 370 kB | 1.39 MB |
 | Dynamic | `/api/ans-domains/[address]` | — | — |
@@ -58,6 +58,6 @@
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
 | Static | `/tos` | 880 B | 1.04 MB |
-| Dynamic | `/tx/[signature]` | 450 kB | 1.46 MB |
+| Dynamic | `/tx/[signature]` | 450 kB | 1.47 MB |
 | Dynamic | `/tx/[signature]/inspect` | 360 kB | 1.38 MB |
 | Static | `/tx/inspector` | 360 kB | 1.38 MB |

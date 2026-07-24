@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
-import { ExpandInfoButton } from '../ExpandInfoButton';
+import { ExpandInfoButton } from '@/app/shared/ui/ExpandInfoButton';
 
 const meta: Meta<typeof ExpandInfoButton> = {
     args: {
