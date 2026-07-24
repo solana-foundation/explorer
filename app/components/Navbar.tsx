@@ -92,7 +92,7 @@ export function Navbar({ children }: INavbarProps) {
                     </NavbarList>
                 </div>
 
-                <div className="ml-[3px] hidden shrink-0 lg:block">
+                <div className="ml-[3px] hidden max-w-[210px] shrink-0 lg:block">
                     <ClusterStatusButton />
                 </div>
             </div>
