@@ -7,10 +7,10 @@ import { AddressLink } from '@/app/components/shared/address';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/app/components/shared/ui/table';
 import { cn } from '@/app/components/shared/utils';
 import { Card, CardContent } from '@/app/shared/ui/Card';
+import { ExpandInfoButton } from '@/app/shared/ui/ExpandInfoButton';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 
 import type { ActivatedFeature, UpcomingFeature } from '../lib/partition-features';
-import { ExpandInfoButton } from './ExpandInfoButton';
 import { SimdLinks } from './SimdLinks';
 
 export type FeatureRow = ActivatedFeature | UpcomingFeature;

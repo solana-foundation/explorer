@@ -40,7 +40,7 @@ import { PublicKey } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
-import { useSearchParams } from 'next/navigation';
+import { redirect, RedirectType, useSearchParams } from 'next/navigation';
 import React, { PropsWithChildren, Suspense, use } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
@@ -50,6 +50,14 @@ import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { SolanaAttestationServiceCard } from '@/app/components/account/sas/SolanaAttestationCard';
 import { getFeatureInfo, useFeatureInfo } from '@/app/entities/feature-gate';
 import { hasTokenMetadata } from '@/app/features/metadata';
+import {
+    isSubscriptionsAccount,
+    SubscriptionsAccountCard,
+    SubscriptionsEventAuthorityCard,
+    useIsEventAuthority,
+    useWalletDelegations,
+    useWalletPlans,
+} from '@/app/features/subscriptions';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
@@ -62,7 +70,7 @@ import {
     getFullTokenInfoSwrKey,
     isRedactedTokenAddress,
 } from '@/app/utils/token-info';
-import { pickClusterParams } from '@/app/utils/url';
+import { pickClusterParams, useClusterPath } from '@/app/utils/url';
 
 import { AccountDataTab } from './AccountDataTab';
 
@@ -127,7 +135,8 @@ export type AddressTabPath =
     | 'program-multisig'
     | 'feature-gate'
     | 'token-extensions'
-    | 'attestation';
+    | 'attestation'
+    | 'subscriptions';
 
 type AddressTab = NavigationTab<AddressTabPath>;
 
@@ -247,6 +256,9 @@ function DetailsSections({
                 <ProgramMultisigTab authority={authority} />
             </Suspense>
             <Suspense fallback={null}>
+                <WalletSubscriptionsTab walletAddress={account.executable ? null : address} />
+            </Suspense>
+            <Suspense fallback={null}>
                 <AccountDataTab programId={account.owner} />
             </Suspense>
         </>
@@ -267,9 +279,14 @@ function DetailsSections({
 function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: FullTokenInfo }) {
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
+    const addressPath = useClusterPath({ pathname: `/address/${account.pubkey.toBase58()}` });
 
     // get feature data from featureGates.json
     const featureInfo = useFeatureInfo({ address: account.pubkey.toBase58() });
+
+    // The Subscriptions event authority is a signer-only PDA with no account data, so it
+    // is recognised by its derived address rather than by decoding bytes.
+    const isEventAuthority = useIsEventAuthority(account.pubkey.toBase58());
 
     // Squads v4 Batch / VaultTransaction accounts aren't RPC-parsed; detect them by
     // discriminator so we can surface a direct "Inspect" link to the transaction inspector.
@@ -316,6 +333,15 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         return <FeatureAccountSection account={account} />;
     } else if (account.owner.toBase58() === SAS_PROGRAM_ID) {
         return <SolanaAttestationServiceCard account={account} />;
+    } else if (isEventAuthority) {
+        return <SubscriptionsEventAuthorityCard account={account} />;
+    } else if (isSubscriptionsAccount(account)) {
+        return (
+            <SubscriptionsAccountCard
+                account={account}
+                onNotFound={() => redirect(addressPath, RedirectType.replace)}
+            />
+        );
     } else if (squadsAccountType) {
         return <SquadsAccountSection account={account} accountType={squadsAccountType} />;
     } else {
@@ -483,4 +509,21 @@ function ProgramMultisigTab({ authority }: { authority: PublicKey | null | undef
     }
 
     return <NavigationTabLink path="program-multisig" title="Program Multisig" />;
+}
+
+function WalletSubscriptionsTab({ walletAddress }: { walletAddress: string | null }) {
+    // Non-suspense: this fires on every non-executable account page, so a failing RPC
+    // (e.g. getProgramAccounts disabled/rate-limited) must hide the tab, not throw and
+    // take down the whole account page. Mirrors ProgramMultisigTab's error handling.
+    const { data: delegationsData, error: delegationsError } = useWalletDelegations(walletAddress, {
+        suspense: false,
+    });
+    const { data: plansData, error: plansError } = useWalletPlans(walletAddress, { suspense: false });
+    if (delegationsError || plansError) return null;
+    const hasAny =
+        (delegationsData?.delegations.length ?? 0) > 0 ||
+        (delegationsData?.delegationsReceived.length ?? 0) > 0 ||
+        (plansData?.plans.length ?? 0) > 0;
+    if (!hasAny) return null;
+    return <NavigationTabLink path="subscriptions" title="Subscriptions" />;
 }

@@ -82,6 +82,9 @@ export enum PROGRAM_NAMES {
 
     // Lighthouse
     LIGHTHOUSE_PROGRAM = 'Lighthouse Program',
+
+    // Subscriptions
+    SUBSCRIPTIONS_PROGRAM = 'Subscriptions Program',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -181,6 +184,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     DZnkkTmCiFWfYTfT41X3Rd1kDgozqzxWaHqsw6W4x2oe: {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.WORMHOLE_TOKEN,
+    },
+    De1egAFMkMWZSN5rYXRj9CAdheBamobVNubTsi9avR44: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.SUBSCRIPTIONS_PROGRAM,
     },
     DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1: {
         deployments: [Cluster.MainnetBeta],

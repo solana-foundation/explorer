@@ -1,16 +1,16 @@
+import { gen } from '@__fixtures__/gen';
 import type { Account } from '@providers/accounts';
-import { PublicKey } from '@solana/web3.js';
 import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { BaseRawAccountRows } from '../BaseRawAccountRows';
+import { BaseRawAccountRows } from '@/app/shared/ui/BaseRawAccountRows';
 
 const mockAccount: Account = {
     data: {},
     executable: false,
     lamports: 1_500_000_000,
-    owner: new PublicKey('11111111111111111111111111111111'),
-    pubkey: new PublicKey('4TPTXRKCbL39nMkWAtRDMRB4gQkUfrfCMvwKS4AYoH7e'),
+    owner: gen.publicKey(0),
+    pubkey: gen.publicKey(1),
     space: 165,
 };
 
