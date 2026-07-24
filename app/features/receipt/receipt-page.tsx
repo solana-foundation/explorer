@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
 import useSWR from 'swr';
 
+import { formatUsdValue, PriceStatus, USD_FALLBACK, useTokenPrice } from '@/app/entities/token-price';
 import { getReceiptAmount, getReceiptMint } from '@/app/entities/token-receipt';
 import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
@@ -24,10 +25,8 @@ import { AutoRefresh, useAutoRefreshInterval, type WithAutoRefreshProp } from '@
 
 import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
-import { formatUsdValue, USD_FALLBACK } from './lib/parse-usd';
 import { usePrimaryDomain } from './lib/use-primary-domain';
 import { extractReceiptData, type ReceiptUnavailabilityReason } from './model/create-receipt';
-import { PriceStatus, useTokenPrice } from './model/use-price';
 import type { FormattedReceipt } from './types';
 import { NoReceipt } from './ui/BaseReceipt';
 import { ReceiptView } from './ui/ReceiptView';

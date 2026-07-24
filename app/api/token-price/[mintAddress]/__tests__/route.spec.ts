@@ -16,14 +16,14 @@ const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
 
 const VALID_MINT = 'So11111111111111111111111111111111111111112';
-const mockRequest = new Request(`http://localhost:3000/api/receipt/price/${VALID_MINT}`);
+const mockRequest = new Request(`http://localhost:3000/api/token-price/${VALID_MINT}`);
 
 // Cast: tests only stub the surface of Response that the route touches.
 function mockResponseOnce(value: Partial<Response>) {
     fetchMock.mockResolvedValueOnce(value as Response);
 }
 
-describe('GET /api/receipt/price/[mintAddress]', () => {
+describe('GET /api/token-price/[mintAddress]', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.stubEnv('JUPITER_API_KEY', 'test-api-key');

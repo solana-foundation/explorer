@@ -297,6 +297,30 @@ describe('AccountHeader', () => {
             });
         });
     });
+
+    describe('stake account', () => {
+        beforeEach(() => {
+            vi.clearAllMocks();
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: undefined });
+        });
+
+        it('should render the "Stake Account" title instead of the generic "Account" fallback', () => {
+            const stakeAddress = '5ASxtmcPKDeD8NoE5QpskizPokqDdX1qHFiqZb1spLdo';
+            const account = {
+                data: { parsed: { parsed: { type: 'delegated' }, program: 'stake' } },
+                executable: false,
+                lamports: 100,
+                owner: PublicKey.default,
+                pubkey: new PublicKey(stakeAddress),
+                space: 200,
+            } as unknown as Account;
+
+            render(<AccountHeader address={stakeAddress} account={account} tokenInfo={undefined} isTokenInfoLoading />);
+
+            expect(screen.getByRole('heading', { name: 'Stake Account' })).toBeInTheDocument();
+            expect(screen.queryByRole('heading', { name: 'Account' })).not.toBeInTheDocument();
+        });
+    });
 });
 
 function setup(address?: string): { account: Account; mockAddress: string } {
