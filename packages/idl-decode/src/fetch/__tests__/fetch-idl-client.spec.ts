@@ -41,7 +41,7 @@ import {
     unwrapResult,
 } from '../../__tests__/fixtures';
 
-import { createLatestIdlFetcher, fetchIdlClient } from '../index';
+import { createLatestIdlFetcher, fetchIdlClient, fetchLatestIdlClient, IdlSource } from '../index';
 
 const provider = codamaProvider();
 
@@ -446,5 +446,132 @@ describe('createLatestIdlFetcher', () => {
 
         expect(client).toBeUndefined();
         expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+    });
+});
+
+describe('fetchLatestIdlClient', () => {
+    it('should attribute a PMP hit as the pmp source with a working client', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpIdlAccount(program, tokenkeg) });
+
+        const { client, source } = unwrapResult(await fetchLatestIdlClient(program, { rpc }));
+
+        expect(source).toBe(IdlSource.Pmp);
+        const [, data] = client.decodeInstructionData<{ amount: bigint }>(transferIx(tokenkeg));
+        expect(data).toMatchObject({ amount: 42n });
+    });
+
+    it('should attribute the anchor fallback as the anchor-pda source', async () => {
+        const simple = loadSimpleIdl();
+        const program = address(simple.address);
+        const rpc = mockRpc({ [await anchorIdlAddress(program)]: anchorIdlAccount(simple) });
+
+        const { client, source } = unwrapResult(await fetchLatestIdlClient(program, { rpc }));
+
+        expect(source).toBe(IdlSource.AnchorPda);
+        const [, data] = client.decodeInstructionData<{ amount: bigint }>(incrementIx(simple));
+        expect(data).toMatchObject({ amount: 42n });
+    });
+
+    it('should surface an absent IDL on both legs as the typed not-found error', async () => {
+        const [error, fetched] = await fetchLatestIdlClient('11111111111111111111111111111111', {
+            rpc: mockRpc({}),
+        });
+
+        expect(fetched).toBeUndefined();
+        expect(isIdlError(error, IDL_ERROR__IDL_NOT_FOUND)).toBe(true);
+    });
+
+    it('should skip the anchor leg when disabled', async () => {
+        const simple = loadSimpleIdl();
+        const program = address(simple.address);
+        const rpc = mockRpc({ [await anchorIdlAddress(program)]: anchorIdlAccount(simple) });
+
+        const [error, fetched] = await fetchLatestIdlClient(program, { anchor: false, rpc });
+
+        expect(fetched).toBeUndefined();
+        expect(isIdlError(error, IDL_ERROR__IDL_NOT_FOUND)).toBe(true);
+    });
+
+    it('should not mask a corrupt PMP leg with the anchor fallback', async () => {
+        const simple = loadSimpleIdl();
+        const program = address(simple.address);
+        const rpc = mockRpc({
+            [await anchorIdlAddress(program)]: anchorIdlAccount(simple),
+            [await pmpIdlAddress(program)]: pmpCorruptIdlAccount(program),
+        });
+
+        const [error, fetched] = await fetchLatestIdlClient(program, { rpc });
+
+        expect(fetched).toBeUndefined();
+        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+    });
+
+    it('should surface a transport failure as the typed fetch error with its cause', async () => {
+        const cause = new Error('rpc exploded');
+        const [error] = await fetchLatestIdlClient('11111111111111111111111111111111', {
+            rpc: mockRpc({}, () => {
+                throw cause;
+            }),
+        });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
+        expect(error?.cause).toBe(cause);
+    });
+
+    it('should reject an IDL declaring a different program address', async () => {
+        const tokenkeg = loadTokenkegIdl(); // declares TokenkegQfe… — not the requested program
+        const requested = address('11111111111111111111111111111111');
+        const rpc = mockRpc({ [await pmpIdlAddress(requested)]: pmpIdlAccount(requested, tokenkeg) });
+
+        const [error, fetched] = await fetchLatestIdlClient(requested, { rpc });
+
+        expect(fetched).toBeUndefined();
+        expect(isIdlError(error, IDL_ERROR__IDL_ADDRESS_MISMATCH)).toBe(true);
+    });
+
+    it('should accept a mislabeled IDL when the address check is disabled', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const requested = address('11111111111111111111111111111111');
+        const rpc = mockRpc({ [await pmpIdlAddress(requested)]: pmpIdlAccount(requested, tokenkeg) });
+
+        const { client, source } = unwrapResult(await fetchLatestIdlClient(requested, { rpc, verifyAddress: false }));
+
+        expect(source).toBe(IdlSource.Pmp);
+        expect(client.programAddress()).toBe(tokenkeg.program.publicKey);
+    });
+
+    it('should surface a fetched value that is no IDL as the typed unsupported-format error', async () => {
+        const requested = address('11111111111111111111111111111111');
+        const rpc = mockRpc({ [await pmpIdlAddress(requested)]: pmpIdlAccount(requested, { not: 'an idl' }) });
+
+        const [error, fetched] = await fetchLatestIdlClient(requested, { rpc });
+
+        expect(fetched).toBeUndefined();
+        expect(isIdlError(error, IDL_ERROR__UNSUPPORTED_IDL_FORMAT)).toBe(true);
+    });
+
+    it('should reject with the abort reason instead of returning an error value', async () => {
+        await expect(
+            fetchLatestIdlClient('11111111111111111111111111111111', {
+                abortSignal: AbortSignal.abort(),
+                rpc: mockRpc({}),
+            }),
+        ).rejects.toThrow(/abort/i);
+    });
+
+    it('should reject with the abort reason when the abort lands mid-fetch', async () => {
+        const controller = new AbortController();
+        const reason = new Error('caller cancelled');
+        const rpc = mockRpc({}, () => {
+            // a transport that wraps the abort in its own rejection — the reason must still win
+            controller.abort(reason);
+            throw new Error('transport wrapper');
+        });
+
+        await expect(
+            fetchLatestIdlClient('11111111111111111111111111111111', { abortSignal: controller.signal, rpc }),
+        ).rejects.toBe(reason);
     });
 });

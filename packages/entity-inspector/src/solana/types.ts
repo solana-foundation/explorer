@@ -257,8 +257,7 @@ export type TransactionPayloadContext =
       })
     | (TransactionPayloadContextBase & { status: 'unknown'; err: null });
 
-// 'idl' joins the union when @explorer/idl-decode is wired into the cascade.
-export type DecodedInstructionSource = 'bundled' | 'raw';
+export type DecodedInstructionSource = 'idl' | 'bundled' | 'raw';
 
 export type DecodedInstructionInfo = {
     /** Decoder-declared program label (e.g. 'spl-token'); omitted when the decoder has none. */
