@@ -550,7 +550,7 @@ export default tseslint.config(
             // app/api (Next route handlers)
             'app/api/domain-info/[[]domain[]]/route.ts',
             'app/api/metadata/proxy/route.ts',
-            'app/api/receipt/price/[[]mintAddress[]]/route.ts',
+            'app/api/token-price/[[]mintAddress[]]/route.ts',
             'app/api/search/route.ts',
 
             // app/components (pre-FSD legacy — to be migrated into features/entities)
@@ -648,6 +648,8 @@ export default tseslint.config(
             'app/entities/nft/lib/is-metaplex-nft.ts',
             'app/entities/token-info/model/token-info-batch-provider.tsx',
             'app/entities/token-info/model/use-token-info.ts',
+            'app/entities/token-price/lib/parse-usd.ts',
+            'app/entities/token-price/model/use-token-price.ts',
 
             // app/features (FSD features)
             'app/features/account/ui/AccountDownloadDropdown.tsx',
@@ -692,7 +694,6 @@ export default tseslint.config(
             'app/features/nicknames/model/use-nickname.ts',
             'app/features/receipt/__e2e__/receipt.e2e.ts',
             'app/features/receipt/lib/generate-receipt-csv.ts',
-            'app/features/receipt/lib/parse-usd.ts',
             'app/features/receipt/lib/use-primary-domain.ts',
             'app/features/receipt/mocks/custom-fee-payer.ts',
             'app/features/receipt/mocks/jito-only-transfer.ts',
@@ -709,7 +710,6 @@ export default tseslint.config(
             'app/features/receipt/mocks/usdc-multisig-transfer.ts',
             'app/features/receipt/mocks/usdc-regular-transfer.ts',
             'app/features/receipt/mocks/zero-transfer.ts',
-            'app/features/receipt/model/use-price.ts',
             'app/features/receipt/receipt-page.tsx',
             'app/features/receipt/ui/BaseReceiptImage.tsx',
             'app/features/receipt/ui/ViewReceiptButton.tsx',
