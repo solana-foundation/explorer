@@ -11,13 +11,21 @@ import {
     normalizeDasOutcome,
     promoteAccountKindWithDas,
 } from '../../solana/inspect-entity-classifier.js';
+import type { ResolveMultisigReference } from '../../solana/enrichments/multisig.js';
+import type { ResolveSecurityMetadata } from '../../solana/enrichments/security.js';
+import type { ResolveProgramVerification } from '../../solana/enrichments/verification.js';
 import type { DiscoverProgramIdl, ResolveIdlClient } from '../../solana/idl-clients.js';
 import { asRecord, asString } from '../../solana/parse-helpers.js';
 import { isSourceUnavailableError, type RpcClient } from '../../solana/rpc.js';
 import { buildTransactionPayload } from '../../solana/transaction/build-payload.js';
 import { decodeTransactionInstructions } from '../../solana/transaction/decode-instructions.js';
 import { normalizeTransactionProbe } from '../../solana/transaction/normalizer.js';
-import type { DasClassificationOutcome, DecodeInstructionFallback, NormalizedAccountInfo } from '../../solana/types.js';
+import type {
+    AccountPayloadContext,
+    DasClassificationOutcome,
+    DecodeInstructionFallback,
+    NormalizedAccountInfo,
+} from '../../solana/types.js';
 import {
     currentlyUnsupported,
     internalError,
@@ -29,7 +37,6 @@ import {
 } from '../errors.js';
 import { inspectEntityInputSchema } from '../schemas.js';
 
-// The remaining resolver deps (verification/security/multisig) return with plan Step 7.
 export type InspectEntityDependencies = {
     decodeInstructionFallback?: DecodeInstructionFallback;
     discoverProgramIdl?: DiscoverProgramIdl;
@@ -39,7 +46,10 @@ export type InspectEntityDependencies = {
     fetchTransaction: RpcClient['fetchTransaction'];
     logger?: InspectorLogger;
     resolveIdlClient?: ResolveIdlClient;
+    resolveMultisigReference?: ResolveMultisigReference;
     resolveProgramName?: (address: string) => string | undefined;
+    resolveProgramVerification?: ResolveProgramVerification;
+    resolveSecurityMetadata?: ResolveSecurityMetadata;
 };
 
 function toSourceUnavailablePayload(kind: 'account' | 'transaction'): Record<string, unknown> {
@@ -113,17 +123,17 @@ async function resolveAccount(
 
         const finalKind = promoteAccountKindWithDas(baseKind, dasOutcome);
 
-        // The program-IDL enrichment is only consumed by the upgradeable-loader builder — resolve it just there.
-        const idlDiscovery =
-            finalKind === 'bpf-upgradeable-loader' && dependencies.discoverProgramIdl
-                ? await dependencies.discoverProgramIdl(identifier, cluster)
+        // Program enrichments are only consumed by the upgradeable-loader builder — resolve them just there.
+        const enrichments =
+            finalKind === 'bpf-upgradeable-loader'
+                ? await resolveProgramEnrichments(identifier, enrichedAccount, cluster, dependencies, logger)
                 : null;
 
         const routedPayload = buildAccountPayloadWithRouter({
             account: enrichedAccount,
             kind: finalKind,
             ...(dasOutcome ? { dasOutcome } : {}),
-            ...(idlDiscovery ? { idlDiscoveryResult: idlDiscovery.discovery } : {}),
+            ...enrichments,
             ...(dependencies.resolveProgramName ? { resolveProgramName: dependencies.resolveProgramName } : {}),
         });
 
@@ -151,6 +161,79 @@ async function resolveAccount(
             payload: {},
         });
     }
+}
+
+type ProgramEnrichments = Pick<
+    AccountPayloadContext,
+    'idlDiscoveryResult' | 'multisigReferenceResult' | 'securityMetadataResult' | 'verificationResult'
+>;
+
+// A resolver outage degrades its own field to unknown/source_unavailable — never the whole payload.
+function catchEnrichment<T>(
+    promise: Promise<T>,
+    label: string,
+    identifier: string,
+    logger: InspectorLogger,
+): Promise<T | { status: 'unknown'; reason: 'source_unavailable' }> {
+    return promise.catch(error => {
+        logger.warn(ns(`${label} enrichment failed`), { error, identifier });
+        return { reason: 'source_unavailable', status: 'unknown' } as const;
+    });
+}
+
+// All four program enrichments resolve in parallel; a missing dep leaves its field absent so the
+// builder falls back to its own unknown marker.
+async function resolveProgramEnrichments(
+    identifier: string,
+    account: NormalizedAccountInfo,
+    cluster: SupportedCluster,
+    dependencies: InspectEntityDependencies,
+    logger: InspectorLogger,
+): Promise<ProgramEnrichments> {
+    const authority = account.programData?.authority ?? null;
+    const programDataBase64 = account.programDataRawBase64 ?? null;
+
+    const [idlDiscovery, verification, security, multisig] = await Promise.all([
+        dependencies.discoverProgramIdl
+            ? catchEnrichment(
+                  dependencies.discoverProgramIdl(identifier, cluster).then(({ discovery }) => discovery),
+                  'program idl',
+                  identifier,
+                  logger,
+              )
+            : null,
+        dependencies.resolveProgramVerification
+            ? catchEnrichment(
+                  dependencies.resolveProgramVerification(identifier, authority, programDataBase64, cluster),
+                  'verification',
+                  identifier,
+                  logger,
+              )
+            : null,
+        dependencies.resolveSecurityMetadata
+            ? catchEnrichment(
+                  dependencies.resolveSecurityMetadata(identifier, programDataBase64, cluster),
+                  'security metadata',
+                  identifier,
+                  logger,
+              )
+            : null,
+        dependencies.resolveMultisigReference
+            ? catchEnrichment(
+                  dependencies.resolveMultisigReference(authority, cluster),
+                  'multisig reference',
+                  identifier,
+                  logger,
+              )
+            : null,
+    ]);
+
+    return {
+        ...(idlDiscovery ? { idlDiscoveryResult: idlDiscovery } : {}),
+        ...(verification ? { verificationResult: verification } : {}),
+        ...(security ? { securityMetadataResult: security } : {}),
+        ...(multisig ? { multisigReferenceResult: multisig } : {}),
+    };
 }
 
 // Unknown-kind accounts get one shot at an IDL decode: resolve the owner program's IDL and decode

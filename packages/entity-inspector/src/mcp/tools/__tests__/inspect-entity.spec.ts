@@ -436,6 +436,102 @@ describe('inspect_entity handler', () => {
         });
     });
 
+    it('should resolve all program enrichments and thread the account context into each resolver', async () => {
+        const authority = 'AeLnXCBPaQHGWRLr2saFsEVfnMNuKixRAbWCT9P5twgZ';
+        const dataBase64 = btoa(String.fromCharCode(1, 2, 3));
+        const discoverProgramIdl = vi.fn().mockResolvedValue({
+            client: null,
+            discovery: { status: 'not_found' },
+        });
+        const resolveProgramVerification = vi.fn().mockResolvedValue({ status: 'unverified' });
+        const resolveSecurityMetadata = vi.fn().mockResolvedValue({ status: 'missing' });
+        const resolveMultisigReference = vi.fn().mockResolvedValue({ status: 'not_multisig' });
+        const fetchAccountInfo = vi
+            .fn()
+            .mockResolvedValueOnce(upgradeableProgramProbe('DoU57AYuPfu2QU514RktNPG220AhpEjnKxnBcu4HDTY'))
+            .mockResolvedValueOnce(upgradeableProgramDataProbe({ authority, dataBase64, slot: 1 }));
+        const dependencies = createDependencies({
+            discoverProgramIdl,
+            fetchAccountInfo,
+            resolveMultisigReference,
+            resolveProgramVerification,
+            resolveSecurityMetadata,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(resolveProgramVerification).toHaveBeenCalledWith(
+            ACCOUNT_IDENTIFIER,
+            authority,
+            dataBase64,
+            'mainnet-beta',
+        );
+        expect(resolveSecurityMetadata).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, dataBase64, 'mainnet-beta');
+        expect(resolveMultisigReference).toHaveBeenCalledWith(authority, 'mainnet-beta');
+        expect(envelope).toMatchObject({
+            payload: {
+                entity: {
+                    idl: { status: 'not_found' },
+                    kind: 'bpf-upgradeable-loader',
+                    multisig: { status: 'not_multisig' },
+                    security_metadata: { status: 'missing' },
+                    verification: { status: 'unverified' },
+                },
+            },
+        });
+    });
+
+    it('should degrade each rejecting enrichment resolver to unknown without failing the payload', async () => {
+        const logger = createLoggerMock();
+        const fetchAccountInfo = vi
+            .fn()
+            .mockResolvedValueOnce(upgradeableProgramProbe('DoU57AYuPfu2QU514RktNPG220AhpEjnKxnBcu4HDTY'))
+            .mockResolvedValueOnce(upgradeableProgramDataProbe({ authority: null, slot: 1 }));
+        const dependencies = createDependencies({
+            discoverProgramIdl: vi.fn().mockRejectedValue(new Error('idl boom')),
+            fetchAccountInfo,
+            logger,
+            resolveMultisigReference: vi.fn().mockRejectedValue(new Error('multisig boom')),
+            resolveProgramVerification: vi.fn().mockRejectedValue(new Error('verification boom')),
+            resolveSecurityMetadata: vi.fn().mockRejectedValue(new Error('security boom')),
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(result.isError).toBe(false);
+        const unknown = { reason: 'source_unavailable', status: 'unknown' };
+        expect(envelope).toMatchObject({
+            errors: [],
+            payload: {
+                entity: {
+                    idl: unknown,
+                    kind: 'bpf-upgradeable-loader',
+                    multisig: unknown,
+                    security_metadata: unknown,
+                    verification: unknown,
+                },
+            },
+        });
+        expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] program idl enrichment failed', {
+            error: new Error('idl boom'),
+            identifier: ACCOUNT_IDENTIFIER,
+        });
+        expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] verification enrichment failed', {
+            error: new Error('verification boom'),
+            identifier: ACCOUNT_IDENTIFIER,
+        });
+        expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] security metadata enrichment failed', {
+            error: new Error('security boom'),
+            identifier: ACCOUNT_IDENTIFIER,
+        });
+        expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] multisig reference enrichment failed', {
+            error: new Error('multisig boom'),
+            identifier: ACCOUNT_IDENTIFIER,
+        });
+    });
+
     it('should mark the upgradeable fields unknown when the programData probe is unavailable', async () => {
         const fetchAccountInfo = vi
             .fn()

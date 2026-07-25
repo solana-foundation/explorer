@@ -1,6 +1,9 @@
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 
 import { consoleLogger, ns } from '../logger.js';
+import { createMultisigResolver } from '../solana/enrichments/multisig.js';
+import { createSecurityMetadataResolver } from '../solana/enrichments/security.js';
+import { createVerificationResolver } from '../solana/enrichments/verification.js';
 import { createIdlClientResolver, createProgramIdlDiscovery } from '../solana/idl-clients.js';
 import { createRpcClient } from '../solana/rpc.js';
 import type { EntityInspectorConfig } from '../types.js';
@@ -13,6 +16,7 @@ export type McpRequestHandler = (request: Request) => Promise<Response>;
 export function createMcpRequestHandler(config: EntityInspectorConfig): McpRequestHandler {
     const logger = config.logger ?? consoleLogger;
     const rpcClient = createRpcClient(config.rpcEndpoints);
+    const resolveIdlClient = createIdlClientResolver(config.rpcEndpoints, logger);
     const dependencies: InspectEntityDependencies = {
         discoverProgramIdl: createProgramIdlDiscovery(config.rpcEndpoints, logger),
         fetchAccountInfo: rpcClient.fetchAccountInfo,
@@ -20,7 +24,14 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
         fetchSignatureStatus: rpcClient.fetchSignatureStatus,
         fetchTransaction: rpcClient.fetchTransaction,
         logger,
-        resolveIdlClient: createIdlClientResolver(config.rpcEndpoints, logger),
+        resolveIdlClient,
+        resolveMultisigReference: createMultisigResolver({ fetchAccountInfo: rpcClient.fetchAccountInfo, logger }),
+        resolveProgramVerification: createVerificationResolver({
+            fetchAccountInfo: rpcClient.fetchAccountInfo,
+            logger,
+            resolveIdlClient,
+        }),
+        resolveSecurityMetadata: createSecurityMetadataResolver(config.rpcEndpoints, logger),
         ...(config.decodeInstructionFallback ? { decodeInstructionFallback: config.decodeInstructionFallback } : {}),
         ...(config.resolveProgramName ? { resolveProgramName: config.resolveProgramName } : {}),
     };
