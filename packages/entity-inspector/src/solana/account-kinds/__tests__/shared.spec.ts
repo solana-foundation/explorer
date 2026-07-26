@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../../constants.js';
+import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, VOTE_PROGRAM_ID } from '../../constants.js';
 import {
     assertUnreachable,
     buildMintOverviewFields,
@@ -31,6 +31,9 @@ describe('account kind shared helpers', () => {
         expect(
             resolveProgramAddressLabel({ account: { ...account, address: TOKEN_PROGRAM_ID }, kind: 'unknown' }),
         ).toBe('Token Program');
+        expect(resolveProgramAddressLabel({ account: { ...account, address: VOTE_PROGRAM_ID }, kind: 'unknown' })).toBe(
+            'Vote Program',
+        );
 
         // Unknown address and missing address both yield null
         expect(

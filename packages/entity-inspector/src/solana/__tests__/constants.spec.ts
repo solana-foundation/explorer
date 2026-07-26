@@ -13,6 +13,7 @@ import {
     SQUADS_V4_ADDRESS,
     TOKEN_2022_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
+    VOTE_PROGRAM_ID,
 } from '../constants.js';
 
 // On-chain IDs are external invariants — a typo (or a silent change in a client package) misclassifies every account of that kind.
@@ -33,5 +34,6 @@ describe('constants', () => {
         expect(NFTOKEN_ADDRESS).toBe('nftokf9qcHSYkVSP3P2gUMmV6d4AwjMueXgUu43HyLL');
         expect(SQUADS_V3_ADDRESS).toBe('SMPLecH534NA9acpos4G6x7uf3LWbCAwZQE9e8ZekMu');
         expect(SQUADS_V4_ADDRESS).toBe('SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf');
+        expect(VOTE_PROGRAM_ID).toBe('Vote111111111111111111111111111111111111111');
     });
 });

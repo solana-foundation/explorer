@@ -10,6 +10,7 @@ export const BPF_LOADER_2_PROGRAM_ID = 'BPFLoader2111111111111111111111111111111
 export const LOADER_V4_PROGRAM_ID = 'LoaderV411111111111111111111111111111111111';
 export const NFTOKEN_ADDRESS = 'nftokf9qcHSYkVSP3P2gUMmV6d4AwjMueXgUu43HyLL';
 export const FEATURE_PROGRAM_ID = 'Feature111111111111111111111111111111111111';
+export const VOTE_PROGRAM_ID = 'Vote111111111111111111111111111111111111111';
 
 // Squads clients exist but are deliberately not imported — third-party supply-chain surface for one string each.
 export const SQUADS_V3_ADDRESS = 'SMPLecH534NA9acpos4G6x7uf3LWbCAwZQE9e8ZekMu'; // https://github.com/Squads-Protocol/squads-mpl

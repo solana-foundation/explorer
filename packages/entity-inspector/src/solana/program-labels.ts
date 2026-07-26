@@ -7,6 +7,7 @@ import {
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ID,
     TOKEN_2022_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
+    VOTE_PROGRAM_ID,
 } from './constants.js';
 
 // Built-in labels for the programs the package already knows via constants; wording matches the
@@ -20,6 +21,7 @@ const PROGRAM_LABELS: Record<string, string> = {
     [SOLANA_ATTESTATION_SERVICE_PROGRAM_ID]: 'Solana Attestation Service Program',
     [TOKEN_2022_PROGRAM_ID]: 'Token-2022 Program',
     [TOKEN_PROGRAM_ID]: 'Token Program',
+    [VOTE_PROGRAM_ID]: 'Vote Program',
 };
 
 export function lookupProgramLabel(address: string): string | undefined {
