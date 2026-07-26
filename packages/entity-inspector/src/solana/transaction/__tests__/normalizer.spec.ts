@@ -133,6 +133,28 @@ describe('transaction normalizer', () => {
         expect(normalize(null)).toBeNull();
     });
 
+    it('should throw on an account key that is neither a string nor {pubkey: string}', () => {
+        expect(() =>
+            normalize(
+                makeFullEnvelope({
+                    meta: null,
+                    transaction: {
+                        message: {
+                            // oxlint-disable-next-line no-explicit-any -- malformed probe shape on purpose
+                            accountKeys: [{ pubkey: 42 } as any],
+                            header: {
+                                numReadonlySignedAccounts: 0,
+                                numReadonlyUnsignedAccounts: 0,
+                                numRequiredSignatures: 1,
+                            },
+                            instructions: [],
+                        },
+                    },
+                }),
+            ),
+        ).toThrow('Unexpected transaction probe: accountKey is not a string or {pubkey: string}: {"pubkey":42}');
+    });
+
     it('should throw on negative required signature count', () => {
         expect(() =>
             normalize(

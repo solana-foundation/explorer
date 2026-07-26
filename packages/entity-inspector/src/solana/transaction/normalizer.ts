@@ -17,7 +17,12 @@ function toAccountKeyString(accountKey: string | { pubkey: string }): string {
     if (typeof accountKey === 'string') {
         return accountKey;
     }
-    return accountKey.pubkey;
+    if (typeof accountKey?.pubkey === 'string') {
+        return accountKey.pubkey;
+    }
+    throw new Error(
+        `Unexpected transaction probe: accountKey is not a string or {pubkey: string}: ${JSON.stringify(accountKey)}`,
+    );
 }
 
 function validateInstructionIndices(
