@@ -4,9 +4,8 @@ import Link from 'next/link';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { useCluster } from '@/app/providers/cluster';
 import { CardTitle } from '@/app/shared/ui/Card';
-import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
-import { useIsProgramVerified } from '@/app/utils/verified-builds';
+import { supportsVerifiedBuilds, useIsProgramVerified } from '@/app/utils/verified-builds';
 import { ProgramDataAccountInfo } from '@/app/validators/accounts/upgradeable-program';
 
 type BadgeVariant = NonNullable<Parameters<typeof Badge>[0]['variant']>;
@@ -29,11 +28,11 @@ export function VerifiedProgramBadge({
     });
     const verifiedBuildTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/verified-build` });
 
-    if (cluster !== Cluster.MainnetBeta) {
+    if (!supportsVerifiedBuilds(cluster)) {
         return (
             <CardTitle as="h3" ui="dashkit">
                 <Badge ui="dashkit" variant="warning">
-                    Verified Builds only available on Mainnet
+                    Verified Builds only available on Mainnet and Devnet
                 </Badge>
             </CardTitle>
         );

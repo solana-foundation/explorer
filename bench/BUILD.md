@@ -27,7 +27,7 @@
 | Dynamic | `/address/[address]/subscriptions` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/token-extensions` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/tokens` | 380 kB | 1.40 MB |
-| Dynamic | `/address/[address]/transfers` | 370 kB | 1.40 MB |
+| Dynamic | `/address/[address]/transfers` | 380 kB | 1.40 MB |
 | Dynamic | `/address/[address]/verified-build` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/vote-history` | 370 kB | 1.39 MB |
 | Dynamic | `/api/ans-domains/[address]` | — | — |

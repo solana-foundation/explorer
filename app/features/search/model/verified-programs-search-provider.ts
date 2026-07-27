@@ -20,8 +20,8 @@ const programs: VerifiedProgramEntry[] = verifiedPrograms as VerifiedProgramEntr
  *
  * Searches against a pre-built JSON file of verified programs (updated daily
  * via GitHub Action). Matches program name or address, and marks results as
- * verified. Only returns results on mainnet since verification data is
- * mainnet-only.
+ * verified. Only returns results on mainnet: the pre-built snapshot covers
+ * mainnet programs, even though OSEC also verifies builds on devnet.
  */
 export const verifiedProgramsSearchProvider: SearchProvider = {
     kind: 'local',

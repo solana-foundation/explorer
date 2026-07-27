@@ -5,9 +5,11 @@ import { describe, expect, it } from 'vitest';
 import { Cluster } from '../cluster';
 import {
     buildEnrichedOsecInfo,
+    getOsecRegistryUrl,
     hashProgramBuffer,
     hashProgramData,
     type OsecInfo,
+    supportsVerifiedBuilds,
     VerificationStatus,
 } from '../verified-builds';
 
@@ -173,6 +175,30 @@ describe('hashProgramBuffer', () => {
     });
 });
 
+describe('getOsecRegistryUrl', () => {
+    it('should return the mainnet registry for Mainnet Beta', () => {
+        expect(getOsecRegistryUrl(Cluster.MainnetBeta)).toBe('https://verify.osec.io');
+    });
+
+    it('should return the devnet registry for Devnet', () => {
+        expect(getOsecRegistryUrl(Cluster.Devnet)).toBe('https://verify-devnet.osec.io');
+    });
+
+    it('should return undefined for clusters without a registry', () => {
+        expect(getOsecRegistryUrl(Cluster.Testnet)).toBeUndefined();
+        expect(getOsecRegistryUrl(Cluster.Custom)).toBeUndefined();
+    });
+});
+
+describe('supportsVerifiedBuilds', () => {
+    it('should support Mainnet Beta and Devnet only', () => {
+        expect(supportsVerifiedBuilds(Cluster.MainnetBeta)).toBe(true);
+        expect(supportsVerifiedBuilds(Cluster.Devnet)).toBe(true);
+        expect(supportsVerifiedBuilds(Cluster.Testnet)).toBe(false);
+        expect(supportsVerifiedBuilds(Cluster.Custom)).toBe(false);
+    });
+});
+
 describe('buildEnrichedOsecInfo', () => {
     const PROGRAM_ID = new PublicKey('BUYuxRfhCMWavaUWxhGtPP3ksKEDZxCD5gzknk3JfAya');
     const FOUNDATION_SIGNER = '5vJwnLeyjV8uNJSp1zn7VLW8GwiQbcsQbGaVSwRmkE4r';
@@ -231,14 +257,36 @@ describe('buildEnrichedOsecInfo', () => {
         expect(info.verify_command).toBe('Program does not have a verify PDA uploaded.');
     });
 
-    it('should note the verify command is mainnet-only off mainnet when the PDA is unavailable', () => {
+    it('should compose the verify command with the devnet moniker (-ud) from the PDA', () => {
+        const info = buildEnrichedOsecInfo({
+            cluster: Cluster.Devnet,
+            osecInfo: makeOsecInfo(),
+            pdaData: PDA,
+            programId: PROGRAM_ID,
+        });
+        expect(info.verify_command).toBe(
+            'solana-verify verify-from-repo -ud --program-id BUYuxRfhCMWavaUWxhGtPP3ksKEDZxCD5gzknk3JfAya https://github.com/Woody4618/bar --commit-hash 07e3f708df2b9483426515bf3bcd8065c57f7a79 --library-name let_me_buy',
+        );
+    });
+
+    it('should report a missing PDA on devnet the same way as mainnet', () => {
         const info = buildEnrichedOsecInfo({
             cluster: Cluster.Devnet,
             osecInfo: makeOsecInfo(),
             pdaData: null,
             programId: PROGRAM_ID,
         });
-        expect(info.verify_command).toBe('Verify command only available on mainnet.');
+        expect(info.verify_command).toBe('Program does not have a verify PDA uploaded.');
+    });
+
+    it('should note the verify command is unavailable on clusters without a registry', () => {
+        const info = buildEnrichedOsecInfo({
+            cluster: Cluster.Testnet,
+            osecInfo: makeOsecInfo(),
+            pdaData: null,
+            programId: PROGRAM_ID,
+        });
+        expect(info.verify_command).toBe('Verify command not available on this cluster.');
     });
 
     it('should label a frozen, non-trusted signer as the program deployer', () => {
