@@ -4,8 +4,11 @@ import { getBase58Encoder } from '@solana/kit';
 import { clusterApiUrl, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { wrapMcpServerWithSentry } from '@/app/shared/lib/sentry';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 import { LOADER_IDS, PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
+
+import { createMcpTrack } from './telemetry';
 
 const resolveProgramName: EntityInspectorConfig['resolveProgramName'] = address =>
     PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address];
@@ -81,5 +84,8 @@ async function importRequestHandler(): Promise<McpRequestHandler> {
         logger,
         resolveProgramName,
         rpcEndpoints: resolveRpcEndpoints(),
+        track: createMcpTrack(),
+        // Sentry auto-instruments tool calls with spans + error capture (dev-facing observability).
+        wrapServer: wrapMcpServerWithSentry,
     });
 }
