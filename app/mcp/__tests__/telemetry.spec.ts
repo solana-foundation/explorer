@@ -73,7 +73,7 @@ describe('createMcpTrack', () => {
         expect(JSON.parse(init.body)).toMatchObject({ client_id: 'anonymous' });
     });
 
-    it('should stay a no-op when the GA credentials are not configured', async () => {
+    it('should warn once and stay a no-op when the GA credentials are not configured', async () => {
         vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', '');
         vi.stubEnv('MCP_GA_API_SECRET', '');
         const fetchMock = vi.fn();
@@ -84,6 +84,33 @@ describe('createMcpTrack', () => {
         await flushMicrotasks();
 
         expect(fetchMock).not.toHaveBeenCalled();
+        expect(loggerMock.warn).toHaveBeenCalledWith(
+            '[mcp] NEXT_PUBLIC_GOOGLE_ANALYTICS_ID or MCP_GA_API_SECRET unset — usage analytics disabled',
+        );
+    });
+
+    it('should warn when only one of the GA credentials is configured', async () => {
+        vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', 'G-TEST123');
+        vi.stubEnv('MCP_GA_API_SECRET', '');
+        const fetchMock = vi.fn();
+        vi.stubGlobal('fetch', fetchMock);
+        headersMock.mockResolvedValue(new Headers());
+
+        createMcpTrack()(EVENT);
+        await flushMicrotasks();
+
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(loggerMock.warn).toHaveBeenCalled();
+    });
+
+    it('should not warn when both GA credentials are configured', async () => {
+        stubGaEnv();
+        headersMock.mockResolvedValue(new Headers());
+
+        createMcpTrack()(EVENT);
+        await flushMicrotasks();
+
+        expect(loggerMock.warn).not.toHaveBeenCalled();
     });
 
     it('should log at debug and swallow a failing headers lookup', async () => {

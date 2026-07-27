@@ -12,6 +12,11 @@ function buildTelemetry(): Telemetry {
     const apiSecret = process.env.MCP_GA_API_SECRET;
     // Missing GA credentials → empty provider list → telemetry is a no-op, call sites stay unconditional.
     const providers = measurementId && apiSecret ? [createGa4Provider({ apiSecret, measurementId })] : [];
+    if (providers.length === 0) {
+        // Once per cold start (same pattern as the MCP_ACCESS_KEYS warning in route.ts) — a silently
+        // disabled pipeline is otherwise indistinguishable from a broken one.
+        Logger.warn('[mcp] NEXT_PUBLIC_GOOGLE_ANALYTICS_ID or MCP_GA_API_SECRET unset — usage analytics disabled');
+    }
     return createTelemetry(providers, {
         logger: {
             debug: (message, context) => Logger.debug(message, context),
