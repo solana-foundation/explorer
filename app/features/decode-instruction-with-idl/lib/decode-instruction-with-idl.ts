@@ -48,7 +48,10 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
     const tryCodama = (root: RootNode): CodamaParsedInstruction | undefined => {
         try {
             return parseInstruction(root, kitIx) ?? undefined;
-        } catch {
+        } catch (error) {
+            Logger.error(new Error('Codama parseInstruction failed', { cause: error }), {
+                sentry: true,
+            });
             return undefined;
         }
     };
