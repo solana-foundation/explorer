@@ -269,8 +269,11 @@ function useEnrichedOsecInfo({
         error: pdaError,
         isLoading: isPdaLoading,
     } = useSWRImmutable(
+        // Scope the key by RPC endpoint: the PDA is an on-chain account that differs per cluster, and
+        // useSWRImmutable never revalidates — without this, switching Mainnet<->Devnet would reuse the
+        // other cluster's PDA and pair it with the wrong -um/-ud verify command.
         accountAnchorProgram && osecInfo && signerAuthorities.length > 0
-            ? `pda-${programId.toBase58()}-${signerAuthorities.map(x => x.toBase58()).join(',')}`
+            ? `pda-${clusterUrl}-${programId.toBase58()}-${signerAuthorities.map(x => x.toBase58()).join(',')}`
             : null,
         async () => {
             if (!osecInfo || !accountAnchorProgram) {
