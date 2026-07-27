@@ -301,8 +301,16 @@ async function resolveTransaction(
                 : {}),
         });
 
+        // A null status only means the status fetch failed (the RPC never legitimately resolves null) —
+        // surface it as a non-fatal error so callers can tell "outage" from "not yet confirmed".
+        const errors: McpToolError[] = [];
+        if (signatureStatus === null) {
+            errors.push(internalError('Confirmation status temporarily unavailable.'));
+        }
+
         return toToolResult({
-            errors: [],
+            errors,
+            isError: false,
             payload: buildTransactionPayload(transactionContext, instructions),
         });
     } catch (error) {

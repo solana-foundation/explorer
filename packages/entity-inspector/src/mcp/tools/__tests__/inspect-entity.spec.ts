@@ -178,7 +178,7 @@ describe('inspect_entity handler', () => {
         });
     });
 
-    it('should tolerate a failing signature status fetch and warn', async () => {
+    it('should tolerate a failing signature status fetch with a non-fatal error and warn', async () => {
         const logger = createLoggerMock();
         const dependencies = createDependencies({
             fetchSignatureStatus: vi.fn().mockRejectedValue(new Error('status unavailable')),
@@ -194,8 +194,19 @@ describe('inspect_entity handler', () => {
             expect.objectContaining({ identifier: TRANSACTION_IDENTIFIER }),
         );
         expect(envelope).toMatchObject({
+            errors: [{ code: 'INTERNAL_ERROR', message: 'Confirmation status temporarily unavailable.' }],
             payload: { entity: { confirmation_status: null, confirmations: null, kind: 'transaction' } },
         });
+    });
+
+    it('should report no errors when the signature status fetch succeeds', async () => {
+        const dependencies = createDependencies();
+
+        const result = await handleInspectEntity({ identifier: TRANSACTION_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(result.isError).toBe(false);
+        expect(envelope).toMatchObject({ errors: [] });
     });
 
     it('should warn through the console logger by default when the signature status fetch fails', async () => {
