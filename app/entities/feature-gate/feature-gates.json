@@ -2036,7 +2036,7 @@
     "description": "Before a transaction can be executed, every account it may read from or write to must be loaded, including any programs it may call. The amount of data a transaction is allowed to load is capped, and if it exceeds that limit, loading is aborted. This functionality is already imp\u2026",
     "devnet_activation_epoch": 1098,
     "key": "LTDSzjZKFJMKHYpNycG1FrWwGGTaFFwqEFjB5GGLNVD",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1008,
     "min_agave_versions": [
       "v4.1.0-beta.1"
     ],
