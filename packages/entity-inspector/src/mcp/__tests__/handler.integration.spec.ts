@@ -280,7 +280,10 @@ describe('createMcpRequestHandler — analytics and server wrapping', () => {
             await transport.handleRequest(
                 mcpRequest(
                     'tools/call',
-                    { arguments: { identifier: '4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T' }, name: 'inspect_entity' },
+                    {
+                        arguments: { identifier: '4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T' },
+                        name: 'inspect_entity',
+                    },
                     20,
                     { ...MCP_HEADERS, 'mcp-protocol-version': LATEST_PROTOCOL_VERSION },
                 ),
