@@ -26,7 +26,7 @@ describe('createTelemetry', () => {
         expect(second.send).toHaveBeenCalledWith(EVENT, CONTEXT);
     });
 
-    it('should isolate a rejecting provider, resolve anyway, and log the failure at debug', async () => {
+    it('should isolate a rejecting provider, resolve anyway, and log the failure at warn', async () => {
         const logger = createLoggerMock();
         const failing: TelemetryProvider = { name: 'ga4', send: vi.fn().mockRejectedValue(new Error('boom')) };
         const healthy: TelemetryProvider = { name: 'other', send: vi.fn().mockResolvedValue(undefined) };
@@ -35,7 +35,7 @@ describe('createTelemetry', () => {
         await expect(telemetry.track(EVENT, CONTEXT)).resolves.toBeUndefined();
 
         expect(healthy.send).toHaveBeenCalledWith(EVENT, CONTEXT);
-        expect(logger.debug).toHaveBeenCalledWith('[entity-inspector] telemetry provider ga4 failed', {
+        expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] telemetry provider ga4 failed', {
             error: new Error('boom'),
             event: 'mcp_tool_call',
         });
@@ -53,20 +53,20 @@ describe('createTelemetry', () => {
 
         await expect(telemetry.track(EVENT, CONTEXT)).resolves.toBeUndefined();
 
-        expect(logger.debug).toHaveBeenCalledWith('[entity-inspector] telemetry provider sync failed', {
+        expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] telemetry provider sync failed', {
             error: new Error('sync boom'),
             event: 'mcp_tool_call',
         });
     });
 
     it('should log through the console logger when none is injected', async () => {
-        const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => undefined);
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
         const failing: TelemetryProvider = { name: 'ga4', send: vi.fn().mockRejectedValue(new Error('boom')) };
         const telemetry = createTelemetry([failing]);
 
         await telemetry.track(EVENT, CONTEXT);
 
-        expect(debugSpy).toHaveBeenCalledWith('[entity-inspector] telemetry provider ga4 failed', {
+        expect(warnSpy).toHaveBeenCalledWith('[entity-inspector] telemetry provider ga4 failed', {
             error: new Error('boom'),
             event: 'mcp_tool_call',
         });
@@ -78,6 +78,6 @@ describe('createTelemetry', () => {
 
         await expect(telemetry.track(EVENT, CONTEXT)).resolves.toBeUndefined();
 
-        expect(logger.debug).not.toHaveBeenCalled();
+        expect(logger.warn).not.toHaveBeenCalled();
     });
 });

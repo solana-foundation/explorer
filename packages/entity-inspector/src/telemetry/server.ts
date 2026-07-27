@@ -30,7 +30,8 @@ export function createTelemetry(providers: readonly TelemetryProvider[], options
                     Promise.resolve()
                         .then(() => provider.send(event, context))
                         .catch((error: unknown) => {
-                            logger.debug(ns(`telemetry provider ${provider.name} failed`), {
+                            // warn, not debug: this line is the only signal for a persistently broken provider (e.g. a bad GA secret).
+                            logger.warn(ns(`telemetry provider ${provider.name} failed`), {
                                 error,
                                 event: event.name,
                             });
