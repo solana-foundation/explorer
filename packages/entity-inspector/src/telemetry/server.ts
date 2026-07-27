@@ -1,5 +1,4 @@
-// Usage-event fan-out over pluggable providers. The MCP core never imports this entry — hosts
-// bind `createTelemetry(...).track` to `EntityInspectorConfig.track` themselves.
+// Usage-event fan-out over pluggable providers — kept import-free from the MCP core; hosts adapt `track` into `EntityInspectorConfig.track` themselves (supplying the context).
 import { consoleLogger, type InspectorLogger, ns } from '../logger.js';
 
 // Scalar-only params: GA4's Measurement Protocol silently discards nested values.
