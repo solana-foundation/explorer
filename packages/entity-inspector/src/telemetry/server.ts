@@ -12,8 +12,8 @@ export type TelemetryProvider = {
 };
 
 export type Telemetry = {
-    /** Fire-and-forget: never throws, never rejects — one failing provider does not affect the rest. */
-    track: (event: TelemetryEvent, context: TelemetryContext) => void;
+    /** Always resolves, never throws — one failing provider does not affect the rest. Await it where the platform must stay alive until delivery (e.g. inside Next `after()`). */
+    track: (event: TelemetryEvent, context: TelemetryContext) => Promise<void>;
 };
 
 export type TelemetryOptions = {
@@ -23,18 +23,20 @@ export type TelemetryOptions = {
 export function createTelemetry(providers: readonly TelemetryProvider[], options: TelemetryOptions = {}): Telemetry {
     const logger = options.logger ?? consoleLogger;
     return {
-        track(event, context) {
-            for (const provider of providers) {
-                // Promise.resolve().then guards synchronous throws from send as well.
-                Promise.resolve()
-                    .then(() => provider.send(event, context))
-                    .catch((error: unknown) => {
-                        logger.debug(ns(`telemetry provider ${provider.name} failed`), {
-                            error,
-                            event: event.name,
-                        });
-                    });
-            }
+        async track(event, context) {
+            await Promise.all(
+                providers.map(provider =>
+                    // Promise.resolve().then guards synchronous throws from send as well.
+                    Promise.resolve()
+                        .then(() => provider.send(event, context))
+                        .catch((error: unknown) => {
+                            logger.debug(ns(`telemetry provider ${provider.name} failed`), {
+                                error,
+                                event: event.name,
+                            });
+                        }),
+                ),
+            );
         },
     };
 }

@@ -39,7 +39,8 @@ export function createMcpTrack(): NonNullable<EntityInspectorConfig['track']> {
     return event => {
         after(async () => {
             try {
-                telemetry.track(event, { clientId: await resolveClientId() });
+                // Awaited so the serverless runtime keeps the function alive until delivery settles.
+                await telemetry.track(event, { clientId: await resolveClientId() });
             } catch (error) {
                 Logger.debug('[mcp] telemetry emission failed', { error });
             }
