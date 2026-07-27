@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest a feature or improvement for Solana Explorer
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest an improvement! Please fill in the fields below so we can understand the request. If you are reporting a bug, please use the Bug report template instead.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What limitation or pain point does this address? What are you trying to do that you cannot do today?
+      placeholder: Tell us what is missing or frustrating
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: A clear and concise description of what you want to happen.
+      placeholder: Describe the feature or change you have in mind
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches or workarounds you evaluated and why they do not work.
+      placeholder: Any alternative solutions or features you considered
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links, sketches, screenshots, or related issues and PRs.
+      placeholder: Any other details that help explain the request
+    validations:
+      required: false
