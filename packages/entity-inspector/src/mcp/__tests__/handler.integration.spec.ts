@@ -258,6 +258,45 @@ describe('createMcpRequestHandler — analytics and server wrapping', () => {
         });
     });
 
+    it('should measure the tool call duration around the handler', async () => {
+        // Only Date is faked — the SDK transport keeps its real timers.
+        vi.useFakeTimers({ toFake: ['Date'] });
+        try {
+            const track = vi.fn();
+            const server = createMcpServer({
+                fetchAccountInfo: vi.fn().mockImplementation(async () => {
+                    vi.setSystemTime(Date.now() + 1234);
+                    return { value: null };
+                }),
+                fetchAsset: vi.fn().mockResolvedValue(null),
+                fetchSignatureStatus: vi.fn(),
+                fetchTransaction: vi.fn(),
+                logger: { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() },
+                track,
+            });
+            // Stateless transport is single-request: one fresh pair, no live negotiation needed.
+            const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
+            await server.connect(transport);
+            await transport.handleRequest(
+                mcpRequest(
+                    'tools/call',
+                    { arguments: { identifier: '4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T' }, name: 'inspect_entity' },
+                    20,
+                    { ...MCP_HEADERS, 'mcp-protocol-version': LATEST_PROTOCOL_VERSION },
+                ),
+            );
+
+            expect(track).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    name: 'mcp_tool_call',
+                    params: expect.objectContaining({ duration_ms: 1234 }),
+                }),
+            );
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
     it('should fall back to the console logger when a bare server has a throwing track sink', () => {
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
         const server = createMcpServer({
