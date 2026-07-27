@@ -25,13 +25,21 @@ const decodeInstructionFallback: EntityInspectorConfig['decodeInstructionFallbac
     if (!isParsedInstruction(dispatched)) {
         return undefined;
     }
-    // Parser info carries PublicKey/BN instances; the wire format needs their JSON forms.
+    // Parser info carries PublicKey/BN/bigint values; the wire format needs their JSON forms
+    // (JSON.stringify throws on bigint — kit-based parsers like lighthouse decode u64s as bigint).
     return {
-        info: JSON.parse(JSON.stringify(dispatched.parsed.info)),
+        info: JSON.parse(JSON.stringify(dispatched.parsed.info, bigIntReplacer)),
         program: dispatched.program,
         type: dispatched.parsed.type,
     };
 };
+
+function bigIntReplacer(_key: string, value: unknown): unknown {
+    if (typeof value === 'bigint') {
+        return value <= Number.MAX_SAFE_INTEGER && value >= Number.MIN_SAFE_INTEGER ? Number(value) : String(value);
+    }
+    return value;
+}
 
 const logger: EntityInspectorConfig['logger'] = {
     debug: (message, context) => Logger.debug(message, context),
