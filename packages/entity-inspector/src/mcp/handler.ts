@@ -34,9 +34,12 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
         resolveSecurityMetadata: createSecurityMetadataResolver(config.rpcEndpoints, logger),
         ...(config.decodeInstructionFallback ? { decodeInstructionFallback: config.decodeInstructionFallback } : {}),
         ...(config.resolveProgramName ? { resolveProgramName: config.resolveProgramName } : {}),
+        ...(config.track ? { track: config.track } : {}),
     };
+    const { wrapServer } = config;
     return async request => {
-        const server = createMcpServer(dependencies);
+        const baseServer = createMcpServer(dependencies);
+        const server = wrapServer ? wrapServer(baseServer) : baseServer;
         const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
         try {
             await server.connect(transport);

@@ -1,0 +1,89 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import type { InspectorLogger } from '../../logger.js';
+import { createTelemetry, type TelemetryProvider } from '../server.js';
+
+const EVENT = { name: 'mcp_tool_call', params: { tool: 'ping' } };
+const CONTEXT = { clientId: 'client-1' };
+
+function createLoggerMock(): InspectorLogger {
+    return { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() };
+}
+
+function flushMicrotasks(): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, 0));
+}
+
+describe('createTelemetry', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it('should fan an event out to every provider with the context', async () => {
+        const first: TelemetryProvider = { name: 'first', send: vi.fn().mockResolvedValue(undefined) };
+        const second: TelemetryProvider = { name: 'second', send: vi.fn().mockResolvedValue(undefined) };
+        const telemetry = createTelemetry([first, second], { logger: createLoggerMock() });
+
+        telemetry.track(EVENT, CONTEXT);
+        await flushMicrotasks();
+
+        expect(first.send).toHaveBeenCalledWith(EVENT, CONTEXT);
+        expect(second.send).toHaveBeenCalledWith(EVENT, CONTEXT);
+    });
+
+    it('should isolate a rejecting provider and log the failure at debug', async () => {
+        const logger = createLoggerMock();
+        const failing: TelemetryProvider = { name: 'ga4', send: vi.fn().mockRejectedValue(new Error('boom')) };
+        const healthy: TelemetryProvider = { name: 'other', send: vi.fn().mockResolvedValue(undefined) };
+        const telemetry = createTelemetry([failing, healthy], { logger });
+
+        telemetry.track(EVENT, CONTEXT);
+        await flushMicrotasks();
+
+        expect(healthy.send).toHaveBeenCalledWith(EVENT, CONTEXT);
+        expect(logger.debug).toHaveBeenCalledWith('[entity-inspector] telemetry provider ga4 failed', {
+            error: new Error('boom'),
+            event: 'mcp_tool_call',
+        });
+    });
+
+    it('should guard a provider that throws synchronously', async () => {
+        const logger = createLoggerMock();
+        const throwing: TelemetryProvider = {
+            name: 'sync',
+            send: () => {
+                throw new Error('sync boom');
+            },
+        };
+        const telemetry = createTelemetry([throwing], { logger });
+
+        expect(() => telemetry.track(EVENT, CONTEXT)).not.toThrow();
+        await flushMicrotasks();
+
+        expect(logger.debug).toHaveBeenCalledWith('[entity-inspector] telemetry provider sync failed', {
+            error: new Error('sync boom'),
+            event: 'mcp_tool_call',
+        });
+    });
+
+    it('should log through the console logger when none is injected', async () => {
+        const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => undefined);
+        const failing: TelemetryProvider = { name: 'ga4', send: vi.fn().mockRejectedValue(new Error('boom')) };
+        const telemetry = createTelemetry([failing]);
+
+        telemetry.track(EVENT, CONTEXT);
+        await flushMicrotasks();
+
+        expect(debugSpy).toHaveBeenCalled();
+    });
+
+    it('should be a no-op with an empty provider list', async () => {
+        const logger = createLoggerMock();
+        const telemetry = createTelemetry([], { logger });
+
+        telemetry.track(EVENT, CONTEXT);
+        await flushMicrotasks();
+
+        expect(logger.debug).not.toHaveBeenCalled();
+    });
+});

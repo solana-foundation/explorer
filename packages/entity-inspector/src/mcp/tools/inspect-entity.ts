@@ -26,6 +26,7 @@ import type {
     DecodeInstructionFallback,
     NormalizedAccountInfo,
 } from '../../solana/types.js';
+import type { McpAnalyticsEvent } from '../../types.js';
 import {
     currentlyUnsupported,
     internalError,
@@ -50,6 +51,7 @@ export type InspectEntityDependencies = {
     resolveProgramName?: (address: string) => string | undefined;
     resolveProgramVerification?: ResolveProgramVerification;
     resolveSecurityMetadata?: ResolveSecurityMetadata;
+    track?: (event: McpAnalyticsEvent) => void;
 };
 
 function toSourceUnavailablePayload(kind: 'account' | 'transaction'): Record<string, unknown> {

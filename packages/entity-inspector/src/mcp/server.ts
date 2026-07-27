@@ -1,5 +1,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
+import { consoleLogger, ns } from '../logger.js';
+import { buildToolCallEvent } from './analytics-event.js';
 import { inspectEntityInputSchema, pingInputSchema } from './schemas.js';
 import { handleInspectEntity, type InspectEntityDependencies } from './tools/inspect-entity.js';
 
@@ -26,12 +29,47 @@ const INSPECT_ENTITY_DESCRIPTION = [
     'OUTPUT: Responses use { payload: { entity: { kind, ...fields } }, errors: [] }. Unresolvable fields return explicit unknown markers instead of being silently omitted.',
 ].join('\n');
 
+// A throwing sink must never break the tool reply — telemetry is strictly best-effort.
+function withToolTracking<TInput>(
+    tool: string,
+    dependencies: InspectEntityDependencies,
+    handler: (input: TInput) => Promise<CallToolResult>,
+): (input: TInput) => Promise<CallToolResult> {
+    const { track } = dependencies;
+    if (!track) {
+        return handler;
+    }
+    const logger = dependencies.logger ?? consoleLogger;
+    return async input => {
+        const started = Date.now();
+        const result = await handler(input);
+        try {
+            track(buildToolCallEvent(tool, input, result, Date.now() - started));
+        } catch (error) {
+            logger.warn(ns('analytics track failed'), { error, tool });
+        }
+        return result;
+    };
+}
+
 export function createMcpServer(dependencies: InspectEntityDependencies): McpServer {
     const server = new McpServer({
         name: 'explorer-mcp',
         // Mirrors the explorer's root package.json version (kept as a literal — the package imports no app code)
         version: '0.1.0',
     });
+
+    const { track } = dependencies;
+    if (track) {
+        const logger = dependencies.logger ?? consoleLogger;
+        server.server.oninitialized = () => {
+            try {
+                track({ name: 'mcp_initialize', params: {} });
+            } catch (error) {
+                logger.warn(ns('analytics track failed'), { error, tool: 'initialize' });
+            }
+        };
+    }
 
     server.registerTool(
         'inspect_entity',
@@ -47,7 +85,7 @@ export function createMcpServer(dependencies: InspectEntityDependencies): McpSer
             inputSchema: inspectEntityInputSchema(),
             title: 'Inspect Solana Entity',
         },
-        async input => handleInspectEntity(input, dependencies),
+        withToolTracking('inspect_entity', dependencies, async input => handleInspectEntity(input, dependencies)),
     );
 
     server.registerTool(
@@ -56,14 +94,14 @@ export function createMcpServer(dependencies: InspectEntityDependencies): McpSer
             description: 'Basic scaffold health tool',
             inputSchema: pingInputSchema(),
         },
-        async () => ({
+        withToolTracking('ping', dependencies, async () => ({
             content: [
                 {
                     text: 'pong',
                     type: 'text',
                 },
             ],
-        }),
+        })),
     );
 
     return server;

@@ -9,4 +9,4 @@ export type {
     FallbackInstruction,
     FallbackInstructionAccount,
 } from './solana/types.js';
-export type { EntityInspectorConfig } from './types.js';
+export type { EntityInspectorConfig, McpAnalyticsEvent, McpToolCallEventParams } from './types.js';
