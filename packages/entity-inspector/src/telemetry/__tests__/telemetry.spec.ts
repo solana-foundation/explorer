@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 
 import type { InspectorLogger } from '../../logger.js';
-import { createTelemetry, type TelemetryProvider } from '../server.js';
+import type { McpAnalyticsEvent } from '../../types.js';
+import { createTelemetry, type TelemetryEvent, type TelemetryProvider } from '../server.js';
 
 const EVENT = { name: 'mcp_tool_call', params: { tool: 'ping' } };
 const CONTEXT = { clientId: 'client-1' };
@@ -79,5 +80,10 @@ describe('createTelemetry', () => {
         await expect(telemetry.track(EVENT, CONTEXT)).resolves.toBeUndefined();
 
         expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    // The core never imports this entry — the bridge is structural; this pins it in package CI.
+    it('should accept every MCP analytics event as a telemetry event', () => {
+        expectTypeOf<McpAnalyticsEvent>().toExtend<TelemetryEvent>();
     });
 });

@@ -2,7 +2,8 @@
 // bind `createTelemetry(...).track` to `EntityInspectorConfig.track` themselves.
 import { consoleLogger, type InspectorLogger, ns } from '../logger.js';
 
-export type TelemetryEvent = { name: string; params: Record<string, unknown> };
+// Scalar-only params: GA4's Measurement Protocol silently discards nested values.
+export type TelemetryEvent = { name: string; params: Record<string, string | number | boolean> };
 
 export type TelemetryContext = { clientId: string };
 
