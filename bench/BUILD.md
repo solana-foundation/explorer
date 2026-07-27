@@ -16,7 +16,7 @@
 | Dynamic | `/address/[address]/entries` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/feature-gate` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/idl` | 510 kB | 1.53 MB |
-| Dynamic | `/address/[address]/instructions` | 370 kB | 1.40 MB |
+| Dynamic | `/address/[address]/instructions` | 380 kB | 1.40 MB |
 | Dynamic | `/address/[address]/metadata` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/program-multisig` | 370 kB | 1.39 MB |
@@ -25,9 +25,9 @@
 | Dynamic | `/address/[address]/slot-hashes` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/stake-history` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/subscriptions` | 370 kB | 1.39 MB |
-| Dynamic | `/address/[address]/token-extensions` | 370 kB | 1.39 MB |
+| Dynamic | `/address/[address]/token-extensions` | 370 kB | 1.40 MB |
 | Dynamic | `/address/[address]/tokens` | 380 kB | 1.40 MB |
-| Dynamic | `/address/[address]/transfers` | 370 kB | 1.40 MB |
+| Dynamic | `/address/[address]/transfers` | 380 kB | 1.40 MB |
 | Dynamic | `/address/[address]/verified-build` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/vote-history` | 370 kB | 1.39 MB |
 | Dynamic | `/api/ans-domains/[address]` | — | — |
@@ -36,19 +36,19 @@
 | Dynamic | `/api/idl-latest` | — | — |
 | Dynamic | `/api/metadata/proxy` | — | — |
 | Dynamic | `/api/ping/[network]` | — | — |
-| Dynamic | `/api/receipt/price/[mintAddress]` | — | — |
 | Dynamic | `/api/search` | — | — |
 | Dynamic | `/api/security-txt` | — | — |
 | Dynamic | `/api/sns-domains/[address]` | — | — |
 | Dynamic | `/api/token-image/[mintAddress]` | — | — |
 | Dynamic | `/api/token-info` | — | — |
 | Dynamic | `/api/token-market-data/[address]` | — | — |
+| Dynamic | `/api/token-price/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/bluprynt/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
 | Dynamic | `/block/[slot]` | 220 kB | 1.24 MB |
-| Dynamic | `/block/[slot]/accounts` | 210 kB | 1.24 MB |
+| Dynamic | `/block/[slot]/accounts` | 220 kB | 1.24 MB |
 | Dynamic | `/block/[slot]/programs` | 210 kB | 1.24 MB |
 | Dynamic | `/block/[slot]/rewards` | 210 kB | 1.24 MB |
 | Dynamic | `/epoch/[epoch]` | 10 kB | 1.04 MB |

@@ -93,7 +93,8 @@ export const Active: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        expect(canvas.getByText('Delegated (active)')).toBeInTheDocument();
+        // Overview surfaces Type + State; the Stake Delegation card carries the amounts.
+        expect(canvas.getByText('Active')).toBeInTheDocument();
         expect(canvas.getByText('Stake Delegation')).toBeInTheDocument();
         expect(canvas.getByText('Authorities')).toBeInTheDocument();
     },
@@ -113,7 +114,7 @@ export const Activating: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        expect(canvas.getByText('Delegated (activating)')).toBeInTheDocument();
+        expect(canvas.getByText('Activating')).toBeInTheDocument();
     },
 };
 
@@ -131,14 +132,14 @@ export const Deactivating: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        expect(canvas.getByText('Delegated (deactivating)')).toBeInTheDocument();
+        expect(canvas.getByText('Deactivating')).toBeInTheDocument();
     },
 };
 
 export const FullyInactivated: Story = {
     // Fully decayed delegation: deactivation epoch is set and `inactive === delegated.stake`.
-    // The section detects this via `isFullyInactivated` and shows "Deactivated" in the overview
-    // (distinct from never-delegated states) while hiding the Stake Delegation card entirely.
+    // Overview shows Type "Delegated" + State "Inactive"; the Stake Delegation card still renders
+    // the (now fully inactive) delegation details.
     args: {
         account,
         activation: { active: 0, inactive: Number(DELEGATED_STAKE), state: 'inactive' },
@@ -147,8 +148,8 @@ export const FullyInactivated: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        expect(canvas.getByText('Deactivated')).toBeInTheDocument();
-        expect(canvas.queryByText('Stake Delegation')).not.toBeInTheDocument();
+        expect(canvas.getByText('Inactive')).toBeInTheDocument();
+        expect(canvas.getByText('Stake Delegation')).toBeInTheDocument();
     },
 };
 
