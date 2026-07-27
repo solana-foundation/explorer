@@ -318,8 +318,9 @@ describe('createMcpRequestHandler — analytics and server wrapping', () => {
         warnSpy.mockRestore();
     });
 
-    it('should route every request through the injected server wrapper', async () => {
-        const wrapServer = vi.fn((server: McpServer) => server);
+    it('should serve every request from the server the wrapper returns', async () => {
+        // A distinct wrapped instance: its identity in the reply proves the return value is used, not just called.
+        const wrapServer = vi.fn(() => new McpServer({ name: 'wrapped-server', version: '9.9.9' }));
         const handler = createMcpRequestHandler({ ...TEST_CONFIG, wrapServer });
 
         const response = await handler(initializeRequest(13));
@@ -327,6 +328,9 @@ describe('createMcpRequestHandler — analytics and server wrapping', () => {
         expect(response.status).toBe(200);
         expect(wrapServer).toHaveBeenCalledTimes(1);
         expect(wrapServer).toHaveBeenCalledWith(expect.any(McpServer));
+        await expect(response.json()).resolves.toMatchObject({
+            result: { serverInfo: { name: 'wrapped-server', version: '9.9.9' } },
+        });
     });
 });
 
