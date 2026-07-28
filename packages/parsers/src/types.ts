@@ -1,7 +1,13 @@
 import type { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import type { KitInstruction } from './kit-instruction.js';
-import type { SPL_TOKEN_PROGRAM_LABEL, SPL_TOKEN_2022_PROGRAM_LABEL } from './program-registry.js';
+import type {
+    BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
+    SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL,
+    SPL_TOKEN_PROGRAM_LABEL,
+    SPL_TOKEN_2022_PROGRAM_LABEL,
+    SYSTEM_PROGRAM_LABEL,
+} from './program-registry.js';
 
 /**
  * The set of `programLabel` values a decoder slice (`InstructionParser`) may
@@ -17,13 +23,13 @@ import type { SPL_TOKEN_PROGRAM_LABEL, SPL_TOKEN_2022_PROGRAM_LABEL } from './pr
  * drifting.
  */
 export type ParserProgramLabel =
-    | 'bpf-upgradeable-loader'
+    | typeof BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL // 'bpf-upgradeable-loader' via the program registry (see note above)
     | 'lighthouse'
     | 'mpl-token-metadata'
-    | 'spl-associated-token-account'
+    | typeof SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL // 'spl-associated-token-account' via the program registry (see note above)
     | typeof SPL_TOKEN_PROGRAM_LABEL // 'spl-token' via the program registry (see note above)
     | typeof SPL_TOKEN_2022_PROGRAM_LABEL // 'spl-token-2022' via the program registry (see note above)
-    | 'system';
+    | typeof SYSTEM_PROGRAM_LABEL; // 'system' via the program registry (see note above)
 
 export interface ParsedInstructionInfo<T extends string = string, I = unknown> {
     type: T;

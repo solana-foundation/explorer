@@ -3,12 +3,16 @@ import { enums } from 'superstruct';
 // Specimens — the RPC jsonParsed `program` discriminators, individually importable.
 // *_PROGRAM_LABEL (not *_PROGRAM_ID) on purpose: these are RPC discriminator labels, not base58 addresses.
 export const ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL = 'address-lookup-table';
+export const BPF_LOADER_PROGRAM_LABEL = 'bpf-loader';
 export const BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL = 'bpf-upgradeable-loader';
 export const CONFIG_PROGRAM_LABEL = 'config';
 export const NONCE_PROGRAM_LABEL = 'nonce';
+export const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL = 'spl-associated-token-account';
+export const SPL_MEMO_PROGRAM_LABEL = 'spl-memo';
 export const SPL_TOKEN_PROGRAM_LABEL = 'spl-token';
 export const SPL_TOKEN_2022_PROGRAM_LABEL = 'spl-token-2022';
 export const STAKE_PROGRAM_LABEL = 'stake';
+export const SYSTEM_PROGRAM_LABEL = 'system';
 export const SYSVAR_PROGRAM_LABEL = 'sysvar';
 export const VOTE_PROGRAM_LABEL = 'vote';
 
@@ -36,4 +40,23 @@ export type RpcParsedAccountProgram = (typeof RPC_PARSED_ACCOUNT_PROGRAMS)[numbe
 export const rpcParsedAccountProgram = enums(RPC_PARSED_ACCOUNT_PROGRAMS);
 export function isRpcParsedAccountProgram(value: string): value is RpcParsedAccountProgram {
     return RPC_PARSED_ACCOUNT_PROGRAMS.some(program => program === value);
+}
+
+// `parsed.program` labels the RPC emits on parsed transaction instructions.
+export const RPC_PARSED_INSTRUCTION_PROGRAMS = [
+    SPL_TOKEN_PROGRAM_LABEL,
+    SPL_TOKEN_2022_PROGRAM_LABEL,
+    ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
+    BPF_LOADER_PROGRAM_LABEL,
+    BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
+    SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL,
+    SPL_MEMO_PROGRAM_LABEL,
+    STAKE_PROGRAM_LABEL,
+    SYSTEM_PROGRAM_LABEL,
+    VOTE_PROGRAM_LABEL,
+] as const;
+export type RpcParsedInstructionProgram = (typeof RPC_PARSED_INSTRUCTION_PROGRAMS)[number];
+export const rpcParsedInstructionProgram = enums(RPC_PARSED_INSTRUCTION_PROGRAMS);
+export function isRpcParsedInstructionProgram(value: string): value is RpcParsedInstructionProgram {
+    return RPC_PARSED_INSTRUCTION_PROGRAMS.some(program => program === value);
 }

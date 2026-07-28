@@ -3,12 +3,16 @@ import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import {
     isRpcParsedAccountProgram,
+    isRpcParsedInstructionProgram,
     isTokenProgram,
     RPC_PARSED_ACCOUNT_PROGRAMS,
     rpcParsedAccountProgram,
+    RPC_PARSED_INSTRUCTION_PROGRAMS,
+    rpcParsedInstructionProgram,
     TOKEN_PROGRAMS,
     tokenProgram,
     type RpcParsedAccountProgram,
+    type RpcParsedInstructionProgram,
     type TokenProgram,
 } from '../program-registry.js';
 
@@ -29,6 +33,14 @@ describe('program registry', () => {
         expect(isRpcParsedAccountProgram('')).toBe(false);
     });
 
+    it('should accept every rpc parsed instruction program via the guard and reject outsiders', () => {
+        for (const program of RPC_PARSED_INSTRUCTION_PROGRAMS) {
+            expect(isRpcParsedInstructionProgram(program)).toBe(true);
+        }
+        expect(isRpcParsedInstructionProgram('sysvar')).toBe(false);
+        expect(isRpcParsedInstructionProgram('')).toBe(false);
+    });
+
     it('should validate members through the superstruct structs', () => {
         for (const program of TOKEN_PROGRAMS) {
             expect(is(program, tokenProgram)).toBe(true);
@@ -36,8 +48,12 @@ describe('program registry', () => {
         for (const program of RPC_PARSED_ACCOUNT_PROGRAMS) {
             expect(is(program, rpcParsedAccountProgram)).toBe(true);
         }
+        for (const program of RPC_PARSED_INSTRUCTION_PROGRAMS) {
+            expect(is(program, rpcParsedInstructionProgram)).toBe(true);
+        }
         expect(is('spl-memo', tokenProgram)).toBe(false);
         expect(is('spl-memo', rpcParsedAccountProgram)).toBe(false);
+        expect(is('sysvar', rpcParsedInstructionProgram)).toBe(false);
     });
 
     // Drift canaries: an accidental edit to either registry array breaks these pins.
@@ -52,6 +68,18 @@ describe('program registry', () => {
             | 'spl-token-2022'
             | 'stake'
             | 'sysvar'
+            | 'vote'
+        >();
+        expectTypeOf<RpcParsedInstructionProgram>().toEqualTypeOf<
+            | 'address-lookup-table'
+            | 'bpf-loader'
+            | 'bpf-upgradeable-loader'
+            | 'spl-associated-token-account'
+            | 'spl-memo'
+            | 'spl-token'
+            | 'spl-token-2022'
+            | 'stake'
+            | 'system'
             | 'vote'
         >();
     });
