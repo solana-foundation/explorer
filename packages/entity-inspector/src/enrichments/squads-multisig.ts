@@ -9,6 +9,7 @@ import { SQUADS_LAMBDA_URL } from '../shared/constants.js';
 import { squadsV3Idl } from './idls/squads-v3.js';
 import { squadsV4Idl } from './idls/squads-v4.js';
 import { asRecord, asSafeNumeric, asString } from '../shared/parse-helpers.js';
+import { err, ok, type Result, toError } from '../shared/result.js';
 import type { RpcClient } from '../rpc/rpc.js';
 import type { MultisigReferenceResult } from './types.js';
 
@@ -29,35 +30,32 @@ type LambdaResult = {
 
 type MultisigDetails = { threshold: number; members: string[] };
 
-async function fetchSquadsLambdaInfo(authority: string, logger: InspectorLogger): Promise<LambdaResult | null> {
+async function fetchSquadsLambdaInfo(authority: string): Promise<Result<LambdaResult | null>> {
     let response: Response;
     try {
         response = await fetch(`${SQUADS_LAMBDA_URL}/${encodeURIComponent(authority)}`, {
             signal: AbortSignal.timeout(LAMBDA_FETCH_TIMEOUT_MS),
         });
     } catch (error) {
-        logger.warn(ns('squads lambda fetch failed'), { authority, error });
-        throw error;
+        return err(toError(error));
     }
 
     if (!response.ok) {
-        logger.warn(ns('squads lambda http error'), { authority, statusCode: response.status });
-        throw new Error(`Lambda responded with HTTP ${response.status}`);
+        return err(new Error(`Lambda responded with HTTP ${response.status}`));
     }
 
     let data: Record<string, unknown> | null;
     try {
         data = asRecord(await response.json());
     } catch (error) {
-        logger.warn(ns('squads lambda json parse failed'), { authority, error });
-        throw error;
+        return err(toError(error));
     }
-    if (!data || 'error' in data || !data.isSquad) return null;
+    if (!data || 'error' in data || !data.isSquad) return ok(null);
     const version = data.version;
-    if (version !== 'v3' && version !== 'v4') return null;
+    if (version !== 'v3' && version !== 'v4') return ok(null);
     const multisig = asString(data.multisig);
-    if (!multisig) return null;
-    return { isSquad: true, multisig, version };
+    if (!multisig) return ok(null);
+    return ok({ isSquad: true, multisig, version });
 }
 
 function createSquadsClient(version: SquadsVersion): IdlClient {
@@ -117,12 +115,16 @@ export async function resolveSquadsMultisigReference(
         return { reason: 'source_unavailable', status: 'unknown' };
     }
 
-    try {
-        const lambdaInfo = await fetchSquadsLambdaInfo(upgradeAuthority, logger);
-        if (!lambdaInfo) {
-            return { status: 'not_multisig' };
-        }
+    const [lambdaError, lambdaInfo] = await fetchSquadsLambdaInfo(upgradeAuthority);
+    if (lambdaError) {
+        logger.warn(ns('squads lambda lookup failed'), { error: lambdaError, upgradeAuthority });
+        return { reason: 'source_unavailable', status: 'unknown' };
+    }
+    if (!lambdaInfo) {
+        return { status: 'not_multisig' };
+    }
 
+    try {
         const account = await fetchDecodedMultisigAccount(
             lambdaInfo.version,
             lambdaInfo.multisig,

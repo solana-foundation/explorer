@@ -3,3 +3,6 @@ export type Result<T, E extends Error = Error> = readonly [E, undefined] | reado
 
 export const ok = <T>(value: T): Result<T, never> => [undefined, value];
 export const err = <E extends Error>(error: E): Result<never, E> => [error, undefined];
+
+/** Coerce a caught unknown into an Error (fp-ts `toError` semantics). */
+export const toError = (thrown: unknown): Error => (thrown instanceof Error ? thrown : new Error(String(thrown)));

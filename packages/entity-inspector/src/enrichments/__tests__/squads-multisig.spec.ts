@@ -88,8 +88,8 @@ describe('resolveSquadsMultisigReference', () => {
                 status: 'unknown',
             });
             expect(dependencies.logger.warn).toHaveBeenCalledWith(
-                expect.stringContaining('squads lambda fetch failed'),
-                expect.objectContaining({ authority: AUTHORITY }),
+                expect.stringContaining('squads lambda lookup failed'),
+                expect.objectContaining({ error: expect.any(Error), upgradeAuthority: AUTHORITY }),
             );
         });
 
@@ -105,8 +105,10 @@ describe('resolveSquadsMultisigReference', () => {
                 status: 'unknown',
             });
             expect(dependencies.logger.warn).toHaveBeenCalledWith(
-                expect.stringContaining('squads lambda http error'),
-                expect.objectContaining({ statusCode: 500 }),
+                expect.stringContaining('squads lambda lookup failed'),
+                expect.objectContaining({
+                    error: expect.objectContaining({ message: 'Lambda responded with HTTP 500' }),
+                }),
             );
         });
 

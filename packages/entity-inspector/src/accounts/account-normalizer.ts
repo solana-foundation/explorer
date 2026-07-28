@@ -2,31 +2,28 @@ import { BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL } from '@explorer/parsers';
 import type { ReadonlyUint8Array } from '@solana/kit';
 
 import type { SupportedCluster } from '../config.js';
-import { consoleLogger, type InspectorLogger, ns } from '../logger.js';
+import { type InspectorLogger, ns } from '../logger.js';
 import { base64Encoder } from '../rpc/codecs.js';
 import { isSourceUnavailableError } from '../rpc/rpc.js';
 import type { AccountProbeEnvelope } from '../rpc/types.js';
 import { asRecord, asSafeNumeric, asString } from '../shared/parse-helpers.js';
+import { err, ok, type Result, toError } from '../shared/result.js';
 import type { NormalizedAccountInfo, NormalizedProgramDataInfo } from './types.js';
 
-export function extractRawDataBytesFromAccountData(
-    data: unknown,
-    logger: InspectorLogger = consoleLogger,
-): ReadonlyUint8Array | null {
+export function extractRawDataBytesFromAccountData(data: unknown): Result<ReadonlyUint8Array | null> {
     if (!Array.isArray(data) || data.length < 2) {
-        return null;
+        return ok(null);
     }
 
     const [encodedData, encoding] = data;
     if (typeof encodedData !== 'string' || encoding !== 'base64') {
-        return null;
+        return ok(null);
     }
 
     try {
-        return base64Encoder().encode(encodedData);
+        return ok(base64Encoder().encode(encodedData));
     } catch (error) {
-        logger.warn(ns('base64 decode of account data failed'), { error });
-        return null;
+        return err(toError(error));
     }
 }
 
@@ -85,6 +82,8 @@ export function normalizeAccountProbe(address: string, envelope: AccountProbeEnv
     const parsedDataContainer = Array.isArray(data) ? null : data;
     const parsedData = parsedDataContainer?.parsed ?? null;
     const normalizedProgramData = extractProgramDataInfo(parsedData);
+    // Malformed base64 degrades to null — same downstream outcome as a non-base64 data shape.
+    const [, rawDataBytes] = extractRawDataBytesFromAccountData(data);
 
     return {
         address,
@@ -96,7 +95,7 @@ export function normalizeAccountProbe(address: string, envelope: AccountProbeEnv
         programData: normalizedProgramData,
         programDataAddress: extractProgramDataAddress(parsedData),
         programDataStatus: normalizedProgramData ? 'resolved' : 'missing',
-        rawDataBytes: extractRawDataBytesFromAccountData(data),
+        rawDataBytes: rawDataBytes ?? null,
     };
 }
 
@@ -106,7 +105,7 @@ export async function enrichUpgradeableProgramData(
     account: NormalizedAccountInfo,
     cluster: SupportedCluster,
     fetchAccount: AccountFetcher,
-    logger: InspectorLogger = consoleLogger,
+    logger: InspectorLogger,
 ): Promise<NormalizedAccountInfo> {
     if (account.parsedProgram !== BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL) {
         return account;

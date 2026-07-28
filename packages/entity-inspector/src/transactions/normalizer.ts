@@ -2,11 +2,13 @@
 // integrity before index resolution so a malformed RPC response fails loudly, not with wrong data.
 import { type InspectorLogger, ns } from '../logger.js';
 import { asRecord, asSafeNumeric } from '../shared/parse-helpers.js';
+import { err, ok, type Result } from '../shared/result.js';
 import type {
     CompiledInnerInstruction,
     CompiledInstruction,
     ConfirmationStatus,
     SignatureStatusEnvelope,
+    SignatureStatusValue,
     TransactionProbeEnvelope,
 } from '../rpc/types.js';
 import type { TransactionPayloadContext, TransactionVersion } from './types.js';
@@ -105,27 +107,23 @@ function normalizeVersion(rawVersion: 'legacy' | number | bigint | null | undefi
     return version;
 }
 
-function isKnownConfirmationStatus(value: string | null): value is ConfirmationStatus {
+function isKnownConfirmationStatus(value: string): value is ConfirmationStatus {
     return value === 'processed' || value === 'confirmed' || value === 'finalized';
 }
 
+function parseConfirmationStatus(raw: string | null): Result<ConfirmationStatus | null> {
+    if (raw === null) return ok(null);
+    if (isKnownConfirmationStatus(raw)) return ok(raw);
+    return err(new Error(`unknown confirmation status: ${raw}`));
+}
+
 function normalizeConfirmation(
-    signatureStatus: SignatureStatusEnvelope | null | undefined,
-    signature: string,
-    logger: InspectorLogger,
+    statusValue: SignatureStatusValue | null,
+    confirmationStatus: ConfirmationStatus | null,
 ): {
     confirmationStatus: ConfirmationStatus | null;
     confirmations: number | 'max' | null;
 } {
-    const statusValue = signatureStatus?.value ?? null;
-    const rawStatus = statusValue?.confirmationStatus ?? null;
-    if (rawStatus !== null && !isKnownConfirmationStatus(rawStatus)) {
-        logger.warn(ns('transaction normalizer: unknown confirmation status'), {
-            signature,
-            value: rawStatus,
-        });
-    }
-    const confirmationStatus = isKnownConfirmationStatus(rawStatus) ? rawStatus : null;
     const rawConfirmations = statusValue?.confirmations ?? null;
     if (confirmationStatus === 'finalized') {
         return { confirmationStatus, confirmations: 'max' };
@@ -141,26 +139,18 @@ function normalizeConfirmation(
 }
 
 // Callers guarantee a non-null err (the success/unknown arms never reach here).
-function normalizeTransactionError(
-    rawErr: unknown,
-    signature: string,
-    logger: InspectorLogger,
-): Record<string, unknown> | string | unknown[] {
+function normalizeTransactionError(rawErr: unknown): Result<Record<string, unknown> | string | unknown[]> {
     if (typeof rawErr === 'string') {
-        return rawErr;
+        return ok(rawErr);
     }
     if (Array.isArray(rawErr)) {
-        return rawErr;
+        return ok(rawErr);
     }
     const record = asRecord(rawErr);
     if (record) {
-        return record;
+        return ok(record);
     }
-    logger.warn(ns('transaction normalizer: unrecognized err shape'), {
-        signature,
-        value: String(rawErr),
-    });
-    return String(rawErr);
+    return err(new Error(`unrecognized err shape: ${String(rawErr)}`));
 }
 
 export function normalizeTransactionProbe(
@@ -210,7 +200,16 @@ export function normalizeTransactionProbe(
     const logMessages = meta?.logMessages ? Array.from(meta.logMessages) : null;
     const recentBlockhash = envelope.transaction.message.recentBlockhash ?? null;
 
-    const { confirmationStatus, confirmations } = normalizeConfirmation(signatureStatus, signature, logger);
+    const statusValue = signatureStatus?.value ?? null;
+    const rawStatus = statusValue?.confirmationStatus ?? null;
+    const [statusError, parsedStatus] = parseConfirmationStatus(rawStatus);
+    if (statusError) {
+        logger.warn(ns('transaction normalizer: unknown confirmation status'), {
+            signature,
+            value: rawStatus,
+        });
+    }
+    const { confirmationStatus, confirmations } = normalizeConfirmation(statusValue, parsedStatus ?? null);
 
     const base = {
         accountKeys: allKeys,
@@ -238,5 +237,12 @@ export function normalizeTransactionProbe(
     if (meta.err === null || meta.err === undefined) {
         return { ...base, err: null, status: 'success' };
     }
-    return { ...base, err: normalizeTransactionError(meta.err, signature, logger), status: 'failed' };
+    const [errShapeError, normalizedError] = normalizeTransactionError(meta.err);
+    if (errShapeError) {
+        logger.warn(ns('transaction normalizer: unrecognized err shape'), {
+            signature,
+            value: String(meta.err),
+        });
+    }
+    return { ...base, err: normalizedError ?? String(meta.err), status: 'failed' };
 }

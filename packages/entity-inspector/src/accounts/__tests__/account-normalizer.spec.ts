@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { InspectorLogger } from '../../logger.js';
+import type { AccountProbeEnvelope } from '../../rpc/types.js';
 import {
     enrichUpgradeableProgramData,
     extractProgramDataInfo,
@@ -25,35 +26,37 @@ function createLoggerMock(): InspectorLogger {
 
 describe('inspect-entity account normalizer', () => {
     it('should extract raw data bytes from same-response base64 tuple', () => {
-        const rawBytes = extractRawDataBytesFromAccountData([BASE64_BYTES, 'base64']);
-
-        expect(rawBytes).toEqual(new Uint8Array([1, 2, 3, 4]));
-        expect(extractRawDataBytesFromAccountData(['abc', 'jsonParsed'])).toBeNull();
+        expect(extractRawDataBytesFromAccountData([BASE64_BYTES, 'base64'])).toEqual([
+            undefined,
+            new Uint8Array([1, 2, 3, 4]),
+        ]);
+        expect(extractRawDataBytesFromAccountData(['abc', 'jsonParsed'])).toEqual([undefined, null]);
     });
 
-    it('should return null for non-tuple account data shapes', () => {
-        expect(extractRawDataBytesFromAccountData(null)).toBeNull();
-        expect(extractRawDataBytesFromAccountData(['only-one'])).toBeNull();
-        expect(extractRawDataBytesFromAccountData([42, 'base64'])).toBeNull();
+    it('should return ok(null) for non-tuple account data shapes', () => {
+        expect(extractRawDataBytesFromAccountData(null)).toEqual([undefined, null]);
+        expect(extractRawDataBytesFromAccountData(['only-one'])).toEqual([undefined, null]);
+        expect(extractRawDataBytesFromAccountData([42, 'base64'])).toEqual([undefined, null]);
     });
 
-    it('should warn and return null when base64 decoding fails', () => {
-        const logger = createLoggerMock();
+    it('should return an error when base64 decoding fails', () => {
+        const [error, bytes] = extractRawDataBytesFromAccountData(['@@invalid@@', 'base64']);
 
-        expect(extractRawDataBytesFromAccountData(['@@invalid@@', 'base64'], logger)).toBeNull();
-        expect(logger.warn).toHaveBeenCalledWith(
-            '[entity-inspector] base64 decode of account data failed',
-            expect.objectContaining({ error: expect.any(Error) }),
-        );
+        expect(error).toBeInstanceOf(Error);
+        expect(bytes).toBeUndefined();
     });
 
-    it('should warn through the console logger by default', () => {
-        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    it('should degrade rawDataBytes to null when base64 decoding fails', () => {
+        const envelope: AccountProbeEnvelope = {
+            value: {
+                data: ['@@invalid@@', 'base64'],
+                executable: false,
+                lamports: 0,
+                owner: 'Owner111111111111111111111111111111111111',
+            },
+        };
 
-        expect(extractRawDataBytesFromAccountData(['@@invalid@@', 'base64'])).toBeNull();
-        expect(warnSpy).toHaveBeenCalled();
-
-        warnSpy.mockRestore();
+        expect(normalizeAccountProbe('addr', envelope)?.rawDataBytes).toBeNull();
     });
 
     it('should return null when envelope value is null', () => {
@@ -151,7 +154,7 @@ describe('inspect-entity account normalizer', () => {
         const account = upgradeableProgramAccount({ parsedProgram: 'spl-token' });
         const fetchAccount = vi.fn();
 
-        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
+        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount, createLoggerMock());
 
         expect(enriched).toBe(account);
         expect(fetchAccount).not.toHaveBeenCalled();
@@ -163,7 +166,7 @@ describe('inspect-entity account normalizer', () => {
         });
         const fetchAccount = vi.fn();
 
-        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
+        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount, createLoggerMock());
 
         expect(enriched.programDataStatus).toBe('resolved');
         expect(fetchAccount).not.toHaveBeenCalled();
@@ -172,7 +175,7 @@ describe('inspect-entity account normalizer', () => {
     it('should mark accounts without a programData address as missing', async () => {
         const account = upgradeableProgramAccount({ programDataAddress: null });
 
-        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', vi.fn());
+        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', vi.fn(), createLoggerMock());
 
         expect(enriched.programDataStatus).toBe('missing');
     });
@@ -187,7 +190,7 @@ describe('inspect-entity account normalizer', () => {
             }),
         );
 
-        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
+        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount, createLoggerMock());
 
         expect(enriched.programDataRawBase64).toBe(BASE64_BYTES);
         expect(enriched.programDataStatus).toBe('resolved');
@@ -197,7 +200,7 @@ describe('inspect-entity account normalizer', () => {
         const account = upgradeableProgramAccount();
         const fetchAccount = vi.fn().mockResolvedValue(notFoundAccountProbe());
 
-        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
+        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount, createLoggerMock());
 
         expect(enriched.programDataStatus).toBe('missing');
     });
@@ -212,7 +215,7 @@ describe('inspect-entity account normalizer', () => {
             }),
         );
 
-        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
+        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount, createLoggerMock());
 
         expect(enriched.programDataStatus).toBe('missing');
     });
@@ -227,7 +230,7 @@ describe('inspect-entity account normalizer', () => {
             }),
         );
 
-        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount);
+        const enriched = await enrichUpgradeableProgramData(account, 'mainnet-beta', fetchAccount, createLoggerMock());
 
         expect(enriched.programDataStatus).toBe('missing');
     });
