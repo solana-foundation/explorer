@@ -1,8 +1,7 @@
 'use client';
 
+import { AdjacentClusterLink, SearchingClusterIndicator } from '@entities/cluster';
 import { useCluster } from '@providers/cluster';
-import { Cluster, clusterName, clusterSlug } from '@utils/cluster';
-import { useClusterPath } from '@utils/url';
 import React from 'react';
 
 import { useClusterTransactionSearch } from '../model/use-cluster-transaction-search';
@@ -34,7 +33,7 @@ export function TransactionNotFoundCard({
             <span>
                 <span className="align-middle">Transaction does not exist</span>
                 <br />
-                <AdjacentTransactionLink signature={signature} foundCluster={foundCluster} />
+                <AdjacentClusterLink foundCluster={foundCluster} pathname={`/tx/${signature}`} />
             </span>
         );
     } else if (status === 'not-found' && firstAvailableBlock !== undefined && firstAvailableBlock > 0n) {
@@ -42,34 +41,4 @@ export function TransactionNotFoundCard({
     }
 
     return <BaseTransactionNotFoundCard retry={retry} subtext={subtext} />;
-}
-
-function AdjacentTransactionLink({ signature, foundCluster }: { signature: string; foundCluster: Cluster }) {
-    const moniker = clusterSlug(foundCluster);
-    const foundClusterPath = useClusterPath({
-        additionalParams: new URLSearchParams(`cluster=${moniker}`),
-        pathname: `/tx/${signature}`,
-    });
-
-    return (
-        <a href={foundClusterPath} className="align-middle text-dk-info" style={{ marginRight: '5px' }}>
-            Found on {clusterName(foundCluster)}
-        </a>
-    );
-}
-
-function SearchingClusterIndicator({ searchingCluster }: { searchingCluster: Cluster }) {
-    const spinnerCls = 'spinner-grow spinner-grow-sm';
-
-    return (
-        <>
-            <span
-                style={{ height: '10px', marginRight: '5px', width: '10px' }}
-                className={`${spinnerCls} inline-block align-middle`}
-            />
-            <span className="align-middle text-dk-gray-700" style={{ marginRight: '10px', verticalAlign: 'middle' }}>
-                checking {clusterName(searchingCluster).toLowerCase()}
-            </span>
-        </>
-    );
 }
