@@ -48,7 +48,7 @@ function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
     switch (kind) {
         case BPF_UPGRADEABLE_LOADER_KIND:
             return buildBpfUpgradeableLoaderPayload;
-        // Full builders exist (account-kinds/{bpf-loader,loader}.ts) but their verification/security/multisig enrichments arrive with plan Step 7 — routed as unsupported until then.
+        // Full builders exist (account-kinds/{bpf-loader,loader}.ts) but the verification/security/multisig enrichment pipeline only runs for upgradeable programs — routed as unsupported until it widens.
         case BPF_LOADER_KIND:
         case BPF_LOADER_2_KIND:
         case LOADER_V4_KIND:

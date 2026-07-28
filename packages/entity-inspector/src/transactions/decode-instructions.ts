@@ -1,4 +1,4 @@
-// The per-instruction decode cascade (D7): on-chain IDL → in-package token batch → bundled
+// The per-instruction decode cascade: on-chain IDL → in-package token batch → bundled
 // @explorer/parsers decoders → injected host-app fallback → raw, with source attribution.
 import type { IdlClient } from '@explorer/idl-decode';
 

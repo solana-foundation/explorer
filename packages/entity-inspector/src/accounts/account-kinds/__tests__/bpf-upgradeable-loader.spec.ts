@@ -4,7 +4,7 @@ import { TOKEN_2022_PROGRAM_ID } from '../../../shared/constants.js';
 import { asRecord } from '../../../shared/parse-helpers.js';
 import { buildBpfUpgradeableLoaderPayload } from '../bpf-upgradeable-loader.js';
 
-// Stub for the injected registry lookup (app wiring lands in Step 5).
+// Stub for the injected registry lookup the host app wires in.
 function resolveProgramName(address: string): string | undefined {
     return address === TOKEN_2022_PROGRAM_ID ? 'Token-2022 Program' : undefined;
 }

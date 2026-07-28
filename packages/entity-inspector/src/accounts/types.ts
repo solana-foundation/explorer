@@ -77,6 +77,6 @@ export type AccountPayloadContext = {
     securityMetadataResult?: SecurityMetadataResult;
     multisigReferenceResult?: MultisigReferenceResult;
     idlDiscoveryResult?: IdlDiscoveryResult;
-    // Injected label lookup (app registry wired in Step 5) — replaces the source's hardcoded PROGRAM_ADDRESS_LABELS map.
+    // Injected label lookup (the host app wires its program registry) — replaces the source's hardcoded PROGRAM_ADDRESS_LABELS map.
     resolveProgramName?: (address: string) => string | undefined;
 };

@@ -3,7 +3,7 @@ import type { TokenProgram } from '@explorer/parsers';
 
 import type { SafeNumeric } from '../shared/types.js';
 
-// Enrichment result shapes live here, not in resolver modules like the source — types are the contract; Step-7 resolvers import them.
+// Enrichment result shapes live here, not in resolver modules like the source — types are the contract; resolvers import them.
 
 export type VerificationEvidence = {
     signer: string;

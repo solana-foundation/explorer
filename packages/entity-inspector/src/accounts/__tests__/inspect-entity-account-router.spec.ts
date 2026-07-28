@@ -128,7 +128,7 @@ describe('inspect-entity account router', () => {
         }
     });
 
-    it('should report legacy-loader accounts as unsupported until Step 7 enrichments land', () => {
+    it('should report legacy-loader accounts as unsupported', () => {
         const loaderKinds = ['bpf-loader', 'bpf-loader-2', 'loader-v4'] as const;
 
         for (const kind of loaderKinds) {
