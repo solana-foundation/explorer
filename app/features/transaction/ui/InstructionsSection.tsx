@@ -200,6 +200,7 @@ function InstructionCard({
             tx,
         };
 
+        // TODO: replace the case literals with *_PROGRAM_LABEL specimens from @explorer/parsers (program registry)
         switch (ix.program) {
             case 'spl-token':
             case 'spl-token-2022': {

@@ -201,6 +201,7 @@ export function ParsedSection({ parsed }: { parsed: ParsedData }) {
     if (isUpgradeableLoaderAccountData(parsed)) {
         return <UpgradeableLoaderSection data={parsed} />;
     }
+    // TODO: replace the program literals below with *_PROGRAM_LABEL specimens from @explorer/parsers (program registry)
     if (parsed.program === 'stake') {
         return <StakeAccountSection account={parsed.parsed} />;
     }
