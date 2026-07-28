@@ -2,7 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import type { SupportedCluster } from './config.js';
 import type { InspectorLogger } from './logger.js';
-import type { DecodeInstructionFallback } from './solana/types.js';
+import type { DecodeInstructionFallback } from './transactions/types.js';
 
 export type McpToolCallEventParams = {
     tool: string;

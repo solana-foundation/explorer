@@ -1,11 +1,11 @@
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 
 import { consoleLogger, ns } from '../logger.js';
-import { createMultisigResolver } from '../solana/enrichments/multisig.js';
-import { createSecurityMetadataResolver } from '../solana/enrichments/security.js';
-import { createVerificationResolver } from '../solana/enrichments/verification.js';
-import { createIdlClientResolver, createProgramIdlDiscovery } from '../solana/idl-clients.js';
-import { createRpcClient } from '../solana/rpc.js';
+import { createMultisigResolver } from '../enrichments/multisig.js';
+import { createSecurityMetadataResolver } from '../enrichments/security.js';
+import { createVerificationResolver } from '../enrichments/verification.js';
+import { createIdlClientResolver, createProgramIdlDiscovery } from '../enrichments/idl-clients.js';
+import { createRpcClient } from '../rpc/rpc.js';
 import type { EntityInspectorConfig } from '../types.js';
 import { createMcpServer } from './server.js';
 import type { InspectEntityDependencies } from './tools/inspect-entity.js';

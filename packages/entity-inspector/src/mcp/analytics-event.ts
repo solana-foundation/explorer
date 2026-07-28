@@ -1,6 +1,6 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
-import { asRecord, asString } from '../solana/parse-helpers.js';
+import { asRecord, asString } from '../shared/parse-helpers.js';
 import type { McpAnalyticsEvent, McpToolCallEventParams } from '../types.js';
 
 // Sources over outer and inner instructions, deduped — 'idl,raw' reads as "partially decoded".

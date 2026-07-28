@@ -8,5 +8,5 @@ export type {
     DecodeInstructionFallback,
     FallbackInstruction,
     FallbackInstructionAccount,
-} from './solana/types.js';
+} from './transactions/types.js';
 export type { EntityInspectorConfig, McpAnalyticsEvent, McpToolCallEventParams } from './types.js';

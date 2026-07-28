@@ -11,9 +11,9 @@ import {
     unknownProgramAccountProbe,
     upgradeableProgramDataProbe,
     upgradeableProgramProbe,
-} from '../../../solana/__tests__/account-fixtures.js';
-import { asRecord } from '../../../solana/parse-helpers.js';
-import { SourceUnavailableError } from '../../../solana/rpc.js';
+} from '../../../accounts/__tests__/account-fixtures.js';
+import { asRecord } from '../../../shared/parse-helpers.js';
+import { SourceUnavailableError } from '../../../rpc/rpc.js';
 import { handleInspectEntity, type InspectEntityDependencies, splitBuilderErrors } from '../inspect-entity.js';
 
 const ACCOUNT_IDENTIFIER = '11111111111111111111111111111111';

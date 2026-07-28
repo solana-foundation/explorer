@@ -2,30 +2,26 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 import type { SupportedCluster } from '../../config.js';
 import { consoleLogger, type InspectorLogger, ns } from '../../logger.js';
-import { unknownMarker } from '../../solana/account-kinds/shared.js';
-import { enrichUpgradeableProgramData, normalizeAccountProbe } from '../../solana/account-normalizer.js';
-import { buildAccountPayloadWithRouter } from '../../solana/inspect-entity-account-router.js';
+import { unknownMarker } from '../../accounts/account-kinds/shared.js';
+import { enrichUpgradeableProgramData, normalizeAccountProbe } from '../../accounts/account-normalizer.js';
+import { buildAccountPayloadWithRouter } from '../../accounts/inspect-entity-account-router.js';
 import {
     classifyAccountKindBase,
     decodeIdentifierKind,
     normalizeDasOutcome,
     promoteAccountKindWithDas,
-} from '../../solana/inspect-entity-classifier.js';
-import type { ResolveMultisigReference } from '../../solana/enrichments/multisig.js';
-import type { ResolveSecurityMetadata } from '../../solana/enrichments/security.js';
-import type { ResolveProgramVerification } from '../../solana/enrichments/verification.js';
-import type { DiscoverProgramIdl, ResolveIdlClient } from '../../solana/idl-clients.js';
-import { asRecord, asString } from '../../solana/parse-helpers.js';
-import { isSourceUnavailableError, type RpcClient } from '../../solana/rpc.js';
-import { buildTransactionPayload } from '../../solana/transaction/build-payload.js';
-import { decodeTransactionInstructions } from '../../solana/transaction/decode-instructions.js';
-import { normalizeTransactionProbe } from '../../solana/transaction/normalizer.js';
-import type {
-    AccountPayloadContext,
-    DasClassificationOutcome,
-    DecodeInstructionFallback,
-    NormalizedAccountInfo,
-} from '../../solana/types.js';
+} from '../../accounts/inspect-entity-classifier.js';
+import type { ResolveMultisigReference } from '../../enrichments/multisig.js';
+import type { ResolveSecurityMetadata } from '../../enrichments/security.js';
+import type { ResolveProgramVerification } from '../../enrichments/verification.js';
+import type { DiscoverProgramIdl, ResolveIdlClient } from '../../enrichments/idl-clients.js';
+import { asRecord, asString } from '../../shared/parse-helpers.js';
+import { isSourceUnavailableError, type RpcClient } from '../../rpc/rpc.js';
+import { buildTransactionPayload } from '../../transactions/build-payload.js';
+import { decodeTransactionInstructions } from '../../transactions/decode-instructions.js';
+import { normalizeTransactionProbe } from '../../transactions/normalizer.js';
+import type { AccountPayloadContext, DasClassificationOutcome, NormalizedAccountInfo } from '../../accounts/types.js';
+import type { DecodeInstructionFallback } from '../../transactions/types.js';
 import type { McpAnalyticsEvent } from '../../types.js';
 import {
     currentlyUnsupported,
