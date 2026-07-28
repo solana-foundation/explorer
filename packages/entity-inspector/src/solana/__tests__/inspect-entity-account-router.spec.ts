@@ -10,6 +10,7 @@ const ALL_ACCOUNT_KINDS = [
     'bpf-loader',
     'bpf-loader-2',
     'loader-v4',
+    'native-program',
     'stake',
     'nftoken',
     'spl-token:mint',
@@ -136,6 +137,29 @@ describe('inspect-entity account router', () => {
                 errors: [`${kind} accounts are not supported yet`],
             });
         }
+    });
+
+    it('should route native-program accounts to a labeled payload', () => {
+        const payload = buildAccountPayloadWithRouter({
+            account: {
+                address: '11111111111111111111111111111111',
+                executable: true,
+                owner: 'NativeLoader1111111111111111111111111111111',
+                parsedData: null,
+                parsedProgram: null,
+                rawDataBytes: null,
+            },
+            kind: 'native-program',
+        });
+
+        expect(payload).toEqual({
+            entity: {
+                address: '11111111111111111111111111111111',
+                address_label: 'System Program',
+                executable: true,
+                kind: 'native-program',
+            },
+        });
     });
 
     it('should route bpf-upgradeable-loader accounts to the real builder', () => {

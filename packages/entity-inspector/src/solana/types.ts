@@ -86,6 +86,7 @@ export type AccountEntityKind =
     | 'bpf-loader'
     | 'bpf-loader-2'
     | 'loader-v4'
+    | 'native-program'
     | 'stake'
     | 'nftoken'
     | 'spl-token:mint'

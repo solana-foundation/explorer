@@ -8,6 +8,7 @@ import {
     BPF_LOADER_PROGRAM_ID,
     FEATURE_PROGRAM_ID,
     LOADER_V4_PROGRAM_ID,
+    NATIVE_LOADER_PROGRAM_ID,
     NFTOKEN_ADDRESS,
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ID,
 } from './constants.js';
@@ -89,6 +90,10 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
     }
     if (account.owner === LOADER_V4_PROGRAM_ID) {
         return 'loader-v4';
+    }
+    // Native (non-BPF) programs — System, Vote, Stake program accounts etc. — are never jsonParsed.
+    if (account.owner === NATIVE_LOADER_PROGRAM_ID) {
+        return 'native-program';
     }
     if (parsedProgram === 'stake') {
         return 'stake';

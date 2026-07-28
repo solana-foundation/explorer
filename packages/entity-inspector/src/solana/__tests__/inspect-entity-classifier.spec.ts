@@ -7,6 +7,7 @@ import {
     BPF_LOADER_PROGRAM_ID,
     FEATURE_PROGRAM_ID,
     LOADER_V4_PROGRAM_ID,
+    NATIVE_LOADER_PROGRAM_ID,
     NFTOKEN_ADDRESS,
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ID,
 } from '../constants.js';
@@ -114,6 +115,17 @@ describe('inspect-entity classifier', () => {
                 rawDataBytes: null,
             }),
         ).toBe('loader-v4');
+    });
+
+    it('should classify NativeLoader-owned accounts as native-program', () => {
+        expect(
+            classifyAccountKindBase({
+                owner: NATIVE_LOADER_PROGRAM_ID,
+                parsedData: null,
+                parsedProgram: null,
+                rawDataBytes: null,
+            }),
+        ).toBe('native-program');
     });
 
     it('should prioritize nftoken owner check before token parser classification', () => {

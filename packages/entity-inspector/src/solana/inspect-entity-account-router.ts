@@ -3,6 +3,7 @@ import { buildBpfUpgradeableLoaderPayload } from './account-kinds/bpf-upgradeabl
 import { buildCompressedNftPayload } from './account-kinds/compressed-nft.js';
 import { buildConfigPayload } from './account-kinds/config.js';
 import { buildFeaturePayload } from './account-kinds/feature.js';
+import { buildNativeProgramPayload } from './account-kinds/native-program.js';
 import { buildNftokenPayload } from './account-kinds/nftoken.js';
 import { buildNoncePayload } from './account-kinds/nonce.js';
 import { type AccountKindBuilder, assertUnreachable, buildUnsupportedKindPayload } from './account-kinds/shared.js';
@@ -28,6 +29,8 @@ function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
         case 'bpf-loader-2':
         case 'loader-v4':
             return buildUnsupportedKindPayload;
+        case 'native-program':
+            return buildNativeProgramPayload;
         case 'stake':
             return buildStakePayload;
         case 'nftoken':
