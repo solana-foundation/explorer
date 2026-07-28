@@ -14,8 +14,20 @@ import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/
 import { Address } from '../common/Address';
 import { Copyable } from '../common/Copyable';
 import { LoadingCard } from '../common/LoadingCard';
+import { BufferBuildCard } from './BufferBuildCard';
 
 export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAccountData; pubkey: PublicKey }) {
+    // A program buffer stages a binary that is not yet deployed, so it has no program id to look up
+    // in the OSEC registry. Resolve its buffer hash to the source build(s) that produced it instead.
+    // Each branch renders a distinct component, so neither calls a hook conditionally.
+    if (data.parsed.type === 'buffer') {
+        return <BufferBuildCard buffer={data.parsed.info} pubkey={pubkey} />;
+    }
+
+    return <DeployedProgramVerifiedBuildCard data={data} pubkey={pubkey} />;
+}
+
+function DeployedProgramVerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAccountData; pubkey: PublicKey }) {
     // suspense:false -- the chain mixes with a non-suspense SWR (useProgramIdls via useAnchorProgram); the mixed path triggers hook-order warnings under HMR.
     const { data: registryInfo, isLoading } = useVerifiedProgram({
         options: { suspense: false },

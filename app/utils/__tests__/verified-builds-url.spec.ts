@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { composeOnchainRepoUrl, normalizeRepoUrl, safeRepoUrl } from '../verified-builds-url';
+import {
+    composeOnchainRepoUrl,
+    normalizeRepoUrl,
+    repoLabel,
+    safeRepoUrl,
+    trimTrailingSlashes,
+} from '../verified-builds-url';
 import osecStatusFixtures from './__fixtures__/osec-status.json';
 
 describe('normalizeRepoUrl', () => {
@@ -124,6 +130,68 @@ describe('composeOnchainRepoUrl', () => {
         it(`should ${scenario}`, () => {
             expect(composeOnchainRepoUrl(gitUrl, commit)).toBeUndefined();
         });
+    });
+});
+
+describe('trimTrailingSlashes', () => {
+    const cases: Array<[{ scenario: string; value: string }, string]> = [
+        [
+            { scenario: 'strip a single trailing slash', value: 'https://github.com/foo/bar/' },
+            'https://github.com/foo/bar',
+        ],
+        [
+            { scenario: 'strip multiple trailing slashes', value: 'https://github.com/foo/bar///' },
+            'https://github.com/foo/bar',
+        ],
+        [
+            { scenario: 'return a slash-free value unchanged', value: 'https://github.com/foo/bar' },
+            'https://github.com/foo/bar',
+        ],
+        [
+            { scenario: 'not touch interior slashes', value: 'https://github.com/foo/bar/tree/abc' },
+            'https://github.com/foo/bar/tree/abc',
+        ],
+        [{ scenario: 'return an empty string for input of only slashes', value: '///' }, ''],
+        [{ scenario: 'return an empty string unchanged', value: '' }, ''],
+    ];
+    cases.forEach(([{ scenario, value }, expected]) => {
+        it(`should ${scenario}`, () => {
+            expect(trimTrailingSlashes(value)).toBe(expected);
+        });
+    });
+});
+
+describe('repoLabel', () => {
+    const cases: Array<[{ scenario: string; repository: string }, string]> = [
+        [{ repository: 'https://github.com/foo/bar', scenario: 'drop the https scheme' }, 'github.com/foo/bar'],
+        [{ repository: 'http://github.com/foo/bar', scenario: 'drop the http scheme' }, 'github.com/foo/bar'],
+        [
+            { repository: 'https://github.com/foo/bar.git', scenario: 'drop a trailing .git suffix' },
+            'github.com/foo/bar',
+        ],
+        [{ repository: 'https://github.com/foo/bar/', scenario: 'drop a trailing slash' }, 'github.com/foo/bar'],
+        [
+            {
+                repository: 'https://github.com/Squads-Protocol/v4/',
+                scenario: 'drop scheme and trailing slash together',
+            },
+            'github.com/Squads-Protocol/v4',
+        ],
+        [
+            { repository: 'https://github.com/foo/bar.git/', scenario: 'drop a trailing slash then .git' },
+            'github.com/foo/bar',
+        ],
+        [{ repository: 'github.com/foo/bar', scenario: 'return a scheme-less label unchanged' }, 'github.com/foo/bar'],
+        [{ repository: '', scenario: 'return an empty string unchanged' }, ''],
+    ];
+    cases.forEach(([{ scenario, repository }, expected]) => {
+        it(`should ${scenario}`, () => {
+            expect(repoLabel(repository)).toBe(expected);
+        });
+    });
+
+    it('should keep interior .git-like segments (only a trailing .git is stripped)', () => {
+        expect(repoLabel('https://github.com/foo/bar.github')).toBe('github.com/foo/bar.github');
     });
 });
 

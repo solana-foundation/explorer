@@ -5,9 +5,11 @@ import { describe, expect, it } from 'vitest';
 import { Cluster } from '../cluster';
 import {
     buildEnrichedOsecInfo,
+    dedupeAndSortBuilds,
     getOsecRegistryUrl,
     hashProgramBuffer,
     hashProgramData,
+    type OsecBuild,
     type OsecInfo,
     supportsVerifiedBuilds,
     VerificationStatus,
@@ -318,5 +320,85 @@ describe('buildEnrichedOsecInfo', () => {
         });
         expect(info.repo_url).toBe('');
         expect(info.onchain_repo_url).toBe('');
+    });
+});
+
+describe('dedupeAndSortBuilds', () => {
+    function makeBuild(overrides: Partial<OsecBuild> = {}): OsecBuild {
+        return {
+            build_id: 'build-0',
+            commit: 'aaaaaaa',
+            completed_at: '2026-01-01T00:00:00.000Z',
+            matches_deployed: true,
+            program_id: 'HfU7iK2hyesWG1abBD8nXDpsw2ijrA2vpdiNYNj3Hg3c',
+            repository: 'https://github.com/example/repo',
+            signer: null,
+            trusted: true,
+            ...overrides,
+        };
+    }
+
+    it('should collapse builds that share program/repo/commit/trusted/matches_deployed', () => {
+        const result = dedupeAndSortBuilds([
+            makeBuild({ build_id: 'a' }),
+            makeBuild({ build_id: 'b' }), // same identity, different build_id -> dropped
+        ]);
+        expect(result).toHaveLength(1);
+        expect(result[0].build_id).toBe('a');
+    });
+
+    it('should keep distinct trusted and untrusted rows for the same build', () => {
+        const result = dedupeAndSortBuilds([
+            makeBuild({ build_id: 'untrusted', trusted: false }),
+            makeBuild({ build_id: 'trusted', trusted: true }),
+        ]);
+        expect(result).toHaveLength(2);
+        // trusted sorts first
+        expect(result[0].build_id).toBe('trusted');
+        expect(result[1].build_id).toBe('untrusted');
+    });
+
+    it('should order by trusted, then matches_deployed, then most recent completed_at', () => {
+        // Distinct commits so none of these collapse during dedupe (which ignores completed_at).
+        const result = dedupeAndSortBuilds([
+            makeBuild({
+                build_id: 'old-trusted',
+                commit: 'commit-old',
+                completed_at: '2026-01-01T00:00:00.000Z',
+                trusted: true,
+            }),
+            makeBuild({
+                build_id: 'new-trusted',
+                commit: 'commit-new',
+                completed_at: '2026-06-01T00:00:00.000Z',
+                trusted: true,
+            }),
+            makeBuild({ build_id: 'untrusted-deployed', commit: 'commit-x', matches_deployed: true, trusted: false }),
+            makeBuild({
+                build_id: 'untrusted-undeployed',
+                commit: 'commit-y',
+                matches_deployed: false,
+                trusted: false,
+            }),
+        ]);
+        expect(result.map(b => b.build_id)).toEqual([
+            'new-trusted',
+            'old-trusted',
+            'untrusted-deployed',
+            'untrusted-undeployed',
+        ]);
+    });
+
+    it('should collapse re-run duplicates that differ only by build_id and completed_at', () => {
+        const result = dedupeAndSortBuilds([
+            makeBuild({ build_id: 'first', completed_at: '2026-01-01T00:00:00.000Z' }),
+            makeBuild({ build_id: 'rerun', completed_at: '2026-02-01T00:00:00.000Z' }),
+        ]);
+        expect(result).toHaveLength(1);
+        expect(result[0].build_id).toBe('first');
+    });
+
+    it('should return an empty array unchanged', () => {
+        expect(dedupeAndSortBuilds([])).toEqual([]);
     });
 });

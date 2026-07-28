@@ -62,6 +62,27 @@ export type OsecInfo = {
     is_frozen: boolean;
 };
 
+// A single completed build returned by the OSEC `/resolve-hash/{executable_hash}` endpoint.
+// Each build is a source repo/commit whose compiled output hashes to the queried executable hash.
+export type OsecBuild = {
+    build_id: string;
+    program_id: string;
+    signer: string | null;
+    repository: string;
+    commit: string;
+    completed_at: string;
+    // Whether this build's hash is what is currently deployed on its `program_id`.
+    matches_deployed: boolean;
+    // Whether the build's signer is a trusted signer.
+    trusted: boolean;
+};
+
+// Response shape of `GET /resolve-hash/{executable_hash}`.
+export type OsecResolveHashResponse = {
+    executable_hash: string;
+    builds: OsecBuild[];
+};
+
 // Decoded subset of the Otter Verify `BuildParams` account used to compose the verify command / repo URL.
 type OtterVerifyBuildParams = {
     gitUrl: string;
@@ -196,6 +217,41 @@ export function useIsProgramVerified({
             return osecInfo.is_verified && hash === osecInfo['on_chain_hash'];
         },
     );
+}
+
+// Resolve the completed builds whose compiled output matches a given executable hash.
+// Used for program buffer accounts: a buffer holds a staged binary with no program id to look
+// up in the OSEC registry, but its buffer hash can still be resolved to the source build(s)
+// that produced it. Returns the `/resolve-hash` response, or nothing while `hash` is undefined
+// (e.g. a buffer whose `data` is unavailable, so no hash could be computed).
+export function useResolveBuildsByHash(hash: string | undefined) {
+    return useSWRImmutable(hash ? ['resolve-hash', hash] : null, async ([, executableHash]) => {
+        const response = await fetch(`${OSEC_REGISTRY_URL}/resolve-hash/${executableHash}`);
+        if (!response.ok) {
+            throw new Error(`resolve-hash request failed with status ${response.status}`);
+        }
+        return (await response.json()) as OsecResolveHashResponse;
+    });
+}
+
+// Collapse exact-duplicate builds and order them for display. `/resolve-hash` can return the same
+// build several times (e.g. re-runs); it can also return genuinely distinct entries that share a
+// program/repo/commit but differ in trust or deploy match, which we keep as separate rows. Ordered
+// most-relevant first: trusted, then matching the deployed program, then most recently completed.
+export function dedupeAndSortBuilds(builds: OsecBuild[]): OsecBuild[] {
+    const seen = new Set<string>();
+    const deduped = builds.filter(build => {
+        const key = `${build.program_id}|${build.repository}|${build.commit}|${build.trusted}|${build.matches_deployed}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+
+    return deduped.sort((a, b) => {
+        if (a.trusted !== b.trusted) return a.trusted ? -1 : 1;
+        if (a.matches_deployed !== b.matches_deployed) return a.matches_deployed ? -1 : 1;
+        return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
+    });
 }
 
 // Method to fetch verified build information for a given program

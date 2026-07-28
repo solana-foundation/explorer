@@ -24,3 +24,20 @@ export function composeOnchainRepoUrl(gitUrl: string | undefined, commit: string
     const composed = commit.length ? `${base}/tree/${commit}` : base;
     return safeRepoUrl(composed);
 }
+
+// Trim trailing slashes so a composed `<repo>/tree/<sha>` link has no `//` and labels read cleanly.
+export function trimTrailingSlashes(value: string): string {
+    let result = value;
+    while (result.endsWith('/')) result = result.slice(0, -1);
+    return result;
+}
+
+// Compact, readable repository label: drop the scheme and any trailing slash or `.git`. Display only
+// — the clickable href is still built from the full URL via composeOnchainRepoUrl.
+export function repoLabel(repository: string): string {
+    let label = trimTrailingSlashes(repository);
+    if (label.startsWith('https://')) label = label.slice('https://'.length);
+    else if (label.startsWith('http://')) label = label.slice('http://'.length);
+    if (label.endsWith('.git')) label = label.slice(0, -'.git'.length);
+    return label;
+}
