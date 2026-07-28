@@ -1,4 +1,5 @@
 // Wire shapes as delivered by the JSON-RPC — probe envelopes and the compiled-message primitives they embed.
+import type { Commitment } from '@solana/kit';
 
 export type AccountProbeEnvelope = {
     value: {
@@ -57,7 +58,7 @@ export type TransactionProbeEnvelope = {
     };
 } | null;
 
-export type ConfirmationStatus = 'processed' | 'confirmed' | 'finalized';
+export type ConfirmationStatus = Commitment;
 
 export type SignatureStatusValue = {
     confirmationStatus: ConfirmationStatus | null;
