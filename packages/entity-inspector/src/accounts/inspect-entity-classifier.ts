@@ -9,10 +9,8 @@ import {
     SYSVAR_PROGRAM_LABEL,
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
-import type { ReadonlyUint8Array } from '@solana/kit';
+import { isAddress, isSignature, type ReadonlyUint8Array } from '@solana/kit';
 
-import { consoleLogger, type InspectorLogger, ns } from '../logger.js';
-import { base58Encoder } from '../rpc/codecs.js';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
     BPF_LOADER_2_PROGRAM_ID,
@@ -24,6 +22,7 @@ import {
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ID,
 } from '../shared/constants.js';
 import { asRecord, asString } from '../shared/parse-helpers.js';
+import { err, ok, type Result } from '../shared/result.js';
 import {
     ACCOUNT_IDENTIFIER_KIND,
     ADDRESS_LOOKUP_TABLE_KIND,
@@ -33,7 +32,6 @@ import {
     COMPRESSED_NFT_KIND,
     CONFIG_KIND,
     FEATURE_KIND,
-    INVALID_IDENTIFIER_KIND,
     LOADER_V4_KIND,
     NATIVE_PROGRAM_KIND,
     NFTOKEN_KIND,
@@ -58,31 +56,14 @@ import type {
 const ADDRESS_LOOKUP_TABLE_META_BYTES = 56;
 const PUBKEY_BYTES = 32;
 
-export function decodeBase58(value: string, logger: InspectorLogger = consoleLogger): ReadonlyUint8Array | null {
-    if (!value) {
-        return null;
+export function decodeIdentifierKind(identifier: string): Result<IdentifierKind> {
+    if (isAddress(identifier)) {
+        return ok(ACCOUNT_IDENTIFIER_KIND);
     }
-
-    try {
-        return base58Encoder().encode(value);
-    } catch (error) {
-        logger.warn(ns('base58 decode of identifier failed'), { error, value });
-        return null;
+    if (isSignature(identifier)) {
+        return ok(TRANSACTION_IDENTIFIER_KIND);
     }
-}
-
-export function decodeIdentifierKind(identifier: string, logger: InspectorLogger = consoleLogger): IdentifierKind {
-    const decoded = decodeBase58(identifier, logger);
-    if (!decoded) {
-        return INVALID_IDENTIFIER_KIND;
-    }
-    if (decoded.length === 32) {
-        return ACCOUNT_IDENTIFIER_KIND;
-    }
-    if (decoded.length === 64) {
-        return TRANSACTION_IDENTIFIER_KIND;
-    }
-    return INVALID_IDENTIFIER_KIND;
+    return err(new Error('identifier must decode from base58 to 32 or 64 bytes'));
 }
 
 function hasAddressLookupTableLayout(rawDataBytes: ReadonlyUint8Array | null): boolean {

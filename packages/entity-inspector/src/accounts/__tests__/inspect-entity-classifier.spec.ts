@@ -1,6 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import type { InspectorLogger } from '../../logger.js';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
     BPF_LOADER_2_PROGRAM_ID,
@@ -13,7 +12,6 @@ import {
 } from '../../shared/constants.js';
 import {
     classifyAccountKindBase,
-    decodeBase58,
     decodeIdentifierKind,
     extractTokenSubtype,
     normalizeDasOutcome,
@@ -24,40 +22,18 @@ const ACCOUNT_IDENTIFIER = '11111111111111111111111111111111';
 const TRANSACTION_IDENTIFIER =
     '4ReKprwf3WdLHRrzp4ctPWNBsQDPL3VZz3zMmoZfcGJMJCHh5Vq937mPdyxhCbw54wNnA6hZ7KfNpQdpt13yY7A9';
 
-function createLoggerMock(): InspectorLogger {
-    return { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() };
-}
-
 describe('inspect-entity classifier', () => {
-    it('should decode base58 identifiers and route by deterministic byte length', () => {
-        const logger = createLoggerMock();
-        const accountBytes = decodeBase58(ACCOUNT_IDENTIFIER);
-        const transactionBytes = decodeBase58(TRANSACTION_IDENTIFIER);
-
-        expect(accountBytes?.length).toBe(32);
-        expect(transactionBytes?.length).toBe(64);
-        expect(decodeIdentifierKind(ACCOUNT_IDENTIFIER)).toBe('account');
-        expect(decodeIdentifierKind(TRANSACTION_IDENTIFIER)).toBe('transaction');
-        expect(decodeIdentifierKind('not@base58', logger)).toBe('invalid');
-        expect(logger.warn).toHaveBeenCalledWith(
-            '[entity-inspector] base58 decode of identifier failed',
-            expect.objectContaining({ value: 'not@base58' }),
-        );
-        expect(decodeBase58('')).toBeNull();
-        expect(decodeBase58('111')).toEqual(new Uint8Array([0, 0, 0]));
+    it('should route base58 identifiers by deterministic byte length', () => {
+        expect(decodeIdentifierKind(ACCOUNT_IDENTIFIER)).toEqual([undefined, 'account']);
+        expect(decodeIdentifierKind(TRANSACTION_IDENTIFIER)).toEqual([undefined, 'transaction']);
     });
 
-    it('should mark base58 values of unsupported byte lengths as invalid', () => {
-        expect(decodeIdentifierKind('111')).toBe('invalid');
-    });
-
-    it('should warn through the console logger by default when base58 decode fails', () => {
-        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-
-        expect(decodeBase58('not@base58')).toBeNull();
-        expect(warnSpy).toHaveBeenCalled();
-
-        warnSpy.mockRestore();
+    it('should return the error side of the result for malformed identifiers', () => {
+        for (const identifier of ['not@base58', '111', '']) {
+            const [error, kind] = decodeIdentifierKind(identifier);
+            expect(kind).toBeUndefined();
+            expect(error?.message).toBe('identifier must decode from base58 to 32 or 64 bytes');
+        }
     });
 
     it('should extract token subtype deterministically', () => {

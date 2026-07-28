@@ -11,14 +11,10 @@ import {
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
 
+// A malformed identifier is the error side of decodeIdentifierKind's Result — not a kind.
 export const ACCOUNT_IDENTIFIER_KIND = 'account';
-export const INVALID_IDENTIFIER_KIND = 'invalid';
 export const TRANSACTION_IDENTIFIER_KIND = 'transaction';
-export const IDENTIFIER_KINDS = [
-    ACCOUNT_IDENTIFIER_KIND,
-    INVALID_IDENTIFIER_KIND,
-    TRANSACTION_IDENTIFIER_KIND,
-] as const;
+export const IDENTIFIER_KINDS = [ACCOUNT_IDENTIFIER_KIND, TRANSACTION_IDENTIFIER_KIND] as const;
 export type IdentifierKind = (typeof IDENTIFIER_KINDS)[number];
 
 export const ACCOUNT_TOKEN_SUBTYPE = 'account';

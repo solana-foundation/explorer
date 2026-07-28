@@ -3,12 +3,7 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { SupportedCluster } from '../../config.js';
 import { consoleLogger, type InspectorLogger, ns } from '../../logger.js';
 import { unknownMarker } from '../../accounts/account-kinds/shared.js';
-import {
-    ACCOUNT_IDENTIFIER_KIND,
-    BPF_UPGRADEABLE_LOADER_KIND,
-    INVALID_IDENTIFIER_KIND,
-    UNKNOWN_KIND,
-} from '../../accounts/kinds.js';
+import { ACCOUNT_IDENTIFIER_KIND, BPF_UPGRADEABLE_LOADER_KIND, UNKNOWN_KIND } from '../../accounts/kinds.js';
 import { enrichUpgradeableProgramData, normalizeAccountProbe } from '../../accounts/account-normalizer.js';
 import { buildAccountPayloadWithRouter } from '../../accounts/inspect-entity-account-router.js';
 import {
@@ -347,11 +342,11 @@ export async function handleInspectEntity(
     }
 
     const input = parseResult.data;
-    const identifierKind = decodeIdentifierKind(input.identifier, dependencies.logger);
+    const [identifierError, identifierKind] = decodeIdentifierKind(input.identifier);
 
-    if (identifierKind === INVALID_IDENTIFIER_KIND) {
+    if (identifierError) {
         return toToolResult({
-            errors: [invalidArgument('identifier must decode from base58 to 32 or 64 bytes')],
+            errors: [invalidArgument(identifierError.message)],
             payload: {},
         });
     }
