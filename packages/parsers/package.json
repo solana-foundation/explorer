@@ -27,7 +27,7 @@
     },
     "scripts": {
         "prebuild": "rm -rf dist",
-        "build": "tsc -p tsconfig.build.json",
+        "build": "tsc -p tsconfig.build.json && node scripts/annotate-pure.mjs",
         "format": "oxfmt --check .",
         "format:fix": "oxfmt .",
         "lint": "oxlint && oxfmt --check .",
