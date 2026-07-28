@@ -86,6 +86,7 @@ export function extractTokenSubtype(parsedData: unknown): TokenSubtype | null {
     return null;
 }
 
+// RPC-shared kinds intentionally equal the *_PROGRAM_LABEL strings — enforced by AccountEntityKind's Exclude derivation, not by convention.
 export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAccountEntityKind {
     const parsedProgram = account.parsedProgram;
 
