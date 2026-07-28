@@ -10,8 +10,7 @@ export type McpToolCallEventParams = {
     status: 'success' | 'error';
     cluster?: string;
     entity_kind?: string;
-    /** Unique instruction decode sources of a transaction, comma-joined (GA4 params are scalars). */
-    decode_sources?: string;
+    decode_sources?: string; // Unique instruction decode sources of a transaction, comma-joined (GA4 params are scalars)
     error_code?: string;
 };
 
