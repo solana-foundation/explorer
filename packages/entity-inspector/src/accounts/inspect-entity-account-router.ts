@@ -19,21 +19,34 @@ import { buildSysvarPayload } from './account-kinds/sysvar.js';
 import { buildUnknownPayload } from './account-kinds/unknown.js';
 import { buildVotePayload } from './account-kinds/vote.js';
 import {
+    ADDRESS_LOOKUP_TABLE_KIND,
     BPF_LOADER_2_KIND,
     BPF_LOADER_KIND,
+    BPF_UPGRADEABLE_LOADER_KIND,
     COMPRESSED_NFT_KIND,
+    CONFIG_KIND,
     FEATURE_KIND,
     LOADER_V4_KIND,
     NATIVE_PROGRAM_KIND,
     NFTOKEN_KIND,
+    NONCE_KIND,
     SOLANA_ATTESTATION_SERVICE_KIND,
+    SPL_TOKEN_2022_ACCOUNT_KIND,
+    SPL_TOKEN_2022_MINT_KIND,
+    SPL_TOKEN_2022_MULTISIG_KIND,
+    SPL_TOKEN_ACCOUNT_KIND,
+    SPL_TOKEN_MINT_KIND,
+    SPL_TOKEN_MULTISIG_KIND,
+    STAKE_KIND,
+    SYSVAR_KIND,
     UNKNOWN_KIND,
+    VOTE_KIND,
 } from './kinds.js';
 import type { AccountEntityKind, AccountPayloadContext } from './types.js';
 
 function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
     switch (kind) {
-        case 'bpf-upgradeable-loader':
+        case BPF_UPGRADEABLE_LOADER_KIND:
             return buildBpfUpgradeableLoaderPayload;
         // Full builders exist (account-kinds/{bpf-loader,loader}.ts) but their verification/security/multisig enrichments arrive with plan Step 7 — routed as unsupported until then.
         case BPF_LOADER_KIND:
@@ -42,31 +55,31 @@ function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
             return buildUnsupportedKindPayload;
         case NATIVE_PROGRAM_KIND:
             return buildNativeProgramPayload;
-        case 'stake':
+        case STAKE_KIND:
             return buildStakePayload;
         case NFTOKEN_KIND:
             return buildNftokenPayload;
-        case 'spl-token:mint':
+        case SPL_TOKEN_MINT_KIND:
             return buildSplTokenMintPayload;
-        case 'spl-token:account':
+        case SPL_TOKEN_ACCOUNT_KIND:
             return buildSplTokenAccountPayload;
-        case 'spl-token:multisig':
+        case SPL_TOKEN_MULTISIG_KIND:
             return buildSplTokenMultisigPayload;
-        case 'spl-token-2022:mint':
+        case SPL_TOKEN_2022_MINT_KIND:
             return buildSplToken2022MintPayload;
-        case 'spl-token-2022:account':
+        case SPL_TOKEN_2022_ACCOUNT_KIND:
             return buildSplToken2022AccountPayload;
-        case 'spl-token-2022:multisig':
+        case SPL_TOKEN_2022_MULTISIG_KIND:
             return buildSplToken2022MultisigPayload;
-        case 'nonce':
+        case NONCE_KIND:
             return buildNoncePayload;
-        case 'vote':
+        case VOTE_KIND:
             return buildVotePayload;
-        case 'sysvar':
+        case SYSVAR_KIND:
             return buildSysvarPayload;
-        case 'config':
+        case CONFIG_KIND:
             return buildConfigPayload;
-        case 'address-lookup-table':
+        case ADDRESS_LOOKUP_TABLE_KIND:
             return buildAddressLookupTablePayload;
         case FEATURE_KIND:
             return buildFeaturePayload;

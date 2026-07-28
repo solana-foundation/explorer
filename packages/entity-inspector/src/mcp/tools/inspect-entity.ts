@@ -3,7 +3,12 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { SupportedCluster } from '../../config.js';
 import { consoleLogger, type InspectorLogger, ns } from '../../logger.js';
 import { unknownMarker } from '../../accounts/account-kinds/shared.js';
-import { ACCOUNT_IDENTIFIER_KIND, INVALID_IDENTIFIER_KIND, UNKNOWN_KIND } from '../../accounts/kinds.js';
+import {
+    ACCOUNT_IDENTIFIER_KIND,
+    BPF_UPGRADEABLE_LOADER_KIND,
+    INVALID_IDENTIFIER_KIND,
+    UNKNOWN_KIND,
+} from '../../accounts/kinds.js';
 import { enrichUpgradeableProgramData, normalizeAccountProbe } from '../../accounts/account-normalizer.js';
 import { buildAccountPayloadWithRouter } from '../../accounts/inspect-entity-account-router.js';
 import {
@@ -124,7 +129,7 @@ async function resolveAccount(
 
         // Program enrichments are only consumed by the upgradeable-loader builder — resolve them just there.
         const enrichments =
-            finalKind === 'bpf-upgradeable-loader'
+            finalKind === BPF_UPGRADEABLE_LOADER_KIND
                 ? await resolveProgramEnrichments(identifier, enrichedAccount, cluster, dependencies, logger)
                 : null;
 

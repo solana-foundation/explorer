@@ -26,18 +26,25 @@ import {
 import { asRecord, asString } from '../shared/parse-helpers.js';
 import {
     ACCOUNT_IDENTIFIER_KIND,
+    ADDRESS_LOOKUP_TABLE_KIND,
     BPF_LOADER_2_KIND,
     BPF_LOADER_KIND,
+    BPF_UPGRADEABLE_LOADER_KIND,
     COMPRESSED_NFT_KIND,
+    CONFIG_KIND,
     FEATURE_KIND,
     INVALID_IDENTIFIER_KIND,
     LOADER_V4_KIND,
     NATIVE_PROGRAM_KIND,
     NFTOKEN_KIND,
+    NONCE_KIND,
     SOLANA_ATTESTATION_SERVICE_KIND,
+    STAKE_KIND,
+    SYSVAR_KIND,
     TOKEN_SUBTYPES,
     TRANSACTION_IDENTIFIER_KIND,
     UNKNOWN_KIND,
+    VOTE_KIND,
 } from './kinds.js';
 import type {
     AccountEntityKind,
@@ -103,7 +110,7 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
     const parsedProgram = account.parsedProgram;
 
     if (parsedProgram === BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL) {
-        return 'bpf-upgradeable-loader';
+        return BPF_UPGRADEABLE_LOADER_KIND;
     }
     // Legacy/v4 loader programs are not jsonParsed by the RPC — classified by owner instead.
     if (account.owner === BPF_LOADER_PROGRAM_ID) {
@@ -120,7 +127,7 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
         return NATIVE_PROGRAM_KIND;
     }
     if (parsedProgram === STAKE_PROGRAM_LABEL) {
-        return 'stake';
+        return STAKE_KIND;
     }
     if (account.owner === NFTOKEN_ADDRESS) {
         return NFTOKEN_KIND;
@@ -135,23 +142,23 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
     }
 
     if (parsedProgram === NONCE_PROGRAM_LABEL) {
-        return 'nonce';
+        return NONCE_KIND;
     }
     if (parsedProgram === VOTE_PROGRAM_LABEL) {
-        return 'vote';
+        return VOTE_KIND;
     }
     if (parsedProgram === SYSVAR_PROGRAM_LABEL) {
-        return 'sysvar';
+        return SYSVAR_KIND;
     }
     if (parsedProgram === CONFIG_PROGRAM_LABEL) {
-        return 'config';
+        return CONFIG_KIND;
     }
     // Layout heuristic alone false-positives on any account sized 56+n·32 — only trust it under the ALT program's ownership.
     if (
         parsedProgram === ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL ||
         (account.owner === ADDRESS_LOOKUP_TABLE_PROGRAM_ID && hasAddressLookupTableLayout(account.rawDataBytes))
     ) {
-        return 'address-lookup-table';
+        return ADDRESS_LOOKUP_TABLE_KIND;
     }
     if (account.owner === FEATURE_PROGRAM_ID) {
         return FEATURE_KIND;
