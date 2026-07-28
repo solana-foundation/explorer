@@ -23,12 +23,17 @@ const expectedHash = hashProgramData(programData);
 
 type OsecOutcome = 'verified' | 'unverified' | 'loading' | 'error';
 
-const withMockedOsec = (outcome: OsecOutcome): Decorator =>
+// Matches any OSEC registry request (mainnet verify.osec.io + devnet verify-devnet.osec.io).
+function isOsecRequest(input: RequestInfo | URL): boolean {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    return url.includes('osec.io');
+}
+
+const withMockedOsec = (outcome: OsecOutcome, state?: ClusterState): Decorator =>
     function WithMockedOsec(Story) {
         const originalFetch = window.fetch;
         window.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-            const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-            if (!url.includes('verify.osec.io')) return originalFetch(input as any, init);
+            if (!isOsecRequest(input)) return originalFetch(input as any, init);
             if (outcome === 'loading') return new Promise<Response>(() => {});
             if (outcome === 'error') throw new Error('mocked OSEC failure');
             return new Response(JSON.stringify({ is_verified: outcome === 'verified', on_chain_hash: expectedHash }), {
@@ -38,7 +43,7 @@ const withMockedOsec = (outcome: OsecOutcome): Decorator =>
         }) as typeof window.fetch;
         return (
             <SWRConfig value={{ provider: () => new Map() }}>
-                <MockClusterProvider>
+                <MockClusterProvider state={state}>
                     <Story />
                 </MockClusterProvider>
             </SWRConfig>
@@ -51,8 +56,14 @@ const devnetState: ClusterState = {
     status: ClusterStatus.Connected,
 };
 
-const withDevnet: Decorator = Story => (
-    <MockClusterProvider state={devnetState}>
+const testnetState: ClusterState = {
+    cluster: Cluster.Testnet,
+    customUrl: 'https://api.testnet.solana.com',
+    status: ClusterStatus.Connected,
+};
+
+const withUnsupportedCluster: Decorator = Story => (
+    <MockClusterProvider state={testnetState}>
         <Story />
     </MockClusterProvider>
 );
@@ -68,13 +79,19 @@ const meta: Meta<typeof VerifiedProgramBadge> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Cluster guard short-circuits before any RPC; exercises `badge bg-warning-soft rank`.
-export const NonMainnet: Story = {
-    decorators: [withDevnet],
+// Cluster guard short-circuits before any RPC on clusters without an OSEC registry
+// (here: Testnet); exercises `badge bg-warning-soft rank`.
+export const UnsupportedCluster: Story = {
+    decorators: [withUnsupportedCluster],
 };
 
 export const Verified: Story = {
     decorators: [withMockedOsec('verified')],
+};
+
+// Devnet is a supported cluster: the badge resolves against verify-devnet.osec.io.
+export const DevnetVerified: Story = {
+    decorators: [withMockedOsec('verified', devnetState)],
 };
 
 export const NotVerified: Story = {

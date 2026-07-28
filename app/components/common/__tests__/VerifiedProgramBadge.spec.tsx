@@ -15,8 +15,9 @@ vi.mock('@/app/utils/url', () => ({
     useClusterPath: vi.fn(() => '/address/mock/verified-build'),
 }));
 
-// Mock the useIsProgramVerified hook
-vi.mock('@/app/utils/verified-builds', () => ({
+// Mock only the useIsProgramVerified hook; keep the real cluster-support helpers.
+vi.mock('@/app/utils/verified-builds', async importOriginal => ({
+    ...(await importOriginal<typeof import('@/app/utils/verified-builds')>()),
     useIsProgramVerified: vi.fn(),
 }));
 
@@ -75,5 +76,27 @@ describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
         });
         render(<VerifiedProgramBadge programData={mockProgramData} pubkey={mockPubkey} />);
         expect(screen.getByText(/Loading/i)).toBeInTheDocument();
+    });
+
+    it('should show the verified badge on devnet (a supported cluster)', () => {
+        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.Devnet });
+        (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+            data: true,
+            error: false,
+            isLoading: false,
+        });
+        render(<VerifiedProgramBadge programData={mockProgramData} pubkey={mockPubkey} />);
+        expect(screen.getByText(/Program Source Verified/i)).toBeInTheDocument();
+    });
+
+    it('should show the unsupported-cluster notice on testnet', () => {
+        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.Testnet });
+        (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+            data: false,
+            error: false,
+            isLoading: false,
+        });
+        render(<VerifiedProgramBadge programData={mockProgramData} pubkey={mockPubkey} />);
+        expect(screen.getByText(/only available on Mainnet and Devnet/i)).toBeInTheDocument();
     });
 });

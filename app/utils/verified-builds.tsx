@@ -13,7 +13,24 @@ import { Cluster } from './cluster';
 import { composeOnchainRepoUrl, normalizeRepoUrl, safeRepoUrl } from './verified-builds-url';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
+const OSEC_DEVNET_REGISTRY_URL = 'https://verify-devnet.osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
+
+export function supportsVerifiedBuilds(cluster: Cluster): boolean {
+    return getOsecRegistryUrl(cluster) !== undefined;
+}
+
+// OSEC hosts a separate verified-builds registry per cluster; Testnet/Custom/SIMD-296 have none.
+export function getOsecRegistryUrl(cluster: Cluster): string | undefined {
+    switch (cluster) {
+        case Cluster.MainnetBeta:
+            return OSEC_REGISTRY_URL;
+        case Cluster.Devnet:
+            return OSEC_DEVNET_REGISTRY_URL;
+        default:
+            return undefined;
+    }
+}
 
 export enum VerificationStatus {
     Verified = 'Verified Build',
@@ -79,14 +96,17 @@ export function useVerifiedProgramRegistry({
     options?: { suspense: boolean };
     programData?: ProgramDataAccountInfo;
 }) {
+    const { cluster } = useCluster();
+    const registryUrl = getOsecRegistryUrl(cluster);
     const {
         data: registryData,
         error: registryError,
         isLoading: isRegistryLoading,
     } = useSWRImmutable(
-        `${programId.toBase58()}`,
-        async (programId: string) => {
-            const response = await fetch(`${OSEC_REGISTRY_URL}/status-all/${programId}`);
+        // The registry URL is part of the key so Mainnet and Devnet never share an entry.
+        registryUrl ? ['status-all', registryUrl, programId.toBase58()] : null,
+        async ([_prefix, base, id]) => {
+            const response = await fetch(`${base}/status-all/${id}`);
 
             return response.json() as Promise<OsecInfo[]>;
         },
@@ -152,14 +172,24 @@ export function useIsProgramVerified({
     programId: PublicKey;
     programData: ProgramDataAccountInfo;
 }) {
+    const { cluster } = useCluster();
+    const registryUrl = getOsecRegistryUrl(cluster);
     return useSWRImmutable(
-        ['is-program-verified', programId.toBase58(), hashProgramData(programData), programData.authority],
-        async ([_prefix, programId, hash]) => {
+        registryUrl
+            ? [
+                  'is-program-verified',
+                  registryUrl,
+                  programId.toBase58(),
+                  hashProgramData(programData),
+                  programData.authority,
+              ]
+            : null,
+        async ([_prefix, base, programId, hash]) => {
             if (!programId) {
                 return false;
             }
 
-            const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
+            const response = await fetch(`${base}/status/${programId}`);
             const osecInfo = (await response.json()) as OsecInfo;
 
             // Cross-check the on-chain hash to stay consistent with useVerifiedProgramRegistry
@@ -239,8 +269,11 @@ function useEnrichedOsecInfo({
         error: pdaError,
         isLoading: isPdaLoading,
     } = useSWRImmutable(
+        // Scope the key by RPC endpoint: the PDA is an on-chain account that differs per cluster, and
+        // useSWRImmutable never revalidates — without this, switching Mainnet<->Devnet would reuse the
+        // other cluster's PDA and pair it with the wrong -um/-ud verify command.
         accountAnchorProgram && osecInfo && signerAuthorities.length > 0
-            ? `pda-${programId.toBase58()}-${signerAuthorities.map(x => x.toBase58()).join(',')}`
+            ? `pda-${clusterUrl}-${programId.toBase58()}-${signerAuthorities.map(x => x.toBase58()).join(',')}`
             : null,
         async () => {
             if (!osecInfo || !accountAnchorProgram) {
@@ -337,15 +370,17 @@ export function buildEnrichedOsecInfo({
               ? VerificationStatus.PdaUploaded
               : VerificationStatus.NotVerified,
         verify_command: pdaData
-            ? coalesceCommandFromPda(programId, pdaData)
-            : isMainnet(cluster)
+            ? coalesceCommandFromPda(programId, pdaData, cluster)
+            : supportsVerifiedBuilds(cluster)
               ? 'Program does not have a verify PDA uploaded.'
-              : 'Verify command only available on mainnet.',
+              : 'Verify command not available on this cluster.',
     };
 }
 
-function coalesceCommandFromPda(programId: PublicKey, pdaData: OtterVerifyBuildParams) {
-    let verify_command = `solana-verify verify-from-repo -um --program-id ${programId.toBase58()} ${pdaData.gitUrl}`;
+function coalesceCommandFromPda(programId: PublicKey, pdaData: OtterVerifyBuildParams, cluster: Cluster) {
+    // solana-verify targets a cluster with the URL moniker: -ud for Devnet, -um for Mainnet.
+    const clusterFlag = cluster === Cluster.Devnet ? '-ud' : '-um';
+    let verify_command = `solana-verify verify-from-repo ${clusterFlag} --program-id ${programId.toBase58()} ${pdaData.gitUrl}`;
 
     if (pdaData.commit) {
         verify_command += ` --commit-hash ${pdaData.commit}`;
@@ -357,10 +392,6 @@ function coalesceCommandFromPda(programId: PublicKey, pdaData: OtterVerifyBuildP
         verify_command += ` ${argsString}`;
     }
     return verify_command;
-}
-
-function isMainnet(currentCluster: Cluster): boolean {
-    return currentCluster == Cluster.MainnetBeta;
 }
 
 // Helper function to hash program data
