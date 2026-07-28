@@ -22,9 +22,8 @@ export type ParserProgramLabel =
     | 'lighthouse'
     | 'mpl-token-metadata'
     | 'spl-associated-token-account'
-    // 'spl-token' | 'spl-token-2022' mirror `TokenProgram` (see note above).
-    | 'spl-token'
-    | 'spl-token-2022'
+    | 'spl-token' // mirrors `TokenProgram` (see note above)
+    | 'spl-token-2022' // mirrors `TokenProgram` (see note above)
     | 'system';
 
 export interface ParsedInstructionInfo<T extends string = string, I = unknown> {
