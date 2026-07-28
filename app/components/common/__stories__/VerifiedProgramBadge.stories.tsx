@@ -23,12 +23,17 @@ const expectedHash = hashProgramData(programData);
 
 type OsecOutcome = 'verified' | 'unverified' | 'loading' | 'error';
 
+// Matches any OSEC registry request (mainnet verify.osec.io + devnet verify-devnet.osec.io).
+function isOsecRequest(input: RequestInfo | URL): boolean {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    return url.includes('osec.io');
+}
+
 const withMockedOsec = (outcome: OsecOutcome, state?: ClusterState): Decorator =>
     function WithMockedOsec(Story) {
         const originalFetch = window.fetch;
         window.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-            const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-            if (!url.includes('osec.io')) return originalFetch(input as any, init);
+            if (!isOsecRequest(input)) return originalFetch(input as any, init);
             if (outcome === 'loading') return new Promise<Response>(() => {});
             if (outcome === 'error') throw new Error('mocked OSEC failure');
             return new Response(JSON.stringify({ is_verified: outcome === 'verified', on_chain_hash: expectedHash }), {

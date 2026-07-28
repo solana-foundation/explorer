@@ -103,10 +103,10 @@ export function useVerifiedProgramRegistry({
         error: registryError,
         isLoading: isRegistryLoading,
     } = useSWRImmutable(
-        // The full URL is the cache key so Mainnet and Devnet never share an entry.
-        registryUrl ? `${registryUrl}/status-all/${programId.toBase58()}` : null,
-        async (url: string) => {
-            const response = await fetch(url);
+        // The registry URL is part of the key so Mainnet and Devnet never share an entry.
+        registryUrl ? ['status-all', registryUrl, programId.toBase58()] : null,
+        async ([_prefix, base, id]) => {
+            const response = await fetch(`${base}/status-all/${id}`);
 
             return response.json() as Promise<OsecInfo[]>;
         },
