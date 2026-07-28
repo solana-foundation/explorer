@@ -3,6 +3,7 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { SupportedCluster } from '../../config.js';
 import { consoleLogger, type InspectorLogger, ns } from '../../logger.js';
 import { unknownMarker } from '../../accounts/account-kinds/shared.js';
+import { ACCOUNT_IDENTIFIER_KIND, INVALID_IDENTIFIER_KIND, UNKNOWN_KIND } from '../../accounts/kinds.js';
 import { enrichUpgradeableProgramData, normalizeAccountProbe } from '../../accounts/account-normalizer.js';
 import { buildAccountPayloadWithRouter } from '../../accounts/inspect-entity-account-router.js';
 import {
@@ -110,7 +111,7 @@ async function resolveAccount(
         const baseKind = classifyAccountKindBase(enrichedAccount);
 
         let dasOutcome: DasClassificationOutcome | null = null;
-        if (baseKind === 'unknown') {
+        if (baseKind === UNKNOWN_KIND) {
             try {
                 dasOutcome = normalizeDasOutcome(await dependencies.fetchAsset(identifier, cluster));
             } catch (error) {
@@ -135,7 +136,7 @@ async function resolveAccount(
             ...(dependencies.resolveProgramName ? { resolveProgramName: dependencies.resolveProgramName } : {}),
         });
 
-        if (finalKind === 'unknown') {
+        if (finalKind === UNKNOWN_KIND) {
             const decoded = await resolveIdlDecodedData(enrichedAccount, cluster, dependencies);
             if (decoded) {
                 routedPayload.entity = { ...asRecord(routedPayload.entity), decoded };
@@ -343,14 +344,14 @@ export async function handleInspectEntity(
     const input = parseResult.data;
     const identifierKind = decodeIdentifierKind(input.identifier, dependencies.logger);
 
-    if (identifierKind === 'invalid') {
+    if (identifierKind === INVALID_IDENTIFIER_KIND) {
         return toToolResult({
             errors: [invalidArgument('identifier must decode from base58 to 32 or 64 bytes')],
             payload: {},
         });
     }
 
-    if (identifierKind === 'account') {
+    if (identifierKind === ACCOUNT_IDENTIFIER_KIND) {
         return resolveAccount(input.identifier, input.cluster, dependencies);
     }
 

@@ -24,6 +24,21 @@ import {
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ID,
 } from '../shared/constants.js';
 import { asRecord, asString } from '../shared/parse-helpers.js';
+import {
+    ACCOUNT_IDENTIFIER_KIND,
+    BPF_LOADER_2_KIND,
+    BPF_LOADER_KIND,
+    COMPRESSED_NFT_KIND,
+    FEATURE_KIND,
+    INVALID_IDENTIFIER_KIND,
+    LOADER_V4_KIND,
+    NATIVE_PROGRAM_KIND,
+    NFTOKEN_KIND,
+    SOLANA_ATTESTATION_SERVICE_KIND,
+    TOKEN_SUBTYPES,
+    TRANSACTION_IDENTIFIER_KIND,
+    UNKNOWN_KIND,
+} from './kinds.js';
 import type {
     AccountEntityKind,
     BaseAccountEntityKind,
@@ -52,15 +67,15 @@ export function decodeBase58(value: string, logger: InspectorLogger = consoleLog
 export function decodeIdentifierKind(identifier: string, logger: InspectorLogger = consoleLogger): IdentifierKind {
     const decoded = decodeBase58(identifier, logger);
     if (!decoded) {
-        return 'invalid';
+        return INVALID_IDENTIFIER_KIND;
     }
     if (decoded.length === 32) {
-        return 'account';
+        return ACCOUNT_IDENTIFIER_KIND;
     }
     if (decoded.length === 64) {
-        return 'transaction';
+        return TRANSACTION_IDENTIFIER_KIND;
     }
-    return 'invalid';
+    return INVALID_IDENTIFIER_KIND;
 }
 
 function hasAddressLookupTableLayout(rawDataBytes: ReadonlyUint8Array | null): boolean {
@@ -80,10 +95,7 @@ export function extractTokenSubtype(parsedData: unknown): TokenSubtype | null {
     if (!subtype) {
         return null;
     }
-    if (subtype === 'mint' || subtype === 'account' || subtype === 'multisig') {
-        return subtype;
-    }
-    return null;
+    return TOKEN_SUBTYPES.find(candidate => candidate === subtype) ?? null;
 }
 
 // RPC-shared kinds intentionally equal the *_PROGRAM_LABEL strings — enforced by AccountEntityKind's Exclude derivation, not by convention.
@@ -95,23 +107,23 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
     }
     // Legacy/v4 loader programs are not jsonParsed by the RPC — classified by owner instead.
     if (account.owner === BPF_LOADER_PROGRAM_ID) {
-        return 'bpf-loader';
+        return BPF_LOADER_KIND;
     }
     if (account.owner === BPF_LOADER_2_PROGRAM_ID) {
-        return 'bpf-loader-2';
+        return BPF_LOADER_2_KIND;
     }
     if (account.owner === LOADER_V4_PROGRAM_ID) {
-        return 'loader-v4';
+        return LOADER_V4_KIND;
     }
     // Native (non-BPF) programs — System, Vote, Stake program accounts etc. — are never jsonParsed.
     if (account.owner === NATIVE_LOADER_PROGRAM_ID) {
-        return 'native-program';
+        return NATIVE_PROGRAM_KIND;
     }
     if (parsedProgram === STAKE_PROGRAM_LABEL) {
         return 'stake';
     }
     if (account.owner === NFTOKEN_ADDRESS) {
-        return 'nftoken';
+        return NFTOKEN_KIND;
     }
 
     const tokenSubtype = extractTokenSubtype(account.parsedData);
@@ -142,13 +154,13 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
         return 'address-lookup-table';
     }
     if (account.owner === FEATURE_PROGRAM_ID) {
-        return 'feature';
+        return FEATURE_KIND;
     }
     if (account.owner === SOLANA_ATTESTATION_SERVICE_PROGRAM_ID) {
-        return 'solana-attestation-service';
+        return SOLANA_ATTESTATION_SERVICE_KIND;
     }
 
-    return 'unknown';
+    return UNKNOWN_KIND;
 }
 
 export function normalizeDasOutcome(value: unknown): DasClassificationOutcome | null {
@@ -183,11 +195,11 @@ export function promoteAccountKindWithDas(
     baseKind: BaseAccountEntityKind,
     dasOutcome: DasClassificationOutcome | null,
 ): AccountEntityKind {
-    if (baseKind !== 'unknown') {
+    if (baseKind !== UNKNOWN_KIND) {
         return baseKind;
     }
     if (dasOutcome?.compressed === true) {
-        return 'compressed-nft';
+        return COMPRESSED_NFT_KIND;
     }
-    return 'unknown';
+    return UNKNOWN_KIND;
 }

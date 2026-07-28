@@ -8,10 +8,20 @@ import type {
     VerificationResult,
 } from '../enrichments/types.js';
 import type { SafeNumeric } from '../shared/types.js';
+import type {
+    BPF_LOADER_2_KIND,
+    BPF_LOADER_KIND,
+    COMPRESSED_NFT_KIND,
+    FEATURE_KIND,
+    LOADER_V4_KIND,
+    NATIVE_PROGRAM_KIND,
+    NFTOKEN_KIND,
+    SOLANA_ATTESTATION_SERVICE_KIND,
+    TokenSubtype,
+    UNKNOWN_KIND,
+} from './kinds.js';
 
-export type IdentifierKind = 'account' | 'transaction' | 'invalid';
-
-export type TokenSubtype = 'mint' | 'account' | 'multisig';
+export type { IdentifierKind, TokenSubtype } from './kinds.js';
 
 // All jsonParsed account programs except the token pair (those appear only subtyped) — zero re-spelled literals.
 type RpcSharedAccountKind = Exclude<RpcParsedAccountProgram, TokenProgram>;
@@ -19,17 +29,17 @@ type RpcSharedAccountKind = Exclude<RpcParsedAccountProgram, TokenProgram>;
 export type AccountEntityKind =
     | RpcSharedAccountKind
     | `${TokenProgram}:${TokenSubtype}`
-    | 'bpf-loader'
-    | 'bpf-loader-2'
-    | 'loader-v4'
-    | 'native-program'
-    | 'nftoken'
-    | 'feature'
-    | 'solana-attestation-service'
-    | 'compressed-nft'
-    | 'unknown';
+    | typeof BPF_LOADER_KIND
+    | typeof BPF_LOADER_2_KIND
+    | typeof LOADER_V4_KIND
+    | typeof NATIVE_PROGRAM_KIND
+    | typeof NFTOKEN_KIND
+    | typeof FEATURE_KIND
+    | typeof SOLANA_ATTESTATION_SERVICE_KIND
+    | typeof COMPRESSED_NFT_KIND
+    | typeof UNKNOWN_KIND;
 
-export type BaseAccountEntityKind = Exclude<AccountEntityKind, 'compressed-nft'>;
+export type BaseAccountEntityKind = Exclude<AccountEntityKind, typeof COMPRESSED_NFT_KIND>;
 
 export type NormalizedProgramDataInfo = {
     authority: string | null;

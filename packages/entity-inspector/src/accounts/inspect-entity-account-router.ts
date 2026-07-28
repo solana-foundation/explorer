@@ -18,6 +18,17 @@ import { buildStakePayload } from './account-kinds/stake.js';
 import { buildSysvarPayload } from './account-kinds/sysvar.js';
 import { buildUnknownPayload } from './account-kinds/unknown.js';
 import { buildVotePayload } from './account-kinds/vote.js';
+import {
+    BPF_LOADER_2_KIND,
+    BPF_LOADER_KIND,
+    COMPRESSED_NFT_KIND,
+    FEATURE_KIND,
+    LOADER_V4_KIND,
+    NATIVE_PROGRAM_KIND,
+    NFTOKEN_KIND,
+    SOLANA_ATTESTATION_SERVICE_KIND,
+    UNKNOWN_KIND,
+} from './kinds.js';
 import type { AccountEntityKind, AccountPayloadContext } from './types.js';
 
 function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
@@ -25,15 +36,15 @@ function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
         case 'bpf-upgradeable-loader':
             return buildBpfUpgradeableLoaderPayload;
         // Full builders exist (account-kinds/{bpf-loader,loader}.ts) but their verification/security/multisig enrichments arrive with plan Step 7 — routed as unsupported until then.
-        case 'bpf-loader':
-        case 'bpf-loader-2':
-        case 'loader-v4':
+        case BPF_LOADER_KIND:
+        case BPF_LOADER_2_KIND:
+        case LOADER_V4_KIND:
             return buildUnsupportedKindPayload;
-        case 'native-program':
+        case NATIVE_PROGRAM_KIND:
             return buildNativeProgramPayload;
         case 'stake':
             return buildStakePayload;
-        case 'nftoken':
+        case NFTOKEN_KIND:
             return buildNftokenPayload;
         case 'spl-token:mint':
             return buildSplTokenMintPayload;
@@ -57,13 +68,13 @@ function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
             return buildConfigPayload;
         case 'address-lookup-table':
             return buildAddressLookupTablePayload;
-        case 'feature':
+        case FEATURE_KIND:
             return buildFeaturePayload;
-        case 'solana-attestation-service':
+        case SOLANA_ATTESTATION_SERVICE_KIND:
             return buildSolanaAttestationServicePayload;
-        case 'compressed-nft':
+        case COMPRESSED_NFT_KIND:
             return buildCompressedNftPayload;
-        case 'unknown':
+        case UNKNOWN_KIND:
             return buildUnknownPayload;
         default:
             return assertUnreachable(kind);
