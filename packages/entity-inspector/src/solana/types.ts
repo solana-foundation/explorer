@@ -1,4 +1,5 @@
 import type { IdlStandard } from '@explorer/idl-decode';
+import type { RpcParsedAccountProgram, TokenProgram } from '@explorer/parsers';
 import type { ReadonlyUint8Array } from '@solana/kit';
 
 export type IdentifierKind = 'account' | 'transaction' | 'invalid';
@@ -81,33 +82,25 @@ export type SignatureStatusEnvelope = {
     value: SignatureStatusValue | null;
 };
 
+export type TokenSubtype = 'mint' | 'account' | 'multisig';
+
+// All jsonParsed account programs except the token pair (those appear only subtyped) — zero re-spelled literals.
+type RpcSharedAccountKind = Exclude<RpcParsedAccountProgram, TokenProgram>;
+
 export type AccountEntityKind =
-    | 'bpf-upgradeable-loader'
+    | RpcSharedAccountKind
+    | `${TokenProgram}:${TokenSubtype}`
     | 'bpf-loader'
     | 'bpf-loader-2'
     | 'loader-v4'
     | 'native-program'
-    | 'stake'
     | 'nftoken'
-    | 'spl-token:mint'
-    | 'spl-token:account'
-    | 'spl-token:multisig'
-    | 'spl-token-2022:mint'
-    | 'spl-token-2022:account'
-    | 'spl-token-2022:multisig'
-    | 'nonce'
-    | 'vote'
-    | 'sysvar'
-    | 'config'
-    | 'address-lookup-table'
     | 'feature'
     | 'solana-attestation-service'
     | 'compressed-nft'
     | 'unknown';
 
 export type BaseAccountEntityKind = Exclude<AccountEntityKind, 'compressed-nft'>;
-
-export type TokenSubtype = 'mint' | 'account' | 'multisig';
 
 export type UnknownMarker = {
     value: null;
@@ -194,7 +187,7 @@ export type SecurityMetadataResult =
 export type MultisigReferenceResult =
     | {
           status: 'is_multisig';
-          version: 'v3' | 'v4' | 'spl-token' | 'spl-token-2022';
+          version: 'v3' | 'v4' | TokenProgram;
           multisig_address: string | null;
           threshold: SafeNumeric;
           members: string[] | null;

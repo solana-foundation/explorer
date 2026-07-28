@@ -139,6 +139,17 @@ describe('inspect-entity classifier', () => {
         expect(kind).toBe('nftoken');
     });
 
+    it('should classify a parsed program outside the RPC vocabulary as unknown', () => {
+        expect(
+            classifyAccountKindBase({
+                owner: 'owner',
+                parsedData: null,
+                parsedProgram: 'spl-memo',
+                rawDataBytes: null,
+            }),
+        ).toBe('unknown');
+    });
+
     it('should fall through token programs without a recognized subtype', () => {
         expect(
             classifyAccountKindBase({

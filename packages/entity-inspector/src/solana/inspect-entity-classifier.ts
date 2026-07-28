@@ -1,3 +1,14 @@
+import {
+    ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
+    BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
+    CONFIG_PROGRAM_LABEL,
+    NONCE_PROGRAM_LABEL,
+    SPL_TOKEN_PROGRAM_LABEL,
+    SPL_TOKEN_2022_PROGRAM_LABEL,
+    STAKE_PROGRAM_LABEL,
+    SYSVAR_PROGRAM_LABEL,
+    VOTE_PROGRAM_LABEL,
+} from '@explorer/parsers';
 import type { ReadonlyUint8Array } from '@solana/kit';
 
 import { consoleLogger, type InspectorLogger, ns } from '../logger.js';
@@ -78,7 +89,7 @@ export function extractTokenSubtype(parsedData: unknown): TokenSubtype | null {
 export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAccountEntityKind {
     const parsedProgram = account.parsedProgram;
 
-    if (parsedProgram === 'bpf-upgradeable-loader') {
+    if (parsedProgram === BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL) {
         return 'bpf-upgradeable-loader';
     }
     // Legacy/v4 loader programs are not jsonParsed by the RPC — classified by owner instead.
@@ -95,7 +106,7 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
     if (account.owner === NATIVE_LOADER_PROGRAM_ID) {
         return 'native-program';
     }
-    if (parsedProgram === 'stake') {
+    if (parsedProgram === STAKE_PROGRAM_LABEL) {
         return 'stake';
     }
     if (account.owner === NFTOKEN_ADDRESS) {
@@ -103,28 +114,28 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
     }
 
     const tokenSubtype = extractTokenSubtype(account.parsedData);
-    if (parsedProgram === 'spl-token' && tokenSubtype) {
-        return `spl-token:${tokenSubtype}`;
+    if (parsedProgram === SPL_TOKEN_PROGRAM_LABEL && tokenSubtype) {
+        return `${SPL_TOKEN_PROGRAM_LABEL}:${tokenSubtype}`;
     }
-    if (parsedProgram === 'spl-token-2022' && tokenSubtype) {
-        return `spl-token-2022:${tokenSubtype}`;
+    if (parsedProgram === SPL_TOKEN_2022_PROGRAM_LABEL && tokenSubtype) {
+        return `${SPL_TOKEN_2022_PROGRAM_LABEL}:${tokenSubtype}`;
     }
 
-    if (parsedProgram === 'nonce') {
+    if (parsedProgram === NONCE_PROGRAM_LABEL) {
         return 'nonce';
     }
-    if (parsedProgram === 'vote') {
+    if (parsedProgram === VOTE_PROGRAM_LABEL) {
         return 'vote';
     }
-    if (parsedProgram === 'sysvar') {
+    if (parsedProgram === SYSVAR_PROGRAM_LABEL) {
         return 'sysvar';
     }
-    if (parsedProgram === 'config') {
+    if (parsedProgram === CONFIG_PROGRAM_LABEL) {
         return 'config';
     }
     // Layout heuristic alone false-positives on any account sized 56+n·32 — only trust it under the ALT program's ownership.
     if (
-        parsedProgram === 'address-lookup-table' ||
+        parsedProgram === ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL ||
         (account.owner === ADDRESS_LOOKUP_TABLE_PROGRAM_ID && hasAddressLookupTableLayout(account.rawDataBytes))
     ) {
         return 'address-lookup-table';

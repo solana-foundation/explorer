@@ -1,3 +1,4 @@
+import { BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL } from '@explorer/parsers';
 import type { ReadonlyUint8Array } from '@solana/kit';
 
 import type { SupportedCluster } from '../config.js';
@@ -106,7 +107,7 @@ export async function enrichUpgradeableProgramData(
     fetchAccount: AccountFetcher,
     logger: InspectorLogger = consoleLogger,
 ): Promise<NormalizedAccountInfo> {
-    if (account.parsedProgram !== 'bpf-upgradeable-loader') {
+    if (account.parsedProgram !== BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL) {
         return account;
     }
 
@@ -125,7 +126,7 @@ export async function enrichUpgradeableProgramData(
 
         if (
             normalizedProgramDataAccount === null ||
-            normalizedProgramDataAccount.parsedProgram !== 'bpf-upgradeable-loader'
+            normalizedProgramDataAccount.parsedProgram !== BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL
         ) {
             return { ...account, programDataStatus: 'missing' };
         }

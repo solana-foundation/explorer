@@ -1,3 +1,5 @@
+import { isTokenProgram } from '@explorer/parsers';
+
 import type { SupportedCluster } from '../../config.js';
 import { type InspectorLogger, ns } from '../../logger.js';
 import { normalizeAccountProbe } from '../account-normalizer.js';
@@ -25,7 +27,7 @@ export async function resolveSplMultisigReference(
         }
 
         const { parsedProgram } = account;
-        if (parsedProgram !== 'spl-token' && parsedProgram !== 'spl-token-2022') {
+        if (parsedProgram === null || !isTokenProgram(parsedProgram)) {
             return { status: 'not_multisig' };
         }
 
@@ -49,7 +51,7 @@ export async function resolveSplMultisigReference(
             multisig_address: address,
             status: 'is_multisig',
             threshold,
-            version: parsedProgram === 'spl-token' ? 'spl-token' : 'spl-token-2022',
+            version: parsedProgram,
         };
     } catch (error) {
         logger.warn(ns('spl multisig resolve failed'), { address, error });
