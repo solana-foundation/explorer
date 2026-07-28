@@ -389,13 +389,18 @@ describe('dedupeAndSortBuilds', () => {
         ]);
     });
 
-    it('should collapse re-run duplicates that differ only by build_id and completed_at', () => {
-        const result = dedupeAndSortBuilds([
-            makeBuild({ build_id: 'first', completed_at: '2026-01-01T00:00:00.000Z' }),
-            makeBuild({ build_id: 'rerun', completed_at: '2026-02-01T00:00:00.000Z' }),
-        ]);
-        expect(result).toHaveLength(1);
-        expect(result[0].build_id).toBe('first');
+    it('should keep the most recent run when collapsing duplicates, regardless of input order', () => {
+        const older = makeBuild({ build_id: 'older', completed_at: '2026-01-01T00:00:00.000Z' });
+        const newer = makeBuild({ build_id: 'newer', completed_at: '2026-02-01T00:00:00.000Z' });
+
+        // Newest survives whether the older or the newer run appears first in the response.
+        const olderFirst = dedupeAndSortBuilds([older, newer]);
+        expect(olderFirst).toHaveLength(1);
+        expect(olderFirst[0].build_id).toBe('newer');
+
+        const newerFirst = dedupeAndSortBuilds([newer, older]);
+        expect(newerFirst).toHaveLength(1);
+        expect(newerFirst[0].build_id).toBe('newer');
     });
 
     it('should return an empty array unchanged', () => {

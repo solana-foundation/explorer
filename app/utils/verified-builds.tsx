@@ -240,12 +240,17 @@ export function useResolveBuildsByHash(hash: string | undefined) {
 // most-relevant first: trusted, then matching the deployed program, then most recently completed.
 export function dedupeAndSortBuilds(builds: OsecBuild[]): OsecBuild[] {
     const seen = new Set<string>();
-    const deduped = builds.filter(build => {
-        const key = `${build.program_id}|${build.repository}|${build.commit}|${build.trusted}|${build.matches_deployed}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-    });
+    // Sort newest-first before de-duping so the entry kept for each duplicate group is the most
+    // recent run — the filter keeps the first occurrence, so this is independent of the order
+    // `/resolve-hash` returned the builds in.
+    const deduped = [...builds]
+        .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
+        .filter(build => {
+            const key = `${build.program_id}|${build.repository}|${build.commit}|${build.trusted}|${build.matches_deployed}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
 
     return deduped.sort((a, b) => {
         if (a.trusted !== b.trusted) return a.trusted ? -1 : 1;
