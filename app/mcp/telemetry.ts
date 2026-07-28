@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
 
 import type { EntityInspectorConfig } from '@explorer/entity-inspector';
-import { createGa4Provider, createTelemetry, type Telemetry } from '@explorer/entity-inspector/telemetry';
+import { createGa4Provider } from '@explorer/entity-inspector/telemetry/providers/ga4';
+import { createTelemetry, type Telemetry } from '@explorer/entity-inspector/telemetry/server';
 import { headers } from 'next/headers';
 import { after } from 'next/server';
 

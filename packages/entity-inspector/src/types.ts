@@ -25,7 +25,7 @@ export type EntityInspectorConfig = {
     // Program label lookup injected by the host app (its curated registry); labels are omitted when absent.
     resolveProgramName?: (address: string) => string | undefined;
     rpcEndpoints: Record<SupportedCluster, string>;
-    /** Usage-event sink (see `@explorer/entity-inspector/telemetry` for a provider-based consumer). */
+    /** Usage-event sink (see `@explorer/entity-inspector/telemetry/server` for a provider-based consumer). */
     track?: (event: McpAnalyticsEvent) => void;
     /** Per-request server decorator — the host app passes e.g. `Sentry.wrapMcpServerWithSentry`. */
     wrapServer?: (server: McpServer) => McpServer;

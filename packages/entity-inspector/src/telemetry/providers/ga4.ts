@@ -1,4 +1,4 @@
-import type { TelemetryProvider } from './server.js';
+import type { TelemetryProvider } from '../server.js';
 
 const GA4_COLLECT_ENDPOINT = 'https://www.google-analytics.com/mp/collect';
 

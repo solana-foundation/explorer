@@ -13,10 +13,15 @@
             "import": "./dist/index.js",
             "default": "./dist/index.js"
         },
-        "./telemetry": {
-            "types": "./dist/telemetry/index.d.ts",
-            "import": "./dist/telemetry/index.js",
-            "default": "./dist/telemetry/index.js"
+        "./telemetry/server": {
+            "types": "./dist/telemetry/server.d.ts",
+            "import": "./dist/telemetry/server.js",
+            "default": "./dist/telemetry/server.js"
+        },
+        "./telemetry/providers/ga4": {
+            "types": "./dist/telemetry/providers/ga4.d.ts",
+            "import": "./dist/telemetry/providers/ga4.js",
+            "default": "./dist/telemetry/providers/ga4.js"
         }
     },
     "scripts": {
@@ -29,8 +34,8 @@
         "pretest": "pnpm run build",
         "test": "pnpm run typecheck && vitest run && pnpm run test:treeshakability && pnpm run test:node-esm && pnpm run test:coverage",
         "test:coverage": "vitest run --config vitest.coverage.config.ts",
-        "test:node-esm": "for entry in dist/index.js dist/telemetry/index.js; do node --input-type=module -e \"import('./$entry')\" || exit 1; done",
-        "test:treeshakability": "for file in dist/index.js dist/telemetry/index.js; do agadoo $file || exit 1; done",
+        "test:node-esm": "for entry in dist/index.js dist/telemetry/server.js dist/telemetry/providers/ga4.js; do node --input-type=module -e \"import('./$entry')\" || exit 1; done",
+        "test:treeshakability": "for file in dist/index.js dist/telemetry/server.js dist/telemetry/providers/ga4.js; do agadoo $file || exit 1; done",
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit"
     },
