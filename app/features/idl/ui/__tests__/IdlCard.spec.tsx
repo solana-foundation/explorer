@@ -321,6 +321,7 @@ describe('IdlCard', () => {
         expect(screen.queryByRole('tab')).not.toBeInTheDocument();
         // The IDL history link lives in the header, so it's offered even when the card has no IDL.
         expect(screen.getByRole('link', { name: /IDL history/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /MCP & API/i })).toBeInTheDocument();
     });
 
     test('should link to the idl.solana.com history view for the program', async () => {
@@ -338,5 +339,52 @@ describe('IdlCard', () => {
         expect(url.searchParams.get('programId')).toBe(programId);
         expect(url.searchParams.get('mode')).toBe('history');
         expect(url.searchParams.get('cluster')).toBe('mainnet-beta');
+    });
+
+    test('should open the Orquestra project page behind the leaving-Explorer interstitial', async () => {
+        mockProgramIdls({ programMetadataIdl: createMockProgramMetadataIdl() });
+
+        render(
+            <ClusterProvider>
+                <IdlCard programId={programId} />
+            </ClusterProvider>,
+        );
+
+        const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+        fireEvent.click(await screen.findByRole('button', { name: /MCP & API/i }));
+
+        // The interstitial names the destination and shows the full URL before anything opens.
+        expect(screen.getByText('Leaving Solana Explorer')).toBeInTheDocument();
+        expect(screen.getByText(/going to Orquestra/)).toBeInTheDocument();
+        expect(windowOpenSpy).not.toHaveBeenCalled();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+        expect(windowOpenSpy).toHaveBeenCalledWith(
+            `https://orquestra.dev/project/${programId}`,
+            '_blank',
+            'noopener,noreferrer',
+        );
+        windowOpenSpy.mockRestore();
+    });
+
+    test('should not open Orquestra when the interstitial is cancelled', async () => {
+        mockProgramIdls({ programMetadataIdl: createMockProgramMetadataIdl() });
+
+        render(
+            <ClusterProvider>
+                <IdlCard programId={programId} />
+            </ClusterProvider>,
+        );
+
+        const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+        fireEvent.click(await screen.findByRole('button', { name: /MCP & API/i }));
+        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+        await waitFor(() => {
+            expect(screen.queryByText('Leaving Solana Explorer')).not.toBeInTheDocument();
+        });
+        expect(windowOpenSpy).not.toHaveBeenCalled();
+        windowOpenSpy.mockRestore();
     });
 });
