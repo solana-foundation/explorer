@@ -6,16 +6,11 @@ import { asRecord } from '../shared/parse-helpers.js';
 import type { VerificationResult } from './types.js';
 import { hashProgramData } from './hash-program-data.js';
 import { type BuildParams, fetchOtterVerifyBuildParams, type OtterVerifyDependencies } from './otter-verify.js';
+import { TRUSTED_SIGNERS } from './config.js';
+import { orderVerifiedEntries } from './verification-core.js';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFICATION_FETCH_TIMEOUT_MS = 5000;
-
-const TRUSTED_SIGNERS: Record<string, string> = {
-    '11111111111111111111111111111111': 'Explorer',
-    '5vJwnLeyjV8uNJSp1zn7VLW8GwiQbcsQbGaVSwRmkE4r': 'Foundation',
-    '9VWiUUhgNoRwTH5NVehYJEDwcotwYX3VgW4MChiHPAqU': 'OtterSecurity',
-    CyJj5ejJAUveDXnLduJbkvwjxcmWJNqCuB9DR7AExrHn: 'Explorer',
-};
 
 export type ResolveProgramVerification = (
     programAddress: string,
@@ -72,21 +67,7 @@ async function fetchOsecStatusAll(programAddress: string): Promise<unknown> {
 
 // The registry entry is only trusted after re-hashing the live program data against its claim.
 function pickAuthorityWinner(entries: OsecInfo[], programAuthority: string, localHash: string): OsecInfo | null {
-    const trusted = entries
-        .filter(e => e.is_verified && (TRUSTED_SIGNERS[e.signer] !== undefined || e.signer === programAuthority))
-        .map(e => ({ ...e, is_verified: localHash === e.on_chain_hash }));
-
-    const hierarchy = [programAuthority, ...Object.keys(TRUSTED_SIGNERS)];
-    const bySigner: Record<string, OsecInfo> = {};
-    for (const e of trusted) {
-        bySigner[e.signer] = e;
-    }
-    const ordered: OsecInfo[] = [];
-    for (const signer of hierarchy) {
-        const entry = bySigner[signer];
-        if (entry) ordered.push(entry);
-    }
-    return ordered.find(e => e.is_verified) ?? null;
+    return orderVerifiedEntries(entries, programAuthority, localHash).find(e => e.is_verified) ?? null;
 }
 
 // NaN dates lose to parsable ones; ties keep the earlier registry entry (matches the source's stable sort).
