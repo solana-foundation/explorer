@@ -23,6 +23,11 @@
             "types": "./dist/programs/system/index.d.ts",
             "import": "./dist/programs/system/index.js",
             "default": "./dist/programs/system/index.js"
+        },
+        "./programs/token-batch": {
+            "types": "./dist/programs/token-batch/index.d.ts",
+            "import": "./dist/programs/token-batch/index.js",
+            "default": "./dist/programs/token-batch/index.js"
         }
     },
     "scripts": {
@@ -35,13 +40,15 @@
         "pretest": "pnpm run build",
         "test": "pnpm run typecheck && vitest run && pnpm run test:treeshakability && pnpm run test:node-esm && pnpm run test:coverage",
         "test:coverage": "vitest run --config vitest.coverage.config.ts",
-        "test:node-esm": "for entry in dist/index.js dist/compat/index.js dist/programs/system/index.js; do node --input-type=module -e \"import('./$entry')\" || exit 1; done",
+        "test:node-esm": "for entry in dist/index.js dist/compat/index.js dist/programs/system/index.js dist/programs/token-batch/index.js; do node --input-type=module -e \"import('./$entry')\" || exit 1; done",
         "test:treeshakability": "agadoo dist/index.js",
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
         "@solana-program/system": "0.12.0",
+        "@solana-program/token": "0.13.0",
+        "@solana-program/token-2022": "0.9.0",
         "@solana/kit": "6.5.0",
         "@solana/web3.js": "1.98.4",
         "superstruct": "0.15.3"
