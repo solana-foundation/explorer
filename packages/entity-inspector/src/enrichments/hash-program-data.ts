@@ -1,12 +1,15 @@
-import { createHash } from 'node:crypto';
+// @noble/hashes + kit base64 (not node:crypto/Buffer) so the module stays environment-agnostic
+// for browser consumers; digests are byte-identical, ~10x slower but single-digit ms at real sizes.
+import { sha256 } from '@noble/hashes/sha256';
+import { bytesToHex } from '@noble/hashes/utils';
+import { getBase64Encoder } from '@solana/kit';
 
 // osec hashes the deployed executable with trailing zero-padding trimmed — must match to compare against on_chain_hash.
 export function hashProgramData(dataBase64: string): string {
-    const buffer = Buffer.from(dataBase64, 'base64');
+    const bytes = getBase64Encoder().encode(dataBase64);
     let truncatedBytes = 0;
-    while (truncatedBytes < buffer.length && buffer[buffer.length - 1 - truncatedBytes] === 0) {
+    while (truncatedBytes < bytes.length && bytes[bytes.length - 1 - truncatedBytes] === 0) {
         truncatedBytes++;
     }
-    const trimmed = buffer.subarray(0, buffer.length - truncatedBytes);
-    return createHash('sha256').update(trimmed).digest('hex');
+    return bytesToHex(sha256(bytes.slice(0, bytes.length - truncatedBytes)));
 }
