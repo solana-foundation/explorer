@@ -154,7 +154,7 @@ export const MethodSupportContext: React.Context<MethodSupport | undefined> = Re
 
 type HistoryProviderProps = { children: React.ReactNode };
 export function HistoryProvider({ children }: HistoryProviderProps) {
-    const { url } = useCluster();
+    const { cluster, url } = useCluster();
     const [state, dispatch] = Cache.useCustomReducer(url, reconcile);
     const inFlightRef = React.useRef(new Set<string>());
     const generationRef = React.useRef(new Map<string, number>());
@@ -168,7 +168,10 @@ export function HistoryProvider({ children }: HistoryProviderProps) {
     }, [dispatch, url]);
 
     const markUnsupported = React.useCallback(() => setSupported(false), []);
-    const methodSupport = React.useMemo(() => ({ markUnsupported, supported }), [markUnsupported, supported]);
+    const methodSupport = React.useMemo(
+        () => ({ markUnsupported, supported: cluster !== Cluster.Custom && supported }),
+        [cluster, markUnsupported, supported],
+    );
 
     return (
         <StateContext.Provider value={state}>
@@ -378,21 +381,29 @@ async function fetchAccountHistory(
     let status;
     let history;
     try {
-        const result = await getTransactionsForAddress(url, pubkey.toBase58(), {
-            filters: options.filters,
-            limit: options.limit,
-            paginationToken: options.paginationToken,
-        });
-        history = {
-            fetched: result.data,
-            // A null/absent paginationToken is the canonical end-of-stream signal; a
-            // short page is not, since the server may still hand back a token for more.
-            foundOldest: !result.paginationToken,
-            paginationToken: result.paginationToken,
-        };
+        if (cluster === Cluster.Custom) {
+            // Custom RPCs are not guaranteed to support the Triton extension.
+            history = await fetchViaSignatures(url, pubkey, {
+                before: options.before,
+                limit: options.limit,
+            });
+        } else {
+            const result = await getTransactionsForAddress(url, pubkey.toBase58(), {
+                filters: options.filters,
+                limit: options.limit,
+                paginationToken: options.paginationToken,
+            });
+            history = {
+                fetched: result.data,
+                // A null/absent paginationToken is the canonical end-of-stream signal; a
+                // short page is not, since the server may still hand back a token for more.
+                foundOldest: !result.paginationToken,
+                paginationToken: result.paginationToken,
+            };
+        }
         status = FetchStatus.Fetched;
     } catch (error) {
-        if (isMethodNotFound(error)) {
+        if (cluster !== Cluster.Custom && isMethodNotFound(error)) {
             // Endpoint doesn't implement getTransactionsForAddress: disable filtering
             // and fall back to the standard getSignaturesForAddress path.
             onMethodNotFound?.();
@@ -403,9 +414,7 @@ async function fetchAccountHistory(
                 });
                 status = FetchStatus.Fetched;
             } catch (fallbackError) {
-                if (cluster !== Cluster.Custom) {
-                    Logger.error(fallbackError, { url });
-                }
+                Logger.error(fallbackError, { url });
                 status = FetchStatus.FetchFailed;
             }
         } else {

@@ -1,13 +1,15 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { Cluster } from '@utils/cluster';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+let mockCluster = Cluster.MainnetBeta;
 vi.mock('@providers/cluster', () => ({
-    useCluster: vi.fn(() => ({
-        cluster: 0,
+    useCluster: () => ({
+        cluster: mockCluster,
         url: 'https://mock.rpc',
-    })),
+    }),
 }));
 
 vi.mock('@solana/web3.js', async () => {
@@ -83,6 +85,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 beforeEach(() => {
     vi.clearAllMocks();
+    mockCluster = Cluster.MainnetBeta;
     vi.mocked(Connection).mockImplementation(function () {
         return mockConnection as unknown as Connection;
     });
@@ -320,6 +323,30 @@ describe('useResetAccountHistory', () => {
 });
 
 describe('getSignaturesForAddress fallback', () => {
+    it('should use getSignaturesForAddress directly on a custom cluster', async () => {
+        mockCluster = Cluster.Custom;
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, { slot: { gte: 10 } }),
+                history: useAccountHistory(ADDRESS),
+                supported: useHistoryFiltersSupported(),
+            }),
+            { wrapper },
+        );
+
+        expect(result.current.supported).toBe(false);
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('legacy'));
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(mockConnection.getSignaturesForAddress).toHaveBeenCalledWith(expect.any(PublicKey), { limit: 25 });
+    });
+
     it('should fall back when getTransactionsForAddress is not found, applying no filters', async () => {
         mockRpcError(-32601, 'Method not found');
         mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
