@@ -389,19 +389,3 @@ export const TOKEN_IDS: { [key: string]: string } = {
     [TOKEN_2022_PROGRAM_ADDRESS]: 'Token-2022 Program',
     [TOKEN_PROGRAM_ADDRESS]: 'Token Program',
 } as const;
-
-// TODO: derive TokenProgram/isTokenProgram/assertIsTokenProgram from @explorer/parsers (program registry) instead of these local duplicates
-export type TokenProgram = 'spl-token' | 'spl-token-2022';
-
-export function assertIsTokenProgram(program: string): asserts program is TokenProgram {
-    if (program !== 'spl-token' && program !== 'spl-token-2022')
-        throw new Error('Expected token program name of `spl-token` or `spl-token-2022`');
-}
-export function isTokenProgram(program: string): program is TokenProgram {
-    try {
-        assertIsTokenProgram(program);
-        return true;
-    } catch (_e) {
-        return false;
-    }
-}

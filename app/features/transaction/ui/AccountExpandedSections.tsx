@@ -1,3 +1,9 @@
+import {
+    ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
+    NONCE_PROGRAM_LABEL,
+    STAKE_PROGRAM_LABEL,
+    VOTE_PROGRAM_LABEL,
+} from '@explorer/parsers';
 import { VoteAccount } from '@features/vote/lib/validators'; // deep import on purpose: this section only needs the account schema, not the vote UI the barrel re-exports
 import {
     isTokenProgramData,
@@ -201,17 +207,16 @@ export function ParsedSection({ parsed }: { parsed: ParsedData }) {
     if (isUpgradeableLoaderAccountData(parsed)) {
         return <UpgradeableLoaderSection data={parsed} />;
     }
-    // TODO: replace the program literals below with *_PROGRAM_LABEL specimens from @explorer/parsers (program registry)
-    if (parsed.program === 'stake') {
+    if (parsed.program === STAKE_PROGRAM_LABEL) {
         return <StakeAccountSection account={parsed.parsed} />;
     }
-    if (parsed.program === 'vote') {
+    if (parsed.program === VOTE_PROGRAM_LABEL) {
         return <VoteAccountSection account={parsed.parsed} />;
     }
-    if (parsed.program === 'nonce') {
+    if (parsed.program === NONCE_PROGRAM_LABEL) {
         return <NonceAccountSection account={parsed.parsed} />;
     }
-    if (parsed.program === 'address-lookup-table') {
+    if (parsed.program === ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL) {
         return <AddressLookupTableSection account={parsed.parsed} />;
     }
     return undefined;

@@ -1,6 +1,19 @@
 'use client';
 
 import { fetchNftData } from '@entities/nft';
+import {
+    ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
+    BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
+    CONFIG_PROGRAM_LABEL,
+    isTokenProgram,
+    NONCE_PROGRAM_LABEL,
+    SPL_TOKEN_2022_PROGRAM_LABEL,
+    SPL_TOKEN_PROGRAM_LABEL,
+    STAKE_PROGRAM_LABEL,
+    SYSVAR_PROGRAM_LABEL,
+    type TokenProgram,
+    VOTE_PROGRAM_LABEL,
+} from '@explorer/parsers';
 import { getStakeActivation, StakeAccount } from '@features/stake';
 import { VoteAccount } from '@features/vote/lib/validators'; // deep import on purpose: this provider only needs the account schema, not the vote UI the barrel re-exports
 import * as Cache from '@providers/cache';
@@ -17,7 +30,6 @@ import {
     SystemProgram,
 } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { assertIsTokenProgram, TokenProgram } from '@utils/programs';
 import { ParsedAddressLookupTableAccount } from '@validators/accounts/address-lookup-table';
 import { ConfigAccount } from '@validators/accounts/config';
 import { NonceAccount } from '@validators/accounts/nonce';
@@ -41,31 +53,26 @@ import { TokensProvider } from './tokens';
 export { useAccountHistory } from './history';
 
 export type StakeProgramData = {
-    program: 'stake';
+    program: typeof STAKE_PROGRAM_LABEL; // 'stake'
     parsed: StakeAccount;
     activation?: StakeActivationData;
 };
 
 export type UpgradeableLoaderAccountData = {
-    program: 'bpf-upgradeable-loader';
+    program: typeof BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL; // 'bpf-upgradeable-loader'
     parsed: UpgradeableLoaderAccount;
     programData?: ProgramDataAccountInfo;
 };
 
 export function isUpgradeableLoaderAccountData(data: { program: string }): data is UpgradeableLoaderAccountData {
-    return data.program === 'bpf-upgradeable-loader';
+    return data.program === BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL;
 }
 
 import type { NFTData } from '@entities/nft';
 export type { EditionInfo, NFTData } from '@entities/nft';
 
 export function isTokenProgramData(data: { program: string }): data is TokenProgramData {
-    try {
-        assertIsTokenProgram(data.program);
-        return true;
-    } catch (_e) {
-        return false;
-    }
+    return isTokenProgram(data.program);
 }
 export type TokenProgramData = {
     program: TokenProgram;
@@ -74,27 +81,27 @@ export type TokenProgramData = {
 };
 
 export type VoteProgramData = {
-    program: 'vote';
+    program: typeof VOTE_PROGRAM_LABEL; // 'vote'
     parsed: VoteAccount;
 };
 
 export type NonceProgramData = {
-    program: 'nonce';
+    program: typeof NONCE_PROGRAM_LABEL; // 'nonce'
     parsed: NonceAccount;
 };
 
 export type SysvarProgramData = {
-    program: 'sysvar';
+    program: typeof SYSVAR_PROGRAM_LABEL; // 'sysvar'
     parsed: SysvarAccount;
 };
 
 export type ConfigProgramData = {
-    program: 'config';
+    program: typeof CONFIG_PROGRAM_LABEL; // 'config'
     parsed: ConfigAccount;
 };
 
 export type AddressLookupTableProgramData = {
-    program: 'address-lookup-table';
+    program: typeof ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL; // 'address-lookup-table'
     parsed: ParsedAddressLookupTableAccount;
 };
 
@@ -342,14 +349,14 @@ async function handleParsedAccountData(
 ): Promise<ParsedData | undefined> {
     const info = create(accountData.parsed, ParsedInfo);
     switch (accountData.program) {
-        case 'bpf-upgradeable-loader': {
+        case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL: {
             const parsed = create(info, UpgradeableLoaderAccount);
 
             // Fetch program data to get program upgradeability info
             let programData: ProgramDataAccountInfo | undefined;
             if (parsed.type === 'program') {
                 const result = (await connection.getParsedAccountInfo(parsed.info.programData)).value;
-                if (result && 'parsed' in result.data && result.data.program === 'bpf-upgradeable-loader') {
+                if (result && 'parsed' in result.data && result.data.program === BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL) {
                     const info = create(result.data.parsed, ParsedInfo);
                     programData = create(info, ProgramDataAccount).info;
                 }
@@ -362,7 +369,7 @@ async function handleParsedAccountData(
             };
         }
 
-        case 'stake': {
+        case STAKE_PROGRAM_LABEL: {
             const parsed = create(info, StakeAccount);
             const stakeInfo = parsed.info;
 
@@ -387,35 +394,35 @@ async function handleParsedAccountData(
             };
         }
 
-        case 'vote': {
+        case VOTE_PROGRAM_LABEL: {
             return {
                 parsed: create(info, VoteAccount),
                 program: accountData.program,
             };
         }
 
-        case 'nonce': {
+        case NONCE_PROGRAM_LABEL: {
             return {
                 parsed: create(info, NonceAccount),
                 program: accountData.program,
             };
         }
 
-        case 'sysvar': {
+        case SYSVAR_PROGRAM_LABEL: {
             return {
                 parsed: create(info, SysvarAccount),
                 program: accountData.program,
             };
         }
 
-        case 'config': {
+        case CONFIG_PROGRAM_LABEL: {
             return {
                 parsed: create(info, ConfigAccount),
                 program: accountData.program,
             };
         }
 
-        case 'address-lookup-table': {
+        case ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL: {
             const parsed = create(info, ParsedAddressLookupTableAccount);
             return {
                 parsed,
@@ -423,8 +430,8 @@ async function handleParsedAccountData(
             };
         }
 
-        case 'spl-token':
-        case 'spl-token-2022': {
+        case SPL_TOKEN_PROGRAM_LABEL:
+        case SPL_TOKEN_2022_PROGRAM_LABEL: {
             const parsed = create(info, TokenAccount);
             let nftData;
 
@@ -518,7 +525,7 @@ function parseAddressLookupTableFromCache(
     const { parsed: parsedData, raw: rawData } = account.data;
 
     const key = new PublicKey(address);
-    if (parsedData && parsedData.program === 'address-lookup-table') {
+    if (parsedData && parsedData.program === ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL) {
         if (parsedData.parsed.type === 'lookupTable') {
             return [
                 new AddressLookupTableAccount({
