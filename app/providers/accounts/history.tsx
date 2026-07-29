@@ -382,7 +382,7 @@ async function fetchAccountHistory(
     let history;
     try {
         if (cluster === Cluster.Custom) {
-            // Custom RPCs are not guaranteed to support the Triton extension.
+            // Custom RPCs are not guaranteed to support the RPC 2.0 method.
             history = await fetchViaSignatures(url, pubkey, {
                 before: options.before,
                 limit: options.limit,
