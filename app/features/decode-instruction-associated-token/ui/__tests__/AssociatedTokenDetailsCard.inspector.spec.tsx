@@ -7,13 +7,15 @@ import { describe } from 'vitest';
 import { resolveAddressLookupTables } from '@/app/__tests__/mock-resolvers';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
+import { InspectorInstructionCard } from '@/app/components/common/InspectorInstructionCard';
+import { AddressWithContextCell } from '@/app/components/inspector/AddressWithContextCell';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@/app/entities/instruction-parser';
 import { associatedTokenInstructionParser } from '@/app/features/decode-instruction-associated-token';
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
-import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenDetailsCard';
+import { AssociatedTokenDetailsCard } from '../AssociatedTokenDetailsCard';
 
 const dispatcher = createInstructionParserDispatcher([associatedTokenInstructionParser]);
 
@@ -35,7 +37,15 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
+                        <AssociatedTokenDetailsCard
+                            ix={ix}
+                            raw={ti}
+                            index={index}
+                            result={{ err: null }}
+                            InstructionCardComponent={InspectorInstructionCard}
+                            AddressComponent={AddressWithContextCell}
+                            showProgramField={false}
+                        />
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,
@@ -71,7 +81,15 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
+                        <AssociatedTokenDetailsCard
+                            ix={ix}
+                            raw={ti}
+                            index={index}
+                            result={{ err: null }}
+                            InstructionCardComponent={InspectorInstructionCard}
+                            AddressComponent={AddressWithContextCell}
+                            showProgramField={false}
+                        />
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,
@@ -104,7 +122,15 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
+                        <AssociatedTokenDetailsCard
+                            ix={ix}
+                            raw={ti}
+                            index={index}
+                            result={{ err: null }}
+                            InstructionCardComponent={InspectorInstructionCard}
+                            AddressComponent={AddressWithContextCell}
+                            showProgramField={false}
+                        />
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,
@@ -141,7 +167,15 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard ix={ix} raw={ti} message={m} index={index} result={{ err: null }} />
+                        <AssociatedTokenDetailsCard
+                            ix={ix}
+                            raw={ti}
+                            index={index}
+                            result={{ err: null }}
+                            InstructionCardComponent={InspectorInstructionCard}
+                            AddressComponent={AddressWithContextCell}
+                            showProgramField={false}
+                        />
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,

@@ -1,5 +1,5 @@
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
-import { type ParsedInstruction, PublicKey, type VersionedMessage } from '@solana/web3.js';
+import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
@@ -38,8 +38,6 @@ const parsedIx: ParsedInstruction = {
     programId,
 } as any;
 
-const message = {} as VersionedMessage;
-
 const meta: Meta<typeof InspectorInstructionCard> = {
     component: InspectorInstructionCard,
     decorators: [withInspectorProviders, withViewportFromGlobal],
@@ -62,7 +60,6 @@ const args = {
     ),
     index: 0,
     ix: parsedIx,
-    message,
     result: { err: null },
     title: 'System Transfer',
 };

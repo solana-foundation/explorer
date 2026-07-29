@@ -1,10 +1,6 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
-import {
-    createInstructionParserDispatcher,
-    isParsedInstruction,
-    toParsedTransaction,
-} from '@entities/instruction-parser';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token';
 import * as spl from '@solana/spl-token';
 import { ParsedInstruction, PublicKey, TransactionMessage } from '@solana/web3.js';
@@ -18,7 +14,7 @@ import * as mock from '@/app/__tests__/mocks';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 
-import { AssociatedTokenDetailsCard } from '../associated-token/AssociatedTokenDetailsCard';
+import { AssociatedTokenDetailsCard } from '../AssociatedTokenDetailsCard';
 
 const dispatcher = createInstructionParserDispatcher([associatedTokenInstructionParser]);
 
@@ -50,7 +46,6 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         };
 
         const ix = withInfo(dispatcher.fromTransactionInstruction(ti), parsed);
-        const tx = toParsedTransaction(ti, m);
 
         // check that component is rendered properly
         render(
@@ -60,7 +55,6 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                         ix={ix}
                         index={index}
                         result={{ err: null }}
-                        tx={tx}
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
@@ -91,7 +85,6 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         };
 
         const ix = withInfo(dispatcher.fromTransactionInstruction(ti), parsed);
-        const tx = toParsedTransaction(ti, m);
 
         render(
             <ScrollAnchorProvider>
@@ -100,7 +93,6 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                         ix={ix}
                         index={index}
                         result={{ err: null }}
-                        tx={tx}
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
@@ -132,7 +124,6 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         };
 
         const ix = withInfo(dispatcher.fromTransactionInstruction(ti), parsed);
-        const tx = toParsedTransaction(ti, m);
 
         render(
             <ScrollAnchorProvider>
@@ -141,7 +132,6 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                         ix={ix}
                         index={index}
                         result={{ err: null }}
-                        tx={tx}
                         InstructionCardComponent={BaseInstructionCard}
                     />
                 </ClusterProvider>
@@ -152,6 +142,45 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
             expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
         });
     });
+
+    // When this slice's parser rejects an RPC payload, the dispatcher falls back to
+    // RPC's raw view: `type` still looks familiar but `info` holds base58 strings
+    // rather than coerced PublicKeys. The card must degrade instead of throwing on
+    // `pubkey.toBase58`.
+    test.each(['create', 'createIdempotent', 'recoverNested'])(
+        'should fall back to the unknown card when RPC info is not coerced (%s)',
+        async type => {
+            const rawInfoIx = {
+                parsed: {
+                    info: {
+                        account: '9E3HDj8spudEWc26h5wu8EUpyfYDbJjjVYaZpv49nzGH',
+                        mint: 'So11111111111111111111111111111111111111112',
+                        source: 'Hs9SPbfNiNofp5ngCgTmei5e1wu3dFfzELEoEBWbyPLx',
+                    },
+                    type,
+                },
+                program: 'spl-associated-token-account',
+                programId: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
+            } as unknown as ParsedInstruction;
+
+            render(
+                <ScrollAnchorProvider>
+                    <ClusterProvider>
+                        <AssociatedTokenDetailsCard
+                            ix={rawInfoIx}
+                            index={0}
+                            result={{ err: null }}
+                            InstructionCardComponent={BaseInstructionCard}
+                        />
+                    </ClusterProvider>
+                </ScrollAnchorProvider>,
+            );
+
+            await waitFor(() => {
+                expect(screen.getByText(/Unknown Instruction/)).toBeInTheDocument();
+            });
+        },
+    );
 });
 
 function withInfo(

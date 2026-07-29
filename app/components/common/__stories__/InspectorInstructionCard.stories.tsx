@@ -1,5 +1,5 @@
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
-import { type ParsedInstruction, PublicKey, TransactionInstruction, type VersionedMessage } from '@solana/web3.js';
+import { type ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
@@ -43,9 +43,6 @@ const parsedIx: ParsedInstruction = {
     programId,
 } as any;
 
-// Card forwards `message` without rendering it; an empty placeholder is enough.
-const message = {} as VersionedMessage;
-
 const meta: Meta<typeof InspectorInstructionCard> = {
     component: InspectorInstructionCard,
     decorators: [withInspectorProviders],
@@ -66,7 +63,6 @@ export const Success: Story = {
         ),
         index: 0,
         ix: parsedIx,
-        message,
         result: { err: null },
         title: 'System Transfer',
     },
@@ -81,7 +77,6 @@ export const Failed: Story = {
         ),
         index: 0,
         ix: parsedIx,
-        message,
         result: { err: { InstructionError: [0, 'Custom'] } },
         title: 'System Transfer',
     },
@@ -93,7 +88,6 @@ export const RawByDefault: Story = {
         defaultRaw: true,
         index: 0,
         ix: transactionIx,
-        message,
         result: { err: null },
         title: 'Raw Token Instruction',
     },
