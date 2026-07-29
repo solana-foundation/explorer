@@ -52,6 +52,7 @@ export function AccountHeader({
     // header — re-requesting its image and flickering — on every account refetch
     // or token-info revalidation. (The accounts cache keeps stale data during a
     // refetch, so these conditions still hold and the header stays mounted.)
+    // TODO: adopt @explorer/entity-inspector's accounts module (src/accounts: classifyAccountKindBase + kinds.ts; needs a browser-safe ./accounts subpath) instead of this inline kind chain
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} />;
     }

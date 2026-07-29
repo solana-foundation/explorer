@@ -301,6 +301,7 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
     // discriminator so we can surface a direct "Inspect" link to the transaction inspector.
     const squadsAccountType = rawData ? detectSquadsAccountType(account.owner, rawData) : undefined;
 
+    // TODO: adopt @explorer/entity-inspector's accounts module (src/accounts: classifyAccountKindBase + kinds.ts; needs a browser-safe ./accounts subpath) instead of this inline kind chain
     if (parsedData && parsedData.program === BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL) {
         return (
             <UpgradeableLoaderAccountSection

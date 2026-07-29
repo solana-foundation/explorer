@@ -348,6 +348,7 @@ async function handleParsedAccountData(
     lamports: number,
 ): Promise<ParsedData | undefined> {
     const info = create(accountData.parsed, ParsedInfo);
+    // TODO: adopt @explorer/entity-inspector's accounts module (src/accounts: classifyAccountKindBase + kinds.ts; needs a browser-safe ./accounts subpath) instead of this inline kind switch
     switch (accountData.program) {
         case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL: {
             const parsed = create(info, UpgradeableLoaderAccount);
