@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    url: 'mailto:disclosures@solana.org'
+    about: 'Do NOT open a public issue for security bugs (including Solana Verify / Verified Builds). Email disclosures@solana.org instead.'
+  - name: Ask a Question
+    url: 'https://solana.stackexchange.com/questions/ask'
+    about: 'Have a question about using Solana Explorer, or about Solana in general? Post it on the Solana Stack Exchange.'
+  - name: Start a Discussion
+    url: 'https://solana.com/discord'
+    about: 'Start or join a discussion on the Solana Tech Discord.'
