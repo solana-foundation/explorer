@@ -322,6 +322,73 @@ describe('useResetAccountHistory', () => {
     });
 });
 
+describe('cluster changes', () => {
+    it('should clear cached history when the cluster changes without changing the RPC URL', async () => {
+        mockResult([sig('rpc-2', 10)], null);
+
+        const { result, rerender } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('rpc-2'));
+
+        mockCluster = Cluster.Custom;
+        rerender();
+
+        expect(result.current.history).toBeUndefined();
+
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('legacy'));
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should discard an in-flight response from the previous cluster at the same RPC URL', async () => {
+        const pending = deferred<ReturnType<typeof envelope>>();
+        fetchMock.mockReturnValueOnce(pending.promise);
+
+        const { result, rerender } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        act(() => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+        await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+        mockCluster = Cluster.Custom;
+        rerender();
+
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('legacy'));
+
+        await act(async () => {
+            pending.resolve(envelope([sig('stale', 1)], null));
+            await pending.promise;
+        });
+
+        expect(result.current.history?.data?.fetched).toHaveLength(1);
+        expect(result.current.history?.data?.fetched[0].signature).toBe('legacy');
+    });
+});
+
 describe('getSignaturesForAddress fallback', () => {
     it('should use getSignaturesForAddress directly on a custom cluster', async () => {
         mockCluster = Cluster.Custom;

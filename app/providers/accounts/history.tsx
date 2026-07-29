@@ -155,17 +155,22 @@ export const MethodSupportContext: React.Context<MethodSupport | undefined> = Re
 type HistoryProviderProps = { children: React.ReactNode };
 export function HistoryProvider({ children }: HistoryProviderProps) {
     const { cluster, url } = useCluster();
+
+    // Two cluster identities can share an RPC URL while selecting different history
+    // methods. Remount the cache boundary so neither cached nor in-flight results cross over.
+    return (
+        <ClusterHistoryProvider key={`${cluster}:${url}`} cluster={cluster} url={url}>
+            {children}
+        </ClusterHistoryProvider>
+    );
+}
+
+type ClusterHistoryProviderProps = HistoryProviderProps & { cluster: Cluster; url: string };
+function ClusterHistoryProvider({ children, cluster, url }: ClusterHistoryProviderProps) {
     const [state, dispatch] = Cache.useCustomReducer(url, reconcile);
     const inFlightRef = React.useRef(new Set<string>());
     const generationRef = React.useRef(new Map<string, number>());
     const [supported, setSupported] = React.useState(true);
-
-    React.useEffect(() => {
-        dispatch({ type: ActionType.Clear, url });
-        inFlightRef.current.clear();
-        generationRef.current.clear();
-        setSupported(true);
-    }, [dispatch, url]);
 
     const markUnsupported = React.useCallback(() => setSupported(false), []);
     const methodSupport = React.useMemo(
