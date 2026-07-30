@@ -9,7 +9,8 @@ import {
     SYSVAR_PROGRAM_LABEL,
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
-import { isAddress, isSignature, type ReadonlyUint8Array } from '@solana/kit';
+import { hasAddressLookupTableLayout } from '@explorer/parsers/programs/address-lookup-table';
+import { isAddress, isSignature } from '@solana/kit';
 
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
@@ -53,9 +54,6 @@ import type {
     TokenSubtype,
 } from './types.js';
 
-const ADDRESS_LOOKUP_TABLE_META_BYTES = 56;
-const PUBKEY_BYTES = 32;
-
 export function decodeIdentifierKind(identifier: string): Result<IdentifierKind> {
     if (isAddress(identifier)) {
         return ok(ACCOUNT_IDENTIFIER_KIND);
@@ -64,17 +62,6 @@ export function decodeIdentifierKind(identifier: string): Result<IdentifierKind>
         return ok(TRANSACTION_IDENTIFIER_KIND);
     }
     return err(new Error('identifier must decode from base58 to 32 or 64 bytes'));
-}
-
-function hasAddressLookupTableLayout(rawDataBytes: ReadonlyUint8Array | null): boolean {
-    if (!rawDataBytes) {
-        return false;
-    }
-    if (rawDataBytes.length < ADDRESS_LOOKUP_TABLE_META_BYTES) {
-        return false;
-    }
-    const remainingBytes = rawDataBytes.length - ADDRESS_LOOKUP_TABLE_META_BYTES;
-    return remainingBytes % PUBKEY_BYTES === 0;
 }
 
 export function extractTokenSubtype(parsedData: unknown): TokenSubtype | null {

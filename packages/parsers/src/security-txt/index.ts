@@ -1,5 +1,5 @@
 // Ported from explorer-mcp's security-txt-parser (not @solana/security-txt) for exact wire parity.
-import type { SecurityTxtFields } from './types.js';
+import { getBase64Encoder, type ReadonlyUint8Array } from '@solana/kit';
 
 const HEADER = '=======BEGIN SECURITY.TXT V1=======\0';
 const FOOTER = '=======END SECURITY.TXT V1=======\0';
@@ -20,6 +20,21 @@ const VALID_KEYS: readonly string[] = [
     'expiry',
 ];
 
+export type SecurityTxtFields = {
+    name: string;
+    project_url: string;
+    contacts: string;
+    policy: string;
+    preferred_languages: string | null;
+    encryption: string | null;
+    source_code: string | null;
+    source_release: string | null;
+    source_revision: string | null;
+    auditors: string | null;
+    acknowledgements: string | null;
+    expiry: string | null;
+};
+
 export type ParseSecurityTxtResult =
     | { ok: true; fields: SecurityTxtFields }
     | { ok: false; error: 'no_markers' | 'invalid_content' };
@@ -35,30 +50,54 @@ function hasRequiredKeys(map: Record<string, string>): map is ValidatedSecurityM
     return REQUIRED_KEYS.every(k => k in map);
 }
 
-export function parseSecurityTxt(dataBase64: string): ParseSecurityTxtResult {
-    const decoded = Buffer.from(dataBase64, 'base64');
+function matchesAt(haystack: ReadonlyUint8Array, needle: Uint8Array, offset: number): boolean {
+    for (let i = 0; i < needle.length; i++) {
+        if (haystack[offset + i] !== needle[i]) {
+            return false;
+        }
+    }
+    return true;
+}
 
-    const headerIdx = decoded.indexOf(HEADER);
-    const footerIdx = decoded.indexOf(FOOTER);
+function indexOfSequence(haystack: ReadonlyUint8Array, needle: Uint8Array): number {
+    for (let i = 0; i + needle.length <= haystack.length; i++) {
+        if (matchesAt(haystack, needle, i)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+export function parseSecurityTxt(dataBase64: string): ParseSecurityTxtResult {
+    let decoded: ReadonlyUint8Array;
+    try {
+        decoded = getBase64Encoder().encode(dataBase64);
+    } catch {
+        // Buffer's lenient base64 path yielded marker-less bytes here; kit's strict encoder throws instead.
+        return { error: 'no_markers', ok: false };
+    }
+
+    const utf8 = new TextEncoder();
+    const headerBytes = utf8.encode(HEADER);
+    const footerBytes = utf8.encode(FOOTER);
+
+    const headerIdx = indexOfSequence(decoded, headerBytes);
+    const footerIdx = indexOfSequence(decoded, footerBytes);
     if (headerIdx < 0 || footerIdx < 0) {
         return { error: 'no_markers', ok: false };
     }
 
-    const content = decoded.subarray(headerIdx + HEADER.length, footerIdx);
+    const content = decoded.subarray(headerIdx + headerBytes.length, footerIdx);
 
-    const tokens = content
-        .reduce<number[][]>(
-            (prev, current) => {
-                if (current === 0) {
-                    prev.push([]);
-                } else {
-                    prev[prev.length - 1]?.push(current);
-                }
-                return prev;
-            },
-            [[]],
-        )
-        .map(c => Buffer.from(c).toString());
+    const decoder = new TextDecoder();
+    const tokens: string[] = [];
+    let tokenStart = 0;
+    for (let i = 0; i <= content.length; i++) {
+        if (i === content.length || content[i] === 0) {
+            tokens.push(decoder.decode(content.subarray(tokenStart, i)));
+            tokenStart = i + 1;
+        }
+    }
 
     const map: Record<string, string> = {};
     for (let i = 0; i + 1 < tokens.length; i += 2) {

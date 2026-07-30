@@ -1,5 +1,6 @@
+import { PROGRAM_DISPLAY_NAMES } from '@explorer/parsers';
+
 import { asBoolean, asRecord, asSafeNumeric, asString } from '../../shared/parse-helpers.js';
-import { lookupProgramLabel } from '../../shared/program-labels.js';
 import type { UnknownMarker } from '../../shared/types.js';
 import type { AccountEntityKind, AccountPayloadContext, NormalizedAccountInfo } from '../types.js';
 
@@ -15,7 +16,7 @@ export function resolveProgramAddressLabel(context: AccountPayloadContext): stri
     if (!address) {
         return null;
     }
-    return context.resolveProgramName?.(address) ?? lookupProgramLabel(address) ?? null;
+    return context.resolveProgramName?.(address) ?? PROGRAM_DISPLAY_NAMES[address] ?? null;
 }
 
 export function unknownMarker(reason: string): UnknownMarker {

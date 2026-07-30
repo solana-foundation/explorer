@@ -1,9 +1,10 @@
+import { parseSecurityTxt } from '@explorer/parsers/security-txt';
+
 import type { SupportedCluster } from '../config.js';
 import { type InspectorLogger, ns } from '../logger.js';
 import { asRecord } from '../shared/parse-helpers.js';
 import type { SecurityMetadataResult, SecurityTxtFields } from './types.js';
 import { fetchPmpSecurityMetadata } from './pmp-security.js';
-import { parseSecurityTxt } from './security-txt-parser.js';
 
 export type ResolveSecurityMetadata = (
     programAddress: string,

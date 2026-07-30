@@ -24,10 +24,20 @@
             "import": "./dist/programs/system/index.js",
             "default": "./dist/programs/system/index.js"
         },
+        "./programs/address-lookup-table": {
+            "types": "./dist/programs/address-lookup-table/index.d.ts",
+            "import": "./dist/programs/address-lookup-table/index.js",
+            "default": "./dist/programs/address-lookup-table/index.js"
+        },
         "./programs/token-batch": {
             "types": "./dist/programs/token-batch/index.d.ts",
             "import": "./dist/programs/token-batch/index.js",
             "default": "./dist/programs/token-batch/index.js"
+        },
+        "./security-txt": {
+            "types": "./dist/security-txt/index.d.ts",
+            "import": "./dist/security-txt/index.js",
+            "default": "./dist/security-txt/index.js"
         }
     },
     "scripts": {
@@ -40,7 +50,7 @@
         "pretest": "pnpm run build",
         "test": "pnpm run typecheck && vitest run && pnpm run test:treeshakability && pnpm run test:node-esm && pnpm run test:coverage",
         "test:coverage": "vitest run --config vitest.coverage.config.ts",
-        "test:node-esm": "for entry in dist/index.js dist/compat/index.js dist/programs/system/index.js dist/programs/token-batch/index.js; do node --input-type=module -e \"import('./$entry')\" || exit 1; done",
+        "test:node-esm": "for entry in $(node -p \"Object.values(require('./package.json').exports).map(e=>e.import).join(' ')\"); do node --input-type=module -e \"import('$entry')\" || exit 1; done",
         "test:treeshakability": "agadoo dist/index.js",
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit"

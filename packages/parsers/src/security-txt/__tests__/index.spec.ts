@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseSecurityTxt } from '../security-txt-parser.js';
+import { parseSecurityTxt } from '../index.js';
 
 const HEADER = '=======BEGIN SECURITY.TXT V1=======\0';
 const FOOTER = '=======END SECURITY.TXT V1=======\0';
@@ -87,6 +87,10 @@ describe('parseSecurityTxt', () => {
         const base64 = Buffer.from(partial, 'utf8').toString('base64');
 
         expect(parseSecurityTxt(base64)).toEqual({ error: 'no_markers', ok: false });
+    });
+
+    it('should return no_markers when the input is not valid base64', () => {
+        expect(parseSecurityTxt('!not base64!')).toEqual({ error: 'no_markers', ok: false });
     });
 
     it('should return invalid_content when the required field name is missing', () => {
