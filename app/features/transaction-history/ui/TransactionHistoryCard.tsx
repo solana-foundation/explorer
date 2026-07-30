@@ -10,6 +10,7 @@ import { getTransactionRows } from '@components/account/HistoryCardComponents';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import {
+    isGtfaDisabled,
     useAccountHistory,
     useFetchAccountHistory,
     useHistoryFiltersSupported,
@@ -31,7 +32,11 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory(25, filters);
     const resetHistory = useResetAccountHistory();
-    const filtersSupported = useHistoryFiltersSupported();
+    // Filtering needs gTFA. It's unavailable when the endpoint doesn't implement gTFA at all
+    // (endpoint-wide flag) or when gTFA is temporarily disabled for this specific address (which
+    // falls back to getSignaturesForAddress and can't honour filters). Both must drop active
+    // filters, otherwise the URL params survive and misleading chips render beside unfiltered rows.
+    const filtersSupported = useHistoryFiltersSupported() && !isGtfaDisabled(address);
     const clearFilters = useClearHistoryFilters();
 
     // Signatures only — the parsed transactions for instruction names are fetched lazily per row, one at a
