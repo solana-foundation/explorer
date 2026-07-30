@@ -3,7 +3,7 @@
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
 | Static | `/` | 130 kB | 1.16 MB |
-| Static | `/_not-found` | 0 B | 1.03 MB |
+| Static | `/_not-found` | 0 B | 1.04 MB |
 | Dynamic | `/address/[address]` | 400 kB | 1.42 MB |
 | Dynamic | `/address/[address]/anchor-account` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/anchor-program` | 370 kB | 1.39 MB |
@@ -47,12 +47,12 @@
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
-| Dynamic | `/block/[slot]` | 220 kB | 1.24 MB |
+| Dynamic | `/block/[slot]` | 220 kB | 1.25 MB |
 | Dynamic | `/block/[slot]/accounts` | 220 kB | 1.24 MB |
 | Dynamic | `/block/[slot]/programs` | 210 kB | 1.24 MB |
 | Dynamic | `/block/[slot]/rewards` | 210 kB | 1.24 MB |
 | Dynamic | `/epoch/[epoch]` | 10 kB | 1.04 MB |
-| Static | `/feature-gates` | 50 kB | 1.07 MB |
+| Static | `/feature-gates` | 50 kB | 1.08 MB |
 | Dynamic | `/mcp` | — | — |
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |

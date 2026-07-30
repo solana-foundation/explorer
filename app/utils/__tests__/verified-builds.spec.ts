@@ -1,14 +1,18 @@
 import { sha256 } from '@noble/hashes/sha256';
 import { PublicKey } from '@solana/web3.js';
+import { create } from 'superstruct';
 import { describe, expect, it } from 'vitest';
 
 import { Cluster } from '../cluster';
 import {
     buildEnrichedOsecInfo,
+    dedupeAndSortBuilds,
     getOsecRegistryUrl,
     hashProgramBuffer,
     hashProgramData,
+    type OsecBuild,
     type OsecInfo,
+    OsecResolveHashResponse,
     supportsVerifiedBuilds,
     VerificationStatus,
 } from '../verified-builds';
@@ -318,5 +322,149 @@ describe('buildEnrichedOsecInfo', () => {
         });
         expect(info.repo_url).toBe('');
         expect(info.onchain_repo_url).toBe('');
+    });
+});
+
+describe('dedupeAndSortBuilds', () => {
+    function makeBuild(overrides: Partial<OsecBuild> = {}): OsecBuild {
+        return {
+            build_id: 'build-0',
+            commit: 'aaaaaaa',
+            completed_at: '2026-01-01T00:00:00.000Z',
+            matches_deployed: true,
+            program_id: 'HfU7iK2hyesWG1abBD8nXDpsw2ijrA2vpdiNYNj3Hg3c',
+            repository: 'https://github.com/example/repo',
+            signer: null,
+            trusted: true,
+            ...overrides,
+        };
+    }
+
+    it('should collapse builds that share program/repo/commit/trusted/matches_deployed', () => {
+        const result = dedupeAndSortBuilds([
+            makeBuild({ build_id: 'a' }),
+            makeBuild({ build_id: 'b' }), // same identity, different build_id -> dropped
+        ]);
+        expect(result).toHaveLength(1);
+        expect(result[0].build_id).toBe('a');
+    });
+
+    it('should keep distinct trusted and untrusted rows for the same build', () => {
+        const result = dedupeAndSortBuilds([
+            makeBuild({ build_id: 'untrusted', trusted: false }),
+            makeBuild({ build_id: 'trusted', trusted: true }),
+        ]);
+        expect(result).toHaveLength(2);
+        // trusted sorts first
+        expect(result[0].build_id).toBe('trusted');
+        expect(result[1].build_id).toBe('untrusted');
+    });
+
+    it('should order by trusted, then matches_deployed, then most recent completed_at', () => {
+        // Distinct commits so none of these collapse during dedupe (which ignores completed_at).
+        const result = dedupeAndSortBuilds([
+            makeBuild({
+                build_id: 'old-trusted',
+                commit: 'commit-old',
+                completed_at: '2026-01-01T00:00:00.000Z',
+                trusted: true,
+            }),
+            makeBuild({
+                build_id: 'new-trusted',
+                commit: 'commit-new',
+                completed_at: '2026-06-01T00:00:00.000Z',
+                trusted: true,
+            }),
+            makeBuild({ build_id: 'untrusted-deployed', commit: 'commit-x', matches_deployed: true, trusted: false }),
+            makeBuild({
+                build_id: 'untrusted-undeployed',
+                commit: 'commit-y',
+                matches_deployed: false,
+                trusted: false,
+            }),
+        ]);
+        expect(result.map(b => b.build_id)).toEqual([
+            'new-trusted',
+            'old-trusted',
+            'untrusted-deployed',
+            'untrusted-undeployed',
+        ]);
+    });
+
+    it('should keep the most recent run when collapsing duplicates, regardless of input order', () => {
+        const older = makeBuild({ build_id: 'older', completed_at: '2026-01-01T00:00:00.000Z' });
+        const newer = makeBuild({ build_id: 'newer', completed_at: '2026-02-01T00:00:00.000Z' });
+
+        // Newest survives whether the older or the newer run appears first in the response.
+        const olderFirst = dedupeAndSortBuilds([older, newer]);
+        expect(olderFirst).toHaveLength(1);
+        expect(olderFirst[0].build_id).toBe('newer');
+
+        const newerFirst = dedupeAndSortBuilds([newer, older]);
+        expect(newerFirst).toHaveLength(1);
+        expect(newerFirst[0].build_id).toBe('newer');
+    });
+
+    it('should return an empty array unchanged', () => {
+        expect(dedupeAndSortBuilds([])).toEqual([]);
+    });
+});
+
+describe('OsecResolveHashResponse', () => {
+    const HASH = '6122072454d9763f71b04106e79a9e670c695d500f104e31e4c2e4177f0cd736';
+
+    function makeRawBuild(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+        return {
+            build_id: 'build-0',
+            commit: 'aaaaaaa',
+            completed_at: '2026-01-01T00:00:00.000Z',
+            matches_deployed: true,
+            program_id: 'HfU7iK2hyesWG1abBD8nXDpsw2ijrA2vpdiNYNj3Hg3c',
+            repository: 'https://github.com/example/repo',
+            signer: null,
+            trusted: true,
+            ...overrides,
+        };
+    }
+
+    it('should accept a well-formed payload', () => {
+        const raw = { builds: [makeRawBuild()], executable_hash: HASH };
+        expect(create(raw, OsecResolveHashResponse).builds).toHaveLength(1);
+    });
+
+    it('should accept a null or string signer', () => {
+        const raw = {
+            builds: [makeRawBuild({ signer: null }), makeRawBuild({ build_id: 'b', signer: 'some-signer' })],
+            executable_hash: HASH,
+        };
+        expect(create(raw, OsecResolveHashResponse).builds.map(b => b.signer)).toEqual([null, 'some-signer']);
+    });
+
+    it('should accept an empty builds list', () => {
+        expect(create({ builds: [], executable_hash: HASH }, OsecResolveHashResponse).builds).toEqual([]);
+    });
+
+    it('should tolerate unknown fields added upstream', () => {
+        const raw = {
+            builds: [makeRawBuild({ future_field: 'ignored' })],
+            executable_hash: HASH,
+            unknown_top_level: 1,
+        };
+        expect(() => create(raw, OsecResolveHashResponse)).not.toThrow();
+    });
+
+    it('should reject a build missing a required field', () => {
+        const raw = { builds: [makeRawBuild()], executable_hash: HASH };
+        delete (raw.builds[0] as Record<string, unknown>).repository;
+        expect(() => create(raw, OsecResolveHashResponse)).toThrow();
+    });
+
+    it('should reject a field with the wrong type', () => {
+        const raw = { builds: [makeRawBuild({ trusted: 'yes' })], executable_hash: HASH };
+        expect(() => create(raw, OsecResolveHashResponse)).toThrow();
+    });
+
+    it('should reject a payload with no builds array', () => {
+        expect(() => create({ executable_hash: HASH }, OsecResolveHashResponse)).toThrow();
     });
 });
