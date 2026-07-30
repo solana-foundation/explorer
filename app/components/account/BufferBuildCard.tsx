@@ -20,7 +20,12 @@ import {
     supportsVerifiedBuilds,
     useResolveBuildsByHash,
 } from '@/app/utils/verified-builds';
-import { composeOnchainRepoUrl, repoLabel, trimTrailingSlashes } from '@/app/utils/verified-builds-url';
+import {
+    composeOnchainRepoUrl,
+    repoLabel,
+    trimTrailingSlashes,
+    VERIFIED_BUILDS_GUIDE_URL,
+} from '@/app/utils/verified-builds-url';
 import { ProgramBufferAccountInfo } from '@/app/validators/accounts/upgradeable-program';
 
 import { Address } from '../common/Address';
@@ -90,7 +95,7 @@ export function BaseBufferBuildCard({
             <Card ui="dashkit">
                 <CardBody ui="dashkit" className="text-center">
                     No verified builds found for this buffer&apos;s binary. For more information, see the{' '}
-                    <Link href="https://solana.com/developers/guides/advanced/verified-builds" target="_blank">
+                    <Link href={VERIFIED_BUILDS_GUIDE_URL} target="_blank">
                         Verified Build Guide
                     </Link>
                     .
@@ -110,11 +115,7 @@ export function BaseBufferBuildCard({
             <Alert className="mb-1.5 mt-1.5">
                 These are completed builds whose compiled output matches this buffer&apos;s binary. A match does not
                 imply that the program has been audited. For more details, refer to the{' '}
-                <a
-                    href="https://solana.com/developers/guides/advanced/verified-builds"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
+                <a href={VERIFIED_BUILDS_GUIDE_URL} target="_blank" rel="noopener noreferrer">
                     Verified Builds Guide <ExternalLink className="ml-[3px] align-text-top" size={13} />
                 </a>
                 .

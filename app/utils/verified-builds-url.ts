@@ -1,3 +1,6 @@
+// Canonical docs link for verified builds, shared by every card that explains the feature.
+export const VERIFIED_BUILDS_GUIDE_URL = 'https://solana.com/developers/guides/advanced/verified-builds';
+
 // Strip `.git` from clone URLs so `<repo>/tree/<sha>` deep-links resolve on GitHub.
 export function normalizeRepoUrl(repoUrl: string | undefined): string | undefined {
     if (!repoUrl) return undefined;

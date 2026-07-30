@@ -10,6 +10,7 @@ import { Alert } from '@/app/shared/ui/Alert';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
+import { VERIFIED_BUILDS_GUIDE_URL } from '@/app/utils/verified-builds-url';
 
 import { Address } from '../common/Address';
 import { Copyable } from '../common/Copyable';
@@ -61,7 +62,7 @@ export function BaseVerifiedBuildCard({
             <Card ui="dashkit">
                 <CardBody ui="dashkit" className="text-center">
                     Verified build information not yet uploaded by the program authority. For more information, see the{' '}
-                    <Link href="https://solana.com/developers/guides/advanced/verified-builds" target="_blank">
+                    <Link href={VERIFIED_BUILDS_GUIDE_URL} target="_blank">
                         Verified Build Guide
                     </Link>
                     .<br />
@@ -95,11 +96,7 @@ export function BaseVerifiedBuildCard({
             <Alert className="mb-1.5 mt-1.5">
                 A verified build badge indicates that this program was built from source code that is publicly
                 available, but does not imply that this program has been audited. For more details, refer to the{' '}
-                <a
-                    href="https://solana.com/developers/guides/advanced/verified-builds"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
+                <a href={VERIFIED_BUILDS_GUIDE_URL} target="_blank" rel="noopener noreferrer">
                     Verified Builds Guide <ExternalLink className="ml-[3px] align-text-top" size={13} />
                 </a>
                 .
