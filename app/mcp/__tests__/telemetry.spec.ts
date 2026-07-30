@@ -37,7 +37,7 @@ describe('createMcpTrack', () => {
         vi.clearAllMocks();
     });
 
-    it('should send the event after the response using the mcp session id as the client id', async () => {
+    it('should send the event after the response using the hashed mcp session id as the client id', async () => {
         const fetchMock = stubGaEnv();
         headersMock.mockResolvedValue(new Headers({ 'mcp-session-id': 'session-123' }));
 
@@ -45,8 +45,10 @@ describe('createMcpTrack', () => {
         await flushMicrotasks();
 
         expect(afterMock).toHaveBeenCalledTimes(1);
+        const expectedHash = createHash('sha256').update('session-123').digest('hex');
         const [, init] = fetchMock.mock.calls[0];
-        expect(JSON.parse(init.body)).toMatchObject({ client_id: 'session-123' });
+        expect(JSON.parse(init.body)).toMatchObject({ client_id: expectedHash });
+        expect(init.body).not.toContain('session-123');
     });
 
     it('should hash the client ip when no session id is present', async () => {

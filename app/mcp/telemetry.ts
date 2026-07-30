@@ -28,15 +28,18 @@ function buildTelemetry(): Telemetry {
     });
 }
 
-// GA4 needs a stable-ish client_id: the MCP session when present, else a hash — the raw IP never leaves.
+const pseudonymize = (value: string) => createHash('sha256').update(value).digest('hex');
+
+// GA4 needs a stable-ish client_id: the MCP session when present, else the IP — both hashed so no
+// caller-supplied identifier (session token or raw IP) ever leaves verbatim to Google Analytics.
 async function resolveClientId(): Promise<string> {
     const requestHeaders = await headers();
     const sessionId = requestHeaders.get('mcp-session-id');
-    if (sessionId) return sessionId;
+    if (sessionId) return pseudonymize(sessionId);
     const [firstEntry = ''] = (requestHeaders.get('x-forwarded-for') ?? '').split(',');
     const clientIp = firstEntry.trim();
     if (clientIp.length === 0) return 'anonymous';
-    return createHash('sha256').update(clientIp).digest('hex');
+    return pseudonymize(clientIp);
 }
 
 /** Usage-event sink for `EntityInspectorConfig.track` — sends after the response via `after()`. */
