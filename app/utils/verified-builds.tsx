@@ -223,15 +223,21 @@ export function useIsProgramVerified({
 // Used for program buffer accounts: a buffer holds a staged binary with no program id to look
 // up in the OSEC registry, but its buffer hash can still be resolved to the source build(s)
 // that produced it. Returns the `/resolve-hash` response, or nothing while `hash` is undefined
-// (e.g. a buffer whose `data` is unavailable, so no hash could be computed).
+// (e.g. a buffer whose `data` is unavailable, so no hash could be computed) or the cluster has
+// no registry. The registry URL is part of the cache key, so clusters never share an entry.
 export function useResolveBuildsByHash(hash: string | undefined) {
-    return useSWRImmutable(hash ? ['resolve-hash', hash] : null, async ([, executableHash]) => {
-        const response = await fetch(`${OSEC_REGISTRY_URL}/resolve-hash/${executableHash}`);
-        if (!response.ok) {
-            throw new Error(`resolve-hash request failed with status ${response.status}`);
-        }
-        return (await response.json()) as OsecResolveHashResponse;
-    });
+    const { cluster } = useCluster();
+    const registryUrl = getOsecRegistryUrl(cluster);
+    return useSWRImmutable(
+        hash && registryUrl ? ['resolve-hash', registryUrl, hash] : null,
+        async ([, base, executableHash]) => {
+            const response = await fetch(`${base}/resolve-hash/${executableHash}`);
+            if (!response.ok) {
+                throw new Error(`resolve-hash request failed with status ${response.status}`);
+            }
+            return (await response.json()) as OsecResolveHashResponse;
+        },
+    );
 }
 
 // Collapse exact-duplicate builds and order them for display. `/resolve-hash` can return the same

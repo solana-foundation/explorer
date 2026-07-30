@@ -94,3 +94,15 @@ export const Error: Story = {
         isLoading: false,
     },
 };
+
+// Testnet/Custom have no OSEC registry, so no resolve-hash lookup runs and the card says so
+// rather than claiming the lookup found no builds.
+export const ClusterUnsupported: Story = {
+    args: {
+        bufferHash: BUFFER_HASH,
+        builds: undefined,
+        clusterSupported: false,
+        error: false,
+        isLoading: false,
+    },
+};

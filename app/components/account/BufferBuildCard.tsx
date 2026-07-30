@@ -8,6 +8,7 @@ import React, { Fragment, useState } from 'react';
 import { ExternalLink } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { useCluster } from '@/app/providers/cluster';
 import { Alert } from '@/app/shared/ui/Alert';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { ExpandInfoButton } from '@/app/shared/ui/ExpandInfoButton';
@@ -16,6 +17,7 @@ import {
     dedupeAndSortBuilds,
     hashProgramBuffer,
     type OsecBuild,
+    supportsVerifiedBuilds,
     useResolveBuildsByHash,
 } from '@/app/utils/verified-builds';
 import { composeOnchainRepoUrl, repoLabel, trimTrailingSlashes } from '@/app/utils/verified-builds-url';
@@ -32,6 +34,7 @@ const COLUMN_COUNT = 7;
 // A buffer has no program id to look up in the OSEC registry, so we hash its bytes with the same
 // `hashProgramBuffer` used elsewhere and resolve that hash against `/resolve-hash`.
 export function BufferBuildCard({ buffer }: { buffer: ProgramBufferAccountInfo; pubkey: PublicKey }) {
+    const { cluster } = useCluster();
     const bufferHash = React.useMemo(() => hashProgramBuffer(buffer), [buffer]);
     const { data, error, isLoading } = useResolveBuildsByHash(bufferHash);
 
@@ -41,6 +44,7 @@ export function BufferBuildCard({ buffer }: { buffer: ProgramBufferAccountInfo; 
             bufferHash={bufferHash}
             isLoading={isLoading}
             error={Boolean(error)}
+            clusterSupported={supportsVerifiedBuilds(cluster)}
         />
     );
 }
@@ -51,12 +55,26 @@ export function BaseBufferBuildCard({
     bufferHash,
     isLoading,
     error,
+    // OSEC hosts no registry for Testnet/Custom, so no resolve-hash lookup happens there. Defaults
+    // to true so stories and tests that exercise the build states need not opt in.
+    clusterSupported = true,
 }: {
     builds: OsecBuild[] | undefined;
     bufferHash: string | undefined;
     isLoading: boolean;
     error: boolean;
+    clusterSupported?: boolean;
 }) {
+    if (!clusterSupported) {
+        return (
+            <Card ui="dashkit">
+                <CardBody ui="dashkit" className="text-center">
+                    Verified Builds only available on Mainnet and Devnet.
+                </CardBody>
+            </Card>
+        );
+    }
+
     if (isLoading) {
         return <LoadingCard message="Resolving buffer build hash" />;
     }
