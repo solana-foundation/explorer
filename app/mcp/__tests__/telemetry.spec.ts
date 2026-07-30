@@ -23,7 +23,7 @@ function flushMicrotasks(): Promise<void> {
 }
 
 function stubGaEnv(): ReturnType<typeof vi.fn> {
-    vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', 'G-TEST123');
+    vi.stubEnv('MCP_GA_MEASUREMENT_ID', 'G-TEST123');
     vi.stubEnv('MCP_GA_API_SECRET', 'secret');
     const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
     vi.stubGlobal('fetch', fetchMock);
@@ -49,6 +49,21 @@ describe('createMcpTrack', () => {
         const [, init] = fetchMock.mock.calls[0];
         expect(JSON.parse(init.body)).toMatchObject({ client_id: expectedHash });
         expect(init.body).not.toContain('session-123');
+    });
+
+    it('should fall back to NEXT_PUBLIC_GOOGLE_ANALYTICS_ID when MCP_GA_MEASUREMENT_ID is unset', async () => {
+        vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', 'G-CLIENT');
+        vi.stubEnv('MCP_GA_API_SECRET', 'secret');
+        const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+        vi.stubGlobal('fetch', fetchMock);
+        headersMock.mockResolvedValue(new Headers({ 'mcp-session-id': 'session-123' }));
+
+        createMcpTrack()(EVENT);
+        await flushMicrotasks();
+
+        expect(fetchMock).toHaveBeenCalledOnce();
+        const [url] = fetchMock.mock.calls[0];
+        expect(url).toContain('measurement_id=G-CLIENT');
     });
 
     it('should hash the client ip when no session id is present', async () => {
@@ -87,7 +102,7 @@ describe('createMcpTrack', () => {
 
         expect(fetchMock).not.toHaveBeenCalled();
         expect(loggerMock.warn).toHaveBeenCalledWith(
-            '[mcp] NEXT_PUBLIC_GOOGLE_ANALYTICS_ID or MCP_GA_API_SECRET unset — usage analytics disabled',
+            '[mcp] MCP_GA_MEASUREMENT_ID (or NEXT_PUBLIC_GOOGLE_ANALYTICS_ID) or MCP_GA_API_SECRET unset — usage analytics disabled',
         );
     });
 

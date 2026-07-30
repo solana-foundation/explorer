@@ -9,14 +9,17 @@ import { after } from 'next/server';
 import { Logger } from '@/app/shared/lib/logger';
 
 function buildTelemetry(): Telemetry {
-    const measurementId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
+    // Prefer a dedicated server id; the NEXT_PUBLIC_ fallback keeps single-id setups working, but server telemetry shouldn't depend on a client var.
+    const measurementId = process.env.MCP_GA_MEASUREMENT_ID ?? process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
     const apiSecret = process.env.MCP_GA_API_SECRET;
     // Missing GA credentials → empty provider list → telemetry is a no-op, call sites stay unconditional.
     const providers = measurementId && apiSecret ? [createGa4Provider({ apiSecret, measurementId })] : [];
     if (providers.length === 0) {
         // Once per cold start (same pattern as the MCP_ACCESS_KEYS warning in route.ts) — a silently
         // disabled pipeline is otherwise indistinguishable from a broken one.
-        Logger.warn('[mcp] NEXT_PUBLIC_GOOGLE_ANALYTICS_ID or MCP_GA_API_SECRET unset — usage analytics disabled');
+        Logger.warn(
+            '[mcp] MCP_GA_MEASUREMENT_ID (or NEXT_PUBLIC_GOOGLE_ANALYTICS_ID) or MCP_GA_API_SECRET unset — usage analytics disabled',
+        );
     }
     return createTelemetry(providers, {
         logger: {
