@@ -8,7 +8,7 @@ import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import type { KitInstruction } from '../../kit-instruction.js';
 import { SPL_TOKEN_2022_PROGRAM_LABEL, SPL_TOKEN_PROGRAM_LABEL, type TokenProgram } from '../../program-registry.js';
 
-// `TokenInstruction::Batch = 255` per https://github.com/solana-program/token/blob/main/interface/src/instruction.rs
+// `TokenInstruction::Batch = 255` per https://github.com/solana-program/token/blob/cd5cdc8d35a854c3dde4b673fabd7570b20aab0d/pinocchio/program/tests/batch.rs#L31
 export const TOKEN_BATCH_DISCRIMINATOR = 0xff;
 
 export function hasTokenBatchDiscriminator(data: { length: number; 0?: number }): boolean {
