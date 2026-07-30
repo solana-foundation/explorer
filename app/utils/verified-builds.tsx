@@ -2,6 +2,7 @@ import { useAnchorProgram } from '@entities/idl';
 import { sha256 } from '@noble/hashes/sha256';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { useEffect, useMemo } from 'react';
+import { array, boolean, create, Infer, nullable, string, type } from 'superstruct';
 import useSWRImmutable from 'swr/immutable';
 
 import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
@@ -64,24 +65,29 @@ export type OsecInfo = {
 
 // A single completed build returned by the OSEC `/resolve-hash/{executable_hash}` endpoint.
 // Each build is a source repo/commit whose compiled output hashes to the queried executable hash.
-export type OsecBuild = {
-    build_id: string;
-    program_id: string;
-    signer: string | null;
-    repository: string;
-    commit: string;
-    completed_at: string;
+// Validated at the fetch boundary, so a field the API drops or retypes surfaces as an error state
+// instead of rendering `undefined` in the table. `type` is lenient about unknown keys, so fields
+// added upstream do not break the card.
+export type OsecBuild = Infer<typeof OsecBuild>;
+export const OsecBuild = type({
+    build_id: string(),
+    commit: string(),
+    completed_at: string(),
     // Whether this build's hash is what is currently deployed on its `program_id`.
-    matches_deployed: boolean;
+    matches_deployed: boolean(),
+    program_id: string(),
+    repository: string(),
+    signer: nullable(string()),
     // Whether the build's signer is a trusted signer.
-    trusted: boolean;
-};
+    trusted: boolean(),
+});
 
 // Response shape of `GET /resolve-hash/{executable_hash}`.
-export type OsecResolveHashResponse = {
-    executable_hash: string;
-    builds: OsecBuild[];
-};
+export type OsecResolveHashResponse = Infer<typeof OsecResolveHashResponse>;
+export const OsecResolveHashResponse = type({
+    builds: array(OsecBuild),
+    executable_hash: string(),
+});
 
 // Decoded subset of the Otter Verify `BuildParams` account used to compose the verify command / repo URL.
 type OtterVerifyBuildParams = {
@@ -235,7 +241,8 @@ export function useResolveBuildsByHash(hash: string | undefined) {
             if (!response.ok) {
                 throw new Error(`resolve-hash request failed with status ${response.status}`);
             }
-            return (await response.json()) as OsecResolveHashResponse;
+            // `create` throws on a malformed payload; SWR surfaces it as the card's error state.
+            return create(await response.json(), OsecResolveHashResponse);
         },
     );
 }

@@ -1,5 +1,6 @@
 import { sha256 } from '@noble/hashes/sha256';
 import { PublicKey } from '@solana/web3.js';
+import { create } from 'superstruct';
 import { describe, expect, it } from 'vitest';
 
 import { Cluster } from '../cluster';
@@ -11,6 +12,7 @@ import {
     hashProgramData,
     type OsecBuild,
     type OsecInfo,
+    OsecResolveHashResponse,
     supportsVerifiedBuilds,
     VerificationStatus,
 } from '../verified-builds';
@@ -405,5 +407,64 @@ describe('dedupeAndSortBuilds', () => {
 
     it('should return an empty array unchanged', () => {
         expect(dedupeAndSortBuilds([])).toEqual([]);
+    });
+});
+
+describe('OsecResolveHashResponse', () => {
+    const HASH = '6122072454d9763f71b04106e79a9e670c695d500f104e31e4c2e4177f0cd736';
+
+    function makeRawBuild(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+        return {
+            build_id: 'build-0',
+            commit: 'aaaaaaa',
+            completed_at: '2026-01-01T00:00:00.000Z',
+            matches_deployed: true,
+            program_id: 'HfU7iK2hyesWG1abBD8nXDpsw2ijrA2vpdiNYNj3Hg3c',
+            repository: 'https://github.com/example/repo',
+            signer: null,
+            trusted: true,
+            ...overrides,
+        };
+    }
+
+    it('should accept a well-formed payload', () => {
+        const raw = { builds: [makeRawBuild()], executable_hash: HASH };
+        expect(create(raw, OsecResolveHashResponse).builds).toHaveLength(1);
+    });
+
+    it('should accept a null or string signer', () => {
+        const raw = {
+            builds: [makeRawBuild({ signer: null }), makeRawBuild({ build_id: 'b', signer: 'some-signer' })],
+            executable_hash: HASH,
+        };
+        expect(create(raw, OsecResolveHashResponse).builds.map(b => b.signer)).toEqual([null, 'some-signer']);
+    });
+
+    it('should accept an empty builds list', () => {
+        expect(create({ builds: [], executable_hash: HASH }, OsecResolveHashResponse).builds).toEqual([]);
+    });
+
+    it('should tolerate unknown fields added upstream', () => {
+        const raw = {
+            builds: [makeRawBuild({ future_field: 'ignored' })],
+            executable_hash: HASH,
+            unknown_top_level: 1,
+        };
+        expect(() => create(raw, OsecResolveHashResponse)).not.toThrow();
+    });
+
+    it('should reject a build missing a required field', () => {
+        const raw = { builds: [makeRawBuild()], executable_hash: HASH };
+        delete (raw.builds[0] as Record<string, unknown>).repository;
+        expect(() => create(raw, OsecResolveHashResponse)).toThrow();
+    });
+
+    it('should reject a field with the wrong type', () => {
+        const raw = { builds: [makeRawBuild({ trusted: 'yes' })], executable_hash: HASH };
+        expect(() => create(raw, OsecResolveHashResponse)).toThrow();
+    });
+
+    it('should reject a payload with no builds array', () => {
+        expect(() => create({ executable_hash: HASH }, OsecResolveHashResponse)).toThrow();
     });
 });
