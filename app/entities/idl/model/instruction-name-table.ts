@@ -9,6 +9,7 @@ import {
 } from '@solana/kit';
 import { type InstructionNode, isNode, titleCase } from 'codama';
 
+import { arrayOrEmpty } from '@/app/shared/lib/array';
 import { startsWith } from '@/app/shared/lib/bytes';
 
 import { type AnchorIdl, type CodamaIdl, type SupportedIdl } from '../lib/types';
@@ -114,7 +115,7 @@ export function matchInstructionName(table: InstructionNameTable, data: Uint8Arr
 // ---------------------------------------------------------------------------
 
 function buildAnchorTable(idl: AnchorIdl): InstructionNameEntry[] {
-    return (idl.instructions ?? []).flatMap(ix =>
+    return arrayOrEmpty(idl.instructions).flatMap(ix =>
         ix.discriminator?.length
             ? [{ discriminator: Uint8Array.from(ix.discriminator), name: titleCase(ix.name) }]
             : [],
@@ -136,7 +137,7 @@ const DISCRIMINATOR_ENCODERS: Record<string, Encoder<number | bigint>> = {
 };
 
 function buildCodamaTable(idl: CodamaIdl): InstructionNameEntry[] {
-    return (idl.program?.instructions ?? []).flatMap(ix => {
+    return arrayOrEmpty(idl.program?.instructions).flatMap(ix => {
         const discriminator = codamaDiscriminator(ix);
         return discriminator ? [{ discriminator, name: titleCase(ix.name) }] : [];
     });
@@ -149,7 +150,7 @@ function codamaDiscriminator(ix: InstructionNode): Uint8Array | undefined {
     if (!field || rest.length > 0 || !isNode(field, 'fieldDiscriminatorNode') || field.offset !== 0) {
         return undefined;
     }
-    const arg = ix.arguments.find(arg => arg.name === field.name);
+    const arg = arrayOrEmpty(ix.arguments).find(arg => arg.name === field.name);
     if (!arg || !isNode(arg.type, 'numberTypeNode') || !isNode(arg.defaultValue, 'numberValueNode')) {
         return undefined;
     }

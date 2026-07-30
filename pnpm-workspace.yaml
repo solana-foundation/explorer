@@ -25,3 +25,7 @@ catalogs:
 ignoreScripts: true
 
 minimumReleaseAge: 20160
+
+minimumReleaseAgeExclude:
+  - '@codama/*'
+  - codama

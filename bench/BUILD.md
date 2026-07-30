@@ -21,14 +21,14 @@
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/program-multisig` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/rewards` | 370 kB | 1.39 MB |
-| Dynamic | `/address/[address]/security` | 370 kB | 1.39 MB |
+| Dynamic | `/address/[address]/security` | 380 kB | 1.40 MB |
 | Dynamic | `/address/[address]/slot-hashes` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/stake-history` | 370 kB | 1.39 MB |
 | Dynamic | `/address/[address]/subscriptions` | 370 kB | 1.39 MB |
-| Dynamic | `/address/[address]/token-extensions` | 370 kB | 1.40 MB |
+| Dynamic | `/address/[address]/token-extensions` | 380 kB | 1.40 MB |
 | Dynamic | `/address/[address]/tokens` | 380 kB | 1.40 MB |
 | Dynamic | `/address/[address]/transfers` | 380 kB | 1.40 MB |
-| Dynamic | `/address/[address]/verified-build` | 370 kB | 1.39 MB |
+| Dynamic | `/address/[address]/verified-build` | 370 kB | 1.40 MB |
 | Dynamic | `/address/[address]/vote-history` | 370 kB | 1.39 MB |
 | Dynamic | `/api/ans-domains/[address]` | — | — |
 | Dynamic | `/api/domain-info/[domain]` | — | — |
@@ -48,7 +48,7 @@
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
 | Dynamic | `/block/[slot]` | 220 kB | 1.24 MB |
-| Dynamic | `/block/[slot]/accounts` | 220 kB | 1.24 MB |
+| Dynamic | `/block/[slot]/accounts` | 210 kB | 1.24 MB |
 | Dynamic | `/block/[slot]/programs` | 210 kB | 1.24 MB |
 | Dynamic | `/block/[slot]/rewards` | 210 kB | 1.24 MB |
 | Dynamic | `/epoch/[epoch]` | 10 kB | 1.04 MB |
@@ -59,5 +59,5 @@
 | Static | `/opengraph-image.png` | — | — |
 | Static | `/tos` | 880 B | 1.04 MB |
 | Dynamic | `/tx/[signature]` | 450 kB | 1.47 MB |
-| Dynamic | `/tx/[signature]/inspect` | 360 kB | 1.38 MB |
-| Static | `/tx/inspector` | 360 kB | 1.38 MB |
+| Dynamic | `/tx/[signature]/inspect` | 360 kB | 1.39 MB |
+| Static | `/tx/inspector` | 360 kB | 1.39 MB |
