@@ -64,6 +64,7 @@ export type UpgradeableLoaderAccountData = {
     programData?: ProgramDataAccountInfo;
 };
 
+// TODO(A.4 follow-up): fold onto @explorer/parsers `isParsedAccountProgram`; `isTokenProgramData` below is a two-label check (spl-token + spl-token-2022), not a single-kind fold.
 export function isUpgradeableLoaderAccountData(data: { program: string }): data is UpgradeableLoaderAccountData {
     return data.program === BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL;
 }

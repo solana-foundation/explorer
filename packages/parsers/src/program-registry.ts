@@ -43,6 +43,21 @@ export function isRpcParsedAccountProgram(value: string): value is RpcParsedAcco
 }
 
 // `parsed.program` labels the RPC emits on parsed transaction instructions.
+/**
+ * Narrows a jsonParsed account envelope by its `program` discriminator. `D` is
+ * inferred from the call site (e.g. the app's `ParsedData` union), so a match
+ * narrows to the exact member — parsers never imports the consumer's union.
+ *
+ * @example
+ * if (isParsedAccountProgram(parsedData, VOTE_PROGRAM_LABEL)) parsedData.parsed; // narrowed
+ */
+export function isParsedAccountProgram<D extends { program: string }, K extends D['program']>(
+    data: D | undefined | null,
+    kind: K,
+): data is Extract<D, { program: K }> {
+    return data?.program === kind;
+}
+
 export const RPC_PARSED_INSTRUCTION_PROGRAMS = [
     SPL_TOKEN_PROGRAM_LABEL,
     SPL_TOKEN_2022_PROGRAM_LABEL,

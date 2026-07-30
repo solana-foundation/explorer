@@ -1,7 +1,7 @@
 'use client';
 
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
-import { VOTE_PROGRAM_LABEL } from '@explorer/parsers';
+import { isParsedAccountProgram, VOTE_PROGRAM_LABEL } from '@explorer/parsers';
 import { VotesCard } from '@features/vote';
 import React from 'react';
 
@@ -16,7 +16,7 @@ function VotesCardRenderer({
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
     const parsedData = account?.data?.parsed;
-    if (!parsedData || parsedData?.program !== VOTE_PROGRAM_LABEL) {
+    if (!isParsedAccountProgram(parsedData, VOTE_PROGRAM_LABEL)) {
         return onNotFound();
     }
     return <VotesCard voteAccount={parsedData.parsed} />;

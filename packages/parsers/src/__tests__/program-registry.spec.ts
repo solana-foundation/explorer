@@ -2,6 +2,7 @@ import { is } from 'superstruct';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import {
+    isParsedAccountProgram,
     isRpcParsedAccountProgram,
     isRpcParsedInstructionProgram,
     isTokenProgram,
@@ -15,6 +16,13 @@ import {
     type RpcParsedInstructionProgram,
     type TokenProgram,
 } from '../program-registry.js';
+
+type Vote = { program: 'vote'; parsed: { slot: number } };
+type Stake = { program: 'stake'; parsed: { active: boolean } };
+type ParsedData = Vote | Stake;
+// Read through a typed accessor (not a literal `const`) so the inferred union
+// stays wide — mirrors the app's `account.data.parsed` access.
+const parsed = (): ParsedData => ({ parsed: { slot: 1 }, program: 'vote' });
 
 describe('program registry', () => {
     it('should accept every token program via the guard and reject outsiders', () => {
@@ -54,6 +62,29 @@ describe('program registry', () => {
         expect(is('spl-memo', tokenProgram)).toBe(false);
         expect(is('spl-memo', rpcParsedAccountProgram)).toBe(false);
         expect(is('sysvar', rpcParsedInstructionProgram)).toBe(false);
+    });
+
+    describe('isParsedAccountProgram', () => {
+        it('should return true when the discriminator matches', () => {
+            expect(isParsedAccountProgram(parsed(), 'vote')).toBe(true);
+        });
+
+        it('should return false when the discriminator differs', () => {
+            expect(isParsedAccountProgram(parsed(), 'stake')).toBe(false);
+        });
+
+        it('should return false for undefined or null data', () => {
+            expect(isParsedAccountProgram(undefined, 'vote')).toBe(false);
+            expect(isParsedAccountProgram(null, 'vote')).toBe(false);
+        });
+
+        it('should narrow the inferred union member on a match', () => {
+            const data = parsed();
+            if (isParsedAccountProgram(data, 'vote')) {
+                expectTypeOf(data).toEqualTypeOf<Vote>();
+                expectTypeOf(data.parsed).toEqualTypeOf<{ slot: number }>();
+            }
+        });
     });
 
     // Drift canaries: an accidental edit to either registry array breaks these pins.
