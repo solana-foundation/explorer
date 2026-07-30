@@ -92,7 +92,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
             foundOldest={history.data.foundOldest}
             onRefresh={refresh}
             onLoadMore={loadMore}
-            headerActions={<HistoryFilterTrigger {...filters} />}
+            headerActions={<HistoryFilterTrigger address={address} {...filters} />}
             headerSubRow={hasActiveFilters ? <HistoryFilterChips {...filters} /> : undefined}
         />
     );

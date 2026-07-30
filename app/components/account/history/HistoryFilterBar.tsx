@@ -6,7 +6,7 @@ import { DateTimePicker } from '@components/shared/ui/date-time-picker';
 import { Input } from '@components/shared/ui/input';
 import { Label } from '@components/shared/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
-import { HistoryFilters, useHistoryFiltersSupported } from '@providers/accounts/history';
+import { HistoryFilters, isGtfaDisabled, useHistoryFiltersSupported } from '@providers/accounts/history';
 import { format } from 'date-fns';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
@@ -187,11 +187,14 @@ export function HistoryFilterChips(filters: HistoryFilters) {
 const SELECT_CLASS =
     'h-9 w-full appearance-none rounded border border-outer-space-950 bg-heavy-metal-900 px-3 pr-8 font-mono text-xs text-neutral-200 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900';
 
-export function HistoryFilterTrigger(filters: HistoryFilters) {
+export function HistoryFilterTrigger({ address, ...filters }: HistoryFilters & { address?: string }) {
     const { slot, blockTime, status } = filters;
     const updateFilters = useUpdateHistoryFilters();
     const clearFilters = useClearHistoryFilters();
-    const supported = useHistoryFiltersSupported();
+    // Filtering needs gTFA. It's unavailable when the endpoint doesn't implement gTFA at all
+    // (global `supported` flag) or when gTFA is temporarily disabled for this specific address
+    // (the address falls back to getSignaturesForAddress, which can't honour filters).
+    const supported = useHistoryFiltersSupported() && !(address !== undefined && isGtfaDisabled(address));
     const [open, setOpen] = React.useState(false);
 
     const [slotGteDraft, setSlotGteDraft] = React.useState('');
@@ -251,8 +254,8 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
         (blockTime?.lte !== undefined ? 1 : 0);
     const triggerLabel = activeCount === 0 ? 'Filters' : 'Edit filters';
 
-    // The endpoint doesn't support getTransactionsForAddress, so filtering can't be
-    // applied server-side; show a disabled control rather than a misleading filter UI.
+    // gTFA is unavailable (endpoint-wide or for this address), so filtering can't be applied
+    // server-side; show a disabled control rather than a misleading filter UI.
     if (!supported) {
         return (
             <Button
@@ -260,7 +263,7 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
                 variant="outline"
                 disabled
                 aria-label="Filters unavailable"
-                title="Transaction filtering requires a Triton- or Helius-compatible RPC endpoint"
+                title="Transaction filtering is unavailable for this account or RPC endpoint"
             >
                 <Filter />
                 <span className="hidden md:inline">Filters</span>
@@ -371,11 +374,11 @@ export function HistoryFilterTrigger(filters: HistoryFilters) {
 }
 
 // Combined bar kept for tests / any consumer that wants chips + trigger inline.
-export function HistoryFilterBar(props: HistoryFilters) {
+export function HistoryFilterBar({ address, ...props }: HistoryFilters & { address?: string }) {
     return (
         <div className="flex flex-wrap items-center gap-2">
             <HistoryFilterChips {...props} />
-            <HistoryFilterTrigger {...props} />
+            <HistoryFilterTrigger address={address} {...props} />
         </div>
     );
 }

@@ -77,6 +77,21 @@ describe('HistoryFilterBar', () => {
         expect(screen.queryByText(/Slot ≤:/)).not.toBeInTheDocument();
     });
 
+    it('should disable the filter control for an address where gTFA is disabled', () => {
+        // Wrapped SOL — in GTFA_DISABLED_ADDRESSES, so filtering falls back to
+        // getSignaturesForAddress and the UI must present filters as unavailable.
+        render(<HistoryFilterBar address="So11111111111111111111111111111111111111112" />);
+
+        const button = screen.getByRole('button', { name: /Filters unavailable/ });
+        expect(button).toBeDisabled();
+    });
+
+    it('should keep the filter control enabled for a non-blocked address', () => {
+        render(<HistoryFilterBar address="4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T" />);
+
+        expect(screen.getByRole('button', { name: /^Filters$/ })).toBeEnabled();
+    });
+
     it('should render a chip per active slot bound', () => {
         render(<HistoryFilterBar slot={{ gte: 100, lte: 2_000_000 }} />);
         expect(screen.getByText(/Slot ≥:\s*100/)).toBeInTheDocument();
