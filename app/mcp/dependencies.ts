@@ -6,12 +6,11 @@ import { clusterApiUrl, PublicKey, TransactionInstruction } from '@solana/web3.j
 import { Logger } from '@/app/shared/lib/logger';
 import { wrapMcpServerWithSentry } from '@/app/shared/lib/sentry';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
-import { LOADER_IDS, PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
+import { programNameByAddress } from '@/app/utils/programs';
 
 import { createMcpTrack } from './telemetry';
 
-const resolveProgramName: EntityInspectorConfig['resolveProgramName'] = address =>
-    PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address];
+const resolveProgramName: EntityInspectorConfig['resolveProgramName'] = programNameByAddress;
 
 const decodeInstructionFallback: EntityInspectorConfig['decodeInstructionFallback'] = instruction => {
     const dispatched = instructionParserDispatcher.fromTransactionInstruction(

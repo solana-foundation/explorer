@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, VOTE_PROGRAM_ID } from '../../../shared/constants.js';
+import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../../../shared/constants.js';
 import {
     assertUnreachable,
     buildMintOverviewFields,
@@ -15,10 +15,10 @@ describe('account kind shared helpers', () => {
         expect(() => assertUnreachable('impossible' as never)).toThrow('Unhandled account entity kind');
     });
 
-    it('should resolve labels via the injected resolver, then the built-in map, then null', () => {
+    it('should resolve labels via the injected resolver, then the address, then null', () => {
         const account = { owner: null, parsedData: null, parsedProgram: null, rawDataBytes: null };
 
-        // Injected resolver wins over the built-in map
+        // Injected resolver (host-app registry) wins
         expect(
             resolveProgramAddressLabel({
                 account: { ...account, address: TOKEN_PROGRAM_ID },
@@ -27,18 +27,15 @@ describe('account kind shared helpers', () => {
             }),
         ).toBe('Custom Label');
 
-        // Built-in map covers well-known programs without a resolver
+        // Without a resolver, the address itself is the label
         expect(
             resolveProgramAddressLabel({ account: { ...account, address: TOKEN_PROGRAM_ID }, kind: 'unknown' }),
-        ).toBe('Token Program');
-        expect(resolveProgramAddressLabel({ account: { ...account, address: VOTE_PROGRAM_ID }, kind: 'unknown' })).toBe(
-            'Vote Program',
+        ).toBe(TOKEN_PROGRAM_ID);
+        expect(resolveProgramAddressLabel({ account: { ...account, address: 'Unknown111' }, kind: 'unknown' })).toBe(
+            'Unknown111',
         );
 
-        // Unknown address and missing address both yield null
-        expect(
-            resolveProgramAddressLabel({ account: { ...account, address: 'Unknown111' }, kind: 'unknown' }),
-        ).toBeNull();
+        // A missing address yields null
         expect(resolveProgramAddressLabel({ account, kind: 'unknown' })).toBeNull();
     });
 

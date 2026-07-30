@@ -1,7 +1,6 @@
-import { PROGRAM_DISPLAY_NAMES } from '@explorer/parsers';
-
 import { asBoolean, asRecord, asSafeNumeric, asString } from '../../shared/parse-helpers.js';
 import type { UnknownMarker } from '../../shared/types.js';
+import { UNKNOWN_KIND } from '../kinds.js';
 import type { AccountEntityKind, AccountPayloadContext, NormalizedAccountInfo } from '../types.js';
 
 export type AccountKindBuilder = (context: AccountPayloadContext) => Record<string, unknown>;
@@ -10,13 +9,18 @@ export function assertUnreachable(kind: never): never {
     throw new Error(`Unhandled account entity kind: ${String(kind)}`);
 }
 
-// The injected resolver (host-app registry) wins; the package's built-in map covers well-known programs for standalone consumers.
+// Display names are the host app's concern (injected via resolveProgramName). With no resolver, fall
+// back to the classified kind label (parsers vocabulary) qualified by the address, then the address alone.
 export function resolveProgramAddressLabel(context: AccountPayloadContext): string | null {
     const address = context.account.address;
     if (!address) {
         return null;
     }
-    return context.resolveProgramName?.(address) ?? PROGRAM_DISPLAY_NAMES[address] ?? null;
+    const resolved = context.resolveProgramName?.(address);
+    if (resolved) {
+        return resolved;
+    }
+    return context.kind === UNKNOWN_KIND ? address : `${context.kind}::${address}`;
 }
 
 export function unknownMarker(reason: string): UnknownMarker {

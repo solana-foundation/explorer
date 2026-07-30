@@ -1,7 +1,6 @@
 // The parsing contract. Transitional web3.js shims live under '@explorer/parsers/compat'.
 export { createInstructionParserDispatcher } from './dispatcher.js';
 export type { KitInstruction } from './kit-instruction.js';
-export { PROGRAM_DISPLAY_NAMES } from './program-names.js';
 export {
     isRpcParsedAccountProgram,
     isRpcParsedInstructionProgram,

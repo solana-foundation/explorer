@@ -29,7 +29,7 @@ describe('native-program account kind payload', () => {
         });
     });
 
-    it('should fall back to the built-in label map without an injected resolver', () => {
+    it('should fall back to the kind-qualified address without an injected resolver', () => {
         const context: AccountPayloadContext = {
             account: {
                 address: SYSTEM_PROGRAM_ID,
@@ -45,7 +45,7 @@ describe('native-program account kind payload', () => {
         expect(buildNativeProgramPayload(context)).toEqual({
             entity: {
                 address: SYSTEM_PROGRAM_ID,
-                address_label: 'System Program',
+                address_label: `native-program::${SYSTEM_PROGRAM_ID}`,
                 executable: true,
                 kind: 'native-program',
             },

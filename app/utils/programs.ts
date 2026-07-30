@@ -389,3 +389,8 @@ export const TOKEN_IDS: { [key: string]: string } = {
     [TOKEN_2022_PROGRAM_ADDRESS]: 'Token-2022 Program',
     [TOKEN_PROGRAM_ADDRESS]: 'Token Program',
 } as const;
+
+// Cluster-agnostic name lookup; the /mcp resolver injects this and has no per-cluster context (see app/mcp/dependencies.ts).
+export function programNameByAddress(address: string): string | undefined {
+    return PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address];
+}
