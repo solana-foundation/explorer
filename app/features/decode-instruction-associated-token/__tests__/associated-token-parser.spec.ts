@@ -1,4 +1,3 @@
-import * as spl from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import { describe, expect, test } from 'vitest';
 
@@ -10,110 +9,72 @@ import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
 import { parseAssociatedTokenInstruction } from '../lib/associated-token-parser';
 
+function parseFixture(stub: string, index: number, v0 = false) {
+    const message = v0 ? mock.deserializeMessageV0(stub) : mock.deserializeMessage(stub);
+    const instruction = intoTransactionInstructionFromVersionedMessage(message.compiledInstructions[index], message);
+    return parseAssociatedTokenInstruction(toKitInstruction(instruction));
+}
+
+/**
+ * Each test asserts the canonical field names, not the kit decoder's names. That
+ * mapping (`payer`->`source`, `ata`->`account`, `owner`->`wallet`, and the
+ * seven-account recoverNested rename) is the parser's load-bearing logic — it is
+ * what lets the byte path and the RPC path share one shape and one card.
+ */
 describe('parseAssociatedTokenInstruction', () => {
-    test('should return "create" instruction data', () => {
-        const index = 2;
-        const message = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
-        const instruction = intoTransactionInstructionFromVersionedMessage(
-            message.compiledInstructions[index],
-            message,
-        );
-        const result = parseAssociatedTokenInstruction(toKitInstruction(instruction));
+    test('should map "create" accounts onto the canonical field names', () => {
+        const result = parseFixture(stubs.aTokenCreateMsgWithInnerCards, 2);
         invariant(result, 'expected parser to return a result for AT create');
+        invariant(result.type === 'create', 'expected create');
 
-        expect(result.type).toBe('create');
-        const info = result.info as {
-            data: { discriminator: number };
-            programAddress: string;
-            accounts: Record<string, { address: string }>;
-        };
-        expect(info.data).toEqual({ discriminator: 0 });
-        expect(info.programAddress).toEqual(spl.ASSOCIATED_TOKEN_PROGRAM_ID.toString());
-        const expectedAccounts = [
-            new PublicKey('Hs9SPbfNiNofp5ngCgTmei5e1wu3dFfzELEoEBWbyPLx'),
-            new PublicKey('9E3HDj8spudEWc26h5wu8EUpyfYDbJjjVYaZpv49nzGH'),
-            new PublicKey('Hs9SPbfNiNofp5ngCgTmei5e1wu3dFfzELEoEBWbyPLx'),
-            new PublicKey('So11111111111111111111111111111111111111112'),
-            new PublicKey('11111111111111111111111111111111'),
-            new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-        ];
-        Object.values(info.accounts).forEach((account, i) => {
-            expect(new PublicKey(account.address).equals(expectedAccounts[i])).toBeTruthy();
-        });
-        expect(Object.keys(info.accounts)).toEqual(['payer', 'ata', 'owner', 'mint', 'systemProgram', 'tokenProgram']);
+        expect(result.info.source.equals(new PublicKey('Hs9SPbfNiNofp5ngCgTmei5e1wu3dFfzELEoEBWbyPLx'))).toBe(true);
+        expect(result.info.account.equals(new PublicKey('9E3HDj8spudEWc26h5wu8EUpyfYDbJjjVYaZpv49nzGH'))).toBe(true);
+        expect(result.info.wallet.equals(new PublicKey('Hs9SPbfNiNofp5ngCgTmei5e1wu3dFfzELEoEBWbyPLx'))).toBe(true);
+        expect(result.info.mint.equals(new PublicKey('So11111111111111111111111111111111111111112'))).toBe(true);
+        expect(result.info.systemProgram.equals(new PublicKey('11111111111111111111111111111111'))).toBe(true);
+        expect(result.info.tokenProgram.equals(new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'))).toBe(
+            true,
+        );
     });
 
-    test('should return "createIdempotent" instruction data', () => {
-        const index = 1;
-        const message = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const instruction = intoTransactionInstructionFromVersionedMessage(
-            message.compiledInstructions[index],
-            message,
-        );
-        const result = parseAssociatedTokenInstruction(toKitInstruction(instruction));
+    test('should map "createIdempotent" accounts onto the canonical field names', () => {
+        const result = parseFixture(stubs.aTokenCreateIdempotentMsg, 1, true);
         invariant(result, 'expected parser to return a result for AT createIdempotent');
+        invariant(result.type === 'createIdempotent', 'expected createIdempotent');
 
-        expect(result.type).toBe('createIdempotent');
-        const info = result.info as {
-            data: { discriminator: number };
-            programAddress: string;
-            accounts: Record<string, { address: string }>;
-        };
-        expect(info.data).toEqual({ discriminator: 1 });
-        expect(info.programAddress).toEqual(spl.ASSOCIATED_TOKEN_PROGRAM_ID.toString());
-        const expectedAccounts = [
-            new PublicKey('EzdQH5zUfTMGb3vwU4oumxjVcxKMDpJ6dB78pbjfHmmb'),
-            new PublicKey('Fv8YYjF2DUqj9RZhyXNzXa4yR9nHHwjg5bFjA82UidF1'),
-            new PublicKey('EzdQH5zUfTMGb3vwU4oumxjVcxKMDpJ6dB78pbjfHmmb'),
-            new PublicKey('74SBV4zDXxTRgv1pEMoECskKBkZHc2yGPnc7GYVepump'),
-            new PublicKey('11111111111111111111111111111111'),
-            new PublicKey('EDDSpjZHrsFKYTMJDcBqXAjkLcu9EKdvrQR4XnqsXErH'),
-        ];
-        Object.values(info.accounts).forEach((account, i) => {
-            expect(new PublicKey(account.address).equals(expectedAccounts[i])).toBeTruthy();
-        });
-        expect(Object.keys(info.accounts)).toEqual(['payer', 'ata', 'owner', 'mint', 'systemProgram', 'tokenProgram']);
+        expect(result.info.source.equals(new PublicKey('EzdQH5zUfTMGb3vwU4oumxjVcxKMDpJ6dB78pbjfHmmb'))).toBe(true);
+        expect(result.info.account.equals(new PublicKey('Fv8YYjF2DUqj9RZhyXNzXa4yR9nHHwjg5bFjA82UidF1'))).toBe(true);
+        expect(result.info.wallet.equals(new PublicKey('EzdQH5zUfTMGb3vwU4oumxjVcxKMDpJ6dB78pbjfHmmb'))).toBe(true);
+        expect(result.info.mint.equals(new PublicKey('74SBV4zDXxTRgv1pEMoECskKBkZHc2yGPnc7GYVepump'))).toBe(true);
+        expect(result.info.systemProgram.equals(new PublicKey('11111111111111111111111111111111'))).toBe(true);
+        expect(result.info.tokenProgram.equals(new PublicKey('EDDSpjZHrsFKYTMJDcBqXAjkLcu9EKdvrQR4XnqsXErH'))).toBe(
+            true,
+        );
     });
 
-    test('should return "recoverNested" instruction data', () => {
-        const index = 0;
-        const message = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
-        const instruction = intoTransactionInstructionFromVersionedMessage(
-            message.compiledInstructions[index],
-            message,
-        );
-        const result = parseAssociatedTokenInstruction(toKitInstruction(instruction));
+    test('should map "recoverNested" accounts onto the canonical field names', () => {
+        const result = parseFixture(stubs.aTokenRecoverNestedMsg, 0);
         invariant(result, 'expected parser to return a result for AT recoverNested');
+        invariant(result.type === 'recoverNested', 'expected recoverNested');
 
-        expect(result.type).toBe('recoverNested');
-        const info = result.info as {
-            data: { discriminator: number };
-            programAddress: string;
-            accounts: Record<string, { address: string }>;
-        };
-        expect(info.data).toEqual({ discriminator: 2 });
-        expect(info.programAddress).toEqual(spl.ASSOCIATED_TOKEN_PROGRAM_ID.toString());
-        const expectedAccounts = [
-            new PublicKey('CfR4Z2zwj2Wz5eX6GLf34CYiyK8hestfvpfub9LLDnNR'),
-            new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
-            new PublicKey('4dbCSgnyU8V8HqmFHcRqwBym3dUQK2MVacXQgAkaeYKU'),
-            new PublicKey('BSqjYANCyCpxTneP9KsWMexwZkk5XJ1nkKws1Zg3X9KH'),
-            new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
-            new PublicKey('3UgveoWTHgDWH4DC8NUoYcQc11vJ8xzk2hCge2ZWPDSL'),
-            new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-        ];
-        Object.values(info.accounts).forEach((account, i) => {
-            expect(new PublicKey(account.address).equals(expectedAccounts[i])).toBeTruthy();
-        });
-        expect(Object.keys(info.accounts)).toEqual([
-            'nestedAssociatedAccountAddress',
-            'nestedTokenMintAddress',
-            'destinationAssociatedAccountAddress',
-            'ownerAssociatedAccountAddress',
-            'ownerTokenMintAddress',
-            'walletAddress',
-            'tokenProgram',
-        ]);
+        // Kit order is [nestedSource, nestedMint, destination, nestedOwner,
+        // ownerMint, wallet, tokenProgram] — note destination and nestedOwner are
+        // not in display order, which is what the old positional card got wrong.
+        expect(result.info.nestedSource.equals(new PublicKey('CfR4Z2zwj2Wz5eX6GLf34CYiyK8hestfvpfub9LLDnNR'))).toBe(
+            true,
+        );
+        expect(result.info.nestedMint.equals(new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'))).toBe(true);
+        expect(result.info.destination.equals(new PublicKey('4dbCSgnyU8V8HqmFHcRqwBym3dUQK2MVacXQgAkaeYKU'))).toBe(
+            true,
+        );
+        expect(result.info.nestedOwner.equals(new PublicKey('BSqjYANCyCpxTneP9KsWMexwZkk5XJ1nkKws1Zg3X9KH'))).toBe(
+            true,
+        );
+        expect(result.info.ownerMint.equals(new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'))).toBe(true);
+        expect(result.info.wallet.equals(new PublicKey('3UgveoWTHgDWH4DC8NUoYcQc11vJ8xzk2hCge2ZWPDSL'))).toBe(true);
+        expect(result.info.tokenProgram.equals(new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'))).toBe(
+            true,
+        );
     });
 
     test('should parse an empty-data instruction as "create"', () => {

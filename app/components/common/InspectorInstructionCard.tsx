@@ -4,7 +4,7 @@ import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { cn } from '@components/shared/utils';
 import { ProgramField } from '@entities/instruction-card';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { ParsedInstruction, SignatureResult, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
+import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import React from 'react';
 import { Code } from 'react-feather';
@@ -29,7 +29,6 @@ type InstructionProps = {
     raw?: TransactionInstruction;
     // will be triggered on requesting raw data for instruction, if present
     onRequestRaw?: () => void;
-    message: VersionedMessage;
 };
 
 export function InspectorInstructionCard({

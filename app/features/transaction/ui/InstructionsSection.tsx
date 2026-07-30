@@ -1,7 +1,6 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { AddressLookupTableDetailsCard } from '@components/instruction/AddressLookupTableDetailsCard';
-import { AssociatedTokenDetailsCard } from '@components/instruction/associated-token/AssociatedTokenDetailsCard';
 import { BpfLoaderDetailsCard } from '@components/instruction/bpf-loader/BpfLoaderDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { ComputeBudgetDetailsCard } from '@components/instruction/ComputeBudgetDetailsCard';
@@ -32,6 +31,7 @@ import {
     isDeprecatedSerumProgram,
     isSerumInstruction,
 } from '@explorer/decoder-serum/detection';
+import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
@@ -236,7 +236,16 @@ function InstructionCard({
             case 'spl-memo':
                 return <MemoDetailsCard {...props} key={key} />;
             case 'spl-associated-token-account':
-                return <AssociatedTokenDetailsCard {...props} key={key} />;
+                return (
+                    <AssociatedTokenDetailsCard
+                        key={key}
+                        ix={parsedIx}
+                        index={index}
+                        result={result}
+                        innerCards={innerCards}
+                        childIndex={childIndex}
+                    />
+                );
             case 'vote':
                 return <VoteDetailsCard {...props} key={key} />;
             case 'address-lookup-table':

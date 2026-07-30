@@ -1,12 +1,7 @@
-import { CreateIdempotentInfo } from '@components/instruction/associated-token/types';
 import { TransferInfo } from '@components/instruction/system/types';
 import { getTokenIxValidator, TransferChecked } from '@components/instruction/token/types';
-import {
-    createInstructionParserDispatcher,
-    type DispatchResult,
-    isParsedInstruction,
-} from '@entities/instruction-parser';
-import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token';
+import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
+import { associatedTokenInstructionParser, CreateAccountsInfo } from '@features/decode-instruction-associated-token';
 import { LIGHTHOUSE_ADDRESS, lighthouseInstructionParser } from '@features/decode-instruction-lighthouse';
 import { systemInstructionParser } from '@features/decode-instruction-system';
 import { tokenInstructionParser } from '@features/decode-instruction-token';
@@ -23,17 +18,12 @@ import { describe, expect, test } from 'vitest';
  * and tx-page via `fromParsedInstruction`) must produce `parsed.info` payloads
  * that yield equivalent values for the same logical instruction.
  *
- * Two shapes of assertion appear here:
- * - **Same-validator parity** (System Transfer, SPL Token TransferChecked,
- *   Token-2022 InitializeMetadataPointer): the byte path normalises into the
- *   same RPC-info shape the superstruct validator expects, so both paths are
- *   validated by the same struct and compared field-for-field.
- * - **Mapped parity** (Associated Token createIdempotent): the byte path emits
- *   `@solana-program/token` kit-shaped objects (`accounts.{payer,ata,owner,…}`)
- *   while the RPC path emits the `CreateIdempotentInfo` shape
- *   (`{source,account,wallet,…}`). The two don't share a validator, so we map
- *   between them and assert the addresses agree. This guards the account
- *   ordering — exactly the class of latent bug the migration fixed.
+ * Every slice here asserts **same-validator parity**: the byte path normalises
+ * into the same RPC-info shape the superstruct validator expects, so both paths
+ * are validated by the same struct and compared field-for-field. For Associated
+ * Token this also guards the account ordering, since the byte decoder names the
+ * same accounts differently (`payer`/`ata`/`owner`) and the slice's parser is
+ * what maps them onto the canonical names.
  *
  * MPL Token Metadata has no parity test by necessity: the RPC never pre-parses
  * it, so there is no `fromParsed` path to compare against.
@@ -328,10 +318,12 @@ describe('instruction-parser contract', () => {
             programId: atProgramId,
         });
 
-        // Byte path: kit-shaped output with named `accounts`.
-        const byteParsed = parseByteAtIdempotent(dispatcher.fromTransactionInstruction(rawIx));
+        const byteDispatched = dispatcher.fromTransactionInstruction(rawIx);
+        if (!byteDispatched || !isParsedInstruction(byteDispatched)) {
+            throw new Error('byte-parsed AT createIdempotent should be recognised');
+        }
+        const byteInfo = create(byteDispatched.parsed.info, CreateAccountsInfo);
 
-        // RPC path: CreateIdempotentInfo shape.
         const rpcInput: ParsedInstruction = {
             parsed: {
                 info: {
@@ -348,18 +340,19 @@ describe('instruction-parser contract', () => {
             programId: atProgramId,
         };
         const rpcParsed = dispatcher.fromParsedInstruction(rpcInput);
-        const rpcInfo = create(rpcParsed.parsed.info, CreateIdempotentInfo);
+        const rpcInfo = create(rpcParsed.parsed.info, CreateAccountsInfo);
 
-        // Map byte `accounts.*` -> RPC info field names and assert agreement.
-        expect(new PublicKey(byteParsed.accounts.payer.address).equals(rpcInfo.source)).toBe(true);
-        expect(new PublicKey(byteParsed.accounts.ata.address).equals(rpcInfo.account)).toBe(true);
-        expect(new PublicKey(byteParsed.accounts.owner.address).equals(rpcInfo.wallet)).toBe(true);
-        expect(new PublicKey(byteParsed.accounts.mint.address).equals(rpcInfo.mint)).toBe(true);
+        // Both paths validate against the same struct, so compare field-for-field.
+        for (const field of ['account', 'mint', 'source', 'systemProgram', 'tokenProgram', 'wallet'] as const) {
+            expect(byteInfo[field].equals(rpcInfo[field])).toBe(true);
+        }
 
-        // And both describe the instruction we built.
-        expect(rpcInfo.source.equals(payer)).toBe(true);
-        expect(rpcInfo.account.equals(ata)).toBe(true);
-        expect(rpcInfo.wallet.equals(owner)).toBe(true);
+        // And both describe the instruction we built, with the kit decoder's
+        // `payer`/`ata`/`owner` mapped onto `source`/`account`/`wallet`.
+        expect(byteInfo.source.equals(payer)).toBe(true);
+        expect(byteInfo.account.equals(ata)).toBe(true);
+        expect(byteInfo.wallet.equals(owner)).toBe(true);
+        expect(byteInfo.mint.equals(mint)).toBe(true);
     });
 
     test('should pass through unchanged when no slice is registered', () => {
@@ -447,15 +440,3 @@ describe('instruction-parser contract', () => {
         expect(lighthouseInstructionParser.fromParsed).toBeUndefined();
     });
 });
-
-type AtAccount = { address: string };
-type ByteAtIdempotentInfo = {
-    accounts: { ata: AtAccount; mint: AtAccount; owner: AtAccount; payer: AtAccount };
-};
-
-function parseByteAtIdempotent(result: DispatchResult | undefined): ByteAtIdempotentInfo {
-    if (!result || !isParsedInstruction(result)) {
-        throw new Error('byte-parsed AT createIdempotent should be recognised');
-    }
-    return result.parsed.info as ByteAtIdempotentInfo;
-}

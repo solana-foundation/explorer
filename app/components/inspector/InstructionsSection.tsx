@@ -1,5 +1,6 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
+import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
 import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
@@ -27,7 +28,7 @@ import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-
 import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
-import { AssociatedTokenDetailsCard } from './associated-token/AssociatedTokenDetailsCard';
+import { AddressWithContextCell } from './AddressWithContextCell';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
 
 const INSPECTOR_RESULT = { err: null };
@@ -215,9 +216,11 @@ function InspectorInstructionCard({
                     key={index}
                     ix={parsedIx}
                     raw={ix}
-                    message={message}
                     index={index}
                     result={INSPECTOR_RESULT}
+                    InstructionCardComponent={InspectorInstructionCardComponent}
+                    AddressComponent={AddressWithContextCell}
+                    showProgramField={false}
                 />
             );
         case 'bpf-upgradeable-loader':
@@ -247,7 +250,6 @@ function InspectorInstructionCard({
                         index={index}
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={InspectorInstructionCardComponent}
-                        message={message}
                         raw={ix}
                     />
                 </ErrorBoundary>
@@ -264,7 +266,6 @@ function InspectorInstructionCard({
                         index={index}
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={InspectorInstructionCardComponent}
-                        message={message}
                         raw={ix}
                     />
                 </ErrorBoundary>
