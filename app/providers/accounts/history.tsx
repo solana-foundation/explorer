@@ -261,6 +261,19 @@ function buildRpcFilters(filters: HistoryFilters): Record<string, unknown> | und
     return Object.keys(out).length > 0 ? out : undefined;
 }
 
+// Addresses for which getTransactionsForAddress is temporarily disabled. gTFA on these
+// hot accounts is currently timing out on the Triton side and driving up ClickHouse CPU
+// (a "death call"), so we skip gTFA and go straight to the getSignaturesForAddress
+// fallback until Triton confirms the issue is mitigated. Remove entries here once cleared.
+// See: Triton report re: Superbank gTFA on wrapped SOL.
+const GTFA_DISABLED_ADDRESSES = new Set<string>([
+    'So11111111111111111111111111111111111111112', // wrapped SOL
+]);
+
+export function isGtfaDisabled(address: string): boolean {
+    return GTFA_DISABLED_ADDRESSES.has(address);
+}
+
 type RpcHistoryItem = ConfirmedSignatureInfo & { transactionIndex?: number };
 type GetTransactionsForAddressResult = {
     data: RpcHistoryItem[];
@@ -377,42 +390,63 @@ async function fetchAccountHistory(
 
     let status;
     let history;
-    try {
-        const result = await getTransactionsForAddress(url, pubkey.toBase58(), {
-            filters: options.filters,
-            limit: options.limit,
-            paginationToken: options.paginationToken,
-        });
-        history = {
-            fetched: result.data,
-            // A null/absent paginationToken is the canonical end-of-stream signal; a
-            // short page is not, since the server may still hand back a token for more.
-            foundOldest: !result.paginationToken,
-            paginationToken: result.paginationToken,
-        };
-        status = FetchStatus.Fetched;
-    } catch (error) {
-        if (isMethodNotFound(error)) {
-            // Endpoint doesn't implement getTransactionsForAddress: disable filtering
-            // and fall back to the standard getSignaturesForAddress path.
-            onMethodNotFound?.();
-            try {
-                history = await fetchViaSignatures(url, pubkey, {
-                    before: options.before,
-                    limit: options.limit,
-                });
-                status = FetchStatus.Fetched;
-            } catch (fallbackError) {
+
+    // Some addresses have gTFA temporarily disabled (see GTFA_DISABLED_ADDRESSES) because the
+    // call is timing out upstream. Skip gTFA for these and use the getSignaturesForAddress
+    // fallback directly. This is scoped to the single address: unlike a real method-not-found,
+    // we do NOT call onMethodNotFound(), so global filtering support stays enabled for every
+    // other account viewed in the session.
+    if (isGtfaDisabled(pubkey.toBase58())) {
+        try {
+            history = await fetchViaSignatures(url, pubkey, {
+                before: options.before,
+                limit: options.limit,
+            });
+            status = FetchStatus.Fetched;
+        } catch (fallbackError) {
+            if (cluster !== Cluster.Custom) {
+                Logger.error(fallbackError, { url });
+            }
+            status = FetchStatus.FetchFailed;
+        }
+    } else {
+        try {
+            const result = await getTransactionsForAddress(url, pubkey.toBase58(), {
+                filters: options.filters,
+                limit: options.limit,
+                paginationToken: options.paginationToken,
+            });
+            history = {
+                fetched: result.data,
+                // A null/absent paginationToken is the canonical end-of-stream signal; a
+                // short page is not, since the server may still hand back a token for more.
+                foundOldest: !result.paginationToken,
+                paginationToken: result.paginationToken,
+            };
+            status = FetchStatus.Fetched;
+        } catch (error) {
+            if (isMethodNotFound(error)) {
+                // Endpoint doesn't implement getTransactionsForAddress: disable filtering
+                // and fall back to the standard getSignaturesForAddress path.
+                onMethodNotFound?.();
+                try {
+                    history = await fetchViaSignatures(url, pubkey, {
+                        before: options.before,
+                        limit: options.limit,
+                    });
+                    status = FetchStatus.Fetched;
+                } catch (fallbackError) {
+                    if (cluster !== Cluster.Custom) {
+                        Logger.error(fallbackError, { url });
+                    }
+                    status = FetchStatus.FetchFailed;
+                }
+            } else {
                 if (cluster !== Cluster.Custom) {
-                    Logger.error(fallbackError, { url });
+                    Logger.error(error, { url });
                 }
                 status = FetchStatus.FetchFailed;
             }
-        } else {
-            if (cluster !== Cluster.Custom) {
-                Logger.error(error, { url });
-            }
-            status = FetchStatus.FetchFailed;
         }
     }
 
