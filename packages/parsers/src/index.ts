@@ -27,13 +27,17 @@ export {
     TOKEN_PROGRAMS,
     tokenProgram,
 } from './program-registry.js';
-export type { RpcParsedAccountProgram, RpcParsedInstructionProgram, TokenProgram } from './program-registry.js';
-export { isParsedInstruction } from './types.js';
+export type {
+    ParserProgramLabel,
+    RpcParsedAccountProgram,
+    RpcParsedInstructionProgram,
+    TokenProgram,
+} from './program-registry.js';
+export { isParsedInstruction } from './dispatcher.js';
 export type {
     DispatchResult,
     InstructionParser,
     InstructionParserDispatcher,
     ParsedInstructionInfo,
-    ParserProgramLabel,
     UnparsedInstruction,
-} from './types.js';
+} from './dispatcher.js';

@@ -16,6 +16,26 @@ export const SYSTEM_PROGRAM_LABEL = 'system';
 export const SYSVAR_PROGRAM_LABEL = 'sysvar';
 export const VOTE_PROGRAM_LABEL = 'vote';
 
+/**
+ * The set of `programLabel` values a decoder slice (`InstructionParser`) may
+ * declare. For programs the RPC pre-parses this is the RPC `parsed.program`
+ * discriminator used to guard `fromParsed` (e.g. `'spl-token'`); for programs
+ * the RPC does not pre-parse (MPL Token Metadata) it is a stable synthetic
+ * label carried in `UnparsedInstruction` for program-aware fallback cards.
+ *
+ * Adding a slice for a new program extends this union, so a slice that declares
+ * a label not listed here fails to compile — keeping slice labels and the RPC
+ * guards they are compared against from drifting.
+ */
+export type ParserProgramLabel =
+    | typeof BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL
+    | 'lighthouse'
+    | 'mpl-token-metadata'
+    | typeof SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL
+    | typeof SPL_TOKEN_PROGRAM_LABEL
+    | typeof SPL_TOKEN_2022_PROGRAM_LABEL
+    | typeof SYSTEM_PROGRAM_LABEL;
+
 export const TOKEN_PROGRAMS = [SPL_TOKEN_PROGRAM_LABEL, SPL_TOKEN_2022_PROGRAM_LABEL] as const;
 export type TokenProgram = (typeof TOKEN_PROGRAMS)[number];
 export const tokenProgram = enums(TOKEN_PROGRAMS);

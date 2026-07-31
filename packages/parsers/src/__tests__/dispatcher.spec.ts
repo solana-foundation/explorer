@@ -1,8 +1,8 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it, vi } from 'vitest';
 
-import { createInstructionParserDispatcher } from '../dispatcher.js';
-import type { InstructionParser, ParsedInstructionInfo } from '../types.js';
+import { createInstructionParserDispatcher, isParsedInstruction } from '../dispatcher.js';
+import type { InstructionParser, ParsedInstructionInfo } from '../dispatcher.js';
 
 const PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const OTHER_PROGRAM_ID = '11111111111111111111111111111111';
@@ -132,5 +132,23 @@ describe('createInstructionParserDispatcher', () => {
             program: 'spl-token',
             programId: new PublicKey(PROGRAM_ID),
         });
+    });
+});
+
+describe('isParsedInstruction', () => {
+    const pubkey = new PublicKey(PROGRAM_ID);
+
+    it('should reject undefined dispatch results', () => {
+        expect(isParsedInstruction(undefined)).toBe(false);
+    });
+
+    it('should reject UnparsedInstruction results', () => {
+        expect(isParsedInstruction({ programId: pubkey, programLabel: 'spl-token', unknown: true })).toBe(false);
+    });
+
+    it('should accept canonical ParsedInstruction results', () => {
+        expect(
+            isParsedInstruction({ parsed: { info: {}, type: 'transfer' }, program: 'spl-token', programId: pubkey }),
+        ).toBe(true);
     });
 });
