@@ -17,14 +17,15 @@ import {
 } from '@solana-program/system';
 import { describe, expect, it } from 'vitest';
 
+import { gen } from '../../../__tests__/gen.js';
 import type { KitInstruction } from '../../../kit-instruction.js';
 import { parseSystemInstruction, parseSystemRpcInstruction, type SystemParsed } from '../parser.js';
 
-const A = 'So11111111111111111111111111111111111111112';
-const B = 'SysvarRent111111111111111111111111111111111';
-const C = 'SysvarC1ock11111111111111111111111111111111';
-const OWNER = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
-const SYSTEM = '11111111111111111111111111111111';
+const A = gen.wrappedSol;
+const B = gen.sysvarRent;
+const C = gen.sysvarClock;
+const OWNER = gen.tokenProgram;
+const SYSTEM = gen.systemProgram;
 
 function toKitIx(ix: unknown): KitInstruction {
     return ix as KitInstruction;

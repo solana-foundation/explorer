@@ -3,9 +3,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { createInstructionParserDispatcher, isParsedInstruction } from '../dispatcher.js';
 import type { InstructionParser, ParsedInstructionInfo } from '../dispatcher.js';
+import { gen } from './gen.js';
 
-const PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
-const OTHER_PROGRAM_ID = '11111111111111111111111111111111';
+const PROGRAM_ID = gen.tokenProgram;
+const OTHER_PROGRAM_ID = gen.systemProgram;
 
 function makeParser(overrides: Partial<InstructionParser> = {}): InstructionParser {
     return {

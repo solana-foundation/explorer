@@ -21,6 +21,7 @@ import {
 } from '@solana/kit';
 import { describe, expect, it, vi } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import { codamaProvider } from '../../codama/index';
 import {
     IDL_ERROR__IDL_ADDRESS_MISMATCH,
@@ -61,7 +62,7 @@ function mockRpc(
                               data: [Buffer.from(accounts[accountAddress]).toString('base64'), 'base64'],
                               executable: false,
                               lamports: 1n,
-                              owner: '11111111111111111111111111111111',
+                              owner: gen.systemProgram,
                               rentEpoch: 0n,
                               space: BigInt(accounts[accountAddress].length),
                           }
@@ -195,7 +196,7 @@ describe('fetchIdlClient', () => {
 
     it('should reject an IDL declaring a different program address', async () => {
         const tokenkeg = loadTokenkegIdl(); // declares TokenkegQfe… — not the requested program
-        const [error, client] = await fetchIdlClient('11111111111111111111111111111111', {
+        const [error, client] = await fetchIdlClient(gen.systemProgram, {
             fetcher: async () => JSON.parse(JSON.stringify(tokenkeg)) as unknown,
             provider,
         });
@@ -204,14 +205,14 @@ describe('fetchIdlClient', () => {
         expect(isIdlError(error, IDL_ERROR__IDL_ADDRESS_MISMATCH)).toBe(true);
         expect(error?.context).toEqual({
             declaredAddress: tokenkeg.program.publicKey,
-            programAddress: '11111111111111111111111111111111',
+            programAddress: gen.systemProgram,
         });
     });
 
     it('should accept a mislabeled IDL when the address check is disabled', async () => {
         const tokenkeg = loadTokenkegIdl();
         const client = unwrapResult(
-            await fetchIdlClient('11111111111111111111111111111111', {
+            await fetchIdlClient(gen.systemProgram, {
                 fetcher: async () => JSON.parse(JSON.stringify(tokenkeg)) as unknown,
                 provider,
                 verifyAddress: false,
@@ -222,7 +223,7 @@ describe('fetchIdlClient', () => {
     });
 
     it('should surface a fetched value that is no IDL as the typed unsupported-format error', async () => {
-        const [error, client] = await fetchIdlClient('11111111111111111111111111111111', {
+        const [error, client] = await fetchIdlClient(gen.systemProgram, {
             fetcher: async () => ({ not: 'an idl' }),
             provider,
         });
@@ -232,19 +233,19 @@ describe('fetchIdlClient', () => {
     });
 
     it('should surface an absent IDL as the typed not-found error', async () => {
-        const [error, client] = await fetchIdlClient('11111111111111111111111111111111', {
+        const [error, client] = await fetchIdlClient(gen.systemProgram, {
             fetcher: async () => undefined,
             provider,
         });
 
         expect(client).toBeUndefined();
         expect(isIdlError(error, IDL_ERROR__IDL_NOT_FOUND)).toBe(true);
-        expect(error?.context).toEqual({ programAddress: '11111111111111111111111111111111' });
+        expect(error?.context).toEqual({ programAddress: gen.systemProgram });
     });
 
     it('should surface a transport failure as the typed fetch error with its cause', async () => {
         const cause = new Error('rpc exploded');
-        const [error] = await fetchIdlClient('11111111111111111111111111111111', {
+        const [error] = await fetchIdlClient(gen.systemProgram, {
             fetcher: async () => {
                 throw cause;
             },
@@ -257,7 +258,7 @@ describe('fetchIdlClient', () => {
 
     it('should reject with the abort reason instead of returning an error value', async () => {
         await expect(
-            fetchIdlClient('11111111111111111111111111111111', {
+            fetchIdlClient(gen.systemProgram, {
                 abortSignal: AbortSignal.abort(),
                 fetcher: async () => loadTokenkegIdl(),
                 provider,
@@ -268,7 +269,7 @@ describe('fetchIdlClient', () => {
     it('should reject with the abort reason when the abort lands mid-fetch', async () => {
         const controller = new AbortController();
         const reason = new Error('caller cancelled');
-        const pending = fetchIdlClient('11111111111111111111111111111111', {
+        const pending = fetchIdlClient(gen.systemProgram, {
             abortSignal: controller.signal,
             // a transport that wraps the abort in its own rejection — the reason must still win
             fetcher: (_programAddress, config) =>
@@ -286,7 +287,7 @@ describe('fetchIdlClient', () => {
     it('should pass the signal through to the fetcher', async () => {
         const controller = new AbortController();
         let receivedSignal: AbortSignal | undefined;
-        await fetchIdlClient('11111111111111111111111111111111', {
+        await fetchIdlClient(gen.systemProgram, {
             abortSignal: controller.signal,
             fetcher: async (_programAddress, config) => {
                 receivedSignal = config?.abortSignal;
@@ -337,7 +338,7 @@ describe('createLatestIdlFetcher', () => {
     it('should resolve undefined when neither source has an IDL', async () => {
         const fetcher = createLatestIdlFetcher(mockRpc({}));
 
-        await expect(fetcher('11111111111111111111111111111111')).resolves.toBeUndefined();
+        await expect(fetcher(gen.systemProgram)).resolves.toBeUndefined();
     });
 
     it('should surface a corrupt direct PMP payload as the typed parse error', async () => {
@@ -475,7 +476,7 @@ describe('fetchLatestIdlClient', () => {
     });
 
     it('should surface an absent IDL on both legs as the typed not-found error', async () => {
-        const [error, fetched] = await fetchLatestIdlClient('11111111111111111111111111111111', {
+        const [error, fetched] = await fetchLatestIdlClient(gen.systemProgram, {
             rpc: mockRpc({}),
         });
 
@@ -510,7 +511,7 @@ describe('fetchLatestIdlClient', () => {
 
     it('should surface a transport failure as the typed fetch error with its cause', async () => {
         const cause = new Error('rpc exploded');
-        const [error] = await fetchLatestIdlClient('11111111111111111111111111111111', {
+        const [error] = await fetchLatestIdlClient(gen.systemProgram, {
             rpc: mockRpc({}, () => {
                 throw cause;
             }),
@@ -522,7 +523,7 @@ describe('fetchLatestIdlClient', () => {
 
     it('should reject an IDL declaring a different program address', async () => {
         const tokenkeg = loadTokenkegIdl(); // declares TokenkegQfe… — not the requested program
-        const requested = address('11111111111111111111111111111111');
+        const requested = address(gen.systemProgram);
         const rpc = mockRpc({ [await pmpIdlAddress(requested)]: pmpIdlAccount(requested, tokenkeg) });
 
         const [error, fetched] = await fetchLatestIdlClient(requested, { rpc });
@@ -533,7 +534,7 @@ describe('fetchLatestIdlClient', () => {
 
     it('should accept a mislabeled IDL when the address check is disabled', async () => {
         const tokenkeg = loadTokenkegIdl();
-        const requested = address('11111111111111111111111111111111');
+        const requested = address(gen.systemProgram);
         const rpc = mockRpc({ [await pmpIdlAddress(requested)]: pmpIdlAccount(requested, tokenkeg) });
 
         const { client, source } = unwrapResult(await fetchLatestIdlClient(requested, { rpc, verifyAddress: false }));
@@ -543,7 +544,7 @@ describe('fetchLatestIdlClient', () => {
     });
 
     it('should surface a fetched value that is no IDL as the typed unsupported-format error', async () => {
-        const requested = address('11111111111111111111111111111111');
+        const requested = address(gen.systemProgram);
         const rpc = mockRpc({ [await pmpIdlAddress(requested)]: pmpIdlAccount(requested, { not: 'an idl' }) });
 
         const [error, fetched] = await fetchLatestIdlClient(requested, { rpc });
@@ -554,7 +555,7 @@ describe('fetchLatestIdlClient', () => {
 
     it('should reject with the abort reason instead of returning an error value', async () => {
         await expect(
-            fetchLatestIdlClient('11111111111111111111111111111111', {
+            fetchLatestIdlClient(gen.systemProgram, {
                 abortSignal: AbortSignal.abort(),
                 rpc: mockRpc({}),
             }),
@@ -570,8 +571,8 @@ describe('fetchLatestIdlClient', () => {
             throw new Error('transport wrapper');
         });
 
-        await expect(
-            fetchLatestIdlClient('11111111111111111111111111111111', { abortSignal: controller.signal, rpc }),
-        ).rejects.toBe(reason);
+        await expect(fetchLatestIdlClient(gen.systemProgram, { abortSignal: controller.signal, rpc })).rejects.toBe(
+            reason,
+        );
     });
 });

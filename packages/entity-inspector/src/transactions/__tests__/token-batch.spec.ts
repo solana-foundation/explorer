@@ -1,11 +1,4 @@
-import {
-    AccountRole,
-    address,
-    getBase58Decoder,
-    isSignerRole,
-    isWritableRole,
-    type ReadonlyUint8Array,
-} from '@solana/kit';
+import { AccountRole, getBase58Decoder, isSignerRole, isWritableRole, type ReadonlyUint8Array } from '@solana/kit';
 import {
     getBatchInstruction,
     getBatchInstructionDataEncoder,
@@ -15,15 +8,16 @@ import {
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { describe, expect, it } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import type { FallbackInstruction } from '../types.js';
 import { decodeTokenBatchInstruction, TOKEN_BATCH_DISCRIMINATOR } from '../token-batch.js';
 
-const SOURCE = address('So11111111111111111111111111111111111111112');
-const DESTINATION = address('SysvarRent111111111111111111111111111111111');
-const AUTHORITY = address('SysvarC1ock11111111111111111111111111111111');
-const EXTRA_SIGNER_1 = address('Vote111111111111111111111111111111111111111');
-const EXTRA_SIGNER_2 = address('Stake11111111111111111111111111111111111111');
-const SYSTEM_PROGRAM = address('11111111111111111111111111111111');
+const SOURCE = gen.wrappedSol;
+const DESTINATION = gen.sysvarRent;
+const AUTHORITY = gen.sysvarClock;
+const EXTRA_SIGNER_1 = gen.voteProgram;
+const EXTRA_SIGNER_2 = gen.stakeProgram;
+const SYSTEM_PROGRAM = gen.systemProgram;
 
 type KitInstructionLike = {
     programAddress: string;

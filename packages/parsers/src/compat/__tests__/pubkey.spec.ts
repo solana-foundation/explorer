@@ -2,9 +2,10 @@ import { PublicKey } from '@solana/web3.js';
 import { create } from 'superstruct';
 import { describe, expect, it } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import { PublicKeyFromString } from '../pubkey.js';
 
-const ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const ADDRESS = gen.tokenProgram;
 
 describe('PublicKeyFromString', () => {
     it('should coerce a base58 string into a PublicKey instance', () => {
