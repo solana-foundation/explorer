@@ -32,6 +32,27 @@ export type LatestIdlFetcherOptions = {
     authority?: Address | null;
 };
 
+/** One publication leg of the latest-IDL policy: how to read it, and which source a hit attributes. */
+type FetchLeg = {
+    fetch: () => Promise<unknown>;
+    source: IdlSource;
+};
+
+// The latest-IDL policy as ordered legs — PMP first, Anchor PDA fallback (skipped when `anchor` is
+// false). Both fetch routes consume this one definition so the ordering can't drift between them.
+function latestIdlLegs(
+    rpc: IdlFetcherRpc,
+    program: Address,
+    authority: Address | null,
+    anchor: boolean,
+    abortSignal: AbortSignal | undefined,
+): FetchLeg[] {
+    return [
+        { fetch: () => fetchPmpIdl(rpc, program, authority, abortSignal), source: IdlSource.Pmp },
+        ...(anchor ? [{ fetch: () => fetchAnchorPdaIdl(rpc, program, abortSignal), source: IdlSource.AnchorPda }] : []),
+    ];
+}
+
 /**
  * A program's "latest" IDL: the PMP `idl` metadata first, the Anchor IDL PDA as the fallback.
  * Absent on both legs resolves `undefined`; corrupt data throws typed `IDL_ERROR__IDL_PARSE_FAILED`
@@ -43,9 +64,11 @@ export function createLatestIdlFetcher(rpc: IdlFetcherRpc, options: LatestIdlFet
     return async (programAddress, config) => {
         config?.abortSignal?.throwIfAborted();
         const program = assertAddress(programAddress);
-        const pmp = await fetchPmpIdl(rpc, program, authority, config?.abortSignal);
-        if (pmp !== undefined) return pmp;
-        return anchor ? fetchAnchorPdaIdl(rpc, program, config?.abortSignal) : undefined;
+        for (const leg of latestIdlLegs(rpc, program, authority, anchor, config?.abortSignal)) {
+            const idl = await leg.fetch();
+            if (idl !== undefined) return idl;
+        }
+        return undefined;
     };
 }
 
@@ -109,12 +132,6 @@ export type FetchedIdlClient = {
     source: IdlSource;
 };
 
-/** One publication leg of the latest-IDL policy: how to read it, and which source a hit attributes. */
-type FetchLeg = {
-    fetch: () => Promise<unknown>;
-    source: IdlSource;
-};
-
 export type FetchLatestIdlClientOptions = IdlClientOptions &
     LatestIdlFetcherOptions & {
         abortSignal?: AbortSignal;
@@ -136,12 +153,7 @@ export async function fetchLatestIdlClient(
     abortSignal?.throwIfAborted();
     const program = assertAddress(programAddress);
 
-    const legs: FetchLeg[] = [
-        { fetch: () => fetchPmpIdl(rpc, program, authority, abortSignal), source: IdlSource.Pmp },
-        ...(anchor ? [{ fetch: () => fetchAnchorPdaIdl(rpc, program, abortSignal), source: IdlSource.AnchorPda }] : []),
-    ];
-
-    for (const leg of legs) {
+    for (const leg of latestIdlLegs(rpc, program, authority, anchor, abortSignal)) {
         let idl: unknown;
         try {
             idl = await leg.fetch();
