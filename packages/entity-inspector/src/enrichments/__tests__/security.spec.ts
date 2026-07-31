@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import type { InspectorLogger } from '../../logger.js';
 import { createSecurityMetadataResolver, type ResolveSecurityMetadata } from '../security.js';
 
@@ -11,7 +12,7 @@ vi.mock('../pmp-security.js', () => ({
     fetchPmpSecurityMetadata: fetchPmpSecurityMetadataMock,
 }));
 
-const PROGRAM_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const PROGRAM_ADDRESS = gen.tokenProgram;
 
 const RPC_ENDPOINTS = {
     devnet: 'https://devnet.rpc.address',

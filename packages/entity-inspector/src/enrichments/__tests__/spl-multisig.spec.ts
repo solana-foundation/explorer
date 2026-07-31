@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import type { InspectorLogger } from '../../logger.js';
 import { notFoundAccountProbe, parsedAccountProbe } from '../../accounts/__tests__/account-fixtures.js';
 import type { AccountProbeEnvelope } from '../../rpc/types.js';
@@ -7,7 +8,7 @@ import { resolveSplMultisigReference } from '../spl-multisig.js';
 
 const ADDRESS = 'SplMultisig111111111111111111111111111111111';
 const CLUSTER = 'mainnet-beta' as const;
-const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const TOKEN_PROGRAM = gen.tokenProgram;
 
 function createLoggerMock(): InspectorLogger {
     return { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() };

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import type { SupportedCluster } from '../../config.js';
 import type { InspectorLogger } from '../../logger.js';
 import { hashProgramData } from '../hash-program-data.js';
@@ -15,7 +16,7 @@ vi.mock('../otter-verify.js', () => ({
 }));
 
 const CLUSTER: SupportedCluster = 'mainnet-beta';
-const PROGRAM_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const PROGRAM_ADDRESS = gen.tokenProgram;
 const AUTHORITY = 'AeLnXCBPaQHGWRLr2saFsEVfnMNuKixRAbWCT9P5twgZ';
 const PROGRAM_DATA_B64 = Buffer.from('deadbeef', 'hex').toString('base64');
 const KNOWN_HASH = hashProgramData(PROGRAM_DATA_B64);
