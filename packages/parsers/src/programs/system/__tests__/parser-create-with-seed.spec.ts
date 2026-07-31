@@ -1,7 +1,7 @@
 import { type Address } from '@solana/kit';
 import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { getCreateAccountWithSeedInstructionDataEncoder } from '@solana-program/system';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { toKitInstruction } from '../../../compat/web3js.js';
 import { parseSystemInstruction } from '../parser.js';
@@ -46,7 +46,7 @@ describe('parseSystemInstruction', () => {
         const lamports = 2100000;
         const space = 165;
 
-        test('should parse 3-account variant (payer !== baseAccount)', () => {
+        it('should parse 3-account variant (payer !== baseAccount)', () => {
             // Create instruction with 3 accounts: payer, newAccount, baseAccount
             const instruction = new TransactionInstruction({
                 data: createCreateAccountWithSeedData({
@@ -78,7 +78,7 @@ describe('parseSystemInstruction', () => {
             expect(info.owner.equals(tokenProgram)).toBe(true);
         });
 
-        test('should parse 2-account variant (payer === baseAccount)', () => {
+        it('should parse 2-account variant (payer === baseAccount)', () => {
             // payer === baseAccount: the 3rd account is omitted and the
             // base address must be recovered from instruction data.
             const instruction = new TransactionInstruction({
@@ -113,7 +113,7 @@ describe('parseSystemInstruction', () => {
             expect(info.owner.equals(tokenProgram)).toBe(true);
         });
 
-        test('should handle different seed lengths correctly', () => {
+        it('should handle different seed lengths correctly', () => {
             const longSeed = 'this-is-a-very-long-seed-for-testing-purposes';
 
             const instruction = new TransactionInstruction({
@@ -137,11 +137,11 @@ describe('parseSystemInstruction', () => {
             expect(infoAsCreateAccountWithSeed(result.info).seed).toBe(longSeed);
         });
 
-        test('should return undefined for non-System Program instructions', () => {
+        it('should return undefined when a recognised discriminator has too few accounts', () => {
             const instruction = new TransactionInstruction({
                 data: Buffer.from([0, 0, 0, 0]),
                 keys: [],
-                programId: tokenProgram,
+                programId: SystemProgram.programId,
             });
 
             const result = parseSystemInstruction(toKitInstruction(instruction));
@@ -149,7 +149,7 @@ describe('parseSystemInstruction', () => {
             expect(result).toBeUndefined();
         });
 
-        test('should return undefined for unrecognised System Program instructions', () => {
+        it('should return undefined for unrecognised System Program instructions', () => {
             const instruction = new TransactionInstruction({
                 data: Buffer.from([255, 255, 255, 255]),
                 keys: [],
