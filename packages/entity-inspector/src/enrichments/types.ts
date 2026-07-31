@@ -1,5 +1,6 @@
 import type { IdlStandard } from '@explorer/idl-decode';
 import type { TokenProgram } from '@explorer/parsers';
+import type { SecurityTxtFields as ParsedSecurityTxtFields } from '@explorer/parsers/security-txt';
 
 import type { SafeNumeric } from '../shared/types.js';
 
@@ -21,19 +22,9 @@ export type VerificationResult =
     | { status: 'unverified' }
     | { status: 'unknown'; reason: 'source_unavailable' | 'verification_invalid' };
 
-export type SecurityTxtFields = {
-    name: string;
-    project_url: string;
-    contacts: string;
-    policy: string;
-    preferred_languages: string | null;
-    encryption: string | null;
-    source_code: string | null;
-    source_release: string | null;
-    source_revision: string | null;
-    auditors: string | null;
-    acknowledgements: string | null;
-    expiry: string | null;
+// The byte-parser's fields (source of truth in @explorer/parsers) plus the PMP-only extras the
+// canonical metadata path populates — extends rather than re-spells so a new parser field propagates.
+export type SecurityTxtFields = ParsedSecurityTxtFields & {
     logo?: string | null;
     description?: string | null;
     notification?: string | null;
