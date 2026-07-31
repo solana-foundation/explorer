@@ -1118,7 +1118,7 @@
     "testnet_activation_epoch": 983,
     "devnet_activation_epoch": 1100,
     "comms_required": null,
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1009,
     "description": "Increase the block limit to 100M CUs."
   },
   {
