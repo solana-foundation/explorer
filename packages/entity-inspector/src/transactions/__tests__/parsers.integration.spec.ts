@@ -1,6 +1,7 @@
 import { getBase58Decoder } from '@solana/kit';
 import { describe, expect, it, vi } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import type { InspectorLogger } from '../../logger.js';
 import type { ResolvedAccount, TransactionPayloadContext } from '../types.js';
 import { decodeTransactionInstructions } from '../decode-instructions.js';
@@ -9,9 +10,9 @@ import { decodeTransactionInstructions } from '../decode-instructions.js';
 // out, no host-app fallback involved. Field-level decode branches are covered in the parsers package.
 describe('@explorer/parsers integration', () => {
     it('should decode a system transfer from raw bytes without the host-app fallback', async () => {
-        const SYSTEM_PROGRAM = '11111111111111111111111111111111';
-        const SOURCE = 'So11111111111111111111111111111111111111112';
-        const DESTINATION = 'SysvarRent111111111111111111111111111111111';
+        const SYSTEM_PROGRAM = gen.systemProgram;
+        const SOURCE = gen.wrappedSol;
+        const DESTINATION = gen.sysvarRent;
         const accounts: ResolvedAccount[] = [
             { address: SOURCE, signer: true, source: 'static', writable: true },
             { address: DESTINATION, signer: false, source: 'static', writable: true },

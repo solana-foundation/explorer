@@ -7,10 +7,11 @@ import {
     parsedAccountProbe,
     rawAccountProbe,
 } from '../../accounts/__tests__/account-fixtures.js';
+import { gen } from '../../__tests__/gen.js';
 import { fetchOtterVerifyBuildParams, type OtterVerifyDependencies, VERIFY_PROGRAM_ID } from '../otter-verify.js';
 
-const PROGRAM_ADDRESS = 'BPFLoaderUpgradeab1e11111111111111111111111';
-const SIGNER = '11111111111111111111111111111111';
+const PROGRAM_ADDRESS = gen.bpfUpgradeableLoader;
+const SIGNER = gen.systemProgram;
 const ACCOUNT_BYTES = new Uint8Array([1, 2, 3, 4]);
 
 function createLoggerMock(): InspectorLogger {

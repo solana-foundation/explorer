@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { NFTOKEN_ADDRESS, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../../shared/constants.js';
+import {
+    NATIVE_LOADER_PROGRAM_ID,
+    NFTOKEN_ADDRESS,
+    SYSTEM_PROGRAM_ID,
+    TOKEN_2022_PROGRAM_ID,
+    TOKEN_PROGRAM_ID,
+} from '../../shared/constants.js';
 import { buildAccountPayloadWithRouter } from '../inspect-entity-account-router.js';
 import { asRecord } from '../../shared/parse-helpers.js';
 import type { AccountEntityKind, AccountPayloadContext } from '../types.js';
@@ -142,9 +148,9 @@ describe('inspect-entity account router', () => {
     it('should route native-program accounts to a labeled payload', () => {
         const payload = buildAccountPayloadWithRouter({
             account: {
-                address: '11111111111111111111111111111111',
+                address: SYSTEM_PROGRAM_ID,
                 executable: true,
-                owner: 'NativeLoader1111111111111111111111111111111',
+                owner: NATIVE_LOADER_PROGRAM_ID,
                 parsedData: null,
                 parsedProgram: null,
                 rawDataBytes: null,
@@ -154,8 +160,8 @@ describe('inspect-entity account router', () => {
 
         expect(payload).toEqual({
             entity: {
-                address: '11111111111111111111111111111111',
-                address_label: 'native-program::11111111111111111111111111111111',
+                address: SYSTEM_PROGRAM_ID,
+                address_label: `native-program::${SYSTEM_PROGRAM_ID}`,
                 executable: true,
                 kind: 'native-program',
             },

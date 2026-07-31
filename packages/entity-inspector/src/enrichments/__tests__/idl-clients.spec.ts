@@ -9,6 +9,7 @@ import {
 import { IdlSource } from '@explorer/idl-decode/fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import type { InspectorLogger } from '../../logger.js';
 import { createIdlClientResolver, createProgramIdlDiscovery } from '../idl-clients.js';
 
@@ -22,6 +23,7 @@ vi.mock('@explorer/idl-decode/fetch', async importOriginal => ({
 }));
 
 vi.mock('@solana/kit', () => ({
+    address: vi.fn((value: string) => value),
     createSolanaRpc: vi.fn(() => ({})),
 }));
 
@@ -32,8 +34,8 @@ const RPC_ENDPOINTS = {
     testnet: 'https://testnet.rpc.address',
 };
 
-const CODAMA_IDL = { kind: 'rootNode', program: { publicKey: '11111111111111111111111111111111' } };
-const ANCHOR_IDL = { address: '11111111111111111111111111111111', instructions: [], metadata: { spec: '0.1.0' } };
+const CODAMA_IDL = { kind: 'rootNode', program: { publicKey: gen.systemProgram } };
+const ANCHOR_IDL = { address: gen.systemProgram, instructions: [], metadata: { spec: '0.1.0' } };
 
 function fakeClient(idl: unknown, programName?: string): IdlClient {
     return { idl, programName: () => programName } as unknown as IdlClient;

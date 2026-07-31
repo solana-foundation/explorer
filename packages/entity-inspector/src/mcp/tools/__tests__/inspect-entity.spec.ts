@@ -2,6 +2,7 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { InspectorLogger } from '../../../logger.js';
+import { gen } from '../../../__tests__/gen.js';
 import {
     addressLookupTableRawProbe,
     compressedNftDasAsset,
@@ -16,7 +17,7 @@ import { asRecord } from '../../../shared/parse-helpers.js';
 import { SourceUnavailableError } from '../../../rpc/rpc.js';
 import { handleInspectEntity, type InspectEntityDependencies, splitBuilderErrors } from '../inspect-entity.js';
 
-const ACCOUNT_IDENTIFIER = '11111111111111111111111111111111';
+const ACCOUNT_IDENTIFIER = gen.systemProgram;
 const TRANSACTION_IDENTIFIER =
     '4ReKprwf3WdLHRrzp4ctPWNBsQDPL3VZz3zMmoZfcGJMJCHh5Vq937mPdyxhCbw54wNnA6hZ7KfNpQdpt13yY7A9';
 

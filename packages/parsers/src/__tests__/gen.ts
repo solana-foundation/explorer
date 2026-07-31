@@ -9,5 +9,6 @@ export const gen = {
     sysvarRent: address('SysvarRent111111111111111111111111111111111'),
     systemProgram: SYSTEM_PROGRAM_ADDRESS,
     tokenProgram: TOKEN_PROGRAM_ADDRESS,
+    voteProgram: address('Vote111111111111111111111111111111111111111'),
     wrappedSol: address('So11111111111111111111111111111111111111112'),
 } satisfies Record<string, Address>;

@@ -1,11 +1,12 @@
 import { PublicKey, TransactionInstruction, type VersionedMessage } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import { toParsedInstruction, toParsedTransaction } from '../index.js';
 
-const PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-const SIGNER = new PublicKey('11111111111111111111111111111111');
-const READONLY = new PublicKey('SysvarRent111111111111111111111111111111111');
+const PROGRAM_ID = new PublicKey(gen.tokenProgram);
+const SIGNER = new PublicKey(gen.systemProgram);
+const READONLY = new PublicKey(gen.sysvarRent);
 
 describe('toParsedInstruction', () => {
     it('should wrap slice output into the canonical ParsedInstruction shape', () => {

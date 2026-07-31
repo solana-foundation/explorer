@@ -2,6 +2,7 @@ import { fetchMaybeMetadataFromSeeds, unpackAndFetchData } from '@solana-program
 import { createSolanaRpc } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import { fetchPmpSecurityMetadata } from '../pmp-security.js';
 
 vi.mock('@solana/kit', () => ({
@@ -20,7 +21,7 @@ vi.mock('../../shared/constants.js', async importOriginal => ({
     RPC_REQUEST_TIMEOUT_MS: 10,
 }));
 
-const PROGRAM_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const PROGRAM_ADDRESS = gen.tokenProgram;
 
 const RPC_ENDPOINTS = {
     devnet: 'https://devnet.rpc.address',

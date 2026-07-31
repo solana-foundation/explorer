@@ -2,25 +2,26 @@ import { AccountRole } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
+import { gen } from '../../__tests__/gen.js';
 import { toKitAddress, toKitInstruction, toLegacyPublicKey } from '../index.js';
 
-const PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+const PROGRAM_ID = new PublicKey(gen.tokenProgram);
 const KEYS = [
-    { isSigner: true, isWritable: true, pubkey: new PublicKey('11111111111111111111111111111111') },
+    { isSigner: true, isWritable: true, pubkey: new PublicKey(gen.systemProgram) },
     {
         isSigner: true,
         isWritable: false,
-        pubkey: new PublicKey('SysvarRent111111111111111111111111111111111'),
+        pubkey: new PublicKey(gen.sysvarRent),
     },
     {
         isSigner: false,
         isWritable: true,
-        pubkey: new PublicKey('SysvarC1ock11111111111111111111111111111111'),
+        pubkey: new PublicKey(gen.sysvarClock),
     },
     {
         isSigner: false,
         isWritable: false,
-        pubkey: new PublicKey('Vote111111111111111111111111111111111111111'),
+        pubkey: new PublicKey(gen.voteProgram),
     },
 ];
 
