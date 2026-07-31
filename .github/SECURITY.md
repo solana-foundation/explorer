@@ -38,8 +38,8 @@ endpoints) and the workspace packages under `packages/`.
 The following are **out of scope** here and should be reported to their
 respective projects:
 
--   The Solana protocol / validator client (report via the appropriate Solana
-    or Anza / Agave security process)
+-   The Solana protocol / validator client — report via the Agave security
+    process at <https://github.com/anza-xyz/agave/security>
 -   Third-party RPC providers (e.g. Triton, Helius) and other upstream services
 -   Vulnerabilities that exist only in a fork or in a self-hosted deployment
     with modified configuration
