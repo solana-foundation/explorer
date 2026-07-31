@@ -161,7 +161,7 @@ describe('inspect-entity account router', () => {
         expect(payload).toEqual({
             entity: {
                 address: SYSTEM_PROGRAM_ID,
-                address_label: `native-program::${SYSTEM_PROGRAM_ID}`,
+                address_label: null,
                 executable: true,
                 kind: 'native-program',
             },

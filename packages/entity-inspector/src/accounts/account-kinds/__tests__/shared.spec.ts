@@ -15,7 +15,7 @@ describe('account kind shared helpers', () => {
         expect(() => assertUnreachable('impossible' as never)).toThrow('Unhandled account entity kind');
     });
 
-    it('should resolve labels via the injected resolver, then the address, then null', () => {
+    it('should resolve labels via the injected resolver, else null', () => {
         const account = { owner: null, parsedData: null, parsedProgram: null, rawDataBytes: null };
 
         // Injected resolver (host-app registry) wins
@@ -27,13 +27,16 @@ describe('account kind shared helpers', () => {
             }),
         ).toBe('Custom Label');
 
-        // Without a resolver, the address itself is the label
+        // No resolver name → null (never a synthetic kind::address or bare address), for any kind
         expect(
             resolveProgramAddressLabel({ account: { ...account, address: TOKEN_PROGRAM_ID }, kind: 'unknown' }),
-        ).toBe(TOKEN_PROGRAM_ID);
-        expect(resolveProgramAddressLabel({ account: { ...account, address: 'Unknown111' }, kind: 'unknown' })).toBe(
-            'Unknown111',
-        );
+        ).toBeNull();
+        expect(
+            resolveProgramAddressLabel({
+                account: { ...account, address: TOKEN_PROGRAM_ID },
+                kind: 'bpf-upgradeable-loader',
+            }),
+        ).toBeNull();
 
         // A missing address yields null
         expect(resolveProgramAddressLabel({ account, kind: 'unknown' })).toBeNull();

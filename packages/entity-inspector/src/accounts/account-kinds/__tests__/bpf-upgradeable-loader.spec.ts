@@ -129,7 +129,7 @@ describe('bpf-upgradeable-loader account kind payload', () => {
         ).toMatchObject({
             entity: {
                 address: 'FrozenProg111111111111111111111111111111111',
-                address_label: 'bpf-upgradeable-loader::FrozenProg111111111111111111111111111111111',
+                address_label: null,
                 balance_lamports: 1000000,
                 executable: true,
                 executable_data: executableDataAddress,
@@ -141,7 +141,7 @@ describe('bpf-upgradeable-loader account kind payload', () => {
         });
     });
 
-    it('should fall back to the kind-qualified address when no resolver is injected', () => {
+    it('should leave address_label null when no resolver name is available', () => {
         const executableDataAddress = 'PdataAddr111111111111111111111111111111111';
         const result = buildBpfUpgradeableLoaderPayload({
             account: {
@@ -159,7 +159,7 @@ describe('bpf-upgradeable-loader account kind payload', () => {
             kind: 'bpf-upgradeable-loader',
         });
 
-        expect(entityOf(result).address_label).toBe(`bpf-upgradeable-loader::${TOKEN_2022_PROGRAM_ID}`);
+        expect(entityOf(result).address_label).toBeNull();
     });
 
     it('should pass verificationResult through to entity when present in context', () => {

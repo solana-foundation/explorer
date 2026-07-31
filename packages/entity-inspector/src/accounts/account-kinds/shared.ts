@@ -1,6 +1,5 @@
 import { asBoolean, asRecord, asSafeNumeric, asString } from '../../shared/parse-helpers.js';
 import type { UnknownMarker } from '../../shared/types.js';
-import { UNKNOWN_KIND } from '../kinds.js';
 import type { AccountEntityKind, AccountPayloadContext, NormalizedAccountInfo } from '../types.js';
 
 export type AccountKindBuilder = (context: AccountPayloadContext) => Record<string, unknown>;
@@ -9,18 +8,14 @@ export function assertUnreachable(kind: never): never {
     throw new Error(`Unhandled account entity kind: ${String(kind)}`);
 }
 
-// Display names are the host app's concern (injected via resolveProgramName). With no resolver, fall
-// back to the classified kind label (parsers vocabulary) qualified by the address, then the address alone.
+// Display names are the host app's concern (injected via resolveProgramName). `null` means unresolved /
+// not loaded — never a synthetic string, since `kind` and `address` are already separate payload fields.
 export function resolveProgramAddressLabel(context: AccountPayloadContext): string | null {
     const address = context.account.address;
     if (!address) {
         return null;
     }
-    const resolved = context.resolveProgramName?.(address);
-    if (resolved) {
-        return resolved;
-    }
-    return context.kind === UNKNOWN_KIND ? address : `${context.kind}::${address}`;
+    return context.resolveProgramName?.(address) ?? null;
 }
 
 export function unknownMarker(reason: string): UnknownMarker {
