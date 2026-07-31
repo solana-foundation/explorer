@@ -6,7 +6,11 @@ import { DateTimePicker } from '@components/shared/ui/date-time-picker';
 import { Input } from '@components/shared/ui/input';
 import { Label } from '@components/shared/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
-import { HistoryFilters, isGtfaDisabled, useHistoryFiltersSupported } from '@providers/accounts/history';
+// deep imports on purpose: the feature's own card renders this bar, so importing the
+// barrel here would close a cycle through ui/TransactionHistoryCard
+import { isGtfaDisabled } from '@features/transaction-history/lib/gtfa-disabled-addresses';
+import { HistoryFilters } from '@features/transaction-history/lib/history-filters';
+import { useHistoryFiltersSupported } from '@features/transaction-history/model/use-account-history';
 import { format } from 'date-fns';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';

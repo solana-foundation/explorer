@@ -1,7 +1,8 @@
 import { ConfirmedSignatureInfo, Connection, PublicKey } from '@solana/web3.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { fetchSignatures, reconcile } from '../history';
+import { fetchSignatures } from '../../api/get-signatures-for-address';
+import { reconcile } from '../reconcile';
 
 const sig = (signature: string) => ({ signature }) as unknown as ConfirmedSignatureInfo;
 

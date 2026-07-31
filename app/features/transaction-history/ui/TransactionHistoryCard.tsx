@@ -9,17 +9,13 @@ import {
 import { getTransactionRows } from '@components/account/HistoryCardComponents';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import {
-    isGtfaDisabled,
-    useAccountHistory,
-    useFetchAccountHistory,
-    useHistoryFiltersSupported,
-    useResetAccountHistory,
-} from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { isGtfaDisabled } from '../lib/gtfa-disabled-addresses';
+import { useAccountHistory, useHistoryFiltersSupported, useResetAccountHistory } from '../model/use-account-history';
+import { useFetchAccountHistory } from '../model/use-fetch-account-history';
 import { BaseTransactionHistoryCard, type TransactionHistoryRowView } from './BaseTransactionHistoryCard';
 import { InstructionsCell } from './InstructionsCell';
 import { TransactionRawDataCell } from './TransactionRawDataCell';

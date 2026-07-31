@@ -1,4 +1,4 @@
-import type { AccountHistory } from '@providers/accounts/history';
+import type { AccountHistory } from '@features/transaction-history/lib/types';
 import type { CacheEntry } from '@providers/cache';
 import { FetchStatus } from '@providers/cache';
 import type { ConfirmedSignatureInfo } from '@solana/web3.js';

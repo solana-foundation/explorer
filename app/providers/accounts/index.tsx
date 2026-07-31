@@ -16,6 +16,9 @@ import {
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
 import { getStakeActivation, StakeAccount } from '@features/stake';
+// deep imports on purpose: this provider only needs the history provider and read hook,
+// not the transaction-history UI that the feature barrel re-exports
+import { HistoryProvider } from '@features/transaction-history/model/history-provider';
 import { VoteAccount } from '@features/vote/lib/validators'; // deep import on purpose: this provider only needs the account schema, not the vote UI the barrel re-exports
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
@@ -48,10 +51,9 @@ import { create } from 'superstruct';
 import { alloc } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
-import { HistoryProvider } from './history';
 import { RewardsProvider } from './rewards';
 import { TokensProvider } from './tokens';
-export { useAccountHistory } from './history';
+export { useAccountHistory } from '@features/transaction-history/model/use-account-history';
 
 export type StakeProgramData = {
     program: typeof STAKE_PROGRAM_LABEL; // 'stake'

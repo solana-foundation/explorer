@@ -24,13 +24,9 @@ vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
 // Must import after mocks
 import { FetchStatus } from '@providers/cache';
 
-import {
-    HistoryProvider,
-    useAccountHistory,
-    useFetchAccountHistory,
-    useHistoryFiltersSupported,
-    useResetAccountHistory,
-} from '../history';
+import { HistoryProvider } from '../history-provider';
+import { useAccountHistory, useHistoryFiltersSupported, useResetAccountHistory } from '../use-account-history';
+import { useFetchAccountHistory } from '../use-fetch-account-history';
 
 const ADDRESS = 'rexav5eNTUSNT1K2N7cfRjnthwhcP5BC25v2tA4rW4h';
 const ADDRESS_B = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
@@ -93,6 +89,9 @@ beforeEach(() => {
         ok: true,
         status: 200,
     });
+    // An empty getTransactionsForAddress page is confirmed against getSignaturesForAddress,
+    // so every test needs this to resolve. "Also empty" keeps the empty result as-is.
+    mockConnection.getSignaturesForAddress.mockResolvedValue([]);
 });
 
 describe('useFetchAccountHistory — getTransactionsForAddress', () => {
@@ -344,6 +343,72 @@ describe('getSignaturesForAddress fallback', () => {
         expect(opts).toEqual({ limit: 25 });
     });
 
+    it('should skip getTransactionsForAddress entirely for a statically disabled address', async () => {
+        // wSOL: gTFA times out upstream on this account, so it must never be attempted.
+        const WRAPPED_SOL = 'So11111111111111111111111111111111111111112';
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('wsol', 7)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(WRAPPED_SOL),
+                supported: useHistoryFiltersSupported(),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(WRAPPED_SOL));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('wsol'));
+        expect(fetchMock).not.toHaveBeenCalled();
+        // Scoped to this address: filtering stays available for every other account.
+        expect(result.current.supported).toBe(true);
+    });
+
+    it('should fall back when an unknown method is reported as a generic internal error', async () => {
+        // Helius reports an unknown method as -32603, not -32601.
+        mockRpcError(-32603, 'Method not found');
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+                supported: useHistoryFiltersSupported(),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('legacy'));
+        expect(result.current.supported).toBe(false);
+    });
+
+    it('should surface an internal error that is not a missing method', async () => {
+        // Same code, genuinely different failure: a slot bound below the endpoint's index floor.
+        mockRpcError(-32603, 'Slot <= 460000000 not found');
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, { slot: { lte: 460_000_000 } }),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
+        expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
+    });
+
     it('should not fall back on a generic RPC error', async () => {
         mockRpcError(-32000, 'boom');
 
@@ -361,6 +426,107 @@ describe('getSignaturesForAddress fallback', () => {
 
         await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
         expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
+    });
+
+    it('should confirm an empty getTransactionsForAddress page against the ledger index', async () => {
+        // Endpoint answers HTTP 200 with `data: []` because the address falls outside its
+        // limited-retention index, while getSignaturesForAddress still has the history.
+        mockResult([], null);
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('older-than-retention', 5)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('older-than-retention'));
+        expect(result.current.history?.data?.paginationToken).toBeUndefined();
+    });
+
+    it('should accept the empty result when the ledger index agrees the account has no history', async () => {
+        mockResult([], null);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
+        expect(result.current.history?.data?.fetched).toEqual([]);
+        expect(result.current.history?.data?.foundOldest).toBe(true);
+        expect(mockConnection.getSignaturesForAddress).toHaveBeenCalled();
+    });
+
+    it('should not confirm an empty page while a filter is active', async () => {
+        // getSignaturesForAddress cannot honour filters, so its rows would answer a different
+        // question. An empty filtered page is a legitimate "no matches".
+        mockResult([], null);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, { status: 'failed' }),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
+        expect(result.current.history?.data?.fetched).toEqual([]);
+        expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
+    });
+
+    it('should keep a confirmed address on the signatures path when loading more', async () => {
+        // A full page from the ledger index, so foundOldest stays false and Load More runs.
+        const page = Array.from({ length: 25 }, (_, i) => sig(`sig${i}`, 1000 - i));
+        mockResult([], null);
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce(page);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
+
+        fetchMock.mockClear();
+        mockConnection.getSignaturesForAddress.mockClear();
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('next-page', 900)]);
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(26));
+        // The latch holds: no second getTransactionsForAddress attempt, and the trailing
+        // signature drives the cursor rather than a (now null) paginationToken.
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(mockConnection.getSignaturesForAddress).toHaveBeenCalledTimes(1);
+        expect(mockConnection.getSignaturesForAddress.mock.calls[0][1]).toEqual({ before: 'sig24', limit: 25 });
     });
 
     it('should mark filtering unsupported after a method-not-found, and stay supported otherwise', async () => {

@@ -605,7 +605,6 @@ export default tseslint.config(
             'app/components/shared/ui/autocomplete.tsx',
 
             // app/providers (pre-FSD legacy)
-            'app/providers/accounts/history.tsx',
             'app/providers/accounts/rewards.tsx',
             'app/providers/compressed-nft.tsx',
             'app/providers/epoch.tsx',
