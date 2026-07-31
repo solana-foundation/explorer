@@ -182,6 +182,30 @@ describe('solana rpc adapter', () => {
         await expect(client.fetchAsset('asset-id', 'devnet')).rejects.toBeInstanceOf(SourceUnavailableError);
     });
 
+    it('should throw for a non-benign DAS error code carried in a 200 body', async () => {
+        const fetchMock = vi.fn().mockResolvedValue(
+            new Response(JSON.stringify({ error: { code: -32005, message: 'rate limited' } }), {
+                headers: { 'content-type': 'application/json' },
+                status: 200,
+            }),
+        );
+        vi.stubGlobal('fetch', fetchMock);
+
+        await expect(client.fetchAsset('asset-id', 'devnet')).rejects.toBeInstanceOf(SourceUnavailableError);
+    });
+
+    it('should throw for a DAS error body with no code', async () => {
+        const fetchMock = vi.fn().mockResolvedValue(
+            new Response(JSON.stringify({ error: { message: 'boom' } }), {
+                headers: { 'content-type': 'application/json' },
+                status: 200,
+            }),
+        );
+        vi.stubGlobal('fetch', fetchMock);
+
+        await expect(client.fetchAsset('asset-id', 'devnet')).rejects.toBeInstanceOf(SourceUnavailableError);
+    });
+
     it('should fetch signature status with searchTransactionHistory', async () => {
         const sendMock = vi.fn().mockResolvedValue({
             value: [{ confirmationStatus: 'finalized', confirmations: null }],

@@ -29,6 +29,15 @@ function toSourceUnavailableError(error: unknown): SourceUnavailableError {
     return new SourceUnavailableError(`Upstream source is unavailable: ${detail}`, { cause: error });
 }
 
+// DAS error codes that mean "this account is simply not an NFT", not a provider outage:
+// asset not found (-32000, the provider's not-found code) and method unsupported (-32601). Any
+// other code (throttling/internal error carried in a 200 body) throws so the outage stays visible.
+const BENIGN_DAS_ERROR_CODES = new Set([-32000, -32601]);
+
+function isBenignDasError(code: number | undefined): boolean {
+    return code !== undefined && BENIGN_DAS_ERROR_CODES.has(code);
+}
+
 type RpcRequest<TValue> = {
     send: (options?: { abortSignal?: AbortSignal }) => Promise<TValue>;
 };
@@ -147,11 +156,15 @@ export function createRpcClient(rpcEndpoints: Record<SupportedCluster, string>):
             if (!response.ok) {
                 throw new SourceUnavailableError('DAS endpoint is unavailable.');
             }
-            const payload: { result?: unknown; error?: unknown } = await response.json();
-            // JSON-RPC-level errors (asset not found, method unsupported) are the normal outcome for
-            // non-NFT accounts — null, not a throw, keeps warn logs for genuine transport failures.
+            const payload: { result?: unknown; error?: { code?: number } } = await response.json();
             if (payload.error !== undefined) {
-                return null;
+                // "Not an NFT" outcomes (asset not found, method unsupported) → null. Any other code is a
+                // real upstream failure (throttling/internal error carried in a 200 body) and must surface
+                // as a throw so the caller's warn log fires instead of it looking like "not an NFT".
+                if (isBenignDasError(payload.error.code)) {
+                    return null;
+                }
+                throw new SourceUnavailableError(`DAS getAsset returned error code ${String(payload.error.code)}.`);
             }
             return payload.result;
         } catch (error) {
