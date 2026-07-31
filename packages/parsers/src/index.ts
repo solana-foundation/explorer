@@ -3,6 +3,7 @@ export { createInstructionParserDispatcher } from './dispatcher.js';
 export type { KitInstruction } from './kit-instruction.js';
 export {
     isParsedAccountProgram,
+    isParsedInstructionProgram,
     isRpcParsedAccountProgram,
     isRpcParsedInstructionProgram,
     isTokenProgram,

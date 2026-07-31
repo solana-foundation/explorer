@@ -1,5 +1,5 @@
 import { getTokenIxValidator } from '@components/instruction/token/types';
-import type { ParserProgramLabel } from '@entities/instruction-parser';
+import { isParsedInstructionProgram, type ParserProgramLabel } from '@explorer/parsers';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import {
     identifyTokenInstruction,
@@ -108,7 +108,7 @@ export function parseTokenInstruction(ix: KitInstruction): TokenParsed | undefin
  * and keeps slices independent (no feature-to-feature import).
  */
 export function parseTokenRpcInstruction(ix: ParsedInstruction): TokenParsed | undefined {
-    if (ix.program !== TOKEN_PROGRAM_LABEL) return undefined;
+    if (!isParsedInstructionProgram(ix, TOKEN_PROGRAM_LABEL)) return undefined;
     const validator = getTokenIxValidator(ix.parsed.type);
     if (!validator) return undefined;
     try {

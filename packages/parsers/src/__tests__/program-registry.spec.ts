@@ -3,6 +3,7 @@ import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import {
     isParsedAccountProgram,
+    isParsedInstructionProgram,
     isRpcParsedAccountProgram,
     isRpcParsedInstructionProgram,
     isTokenProgram,
@@ -23,6 +24,10 @@ type ParsedData = Vote | Stake;
 // Read through a typed accessor (not a literal `const`) so the inferred union
 // stays wide — mirrors the app's `account.data.parsed` access.
 const parsed = (): ParsedData => ({ parsed: { slot: 1 }, program: 'vote' });
+
+// Mirrors web3.js ParsedInstruction — `program` is `string`, not a discriminated union.
+type ParsedInstructionFixture = { program: string; parsed: { type: string } };
+const instruction = (): ParsedInstructionFixture => ({ parsed: { type: 'transfer' }, program: 'spl-token' });
 
 describe('program registry', () => {
     it('should accept every token program via the guard and reject outsiders', () => {
@@ -83,6 +88,24 @@ describe('program registry', () => {
             if (isParsedAccountProgram(data, 'vote')) {
                 expectTypeOf(data).toEqualTypeOf<Vote>();
                 expectTypeOf(data.parsed).toEqualTypeOf<{ slot: number }>();
+            }
+        });
+    });
+
+    describe('isParsedInstructionProgram', () => {
+        it('should return true when the instruction program matches', () => {
+            expect(isParsedInstructionProgram(instruction(), 'spl-token')).toBe(true);
+        });
+
+        it('should return false when the instruction program differs', () => {
+            expect(isParsedInstructionProgram(instruction(), 'spl-token-2022')).toBe(false);
+        });
+
+        it('should intersect the program literal without dropping the instruction shape', () => {
+            const ix = instruction();
+            if (isParsedInstructionProgram(ix, 'spl-token')) {
+                expectTypeOf(ix.program).toEqualTypeOf<'spl-token'>();
+                expectTypeOf(ix.parsed).toEqualTypeOf<{ type: string }>();
             }
         });
     });

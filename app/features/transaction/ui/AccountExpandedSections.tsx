@@ -1,5 +1,6 @@
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
+    isParsedAccountProgram,
     NONCE_PROGRAM_LABEL,
     STAKE_PROGRAM_LABEL,
     VOTE_PROGRAM_LABEL,
@@ -207,16 +208,16 @@ export function ParsedSection({ parsed }: { parsed: ParsedData }) {
     if (isUpgradeableLoaderAccountData(parsed)) {
         return <UpgradeableLoaderSection data={parsed} />;
     }
-    if (parsed.program === STAKE_PROGRAM_LABEL) {
+    if (isParsedAccountProgram(parsed, STAKE_PROGRAM_LABEL)) {
         return <StakeAccountSection account={parsed.parsed} />;
     }
-    if (parsed.program === VOTE_PROGRAM_LABEL) {
+    if (isParsedAccountProgram(parsed, VOTE_PROGRAM_LABEL)) {
         return <VoteAccountSection account={parsed.parsed} />;
     }
-    if (parsed.program === NONCE_PROGRAM_LABEL) {
+    if (isParsedAccountProgram(parsed, NONCE_PROGRAM_LABEL)) {
         return <NonceAccountSection account={parsed.parsed} />;
     }
-    if (parsed.program === ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL) {
+    if (isParsedAccountProgram(parsed, ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL)) {
         return <AddressLookupTableSection account={parsed.parsed} />;
     }
     return undefined;

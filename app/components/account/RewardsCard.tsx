@@ -4,7 +4,7 @@ import { Epoch } from '@components/common/Epoch';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Slot } from '@components/common/Slot';
-import { STAKE_PROGRAM_LABEL } from '@explorer/parsers';
+import { isParsedAccountProgram, STAKE_PROGRAM_LABEL } from '@explorer/parsers';
 import { useAccountInfo } from '@providers/accounts';
 import { useFetchRewards, useRewards } from '@providers/accounts/rewards';
 import { FetchStatus } from '@providers/cache';
@@ -25,8 +25,7 @@ export function RewardsCard({ address }: { address: string }) {
     const parsedData = account?.data.parsed;
 
     const highestEpoch = React.useMemo(() => {
-        if (!parsedData) return;
-        if (parsedData.program !== STAKE_PROGRAM_LABEL) return;
+        if (!isParsedAccountProgram(parsedData, STAKE_PROGRAM_LABEL)) return;
         const stakeInfo = parsedData.parsed.info.stake;
         if (stakeInfo !== null && stakeInfo.delegation.deactivationEpoch !== U64_MAX) {
             return Number(stakeInfo.delegation.deactivationEpoch);

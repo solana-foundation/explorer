@@ -58,6 +58,19 @@ export function isParsedAccountProgram<D extends { program: string }, K extends 
     return data?.program === kind;
 }
 
+/**
+ * Narrows an RPC-parsed instruction by its `program` label. Intersects rather
+ * than `Extract`s: web3.js `ParsedInstruction.program` is `string`, not a
+ * discriminated union, so `Extract` would collapse to `never` — the
+ * union-narrowing sibling is {@link isParsedAccountProgram}.
+ */
+export function isParsedInstructionProgram<D extends { program: string }, K extends string>(
+    instruction: D,
+    program: K,
+): instruction is D & { program: K } {
+    return instruction.program === program;
+}
+
 export const RPC_PARSED_INSTRUCTION_PROGRAMS = [
     SPL_TOKEN_PROGRAM_LABEL,
     SPL_TOKEN_2022_PROGRAM_LABEL,

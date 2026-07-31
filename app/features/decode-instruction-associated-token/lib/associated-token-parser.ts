@@ -1,4 +1,4 @@
-import type { ParserProgramLabel } from '@entities/instruction-parser';
+import { isParsedInstructionProgram, type ParserProgramLabel } from '@explorer/parsers';
 import { type ParsedInstruction } from '@solana/web3.js';
 import {
     AssociatedTokenInstruction,
@@ -63,7 +63,7 @@ export function parseAssociatedTokenInstruction(ix: KitInstruction): AssociatedT
 
 /** Normalise an RPC-pre-parsed Associated Token instruction into `AssociatedTokenParsed`. */
 export function parseAssociatedTokenRpcInstruction(ix: ParsedInstruction): AssociatedTokenParsed | undefined {
-    if (ix.program !== ASSOCIATED_TOKEN_PROGRAM_LABEL) return undefined;
+    if (!isParsedInstructionProgram(ix, ASSOCIATED_TOKEN_PROGRAM_LABEL)) return undefined;
     try {
         switch (ix.parsed.type) {
             case 'create':
