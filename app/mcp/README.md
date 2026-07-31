@@ -6,12 +6,12 @@ MCP server serving the `@explorer/entity-inspector` tools over the [Streamable H
 
 Inert by default (`503`). Env-only configuration (see `.env.example`):
 
-| Variable | Purpose |
-| --- | --- |
-| `MCP_ENDPOINT_ENABLED` | `true` enables the endpoint. |
-| `MCP_ACCESS_KEYS` | Comma-separated bearer keys; requests need `Authorization: Bearer <key>`. Unset = open access (startup warning). |
-| `MCP_BLOCKED_IPS` | Comma-separated client IPs rejected with 403. |
-| `MCP_SOLANA_RPC_URL_MAINNET_BETA` / `_DEVNET` / `_TESTNET` / `_SIMD296` | Dedicated RPC endpoints keeping MCP traffic off the app's quota; public endpoints are the fallback. |
+| Variable                                                                | Purpose                                                                                                                     |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `MCP_ENDPOINT_ENABLED`                                                  | `true` enables the endpoint.                                                                                                |
+| `MCP_ACCESS_KEYS`                                                       | Comma-separated bearer keys; requests need `Authorization: Bearer <key>`. Unset = open access (startup warning).            |
+| `MCP_BLOCKED_IPS`                                                       | Comma-separated client IPs rejected with 403.                                                                               |
+| `MCP_SOLANA_RPC_URL_MAINNET_BETA` / `_DEVNET` / `_TESTNET` / `_SIMD296` | Dedicated RPC endpoints keeping MCP traffic off the app's quota; the app's server RPC config (`*_RPC_URL`) is the fallback. |
 
 Keys and blocklist are parsed at module scope — changes require a redeploy.
 

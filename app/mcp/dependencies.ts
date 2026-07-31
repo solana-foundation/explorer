@@ -1,11 +1,15 @@
+// Fails the build if this module (which reads key-bearing RPC env) is ever imported into a client bundle.
+import 'server-only';
+
 import type { EntityInspectorConfig, McpRequestHandler } from '@explorer/entity-inspector';
 import { isParsedInstruction } from '@explorer/parsers';
 import { getBase58Encoder } from '@solana/kit';
-import { clusterApiUrl, PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { wrapMcpServerWithSentry } from '@/app/shared/lib/sentry';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
+import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 import { programNameByAddress } from '@/app/utils/programs';
 
 import { createMcpTrack } from './telemetry';
@@ -52,13 +56,14 @@ const logger: EntityInspectorConfig['logger'] = {
 };
 
 // Resolved at handler init (cold start), not module scope, so key-bearing URLs come from runtime env, never a build artifact.
+// Dedicated MCP endpoints keep MCP traffic off the app's quota; unset falls back to the app's own server RPC config
+// (`serverClusterUrl` → `*_RPC_URL` env → proxied default), not a raw public endpoint.
 function resolveRpcEndpoints(): EntityInspectorConfig['rpcEndpoints'] {
     return {
-        devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || clusterApiUrl('devnet'),
-        'mainnet-beta': process.env.MCP_SOLANA_RPC_URL_MAINNET_BETA || clusterApiUrl('mainnet-beta'),
-        // simd296 is not a web3.js cluster, so its public endpoint stays a literal
-        simd296: process.env.MCP_SOLANA_RPC_URL_SIMD296 || 'https://simd-0296.surfnet.dev:8899',
-        testnet: process.env.MCP_SOLANA_RPC_URL_TESTNET || clusterApiUrl('testnet'),
+        devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || serverClusterUrl(Cluster.Devnet, ''),
+        'mainnet-beta': process.env.MCP_SOLANA_RPC_URL_MAINNET_BETA || serverClusterUrl(Cluster.MainnetBeta, ''),
+        simd296: process.env.MCP_SOLANA_RPC_URL_SIMD296 || serverClusterUrl(Cluster.Simd296, ''),
+        testnet: process.env.MCP_SOLANA_RPC_URL_TESTNET || serverClusterUrl(Cluster.Testnet, ''),
     };
 }
 
