@@ -112,12 +112,12 @@ describe('createInstructionParserDispatcher', () => {
     });
 
     it('should fall back to the RPC view when the slice rejects the parsed input', () => {
-        const dispatcher = createInstructionParserDispatcher([
-            makeParser({ fromParsed: vi.fn().mockReturnValue(undefined) }),
-        ]);
+        const fromParsed = vi.fn().mockReturnValue(undefined);
+        const dispatcher = createInstructionParserDispatcher([makeParser({ fromParsed })]);
         const ix = makeRpcParsedInstruction() as never;
 
         expect(dispatcher.fromParsedInstruction(ix)).toBe(ix);
+        expect(fromParsed).toHaveBeenCalled();
     });
 
     it('should normalize RPC-parsed input through the slice fromParsed', () => {
