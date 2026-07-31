@@ -56,12 +56,20 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
             const generation = generations.get(key) ?? 0;
             const isCurrent = () => (generations.get(key) ?? 0) === generation;
 
+            // Latch entries are keyed by endpoint as well as address. Index coverage is a
+            // property of the endpoint, and a request still in flight when the cluster changes
+            // resolves against the new one: the provider has already cleared the set, and the
+            // generation guard can't help because it resets to 0 at the same moment. Scoping
+            // the key makes such a late write inert instead of skipping a working gTFA path on
+            // the new endpoint.
+            const latchKey = `${url}:${key}`;
+
             // The latch only governs the unfiltered path. getSignaturesForAddress can't honour
             // filters, so once a filter is active getTransactionsForAddress is the only method
             // that can answer it — reverting to the signatures path would render unfiltered
             // rows while the UI still shows the filter as applied. (The statically disabled
             // addresses are handled inside fetchHistoryPage, which is not filter-dependent.)
-            const forceSignatures = signaturesOnly.has(key) && !hasActiveFilters(activeFilters);
+            const forceSignatures = signaturesOnly.has(latchKey) && !hasActiveFilters(activeFilters);
 
             const common = {
                 cluster,
@@ -72,7 +80,11 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                 isCurrent,
                 limit,
                 onMethodNotFound: markUnsupported,
-                onSignaturesOnly: () => signaturesOnly.add(key),
+                // Recorded even when isCurrent() later rejects the page. A filter change
+                // supersedes the request but not what it proved: the endpoint really does
+                // return an empty gTFA page for this address, so the next unfiltered request
+                // should still skip it. Cross-endpoint leakage is handled by latchKey above.
+                onSignaturesOnly: () => signaturesOnly.add(latchKey),
                 pubkey,
                 url,
             };

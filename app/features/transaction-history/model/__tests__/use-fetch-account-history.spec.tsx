@@ -23,6 +23,7 @@ vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
 
 // Must import after mocks
 import { FetchStatus } from '@providers/cache';
+import { useCluster } from '@providers/cluster';
 
 import { HistoryProvider } from '../history-provider';
 import { useAccountHistory, useHistoryFiltersSupported, useResetAccountHistory } from '../use-account-history';
@@ -92,6 +93,7 @@ beforeEach(() => {
     // An empty getTransactionsForAddress page is confirmed against getSignaturesForAddress,
     // so every test needs this to resolve. "Also empty" keeps the empty result as-is.
     mockConnection.getSignaturesForAddress.mockResolvedValue([]);
+    vi.mocked(useCluster).mockReturnValue({ cluster: 0, url: 'https://mock.rpc' } as any);
 });
 
 describe('useFetchAccountHistory — getTransactionsForAddress', () => {
@@ -527,6 +529,52 @@ describe('getSignaturesForAddress fallback', () => {
         expect(fetchMock).not.toHaveBeenCalled();
         expect(mockConnection.getSignaturesForAddress).toHaveBeenCalledTimes(1);
         expect(mockConnection.getSignaturesForAddress.mock.calls[0][1]).toEqual({ before: 'sig24', limit: 25 });
+    });
+
+    it('should not let a request in flight across a cluster change latch the new endpoint', async () => {
+        // The provider clears the latch on a cluster change, but a request already in flight
+        // resolves afterwards and still reports what it proved. That report must not apply to
+        // the endpoint that is now selected.
+        const pendingConfirm = deferred<ReturnType<typeof sig>[]>();
+        mockResult([], null); // endpoint A: gTFA answers empty
+        mockConnection.getSignaturesForAddress.mockReturnValueOnce(pendingConfirm.promise);
+
+        const { result, rerender } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        act(() => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+        // The confirmation is issued but not yet resolved.
+        await waitFor(() => expect(mockConnection.getSignaturesForAddress).toHaveBeenCalledTimes(1));
+
+        // Cluster changes while that confirmation is still open.
+        vi.mocked(useCluster).mockReturnValue({ cluster: 0, url: 'https://other.rpc' } as any);
+        rerender();
+
+        // Now the stale confirmation lands and reports the address as uncovered.
+        await act(async () => {
+            pendingConfirm.resolve([sig('from-endpoint-a', 5)]);
+            await pendingConfirm.promise;
+        });
+
+        // A fresh unfiltered request on the new endpoint must still try gTFA.
+        fetchMock.mockClear();
+        mockConnection.getSignaturesForAddress.mockClear();
+        mockResult([sig('from-endpoint-b', 9)], null);
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        expect(JSON.parse(fetchMock.mock.calls[0][1].body).method).toBe('getTransactionsForAddress');
+        expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
     });
 
     it('should mark filtering unsupported after a method-not-found, and stay supported otherwise', async () => {
