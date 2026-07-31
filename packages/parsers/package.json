@@ -29,10 +29,10 @@
             "import": "./dist/programs/address-lookup-table/index.js",
             "default": "./dist/programs/address-lookup-table/index.js"
         },
-        "./programs/token-batch": {
-            "types": "./dist/programs/token-batch/index.d.ts",
-            "import": "./dist/programs/token-batch/index.js",
-            "default": "./dist/programs/token-batch/index.js"
+        "./token-batch": {
+            "types": "./dist/token-batch/index.d.ts",
+            "import": "./dist/token-batch/index.js",
+            "default": "./dist/token-batch/index.js"
         },
         "./security-txt": {
             "types": "./dist/security-txt/index.d.ts",

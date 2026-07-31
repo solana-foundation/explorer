@@ -3,7 +3,7 @@ import { TOKEN_PROGRAM_ADDRESS, TokenInstruction } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { describe, expect, it } from 'vitest';
 
-import type { KitInstruction } from '../../../kit-instruction.js';
+import type { KitInstruction } from '../../kit-instruction.js';
 import {
     hasTokenBatchDiscriminator,
     isTokenBatchInstruction,

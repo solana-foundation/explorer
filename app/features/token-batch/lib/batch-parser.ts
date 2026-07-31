@@ -5,7 +5,7 @@ import {
     hasTokenBatchDiscriminator,
     isTokenBatchInstruction as isTokenBatchKitInstruction,
     parseTokenBatchInstruction,
-} from '@explorer/parsers/programs/token-batch';
+} from '@explorer/parsers/token-batch';
 import { type AccountMeta, isSignerRole, isWritableRole } from '@solana/kit';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import { type ParsedTokenInstruction } from '@solana-program/token';

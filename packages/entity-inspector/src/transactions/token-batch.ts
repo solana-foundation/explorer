@@ -6,7 +6,7 @@ import {
     parseTokenBatchInstruction,
     TOKEN_BATCH_DISCRIMINATOR,
     tokenBatchProgramLabel,
-} from '@explorer/parsers/programs/token-batch';
+} from '@explorer/parsers/token-batch';
 import { isSignerRole, isWritableRole } from '@solana/kit';
 import { TokenInstruction } from '@solana-program/token';
 
