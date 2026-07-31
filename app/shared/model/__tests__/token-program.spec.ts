@@ -1,4 +1,4 @@
-import type { Address, ReadonlyUint8Array } from '@solana/kit';
+import { type Address, address, type ReadonlyUint8Array } from '@solana/kit';
 import { TOKEN_PROGRAM_ADDRESS, TokenAccount } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS, Token2022Account } from '@solana-program/token-2022';
 import { describe, expect, expectTypeOf, it } from 'vitest';
@@ -48,8 +48,49 @@ describe('isTokenProgramAddress', () => {
 });
 
 describe('identifyTokenAccountType', () => {
+    // identifyTokenAccount discriminates purely by data length: 82 = mint, 165 = token, 355 = multisig.
     it('should return undefined for malformed data', () => {
         expect(identifyTokenAccountType(TOKEN_PROGRAM_ADDRESS, new Uint8Array(0))).toBeUndefined();
         expect(identifyTokenAccountType(TOKEN_PROGRAM_ADDRESS, new Uint8Array([1, 2, 3]))).toBeUndefined();
+    });
+
+    it('should identify an 82-byte Token account as a mint', () => {
+        expect(identifyTokenAccountType(TOKEN_PROGRAM_ADDRESS, new Uint8Array(82))).toBe(TokenAccount.Mint);
+    });
+
+    it('should identify a 165-byte Token account as a token account', () => {
+        expect(identifyTokenAccountType(TOKEN_PROGRAM_ADDRESS, new Uint8Array(165))).toBe(TokenAccount.Token);
+    });
+
+    it('should identify a 355-byte Token account as a multisig', () => {
+        expect(identifyTokenAccountType(TOKEN_PROGRAM_ADDRESS, new Uint8Array(355))).toBe(TokenAccount.Multisig);
+    });
+
+    it('should route Token-2022 owners through the Token-2022 identifier', () => {
+        expect(identifyTokenAccountType(TOKEN_2022_PROGRAM_ADDRESS, new Uint8Array(82))).toBe(Token2022Account.Mint);
+    });
+
+    it('should return undefined for a non-token owner', () => {
+        expect(
+            identifyTokenAccountType(address('11111111111111111111111111111111'), new Uint8Array(82)),
+        ).toBeUndefined();
+    });
+});
+
+describe('isTokenMintByOwner', () => {
+    it('should return true for a token owner with 82-byte mint data', () => {
+        expect(isTokenMintByOwner(TOKEN_PROGRAM_ADDRESS, new Uint8Array(82))).toBe(true);
+    });
+
+    it('should return false for a token owner with 165-byte token-account data', () => {
+        expect(isTokenMintByOwner(TOKEN_PROGRAM_ADDRESS, new Uint8Array(165))).toBe(false);
+    });
+
+    it('should return false for a non-token owner regardless of data', () => {
+        expect(isTokenMintByOwner(address('11111111111111111111111111111111'), new Uint8Array(82))).toBe(false);
+    });
+
+    it('should return true for a token owner with no data (data-absent fast path)', () => {
+        expect(isTokenMintByOwner(TOKEN_PROGRAM_ADDRESS)).toBe(true);
     });
 });
