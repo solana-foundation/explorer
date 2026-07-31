@@ -48,6 +48,13 @@ export type NormalizedProgramDataInfo = {
 
 export type ProgramDataStatus = 'resolved' | 'missing' | 'source_unavailable';
 
+// programData is present iff the status is 'resolved' — keyed on the status so the illegal
+// combinations (resolved-without-data, missing-with-data) are unrepresentable.
+type ProgramDataResolution =
+    | { programDataStatus: 'resolved'; programData: NormalizedProgramDataInfo; programDataRawBase64?: string | null }
+    | { programDataStatus: 'missing' | 'source_unavailable'; programData?: undefined; programDataRawBase64?: undefined }
+    | { programDataStatus?: undefined; programData?: undefined; programDataRawBase64?: undefined };
+
 export type NormalizedAccountInfo = {
     owner: string | null;
     parsedProgram: string | null;
@@ -55,12 +62,9 @@ export type NormalizedAccountInfo = {
     rawDataBytes: ReadonlyUint8Array | null;
     address?: string;
     lamports?: SafeNumeric;
-    executable?: boolean | null;
+    executable?: boolean;
     programDataAddress?: string | null;
-    programData?: NormalizedProgramDataInfo | null;
-    programDataStatus?: ProgramDataStatus;
-    programDataRawBase64?: string | null;
-};
+} & ProgramDataResolution;
 
 export type DasClassificationOutcome = {
     compressed: boolean;

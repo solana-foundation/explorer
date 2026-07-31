@@ -1,6 +1,6 @@
 import { ADDRESS_LOOKUP_TABLE_PROGRAM_ID, BPF_UPGRADEABLE_LOADER_PROGRAM_ID } from '../../shared/constants.js';
 import type { AccountProbeEnvelope } from '../../rpc/types.js';
-import type { NormalizedAccountInfo } from '../types.js';
+import type { NormalizedAccountInfo, NormalizedProgramDataInfo } from '../types.js';
 
 // Constructors for account fixtures (RPC probe envelopes + normalized accounts) so specs assert behavior instead of hand-building raw shapes.
 
@@ -83,21 +83,32 @@ export function upgradeableProgramDataProbe({
     });
 }
 
+type UpgradeableAccountOverrides = {
+    address?: string;
+    parsedProgram?: string;
+    programData?: NormalizedProgramDataInfo;
+    programDataAddress?: string | null;
+};
+
 /** A normalized upgradeable-program account awaiting its programData enrichment. */
-export function upgradeableProgramAccount(overrides?: Partial<NormalizedAccountInfo>): NormalizedAccountInfo {
-    return {
+export function upgradeableProgramAccount(overrides: UpgradeableAccountOverrides = {}): NormalizedAccountInfo {
+    const base = {
+        address: overrides.address,
         owner: BPF_UPGRADEABLE_LOADER_PROGRAM_ID,
         parsedData: {
             info: { programData: 'ProgramData111111111111111111111111111111111' },
             type: 'program',
         },
-        parsedProgram: 'bpf-upgradeable-loader',
-        programData: null,
-        programDataAddress: 'ProgramData111111111111111111111111111111111',
-        programDataStatus: 'missing',
+        parsedProgram: overrides.parsedProgram ?? 'bpf-upgradeable-loader',
+        programDataAddress:
+            overrides.programDataAddress === undefined
+                ? 'ProgramData111111111111111111111111111111111'
+                : overrides.programDataAddress,
         rawDataBytes: null,
-        ...overrides,
     };
+    return overrides.programData
+        ? { ...base, programData: overrides.programData, programDataStatus: 'resolved' }
+        : { ...base, programDataStatus: 'missing' };
 }
 
 export function unknownProgramAccountProbe(): AccountProbeEnvelope {

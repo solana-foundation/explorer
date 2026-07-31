@@ -82,21 +82,23 @@ export function normalizeAccountProbe(address: string, envelope: AccountProbeEnv
     const parsedDataContainer = Array.isArray(data) ? null : data;
     const parsedData = parsedDataContainer?.parsed ?? null;
     const normalizedProgramData = extractProgramDataInfo(parsedData);
-    // Malformed base64 degrades to null — same downstream outcome as a non-base64 data shape.
+    // Malformed base64 → error branch (value undefined); treated as absent like a non-base64 shape.
     const [, rawDataBytes] = extractRawDataBytesFromAccountData(data);
 
-    return {
+    const base = {
         address,
         executable: accountValue.executable,
         lamports: asSafeNumeric(accountValue.lamports),
         owner: accountValue.owner,
         parsedData,
         parsedProgram: parsedDataContainer?.program ?? null,
-        programData: normalizedProgramData,
         programDataAddress: extractProgramDataAddress(parsedData),
-        programDataStatus: normalizedProgramData ? 'resolved' : 'missing',
         rawDataBytes: rawDataBytes ?? null,
     };
+
+    return normalizedProgramData
+        ? { ...base, programData: normalizedProgramData, programDataStatus: 'resolved' }
+        : { ...base, programDataStatus: 'missing' };
 }
 
 type AccountFetcher = (address: string, cluster: SupportedCluster) => Promise<AccountProbeEnvelope>;
