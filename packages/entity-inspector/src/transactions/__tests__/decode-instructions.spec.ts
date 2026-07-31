@@ -170,6 +170,7 @@ describe('decodeTransactionInstructions', () => {
 
         const entries = await decodeTransactionInstructions(makeContext(), { decodeInstructionFallback, logger });
 
+        expect(decodeInstructionFallback).toHaveBeenCalled();
         expect(entries[0].source).toBe('raw');
         expect(entries[0]).not.toHaveProperty('decoded');
     });
