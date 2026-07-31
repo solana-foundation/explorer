@@ -323,6 +323,9 @@ function toUpgradeNonceInfo(parsed: ReturnType<typeof parseUpgradeNonceAccountIn
     };
 }
 
+// Number(bigint) loses precision above 2^53 for lamports/space. Kept verbatim from the app card
+// port; widening the validators to a string fallback (cf. entity-inspector's SafeNumeric) is a
+// separate decision that ripples to every app consumer of the parsed shape.
 function safeNumber(value: bigint | number): number {
     return Number(value);
 }
