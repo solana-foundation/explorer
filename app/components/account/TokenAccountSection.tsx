@@ -45,13 +45,15 @@ import {
 import { BigNumber } from 'bignumber.js';
 import { capitalCase } from 'change-case';
 import { useEffect, useMemo, useState } from 'react';
-import { ExternalLink } from 'react-feather';
+import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
+import { getSafeExternalHref } from '@/app/shared/lib/url';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
@@ -185,10 +187,14 @@ function FungibleTokenMintAccountCard({
                 <BaseTable.Row>
                     <BaseTable.Cell>Website</BaseTable.Cell>
                     <BaseTable.Cell className="md:text-right">
-                        <a rel="noopener noreferrer" target="_blank" href={tokenInfo.extensions.website}>
-                            {tokenInfo.extensions.website}
-                            <ExternalLink className="ml-1.5 align-text-top" size={13} />
-                        </a>
+                        {getSafeExternalHref(tokenInfo.extensions.website) ? (
+                            <ExternalLink href={tokenInfo.extensions.website}>
+                                {tokenInfo.extensions.website}
+                                <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                            </ExternalLink>
+                        ) : (
+                            tokenInfo.extensions.website
+                        )}
                     </BaseTable.Cell>
                 </BaseTable.Row>
             )}
@@ -223,9 +229,13 @@ function FungibleTokenMintAccountCard({
                     <BaseTable.Cell>Bridge Contract</BaseTable.Cell>
                     <BaseTable.Cell className="md:text-right">
                         <Copyable text={bridgeContractAddress}>
-                            <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
-                                {bridgeContractAddress}
-                            </a>
+                            {getSafeExternalHref(tokenInfo.extensions.bridgeContract) ? (
+                                <ExternalLink href={tokenInfo.extensions.bridgeContract}>
+                                    {bridgeContractAddress}
+                                </ExternalLink>
+                            ) : (
+                                bridgeContractAddress
+                            )}
                         </Copyable>
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -235,9 +245,13 @@ function FungibleTokenMintAccountCard({
                     <BaseTable.Cell>Bridged Asset Contract</BaseTable.Cell>
                     <BaseTable.Cell className="md:text-right">
                         <Copyable text={assetContractAddress}>
-                            <a href={tokenInfo.extensions.bridgeContract} target="_blank" rel="noreferrer">
-                                {assetContractAddress}
-                            </a>
+                            {getSafeExternalHref(tokenInfo.extensions.bridgeContract) ? (
+                                <ExternalLink href={tokenInfo.extensions.bridgeContract}>
+                                    {assetContractAddress}
+                                </ExternalLink>
+                            ) : (
+                                assetContractAddress
+                            )}
                         </Copyable>
                     </BaseTable.Cell>
                 </BaseTable.Row>
@@ -336,10 +350,14 @@ function NonFungibleTokenMintAccountCard({
                 <BaseTable.Row>
                     <BaseTable.Cell>Website</BaseTable.Cell>
                     <BaseTable.Cell className="md:text-right">
-                        <a rel="noopener noreferrer" target="_blank" href={nftData.json.external_url}>
-                            {nftData.json.external_url}
-                            <ExternalLink className="ml-1.5 align-text-top" size={13} />
-                        </a>
+                        {getSafeExternalHref(nftData.json.external_url) ? (
+                            <ExternalLink href={nftData.json.external_url}>
+                                {nftData.json.external_url}
+                                <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                            </ExternalLink>
+                        ) : (
+                            nftData.json.external_url
+                        )}
                     </BaseTable.Cell>
                 </BaseTable.Row>
             )}
@@ -1026,11 +1044,11 @@ export function TokenExtensionRow(
                     <BaseTable.Row>
                         <BaseTable.Cell>URI</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">
-                            {extension.uri.startsWith('http') ? (
-                                <a rel="noopener noreferrer" target="_blank" href={extension.uri}>
+                            {getSafeExternalHref(extension.uri) ? (
+                                <ExternalLink href={extension.uri}>
                                     {extension.uri}
-                                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
-                                </a>
+                                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                                </ExternalLink>
                             ) : (
                                 extension.uri
                             )}

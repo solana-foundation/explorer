@@ -1,10 +1,11 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@components/shared/ui/accordion';
 import { useCallback, useMemo, useState } from 'react';
-import { Code, ExternalLink } from 'react-feather';
+import { Code, ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import { TableCardBodyHeaded } from '@/app/components/common/TableCardBody';
 import { Badge } from '@/app/components/shared/ui/badge';
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import {
     getAnchorId,
     useTokenExtensionNavigation,
@@ -126,12 +127,12 @@ function TokenExtensionAccordionItem({
                         </Badge>
                     </button>
                     {parsedExtension.externalLinks.map((link, index) => (
-                        <a key={index} href={link.url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink key={index} href={link.url}>
                             <Badge variant="transparent" size="sm" as="link" className="font-normal text-white">
-                                <ExternalLink size={16} />
+                                <ExternalLinkIcon size={16} />
                                 {link.label}
                             </Badge>
-                        </a>
+                        </ExternalLink>
                     ))}
                 </div>
             </div>
