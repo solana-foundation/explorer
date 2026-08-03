@@ -1,6 +1,6 @@
-import { getChainId } from '@entities/token-info';
+import { ChainId } from '@entities/chain-id';
+import { getChainId, type TokenInfo } from '@entities/token-info';
 import { PublicKey } from '@solana/web3.js';
-import { ChainId, Token } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
 import { TokenExtension } from '@validators/accounts/token-extension';
 
@@ -42,6 +42,40 @@ type FullLegacyTokenInfoList = {
     tokens: FullLegacyTokenInfo[];
 };
 
+/**
+ * Resolves mints through the `/api/token-info` route. The route owns the UTL
+ * list lookup and the RPC endpoint, so no RPC URL is sent from the browser.
+ *
+ * @param includeOnChainFallback Also read on-chain Metaplex metadata for mints
+ * the UTL list does not carry. Costs extra RPC calls, so it is opt-in.
+ */
+async function fetchTokenInfosFromApi(
+    addresses: string[],
+    cluster: Cluster,
+    genesisHash: string | undefined,
+    includeOnChainFallback: boolean,
+): Promise<TokenInfo[] | undefined> {
+    const chainId = getChainId(cluster, genesisHash);
+    if (!chainId) return undefined;
+    if (addresses.length === 0) return [];
+
+    try {
+        const response = await fetch('/api/token-info', {
+            body: JSON.stringify({ addresses, cluster, genesisHash, includeOnChainFallback }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        });
+
+        if (!response.ok) return undefined;
+
+        const data = (await response.json()) as { content?: TokenInfo[] };
+        return data.content;
+    } catch (error) {
+        Logger.warn('[utils:token-info] Failed to fetch token info', { addresses, error });
+        return undefined;
+    }
+}
+
 export function getTokenInfoSwrKey(address: string, cluster: Cluster, genesisHash?: string) {
     return ['get-token-info', address, cluster, genesisHash];
 }
@@ -50,7 +84,7 @@ export async function getTokenInfo(
     address: PublicKey,
     cluster: Cluster,
     genesisHash?: string,
-): Promise<Token | undefined> {
+): Promise<TokenInfo | undefined> {
     return getTokenInfoWithoutOnChainFallback(address, cluster, genesisHash);
 }
 
@@ -61,25 +95,9 @@ export async function getTokenInfoWithoutOnChainFallback(
     address: PublicKey,
     cluster: Cluster,
     genesisHash?: string,
-): Promise<Token | undefined> {
-    const chainId = getChainId(cluster, genesisHash);
-    if (!chainId) return undefined;
-
-    try {
-        const response = await fetch('/api/token-info', {
-            body: JSON.stringify({ address: address.toBase58(), cluster, genesisHash }),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-        });
-
-        if (!response.ok) return undefined;
-
-        const data = (await response.json()) as { content?: Token };
-        return data.content;
-    } catch (error) {
-        Logger.warn('[utils:token-info] Failed to fetch token info', { address: address.toString(), error });
-        return undefined;
-    }
+): Promise<TokenInfo | undefined> {
+    const tokens = await fetchTokenInfosFromApi([address.toBase58()], cluster, genesisHash, false);
+    return tokens?.[0];
 }
 
 async function getFullLegacyTokenInfoUsingCdn(
@@ -168,6 +186,23 @@ export async function getFullTokenInfo(
         tags,
         verified: sdkTokenInfo.verified ?? false,
     };
+}
+
+/**
+ * Resolves several mints at once. Matches what the UTL SDK's `fetchMints` did:
+ * the UTL list first, then on-chain Metaplex metadata for whatever is missing.
+ */
+export async function getTokenInfos(
+    addresses: PublicKey[],
+    cluster: Cluster,
+    genesisHash?: string,
+): Promise<TokenInfo[] | undefined> {
+    return fetchTokenInfosFromApi(
+        addresses.map(address => address.toBase58()),
+        cluster,
+        genesisHash,
+        true,
+    );
 }
 
 export function getCurrentTokenScaledUiAmountMultiplier(extensions: Array<TokenExtension> | undefined): string {

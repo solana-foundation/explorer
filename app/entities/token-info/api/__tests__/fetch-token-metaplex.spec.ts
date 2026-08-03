@@ -1,0 +1,278 @@
+import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
+import { none, some } from '@metaplex-foundation/umi';
+import { PublicKey } from '@solana/web3.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const MINT_A = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+const MINT_B = 'So11111111111111111111111111111111111111112';
+const RPC = 'https://rpc.example.com';
+const NULL_CHAR = String.fromCharCode(0);
+
+const mocks = vi.hoisted(() => ({
+    getMetadataJson: vi.fn(),
+    getMultipleParsedAccounts: vi.fn(),
+    getUmi: vi.fn(() => ({})),
+    safeFetchAllMetadata: vi.fn(),
+}));
+
+vi.mock('@metaplex-foundation/mpl-token-metadata', async () => {
+    const actual = await vi.importActual<typeof import('@metaplex-foundation/mpl-token-metadata')>(
+        '@metaplex-foundation/mpl-token-metadata',
+    );
+    return {
+        ...actual,
+        // The PDA is derived by the real program elsewhere; here it only has to be a stable stand-in.
+        findMetadataPda: vi.fn((_umi, { mint }: { mint: string }) => [`${mint}-pda`, 255]),
+        safeFetchAllMetadata: mocks.safeFetchAllMetadata,
+    };
+});
+
+vi.mock('@solana/web3.js', async () => {
+    const actual = await vi.importActual<typeof import('@solana/web3.js')>('@solana/web3.js');
+    return {
+        ...actual,
+        // `Connection` is called with `new`, so the stand-in has to be constructible.
+        Connection: class {
+            getMultipleParsedAccounts = mocks.getMultipleParsedAccounts;
+        },
+    };
+});
+
+vi.mock('@/app/entities/nft/lib/umi', () => ({ getUmi: mocks.getUmi }));
+vi.mock('@/app/entities/nft/lib/get-metadata-json', () => ({ getMetadataJson: mocks.getMetadataJson }));
+
+type MetadataStub = { mint: string; name: string; symbol: string; tokenStandard: unknown; uri: string };
+
+function metadata(mint: string, overrides: Partial<MetadataStub> = {}): MetadataStub {
+    return {
+        mint,
+        name: 'USD Coin',
+        symbol: 'USDC',
+        tokenStandard: some(TokenStandard.Fungible),
+        uri: 'https://example.com/metadata.json',
+        ...overrides,
+    };
+}
+
+function parsedMint(decimals: number) {
+    return { data: { parsed: { info: { decimals } } } };
+}
+
+/** Builds a distinct, well-formed mint address; umi's `publicKey()` validates base58. */
+function addressAt(index: number): string {
+    const bytes = new Uint8Array(32);
+    bytes[0] = index % 256;
+    bytes[1] = Math.floor(index / 256) + 1;
+    return new PublicKey(bytes).toBase58();
+}
+
+async function importSubject() {
+    return await import('../fetch-token-metaplex');
+}
+
+describe('getTokenInfosFromMetaplex', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mocks.getUmi.mockReturnValue({});
+        mocks.safeFetchAllMetadata.mockResolvedValue([]);
+        mocks.getMultipleParsedAccounts.mockResolvedValue({ value: [] });
+        mocks.getMetadataJson.mockResolvedValue(undefined);
+    });
+
+    it('should not touch the network without addresses', async () => {
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        await expect(getTokenInfosFromMetaplex([], RPC)).resolves.toEqual([]);
+        expect(mocks.safeFetchAllMetadata).not.toHaveBeenCalled();
+    });
+
+    it('should return nothing when no RPC endpoint is configured', async () => {
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        await expect(getTokenInfosFromMetaplex([MINT_A], '')).resolves.toEqual([]);
+        expect(mocks.safeFetchAllMetadata).not.toHaveBeenCalled();
+    });
+
+    it('should look up one metadata PDA per requested mint', async () => {
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        await getTokenInfosFromMetaplex([MINT_A, MINT_B], RPC);
+
+        expect(mocks.safeFetchAllMetadata).toHaveBeenCalledWith({}, [
+            [`${MINT_A}-pda`, 255],
+            [`${MINT_B}-pda`, 255],
+        ]);
+    });
+
+    it('should batch the metadata lookup so it stays under the getMultipleAccounts key limit', async () => {
+        // Umi sends every key in one request, and the RPC rejects more than 100 at a time.
+        const addresses = Array.from({ length: 230 }, (_, i) => addressAt(i));
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        await getTokenInfosFromMetaplex(addresses, RPC);
+
+        expect(mocks.safeFetchAllMetadata).toHaveBeenCalledTimes(3);
+        const batchSizes = mocks.safeFetchAllMetadata.mock.calls.map(([, pdas]) => pdas.length);
+        expect(batchSizes).toEqual([100, 100, 30]);
+    });
+
+    it('should keep the mints a surviving batch resolved when another batch fails', async () => {
+        const onError = vi.fn();
+        const addresses = Array.from({ length: 150 }, (_, i) => addressAt(i));
+        mocks.safeFetchAllMetadata
+            .mockRejectedValueOnce(new Error('rpc exploded'))
+            .mockResolvedValueOnce([metadata(MINT_B)]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(9)] });
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const result = await getTokenInfosFromMetaplex(addresses, RPC, { onError });
+
+        expect(result.map(t => t.address)).toEqual([MINT_B]);
+        expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('should map on-chain metadata into unverified token info', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+        mocks.getMetadataJson.mockResolvedValueOnce({ image: 'https://example.com/logo.png' });
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+
+        await expect(getTokenInfosFromMetaplex([MINT_A], RPC)).resolves.toEqual([
+            {
+                address: MINT_A,
+                decimals: 6,
+                logoURI: 'https://example.com/logo.png',
+                name: 'USD Coin',
+                symbol: 'USDC',
+                verified: false,
+            },
+        ]);
+    });
+
+    it('should keep only mints whose token standard is Fungible', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([
+            metadata(MINT_A),
+            metadata(MINT_B, { tokenStandard: some(TokenStandard.NonFungible) }),
+        ]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const result = await getTokenInfosFromMetaplex([MINT_A, MINT_B], RPC);
+
+        expect(result.map(t => t.address)).toEqual([MINT_A]);
+    });
+
+    it('should drop mints that declare no token standard', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A, { tokenStandard: none() })]);
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+
+        await expect(getTokenInfosFromMetaplex([MINT_A], RPC)).resolves.toEqual([]);
+        // Nothing survived the filter, so the mint accounts are never read.
+        expect(mocks.getMultipleParsedAccounts).not.toHaveBeenCalled();
+    });
+
+    it('should strip the null padding the metadata program adds', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([
+            metadata(MINT_A, { name: `USD Coin${NULL_CHAR.repeat(24)}`, symbol: `USDC${NULL_CHAR.repeat(6)}` }),
+        ]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
+
+        expect(result.name).toBe('USD Coin');
+        expect(result.symbol).toBe('USDC');
+    });
+
+    it('should read decimals from the mint account, including zero', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(0)] });
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
+
+        expect(result.decimals).toBe(0);
+    });
+
+    it('should fall back to 6 decimals when the mint account is missing', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [null] });
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
+
+        expect(result.decimals).toBe(6);
+    });
+
+    it('should report a null logo when the off-chain JSON has no image', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+        mocks.getMetadataJson.mockResolvedValueOnce(undefined);
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
+
+        expect(result.logoURI).toBeNull();
+    });
+
+    it('should pass the request origin and an abort signal when reading off-chain JSON', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        await getTokenInfosFromMetaplex([MINT_A], RPC, { baseUrl: 'http://localhost:3000' });
+
+        expect(mocks.getMetadataJson).toHaveBeenCalledWith(
+            expect.objectContaining({ mint: MINT_A }),
+            expect.objectContaining({ baseUrl: 'http://localhost:3000', signal: expect.any(AbortSignal) }),
+        );
+    });
+
+    it('should abort an off-chain JSON read that outlives the timeout', async () => {
+        vi.useFakeTimers();
+        try {
+            mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
+            mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+
+            let captured: AbortSignal | undefined;
+            mocks.getMetadataJson.mockImplementationOnce((_metadata, deps) => {
+                captured = deps.signal;
+                return new Promise(resolve => {
+                    deps.signal.addEventListener('abort', () => resolve(undefined));
+                });
+            });
+
+            const { getTokenInfosFromMetaplex, METAPLEX_TIMEOUT_MS } = await importSubject();
+            const pending = getTokenInfosFromMetaplex([MINT_A], RPC);
+
+            await vi.advanceTimersByTimeAsync(METAPLEX_TIMEOUT_MS);
+            const [result] = await pending;
+
+            expect(captured?.aborted).toBe(true);
+            expect(result.logoURI).toBeNull();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('should report and return nothing when the metadata lookup throws', async () => {
+        const onError = vi.fn();
+        mocks.safeFetchAllMetadata.mockRejectedValueOnce(new Error('rpc exploded'));
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+
+        await expect(getTokenInfosFromMetaplex([MINT_A], RPC, { onError })).resolves.toEqual([]);
+        expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('should keep the token when reading its decimals fails', async () => {
+        const onError = vi.fn();
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
+        mocks.getMultipleParsedAccounts.mockRejectedValueOnce(new Error('rpc exploded'));
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC, { onError });
+
+        expect(result).toMatchObject({ address: MINT_A, decimals: 6 });
+        expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    });
+});

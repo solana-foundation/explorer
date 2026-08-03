@@ -2,9 +2,9 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '../errors';
+import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '../../lib/errors';
+import { type TokenInfo } from '../../lib/types';
 import { getTokenInfo, getTokenInfos } from '../fetch-token-mints';
-import { type TokenInfo } from '../types';
 
 const mockToken: TokenInfo = {
     address: PublicKey.default.toBase58(),

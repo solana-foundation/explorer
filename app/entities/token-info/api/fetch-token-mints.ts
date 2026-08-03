@@ -1,11 +1,11 @@
 'use server';
 
-import { getChainId } from '@entities/chain-id';
+import { getChainId } from '@entities/chain-id/@x/token-info';
 import { Cluster } from '@utils/cluster';
 
 import { UTL_API_BASE_URL } from '../env';
-import { TokenInfoHttpError, TokenInfoInvalidResponseError } from './errors';
-import { type FetchConfig, type TokenInfo } from './types';
+import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '../lib/errors';
+import { type FetchConfig, type TokenInfo } from '../lib/types';
 
 export async function getTokenInfos(
     addresses: string[],

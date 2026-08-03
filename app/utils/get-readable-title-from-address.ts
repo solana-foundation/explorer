@@ -1,6 +1,6 @@
 import { Cluster } from '@utils/cluster';
 
-import { getTokenInfo } from '@/app/entities/token-info';
+import { getTokenInfo } from '@/app/entities/token-info/server';
 
 export type AddressPageMetadataProps = Readonly<{
     params: Promise<{
