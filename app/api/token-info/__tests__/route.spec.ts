@@ -170,10 +170,12 @@ describe('POST /api/token-info', () => {
             }),
         );
 
+        // The endpoint is resolved from server config, and nothing is derived from the incoming
+        // request — a caller-controlled Host must not be able to redirect the fallback's fetches.
         expect(mocks.getTokenInfosFromMetaplex).toHaveBeenCalledWith(
             [MINT_B, MINT_C],
             expect.any(String),
-            expect.objectContaining({ baseUrl: 'http://localhost:3000' }),
+            expect.not.objectContaining({ baseUrl: expect.anything() }),
         );
         expect(await res.json()).toEqual({ content: [token(MINT_A), token(MINT_C, { verified: false })] });
     });

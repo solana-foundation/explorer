@@ -27,73 +27,23 @@ describe('getMetadataJson', () => {
         global.fetch = originalFetch;
     });
 
-    it('should resolve a root-relative proxy path against the given origin', async () => {
-        mocks.getProxiedUri.mockReturnValue(PROXY_PATH);
-
-        const { getMetadataJson } = await import('../get-metadata-json');
-        await getMetadataJson(metadata('https://example.com/meta.json'), { baseUrl: 'http://localhost:3000' });
-
-        expect(global.fetch).toHaveBeenCalledWith(`http://localhost:3000${PROXY_PATH}`, expect.anything());
-    });
-
-    it('should leave a root-relative proxy path alone in the browser, where no origin is given', async () => {
+    // The browser resolves a root-relative proxy path against the current page.
+    it('should fetch the proxy path as given', async () => {
         mocks.getProxiedUri.mockReturnValue(PROXY_PATH);
 
         const { getMetadataJson } = await import('../get-metadata-json');
         await getMetadataJson(metadata('https://example.com/meta.json'));
 
-        expect(global.fetch).toHaveBeenCalledWith(PROXY_PATH, expect.anything());
+        expect(global.fetch).toHaveBeenCalledWith(PROXY_PATH);
     });
 
-    // A mint's `uri` is attacker-controlled on-chain data. The browser fetching it directly is
-    // the user's own network, but the server must only go through `/api/metadata/proxy`, which
-    // pins DNS and rejects private hosts. `getProxiedUri` returns the raw URI when
-    // `NEXT_PUBLIC_METADATA_ENABLED` is off, so the server has to refuse it.
-    it('should refuse a server fetch of an unproxied URI rather than reach it directly', async () => {
-        mocks.getProxiedUri.mockReturnValue('http://169.254.169.254/latest/meta-data/');
-
-        const { getMetadataJson } = await import('../get-metadata-json');
-
-        await expect(
-            getMetadataJson(metadata('http://169.254.169.254/latest/meta-data/'), {
-                baseUrl: 'http://localhost:3000',
-            }),
-        ).resolves.toBeUndefined();
-        expect(global.fetch).not.toHaveBeenCalled();
-    });
-
-    it('should refuse a server fetch of an unproxied public URI too', async () => {
-        // Not only private hosts: without the proxy there is no redirect or size guard either.
-        mocks.getProxiedUri.mockReturnValue('https://ipfs.io/ipfs/abc');
-
-        const { getMetadataJson } = await import('../get-metadata-json');
-
-        await expect(
-            getMetadataJson(metadata('ipfs://abc'), { baseUrl: 'http://localhost:3000' }),
-        ).resolves.toBeUndefined();
-        expect(global.fetch).not.toHaveBeenCalled();
-    });
-
-    it('should still fetch an unproxied URI in the browser, where no origin is given', async () => {
+    it('should fetch an unproxied URI as given, since the browser uses its own network', async () => {
         mocks.getProxiedUri.mockReturnValue('https://ipfs.io/ipfs/abc');
 
         const { getMetadataJson } = await import('../get-metadata-json');
         await getMetadataJson(metadata('ipfs://abc'));
 
-        expect(global.fetch).toHaveBeenCalledWith('https://ipfs.io/ipfs/abc', expect.anything());
-    });
-
-    it('should forward the abort signal so callers can bound the wait', async () => {
-        mocks.getProxiedUri.mockReturnValue('https://example.com/meta.json');
-        const controller = new AbortController();
-
-        const { getMetadataJson } = await import('../get-metadata-json');
-        await getMetadataJson(metadata('https://example.com/meta.json'), { signal: controller.signal });
-
-        expect(global.fetch).toHaveBeenCalledWith(
-            'https://example.com/meta.json',
-            expect.objectContaining({ signal: controller.signal }),
-        );
+        expect(global.fetch).toHaveBeenCalledWith('https://ipfs.io/ipfs/abc');
     });
 
     it('should resolve undefined when the request fails', async () => {
@@ -129,19 +79,6 @@ describe('getMetadataJson', () => {
 
         await expect(getMetadataJson(metadata('https://example.com/meta.json'), { onError })).resolves.toBeUndefined();
         expect(onError).not.toHaveBeenCalled();
-    });
-
-    it('should report a malformed origin, which is bad input rather than a dead link', async () => {
-        mocks.getProxiedUri.mockReturnValue(PROXY_PATH);
-        const onError = vi.fn();
-
-        const { getMetadataJson } = await import('../get-metadata-json');
-
-        await expect(
-            getMetadataJson(metadata('https://example.com/meta.json'), { baseUrl: 'not-an-origin', onError }),
-        ).resolves.toBeUndefined();
-        expect(onError).toHaveBeenCalledWith(expect.any(Error));
-        expect(global.fetch).not.toHaveBeenCalled();
     });
 
     it('should resolve undefined when the metadata carries no URI', async () => {

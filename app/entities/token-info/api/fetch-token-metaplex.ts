@@ -1,4 +1,4 @@
-import { getMetadataJson, getUmi } from '@entities/nft/@x/token-info';
+import { getUmi } from '@entities/nft/@x/token-info';
 import {
     findMetadataPda,
     type Metadata,
@@ -7,6 +7,9 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import { publicKey, unwrapOption } from '@metaplex-foundation/umi';
 import { Connection, PublicKey } from '@solana/web3.js';
+
+import { MAX_SIZE, USER_AGENT } from '@/app/api/metadata/proxy/config';
+import { fetchResource, matchJsonContent } from '@/app/api/metadata/proxy/feature';
 
 import type { TokenInfo } from '../lib/types';
 
@@ -23,11 +26,6 @@ const DEFAULT_DECIMALS = 6;
 const ACCOUNTS_CHUNK_SIZE = 100;
 
 export type FetchTokenInfosMetaplexOptions = {
-    /**
-     * Absolute origin of the incoming request. Needed because the off-chain
-     * JSON goes through the root-relative `/api/metadata/proxy` path.
-     */
-    baseUrl?: string;
     onError?: (error: unknown) => void;
 };
 
@@ -86,30 +84,36 @@ async function fetchDecimals(
 }
 
 /**
- * Reads one mint's off-chain JSON to find its logo, bounded by
- * `METAPLEX_TIMEOUT_MS`.
+ * Reads one mint's off-chain JSON to find its logo, bounded by `METAPLEX_TIMEOUT_MS`.
  *
- * Resolves to `null`, not `undefined`, because `TokenInfo.logoURI` is `string |
- * null` in the UTL REST contract and this value is serialised straight into it.
+ * A mint's `uri` is attacker-controlled on-chain data, so this calls the metadata proxy's
+ * `fetchResource` in process rather than requesting `/api/metadata/proxy` over HTTP. Same
+ * hardening — per-hop private-IP rejection, protocol and redirect validation, size cap — with
+ * no round trip, and nothing derived from the incoming request's host.
+ *
+ * Resolves to `null`, not `undefined`, because `TokenInfo.logoURI` is `string | null` in the
+ * UTL REST contract and this value is serialised straight into it.
  */
-
 async function fetchLogoUri(metadata: Metadata, options: FetchTokenInfosMetaplexOptions): Promise<string | null> {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), METAPLEX_TIMEOUT_MS);
+    // eslint-disable-next-line unicorn/no-null -- `TokenInfo.logoURI` is `string | null` per the UTL contract
+    if (!metadata.uri) return null;
+
     try {
-        const json = await getMetadataJson(metadata, {
-            baseUrl: options.baseUrl,
-            onError: options.onError,
-            signal: controller.signal,
+        const { data, headers } = await fetchResource(metadata.uri, {
+            headers: new Headers({ 'User-Agent': USER_AGENT }),
+            size: MAX_SIZE,
+            timeout: METAPLEX_TIMEOUT_MS,
         });
         // eslint-disable-next-line unicorn/no-null -- same contract as above
-        return json?.image ?? null;
+        if (!matchJsonContent(headers.get('content-type'))) return null;
+        const image = (data as { image?: unknown } | undefined)?.image;
+        // eslint-disable-next-line unicorn/no-null -- same contract as above
+        return typeof image === 'string' ? image : null;
     } catch (error) {
+        // A dead link, a slow host, or a blocked address is routine for third-party metadata.
         options.onError?.(error);
         // eslint-disable-next-line unicorn/no-null -- same contract as above
         return null;
-    } finally {
-        clearTimeout(timeout);
     }
 }
 

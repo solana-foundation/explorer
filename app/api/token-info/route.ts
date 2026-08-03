@@ -51,9 +51,7 @@ export async function POST(request: Request) {
     // Opt-in: only the batch path used to get the SDK's on-chain fallback, so
     // single-mint callers keep paying for the list lookup alone.
     const tokens =
-        body.includeOnChainFallback === true
-            ? await withMetaplexFallback(listed, addresses, cluster, request.url)
-            : listed;
+        body.includeOnChainFallback === true ? await withMetaplexFallback(listed, addresses, cluster) : listed;
 
     // `content` is always an array; single-address callers read `content[0]`.
     return NextResponse.json({ content: tokens });
@@ -84,12 +82,7 @@ function parseAddresses(body: RequestBody): string[] | undefined {
  * metadata. The fallback is best-effort: a failure here still returns the
  * listed tokens.
  */
-async function withMetaplexFallback(
-    listed: TokenInfo[],
-    addresses: string[],
-    cluster: Cluster,
-    requestUrl: string,
-): Promise<TokenInfo[]> {
+async function withMetaplexFallback(listed: TokenInfo[], addresses: string[], cluster: Cluster): Promise<TokenInfo[]> {
     const found = new Set(listed.map(token => token.address));
     const missing = addresses.filter(address => !found.has(address));
     if (missing.length === 0) return listed;
@@ -107,7 +100,6 @@ async function withMetaplexFallback(
 
     try {
         const onChain = await getTokenInfosFromMetaplex(missing, rpcEndpoint, {
-            baseUrl: new URL(requestUrl).origin,
             onError: error => Logger.warn('[api:token-info] Metaplex lookup failed', { error }),
         });
         return [...listed, ...onChain];

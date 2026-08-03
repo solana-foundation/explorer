@@ -9,7 +9,7 @@ const RPC = 'https://rpc.example.com';
 const NULL_CHAR = String.fromCharCode(0);
 
 const mocks = vi.hoisted(() => ({
-    getMetadataJson: vi.fn(),
+    fetchResource: vi.fn(),
     getMultipleParsedAccounts: vi.fn(),
     getUmi: vi.fn(() => ({})),
     safeFetchAllMetadata: vi.fn(),
@@ -39,7 +39,13 @@ vi.mock('@solana/web3.js', async () => {
 });
 
 vi.mock('@/app/entities/nft/lib/umi', () => ({ getUmi: mocks.getUmi }));
-vi.mock('@/app/entities/nft/lib/get-metadata-json', () => ({ getMetadataJson: mocks.getMetadataJson }));
+// The off-chain JSON is read through the metadata proxy's hardened fetcher, in process.
+vi.mock('@/app/api/metadata/proxy/feature', async () => {
+    const actual = await vi.importActual<typeof import('@/app/api/metadata/proxy/feature')>(
+        '@/app/api/metadata/proxy/feature',
+    );
+    return { ...actual, fetchResource: mocks.fetchResource };
+});
 
 type MetadataStub = { mint: string; name: string; symbol: string; tokenStandard: unknown; uri: string };
 
@@ -56,6 +62,11 @@ function metadata(mint: string, overrides: Partial<MetadataStub> = {}): Metadata
 
 function parsedMint(decimals: number) {
     return { data: { parsed: { info: { decimals } } } };
+}
+
+/** Shape `fetchResource` resolves to for a JSON body. */
+function jsonResource(data: unknown) {
+    return { data, headers: new Headers({ 'content-type': 'application/json' }) };
 }
 
 /** Builds a distinct, well-formed mint address; umi's `publicKey()` validates base58. */
@@ -76,7 +87,7 @@ describe('getTokenInfosFromMetaplex', () => {
         mocks.getUmi.mockReturnValue({});
         mocks.safeFetchAllMetadata.mockResolvedValue([]);
         mocks.getMultipleParsedAccounts.mockResolvedValue({ value: [] });
-        mocks.getMetadataJson.mockResolvedValue(undefined);
+        mocks.fetchResource.mockResolvedValue(jsonResource({}));
     });
 
     it('should not touch the network without addresses', async () => {
@@ -131,7 +142,7 @@ describe('getTokenInfosFromMetaplex', () => {
     it('should map on-chain metadata into unverified token info', async () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
-        mocks.getMetadataJson.mockResolvedValueOnce({ image: 'https://example.com/logo.png' });
+        mocks.fetchResource.mockResolvedValueOnce(jsonResource({ image: 'https://example.com/logo.png' }));
 
         const { getTokenInfosFromMetaplex } = await importSubject();
 
@@ -206,7 +217,7 @@ describe('getTokenInfosFromMetaplex', () => {
     it('should report a null logo when the off-chain JSON has no image', async () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
-        mocks.getMetadataJson.mockResolvedValueOnce(undefined);
+        mocks.fetchResource.mockResolvedValueOnce(jsonResource({}));
 
         const { getTokenInfosFromMetaplex } = await importSubject();
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
@@ -214,44 +225,58 @@ describe('getTokenInfosFromMetaplex', () => {
         expect(result.logoURI).toBeNull();
     });
 
-    it('should pass the request origin and an abort signal when reading off-chain JSON', async () => {
+    // Regression guard: this must never build a URL from the incoming request's host, and must
+    // never fetch the mint's URI outside the proxy's hardened fetcher.
+    it('should read the off-chain JSON through the proxy fetcher, bounded by the timeout', async () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
 
-        const { getTokenInfosFromMetaplex } = await importSubject();
-        await getTokenInfosFromMetaplex([MINT_A], RPC, { baseUrl: 'http://localhost:3000' });
+        const { getTokenInfosFromMetaplex, METAPLEX_TIMEOUT_MS } = await importSubject();
+        await getTokenInfosFromMetaplex([MINT_A], RPC);
 
-        expect(mocks.getMetadataJson).toHaveBeenCalledWith(
-            expect.objectContaining({ mint: MINT_A }),
-            expect.objectContaining({ baseUrl: 'http://localhost:3000', signal: expect.any(AbortSignal) }),
+        expect(mocks.fetchResource).toHaveBeenCalledWith(
+            'https://example.com/metadata.json',
+            expect.objectContaining({ timeout: METAPLEX_TIMEOUT_MS }),
         );
     });
 
-    it('should abort an off-chain JSON read that outlives the timeout', async () => {
-        vi.useFakeTimers();
-        try {
-            mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
-            mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+    it('should report a null logo when the proxy fetcher rejects the address', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+        // What `fetchResource` does for a private host or a redirect loop.
+        mocks.fetchResource.mockRejectedValueOnce(new Error('Hostname resolves to a private IP'));
+        const onError = vi.fn();
 
-            let captured: AbortSignal | undefined;
-            mocks.getMetadataJson.mockImplementationOnce((_metadata, deps) => {
-                captured = deps.signal;
-                return new Promise(resolve => {
-                    deps.signal.addEventListener('abort', () => resolve(undefined));
-                });
-            });
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC, { onError });
 
-            const { getTokenInfosFromMetaplex, METAPLEX_TIMEOUT_MS } = await importSubject();
-            const pending = getTokenInfosFromMetaplex([MINT_A], RPC);
+        expect(result).toMatchObject({ address: MINT_A, logoURI: null });
+        expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    });
 
-            await vi.advanceTimersByTimeAsync(METAPLEX_TIMEOUT_MS);
-            const [result] = await pending;
+    it('should ignore a non-JSON body rather than treat it as metadata', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+        mocks.fetchResource.mockResolvedValueOnce({
+            data: { image: 'https://example.com/logo.png' },
+            headers: new Headers({ 'content-type': 'text/html' }),
+        });
 
-            expect(captured?.aborted).toBe(true);
-            expect(result.logoURI).toBeNull();
-        } finally {
-            vi.useRealTimers();
-        }
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
+
+        expect(result.logoURI).toBeNull();
+    });
+
+    it('should skip the off-chain read for a mint with no uri', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A, { uri: '' })]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
+
+        expect(result.logoURI).toBeNull();
+        expect(mocks.fetchResource).not.toHaveBeenCalled();
     });
 
     it('should report and return nothing when the metadata lookup throws', async () => {
