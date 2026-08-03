@@ -45,11 +45,40 @@ describe('getMetadataJson', () => {
         expect(global.fetch).toHaveBeenCalledWith(PROXY_PATH, expect.anything());
     });
 
-    it('should leave an absolute URI unchanged even when an origin is given', async () => {
+    // A mint's `uri` is attacker-controlled on-chain data. The browser fetching it directly is
+    // the user's own network, but the server must only go through `/api/metadata/proxy`, which
+    // pins DNS and rejects private hosts. `getProxiedUri` returns the raw URI when
+    // `NEXT_PUBLIC_METADATA_ENABLED` is off, so the server has to refuse it.
+    it('should refuse a server fetch of an unproxied URI rather than reach it directly', async () => {
+        mocks.getProxiedUri.mockReturnValue('http://169.254.169.254/latest/meta-data/');
+
+        const { getMetadataJson } = await import('../get-metadata-json');
+
+        await expect(
+            getMetadataJson(metadata('http://169.254.169.254/latest/meta-data/'), {
+                baseUrl: 'http://localhost:3000',
+            }),
+        ).resolves.toBeUndefined();
+        expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('should refuse a server fetch of an unproxied public URI too', async () => {
+        // Not only private hosts: without the proxy there is no redirect or size guard either.
         mocks.getProxiedUri.mockReturnValue('https://ipfs.io/ipfs/abc');
 
         const { getMetadataJson } = await import('../get-metadata-json');
-        await getMetadataJson(metadata('ipfs://abc'), { baseUrl: 'http://localhost:3000' });
+
+        await expect(
+            getMetadataJson(metadata('ipfs://abc'), { baseUrl: 'http://localhost:3000' }),
+        ).resolves.toBeUndefined();
+        expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('should still fetch an unproxied URI in the browser, where no origin is given', async () => {
+        mocks.getProxiedUri.mockReturnValue('https://ipfs.io/ipfs/abc');
+
+        const { getMetadataJson } = await import('../get-metadata-json');
+        await getMetadataJson(metadata('ipfs://abc'));
 
         expect(global.fetch).toHaveBeenCalledWith('https://ipfs.io/ipfs/abc', expect.anything());
     });
