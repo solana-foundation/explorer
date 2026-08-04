@@ -16,9 +16,9 @@ See `proposal.md` for motivation and for the URL-query leak this change delibera
 
 **Non-Goals:**
 
-- Changing where the custom endpoint lives. It stays in the page URL. See `proposal.md`, follow-up 2.
+- Changing where the custom endpoint lives *for the Custom cluster*. It stays in the page URL. See `proposal.md`, follow-up 2.
 - Scrubbing query strings at the analytics / Sentry / logging sinks. See `proposal.md`, follow-up 1.
-- Touching link generation, `pickClusterParams`, the cluster switcher, `isCustomUrlAllowed`, or the cross-cluster discovery probes.
+- Touching link generation (`buildExplorerLink`), the cluster switcher, `isCustomUrlAllowed`, or the cross-cluster discovery probes. All four keep emitting and honoring `customUrl` exactly as before.
 - Making custom-cluster token images render. They do not today; that is a separate feature.
 
 ## Decisions
@@ -46,7 +46,18 @@ This was the only client fetch that forwarded the value. The page URL still carr
 
 The client no longer sends `customUrl`, but the route keeps rejecting `Cluster.Custom` and keeps its regression test. Cheap, and it still covers a hand-crafted request.
 
-### 4. Test the invariant at its definition, not per caller
+### 4. Propagate customUrl in navigation params only when the target cluster is Custom
+
+`pickClusterParams` carries `customUrl` forward only when the resulting cluster is `custom`, and strips it otherwise. It applies the rule twice, because there are two paths into the merged params:
+
+- the no-`additionalParams` path decides from the *current* cluster while picking which params survive;
+- the `additionalParams` path decides from the **merged** cluster, after the override is applied. That ordering matters: `additionalParams` can switch the cluster away from custom, and deciding from the incoming cluster would carry the endpoint into a devnet URL.
+
+A `customUrl` is only meaningful on the Custom cluster — it *is* that cluster's endpoint, and every other cluster resolves from its own configured URL. Propagating it onto a non-custom link ships the user's endpoint (often API-keyed) into our server logs and into any shared link, for a cluster that ignores it.
+
+This is the one place the change touches URL propagation. Link generation (`buildExplorerLink`) and the switcher are deliberately left alone, so a Custom-cluster URL still carries its endpoint — that is what follow-up 2 in `proposal.md` would change.
+
+### 5. Test the invariant at its definition, not per caller
 
 One type-level test in `app/entities/cluster/lib/__tests__/cluster.spec.ts` asserts that `Cluster.Custom` is not assignable to `ServerCluster`. Individual callers get no duplicate type test: widening any caller's parameter back to `Cluster` would still fail to compile at its `serverClusterUrl` call, so per-caller tests would add maintenance without adding coverage.
 

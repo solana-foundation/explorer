@@ -27,8 +27,9 @@ Alternatives considered:
 
 - **Server (structural):** `serverClusterUrl` loses its `customUrl` parameter and takes `ServerCluster = Exclude<Cluster, Cluster.Custom>`. `resolveSearchTokens` loses its dead `customUrl`. `getReadableTitleFromAddress` loses the unused `customUrl?`.
 - **Client transport:** `useDasImage` stops attaching `customUrl` to `/api/token-image`. Rule established: no client-issued fetch to an Explorer `/api/*` route carries `customUrl`. Custom-cluster token images continue not to render.
+- **Navigation params:** `pickClusterParams` propagates `customUrl` only when the resulting cluster is `custom`, and strips it otherwise — so browsing a non-custom cluster stops carrying the endpoint from link to link. The `additionalParams` path decides from the *merged* cluster, so switching custom → devnet drops the endpoint rather than inheriting it.
 - **Kept as defense-in-depth:** the token-image route's `Cluster.Custom → 400` guard and its regression test.
-- **Unchanged:** the page URL keeps `?cluster=custom&customUrl=…` as the source of truth. Link generation, `pickClusterParams`, the cluster switcher, `isCustomUrlAllowed`, and the cross-cluster discovery probes are untouched.
+- **Unchanged:** on the Custom cluster the page URL still carries `?cluster=custom&customUrl=…` as the source of truth. Link generation (`buildExplorerLink`), the cluster switcher, `isCustomUrlAllowed`, and the cross-cluster discovery probes are untouched.
 
 ## Known residual: the page URL still carries `customUrl`
 

@@ -18,16 +18,24 @@
 - [x] 3.1 New `app/entities/cluster/lib/__tests__/cluster.spec.ts`: each non-custom cluster resolves to its own valid URL; the server env var wins over the public default; `Cluster.Custom` is not assignable to `ServerCluster` (`@ts-expect-error`, asserted on the type rather than on a call).
 - [x] 3.2 Extend `cluster-from-param.spec.ts`: `serverClusterUrlFromParam` returns `undefined` when the cluster env var is set to `''`. Fix the stale comment claiming Custom resolves to an empty URL.
 - [x] 3.3 In `use-das-image.spec.ts`, assert the SWR key carries no `customUrl` and the issued request has `cluster=custom` but no `customUrl` param.
-- [x] 3.4 No per-caller type test for `resolveSearchTokens`. See design decision 4 — widening a caller's parameter would still fail to compile at its `serverClusterUrl` call, so the definition-site test covers it.
+- [x] 3.4 No per-caller type test for `resolveSearchTokens`. See design decision 5 — widening a caller's parameter would still fail to compile at its `serverClusterUrl` call, so the definition-site test covers it.
 
-## 4. Verify
+## 4. Review feedback (PR #1132)
 
-- [x] 4.1 Run the full gate: `pnpm format:ci` → `pnpm lint` → `pnpm openspec:validate` → `pnpm typecheck` → `pnpm build` → `pnpm test:ci`.
+- [x] 4.1 `app/utils/url.ts`: replace the two WHAT comments on the `customUrl` rule with WHY — a `customUrl` is only meaningful on the Custom cluster, and propagating it elsewhere leaks the user's (often API-keyed) endpoint for no functional gain. Explain why the `additionalParams` path decides from the *merged* cluster.
+- [x] 4.2 `app/utils/__tests__/url.spec.ts`: cover the previously-untested side of the `additionalParams` guard — `customUrl` is *kept* when the merged cluster is `custom` (from current params, from additional params, and when switching to custom), and dropped when an override switches away from custom. Validated by mutation: removing the guard fails exactly these cases and passed silently before.
+- [x] 4.3 Correct the documented URL-propagation policy. The non-goals wrongly listed `pickClusterParams` as untouched while this PR changes it. Added design decision 4 and a spec requirement so future work follows the actual policy; narrowed the non-goal to `buildExplorerLink` and the switcher, which really are untouched.
 
-No manual browser smoke needed: the change is behavior-neutral. The URL, links, and cluster switcher are untouched, and custom-cluster token images do not render either way.
+## 5. Verify
+
+- [x] 5.1 Run the full gate: `pnpm format:ci` → `pnpm lint` → `pnpm openspec:validate` → `pnpm typecheck` → `pnpm build` → `pnpm test:ci`.
+
+- [ ] 5.2 Manual smoke on the preview deploy, covering the one user-visible change: browsing a non-custom cluster no longer carries `customUrl` from link to link, while the Custom cluster keeps its endpoint in the URL. Server-side changes need no smoke — they are type-only and behavior-neutral, and custom-cluster token images do not render either way.
 
 ## Descoped
 
-The client-state half of the original proposal was cut: making the custom endpoint a `localStorage`-only value and removing it from the URL, links, `pickClusterParams`, the cluster switcher, `isCustomUrlAllowed`, and the cross-cluster discovery probes. The endpoint stays in the page URL exactly as before.
+The client-state half of the original proposal was cut: making the custom endpoint a `localStorage`-only value and removing it from generated links (`buildExplorerLink`), the cluster switcher, `isCustomUrlAllowed`, and the cross-cluster discovery probes. On the Custom cluster the endpoint stays in the page URL exactly as before.
+
+`pickClusterParams` is **not** descoped — it ships in this change (see design decision 4). It stops propagating `customUrl` onto non-custom navigation targets, which is the one user-visible behavior change here.
 
 That leaves the passive query-string leak open. See `proposal.md` ("Known residual") for the verified sinks and the two follow-up changes.
