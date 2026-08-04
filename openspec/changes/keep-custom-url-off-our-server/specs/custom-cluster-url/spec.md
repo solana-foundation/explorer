@@ -33,3 +33,27 @@ This requirement governs fetches that client code constructs. It does NOT cover 
 - **WHEN** client code adds a fetch to an Explorer `/api/*` route that depends on the active cluster
 - **THEN** it SHALL identify the cluster by its slug alone
 - **AND** SHALL NOT forward the custom endpoint, because no server route can consume it
+
+### Requirement: Navigation params SHALL carry customUrl only when the target cluster is Custom
+
+Preserving cluster params across navigation SHALL propagate `customUrl` only when the resulting cluster is `custom`, and SHALL strip it for every other cluster. A `customUrl` is meaningful only on the Custom cluster — it is that cluster's endpoint, and every other cluster resolves from its own configured URL — so propagating it elsewhere ships the user's endpoint to a cluster that ignores it.
+
+Where params are merged with an override, the decision SHALL use the **merged** cluster, not the incoming one, so an override that switches away from Custom drops the endpoint instead of inheriting it.
+
+This requirement governs navigation-param preservation only. Generated share links and the cluster switcher are out of scope for this change and continue to emit `customUrl` for the Custom cluster.
+
+#### Scenario: Navigating while a non-custom cluster is selected
+
+- **WHEN** cluster params are preserved for a navigation target whose cluster is not `custom`
+- **THEN** `customUrl` SHALL NOT appear in the resulting URL
+
+#### Scenario: Navigating while the Custom cluster is selected
+
+- **WHEN** cluster params are preserved for a navigation target whose cluster is `custom`
+- **THEN** `customUrl` SHALL be carried forward unchanged
+
+#### Scenario: An override switches the cluster away from Custom
+
+- **WHEN** additional params override the cluster from `custom` to a non-custom cluster
+- **THEN** the decision SHALL be made on the merged cluster
+- **AND** the previously-present `customUrl` SHALL be stripped from the result

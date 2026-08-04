@@ -84,6 +84,35 @@ describe('pickClusterParams', () => {
             const result = pickClusterParams('/address/abc123', currentParams, additionalParams);
             expect(result).toBe('/address/abc123?cluster=testnet&param=value');
         });
+
+        it('should keep customUrl when the current cluster is custom', () => {
+            const currentParams = new URLSearchParams('cluster=custom&customUrl=http://localhost:8899');
+            const additionalParams = new URLSearchParams('param=value');
+            const result = pickClusterParams('/address/abc123', currentParams, additionalParams);
+            expect(result).toBe('/address/abc123?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899&param=value');
+        });
+
+        it('should keep customUrl when additional params select the custom cluster', () => {
+            const additionalParams = new URLSearchParams('cluster=custom&customUrl=http://localhost:8899');
+            const result = pickClusterParams('/address/abc123', undefined, additionalParams);
+            expect(result).toBe('/address/abc123?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899');
+        });
+
+        it('should keep customUrl when additional params switch to custom from another cluster', () => {
+            const currentParams = new URLSearchParams('cluster=devnet');
+            const additionalParams = new URLSearchParams('cluster=custom&customUrl=http://localhost:8899');
+            const result = pickClusterParams('/address/abc123', currentParams, additionalParams);
+            expect(result).toBe('/address/abc123?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899');
+        });
+
+        it('should drop the current customUrl when additional params switch away from custom', () => {
+            // The merged cluster decides, not the incoming one — switching custom → devnet must not
+            // carry the endpoint into the new URL.
+            const currentParams = new URLSearchParams('cluster=custom&customUrl=http://localhost:8899');
+            const additionalParams = new URLSearchParams('cluster=devnet');
+            const result = pickClusterParams('/address/abc123', currentParams, additionalParams);
+            expect(result).toBe('/address/abc123?cluster=devnet');
+        });
     });
 
     describe('edge cases', () => {
