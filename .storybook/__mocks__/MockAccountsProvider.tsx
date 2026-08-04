@@ -47,6 +47,11 @@ const mockFetchers = {
 
 type MockAccountsProviderProps = {
     children: React.ReactNode;
+    /**
+     * Extra cache entries, merged over the built-in program accounts. Lets a story drive a component that reads
+     * an account by address without touching this shared fixture - see `withMockTransactions`.
+     */
+    accounts?: State['entries'];
 };
 
 /**
@@ -74,9 +79,14 @@ type MockAccountsProviderProps = {
  *
  * To add more mock accounts, add entries to the `mockState.entries` object.
  */
-export function MockAccountsProvider({ children }: MockAccountsProviderProps) {
+export function MockAccountsProvider({ accounts, children }: MockAccountsProviderProps) {
+    const state: State = React.useMemo(
+        () => (accounts ? { ...mockState, entries: { ...mockState.entries, ...accounts } } : mockState),
+        [accounts],
+    );
+
     return (
-        <StateContext.Provider value={mockState}>
+        <StateContext.Provider value={state}>
             <DispatchContext.Provider value={() => {}}>
                 <FetchersContext.Provider value={mockFetchers as any}>{children}</FetchersContext.Provider>
             </DispatchContext.Provider>
