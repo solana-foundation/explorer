@@ -2,6 +2,7 @@ import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
 import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
+import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
@@ -14,6 +15,7 @@ import {
     type VersionedMessage,
 } from '@solana/web3.js';
 import { getProgramName } from '@utils/tx';
+import dynamic from 'next/dynamic';
 import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -33,6 +35,14 @@ import { UnknownDetailsCard } from './UnknownDetailsCard';
 
 const INSPECTOR_RESULT = { err: null };
 const INSPECTOR_SIGNATURE = '';
+
+// The PMP card carries the generated client plus pako/yaml/smol-toml (~35 kB gzip), which only a transaction that
+// actually touches the program needs. `isProgramMetadataInstruction` comes from the light `/detection` entry so
+// the branch below can stay static.
+const PmpDetailsCard = dynamic(() => import('@features/decode-instruction-pmp').then(mod => mod.PmpDetailsCard), {
+    loading: () => <LoadingCard />,
+    ssr: false,
+});
 
 export function InstructionsSection({
     message,
@@ -124,6 +134,37 @@ function InspectorInstructionCard({
 
     // Dynamic IDL tier — shared with the tx page. See app/features/transaction/ui/InstructionsSection.tsx.
     const idlDecode = useIdlInstructionDecode({ programId: programId.toString(), raw: ix });
+
+    // PMP owns every instruction on its program id: `setData`/`initialize`/`write` render decoded content from
+    // the bundled typed decoders (no IDL needed), and the housekeeping instructions delegate to the IDL tier
+    // from inside the card. Must sit before the generic idlDecode tier so it wins for the content instructions.
+    if (isProgramMetadataInstruction(ix)) {
+        return (
+            <PmpDetailsCard
+                ix={ix}
+                index={index}
+                result={INSPECTOR_RESULT}
+                innerCards={innerCards}
+                InstructionCardComponent={BaseInstructionCard}
+                // The card cannot import the IDL feature (boundaries/dependencies), so this surface decides what
+                // a non-content PMP instruction falls back to. Same two outcomes as before the branch existed.
+                fallback={
+                    idlDecode ? (
+                        <IdlInstructionCard
+                            decoded={idlDecode}
+                            ix={ix}
+                            index={index}
+                            result={INSPECTOR_RESULT}
+                            signature={INSPECTOR_SIGNATURE}
+                        />
+                    ) : (
+                        <UnknownDetailsCard index={index} ix={ix} programName={programName} innerCards={innerCards} />
+                    )
+                }
+            />
+        );
+    }
+
     if (idlDecode) {
         return (
             <IdlInstructionCard

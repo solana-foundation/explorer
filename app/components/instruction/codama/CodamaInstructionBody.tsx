@@ -22,12 +22,19 @@ export function CodamaInstructionBody({
     programName,
     accounts,
     namedAccounts,
+    accountNames,
     data,
 }: {
     programId: PublicKey;
     programName: string;
     accounts: readonly AccountLike[];
     namedAccounts?: Record<string, AccountMeta<string>>;
+    /**
+     * FINAL positional row labels, rendered verbatim, for callers with no Codama parse to read names from (the
+     * PMP card decodes IDL-free). Takes precedence over `namedAccounts`, whose camelCase keys still go through
+     * `camelToTitleCase`. Verbatim rather than title-cased so a caller can match Codama's own capitalisation.
+     */
+    accountNames?: readonly string[];
     data?: Record<string, unknown>;
 }) {
     // Codama emits `namedAccounts` in instruction-account order, so the Nth
@@ -35,7 +42,9 @@ export function CodamaInstructionBody({
     // name-by-address map: two accounts can share the same address (e.g.
     // MemoryWrite's payer and sourceAccount), which would collapse in a map and
     // mislabel one of the rows.
-    const namedAccountNames = namedAccounts ? Object.keys(namedAccounts) : [];
+    const namedAccountNames = namedAccounts ? Object.keys(namedAccounts) : undefined;
+    // `accountNames` arrives pre-formatted, `namedAccounts` keys do not, so the two differ only in formatting.
+    const names = accountNames ?? namedAccountNames?.map(camelToTitleCase);
 
     return (
         <>
@@ -56,10 +65,10 @@ export function CodamaInstructionBody({
                     <BaseTable.Row key={keyIndex} data-testid={`account-row-${keyIndex}`}>
                         <BaseTable.Cell>
                             <div className="mr-1.5 md:inline">
-                                {namedAccounts
-                                    ? keyIndex < namedAccountNames.length
-                                        ? camelToTitleCase(namedAccountNames[keyIndex])
-                                        : `Remaining Account #${keyIndex + 1 - namedAccountNames.length}`
+                                {names
+                                    ? keyIndex < names.length
+                                        ? names[keyIndex]
+                                        : `Remaining Account #${keyIndex + 1 - names.length}`
                                     : `Account #${keyIndex + 1}`}
                             </div>
                             {isWritableRole(role) && (

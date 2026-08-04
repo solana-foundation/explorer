@@ -156,12 +156,13 @@ export const withStats: Decorator = Story => (
 /**
  * Wraps stories with ClusterProvider, MockTransactionsProvider, and MockAccountsProvider.
  * Replaces the production TransactionsProvider so consumers don't fire RPC calls.
- * Usage: `decorators: [withMockTransactions]`
+ * Seeds the accounts cache from `parameters.accounts` (built-in program accounts only when omitted).
+ * Usage: `decorators: [withMockTransactions]`, optionally `parameters: { accounts: {...} }`
  */
-export const withMockTransactions: Decorator = Story => (
+export const withMockTransactions: Decorator = (Story, context) => (
     <ClusterProvider>
         <MockTransactionsProvider>
-            <MockAccountsProvider>
+            <MockAccountsProvider accounts={context.parameters.accounts}>
                 <Story />
             </MockAccountsProvider>
         </MockTransactionsProvider>
