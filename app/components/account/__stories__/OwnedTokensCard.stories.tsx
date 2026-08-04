@@ -8,6 +8,7 @@ import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
+import { MockTokenInfoBatchProvider } from '@storybook-config/__mocks__/MockTokenInfoBatchProvider';
 import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
@@ -16,6 +17,19 @@ import { OwnedTokensCard } from '../OwnedTokensCard';
 
 const ADDRESS = '11111111111111111111111111111111';
 const noop = () => undefined;
+
+const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+const WSOL_MINT = 'So11111111111111111111111111111111111111112';
+const logoInfos = {
+    [USDC_MINT]: {
+        address: USDC_MINT,
+        logoURI:
+            'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png',
+        name: 'USD Coin',
+        symbol: 'USDC',
+    },
+    // No entry for WSOL_MINT on purpose - exercises the fallback-logo branch alongside the seeded row.
+} as const;
 
 const tokensState = (entries: TokensState['entries']): TokensState => ({
     entries,
@@ -33,9 +47,7 @@ const sampleTokensEntry = {
                     state: 'initialized' as const,
                     tokenAmount: { amount: '1234560000', decimals: 6, uiAmount: 1234.56, uiAmountString: '1234.56' },
                 },
-                name: 'USD Coin',
                 pubkey: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-                symbol: 'USDC',
             },
         ],
     },
@@ -53,24 +65,18 @@ const sampleTokensWithLogosEntry = {
                     state: 'initialized' as const,
                     tokenAmount: { amount: '1234560000', decimals: 6, uiAmount: 1234.56, uiAmountString: '1234.56' },
                 },
-                logoURI:
-                    'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png',
-                name: 'USD Coin',
                 pubkey: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-                symbol: 'USDC',
             },
             {
                 info: {
                     isNative: false,
-                    mint: new PublicKey('So11111111111111111111111111111111111111112'),
+                    mint: new PublicKey(WSOL_MINT),
                     owner: new PublicKey(ADDRESS),
                     state: 'initialized' as const,
                     tokenAmount: { amount: '5000000000', decimals: 9, uiAmount: 5, uiAmountString: '5' },
                 },
-                // Empty logoURI on one row exercises the placeholder branch alongside the img branch.
-                name: 'Wrapped SOL',
+                // No seeded logo for this mint exercises the fallback-logo branch alongside the seeded USDC row.
                 pubkey: gen.publicKey(2),
-                symbol: 'wSOL',
             },
         ],
     },
@@ -129,7 +135,14 @@ export const WithHoldings: Story = {
 
 export const WithLogos: Story = {
     args: { address: ADDRESS },
-    decorators: [withTokensAndLogos],
+    decorators: [
+        Story => (
+            <MockTokenInfoBatchProvider infos={logoInfos}>
+                <Story />
+            </MockTokenInfoBatchProvider>
+        ),
+        withTokensAndLogos,
+    ],
 };
 
 export const Empty: Story = {

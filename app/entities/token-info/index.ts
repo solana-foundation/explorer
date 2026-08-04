@@ -1,4 +1,5 @@
 export { createAbortSignal } from './lib/create-abort-signal';
+export { deriveScaledUiAmountMultiplier } from './lib/derive-scaled-ui-multiplier';
 export { TokenInfoHttpError, TokenInfoInvalidResponseError } from './lib/errors';
 export { getTokenInfo, getTokenInfos } from './lib/fetch-token-mints';
 export { getChainId } from '@entities/chain-id';

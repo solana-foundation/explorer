@@ -13,6 +13,7 @@ import {
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
+import { useTokenInfo } from '@entities/token-info';
 import { isMangoInstruction, parseMangoInstructionTitle } from '@explorer/decoder-mango/detection';
 import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
 import { isTokenProgramData } from '@providers/accounts';
@@ -25,7 +26,7 @@ import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction,
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
 import { getTokenProgramInstructionName, InstructionType } from '@utils/instruction';
-import { displayAddress, intoTransactionInstruction } from '@utils/tx';
+import { displayAddress, intoTransactionInstruction, TokenLabelInfo } from '@utils/tx';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback } from 'react';
@@ -309,8 +310,16 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     );
 }
 
-const FilterDropdown = ({ filter, tokens }: FilterProps) => {
-    const { cluster } = useCluster();
+// Resolves one mint's label through the shared token-info batch provider (the same cache the holdings rows use).
+// Fetches on mount and coalesces with the holdings fetch into one batched POST.
+// The cache-aware provider then skips this mint on any later re-request (filter change, holdings Load More).
+function TokenFilterLabel({ mint }: { mint: string }) {
+    const { cluster, genesisHash } = useCluster();
+    const info = useTokenInfo(true, mint, cluster, genesisHash);
+    return <>{formatTokenName(mint, cluster, info)}</>;
+}
+
+export function FilterDropdown({ filter, tokens }: FilterProps) {
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
     const buildLocation = useCallback(
@@ -327,23 +336,17 @@ const FilterDropdown = ({ filter, tokens }: FilterProps) => {
         [currentPathname, currentSearchParams],
     );
 
-    const filterOptions: string[] = [ALL_TOKENS];
-    const nameLookup: Map<string, string> = new Map();
-
-    tokens.forEach(token => {
-        const address = token.info.mint.toBase58();
-        if (!nameLookup.has(address)) {
-            filterOptions.push(address);
-            nameLookup.set(address, formatTokenName(address, cluster, token));
-        }
-    });
+    const filterOptions = React.useMemo(
+        () => [ALL_TOKENS, ...new Set(tokens.map(token => token.info.mint.toBase58()))],
+        [tokens],
+    );
 
     return (
         <Dropdown className="mr-1.5">
             <small className="mr-1.5">Filter:</small>
             <DropdownToggle asChild>
                 <Button ui="dashkit" variant="white" size="sm" type="button">
-                    {filter === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filter)}{' '}
+                    {filter === ALL_TOKENS ? 'All Tokens' : <TokenFilterLabel mint={filter} />}{' '}
                     <ChevronDown size={15} className="align-text-top" />
                 </Button>
             </DropdownToggle>
@@ -352,9 +355,7 @@ const FilterDropdown = ({ filter, tokens }: FilterProps) => {
                     return (
                         <DropdownItem asChild key={filterOption} className={cn(filterOption === filter && 'active')}>
                             <Link href={buildLocation(filterOption)}>
-                                {filterOption === ALL_TOKENS
-                                    ? 'All Tokens'
-                                    : nameLookup.get(filterOption) || filterOption}
+                                {filterOption === ALL_TOKENS ? 'All Tokens' : <TokenFilterLabel mint={filterOption} />}
                             </Link>
                         </DropdownItem>
                     );
@@ -362,7 +363,7 @@ const FilterDropdown = ({ filter, tokens }: FilterProps) => {
             </DropdownMenu>
         </Dropdown>
     );
-};
+}
 
 const TokenTransactionRow = React.memo(function TokenTransactionRow({
     mint,
@@ -408,7 +409,7 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
     );
 });
 
-function formatTokenName(pubkey: string, cluster: Cluster, tokenInfo: TokenInfoWithPubkey): string {
+function formatTokenName(pubkey: string, cluster: Cluster, tokenInfo?: TokenLabelInfo): string {
     let display = displayAddress(pubkey, cluster, tokenInfo);
 
     if (display === pubkey) {

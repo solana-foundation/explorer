@@ -1,9 +1,14 @@
-import React from 'react';
+import { Token } from '@solflare-wallet/utl-sdk';
+import { getTokenInfoSwrKey } from '@utils/token-info';
+import React, { useCallback } from 'react';
+import { mutate } from 'swr';
 
 import { TokenInfoBatchContext } from '../../app/entities/token-info/model/token-info-batch-provider';
 
 type MockTokenInfoBatchProviderProps = {
     children: React.ReactNode;
+    /** Optional per-mint token info keyed by base58 address. When set, a requested mint's SWR entry is seeded. */
+    infos?: Record<string, Partial<Token>>;
 };
 
 /**
@@ -27,8 +32,14 @@ type MockTokenInfoBatchProviderProps = {
  * };
  * ```
  */
-export function MockTokenInfoBatchProvider({ children }: MockTokenInfoBatchProviderProps) {
-    const noopRequestTokenInfo = () => {};
+export function MockTokenInfoBatchProvider({ children, infos }: MockTokenInfoBatchProviderProps) {
+    const requestTokenInfo = useCallback(
+        (address: string, cluster: any, genesisHash?: string) => {
+            const info = infos?.[address];
+            if (info) mutate(getTokenInfoSwrKey(address, cluster, genesisHash), info, false);
+        },
+        [infos],
+    );
 
-    return <TokenInfoBatchContext.Provider value={noopRequestTokenInfo}>{children}</TokenInfoBatchContext.Provider>;
+    return <TokenInfoBatchContext.Provider value={requestTokenInfo}>{children}</TokenInfoBatchContext.Provider>;
 }

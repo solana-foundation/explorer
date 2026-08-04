@@ -11,15 +11,12 @@ import React from 'react';
 import { create } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { getCurrentTokenScaledUiAmountMultiplier, getTokenInfos } from '@/app/utils/token-info';
+import { getCurrentTokenScaledUiAmountMultiplier } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
 export type TokenInfoWithPubkey = {
     info: TokenAccountInfo;
     pubkey: PublicKey;
-    logoURI?: string;
-    symbol?: string;
-    name?: string;
 };
 
 interface AccountTokens {
@@ -76,41 +73,13 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
             },
         );
 
-        const tokens: TokenInfoWithPubkey[] = tokenAccounts
-            .concat(token2022Accounts)
-            .slice(0, 101)
-            .map(accountInfo => {
-                const parsedInfo = accountInfo.account.data.parsed.info;
-                const info = create(parsedInfo, TokenAccountInfo);
-                return { info, pubkey: accountInfo.pubkey };
-            });
-
-        // Fetch symbols and logos for tokens
-        const tokenMintInfos = await getTokenInfos(
-            tokens.map(t => t.info.mint),
-            cluster,
-            url,
-        );
-        if (tokenMintInfos) {
-            const mappedTokenInfos = Object.fromEntries(
-                tokenMintInfos.map(t => [
-                    t.address,
-                    {
-                        logoURI: t.logoURI,
-                        name: t.name,
-                        symbol: t.symbol,
-                    },
-                ]),
-            );
-            tokens.forEach(t => {
-                const tokenInfo = mappedTokenInfos[t.info.mint.toString()];
-                if (tokenInfo) {
-                    t.logoURI = tokenInfo.logoURI ?? undefined;
-                    t.symbol = tokenInfo.symbol;
-                    t.name = tokenInfo.name;
-                }
-            });
-        }
+        // Return raw holdings only. Symbol/logo/name are enriched lazily per visible row via useTokenInfo
+        // (the app-wide batched token-info provider), so there is no upfront bulk metadata fetch and no cap.
+        const tokens: TokenInfoWithPubkey[] = tokenAccounts.concat(token2022Accounts).map(accountInfo => {
+            const parsedInfo = accountInfo.account.data.parsed.info;
+            const info = create(parsedInfo, TokenAccountInfo);
+            return { info, pubkey: accountInfo.pubkey };
+        });
 
         data = {
             tokens,
@@ -118,7 +87,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
         status = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            Logger.error(error, { url });
+            Logger.error(new Error('Failed to fetch token accounts', { cause: error }), { url });
         }
         status = FetchStatus.FetchFailed;
     }

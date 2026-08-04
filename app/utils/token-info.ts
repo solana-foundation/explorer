@@ -1,6 +1,6 @@
 import { getChainId } from '@entities/token-info';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { ChainId, Client, Token, UtlConfig } from '@solflare-wallet/utl-sdk';
+import { PublicKey } from '@solana/web3.js';
+import { ChainId, Token } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
 import { TokenExtension } from '@validators/accounts/token-extension';
 
@@ -41,18 +41,6 @@ export type FullTokenInfo = FullLegacyTokenInfo & {
 type FullLegacyTokenInfoList = {
     tokens: FullLegacyTokenInfo[];
 };
-
-function makeUtlClient(cluster: Cluster, connectionString: string, genesisHash?: string): Client | undefined {
-    const chainId = getChainId(cluster, genesisHash);
-    if (!chainId) return undefined;
-
-    const config: UtlConfig = new UtlConfig({
-        chainId,
-        connection: new Connection(connectionString),
-    });
-
-    return new Client(config);
-}
 
 export function getTokenInfoSwrKey(address: string, cluster: Cluster, genesisHash?: string) {
     return ['get-token-info', address, cluster, genesisHash];
@@ -180,18 +168,6 @@ export async function getFullTokenInfo(
         tags,
         verified: sdkTokenInfo.verified ?? false,
     };
-}
-
-export async function getTokenInfos(
-    addresses: PublicKey[],
-    cluster: Cluster,
-    connectionString: string,
-    genesisHash?: string,
-): Promise<Token[] | undefined> {
-    const client = makeUtlClient(cluster, connectionString, genesisHash);
-    if (!client) return undefined;
-    const tokens = await client.fetchMints(addresses);
-    return tokens;
 }
 
 export function getCurrentTokenScaledUiAmountMultiplier(extensions: Array<TokenExtension> | undefined): string {
