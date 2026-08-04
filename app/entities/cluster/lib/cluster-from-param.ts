@@ -10,12 +10,14 @@ export function clusterFromParam(value: string): Cluster | undefined {
     return CLUSTERS.find(c => c === n);
 }
 
-// Resolve a numeric cluster query-param to its server RPC URL, or `undefined` when the param isn't a
-// known cluster. Shared by the `/api/idl-latest` and `/api/security-txt` route handlers so both reject
-// the same malformed inputs (`clusterFromParam` is stricter than a bare `Number()` — see above). A
-// custom cluster resolves to an empty URL (no server endpoint), which the routes treat as invalid.
+// Resolve a numeric cluster query-param to its server RPC URL. Returns `undefined` for anything the
+// server must not resolve: a malformed param, an unknown cluster, or Custom (whose URL is client-
+// supplied). Shared by the `/api/idl-latest` and `/api/security-txt` handlers so both reject the same
+// inputs — `clusterFromParam` is stricter than a bare `Number()`, see above.
 export function serverClusterUrlFromParam(value: string): string | undefined {
     const cluster = clusterFromParam(value);
-    if (cluster === undefined) return undefined;
-    return serverClusterUrl(cluster, '') || undefined;
+    if (cluster === undefined || cluster === Cluster.Custom) return undefined;
+    // `|| undefined` keeps the "never an empty string" contract: a `*_RPC_URL` env var set to `""`
+    // survives the `??` fallback in `serverClusterUrl`, and callers only check for `undefined`.
+    return serverClusterUrl(cluster) || undefined;
 }

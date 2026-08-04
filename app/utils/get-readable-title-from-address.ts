@@ -8,7 +8,6 @@ export type AddressPageMetadataProps = Readonly<{
     }>;
     searchParams: Promise<{
         cluster: string;
-        customUrl?: string;
     }>;
 }>;
 

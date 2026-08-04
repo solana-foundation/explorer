@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '../cluster';
 import { clusterFromParam, serverClusterUrlFromParam } from '../cluster-from-param';
@@ -32,8 +32,16 @@ describe('serverClusterUrlFromParam', () => {
     });
 
     it('should return undefined for a custom cluster (no server endpoint)', () => {
-        // Custom resolves to an empty URL; the routes treat that as invalid (custom resolves client-side).
+        // Custom short-circuits before `serverClusterUrl`, which cannot resolve it. Custom is client-only.
         expect(serverClusterUrlFromParam('4')).toBeUndefined();
+    });
+
+    it('should return undefined when the cluster env var is set to an empty string', () => {
+        // `??` in `serverClusterUrl` does not fall back on `''`, so guard it here: callers test for
+        // `undefined`, and an empty URL would otherwise read as a valid endpoint.
+        vi.stubEnv('MAINNET_RPC_URL', '');
+        expect(serverClusterUrlFromParam('0')).toBeUndefined();
+        vi.unstubAllEnvs();
     });
 
     it('should reject the same malformed params as clusterFromParam (no bare Number() coercion)', () => {

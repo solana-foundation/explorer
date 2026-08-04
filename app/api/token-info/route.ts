@@ -102,12 +102,16 @@ async function withMetaplexFallback(listed: TokenInfo[], addresses: string[], cl
     // Resolved server-side on purpose: forwarding the browser's RPC URL would let any caller
     // point this route at an arbitrary host.
     //
-    // The cost is `Cluster.Custom`, whose endpoint only the browser knows, so it returns ''
-    // and the on-chain fallback is skipped. No regression: a custom cluster has no chain id
-    // unless the caller supplies a matching `genesisHash`, and neither `TokenBalancesCard` nor
-    // `TokensProvider` does, so `getTokenInfos` already returned nothing there. Where a chain
-    // id does resolve, the UTL list is still served — only the on-chain fallback is dropped.
-    const rpcEndpoint = serverClusterUrl(cluster, '');
+    // The cost is `Cluster.Custom`, whose endpoint only the browser knows, so the on-chain
+    // fallback is skipped. No regression: a custom cluster has no chain id unless the caller
+    // supplies a matching `genesisHash`, and neither `TokenBalancesCard` nor `TokensProvider`
+    // does, so `getTokenInfos` already returned nothing there. Where a chain id does resolve,
+    // the UTL list is still served — only the on-chain fallback is dropped.
+    if (cluster === Cluster.Custom) return listed;
+
+    // `!rpcEndpoint` still guards a `*_RPC_URL` env var set to `""`, which survives the `??`
+    // fallback in `serverClusterUrl`.
+    const rpcEndpoint = serverClusterUrl(cluster);
     if (!rpcEndpoint) return listed;
 
     try {

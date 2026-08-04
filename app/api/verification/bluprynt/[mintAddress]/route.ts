@@ -13,7 +13,7 @@ const RPC_TIMEOUT_MS = 15_000;
 // SAS protocol supports up to 256 schema versions. We decided to use 32 for now.
 const MAX_SCHEMA_VERSIONS = 32;
 
-const connection = new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), {
+const connection = new Connection(serverClusterUrl(Cluster.MainnetBeta), {
     commitment: 'confirmed',
     fetchMiddleware: (info, init, fetch) => {
         fetch(info, { ...init, signal: AbortSignal.timeout(RPC_TIMEOUT_MS) });
