@@ -92,6 +92,18 @@ export const PMP_COMPRESSION_LABELS: Record<Compression, string> = {
     [Compression.Zlib]: 'Zlib',
 };
 
+/**
+ * Badge labels for the bytes a payload panel holds, naming the compression rather than inventing a verb per variant,
+ * so a Zlib payload reads as plainly as a Gzip one instead of as "zlibbed". `Compression.None` is excluded because
+ * there is no distinction to label then: the stored bytes and the unpacked bytes are the same bytes.
+ */
+export const PMP_COMPRESSED_BYTES_LABELS: Record<Exclude<Compression, Compression.None>, string> = {
+    [Compression.Gzip]: 'gzipped',
+    [Compression.Zlib]: 'zlib',
+};
+
+export const PMP_UNCOMPRESSED_BYTES_LABEL = 'uncompressed';
+
 export const PMP_FORMAT_LABELS: Record<Format, string> = {
     [Format.Json]: 'JSON',
     [Format.None]: 'None',

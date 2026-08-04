@@ -296,6 +296,64 @@ describe('DataPayloadSection', () => {
         expect(screen.getByLabelText('Download')).toBeInTheDocument();
     });
 
+    it('should report both the unpacked and the stored size when an oversized payload was compressed', async () => {
+        renderSection(
+            {
+                config: { compression: Compression.Gzip, encoding: Encoding.Utf8, format: Format.Json },
+                dataSource: DataSource.Direct,
+                kind: 'setData',
+                payload: gzip(new Uint8Array(20480)),
+            },
+            8,
+        );
+        await openDecodedTab();
+
+        const oversized = screen.getByTestId('pmp-payload-oversized');
+        expect(oversized).toHaveTextContent('20480 bytes unpacked from 55 stored');
+        // Sits in the field header beside the 20,480, saying which of the two counts this download carries.
+        expect(screen.getByTestId('pmp-bytes-badge-uncompressed')).toHaveTextContent('uncompressed');
+    });
+
+    it('should badge the Raw tab of a compressed payload with the compression it is still in', async () => {
+        renderSection({
+            config: { compression: Compression.Gzip, encoding: Encoding.Utf8, format: Format.Json },
+            dataSource: DataSource.Direct,
+            kind: 'setData',
+            payload: pack(DOC, Compression.Gzip),
+        });
+
+        await userEvent.click(screen.getByRole('tab', { name: 'Raw' }));
+
+        expect(screen.getByTestId('pmp-bytes-badge-compressed')).toHaveTextContent('gzipped');
+    });
+
+    it('should badge a Zlib payload by name rather than as gzipped', async () => {
+        renderSection({
+            config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
+            dataSource: DataSource.Direct,
+            kind: 'setData',
+            payload: pack(DOC, Compression.Zlib),
+        });
+
+        await userEvent.click(screen.getByRole('tab', { name: 'Raw' }));
+
+        expect(screen.getByTestId('pmp-bytes-badge-compressed')).toHaveTextContent('zlib');
+    });
+
+    it('should badge no tab of an uncompressed payload', async () => {
+        renderSection({
+            config: JSON_CONFIG,
+            dataSource: DataSource.Direct,
+            kind: 'setData',
+            payload: pack(DOC, Compression.None),
+        });
+
+        await userEvent.click(screen.getByRole('tab', { name: 'Raw' }));
+
+        // Nothing was unpacked, so the Raw tab's count IS the payload length and there is no distinction to mark.
+        expect(screen.queryByTestId('pmp-bytes-badge-compressed')).not.toBeInTheDocument();
+    });
+
     it('should promise no download when the payload expands past the unpack limit', async () => {
         // What separates this from `oversized`: the unpack was abandoned, so no decompressed bytes exist to copy or
         // download. The panel must not offer an affordance it cannot honour.

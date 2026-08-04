@@ -23,6 +23,7 @@ import {
     withTokenInfoBatch,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
+import { gzip } from 'pako';
 
 const PROGRAM_ID = new PublicKey(PROGRAM_METADATA_PROGRAM_ADDRESS);
 
@@ -95,6 +96,22 @@ export const SetDataInlineJson: Story = {
 
 export const SetDataZlibCompressedJson: Story = {
     args: { ...baseArgs, ix: setDataIx({ compression: Compression.Zlib, content: IDL_DOC, format: Format.Json }) },
+};
+
+export const SetDataOversizedGzip: Story = {
+    args: {
+        ...baseArgs,
+        ix: makeIx(
+            getSetDataInstructionDataEncoder().encode({
+                compression: Compression.Gzip,
+                data: gzip(new Uint8Array(20480)),
+                dataSource: DataSource.Direct,
+                encoding: Encoding.Base58,
+                format: Format.None,
+            }) as Uint8Array,
+            5,
+        ),
+    },
 };
 
 export const SetDataYamlVerbatim: Story = {

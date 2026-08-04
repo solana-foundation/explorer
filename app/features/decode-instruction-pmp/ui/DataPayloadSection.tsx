@@ -1,10 +1,11 @@
 import { RawDataField } from '@components/shared/RawDataField';
 import { PublicKey } from '@solana/web3.js';
-import { DataSource } from '@solana-program/program-metadata';
+import { Compression, DataSource } from '@solana-program/program-metadata';
 import React from 'react';
 
 import { Address } from '@/app/components/common/Address';
 import { Copyable } from '@/app/components/common/Copyable';
+import { Badge } from '@/app/components/shared/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/shared/ui/tabs';
 import { Alert } from '@/app/shared/ui/Alert';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -13,10 +14,12 @@ import { pmpAnalytics } from '../lib/analytics';
 import {
     PMP_ACCOUNT_RAW_DOWNLOAD_FILENAME,
     PMP_ANALYTICS_IX_NAMES,
+    PMP_COMPRESSED_BYTES_LABELS,
     PMP_DATA_SOURCE_ANALYTICS_NAMES,
     PMP_DECODED_DOWNLOAD_FILENAME,
     PMP_FORMAT_ANALYTICS_NAMES,
     PMP_RAW_DOWNLOAD_FILENAME,
+    PMP_UNCOMPRESSED_BYTES_LABEL,
 } from '../lib/constants';
 import { decodePmpPayload } from '../lib/decode-pmp-payload';
 import type { PmpAccountContent, PmpDecodedPayload, PmpPayloadInstruction } from '../lib/types';
@@ -94,6 +97,7 @@ function PayloadBody({
 
     return (
         <DecodedTabs
+            compression={content.config.compression}
             content={content}
             dataSource={dataSource}
             decoded={decoded}
@@ -206,6 +210,7 @@ function AccountContentBody({
     return (
         <div className="flex flex-col gap-0">
             <DecodedTabs
+                compression={result.config.compression}
                 content={content}
                 dataSource={dataSource}
                 decoded={result.payload}
@@ -217,12 +222,14 @@ function AccountContentBody({
 }
 
 function DecodedTabs({
+    compression,
     content,
     dataSource,
     decoded,
     payload,
     source,
 }: {
+    compression: Compression;
     content: PmpPayloadInstruction;
     dataSource: DataSource;
     decoded: PmpDecodedPayload;
@@ -249,16 +256,24 @@ function DecodedTabs({
                 <TabsTrigger value="decoded">Decoded</TabsTrigger>
             </TabsList>
             <TabsContent value="raw" className="pt-3">
-                <RawBytes payload={payload} source={source} />
+                <RawBytes compression={compression} payload={payload} source={source} />
             </TabsContent>
             <TabsContent value="decoded" className="pt-3">
-                <DecodedBody decoded={decoded} />
+                <DecodedBody compression={compression} decoded={decoded} stored={payload.length} />
             </TabsContent>
         </Tabs>
     );
 }
 
-function DecodedBody({ decoded }: { decoded: PmpDecodedPayload }) {
+function DecodedBody({
+    compression,
+    decoded,
+    stored,
+}: {
+    compression: Compression;
+    decoded: PmpDecodedPayload;
+    stored: number;
+}) {
     if (decoded.kind === 'failed') {
         return (
             <div className="flex flex-col gap-0">
@@ -273,7 +288,7 @@ function DecodedBody({ decoded }: { decoded: PmpDecodedPayload }) {
     // Raw tab still has the payload as stored, which is the only thing that exists for this state.
     if (decoded.kind === 'unpack-overflow') {
         return (
-            <div className="flex flex-col gap-0" data-testid="pmp-payload-unpack-overflow">
+            <div className="flex flex-col gap-0 whitespace-pre-wrap" data-testid="pmp-payload-unpack-overflow">
                 <Alert variant="warning" className="!mb-0">
                     Payload expands past the {decoded.limit}-byte limit for unpacking.
                 </Alert>
@@ -284,11 +299,15 @@ function DecodedBody({ decoded }: { decoded: PmpDecodedPayload }) {
     if (decoded.kind === 'oversized') {
         return (
             <div className="flex flex-col gap-3" data-testid="pmp-payload-oversized">
-                <Alert variant="warning" className="!mb-0">
-                    Payload too large to render ({decoded.bytes.length} bytes, limit {decoded.budget}). Copy or download
-                    it instead.
+                <Alert variant="warning" className="!mb-0 whitespace-pre-wrap">
+                    Payload too large to render ({describeSize(decoded.bytes.length, stored, compression)}, limit{' '}
+                    {decoded.budget}). Copy or download it instead.
                 </Alert>
-                <RawDataField data={decoded.bytes} filename={PMP_DECODED_DOWNLOAD_FILENAME} />
+                <RawDataField
+                    data={decoded.bytes}
+                    extraButton={<BytesBadge compression={compression} side="uncompressed" />}
+                    filename={PMP_DECODED_DOWNLOAD_FILENAME}
+                />
             </div>
         );
     }
@@ -320,13 +339,42 @@ function DecodedBody({ decoded }: { decoded: PmpDecodedPayload }) {
     );
 }
 
-/** Thin wrapper so the section's own test id sits on a stable node around the shared field. */
-function RawBytes({ payload, source }: { payload: Uint8Array; source: 'account' | 'instruction' }) {
+/**
+ * Names WHICH bytes a count refers to, because the two tabs measure two different things:
+ * the Decoded panel counts the UNPACKED payload.
+ * the Raw tab counts the payload as stored.
+ */
+function describeSize(unpacked: number, stored: number, compression: Compression): string {
+    if (compression === Compression.None) return `${unpacked} bytes`;
+    return `${unpacked} bytes unpacked from ${stored} stored`;
+}
+
+function BytesBadge({ compression, side }: { compression: Compression; side: 'compressed' | 'uncompressed' }) {
+    if (compression === Compression.None) return undefined;
+
+    const isCompressed = side === 'compressed';
+    return (
+        <Badge data-testid={`pmp-bytes-badge-${side}`} variant={isCompressed ? 'warning' : 'info'}>
+            {isCompressed ? PMP_COMPRESSED_BYTES_LABELS[compression] : PMP_UNCOMPRESSED_BYTES_LABEL}
+        </Badge>
+    );
+}
+
+function RawBytes({
+    compression,
+    payload,
+    source,
+}: {
+    compression: Compression;
+    payload: Uint8Array;
+    source: 'account' | 'instruction';
+}) {
     const isAccount = source === 'account';
     return (
         <div data-testid={isAccount ? 'pmp-account-raw' : 'pmp-payload-raw'}>
             <RawDataField
                 data={payload}
+                extraButton={<BytesBadge compression={compression} side="compressed" />}
                 filename={isAccount ? PMP_ACCOUNT_RAW_DOWNLOAD_FILENAME : PMP_RAW_DOWNLOAD_FILENAME}
             />
         </div>

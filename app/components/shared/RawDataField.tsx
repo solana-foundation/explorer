@@ -27,9 +27,10 @@ export type RawDataFieldProps = {
     data: ByteArray | undefined;
     loading?: boolean;
     filename: string;
+    extraButton?: React.ReactNode;
 };
 
-export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
+export function RawDataField({ data, loading, filename, extraButton }: RawDataFieldProps) {
     const [tab, setTab] = useState<'hex' | 'base64'>('hex');
     const [expanded, setExpanded] = useState(false);
     const [copyState, copy] = useCopyToClipboard();
@@ -87,6 +88,7 @@ export function RawDataField({ data, loading, filename }: RawDataFieldProps) {
                     {data !== undefined && !loading && (
                         <span className="whitespace-nowrap text-xs text-outer-space-300">{data.length} bytes</span>
                     )}
+                    {Boolean(extraButton) && extraButton}
                     <Button
                         variant="outline"
                         size="sm"
