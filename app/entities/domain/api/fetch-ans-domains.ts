@@ -57,7 +57,7 @@ export async function fetchAnsDomains(address: string): Promise<AnsDomain[]> {
 }
 
 function createMainnetConnection(): Connection {
-    return new Connection(serverClusterUrl(Cluster.MainnetBeta, ''), 'confirmed');
+    return new Connection(serverClusterUrl(Cluster.MainnetBeta), 'confirmed');
 }
 
 function buildTldLookup(tlds: SerializedTldInfo[]): Map<string, SerializedTldInfo> {

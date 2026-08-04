@@ -1,5 +1,5 @@
 import { getAssetBatch } from '@/app/entities/digital-asset/server';
-import { type Cluster, serverClusterUrl } from '@/app/utils/cluster';
+import { type ServerCluster, serverClusterUrl } from '@/app/utils/cluster';
 
 import { discoverWithJupiter, fetchJupiterImages } from './discover-with-jupiter';
 import { discoverWithUtl } from './discover-with-utl';
@@ -30,8 +30,7 @@ export type ResolveSearchTokensOptions = {
 
 export async function resolveSearchTokens(
     query: string,
-    cluster: Cluster,
-    customUrl = '',
+    cluster: ServerCluster,
     options: ResolveSearchTokensOptions = {},
 ): Promise<NormalizedToken[]> {
     // --- Discovery (3s budget) ---
@@ -68,7 +67,7 @@ export async function resolveSearchTokens(
     const imageController = new AbortController();
     const imageTimeout = setTimeout(() => imageController.abort(), IMAGE_FALLBACK_TIMEOUT_MS);
 
-    const rpcUrl = serverClusterUrl(cluster, customUrl);
+    const rpcUrl = serverClusterUrl(cluster);
     const addresses = discovered.map(t => t.address);
 
     let assets: Awaited<ReturnType<typeof getAssetBatch>> = undefined;

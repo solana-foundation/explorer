@@ -86,7 +86,12 @@ export function clusterUrl(cluster: Cluster, customUrl: string): string {
     }
 }
 
-export function serverClusterUrl(cluster: Cluster, customUrl: string): string {
+// The clusters the Explorer server may resolve to an endpoint. Custom is excluded on purpose: its URL
+// is client-supplied, so resolving it server-side would let a caller aim our server at any host. The
+// exclusion makes that a compile error instead of a per-route runtime guard.
+export type ServerCluster = Exclude<Cluster, Cluster.Custom>;
+
+export function serverClusterUrl(cluster: ServerCluster): string {
     switch (cluster) {
         case Cluster.Devnet:
             return process.env.DEVNET_RPC_URL ?? modifyUrl(DEVNET_URL);
@@ -96,8 +101,6 @@ export function serverClusterUrl(cluster: Cluster, customUrl: string): string {
             return process.env.TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
         case Cluster.Simd296:
             return process.env.SIMD296_RPC_URL ?? SIMD296_URL;
-        case Cluster.Custom:
-            return customUrl;
     }
 }
 
