@@ -3,16 +3,19 @@ import useSWR from 'swr';
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
 
-type DasImageKey = ['das-image', string, string, string];
+type DasImageKey = ['das-image', string, string];
 
-function getDasImageKey(cluster: Cluster, mintAddress: string, customUrl: string): DasImageKey {
-    return ['das-image', mintAddress, clusterSlug(cluster), customUrl];
+// The cluster slug alone identifies the endpoint: the route rejects the Custom cluster, so a Custom
+// entry never holds a per-endpoint image and needs no `customUrl` in its key.
+function getDasImageKey(cluster: Cluster, mintAddress: string): DasImageKey {
+    return ['das-image', mintAddress, clusterSlug(cluster)];
 }
 
-async function fetchDasImage([, mintAddress, cluster, customUrl]: DasImageKey): Promise<string | undefined> {
+// Sends no `customUrl`. The route rejects the Custom cluster, so custom-cluster images do not render
+// either way — forwarding the user's endpoint would leak it to our server for nothing.
+async function fetchDasImage([, mintAddress, cluster]: DasImageKey): Promise<string | undefined> {
     try {
         const params = new URLSearchParams({ cluster });
-        if (customUrl) params.set('customUrl', customUrl);
         const response = await fetch(`/api/token-image/${mintAddress}?${params}`);
         if (!response.ok) return undefined;
         const data = await response.json();
@@ -29,8 +32,8 @@ const DAS_IMAGE_SWR_CONFIG = {
 };
 
 export function useDasImage(mintAddress?: string): string | undefined {
-    const { cluster, customUrl } = useCluster();
-    const swrKey = mintAddress ? getDasImageKey(cluster, mintAddress, customUrl) : undefined;
+    const { cluster } = useCluster();
+    const swrKey = mintAddress ? getDasImageKey(cluster, mintAddress) : undefined;
     const { data } = useSWR(swrKey, fetchDasImage, DAS_IMAGE_SWR_CONFIG);
     return data;
 }

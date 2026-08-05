@@ -37,7 +37,7 @@ export async function GET(request: Request, props: Params) {
         );
     }
 
-    const rpcUrl = serverClusterUrl(cluster, '');
+    const rpcUrl = serverClusterUrl(cluster);
     const assets = await getAssetBatch([mintAddress], rpcUrl);
 
     if (!assets) {

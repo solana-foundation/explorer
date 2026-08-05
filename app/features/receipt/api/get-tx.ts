@@ -1,7 +1,7 @@
 import { Connection, type ParsedTransactionWithMeta } from '@solana/web3.js';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { Cluster, clusterSlug, serverClusterUrl } from '@/app/utils/cluster';
+import { Cluster, clusterSlug, type ServerCluster, serverClusterUrl } from '@/app/utils/cluster';
 
 import { isClusterProbeEnabled } from '../env';
 import { ReceiptError } from './errors';
@@ -18,17 +18,17 @@ export type ApiData = {
 export async function getTx(
     signature: string,
     dependencies?: {
-        findCluster?: (signature: string) => Promise<Cluster | undefined>;
+        findCluster?: (signature: string) => Promise<ServerCluster | undefined>;
         fetchDetails?: (signature: string, rpcUrl: string) => Promise<ParsedTransactionWithMeta>;
     },
-    cluster?: Cluster,
+    cluster?: ServerCluster,
 ): Promise<ApiData> {
     const findClusterFn = dependencies?.findCluster ?? findTransactionCluster;
     const fetchDetailsFn = dependencies?.fetchDetails ?? fetchTransactionDetails;
 
     // If cluster is provided, fetch directly without probing
     if (cluster !== undefined) {
-        const rpcUrl = serverClusterUrl(cluster, '');
+        const rpcUrl = serverClusterUrl(cluster);
         const transaction = await fetchDetailsFn(signature, rpcUrl);
         return { cluster, transaction };
     }
@@ -41,7 +41,7 @@ export async function getTx(
         throw new ReceiptError('Cluster not found', { status: 404 });
     }
 
-    const rpcUrl = serverClusterUrl(foundCluster, '');
+    const rpcUrl = serverClusterUrl(foundCluster);
     const transaction = await fetchDetailsFn(signature, rpcUrl);
 
     if (!transaction) {
@@ -51,7 +51,7 @@ export async function getTx(
     return { cluster: foundCluster, transaction };
 }
 
-async function findTransactionCluster(signature: string): Promise<Cluster | undefined> {
+async function findTransactionCluster(signature: string): Promise<ServerCluster | undefined> {
     const mainnetResult = await getSignatureStatus(signature, Cluster.MainnetBeta);
 
     // Fail on mainnet network error - don't silently probe other clusters
@@ -96,8 +96,8 @@ async function findTransactionCluster(signature: string): Promise<Cluster | unde
 
 type SignatureStatusResult = { left: Error } | { right: boolean };
 
-async function getSignatureStatus(signature: string, cluster: Cluster): Promise<SignatureStatusResult> {
-    const rpcUrl = serverClusterUrl(cluster, '');
+async function getSignatureStatus(signature: string, cluster: ServerCluster): Promise<SignatureStatusResult> {
+    const rpcUrl = serverClusterUrl(cluster);
     const connection = new Connection(rpcUrl, 'confirmed');
 
     try {
