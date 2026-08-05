@@ -11,8 +11,8 @@ function metadata(uri: string) {
     return { uri } as Metadata;
 }
 
-function jsonResponse(body: unknown) {
-    return { json: () => Promise.resolve(body) } as Response;
+function jsonResponse(body: unknown, ok = true) {
+    return { json: () => Promise.resolve(body), ok } as Response;
 }
 
 describe('getMetadataJson', () => {
@@ -68,10 +68,22 @@ describe('getMetadataJson', () => {
         expect(onError).not.toHaveBeenCalled();
     });
 
+    // The proxy answers a blocked or dead URI with `{ error: … }`. That body names no artwork, so
+    // `processJson` would hand it back as metadata if the status were not checked first.
+    it('should resolve undefined for an error response rather than read its body as metadata', async () => {
+        mocks.getProxiedUri.mockReturnValue(PROXY_PATH);
+        vi.mocked(global.fetch).mockResolvedValueOnce(jsonResponse({ error: 'Forbidden' }, false));
+
+        const { getMetadataJson } = await import('../get-metadata-json');
+
+        await expect(getMetadataJson(metadata('https://example.com/meta.json'))).resolves.toBeUndefined();
+    });
+
     it('should not report an unparseable body', async () => {
         mocks.getProxiedUri.mockReturnValue('https://example.com/meta.json');
         vi.mocked(global.fetch).mockResolvedValueOnce({
             json: () => Promise.reject(new SyntaxError('Unexpected token <')),
+            ok: true,
         } as unknown as Response);
         const onError = vi.fn();
 

@@ -57,6 +57,10 @@ export async function getMetadataJson(metadata: Metadata, deps?: GetMetadataJson
     // would escalate the ordinary case.
     try {
         const response = await fetch(requestUri);
+        // The proxy answers a blocked, dead or oversize URI with a JSON error body, and an
+        // upstream can serve its own JSON error page. Neither is metadata, and `processJson`
+        // would pass such a body through: it only rejects a payload that names no artwork.
+        if (!response.ok) return undefined;
         return processJson(await response.json(), uri);
     } catch {
         return undefined;
