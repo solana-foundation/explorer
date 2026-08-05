@@ -1,7 +1,8 @@
 import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
 import { none, some } from '@metaplex-foundation/umi';
-import { PublicKey } from '@solana/web3.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { gen } from '@/app/__fixtures__/gen';
 
 const MINT_A = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 const MINT_B = 'So11111111111111111111111111111111111111112';
@@ -69,14 +70,6 @@ function jsonResource(data: unknown) {
     return { data, headers: new Headers({ 'content-type': 'application/json' }) };
 }
 
-/** Builds a distinct, well-formed mint address; umi's `publicKey()` validates base58. */
-function addressAt(index: number): string {
-    const bytes = new Uint8Array(32);
-    bytes[0] = index % 256;
-    bytes[1] = Math.floor(index / 256) + 1;
-    return new PublicKey(bytes).toBase58();
-}
-
 async function importSubject() {
     return await import('../fetch-token-metaplex');
 }
@@ -114,7 +107,7 @@ describe('getTokenInfosFromMetaplex', () => {
 
     it('should batch the metadata lookup so it stays under the getMultipleAccounts key limit', async () => {
         // Umi sends every key in one request, and the RPC rejects more than 100 at a time.
-        const addresses = Array.from({ length: 230 }, (_, i) => addressAt(i));
+        const addresses = Array.from({ length: 230 }, (_, i) => gen.address(i));
 
         const { getTokenInfosFromMetaplex } = await importSubject();
         await getTokenInfosFromMetaplex(addresses, RPC);
@@ -126,7 +119,7 @@ describe('getTokenInfosFromMetaplex', () => {
 
     it('should keep the mints a surviving batch resolved when another batch fails', async () => {
         const onError = vi.fn();
-        const addresses = Array.from({ length: 150 }, (_, i) => addressAt(i));
+        const addresses = Array.from({ length: 150 }, (_, i) => gen.address(i));
         mocks.safeFetchAllMetadata
             .mockRejectedValueOnce(new Error('rpc exploded'))
             .mockResolvedValueOnce([metadata(MINT_B)]);
@@ -238,6 +231,72 @@ describe('getTokenInfosFromMetaplex', () => {
             'https://example.com/metadata.json',
             expect.objectContaining({ timeout: METAPLEX_TIMEOUT_MS }),
         );
+    });
+
+    it('should keep the off-chain reads within the concurrency limit', async () => {
+        const addresses = Array.from({ length: 20 }, (_, i) => gen.address(i));
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce(addresses.map(address => metadata(address)));
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: addresses.map(() => parsedMint(6)) });
+
+        let inFlight = 0;
+        let peak = 0;
+        mocks.fetchResource.mockImplementation(async () => {
+            inFlight++;
+            peak = Math.max(peak, inFlight);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            inFlight--;
+            return jsonResource({});
+        });
+
+        const { getTokenInfosFromMetaplex, LOGO_CONCURRENCY } = await importSubject();
+        await getTokenInfosFromMetaplex(addresses, RPC);
+
+        expect(mocks.fetchResource).toHaveBeenCalledTimes(addresses.length);
+        expect(peak).toBeGreaterThan(1);
+        expect(peak).toBeLessThanOrEqual(LOGO_CONCURRENCY);
+    });
+
+    it('should keep every logo with its own mint when the reads settle out of order', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A), metadata(MINT_B)]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6), parsedMint(6)] });
+        mocks.fetchResource
+            .mockImplementationOnce(
+                () => new Promise(resolve => setTimeout(() => resolve(jsonResource({ image: 'logo-a' })), 10)),
+            )
+            .mockResolvedValueOnce(jsonResource({ image: 'logo-b' }));
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const result = await getTokenInfosFromMetaplex([MINT_A, MINT_B], RPC);
+
+        expect(result.map(t => [t.address, t.logoURI])).toEqual([
+            [MINT_A, 'logo-a'],
+            [MINT_B, 'logo-b'],
+        ]);
+    });
+
+    it('should give up the remaining logos once the batch spends its budget', async () => {
+        vi.useFakeTimers();
+        try {
+            mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A), metadata(MINT_B)]);
+            mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6), parsedMint(6)] });
+
+            const { getTokenInfosFromMetaplex, LOGO_BUDGET_MS } = await importSubject();
+            mocks.fetchResource.mockImplementationOnce(async () => {
+                vi.advanceTimersByTime(LOGO_BUDGET_MS);
+                return jsonResource({ image: 'logo-a' });
+            });
+
+            const result = await getTokenInfosFromMetaplex([MINT_A, MINT_B], RPC);
+
+            // The batch still answers with both mints — only the second one's logo is dropped.
+            expect(mocks.fetchResource).toHaveBeenCalledTimes(1);
+            expect(result.map(t => [t.address, t.logoURI])).toEqual([
+                [MINT_A, 'logo-a'],
+                [MINT_B, null],
+            ]);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it('should report a null logo when the proxy fetcher rejects the address', async () => {

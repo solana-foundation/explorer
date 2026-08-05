@@ -7,6 +7,7 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import { publicKey, unwrapOption } from '@metaplex-foundation/umi';
 import { Connection, PublicKey } from '@solana/web3.js';
+import { fetchAll } from '@utils/fetch-all';
 
 import { MAX_SIZE, USER_AGENT } from '@/app/api/metadata/proxy/config';
 import { fetchResource, matchJsonContent } from '@/app/api/metadata/proxy/feature';
@@ -18,6 +19,22 @@ import type { TokenInfo } from '../lib/types';
  * `metaplexTimeout` default in `@solflare-wallet/utl-sdk`.
  */
 export const METAPLEX_TIMEOUT_MS = 5_000;
+
+/**
+ * How many off-chain JSON reads may be in flight at once. One batch names up to
+ * `MAX_ADDRESSES` mints, each pointing at a third-party host, so this bounds the
+ * sockets one request opens instead of fanning out over the whole batch.
+ */
+export const LOGO_CONCURRENCY = 8;
+
+/**
+ * Wall clock the off-chain reads may spend across one batch, in milliseconds.
+ * `METAPLEX_TIMEOUT_MS` bounds a single read, but a run of slow hosts would still
+ * add up past the route's `maxDuration` and lose the whole response. Past this
+ * point the remaining mints report `logoURI: null`, so names, symbols and
+ * decimals — which come from the metadata and mint accounts — still arrive.
+ */
+export const LOGO_BUDGET_MS = 10_000;
 
 /** Decimals reported when the mint account is missing or unparseable. */
 const DEFAULT_DECIMALS = 6;
@@ -84,7 +101,8 @@ async function fetchDecimals(
 }
 
 /**
- * Reads one mint's off-chain JSON to find its logo, bounded by `METAPLEX_TIMEOUT_MS`.
+ * Reads one mint's off-chain JSON to find its logo, bounded by `METAPLEX_TIMEOUT_MS` and by
+ * whatever is left of the batch's `deadline`.
  *
  * A mint's `uri` is attacker-controlled on-chain data, so this calls the metadata proxy's
  * `fetchResource` in process rather than requesting `/api/metadata/proxy` over HTTP. Same
@@ -94,15 +112,25 @@ async function fetchDecimals(
  * Resolves to `null`, not `undefined`, because `TokenInfo.logoURI` is `string | null` in the
  * UTL REST contract and this value is serialised straight into it.
  */
-async function fetchLogoUri(metadata: Metadata, options: FetchTokenInfosMetaplexOptions): Promise<string | null> {
+async function fetchLogoUri(
+    metadata: Metadata,
+    deadline: number,
+    options: FetchTokenInfosMetaplexOptions,
+): Promise<string | null> {
     // eslint-disable-next-line unicorn/no-null -- `TokenInfo.logoURI` is `string | null` per the UTL contract
     if (!metadata.uri) return null;
+
+    const timeout = Math.min(METAPLEX_TIMEOUT_MS, deadline - Date.now());
+    // The batch has spent its budget; the mints still queued give up their logo rather than the
+    // request giving up its response.
+    // eslint-disable-next-line unicorn/no-null -- same contract as above
+    if (timeout <= 0) return null;
 
     try {
         const { data, headers } = await fetchResource(metadata.uri, {
             headers: new Headers({ 'User-Agent': USER_AGENT }),
             size: MAX_SIZE,
-            timeout: METAPLEX_TIMEOUT_MS,
+            timeout,
         });
         // eslint-disable-next-line unicorn/no-null -- same contract as above
         if (!matchJsonContent(headers.get('content-type'))) return null;
@@ -158,13 +186,17 @@ export async function getTokenInfosFromMetaplex(
 
     if (fungible.length === 0) return [];
 
+    const deadline = Date.now() + LOGO_BUDGET_MS;
+
     const [decimals, logoUris] = await Promise.all([
         fetchDecimals(
             fungible.map(metadata => metadata.mint.toString()),
             rpcEndpoint,
             options.onError,
         ),
-        Promise.all(fungible.map(metadata => fetchLogoUri(metadata, options))),
+        // `fetchAll` runs at most `LOGO_CONCURRENCY` reads at a time and keeps the results in the
+        // order the mints were given, so `logoUris[index]` below still belongs to `fungible[index]`.
+        fetchAll(fungible, metadata => fetchLogoUri(metadata, deadline, options), LOGO_CONCURRENCY),
     ]);
 
     return fungible.map((metadata, index) => ({
