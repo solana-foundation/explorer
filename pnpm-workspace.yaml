@@ -5,6 +5,8 @@ packages:
 
 autoInstallPeers: true
 
+frozenLockfile: true
+
 catalogs:
   storybook:
     '@storybook/addon-a11y': 10.2.6

@@ -4,6 +4,7 @@ import { isNFTokenAccount } from '@components/account/nftoken/isNFTokenAccount';
 import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
 import { useDasImage } from '@entities/digital-asset';
 import { isMetaplexNFT } from '@entities/nft';
+import { STAKE_PROGRAM_LABEL } from '@explorer/parsers';
 import {
     Account,
     isTokenProgramData,
@@ -51,6 +52,7 @@ export function AccountHeader({
     // header — re-requesting its image and flickering — on every account refetch
     // or token-info revalidation. (The accounts cache keeps stale data during a
     // refetch, so these conditions still hold and the header stays mounted.)
+    // TODO: adopt @explorer/entity-inspector's accounts module (src/accounts: classifyAccountKindBase + kinds.ts; needs a browser-safe ./accounts subpath) instead of this inline kind chain
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} />;
     }
@@ -71,7 +73,7 @@ export function AccountHeader({
     // Stake accounts have a stable parsed type that doesn't depend on the token-info (UTL) fetch,
     // so resolve their header before the isTokenInfoLoading gate and render the correct title
     // ("Stake Account") instead of the generic "Account" fallback.
-    if (parsedData?.program === 'stake') {
+    if (parsedData?.program === STAKE_PROGRAM_LABEL) {
         return <AccountDetailsHeader title="Stake Account" />;
     }
 

@@ -31,6 +31,18 @@ import {
     isDeprecatedSerumProgram,
     isSerumInstruction,
 } from '@explorer/decoder-serum/detection';
+import {
+    ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
+    BPF_LOADER_PROGRAM_LABEL,
+    BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
+    SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL,
+    SPL_MEMO_PROGRAM_LABEL,
+    SPL_TOKEN_2022_PROGRAM_LABEL,
+    SPL_TOKEN_PROGRAM_LABEL,
+    STAKE_PROGRAM_LABEL,
+    SYSTEM_PROGRAM_LABEL,
+    VOTE_PROGRAM_LABEL,
+} from '@explorer/parsers';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
@@ -210,8 +222,8 @@ function InstructionCard({
         };
 
         switch (ix.program) {
-            case 'spl-token':
-            case 'spl-token-2022': {
+            case SPL_TOKEN_PROGRAM_LABEL:
+            case SPL_TOKEN_2022_PROGRAM_LABEL: {
                 // The RPC parses batch instructions (disc 0xff) as ParsedInstruction
                 // with type "batch". Route them to the batch card before TokenDetailsCard
                 // throws on the unrecognised type.
@@ -234,17 +246,17 @@ function InstructionCard({
                     </ErrorBoundary>
                 );
             }
-            case 'bpf-loader':
+            case BPF_LOADER_PROGRAM_LABEL:
                 return <BpfLoaderDetailsCard {...props} key={key} />;
-            case 'bpf-upgradeable-loader':
+            case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL:
                 return <BpfUpgradeableLoaderDetailsCard {...props} key={key} />;
-            case 'system':
+            case SYSTEM_PROGRAM_LABEL:
                 return <SystemDetailsCard {...props} key={key} />;
-            case 'stake':
+            case STAKE_PROGRAM_LABEL:
                 return <StakeDetailsCard {...props} key={key} />;
-            case 'spl-memo':
+            case SPL_MEMO_PROGRAM_LABEL:
                 return <MemoDetailsCard {...props} key={key} />;
-            case 'spl-associated-token-account':
+            case SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL:
                 return (
                     <AssociatedTokenDetailsCard
                         key={key}
@@ -255,9 +267,9 @@ function InstructionCard({
                         childIndex={childIndex}
                     />
                 );
-            case 'vote':
+            case VOTE_PROGRAM_LABEL:
                 return <VoteDetailsCard {...props} key={key} />;
-            case 'address-lookup-table':
+            case ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL:
                 return <AddressLookupTableDetailsCard {...props} key={key} />;
             default:
                 return <UnknownDetailsCard {...props} key={key} />;

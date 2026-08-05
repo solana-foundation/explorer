@@ -2,7 +2,7 @@ import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import type { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 
-import { isTokenProgram } from '@/app/shared/model/token-program';
+import { isTokenProgramAddress } from '@/app/shared/model/token-program';
 
 import type { SolTransferInstruction, TokenTransferInstruction } from './types';
 
@@ -54,7 +54,7 @@ export function isTokenTransferInstruction(
     instruction: ParsedInstruction | PartiallyDecodedInstruction,
 ): instruction is TokenTransferInstruction {
     return (
-        isTokenProgram(instruction.programId.toBase58()) &&
+        isTokenProgramAddress(instruction.programId.toBase58()) &&
         'parsed' in instruction &&
         TOKEN_TRANSFER_TYPES.has(instruction.parsed.type)
     );

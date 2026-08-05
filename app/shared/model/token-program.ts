@@ -12,12 +12,13 @@ export function isNativeMint(mint: Address | string): boolean {
 }
 
 // p-token (Pinocchio Token) not supported yet — skipped.
-export function isTokenProgram(owner: Address | string): boolean {
+// "Address" suffix disambiguates from @explorer/parsers' isTokenProgram, which takes RPC labels.
+export function isTokenProgramAddress(owner: Address | string): boolean {
     return owner === TOKEN_PROGRAM_ADDRESS || owner === TOKEN_2022_PROGRAM_ADDRESS;
 }
 
 export function isTokenMintByOwner(owner: Address, data?: ReadonlyUint8Array): boolean {
-    if (!isTokenProgram(owner)) {
+    if (!isTokenProgramAddress(owner)) {
         return false;
     }
     if (data) {

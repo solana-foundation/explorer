@@ -1,5 +1,10 @@
 type LogContext = Record<string, unknown>;
 
+/** Prefixes a message with the package namespace — every log/warn/error goes through this. */
+export function ns(message: string): string {
+    return `[entity-inspector] ${message}`;
+}
+
 export type InspectorLogger = {
     debug(message: string, context?: LogContext): void;
     error(message: string, context?: LogContext): void;

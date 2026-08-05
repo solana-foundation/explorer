@@ -12,6 +12,21 @@
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js",
             "default": "./dist/index.js"
+        },
+        "./telemetry/server": {
+            "types": "./dist/telemetry/server.d.ts",
+            "import": "./dist/telemetry/server.js",
+            "default": "./dist/telemetry/server.js"
+        },
+        "./telemetry/providers/ga4": {
+            "types": "./dist/telemetry/providers/ga4.d.ts",
+            "import": "./dist/telemetry/providers/ga4.js",
+            "default": "./dist/telemetry/providers/ga4.js"
+        },
+        "./verification": {
+            "types": "./dist/verification/index.d.ts",
+            "import": "./dist/verification/index.js",
+            "default": "./dist/verification/index.js"
         }
     },
     "scripts": {
@@ -24,15 +39,20 @@
         "pretest": "pnpm run build",
         "test": "pnpm run typecheck && vitest run && pnpm run test:treeshakability && pnpm run test:node-esm && pnpm run test:coverage",
         "test:coverage": "vitest run --config vitest.coverage.config.ts",
-        "test:node-esm": "for entry in dist/index.js; do node --input-type=module -e \"import('./$entry')\" || exit 1; done",
-        "test:treeshakability": "for file in dist/index.js; do agadoo $file || exit 1; done",
+        "test:node-esm": "for entry in dist/index.js dist/telemetry/server.js dist/telemetry/providers/ga4.js dist/verification/index.js; do node --input-type=module -e \"import('./$entry')\" || exit 1; done",
+        "test:treeshakability": "for file in dist/index.js dist/telemetry/server.js dist/telemetry/providers/ga4.js dist/verification/index.js; do agadoo $file || exit 1; done",
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
+        "@explorer/idl-decode": "workspace:*",
+        "@explorer/parsers": "workspace:*",
         "@modelcontextprotocol/sdk": "1.27.1",
+        "@noble/hashes": "1.5.0",
         "@solana-program/address-lookup-table": "0.11.0",
         "@solana-program/loader-v3": "0.3.0",
+        "@solana-program/program-metadata": "0.7.0",
+        "@solana-program/system": "0.12.0",
         "@solana-program/token": "0.13.0",
         "@solana-program/token-2022": "0.9.0",
         "@solana/kit": "6.5.0",

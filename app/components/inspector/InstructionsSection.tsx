@@ -1,5 +1,12 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
+import {
+    BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
+    SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL,
+    SPL_TOKEN_2022_PROGRAM_LABEL,
+    SPL_TOKEN_PROGRAM_LABEL,
+    SYSTEM_PROGRAM_LABEL,
+} from '@explorer/parsers';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
 import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
@@ -239,8 +246,9 @@ function InspectorInstructionCard({
         );
     }
 
+    // mpl-token-metadata / lighthouse below stay literal: dispatcher-only labels with no registry specimen (see ParserProgramLabel)
     switch (parsedIx.program) {
-        case 'system':
+        case SYSTEM_PROGRAM_LABEL:
             return (
                 <SystemDetailsCard
                     key={index}
@@ -251,7 +259,7 @@ function InspectorInstructionCard({
                     raw={ix}
                 />
             );
-        case 'spl-associated-token-account':
+        case SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL:
             return (
                 <AssociatedTokenDetailsCard
                     key={index}
@@ -264,7 +272,7 @@ function InspectorInstructionCard({
                     showProgramField={false}
                 />
             );
-        case 'bpf-upgradeable-loader':
+        case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL:
             return (
                 <ErrorBoundary
                     fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
@@ -279,7 +287,7 @@ function InspectorInstructionCard({
                     />
                 </ErrorBoundary>
             );
-        case 'spl-token':
+        case SPL_TOKEN_PROGRAM_LABEL:
             return (
                 <ErrorBoundary
                     fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
@@ -295,7 +303,7 @@ function InspectorInstructionCard({
                     />
                 </ErrorBoundary>
             );
-        case 'spl-token-2022':
+        case SPL_TOKEN_2022_PROGRAM_LABEL:
             return (
                 <ErrorBoundary
                     fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}

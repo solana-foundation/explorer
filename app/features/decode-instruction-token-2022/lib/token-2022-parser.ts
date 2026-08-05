@@ -1,5 +1,5 @@
 import { getTokenIxValidator } from '@components/instruction/token/types';
-import type { ParserProgramLabel } from '@entities/instruction-parser';
+import { isParsedInstructionProgram, type ParserProgramLabel } from '@explorer/parsers';
 import { unwrapOption } from '@solana/kit';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import {
@@ -328,7 +328,7 @@ function tokenMetadataFieldToString(field: { __kind: string; fields?: readonly [
  * Token-2022 share `IX_STRUCTS` for validation; only the program label differs.
  */
 export function parseToken2022RpcInstruction(ix: ParsedInstruction): Token2022Parsed | undefined {
-    if (ix.program !== TOKEN_2022_PROGRAM_LABEL) return undefined;
+    if (!isParsedInstructionProgram(ix, TOKEN_2022_PROGRAM_LABEL)) return undefined;
     const validator = getTokenIxValidator(ix.parsed.type);
     if (!validator) return undefined;
     try {

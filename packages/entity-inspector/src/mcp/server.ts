@@ -1,5 +1,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
+import { consoleLogger, ns } from '../logger.js';
+import { buildToolCallEvent } from './analytics-event.js';
 import { inspectEntityInputSchema, pingInputSchema } from './schemas.js';
 import { handleInspectEntity, type InspectEntityDependencies } from './tools/inspect-entity.js';
 
@@ -17,13 +20,37 @@ const INSPECT_ENTITY_DESCRIPTION = [
     '- "spl-token:multisig" / "spl-token-2022:multisig": Token multisigs — signers, threshold, initialization status.',
     '- "compressed-nft": Compressed NFTs — asset ID, owner, merkle tree.',
     '- "stake", "vote", "nonce", "sysvar", "config", "address-lookup-table", "feature", "nftoken", "solana-attestation-service": Recognized system account types.',
-    '- "bpf-upgradeable-loader" / "bpf-loader" / "bpf-loader-2" / "loader-v4": Executable programs — currently unsupported; return a CURRENTLY_UNSUPPORTED error until IDL-based enrichment lands.',
-    '- "unknown": Unrecognized account type.',
+    '- "bpf-upgradeable-loader": Upgradeable programs — address, label, balance, executable-data account, upgradeability, last deploy slot, upgrade authority, plus an "idl" enrichment (status, idl_type, source, program name). Verification/security/multisig enrichments are not implemented yet.',
+    '- "bpf-loader" / "bpf-loader-2" / "loader-v4": Legacy-loader programs — currently unsupported; return a CURRENTLY_UNSUPPORTED error.',
+    '- "unknown": Unrecognized account type. When the owner program publishes an IDL, the account data is decoded through it and returned as "decoded" (source "idl").',
     '',
-    'TRANSACTIONS: not supported yet — 64-byte signatures return a CURRENTLY_UNSUPPORTED error.',
+    'TRANSACTIONS: 64-byte signatures return entity.kind "transaction" — slot, block time, fee, status, error, signers, accounts (v0 lookup-table addresses attributed via source/lookupTableAddress), and instructions with inner instructions. Instructions decode through a cascade: programs publishing an on-chain IDL carry "decoded" with source "idl"; token batch and host-app-supported programs decode with source "bundled"; the rest stay base58 with source "raw".',
     '',
     'OUTPUT: Responses use { payload: { entity: { kind, ...fields } }, errors: [] }. Unresolvable fields return explicit unknown markers instead of being silently omitted.',
 ].join('\n');
+
+// A throwing sink must never break the tool reply — telemetry is strictly best-effort.
+function withToolTracking<TInput>(
+    tool: string,
+    dependencies: InspectEntityDependencies,
+    handler: (input: TInput) => Promise<CallToolResult>,
+): (input: TInput) => Promise<CallToolResult> {
+    const { track } = dependencies;
+    if (!track) {
+        return handler;
+    }
+    const logger = dependencies.logger ?? consoleLogger;
+    return async input => {
+        const started = Date.now();
+        const result = await handler(input);
+        try {
+            track(buildToolCallEvent(tool, input, result, Date.now() - started));
+        } catch (error) {
+            logger.warn(ns('analytics track failed'), { error, tool });
+        }
+        return result;
+    };
+}
 
 export function createMcpServer(dependencies: InspectEntityDependencies): McpServer {
     const server = new McpServer({
@@ -31,6 +58,18 @@ export function createMcpServer(dependencies: InspectEntityDependencies): McpSer
         // Mirrors the explorer's root package.json version (kept as a literal — the package imports no app code)
         version: '0.1.0',
     });
+
+    const { track } = dependencies;
+    if (track) {
+        const logger = dependencies.logger ?? consoleLogger;
+        server.server.oninitialized = () => {
+            try {
+                track({ name: 'mcp_initialize', params: {} });
+            } catch (error) {
+                logger.warn(ns('analytics track failed'), { error, tool: 'initialize' });
+            }
+        };
+    }
 
     server.registerTool(
         'inspect_entity',
@@ -46,7 +85,7 @@ export function createMcpServer(dependencies: InspectEntityDependencies): McpSer
             inputSchema: inspectEntityInputSchema(),
             title: 'Inspect Solana Entity',
         },
-        async input => handleInspectEntity(input, dependencies),
+        withToolTracking('inspect_entity', dependencies, async input => handleInspectEntity(input, dependencies)),
     );
 
     server.registerTool(
@@ -55,14 +94,14 @@ export function createMcpServer(dependencies: InspectEntityDependencies): McpSer
             description: 'Basic scaffold health tool',
             inputSchema: pingInputSchema(),
         },
-        async () => ({
+        withToolTracking('ping', dependencies, async () => ({
             content: [
                 {
                     text: 'pong',
                     type: 'text',
                 },
             ],
-        }),
+        })),
     );
 
     return server;

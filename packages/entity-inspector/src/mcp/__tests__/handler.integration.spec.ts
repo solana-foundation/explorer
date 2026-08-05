@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { EntityInspectorConfig } from '../../types.js';
 import { createMcpRequestHandler } from '../handler.js';
+import { createMcpServer } from '../server.js';
 
 const TEST_CONFIG: EntityInspectorConfig = {
     rpcEndpoints: {
@@ -146,9 +147,10 @@ describe('createMcpRequestHandler — real MCP SDK transport', () => {
         });
     });
 
-    it('should accept a config with a program name resolver', async () => {
+    it('should accept a config with a program name resolver and an instruction decode fallback', async () => {
         const handlerWithResolver = createMcpRequestHandler({
             ...TEST_CONFIG,
+            decodeInstructionFallback: () => undefined,
             resolveProgramName: () => undefined,
         });
         const response = await handlerWithResolver(
@@ -164,6 +166,173 @@ describe('createMcpRequestHandler — real MCP SDK transport', () => {
         await expect(response.json()).resolves.toMatchObject({
             id: 5,
             result: { isError: true },
+        });
+    });
+});
+
+// The initialized NOTIFICATION (not the initialize request) is what fires `oninitialized` — real
+// MCP clients send it right after negotiation; the sessionless harness must do so explicitly.
+function initializedNotification(): Request {
+    return new Request('http://localhost/mcp', {
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }),
+        headers: MCP_HEADERS,
+        method: 'POST',
+    });
+}
+
+describe('createMcpRequestHandler — analytics and server wrapping', () => {
+    it('should emit mcp_initialize and a ping mcp_tool_call through the injected track', async () => {
+        const track = vi.fn();
+        const handler = createMcpRequestHandler({ ...TEST_CONFIG, track });
+
+        await handler(initializedNotification());
+        const response = await handler(
+            await negotiatedToolRequest(handler, 'tools/call', { arguments: {}, name: 'ping' }, 10),
+        );
+
+        expect(response.status).toBe(200);
+        expect(track).toHaveBeenCalledWith({ name: 'mcp_initialize', params: {} });
+        expect(track).toHaveBeenCalledWith({
+            name: 'mcp_tool_call',
+            params: {
+                duration_ms: expect.any(Number),
+                status: 'success',
+                tool: 'ping',
+            },
+        });
+    });
+
+    it('should emit an errored inspect_entity mcp_tool_call with the defaulted cluster and error code', async () => {
+        const track = vi.fn();
+        const handler = createMcpRequestHandler({ ...TEST_CONFIG, track });
+
+        const response = await handler(
+            await negotiatedToolRequest(
+                handler,
+                'tools/call',
+                { arguments: { identifier: '111' }, name: 'inspect_entity' },
+                11,
+            ),
+        );
+
+        expect(response.status).toBe(200);
+        expect(track).toHaveBeenCalledWith({
+            name: 'mcp_tool_call',
+            params: {
+                cluster: 'mainnet-beta',
+                duration_ms: expect.any(Number),
+                error_code: 'INVALID_ARGUMENT',
+                status: 'error',
+                tool: 'inspect_entity',
+            },
+        });
+    });
+
+    it('should warn and still answer when the track sink throws', async () => {
+        const track = vi.fn().mockImplementation(() => {
+            throw new Error('sink boom');
+        });
+        const warn = vi.fn();
+        const handler = createMcpRequestHandler({
+            ...TEST_CONFIG,
+            logger: { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn },
+            track,
+        });
+
+        await handler(initializedNotification());
+        const response = await handler(
+            await negotiatedToolRequest(handler, 'tools/call', { arguments: {}, name: 'ping' }, 12),
+        );
+
+        expect(response.status).toBe(200);
+        await expect(response.json()).resolves.toMatchObject({
+            result: { content: [{ text: 'pong', type: 'text' }] },
+        });
+        expect(warn).toHaveBeenCalledWith('[entity-inspector] analytics track failed', {
+            error: expect.any(Error),
+            tool: 'initialize',
+        });
+        expect(warn).toHaveBeenCalledWith('[entity-inspector] analytics track failed', {
+            error: expect.any(Error),
+            tool: 'ping',
+        });
+    });
+
+    it('should measure the tool call duration around the handler', async () => {
+        // Only Date is faked — the SDK transport keeps its real timers.
+        vi.useFakeTimers({ toFake: ['Date'] });
+        try {
+            const track = vi.fn();
+            const server = createMcpServer({
+                fetchAccountInfo: vi.fn().mockImplementation(async () => {
+                    vi.setSystemTime(Date.now() + 1234);
+                    return { value: null };
+                }),
+                fetchAsset: vi.fn().mockResolvedValue(null),
+                fetchSignatureStatus: vi.fn(),
+                fetchTransaction: vi.fn(),
+                logger: { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() },
+                track,
+            });
+            // Stateless transport is single-request: one fresh pair, no live negotiation needed.
+            const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
+            await server.connect(transport);
+            await transport.handleRequest(
+                mcpRequest(
+                    'tools/call',
+                    {
+                        arguments: { identifier: '4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T' },
+                        name: 'inspect_entity',
+                    },
+                    20,
+                    { ...MCP_HEADERS, 'mcp-protocol-version': LATEST_PROTOCOL_VERSION },
+                ),
+            );
+
+            expect(track).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    name: 'mcp_tool_call',
+                    params: expect.objectContaining({ duration_ms: 1234 }),
+                }),
+            );
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('should fall back to the console logger when a bare server has a throwing track sink', () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+        const server = createMcpServer({
+            fetchAccountInfo: vi.fn(),
+            fetchAsset: vi.fn(),
+            fetchSignatureStatus: vi.fn(),
+            fetchTransaction: vi.fn(),
+            track: () => {
+                throw new Error('sink boom');
+            },
+        });
+
+        server.server.oninitialized?.();
+
+        expect(warnSpy).toHaveBeenCalledWith('[entity-inspector] analytics track failed', {
+            error: expect.any(Error),
+            tool: 'initialize',
+        });
+        warnSpy.mockRestore();
+    });
+
+    it('should serve every request from the server the wrapper returns', async () => {
+        // A distinct wrapped instance: its identity in the reply proves the return value is used, not just called.
+        const wrapServer = vi.fn(() => new McpServer({ name: 'wrapped-server', version: '9.9.9' }));
+        const handler = createMcpRequestHandler({ ...TEST_CONFIG, wrapServer });
+
+        const response = await handler(initializeRequest(13));
+
+        expect(response.status).toBe(200);
+        expect(wrapServer).toHaveBeenCalledTimes(1);
+        expect(wrapServer).toHaveBeenCalledWith(expect.any(McpServer));
+        await expect(response.json()).resolves.toMatchObject({
+            result: { serverInfo: { name: 'wrapped-server', version: '9.9.9' } },
         });
     });
 });

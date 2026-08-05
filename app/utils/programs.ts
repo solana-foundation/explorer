@@ -390,17 +390,7 @@ export const TOKEN_IDS: { [key: string]: string } = {
     [TOKEN_PROGRAM_ADDRESS]: 'Token Program',
 } as const;
 
-export type TokenProgram = 'spl-token' | 'spl-token-2022';
-
-export function assertIsTokenProgram(program: string): asserts program is TokenProgram {
-    if (program !== 'spl-token' && program !== 'spl-token-2022')
-        throw new Error('Expected token program name of `spl-token` or `spl-token-2022`');
-}
-export function isTokenProgram(program: string): program is TokenProgram {
-    try {
-        assertIsTokenProgram(program);
-        return true;
-    } catch (_e) {
-        return false;
-    }
+// Cluster-agnostic name lookup; the /mcp resolver injects this and has no per-cluster context (see app/mcp/dependencies.ts).
+export function programNameByAddress(address: string): string | undefined {
+    return PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address];
 }

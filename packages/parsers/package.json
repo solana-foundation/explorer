@@ -1,0 +1,74 @@
+{
+    "name": "@explorer/parsers",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Instruction-parsing contract and dispatcher shared by the explorer app and sibling packages — generic parsing cores, distinct from the per-program @explorer/decoder-* packages.",
+    "files": [
+        "dist"
+    ],
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        },
+        "./compat": {
+            "types": "./dist/compat/index.d.ts",
+            "import": "./dist/compat/index.js",
+            "default": "./dist/compat/index.js"
+        },
+        "./programs/system": {
+            "types": "./dist/programs/system/index.d.ts",
+            "import": "./dist/programs/system/index.js",
+            "default": "./dist/programs/system/index.js"
+        },
+        "./programs/address-lookup-table": {
+            "types": "./dist/programs/address-lookup-table/index.d.ts",
+            "import": "./dist/programs/address-lookup-table/index.js",
+            "default": "./dist/programs/address-lookup-table/index.js"
+        },
+        "./token-batch": {
+            "types": "./dist/token-batch/index.d.ts",
+            "import": "./dist/token-batch/index.js",
+            "default": "./dist/token-batch/index.js"
+        },
+        "./security-txt": {
+            "types": "./dist/security-txt/index.d.ts",
+            "import": "./dist/security-txt/index.js",
+            "default": "./dist/security-txt/index.js"
+        }
+    },
+    "scripts": {
+        "prebuild": "rm -rf dist",
+        "build": "tsc -p tsconfig.build.json && node scripts/annotate-pure.mjs",
+        "format": "oxfmt --check .",
+        "format:fix": "oxfmt .",
+        "lint": "oxlint && oxfmt --check .",
+        "lint:fix": "oxlint --fix",
+        "pretest": "pnpm run build",
+        "test": "pnpm run typecheck && vitest run && pnpm run test:treeshakability && pnpm run test:node-esm && pnpm run test:coverage",
+        "test:coverage": "vitest run --config vitest.coverage.config.ts",
+        "test:node-esm": "for entry in $(node -p \"Object.values(require('./package.json').exports).map(e=>e.import).join(' ')\"); do node --input-type=module -e \"import('$entry')\" || exit 1; done",
+        "test:treeshakability": "agadoo dist/index.js",
+        "test:watch": "vitest",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@solana-program/system": "0.12.0",
+        "@solana-program/token": "0.13.0",
+        "@solana-program/token-2022": "0.9.0",
+        "@solana/kit": "6.5.0",
+        "@solana/web3.js": "1.98.4",
+        "superstruct": "0.15.3"
+    },
+    "devDependencies": {
+        "@vitest/coverage-v8": "catalog:vitest",
+        "agadoo": "^3.0.0",
+        "oxfmt": "^0.56.0",
+        "oxlint": "^1.71.0",
+        "typescript": "catalog:tooling",
+        "vitest": "catalog:vitest"
+    }
+}

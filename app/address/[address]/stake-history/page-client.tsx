@@ -1,6 +1,7 @@
 'use client';
 
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
+import { isParsedAccountProgram, SYSVAR_PROGRAM_LABEL } from '@explorer/parsers';
 import { StakeHistoryCard } from '@features/stake';
 import React from 'react';
 
@@ -15,7 +16,7 @@ function StakeHistoryCardRenderer({
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
     const parsedData = account?.data?.parsed;
-    if (!parsedData || parsedData.program !== 'sysvar' || parsedData.parsed.type !== 'stakeHistory') {
+    if (!isParsedAccountProgram(parsedData, SYSVAR_PROGRAM_LABEL) || parsedData.parsed.type !== 'stakeHistory') {
         return onNotFound();
     }
     return <StakeHistoryCard sysvarAccount={parsedData.parsed} />;

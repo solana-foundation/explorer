@@ -1,11 +1,51 @@
+// Fails the build if this module (which reads key-bearing RPC env) is ever imported into a client bundle.
+import 'server-only';
+
 import type { EntityInspectorConfig, McpRequestHandler } from '@explorer/entity-inspector';
-import { clusterApiUrl } from '@solana/web3.js';
+import { isParsedInstruction } from '@explorer/parsers';
+import { getBase58Encoder } from '@solana/kit';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { LOADER_IDS, PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
+import { wrapMcpServerWithSentry } from '@/app/shared/lib/sentry';
+import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
+import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
+import { programNameByAddress } from '@/app/utils/programs';
 
-const resolveProgramName: EntityInspectorConfig['resolveProgramName'] = address =>
-    PROGRAM_INFO_BY_ID[address]?.name ?? LOADER_IDS[address];
+import { createMcpTrack } from './telemetry';
+
+const resolveProgramName: EntityInspectorConfig['resolveProgramName'] = programNameByAddress;
+
+const decodeInstructionFallback: EntityInspectorConfig['decodeInstructionFallback'] = instruction => {
+    const dispatched = instructionParserDispatcher.fromTransactionInstruction(
+        new TransactionInstruction({
+            data: Buffer.from(getBase58Encoder().encode(instruction.data)),
+            keys: instruction.accounts.map(account => ({
+                isSigner: account.signer,
+                isWritable: account.writable,
+                pubkey: new PublicKey(account.address),
+            })),
+            programId: new PublicKey(instruction.programId),
+        }),
+    );
+    if (!isParsedInstruction(dispatched)) {
+        return undefined;
+    }
+    // Parser info carries PublicKey/BN/bigint values; the wire format needs their JSON forms
+    // (JSON.stringify throws on bigint — kit-based parsers like lighthouse decode u64s as bigint).
+    return {
+        info: JSON.parse(JSON.stringify(dispatched.parsed.info, bigIntReplacer)),
+        program: dispatched.program,
+        type: dispatched.parsed.type,
+    };
+};
+
+function bigIntReplacer(_key: string, value: unknown): unknown {
+    if (typeof value === 'bigint') {
+        return value <= Number.MAX_SAFE_INTEGER && value >= Number.MIN_SAFE_INTEGER ? Number(value) : String(value);
+    }
+    return value;
+}
 
 const logger: EntityInspectorConfig['logger'] = {
     debug: (message, context) => Logger.debug(message, context),
@@ -16,13 +56,14 @@ const logger: EntityInspectorConfig['logger'] = {
 };
 
 // Resolved at handler init (cold start), not module scope, so key-bearing URLs come from runtime env, never a build artifact.
+// Dedicated MCP endpoints keep MCP traffic off the app's quota; unset falls back to the app's own server RPC config
+// (`serverClusterUrl` → `*_RPC_URL` env → proxied default), not a raw public endpoint.
 function resolveRpcEndpoints(): EntityInspectorConfig['rpcEndpoints'] {
     return {
-        devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || clusterApiUrl('devnet'),
-        'mainnet-beta': process.env.MCP_SOLANA_RPC_URL_MAINNET_BETA || clusterApiUrl('mainnet-beta'),
-        // simd296 is not a web3.js cluster, so its public endpoint stays a literal
-        simd296: process.env.MCP_SOLANA_RPC_URL_SIMD296 || 'https://simd-0296.surfnet.dev:8899',
-        testnet: process.env.MCP_SOLANA_RPC_URL_TESTNET || clusterApiUrl('testnet'),
+        devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || serverClusterUrl(Cluster.Devnet, ''),
+        'mainnet-beta': process.env.MCP_SOLANA_RPC_URL_MAINNET_BETA || serverClusterUrl(Cluster.MainnetBeta, ''),
+        simd296: process.env.MCP_SOLANA_RPC_URL_SIMD296 || serverClusterUrl(Cluster.Simd296, ''),
+        testnet: process.env.MCP_SOLANA_RPC_URL_TESTNET || serverClusterUrl(Cluster.Testnet, ''),
     };
 }
 
@@ -42,5 +83,13 @@ export function getMcpRequestHandler(): Promise<McpRequestHandler> {
 
 async function importRequestHandler(): Promise<McpRequestHandler> {
     const { createMcpRequestHandler } = await import('@explorer/entity-inspector');
-    return createMcpRequestHandler({ logger, resolveProgramName, rpcEndpoints: resolveRpcEndpoints() });
+    return createMcpRequestHandler({
+        decodeInstructionFallback,
+        logger,
+        resolveProgramName,
+        rpcEndpoints: resolveRpcEndpoints(),
+        track: createMcpTrack(),
+        // Sentry auto-instruments tool calls with spans + error capture (dev-facing observability).
+        wrapServer: wrapMcpServerWithSentry,
+    });
 }

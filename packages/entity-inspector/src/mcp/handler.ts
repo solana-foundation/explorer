@@ -1,7 +1,11 @@
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 
-import { consoleLogger } from '../logger.js';
-import { createRpcClient } from '../solana/rpc.js';
+import { consoleLogger, ns } from '../logger.js';
+import { createMultisigResolver } from '../enrichments/multisig.js';
+import { createSecurityMetadataResolver } from '../enrichments/security.js';
+import { createVerificationResolver } from '../enrichments/verification.js';
+import { createIdlClientResolver, createProgramIdlDiscovery } from '../enrichments/idl-clients.js';
+import { createRpcClient } from '../rpc/rpc.js';
 import type { EntityInspectorConfig } from '../types.js';
 import { createMcpServer } from './server.js';
 import type { InspectEntityDependencies } from './tools/inspect-entity.js';
@@ -12,21 +16,37 @@ export type McpRequestHandler = (request: Request) => Promise<Response>;
 export function createMcpRequestHandler(config: EntityInspectorConfig): McpRequestHandler {
     const logger = config.logger ?? consoleLogger;
     const rpcClient = createRpcClient(config.rpcEndpoints);
+    const resolveIdlClient = createIdlClientResolver(config.rpcEndpoints, logger);
     const dependencies: InspectEntityDependencies = {
+        discoverProgramIdl: createProgramIdlDiscovery(config.rpcEndpoints, logger),
         fetchAccountInfo: rpcClient.fetchAccountInfo,
         fetchAsset: rpcClient.fetchAsset,
+        fetchSignatureStatus: rpcClient.fetchSignatureStatus,
+        fetchTransaction: rpcClient.fetchTransaction,
         logger,
+        resolveIdlClient,
+        resolveMultisigReference: createMultisigResolver({ fetchAccountInfo: rpcClient.fetchAccountInfo, logger }),
+        resolveProgramVerification: createVerificationResolver({
+            fetchAccountInfo: rpcClient.fetchAccountInfo,
+            logger,
+            resolveIdlClient,
+        }),
+        resolveSecurityMetadata: createSecurityMetadataResolver(config.rpcEndpoints, logger),
+        ...(config.decodeInstructionFallback ? { decodeInstructionFallback: config.decodeInstructionFallback } : {}),
         ...(config.resolveProgramName ? { resolveProgramName: config.resolveProgramName } : {}),
+        ...(config.track ? { track: config.track } : {}),
     };
+    const { wrapServer } = config;
     return async request => {
-        const server = createMcpServer(dependencies);
+        const baseServer = createMcpServer(dependencies);
+        const server = wrapServer ? wrapServer(baseServer) : baseServer;
         const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
         try {
             await server.connect(transport);
             return await transport.handleRequest(request);
         } finally {
-            await transport.close().catch(error => logger.warn('[entity-inspector] transport close failed', { error }));
-            await server.close().catch(error => logger.warn('[entity-inspector] server close failed', { error }));
+            await transport.close().catch(error => logger.warn(ns('transport close failed'), { error }));
+            await server.close().catch(error => logger.warn(ns('server close failed'), { error }));
         }
     };
 }

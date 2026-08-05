@@ -45,6 +45,7 @@ export function UpgradeableLoaderAccountSection({
     parsedData: UpgradeableLoaderAccount;
     programData: ProgramDataAccountInfo | undefined;
 }) {
+    // TODO: adopt @explorer/entity-inspector's accounts module (src/accounts: classifyAccountKindBase + kinds.ts; needs a browser-safe ./accounts subpath) instead of this inline kind dispatch
     switch (parsedData.type) {
         case 'program': {
             return (

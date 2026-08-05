@@ -1,6 +1,6 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
-import { asRecord } from '../solana/parse-helpers.js';
+import { asRecord } from '../shared/parse-helpers.js';
 import { formatSchemaValidationError } from './schemas.js';
 
 export const MCP_TOOL_ERROR_CODES = [

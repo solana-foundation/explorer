@@ -1,8 +1,7 @@
-'use client';
+import 'client-only';
 
-import React, { createContext, useContext } from 'react';
-
-import type { InstructionParserDispatcher } from './types';
+import type { InstructionParserDispatcher } from '@explorer/parsers';
+import { createContext, type ReactNode, useContext } from 'react';
 
 const InstructionParserContext = createContext<InstructionParserDispatcher | undefined>(undefined);
 
@@ -11,7 +10,7 @@ export function InstructionParserProvider({
     children,
 }: {
     dispatcher: InstructionParserDispatcher;
-    children: React.ReactNode;
+    children: ReactNode;
 }) {
     return <InstructionParserContext.Provider value={dispatcher}>{children}</InstructionParserContext.Provider>;
 }

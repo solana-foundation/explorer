@@ -8,7 +8,7 @@ import {
     UpgradeInfo,
     WriteInfo,
 } from '@components/instruction/bpf-upgradeable-loader/types';
-import type { ParserProgramLabel } from '@entities/instruction-parser';
+import { isParsedInstructionProgram, type ParserProgramLabel } from '@explorer/parsers';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { create } from 'superstruct';
 
@@ -151,7 +151,7 @@ export function parseBpfUpgradeableLoaderInstruction(ix: KitInstruction): BpfUpg
  * so the dispatcher passes RPC's value through unchanged.
  */
 export function parseBpfUpgradeableLoaderRpcInstruction(ix: ParsedInstruction): BpfUpgradeableLoaderParsed | undefined {
-    if (ix.program !== BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL) return undefined;
+    if (!isParsedInstructionProgram(ix, BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL)) return undefined;
     try {
         switch (ix.parsed.type) {
             case 'initializeBuffer':

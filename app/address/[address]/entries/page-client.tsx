@@ -3,6 +3,7 @@
 import { LookupTableEntriesCard } from '@components/account/address-lookup-table/LookupTableEntriesCard';
 import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
+import { ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL, isParsedAccountProgram } from '@explorer/parsers';
 import { Address } from '@solana/kit';
 import React from 'react';
 
@@ -18,7 +19,10 @@ function AddressLookupTableEntriesRenderer({
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
     const parsedData = account?.data.parsed;
     const rawData = account?.data.raw;
-    if (parsedData && parsedData.program === 'address-lookup-table' && parsedData.parsed.type === 'lookupTable') {
+    if (
+        isParsedAccountProgram(parsedData, ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL) &&
+        parsedData.parsed.type === 'lookupTable'
+    ) {
         return <LookupTableEntriesCard parsedLookupTable={parsedData.parsed.info} />;
     } else if (rawData && isAddressLookupTableAccount(account.owner.toBase58() as Address, rawData)) {
         return <LookupTableEntriesCard lookupTableAccountData={rawData} />;

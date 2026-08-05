@@ -2,6 +2,7 @@
 
 import { BlockhashesCard } from '@components/account/BlockhashesCard';
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
+import { isParsedAccountProgram, SYSVAR_PROGRAM_LABEL } from '@explorer/parsers';
 import React from 'react';
 
 type Props = Readonly<{
@@ -15,7 +16,7 @@ function BlockhashesCardRenderer({
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
     const parsedData = account?.data?.parsed;
-    if (!parsedData || parsedData.program !== 'sysvar' || parsedData.parsed.type !== 'recentBlockhashes') {
+    if (!isParsedAccountProgram(parsedData, SYSVAR_PROGRAM_LABEL) || parsedData.parsed.type !== 'recentBlockhashes') {
         return onNotFound();
     }
     return <BlockhashesCard blockhashes={parsedData.parsed.info} />;

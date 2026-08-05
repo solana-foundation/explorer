@@ -1,11 +1,11 @@
 import { useAnchorProgram } from '@entities/idl';
-import { sha256 } from '@noble/hashes/sha256';
+import { hashProgramBytes, orderVerifiedEntries, TRUSTED_SIGNERS } from '@explorer/entity-inspector/verification';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { useEffect, useMemo } from 'react';
 import { array, boolean, create, Infer, nullable, string, type } from 'superstruct';
 import useSWRImmutable from 'swr/immutable';
 
-import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
+import { fromBase64, fromUtf8 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { useCluster } from '../providers/cluster';
@@ -105,13 +105,6 @@ function parsePublicKey(value: string | undefined): PublicKey | null {
     }
 }
 
-const TRUSTED_SIGNERS: Record<string, string> = {
-    '11111111111111111111111111111111': 'Explorer',
-    '5vJwnLeyjV8uNJSp1zn7VLW8GwiQbcsQbGaVSwRmkE4r': 'Foundation',
-    '9VWiUUhgNoRwTH5NVehYJEDwcotwYX3VgW4MChiHPAqU': 'OtterSecurity',
-    CyJj5ejJAUveDXnLduJbkvwjxcmWJNqCuB9DR7AExrHn: 'Explorer',
-};
-
 export function useVerifiedProgramRegistry({
     programId,
     programAuthority,
@@ -144,35 +137,15 @@ export function useVerifiedProgramRegistry({
         return { data: null, error: registryError, isLoading: isRegistryLoading };
     }
 
-    // Only trust entries that are verified and signed by a trusted signer or the program authority
+    // Only trust entries that are verified and signed by a trusted signer or the program authority.
+    // Filtering, local re-validation, and hierarchy ordering are the shared verification core.
     let orderedVerifiedEntries: OsecInfo[] = [];
     if (programAuthority) {
-        const trustedEntries = registryData.filter(
-            entry =>
-                (TRUSTED_SIGNERS[entry.signer] || entry.signer === programAuthority?.toBase58()) && entry.is_verified,
+        orderedVerifiedEntries = orderVerifiedEntries(
+            registryData,
+            programAuthority.toBase58(),
+            hashProgramData(programData),
         );
-
-        // Re-validate the on-chain hash locally (the registry's is_verified flag may be stale)
-        const hash = hashProgramData(programData);
-        const validatedEntries = trustedEntries.map(entry => ({
-            ...entry,
-            is_verified: hash === entry['on_chain_hash'],
-        }));
-
-        const mappedBySigner: Record<string, OsecInfo> = {};
-
-        // Map the registryData by signer in order to enforce hierarchy of trust
-        validatedEntries.forEach(entry => {
-            mappedBySigner[entry.signer] = entry;
-        });
-
-        // Get the program authority's entry first, then the trusted signers
-        const hierarchy = [...(programAuthority ? [programAuthority.toBase58()] : []), ...Object.keys(TRUSTED_SIGNERS)];
-        for (const signer of hierarchy) {
-            if (mappedBySigner[signer]) {
-                orderedVerifiedEntries.push(mappedBySigner[signer]);
-            }
-        }
     } else {
         // Program is immutable (no authority) — trust verified entries from
         // frozen programs or trusted signers. Since immutable programs cannot
@@ -481,12 +454,7 @@ export function hashProgramBuffer(buffer: ProgramBufferAccountInfo): string | un
     // Same RPC quirk as hashProgramData: when authority is None the parsed `data` carries the
     // 32-byte pubkey from the (Option) header, so skip it to match solana-verify's raw offset.
     const offset = buffer.authority === null ? 32 : 0;
-    const data = bytes.slice(offset);
-    let truncatedBytes = 0;
-    while (truncatedBytes < data.length && data[data.length - 1 - truncatedBytes] === 0) {
-        truncatedBytes++;
-    }
-    return toHex(sha256(data.slice(0, data.length - truncatedBytes)));
+    return hashProgramBytes(bytes.slice(offset));
 }
 
 export function hashProgramData(programData: ProgramDataAccountInfo): string {
@@ -496,13 +464,5 @@ export function hashProgramData(programData: ProgramDataAccountInfo): string {
     // authority). Skip them so the hash matches what solana-verify computes from
     // raw account data at the fixed 45-byte offset.
     const offset = programData.authority === null ? 32 : 0;
-    const data = buffer.slice(offset);
-    // Truncate null bytes at the end of the buffer
-    let truncatedBytes = 0;
-    while (truncatedBytes < data.length && data[data.length - 1 - truncatedBytes] === 0) {
-        truncatedBytes++;
-    }
-    // Hash the binary
-    const dataToHash = data.slice(0, data.length - truncatedBytes);
-    return toHex(sha256(dataToHash));
+    return hashProgramBytes(buffer.slice(offset));
 }

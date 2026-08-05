@@ -4,7 +4,7 @@ import type { AccountInfo, ParsedAccountData, PublicKey, SimulatedTransactionAcc
 import { getMintSize, getTokenSize } from '@solana-program/token';
 
 import { fromBase64, toBuffer } from '@/app/shared/lib/bytes';
-import { isTokenProgram } from '@/app/shared/model/token-program';
+import { isTokenProgramAddress } from '@/app/shared/model/token-program';
 
 import { ACCOUNT_TYPE_MINT } from './token-layout';
 
@@ -64,7 +64,7 @@ function decimalsFromPostAccount(
     const dataBase64 = accountInfo?.data[0];
     const owner = accountInfo?.owner;
 
-    if (!owner || !dataBase64 || !isTokenProgram(owner)) return undefined;
+    if (!owner || !dataBase64 || !isTokenProgramAddress(owner)) return undefined;
 
     const bytes = fromBase64(dataBase64);
     if (!isMintBuffer(bytes)) return undefined;
