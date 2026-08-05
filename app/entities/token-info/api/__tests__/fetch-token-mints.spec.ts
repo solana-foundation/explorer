@@ -131,6 +131,51 @@ describe('getTokenInfos', () => {
         expect(result).toEqual([]);
     });
 
+    it('should call onError with TokenInfoInvalidResponseError when content is not an array', async () => {
+        const onError = vi.fn();
+
+        vi.mocked(global.fetch).mockResolvedValueOnce({
+            json: () => Promise.resolve({ content: { [mockToken.address]: mockToken } }),
+            ok: true,
+        } as Response);
+
+        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
+
+        expect(onError.mock.calls[0][0]).toBeInstanceOf(TokenInfoInvalidResponseError);
+        expect(result).toEqual([]);
+    });
+
+    // A batch is worth more than its worst entry: dropping one malformed token keeps the symbols
+    // of every other mint in the transaction.
+    it('should drop a malformed token, keep the rest, and report the drop', async () => {
+        const onError = vi.fn();
+        const malformed = { ...mockToken, decimals: '9' };
+
+        vi.mocked(global.fetch).mockResolvedValueOnce({
+            json: () => Promise.resolve({ content: [malformed, mockToken] }),
+            ok: true,
+        } as Response);
+
+        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
+
+        expect(result).toEqual([mockToken]);
+        expect(onError).toHaveBeenCalledTimes(1);
+        expect(onError.mock.calls[0][0]).toBeInstanceOf(TokenInfoInvalidResponseError);
+    });
+
+    it('should keep a token that carries fields the app does not read', async () => {
+        const withExtras = { ...mockToken, chainId: 101, holders: null, tags: ['lp-token'] };
+
+        vi.mocked(global.fetch).mockResolvedValueOnce({
+            json: () => Promise.resolve({ content: [withExtras] }),
+            ok: true,
+        } as Response);
+
+        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined);
+
+        expect(result).toEqual([withExtras]);
+    });
+
     it('should return tokens on successful response', async () => {
         const mockResponse = { content: [mockToken] };
 

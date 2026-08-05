@@ -1,13 +1,17 @@
-import { PublicKey } from '@solana/web3.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { gen } from '@/app/__fixtures__/gen';
 import type { TokenInfo } from '@/app/entities/token-info/server';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
-const MINT_A = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-const MINT_B = 'So11111111111111111111111111111111111111112';
-const MINT_C = 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So';
+import { MAX_ADDRESSES } from '../config';
+
+// The route treats a mint as an opaque, well-formed address, so generated ones say more about
+// what is under test than real mints would.
+const MINT_A = gen.address(1);
+const MINT_B = gen.address(2);
+const MINT_C = gen.address(3);
 
 const mocks = vi.hoisted(() => ({
     getTokenInfos: vi.fn(),
@@ -79,9 +83,32 @@ describe('POST /api/token-info', () => {
         expect(mocks.getTokenInfos).not.toHaveBeenCalled();
     });
 
+    it('should return 400 when the cluster is not a number', async () => {
+        const { POST } = await importRoute();
+        const res = await POST(createRequest({ addresses: [MINT_A], cluster: '0' }));
+
+        expect(res.status).toBe(400);
+        expect(mocks.getTokenInfos).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 when the genesis hash is not a string', async () => {
+        const { POST } = await importRoute();
+        const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.Custom, genesisHash: 42 }));
+
+        expect(res.status).toBe(400);
+        expect(mocks.getTokenInfos).not.toHaveBeenCalled();
+    });
+
+    it('should ignore keys it does not know', async () => {
+        const { POST } = await importRoute();
+        const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta, verbose: true }));
+
+        expect(res.status).toBe(200);
+    });
+
     it('should return 400 when more distinct addresses than the cap are requested', async () => {
         const { POST } = await importRoute();
-        const addresses = Array.from({ length: 129 }, (_, i) => addressAt(i));
+        const addresses = Array.from({ length: MAX_ADDRESSES + 1 }, (_, i) => gen.address(i));
         const res = await POST(createRequest({ addresses, cluster: Cluster.MainnetBeta }));
 
         expect(res.status).toBe(400);
@@ -222,14 +249,6 @@ describe('POST /api/token-info', () => {
         expect(mocks.getTokenInfos).not.toHaveBeenCalled();
     });
 });
-
-/** Builds a distinct, well-formed mint address for cap tests. */
-function addressAt(index: number): string {
-    const bytes = new Uint8Array(32);
-    bytes[0] = index + 1;
-    bytes[1] = Math.floor((index + 1) / 256);
-    return new PublicKey(bytes).toBase58();
-}
 
 function createRequest(body: Record<string, unknown>) {
     return new Request('http://localhost:3000/api/token-info', {

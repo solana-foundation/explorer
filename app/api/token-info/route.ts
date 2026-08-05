@@ -2,40 +2,53 @@ import { getTokenInfos, getTokenInfosFromMetaplex, isValidCluster, type TokenInf
 import { isAddress } from '@solana/kit';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { NextResponse } from 'next/server';
+import { array, boolean, type Infer, is, number, optional, refine, string, type } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-const CACHE_MAX_AGE = 3600; // 1 hour
+import { CACHE_MAX_AGE, MAX_ADDRESSES } from './config';
+
+// Platform backstop, as in `app/api/metadata/proxy/route.ts`. One invocation is the UTL list
+// lookup, then at most four RPC calls (`MAX_ADDRESSES` keys, chunked 100 at a time), then the
+// off-chain logo reads — and those are already bounded as a group by `LOGO_BUDGET_MS` (10s).
+// That leaves headroom here rather than a limit the fallback can hit. Kept inline (not in
+// config.ts): Next reads route segment config only as literal route exports.
+export const maxDuration = 30;
+
+const AddressStruct = refine(string(), 'address', value => isAddress(value));
 
 /**
- * Caps how many distinct mints one request may resolve. `TokensProvider` sends
- * up to 101 token accounts, so this leaves headroom without letting a caller
- * fan out an unbounded number of RPC lookups.
+ * An accepted request body; unknown keys are ignored.
+ *
+ * Two rules stay outside the struct because they are not shape checks: `cluster` is validated
+ * here only as a number, since `isValidCluster` decides whether it resolves a chain id, and the
+ * address cap applies after de-duplication.
  */
-const MAX_ADDRESSES = 128;
+const RequestStruct = type({
+    address: optional(AddressStruct),
+    addresses: optional(array(AddressStruct)),
+    cluster: number(),
+    genesisHash: optional(string()),
+    includeOnChainFallback: optional(boolean()),
+});
 
-type RequestBody = {
-    address?: unknown;
-    addresses?: unknown;
-    cluster?: unknown;
-    genesisHash?: unknown;
-    includeOnChainFallback?: unknown;
-};
+type RequestBody = Infer<typeof RequestStruct>;
 
 export async function POST(request: Request) {
-    let body: RequestBody;
+    let payload: unknown;
     try {
-        body = await request.json();
+        payload = await request.json();
     } catch {
-        return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+        return invalidRequest();
     }
 
-    const { cluster, genesisHash } = body;
-    const maybeGenesisHash = typeof genesisHash === 'string' ? genesisHash : undefined;
-    const addresses = parseAddresses(body);
+    if (!is(payload, RequestStruct)) return invalidRequest();
 
-    if (!addresses || !isValidCluster(cluster, maybeGenesisHash)) {
-        return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+    const { cluster, genesisHash, includeOnChainFallback } = payload;
+    const addresses = distinctAddresses(payload);
+
+    if (!addresses || !isValidCluster(cluster, genesisHash)) {
+        return invalidRequest();
     }
 
     if (addresses.length === 0) {
@@ -44,37 +57,36 @@ export async function POST(request: Request) {
 
     // Allow to resolve chainId with genesisHash as the request does not use Connection instance
     // For requests that use Connection, Custom cluster should be disabled
-    const listed = await getTokenInfos(addresses, cluster, maybeGenesisHash, {
+    const listed = await getTokenInfos(addresses, cluster, genesisHash, {
         next: { revalidate: CACHE_MAX_AGE },
     });
 
     // Opt-in: only the batch path used to get the SDK's on-chain fallback, so
     // single-mint callers keep paying for the list lookup alone.
-    const tokens =
-        body.includeOnChainFallback === true ? await withMetaplexFallback(listed, addresses, cluster) : listed;
+    const tokens = includeOnChainFallback === true ? await withMetaplexFallback(listed, addresses, cluster) : listed;
 
     // `content` is always an array; single-address callers read `content[0]`.
     return NextResponse.json({ content: tokens });
 }
 
+function invalidRequest() {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+}
+
 /**
  * Reads the requested mints. Accepts a single `address` or an `addresses`
  * array; `address` is kept for the callers that resolve one mint at a time.
+ * Answers `undefined` when neither is given, or when the request names more
+ * distinct mints than `MAX_ADDRESSES`.
  */
-function parseAddresses(body: RequestBody): string[] | undefined {
-    let raw: unknown[] | undefined;
-    if (Array.isArray(body.addresses)) raw = body.addresses;
-    else if (body.address !== undefined) raw = [body.address];
-
-    if (!raw) return undefined;
+function distinctAddresses({ address, addresses }: RequestBody): string[] | undefined {
+    const requested = addresses ?? (address === undefined ? undefined : [address]);
+    if (!requested) return undefined;
 
     // De-duplicate before the cap: one transaction often moves the same mint through several token
     // accounts, and a repeated mint costs one lookup rather than a slot against the limit.
-    const unique = Array.from(new Set(raw));
-    if (unique.length > MAX_ADDRESSES) return undefined;
-    if (!unique.every((value): value is string => typeof value === 'string' && isAddress(value))) return undefined;
-
-    return unique;
+    const unique = Array.from(new Set(requested));
+    return unique.length > MAX_ADDRESSES ? undefined : unique;
 }
 
 /**
