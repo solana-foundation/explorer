@@ -48,7 +48,7 @@
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
 | Dynamic | `/block/[slot]` | 220 kB | 1.25 MB |
-| Dynamic | `/block/[slot]/accounts` | 220 kB | 1.24 MB |
+| Dynamic | `/block/[slot]/accounts` | 210 kB | 1.24 MB |
 | Dynamic | `/block/[slot]/programs` | 210 kB | 1.24 MB |
 | Dynamic | `/block/[slot]/rewards` | 210 kB | 1.24 MB |
 | Dynamic | `/epoch/[epoch]` | 10 kB | 1.04 MB |

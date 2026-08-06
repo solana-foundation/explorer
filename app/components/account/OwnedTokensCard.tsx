@@ -4,13 +4,10 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { cn } from '@components/shared/utils';
-import {
-    TokenInfoWithPubkey,
-    useAccountOwnedTokens,
-    useFetchAccountOwnedTokens,
-    useScaledUiAmountForMint,
-} from '@providers/accounts/tokens';
+import { deriveScaledUiAmountMultiplier, useTokenInfo } from '@entities/token-info';
+import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
+import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
 import Link from 'next/link';
@@ -21,12 +18,15 @@ import { ChevronDown } from 'react-feather';
 import { Button } from '@/app/components/shared/ui/button';
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { ProxiedImage } from '@/app/features/metadata';
-import { INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
-import { normalizeTokenAmount } from '@/app/utils';
 
 type Display = 'summary' | 'detail' | null;
+
+// Holdings paginate independently of Token History (which stays at 4/4 in @/app/features/token-history/config).
+// A single local declaration next to the only consumer - no shared feature module exists for holdings.
+const HOLDINGS_INITIAL_VISIBLE_COUNT = 20;
+const HOLDINGS_LOAD_MORE_COUNT = 20;
 
 const useQueryDisplay = (): Display => {
     const searchParams = useSearchParams();
@@ -43,7 +43,7 @@ export function OwnedTokensCard({ address }: { address: string }) {
     const ownedTokens = useAccountOwnedTokens(address);
     const fetchAccountTokens = useFetchAccountOwnedTokens();
     const refresh = () => fetchAccountTokens(pubkey);
-    const [visibleCount, setVisibleCount] = React.useState(INITIAL_VISIBLE_COUNT);
+    const [visibleCount, setVisibleCount] = React.useState(HOLDINGS_INITIAL_VISIBLE_COUNT);
     const display = useQueryDisplay();
 
     // Fetch owned tokens
@@ -68,11 +68,6 @@ export function OwnedTokensCard({ address }: { address: string }) {
         return <ErrorCard retry={refresh} retryText="Try Again" text={'No token holdings found'} />;
     }
 
-    if (tokens.length > 100) {
-        return <ErrorCard text="Token holdings are not available for accounts with over 100 token accounts" />;
-    }
-    const showLogos = tokens.some(t => t.logoURI !== undefined);
-
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
@@ -85,11 +80,9 @@ export function OwnedTokensCard({ address }: { address: string }) {
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>
-                        {showLogos && (
-                            <BaseTable.HeaderCell className="w-px p-0 text-center text-dk-gray-700">
-                                Logo
-                            </BaseTable.HeaderCell>
-                        )}
+                        <BaseTable.HeaderCell className="w-px p-0 text-center text-dk-gray-700">
+                            Logo
+                        </BaseTable.HeaderCell>
                         {display === 'detail' && (
                             <BaseTable.HeaderCell className="text-dk-gray-700">Account Address</BaseTable.HeaderCell>
                         )}
@@ -100,15 +93,15 @@ export function OwnedTokensCard({ address }: { address: string }) {
                     </BaseTable.Row>
                 </BaseTable.Head>
                 {display === 'detail' ? (
-                    <HoldingsDetail tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
+                    <HoldingsDetail tokens={tokens} visibleCount={visibleCount} />
                 ) : (
-                    <HoldingsSummary tokens={tokens} showLogos={showLogos} visibleCount={visibleCount} />
+                    <HoldingsSummary tokens={tokens} visibleCount={visibleCount} />
                 )}
             </BaseTable>
             <TokensCardFooter
                 tokens={tokens}
                 visibleCount={visibleCount}
-                loadMore={() => setVisibleCount(c => c + LOAD_MORE_COUNT)}
+                loadMore={() => setVisibleCount(c => c + HOLDINGS_LOAD_MORE_COUNT)}
             />
         </Card>
     );
@@ -117,45 +110,40 @@ export function OwnedTokensCard({ address }: { address: string }) {
 type MappedToken = {
     amount: string;
     decimals: number;
-    logoURI?: string;
-    name?: string;
     pubkey?: string;
     rawAmount: string;
-    symbol?: string;
+    scaledUiAmountMultiplier: string;
 };
 
-function HoldingsDetail({
-    tokens,
-    showLogos,
-    visibleCount,
-}: {
-    tokens: TokenInfoWithPubkey[];
-    showLogos: boolean;
-    visibleCount: number;
-}) {
+function HoldingsDetail({ tokens, visibleCount }: { tokens: TokenInfoWithPubkey[]; visibleCount: number }) {
     const mappedTokens = useMemo(() => {
         const tokensMap = new Map<string, MappedToken>();
 
-        tokens.forEach(({ info: token, logoURI, pubkey, symbol, name }) => {
+        tokens.forEach(({ info: token, pubkey }) => {
             const mintAddress = token.mint.toBase58();
             const existingToken = tokensMap.get(mintAddress);
 
-            const rawAmount = token.tokenAmount.amount;
             const decimals = token.tokenAmount.decimals;
             let amount = token.tokenAmount.uiAmountString;
+            // Accumulated alongside `amount` so the tooltip's pre-scaling value matches the total the row renders.
+            let rawAmount = token.tokenAmount.amount;
 
             if (existingToken) {
                 amount = new BigNumber(existingToken.amount).plus(token.tokenAmount.uiAmountString).toString();
+                rawAmount = new BigNumber(existingToken.rawAmount).plus(token.tokenAmount.amount).toString();
             }
 
             tokensMap.set(mintAddress, {
                 amount,
                 decimals,
-                logoURI,
-                name,
                 pubkey: pubkey.toBase58(),
                 rawAmount,
-                symbol,
+                // Multiplier is a per-mint ratio, so one account's raw/ui pair is enough to derive it.
+                scaledUiAmountMultiplier: deriveScaledUiAmountMultiplier(
+                    token.tokenAmount.amount,
+                    decimals,
+                    token.tokenAmount.uiAmountString,
+                ),
             });
         });
 
@@ -167,62 +155,50 @@ function HoldingsDetail({
     return (
         <tbody>
             {visibleTokens.map(([mintAddress, token]) => (
-                <TokenRow
-                    key={mintAddress}
-                    mintAddress={mintAddress}
-                    token={token}
-                    showLogo={showLogos}
-                    showAccountAddress={true}
-                />
+                <TokenRow key={mintAddress} mintAddress={mintAddress} token={token} showAccountAddress={true} />
             ))}
         </tbody>
     );
 }
 
-function HoldingsSummary({
-    tokens,
-    showLogos,
-    visibleCount,
-}: {
-    tokens: TokenInfoWithPubkey[];
-    showLogos: boolean;
-    visibleCount: number;
-}) {
+function HoldingsSummary({ tokens, visibleCount }: { tokens: TokenInfoWithPubkey[]; visibleCount: number }) {
     const mappedTokens = useMemo(() => {
         const tokensMap = new Map<string, MappedToken>();
-        for (const { info: token, logoURI, symbol, name } of tokens) {
+        for (const { info: token } of tokens) {
             const mintAddress = token.mint.toBase58();
-            const totalByMint = tokensMap.get(mintAddress)?.amount;
+            const existingToken = tokensMap.get(mintAddress);
 
             let amount = token.tokenAmount.uiAmountString;
-            if (totalByMint !== undefined) {
-                amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
+            // Accumulated alongside `amount` so the tooltip's pre-scaling value matches the total the row renders.
+            let rawAmount = token.tokenAmount.amount;
+            if (existingToken) {
+                amount = new BigNumber(existingToken.amount).plus(token.tokenAmount.uiAmountString).toString();
+                rawAmount = new BigNumber(existingToken.rawAmount).plus(token.tokenAmount.amount).toString();
             }
 
             tokensMap.set(mintAddress, {
                 amount,
                 decimals: token.tokenAmount.decimals,
-                logoURI,
-                name,
-                rawAmount: token.tokenAmount.amount,
-                symbol,
+                rawAmount,
+                // Multiplier is a per-mint ratio, so one account's raw/ui pair is enough to derive it.
+                scaledUiAmountMultiplier: deriveScaledUiAmountMultiplier(
+                    token.tokenAmount.amount,
+                    token.tokenAmount.decimals,
+                    token.tokenAmount.uiAmountString,
+                ),
             });
         }
         return tokensMap;
     }, [tokens]);
 
+    // The Map build is memoized on `tokens`; only this materialize-and-slice runs per render, O(unique mints).
+    // Negligible even at a few thousand mints. If a profile ever flags it, iterate the Map and break at visibleCount.
     const visibleTokens = Array.from(mappedTokens.entries()).slice(0, visibleCount);
 
     return (
         <tbody>
             {visibleTokens.map(([mintAddress, token]) => (
-                <TokenRow
-                    key={mintAddress}
-                    mintAddress={mintAddress}
-                    token={token}
-                    showLogo={showLogos}
-                    showAccountAddress={false}
-                />
+                <TokenRow key={mintAddress} mintAddress={mintAddress} token={token} showAccountAddress={false} />
             ))}
         </tbody>
     );
@@ -231,39 +207,39 @@ function HoldingsSummary({
 type TokenRowProps = {
     mintAddress: string;
     token: MappedToken;
-    showLogo: boolean;
     showAccountAddress: boolean;
 };
 
-function TokenRow({ mintAddress, token, showLogo, showAccountAddress }: TokenRowProps) {
-    const [_, scaledUiAmountMultiplier] = useScaledUiAmountForMint(mintAddress, token.rawAmount);
+function TokenRow({ mintAddress, token, showAccountAddress }: TokenRowProps) {
+    const { cluster, genesisHash } = useCluster();
+    // Each visible row fetches its mint metadata once via useTokenInfo (coalesced into the app-wide
+    // batched POST) and feeds it to the mint Address as tokenLabelInfo - no second fetch.
+    const tokenInfo = useTokenInfo(true, mintAddress, cluster, genesisHash);
 
     return (
         <tr>
-            {showLogo && (
-                <td className="w-px p-0 text-center">
-                    <ProxiedImage
-                        alt="Token icon"
-                        className="h-6 w-6 rounded-full border-4 border-solid border-dk-gray-700-dark"
-                        height={16}
-                        uri={token.logoURI}
-                        width={16}
-                    />
-                </td>
-            )}
+            <td className="w-px p-0 text-center">
+                <ProxiedImage
+                    alt="Token icon"
+                    className="h-6 w-6 rounded-full border-4 border-solid border-dk-gray-700-dark"
+                    height={16}
+                    uri={tokenInfo?.logoURI ?? undefined}
+                    width={16}
+                />
+            </td>
             {showAccountAddress && token.pubkey && (
                 <td>
                     <Address pubkey={new PublicKey(token.pubkey)} link />
                 </td>
             )}
             <td>
-                <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={token} />
+                <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={tokenInfo} />
             </td>
             <td>
-                {token.amount} {token.symbol}
+                {token.amount} {tokenInfo?.symbol}
                 <ScaledUiAmountMultiplierTooltip
-                    rawAmount={normalizeTokenAmount(Number(token.rawAmount), token.decimals || 0).toString()}
-                    scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+                    rawAmount={new BigNumber(token.rawAmount).shiftedBy(-(token.decimals || 0)).toString()}
+                    scaledUiAmountMultiplier={token.scaledUiAmountMultiplier}
                 />
             </td>
         </tr>
