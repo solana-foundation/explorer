@@ -19,7 +19,7 @@ vi.mock('@solana/web3.js', async () => {
     };
 });
 
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
+vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn: vi.fn() } }));
 
 // Must import after mocks
 import { FetchStatus } from '@providers/cache';
@@ -471,6 +471,83 @@ describe('getSignaturesForAddress fallback', () => {
         expect(result.current.history?.data?.fetched).toEqual([]);
         expect(result.current.history?.data?.foundOldest).toBe(true);
         expect(mockConnection.getSignaturesForAddress).toHaveBeenCalled();
+    });
+
+    it('should keep the empty result when the confirmation call itself fails', async () => {
+        // The confirmation only verifies an answer we already hold. A rate-limited endpoint
+        // must not turn an empty account into "Failed to fetch transaction history".
+        mockResult([], null);
+        mockConnection.getSignaturesForAddress.mockRejectedValue(new Error('429 Too Many Requests'));
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
+        expect(result.current.history?.data?.fetched).toEqual([]);
+    });
+
+    it('should not confirm an empty page that still carries a token when loading more', async () => {
+        // A sparse region mid-stream: no rows, but the endpoint hands back a cursor. That is
+        // not an end-of-history claim, so the gTFA cursor must survive rather than be traded
+        // for the signatures path.
+        mockResult(
+            Array.from({ length: 25 }, (_, i) => sig(`sig${i}`, 1000 - i)),
+            'token-page-2',
+        );
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
+
+        // Load More returns an empty page that still advances the cursor.
+        mockConnection.getSignaturesForAddress.mockClear();
+        mockResult([], 'token-page-3');
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.paginationToken).toBe('token-page-3'));
+        expect(result.current.history?.data?.foundOldest).toBe(false);
+        expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
+    });
+
+    it('should confirm an empty first page even when it carries a token', async () => {
+        // No rows means no cursor the UI can reach: Load More is driven by existing rows, so
+        // accepting this page would strand the account on an empty table.
+        mockResult([], 'token-page-2');
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('from-ledger', 5)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('from-ledger'));
     });
 
     it('should not confirm an empty page while a filter is active', async () => {
