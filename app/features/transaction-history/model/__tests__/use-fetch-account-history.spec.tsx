@@ -19,18 +19,15 @@ vi.mock('@solana/web3.js', async () => {
     };
 });
 
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
+vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn: vi.fn() } }));
 
 // Must import after mocks
 import { FetchStatus } from '@providers/cache';
+import { useCluster } from '@providers/cluster';
 
-import {
-    HistoryProvider,
-    useAccountHistory,
-    useFetchAccountHistory,
-    useHistoryFiltersSupported,
-    useResetAccountHistory,
-} from '../history';
+import { HistoryProvider } from '../history-provider';
+import { useAccountHistory, useHistoryFiltersSupported, useResetAccountHistory } from '../use-account-history';
+import { useFetchAccountHistory } from '../use-fetch-account-history';
 
 const ADDRESS = 'rexav5eNTUSNT1K2N7cfRjnthwhcP5BC25v2tA4rW4h';
 const ADDRESS_B = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
@@ -93,6 +90,10 @@ beforeEach(() => {
         ok: true,
         status: 200,
     });
+    // An empty getTransactionsForAddress page is confirmed against getSignaturesForAddress,
+    // so every test needs this to resolve. "Also empty" keeps the empty result as-is.
+    mockConnection.getSignaturesForAddress.mockResolvedValue([]);
+    vi.mocked(useCluster).mockReturnValue({ cluster: 0, url: 'https://mock.rpc' } as any);
 });
 
 describe('useFetchAccountHistory — getTransactionsForAddress', () => {
@@ -344,6 +345,72 @@ describe('getSignaturesForAddress fallback', () => {
         expect(opts).toEqual({ limit: 25 });
     });
 
+    it('should skip getTransactionsForAddress entirely for a statically disabled address', async () => {
+        // wSOL: gTFA times out upstream on this account, so it must never be attempted.
+        const WRAPPED_SOL = 'So11111111111111111111111111111111111111112';
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('wsol', 7)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(WRAPPED_SOL),
+                supported: useHistoryFiltersSupported(),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(WRAPPED_SOL));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('wsol'));
+        expect(fetchMock).not.toHaveBeenCalled();
+        // Scoped to this address: filtering stays available for every other account.
+        expect(result.current.supported).toBe(true);
+    });
+
+    it('should fall back when an unknown method is reported as a generic internal error', async () => {
+        // Helius reports an unknown method as -32603, not -32601.
+        mockRpcError(-32603, 'Method not found');
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+                supported: useHistoryFiltersSupported(),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('legacy'));
+        expect(result.current.supported).toBe(false);
+    });
+
+    it('should surface an internal error that is not a missing method', async () => {
+        // Same code, genuinely different failure: a slot bound below the endpoint's index floor.
+        mockRpcError(-32603, 'Slot <= 460000000 not found');
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, { slot: { lte: 460_000_000 } }),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
+        expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
+    });
+
     it('should not fall back on a generic RPC error', async () => {
         mockRpcError(-32000, 'boom');
 
@@ -360,6 +427,230 @@ describe('getSignaturesForAddress fallback', () => {
         });
 
         await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
+        expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
+    });
+
+    it('should confirm an empty getTransactionsForAddress page against the ledger index', async () => {
+        // Endpoint answers HTTP 200 with `data: []` because the address falls outside its
+        // limited-retention index, while getSignaturesForAddress still has the history.
+        mockResult([], null);
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('older-than-retention', 5)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('older-than-retention'));
+        expect(result.current.history?.data?.paginationToken).toBeUndefined();
+    });
+
+    it('should accept the empty result when the ledger index agrees the account has no history', async () => {
+        mockResult([], null);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
+        expect(result.current.history?.data?.fetched).toEqual([]);
+        expect(result.current.history?.data?.foundOldest).toBe(true);
+        expect(mockConnection.getSignaturesForAddress).toHaveBeenCalled();
+    });
+
+    it('should keep the empty result when the confirmation call itself fails', async () => {
+        // The confirmation only verifies an answer we already hold. A rate-limited endpoint
+        // must not turn an empty account into "Failed to fetch transaction history".
+        mockResult([], null);
+        mockConnection.getSignaturesForAddress.mockRejectedValue(new Error('429 Too Many Requests'));
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
+        expect(result.current.history?.data?.fetched).toEqual([]);
+    });
+
+    it('should not confirm an empty page that still carries a token when loading more', async () => {
+        // A sparse region mid-stream: no rows, but the endpoint hands back a cursor. That is
+        // not an end-of-history claim, so the gTFA cursor must survive rather than be traded
+        // for the signatures path.
+        mockResult(
+            Array.from({ length: 25 }, (_, i) => sig(`sig${i}`, 1000 - i)),
+            'token-page-2',
+        );
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
+
+        // Load More returns an empty page that still advances the cursor.
+        mockConnection.getSignaturesForAddress.mockClear();
+        mockResult([], 'token-page-3');
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.paginationToken).toBe('token-page-3'));
+        expect(result.current.history?.data?.foundOldest).toBe(false);
+        expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
+    });
+
+    it('should confirm an empty first page even when it carries a token', async () => {
+        // No rows means no cursor the UI can reach: Load More is driven by existing rows, so
+        // accepting this page would strand the account on an empty table.
+        mockResult([], 'token-page-2');
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('from-ledger', 5)]);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('from-ledger'));
+    });
+
+    it('should not confirm an empty page while a filter is active', async () => {
+        // getSignaturesForAddress cannot honour filters, so its rows would answer a different
+        // question. An empty filtered page is a legitimate "no matches".
+        mockResult([], null);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, { status: 'failed' }),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
+        expect(result.current.history?.data?.fetched).toEqual([]);
+        expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
+    });
+
+    it('should keep a confirmed address on the signatures path when loading more', async () => {
+        // A full page from the ledger index, so foundOldest stays false and Load More runs.
+        const page = Array.from({ length: 25 }, (_, i) => sig(`sig${i}`, 1000 - i));
+        mockResult([], null);
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce(page);
+
+        const { result } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
+
+        fetchMock.mockClear();
+        mockConnection.getSignaturesForAddress.mockClear();
+        mockConnection.getSignaturesForAddress.mockResolvedValueOnce([sig('next-page', 900)]);
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(26));
+        // The latch holds: no second getTransactionsForAddress attempt, and the trailing
+        // signature drives the cursor rather than a (now null) paginationToken.
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(mockConnection.getSignaturesForAddress).toHaveBeenCalledTimes(1);
+        expect(mockConnection.getSignaturesForAddress.mock.calls[0][1]).toEqual({ before: 'sig24', limit: 25 });
+    });
+
+    it('should not let a request in flight across a cluster change latch the new endpoint', async () => {
+        // The provider clears the latch on a cluster change, but a request already in flight
+        // resolves afterwards and still reports what it proved. That report must not apply to
+        // the endpoint that is now selected.
+        const pendingConfirm = deferred<ReturnType<typeof sig>[]>();
+        mockResult([], null); // endpoint A: gTFA answers empty
+        mockConnection.getSignaturesForAddress.mockReturnValueOnce(pendingConfirm.promise);
+
+        const { result, rerender } = renderHook(
+            () => ({
+                fetch: useFetchAccountHistory(25, {}),
+                history: useAccountHistory(ADDRESS),
+            }),
+            { wrapper },
+        );
+
+        act(() => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+        // The confirmation is issued but not yet resolved.
+        await waitFor(() => expect(mockConnection.getSignaturesForAddress).toHaveBeenCalledTimes(1));
+
+        // Cluster changes while that confirmation is still open.
+        vi.mocked(useCluster).mockReturnValue({ cluster: 0, url: 'https://other.rpc' } as any);
+        rerender();
+
+        // Now the stale confirmation lands and reports the address as uncovered.
+        await act(async () => {
+            pendingConfirm.resolve([sig('from-endpoint-a', 5)]);
+            await pendingConfirm.promise;
+        });
+
+        // A fresh unfiltered request on the new endpoint must still try gTFA.
+        fetchMock.mockClear();
+        mockConnection.getSignaturesForAddress.mockClear();
+        mockResult([sig('from-endpoint-b', 9)], null);
+
+        await act(async () => {
+            result.current.fetch(new PublicKey(ADDRESS));
+        });
+
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        expect(JSON.parse(fetchMock.mock.calls[0][1].body).method).toBe('getTransactionsForAddress');
         expect(mockConnection.getSignaturesForAddress).not.toHaveBeenCalled();
     });
 
