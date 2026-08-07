@@ -58,6 +58,6 @@
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
 | Static | `/tos` | 880 B | 400 kB |
-| Dynamic | `/tx/[signature]` | 690 kB | 1.06 MB |
+| Dynamic | `/tx/[signature]` | 690 kB | 1.05 MB |
 | Dynamic | `/tx/[signature]/inspect` | 480 kB | 880 kB |
 | Static | `/tx/inspector` | 480 kB | 880 kB |
