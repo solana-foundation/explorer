@@ -163,6 +163,39 @@ describe('getTokenInfos', () => {
         expect(onError.mock.calls[0][0]).toBeInstanceOf(TokenInfoInvalidResponseError);
     });
 
+    // UTL omits these keys rather than sending null for some tokens. Requiring them would drop the
+    // token outright, losing the name and symbol over a missing logo — the failure this whole path
+    // exists to prevent. `discover-with-utl.ts` reads the same API and treats both as optional.
+    it('should keep a token that omits logoURI, reporting the logo as null', async () => {
+        const onError = vi.fn();
+        const withoutLogo = { address: mockToken.address, decimals: 9, name: 'Wrapped SOL', symbol: 'SOL' };
+
+        vi.mocked(global.fetch).mockResolvedValueOnce({
+            json: () => Promise.resolve({ content: [withoutLogo] }),
+            ok: true,
+        } as Response);
+
+        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
+
+        expect(result).toEqual([{ ...withoutLogo, logoURI: null }]);
+        expect(onError).not.toHaveBeenCalled();
+    });
+
+    it('should keep a token that omits decimals, reporting them as null', async () => {
+        const onError = vi.fn();
+        const withoutDecimals = { address: mockToken.address, logoURI: null, name: 'Wrapped SOL', symbol: 'SOL' };
+
+        vi.mocked(global.fetch).mockResolvedValueOnce({
+            json: () => Promise.resolve({ content: [withoutDecimals] }),
+            ok: true,
+        } as Response);
+
+        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
+
+        expect(result).toEqual([{ ...withoutDecimals, decimals: null }]);
+        expect(onError).not.toHaveBeenCalled();
+    });
+
     it('should keep a token that carries fields the app does not read', async () => {
         const withExtras = { ...mockToken, chainId: 101, holders: null, tags: ['lp-token'] };
 
