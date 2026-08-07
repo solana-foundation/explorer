@@ -8,6 +8,8 @@ const MINT_A = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 const MINT_B = 'So11111111111111111111111111111111111111112';
 const RPC = 'https://rpc.example.com';
 const NULL_CHAR = String.fromCharCode(0);
+// A well-known valid CIDv0, as in app/features/metadata/__tests__/utils.spec.ts.
+const VALID_CID = 'QmWATWQ7fVPP2EFGu71UkfnqhYXDYH566qy47CnJDgvs8u';
 
 const mocks = vi.hoisted(() => ({
     fetchResource: vi.fn(),
@@ -336,6 +338,49 @@ describe('getTokenInfosFromMetaplex', () => {
 
         expect(result.logoURI).toBeNull();
         expect(mocks.fetchResource).not.toHaveBeenCalled();
+    });
+
+    // `fetchResource` speaks only http(s), so an `ipfs://` uri handed to it straight would be
+    // rejected as a blocked protocol and every IPFS-hosted mint would lose its logo. The browser
+    // path already maps these through a gateway in `getProxiedUri`; this path must match it.
+    it('should read an ipfs uri through the http gateway', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A, { uri: `ipfs://${VALID_CID}/meta.json` })]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+        mocks.fetchResource.mockResolvedValueOnce(jsonResource({ image: 'https://example.com/logo.png' }));
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
+
+        expect(mocks.fetchResource).toHaveBeenCalledWith(
+            `https://ipfs.io/ipfs/${VALID_CID}/meta.json`,
+            expect.anything(),
+        );
+        expect(result.logoURI).toBe('https://example.com/logo.png');
+    });
+
+    it('should skip the off-chain read for an ipfs uri with a malformed CID', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A, { uri: 'ipfs://not-a-valid-cid' })]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
+
+        expect(result).toMatchObject({ address: MINT_A, decimals: 6, logoURI: null, symbol: 'USDC' });
+        expect(mocks.fetchResource).not.toHaveBeenCalled();
+    });
+
+    it('should skip the off-chain read for an unparseable uri', async () => {
+        const onError = vi.fn();
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A, { uri: 'not-a-url' })]);
+        mocks.getMultipleParsedAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC, { onError });
+
+        expect(result.logoURI).toBeNull();
+        expect(mocks.fetchResource).not.toHaveBeenCalled();
+        // Junk on-chain data is not an app fault, and the NFT page maps `onError` to `Logger.error`.
+        expect(onError).not.toHaveBeenCalled();
     });
 
     it('should report and return nothing when the metadata lookup throws', async () => {

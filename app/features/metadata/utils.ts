@@ -1,9 +1,5 @@
-import { CID } from 'multiformats/cid';
-
-import { Logger } from '@/app/shared/lib/logger';
+import { IPFS_PROTOCOL, resolveIpfsUri } from '@/app/shared/lib/ipfs';
 import { parseUrl, SAFE_EXTERNAL_PROTOCOLS } from '@/app/shared/lib/url';
-
-const IPFS_GATEWAY = 'https://ipfs.io/ipfs';
 
 export const getProxiedUri = (uri: string): string | '' => {
     if (!uri) return '';
@@ -18,7 +14,7 @@ export const getProxiedUri = (uri: string): string | '' => {
 
     const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
 
-    if (url.protocol === 'ipfs:') {
+    if (url.protocol === IPFS_PROTOCOL) {
         const gatewayUri = resolveIpfsUri(url);
         if (gatewayUri === '') return '';
         return isProxyEnabled ? proxyUri(gatewayUri) : gatewayUri;
@@ -33,27 +29,4 @@ export const getProxiedUri = (uri: string): string | '' => {
     return proxyUri(uri);
 };
 
-const resolveIpfsUri = (url: URL): string => {
-    // eslint-disable-next-line no-restricted-syntax -- Strips redundant "ipfs/" prefix from the path for a clean gateway URL.
-    const fullPath = (url.host + url.pathname).replace(/^ipfs\//, '');
-    // Split the CID from any subpath (e.g. "QmXXX/image.png" → cid="QmXXX", subpath="/image.png")
-    const firstSlash = fullPath.indexOf('/');
-    const cid = firstSlash === -1 ? fullPath : fullPath.slice(0, firstSlash);
-    const subpath = firstSlash === -1 ? '' : fullPath.slice(firstSlash);
-    if (!verifyCID(cid)) {
-        Logger.warn(`[metadata] Cannot fetch a malformed CID: ${cid}`);
-        return '';
-    }
-    return `${IPFS_GATEWAY}/${cid}${subpath}${url.search}`;
-};
-
 const proxyUri = (uri: string): string => `/api/metadata/proxy?uri=${encodeURIComponent(uri)}`;
-
-const verifyCID = (cid: string): boolean => {
-    try {
-        CID.parse(cid);
-        return true;
-    } catch {
-        return false;
-    }
-};

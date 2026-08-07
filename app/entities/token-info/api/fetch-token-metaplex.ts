@@ -11,6 +11,8 @@ import { fetchAll } from '@utils/fetch-all';
 
 import { MAX_SIZE, USER_AGENT } from '@/app/api/metadata/proxy/config';
 import { fetchResource, matchJsonContent } from '@/app/api/metadata/proxy/feature';
+import { IPFS_PROTOCOL, resolveIpfsUri } from '@/app/shared/lib/ipfs';
+import { parseUrl } from '@/app/shared/lib/url';
 
 import type { TokenInfo } from '../lib/types';
 
@@ -101,6 +103,22 @@ async function fetchDecimals(
 }
 
 /**
+ * Resolves a mint's on-chain `uri` to something `fetchResource` can read.
+ *
+ * `ipfs://` is common in metadata and `fetchResource` speaks only http(s), so an ipfs URI is
+ * mapped to the same gateway the browser path uses via `getProxiedUri`. Without this every
+ * unlisted mint hosted on IPFS reports a blocked protocol instead of a logo.
+ *
+ * Returns '' when the URI names nothing readable — unparseable, or an ipfs address with a
+ * malformed CID. Other schemes pass through unchanged, for `fetchResource` to reject.
+ */
+function resolveMetadataUri(uri: string): string {
+    const url = parseUrl(uri);
+    if (!url) return '';
+    return url.protocol === IPFS_PROTOCOL ? resolveIpfsUri(url) : uri;
+}
+
+/**
  * Reads one mint's off-chain JSON to find its logo, bounded by `METAPLEX_TIMEOUT_MS` and by
  * whatever is left of the batch's `deadline`.
  *
@@ -117,8 +135,10 @@ async function fetchLogoUri(
     deadline: number,
     options: FetchTokenInfosMetaplexOptions,
 ): Promise<string | null> {
+    // Covers a mint with no `uri` at all, as well as one naming nothing readable.
+    const uri = resolveMetadataUri(metadata.uri);
     // eslint-disable-next-line unicorn/no-null -- `TokenInfo.logoURI` is `string | null` per the UTL contract
-    if (!metadata.uri) return null;
+    if (!uri) return null;
 
     const timeout = Math.min(METAPLEX_TIMEOUT_MS, deadline - Date.now());
     // The batch has spent its budget; the mints still queued give up their logo rather than the
@@ -127,7 +147,7 @@ async function fetchLogoUri(
     if (timeout <= 0) return null;
 
     try {
-        const { data, headers } = await fetchResource(metadata.uri, {
+        const { data, headers } = await fetchResource(uri, {
             headers: new Headers({ 'User-Agent': USER_AGENT }),
             size: MAX_SIZE,
             timeout,
