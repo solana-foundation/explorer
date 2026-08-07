@@ -65,6 +65,42 @@ describe('withBackoff', () => {
         expect(fn).toHaveBeenCalledTimes(6);
     });
 
+    it('should not retry when the signal is already aborted', async () => {
+        const fn = vi.fn().mockRejectedValue(new Error('boom'));
+
+        await expect(withBackoff(fn, { signal: AbortSignal.abort() })).rejects.toThrow('boom');
+        // The rejection is the caller's error, not an abort error: the abort only ends the loop.
+        expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should stop retrying when the signal aborts while an attempt sleeps', async () => {
+        const controller = new AbortController();
+        const fn = vi.fn().mockRejectedValue(new Error('boom'));
+
+        const promise = withBackoff(fn, { initialDelay: 100, maxRetries: 5, signal: controller.signal });
+        const assertion = expect(promise).rejects.toThrow('boom');
+
+        // Let the first attempt fail and schedule its retry, then abort mid-sleep.
+        await vi.advanceTimersByTimeAsync(0);
+        expect(fn).toHaveBeenCalledTimes(1);
+        controller.abort();
+        await vi.runAllTimersAsync();
+        await assertion;
+
+        // The abort landed during the first delay, so the queued retry never ran.
+        expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should retry as usual while the signal stays unaborted', async () => {
+        const fn = vi.fn().mockRejectedValueOnce(new Error('boom')).mockResolvedValue('ok');
+
+        const promise = withBackoff(fn, { signal: new AbortController().signal });
+        await vi.runAllTimersAsync();
+
+        await expect(promise).resolves.toBe('ok');
+        expect(fn).toHaveBeenCalledTimes(2);
+    });
+
     it('should wait initialDelay and multiply it by factor between retries', async () => {
         const fn = vi.fn().mockRejectedValue(new Error('x'));
 

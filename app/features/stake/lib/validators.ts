@@ -44,3 +44,31 @@ export const StakeAccount = type({
     info: StakeAccountInfo,
     type: StakeAccountType,
 });
+
+/**
+ * The delegation epochs alone, validated against **kit's** jsonParsed output.
+ *
+ * Separate from `StakeAccount` because kit upcasts every JSON integer to bigint except an
+ * allowlist (`jsonParsedAccountsConfigs` in `@solana/rpc-transformers`, which for a stake account
+ * holds only `warmupCooldownRate`). That makes `lockup.epoch`, `lockup.unixTimestamp`, and
+ * `creditsObserved` bigints, which `StakeAccount`'s `number()` fields reject — so a real stake
+ * account would fail validation. `type()` ignores the fields absent here, and a caller that needs
+ * only the epochs never reads those three.
+ *
+ * `stake: nullable` also rejects a nonce account, which jsonParsed likewise reports as
+ * `type: 'initialized'` but with no `stake` key at all.
+ */
+export type StakeDelegationAccount = Infer<typeof StakeDelegationAccount>;
+export const StakeDelegationAccount = type({
+    info: type({
+        stake: nullable(
+            type({
+                delegation: type({
+                    activationEpoch: BigIntFromString,
+                    deactivationEpoch: BigIntFromString,
+                }),
+            }),
+        ),
+    }),
+    type: StakeAccountType,
+});
