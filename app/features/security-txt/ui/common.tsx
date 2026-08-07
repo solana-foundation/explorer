@@ -1,11 +1,13 @@
 import classNames from 'classnames';
-import { ExternalLink } from 'react-feather';
+import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
+import { getSafeExternalHref } from '@/app/shared/lib/url';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { SecurityTxtVersion } from './types';
-import { isValidLink, parseCodeValue } from './utils';
+import { parseCodeValue } from './utils';
 
 export function CodeCell({ value, alignRight = true }: { value: string; alignRight: boolean }) {
     return (
@@ -45,30 +47,31 @@ export function ContactInfo({ type, information }: { type: string; information: 
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`mailto:${information}`}>
                     {information}
-                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
+                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
                 </a>
             );
         case 'telegram':
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`https://t.me/${information}`}>
                     Telegram: {information}
-                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
+                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
                 </a>
             );
         case 'twitter':
             return (
                 <a rel="noopener noreferrer" target="_blank" href={`https://twitter.com/${information}`}>
                     Twitter {information}
-                    <ExternalLink className="ml-1.5 align-text-top" size={13} />
+                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
                 </a>
             );
         case 'link':
-            if (isValidLink(information)) {
+            // On-chain contact URLs are untrusted — ExternalLink scheme-guards; fall back to plain text.
+            if (getSafeExternalHref(information)) {
                 return (
-                    <a rel="noopener noreferrer" target="_blank" href={`${information}`}>
+                    <ExternalLink href={information}>
                         {information}
-                        <ExternalLink className="ml-1.5 align-text-top" size={13} />
-                    </a>
+                        <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                    </ExternalLink>
                 );
             }
             return <>{information}</>;
@@ -85,10 +88,14 @@ export function ContactInfo({ type, information }: { type: string; information: 
 export function RenderExternalLink({ url }: { url: string }) {
     return (
         <span className="font-mono">
-            <a rel="noopener noreferrer" target="_blank" href={url}>
-                {url}
-                <ExternalLink className="ml-1.5 align-text-top" size={13} />
-            </a>
+            {getSafeExternalHref(url) ? (
+                <ExternalLink href={url}>
+                    {url}
+                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                </ExternalLink>
+            ) : (
+                url
+            )}
         </span>
     );
 }

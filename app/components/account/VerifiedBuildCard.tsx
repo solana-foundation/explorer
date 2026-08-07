@@ -3,9 +3,11 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { UpgradeableLoaderAccountData } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
-import { ExternalLink } from 'react-feather';
+import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
+import { getSafeExternalHref } from '@/app/shared/lib/url';
 import { Alert } from '@/app/shared/ui/Alert';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -97,7 +99,7 @@ export function BaseVerifiedBuildCard({
                 A verified build badge indicates that this program was built from source code that is publicly
                 available, but does not imply that this program has been audited. For more details, refer to the{' '}
                 <a href={VERIFIED_BUILDS_GUIDE_URL} target="_blank" rel="noopener noreferrer">
-                    Verified Builds Guide <ExternalLink className="ml-[3px] align-text-top" size={13} />
+                    Verified Builds Guide <ExternalLinkIcon className="ml-[3px] align-text-top" size={13} />
                 </a>
                 .
             </Alert>
@@ -219,24 +221,26 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                     )}
                 </BaseTable.Cell>
             );
-        case DisplayType.URL:
-            if (isValidLink(value as string)) {
+        case DisplayType.URL: {
+            const href = value as string;
+            if (getSafeExternalHref(href)) {
                 return (
                     <BaseTable.Cell className="text-right">
                         <span className="whitespace-nowrap font-mono">
-                            <a rel="noopener noreferrer" target="_blank" href={value as string}>
-                                {value}
-                                <ExternalLink className="ml-1.5 align-text-top" size={13} />
-                            </a>
+                            <ExternalLink href={href}>
+                                {href}
+                                <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                            </ExternalLink>
                         </span>
                     </BaseTable.Cell>
                 );
             }
             return (
                 <BaseTable.Cell className="text-right font-mono">
-                    {value && (value as string).length > 1 ? (value as string).trim() : '-'}
+                    {href && href.length > 1 ? href.trim() : '-'}
                 </BaseTable.Cell>
             );
+        }
         case DisplayType.Date:
             return (
                 <BaseTable.Cell className="text-right font-mono">
@@ -253,13 +257,4 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
             break;
     }
     return <></>;
-}
-
-function isValidLink(value: string) {
-    try {
-        const url = new URL(value);
-        return ['http:', 'https:'].includes(url.protocol);
-    } catch (_err) {
-        return false;
-    }
 }

@@ -1,16 +1,10 @@
 import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { parseUrl, SAFE_EXTERNAL_PROTOCOLS } from '@/app/shared/lib/url';
 
 import { CACHE_HEADERS, ERROR_CACHE_HEADERS, MAX_SIZE, SECURITY_HEADERS, TIMEOUT, USER_AGENT } from './config';
-import {
-    fetchResource,
-    isHTTPProtocol,
-    matchJsonContent,
-    STATUS_MESSAGES,
-    type StatusCode,
-    StatusError,
-} from './feature';
+import { fetchResource, matchJsonContent, STATUS_MESSAGES, type StatusCode, StatusError } from './feature';
 
 export const dynamic = 'force-dynamic';
 // Platform backstop. The per-hop fetch timeout (NEXT_PUBLIC_METADATA_TIMEOUT,
@@ -29,12 +23,12 @@ export async function GET(request: Request) {
     // decodeURIComponent needed. The client encodes once via encodeURIComponent
     // in getProxiedUri, and this single decode reverses it symmetrically.
     const uri = new URL(request.url).searchParams.get('uri');
-    const parsedUri = parseUrl(uri);
+    const parsedUri = parseProxyUrl(uri);
     if (!parsedUri) {
         return respondWithError(400);
     }
 
-    if (!isHTTPProtocol(parsedUri)) {
+    if (!SAFE_EXTERNAL_PROTOCOLS.includes(parsedUri.protocol)) {
         Logger.error(new Error('[api:metadata-proxy] Unsupported protocol'), { protocol: parsedUri.protocol });
         return respondWithError(400);
     }
@@ -60,14 +54,15 @@ export async function GET(request: Request) {
     }
 }
 
-function parseUrl(maybeUrl: string | null): URL | undefined {
+/** Thin wrapper around shared `parseUrl` that logs invalid inputs for ops. */
+function parseProxyUrl(maybeUrl: string | null): URL | undefined {
     if (!maybeUrl) return undefined;
-    try {
-        return new URL(maybeUrl);
-    } catch (error) {
-        Logger.error(new Error('[api:metadata-proxy] Invalid URL', { cause: error }));
+    const url = parseUrl(maybeUrl);
+    if (!url) {
+        Logger.error(new Error('[api:metadata-proxy] Invalid URL'));
         return undefined;
     }
+    return url;
 }
 
 // Content-Length is intentionally omitted to avoid browser CORS issues:
