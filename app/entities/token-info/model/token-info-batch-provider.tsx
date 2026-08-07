@@ -7,7 +7,7 @@ import { mutate } from 'swr';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { getTokenInfos } from '../lib/fetch-token-mints';
+import { getTokenInfos } from '../api/fetch-token-mints';
 
 type RequestTokenInfo = (address: string, cluster: Cluster, genesisHash?: string) => void;
 type BatchRequest = { address: string; cluster: Cluster; genesisHash?: string };

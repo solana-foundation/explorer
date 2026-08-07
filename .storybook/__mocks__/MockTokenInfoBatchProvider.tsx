@@ -1,14 +1,15 @@
-import { Token } from '@solflare-wallet/utl-sdk';
 import { getTokenInfoSwrKey } from '@utils/token-info';
 import React, { useCallback } from 'react';
 import { mutate } from 'swr';
+
+import type { TokenInfo } from '@/app/entities/token-info';
 
 import { TokenInfoBatchContext } from '../../app/entities/token-info/model/token-info-batch-provider';
 
 type MockTokenInfoBatchProviderProps = {
     children: React.ReactNode;
     /** Optional per-mint token info keyed by base58 address. When set, a requested mint's SWR entry is seeded. */
-    infos?: Record<string, Partial<Token>>;
+    infos?: Record<string, Partial<TokenInfo>>;
 };
 
 /**

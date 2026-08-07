@@ -404,9 +404,6 @@ export default tseslint.config(
         files: [
             // app/entities cross-entity / wrong-direction imports
             'app/entities/nft/lib/get-metadata-json.ts',
-            'app/entities/token-info/index.ts',
-            'app/entities/token-info/lib/fetch-token-mints.ts',
-            'app/entities/token-info/lib/is-valid-cluster.ts',
 
             // app/features cross-feature imports
             'app/features/idl/interactive-idl/model/use-mainnet-confirmation.ts',

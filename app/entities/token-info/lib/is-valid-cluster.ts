@@ -1,4 +1,4 @@
-import { getChainId } from '@entities/chain-id';
+import { getChainId } from '@entities/chain-id/@x/token-info';
 import { Cluster } from '@utils/cluster';
 
 type SupportedCluster = Extract<

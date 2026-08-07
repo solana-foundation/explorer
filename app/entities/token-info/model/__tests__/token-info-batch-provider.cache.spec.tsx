@@ -4,7 +4,7 @@ import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { getTokenInfosMock } = vi.hoisted(() => ({ getTokenInfosMock: vi.fn().mockResolvedValue([]) }));
-vi.mock('@entities/token-info/lib/fetch-token-mints', () => ({ getTokenInfos: getTokenInfosMock }));
+vi.mock('@entities/token-info/api/fetch-token-mints', () => ({ getTokenInfos: getTokenInfosMock }));
 
 // The specs setup (test-setup.specs.ts) globally no-ops useTokenInfoBatch to prevent network. This suite
 // asserts real batch behavior, so restore the actual provider for this file only.

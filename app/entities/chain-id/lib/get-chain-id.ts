@@ -1,6 +1,6 @@
-import { ChainId } from '@solflare-wallet/utl-sdk';
 import { Cluster } from '@utils/cluster';
 
+import { ChainId } from './chain-id';
 import { GENESIS_HASHES } from './const';
 
 function getChainIdFromGenesisHash(genesisHash: string): ChainId | undefined {

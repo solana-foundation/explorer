@@ -4,7 +4,6 @@ import ScaledUiAmountMultiplierTooltip from '@components/account/token-extension
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
 import { cn } from '@components/shared/utils';
-import { getTokenInfos } from '@entities/token-info';
 import { useTransactionDetails } from '@providers/transactions';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
@@ -14,6 +13,7 @@ import useAsyncEffect from 'use-async-effect';
 
 import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
+import { getTokenInfos } from '@/app/utils/token-info';
 
 import { CollapsibleSection } from './CollapsibleSection';
 
@@ -65,11 +65,10 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     // genesisHash is required to derive a chainId on Custom/Simd296 clusters - without it getTokenInfos returns [].
     useAsyncEffect(
         async isMounted => {
-            const mints = rows.map(r => r.mint);
+            const mints = rows.map(r => new PublicKey(r.mint));
             const tokens = await getTokenInfos(mints, cluster, genesisHash);
-            if (isMounted()) {
-                setTokenSymbols(new Map(tokens.map(t => [t.address, t.symbol])));
-            }
+            if (!isMounted()) return;
+            setTokenSymbols(new Map(tokens?.map(t => [t.address, t.symbol])));
         },
         [mintKey, cluster, genesisHash],
     );

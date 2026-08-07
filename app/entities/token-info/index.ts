@@ -1,9 +1,10 @@
+// Client-facing surface. Server-only pieces (the UTL list fetch, the on-chain
+// Metaplex fallback, cluster validation) live in `./server`.
 export { createAbortSignal } from './lib/create-abort-signal';
 export { deriveScaledUiAmountMultiplier } from './lib/derive-scaled-ui-multiplier';
 export { TokenInfoHttpError, TokenInfoInvalidResponseError } from './lib/errors';
-export { getTokenInfo, getTokenInfos } from './lib/fetch-token-mints';
-export { getChainId } from '@entities/chain-id';
-export { isValidCluster } from './lib/is-valid-cluster';
+export { getChainId } from '@entities/chain-id/@x/token-info';
+export { Tag } from './lib/types';
 export type { FetchConfig, TokenInfo } from './lib/types';
 export { TokenInfoBatchProvider, useTokenInfoBatch } from './model/token-info-batch-provider';
 export { useTokenInfo } from './model/use-token-info';
