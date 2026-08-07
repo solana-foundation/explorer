@@ -3,6 +3,15 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { AddressLink } from '@components/shared/address';
 import { Badge } from '@components/shared/ui/badge';
 import { Button, buttonVariants } from '@components/shared/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@components/shared/ui/dialog';
 import { ExternalLink } from '@components/shared/ui/external-link';
 import {
     buildProgramName,
@@ -36,6 +45,7 @@ export function IdlCard({ programId }: { programId: string }) {
         cluster,
     );
     const [searchStr, setSearchStr] = useState<string>('');
+    const [isOrquestraDialogOpen, setIsOrquestraDialogOpen] = useState(false);
 
     // Link to the standalone IDL explorer (idl.solana.com) — the full history view across every IDL
     // source for this program; this card surfaces only the single latest IDL.
@@ -54,6 +64,63 @@ export function IdlCard({ programId }: { programId: string }) {
         </ExternalLink>
     );
 
+    // Orquestra exposes this program's IDL as MCP tooling and an API; its project page is
+    // cluster-agnostic, so the link is offered regardless of the selected cluster. Like the Castaway
+    // "Generate SDK" flow, it goes through a leaving-the-Explorer interstitial that shows the
+    // destination URL before opening it.
+    const orquestraUrl = `https://orquestra.dev/project/${programId}`;
+    const orquestraLink = (
+        <Button
+            ui="dashkit"
+            variant="white"
+            size="sm"
+            className="whitespace-nowrap"
+            onClick={() => setIsOrquestraDialogOpen(true)}
+        >
+            MCP &amp; API
+            <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+        </Button>
+    );
+
+    const headerLinks = (
+        <div className="flex flex-wrap items-center gap-2">
+            {idlHistoryLink}
+            {orquestraLink}
+            <Dialog open={isOrquestraDialogOpen} onOpenChange={setIsOrquestraDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <AlertCircle className="text-destructive" size={16} />
+                            Leaving Solana Explorer
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-2 pl-6">
+                        <DialogDescription>You are now leaving Explorer and going to Orquestra.</DialogDescription>
+                        <DialogDescription className="break-all font-mono text-xs">{orquestraUrl}</DialogDescription>
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button variant="outline" size="sm">
+                                Cancel
+                            </Button>
+                        </DialogClose>
+                        <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => {
+                                window.open(orquestraUrl, '_blank', 'noopener,noreferrer');
+                                setIsOrquestraDialogOpen(false);
+                            }}
+                        >
+                            Continue
+                            <ExternalLinkIcon size={12} />
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+
     // Single IDL view: show the program-metadata (PMP) IDL, falling back to the Anchor source only
     // when no PMP IDL exists.
     const idl: SupportedIdl | undefined = programMetadataIdl ?? anchorIdl;
@@ -69,7 +136,7 @@ export function IdlCard({ programId }: { programId: string }) {
                     <CardTitle as="h4" ui="dashkit">
                         Program IDL
                     </CardTitle>
-                    {idlHistoryLink}
+                    {headerLinks}
                 </CardHeader>
                 <CardBody ui="dashkit">
                     <div className="mb-6 flex items-center gap-2 text-destructive">
@@ -184,7 +251,7 @@ export function IdlCard({ programId }: { programId: string }) {
                 <CardTitle as="h4" ui="dashkit">
                     Program IDL
                 </CardTitle>
-                {idlHistoryLink}
+                {headerLinks}
             </CardHeader>
             <CardBody ui="dashkit">
                 {isMismatch ? (
