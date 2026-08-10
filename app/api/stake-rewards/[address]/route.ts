@@ -39,7 +39,7 @@ export async function GET(request: Request, props: Params) {
 
     const apiKey = getSolscanApiKey();
     if (!apiKey) {
-        Logger.warn('[api:stake-rewards] SOLSCAN_API is not configured', { sentry: true });
+        Logger.warn('[api:stake-rewards] solscan_api is not configured', { sentry: true });
         return NextResponse.json(
             { error: 'Stake rewards are not configured' },
             { headers: NO_STORE_HEADERS, status: 503 },

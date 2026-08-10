@@ -13,7 +13,7 @@ vi.stubGlobal('fetch', fetchMock);
 
 describe('GET /api/stake-rewards/[address]', () => {
     beforeEach(() => {
-        vi.stubEnv('SOLSCAN_API', 'test-key');
+        vi.stubEnv('solscan_api', 'test-key');
     });
 
     afterEach(() => {
@@ -74,7 +74,7 @@ describe('GET /api/stake-rewards/[address]', () => {
     });
 
     it('should return 503 when the key is not configured', async () => {
-        vi.stubEnv('SOLSCAN_API', '');
+        vi.stubEnv('solscan_api', '');
 
         const response = await callRoute(VALID_ADDRESS);
 
