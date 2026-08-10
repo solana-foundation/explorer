@@ -39,6 +39,7 @@
 | Dynamic | `/api/search` | — | — |
 | Dynamic | `/api/security-txt` | — | — |
 | Dynamic | `/api/sns-domains/[address]` | — | — |
+| Dynamic | `/api/stake-rewards/[address]` | — | — |
 | Dynamic | `/api/token-image/[mintAddress]` | — | — |
 | Dynamic | `/api/token-info` | — | — |
 | Dynamic | `/api/token-market-data/[address]` | — | — |
