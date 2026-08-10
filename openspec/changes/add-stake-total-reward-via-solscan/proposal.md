@@ -22,7 +22,8 @@ The route is public, so one cheap `getAccountInfo` gates it: without that, enume
 
 - A `stake-rewards` entity that pages `GET /v2.0/account/stake/reward` and sums `amount`, behind `GET /api/stake-rewards/[address]` — mainnet-only, response cached 4 h at the CDN.
 - A `Total Reward (SOL)` row on the Stake Delegation card. `DelegationCard` becomes presentational and takes the state as a prop; the section owns the fetch.
-- `SOLSCAN_API` in `.env.example`.
+- A `NEXT_PUBLIC_STAKE_TOTAL_REWARD_ENABLED` flag, off by default, gating both the row and the route. It is client-readable on purpose: the browser otherwise cannot tell an unprovisioned deployment from a broken one, so it requests a total it will never get and renders `Unavailable` on every stake page. The flag is feature-scoped rather than Solscan-wide because there is one consumer.
+- `solscan_api` in `.env.example`.
 
 Behaviour — the range floor, the paging bound, the guards, and the row's states — is specified in [`specs/stake-reward-total/spec.md`](specs/stake-reward-total/spec.md).
 

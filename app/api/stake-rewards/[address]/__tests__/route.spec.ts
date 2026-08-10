@@ -20,6 +20,7 @@ vi.stubGlobal('fetch', fetchMock);
 
 describe('GET /api/stake-rewards/[address]', () => {
     beforeEach(() => {
+        vi.stubEnv('NEXT_PUBLIC_STAKE_TOTAL_REWARD_ENABLED', 'true');
         vi.stubEnv('solscan_api', 'test-key');
         isStakeAccountMock.mockResolvedValue(true);
     });
@@ -55,6 +56,17 @@ describe('GET /api/stake-rewards/[address]', () => {
         const response = await callRoute(VALID_ADDRESS);
 
         expect(response.headers.get('Cache-Control')).toContain('s-maxage=14400');
+    });
+
+    it('should refuse every request when the feature is disabled', async () => {
+        vi.stubEnv('NEXT_PUBLIC_STAKE_TOTAL_REWARD_ENABLED', 'false');
+
+        const response = await callRoute(VALID_ADDRESS);
+
+        expect(response.status).toBe(404);
+        expect(await response.json()).toEqual({ error: 'Stake rewards are not enabled' });
+        expect(isStakeAccountMock).not.toHaveBeenCalled();
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 
     it('should reject an invalid address without calling Solscan', async () => {

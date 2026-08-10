@@ -76,6 +76,21 @@ The system SHALL expose the total at `GET /api/stake-rewards/{address}`, holding
 - **WHEN** upstream reports a rate limit
 - **THEN** the route SHALL pass `429` through rather than masking it as a server error
 
+### Requirement: The feature SHALL be gated by a flag, off by default
+
+The system SHALL render no Total Reward row and serve no total unless the feature is explicitly enabled for the deployment. The flag MUST be readable by the client, because otherwise the browser cannot tell an unprovisioned deployment from a broken one and requests a total it will never get on every stake page.
+
+#### Scenario: Feature disabled
+
+- **WHEN** the feature flag is not enabled
+- **THEN** the card SHALL omit the Total Reward row entirely, rather than rendering it as unavailable
+- **AND** the client SHALL make no request for the total
+
+#### Scenario: Endpoint reached directly while disabled
+
+- **WHEN** the route is requested and the feature flag is not enabled
+- **THEN** the route SHALL refuse before validating the address or spending any upstream quota
+
 ### Requirement: The card row SHALL distinguish a zero total from an unavailable one
 
 The Stake Delegation card SHALL render the total in its own row with three states — loading, an amount, and an unavailable message — and MUST NOT render `0` when the figure could not be fetched, because zero is a claim about the account rather than about the request. The remaining rows SHALL render regardless of the total's state.

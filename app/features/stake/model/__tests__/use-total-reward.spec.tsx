@@ -4,7 +4,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { type ReactNode } from 'react';
 import { SWRConfig } from 'swr';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useTotalReward } from '../use-total-reward';
 
@@ -20,7 +20,12 @@ vi.stubGlobal('fetch', fetchMock);
 describe('useTotalReward', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.stubEnv('NEXT_PUBLIC_STAKE_TOTAL_REWARD_ENABLED', 'true');
         mocks.cluster = { cluster: Cluster.MainnetBeta };
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
     });
 
     it('should report loading before the request resolves', () => {
@@ -59,6 +64,13 @@ describe('useTotalReward', () => {
         const { result } = renderTotalReward();
 
         await waitFor(() => expect(result.current).toEqual({ lamports: 0, status: 'ready' }));
+    });
+
+    it('should report disabled without calling the route when the feature is off', () => {
+        vi.stubEnv('NEXT_PUBLIC_STAKE_TOTAL_REWARD_ENABLED', 'false');
+
+        expect(renderTotalReward().result.current).toEqual({ status: 'disabled' });
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 
     it('should not call the route on a cluster Solscan does not index', () => {

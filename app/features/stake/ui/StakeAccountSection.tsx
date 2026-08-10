@@ -228,12 +228,14 @@ export function DelegationCard({
                     </>
                 )}
 
-                <BaseTable.Row>
-                    <BaseTable.Cell>Total Reward (SOL)</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <TotalReward state={totalReward} solPrice={solPrice} />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
+                {totalReward.status !== 'disabled' && (
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Total Reward (SOL)</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">
+                            <TotalReward state={totalReward} solPrice={solPrice} />
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
+                )}
 
                 <BaseTable.Row>
                     <BaseTable.Cell>Delegated Vote Address</BaseTable.Cell>
@@ -261,7 +263,14 @@ export function DelegationCard({
 
 // Lifetime rewards load separately from the account, so the row carries its own state. A failure
 // shows a quiet message rather than 0 — zero is a claim about the account, not about the request.
-function TotalReward({ state, solPrice }: { state: TotalRewardState; solPrice: number | null }) {
+// `disabled` is excluded because the caller drops the whole row, leaving this switch exhaustive.
+function TotalReward({
+    state,
+    solPrice,
+}: {
+    state: Exclude<TotalRewardState, { status: 'disabled' }>;
+    solPrice: number | null;
+}) {
     switch (state.status) {
         case 'loading':
             return <Skeleton className="ml-auto h-4 w-24" />;

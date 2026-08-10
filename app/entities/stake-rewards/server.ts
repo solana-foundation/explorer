@@ -5,4 +5,4 @@ export {
     type StakeRewardTotal,
 } from './api/fetch-total-stake-reward';
 export { isStakeAccount } from './api/is-stake-account';
-export { getSolscanApiKey } from './env';
+export { getSolscanApiKey, isStakeTotalRewardEnabled } from './env';

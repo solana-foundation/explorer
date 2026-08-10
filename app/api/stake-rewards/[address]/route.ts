@@ -2,6 +2,7 @@ import {
     fetchTotalStakeReward,
     getSolscanApiKey,
     isStakeAccount,
+    isStakeTotalRewardEnabled,
     SolscanRequestError,
     SolscanResponseError,
 } from '@entities/stake-rewards/server';
@@ -22,6 +23,14 @@ type Params = { params: Promise<{ address: string }> };
  */
 export async function GET(request: Request, props: Params) {
     const { address } = await props.params;
+
+    // First, so a disabled deployment spends nothing even if the endpoint is hit directly.
+    if (!isStakeTotalRewardEnabled()) {
+        return NextResponse.json(
+            { error: 'Stake rewards are not enabled' },
+            { headers: NO_STORE_HEADERS, status: 404 },
+        );
+    }
 
     if (!isAddress(address)) {
         return NextResponse.json({ error: 'Invalid address' }, { status: 400 });
