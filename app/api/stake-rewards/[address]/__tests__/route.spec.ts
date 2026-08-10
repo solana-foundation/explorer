@@ -6,6 +6,13 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../route';
 
+const { isStakeAccountMock } = vi.hoisted(() => ({ isStakeAccountMock: vi.fn() }));
+
+vi.mock('@entities/stake-rewards/server', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/stake-rewards/server')>()),
+    isStakeAccount: isStakeAccountMock,
+}));
+
 const VALID_ADDRESS = address(gen.address(0));
 
 const fetchMock = vi.fn();
@@ -14,6 +21,7 @@ vi.stubGlobal('fetch', fetchMock);
 describe('GET /api/stake-rewards/[address]', () => {
     beforeEach(() => {
         vi.stubEnv('solscan_api', 'test-key');
+        isStakeAccountMock.mockResolvedValue(true);
     });
 
     afterEach(() => {
@@ -80,6 +88,25 @@ describe('GET /api/stake-rewards/[address]', () => {
 
         expect(response.status).toBe(503);
         expect(await response.json()).toEqual({ error: 'Stake rewards are not configured' });
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('should refuse an address that is not a stake account without spending upstream quota', async () => {
+        isStakeAccountMock.mockResolvedValue(false);
+
+        const response = await callRoute(VALID_ADDRESS);
+
+        expect(response.status).toBe(404);
+        expect(await response.json()).toEqual({ error: 'Not a stake account' });
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('should not spend upstream quota when the stake-account check fails', async () => {
+        isStakeAccountMock.mockRejectedValue(new Error('rpc down'));
+
+        const response = await callRoute(VALID_ADDRESS);
+
+        expect(response.status).toBe(502);
         expect(fetchMock).not.toHaveBeenCalled();
     });
 

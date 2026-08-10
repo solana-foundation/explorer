@@ -16,6 +16,8 @@ Solscan indexes the per-epoch rewards. Three of its endpoints could supply them:
 
 The paging runs server-side because the key must not reach the browser and every visitor gets the same answer, so the work is done once and shared through the CDN. `GET /api/token-market-data/[address]` already has this shape.
 
+The route is public, so one cheap `getAccountInfo` gates it: without that, enumerating arbitrary addresses would spend metered quota, and paging makes each request worth up to ten upstream calls. Legitimate traffic only ever asks about stake accounts, so the check costs users nothing.
+
 ## What Changes
 
 - A `stake-rewards` entity that pages `GET /v2.0/account/stake/reward` and sums `amount`, behind `GET /api/stake-rewards/[address]` — mainnet-only, response cached 4 h at the CDN.

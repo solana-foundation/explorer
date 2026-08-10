@@ -49,7 +49,17 @@ The system MUST fail the request rather than return a total that is incomplete, 
 
 ### Requirement: The total SHALL be served from a cached server route, mainnet only
 
-The system SHALL expose the total at `GET /api/stake-rewards/{address}`, holding the upstream API key server-side and caching successful responses at the CDN so the work is shared across visitors. The route SHALL refuse clusters the upstream does not index rather than serve a mainnet figure for another cluster's address.
+The system SHALL expose the total at `GET /api/stake-rewards/{address}`, holding the upstream API key server-side and caching successful responses at the CDN so the work is shared across visitors. The route SHALL refuse clusters the upstream does not index rather than serve a mainnet figure for another cluster's address. Because the route is public and each cache miss spends metered upstream quota, it MUST confirm the address is a stake account before spending any.
+
+#### Scenario: Address is not a stake account
+
+- **WHEN** the requested address is not owned by the stake program
+- **THEN** the route SHALL respond `404` without calling upstream
+
+#### Scenario: The stake-account check cannot be completed
+
+- **WHEN** the check itself fails
+- **THEN** the route SHALL fail without calling upstream, rather than spending quota on an unverified address
 
 #### Scenario: Successful total
 

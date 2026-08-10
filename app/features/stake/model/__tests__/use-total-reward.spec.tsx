@@ -70,8 +70,8 @@ describe('useTotalReward', () => {
 });
 
 /**
- * A fresh SWR cache per test. `useSWRImmutable` never revalidates, so a shared cache would let one
- * test's result — including a pending promise — satisfy the next test's identical key.
+ * A fresh SWR cache per test, so one test's result — including a pending promise — cannot satisfy
+ * the next test's identical key.
  */
 function renderTotalReward() {
     const wrapper = ({ children }: { children: ReactNode }) => (

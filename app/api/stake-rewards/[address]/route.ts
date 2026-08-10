@@ -1,11 +1,12 @@
 import {
     fetchTotalStakeReward,
     getSolscanApiKey,
+    isStakeAccount,
     SolscanRequestError,
     SolscanResponseError,
 } from '@entities/stake-rewards/server';
 import { type Address, isAddress } from '@solana/kit';
-import { Cluster, clusterSlug } from '@utils/cluster';
+import { Cluster, clusterSlug, serverClusterUrl } from '@utils/cluster';
 import { NextResponse } from 'next/server';
 
 import { CACHE_HEADERS, ERROR_CACHE_HEADERS, isTimeoutError, NO_STORE_HEADERS } from '@/app/shared/lib/http-utils';
@@ -47,6 +48,12 @@ export async function GET(request: Request, props: Params) {
     }
 
     try {
+        // Gate the metered request behind one cheap RPC call: the route is public, and every cache
+        // miss spends shared paid quota across up to ten upstream calls.
+        if (!(await isStakeAccount({ address, rpcUrl: serverClusterUrl(Cluster.MainnetBeta, '') }))) {
+            return NextResponse.json({ error: 'Not a stake account' }, { headers: ERROR_CACHE_HEADERS, status: 404 });
+        }
+
         const { epochs, lamports } = await fetchTotalStakeReward({ address, apiKey });
         Logger.info('[api:stake-rewards] Summed stake rewards', { address, epochs });
         return NextResponse.json({ totalReward: lamports }, { headers: CACHE_HEADERS });

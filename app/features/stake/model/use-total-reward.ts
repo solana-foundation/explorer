@@ -3,7 +3,7 @@
 import { useCluster } from '@entities/cluster';
 import { type Address } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
-import useSWRImmutable from 'swr/immutable';
+import useSWR from 'swr';
 
 /**
  * `unavailable` covers every reason there is no figure to show — a failed request, a cluster
@@ -26,9 +26,13 @@ export function useTotalReward(stakeAccountAddress: Address): TotalRewardState {
     // Solscan indexes mainnet-beta only, so other clusters skip the request rather than fail it.
     const isSupported = cluster === Cluster.MainnetBeta;
 
-    const { data, error, isLoading } = useSWRImmutable(
+    const { data, error, isLoading } = useSWR(
         isSupported && (['stake-total-reward', stakeAccountAddress] as const),
         () => fetchTotalReward(stakeAccountAddress),
+        // Revalidating (rather than `useSWRImmutable`) keeps a long-lived tab from showing a total
+        // frozen from before the last epoch boundary. It costs no upstream quota: a revalidation
+        // inside the route's 4 h CDN window is served by the CDN and never reaches Solscan.
+        //
         // fetchTotalReward throws rather than returning undefined, so cap the retries.
         { errorRetryCount: 3 },
     );
