@@ -24,11 +24,6 @@ export const HEADER_ONLY_SET_DATA_LEN = 4;
 /** setData's optional `buffer` and write's optional `sourceBuffer` both sit at account index 2. */
 export const PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX = 2;
 
-export const PMP_ANALYTICS_IX_NAMES = {
-    initialize: 'initialize',
-    setData: 'set_data',
-} as const;
-
 /**
  * Instruction account order, verified against the generated client's `getXInstruction` builders.
  * These are FINAL row labels, rendered verbatim. They carry Codama's own capitalisation (first letter upper,

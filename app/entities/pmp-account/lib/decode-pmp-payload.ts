@@ -5,6 +5,7 @@ import { bytes, concat } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { PMP_DECODE_BUDGET_BYTES, PMP_MAX_UNPACKED_BYTES } from './constants';
+import { toErrorReason } from './errors';
 import type { PmpDecodeConfig, PmpDecodedPayload } from './types';
 
 /**
@@ -87,7 +88,7 @@ export function decodePmpPayload({
 
         return { bytes, kind: 'decoded', text: toDocumentText(text, config.format) };
     } catch (error) {
-        const reason = toDecodeFailureReason(error);
+        const reason = toErrorReason(error, 'unknown decode error');
         Logger.error(new Error('[pmp:decode-payload] failed to decode', { cause: error }), {
             compression: config.compression,
             encoding: config.encoding,
@@ -108,7 +109,7 @@ const UNPACK_OVERFLOW_ERROR = new UnpackOverflow('[pmp:decode-payload] unpack ex
  * leaves `err` at zero and simply never reaches the end of the stream. That is the state `uncompressData` turns
  * into a silent `undefined`, which used to surface as a TypeError from the length check below it.
  */
-type BoundedUnpackResult =
+export type BoundedUnpackResult =
     | { kind: 'ok'; bytes: Uint8Array }
     | { kind: 'overflow'; limit: number }
     | { kind: 'incomplete' }
@@ -127,7 +128,9 @@ type BoundedUnpackResult =
  * Never throws. The library helper signals a corrupt stream by throwing a bare string and an incomplete one by
  * returning `undefined`, and both arrive here as a typed result instead.
  */
-function unpackBounded(data: Uint8Array, limit: number): BoundedUnpackResult {
+// Exported, not private: PR 2 recovers a Buffer's decode config by trial-inflating candidate configs, and it needs
+// this bound plus the `incomplete` signal rather than pako's raw helpers.
+export function unpackBounded(data: Uint8Array, limit: number): BoundedUnpackResult {
     const inflator = new Inflate();
     const chunks: Uint8Array[] = [];
     let total = 0;
@@ -166,13 +169,6 @@ function unpackBounded(data: Uint8Array, limit: number): BoundedUnpackResult {
 
     // A stream that decompresses to nothing emits no chunk at all, so this is an empty payload, not a failure.
     return { bytes: concat(chunks), kind: 'ok' };
-}
-
-/** Not every decoder throws an Error: pako threw bare strings before the unpack moved in-house, so this stays. */
-function toDecodeFailureReason(error: unknown): string {
-    if (typeof error === 'string') return error;
-    if (error instanceof Error) return error.message;
-    return 'unknown decode error';
 }
 
 /**

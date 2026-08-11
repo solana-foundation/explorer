@@ -324,7 +324,7 @@ describe('DataPayloadSection', () => {
 
         await userEvent.click(screen.getByRole('tab', { name: 'Raw' }));
 
-        expect(screen.getByTestId('pmp-bytes-badge-compressed')).toHaveTextContent('gzipped');
+        expect(screen.getByTestId('pmp-bytes-badge-compressed')).toHaveTextContent('gzip');
     });
 
     it('should badge a Zlib payload by name rather than as gzipped', async () => {
@@ -386,7 +386,7 @@ describe('DataPayloadSection', () => {
         expect(trackEvent).toHaveBeenCalledWith('pmp_data_tab_opened', {
             data_source: 'direct',
             format: 'json',
-            instruction: 'set_data',
+            instruction: 'setData',
             source: 'instruction',
             tab: 'decoded',
         });

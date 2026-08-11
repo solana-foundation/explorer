@@ -2,8 +2,8 @@ import { RawDataField } from '@components/shared/RawDataField';
 import {
     decodePmpPayload,
     PMP_COMPRESSED_BYTES_LABELS,
-    PMP_DATA_SOURCE_ANALYTICS_NAMES,
-    PMP_FORMAT_ANALYTICS_NAMES,
+    PMP_DATA_SOURCE_LABELS,
+    PMP_FORMAT_LABELS,
     PMP_UNCOMPRESSED_BYTES_LABEL,
     type PmpAccountContent,
     type PmpDecodedPayload,
@@ -22,7 +22,6 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import { pmpAnalytics } from '../lib/analytics';
 import {
     PMP_ACCOUNT_RAW_DOWNLOAD_FILENAME,
-    PMP_ANALYTICS_IX_NAMES,
     PMP_DECODED_DOWNLOAD_FILENAME,
     PMP_RAW_DOWNLOAD_FILENAME,
 } from '../lib/constants';
@@ -245,9 +244,12 @@ function DecodedTabs({
     const handleTabChange = (value: string) => {
         if (value !== 'decoded' && value !== 'raw') return;
         pmpAnalytics.trackTabOpened({
-            dataSource: PMP_DATA_SOURCE_ANALYTICS_NAMES[dataSource],
-            format: PMP_FORMAT_ANALYTICS_NAMES[content.config.format],
-            instruction: PMP_ANALYTICS_IX_NAMES[content.kind],
+            // GA param values are lowercase, which the display labels already are once lowercased. If a label ever
+            // grows human-readable copy, as `PMP_ENCODING_LABELS[Encoding.None]` did with 'None (hex)', give that
+            // field an explicit analytics name here instead of deriving it.
+            dataSource: PMP_DATA_SOURCE_LABELS[dataSource].toLowerCase(),
+            format: PMP_FORMAT_LABELS[content.config.format].toLowerCase(),
+            instruction: content.kind,
             source,
             tab: value,
         });

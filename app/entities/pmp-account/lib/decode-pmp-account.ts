@@ -4,57 +4,50 @@ import { AccountDiscriminator, getBufferDecoder, getMetadataDecoder } from '@sol
 import { bytes } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
-import { PMP_ACCOUNT_HEADER_LEN, PMP_ADDRESS } from './constants';
 import { decodePmpPayload } from './decode-pmp-payload';
+import { toErrorReason } from './errors';
+import { readPmpAccountBytes } from './read-pmp-account-bytes';
 import type { PmpAccountContent, PmpAccountKind, PmpAccountSnapshot, PmpDecodeConfig } from './types';
 
 /**
- * Decodes the payload a PMP account currently holds, for the instructions that carry no inline bytes: a `setData`
- * whose payload came from a foreign buffer, and an `initialize` that finalized bytes pre-written to its metadata
- * PDA. Pure - the caller supplies the already-fetched account.
+ * Decodes the payload a PMP account currently holds. Pure - the caller supplies the already-fetched account, so
+ * both the transaction page (reading the account a `setData` or `initialize` points at) and the account page
+ * (reading the account being viewed) share one implementation.
  *
- * This reads CURRENT state. It is not a reconstruction of what the viewed transaction wrote, and it makes no
- * attempt to be: no write history, no execution-position bound, no length derivation. The UI says so.
+ * This reads CURRENT state. It is not a reconstruction of what any transaction wrote, and it makes no attempt to
+ * be: no write history, no execution-position bound, no length derivation. The UI says so.
  *
  * `config` is used only for a Buffer account, whose header carries no encoding/compression/format of its own. A
  * Metadata account carries its own hints, and those are the ones that match the bytes it currently holds.
  */
-export function decodePmpBufferAccount({
+export function decodePmpAccount({
     account,
     config,
     cap,
 }: {
     account: PmpAccountSnapshot;
-    config: PmpDecodeConfig;
+    /**
+     * Omitted by the account page, which has no instruction to take hints from. A Metadata account carries its
+     * own, so this only decides whether a BUFFER body can be decoded at all.
+     */
+    config?: PmpDecodeConfig;
     cap?: number;
 }): PmpAccountContent {
-    const { data, lamports, owner } = account;
+    // Named `accountBytes` rather than `bytes`, which is the Uint8Array helper this module imports.
+    const accountBytes = readPmpAccountBytes({ account });
+    if (accountBytes.kind !== 'ok') return accountBytes;
 
-    // The accounts provider models "no such account" as zero lamports plus an empty raw buffer, which is exactly
-    // what a closed PMP buffer leaves behind. No account can hold data at zero lamports, so this is unambiguous.
-    if (lamports === 0 && (data === undefined || data.length === 0)) return { kind: 'absent' };
-
-    if (owner !== PMP_ADDRESS) {
-        return {
-            kind: 'unreadable',
-            reason: `the account is owned by ${owner}, not the Program Metadata Program`,
-        };
-    }
-
-    if (data === undefined) {
-        return { kind: 'unreadable', reason: 'the account was fetched without its data' };
-    }
-
-    if (data.length < PMP_ACCOUNT_HEADER_LEN) {
-        return {
-            kind: 'unreadable',
-            reason: `the account is shorter than the ${PMP_ACCOUNT_HEADER_LEN}-byte header`,
-        };
-    }
+    const { data } = accountBytes;
 
     try {
         switch (data[0]) {
             case AccountDiscriminator.Buffer: {
+                // A Buffer header stores no encoding/compression/format and, at program-source level, never can.
+                // Without an instruction to take them from there is nothing to decode with, and guessing would
+                // render invented content. Recovering them from write history is PR 2's job.
+                if (!config) {
+                    return { kind: 'unreadable', reason: 'a Buffer account header carries no decode config' };
+                }
                 // A buffer has no length field: its body runs to the end of the account, which is what the
                 // remainder decoder hands back.
                 const bufferData = getBufferDecoder().decode(data).data;
@@ -90,7 +83,7 @@ export function decodePmpBufferAccount({
             sentry: true,
             sentryExtras: { discriminator: data[0], length: data.length },
         });
-        return { kind: 'unreadable', reason: toReason(error) };
+        return { kind: 'unreadable', reason: toErrorReason(error, 'unknown account decode error') };
     }
 }
 
@@ -112,11 +105,4 @@ function decodeAccountContent(
     const body = bytes(data);
     const payload = decodePmpPayload({ cap, config, data: body });
     return { account, body, config, kind: 'payload', payload };
-}
-
-/** The generated decoders throw plain Errors, but a non-Error throw stays handled rather than read as `undefined`. */
-function toReason(error: unknown): string {
-    if (typeof error === 'string') return error;
-    if (error instanceof Error) return error.message;
-    return 'unknown account decode error';
 }
