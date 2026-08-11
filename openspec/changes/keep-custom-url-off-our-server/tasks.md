@@ -25,12 +25,13 @@
 - [x] 4.1 `app/utils/url.ts`: replace the two WHAT comments on the `customUrl` rule with WHY — a `customUrl` is only meaningful on the Custom cluster, and propagating it elsewhere leaks the user's (often API-keyed) endpoint for no functional gain. Explain why the `additionalParams` path decides from the *merged* cluster.
 - [x] 4.2 `app/utils/__tests__/url.spec.ts`: cover the previously-untested side of the `additionalParams` guard — `customUrl` is *kept* when the merged cluster is `custom` (from current params, from additional params, and when switching to custom), and dropped when an override switches away from custom. Validated by mutation: removing the guard fails exactly these cases and passed silently before.
 - [x] 4.3 Correct the documented URL-propagation policy. The non-goals wrongly listed `pickClusterParams` as untouched while this PR changes it. Added design decision 4 and a spec requirement so future work follows the actual policy; narrowed the non-goal to `buildExplorerLink` and the switcher, which really are untouched.
+- [x] 4.4 Decide navigation propagation with `isCustomUrlAllowed` instead of a bare `cluster === custom` check. The bare check made the link builder stricter than the reader: with the dev flag on, or on a whitelisted host (`engine.mirror.ad`), `useClusterUrl` honors a `customUrl` on any cluster, so the first in-app click silently dropped an endpoint the page was using. `pickClusterParams` takes `devFlagEnabled` (default `false`, fails closed) and the five React call sites read `customUrlEnabledAtom`. Absent cluster param maps to `DEFAULT_CLUSTER`, since `mainnet-beta` is omitted for being the default. Covered by six new cases in `url.spec.ts`.
 
 ## 5. Verify
 
 - [x] 5.1 Run the full gate: `pnpm format:ci` → `pnpm lint` → `pnpm openspec:validate` → `pnpm typecheck` → `pnpm build` → `pnpm test:ci`.
 
-- [ ] 5.2 Manual smoke on the preview deploy, covering the one user-visible change: browsing a non-custom cluster no longer carries `customUrl` from link to link, while the Custom cluster keeps its endpoint in the URL. Server-side changes need no smoke — they are type-only and behavior-neutral, and custom-cluster token images do not render either way.
+- [ ] 5.2 Manual smoke on the preview deploy, covering the one user-visible change: browsing a non-custom cluster no longer carries `customUrl` from link to link, while the Custom cluster keeps its endpoint in the URL. Also confirm the two allow-cases survive navigation — `enableCustomUrl` set in `localStorage` on a non-custom cluster, and a whitelisted `engine.mirror.ad` endpoint without the flag. Server-side changes need no smoke — they are type-only and behavior-neutral, and custom-cluster token images do not render either way.
 
 ## Descoped
 

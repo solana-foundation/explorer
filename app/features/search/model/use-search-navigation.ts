@@ -1,5 +1,7 @@
+import { customUrlEnabledAtom } from '@entities/cluster';
 import { useCluster } from '@providers/cluster';
 import { Cluster, clusterSlug } from '@utils/cluster';
+import { useAtomValue } from 'jotai';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 
@@ -11,6 +13,7 @@ export function useSearchNavigation(): (option: SearchItem) => void {
     const router = useRouter();
     const { cluster } = useCluster();
     const searchParams = useSearchParams();
+    const devFlagEnabled = useAtomValue(customUrlEnabledAtom);
 
     return useCallback(
         (option: SearchItem) => {
@@ -25,6 +28,7 @@ export function useSearchNavigation(): (option: SearchItem) => void {
                     path,
                     new URLSearchParams(currentSearchParamsString),
                     new URLSearchParams(`cluster=${clusterSlug(effectiveCluster)}`),
+                    devFlagEnabled,
                 );
                 router.push(nextPath);
             } else if (option.cluster !== undefined) {
@@ -39,6 +43,6 @@ export function useSearchNavigation(): (option: SearchItem) => void {
                 router.push(`${pathname}${nextQueryString ? `?${nextQueryString}` : ''}`);
             }
         },
-        [cluster, router, searchParams],
+        [cluster, devFlagEnabled, router, searchParams],
     );
 }

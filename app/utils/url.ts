@@ -1,7 +1,10 @@
+import { isCustomUrlAllowed } from '@entities/cluster/lib/resolve-cluster';
+import { customUrlEnabledAtom } from '@entities/cluster/model/cluster-storage';
+import { useAtomValue } from 'jotai';
 import { useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 
-import { Cluster, clusterSlug } from './cluster';
+import { Cluster, clusterFromSlug, clusterSlug, DEFAULT_CLUSTER } from './cluster';
 
 type Config = Readonly<{
     additionalParams?: { get(key: string): string | null; toString(): string };
@@ -18,21 +21,40 @@ function extractPathnameHash(pathname: string) {
 
 export function useClusterPath({ additionalParams, pathname }: Config) {
     const currentSearchParams = useSearchParams();
+    const devFlagEnabled = useAtomValue(customUrlEnabledAtom);
     const [pathnameWithoutHash, hash] = extractPathnameHash(pathname);
     return useMemo(
         () =>
-            pickClusterParams(pathnameWithoutHash, currentSearchParams ?? undefined, additionalParams) +
+            pickClusterParams(pathnameWithoutHash, currentSearchParams ?? undefined, additionalParams, devFlagEnabled) +
             (hash ? `#${hash}` : ''),
-        [additionalParams, currentSearchParams, hash, pathnameWithoutHash],
+        [additionalParams, currentSearchParams, devFlagEnabled, hash, pathnameWithoutHash],
     );
 }
 
 const MAINNET_MONIKER = clusterSlug(Cluster.MainnetBeta);
-const CUSTOM_MONIKER = clusterSlug(Cluster.Custom);
+
+// Whether a link may carry `customUrl`, decided by the same rule the reader uses (`isCustomUrlAllowed`
+// via `useClusterUrl`). Keeping one criterion matters: a link builder that is stricter than the reader
+// silently drops an endpoint the app would have honored — on the dev flag, or on a whitelisted host —
+// so the first in-app click would fall back to the remembered URL.
+//
+// `clusterMoniker` is the slug as it will appear in the built URL, so `null` means the default cluster:
+// `pickClusterParams` omits `cluster=mainnet-beta` because it is the default, not because it is absent.
+function mayCarryCustomUrl(clusterMoniker: string | null, candidateUrl: string | null, devFlagEnabled: boolean) {
+    if (!candidateUrl) return false;
+    const cluster = clusterMoniker === null ? DEFAULT_CLUSTER : clusterFromSlug(clusterMoniker);
+    if (cluster === undefined) return false;
+    return isCustomUrlAllowed({ candidateUrl, cluster, devFlagEnabled });
+}
+
 export function pickClusterParams(
     pathname: string,
     currentSearchParams?: { toString(): string; get(key: string): string | null },
     additionalParams?: { get(key: string): string | null },
+    // The persisted dev toggle (`customUrlEnabledAtom`), which honors `customUrl` on any cluster.
+    // Defaults to `false` so a caller that omits it fails closed — it strips the endpoint rather than
+    // propagating it. React callers read the atom; `useClusterPath` does it for you.
+    devFlagEnabled = false,
 ): string {
     let nextSearchParams: URLSearchParams | undefined;
 
@@ -49,11 +71,13 @@ export function pickClusterParams(
                     if (paramName === 'cluster' && existingValue === MAINNET_MONIKER) {
                         return;
                     }
-                    // A customUrl is only meaningful on the Custom cluster — it *is* that cluster's
-                    // endpoint, and every other cluster resolves from its own configured URL. Carrying
-                    // it onto a non-custom link would leak the user's endpoint (these often embed an
-                    // API key) into our server logs and into any shared link, for no functional gain.
-                    if (paramName === 'customUrl' && currentSearchParams.get('cluster') !== CUSTOM_MONIKER) {
+                    // Carrying a customUrl the app will not honor leaks the user's endpoint (these often
+                    // embed an API key) into our server logs and into any shared link, for no functional
+                    // gain. `mayCarryCustomUrl` decides; see its comment for why the rule is shared.
+                    if (
+                        paramName === 'customUrl' &&
+                        !mayCarryCustomUrl(currentSearchParams.get('cluster'), existingValue, devFlagEnabled)
+                    ) {
                         return;
                     }
                     nextSearchParams ||= new URLSearchParams();
@@ -80,7 +104,7 @@ export function pickClusterParams(
         // from custom (or supply a customUrl for a cluster that ignores it), so decide from the *merged*
         // cluster rather than the incoming one. Otherwise switching custom → devnet would carry the
         // user's endpoint along into the new URL.
-        if (params.get('cluster') !== CUSTOM_MONIKER) {
+        if (!mayCarryCustomUrl(params.get('cluster'), params.get('customUrl'), devFlagEnabled)) {
             params.delete('customUrl');
         }
     }

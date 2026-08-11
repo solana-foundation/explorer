@@ -115,6 +115,50 @@ describe('pickClusterParams', () => {
         });
     });
 
+    // The link builder must not be stricter than the reader. `useClusterUrl` honors a `customUrl` on a
+    // non-custom cluster in two cases (`isCustomUrlAllowed`); if navigation stripped it anyway, the
+    // first in-app click would silently drop the endpoint the page is actually using.
+    describe('customUrl allowed on a non-custom cluster', () => {
+        it('should keep customUrl on a non-custom cluster when the dev flag is enabled', () => {
+            const currentParams = new URLSearchParams('cluster=devnet&customUrl=http://localhost:8899');
+            const result = pickClusterParams('/address/abc123', currentParams, undefined, true);
+            expect(result).toBe('/address/abc123?cluster=devnet&customUrl=http%3A%2F%2Flocalhost%3A8899');
+        });
+
+        it('should keep customUrl on the default cluster when the dev flag is enabled', () => {
+            // `cluster=mainnet-beta` is dropped as the default, so the merged params carry no cluster at
+            // all — the rule must read that as mainnet-beta, not as an unknown cluster.
+            const currentParams = new URLSearchParams('cluster=mainnet-beta&customUrl=http://localhost:8899');
+            const result = pickClusterParams('/address/abc123', currentParams, undefined, true);
+            expect(result).toBe('/address/abc123?customUrl=http%3A%2F%2Flocalhost%3A8899');
+        });
+
+        it('should keep a whitelisted customUrl on a non-custom cluster without the dev flag', () => {
+            const currentParams = new URLSearchParams('cluster=devnet&customUrl=https://engine.mirror.ad/rpc');
+            const result = pickClusterParams('/address/abc123', currentParams);
+            expect(result).toBe('/address/abc123?cluster=devnet&customUrl=https%3A%2F%2Fengine.mirror.ad%2Frpc');
+        });
+
+        it('should keep an allowed customUrl through an additionalParams merge', () => {
+            const currentParams = new URLSearchParams('cluster=devnet&customUrl=http://localhost:8899');
+            const additionalParams = new URLSearchParams('sort=fee');
+            const result = pickClusterParams('/address/abc123', currentParams, additionalParams, true);
+            expect(result).toBe('/address/abc123?cluster=devnet&customUrl=http%3A%2F%2Flocalhost%3A8899&sort=fee');
+        });
+
+        it('should still strip customUrl on a non-custom cluster when nothing allows it', () => {
+            const currentParams = new URLSearchParams('cluster=devnet&customUrl=http://localhost:8899');
+            const result = pickClusterParams('/address/abc123', currentParams, undefined, false);
+            expect(result).toBe('/address/abc123?cluster=devnet');
+        });
+
+        it('should strip customUrl for an unrecognized cluster slug even with the dev flag', () => {
+            const currentParams = new URLSearchParams('cluster=bogus&customUrl=http://localhost:8899');
+            const result = pickClusterParams('/address/abc123', currentParams, undefined, true);
+            expect(result).toBe('/address/abc123?cluster=bogus');
+        });
+    });
+
     describe('edge cases', () => {
         it('should handle pathname with trailing slash', () => {
             const currentParams = new URLSearchParams('cluster=devnet');

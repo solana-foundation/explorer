@@ -18,7 +18,8 @@ See `proposal.md` for motivation and for the URL-query leak this change delibera
 
 - Changing where the custom endpoint lives *for the Custom cluster*. It stays in the page URL. See `proposal.md`, follow-up 2.
 - Scrubbing query strings at the analytics / Sentry / logging sinks. See `proposal.md`, follow-up 1.
-- Touching link generation (`buildExplorerLink`), the cluster switcher, `isCustomUrlAllowed`, or the cross-cluster discovery probes. All four keep emitting and honoring `customUrl` exactly as before.
+- Touching link generation (`buildExplorerLink`), the cluster switcher, or the cross-cluster discovery probes. All three keep emitting and honoring `customUrl` exactly as before.
+- Changing `isCustomUrlAllowed`. Navigation now *calls* it (decision 4), but its rule is unchanged: Custom cluster, or the dev flag, or a whitelisted host.
 - Making custom-cluster token images render. They do not today; that is a separate feature.
 
 ## Decisions
@@ -46,14 +47,20 @@ This was the only client fetch that forwarded the value. The page URL still carr
 
 The client no longer sends `customUrl`, but the route keeps rejecting `Cluster.Custom` and keeps its regression test. Cheap, and it still covers a hand-crafted request.
 
-### 4. Propagate customUrl in navigation params only when the target cluster is Custom
+### 4. Propagate customUrl in navigation params only where the app would honor it
 
-`pickClusterParams` carries `customUrl` forward only when the resulting cluster is `custom`, and strips it otherwise. It applies the rule twice, because there are two paths into the merged params:
+`pickClusterParams` carries `customUrl` forward only when `isCustomUrlAllowed` accepts it for the resulting cluster, and strips it otherwise. It applies the rule twice, because there are two paths into the merged params:
 
 - the no-`additionalParams` path decides from the *current* cluster while picking which params survive;
 - the `additionalParams` path decides from the **merged** cluster, after the override is applied. That ordering matters: `additionalParams` can switch the cluster away from custom, and deciding from the incoming cluster would carry the endpoint into a devnet URL.
 
-A `customUrl` is only meaningful on the Custom cluster — it *is* that cluster's endpoint, and every other cluster resolves from its own configured URL. Propagating it onto a non-custom link ships the user's endpoint (often API-keyed) into our server logs and into any shared link, for a cluster that ignores it.
+Propagating a `customUrl` the app will not honor ships the user's endpoint (often API-keyed) into our server logs and into any shared link, for a cluster that ignores it.
+
+**Why the shared criterion, not `cluster === custom`.** An earlier revision used the bare cluster check. That made the link builder stricter than the reader: `useClusterUrl` honors a `customUrl` on *any* cluster when the persisted dev flag is on or when the host is whitelisted (`engine.mirror.ad`, the solana.com live code example). Under the bare check, both users kept a working endpoint on the page they landed on and lost it on the first in-app click — the URL the reader accepted, the builder deleted. One criterion in one place removes that class of drift: tighten or loosen `isCustomUrlAllowed` and navigation follows.
+
+The cost is that the rule is no longer a pure function of the URL — `isCustomUrlAllowed` needs the dev flag, which lives in `localStorage` behind `customUrlEnabledAtom`. `pickClusterParams` therefore takes `devFlagEnabled` as a parameter rather than reading the atom itself: it stays pure and directly testable, and the five React call sites read the atom (`useClusterPath` does it for its own callers). The parameter defaults to `false` so a caller that forgets fails closed — it strips the endpoint rather than propagating one the app might not honor.
+
+A cluster param absent from the merged result means the *default* cluster, not an unknown one: `pickClusterParams` omits `cluster=mainnet-beta` precisely because it is the default. The helper maps `null` to `DEFAULT_CLUSTER` for that reason, and an unrecognized slug still strips.
 
 This is the one place the change touches URL propagation. Link generation (`buildExplorerLink`) and the switcher are deliberately left alone, so a Custom-cluster URL still carries its endpoint — that is what follow-up 2 in `proposal.md` would change.
 

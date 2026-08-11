@@ -27,9 +27,9 @@ Alternatives considered:
 
 - **Server (structural):** `serverClusterUrl` loses its `customUrl` parameter and takes `ServerCluster = Exclude<Cluster, Cluster.Custom>`. `resolveSearchTokens` loses its dead `customUrl`. `getReadableTitleFromAddress` loses the unused `customUrl?`.
 - **Client transport:** `useDasImage` stops attaching `customUrl` to `/api/token-image`. Rule established: no client-issued fetch to an Explorer `/api/*` route carries `customUrl`. Custom-cluster token images continue not to render.
-- **Navigation params:** `pickClusterParams` propagates `customUrl` only when the resulting cluster is `custom`, and strips it otherwise — so browsing a non-custom cluster stops carrying the endpoint from link to link. The `additionalParams` path decides from the *merged* cluster, so switching custom → devnet drops the endpoint rather than inheriting it.
+- **Navigation params:** `pickClusterParams` propagates `customUrl` only when `isCustomUrlAllowed` accepts it for the resulting cluster, and strips it otherwise — so browsing a non-custom cluster stops carrying the endpoint from link to link, unless the dev flag or the host whitelist says the app honors it there. The `additionalParams` path decides from the *merged* cluster, so switching custom → devnet drops the endpoint rather than inheriting it.
 - **Kept as defense-in-depth:** the token-image route's `Cluster.Custom → 400` guard and its regression test.
-- **Unchanged:** on the Custom cluster the page URL still carries `?cluster=custom&customUrl=…` as the source of truth. Link generation (`buildExplorerLink`), the cluster switcher, `isCustomUrlAllowed`, and the cross-cluster discovery probes are untouched.
+- **Unchanged:** on the Custom cluster the page URL still carries `?cluster=custom&customUrl=…` as the source of truth. Link generation (`buildExplorerLink`), the cluster switcher, and the cross-cluster discovery probes are untouched. `isCustomUrlAllowed` keeps its rule — navigation now defers to it instead of re-deciding.
 
 ## Known residual: the page URL still carries `customUrl`
 
@@ -63,7 +63,7 @@ Two follow-ups, each worth its own change:
 ## Impact
 
 - **Server:** `app/entities/cluster/lib/cluster.ts`, `cluster-from-param.ts`, `app/features/search/api/resolve-search-tokens.ts`, `app/api/search/route.ts`, `app/utils/get-readable-title-from-address.ts`, `app/utils/cluster.ts` (re-export), and the `serverClusterUrl` call sites in `app/api/token-image/[mintAddress]/route.ts`, `app/api/verification/bluprynt/[mintAddress]/route.ts`, `app/features/receipt/api/get-tx.ts`, `app/entities/domain/api/fetch-ans-domains.ts`, `resolve-domain.ts`.
-- **Client:** `app/entities/digital-asset/model/use-das-image.ts`.
-- **Behavior:** none visible. Custom-cluster token images are unchanged (still not rendered). Non-custom clusters unaffected. The URL, links, and the cluster switcher behave exactly as before.
+- **Client:** `app/entities/digital-asset/model/use-das-image.ts`, `app/utils/url.ts`, and the `pickClusterParams` call sites that now pass the dev flag: `app/features/search/model/use-search-navigation.ts`, `app/components/block/BlockHistoryCard.tsx`, `app/address/[address]/layout.tsx`, `app/block/[slot]/layout.tsx`.
+- **Behavior:** one visible change — navigation stops carrying `customUrl` onto a cluster where the app would not honor it. A user on the Custom cluster, a developer with the persisted flag on, and the whitelisted-host flow all keep their endpoint across links, exactly as before. Custom-cluster token images are unchanged (still not rendered). Server changes are type-only.
 - **Compatibility:** no URL-format and no persisted-format change. Rollback is a straight revert.
-- **Tests:** `serverClusterUrl` (env precedence + the `ServerCluster` type exclusion), `serverClusterUrlFromParam`'s empty-env-var guard, and `useDasImage` sending no `customUrl`. The token-image `customUrl` SSRF regression test stays.
+- **Tests:** `serverClusterUrl` (env precedence + the `ServerCluster` type exclusion), `serverClusterUrlFromParam`'s empty-env-var guard, `useDasImage` sending no `customUrl`, and `pickClusterParams` on both sides of the allow rule — kept for Custom, the dev flag, and a whitelisted host; stripped otherwise. The token-image `customUrl` SSRF regression test stays.

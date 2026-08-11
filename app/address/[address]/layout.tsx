@@ -19,6 +19,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
+import { customUrlEnabledAtom } from '@entities/cluster';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
     BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
@@ -50,6 +51,7 @@ import { PublicKey } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
+import { useAtomValue } from 'jotai';
 import { redirect, RedirectType, useSearchParams } from 'next/navigation';
 import React, { PropsWithChildren, Suspense, use } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -378,9 +380,10 @@ function MoreSection({
     asyncChildren?: React.ReactNode;
 }) {
     const searchParams = useSearchParams();
+    const devFlagEnabled = useAtomValue(customUrlEnabledAtom);
     const buildHref = React.useCallback(
-        (path: string) => pickClusterParams(`${baseUrl}/${path}`, searchParams ?? undefined),
-        [baseUrl, searchParams],
+        (path: string) => pickClusterParams(`${baseUrl}/${path}`, searchParams ?? undefined, undefined, devFlagEnabled),
+        [baseUrl, devFlagEnabled, searchParams],
     );
 
     return (

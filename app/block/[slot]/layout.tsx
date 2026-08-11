@@ -7,12 +7,14 @@ import { ExternalLinkWarning } from '@components/common/ExternalLinkWarning';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
+import { customUrlEnabledAtom } from '@entities/cluster';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
 import { BlockProvider, FetchStatus, useBlock, useFetchBlock } from '@providers/block';
 import { useCluster, useClusterInfo } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
+import { useAtomValue } from 'jotai';
 import { notFound, useSearchParams } from 'next/navigation';
 import React, { PropsWithChildren, use } from 'react';
 import { ExternalLink } from 'react-feather';
@@ -256,9 +258,11 @@ const TABS: NavigationTab[] = [
 
 function MoreSection({ children, slot }: { children: React.ReactNode; slot: number }) {
     const searchParams = useSearchParams();
+    const devFlagEnabled = useAtomValue(customUrlEnabledAtom);
     const buildHref = React.useCallback(
-        (path: string) => pickClusterParams(`/block/${slot}/${path}`, searchParams ?? undefined),
-        [slot, searchParams],
+        (path: string) =>
+            pickClusterParams(`/block/${slot}/${path}`, searchParams ?? undefined, undefined, devFlagEnabled),
+        [devFlagEnabled, slot, searchParams],
     );
 
     return (

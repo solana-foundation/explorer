@@ -34,17 +34,20 @@ This requirement governs fetches that client code constructs. It does NOT cover 
 - **THEN** it SHALL identify the cluster by its slug alone
 - **AND** SHALL NOT forward the custom endpoint, because no server route can consume it
 
-### Requirement: Navigation params SHALL carry customUrl only when the target cluster is Custom
+### Requirement: Navigation params SHALL carry customUrl only where the app would honor it
 
-Preserving cluster params across navigation SHALL propagate `customUrl` only when the resulting cluster is `custom`, and SHALL strip it for every other cluster. A `customUrl` is meaningful only on the Custom cluster — it is that cluster's endpoint, and every other cluster resolves from its own configured URL — so propagating it elsewhere ships the user's endpoint to a cluster that ignores it.
+Preserving cluster params across navigation SHALL propagate `customUrl` only when the app would honor that value for the resulting cluster, and SHALL strip it otherwise. The decision SHALL use the single shared criterion (`isCustomUrlAllowed`), which honors a `customUrl` on the Custom cluster, when the persisted developer flag is enabled, or when the candidate host is whitelisted.
 
-Where params are merged with an override, the decision SHALL use the **merged** cluster, not the incoming one, so an override that switches away from Custom drops the endpoint instead of inheriting it.
+The link builder SHALL NOT be stricter than the reader. A builder that stripped `customUrl` whenever the cluster is not `custom` would drop an endpoint the page is actively using — under the developer flag, or on a whitelisted host — so the first in-app navigation would silently fall back to the remembered URL.
+
+Where params are merged with an override, the decision SHALL use the **merged** cluster, not the incoming one, so an override that switches away from Custom drops the endpoint instead of inheriting it. A cluster param absent from the merged result SHALL be read as the default cluster, since `mainnet-beta` is omitted for being the default rather than for being unset.
 
 This requirement governs navigation-param preservation only. Generated share links and the cluster switcher are out of scope for this change and continue to emit `customUrl` for the Custom cluster.
 
-#### Scenario: Navigating while a non-custom cluster is selected
+#### Scenario: Navigating while a non-custom cluster is selected and nothing allows the endpoint
 
 - **WHEN** cluster params are preserved for a navigation target whose cluster is not `custom`
+- **AND** neither the developer flag nor the host whitelist allows the candidate URL
 - **THEN** `customUrl` SHALL NOT appear in the resulting URL
 
 #### Scenario: Navigating while the Custom cluster is selected
@@ -52,8 +55,20 @@ This requirement governs navigation-param preservation only. Generated share lin
 - **WHEN** cluster params are preserved for a navigation target whose cluster is `custom`
 - **THEN** `customUrl` SHALL be carried forward unchanged
 
+#### Scenario: Navigating on a non-custom cluster with the developer flag enabled
+
+- **WHEN** cluster params are preserved for a non-custom navigation target
+- **AND** the persisted developer flag is enabled
+- **THEN** `customUrl` SHALL be carried forward, because the app honors it for that cluster
+
+#### Scenario: Navigating on a non-custom cluster with a whitelisted endpoint
+
+- **WHEN** cluster params are preserved for a non-custom navigation target
+- **AND** the candidate `customUrl` resolves to a whitelisted host
+- **THEN** `customUrl` SHALL be carried forward, with or without the developer flag
+
 #### Scenario: An override switches the cluster away from Custom
 
 - **WHEN** additional params override the cluster from `custom` to a non-custom cluster
 - **THEN** the decision SHALL be made on the merged cluster
-- **AND** the previously-present `customUrl` SHALL be stripped from the result
+- **AND** the previously-present `customUrl` SHALL be stripped unless the flag or the whitelist still allows it
