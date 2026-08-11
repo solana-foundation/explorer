@@ -32,8 +32,6 @@
 
 - [x] 5.1 Run the full gate: `pnpm format:ci` → `pnpm lint` → `pnpm openspec:validate` → `pnpm typecheck` → `pnpm build` → `pnpm test:ci`.
 
-- [ ] 5.2 Manual smoke on the preview deploy, covering the one user-visible change: browsing a non-custom cluster no longer carries `customUrl` from link to link, while the Custom cluster keeps its endpoint in the URL. Also confirm the two allow-cases survive navigation — `enableCustomUrl` set in `localStorage` on a non-custom cluster, and a whitelisted `engine.mirror.ad` endpoint without the flag. Server-side changes need no smoke — they are type-only and behavior-neutral, and custom-cluster token images do not render either way.
-
 ## Descoped
 
 The client-state half of the original proposal was cut: making the custom endpoint a `localStorage`-only value and removing it from generated links (`buildExplorerLink`), the cluster switcher, `isCustomUrlAllowed`, and the cross-cluster discovery probes. On the Custom cluster the endpoint stays in the page URL exactly as before.
