@@ -21,7 +21,7 @@ vi.stubGlobal('fetch', fetchMock);
 describe('GET /api/stake-rewards/[address]', () => {
     beforeEach(() => {
         vi.stubEnv('NEXT_PUBLIC_STAKE_TOTAL_REWARD_ENABLED', 'true');
-        vi.stubEnv('solscan_api', 'test-key');
+        vi.stubEnv('SOLSCAN_API_KEY', 'test-key');
         isStakeAccountMock.mockResolvedValue(true);
     });
 
@@ -94,7 +94,7 @@ describe('GET /api/stake-rewards/[address]', () => {
     });
 
     it('should return 503 when the key is not configured', async () => {
-        vi.stubEnv('solscan_api', '');
+        vi.stubEnv('SOLSCAN_API_KEY', '');
 
         const response = await callRoute(VALID_ADDRESS);
 
