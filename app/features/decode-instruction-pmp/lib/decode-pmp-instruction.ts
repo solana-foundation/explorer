@@ -1,3 +1,4 @@
+import { PmpDecodeConfigStruct } from '@entities/pmp-account';
 import { unwrapOption } from '@solana/kit';
 import type { TransactionInstruction } from '@solana/web3.js';
 import {
@@ -11,7 +12,6 @@ import { is } from 'superstruct';
 
 import { HEADER_ONLY_SET_DATA_LEN, PMP_ADDRESS, PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX } from './constants';
 import type { PmpContentInstruction } from './types';
-import { PmpDecodeConfigStruct } from './validators';
 
 /**
  * Decodes the config and payload of a content-carrying PMP instruction from its RAW bytes, using the library's

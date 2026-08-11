@@ -1,4 +1,13 @@
 import { RawDataField } from '@components/shared/RawDataField';
+import {
+    decodePmpPayload,
+    PMP_COMPRESSED_BYTES_LABELS,
+    PMP_DATA_SOURCE_ANALYTICS_NAMES,
+    PMP_FORMAT_ANALYTICS_NAMES,
+    PMP_UNCOMPRESSED_BYTES_LABEL,
+    type PmpAccountContent,
+    type PmpDecodedPayload,
+} from '@entities/pmp-account';
 import { PublicKey } from '@solana/web3.js';
 import { Compression, DataSource } from '@solana-program/program-metadata';
 import React from 'react';
@@ -14,15 +23,10 @@ import { pmpAnalytics } from '../lib/analytics';
 import {
     PMP_ACCOUNT_RAW_DOWNLOAD_FILENAME,
     PMP_ANALYTICS_IX_NAMES,
-    PMP_COMPRESSED_BYTES_LABELS,
-    PMP_DATA_SOURCE_ANALYTICS_NAMES,
     PMP_DECODED_DOWNLOAD_FILENAME,
-    PMP_FORMAT_ANALYTICS_NAMES,
     PMP_RAW_DOWNLOAD_FILENAME,
-    PMP_UNCOMPRESSED_BYTES_LABEL,
 } from '../lib/constants';
-import { decodePmpPayload } from '../lib/decode-pmp-payload';
-import type { PmpAccountContent, PmpDecodedPayload, PmpPayloadInstruction } from '../lib/types';
+import type { PmpPayloadInstruction } from '../lib/types';
 import { usePmpAccountPayload } from '../model/use-pmp-account-payload';
 
 /** The card table has three columns, so every row in this section spans all of them. */

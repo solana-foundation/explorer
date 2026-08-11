@@ -1,4 +1,10 @@
 import { RawDataField } from '@components/shared/RawDataField';
+import {
+    PMP_COMPRESSION_LABELS,
+    PMP_DATA_SOURCE_LABELS,
+    PMP_ENCODING_LABELS,
+    PMP_FORMAT_LABELS,
+} from '@entities/pmp-account';
 import { PublicKey, type SignatureResult, type TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -12,10 +18,6 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import {
     PMP_ACCOUNT_NAMES,
     PMP_CODAMA_PROGRAM_NAME,
-    PMP_COMPRESSION_LABELS,
-    PMP_DATA_SOURCE_LABELS,
-    PMP_ENCODING_LABELS,
-    PMP_FORMAT_LABELS,
     PMP_IX_TITLES,
     PMP_WRITE_CHUNK_DOWNLOAD_FILENAME,
 } from '../lib/constants';
