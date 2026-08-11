@@ -1,11 +1,9 @@
-import { customUrlEnabledAtom } from '@entities/cluster';
 import { useCluster } from '@providers/cluster';
 import { Cluster, clusterSlug } from '@utils/cluster';
-import { useAtomValue } from 'jotai';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 
-import { pickClusterParams } from '@/app/utils/url';
+import { useBuildClusterPath } from '@/app/utils/url';
 
 import type { SearchItem } from '../lib/types';
 
@@ -13,7 +11,7 @@ export function useSearchNavigation(): (option: SearchItem) => void {
     const router = useRouter();
     const { cluster } = useCluster();
     const searchParams = useSearchParams();
-    const devFlagEnabled = useAtomValue(customUrlEnabledAtom);
+    const buildClusterPath = useBuildClusterPath();
 
     return useCallback(
         (option: SearchItem) => {
@@ -24,12 +22,11 @@ export function useSearchNavigation(): (option: SearchItem) => void {
                 const qIndex = pathname.indexOf('?');
                 const path = pathname.slice(0, qIndex);
                 const currentSearchParamsString = pathname.slice(qIndex + 1);
-                const nextPath = pickClusterParams(
-                    path,
-                    new URLSearchParams(currentSearchParamsString),
-                    new URLSearchParams(`cluster=${clusterSlug(effectiveCluster)}`),
-                    devFlagEnabled,
-                );
+                const nextPath = buildClusterPath(path, {
+                    additionalParams: new URLSearchParams(`cluster=${clusterSlug(effectiveCluster)}`),
+                    // Not the URL bar's params — the target item carries its own query string.
+                    currentSearchParams: new URLSearchParams(currentSearchParamsString),
+                });
                 router.push(nextPath);
             } else if (option.cluster !== undefined) {
                 // Item carries its own cluster — use it instead of inheriting from the URL bar.
@@ -43,6 +40,6 @@ export function useSearchNavigation(): (option: SearchItem) => void {
                 router.push(`${pathname}${nextQueryString ? `?${nextQueryString}` : ''}`);
             }
         },
-        [cluster, devFlagEnabled, router, searchParams],
+        [buildClusterPath, cluster, router, searchParams],
     );
 }

@@ -2,12 +2,16 @@ import { isCustomUrlAllowed } from '@entities/cluster/lib/resolve-cluster';
 import { customUrlEnabledAtom } from '@entities/cluster/model/cluster-storage';
 import { useAtomValue } from 'jotai';
 import { useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { Cluster, clusterFromSlug, clusterSlug, DEFAULT_CLUSTER } from './cluster';
 
+// The read-only slice of URLSearchParams these helpers need. Kept structural so callers can pass a
+// `ReadonlyURLSearchParams`, a plain `URLSearchParams`, or a test double.
+type ParamsLike = { get(key: string): string | null; toString(): string };
+
 type Config = Readonly<{
-    additionalParams?: { get(key: string): string | null; toString(): string };
+    additionalParams?: ParamsLike;
     pathname: string;
 }>;
 
@@ -19,15 +23,33 @@ function extractPathnameHash(pathname: string) {
     return [pathnameWithoutHash, hash];
 }
 
-export function useClusterPath({ additionalParams, pathname }: Config) {
+// Builds a cluster-preserving path, for callers that need one *inside* a callback or a loop — where a
+// hook cannot run per item. This is the only place the navigation code reads the dev toggle, so the
+// components that build links stay unaware that one exists.
+//
+// `currentSearchParams` defaults to the live URL. Override it when the incoming params are not the URL
+// bar's: search navigation parses them out of the target item's own pathname.
+export function useBuildClusterPath() {
     const currentSearchParams = useSearchParams();
     const devFlagEnabled = useAtomValue(customUrlEnabledAtom);
-    const [pathnameWithoutHash, hash] = extractPathnameHash(pathname);
+    return useCallback(
+        (pathname: string, options?: { additionalParams?: ParamsLike; currentSearchParams?: ParamsLike }) => {
+            const [pathnameWithoutHash, hash] = extractPathnameHash(pathname);
+            const current = options?.currentSearchParams ?? currentSearchParams ?? undefined;
+            return (
+                pickClusterParams(pathnameWithoutHash, current, options?.additionalParams, devFlagEnabled) +
+                (hash ? `#${hash}` : '')
+            );
+        },
+        [currentSearchParams, devFlagEnabled],
+    );
+}
+
+export function useClusterPath({ additionalParams, pathname }: Config) {
+    const buildClusterPath = useBuildClusterPath();
     return useMemo(
-        () =>
-            pickClusterParams(pathnameWithoutHash, currentSearchParams ?? undefined, additionalParams, devFlagEnabled) +
-            (hash ? `#${hash}` : ''),
-        [additionalParams, currentSearchParams, devFlagEnabled, hash, pathnameWithoutHash],
+        () => buildClusterPath(pathname, { additionalParams }),
+        [additionalParams, buildClusterPath, pathname],
     );
 }
 
@@ -47,13 +69,15 @@ function mayCarryCustomUrl(clusterMoniker: string | null, candidateUrl: string |
     return isCustomUrlAllowed({ candidateUrl, cluster, devFlagEnabled });
 }
 
+// The pure primitive. React callers should reach for `useClusterPath` or `useBuildClusterPath` instead,
+// which supply `devFlagEnabled` from the atom; this stays exported for direct, store-free testing.
 export function pickClusterParams(
     pathname: string,
-    currentSearchParams?: { toString(): string; get(key: string): string | null },
+    currentSearchParams?: ParamsLike,
     additionalParams?: { get(key: string): string | null },
     // The persisted dev toggle (`customUrlEnabledAtom`), which honors `customUrl` on any cluster.
     // Defaults to `false` so a caller that omits it fails closed — it strips the endpoint rather than
-    // propagating it. React callers read the atom; `useClusterPath` does it for you.
+    // propagating it.
     devFlagEnabled = false,
 ): string {
     let nextSearchParams: URLSearchParams | undefined;

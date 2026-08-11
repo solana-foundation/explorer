@@ -1,8 +1,10 @@
 import { renderHook } from '@testing-library/react';
+import { createStore, Provider } from 'jotai';
 import { useSearchParams } from 'next/navigation';
-import { describe, expect, it, vi } from 'vitest';
+import { createElement } from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { pickClusterParams, useClusterPath } from '../url';
+import { pickClusterParams, useBuildClusterPath, useClusterPath } from '../url';
 
 vi.mock('next/navigation');
 
@@ -301,5 +303,63 @@ describe('useClusterPath', () => {
 
             expect(result.current).toBe('/address/abc123');
         });
+    });
+});
+
+// `pickClusterParams` is tested directly above with an explicit flag. These cover the wiring the
+// components rely on: the hook is the only place that reads the persisted toggle, so if it stopped
+// reading it, every link would silently fall back to the stripping behavior.
+describe('useBuildClusterPath', () => {
+    const CUSTOM_ON_DEVNET = 'cluster=devnet&customUrl=http://localhost:8899';
+
+    afterEach(() => {
+        localStorage.removeItem('enableCustomUrl');
+    });
+
+    function mountBuilder() {
+        // A fresh store per test, so the persisted flag cannot leak between cases. `customUrlEnabledAtom`
+        // uses `getOnInit`, so it reads localStorage as the store initializes it.
+        const store = createStore();
+        const { result } = renderHook(() => useBuildClusterPath(), {
+            wrapper: ({ children }) => createElement(Provider, { store }, children),
+        });
+        return result;
+    }
+
+    it('should honor customUrl on a non-custom cluster when the persisted flag is set', () => {
+        localStorage.setItem('enableCustomUrl', 'true');
+        vi.mocked(useSearchParams).mockReturnValue(undefined as any);
+
+        const builder = mountBuilder();
+
+        expect(builder.current('/address/abc123', { currentSearchParams: new URLSearchParams(CUSTOM_ON_DEVNET) })).toBe(
+            '/address/abc123?cluster=devnet&customUrl=http%3A%2F%2Flocalhost%3A8899',
+        );
+    });
+
+    it('should strip customUrl on a non-custom cluster when the flag is unset', () => {
+        vi.mocked(useSearchParams).mockReturnValue(undefined as any);
+
+        const builder = mountBuilder();
+
+        expect(builder.current('/address/abc123', { currentSearchParams: new URLSearchParams(CUSTOM_ON_DEVNET) })).toBe(
+            '/address/abc123?cluster=devnet',
+        );
+    });
+
+    it('should fall back to the live search params when no override is given', () => {
+        vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams('cluster=testnet') as any);
+
+        const builder = mountBuilder();
+
+        expect(builder.current('/address/abc123')).toBe('/address/abc123?cluster=testnet');
+    });
+
+    it('should keep the hash fragment after the query string', () => {
+        vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams('cluster=testnet') as any);
+
+        const builder = mountBuilder();
+
+        expect(builder.current('/address/abc123#tokens')).toBe('/address/abc123?cluster=testnet#tokens');
     });
 });
