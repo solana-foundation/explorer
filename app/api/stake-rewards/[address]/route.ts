@@ -59,7 +59,7 @@ export async function GET(request: Request, props: Params) {
     try {
         // Gate the metered request behind one cheap RPC call: the route is public, and every cache
         // miss spends shared paid quota across up to ten upstream calls.
-        if (!(await isStakeAccount({ address, rpcUrl: serverClusterUrl(Cluster.MainnetBeta, '') }))) {
+        if (!(await isStakeAccount({ address, rpcUrl: serverClusterUrl(Cluster.MainnetBeta) }))) {
             return NextResponse.json({ error: 'Not a stake account' }, { headers: ERROR_CACHE_HEADERS, status: 404 });
         }
 
