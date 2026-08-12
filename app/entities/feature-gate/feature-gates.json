@@ -2058,7 +2058,7 @@
   {
     "comms_required": null,
     "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1115,
     "key": "iBRL5RuWhw4yqaAZu96RUULHckHTZAoe2b77qaV38JZ",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
@@ -2076,13 +2076,13 @@
     "simds": [
       "0525"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1000,
     "title": "SIMD-0525: Reduce Slot Time to 350ms"
   },
   {
     "comms_required": null,
     "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1118,
     "key": "iBRLL3k18HST852F1Mf3Lv83waTNQmmqvKDxvYGwQFL",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
@@ -2100,7 +2100,7 @@
     "simds": [
       "0525"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1002,
     "title": "SIMD-0525: Reduce Slot Time to 300ms"
   },
   {
@@ -2124,7 +2124,7 @@
     "simds": [
       "0525"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1004,
     "title": "SIMD-0525: Reduce Slot Time to 250ms"
   },
   {
