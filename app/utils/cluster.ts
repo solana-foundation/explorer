@@ -13,6 +13,7 @@ export {
     DEFAULT_CLUSTER,
     DEVNET_URL,
     MAINNET_BETA_URL,
+    type ServerCluster,
     serverClusterUrl,
     SIMD296_URL,
     TESTNET_URL,

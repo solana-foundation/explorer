@@ -13,7 +13,7 @@ import { useCluster, useClusterInfo } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
-import { notFound, useSearchParams } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import React, { PropsWithChildren, use } from 'react';
 import { ExternalLink } from 'react-feather';
 
@@ -23,7 +23,7 @@ import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { getEpochForSlot, getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
-import { pickClusterParams } from '@/app/utils/url';
+import { useBuildClusterPath } from '@/app/utils/url';
 
 type SlotParams = { slot: string };
 type Props = PropsWithChildren<{ params: Promise<SlotParams> }>;
@@ -255,10 +255,10 @@ const TABS: NavigationTab[] = [
 ];
 
 function MoreSection({ children, slot }: { children: React.ReactNode; slot: number }) {
-    const searchParams = useSearchParams();
+    const buildClusterPath = useBuildClusterPath();
     const buildHref = React.useCallback(
-        (path: string) => pickClusterParams(`/block/${slot}/${path}`, searchParams ?? undefined),
-        [slot, searchParams],
+        (path: string) => buildClusterPath(`/block/${slot}/${path}`),
+        [buildClusterPath, slot],
     );
 
     return (

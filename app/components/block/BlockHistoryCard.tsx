@@ -14,7 +14,7 @@ import {
 } from '@solana/web3.js';
 import { parseProgramLogs } from '@utils/program-logs';
 import { displayAddress } from '@utils/tx';
-import { pickClusterParams } from '@utils/url';
+import { useBuildClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useMemo } from 'react';
@@ -76,6 +76,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
     const sortMode = useQuerySort(currentSearchParams);
     const router = useRouter();
     const { cluster } = useCluster();
+    const buildClusterPath = useBuildClusterPath();
 
     const { transactions, invokedPrograms } = React.useMemo(() => {
         const invokedPrograms = new Map<string, number>();
@@ -238,9 +239,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.delete('sort');
-                                    router.push(
-                                        pickClusterParams(currentPathname, currentSearchParams, additionalParams),
-                                    );
+                                    router.push(buildClusterPath(currentPathname, { additionalParams }));
                                 }}
                             >
                                 #
@@ -254,9 +253,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'fee');
-                                    router.push(
-                                        pickClusterParams(currentPathname, currentSearchParams, additionalParams),
-                                    );
+                                    router.push(buildClusterPath(currentPathname, { additionalParams }));
                                 }}
                             >
                                 Fee
@@ -266,9 +263,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'reservedCUs');
-                                    router.push(
-                                        pickClusterParams(currentPathname, currentSearchParams, additionalParams),
-                                    );
+                                    router.push(buildClusterPath(currentPathname, { additionalParams }));
                                 }}
                             >
                                 Reserved CUs
@@ -279,9 +274,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                     onClick={() => {
                                         const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                         additionalParams.set('sort', 'compute');
-                                        router.push(
-                                            pickClusterParams(currentPathname, currentSearchParams, additionalParams),
-                                        );
+                                        router.push(buildClusterPath(currentPathname, { additionalParams }));
                                     }}
                                 >
                                     Compute
@@ -292,9 +285,7 @@ export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockRespon
                                 onClick={() => {
                                     const additionalParams = new URLSearchParams(currentSearchParams?.toString());
                                     additionalParams.set('sort', 'txnCost');
-                                    router.push(
-                                        pickClusterParams(currentPathname, currentSearchParams, additionalParams),
-                                    );
+                                    router.push(buildClusterPath(currentPathname, { additionalParams }));
                                 }}
                             >
                                 Txn Cost
