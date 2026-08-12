@@ -21,7 +21,7 @@ import {
 } from '@providers/transactions';
 import { ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
-import { displayTimestamp } from '@utils/date';
+import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
@@ -349,18 +349,31 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                 )}
 
                 {/* Timestamp */}
-                <Row>
-                    <Label>Timestamp</Label>
-                    <Value>
-                        {info.timestamp !== 'unavailable' ? (
-                            <span className="font-mono">{displayTimestamp(info.timestamp * 1000)}</span>
-                        ) : (
+                {info.timestamp !== 'unavailable' ? (
+                    <>
+                        <Row divider>
+                            <Label>Timestamp (Local)</Label>
+                            <Value>
+                                <span className="font-mono">{displayTimestamp(info.timestamp * 1000, true)}</span>
+                            </Value>
+                        </Row>
+                        <Row>
+                            <Label>Timestamp (UTC)</Label>
+                            <Value>
+                                <span className="font-mono">{displayTimestampUtc(info.timestamp * 1000, true)}</span>
+                            </Value>
+                        </Row>
+                    </>
+                ) : (
+                    <Row>
+                        <Label>Timestamp</Label>
+                        <Value>
                             <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
                                 Unavailable
                             </InfoTooltip>
-                        )}
-                    </Value>
-                </Row>
+                        </Value>
+                    </Row>
+                )}
             </Card>
         </section>
     );
