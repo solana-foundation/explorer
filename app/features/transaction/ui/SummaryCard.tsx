@@ -10,6 +10,7 @@ import { Button } from '@components/shared/ui/button';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
+import type { TransactionVersion } from '@entities/transaction-data';
 import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
 import { useCluster, useClusterInfo } from '@providers/cluster';
@@ -27,7 +28,7 @@ import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { ZoomIn } from 'react-feather';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
@@ -112,8 +113,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         pathname: `/tx/${signature}`,
     });
 
-    const rawMessage = rawDetails?.data?.raw?.message;
-    const serializedRawData = useMemo(() => rawMessage?.serialize(), [rawMessage]);
+    const serializedRawData = rawDetails?.data?.raw?.messageBytes;
 
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
@@ -160,13 +160,18 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const fee = transactionWithMeta?.meta?.fee;
     const costUnits = transactionWithMeta?.meta?.costUnits;
     const computeUnitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed;
-    const reservedCUs = transactionWithMeta?.transaction
-        ? estimateRequestedComputeUnitsForParsedTransaction(
-              transactionWithMeta.transaction,
-              clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(info.slot)) : undefined,
-              cluster,
-          )
-        : undefined;
+    const transactionConfig = transactionWithMeta?.transactionConfig;
+    // v1 declares its compute unit limit on the message; every earlier version has to have it
+    // reconstructed from the Compute Budget instructions, which v1 does not carry.
+    const reservedCUs =
+        transactionConfig?.computeUnitLimit ??
+        (transactionWithMeta?.transaction && transactionWithMeta.version !== 1
+            ? estimateRequestedComputeUnitsForParsedTransaction(
+                  transactionWithMeta.transaction,
+                  clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(info.slot)) : undefined,
+                  cluster,
+              )
+            : undefined);
     const transaction = transactionWithMeta?.transaction;
     const blockhash = transaction?.message.recentBlockhash;
     const version = transactionWithMeta?.version;
@@ -340,11 +345,37 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     </Row>
                 )}
 
+                {/* v1 message-level resource limits */}
+                {transactionConfig?.priorityFeeLamports !== undefined && (
+                    <Row divider>
+                        <Label className="overflow-visible">
+                            <InfoTooltip text="A total amount paid for prioritization, unlike the per-compute-unit price used before v1">
+                                Priority fee (total)
+                            </InfoTooltip>
+                        </Label>
+                        <Value>
+                            <SolBalance lamports={transactionConfig.priorityFeeLamports} />
+                        </Value>
+                    </Row>
+                )}
+                {transactionConfig?.loadedAccountsDataSizeLimit !== undefined && (
+                    <Row divider>
+                        <Label>Loaded accounts data size limit</Label>
+                        <Value>{transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}</Value>
+                    </Row>
+                )}
+                {transactionConfig?.heapSize !== undefined && (
+                    <Row divider>
+                        <Label>Heap size</Label>
+                        <Value>{transactionConfig.heapSize.toLocaleString('en-US')}</Value>
+                    </Row>
+                )}
+
                 {/* Transaction Version */}
                 {version !== undefined && (
                     <Row divider>
                         <Label>Transaction Version</Label>
-                        <Value className="uppercase">{version}</Value>
+                        <Value className="uppercase">{formatTransactionVersion(version)}</Value>
                     </Row>
                 )}
 
@@ -377,4 +408,8 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
             </Card>
         </section>
     );
+}
+
+function formatTransactionVersion(version: TransactionVersion): string {
+    return version === 'legacy' ? version : `v${version}`;
 }

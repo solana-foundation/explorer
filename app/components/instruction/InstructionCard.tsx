@@ -41,7 +41,7 @@ export function InstructionCard({
     // Use provided raw prop, or fetch from transaction details
     let raw: TransactionInstruction | undefined = rawProp;
     if (!raw && rawDetails && childIndex === undefined) {
-        raw = rawDetails?.data?.raw?.transaction.instructions[index];
+        raw = rawDetails?.data?.raw?.transaction?.instructions[index];
     }
 
     const fetchRaw = useFetchRawTransaction();

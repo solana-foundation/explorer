@@ -1,5 +1,5 @@
 import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import type { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
+import type { ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 
 import { isTokenProgramAddress } from '@/app/shared/model/token-program';
@@ -13,6 +13,17 @@ const RENT_FUNDING_PROGRAMS: PublicKey[] = [ASSOCIATED_TOKEN_PROGRAM_ID];
 export function isRentFundingProgram(programId: PublicKey): boolean {
     return RENT_FUNDING_PROGRAMS.some(p => p.equals(programId));
 }
+
+// The instruction-bearing slice of a parsed transaction. Declared structurally so callers can
+// pass any transaction version — instruction layout does not vary by version.
+type TransactionInstructionSource = {
+    meta?: {
+        innerInstructions?:
+            | { index: number; instructions: (ParsedInstruction | PartiallyDecodedInstruction)[] }[]
+            | null;
+    } | null;
+    transaction: { message: { instructions: (ParsedInstruction | PartiallyDecodedInstruction)[] } };
+};
 
 export type LocatedInstruction<T> = {
     instruction: T;
@@ -28,7 +39,7 @@ export type LocatedInstruction<T> = {
 // Each match carries `topLevelIndex` (and `innerIndex` if the match came from an
 // inner instruction) so downstream loggers can pinpoint the original tx position.
 export function collectTransferInstructions<T extends ParsedInstruction | PartiallyDecodedInstruction>(
-    transaction: ParsedTransactionWithMeta,
+    transaction: TransactionInstructionSource,
     isMatch: (instr: ParsedInstruction | PartiallyDecodedInstruction) => instr is T,
 ): LocatedInstruction<T>[] {
     const innerByIndex = new Map<number, (ParsedInstruction | PartiallyDecodedInstruction)[]>();

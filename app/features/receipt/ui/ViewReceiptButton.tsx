@@ -1,7 +1,7 @@
 'use client';
 
+import type { TransactionWithMeta } from '@entities/transaction-data';
 import { useCluster } from '@providers/cluster';
-import { ParsedTransactionWithMeta } from '@solana/web3.js';
 import Link from 'next/link';
 import { FileText } from 'react-feather';
 import useSWR from 'swr';
@@ -15,7 +15,7 @@ import { extractReceiptData } from '../model/create-receipt';
 interface ViewReceiptButtonProps {
     signature: string;
     receiptPath: string;
-    transactionWithMeta: ParsedTransactionWithMeta | null | undefined;
+    transactionWithMeta: TransactionWithMeta | null | undefined;
 }
 
 // FIXME: missing Storybook story — gated on NEXT_PUBLIC_RECEIPT_ENABLED + needs a populated transactionWithMeta to render.

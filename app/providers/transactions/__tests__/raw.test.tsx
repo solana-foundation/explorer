@@ -17,16 +17,10 @@ vi.mock('@providers/cluster', () => ({
 const loggerError = vi.fn();
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: (...args: unknown[]) => loggerError(...args) } }));
 
-const getTransaction = vi.fn();
-vi.mock('@solana/web3.js', async () => {
-    const actual = await vi.importActual<typeof import('@solana/web3.js')>('@solana/web3.js');
-    return {
-        ...actual,
-        Connection: vi.fn().mockImplementation(function () {
-            return { getTransaction: (...args: unknown[]) => getTransaction(...args) };
-        }),
-    };
-});
+const fetchRawTransaction = vi.fn();
+vi.mock('@entities/transaction-data', () => ({
+    fetchRawTransaction: (...args: unknown[]) => fetchRawTransaction(...args),
+}));
 
 const dispatch = vi.fn();
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -39,8 +33,8 @@ beforeEach(() => {
 });
 
 describe('useFetchRawTransaction', () => {
-    it('should dispatch FetchFailed when getTransaction throws', async () => {
-        getTransaction.mockRejectedValue(new Error('rpc boom'));
+    it('should dispatch FetchFailed when the fetch throws', async () => {
+        fetchRawTransaction.mockRejectedValue(new Error('rpc boom'));
         const { result } = renderHook(() => useFetchRawTransaction(), { wrapper });
 
         result.current('sig', 'confirmed');
@@ -61,37 +55,45 @@ describe('useFetchRawTransaction', () => {
         expect(failedAction).not.toHaveProperty('data');
     });
 
-    it('should thread the commitment through to getTransaction', async () => {
-        getTransaction.mockResolvedValue(null);
+    it('should thread the commitment through to the fetch', async () => {
+        fetchRawTransaction.mockResolvedValue(null);
         const { result } = renderHook(() => useFetchRawTransaction(), { wrapper });
 
         result.current('sig', 'confirmed');
 
-        await waitFor(() =>
-            expect(getTransaction).toHaveBeenCalledWith('sig', {
-                commitment: 'confirmed',
-                maxSupportedTransactionVersion: 0,
-            }),
-        );
+        await waitFor(() => expect(fetchRawTransaction).toHaveBeenCalledWith(MOCK_URL, 'sig', 'confirmed'));
     });
 
     it('should pass undefined commitment by default (unchanged behavior for existing callers)', async () => {
-        getTransaction.mockResolvedValue(null);
+        fetchRawTransaction.mockResolvedValue(null);
+        const { result } = renderHook(() => useFetchRawTransaction(), { wrapper });
+
+        result.current('sig');
+
+        await waitFor(() => expect(fetchRawTransaction).toHaveBeenCalledWith(MOCK_URL, 'sig', undefined));
+    });
+
+    it('should dispatch the fetched transaction', async () => {
+        const raw = { messageBytes: new Uint8Array([1, 2, 3]), signatures: ['sig'], version: 1 };
+        fetchRawTransaction.mockResolvedValue(raw);
         const { result } = renderHook(() => useFetchRawTransaction(), { wrapper });
 
         result.current('sig');
 
         await waitFor(() =>
-            expect(getTransaction).toHaveBeenCalledWith('sig', {
-                commitment: undefined,
-                maxSupportedTransactionVersion: 0,
+            expect(dispatch).toHaveBeenCalledWith({
+                data: { raw },
+                key: 'sig',
+                status: FetchStatus.Fetched,
+                type: ActionType.Update,
+                url: MOCK_URL,
             }),
         );
     });
 
     it('should not log to Sentry on a custom cluster, but still dispatch FetchFailed', async () => {
         mockCluster = Cluster.Custom;
-        getTransaction.mockRejectedValue(new Error('rpc boom'));
+        fetchRawTransaction.mockRejectedValue(new Error('rpc boom'));
         const { result } = renderHook(() => useFetchRawTransaction(), { wrapper });
 
         result.current('sig', 'confirmed');

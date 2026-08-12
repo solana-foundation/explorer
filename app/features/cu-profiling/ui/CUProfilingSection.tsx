@@ -1,14 +1,14 @@
 import { CUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
+import type { TransactionWithMeta } from '@entities/transaction-data';
 import { useCluster, useClusterInfo } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
-import type { ParsedTransactionWithMeta } from '@solana/web3.js';
 import type { Cluster } from '@utils/cluster';
 import { getEpochForSlot } from '@utils/epoch-schedule';
 import type { SignatureProps } from '@utils/index';
 import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
 
-// FIXME: missing Storybook story — needs useTransactionDetails provider + ParsedTransactionWithMeta fixture.
+// FIXME: missing Storybook story — needs useTransactionDetails provider + TransactionWithMeta fixture.
 export function CUProfilingSection({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { cluster } = useCluster();
@@ -43,7 +43,7 @@ export function CUProfilingSection({ signature }: SignatureProps) {
     return <CUProfilingCard instructions={instructionsForCU} unitsConsumed={unitsConsumed} />;
 }
 
-function formatTransactionLogs(transactionWithMeta: ParsedTransactionWithMeta | null | undefined, cluster: Cluster) {
+function formatTransactionLogs(transactionWithMeta: TransactionWithMeta | null | undefined, cluster: Cluster) {
     const logMessages = transactionWithMeta?.meta?.logMessages || null;
     const err = transactionWithMeta?.meta?.err || undefined;
 

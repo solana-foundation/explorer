@@ -1,3 +1,4 @@
+import type { TransactionWithMeta } from '@entities/transaction-data';
 import {
     collectTransferInstructions,
     isRentFundingProgram,
@@ -5,7 +6,7 @@ import {
     type LocatedInstruction,
     type SolTransferInstruction,
 } from '@entities/transfer-instruction';
-import type { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction } from '@solana/web3.js';
+import type { ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { validate } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -15,7 +16,7 @@ import { extractMemoFromTransaction } from './memo';
 import { SolTransferPayload } from './schemas';
 import { type ReceiptSol, type Transfer } from './types';
 
-export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta): ReceiptSol | undefined {
+export function createSolTransferReceipt(transaction: TransactionWithMeta): ReceiptSol | undefined {
     const located = getSolTransferInstructions(transaction);
     if (located.length === 0) return undefined;
 
@@ -46,9 +47,7 @@ export function createSolTransferReceipt(transaction: ParsedTransactionWithMeta)
     };
 }
 
-function getSolTransferInstructions(
-    transaction: ParsedTransactionWithMeta,
-): LocatedInstruction<SolTransferInstruction>[] {
+function getSolTransferInstructions(transaction: TransactionWithMeta): LocatedInstruction<SolTransferInstruction>[] {
     const collected = collectTransferInstructions(
         transaction,
         (instr: ParsedInstruction | PartiallyDecodedInstruction): instr is SolTransferInstruction =>
@@ -64,7 +63,7 @@ function getSolTransferInstructions(
 }
 
 function buildTransfers(
-    transaction: ParsedTransactionWithMeta,
+    transaction: TransactionWithMeta,
     located: LocatedInstruction<SolTransferInstruction>[],
 ): Transfer[] | undefined {
     const result: Transfer[] = [];
@@ -80,7 +79,7 @@ function buildTransfers(
     return result;
 }
 
-function extractSolTransferPayload(transaction: ParsedTransactionWithMeta, instruction: SolTransferInstruction) {
+function extractSolTransferPayload(transaction: TransactionWithMeta, instruction: SolTransferInstruction) {
     const { info } = instruction.parsed;
     return {
         date: transaction.blockTime ?? undefined,
