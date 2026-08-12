@@ -5,8 +5,7 @@ cache/
 coverage/
 node_modules/
 dist/
-packages/entity-inspector/**
-!packages/entity-inspector/**/*.md
+packages/entity-inspector/
 build/
 .pnpm-store/
 .claude/

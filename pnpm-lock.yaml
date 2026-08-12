@@ -28,6 +28,9 @@ catalogs:
       specifier: 10.2.6
       version: 10.2.6
   tooling:
+    prettier:
+      specifier: 3.5.3
+      version: 3.5.3
     typescript:
       specifier: 5.7.3
       version: 5.7.3
@@ -557,7 +560,7 @@ importers:
         specifier: 16.1.0
         version: 16.1.0(postcss@8.5.10)
       prettier:
-        specifier: 3.5.3
+        specifier: catalog:tooling
         version: 3.5.3
       prettier-plugin-tailwindcss:
         specifier: 0.7.2
@@ -694,6 +697,9 @@ importers:
       oxlint:
         specifier: ^1.71.0
         version: 1.72.0
+      prettier:
+        specifier: catalog:tooling
+        version: 3.5.3
       typescript:
         specifier: catalog:tooling
         version: 5.7.3
