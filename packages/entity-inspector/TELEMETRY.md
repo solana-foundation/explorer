@@ -23,15 +23,19 @@ Required on every request: `measurement_id` and `api_secret` go in the URL, `cli
 sent by [`src/telemetry/providers/ga4.ts`](./src/telemetry/providers/ga4.ts). The host app supplies it as
 `context.clientId`; this repo resolves it in `app/mcp/telemetry.ts`:
 
-| Source                             | Value sent          |
-| ---------------------------------- | ------------------- |
-| `mcp-session-id` header            | `sha256(sessionId)` |
-| else first `x-forwarded-for` entry | `sha256(clientIp)`  |
-| else                               | `anonymous`         |
+| Source                             | Value sent                 |
+| ---------------------------------- | -------------------------- |
+| `mcp-session-id` header            | `sid_` + `sha256(session)` |
+| else first `x-forwarded-for` entry | `ip_` + `sha256(clientIp)` |
+| else                               | `anon`                     |
 
-Hashed so no session token or raw IP reaches Google verbatim. The stateless transport issues no session id, so most
-callers land on the IP branch — GA4 user counts approximate distinct caller IPs, not distinct agents. Trust event
-counts.
+Hashed so no session token or raw IP reaches Google verbatim. The prefix keeps provenance legible: an `ip_` value can be
+matched back to an address by hashing a suspect IP and comparing, and is therefore actionable; a `sid_` value cannot.
+
+Two limits to read reports against. GA4 counts users by `client_id`, so a caller on the IP branch is really "one
+address" — NAT collapses several callers into one, a rotating IP fans one caller into several. And an unsalted SHA-256
+over the 2³² IPv4 space is enumerable, so a hashed IP is pseudonymous, not anonymous. Event counts are the trustworthy
+figure; user counts are indicative.
 
 ## Events
 

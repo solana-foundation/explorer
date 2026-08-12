@@ -35,14 +35,16 @@ const pseudonymize = (value: string) => createHash('sha256').update(value).diges
 
 // GA4 needs a stable-ish client_id: the MCP session when present, else the IP — both hashed so no
 // caller-supplied identifier (session token or raw IP) ever leaves verbatim to Google Analytics.
+// The prefix keeps the provenance readable: only an `ip_` value can be matched back to an address (hash a
+// suspect IP and compare) and therefore blocked; a `sid_` value says nothing about where the caller is.
 async function resolveClientId(): Promise<string> {
     const requestHeaders = await headers();
     const sessionId = requestHeaders.get('mcp-session-id');
-    if (sessionId) return pseudonymize(sessionId);
+    if (sessionId) return `sid_${pseudonymize(sessionId)}`;
     const [firstEntry = ''] = (requestHeaders.get('x-forwarded-for') ?? '').split(',');
     const clientIp = firstEntry.trim();
-    if (clientIp.length === 0) return 'anonymous';
-    return pseudonymize(clientIp);
+    if (clientIp.length === 0) return 'anon';
+    return `ip_${pseudonymize(clientIp)}`;
 }
 
 /** Usage-event sink for `EntityInspectorConfig.track` — sends after the response via `after()`. */

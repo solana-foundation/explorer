@@ -47,7 +47,7 @@ describe('createMcpTrack', () => {
         expect(afterMock).toHaveBeenCalledTimes(1);
         const expectedHash = createHash('sha256').update('session-123').digest('hex');
         const [, init] = fetchMock.mock.calls[0];
-        expect(JSON.parse(init.body)).toMatchObject({ client_id: expectedHash });
+        expect(JSON.parse(init.body)).toMatchObject({ client_id: `sid_${expectedHash}` });
         expect(init.body).not.toContain('session-123');
     });
 
@@ -75,7 +75,7 @@ describe('createMcpTrack', () => {
 
         const expectedHash = createHash('sha256').update('1.2.3.4').digest('hex');
         const [, init] = fetchMock.mock.calls[0];
-        expect(JSON.parse(init.body)).toMatchObject({ client_id: expectedHash });
+        expect(JSON.parse(init.body)).toMatchObject({ client_id: `ip_${expectedHash}` });
         expect(init.body).not.toContain('1.2.3.4');
     });
 
@@ -87,7 +87,7 @@ describe('createMcpTrack', () => {
         await flushMicrotasks();
 
         const [, init] = fetchMock.mock.calls[0];
-        expect(JSON.parse(init.body)).toMatchObject({ client_id: 'anonymous' });
+        expect(JSON.parse(init.body)).toMatchObject({ client_id: 'anon' });
     });
 
     it('should warn once and stay a no-op when the GA credentials are not configured', async () => {
