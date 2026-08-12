@@ -1,4 +1,4 @@
-import { array, boolean, Infer, integer, min, number, type } from 'superstruct';
+import { array, boolean, Infer, integer, min, number, optional, string, type } from 'superstruct';
 
 /**
  * One epoch's inflation reward for a stake account.
@@ -18,6 +18,9 @@ export const SolscanStakeReward = type({
 
 export type SolscanStakeRewardResponse = Infer<typeof SolscanStakeRewardResponse>;
 export const SolscanStakeRewardResponse = type({
-    data: array(SolscanStakeReward),
+    // Optional because a `success: false` body carries `errors` in place of rows. Requiring it
+    // would report every upstream failure as a contract change, and hide the reason Solscan gave.
+    data: optional(array(SolscanStakeReward)),
+    errors: optional(type({ code: optional(number()), message: optional(string()) })),
     success: boolean(),
 });

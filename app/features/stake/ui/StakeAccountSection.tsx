@@ -21,7 +21,12 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import type { StakeActivationStatus } from '../api/stake-activation';
 import { EPOCH_NEVER_SET } from '../lib/constants';
 import type { StakeAccountInfo, StakeAccountType, StakeMeta } from '../lib/validators';
-import { type TotalRewardState, useTotalReward } from '../model/use-total-reward';
+import {
+    type DisabledTotalRewardState,
+    type TotalRewardState,
+    TotalRewardStatus,
+    useTotalReward,
+} from '../model/use-total-reward';
 
 type StakeActivationData = {
     state: StakeActivationStatus;
@@ -173,8 +178,8 @@ function OverviewCard({
 }
 
 /**
- * Exported for Storybook: the card is presentational, so its three total-reward states are covered
- * by passing `totalReward` directly rather than by mocking the hook the section calls.
+ * Exported for Storybook: the card is presentational, so its total-reward states are covered by
+ * passing `totalReward` directly rather than by mocking the hook the section calls.
  */
 export function DelegationCard({
     stakeAccount,
@@ -228,7 +233,7 @@ export function DelegationCard({
                     </>
                 )}
 
-                {totalReward.status !== 'disabled' && (
+                {totalReward.status !== TotalRewardStatus.Disabled && (
                     <BaseTable.Row>
                         <BaseTable.Cell>Total Reward (SOL)</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">
@@ -263,20 +268,23 @@ export function DelegationCard({
 
 // Lifetime rewards load separately from the account, so the row carries its own state. A failure
 // shows a quiet message rather than 0 — zero is a claim about the account, not about the request.
-// `disabled` is excluded because the caller drops the whole row, leaving this switch exhaustive.
+// `Disabled` is excluded because the caller drops the whole row, leaving this switch exhaustive.
 function TotalReward({
     state,
     solPrice,
 }: {
-    state: Exclude<TotalRewardState, { status: 'disabled' }>;
+    state: Exclude<TotalRewardState, DisabledTotalRewardState>;
     solPrice: number | null;
 }) {
     switch (state.status) {
-        case 'loading':
+        case TotalRewardStatus.Loading:
             return <Skeleton className="ml-auto h-4 w-24" />;
-        case 'ready':
+        case TotalRewardStatus.Ready:
             return <SolWithUsd lamports={state.lamports} solPrice={solPrice} />;
-        case 'unavailable':
+        // A cluster Solscan does not index and a request that failed read the same to a visitor:
+        // the figure is not here. The distinction is ours to act on, not theirs.
+        case TotalRewardStatus.Unavailable:
+        case TotalRewardStatus.Unsupported:
             return <span className="text-dk-gray-700">Unavailable</span>;
     }
 }

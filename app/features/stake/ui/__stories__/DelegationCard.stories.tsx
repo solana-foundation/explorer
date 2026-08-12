@@ -7,6 +7,7 @@ import { expect, within } from 'storybook/test';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '../../../../../.storybook/decorators';
 import { EPOCH_NEVER_SET } from '../../lib/constants';
 import type { StakeAccountInfo } from '../../lib/validators';
+import { TotalRewardStatus } from '../../model/use-total-reward';
 import { DelegationCard } from '../StakeAccountSection';
 
 // CUSTODIAN sentinel = System Program — convention for "no custodian set" in stake accounts.
@@ -55,7 +56,7 @@ export const TotalRewardReady: Story = {
         activation: { active: Number(DELEGATED_STAKE), inactive: 0, state: 'active' },
         solPrice: SOL_PRICE,
         stakeAccount,
-        totalReward: { lamports: 4_200_824, status: 'ready' },
+        totalReward: { lamports: 4_200_824, status: TotalRewardStatus.Ready },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -68,21 +69,21 @@ export const TotalRewardReady: Story = {
 export const TotalRewardZero: Story = {
     args: {
         ...TotalRewardReady.args,
-        totalReward: { lamports: 0, status: 'ready' },
+        totalReward: { lamports: 0, status: TotalRewardStatus.Ready },
     },
 };
 
 export const TotalRewardLoading: Story = {
     args: {
         ...TotalRewardReady.args,
-        totalReward: { status: 'loading' },
+        totalReward: { status: TotalRewardStatus.Loading },
     },
 };
 
 export const TotalRewardUnavailable: Story = {
     args: {
         ...TotalRewardReady.args,
-        totalReward: { status: 'unavailable' },
+        totalReward: { status: TotalRewardStatus.Unavailable },
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);

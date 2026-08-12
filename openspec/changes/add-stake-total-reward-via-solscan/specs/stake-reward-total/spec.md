@@ -37,6 +37,11 @@ The system MUST fail the request rather than return a total that is incomplete, 
 - **WHEN** paging reaches the maximum page count without a short page
 - **THEN** the request SHALL fail rather than return the partial sum
 
+#### Scenario: Upstream reports a failure inside a successful HTTP response
+
+- **WHEN** upstream answers `200` with a body marking the request unsuccessful
+- **THEN** the request SHALL fail rather than read the absent rows as the end of the history
+
 #### Scenario: Reward not denominated in lamports
 
 - **WHEN** a reward row reports a decimals value other than 9
@@ -90,6 +95,20 @@ The system SHALL render no Total Reward row and serve no total unless the featur
 
 - **WHEN** the route is requested and the feature flag is not enabled
 - **THEN** the route SHALL refuse before validating the address or spending any upstream quota
+
+### Requirement: The client SHALL retry only the failures a repeat request can resolve
+
+The client SHALL retry a rate limit or an upstream failure, because both can answer differently on the next call. It MUST NOT retry a refusal that is settled for the address — a rejected address, a cluster the upstream does not index, a disabled deployment, or an unconfigured key — because repeating the request cannot change the answer.
+
+#### Scenario: Route refuses the address
+
+- **WHEN** the route answers with a client error the request cannot change
+- **THEN** the client SHALL show the unavailable message without repeating the request
+
+#### Scenario: Route reports a rate limit
+
+- **WHEN** the route answers `429`
+- **THEN** the client SHALL retry, because the limit resets
 
 ### Requirement: The card row SHALL distinguish a zero total from an unavailable one
 

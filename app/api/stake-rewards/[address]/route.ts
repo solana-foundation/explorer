@@ -105,10 +105,10 @@ function errorResponse(error: unknown, address: Address): NextResponse {
         );
     }
 
-    // Their contract changed, not our logic — a warning against the vendor rather than a panic at
-    // ourselves. Still 502: we have no total to serve either way.
+    // Their answer, not our logic — a warning against the vendor rather than a panic at ourselves.
+    // Still 502: we have no total to serve either way.
     if (error instanceof SolscanResponseError) {
-        Logger.warn('[api:stake-rewards] Solscan response shape changed', {
+        Logger.warn('[api:stake-rewards] Solscan returned an unusable response', {
             address,
             reason: error.message,
             sentry: true,

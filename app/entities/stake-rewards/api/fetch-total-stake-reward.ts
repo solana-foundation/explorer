@@ -3,6 +3,7 @@ import { create } from 'superstruct';
 
 import { fetchUpstream } from '@/app/shared/lib/http-utils';
 
+import { SolscanRequestError, SolscanResponseError } from '../lib/errors';
 import { SolscanStakeReward, SolscanStakeRewardResponse } from '../lib/validators';
 
 const SOLSCAN_BASE_URL = 'https://pro-api.solscan.io/v2.0';
@@ -30,36 +31,6 @@ const MAINNET_GENESIS_UNIX = 1_584_316_800;
 
 /** SOL is always 9 decimals. Any other value means `amount` is not in lamports. */
 const SOL_DECIMALS = 9;
-
-/**
- * Carries the upstream status so the route can distinguish a rate limit from a hard failure.
- *
- * `status` rides in the options bag rather than in `cause`, so `cause` keeps its standard
- * Error-chaining semantics and reporters can still walk the chain.
- */
-export class SolscanRequestError extends Error {
-    readonly status: number;
-
-    constructor(message: string, options: ErrorOptions & { status: number }) {
-        super(message, options);
-        this.name = 'SolscanRequestError';
-        this.status = options.status;
-    }
-}
-
-/**
- * Solscan answered, but not in a shape we can trust — their contract changed, not our logic.
- *
- * Separate from our own invariant failures (the paging bound, the safe-integer guard) because the
- * two need different owners: this one is read-their-changelog-and-fix-the-parser, and until someone
- * does, every stake account's Total Reward row quietly reads `Unavailable`.
- */
-export class SolscanResponseError extends Error {
-    constructor(message: string, options?: ErrorOptions) {
-        super(message, options);
-        this.name = 'SolscanResponseError';
-    }
-}
 
 export type StakeRewardTotal = {
     /** Lifetime inflation reward, in lamports. */
@@ -149,7 +120,20 @@ async function fetchRewardPage({
         throw new SolscanRequestError(`Stake reward page ${page} failed`, { status: response.status });
     }
 
-    return parseRewardPage(await response.json()).data;
+    const body = parseRewardPage(await response.json());
+
+    // Solscan can answer 200 with `success: false`. Reading `data` straight off that body would
+    // take the absent rows for a short page, end the sweep, and return a total that stopped early —
+    // the exact silent-undercount this fetcher exists to avoid.
+    if (!body.success) {
+        const reason = body.errors?.message ?? 'no reason given';
+        throw new SolscanResponseError(`Solscan reported a failure on stake reward page ${page}: ${reason}`);
+    }
+    if (!body.data) {
+        throw new SolscanResponseError(`Stake reward page ${page} succeeded but carried no data`);
+    }
+
+    return body.data;
 }
 
 /** Wraps superstruct's `StructError` so a contract change is distinguishable from a bug of ours. */

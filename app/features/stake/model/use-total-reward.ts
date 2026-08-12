@@ -6,20 +6,56 @@ import { type Address } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import useSWR from 'swr';
 
+export enum TotalRewardStatus {
+    Disabled,
+    Loading,
+    Ready,
+    Unavailable,
+    Unsupported,
+}
+
 /**
- * `unavailable` covers every reason the figure could not be fetched — a failed request, a cluster
- * Solscan does not index, or an unconfigured key. The row renders the same quiet message for all of
- * them, and never a zero, which would be a claim about the account.
+ * The feature is off for this deployment, so there is no row at all.
  *
- * `disabled` is separate: the feature is not turned on for this deployment, so there is no row at
- * all. Collapsing the two would render `Unavailable` on every stake page of an unprovisioned
- * deployment, which reads as broken rather than as not-enabled-here.
+ * Named rather than inlined so callers can `Exclude` this exact shape once the row is dropped. Kept
+ * apart from `Unavailable` because collapsing the two would print that message on every stake page
+ * of an unprovisioned deployment, which reads as broken rather than as not-enabled-here.
+ */
+export type DisabledTotalRewardState = { status: TotalRewardStatus.Disabled };
+
+/**
+ * `Unsupported` and `Unavailable` are both a missing figure, split by who can act on it:
+ * `Unsupported` is a cluster Solscan does not index, where nothing was ever requested, and
+ * `Unavailable` is a request that was made and did not yield a total we can stand behind. The row
+ * prints the same quiet message for both — and never a zero, which would be a claim about the
+ * account rather than about the request.
  */
 export type TotalRewardState =
-    | { status: 'disabled' }
-    | { status: 'loading' }
-    | { status: 'ready'; lamports: number }
-    | { status: 'unavailable' };
+    | DisabledTotalRewardState
+    | { status: TotalRewardStatus.Loading }
+    | { status: TotalRewardStatus.Ready; lamports: number }
+    | { status: TotalRewardStatus.Unavailable }
+    | { status: TotalRewardStatus.Unsupported };
+
+/**
+ * What one call to the route settled on: a total, or no total that repeating the call would change.
+ * The fetcher resolves to this rather than throwing for a settled refusal, so SWR caches the answer
+ * instead of retrying it.
+ */
+type SettledTotalReward = Extract<
+    TotalRewardState,
+    { status: TotalRewardStatus.Ready | TotalRewardStatus.Unavailable }
+>;
+
+/**
+ * The route statuses worth asking again for: a rate limit resets, and a 502 or 504 is one bad
+ * upstream call. Every other answer is settled for this address — 400 for a malformed address or a
+ * non-mainnet cluster, 404 for a disabled deployment or a non-stake account, 503 for an
+ * unconfigured key — and repeating the request cannot change it.
+ */
+const RETRYABLE_STATUSES = new Set([429, 502, 504]);
+
+const ERROR_RETRY_COUNT = 3;
 
 /**
  * A stake account's lifetime inflation-reward total, in lamports.
@@ -41,29 +77,41 @@ export function useTotalReward(stakeAccountAddress: Address): TotalRewardState {
         // frozen from before the last epoch boundary. It costs no upstream quota: a revalidation
         // inside the route's 4 h CDN window is served by the CDN and never reaches Solscan.
         //
-        // fetchTotalReward throws rather than returning undefined, so cap the retries.
-        { errorRetryCount: 3 },
+        // The retries apply to the retryable statuses alone — fetchTotalReward resolves rather than
+        // throws for the settled ones, so a 400 is never asked again.
+        { errorRetryCount: ERROR_RETRY_COUNT },
     );
 
     if (!isEnabled) {
-        return { status: 'disabled' };
+        return { status: TotalRewardStatus.Disabled };
     }
-    if (!isSupported || error) {
-        return { status: 'unavailable' };
+    // Ahead of the request states: nothing was asked for, so there is no failure to report.
+    if (!isSupported) {
+        return { status: TotalRewardStatus.Unsupported };
+    }
+    // A retryable failure that ran out of retries. A settled refusal arrives as `data` instead.
+    if (error) {
+        return { status: TotalRewardStatus.Unavailable };
     }
     if (isLoading || data === undefined) {
-        return { status: 'loading' };
+        return { status: TotalRewardStatus.Loading };
     }
-    return { lamports: data, status: 'ready' };
+    return data;
 }
 
-async function fetchTotalReward(stakeAccountAddress: Address): Promise<number> {
+/**
+ * Throws only for the statuses a retry can still fix, and resolves to `Unavailable` for the rest, so
+ * SWR's backoff is spent on the transient failures alone rather than on four identical requests for
+ * an address the route has already refused.
+ */
+async function fetchTotalReward(stakeAccountAddress: Address): Promise<SettledTotalReward> {
     const response = await fetch(`/api/stake-rewards/${stakeAccountAddress}`);
     if (!response.ok) {
-        // Throw rather than return: a transient 502 should be retried, not cached as a successful
-        // "no total" under useSWRImmutable, which never revalidates.
-        throw new Error(`/api/stake-rewards returned ${response.status}`);
+        if (RETRYABLE_STATUSES.has(response.status)) {
+            throw new Error(`/api/stake-rewards returned ${response.status}`);
+        }
+        return { status: TotalRewardStatus.Unavailable };
     }
     const { totalReward } = await response.json();
-    return totalReward;
+    return { lamports: totalReward, status: TotalRewardStatus.Ready };
 }

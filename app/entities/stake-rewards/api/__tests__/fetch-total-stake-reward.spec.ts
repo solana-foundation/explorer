@@ -2,7 +2,8 @@ import { gen } from '@__fixtures__/gen';
 import { address } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { fetchTotalStakeReward, SolscanRequestError, SolscanResponseError } from '../fetch-total-stake-reward';
+import { SolscanRequestError, SolscanResponseError } from '../../lib/errors';
+import { fetchTotalStakeReward } from '../fetch-total-stake-reward';
 
 const ADDRESS = address(gen.address(0));
 const API_KEY = 'test-key';
@@ -129,6 +130,45 @@ describe('fetchTotalStakeReward', () => {
             ok: true,
             status: 200,
         });
+
+        await expect(fetchTotalStakeReward({ address: ADDRESS, apiKey: API_KEY })).rejects.toBeInstanceOf(
+            SolscanResponseError,
+        );
+    });
+
+    it('should reject a 200 that reports success: false rather than read it as a short page', async () => {
+        fetchMock.mockResolvedValueOnce({
+            json: async () => ({ errors: { code: 1001, message: 'Invalid address' }, success: false }),
+            ok: true,
+            status: 200,
+        });
+
+        await expect(fetchTotalStakeReward({ address: ADDRESS, apiKey: API_KEY })).rejects.toBeInstanceOf(
+            SolscanResponseError,
+        );
+    });
+
+    it('should carry the reason Solscan gave for an unsuccessful response', async () => {
+        fetchMock.mockResolvedValueOnce({
+            json: async () => ({ errors: { code: 1001, message: 'Invalid address' }, success: false }),
+            ok: true,
+            status: 200,
+        });
+
+        await expect(fetchTotalStakeReward({ address: ADDRESS, apiKey: API_KEY })).rejects.toThrow('Invalid address');
+    });
+
+    it('should stop paging rather than sum rows from an unsuccessful later page', async () => {
+        mockPages([fullPage(10)]);
+        fetchMock.mockResolvedValueOnce({ json: async () => ({ success: false }), ok: true, status: 200 });
+
+        await expect(fetchTotalStakeReward({ address: ADDRESS, apiKey: API_KEY })).rejects.toBeInstanceOf(
+            SolscanResponseError,
+        );
+    });
+
+    it('should reject a success that carries no data at all', async () => {
+        fetchMock.mockResolvedValueOnce({ json: async () => ({ success: true }), ok: true, status: 200 });
 
         await expect(fetchTotalStakeReward({ address: ADDRESS, apiKey: API_KEY })).rejects.toBeInstanceOf(
             SolscanResponseError,
