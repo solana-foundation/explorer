@@ -1,33 +1,36 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
+import { type EnabledClusters, SUPPORTED_CLUSTERS } from '../config.js';
 import { consoleLogger, ns } from '../logger.js';
 import { buildToolCallEvent } from './analytics-event.js';
-import { inspectEntityInputSchema, pingInputSchema } from './schemas.js';
+import { defaultCluster, inspectEntityInputSchema, pingInputSchema } from './schemas.js';
 import { handleInspectEntity, type InspectEntityDependencies } from './tools/inspect-entity.js';
 
-const INSPECT_ENTITY_DESCRIPTION = [
-    'Retrieve detailed on-chain data for any Solana account.',
-    'Use this tool when a user asks about a Solana address, program, token, NFT, wallet, or other blockchain entity.',
-    '',
-    'IDENTIFIER: A base58-encoded string. Accepts account addresses (32-byte) and transaction signatures (64-byte) — the tool detects which type was provided.',
-    '',
-    'CLUSTER: Solana network to query (mainnet-beta, devnet, testnet, simd296). Defaults to mainnet-beta.',
-    '',
-    'ACCOUNT TYPES RETURNED (by entity.kind):',
-    '- "spl-token:mint" / "spl-token-2022:mint": Token mints — address, supply, decimals, mint/freeze authorities, supply type (fixed/variable), token program. Token-2022 mints also include parsed extensions.',
-    '- "spl-token:account" / "spl-token-2022:account": Token accounts — mint, owner, token program.',
-    '- "spl-token:multisig" / "spl-token-2022:multisig": Token multisigs — signers, threshold, initialization status.',
-    '- "compressed-nft": Compressed NFTs — asset ID, owner, merkle tree.',
-    '- "stake", "vote", "nonce", "sysvar", "config", "address-lookup-table", "feature", "nftoken", "solana-attestation-service": Recognized system account types.',
-    '- "bpf-upgradeable-loader": Upgradeable programs — address, label, balance, executable-data account, upgradeability, last deploy slot, upgrade authority, plus an "idl" enrichment (status, idl_type, source, program name). Verification/security/multisig enrichments are not implemented yet.',
-    '- "bpf-loader" / "bpf-loader-2" / "loader-v4": Legacy-loader programs — currently unsupported; return a CURRENTLY_UNSUPPORTED error.',
-    '- "unknown": Unrecognized account type. When the owner program publishes an IDL, the account data is decoded through it and returned as "decoded" (source "idl").',
-    '',
-    'TRANSACTIONS: 64-byte signatures return entity.kind "transaction" — slot, block time, fee, status, error, signers, accounts (v0 lookup-table addresses attributed via source/lookupTableAddress), and instructions with inner instructions. Instructions decode through a cascade: programs publishing an on-chain IDL carry "decoded" with source "idl"; token batch and host-app-supported programs decode with source "bundled"; the rest stay base58 with source "raw".',
-    '',
-    'OUTPUT: Responses use { payload: { entity: { kind, ...fields } }, errors: [] }. Unresolvable fields return explicit unknown markers instead of being silently omitted.',
-].join('\n');
+// Built per server so the CLUSTER line names the deployment's enabled set rather than every cluster the package knows.
+const buildInspectEntityDescription = (clusters: EnabledClusters) =>
+    [
+        'Retrieve detailed on-chain data for any Solana account.',
+        'Use this tool when a user asks about a Solana address, program, token, NFT, wallet, or other blockchain entity.',
+        '',
+        'IDENTIFIER: A base58-encoded string. Accepts account addresses (32-byte) and transaction signatures (64-byte) — the tool detects which type was provided.',
+        '',
+        `CLUSTER: Solana network to query (${clusters.join(', ')}). Defaults to ${defaultCluster(clusters)}.`,
+        '',
+        'ACCOUNT TYPES RETURNED (by entity.kind):',
+        '- "spl-token:mint" / "spl-token-2022:mint": Token mints — address, supply, decimals, mint/freeze authorities, supply type (fixed/variable), token program. Token-2022 mints also include parsed extensions.',
+        '- "spl-token:account" / "spl-token-2022:account": Token accounts — mint, owner, token program.',
+        '- "spl-token:multisig" / "spl-token-2022:multisig": Token multisigs — signers, threshold, initialization status.',
+        '- "compressed-nft": Compressed NFTs — asset ID, owner, merkle tree.',
+        '- "stake", "vote", "nonce", "sysvar", "config", "address-lookup-table", "feature", "nftoken", "solana-attestation-service": Recognized system account types.',
+        '- "bpf-upgradeable-loader": Upgradeable programs — address, label, balance, executable-data account, upgradeability, last deploy slot, upgrade authority, plus an "idl" enrichment (status, idl_type, source, program name). Verification/security/multisig enrichments are not implemented yet.',
+        '- "bpf-loader" / "bpf-loader-2" / "loader-v4": Legacy-loader programs — currently unsupported; return a CURRENTLY_UNSUPPORTED error.',
+        '- "unknown": Unrecognized account type. When the owner program publishes an IDL, the account data is decoded through it and returned as "decoded" (source "idl").',
+        '',
+        'TRANSACTIONS: 64-byte signatures return entity.kind "transaction" — slot, block time, fee, status, error, signers, accounts (v0 lookup-table addresses attributed via source/lookupTableAddress), and instructions with inner instructions. Instructions decode through a cascade: programs publishing an on-chain IDL carry "decoded" with source "idl"; token batch and host-app-supported programs decode with source "bundled"; the rest stay base58 with source "raw".',
+        '',
+        'OUTPUT: Responses use { payload: { entity: { kind, ...fields } }, errors: [] }. Unresolvable fields return explicit unknown markers instead of being silently omitted.',
+    ].join('\n');
 
 // A throwing sink must never break the tool reply — telemetry is strictly best-effort.
 function withToolTracking<TInput>(
@@ -52,7 +55,10 @@ function withToolTracking<TInput>(
     };
 }
 
-export function createMcpServer(dependencies: InspectEntityDependencies): McpServer {
+export function createMcpServer(
+    dependencies: InspectEntityDependencies,
+    enabledClusters: EnabledClusters = SUPPORTED_CLUSTERS,
+): McpServer {
     const server = new McpServer({
         name: 'explorer-mcp',
         // Mirrors the explorer's root package.json version (kept as a literal — the package imports no app code)
@@ -81,8 +87,8 @@ export function createMcpServer(dependencies: InspectEntityDependencies): McpSer
                 readOnlyHint: true,
                 title: 'Inspect Solana Entity',
             },
-            description: INSPECT_ENTITY_DESCRIPTION,
-            inputSchema: inspectEntityInputSchema(),
+            description: buildInspectEntityDescription(enabledClusters),
+            inputSchema: inspectEntityInputSchema(enabledClusters),
             title: 'Inspect Solana Entity',
         },
         withToolTracking('inspect_entity', dependencies, async input => handleInspectEntity(input, dependencies)),

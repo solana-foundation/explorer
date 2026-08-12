@@ -38,7 +38,7 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
     };
     const { wrapServer } = config;
     return async request => {
-        const baseServer = createMcpServer(dependencies);
+        const baseServer = createMcpServer(dependencies, config.enabledClusters);
         const server = wrapServer ? wrapServer(baseServer) : baseServer;
         const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
         try {
