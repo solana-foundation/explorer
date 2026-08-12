@@ -1,11 +1,18 @@
-import { createSolanaRpc, MAX_SUPPORTED_TRANSACTION_VERSION, signature as createSignature } from '@solana/kit';
+import {
+    type CompiledTransactionMessage,
+    type CompiledTransactionMessageWithLifetime,
+    createSolanaRpc,
+    decodeTransactionFromRpcResponse,
+    decompileTransactionMessage,
+    getBase58Decoder,
+    MAX_SUPPORTED_TRANSACTION_VERSION,
+    signature as createSignature,
+    type Transaction,
+} from '@solana/kit';
 import { type DecompileArgs, type Finality, PublicKey, TransactionMessage, VersionedMessage } from '@solana/web3.js';
 
-import { fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
-import { decodeTransactionConfig } from '../lib/decode-transaction-config';
-import { decodeWireTransaction, type WireTransaction } from '../lib/decode-wire-transaction';
 import type { RawTransaction, TransactionConfig } from '../model/types';
 
 /**
@@ -35,8 +42,10 @@ export async function fetchRawTransaction(
         return null;
     }
 
-    const [base64Transaction] = response.transaction;
-    const { compiledMessage, messageBytes, signatures } = decodeWireTransaction(fromBase64(base64Transaction));
+    const { compiledMessage, transaction } = decodeTransactionFromRpcResponse(response);
+    // The decoded message bytes are a view over the response buffer; copy so callers own theirs.
+    const messageBytes = new Uint8Array(transaction.messageBytes);
+    const signatures = toBase58Signatures(transaction.signatures);
     const meta = response.meta;
 
     const base = {
@@ -73,15 +82,31 @@ export async function fetchRawTransaction(
 // The resource-limit rows are supplemental; the wire bytes still render, download, and inspect
 // without them.
 function readTransactionConfig(
-    compiledMessage: WireTransaction['compiledMessage'],
+    compiledMessage: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime & { version: 1 },
     signature: string,
 ): TransactionConfig | undefined {
     try {
-        return decodeTransactionConfig(compiledMessage);
+        const { config } = decompileTransactionMessage(compiledMessage);
+
+        // A v1 message may set no limits at all, in which case there are no rows to render.
+        return config && Object.values(config).some(value => value !== undefined) ? config : undefined;
     } catch (error) {
         Logger.error(error, { module: '[transaction-data]', signature });
         return undefined;
     }
+}
+
+/**
+ * Renders a transaction's signatures in signer order.
+ *
+ * The map is insertion-ordered, matching the message's signer order. A signer slot that has not
+ * been signed holds no bytes at all, which consumers render as missing rather than as a signature
+ * that fails to verify.
+ */
+function toBase58Signatures(signatures: Transaction['signatures']): (string | undefined)[] {
+    const base58Decoder = getBase58Decoder();
+
+    return Object.values(signatures).map(signature => (signature ? base58Decoder.decode(signature) : undefined));
 }
 
 type RpcLoadedAddresses = Readonly<{ readonly: readonly string[]; writable: readonly string[] }>;

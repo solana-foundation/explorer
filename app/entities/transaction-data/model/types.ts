@@ -1,4 +1,4 @@
-import type { TransactionVersion } from '@solana/kit';
+import type { TransactionMessage as KitTransactionMessage, TransactionVersion } from '@solana/kit';
 import type {
     CompiledInnerInstruction,
     ParsedTransactionWithMeta,
@@ -12,14 +12,10 @@ import type {
  * v1 moves these out of Compute Budget instructions and into the message itself. `priorityFee`
  * is a total amount in lamports, unlike v0's per-compute-unit price in micro-lamports.
  *
- * Structurally mirrors kit's `V1TransactionConfig`, which kit does not re-export as a type.
+ * kit models this as `V1TransactionConfig` but does not export that type by name, so it is read
+ * off the v1 arm of kit's `TransactionMessage` to stay in step with kit's definition.
  */
-export type TransactionConfig = {
-    computeUnitLimit?: number;
-    heapSize?: number;
-    loadedAccountsDataSizeLimit?: number;
-    priorityFeeLamports?: bigint;
-};
+export type TransactionConfig = NonNullable<Extract<KitTransactionMessage, { version: 1 }>['config']>;
 
 /**
  * A parsed transaction in the shape the transaction detail page consumes.
