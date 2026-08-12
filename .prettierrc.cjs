@@ -25,5 +25,13 @@ module.exports = {
                 proseWrap: 'never',
             },
         },
+        // Reflow prose at printWidth so these docs stay readable in a diff and in an editor without soft wrap.
+        // Scoped rather than repo-wide: turning it on everywhere would reflow every existing markdown file.
+        {
+            files: ['app/mcp/**/*.md', 'packages/entity-inspector/**/*.md'],
+            options: {
+                proseWrap: 'always',
+            },
+        },
     ],
 };
