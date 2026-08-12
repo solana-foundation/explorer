@@ -58,13 +58,12 @@ const logger: EntityInspectorConfig['logger'] = {
 
 // Resolved at handler init (cold start), not module scope, so key-bearing URLs come from runtime env, never a build artifact.
 // Dedicated MCP endpoints keep MCP traffic off the app's quota; unset falls back to the app's own server RPC config
-// (`serverClusterUrl` → `*_RPC_URL` env → proxied default), not a raw public endpoint.
+// (`serverClusterUrl` → `*_RPC_URL` env → proxied default), not a raw public endpoint. Every supported cluster gets an
+// entry whether or not MCP_ENABLED_CLUSTERS lists it, so enabling one is a change in clusters.ts alone.
 function resolveRpcEndpoints(): EntityInspectorConfig['rpcEndpoints'] {
     return {
         devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || serverClusterUrl(Cluster.Devnet),
         'mainnet-beta': process.env.MCP_SOLANA_RPC_URL_MAINNET_BETA || serverClusterUrl(Cluster.MainnetBeta),
-        // Every SupportedCluster needs an entry even when MCP_ENABLED_CLUSTERS withholds it, so enabling one later is a
-        // change in clusters.ts alone. MCP_SOLANA_RPC_URL_SIMD296 is unprovisioned today and falls through to the app.
         simd296: process.env.MCP_SOLANA_RPC_URL_SIMD296 || serverClusterUrl(Cluster.Simd296),
         testnet: process.env.MCP_SOLANA_RPC_URL_TESTNET || serverClusterUrl(Cluster.Testnet),
     };

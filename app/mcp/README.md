@@ -50,6 +50,10 @@ GA4 collects the parameters but cannot report on them.
 Add the variables in **Project Settings → Environment Variables**, then redeploy. `maxDuration = 60` applies to this
 route only.
 
+Per-IP abuse handling belongs in a Firewall rule on `/mcp`, not in this code: it sees real client IPs and applies
+without a deploy, whereas `MCP_BLOCKED_IPS` is parsed at module scope and is only useful as a static backstop. Usage
+analytics cannot stand in for it — GA4 receives a hashed `client_id`, never an address.
+
 ### Preview deployments
 
 Previews sit behind Deployment Protection, so clients must also present the
