@@ -29,6 +29,12 @@ ignoreScripts: true
 
 minimumReleaseAge: 20160
 
+# @solana/subscriptions 0.5.0 is the first release built against @solana/kit 7; every older release
+# imports `getMinimumBalanceForRentExemption`, which kit 7 removed, and fails at import time. Drop
+# this exclusion once 0.5.0 is older than `minimumReleaseAge`.
+minimumReleaseAgeExclude:
+  - '@solana/subscriptions'
+
 # @onsol/tldparser requires @metaplex-foundation/beet without declaring it, so it resolves only via hoisting.
 packageExtensions:
   '@onsol/tldparser':
