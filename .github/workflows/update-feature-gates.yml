@@ -31,6 +31,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # scripts/update-feature-gates.ts imports app/entities/feature-gate/server, which reaches the
+      # built @explorer/parsers through app/validators/pubkey.ts.
+      - name: Build workspace packages
+        run: pnpm build:packages
+
       - name: Update feature gates
         run: pnpm exec tsx scripts/update-feature-gates.ts
 
