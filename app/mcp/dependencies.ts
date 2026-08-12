@@ -12,6 +12,7 @@ import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatc
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 import { programNameByAddress } from '@/app/utils/programs';
 
+import { MCP_ENABLED_CLUSTERS } from './clusters';
 import { createMcpTrack } from './telemetry';
 
 const resolveProgramName: EntityInspectorConfig['resolveProgramName'] = programNameByAddress;
@@ -62,8 +63,8 @@ function resolveRpcEndpoints(): EntityInspectorConfig['rpcEndpoints'] {
     return {
         devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || serverClusterUrl(Cluster.Devnet),
         'mainnet-beta': process.env.MCP_SOLANA_RPC_URL_MAINNET_BETA || serverClusterUrl(Cluster.MainnetBeta),
-        // MCP_SOLANA_RPC_URL_SIMD296 is deliberately unprovisioned today — simd296 resolves through the app's
-        // cluster config. The read stays so a dedicated endpoint needs only the env var, no code change.
+        // Every SupportedCluster needs an entry even when MCP_ENABLED_CLUSTERS withholds it, so enabling one later is a
+        // change in clusters.ts alone. MCP_SOLANA_RPC_URL_SIMD296 is unprovisioned today and falls through to the app.
         simd296: process.env.MCP_SOLANA_RPC_URL_SIMD296 || serverClusterUrl(Cluster.Simd296),
         testnet: process.env.MCP_SOLANA_RPC_URL_TESTNET || serverClusterUrl(Cluster.Testnet),
     };
@@ -87,6 +88,7 @@ async function importRequestHandler(): Promise<McpRequestHandler> {
     const { createMcpRequestHandler } = await import('@explorer/entity-inspector');
     return createMcpRequestHandler({
         decodeInstructionFallback,
+        enabledClusters: MCP_ENABLED_CLUSTERS,
         logger,
         resolveProgramName,
         rpcEndpoints: resolveRpcEndpoints(),

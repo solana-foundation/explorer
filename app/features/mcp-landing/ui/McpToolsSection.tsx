@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { MCP_ENABLED_CLUSTERS } from '@/app/mcp/clusters';
 import { BaseCard } from '@/app/shared/ui/Card';
 import { BaseCodeBlock } from '@/app/shared/ui/CodeBlock';
-
-import { MCP_SUPPORTED_CLUSTERS } from '../model/constants';
 
 // Verbatim mainnet-beta reply for the USDC mint, so the documented shape cannot drift into fiction.
 const SAMPLE_RESPONSE = `{
@@ -78,7 +77,7 @@ export function McpToolsSection() {
                             signature.
                         </Param>
                         <Param name="cluster">
-                            One of {MCP_SUPPORTED_CLUSTERS.join(', ')}. Defaults to mainnet-beta.
+                            One of {MCP_ENABLED_CLUSTERS.join(', ')}. Defaults to mainnet-beta.
                         </Param>
                     </dl>
 

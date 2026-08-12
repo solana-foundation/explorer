@@ -1,9 +1,10 @@
 import { isEnvEnabled } from '@utils/env';
 import type { ReactNode } from 'react';
 
+import { MCP_ENABLED_CLUSTERS } from '@/app/mcp/clusters';
 import { BaseCard } from '@/app/shared/ui/Card';
 
-import { MCP_ENDPOINT_URL, MCP_SUPPORTED_CLUSTERS } from '../model/constants';
+import { MCP_ENDPOINT_URL } from '../model/constants';
 import { McpStatusIndicator } from './McpStatusIndicator';
 
 function Stat({ children, className, label }: { children: ReactNode; className?: string; label: string }) {
@@ -29,7 +30,7 @@ export function McpStatusSection() {
                 <Stat label="Transport">Streamable HTTP</Stat>
                 <Stat label="Authentication">Open — no key required</Stat>
                 <Stat label="Clusters" className="lg:col-span-2">
-                    {MCP_SUPPORTED_CLUSTERS.join(', ')}
+                    {MCP_ENABLED_CLUSTERS.join(', ')}
                 </Stat>
             </dl>
         </BaseCard>

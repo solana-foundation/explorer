@@ -1,17 +1,11 @@
-import { SUPPORTED_CLUSTERS } from '@explorer/entity-inspector';
 import { describe, expect, it } from 'vitest';
 
-import { MCP_SUPPORTED_CLUSTERS } from '../constants';
+import { MCP_ENDPOINT_PATH, MCP_ENDPOINT_URL } from '../constants';
 
 describe('mcp-landing constants', () => {
-    // Drift canary: the advertised list is a restated subset, so a rename or removal upstream must not go unnoticed.
-    it('should only advertise clusters the inspector supports', () => {
-        for (const cluster of MCP_SUPPORTED_CLUSTERS) {
-            expect(SUPPORTED_CLUSTERS, cluster).toContain(cluster);
-        }
-    });
-
-    it('should not advertise simd296 yet', () => {
-        expect(MCP_SUPPORTED_CLUSTERS).not.toContain('simd296');
+    // Snippets are copied into other people's config files, so a relative or preview-host URL would be useless there.
+    it('should expose an absolute endpoint URL ending in the endpoint path', () => {
+        expect(MCP_ENDPOINT_URL).toMatch('https://');
+        expect(MCP_ENDPOINT_URL.endsWith(MCP_ENDPOINT_PATH)).toBe(true);
     });
 });

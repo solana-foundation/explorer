@@ -9,7 +9,3 @@ export const MCP_ENDPOINT_URL = `${EXPLORER_BASE_URL}${MCP_ENDPOINT_PATH}`;
 export const MCP_SERVER_KEY = 'solana-explorer';
 
 export const MCP_SERVER_NAME = 'explorer-mcp';
-
-// Deliberate subset of SUPPORTED_CLUSTERS in @explorer/entity-inspector: simd296 is queryable but not
-// advertised yet. Restated here so a client bundle never pulls the MCP runtime barrel; a spec keeps it honest.
-export const MCP_SUPPORTED_CLUSTERS: readonly string[] = ['mainnet-beta', 'devnet', 'testnet'];

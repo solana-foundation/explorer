@@ -9,17 +9,27 @@ proxy matcher.
 
 Inert by default (`503`). Env-only configuration (see `.env.example`):
 
-| Variable                          | Purpose                                                                                                             |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `MCP_ENDPOINT_ENABLED`            | `true` enables the endpoint.                                                                                        |
-| `MCP_ACCESS_KEYS`                 | Comma-separated bearer keys; requests need `Authorization: Bearer <key>`. Unset = open access (startup warning).    |
-| `MCP_BLOCKED_IPS`                 | Comma-separated client IPs rejected with 403.                                                                       |
-| `MCP_SOLANA_RPC_URL_MAINNET_BETA` | Dedicated mainnet-beta RPC endpoint, keeping MCP traffic off the app's quota. Falls back to `MAINNET_RPC_URL`.      |
-| `MCP_SOLANA_RPC_URL_DEVNET`       | Dedicated devnet RPC endpoint. Falls back to `DEVNET_RPC_URL`.                                                      |
-| `MCP_SOLANA_RPC_URL_TESTNET`      | Dedicated testnet RPC endpoint. Falls back to `TESTNET_RPC_URL`.                                                    |
-| `MCP_SOLANA_RPC_URL_SIMD296`      | Dedicated simd296 RPC endpoint. Supported but not provisioned today, so simd296 resolves through `SIMD296_RPC_URL`. |
+| Variable                          | Purpose                                                                                                          |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `MCP_ENDPOINT_ENABLED`            | `true` enables the endpoint.                                                                                     |
+| `MCP_ACCESS_KEYS`                 | Comma-separated bearer keys; requests need `Authorization: Bearer <key>`. Unset = open access (startup warning). |
+| `MCP_BLOCKED_IPS`                 | Comma-separated client IPs rejected with 403.                                                                    |
+| `MCP_SOLANA_RPC_URL_MAINNET_BETA` | Dedicated mainnet-beta RPC endpoint, keeping MCP traffic off the app's quota. Falls back to `MAINNET_RPC_URL`.   |
+| `MCP_SOLANA_RPC_URL_DEVNET`       | Dedicated devnet RPC endpoint. Falls back to `DEVNET_RPC_URL`.                                                   |
+| `MCP_SOLANA_RPC_URL_TESTNET`      | Dedicated testnet RPC endpoint. Falls back to `TESTNET_RPC_URL`.                                                 |
+| `MCP_SOLANA_RPC_URL_SIMD296`      | Dedicated simd296 RPC endpoint. Falls back to `SIMD296_RPC_URL`.                                                 |
 
 Keys and blocklist are parsed at module scope — changes require a redeploy.
+
+## Enabled clusters
+
+`clusters.ts` holds `MCP_ENABLED_CLUSTERS`, the clusters the tool advertises and accepts. It is passed to the handler as
+`enabledClusters`, so the `cluster` enum, the tool description and the landing page all derive from that one list —
+anything outside it is rejected with an input-validation error.
+
+The list is written out rather than aliased to the package's `SUPPORTED_CLUSTERS` so a newly supported cluster is opt-in
+here instead of going live with a package bump. Adding or removing an entry is the whole change — `resolveRpcEndpoints`
+resolves a URL for every supported cluster either way.
 
 ## Analytics
 
