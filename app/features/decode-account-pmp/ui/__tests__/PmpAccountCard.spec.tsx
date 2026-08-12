@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { PMP_ADDRESS, PMP_EMPTY_DISCRIMINATOR, type PmpDecodedPayload } from '@entities/pmp-account';
+import { PMP_ADDRESS, PMP_EMPTY_DISCRIMINATOR, type PmpPayloadDecodeResult } from '@entities/pmp-account';
 import type { Account } from '@providers/accounts';
 import type { Address } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
@@ -19,7 +19,10 @@ import { trackEvent } from '@/app/shared/lib/analytics';
 
 import { PmpAccountCard } from '../PmpAccountCard';
 
-const { mockDecodePmpPayload } = vi.hoisted(() => ({ mockDecodePmpPayload: vi.fn() }));
+const { mockDecodePmpPayload, mockFindConfigInTransactions } = vi.hoisted(() => ({
+    mockDecodePmpPayload: vi.fn(),
+    mockFindConfigInTransactions: vi.fn(),
+}));
 
 // Partial mock: the header read and the label maps stay real, because the point of the spec is which rows the
 // header alone produces. Only the payload decode is observed - and observing it is also what proves the card
@@ -37,6 +40,13 @@ vi.mock('@/app/shared/lib/analytics', async importOriginal => ({
 
 vi.mock('@components/common/Address', () => ({
     Address: ({ pubkey }: { pubkey: { toBase58(): string } }) => <div data-testid="address">{pubkey.toBase58()}</div>,
+}));
+
+vi.mock('@providers/cluster', () => ({ useCluster: () => ({ url: 'https://api.devnet.solana.com' }) }));
+
+vi.mock('../../api/find-config-in-transactions', async importOriginal => ({
+    ...(await importOriginal<typeof import('../../api/find-config-in-transactions')>()),
+    findConfigInTransactions: mockFindConfigInTransactions,
 }));
 
 const TARGET_PROGRAM = gen.address(1) as Address;
@@ -87,22 +97,20 @@ function toAccount(raw: Uint8Array): Account {
     };
 }
 
-const DECODED: PmpDecodedPayload = { bytes: new TextEncoder().encode(DOC), kind: 'decoded', text: DOC_PRETTY };
+const DECODED: PmpPayloadDecodeResult = { bytes: new TextEncoder().encode(DOC), kind: 'decoded', text: DOC_PRETTY };
 
 const METADATA_ACCOUNT = metadataAccountData(pack(DOC, Compression.Zlib));
 
 describe('PmpAccountCard', () => {
     beforeEach(() => {
         mockDecodePmpPayload.mockReset().mockReturnValue(DECODED);
+        mockFindConfigInTransactions.mockReset().mockResolvedValue({ kind: 'not-found' });
         vi.mocked(trackEvent).mockClear();
     });
 
     it('should render the Metadata header identity from the header alone', () => {
         render(<PmpAccountCard account={toAccount(METADATA_ACCOUNT)} />);
 
-        // These come from `readPmpAccountHeader`, which runs in a render memo and touches no payload bytes, so they
-        // are present regardless of what the decode does. The loader frame they used to share is not asserted here:
-        // the decode now runs synchronously inside the effect, which `render` flushes before this line.
         expect(screen.getByTestId('pmp-account-mutable')).toHaveTextContent('Yes');
         expect(screen.getByTestId('pmp-account-canonical')).toHaveTextContent('Yes');
         expect(screen.getByTestId('pmp-account-seed')).toHaveTextContent('idl');
@@ -122,6 +130,25 @@ describe('PmpAccountCard', () => {
         expect(screen.queryByTestId('pmp-account-decoded-pending')).not.toBeInTheDocument();
     });
 
+    it('should render a binary Metadata payload as raw bytes rather than as a document', async () => {
+        const binary = Uint8Array.from({ length: 64 }, (_, index) => 128 + ((index * 37) % 128));
+        mockDecodePmpPayload.mockReturnValue({ bytes: binary, kind: 'decoded', text: 'gKXK75S53oOozfKX' });
+
+        render(<PmpAccountCard account={toAccount(METADATA_ACCOUNT)} />);
+
+        expect(await screen.findByTestId('pmp-account-raw')).toBeInTheDocument();
+        expect(screen.queryByTestId('pmp-account-document')).not.toBeInTheDocument();
+        // The declared config still renders: what changed is how the payload is presented, not what it claims.
+        expect(screen.getByTestId('pmp-account-encoding')).toHaveTextContent('UTF-8');
+    });
+
+    it('should keep rendering a readable Metadata payload as a document', async () => {
+        render(<PmpAccountCard account={toAccount(METADATA_ACCOUNT)} />);
+
+        expect(await screen.findByTestId('pmp-account-document')).toBeInTheDocument();
+        expect(screen.queryByTestId('pmp-account-raw')).not.toBeInTheDocument();
+    });
+
     it('should decode again when the account bytes are replaced', async () => {
         const { rerender } = render(<PmpAccountCard account={toAccount(METADATA_ACCOUNT)} />);
         await screen.findByTestId('pmp-account-document');
@@ -133,20 +160,11 @@ describe('PmpAccountCard', () => {
         await waitFor(() => expect(mockDecodePmpPayload).toHaveBeenCalledTimes(2));
     });
 
-    // The card renders a plain `Card`, not `AccountCard`, so it offers neither control. Both are owned by the
-    // account card one level up, which shows the same account's bytes - a second copy here would duplicate them.
-    it('should offer neither a Raw nor a Refresh button, because the card above this tab owns both', () => {
-        render(<PmpAccountCard account={toAccount(METADATA_ACCOUNT)} />);
-
-        expect(screen.queryByRole('button', { name: 'Raw' })).not.toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: 'Refresh' })).not.toBeInTheDocument();
-    });
-
     it('should render the decoder reason when the payload does not decode', async () => {
         mockDecodePmpPayload.mockReturnValue({
             kind: 'failed',
             reason: 'incorrect header check',
-        } satisfies PmpDecodedPayload);
+        } satisfies PmpPayloadDecodeResult);
         render(<PmpAccountCard account={toAccount(METADATA_ACCOUNT)} />);
 
         expect(await screen.findByTestId('pmp-account-decode-error')).toHaveTextContent('incorrect header check');
@@ -154,12 +172,17 @@ describe('PmpAccountCard', () => {
         expect(screen.getByTestId('pmp-account-mutable')).toBeInTheDocument();
     });
 
-    it('should render a Buffer account without decoding it, and say why', () => {
+    it('should decode a Buffer account from its bytes and say the config was resolved from them', async () => {
         render(<PmpAccountCard account={toAccount(bufferAccountData(pack(DOC, Compression.Zlib)))} />);
 
-        expect(screen.getByTestId('pmp-account-buffer-note')).toBeInTheDocument();
+        expect(await screen.findByTestId('pmp-account-buffer-note')).toHaveTextContent('resolved from bytes');
+        expect(screen.getByTestId('pmp-account-compression')).toHaveTextContent('Zlib');
+        expect(screen.getByTestId('pmp-account-format')).toHaveTextContent('JSON');
+        expect(screen.getByTestId('pmp-account-document')).toHaveTextContent('company');
+
         expect(screen.queryByTestId('pmp-account-encoding')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('pmp-account-decoded-pending')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('pmp-account-dataSource')).not.toBeInTheDocument();
+
         expect(mockDecodePmpPayload).not.toHaveBeenCalled();
     });
 
@@ -177,13 +200,5 @@ describe('PmpAccountCard', () => {
 
         expect(screen.getByTestId('pmp-account-unreadable-note')).toHaveTextContent('96-byte');
         expect(mockDecodePmpPayload).not.toHaveBeenCalled();
-    });
-
-    // This tab reports no analytics of its own: a route-level open is already a GA4 page view, and the card has no
-    // reader interaction left to instrument now that Raw and Refresh live on the card above it.
-    it('should report no analytics event', () => {
-        render(<PmpAccountCard account={toAccount(METADATA_ACCOUNT)} />);
-
-        expect(trackEvent).not.toHaveBeenCalled();
     });
 });

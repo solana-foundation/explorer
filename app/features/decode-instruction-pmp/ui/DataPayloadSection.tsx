@@ -5,8 +5,8 @@ import {
     PMP_DATA_SOURCE_LABELS,
     PMP_FORMAT_LABELS,
     PMP_UNCOMPRESSED_BYTES_LABEL,
-    type PmpAccountContent,
-    type PmpDecodedPayload,
+    type PmpAccountDecodeResult,
+    type PmpPayloadDecodeResult,
 } from '@entities/pmp-account';
 import { PublicKey } from '@solana/web3.js';
 import { Compression, DataSource } from '@solana-program/program-metadata';
@@ -74,7 +74,7 @@ function PayloadBody({
 }: {
     cap: number | undefined;
     content: PmpPayloadInstruction;
-    decoded: PmpDecodedPayload | undefined;
+    decoded: PmpPayloadDecodeResult | undefined;
 }) {
     const { dataSource } = content;
 
@@ -192,7 +192,7 @@ function AccountContentBody({
 }: {
     content: PmpPayloadInstruction;
     dataSource: DataSource;
-    result: PmpAccountContent;
+    result: PmpAccountDecodeResult;
 }) {
     if (result.kind === 'absent') {
         return (
@@ -235,7 +235,7 @@ function DecodedTabs({
     compression: Compression;
     content: PmpPayloadInstruction;
     dataSource: DataSource;
-    decoded: PmpDecodedPayload;
+    decoded: PmpPayloadDecodeResult;
     payload: Uint8Array;
     source: 'account' | 'instruction';
 }) {
@@ -277,7 +277,7 @@ function DecodedBody({
     stored,
 }: {
     compression: Compression;
-    decoded: PmpDecodedPayload;
+    decoded: PmpPayloadDecodeResult;
     stored: number;
 }) {
     if (decoded.kind === 'failed') {
@@ -337,7 +337,7 @@ function DecodedBody({
             </div>
             <pre
                 data-testid="pmp-decoded-text"
-                className="mb-0 max-h-80 overflow-auto whitespace-pre-wrap break-words bg-heavy-metal-900 p-3 pr-8 text-left text-xs"
+                className="mb-0 max-h-80 overflow-auto whitespace-pre-wrap bg-heavy-metal-900 p-3 pr-8 text-left text-xs [overflow-wrap:anywhere]"
             >
                 {decoded.text}
             </pre>

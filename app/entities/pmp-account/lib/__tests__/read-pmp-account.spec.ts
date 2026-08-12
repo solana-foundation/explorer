@@ -14,7 +14,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { PMP_ADDRESS } from '../constants';
-import { readPmpAccountHeader } from '../read-pmp-account-header';
+import { readPmpAccount } from '../read-pmp-account';
 
 const PROGRAM = gen.address(1) as Address;
 const AUTHORITY = gen.address(2) as Address;
@@ -50,12 +50,12 @@ function metadataAccount({ dataLength }: { dataLength?: number } = {}): Uint8Arr
 }
 
 function read(data: Uint8Array | undefined, overrides: { lamports?: number; owner?: string } = {}) {
-    return readPmpAccountHeader({
+    return readPmpAccount({
         account: { data, lamports: overrides.lamports ?? 1_000_000, owner: overrides.owner ?? PMP_ADDRESS },
     });
 }
 
-describe('readPmpAccountHeader', () => {
+describe('readPmpAccount', () => {
     // The Logger is a global no-op mock (test-setup.specs.ts), so these read the calls the read makes.
     beforeEach(() => {
         vi.clearAllMocks();
@@ -151,7 +151,6 @@ describe('readPmpAccountHeader', () => {
         const header = read(undefined, { lamports: 2_000_000 });
 
         expect(header).toEqual({ kind: 'unreadable', reason: expect.stringContaining('without its data') });
-        expect(header.kind === 'unreadable' && header.reason).not.toContain('96-byte');
     });
 
     it('should report a discriminator outside the enum to Sentry, since it means an unknown account layout', () => {

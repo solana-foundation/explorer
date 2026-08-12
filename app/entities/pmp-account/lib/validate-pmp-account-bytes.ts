@@ -1,21 +1,7 @@
 import { PMP_ACCOUNT_HEADER_LEN, PMP_ADDRESS } from './constants';
-import type { PmpAccountSnapshot } from './types';
+import type { PmpAccountSnapshot, PmpAccountValidateResult } from './types';
 
-/**
- * The four checks every PMP account read starts with, and the reason strings they produce.
- *
- * Shared by `readPmpAccountHeader` and `decodePmpAccount` rather than written out in both: they are asserted
- * independently by two specs, so two copies would let a reworded message pass CI while the pair silently diverged.
- *
- * `absent` and `unreadable` are spelled exactly as `PmpAccountHeader` and `PmpAccountContent` spell them, so both
- * callers can return this result unchanged instead of restating it.
- */
-export type PmpAccountBytes =
-    | { kind: 'ok'; data: Uint8Array }
-    | { kind: 'absent' }
-    | { kind: 'unreadable'; reason: string };
-
-export function readPmpAccountBytes({ account }: { account: PmpAccountSnapshot }): PmpAccountBytes {
+export function validatePmpAccountBytes({ account }: { account: PmpAccountSnapshot }): PmpAccountValidateResult {
     const { data, lamports, owner } = account;
 
     // The accounts provider models "no such account" as zero lamports plus an empty raw buffer, which is also what

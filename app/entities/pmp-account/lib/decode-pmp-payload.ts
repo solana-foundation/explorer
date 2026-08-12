@@ -6,7 +6,7 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { PMP_DECODE_BUDGET_BYTES, PMP_MAX_UNPACKED_BYTES } from './constants';
 import { toErrorReason } from './errors';
-import type { PmpDecodeConfig, PmpDecodedPayload } from './types';
+import type { PmpDecodeConfig, PmpPayloadDecodeResult } from './types';
 
 /**
  * Decodes an inline PMP payload: unpack, enforce the decode budget, then decode per `encoding` and present per
@@ -34,9 +34,7 @@ export function decodePmpPayload({
     config: PmpDecodeConfig;
     data: Uint8Array;
     cap?: number;
-}): PmpDecodedPayload {
-    const budget = cap ?? PMP_DECODE_BUDGET_BYTES[config.encoding];
-
+}): PmpPayloadDecodeResult {
     // Checked before the unpack: an empty stream emits no bytes and never ends, so a declared compression would
     // otherwise report an account that simply holds nothing as a truncated one.
     if (data.length === 0) {
@@ -63,12 +61,37 @@ export function decodePmpPayload({
         return { kind: 'failed', reason };
     }
 
-    const { bytes } = unpacked;
+    return decodeUnpackedPayload({ bytes: unpacked.bytes, cap, config });
+}
+
+/**
+ * Decodes payload bytes that are ALREADY unpacked, per `encoding`, and presents them per `format`.
+ *
+ * Split out of `decodePmpPayload` because a Buffer's declared-config upgrade arrives after detection has already
+ * inflated the body: re-running the whole pipeline would inflate a 5896-byte body into 104798 bytes a second time
+ * for no gain, and reimplementing only this tail would duplicate the budget guard that keeps `Encoding.Base58`
+ * off the main thread.
+ *
+ * The budget is checked BEFORE the encoding step, so an oversized payload is never handed to `decodeData` or
+ * `JSON.parse`. `cap` overrides the per-encoding budget for the whole call, for tests and stories.
+ */
+export function decodeUnpackedPayload({
+    bytes,
+    config,
+    cap,
+}: {
+    bytes: Uint8Array;
+    config: PmpDecodeConfig;
+    cap?: number;
+}): PmpPayloadDecodeResult {
+    const budget = cap ?? PMP_DECODE_BUDGET_BYTES[config.encoding];
 
     if (bytes.length > budget) {
         return { budget, bytes, kind: 'oversized' };
     }
 
+    // Zero payload bytes come back as `empty`, never as `decoded`. Every encoding decodes nothing to the empty
+    // string, which would otherwise render as a blank document styled exactly like a successful one.
     if (bytes.length === 0) {
         return { kind: 'empty' };
     }
@@ -76,7 +99,7 @@ export function decodePmpPayload({
     try {
         const text = decodeData(bytes, config.encoding);
         if (typeof text !== 'string') {
-            // No validated config can reach this: both entry points narrow `encoding` to the library enum first.
+            // No validated config can reach this: every entry point narrows `encoding` to the library enum first.
             // If it fires, `Encoding` grew a variant whose decoder returns something other than a string, and
             // every card holding that encoding renders a decode failure. Reported, because it is our drift.
             Logger.warn('[pmp:decode-payload] decodeData returned a non-string for a declared encoding', {

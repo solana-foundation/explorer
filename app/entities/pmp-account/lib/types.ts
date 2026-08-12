@@ -32,7 +32,7 @@ export type PmpDecodeConfig = {
  * `text` is display-ready: a `Json` payload arrives pretty-printed, everything else verbatim. The card renders it
  * as-is, so nothing downstream has to know which format produced it.
  */
-export type PmpDecodedPayload =
+export type PmpPayloadDecodeResult =
     | { kind: 'decoded'; text: string; bytes: Uint8Array }
     | { kind: 'empty' }
     | { kind: 'oversized'; bytes: Uint8Array; budget: number }
@@ -53,14 +53,10 @@ export type PmpAccountSnapshot = {
 };
 
 /**
- * Result of reading a payload from the account the instruction points at, rather than from the instruction.
- *
- * `absent` is an ordinary outcome, not an error: the canonical client closes a `setData` source buffer right
- * after the instruction to reclaim its rent, so a historical transaction's buffer is normally gone.
+ * Result of decoding account with its data payload.
  */
-export type PmpAccountContent =
-    | { kind: 'absent' }
-    | { kind: 'unreadable'; reason: string }
+export type PmpAccountDecodeResult =
+    | InvalidPmpAccountResult
     | {
           kind: 'payload';
           account: PmpAccountKind;
@@ -68,8 +64,12 @@ export type PmpAccountContent =
           config: PmpDecodeConfig;
           /** The account body as stored, before decompression - what the Raw tab shows. */
           body: Uint8Array;
-          payload: PmpDecodedPayload;
+          payload: PmpPayloadDecodeResult;
       };
+
+type InvalidPmpAccountResult = { kind: 'absent' } | { kind: 'unreadable'; reason: string };
+
+export type PmpAccountValidateResult = InvalidPmpAccountResult | { kind: 'ok'; data: Uint8Array };
 
 /**
  * The outcome of reading a PMP account, with the generated struct carried verbatim rather than mirrored.
@@ -82,12 +82,11 @@ export type PmpAccountContent =
  * have no struct to be, and both structs type `discriminator` as the whole `AccountDiscriminator` enum rather than
  * a literal member, so TypeScript cannot narrow `Buffer | Metadata` on it.
  *
- * `absent` and `unreadable` are spelled as `PmpAccountContent` spells them, deliberately: a reader meeting one of
+ * `absent` and `unreadable` are spelled as `PmpAccountDecodeResult` spells them, deliberately: a reader meeting one of
  * them should not have to learn two spellings of the same outcome.
  */
-export type PmpAccountHeader =
-    | { kind: 'absent' }
-    | { kind: 'unreadable'; reason: string }
+export type PmpAccountReadResult =
+    | InvalidPmpAccountResult
     /** Allocated and not written yet. An ordinary state, so it is reported rather than treated as a failure. */
     | { kind: 'empty' }
     /** `program` and `authority` are zeroable options: `allocate` leaves both unset for a KEYPAIR buffer. */

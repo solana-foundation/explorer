@@ -18,11 +18,11 @@ export const PMP_DECODED_DOWNLOAD_FILENAME = 'pmp-payload-decoded';
 export const PMP_WRITE_CHUNK_DOWNLOAD_FILENAME = 'pmp-write-chunk';
 export const PMP_ACCOUNT_RAW_DOWNLOAD_FILENAME = 'pmp-account-raw';
 
-/** setData carries `dataSource` as an optional trailing byte, so 4 bytes is the header-only hint-update shape. */
-export const HEADER_ONLY_SET_DATA_LEN = 4;
-
-/** setData's optional `buffer` and write's optional `sourceBuffer` both sit at account index 2. */
-export const PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX = 2;
+/**
+ * Re-exported for the decode modules alongside. The definitions live in the `pmp-instruction` entity, so the wire
+ * layout is stated once and the account page's declared-config lookup reads the same numbers this card does.
+ */
+export { HEADER_ONLY_SET_DATA_LEN, PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX } from '@entities/pmp-instruction';
 
 /**
  * Instruction account order, verified against the generated client's `getXInstruction` builders.

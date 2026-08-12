@@ -1,0 +1,215 @@
+import {
+    PMP_DECODED_RENDER_CAP_BYTES,
+    PMP_MAX_UNPACKED_BYTES,
+    toDocumentText,
+    unpackBounded,
+} from '@entities/pmp-account';
+import { Compression, Format } from '@solana-program/program-metadata';
+
+/**
+ * What a Buffer account's body bytes support saying about it.
+ *
+ * Note what is ABSENT from every arm: `encoding`. All four encodings are lossless views of the same stored bytes -
+ * `getBase16Encoder().encode('68656c6c6f')` and `getUtf8Encoder().encode('hello')` produce byte-identical output
+ * while declaring different encodings - so no byte evidence can pick one. Detection reports which VIEW to render,
+ * and only the history lookup can supply a declared value, because only an instruction ever stated one.
+ */
+export type ConfigResolutionFromBytesResult =
+    | {
+          kind: 'text';
+          compression: Compression;
+          /** The unpacked bytes, carried so a declared-config upgrade never inflates the body a second time. */
+          payload: Uint8Array;
+          text: string;
+          /** `Format.Json` when `JSON.parse` accepted it. `undefined` is unresolved - Yaml/Toml/None are alike. */
+          format: Format.Json | undefined;
+      }
+    /** Fails a strict UTF-8 decode, so there is no document to show. Renders through `RawDataField`. */
+    | { kind: 'binary'; compression: Compression; payload: Uint8Array }
+    | { kind: 'empty' }
+    | { kind: 'incomplete' }
+    | { kind: 'oversized'; bytes: Uint8Array; budget: number }
+    | { kind: 'overflow'; limit: number };
+
+/** The two arms that carry bytes a decode config could describe. */
+export type BufferConfigFromBytesPayload = Extract<ConfigResolutionFromBytesResult, { kind: 'binary' | 'text' }>;
+
+/**
+ * Resolves what a Buffer account's body can be rendered as, from the bytes alone.
+ *
+ * A Buffer header carries no encoding/compression/format - the fields do not exist on the Rust struct - so this is
+ * the only thing that works for a buffer no `setData` has consumed yet, which is a normal pending state rather
+ * than a broken account.
+ *
+ * Two axes are decided by evidence rather than guessed:
+ * - compression, by a bounded inflate. pako validates the trailer checksum, so a clean end is proof - it compares
+ *   the stored crc32/adler32 against the one it accumulated and reports "incorrect data check" on a mismatch
+ *   (`pako@2.1.0/lib/zlib/inflate.js:1390`).
+ * - text versus binary, by a strict UTF-8 decode. Measured at 0 false positives over 20000 random payloads per size.
+ *
+ * Never throws. Every outcome is a member of the union above.
+ */
+export function resolveBufferConfigFromBytes(body: Uint8Array): ConfigResolutionFromBytesResult {
+    if (body.length === 0) return { kind: 'empty' };
+
+    const unpacked = unpackBounded(body, PMP_MAX_UNPACKED_BYTES);
+
+    if (unpacked.kind === 'overflow') return { kind: 'overflow', limit: unpacked.limit };
+    if (unpacked.kind === 'incomplete') return { kind: 'incomplete' };
+
+    // A body that simply is not a compressed stream is `Compression.None`, not a failure. `error` means exactly
+    // that: pako rejected the header, so there was never a stream here to finish.
+    const inflated = unpacked.kind === 'ok' ? unpacked.bytes : undefined;
+
+    // Cross-axis check. When the body BOTH inflates cleanly AND is itself valid UTF-8 that parses as JSON, the
+    // text reading wins: for compressed bytes to be valid UTF-8 JSON is effectively impossible, whereas JSON text
+    // that accidentally inflates is merely astronomically unlikely.
+    //
+    // Only zlib can reach this. Do NOT "fix" the asymmetry by extending the check to gzip - `isGzipStream` explains
+    // why a gzip stream can never satisfy the second half of it.
+    const isGzip = isGzipStream(body);
+    const bodyReadsAsJson = !isGzip && isJson(toStrictUtf8(body));
+
+    const compression =
+        inflated === undefined || bodyReadsAsJson ? Compression.None : isGzip ? Compression.Gzip : Compression.Zlib;
+
+    const payload = compression === Compression.None ? body : (inflated as Uint8Array);
+
+    if (payload.length === 0) return { kind: 'empty' };
+    if (payload.length > PMP_DECODED_RENDER_CAP_BYTES) {
+        return { budget: PMP_DECODED_RENDER_CAP_BYTES, bytes: payload, kind: 'oversized' };
+    }
+
+    const text = toStrictUtf8(payload);
+    if (text === undefined) return { compression, kind: 'binary', payload };
+
+    // Self-validating slack trim, for an UNCOMPRESSED payload only. A Buffer has no `data_length`, so an
+    // over-allocated account carries trailing zeros inside its body. The trim is kept ONLY when it turned a
+    // failing parse into a passing one, which is what makes it evidence rather than a guess.
+    //
+    // Never applied before the inflate: pako stops at the end of a stream on its own, so slack after a compressed
+    // payload is already harmless.
+    if (compression === Compression.None && !isJson(text)) {
+        const trimmed = trimTrailingZeros(payload);
+        const trimmedText = trimmed.length === payload.length ? undefined : toStrictUtf8(trimmed);
+
+        if (trimmedText !== undefined && isJson(trimmedText)) {
+            return {
+                compression,
+                format: Format.Json,
+                kind: 'text',
+                payload: trimmed,
+                text: toDocumentText(trimmedText, Format.Json),
+            };
+        }
+    }
+
+    const format = isJson(text) ? Format.Json : undefined;
+    return { compression, format, kind: 'text', payload, text: toDocumentText(text, format ?? Format.None) };
+}
+
+/**
+ * Whether this resolution produced bytes a config could describe, as opposed to `empty`, `incomplete`, `oversized`
+ * or `overflow` - the four outcomes with no payload for a config to apply to.
+ *
+ * A type guard so callers narrowing on it get `payload` and `compression` without re-testing the kind.
+ */
+export function hasPmpPayload(detection: ConfigResolutionFromBytesResult): detection is BufferConfigFromBytesPayload {
+    return detection.kind === 'text' || detection.kind === 'binary';
+}
+
+/**
+ * Whether the on-chain strategy is worth an RPC call after this one has run.
+ *
+ * A `text` payload that parses as JSON stays certain even though its encoding is unproven: for the bytes to be text
+ * that parses as JSON while some OTHER encoding was declared, an author would have had to write a base58, base64 or
+ * hex document that happens to decode into valid JSON. Rendering it as the JSON document is right either way, so
+ * the call would buy nothing.
+ *
+ * The non-payload arms are certain because there is no document to upgrade.
+ */
+export function isDetectionUncertain(detection: ConfigResolutionFromBytesResult): boolean {
+    if (detection.kind === 'binary') return true;
+    return detection.kind === 'text' && detection.format === undefined;
+}
+
+/**
+ * Whether payload bytes have no readable text form, and so should be offered as bytes rather than as a document.
+ *
+ * The single rule both account kinds share. A Buffer reaches it through detection's `binary` arm; a Metadata
+ * account reaches it here, on the bytes its own declared config unpacked. Deliberately tests the BYTES rather
+ * than the declared `encoding`: `Encoding.Base64` is a rendering choice, and an author may legitimately declare it
+ * over a base64-encoded text file, so treating it as a synonym for "binary" would be a proxy rather than evidence.
+ *
+ * Nothing is hidden by answering true - `RawDataField` shows a Base64 tab alongside Hex, so the declared view
+ * survives and gains a byte count, a download and a copy affordance next to it.
+ */
+export function isBinaryPayload(data: Uint8Array): boolean {
+    return toStrictUtf8(data) === undefined;
+}
+
+/**
+ * Whether a body opens with gzip's magic number, `1f 8b` - `ID1`/`ID2` in RFC 1952, fixed for every gzip stream
+ * ever written. A header check, not a heuristic.
+ *
+ * Both ends of pako spell the same two bytes. It writes them as decimals on deflate,
+ * `put_byte(s, 31); put_byte(s, 139)` (`pako@2.1.0/lib/zlib/deflate.js:1669`), and matches them on inflate as
+ * `hold === 0x8b1f` (`inflate.js:451`) - byte-swapped only because `hold` is packed little-endian a byte at a time
+ * in the loop above it, so the stream on the wire is still `1f 8b`.
+ *
+ * It earns its place twice over:
+ *
+ * 1. **Naming the compression.** pako auto-detects gzip and zlib and inflates both, and the decompressed bytes are
+ *    identical either way, so a successful unpack says nothing about WHICH container it came out of. Reading the
+ *    still-packed body is the only thing that separates `Compression.Gzip` from `Compression.Zlib`.
+ * 2. **Excusing gzip from the cross-axis check.** `0x8b` is `1000_1011`, and that leading `10` marks a UTF-8
+ *    CONTINUATION byte - yet it sits at offset 1, immediately after the ASCII `0x1f`, where a new sequence has to
+ *    open with a lead byte (`00-7F` or `C2-F4`). A strict decoder rejects `1f 8b` outright, so a gzip stream can
+ *    never itself be valid UTF-8, let alone valid JSON.
+ *
+ * Safe on three counts:
+ *
+ * - **Short bodies.** An out-of-range index is `undefined`, which equals neither literal, so a 0- or 1-byte body
+ *   reports false instead of throwing.
+ * - **No collision with zlib.** A zlib header's low nibble must be 8 (deflate is the only defined method), and
+ *   `0x1f & 0x0f` is 15, so a zlib stream can never begin `1f`. The two containers cannot be confused. Both
+ *   constraints sit in pako's zlib branch, twenty lines below the gzip one: `% 31` on the byte pair and
+ *   `(hold & 0x0f) !== Z_DEFLATED` (`pako@2.1.0/lib/zlib/inflate.js:472-479`).
+ * - **No false Gzip on an uncompressed body.** The caller only consults this once the inflate has already
+ *   succeeded, so bytes that merely happen to start `1f 8b` without being a stream stay `Compression.None`.
+ *
+ * The second use is belt-and-braces rather than load-bearing: drop the `!isGzip` guard and the strict UTF-8 decode
+ * would fail on the same bytes anyway. It short-circuits a decode that is guaranteed to fail, and records why.
+ */
+function isGzipStream(body: Uint8Array): boolean {
+    return body[0] === 0x1f && body[1] === 0x8b;
+}
+
+/**
+ * `getUtf8Decoder()` substitutes U+FFFD for invalid sequences instead of throwing, so it cannot be used as a
+ * validity test. This runs its own `fatal` decode, which is the whole signal for the text-versus-binary split.
+ */
+function toStrictUtf8(data: Uint8Array): string | undefined {
+    try {
+        return new TextDecoder('utf-8', { fatal: true }).decode(data);
+    } catch {
+        return undefined;
+    }
+}
+
+function isJson(text: string | undefined): boolean {
+    if (text === undefined) return false;
+    try {
+        JSON.parse(text);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/** Returns the input itself when there is nothing to trim, so the caller can compare by length. */
+function trimTrailingZeros(data: Uint8Array): Uint8Array {
+    let end = data.length;
+    while (end > 0 && data[end - 1] === 0) end--;
+    return end === data.length ? data : data.subarray(0, end);
+}

@@ -20,6 +20,7 @@ type Props = Readonly<{
 }>;
 
 // Page for decoded Program account data. (can contain Anchor, Codama or custom accounts decodings)
+// Currently is used only for PMP accounts.
 export default async function AccountDataPage(props: Props) {
     const params = await props.params;
     return <AccountDataPageClient params={params} />;

@@ -1,10 +1,7 @@
 /**
- * The `pmp-account` entity: the on-chain Program Metadata Program ACCOUNT layouts (Buffer, Metadata, Empty) and
- * everything needed to read them. Its sibling `program-metadata` entity is a different concern - the IDL-label
- * resolution shim over `@entities/idl` - and neither imports the other.
- *
- * This surface is HEAVY: it reaches the generated client, and with it pako, yaml and smol-toml, none of which is
- * marked side-effect-free.
+ * The `pmp-account` entity:
+ * The on-chain Program Metadata Program ACCOUNT layouts and everything needed to read them.
+ * This surface is HEAVY: it reaches the generated client, and with it pako, yaml and smol-toml.
  */
 export {
     isPmpMetadataAccountData,
@@ -26,20 +23,20 @@ export {
     PMP_UNCOMPRESSED_BYTES_LABEL,
 } from './lib/constants';
 export { decodePmpAccount } from './lib/decode-pmp-account';
-export { decodePmpPayload, toDocumentText, unpackBounded } from './lib/decode-pmp-payload';
+export { decodePmpPayload, decodeUnpackedPayload, toDocumentText, unpackBounded } from './lib/decode-pmp-payload';
 export type { BoundedUnpackResult } from './lib/decode-pmp-payload';
 export { toErrorReason } from './lib/errors';
 export { isPmpAccount } from './lib/program-address';
-export { readPmpAccountHeader } from './lib/read-pmp-account-header';
+export { readPmpAccount } from './lib/read-pmp-account';
 export type {
     // The generated `Buffer` / `Metadata` structs, aliased so `Buffer` cannot shadow the Node global.
     BufferAccount,
     MetadataAccount,
-    PmpAccountContent,
-    PmpAccountHeader,
+    PmpAccountDecodeResult,
+    PmpAccountReadResult,
     PmpAccountKind,
     PmpAccountSnapshot,
     PmpDecodeConfig,
-    PmpDecodedPayload,
+    PmpPayloadDecodeResult,
 } from './lib/types';
 export { PmpDecodeConfigStruct } from './lib/validators';

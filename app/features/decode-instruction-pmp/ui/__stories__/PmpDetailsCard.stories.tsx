@@ -141,6 +141,30 @@ export const SetDataEncodingNoneAsHex: Story = {
     },
 };
 
+/**
+ * Regression guard for horizontal overflow. `Encoding.Base64` over a binary payload renders as one unbroken
+ * base64 token - 512 bytes become 684 characters with no space or newline anywhere in them.
+ *
+ * Under Tailwind's `break-words` that widened the whole card, because `overflow-wrap: break-word` does not
+ * contribute to the min-content size the auto-layout table sizes its column from. The document must wrap inside
+ * the card, with no horizontal scrollbar.
+ */
+export const SetDataBase64Binary: Story = {
+    args: {
+        ...baseArgs,
+        ix: makeIx(
+            getSetDataInstructionDataEncoder().encode({
+                compression: Compression.None,
+                data: Uint8Array.from({ length: 512 }, (_, index) => 128 + ((index * 37) % 128)),
+                dataSource: DataSource.Direct,
+                encoding: Encoding.Base64,
+                format: Format.None,
+            }) as Uint8Array,
+            5,
+        ),
+    },
+};
+
 // The 4-byte header-only shape. The generated encoder cannot build it, so the bytes are a literal:
 // discriminator 3, encoding Utf8, compression None, format Json.
 export const SetDataHeaderOnly: Story = {

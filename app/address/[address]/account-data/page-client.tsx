@@ -1,8 +1,6 @@
 'use client';
 
-// `lib/program-address` rather than the barrel, matching `layout.tsx`. Here it is consistency rather than weight
-// saving, because the barrel arrives with `PmpAccountCard` below anyway.
-import { isPmpAccount } from '@entities/pmp-account/lib/program-address';
+import { isPmpAccount } from '@entities/pmp-account';
 import { PmpAccountCard } from '@features/decode-account-pmp';
 import React from 'react';
 

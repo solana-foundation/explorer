@@ -19,10 +19,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
-// Direct imports of two modules that import NOTHING, so the tab gate below - which runs on every account page -
-// drags neither the generated client nor pako, yaml and smol-toml into the account page's first-load JS.
-// `isPmpAccount` deliberately comes from `lib/program-address`, NOT from `lib/constants`, which pulls the client.
-import { isPmpMetadataAccountData } from '@entities/pmp-account/lib/account-discriminators';
+// Deliberately import from `lib/program-address`, NOT from `index`, which pulls the client and packo.
 import { isPmpAccount } from '@entities/pmp-account/lib/program-address';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
@@ -473,9 +470,8 @@ function getNavigationTabs(pubkey: PublicKey, account: Account): AddressTab[] {
     }
 
     // account-data tab is to display decoded data of account.
-    // Currently, supports PMP Metadata account, and PMP Buffer accounts later.
-    // TODO: consider moving anchor-account tab to account-data. And add support for Codama IDL accounts.
-    if (isPmpAccount(account) && isPmpMetadataAccountData(account.data.raw)) {
+    // TODO: consider moving anchor-account tab to account-data and add support for Codama IDL accounts.
+    if (isPmpAccount(account)) {
         tabs.push({ path: 'account-data', title: 'Account Data' });
     }
 
