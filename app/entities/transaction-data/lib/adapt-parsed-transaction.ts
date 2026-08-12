@@ -29,7 +29,8 @@ type RpcTokenBalance = Readonly<{
     uiTokenAmount: Readonly<{
         amount: string;
         decimals: number;
-        uiAmount: number | null;
+        /** kit declares this `number`, but delivers a bigint whenever the balance is a whole number. */
+        uiAmount: number | bigint | null;
         uiAmountString: string;
     }>;
 }>;
@@ -113,7 +114,9 @@ function adaptMeta(meta: RpcMeta | null): TransactionWithMeta['meta'] {
     return {
         computeUnitsConsumed: toOptionalNumber(meta.computeUnitsConsumed),
         costUnits: toOptionalNumber(meta.costUnits),
-        err: meta.err,
+        // Instruction indices and custom program error codes arrive as bigints; the error
+        // formatters do arithmetic on them and would throw on a mixed-type operation.
+        err: withNumbersInsteadOfBigInts(meta.err),
         fee: Number(meta.fee),
         innerInstructions: meta.innerInstructions?.map(({ index, instructions }) => ({
             index,
@@ -144,7 +147,7 @@ function adaptAccountKey(accountKey: RpcAccountKey): ParsedMessageAccount {
 function adaptInstruction(instruction: RpcInstruction): ParsedInstruction | PartiallyDecodedInstruction {
     if ('parsed' in instruction) {
         return {
-            parsed: instruction.parsed,
+            parsed: withNumbersInsteadOfBigInts(instruction.parsed),
             program: instruction.program,
             programId: new PublicKey(instruction.programId),
         };
@@ -163,10 +166,48 @@ function adaptTokenBalance(tokenBalance: RpcTokenBalance): TokenBalance {
         mint: tokenBalance.mint,
         owner: tokenBalance.owner,
         programId: tokenBalance.programId,
-        uiTokenAmount: { ...tokenBalance.uiTokenAmount },
+        uiTokenAmount: {
+            amount: tokenBalance.uiTokenAmount.amount,
+            decimals: tokenBalance.uiTokenAmount.decimals,
+            // `uiAmount` is not on kit's allow-list, so a whole-number balance arrives as a
+            // bigint while a fractional one stays a number.
+            uiAmount: toNullableNumber(tokenBalance.uiTokenAmount.uiAmount),
+            uiAmountString: tokenBalance.uiTokenAmount.uiAmountString,
+        },
     };
 }
 
 function toOptionalNumber(value: number | bigint | undefined): number | undefined {
     return value === undefined ? undefined : Number(value);
+}
+
+function toNullableNumber(value: number | bigint | null): number | null {
+    // web3.js types `uiAmount` as `number | null`, so null is the contract here.
+    // eslint-disable-next-line unicorn/no-null
+    return value === null ? null : Number(value);
+}
+
+/**
+ * Recursively replaces bigints with numbers.
+ *
+ * kit upcasts every integral value in an RPC response to a bigint unless its key path is on an
+ * allow-list, and that list covers nothing inside a parsed instruction or a transaction error.
+ * web3.js delivered plain numbers throughout, and consumers `JSON.stringify` these payloads —
+ * which throws on a bigint — and validate them against superstruct `number()` schemas.
+ *
+ * Precision above 2^53 is lost, exactly as it was when web3.js parsed the same response.
+ */
+function withNumbersInsteadOfBigInts<T>(value: T): T {
+    if (typeof value === 'bigint') {
+        return Number(value) as T;
+    }
+    if (Array.isArray(value)) {
+        return value.map(withNumbersInsteadOfBigInts) as T;
+    }
+    if (typeof value === 'object' && value !== null) {
+        return Object.fromEntries(
+            Object.entries(value).map(([key, item]) => [key, withNumbersInsteadOfBigInts(item)]),
+        ) as T;
+    }
+    return value;
 }

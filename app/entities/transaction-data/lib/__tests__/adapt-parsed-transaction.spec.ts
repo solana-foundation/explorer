@@ -8,34 +8,42 @@ const SYSTEM_PROGRAM = '11111111111111111111111111111111';
 const MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 const BLOCKHASH = '9vHo1dQ6H2XZ1g6TbsbT1T1zuHz39qrkAPGe2f4tXU5V';
 
+type RpcMeta = NonNullable<RpcParsedTransaction['meta']>;
+
+function createMeta(overrides: Partial<RpcMeta> = {}): RpcMeta {
+    return {
+        computeUnitsConsumed: 8442n,
+        costUnits: 3234,
+        err: null,
+        fee: 5000n,
+        innerInstructions: [
+            {
+                index: 0,
+                instructions: [{ accounts: [FEE_PAYER], data: '3Bxs4', programId: SYSTEM_PROGRAM }],
+            },
+        ],
+        loadedAddresses: { readonly: [RECIPIENT], writable: [FEE_PAYER] },
+        logMessages: ['Program 11111111111111111111111111111111 invoke [1]'],
+        postBalances: [900_000_000n, 100_000_000n],
+        postTokenBalances: [
+            {
+                accountIndex: 1,
+                mint: MINT,
+                owner: RECIPIENT,
+                programId: SYSTEM_PROGRAM,
+                // `uiAmount` is not on kit's allow-list, so a whole-number balance is a bigint.
+                uiTokenAmount: { amount: '15000000', decimals: 6, uiAmount: 15n, uiAmountString: '15' },
+            },
+        ],
+        preBalances: [1_000_000_000n, 0n],
+        ...overrides,
+    };
+}
+
 function createResponse(overrides: Partial<RpcParsedTransaction> = {}): RpcParsedTransaction {
     return {
         blockTime: 1_778_761_079n,
-        meta: {
-            computeUnitsConsumed: 8442n,
-            costUnits: 3234,
-            err: null,
-            fee: 5000n,
-            innerInstructions: [
-                {
-                    index: 0,
-                    instructions: [{ accounts: [FEE_PAYER], data: '3Bxs4', programId: SYSTEM_PROGRAM }],
-                },
-            ],
-            loadedAddresses: { readonly: [RECIPIENT], writable: [FEE_PAYER] },
-            logMessages: ['Program 11111111111111111111111111111111 invoke [1]'],
-            postBalances: [900_000_000n, 100_000_000n],
-            postTokenBalances: [
-                {
-                    accountIndex: 1,
-                    mint: MINT,
-                    owner: RECIPIENT,
-                    programId: SYSTEM_PROGRAM,
-                    uiTokenAmount: { amount: '15000000', decimals: 6, uiAmount: 15, uiAmountString: '15' },
-                },
-            ],
-            preBalances: [1_000_000_000n, 0n],
-        },
+        meta: createMeta(),
         slot: 372_654_321n,
         transaction: {
             message: {
@@ -45,7 +53,12 @@ function createResponse(overrides: Partial<RpcParsedTransaction> = {}): RpcParse
                 ],
                 instructions: [
                     {
-                        parsed: { info: { lamports: 100_000_000 }, type: 'transfer' },
+                        // Nothing inside a parsed instruction is on kit's allow-list, so every
+                        // integral value in here arrives as a bigint.
+                        parsed: {
+                            info: { destination: RECIPIENT, lamports: 100_000_000n, source: FEE_PAYER },
+                            type: 'transfer',
+                        },
                         program: 'system',
                         programId: SYSTEM_PROGRAM,
                     },
@@ -108,6 +121,32 @@ describe('adaptParsedTransaction', () => {
             programId: SYSTEM_PROGRAM,
             uiTokenAmount: { amount: '15000000', decimals: 6, uiAmount: 15, uiAmountString: '15' },
         });
+        expect(typeof postTokenBalance.uiTokenAmount.uiAmount).toBe('number');
+    });
+
+    // Cards render these payloads with JSON.stringify, which throws on a bigint, and the receipt
+    // model validates them against superstruct `number()` schemas.
+    it('should leave no bigint anywhere in the adapted transaction', () => {
+        const result = adaptParsedTransaction(
+            createResponse({ meta: createMeta({ err: { InstructionError: [1n, { Custom: 6001n }] } }) }),
+        );
+
+        expect(() => JSON.stringify(result)).not.toThrow();
+        expect(findBigIntPath(result)).toBeUndefined();
+    });
+
+    it('should convert instruction error indices and codes so the error formatters can do arithmetic', () => {
+        const response = createResponse({
+            meta: createMeta({ err: { InstructionError: [1n, { Custom: 6001n }] } }),
+        });
+
+        expect(adaptParsedTransaction(response).meta?.err).toEqual({ InstructionError: [1, { Custom: 6001 }] });
+    });
+
+    it('should convert numbers nested inside a parsed instruction', () => {
+        const [instruction] = adaptParsedTransaction(createResponse()).transaction.message.instructions;
+
+        expect('parsed' in instruction && instruction.parsed.info.lamports).toBe(100_000_000);
     });
 
     it.each(['legacy' as const, 0 as const, 1 as const])('should carry version %s through', version => {
@@ -135,3 +174,14 @@ describe('adaptParsedTransaction', () => {
         expect(result.meta?.costUnits).toBeUndefined();
     });
 });
+
+// Returns the dotted path of the first bigint found, so a failure names the offending field.
+function findBigIntPath(value: unknown, path = ''): string | undefined {
+    if (typeof value === 'bigint') return path || '<root>';
+    if (value === null || typeof value !== 'object') return undefined;
+    for (const [key, item] of Object.entries(value)) {
+        const found = findBigIntPath(item, path ? `${path}.${key}` : key);
+        if (found) return found;
+    }
+    return undefined;
+}
