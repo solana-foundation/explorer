@@ -55,10 +55,11 @@
 | Dynamic | `/epoch/[epoch]` | 10 kB | 410 kB |
 | Static | `/feature-gates` | 50 kB | 440 kB |
 | Dynamic | `/mcp` | — | — |
+| Static | `/mcp/start` | 20 kB | 410 kB |
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
-| Static | `/tos` | 880 B | 400 kB |
+| Static | `/tos` | 890 B | 400 kB |
 | Dynamic | `/tx/[signature]` | 690 kB | 1.05 MB |
 | Dynamic | `/tx/[signature]/inspect` | 480 kB | 880 kB |
 | Static | `/tx/inspector` | 480 kB | 880 kB |

@@ -62,6 +62,12 @@ export function Navbar({ children }: INavbarProps) {
                             </NavbarLink>
                         </NavbarItem>
                         <NavbarItem>
+                            {/* Plain path, not useClusterPath: the page documents a cluster-agnostic endpoint. */}
+                            <NavbarLink asChild active={selectedLayoutSegment === 'mcp'}>
+                                <Link href="/mcp/start">MCP</Link>
+                            </NavbarLink>
+                        </NavbarItem>
+                        <NavbarItem>
                             <NavbarLink
                                 asChild
                                 active={
