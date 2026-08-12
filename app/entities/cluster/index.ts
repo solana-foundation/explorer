@@ -1,5 +1,4 @@
 export type { ClusterInfo } from './lib/types';
-export { DEFAULT_CUSTOM_URL } from './lib/resolve-cluster';
 export { isLocalRpcUrl, shouldUseDirectRpc } from './lib/should-use-direct-rpc';
 export { ClusterProvider, type ClusterState, StateContext } from './model/cluster-provider';
 export { customUrlEnabledAtom, rememberedCustomUrlAtom } from './model/cluster-storage';

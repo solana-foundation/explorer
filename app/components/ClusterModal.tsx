@@ -1,6 +1,5 @@
 'use client';
 
-import { DEFAULT_CUSTOM_URL } from '@entities/cluster';
 import {
     addSavedClusterAtom,
     removeSavedClusterAtom,
@@ -18,7 +17,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { Trash2 } from 'react-feather';
 
-import { useHydrated } from '../shared/lib/use-hydrated';
 import { Alert } from '../shared/ui/Alert';
 import { FormControl } from '../shared/ui/FormControl';
 import { Overlay } from './common/Overlay';
@@ -90,12 +88,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
     const [saving, setSaving] = React.useState(false);
     const [savedName, setSavedName] = React.useState('');
     const [saveError, setSaveError] = React.useState<Error | undefined>(undefined);
-    // `customUrl` is localStorage-backed (read synchronously via getOnInit), so the server can only ever
-    // render the default. Hold that default through the first client render as well: a mismatched href is
-    // never patched, and React's own tree already holds the stored value, so it would stay stale forever.
-    const hydrated = useHydrated();
-    const renderedCustomUrl = hydrated ? customUrl : DEFAULT_CUSTOM_URL;
-    const [localUrl, setLocalUrl] = React.useState(renderedCustomUrl);
+    const [localUrl, setLocalUrl] = React.useState(customUrl);
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -141,12 +134,7 @@ function CustomClusterInput({ status, active, savedClusters }: InputProps) {
         <>
             <Link
                 className={cn(clusterButtonVariants({ active, status }), 'mb-3')}
-                href={{
-                    query: {
-                        cluster: 'custom',
-                        ...(renderedCustomUrl.length > 0 ? { customUrl: renderedCustomUrl } : null),
-                    },
-                }}
+                href={{ query: { cluster: 'custom', ...(customUrl.length > 0 ? { customUrl } : null) } }}
             >
                 Custom RPC URL
             </Link>
