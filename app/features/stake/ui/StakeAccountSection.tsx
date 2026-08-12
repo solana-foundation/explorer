@@ -12,6 +12,7 @@ import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { capitalizeFirstLetter, lamportsToSol } from '@utils/index';
 import React from 'react';
 
+import { Skeleton } from '@/app/components/shared/ui/skeleton';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { Alert } from '@/app/shared/ui/Alert';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
@@ -20,6 +21,12 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import type { StakeActivationStatus } from '../api/stake-activation';
 import { EPOCH_NEVER_SET } from '../lib/constants';
 import type { StakeAccountInfo, StakeAccountType, StakeMeta } from '../lib/validators';
+import {
+    type DisabledTotalRewardState,
+    type TotalRewardState,
+    TotalRewardStatus,
+    useTotalReward,
+} from '../model/use-total-reward';
 
 type StakeActivationData = {
     state: StakeActivationStatus;
@@ -49,6 +56,8 @@ export function StakeAccountSection({
     // simply don't render on other clusters.
     const priceResult = useTokenPrice(NATIVE_MINT.toBase58());
     const solPrice = priceResult?.status === PriceStatus.Success ? priceResult.price : null;
+    // Fetched here, alongside the price, so `DelegationCard` stays presentational.
+    const totalReward = useTotalReward(toKitAddress(account.pubkey));
     return (
         <>
             <LockupCard stakeAccount={stakeAccount} />
@@ -60,7 +69,12 @@ export function StakeAccountSection({
                 solPrice={solPrice}
             />
             {stakeAccount.stake && (
-                <DelegationCard stakeAccount={stakeAccount} activation={activation} solPrice={solPrice} />
+                <DelegationCard
+                    stakeAccount={stakeAccount}
+                    activation={activation}
+                    solPrice={solPrice}
+                    totalReward={totalReward}
+                />
             )}
             <AuthoritiesCard meta={stakeAccount.meta} />
         </>
@@ -163,14 +177,20 @@ function OverviewCard({
     );
 }
 
-function DelegationCard({
+/**
+ * Exported for Storybook: the card is presentational, so its total-reward states are covered by
+ * passing `totalReward` directly rather than by mocking the hook the section calls.
+ */
+export function DelegationCard({
     stakeAccount,
     activation,
     solPrice,
+    totalReward,
 }: {
     stakeAccount: StakeAccountInfo;
     activation?: StakeActivationData;
     solPrice: number | null;
+    totalReward: TotalRewardState;
 }) {
     const { stake } = stakeAccount;
     if (!stake) {
@@ -213,6 +233,15 @@ function DelegationCard({
                     </>
                 )}
 
+                {totalReward.status !== TotalRewardStatus.Disabled && (
+                    <BaseTable.Row>
+                        <BaseTable.Cell>Total Reward (SOL)</BaseTable.Cell>
+                        <BaseTable.Cell className="md:text-right">
+                            <TotalReward state={totalReward} solPrice={solPrice} />
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
+                )}
+
                 <BaseTable.Row>
                     <BaseTable.Cell>Delegated Vote Address</BaseTable.Cell>
                     <BaseTable.Cell className="md:text-right">
@@ -235,6 +264,29 @@ function DelegationCard({
             </TableCardBody>
         </Card>
     );
+}
+
+// Lifetime rewards load separately from the account, so the row carries its own state. A failure
+// shows a quiet message rather than 0 — zero is a claim about the account, not about the request.
+// `Disabled` is excluded because the caller drops the whole row, leaving this switch exhaustive.
+function TotalReward({
+    state,
+    solPrice,
+}: {
+    state: Exclude<TotalRewardState, DisabledTotalRewardState>;
+    solPrice: number | null;
+}) {
+    switch (state.status) {
+        case TotalRewardStatus.Loading:
+            return <Skeleton className="ml-auto h-4 w-24" />;
+        case TotalRewardStatus.Ready:
+            return <SolWithUsd lamports={state.lamports} solPrice={solPrice} />;
+        // A cluster Solscan does not index and a request that failed read the same to a visitor:
+        // the figure is not here. The distinction is ours to act on, not theirs.
+        case TotalRewardStatus.Unavailable:
+        case TotalRewardStatus.Unsupported:
+            return <span className="text-dk-gray-700">Unavailable</span>;
+    }
 }
 
 function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
