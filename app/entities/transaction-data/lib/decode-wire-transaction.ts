@@ -6,6 +6,8 @@ import {
     getTransactionDecoder,
 } from '@solana/kit';
 
+const SIGNATURE_BYTES = 64;
+
 export type WireTransaction = {
     compiledMessage: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime;
     /** The message portion of the wire bytes, exactly as served by the RPC. */
@@ -29,9 +31,10 @@ export function decodeWireTransaction(bytes: Uint8Array): WireTransaction {
         compiledMessage: getCompiledTransactionMessageDecoder().decode(transaction.messageBytes),
         // The decoded message bytes are a view over `bytes`; copy so callers own their buffer.
         messageBytes: new Uint8Array(transaction.messageBytes),
-        // SignaturesMap is insertion-ordered, matching the message's signer order.
+        // SignaturesMap is insertion-ordered, matching the message's signer order. A signer that has
+        // not signed yet gets the all-zero signature, which renders as a placeholder rather than a gap.
         signatures: Object.values(transaction.signatures).map(signature =>
-            signature ? base58Decoder.decode(signature) : '',
+            base58Decoder.decode(signature ?? new Uint8Array(SIGNATURE_BYTES)),
         ),
     };
 }

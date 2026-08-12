@@ -72,7 +72,11 @@ export type RpcParsedTransaction = Readonly<{
         }>;
         signatures: readonly string[];
     }>;
-    version?: TransactionVersion;
+    /**
+     * kit types the numeric versions as numbers, but `version` is absent from its integer
+     * allow-list, so they arrive as bigints at runtime.
+     */
+    version?: TransactionVersion | bigint;
 }>;
 
 /**
@@ -102,8 +106,12 @@ export function adaptParsedTransaction(response: RpcParsedTransaction): Transact
             },
             signatures: [...signatures],
         },
-        version: response.version,
+        version: adaptVersion(response.version),
     };
+}
+
+function adaptVersion(version: RpcParsedTransaction['version']): TransactionVersion | undefined {
+    return typeof version === 'bigint' ? (Number(version) as TransactionVersion) : version;
 }
 
 function adaptMeta(meta: RpcMeta | null): TransactionWithMeta['meta'] {

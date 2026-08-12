@@ -67,7 +67,7 @@ function createResponse(overrides: Partial<RpcParsedTransaction> = {}): RpcParse
             },
             signatures: ['5xyz'],
         },
-        version: 0,
+        version: 0n,
         ...overrides,
     };
 }
@@ -149,8 +149,12 @@ describe('adaptParsedTransaction', () => {
         expect('parsed' in instruction && instruction.parsed.info.lamports).toBe(100_000_000);
     });
 
-    it.each(['legacy' as const, 0 as const, 1 as const])('should carry version %s through', version => {
-        expect(adaptParsedTransaction(createResponse({ version })).version).toBe(version);
+    it.each([
+        ['legacy' as const, 'legacy'],
+        [0n, 0],
+        [1n, 1],
+    ])('should narrow version %s to %s', (version, expected) => {
+        expect(adaptParsedTransaction(createResponse({ version })).version).toBe(expected);
     });
 
     it('should tolerate a response with no optional metadata', () => {

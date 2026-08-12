@@ -53,5 +53,10 @@ async function fetchTransactionConfig(url: string, signature: string): Promise<T
     }
 
     const [base64Transaction] = response.transaction;
-    return decodeTransactionConfig(decodeWireTransaction(fromBase64(base64Transaction)).compiledMessage);
+    try {
+        return decodeTransactionConfig(decodeWireTransaction(fromBase64(base64Transaction)).compiledMessage);
+    } catch {
+        // The resource-limit rows are supplemental; the rest of the page renders without them.
+        return undefined;
+    }
 }
