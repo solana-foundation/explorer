@@ -3,7 +3,7 @@ const prettierConfigSolana = require('@solana/prettier-config-solana');
 /** @type {import("prettier").Config} */
 module.exports = {
     ...prettierConfigSolana,
-    plugins: [prettierConfigSolana.plugins ?? []].concat(['prettier-plugin-tailwindcss']),
+    plugins: [...(prettierConfigSolana.plugins ?? []), 'prettier-plugin-tailwindcss'],
     endOfLine: 'lf',
     overrides: [
         ...(prettierConfigSolana.overrides ?? []),
@@ -28,7 +28,7 @@ module.exports = {
         // Reflow prose at printWidth so these docs stay readable in a diff and in an editor without soft wrap.
         // Scoped rather than repo-wide: turning it on everywhere would reflow every existing markdown file.
         {
-            files: ['app/mcp/**/*.md', 'packages/entity-inspector/**/*.md'],
+            files: 'app/mcp/**/*.md',
             options: {
                 proseWrap: 'always',
             },
