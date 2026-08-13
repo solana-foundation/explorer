@@ -1,5 +1,6 @@
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 
+import { SUPPORTED_CLUSTERS } from '../config.js';
 import { consoleLogger, ns } from '../logger.js';
 import { createMultisigResolver } from '../enrichments/multisig.js';
 import { createSecurityMetadataResolver } from '../enrichments/security.js';
@@ -12,9 +13,18 @@ import type { InspectEntityDependencies } from './tools/inspect-entity.js';
 
 export type McpRequestHandler = (request: Request) => Promise<Response>;
 
-/** Stateless transport: a fresh server + transport pair per request, both closed in `finally`. */
+/**
+ * Stateless transport: a fresh server + transport pair per request, both closed in `finally`.
+ *
+ * @throws if an enabled cluster has no RPC endpoint — a misconfiguration that would otherwise fail per tool call.
+ */
 export function createMcpRequestHandler(config: EntityInspectorConfig): McpRequestHandler {
     const logger = config.logger ?? consoleLogger;
+    for (const cluster of config.enabledClusterNames ?? SUPPORTED_CLUSTERS) {
+        if (!config.rpcEndpoints[cluster]) {
+            throw new Error(ns(`enabledClusterNames lists ${cluster} but rpcEndpoints has no endpoint for it`));
+        }
+    }
     const rpcClient = createRpcClient(config.rpcEndpoints);
     const resolveIdlClient = createIdlClientResolver(config.rpcEndpoints, logger);
     const dependencies: InspectEntityDependencies = {
@@ -32,6 +42,7 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
             resolveIdlClient,
         }),
         resolveSecurityMetadata: createSecurityMetadataResolver(config.rpcEndpoints, logger),
+        ...(config.enabledClusterNames ? { enabledClusterNames: config.enabledClusterNames } : {}),
         ...(config.decodeInstructionFallback ? { decodeInstructionFallback: config.decodeInstructionFallback } : {}),
         ...(config.resolveProgramName ? { resolveProgramName: config.resolveProgramName } : {}),
         ...(config.track ? { track: config.track } : {}),

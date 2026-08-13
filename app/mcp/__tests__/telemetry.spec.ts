@@ -47,7 +47,7 @@ describe('createMcpTrack', () => {
         expect(afterMock).toHaveBeenCalledTimes(1);
         const expectedHash = createHash('sha256').update('session-123').digest('hex');
         const [, init] = fetchMock.mock.calls[0];
-        expect(JSON.parse(init.body)).toMatchObject({ client_id: expectedHash });
+        expect(JSON.parse(init.body)).toMatchObject({ client_id: `sid_${expectedHash}` });
         expect(init.body).not.toContain('session-123');
     });
 
@@ -66,6 +66,36 @@ describe('createMcpTrack', () => {
         expect(url).toContain('measurement_id=G-CLIENT');
     });
 
+    // .env.example ships MCP_GA_MEASUREMENT_ID empty, so an empty value must fall back like an unset one.
+    it('should fall back to NEXT_PUBLIC_GOOGLE_ANALYTICS_ID when MCP_GA_MEASUREMENT_ID is empty', async () => {
+        vi.stubEnv('MCP_GA_MEASUREMENT_ID', '');
+        vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', 'G-CLIENT');
+        vi.stubEnv('MCP_GA_API_SECRET', 'secret');
+        const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+        vi.stubGlobal('fetch', fetchMock);
+        headersMock.mockResolvedValue(new Headers());
+
+        createMcpTrack()(EVENT);
+        await flushMicrotasks();
+
+        const [url] = fetchMock.mock.calls[0];
+        expect(url).toContain('measurement_id=G-CLIENT');
+    });
+
+    // The session branch returns early, so a request carrying both must never be keyed on its IP.
+    it('should prefer the session id over the client ip when both are present', async () => {
+        const fetchMock = stubGaEnv();
+        headersMock.mockResolvedValue(new Headers({ 'mcp-session-id': 'session-123', 'x-forwarded-for': '1.2.3.4' }));
+
+        createMcpTrack()(EVENT);
+        await flushMicrotasks();
+
+        const expectedHash = createHash('sha256').update('session-123').digest('hex');
+        const [, init] = fetchMock.mock.calls[0];
+        expect(JSON.parse(init.body)).toMatchObject({ client_id: `sid_${expectedHash}` });
+        expect(init.body).not.toContain(createHash('sha256').update('1.2.3.4').digest('hex'));
+    });
+
     it('should hash the client ip when no session id is present', async () => {
         const fetchMock = stubGaEnv();
         headersMock.mockResolvedValue(new Headers({ 'x-forwarded-for': '1.2.3.4, 10.0.0.1' }));
@@ -75,7 +105,7 @@ describe('createMcpTrack', () => {
 
         const expectedHash = createHash('sha256').update('1.2.3.4').digest('hex');
         const [, init] = fetchMock.mock.calls[0];
-        expect(JSON.parse(init.body)).toMatchObject({ client_id: expectedHash });
+        expect(JSON.parse(init.body)).toMatchObject({ client_id: `ip_${expectedHash}` });
         expect(init.body).not.toContain('1.2.3.4');
     });
 
@@ -87,7 +117,7 @@ describe('createMcpTrack', () => {
         await flushMicrotasks();
 
         const [, init] = fetchMock.mock.calls[0];
-        expect(JSON.parse(init.body)).toMatchObject({ client_id: 'anonymous' });
+        expect(JSON.parse(init.body)).toMatchObject({ client_id: 'anon' });
     });
 
     it('should warn once and stay a no-op when the GA credentials are not configured', async () => {
@@ -130,15 +160,14 @@ describe('createMcpTrack', () => {
         expect(loggerMock.warn).not.toHaveBeenCalled();
     });
 
-    it('should log at debug and swallow a failing headers lookup', async () => {
+    // Reported, not debug-logged: a rotated secret would otherwise leave the dashboards merely quiet.
+    it('should report a failing headers lookup to Sentry and swallow it', async () => {
         stubGaEnv();
         headersMock.mockRejectedValue(new Error('no request scope'));
 
         createMcpTrack()(EVENT);
         await flushMicrotasks();
 
-        expect(loggerMock.debug).toHaveBeenCalledWith('[mcp] telemetry emission failed', {
-            error: expect.any(Error),
-        });
+        expect(loggerMock.error).toHaveBeenCalledWith(expect.any(Error), { sentry: true });
     });
 });

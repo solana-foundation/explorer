@@ -14,34 +14,41 @@ export function useCopyToClipboard(resetMs = 2000): readonly [CopyState, (text: 
         };
     }, []);
 
-    const scheduleReset = useCallback(() => {
-        timeoutRef.current = setTimeout(() => setState('copy'), resetMs);
-    }, [resetMs]);
+    const scheduleReset = useCallback(
+        (ms: number) => {
+            timeoutRef.current = setTimeout(() => setState('copy'), ms);
+        },
+        [setState],
+    );
+
+    // A failure the user glanced past means pasting stale clipboard content, so it lingers longer than a success.
+    const failWith = useCallback(
+        (error: Error) => {
+            Logger.error(error);
+            setState('errored');
+            scheduleReset(resetMs * 3);
+        },
+        [resetMs, scheduleReset],
+    );
 
     const copy = useCallback(
         (text: string) => {
             clearTimeout(timeoutRef.current);
 
             if (typeof navigator === 'undefined' || !navigator.clipboard) {
-                Logger.error(new Error('Clipboard API is not available'));
-                setState('errored');
-                scheduleReset();
+                failWith(new Error('Clipboard API is not available'));
                 return;
             }
 
             navigator.clipboard.writeText(text).then(
                 () => {
                     setState('copied');
-                    scheduleReset();
+                    scheduleReset(resetMs);
                 },
-                (error: unknown) => {
-                    Logger.error(new Error('Clipboard write failed', { cause: error }));
-                    setState('errored');
-                    scheduleReset();
-                },
+                (error: unknown) => failWith(new Error('Clipboard write failed', { cause: error })),
             );
         },
-        [scheduleReset],
+        [failWith, resetMs, scheduleReset],
     );
 
     return [state, copy] as const;

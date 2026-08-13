@@ -170,6 +170,41 @@ describe('createMcpRequestHandler — real MCP SDK transport', () => {
     });
 });
 
+describe('createMcpRequestHandler — a deployment that enables one cluster', () => {
+    const handler = createMcpRequestHandler({ ...TEST_CONFIG, enabledClusterNames: ['devnet'] });
+
+    it('should advertise only the enabled cluster in the schema and the description', async () => {
+        const response = await handler(await negotiatedToolRequest(handler, 'tools/list', {}, 30));
+
+        const [inspectEntity] = (await response.json()).result.tools;
+        expect(inspectEntity.inputSchema.properties.cluster).toMatchObject({ default: 'devnet', enum: ['devnet'] });
+        expect(inspectEntity.description).toContain('CLUSTER: Solana network to query (devnet). Defaults to devnet.');
+    });
+
+    it('should reject a call naming a cluster the deployment withheld', async () => {
+        const response = await handler(
+            await negotiatedToolRequest(
+                handler,
+                'tools/call',
+                { arguments: { cluster: 'mainnet-beta', identifier: '111' }, name: 'inspect_entity' },
+                31,
+            ),
+        );
+
+        await expect(response.json()).resolves.toMatchObject({ id: 31, result: { isError: true } });
+    });
+
+    it('should refuse to start when an enabled cluster has no RPC endpoint', () => {
+        expect(() =>
+            createMcpRequestHandler({
+                ...TEST_CONFIG,
+                enabledClusterNames: ['devnet'],
+                rpcEndpoints: { ...TEST_CONFIG.rpcEndpoints, devnet: '' },
+            }),
+        ).toThrow(/devnet/);
+    });
+});
+
 // The initialized NOTIFICATION (not the initialize request) is what fires `oninitialized` — real
 // MCP clients send it right after negotiation; the sessionless harness must do so explicitly.
 function initializedNotification(): Request {

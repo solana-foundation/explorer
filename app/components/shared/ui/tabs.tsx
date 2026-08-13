@@ -22,6 +22,8 @@ const TabsTrigger = React.forwardRef<
         ref={ref}
         className={cn(
             'appearance-none border-solid shadow-none outline-none',
+            // Ring, not outline: the global `button:focus { outline: none !important }` would win otherwise.
+            'rounded focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
             'border-b border-transparent data-[state=active]:border-b-accent',
             'bg-transparent',
             'px-0 py-4',

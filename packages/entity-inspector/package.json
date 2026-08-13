@@ -32,9 +32,10 @@
     "scripts": {
         "prebuild": "rm -rf dist",
         "build": "tsc -p tsconfig.build.json",
-        "format": "oxfmt --check .",
-        "format:fix": "oxfmt .",
-        "lint": "oxlint && oxfmt --check .",
+        "format": "pnpm run format:md && oxfmt --check .",
+        "format:fix": "prettier --write '**/*.md' && oxfmt .",
+        "format:md": "prettier --check '**/*.md'",
+        "lint": "oxlint && pnpm run format",
         "lint:fix": "oxlint --fix",
         "pretest": "pnpm run build",
         "test": "pnpm run typecheck && vitest run && pnpm run test:treeshakability && pnpm run test:node-esm && pnpm run test:coverage",
@@ -64,6 +65,7 @@
         "agadoo": "^3.0.0",
         "oxfmt": "^0.56.0",
         "oxlint": "^1.71.0",
+        "prettier": "catalog:tooling",
         "typescript": "catalog:tooling",
         "vitest": "catalog:vitest"
     }
