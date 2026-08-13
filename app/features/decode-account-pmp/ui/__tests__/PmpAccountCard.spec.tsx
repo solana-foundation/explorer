@@ -167,7 +167,9 @@ describe('PmpAccountCard', () => {
         } satisfies PmpPayloadDecodeResult);
         render(<PmpAccountCard account={toAccount(METADATA_ACCOUNT)} />);
 
-        expect(await screen.findByTestId('pmp-account-decode-error')).toHaveTextContent('incorrect header check');
+        expect(await screen.findByTestId('pmp-account-payload-undecodable')).toHaveTextContent(
+            'incorrect header check',
+        );
         // A failed decode degrades to the header rows, it does not take out the tab.
         expect(screen.getByTestId('pmp-account-mutable')).toBeInTheDocument();
     });

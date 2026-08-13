@@ -386,7 +386,7 @@ describe('DataPayloadSection', () => {
         expect(trackEvent).toHaveBeenCalledWith('pmp_data_tab_opened', {
             data_source: 'direct',
             format: 'json',
-            instruction: 'setData',
+            instruction: 'set_data',
             source: 'instruction',
             tab: 'decoded',
         });

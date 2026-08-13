@@ -100,23 +100,29 @@ const INITIALIZE = new Uint8Array(
  * real devnet twin transactions - the source buffer sits at index 2 of the write, and the config is declared for
  * the PDA at index 0 of the initialize.
  */
-function copyTransaction({
-    source = BUFFER,
-    offset = 0,
-    extraWrite = false,
-}: { source?: string; offset?: number; extraWrite?: boolean } = {}) {
-    const keys = [METADATA, AUTHORITY, source, PMP_ADDRESS, OTHER];
+/** One `write` in the fixture. Named accounts rather than key indexes, so a case reads as what it models. */
+type WriteIx = { target?: string; source?: string; offset?: number };
+
+function copyTransaction({ writeIxs = [{}] }: { writeIxs?: WriteIx[] } = {}) {
+    const keys = [METADATA, AUTHORITY, BUFFER, PMP_ADDRESS, OTHER];
     const programIdIndex = keys.indexOf(PMP_ADDRESS);
-    const ix = (data: Uint8Array, accountKeyIndexes: number[]) => ({ accountKeyIndexes, data, programIdIndex });
+    const at = (address: string) => keys.indexOf(address);
+    const ix = (data: Uint8Array, accounts: string[]) => ({
+        accountKeyIndexes: accounts.map(at),
+        data,
+        programIdIndex,
+    });
 
     return {
         meta: { err: null, innerInstructions: [], loadedAddresses: undefined },
         transaction: {
             message: {
                 compiledInstructions: [
-                    ix(writeBytes(offset), [0, 1, 2]),
-                    ...(extraWrite ? [ix(writeBytes(900), [0, 1, 4])] : []),
-                    ix(INITIALIZE, [0, 1]),
+                    // `write` accounts are [Buffer, Authority, SourceBuffer] - the target is index 0, not index 2.
+                    ...writeIxs.map(({ target = METADATA, source = BUFFER, offset = 0 }) =>
+                        ix(writeBytes(offset), [target, AUTHORITY, source]),
+                    ),
+                    ix(INITIALIZE, [METADATA, AUTHORITY]),
                 ],
                 getAccountKeys: () => ({ get: (index: number) => ({ toBase58: () => keys[index] }) }),
             },
@@ -223,7 +229,7 @@ describe('findConfigInTransactions', () => {
     // assembly this buffer is a fragment of - applying it here would try to inflate the middle of a stream.
     it('should refuse a copy that did not start at offset 0', async () => {
         const { connection } = connectionWith([{ signature: 'partial' }], {
-            partial: copyTransaction({ offset: 900 }),
+            partial: copyTransaction({ writeIxs: [{ offset: 900 }] }),
         });
 
         await expect(findConfigInTransactions(connection, BUFFER)).resolves.toEqual({ kind: 'not-found' });
@@ -231,7 +237,18 @@ describe('findConfigInTransactions', () => {
 
     it('should refuse a copy when another buffer also wrote to the same metadata account', async () => {
         const { connection } = connectionWith([{ signature: 'shared' }], {
-            shared: copyTransaction({ extraWrite: true }),
+            shared: copyTransaction({ writeIxs: [{}, { offset: 900, source: OTHER }] }),
+        });
+
+        await expect(findConfigInTransactions(connection, BUFFER)).resolves.toEqual({ kind: 'not-found' });
+    });
+
+    // The case above is two sources feeding ONE destination. This is the opposite: one source feeding TWO, which
+    // is what `copies.length !== 1` guards. Nothing says which destination's config describes this buffer, so no
+    // inference is safe - even though both copies carry its bytes whole.
+    it('should refuse a copy when this buffer was copied into two destinations', async () => {
+        const { connection } = connectionWith([{ signature: 'twice' }], {
+            twice: copyTransaction({ writeIxs: [{}, { target: OTHER }] }),
         });
 
         await expect(findConfigInTransactions(connection, BUFFER)).resolves.toEqual({ kind: 'not-found' });
@@ -239,7 +256,7 @@ describe('findConfigInTransactions', () => {
 
     it('should ignore a copy that names a different source buffer', async () => {
         const { connection } = connectionWith([{ signature: 'other' }], {
-            other: copyTransaction({ source: OTHER }),
+            other: copyTransaction({ writeIxs: [{ source: OTHER }] }),
         });
 
         await expect(findConfigInTransactions(connection, BUFFER)).resolves.toEqual({ kind: 'not-found' });

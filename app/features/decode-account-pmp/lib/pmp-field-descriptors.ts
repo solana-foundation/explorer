@@ -19,20 +19,24 @@ type BufferHeader = Extract<PmpAccountReadResult, { kind: 'buffer' }>;
 export type FieldType = 'bool' | 'enum' | 'number' | 'pubkey' | 'string';
 
 /**
- * One rendered row.
+ * One rendered row. `data` is excluded simply by never being listed - it renders as a document, not a field.
  */
 export type FieldDescriptor<TData> = {
     field: string;
     type: FieldType;
-    /** `undefined` renders as "None" - the account does not carry this value. */
-    value: (header: TData) => boolean | string | undefined;
-    /** Row-level policy. `data` is excluded simply by never being listed - it renders as a document, not a field. */
-    when?: (header: TData) => boolean;
+    /**
+     * `undefined` drops the row - the field does not apply here, or nothing resolved it.
+     * `null` renders "None" - the row exists and the stored value is genuinely absent.
+     *
+     * `null` is what `unwrapOption` returns, so an Option-backed field needs no adapter. It is also rendered BEFORE
+     * the `type` dispatch, which is what keeps an absent pubkey away from `new PublicKey()`.
+     */
+    value: (data: TData) => boolean | string | null | undefined;
 };
 
 export const METADATA_HEADER_FIELDS: FieldDescriptor<MetadataHeader>[] = [
     { field: 'program', type: 'pubkey', value: h => h.account.program },
-    { field: 'authority', type: 'pubkey', value: h => unwrapOption(h.account.authority) ?? undefined },
+    { field: 'authority', type: 'pubkey', value: h => unwrapOption(h.account.authority) },
     { field: 'mutable', type: 'bool', value: h => h.account.mutable },
     { field: 'canonical', type: 'bool', value: h => h.account.canonical },
     { field: 'seed', type: 'string', value: h => h.account.seed || '-' },
@@ -48,10 +52,10 @@ export const METADATA_CONFIG_FIELDS: FieldDescriptor<MetadataHeader>[] = [
 
 /** Same leading order as `METADATA_HEADER_FIELDS`, so a buffer and the metadata twin it feeds scan side by side. */
 export const BUFFER_HEADER_FIELDS: FieldDescriptor<BufferHeader>[] = [
-    { field: 'program', type: 'pubkey', value: h => unwrapOption(h.account.program) ?? undefined },
-    { field: 'authority', type: 'pubkey', value: h => unwrapOption(h.account.authority) ?? undefined },
-    { field: 'canonical', type: 'bool', value: h => h.account.canonical, when: isPdaBuffer },
-    { field: 'seed', type: 'string', value: h => h.account.seed || '-', when: isPdaBuffer },
+    { field: 'program', type: 'pubkey', value: h => unwrapOption(h.account.program) },
+    { field: 'authority', type: 'pubkey', value: h => unwrapOption(h.account.authority) },
+    { field: 'canonical', type: 'bool', value: h => (isPdaBuffer(h) ? h.account.canonical : undefined) },
+    { field: 'seed', type: 'string', value: h => (isPdaBuffer(h) ? h.account.seed || '-' : undefined) },
 ];
 
 /**
@@ -74,7 +78,7 @@ function isPdaBuffer(header: BufferHeader): boolean {
  */
 export type BufferConfigRow = {
     compression: Compression;
-    /** Only ever set from a DECLARED config. Detection cannot assert an encoding - see `detect-buffer-config`. */
+    /** Only ever set from a resolved config. The bytes cannot assert an encoding - see `resolve-buffer-config-from-bytes`. */
     encoding: Encoding | undefined;
     format: Format | undefined;
     /** Not recoverable from bytes at all, so it appears only once the history lookup returns one. */
@@ -87,18 +91,15 @@ export const BUFFER_CONFIG_FIELDS: FieldDescriptor<BufferConfigRow>[] = [
         field: 'encoding',
         type: 'enum',
         value: row => (row.encoding === undefined ? undefined : PMP_ENCODING_LABELS[row.encoding]),
-        when: row => row.encoding !== undefined,
     },
     {
         field: 'format',
         type: 'enum',
         value: row => (row.format === undefined ? undefined : PMP_FORMAT_LABELS[row.format]),
-        when: row => row.format !== undefined,
     },
     {
         field: 'dataSource',
         type: 'enum',
         value: row => (row.dataSource === undefined ? undefined : PMP_DATA_SOURCE_LABELS[row.dataSource]),
-        when: row => row.dataSource !== undefined,
     },
 ];

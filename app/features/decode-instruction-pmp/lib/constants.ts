@@ -1,3 +1,5 @@
+import { DataSource, Format } from '@solana-program/program-metadata';
+
 /**
  * Re-exported for the decode modules alongside. The definition now lives in the `pmp-account` entity, in a
  * library-free module, so the detection path can reach it without the generated client.
@@ -41,4 +43,22 @@ export const PMP_IX_TITLES = {
     initialize: 'Initialize',
     setData: 'SetData',
     write: 'Write',
+} as const;
+
+export const PMP_FORMAT_ANALYTICS_NAMES: Record<Format, string> = {
+    [Format.Json]: 'json',
+    [Format.None]: 'none',
+    [Format.Toml]: 'toml',
+    [Format.Yaml]: 'yaml',
+};
+
+export const PMP_DATA_SOURCE_ANALYTICS_NAMES: Record<DataSource, string> = {
+    [DataSource.Direct]: 'direct',
+    [DataSource.External]: 'external',
+    [DataSource.Url]: 'url',
+};
+
+export const PMP_ANALYTICS_IX_NAMES = {
+    initialize: 'initialize',
+    setData: 'set_data',
 } as const;

@@ -36,17 +36,19 @@ function pack(content: string, compression: Compression): Uint8Array {
     return packDirectData({ compression, content, encoding: Encoding.Utf8 }).data as Uint8Array;
 }
 
+type BufferHeaderOverrides = { canonical?: boolean; program?: Address | null; seed?: string };
+
 /**
  * Derives both data props from the body the same way the card's stateful half does, so a hand-written from-bytes
  * result cannot drift from what `resolveBufferConfigFromBytes` actually returns for these bytes.
  */
-function bufferArgs(body: Uint8Array) {
+function bufferArgs(body: Uint8Array, header: BufferHeaderOverrides = {}) {
     const raw = getBufferEncoder().encode({
         authority: AUTHORITY,
-        canonical: true,
+        canonical: header.canonical ?? true,
         data: body,
-        program: TARGET_PROGRAM,
-        seed: 'security',
+        program: header.program === undefined ? TARGET_PROGRAM : header.program,
+        seed: header.seed ?? 'security',
     }) as Uint8Array;
 
     return {
@@ -123,5 +125,95 @@ describe('BaseBufferAccountCard', () => {
         expect(screen.getByTestId('pmp-account-compression')).toHaveTextContent('Gzip');
         expect(screen.getByTestId('pmp-account-document')).toHaveTextContent('name: orbit');
         expect(screen.queryByTestId('pmp-account-encoding')).not.toBeInTheDocument();
+    });
+
+    it('should render a keypair buffer with no program while hiding canonical and seed', () => {
+        render(
+            <BaseBufferAccountCard
+                {...bufferArgs(pack(YAML_DOC, Compression.Gzip), { canonical: false, program: null, seed: '' })}
+            />,
+        );
+
+        expect(screen.getByTestId('pmp-account-program')).toHaveTextContent('None');
+        expect(screen.getByTestId('pmp-account-authority')).toHaveTextContent(AUTHORITY);
+        expect(screen.queryByTestId('pmp-account-canonical')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('pmp-account-seed')).not.toBeInTheDocument();
+    });
+
+    it('should render canonical and seed on a PDA buffer', () => {
+        render(<BaseBufferAccountCard {...bufferArgs(pack(YAML_DOC, Compression.Gzip))} />);
+
+        expect(screen.getByTestId('pmp-account-canonical')).toHaveTextContent('Yes');
+        expect(screen.getByTestId('pmp-account-seed')).toHaveTextContent('security');
+    });
+
+    it('should render an unwritten buffer as allocated but not written yet', () => {
+        render(<BaseBufferAccountCard {...bufferArgs(new Uint8Array(0))} />);
+
+        expect(screen.getByTestId('pmp-account-buffer-empty-note')).toHaveTextContent('has not been written yet');
+    });
+
+    it('should say the stream is incomplete while write chunks are still landing', () => {
+        render(
+            <BaseBufferAccountCard
+                {...bufferArgs(pack(YAML_DOC, Compression.Gzip))}
+                configFromBytes={{ result: { kind: 'incomplete' }, status: 'ready' }}
+            />,
+        );
+
+        expect(screen.getByTestId('pmp-account-buffer-incomplete-note')).toHaveTextContent('incomplete');
+    });
+
+    it('should report a failed read of the buffer itself', () => {
+        render(
+            <BaseBufferAccountCard
+                {...bufferArgs(pack(YAML_DOC, Compression.Gzip))}
+                configFromBytes={{ status: 'failed' }}
+            />,
+        );
+
+        expect(screen.getByTestId('pmp-account-buffer-read-failed-note')).toHaveTextContent('The decode failed');
+    });
+
+    it('should surface the inflate reason when a declared container fails to unpack', () => {
+        render(
+            <BaseBufferAccountCard
+                {...bufferArgs(pack(YAML_DOC, Compression.Gzip))}
+                configFromBytes={{
+                    result: { kind: 'unpack-error', reason: 'invalid distance too far back' },
+                    status: 'ready',
+                }}
+            />,
+        );
+
+        expect(screen.getByTestId('pmp-account-buffer-unpack-error-note')).toHaveTextContent(
+            'invalid distance too far back',
+        );
+    });
+
+    it('should say the payload expands past the unpack limit', () => {
+        render(
+            <BaseBufferAccountCard
+                {...bufferArgs(pack(YAML_DOC, Compression.Gzip))}
+                configFromBytes={{ result: { kind: 'overflow', limit: 1024 }, status: 'ready' }}
+            />,
+        );
+
+        expect(screen.getByTestId('pmp-account-payload-unpack-overflow')).toHaveTextContent('1024-byte limit');
+    });
+
+    it('should offer the decompressed bytes when the payload is too large to render', () => {
+        render(
+            <BaseBufferAccountCard
+                {...bufferArgs(pack(YAML_DOC, Compression.Gzip))}
+                configFromBytes={{
+                    result: { budget: 2, bytes: new Uint8Array([1, 2, 3]), kind: 'oversized' },
+                    status: 'ready',
+                }}
+            />,
+        );
+
+        expect(screen.getByTestId('pmp-account-payload-too-large')).toHaveTextContent('3 bytes, limit 2');
+        expect(screen.getByTestId('pmp-account-raw')).toBeInTheDocument();
     });
 });

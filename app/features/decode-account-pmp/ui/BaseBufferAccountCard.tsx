@@ -16,7 +16,7 @@ import {
     PendingRow,
     PMP_CARD_TITLE,
 } from './BasePmpAccountDataCard';
-import { DecodedContentRow, RawPayloadRow } from './PmpPayloadRows';
+import { PayloadRows, PayloadTooLargeRow, PayloadUnpackOverflowRow, RawPayloadRow } from './payload-rows';
 
 export type BufferAccountRead = Extract<PmpAccountReadResult, { kind: 'buffer' }>;
 
@@ -49,7 +49,7 @@ function BufferDataContentRows({
 
     if (configFromBytes.status === 'failed') {
         return (
-            <NoteRow testId="pmp-account-decode-error" variant="warning">
+            <NoteRow testId="pmp-account-buffer-read-failed-note" variant="warning">
                 Could not read this buffer. The decode failed.
             </NoteRow>
         );
@@ -59,7 +59,7 @@ function BufferDataContentRows({
 
     if (resultFromBytes.kind === 'empty') {
         return (
-            <NoteRow testId="pmp-account-empty-note" variant="default">
+            <NoteRow testId="pmp-account-buffer-empty-note" variant="default">
                 This buffer is allocated but has not been written yet.
             </NoteRow>
         );
@@ -67,27 +67,33 @@ function BufferDataContentRows({
 
     if (resultFromBytes.kind === 'incomplete') {
         return (
-            <NoteRow testId="pmp-account-decode-error" variant="warning">
+            <NoteRow testId="pmp-account-buffer-incomplete-note" variant="warning">
                 The compressed stream is incomplete, which is what a buffer looks like while its write chunks are still
                 landing.
             </NoteRow>
         );
     }
 
-    if (resultFromBytes.kind === 'overflow') {
+    if (resultFromBytes.kind === 'unpack-error') {
         return (
-            <NoteRow testId="pmp-account-decode-error" variant="warning">
-                Payload expands past the {resultFromBytes.limit}-byte limit for unpacking.
+            <NoteRow testId="pmp-account-buffer-unpack-error-note" variant="warning">
+                Could not read config from Buffer bytes, error: {resultFromBytes.reason}.
             </NoteRow>
         );
     }
 
+    if (resultFromBytes.kind === 'overflow') {
+        return <PayloadUnpackOverflowRow limit={resultFromBytes.limit} />;
+    }
+
+    // The bytes here are the DECOMPRESSED payload, which is why they are worth offering rather than pointing at the
+    // still-compressed account bytes on the card above.
     if (resultFromBytes.kind === 'oversized') {
         return (
-            <NoteRow testId="pmp-account-decode-error" variant="warning">
-                Payload too large to render ({resultFromBytes.bytes.length} bytes, limit {resultFromBytes.budget}). The
-                download menu above offers the raw account bytes; the decoded document is not available here.
-            </NoteRow>
+            <>
+                <PayloadTooLargeRow budget={resultFromBytes.budget} size={resultFromBytes.bytes.length} />
+                <RawPayloadRow bytes={resultFromBytes.bytes} />
+            </>
         );
     }
 
@@ -106,7 +112,7 @@ function BufferDataContentRows({
                         (resultFromBytes.kind === 'text' ? resultFromBytes.format : undefined),
                 }}
             />
-            <BufferDocumentRow foundConfig={foundConfig} fromBytesConfig={resultFromBytes} />
+            <BufferPayloadRow foundConfig={foundConfig} fromBytesConfig={resultFromBytes} />
         </>
     );
 }
@@ -140,7 +146,7 @@ function BufferConfigResolutionNote({
     if (lookup?.kind === 'found-for-metadata-acc') {
         return (
             <InfoRow testId="pmp-account-buffer-copied-note">
-                Config for decoding Buffer resolved from Metadata account from transaction{' '}
+                Config for decoding Buffer resolved from the Metadata account in transaction{' '}
                 <InlineSignature signature={lookup.signature} />.
             </InfoRow>
         );
@@ -172,7 +178,7 @@ function BufferConfigResolutionNote({
  * When a declared config arrives it decodes the ALREADY-UNPACKED payload, so the body never inflates twice. That is
  * what lets a buffer holding readable YAML render as a base64 string once its `setData` declares `Base64`.
  */
-function BufferDocumentRow({
+function BufferPayloadRow({
     foundConfig,
     fromBytesConfig,
 }: {
@@ -181,7 +187,7 @@ function BufferDocumentRow({
 }) {
     if (foundConfig) {
         return (
-            <DecodedContentRow
+            <PayloadRows
                 payload={decodeUnpackedPayload({ bytes: fromBytesConfig.payload, config: foundConfig.config })}
             />
         );
@@ -189,13 +195,11 @@ function BufferDocumentRow({
 
     if (fromBytesConfig.kind === 'text') {
         return (
-            <DecodedContentRow
-                payload={{ bytes: fromBytesConfig.payload, kind: 'decoded', text: fromBytesConfig.text }}
-            />
+            <PayloadRows payload={{ bytes: fromBytesConfig.payload, kind: 'decoded', text: fromBytesConfig.text }} />
         );
     }
 
-    // Detection's `binary` arm carries no text to hand `DecodedContentRow`, so it reaches the raw view directly.
+    // The `binary` arm carries no text to hand `PayloadRows`, so it reaches the raw view directly.
     return <RawPayloadRow bytes={fromBytesConfig.payload} />;
 }
 

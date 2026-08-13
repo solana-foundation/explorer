@@ -3,7 +3,7 @@ import type { PmpAccountReadResult } from '@entities/pmp-account';
 import { METADATA_CONFIG_FIELDS, METADATA_HEADER_FIELDS } from '../lib/pmp-field-descriptors';
 import type { MetadataPayloadDecodeResult } from '../model/use-decode-metadata-payload';
 import { BasePmpAccountDataCard, FieldRows, NoteRow, PendingRow, PMP_CARD_TITLE } from './BasePmpAccountDataCard';
-import { DecodedContentRow } from './PmpPayloadRows';
+import { PayloadRows } from './payload-rows';
 
 export type MetadataAccountRead = Extract<PmpAccountReadResult, { kind: 'metadata' }>;
 
@@ -27,23 +27,23 @@ export function BaseMetadataAccountCard({ payload, metadata }: BaseMetadataAccou
                 </NoteRow>
             )}
 
-            <MetadataDocumentRow payloadResult={payload} />
+            <MetadataPayloadRow payloadResult={payload} />
         </BasePmpAccountDataCard>
     );
 }
 
-function MetadataDocumentRow({ payloadResult }: { payloadResult: MetadataPayloadDecodeResult }) {
+function MetadataPayloadRow({ payloadResult }: { payloadResult: MetadataPayloadDecodeResult }) {
     if (payloadResult.status === 'idle') {
         return <PendingRow testId="pmp-account-decoded-pending">Decoding...</PendingRow>;
     }
 
     if (payloadResult.status === 'failed') {
         return (
-            <NoteRow testId="pmp-account-decode-error" variant="warning">
+            <NoteRow testId="pmp-account-metadata-read-failed-note" variant="warning">
                 Could not read this account. The decode failed.
             </NoteRow>
         );
     }
 
-    return <DecodedContentRow payload={payloadResult.payload} />;
+    return <PayloadRows payload={payloadResult.payload} />;
 }

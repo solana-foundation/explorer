@@ -42,15 +42,16 @@ export function FieldRows<TData>({
     return (
         <>
             {descriptors.map(descriptor => {
-                if (descriptor.when && !descriptor.when(accountData)) return undefined;
-
                 const value = descriptor.value(accountData);
+
+                // The ONE presence signal. `null` is not absence in this sense - it still renders, as "None".
+                if (value === undefined) return undefined;
 
                 return (
                     <BaseTable.Row data-testid={`pmp-account-${descriptor.field}`} key={descriptor.field}>
                         <BaseTable.Cell>{camelToTitleCase(descriptor.field)}</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">
-                            {value === undefined ? 'None' : <FieldValue type={descriptor.type} value={value} />}
+                            {value === null ? 'None' : <FieldValue type={descriptor.type} value={value} />}
                         </BaseTable.Cell>
                     </BaseTable.Row>
                 );

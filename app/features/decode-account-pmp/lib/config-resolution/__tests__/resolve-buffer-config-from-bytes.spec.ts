@@ -7,7 +7,9 @@ import { describe, expect, it } from 'vitest';
 import {
     hasPmpPayload,
     isBinaryPayload,
+    isCompressed,
     isDetectionUncertain,
+    isZlibStream,
     resolveBufferConfigFromBytes,
 } from '../resolve-buffer-config-from-bytes';
 
@@ -102,6 +104,59 @@ describe('resolveBufferConfigFromBytes', () => {
         expect(resolveBufferConfigFromBytes(new Uint8Array(0))).toEqual({ kind: 'empty' });
     });
 
+    // The trailer is the last 8 bytes of a gzip stream, crc32 then isize. Flipping a crc byte leaves the header
+    // and every deflate block intact, so pako inflates the whole payload and only then rejects the checksum -
+    // which is exactly the shape that used to be reported as `Compression.None`.
+    it('should report a gzip stream with a corrupt checksum as unpack-error', () => {
+        const damaged = gzip(utf8(JSON_DOC));
+        damaged[damaged.length - 5] ^= 0xff;
+
+        expect(resolveBufferConfigFromBytes(damaged)).toEqual({
+            kind: 'unpack-error',
+            reason: 'incorrect data check',
+        });
+    });
+
+    it('should report a gzip stream with a corrupt body as unpack-error', () => {
+        const damaged = gzip(utf8(JSON_DOC));
+        damaged[Math.floor(damaged.length / 2)] ^= 0xff;
+
+        expect(resolveBufferConfigFromBytes(damaged)).toMatchObject({ kind: 'unpack-error' });
+    });
+
+    it('should report a zlib stream with a corrupt checksum as unpack-error', () => {
+        const damaged = deflate(utf8(JSON_DOC));
+        damaged[damaged.length - 3] ^= 0xff;
+
+        expect(resolveBufferConfigFromBytes(damaged)).toMatchObject({ kind: 'unpack-error' });
+    });
+
+    // The regression guard for the fix itself. pako rejects an uncompressed body through the SAME error arm as a
+    // damaged stream, with "incorrect header check", so a guard that only tested `unpacked.kind === 'error'` would
+    // report every plain text buffer as a failure instead of rendering its document.
+    it('should keep reporting an uncompressed body as text rather than unpack-error', () => {
+        expect(resolveBufferConfigFromBytes(utf8(JSON_DOC))).toMatchObject({
+            compression: Compression.None,
+            kind: 'text',
+        });
+        expect(resolveBufferConfigFromBytes(utf8('name: orbit\n'))).toMatchObject({ kind: 'text' });
+    });
+
+    // `isZlibStream` is ten bits of evidence, so ordinary text satisfies it by chance. Readable text must still win.
+    it('should report text that accidentally passes the zlib header check as text', () => {
+        const body = utf8('hb-program-metadata-doc');
+
+        expect(isZlibStream(body)).toBe(true);
+        expect(resolveBufferConfigFromBytes(body)).toMatchObject({ compression: Compression.None, kind: 'text' });
+    });
+
+    it('should report uncompressed binary bytes as binary rather than unpack-error', () => {
+        expect(resolveBufferConfigFromBytes(new Uint8Array([0xff, 0x80, 0x81]))).toMatchObject({
+            compression: Compression.None,
+            kind: 'binary',
+        });
+    });
+
     it('should report a payload past the render cap as oversized', () => {
         const body = utf8('x'.repeat(PMP_DECODED_RENDER_CAP_BYTES + 1));
 
@@ -109,6 +164,57 @@ describe('resolveBufferConfigFromBytes', () => {
             budget: PMP_DECODED_RENDER_CAP_BYTES,
             kind: 'oversized',
         });
+    });
+});
+
+describe('isZlibStream', () => {
+    // FLG carries FLEVEL, so the header byte pair varies with compression level and there is no single signature
+    // to compare against - `78 01`, `78 5e`, `78 9c` and `78 da` are all valid, and `78 9c` is pako's default.
+    it('should accept a zlib header at every compression level', () => {
+        for (let level = 1; level <= 9; level++) {
+            const stream = deflate(utf8(JSON_DOC), { level: level as 1 });
+
+            expect({ level, zlib: isZlibStream(stream) }).toEqual({ level, zlib: true });
+        }
+    });
+
+    it('should reject a gzip stream, whose CMF low nibble is 15 rather than 8', () => {
+        expect(isZlibStream(gzip(utf8(JSON_DOC)))).toBe(false);
+    });
+
+    it('should reject a body whose method nibble is not deflate', () => {
+        // 0x79 passes the % 31 test with 0x9b but declares method 9, which RFC 1950 does not define.
+        expect(isZlibStream(new Uint8Array([0x79, 0x9b]))).toBe(false);
+    });
+
+    it('should reject a body that declares deflate but fails the FCHECK modulus', () => {
+        expect(isZlibStream(new Uint8Array([0x78, 0x9d]))).toBe(false);
+    });
+
+    it('should reject bodies too short to carry a header', () => {
+        expect(isZlibStream(new Uint8Array(0))).toBe(false);
+        expect(isZlibStream(new Uint8Array([0x78]))).toBe(false);
+    });
+});
+
+describe('isCompressed', () => {
+    it('should accept both containers', () => {
+        expect(isCompressed(gzip(utf8(JSON_DOC)))).toBe(true);
+        expect(isCompressed(deflate(utf8(JSON_DOC)))).toBe(true);
+    });
+
+    // Still true once the stream is damaged: it reports that a stream STARTS here, not that it is intact, which is
+    // the whole reason it can be asked after an inflate has already failed.
+    it('should still accept a damaged stream, because it reads the header and not the body', () => {
+        const damaged = gzip(utf8(JSON_DOC));
+        damaged[damaged.length - 5] ^= 0xff;
+
+        expect(isCompressed(damaged)).toBe(true);
+    });
+
+    it('should reject an uncompressed body', () => {
+        expect(isCompressed(utf8(JSON_DOC))).toBe(false);
+        expect(isCompressed(new Uint8Array(0))).toBe(false);
     });
 });
 
