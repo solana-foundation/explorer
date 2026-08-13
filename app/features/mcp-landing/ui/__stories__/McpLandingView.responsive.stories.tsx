@@ -1,3 +1,4 @@
+import { withMcpHealthy } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -5,7 +6,7 @@ import { McpLandingView } from '../McpLandingView';
 
 const meta: Meta<typeof McpLandingView> = {
     component: McpLandingView,
-    decorators: [withViewportFromGlobal],
+    decorators: [withViewportFromGlobal, withMcpHealthy],
     parameters: {
         viewport: { options: INITIAL_VIEWPORTS },
     },

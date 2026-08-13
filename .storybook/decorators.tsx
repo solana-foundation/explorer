@@ -212,6 +212,36 @@ export const withClipboardMock: Decorator = Story => {
     return <Story />;
 };
 
+const MCP_PONG = { id: 1, jsonrpc: '2.0', result: { content: [{ text: 'pong', type: 'text' }] } };
+
+// Patched during render so the swap lands before any child effect fires, and restored on unmount so the
+// stub cannot leak into another story sharing this browser context.
+function McpHealthyBoundary({ children }: { children: React.ReactNode }) {
+    const original = useRef(globalThis.fetch);
+
+    if (globalThis.fetch === original.current) {
+        globalThis.fetch = fn(() => Promise.resolve(Response.json(MCP_PONG)));
+    }
+    useLayoutEffect(() => {
+        const restore = original.current;
+        return () => {
+            globalThis.fetch = restore;
+        };
+    }, []);
+
+    return <>{children}</>;
+}
+
+/**
+ * Answers the /mcp health probe with a pong so the status badge settles on "Ready".
+ * Without it the badge races from "Checking" to "Unreachable" mid-screenshot.
+ */
+export const withMcpHealthy: Decorator = Story => (
+    <McpHealthyBoundary>
+        <Story />
+    </McpHealthyBoundary>
+);
+
 /** Errored variant — writeText rejects so consumers flip to 'errored' state. */
 export const withClipboardMockErrored: Decorator = Story => {
     Object.defineProperty(navigator, 'clipboard', {

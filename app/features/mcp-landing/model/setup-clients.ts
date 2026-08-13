@@ -4,7 +4,8 @@ export interface McpSetupSnippet {
     /** Where the code goes — a config path or `Terminal`. */
     caption: string;
     code: string;
-    wrap?: boolean;
+    /** Matches BaseCodeBlock's variant so the value passes straight through. */
+    wrap?: 'nowrap' | 'wrap';
 }
 
 export interface McpSetupStep {
@@ -20,9 +21,10 @@ export interface McpSetupClient {
     steps: readonly McpSetupStep[];
 }
 
-// No Authorization header anywhere: the endpoint runs open, and a snippet that invents a key would send
-// people looking for one that does not exist.
-export const MCP_SETUP_CLIENTS: readonly McpSetupClient[] = [
+// No Authorization header anywhere: production deliberately runs without MCP_ACCESS_KEYS, and a snippet that
+// invents a key would send people looking for one that does not exist.
+// Non-empty tuple so the tab strip can read `[0]` for its default without an assertion.
+export const MCP_SETUP_CLIENTS: readonly [McpSetupClient, ...McpSetupClient[]] = [
     {
         id: 'claude-code',
         label: 'Claude Code',
@@ -31,7 +33,7 @@ export const MCP_SETUP_CLIENTS: readonly McpSetupClient[] = [
                 snippet: {
                     caption: 'Terminal',
                     code: `claude mcp add --transport http ${MCP_SERVER_KEY} ${MCP_ENDPOINT_URL}`,
-                    wrap: true,
+                    wrap: 'wrap',
                 },
                 title: 'Add the server',
             },

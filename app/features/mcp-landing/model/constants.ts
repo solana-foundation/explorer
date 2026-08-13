@@ -7,5 +7,3 @@ export const MCP_ENDPOINT_URL = `${EXPLORER_BASE_URL}${MCP_ENDPOINT_PATH}`;
 
 /** Server key used in every client's config file, so all setup snippets agree. */
 export const MCP_SERVER_KEY = 'solana-explorer';
-
-export const MCP_SERVER_NAME = 'explorer-mcp';

@@ -5,15 +5,12 @@ import { CodeBlock } from '@/app/shared/ui/CodeBlock';
 
 import { MCP_SETUP_CLIENTS } from '../model/setup-clients';
 
-// TabsTrigger ships no focus ring of its own, so this className adds one without fighting its cva base.
-const TRIGGER_FOCUS = 'rounded focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2';
-
 export function McpSetupTabs() {
     return (
         <Tabs defaultValue={MCP_SETUP_CLIENTS[0].id}>
             <TabsList className="flex w-full flex-wrap gap-4 border-0 border-b border-solid border-heavy-metal-950">
                 {MCP_SETUP_CLIENTS.map(client => (
-                    <TabsTrigger key={client.id} value={client.id} className={TRIGGER_FOCUS}>
+                    <TabsTrigger key={client.id} value={client.id}>
                         {client.label}
                     </TabsTrigger>
                 ))}
@@ -40,7 +37,7 @@ export function McpSetupTabs() {
                                         <CodeBlock
                                             caption={step.snippet.caption}
                                             code={step.snippet.code}
-                                            wrap={step.snippet.wrap ? 'wrap' : 'nowrap'}
+                                            wrap={step.snippet.wrap}
                                         />
                                     )}
                                 </div>

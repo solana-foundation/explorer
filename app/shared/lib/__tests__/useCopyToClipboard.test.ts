@@ -95,7 +95,8 @@ describe('useCopyToClipboard', () => {
         expect(result.current[0]).toBe('copy');
     });
 
-    it('should reset to copy after resetMs when errored', async () => {
+    // Errored lingers longer than copied: a failure the user glanced past means pasting stale clipboard content.
+    it('should hold the errored state past the success reset window', async () => {
         vi.mocked(navigator.clipboard.writeText).mockRejectedValueOnce(new Error('denied'));
         const { result } = renderHook(() => useCopyToClipboard(500));
 
@@ -107,6 +108,21 @@ describe('useCopyToClipboard', () => {
 
         act(() => {
             vi.advanceTimersByTime(500);
+        });
+
+        expect(result.current[0]).toBe('errored');
+    });
+
+    it('should reset to copy once the longer errored window elapses', async () => {
+        vi.mocked(navigator.clipboard.writeText).mockRejectedValueOnce(new Error('denied'));
+        const { result } = renderHook(() => useCopyToClipboard(500));
+
+        await act(async () => {
+            result.current[1]('hello');
+        });
+
+        act(() => {
+            vi.advanceTimersByTime(1500);
         });
 
         expect(result.current[0]).toBe('copy');

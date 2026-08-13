@@ -13,12 +13,13 @@ describe('McpSetupTabs', () => {
     });
 
     it('should select the first client by default', () => {
+        const [{ label, steps }] = MCP_SETUP_CLIENTS;
+        const firstCode = steps.flatMap(step => step.snippet ?? []).at(0)?.code;
         render(<McpSetupTabs />);
 
-        expect(screen.getByRole('tab', { name: 'Claude Code' })).toHaveAttribute('data-state', 'active');
-        expect(
-            screen.getByText('claude mcp add --transport http solana-explorer https://explorer.solana.com/mcp'),
-        ).toBeInTheDocument();
+        expect(firstCode).toBeDefined();
+        expect(screen.getByRole('tab', { name: label })).toHaveAttribute('data-state', 'active');
+        expect(screen.getByText(String(firstCode))).toBeInTheDocument();
     });
 
     it('should swap the visible steps when another client is selected', async () => {

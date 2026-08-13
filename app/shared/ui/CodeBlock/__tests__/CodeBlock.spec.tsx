@@ -1,8 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CodeBlock } from '../CodeBlock';
+
+const { error } = vi.hoisted(() => ({ error: vi.fn() }));
+
+vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error } }));
 
 const CODE = '{\n    "mcpServers": {}\n}';
 
@@ -11,7 +15,12 @@ describe('CodeBlock', () => {
 
     beforeEach(() => {
         writeText.mockReset();
+        error.mockReset();
         vi.stubGlobal('navigator', { clipboard: { writeText } });
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
     });
 
     it('should write the exact code to the clipboard', async () => {
@@ -39,5 +48,16 @@ describe('CodeBlock', () => {
         await userEvent.click(screen.getByRole('button', { name: 'Copy code' }));
 
         expect(await screen.findByRole('button', { name: 'Copy failed' })).toBeInTheDocument();
+    });
+
+    // Console output is suppressed on the client, so Sentry is the only sink that makes this visible.
+    it('should report a rejected clipboard write to Sentry', async () => {
+        writeText.mockRejectedValue(new Error('denied'));
+        render(<CodeBlock code={CODE} />);
+
+        await userEvent.click(screen.getByRole('button', { name: 'Copy code' }));
+        await screen.findByRole('button', { name: 'Copy failed' });
+
+        expect(error).toHaveBeenCalledWith(expect.any(Error), { sentry: true });
     });
 });

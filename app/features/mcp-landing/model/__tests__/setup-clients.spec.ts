@@ -42,7 +42,8 @@ describe('MCP_SETUP_CLIENTS', () => {
         }
     });
 
-    // The endpoint runs open; the operator README snippets do carry a Bearer header, so guard against a copy-paste of those.
+    // Production deliberately runs without MCP_ACCESS_KEYS; the operator README snippets do carry a Bearer header,
+    // so guard against a copy-paste of those.
     it('should not present any authentication header', () => {
         for (const snippet of snippets) {
             const code = snippet.code.toLowerCase();

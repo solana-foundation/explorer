@@ -5,7 +5,7 @@ import { Check, Copy, XCircle } from 'react-feather';
 import { cn } from '@/app/components/shared/utils';
 import type { CopyState } from '@/app/shared/lib/useCopyToClipboard';
 
-// `p-0`/`bg-transparent` beat the global `code, pre` chip rule (styles.css:162) so padding and surface stay on the root.
+// `p-0`/`bg-transparent` beat the global `code, pre` chip rule so padding and surface stay on the root.
 const preVariants = cva('bg-transparent p-3', {
     defaultVariants: { wrap: 'nowrap' },
     variants: {
@@ -23,13 +23,15 @@ const copyLabelByState: Record<CopyState, string> = {
 };
 
 export interface BaseCodeBlockProps
-    extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'>,
-        VariantProps<typeof preVariants> {
+    // `dangerouslySetInnerHTML` is excluded alongside `children`: it spreads onto the div that renders them.
+    extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'dangerouslySetInnerHTML'>,
+        Omit<VariantProps<typeof preVariants>, 'wrap'> {
     caption?: string;
     code: string;
     copyState?: CopyState;
     /** Presence of a handler is what renders the copy control. */
     onCopy?: () => void;
+    wrap?: 'nowrap' | 'wrap';
 }
 
 export function BaseCodeBlock({
@@ -58,9 +60,13 @@ export function BaseCodeBlock({
                         <button
                             type="button"
                             onClick={onCopy}
-                            aria-label={label}
-                            // border-0 + explicit padding: styles.css:223 reverts UA button chrome. Ring, not outline: `button:focus { outline: none !important }`.
-                            className="inline-flex shrink-0 items-center gap-1 rounded border-0 bg-transparent px-1.5 py-1 text-xs text-neutral-400 hover:text-neutral-200 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-heavy-metal-900"
+                            // border-0 + explicit padding: the global button reset reverts UA chrome. Ring, not outline: `button:focus { outline: none !important }`.
+                            className={cn(
+                                'inline-flex shrink-0 items-center gap-1 rounded border-0 bg-transparent px-1.5 py-1 text-xs focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-heavy-metal-900',
+                                copyState === 'errored'
+                                    ? 'text-destructive'
+                                    : 'text-neutral-400 hover:text-neutral-200',
+                            )}
                         >
                             {copyState === 'copied' ? (
                                 <Check size={14} aria-hidden />
