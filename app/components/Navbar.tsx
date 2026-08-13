@@ -51,8 +51,10 @@ export function Navbar({ children }: INavbarProps) {
 
                 <div
                     className={cn(
-                        'ml-auto shrink-0',
-                        navOpened ? 'flex w-full flex-col' : 'hidden lg:flex lg:w-auto lg:flex-row lg:items-center',
+                        // The lg: row layout is unconditional: `navOpened` only drives the below-lg drawer, and it
+                        // survives a resize past the breakpoint where the toggle that set it is no longer rendered.
+                        'ml-auto shrink-0 lg:flex lg:w-auto lg:flex-row lg:items-center',
+                        navOpened ? 'flex w-full flex-col' : 'hidden',
                     )}
                 >
                     <NavbarList className="mr-auto flex-col lg:flex-row">
@@ -78,13 +80,15 @@ export function Navbar({ children }: INavbarProps) {
                                 <Link href={inspectorPath}>Inspector</Link>
                             </NavbarLink>
                         </NavbarItem>
-                        <NavbarItem className="flex items-center justify-center">
+                        {/* Centred only in the lg row; the drawer stacks vertically, where centring breaks the left edge the text links share. */}
+                        <NavbarItem className="flex items-center lg:justify-center">
                             <a
                                 aria-label="GitHub Repository"
                                 href="https://github.com/solana-foundation/explorer"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mx-3"
+                                // mx-2 matches the text links' px-2 so the drawer shares one left edge; lg restores the row spacing.
+                                className="mx-2 lg:mx-3"
                             >
                                 <svg width="30" height="30" viewBox="0 0 98 98" xmlns="http://www.w3.org/2000/svg">
                                     <path
