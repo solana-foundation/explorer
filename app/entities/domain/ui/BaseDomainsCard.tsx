@@ -4,7 +4,7 @@ import { Address } from '@components/common/Address';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
 import { PublicKey } from '@solana/web3.js';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { Card } from '@/app/shared/ui/Card';
 
@@ -21,7 +21,8 @@ const COLUMNS = ['Domain', 'Name Service Account'] as const;
 // `InstructionsSection` uses).
 //
 // The domain list is a CSS-grid built from `div`s (see `DomainsGrid`), mirroring the transaction
-// page's Accounts/Token Balances tables.
+// page's Accounts/Token Balances tables. ARIA table roles are layered on so it keeps the
+// table/row/columnheader/cell relationships assistive tech got from the old `<table>` markup.
 export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
     const validDomains = useMemo(
         () =>
@@ -66,22 +67,34 @@ const GRID_DOMAIN_FLOOR = 'min-w-[clamp(120px,25%,240px)]';
 function DomainsGrid({ domains }: { domains: ValidDomain[] }) {
     return (
         <div className="w-full overflow-x-auto text-sm text-white">
-            <div className="grid min-w-full grid-cols-[fit-content(clamp(200px,50%,400px))_1fr] md:grid-cols-[clamp(120px,25%,240px)_1fr]">
-                {COLUMNS.map(label => (
-                    <div key={label} className={GRID_HEADER_CELL}>
-                        {label}
-                    </div>
-                ))}
+            {/* `role="table"` + `role="row"` wrappers restore the semantics the old `<table>` gave screen
+                readers. The row wrappers use `contents` (`display: contents`) so they generate no box and
+                their cells stay direct participants in this grid — ARIA structure without disturbing the
+                CSS-grid column alignment. */}
+            <div
+                role="table"
+                aria-label="Owned domain names"
+                className="grid min-w-full grid-cols-[fit-content(clamp(200px,50%,400px))_1fr] md:grid-cols-[clamp(120px,25%,240px)_1fr]"
+            >
+                <div role="row" className="contents">
+                    {COLUMNS.map(label => (
+                        <div key={label} role="columnheader" className={GRID_HEADER_CELL}>
+                            {label}
+                        </div>
+                    ))}
+                </div>
                 {domains.map(domain => (
-                    <React.Fragment key={domain.address}>
+                    <div key={domain.address} role="row" className="contents">
                         {/* A domain name is a single spaceless token, so `break-all` is what lets it wrap —
                             on mobile once the column hits its `fit-content` ceiling, on md+ inside the fixed
                             25% track. `min-w` sets the mobile floor (and matches the md+ track width). */}
-                        <div className={cn(GRID_BODY_CELL, GRID_DOMAIN_FLOOR, 'break-all')}>{domain.name}</div>
-                        <div className={cn(GRID_BODY_CELL, 'min-w-0 whitespace-nowrap')}>
+                        <div role="cell" className={cn(GRID_BODY_CELL, GRID_DOMAIN_FLOOR, 'break-all')}>
+                            {domain.name}
+                        </div>
+                        <div role="cell" className={cn(GRID_BODY_CELL, 'min-w-0 whitespace-nowrap')}>
                             <Address pubkey={domain.pubkey} link />
                         </div>
-                    </React.Fragment>
+                    </div>
                 ))}
             </div>
         </div>
