@@ -6,13 +6,13 @@ import { isParsedInstruction } from '@explorer/parsers';
 import { getBase58Encoder } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
+import { MCP_ENABLED_CLUSTER_NAMES } from '@/app/shared/config/mcp-clusters';
 import { Logger } from '@/app/shared/lib/logger';
 import { wrapMcpServerWithSentry } from '@/app/shared/lib/sentry';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 import { programNameByAddress } from '@/app/utils/programs';
 
-import { MCP_ENABLED_CLUSTERS } from './clusters';
 import { createMcpTrack } from './telemetry';
 
 const resolveProgramName: EntityInspectorConfig['resolveProgramName'] = programNameByAddress;
@@ -57,9 +57,8 @@ const logger: EntityInspectorConfig['logger'] = {
 };
 
 // Resolved at handler init (cold start), not module scope, so key-bearing URLs come from runtime env, never a build artifact.
-// Dedicated MCP endpoints keep MCP traffic off the app's quota; unset falls back to the app's own server RPC config
-// (`serverClusterUrl` → `*_RPC_URL` env → proxied default), not a raw public endpoint. Every supported cluster gets an
-// entry whether or not MCP_ENABLED_CLUSTERS lists it, so enabling one is a change in clusters.ts alone.
+// Unset falls back to the app's own server RPC config (`serverClusterUrl` → `*_RPC_URL` env), which is the proxied
+// default for every cluster except simd296. Every supported cluster gets an entry whether or not it is enabled.
 function resolveRpcEndpoints(): EntityInspectorConfig['rpcEndpoints'] {
     return {
         devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || serverClusterUrl(Cluster.Devnet),
@@ -87,7 +86,7 @@ async function importRequestHandler(): Promise<McpRequestHandler> {
     const { createMcpRequestHandler } = await import('@explorer/entity-inspector');
     return createMcpRequestHandler({
         decodeInstructionFallback,
-        enabledClusters: MCP_ENABLED_CLUSTERS,
+        enabledClusterNames: MCP_ENABLED_CLUSTER_NAMES,
         logger,
         resolveProgramName,
         rpcEndpoints: resolveRpcEndpoints(),

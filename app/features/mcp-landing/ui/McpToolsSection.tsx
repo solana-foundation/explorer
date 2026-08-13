@@ -1,11 +1,12 @@
+import { defaultCluster } from '@explorer/entity-inspector';
 import type { ReactNode } from 'react';
 
 import { Badge } from '@/app/components/shared/ui/badge';
-import { MCP_ENABLED_CLUSTERS } from '@/app/mcp/clusters';
+import { MCP_ENABLED_CLUSTER_NAMES } from '@/app/shared/config/mcp-clusters';
 import { BaseCard } from '@/app/shared/ui/Card';
 import { BaseCodeBlock } from '@/app/shared/ui/CodeBlock';
 
-// Verbatim mainnet-beta reply for the USDC mint, so the documented shape cannot drift into fiction.
+// Real mainnet-beta reply for the USDC mint, pasted 2026-08-12 — refresh it if the mint payload fields change.
 const SAMPLE_RESPONSE = `{
     "payload": {
         "entity": {
@@ -26,7 +27,7 @@ const SAMPLE_RESPONSE = `{
 const COVERAGE: readonly string[] = [
     'SPL Token and Token-2022 mints, token accounts and multisigs, including parsed Token-2022 extensions.',
     'Upgradeable programs, enriched with IDL discovery, verified-build status, security.txt metadata and upgrade-authority multisig.',
-    'Stake, vote, nonce, sysvar, config, address lookup table and feature accounts.',
+    'Stake, vote, nonce, sysvar, config, address lookup table, feature and native program accounts.',
     'Compressed NFTs, nftoken accounts and Solana Attestation Service accounts.',
     'Transactions — signers, fee, status and instructions with inner instructions, decoded through IDL, bundled and raw sources.',
     'Accounts of unrecognised programs, decoded through the owner program’s on-chain IDL when it publishes one.',
@@ -77,7 +78,8 @@ export function McpToolsSection() {
                             signature.
                         </Param>
                         <Param name="cluster">
-                            One of {MCP_ENABLED_CLUSTERS.join(', ')}. Defaults to mainnet-beta.
+                            One of {MCP_ENABLED_CLUSTER_NAMES.join(', ')}. Defaults to{' '}
+                            {defaultCluster(MCP_ENABLED_CLUSTER_NAMES)}.
                         </Param>
                     </dl>
 

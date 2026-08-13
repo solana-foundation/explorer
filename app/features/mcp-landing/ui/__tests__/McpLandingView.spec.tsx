@@ -1,9 +1,22 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { MCP_ENABLED_CLUSTER_NAMES } from '@/app/shared/config/mcp-clusters';
 
 import { McpLandingView } from '../McpLandingView';
 
+// The status badge probes /mcp on mount; without a stub the render leaks a real request and an act() warning.
+vi.mock('../McpStatusIndicator', () => ({ McpStatusIndicator: () => null }));
+
 describe('McpLandingView', () => {
+    beforeEach(() => {
+        vi.stubGlobal('fetch', vi.fn());
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
     it('should render the hero heading', () => {
         render(<McpLandingView />);
 
@@ -37,5 +50,12 @@ describe('McpLandingView', () => {
         render(<McpLandingView />);
 
         expect(screen.getByText('Open — no key required')).toBeInTheDocument();
+    });
+
+    // Both surfaces route through MCP_ENABLED_CLUSTER_NAMES; a hardcoded list either side would drift.
+    it('should advertise the enabled clusters wherever it lists them', () => {
+        render(<McpLandingView />);
+
+        expect(screen.getByText(MCP_ENABLED_CLUSTER_NAMES.join(', '))).toBeInTheDocument();
     });
 });

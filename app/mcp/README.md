@@ -23,17 +23,19 @@ Keys and blocklist are parsed at module scope — changes require a redeploy.
 
 ## Enabled clusters
 
-`clusters.ts` holds `MCP_ENABLED_CLUSTERS`, the clusters the tool advertises and accepts. It is passed to the handler as
-`enabledClusters`, so the `cluster` enum, the tool description and the landing page all derive from that one list —
-anything outside it is rejected with an input-validation error.
+`app/shared/config/mcp-clusters.ts` holds `MCP_ENABLED_CLUSTER_NAMES`, the cluster names the tool advertises and
+accepts. It is passed to the handler as `enabledClusterNames`, so the `cluster` enum, the tool description and the
+landing page all derive from that one list — anything outside it is rejected with an input-validation error. The
+advertised default comes from the package's `defaultCluster`, which prefers `mainnet-beta` and otherwise falls back to
+the first entry.
 
 The list is written out rather than aliased to the package's `SUPPORTED_CLUSTERS` so a newly supported cluster is opt-in
 here instead of going live with a package bump. Adding or removing an entry is the whole change — `resolveRpcEndpoints`
-resolves a URL for every supported cluster either way.
+resolves a URL for every supported cluster either way, and the handler refuses to start if an enabled cluster has none.
 
 ## Analytics
 
-Optional, and off unless both variables are set:
+Optional, and off unless an API secret and a measurement id both resolve:
 
 | Variable                | Purpose                                                                                                                        |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -52,7 +54,8 @@ route only.
 
 Per-IP abuse handling belongs in a Firewall rule on `/mcp`, not in this code: it sees real client IPs and applies
 without a deploy, whereas `MCP_BLOCKED_IPS` is parsed at module scope and is only useful as a static backstop. Usage
-analytics cannot stand in for it — GA4 receives a hashed `client_id`, never an address.
+analytics cannot stand in for it: GA4 receives a hashed `client_id`, so it can confirm an address you already suspect
+but can never hand you one to block (see [`TELEMETRY.md`](../../packages/entity-inspector/TELEMETRY.md#client_id)).
 
 ### Preview deployments
 

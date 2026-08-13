@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import type { EnabledClusters, SupportedCluster } from './config.js';
+import type { EnabledClusterNames, SupportedCluster } from './config.js';
 import type { InspectorLogger } from './logger.js';
 import type { DecodeInstructionFallback } from './transactions/types.js';
 
@@ -22,7 +22,7 @@ export type EntityInspectorConfig = {
     // Host-app instruction decoder tried after the package's built-in decoders, before raw fallback.
     decodeInstructionFallback?: DecodeInstructionFallback;
     /** Clusters the tool advertises and accepts. Defaults to every SUPPORTED_CLUSTERS entry. */
-    enabledClusters?: EnabledClusters;
+    enabledClusterNames?: EnabledClusterNames;
     logger?: InspectorLogger;
     // Program label lookup injected by the host app (its curated registry); labels are omitted when absent.
     resolveProgramName?: (address: string) => string | undefined;

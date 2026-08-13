@@ -1,6 +1,6 @@
 import { z, ZodError } from 'zod';
 
-import { DEFAULT_CLUSTER, type EnabledClusters, SUPPORTED_CLUSTERS, type SupportedCluster } from '../config.js';
+import { defaultCluster, type EnabledClusterNames, SUPPORTED_CLUSTERS } from '../config.js';
 
 // Zod confined here: the MCP SDK requires it for inputSchema; a swap-out stays local to this file.
 // Factory (not a module-scope const) keeps importing the package side-effect-free for tree-shaking.
@@ -9,18 +9,13 @@ export function pingInputSchema() {
 }
 
 /** The advertised `cluster` enum is the deployment's enabled set, not every cluster the package can reach. */
-export function inspectEntityInputSchema(clusters: EnabledClusters = SUPPORTED_CLUSTERS) {
+export function inspectEntityInputSchema(clusterNames: EnabledClusterNames = SUPPORTED_CLUSTERS) {
     return z
         .object({
-            cluster: z.enum(clusters).optional().default(defaultCluster(clusters)),
+            cluster: z.enum(clusterNames).optional().default(defaultCluster(clusterNames)),
             identifier: z.string().min(1).max(128),
         })
         .strict();
-}
-
-/** Falls back to the first enabled cluster so the default is always a value the enum accepts. */
-export function defaultCluster(clusters: EnabledClusters): SupportedCluster {
-    return clusters.includes(DEFAULT_CLUSTER) ? DEFAULT_CLUSTER : clusters[0];
 }
 
 /** Flattens a schema validation failure into a "field: message" summary; undefined when the error is not one. */

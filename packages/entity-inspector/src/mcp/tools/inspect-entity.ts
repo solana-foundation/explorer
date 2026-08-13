@@ -1,6 +1,6 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
-import type { SupportedCluster } from '../../config.js';
+import type { EnabledClusterNames, SupportedCluster } from '../../config.js';
 import { consoleLogger, type InspectorLogger, ns } from '../../logger.js';
 import { unknownMarker } from '../../accounts/account-kinds/shared.js';
 import { ACCOUNT_IDENTIFIER_KIND, BPF_UPGRADEABLE_LOADER_KIND, UNKNOWN_KIND } from '../../accounts/kinds.js';
@@ -38,6 +38,8 @@ import { inspectEntityInputSchema } from '../schemas.js';
 export type InspectEntityDependencies = {
     decodeInstructionFallback?: DecodeInstructionFallback;
     discoverProgramIdl?: DiscoverProgramIdl;
+    // Carried here so this handler's parse applies the same enum the tool advertised, however it is called.
+    enabledClusterNames?: EnabledClusterNames;
     fetchAccountInfo: RpcClient['fetchAccountInfo'];
     fetchAsset: RpcClient['fetchAsset'];
     fetchSignatureStatus: RpcClient['fetchSignatureStatus'];
@@ -333,7 +335,7 @@ export async function handleInspectEntity(
     rawInput: unknown,
     dependencies: InspectEntityDependencies,
 ): Promise<CallToolResult> {
-    const parseResult = inspectEntityInputSchema().safeParse(rawInput);
+    const parseResult = inspectEntityInputSchema(dependencies.enabledClusterNames).safeParse(rawInput);
     if (!parseResult.success) {
         return toToolResult({
             errors: [sanitizeToolError(parseResult.error)],
