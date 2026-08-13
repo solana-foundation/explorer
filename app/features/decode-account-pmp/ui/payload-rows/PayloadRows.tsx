@@ -1,4 +1,5 @@
 import type { PmpPayloadDecodeResult } from '@entities/pmp-account';
+import { useMemo } from 'react';
 
 import { isBinaryPayload } from '../../lib/config-resolution/resolve-buffer-config-from-bytes';
 import { PayloadDocumentRow } from './PayloadDocumentRow';
@@ -17,6 +18,10 @@ import { RawPayloadRow } from './RawPayloadRow';
  * has to be able to render one row without coming through this switch.
  */
 export function PayloadRows({ payload }: { payload: PmpPayloadDecodeResult }) {
+    // Memoised because it is a full strict UTF-8 decode over up to `PMP_DECODED_RENDER_CAP_BYTES`, and this component
+    // re-renders whenever the card above it does. Guarded on `decoded` so the arms that never ask pay nothing.
+    const isBinary = useMemo(() => payload.kind === 'decoded' && isBinaryPayload(payload.bytes), [payload]);
+
     if (payload.kind === 'empty') return <PayloadEmptyRow />;
 
     if (payload.kind === 'failed') return <PayloadUndecodableRow reason={payload.reason} />;
@@ -37,7 +42,7 @@ export function PayloadRows({ payload }: { payload: PmpPayloadDecodeResult }) {
     }
 
     // Bytes with no readable text form get the hex/base64 view rather than a document.
-    if (isBinaryPayload(payload.bytes)) return <RawPayloadRow bytes={payload.bytes} />;
+    if (isBinary) return <RawPayloadRow bytes={payload.bytes} />;
 
     return <PayloadDocumentRow text={payload.text} />;
 }

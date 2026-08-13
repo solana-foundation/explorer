@@ -23,10 +23,14 @@ const ZERO_ADDRESS = '11111111111111111111111111111111' as Address;
 
 const BODY = new Uint8Array([1, 2, 3, 4]);
 
-function bufferAccount({ program = PROGRAM, seed = 'idl' }: { program?: Address; seed?: string } = {}): Uint8Array {
+function bufferAccount({
+    canonical = true,
+    program = PROGRAM,
+    seed = 'idl',
+}: { canonical?: boolean; program?: Address; seed?: string } = {}): Uint8Array {
     return getBufferEncoder().encode({
         authority: AUTHORITY,
-        canonical: true,
+        canonical,
         data: BODY,
         program,
         seed,
@@ -107,7 +111,7 @@ describe('readPmpAccount', () => {
     it('should report no program and no seed for a keypair Buffer, which leaves both zeroed', () => {
         // `allocate` writes program/canonical/seed only for a PDA buffer, so the option decoder reports none and
         // the card hides those rows rather than showing the reader fields the account does not have.
-        const header = read(bufferAccount({ program: ZERO_ADDRESS, seed: '' }));
+        const header = read(bufferAccount({ canonical: false, program: ZERO_ADDRESS, seed: '' }));
 
         expect(header.kind === 'buffer' && unwrapOption(header.account.program)).toBeNull();
         expect(header.kind === 'buffer' && header.account.seed).toBe('');

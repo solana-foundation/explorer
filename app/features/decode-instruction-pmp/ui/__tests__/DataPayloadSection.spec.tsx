@@ -327,7 +327,7 @@ describe('DataPayloadSection', () => {
         expect(screen.getByTestId('pmp-bytes-badge-compressed')).toHaveTextContent('gzip');
     });
 
-    it('should badge a Zlib payload by name rather than as gzipped', async () => {
+    it('should badge a Zlib payload as zlib rather than as gzip', async () => {
         renderSection({
             config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
             dataSource: DataSource.Direct,

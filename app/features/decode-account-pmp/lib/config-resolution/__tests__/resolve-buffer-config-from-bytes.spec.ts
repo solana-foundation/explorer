@@ -183,8 +183,9 @@ describe('isZlibStream', () => {
     });
 
     it('should reject a body whose method nibble is not deflate', () => {
-        // 0x79 passes the % 31 test with 0x9b but declares method 9, which RFC 1950 does not define.
-        expect(isZlibStream(new Uint8Array([0x79, 0x9b]))).toBe(false);
+        // `0x79 0x18` satisfies the % 31 check, so the method nibble is the ONLY thing that can reject it: 0x79 & 0x0f
+        // is 9, and RFC 1950 defines deflate (8) alone. A pair that failed both checks would not isolate this one.
+        expect(isZlibStream(new Uint8Array([0x79, 0x18]))).toBe(false);
     });
 
     it('should reject a body that declares deflate but fails the FCHECK modulus', () => {

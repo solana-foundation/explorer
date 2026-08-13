@@ -17,7 +17,13 @@ import {
     PendingRow,
     PMP_CARD_TITLE,
 } from './BasePmpAccountDataCard';
-import { PayloadRows, PayloadTooLargeRow, PayloadUnpackOverflowRow, RawPayloadRow } from './payload-rows';
+import {
+    PayloadDocumentRow,
+    PayloadRows,
+    PayloadTooLargeRow,
+    PayloadUnpackOverflowRow,
+    RawPayloadRow,
+} from './payload-rows';
 
 export type BufferAccountRead = Extract<PmpAccountReadResult, { kind: 'buffer' }>;
 
@@ -187,10 +193,10 @@ function BufferPayloadRow({
         return <PayloadRows payload={payload} />;
     }
 
+    // Rendered as a document directly rather than through `PayloadRows`. The `text` arm was produced BY a strict UTF-8
+    // decode of these very bytes, so the binary test inside `PayloadRows` would re-run a decode whose answer is known.
     if (fromBytesConfig.kind === 'text') {
-        return (
-            <PayloadRows payload={{ bytes: fromBytesConfig.payload, kind: 'decoded', text: fromBytesConfig.text }} />
-        );
+        return <PayloadDocumentRow text={fromBytesConfig.text} />;
     }
 
     // The `binary` arm carries no text to hand `PayloadRows`, so it reaches the raw view directly.
