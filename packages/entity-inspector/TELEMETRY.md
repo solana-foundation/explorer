@@ -29,13 +29,15 @@ sent by [`src/telemetry/providers/ga4.ts`](./src/telemetry/providers/ga4.ts). Th
 | else first `x-forwarded-for` entry | `ip_` + `sha256(clientIp)` |
 | else                               | `anon`                     |
 
-Hashed so no session token or raw IP reaches Google verbatim. The prefix keeps provenance legible: an `ip_` value can be
-matched back to an address by hashing a suspect IP and comparing, and is therefore actionable; a `sid_` value cannot.
+Hashed so no session token or raw IP reaches Google verbatim. The prefix keeps provenance legible: an `ip_` value
+confirms or rules out an address you already suspect (hash it and compare), whereas a `sid_` value says nothing about
+where the caller is. It cannot hand you an address you did not already have — which is why abuse handling belongs in a
+Firewall rule rather than here (see `app/mcp/README.md`).
 
-Two limits to read reports against. GA4 counts users by `client_id`, so a caller on the IP branch is really "one
-address" — NAT collapses several callers into one, a rotating IP fans one caller into several. And an unsalted SHA-256
-over the 2³² IPv4 space is enumerable, so a hashed IP is pseudonymous, not anonymous. Event counts are the trustworthy
-figure; user counts are indicative.
+Three limits to read reports against. GA4 counts users by `client_id`, so a caller on the IP branch is really "one
+address" — NAT collapses several callers into one, a rotating IP fans one caller into several. Every caller on the
+`anon` branch collapses into a single GA4 user. And an unsalted SHA-256 over the 2³² IPv4 space is enumerable, so a
+hashed IP is pseudonymous, not anonymous. Event counts are the trustworthy figure; user counts are indicative.
 
 ## Events
 
@@ -60,19 +62,20 @@ Register before enabling telemetry: definitions are not retroactive, so anything
 through them. Reports lag creation by 24–48h.
 
 GA4 warns about high-cardinality dimensions (>500 unique values a day, condensed into an `(other)` row). None apply
-here: every value comes from a closed set, not caller input. `entity_kind` is the widest — 23 kinds in
-[`src/accounts/kinds.ts`](./src/accounts/kinds.ts), 20 reachable, since the legacy loaders answer
-`CURRENTLY_UNSUPPORTED` and so carry no entity. The caller-supplied `identifier` is deliberately never a parameter.
+here: every value comes from a closed set, not caller input. `entity_kind` is the widest — the 22 account kinds in
+[`src/accounts/kinds.ts`](./src/accounts/kinds.ts), plus `transaction` and the bare `account` a not-found reply carries.
+Legacy-loader kinds still arrive: `buildUnsupportedKindPayload` returns an entity, so they pair a kind with a
+`CURRENTLY_UNSUPPORTED` `error_code`. The caller-supplied `identifier` is deliberately never a parameter.
 
-| Register as      | Event parameter / Dimension | Scope | Unit         | Carried by      | Values                                                                                                                                                |
-| ---------------- | --------------------------- | ----- | ------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Custom dimension | `tool`                      | Event | —            | `mcp_tool_call` | `inspect_entity`, `ping`                                                                                                                              |
-| Custom dimension | `status`                    | Event | —            | `mcp_tool_call` | `success`, `error`                                                                                                                                    |
-| Custom dimension | `cluster`                   | Event | —            | `mcp_tool_call` | Whichever clusters the deployment enables (`enabledClusters`); absent unless the caller passed one                                                    |
-| Custom dimension | `entity_kind`               | Event | —            | `mcp_tool_call` | Any `entity.kind` the tool returns (`spl-token:mint`, `bpf-upgradeable-loader`, `transaction`, `unknown`, …); absent when the reply carried no entity |
-| Custom dimension | `decode_sources`            | Event | —            | `mcp_tool_call` | Sorted comma-joined subset of `idl`, `bundled`, `raw`; transactions only                                                                              |
-| Custom dimension | `error_code`                | Event | —            | `mcp_tool_call` | `INVALID_ARGUMENT`, `NOT_FOUND`, `CURRENTLY_UNSUPPORTED`, `INTERNAL_ERROR`; absent when the envelope reported no error                                |
-| Custom metric    | `duration_ms`               | Event | Milliseconds | `mcp_tool_call` | Handler wall time, integer                                                                                                                            |
+| Register as      | Event parameter / Dimension | Scope | Unit         | Carried by      | Values                                                                                                                                                                                     |
+| ---------------- | --------------------------- | ----- | ------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Custom dimension | `tool`                      | Event | —            | `mcp_tool_call` | `inspect_entity`, `ping`                                                                                                                                                                   |
+| Custom dimension | `status`                    | Event | —            | `mcp_tool_call` | `success`, `error`                                                                                                                                                                         |
+| Custom dimension | `cluster`                   | Event | —            | `mcp_tool_call` | Whichever clusters the deployment enables (`enabledClusterNames`); always present on `inspect_entity` — the schema defaults it, so an explicit request is indistinguishable from a default |
+| Custom dimension | `entity_kind`               | Event | —            | `mcp_tool_call` | Any `entity.kind` the tool returns (`spl-token:mint`, `bpf-upgradeable-loader`, `transaction`, `unknown`, …); absent when the reply carried no entity                                      |
+| Custom dimension | `decode_sources`            | Event | —            | `mcp_tool_call` | Sorted comma-joined subset of `idl`, `bundled`, `raw`; transactions only                                                                                                                   |
+| Custom dimension | `error_code`                | Event | —            | `mcp_tool_call` | `INVALID_ARGUMENT`, `NOT_FOUND`, `CURRENTLY_UNSUPPORTED`, `INTERNAL_ERROR`; absent when the envelope reported no error                                                                     |
+| Custom metric    | `duration_ms`               | Event | Milliseconds | `mcp_tool_call` | Handler wall time, integer                                                                                                                                                                 |
 
 Six dimensions and one metric. A standard property allows 50 event-scoped dimensions and 50 event-scoped metrics from
 separate budgets, so this spends 12% of the former and 2% of the latter — but the budget is per property, so a property

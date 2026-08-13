@@ -23,9 +23,12 @@ describe('POST /mcp — MCP_ACCESS_KEYS unset (open access)', () => {
         handlerMock.mockResolvedValue(new Response('{"ok":true}', { status: 200 }));
     });
 
+    // `sentry: true` is the assertion that matters: without it the warning is silent on any deployment
+    // that leaves NEXT_LOG_LEVEL unset.
     it('should log a startup warning that authentication is disabled', () => {
         expect(vi.mocked(Logger.warn)).toHaveBeenCalledWith(
             '[mcp] MCP_ACCESS_KEYS is unset — /mcp is enabled without authentication',
+            { sentry: true },
         );
     });
 

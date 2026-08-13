@@ -9,16 +9,19 @@ import { after } from 'next/server';
 import { Logger } from '@/app/shared/lib/logger';
 
 function buildTelemetry(): Telemetry {
+    // `||` not `??`: .env.example ships MCP_GA_MEASUREMENT_ID empty, and an empty id must fall back like an unset one.
     // Prefer a dedicated server id; the NEXT_PUBLIC_ fallback keeps single-id setups working, but server telemetry shouldn't depend on a client var.
-    const measurementId = process.env.MCP_GA_MEASUREMENT_ID ?? process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
+    const measurementId = process.env.MCP_GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
     const apiSecret = process.env.MCP_GA_API_SECRET;
     // Missing GA credentials → empty provider list → telemetry is a no-op, call sites stay unconditional.
     const providers = measurementId && apiSecret ? [createGa4Provider({ apiSecret, measurementId })] : [];
     if (providers.length === 0) {
         // Once per cold start (same pattern as the MCP_ACCESS_KEYS warning in route.ts) — a silently
         // disabled pipeline is otherwise indistinguishable from a broken one.
+        // `sentry: true` or it is silent: console output needs NEXT_LOG_LEVEL, which most deployments leave unset.
         Logger.warn(
             '[mcp] MCP_GA_MEASUREMENT_ID (or NEXT_PUBLIC_GOOGLE_ANALYTICS_ID) or MCP_GA_API_SECRET unset — usage analytics disabled',
+            { sentry: true },
         );
     }
     return createTelemetry(providers, {
@@ -33,10 +36,8 @@ function buildTelemetry(): Telemetry {
 
 const pseudonymize = (value: string) => createHash('sha256').update(value).digest('hex');
 
-// GA4 needs a stable-ish client_id: the MCP session when present, else the IP — both hashed so no
-// caller-supplied identifier (session token or raw IP) ever leaves verbatim to Google Analytics.
-// The prefix keeps the provenance readable: only an `ip_` value can be matched back to an address (hash a
-// suspect IP and compare) and therefore blocked; a `sid_` value says nothing about where the caller is.
+// Hashed so no session token or raw IP reaches GA4 verbatim; the prefix records which branch produced it
+// (see packages/entity-inspector/TELEMETRY.md).
 async function resolveClientId(): Promise<string> {
     const requestHeaders = await headers();
     const sessionId = requestHeaders.get('mcp-session-id');
@@ -56,7 +57,8 @@ export function createMcpTrack(): NonNullable<EntityInspectorConfig['track']> {
                 // Awaited so the serverless runtime keeps the function alive until delivery settles.
                 await telemetry.track(event, { clientId: await resolveClientId() });
             } catch (error) {
-                Logger.debug('[mcp] telemetry emission failed', { error });
+                // Not `debug`: a rotated secret or a GA4 outage would otherwise leave the dashboards merely quiet.
+                Logger.error(new Error('[mcp] telemetry emission failed', { cause: error }), { sentry: true });
             }
         });
     };
