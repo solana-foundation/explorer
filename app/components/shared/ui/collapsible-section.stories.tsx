@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, userEvent, within } from 'storybook/test';
 
-import { CollapsibleSection } from '../CollapsibleSection';
+import { CollapsibleSection } from './collapsible-section';
 
 const meta: Meta<typeof CollapsibleSection> = {
     args: {
@@ -12,7 +12,7 @@ const meta: Meta<typeof CollapsibleSection> = {
     },
     component: CollapsibleSection,
     tags: ['autodocs', 'test'],
-    title: 'Features/Transaction/CollapsibleSection',
+    title: 'Components/Shared/CollapsibleSection',
 };
 
 export default meta;

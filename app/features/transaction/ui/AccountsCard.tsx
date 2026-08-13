@@ -5,6 +5,7 @@ import { BalanceDelta } from '@components/common/BalanceDelta';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { SolBalance } from '@components/common/SolBalance';
 import { Button } from '@components/shared/ui/button';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
 import { AccountInfo, useAccountsInfo } from '@entities/account';
 import { useCluster } from '@providers/cluster';
@@ -20,7 +21,6 @@ import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { AccountBadges } from './AccountBadges';
 import { AccountDetailSlideover } from './AccountDetailSlideover';
 import { AccountExpandedContent } from './AccountExpandedContent';
-import { CollapsibleSection } from './CollapsibleSection';
 
 type TransactionAccountRowProps = {
     account: ParsedMessageAccount;

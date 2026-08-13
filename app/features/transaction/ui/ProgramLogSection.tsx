@@ -1,5 +1,6 @@
 import { TableCardBody } from '@components/common/TableCardBody';
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
@@ -10,8 +11,6 @@ import React from 'react';
 import { Button } from '@/app/components/shared/ui/button';
 import { BaseCardBody } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
-
-import { CollapsibleSection } from './CollapsibleSection';
 
 type ChipProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean };
 export function Chip({ children, className, active, ...props }: ChipProps) {

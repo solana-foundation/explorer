@@ -4,6 +4,22 @@ import { BaseCard, BaseCardBody, BaseCardHeader, BaseCardTitle } from '../../Car
 import { BaseTable } from '../BaseTable';
 
 const meta: Meta<typeof BaseTable> = {
+    argTypes: {
+        body: {
+            control: 'inline-radio',
+            description: 'Data row styling. `subtle` sets 8px vertical / 12px horizontal cell padding.',
+            options: ['default', 'subtle'],
+        },
+        head: {
+            control: 'inline-radio',
+            description:
+                'Header row styling. `subtle` uses the Token Balances header colour, a transparent (row-matching) background, and 8px/12px padding.',
+            options: ['default', 'subtle'],
+        },
+        nowrap: { control: 'boolean' },
+        ui: { control: 'inline-radio', options: ['dashkit', 'tw'] },
+        variant: { control: 'inline-radio', options: ['plain', 'card'] },
+    },
     component: BaseTable,
     tags: ['autodocs', 'test'],
     title: 'Components/Shared/Table/BaseTable',
@@ -126,6 +142,31 @@ export const DashkitCardInsideCard: Story = {
                 </BaseTable>
             </BaseCardBody>
         </BaseCard>
+    ),
+};
+
+// `head="subtle"` restyles just the header row (muted `outer-space-300` colour, transparent row-matching
+// background, 8px/12px padding), matching the transaction Token Balances header. Flip the `head` control
+// to compare with `default`.
+export const DashkitCardSubtleHead: Story = {
+    args: { head: 'subtle', nowrap: true, ui: 'dashkit', variant: 'card' },
+    name: 'Dashkit / Card variant + subtle head',
+    render: args => (
+        <BaseTable {...args}>
+            <CardSampleRows />
+        </BaseTable>
+    ),
+};
+
+// The domain-list combination: `subtle` header + `subtle` rows (row-matching header background, muted
+// header colour, uniform 8px/12px padding across header and body). Flip `head`/`body` to compare.
+export const DashkitCardSubtleHeadAndBody: Story = {
+    args: { body: 'subtle', head: 'subtle', nowrap: true, ui: 'dashkit', variant: 'card' },
+    name: 'Dashkit / Card variant + subtle head & body',
+    render: args => (
+        <BaseTable {...args}>
+            <CardSampleRows />
+        </BaseTable>
     ),
 };
 

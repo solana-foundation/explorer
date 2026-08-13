@@ -3,6 +3,7 @@
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
 import { useTransactionDetails } from '@providers/transactions';
 import { ParsedMessageAccount, PublicKey, TokenBalance } from '@solana/web3.js';
@@ -14,8 +15,6 @@ import useAsyncEffect from 'use-async-effect';
 import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
 import { getTokenInfos } from '@/app/utils/token-info';
-
-import { CollapsibleSection } from './CollapsibleSection';
 
 type TokenBalanceRow = {
     account: PublicKey;

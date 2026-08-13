@@ -1,22 +1,14 @@
 // Registers a Tailwind breakpoint quick-select toolbar in the Storybook manager.
 // Uses React.createElement (no JSX) so this file is safe to import from both the
 // production Storybook manager and the design-sb manager, which has no JSX transform.
-// Viewport keys must match the `viewport.options` keys in preview.tsx.
+// BREAKPOINTS are generated from tailwind.config in ./breakpoints (keys match viewport.options there).
 import React, { useCallback } from 'react';
 import { addons, types, useGlobals } from 'storybook/manager-api';
 
+import { BREAKPOINTS } from './breakpoints';
+
 const ADDON_ID = 'explorer/breakpoint-toolbar';
 const TOOL_ID = `${ADDON_ID}/tool`;
-
-// Must match the bsXxx keys in preview.tsx viewport.options
-export const BREAKPOINTS = [
-    { key: 'bsXs', label: 'xs·375' },
-    { key: 'bsSm', label: 'sm·576' },
-    { key: 'bsMd', label: 'md·768' },
-    { key: 'bsLg', label: 'lg·992' },
-    { key: 'bsXl', label: 'xl·1200' },
-    { key: 'bsXxl', label: 'xxl·1400' },
-] as const;
 
 function BreakpointTool() {
     const [globals, updateGlobals] = useGlobals();

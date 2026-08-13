@@ -24,6 +24,7 @@ import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProofDetailsCard';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
 import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
@@ -63,7 +64,6 @@ import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { CollapsibleSection } from './CollapsibleSection';
 import { CommonInstructionDetailsCard } from './CommonInstructionDetailsCard';
 
 const SerumDetailsCard = dynamic(
