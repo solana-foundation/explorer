@@ -71,6 +71,7 @@ export enum PROGRAM_NAMES {
     WORMHOLE_CORE = 'Wormhole Core Bridge',
     WORMHOLE_TOKEN = 'Wormhole Token Bridge',
     WORMHOLE_NFT = 'Wormhole NFT Bridge',
+    YEET_AMM = 'YeetAMM Program',
 
     // ZK Compression
     ZK_LIGHT_SYSTEM_PROGRAM = 'Light System Program',
@@ -140,6 +141,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8': {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.RAYDIUM_AMM,
+    },
+    'yeetaecvxpd7DFzZAYTEYracRt1WYJ7DfMVjEeEt2Cp': {
+        deployments: [Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.YEET_AMM,
     },
     '8tfDNiaEyrV6Q1U4DEXrEigs9DoDtkugzFbybENEbCDz': {
         deployments: [Cluster.Testnet],
