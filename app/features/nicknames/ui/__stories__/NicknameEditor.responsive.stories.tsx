@@ -1,4 +1,4 @@
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { withAutoFocusReleased } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withFixedContainer, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -23,7 +23,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const args = {
-    address: TOKEN_PROGRAM_ID.toBase58(),
+    address: TOKEN_PROGRAM_ADDRESS,
     onClose: fn(),
     open: true,
 };

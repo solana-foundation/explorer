@@ -1,4 +1,3 @@
-import { NATIVE_MINT } from '@solana/spl-token';
 import type { AccountInfo, ParsedAccountData, SimulatedTransactionAccountInfo } from '@solana/web3.js';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
@@ -6,12 +5,13 @@ import { getMintSize, getTokenSize, TOKEN_PROGRAM_ADDRESS } from '@solana-progra
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
 import { USDC_MINT } from '@/app/shared/model/known-mints';
+import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 
 const MINT_SIZE = getMintSize();
 const TOKEN_ACCOUNT_SIZE = getTokenSize();
 
 export { SYSTEM_PROGRAM_ADDRESS, TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS, USDC_MINT };
-export const WSOL_MINT = NATIVE_MINT;
+export const WSOL_MINT = new PublicKey(NATIVE_MINT_ADDRESS);
 export const SOME_KEY = Keypair.generate().publicKey;
 
 /** Parsed USDC token account (decimals 6, owned by TOKEN_PROGRAM) as returned by getMultipleParsedAccounts */

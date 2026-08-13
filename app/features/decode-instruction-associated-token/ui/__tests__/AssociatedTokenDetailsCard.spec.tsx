@@ -2,8 +2,8 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token';
-import * as spl from '@solana/spl-token';
 import { ParsedInstruction, PublicKey, TransactionMessage } from '@solana/web3.js';
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
@@ -34,7 +34,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         const ti = TransactionMessage.decompile(m, {
             addressLookupTableAccounts: lookups,
         }).instructions[index];
-        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 
         const parsed = {
             account: new PublicKey('Fv8YYjF2DUqj9RZhyXNzXa4yR9nHHwjg5bFjA82UidF1'),
@@ -73,7 +73,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         const ti = TransactionMessage.decompile(m, {
             addressLookupTableAccounts: lookups,
         }).instructions[index];
-        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 
         const parsed = {
             account: new PublicKey(ti.keys[1].pubkey),
@@ -111,7 +111,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         const ti = TransactionMessage.decompile(m, {
             addressLookupTableAccounts: lookups,
         }).instructions[index];
-        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 
         const parsed = {
             destination: new PublicKey(ti.keys[2].pubkey),
@@ -160,7 +160,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                     type,
                 },
                 program: 'spl-associated-token-account',
-                programId: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
+                programId: new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ADDRESS),
             } as unknown as ParsedInstruction;
 
             render(

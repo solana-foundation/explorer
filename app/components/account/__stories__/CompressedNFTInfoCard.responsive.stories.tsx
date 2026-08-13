@@ -1,5 +1,5 @@
 import { DEFAULT_BLOCKHASH, gen } from '@__fixtures__/gen';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -9,14 +9,14 @@ import type { CompressedNft, CompressedNftProof } from '@/app/providers/compress
 import { DasCompressionInfoCard } from '../CompressedNFTInfoCard';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
-const TREE_KEY = TOKEN_PROGRAM_ID;
+const TREE_KEY = TOKEN_PROGRAM_ADDRESS;
 
 const sampleProof: CompressedNftProof = {
     leaf: DEFAULT_BLOCKHASH,
     node_index: 0,
     proof: [gen.blockhash(1), gen.blockhash(2), gen.blockhash(3), gen.blockhash(4)],
     root: gen.blockhash(5),
-    tree_id: TREE_KEY.toBase58(),
+    tree_id: TREE_KEY,
 };
 
 const sampleCompressedNft = {
@@ -28,7 +28,7 @@ const sampleCompressedNft = {
         eligible: true,
         leaf_id: 42,
         seq: 17,
-        tree: TREE_KEY.toBase58(),
+        tree: TREE_KEY,
     },
 } as unknown as CompressedNft;
 

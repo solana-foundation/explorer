@@ -1,9 +1,12 @@
-import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { describe, expect, it } from 'vitest';
 
 import { resolveProgramId } from '../program-resolver';
 import type { IdlSeedAccount, IdlSeedArg, IdlSeedConst } from '../types';
+
+const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
+const TOKEN_PROGRAM_ID = new PublicKey(TOKEN_PROGRAM_ADDRESS);
 
 describe('resolveProgramId', () => {
     const defaultProgramId = PublicKey.default;

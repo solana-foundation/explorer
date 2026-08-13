@@ -42,7 +42,6 @@
         "vitest:test": "vitest --project specs"
     },
     "dependencies": {
-        "@bonfida/spl-name-service": "0.1.30",
         "@codama/dynamic-client": "0.1.0",
         "@codama/dynamic-parsers": "1.1.30",
         "@codama/nodes-from-anchor": "1.3.8",
@@ -86,7 +85,6 @@
         "@solana/kit": "7.0.0",
         "@solana/security-txt": "0.1.0",
         "@solana/spl-account-compression": "0.1.8",
-        "@solana/spl-token": "0.1.8",
         "@solana/subscriptions": "0.5.0",
         "@solana/wallet-adapter-base": "0.9.27",
         "@solana/wallet-adapter-base-ui": "0.1.6",
