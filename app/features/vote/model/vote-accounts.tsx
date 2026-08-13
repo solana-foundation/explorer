@@ -1,5 +1,4 @@
-import { useCluster } from '@providers/cluster';
-import { createSolanaRpc } from '@solana/kit';
+import { getRpc, useCluster } from '@providers/cluster';
 import { Cluster } from '@utils/cluster';
 import { type Dispatch, type SetStateAction, useState } from 'react';
 
@@ -34,7 +33,7 @@ async function fetchVoteAccounts({
     url: string;
 }) {
     try {
-        const rpc = createSolanaRpc(url);
+        const rpc = getRpc(url);
 
         const voteAccountsResponse = await rpc.getVoteAccounts({ commitment: 'confirmed' }).send();
         const voteAccounts: VoteAccounts = {

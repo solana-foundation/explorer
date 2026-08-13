@@ -1,7 +1,6 @@
 'use client';
 
-import { useCluster } from '@providers/cluster';
-import { createSolanaRpc } from '@solana/kit';
+import { getRpc, useCluster } from '@providers/cluster';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import React from 'react';
 
@@ -53,7 +52,7 @@ async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
     dispatch(Status.Connecting);
 
     try {
-        const rpc = createSolanaRpc(url);
+        const rpc = getRpc(url);
 
         const supplyResponse = await rpc
             .getSupply({ commitment: 'finalized', excludeNonCirculatingAccountsList: true })
