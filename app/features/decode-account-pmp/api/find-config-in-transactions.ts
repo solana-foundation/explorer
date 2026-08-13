@@ -64,7 +64,7 @@ export async function findConfigInTransactions(
         // The card reports only THAT the scan did not complete, never this string, and console logging is suppressed
         // outright on the client - so Sentry is the one place the reason survives. Warn rather than error: a dead scan
         // costs two config rows and leaves the from-bytes result, and the document it decodes, standing.
-        Logger.warn('[pmp:find-config] buffer config scan failed', {
+        Logger.warn('[pmp:find-config-in-transactions] buffer config scan failed', {
             sentry: true,
             sentryExtras: { bufferAddress, reason },
         });

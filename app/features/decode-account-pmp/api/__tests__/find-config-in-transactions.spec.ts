@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { PMP_ADDRESS } from '@entities/pmp-account';
 import type { Connection } from '@solana/web3.js';
 import {
@@ -13,11 +14,14 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { findConfigInTransactions, PMP_LOOKUP_MAX_SIGNATURES } from '../find-config-in-transactions';
 
-const BUFFER = 'CiYCLnyvdQNtRxwo8BA6MSe6368HLycdkh8YuAitwjQD';
-const AUTHORITY = 'FVdEMMJZznMv7Ycs2Wqz41H8knst9JKanJxnKXZUG9b6';
-const METADATA = '9hp6rRiXfMYQmS5tbaMGreUniT9NE63Lfsv6QDy4DmF8';
+// Generated rather than borrowed from the devnet fixtures. Every assertion here turns on WHICH INDEX an account
+// occupies, never on the account itself, so a real address would imply a dependency the scan does not have - and it
+// would break if the fixtures were ever re-minted.
+const BUFFER = gen.address(1);
+const AUTHORITY = gen.address(2);
+const METADATA = gen.address(3);
 /** A second, unrelated buffer - the "some other account" in every negative case. */
-const OTHER = 'BALMba76qUAf1N7TmUSmXGeakoc7czxdQCvEzhRCWj8z';
+const OTHER = gen.address(4);
 
 const SET_DATA = new Uint8Array(
     getSetDataInstructionDataEncoder().encode({

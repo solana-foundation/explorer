@@ -13,13 +13,18 @@ import {
 } from '@solana-program/program-metadata';
 
 /**
- * Account-byte builders shared by the Metadata, Buffer and Notice story files.
+ * Account-byte builders shared by the PMP card specs and story files.
  *
  * Every fixture is built with the LIBRARY's own encoders and `packDirectData`, so each one is a byte-exact round trip
  * of what the client puts on chain rather than a hand-assembled header that could drift from the real layout.
+ *
+ * Lives in `__fixtures__` rather than `__stories__` because both `__tests__` and `__stories__` consume it, and a spec
+ * reaching into a stories folder for its builders reads as a dependency that is not really there.
  */
 export const TARGET_PROGRAM = gen.address(1) as Address;
 export const AUTHORITY = gen.address(2) as Address;
+
+export const YAML_DOC = 'name: orbit\nversion: 1.0.0\n';
 
 export const IDL_DOC = JSON.stringify({
     instructions: [{ name: 'initialize' }],
@@ -69,13 +74,20 @@ export function metadataBase64AccountData(body: Uint8Array): Uint8Array {
     }) as Uint8Array;
 }
 
-export function bufferAccountData(body: Uint8Array): Uint8Array {
+/**
+ * `program: null` is the KEYPAIR-buffer case: `allocate` writes program, canonical and seed together or not at all,
+ * so a keypair buffer carries none of the three. Tested with `=== undefined` rather than `??`, because `??` would
+ * quietly replace an explicit `null` with the PDA default and there would be no way to build that case.
+ */
+export type BufferHeaderOverrides = { canonical?: boolean; program?: Address | null; seed?: string };
+
+export function bufferAccountData(body: Uint8Array, header: BufferHeaderOverrides = {}): Uint8Array {
     return getBufferEncoder().encode({
         authority: AUTHORITY,
-        canonical: true,
+        canonical: header.canonical ?? true,
         data: body,
-        program: TARGET_PROGRAM,
-        seed: 'security',
+        program: header.program === undefined ? TARGET_PROGRAM : header.program,
+        seed: header.seed ?? 'security',
     }) as Uint8Array;
 }
 

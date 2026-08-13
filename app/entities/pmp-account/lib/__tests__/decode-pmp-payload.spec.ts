@@ -241,8 +241,7 @@ describe('decodePmpPayload', () => {
 });
 
 /**
- * The post-unpack half, reached directly. A Buffer's declared-config upgrade arrives after detection has already
- * inflated the body, so it decodes the bytes it holds rather than re-running the whole pipeline.
+ * The post-unpack checks.
  */
 describe('decodeUnpackedPayload', () => {
     const bytes = new TextEncoder().encode('hello');

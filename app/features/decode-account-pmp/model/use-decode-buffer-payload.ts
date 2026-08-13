@@ -5,7 +5,7 @@ import type { BufferAccount } from '@entities/pmp-account';
 import {
     type ConfigResolutionFromBytesResult,
     hasPmpPayload,
-    isDetectionUncertain,
+    isConfigFromBytesResolutionUncertain,
 } from '../lib/config-resolution/resolve-buffer-config-from-bytes';
 import { PMP_FULL_CONFIG_LOOKUP } from '../lib/constants';
 import { useResolveBufferConfigFromBytes } from './use-resolve-buffer-config-from-bytes';
@@ -41,5 +41,5 @@ export function useDecodeBufferPayload({ account, address }: { account: BufferAc
 function shouldResolveOnchain(fromBytes: ConfigResolutionFromBytesResult | undefined): boolean {
     if (fromBytes === undefined) return false;
 
-    return PMP_FULL_CONFIG_LOOKUP ? hasPmpPayload(fromBytes) : isDetectionUncertain(fromBytes);
+    return PMP_FULL_CONFIG_LOOKUP ? hasPmpPayload(fromBytes) : isConfigFromBytesResolutionUncertain(fromBytes);
 }

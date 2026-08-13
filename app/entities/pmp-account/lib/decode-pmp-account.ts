@@ -19,7 +19,7 @@ export function decodePmpAccount({
 }: {
     account: PmpAccountSnapshot;
     /**
-     * Omitted by the account page, which has no instruction to take hints from. A Metadata account carries its
+     * Omitted by the account page, which has no instruction to take decode-config from. A Metadata account carries its
      * own, so this only decides whether a BUFFER body can be decoded at all.
      */
     config?: PmpDecodeConfig;

@@ -8,7 +8,7 @@ import {
     hasPmpPayload,
     isBinaryPayload,
     isCompressed,
-    isDetectionUncertain,
+    isConfigFromBytesResolutionUncertain,
     isZlibStream,
     resolveBufferConfigFromBytes,
 } from '../resolve-buffer-config-from-bytes';
@@ -260,21 +260,21 @@ describe('hasPmpPayload', () => {
     });
 });
 
-describe('isDetectionUncertain', () => {
+describe('isConfigFromBytesResolutionUncertain', () => {
     it('should be certain for text that parses as Json', () => {
-        expect(isDetectionUncertain(resolveBufferConfigFromBytes(utf8(JSON_DOC)))).toBe(false);
+        expect(isConfigFromBytesResolutionUncertain(resolveBufferConfigFromBytes(utf8(JSON_DOC)))).toBe(false);
     });
 
     // A Url payload is a URL string: UTF-8 but not Json. This is the case the lookup exists for.
     it('should be uncertain for text that is not Json', () => {
-        expect(isDetectionUncertain(resolveBufferConfigFromBytes(utf8('https://example.com/idl.json')))).toBe(true);
+        expect(isConfigFromBytesResolutionUncertain(resolveBufferConfigFromBytes(utf8('https://example.com/idl.json')))).toBe(true);
     });
 
     it('should be uncertain for a binary payload', () => {
-        expect(isDetectionUncertain(resolveBufferConfigFromBytes(new Uint8Array([0xff, 0x80])))).toBe(true);
+        expect(isConfigFromBytesResolutionUncertain(resolveBufferConfigFromBytes(new Uint8Array([0xff, 0x80])))).toBe(true);
     });
 
     it('should be certain for a non-payload outcome, which has nothing to upgrade', () => {
-        expect(isDetectionUncertain({ kind: 'empty' })).toBe(false);
+        expect(isConfigFromBytesResolutionUncertain({ kind: 'empty' })).toBe(false);
     });
 });

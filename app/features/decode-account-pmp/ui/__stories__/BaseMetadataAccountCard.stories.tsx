@@ -4,8 +4,14 @@ import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@s
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { gzip } from 'pako';
 
+import {
+    IDL_DOC,
+    metadataAccountData,
+    metadataBase64AccountData,
+    pack,
+    readAs,
+} from '../__fixtures__/pmp-account-fixtures';
 import { BaseMetadataAccountCard } from '../BaseMetadataAccountCard';
-import { IDL_DOC, metadataAccountData, metadataBase64AccountData, pack, readAs } from './pmp-account-fixtures';
 
 function argsFor(raw: Uint8Array) {
     const metadata = readAs(raw, 'metadata');

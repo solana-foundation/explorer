@@ -4,10 +4,8 @@ import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@s
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { resolveBufferConfigFromBytes } from '../../lib/config-resolution/resolve-buffer-config-from-bytes';
+import { bufferAccountData, IDL_DOC, pack, readAs, YAML_DOC } from '../__fixtures__/pmp-account-fixtures';
 import { BaseBufferAccountCard } from '../BaseBufferAccountCard';
-import { bufferAccountData, IDL_DOC, pack, readAs } from './pmp-account-fixtures';
-
-const YAML_DOC = 'name: orbit\nversion: 1.0.0\n';
 
 function bufferArgsFor(body: Uint8Array) {
     return {
@@ -77,8 +75,7 @@ export const BufferConfigFromMetadataAcc: Story = {
 };
 
 /**
- * The lookup is in flight. The provenance note must NOT show the detected wording here: it would be replaced a few
- * hundred milliseconds later by `derived from transaction`, which reads as a glitch rather than as progress.
+ * The lookup is in flight.
  */
 export const BufferResolvingConfig: Story = {
     args: {

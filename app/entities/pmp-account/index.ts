@@ -29,7 +29,6 @@ export { toErrorReason } from './lib/errors';
 export { isPmpAccount } from './lib/program-address';
 export { readPmpAccount } from './lib/read-pmp-account';
 export type {
-    // The generated `Buffer` / `Metadata` structs, aliased so `Buffer` cannot shadow the Node global.
     BufferAccount,
     MetadataAccount,
     PmpAccountDecodeResult,

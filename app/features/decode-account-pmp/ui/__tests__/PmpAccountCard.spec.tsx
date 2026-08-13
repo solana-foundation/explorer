@@ -1,22 +1,14 @@
 import { gen } from '@__fixtures__/gen';
 import { PMP_ADDRESS, PMP_EMPTY_DISCRIMINATOR, type PmpPayloadDecodeResult } from '@entities/pmp-account';
 import type { Account } from '@providers/accounts';
-import type { Address } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
-import {
-    Compression,
-    DataSource,
-    Encoding,
-    Format,
-    getBufferEncoder,
-    getMetadataEncoder,
-    packDirectData,
-} from '@solana-program/program-metadata';
+import { Compression } from '@solana-program/program-metadata';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { trackEvent } from '@/app/shared/lib/analytics';
 
+import { bufferAccountData, metadataAccountData, pack } from '../__fixtures__/pmp-account-fixtures';
 import { PmpAccountCard } from '../PmpAccountCard';
 
 const { mockDecodePmpPayload, mockFindConfigInTransactions } = vi.hoisted(() => ({
@@ -49,42 +41,9 @@ vi.mock('../../api/find-config-in-transactions', async importOriginal => ({
     findConfigInTransactions: mockFindConfigInTransactions,
 }));
 
-const TARGET_PROGRAM = gen.address(1) as Address;
-const AUTHORITY = gen.address(2) as Address;
-
 const DOC = '{"name":"company","version":"1.0.0"}';
 const DOC_PRETTY = '{\n  "name": "company",\n  "version": "1.0.0"\n}';
 const OTHER_DOC = '{"name":"other","version":"2.0.0"}';
-
-function pack(content: string, compression: Compression): Uint8Array {
-    return packDirectData({ compression, content, encoding: Encoding.Utf8 }).data as Uint8Array;
-}
-
-function metadataAccountData(body: Uint8Array): Uint8Array {
-    return getMetadataEncoder().encode({
-        authority: AUTHORITY,
-        canonical: true,
-        compression: Compression.Zlib,
-        data: body,
-        dataLength: body.length,
-        dataSource: DataSource.Direct,
-        encoding: Encoding.Utf8,
-        format: Format.Json,
-        mutable: true,
-        program: TARGET_PROGRAM,
-        seed: 'idl',
-    }) as Uint8Array;
-}
-
-function bufferAccountData(body: Uint8Array): Uint8Array {
-    return getBufferEncoder().encode({
-        authority: AUTHORITY,
-        canonical: true,
-        data: body,
-        program: TARGET_PROGRAM,
-        seed: 'security',
-    }) as Uint8Array;
-}
 
 function toAccount(raw: Uint8Array): Account {
     return {

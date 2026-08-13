@@ -19,7 +19,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
-// Deliberately import from `lib/program-address`, NOT from `index`, which pulls the client and packo.
+// Deliberately import from `lib/program-address`, NOT from `index`, which pulls the client and pako.
 import { isPmpAccount } from '@entities/pmp-account/lib/program-address';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,

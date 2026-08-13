@@ -24,7 +24,7 @@ export function PayloadUndecodableRow({ reason }: { reason: string }) {
 export function PayloadTooLargeRow({ budget, size }: { budget: number; size: number }) {
     return (
         <NoteRow testId="pmp-account-payload-too-large" variant="warning">
-            Payload too large to render ({size} bytes, limit {budget}). Copy or download it instead.
+            Payload too large to render ({size} bytes, limit {budget}).
         </NoteRow>
     );
 }

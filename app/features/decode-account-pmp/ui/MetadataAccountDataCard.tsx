@@ -5,6 +5,5 @@ import { BaseMetadataAccountCard, type MetadataAccountRead } from './BaseMetadat
 
 export function MetadataAccountDataCard({ metadata }: { metadata: MetadataAccountRead }) {
     const decodedPayload = useDecodeMetadataPayload(metadata.account);
-
     return <BaseMetadataAccountCard payload={decodedPayload} metadata={metadata} />;
 }

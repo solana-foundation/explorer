@@ -1,5 +1,6 @@
 import { Signature } from '@components/common/Signature';
 import { decodeUnpackedPayload, type PmpAccountReadResult } from '@entities/pmp-account';
+import { useMemo } from 'react';
 
 import {
     type BufferConfigFromBytesPayload,
@@ -50,7 +51,7 @@ function BufferDataContentRows({
     if (configFromBytes.status === 'failed') {
         return (
             <NoteRow testId="pmp-account-buffer-read-failed-note" variant="warning">
-                Could not read this buffer. The decode failed.
+                Could not read this buffer.
             </NoteRow>
         );
     }
@@ -68,8 +69,7 @@ function BufferDataContentRows({
     if (resultFromBytes.kind === 'incomplete') {
         return (
             <NoteRow testId="pmp-account-buffer-incomplete-note" variant="warning">
-                The compressed stream is incomplete, which is what a buffer looks like while its write chunks are still
-                landing.
+                The compressed stream is incomplete. Write chunks are still landing.
             </NoteRow>
         );
     }
@@ -130,19 +130,12 @@ function BufferConfigResolutionNote({
     if (configFromBytes.status !== 'ready') return undefined;
     if (!hasPmpPayload(configFromBytes.result)) return undefined;
 
-    // The lookup is in flight, so the detected provenance is about to be replaced by a stronger one. Rendering it
-    // here would state a claim for a few hundred milliseconds and then contradict it, which reads as a glitch rather
-    // than as progress. `skipped` does NOT land here: a certain detection resolves nothing further, so its note is
-    // final and paints immediately.
     if (configFromOnchain.status === 'loading') {
         return <PendingRow testId="pmp-account-config-pending">Resolving config for decoding...</PendingRow>;
     }
 
     const lookup = configFromOnchain.status === 'ready' ? configFromOnchain.result : undefined;
 
-    // `derived`, not `declared`: the config was stated for the metadata account this buffer's bytes were copied
-    // into, not for the buffer. The transaction link is where a reader can see which account that was, so the
-    // sentence stays short rather than naming it twice over.
     if (lookup?.kind === 'found-for-metadata-acc') {
         return (
             <InfoRow testId="pmp-account-buffer-copied-note">
@@ -185,12 +178,13 @@ function BufferPayloadRow({
     foundConfig: ReturnType<typeof toFoundConfig>;
     fromBytesConfig: BufferConfigFromBytesPayload;
 }) {
-    if (foundConfig) {
-        return (
-            <PayloadRows
-                payload={decodeUnpackedPayload({ bytes: fromBytesConfig.payload, config: foundConfig.config })}
-            />
-        );
+    const payload = useMemo(
+        () => foundConfig && decodeUnpackedPayload({ bytes: fromBytesConfig.payload, config: foundConfig.config }),
+        [foundConfig, fromBytesConfig],
+    );
+
+    if (payload) {
+        return <PayloadRows payload={payload} />;
     }
 
     if (fromBytesConfig.kind === 'text') {

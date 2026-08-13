@@ -1,20 +1,18 @@
 import { gen } from '@__fixtures__/gen';
-import { readPmpAccount } from '@entities/pmp-account';
-import type { Address } from '@solana/kit';
-import {
-    Compression,
-    DataSource,
-    Encoding,
-    Format,
-    getBufferEncoder,
-    packDirectData,
-    PROGRAM_METADATA_PROGRAM_ADDRESS,
-} from '@solana-program/program-metadata';
+import { Compression, DataSource, Encoding, Format } from '@solana-program/program-metadata';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { resolveBufferConfigFromBytes } from '../../lib/config-resolution/resolve-buffer-config-from-bytes';
-import { BaseBufferAccountCard, type BufferAccountRead } from '../BaseBufferAccountCard';
+import {
+    AUTHORITY,
+    bufferAccountData,
+    type BufferHeaderOverrides,
+    pack,
+    readAs,
+    YAML_DOC,
+} from '../__fixtures__/pmp-account-fixtures';
+import { BaseBufferAccountCard } from '../BaseBufferAccountCard';
 
 // Both render address-shaped links that reach for the active cluster, which has no provider here. The rows under
 // test are the config enums, so stubbing them keeps this spec to the precedence question.
@@ -26,35 +24,13 @@ vi.mock('@components/common/Signature', () => ({
     Signature: ({ signature }: { signature: string }) => <span data-testid="signature">{signature}</span>,
 }));
 
-const TARGET_PROGRAM = gen.address(1) as Address;
-const AUTHORITY = gen.address(2) as Address;
-
-const YAML_DOC = 'name: orbit\nversion: 1.0.0\n';
-
-/** The library's own producer, so the body is a byte-exact round trip of what the client puts on chain. */
-function pack(content: string, compression: Compression): Uint8Array {
-    return packDirectData({ compression, content, encoding: Encoding.Utf8 }).data as Uint8Array;
-}
-
-type BufferHeaderOverrides = { canonical?: boolean; program?: Address | null; seed?: string };
-
 /**
  * Derives both data props from the body the same way the card's stateful half does, so a hand-written from-bytes
  * result cannot drift from what `resolveBufferConfigFromBytes` actually returns for these bytes.
  */
 function bufferArgs(body: Uint8Array, header: BufferHeaderOverrides = {}) {
-    const raw = getBufferEncoder().encode({
-        authority: AUTHORITY,
-        canonical: header.canonical ?? true,
-        data: body,
-        program: header.program === undefined ? TARGET_PROGRAM : header.program,
-        seed: header.seed ?? 'security',
-    }) as Uint8Array;
-
     return {
-        buffer: readPmpAccount({
-            account: { data: raw, lamports: 2_000_000, owner: PROGRAM_METADATA_PROGRAM_ADDRESS },
-        }) as BufferAccountRead,
+        buffer: readAs(bufferAccountData(body, header), 'buffer'),
         configFromBytes: { result: resolveBufferConfigFromBytes(body), status: 'ready' as const },
         configFromOnchain: { status: 'skipped' as const },
     };
@@ -172,7 +148,9 @@ describe('BaseBufferAccountCard', () => {
             />,
         );
 
-        expect(screen.getByTestId('pmp-account-buffer-read-failed-note')).toHaveTextContent('The decode failed');
+        expect(screen.getByTestId('pmp-account-buffer-read-failed-note')).toHaveTextContent(
+            'Could not read this buffer',
+        );
     });
 
     it('should surface the inflate reason when a declared container fails to unpack', () => {

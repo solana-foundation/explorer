@@ -72,18 +72,7 @@ type InvalidPmpAccountResult = { kind: 'absent' } | { kind: 'unreadable'; reason
 export type PmpAccountValidateResult = InvalidPmpAccountResult | { kind: 'ok'; data: Uint8Array };
 
 /**
- * The outcome of reading a PMP account, with the generated struct carried verbatim rather than mirrored.
- *
- * The two decoded arms hold the client's own `Buffer` / `Metadata` types, so a library change to either layout is a
- * compile error here instead of a hand-written copy quietly rotting. It also keeps every field name identical to
- * the one the Codama IDL declares, which is what lets the card's field descriptors key off `field` alone.
- *
- * The wrapper is still needed for two reasons the generated types cannot cover: `absent` / `unreadable` / `empty`
- * have no struct to be, and both structs type `discriminator` as the whole `AccountDiscriminator` enum rather than
- * a literal member, so TypeScript cannot narrow `Buffer | Metadata` on it.
- *
- * `absent` and `unreadable` are spelled as `PmpAccountDecodeResult` spells them, deliberately: a reader meeting one of
- * them should not have to learn two spellings of the same outcome.
+ * The outcome of reading a PMP onchain Account.
  */
 export type PmpAccountReadResult =
     | InvalidPmpAccountResult

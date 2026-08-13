@@ -2,8 +2,8 @@ import { PMP_EMPTY_DISCRIMINATOR } from '@entities/pmp-account';
 import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
+import { bufferAccountData, readAs } from '../__fixtures__/pmp-account-fixtures';
 import { PmpAccountNoticeCard } from '../PmpAccountNoticeCard';
-import { bufferAccountData, readAs } from './pmp-account-fixtures';
 
 const meta = {
     component: PmpAccountNoticeCard,

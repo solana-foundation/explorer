@@ -40,7 +40,7 @@ function MetadataPayloadRow({ payloadResult }: { payloadResult: MetadataPayloadD
     if (payloadResult.status === 'failed') {
         return (
             <NoteRow testId="pmp-account-metadata-read-failed-note" variant="warning">
-                Could not read this account. The decode failed.
+                Could not read this account.
             </NoteRow>
         );
     }

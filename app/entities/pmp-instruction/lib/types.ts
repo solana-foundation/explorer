@@ -3,10 +3,6 @@ import type { DataSource } from '@solana-program/program-metadata';
 
 /**
  * What a PMP instruction's DATA bytes carry, and nothing else.
- *
- * Account-derived fields (`sourceBuffer`, `metadataAccount`) are deliberately absent: they need the instruction's
- * account list, which is the caller's concern and differs between a web3.js `TransactionInstruction` and the
- * compiled instructions of a `getTransaction` response.
  */
 export type PmpInstructionData =
     | {

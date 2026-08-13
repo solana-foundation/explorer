@@ -1,8 +1,7 @@
 /**
  * The three PMP account layouts, as the byte at offset 0. Duplicated from the generated client's
  * `AccountDiscriminator` deliberately: this file imports NOTHING, so the account page's tab gate can classify an
- * account without pulling the client, pako, yaml and smol-toml onto `/address/*`. The spec alongside pins every
- * value to the library's enum, so drift fails a test rather than mis-rendering a tab.
+ * account without pulling the client, pako, yaml and smol-toml onto `/address/*`.
  */
 export const PMP_EMPTY_DISCRIMINATOR = 0;
 export const PMP_BUFFER_DISCRIMINATOR = 1;

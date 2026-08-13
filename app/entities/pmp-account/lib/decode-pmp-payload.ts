@@ -151,8 +151,6 @@ export type BoundedUnpackResult =
  * Never throws. The library helper signals a corrupt stream by throwing a bare string and an incomplete one by
  * returning `undefined`, and both arrive here as a typed result instead.
  */
-// Exported, not private: PR 2 recovers a Buffer's decode config by trial-inflating candidate configs, and it needs
-// this bound plus the `incomplete` signal rather than pako's raw helpers.
 export function unpackBounded(data: Uint8Array, limit: number): BoundedUnpackResult {
     const inflator = new Inflate();
     const chunks: Uint8Array[] = [];
