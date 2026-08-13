@@ -66,10 +66,9 @@ export function resolveBufferConfigFromBytes(body: Uint8Array): ConfigResolution
     const bodyReadsAsJson = isJson(utfBodyOrUndefined);
     const isUncompressedStream = inflated === undefined || bodyReadsAsJson;
 
-    const { compression, payload } =
-        isUncompressedStream
-            ? { compression: Compression.None, payload: body }
-            : { compression: isGzipStream(body) ? Compression.Gzip : Compression.Zlib, payload: inflated };
+    const { compression, payload } = isUncompressedStream
+        ? { compression: Compression.None, payload: body }
+        : { compression: isGzipStream(body) ? Compression.Gzip : Compression.Zlib, payload: inflated };
 
     if (payload.length === 0) return { kind: 'empty' };
     if (payload.length > PMP_DECODED_RENDER_CAP_BYTES) {
