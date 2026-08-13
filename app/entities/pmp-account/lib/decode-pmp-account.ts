@@ -1,5 +1,4 @@
 import type { ReadonlyUint8Array } from '@solana/kit';
-import { AccountDiscriminator } from '@solana-program/program-metadata';
 
 import { bytes } from '@/app/shared/lib/bytes';
 
@@ -50,17 +49,13 @@ export function decodePmpAccount({
                 cap,
             );
         }
-        // `readPmpAccount` reports this as an ordinary allocated-but-unwritten account.
+        // Passed through verbatim, `empty` included. It is an ordinary allocated-but-unwritten account rather than a
+        // failure, so demoting it to `unreadable` here would make every card warn about a normal state.
         case 'empty':
-            return noPayloadContent(AccountDiscriminator.Empty);
         case 'absent':
         case 'unreadable':
             return pmpAccountResult;
     }
-}
-
-function noPayloadContent(discriminator: number): PmpAccountDecodeResult {
-    return { kind: 'unreadable', reason: `the account holds no PMP payload (discriminator ${discriminator})` };
 }
 
 function decodeAccountContent(

@@ -160,11 +160,11 @@ describe('decodePmpAccount', () => {
         expect(result.kind === 'unreadable' && result.reason).not.toContain('96-byte');
     });
 
-    it('should report unreadable for a discriminator that carries no payload', () => {
+    it('should report an Empty discriminator as empty rather than demote it to a failure', () => {
         const empty = bufferAccount(pack(DOC, Compression.None));
         empty[0] = 0; // AccountDiscriminator.Empty
 
-        expect(read(empty)).toEqual({ kind: 'unreadable', reason: expect.stringContaining('discriminator 0') });
+        expect(read(empty)).toEqual({ kind: 'empty' });
     });
 
     it('should report unreadable when a Metadata header carries an out-of-range hint', () => {

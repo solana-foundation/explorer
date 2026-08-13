@@ -57,6 +57,8 @@ export type PmpAccountSnapshot = {
  */
 export type PmpAccountDecodeResult =
     | InvalidPmpAccountResult
+    /** Allocated and not written yet, so there is no payload. */
+    | { kind: 'empty' }
     | {
           kind: 'payload';
           account: PmpAccountKind;

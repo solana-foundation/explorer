@@ -203,6 +203,15 @@ function AccountContentBody({
         );
     }
 
+    // Not a warning: the account exists and is well formed, it simply has no payload yet.
+    if (result.kind === 'empty') {
+        return (
+            <Alert variant="default" data-testid="pmp-account-empty" className="!mb-0">
+                The account is allocated but has not been written yet.
+            </Alert>
+        );
+    }
+
     if (result.kind === 'unreadable') {
         return (
             <Alert variant="warning" data-testid="pmp-account-unreadable" className="!mb-0">

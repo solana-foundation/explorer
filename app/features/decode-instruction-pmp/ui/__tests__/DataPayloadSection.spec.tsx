@@ -471,6 +471,18 @@ describe('DataPayloadSection', () => {
         expect(screen.queryByTestId('pmp-account-unreadable')).not.toBeInTheDocument();
     });
 
+    it('should say the referenced account is unwritten rather than warn that it cannot be read', () => {
+        // A PMP-owned account still carrying the Empty discriminator: created, never `allocate`d. `readPmpAccount`
+        // calls that ordinary, so `decodePmpAccount` passes it through instead of demoting it to `unreadable`.
+        const unwritten = bufferAccountData(new Uint8Array(0));
+        unwritten[0] = 0; // AccountDiscriminator.Empty
+        mockUseAccountInfo.mockReturnValue(fetchedEntry(unwritten));
+        renderSection(DEFERRED_SET_DATA);
+
+        expect(screen.getByTestId('pmp-account-empty')).toHaveTextContent(/has not been written yet/i);
+        expect(screen.queryByTestId('pmp-account-unreadable')).not.toBeInTheDocument();
+    });
+
     it('should warn when the referenced account is not owned by the Program Metadata Program', () => {
         mockUseAccountInfo.mockReturnValue(
             fetchedEntry(bufferAccountData(pack(DOC, Compression.None)), { owner: BUFFER_ADDRESS }),
