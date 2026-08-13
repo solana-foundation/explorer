@@ -50,14 +50,13 @@ describe('CodeBlock', () => {
         expect(await screen.findByRole('button', { name: 'Copy failed' })).toBeInTheDocument();
     });
 
-    // Console output is suppressed on the client, so Sentry is the only sink that makes this visible.
-    it('should report a rejected clipboard write to Sentry', async () => {
+    it('should log a rejected clipboard write', async () => {
         writeText.mockRejectedValue(new Error('denied'));
         render(<CodeBlock code={CODE} />);
 
         await userEvent.click(screen.getByRole('button', { name: 'Copy code' }));
         await screen.findByRole('button', { name: 'Copy failed' });
 
-        expect(error).toHaveBeenCalledWith(expect.any(Error), { sentry: true });
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 });

@@ -24,8 +24,7 @@ export function useCopyToClipboard(resetMs = 2000): readonly [CopyState, (text: 
     // A failure the user glanced past means pasting stale clipboard content, so it lingers longer than a success.
     const failWith = useCallback(
         (error: Error) => {
-            // `sentry: true` is load-bearing: on the client, console output is suppressed and this is the only sink.
-            Logger.error(error, { sentry: true });
+            Logger.error(error);
             setState('errored');
             scheduleReset(resetMs * 3);
         },

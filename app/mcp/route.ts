@@ -20,8 +20,7 @@ const blockedIps = parseCsvList(process.env.MCP_BLOCKED_IPS);
 const accessKeys = parseCsvList(process.env.MCP_ACCESS_KEYS);
 
 if (isEnvEnabled(process.env.MCP_ENDPOINT_ENABLED) && accessKeys.length === 0) {
-    // `sentry: true` or it is silent: console output needs NEXT_LOG_LEVEL, which most deployments leave unset.
-    Logger.warn('[mcp] MCP_ACCESS_KEYS is unset — /mcp is enabled without authentication', { sentry: true });
+    Logger.warn('[mcp] MCP_ACCESS_KEYS is unset — /mcp is enabled without authentication');
 }
 
 async function handleMcpRequest(request: Request): Promise<Response> {

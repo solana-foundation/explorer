@@ -133,7 +133,6 @@ describe('createMcpTrack', () => {
         expect(fetchMock).not.toHaveBeenCalled();
         expect(loggerMock.warn).toHaveBeenCalledWith(
             '[mcp] MCP_GA_MEASUREMENT_ID (or NEXT_PUBLIC_GOOGLE_ANALYTICS_ID) or MCP_GA_API_SECRET unset — usage analytics disabled',
-            { sentry: true },
         );
     });
 

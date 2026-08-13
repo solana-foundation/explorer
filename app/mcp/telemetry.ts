@@ -18,10 +18,8 @@ function buildTelemetry(): Telemetry {
     if (providers.length === 0) {
         // Once per cold start (same pattern as the MCP_ACCESS_KEYS warning in route.ts) — a silently
         // disabled pipeline is otherwise indistinguishable from a broken one.
-        // `sentry: true` or it is silent: console output needs NEXT_LOG_LEVEL, which most deployments leave unset.
         Logger.warn(
             '[mcp] MCP_GA_MEASUREMENT_ID (or NEXT_PUBLIC_GOOGLE_ANALYTICS_ID) or MCP_GA_API_SECRET unset — usage analytics disabled',
-            { sentry: true },
         );
     }
     return createTelemetry(providers, {
