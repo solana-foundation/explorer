@@ -142,7 +142,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.RAYDIUM_AMM,
     },
-    'yeetaecvxpd7DFzZAYTEYracRt1WYJ7DfMVjEeEt2Cp': {
+    yeetaecvxpd7DFzZAYTEYracRt1WYJ7DfMVjEeEt2Cp: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.YEET_AMM,
     },
