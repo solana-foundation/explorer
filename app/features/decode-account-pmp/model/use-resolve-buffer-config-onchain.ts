@@ -14,27 +14,32 @@ export type ConfigResolutionOnchainState =
     | { status: 'loading' }
     | { status: 'ready'; result: ConfigResolutionOnchainResult };
 
-function swrKey(url: string, address: string, enabled: boolean): string | null {
+function swrKey(url: string, address: string, fingerprint: string, enabled: boolean): string | null {
     // eslint-disable-next-line unicorn/no-null -- SWR uses a null key to disable the request
     if (!enabled) return null;
-    return `pmp-buffer-onchain-config-resolution:${url}:${address}`;
+    return `pmp-buffer-onchain-config-resolution:${url}:${address}:${fingerprint}`;
 }
 
 /**
  * The second config-resolution strategy: read what an on-chain instruction declared for this buffer.
+ *
+ * `fingerprint` identifies the account body the caller resolved from - see `useDecodeBufferPayload` for why the
+ * result is cached against it rather than against the address alone.
  */
 export function useResolveBufferConfigOnchain({
     address,
     enabled,
+    fingerprint,
 }: {
     address: string;
     enabled: boolean;
+    fingerprint: string;
 }): ConfigResolutionOnchainState {
     const { url } = useCluster();
     const connection = React.useMemo(() => new Connection(url), [url]);
 
     const { data, error, isLoading } = useSWRImmutable(
-        swrKey(url, address, enabled),
+        swrKey(url, address, fingerprint, enabled),
         () => findConfigInTransactions(connection, address),
         { shouldRetryOnError: false },
     );
