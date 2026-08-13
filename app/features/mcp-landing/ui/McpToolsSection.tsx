@@ -90,11 +90,6 @@ export function McpToolsSection() {
                                 <li key={item}>{item}</li>
                             ))}
                         </ul>
-                        <p className="mb-0 mt-3 text-sm text-neutral-400">
-                            Accounts owned by the legacy loaders are not supported yet and answer with a
-                            CURRENTLY_UNSUPPORTED error. Fields that cannot be resolved come back as explicit unknown
-                            markers rather than being dropped.
-                        </p>
                     </div>
 
                     <div>
