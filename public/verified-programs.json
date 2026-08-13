@@ -116,8 +116,8 @@
   {
     "address": "2kZqCjGfKgVR8dUkv4PCogFsFgN3EoSSNX41HN1cBfBA",
     "name": "juancanero03-hue/wagon-program",
-    "repoUrl": "https://github.com/juancanero03-hue/wagon-program/tree/9cd2b3c68c81c38fb00bacfb412675d3c31d0d82",
-    "verifiedAt": "2026-08-11T07:02:04"
+    "repoUrl": "https://github.com/juancanero03-hue/wagon-program/tree/4f9c58671683ef654016ec968a2fddd22e639e08",
+    "verifiedAt": "2026-08-13T01:00:26"
   },
   {
     "address": "2n2puiEN8BbMMEtq387b6HKR2trvKY9rK5uM82Ht2Vtc",
@@ -298,6 +298,12 @@
     "name": "Thewreckitral/bextree-programs",
     "repoUrl": "https://github.com/Thewreckitral/bextree-programs/tree/e427ebebaed1a0bcca51d7fe5f17cfe7eea5753b",
     "verifiedAt": "2026-07-20T21:16:27"
+  },
+  {
+    "address": "5uJgCDrQHfA58fPqLsuU14Srg9quxXNHz91cZ54cq4pK",
+    "name": "provenance-io/hastra-sol-vault",
+    "repoUrl": "https://github.com/provenance-io/hastra-sol-vault/tree/121e4cc600b976a97faa018359e00bda48113ec2",
+    "verifiedAt": "2026-08-12T20:48:31"
   },
   {
     "address": "5vNJx78mz7KVMjhuipyr9jKBKcMrKYGdjGkgE4LUmjKk",
@@ -522,6 +528,12 @@
     "verifiedAt": "2025-04-11T11:25:04"
   },
   {
+    "address": "97V7JsExNC6yFWu5KjK1FLfVkNVvtMpAFL5QkLWKEGxY",
+    "name": "provenance-io/hastra-sol-vault",
+    "repoUrl": "https://github.com/provenance-io/hastra-sol-vault/tree/121e4cc600b976a97faa018359e00bda48113ec2",
+    "verifiedAt": "2026-08-12T20:23:57"
+  },
+  {
     "address": "9cstDz8WWRAFaq1vVpTjfHz6tjgh6SJaqYFeZWi1pFHG",
     "name": "credential_signer",
     "repoUrl": "https://github.com/alien-id/solana-attestation-signer/tree/cf90359175ab92e4d9f7efcaf658f976082c7a3e",
@@ -556,6 +568,12 @@
     "name": "swap_router",
     "repoUrl": "https://github.com/topbit-io/topbit/tree/b488416bdb2b3880c4b2d8ba945adb808387a9ae",
     "verifiedAt": "2026-07-20T17:22:30"
+  },
+  {
+    "address": "9WUyNREiPDMgwMh5Gt81Fd3JpiCKxpjZ5Dpq9Bo1RhMV",
+    "name": "provenance-io/hastra-sol-vault",
+    "repoUrl": "https://github.com/provenance-io/hastra-sol-vault/tree/121e4cc600b976a97faa018359e00bda48113ec2",
+    "verifiedAt": "2026-08-12T20:20:27"
   },
   {
     "address": "9XiAk8AJVCWkypFstaRERag2DeKgtSergJR4PqTYeV9C",
@@ -718,6 +736,12 @@
     "name": "KamiFin/Dawae-LZ-Oapp",
     "repoUrl": "https://github.com/KamiFin/Dawae-LZ-Oapp/tree/01534aa2b64b65f276ddee3493b1d172d2c1f84e",
     "verifiedAt": "2025-02-27T14:45:22"
+  },
+  {
+    "address": "BQrR1sqG3HdMBtq5p2BRPz9qzyA42ZYCBcDXC3m6eVXY",
+    "name": "listedterminal/listed-router-solana",
+    "repoUrl": "https://github.com/listedterminal/listed-router-solana/tree/d5865cd669aaa925acb92e995455088bcffa3cc1",
+    "verifiedAt": "2026-08-13T07:43:06"
   },
   {
     "address": "BRoueHsu3h2SfEse9ohXipm1R9uRGRSe3zPYsAT8RySr",
@@ -1248,6 +1272,12 @@
     "verifiedAt": "2026-01-07T09:23:22"
   },
   {
+    "address": "FtpEAgur3VALsDw91PfNre82eXVrtgiDNf9EG3JeBd2r",
+    "name": "provenance-io/hastra-sol-vault",
+    "repoUrl": "https://github.com/provenance-io/hastra-sol-vault/tree/121e4cc600b976a97faa018359e00bda48113ec2",
+    "verifiedAt": "2026-08-12T20:52:17"
+  },
+  {
     "address": "FTUi8srvZA5Gng8sfiDFsdN352ydQPnUABWvVqp5qGqF",
     "name": "TREEINCAT/tree-vs-cat-smart-contract",
     "repoUrl": "https://github.com/TREEINCAT/tree-vs-cat-smart-contract/tree/c610de042da3607cc524bea102104ea698718174",
@@ -1404,6 +1434,12 @@
     "verifiedAt": "2024-10-01T10:58:14"
   },
   {
+    "address": "GsVBvFRcBCNUudsABSjBFCs8YzkmNFbnWU39CGouQcFS",
+    "name": "AnsemStrategyio/ansemstr-flywheel",
+    "repoUrl": "https://github.com/AnsemStrategyio/ansemstr-flywheel/tree/3562e02dd7ca8018002d55be6b4600e842e46e9e",
+    "verifiedAt": "2026-08-13T05:22:47"
+  },
+  {
     "address": "Gt1duB4bPj2CmW9y7eiGzekeCfiR1UckjiyPGSbyWRVU",
     "name": "koshak01/tidex6",
     "repoUrl": "https://github.com/koshak01/tidex6/tree/2965920f690e4695c24c6fc84bd31315a7cd967d",
@@ -1450,6 +1486,12 @@
     "name": "wanesurf/meanwhile-treasury",
     "repoUrl": "https://github.com/wanesurf/meanwhile-treasury/tree/823633e8f4106aee54af8f1c3b62def13343138d",
     "verifiedAt": "2026-07-11T07:34:43"
+  },
+  {
+    "address": "H2Ju7e1tvDf7Wmn8wQ1t3Ch4Yi8WZtTd9q1F1MxJX6qj",
+    "name": "Curved-labs/beacon",
+    "repoUrl": "https://github.com/Curved-labs/beacon/tree/f49b29783adf068ee4df7c02a6b952ff1eeb2693",
+    "verifiedAt": "2026-08-13T07:01:06"
   },
   {
     "address": "H59K28q5kyteWfAGqt34pwkduNwntcambE75tXVp3nZF",
@@ -1592,8 +1634,8 @@
   {
     "address": "KLend2g3cP87fffoy8q1mQqGKjrxjC8boSyAYavgmjD",
     "name": "kamino_lending",
-    "repoUrl": "https://github.com/Kamino-Finance/klend/tree/37592174054e3aa669a7fe6db6272d4be82b2268",
-    "verifiedAt": "2026-05-28T13:02:12"
+    "repoUrl": "https://github.com/Kamino-Finance/klend/tree/67bd6dc7cffd33b789717b75d2c8297ca483758c",
+    "verifiedAt": "2026-08-12T16:17:09"
   },
   {
     "address": "KvauGMspG5k6rtzrqqn7WNn3oZdyKqLKwK2XWQ8FLjd",
@@ -1952,8 +1994,8 @@
   {
     "address": "oreV3EG1i9BEgiAJ8b177Z2S2rMarzak4NMv1kULvWv",
     "name": "regolith-labs/ore",
-    "repoUrl": "https://github.com/regolith-labs/ore/tree/7e9be7a8a9d8be433825e37af5a55ae4ef6819cd",
-    "verifiedAt": "2026-08-03T17:07:13"
+    "repoUrl": "https://github.com/regolith-labs/ore/tree/e8e5b3b3b939c37e0581418af8a533c9df384c92",
+    "verifiedAt": "2026-08-13T01:25:46"
   },
   {
     "address": "paxosVkYuJBKUQoZGAidRA47Qt4uidqG5fAt5kmr1nR",
