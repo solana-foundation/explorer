@@ -289,9 +289,6 @@ describe('DataPayloadSection', () => {
         // uncompressed, so the two happen to match, but the number reported is the decoded one.
         expect(oversized).toHaveTextContent('2048 bytes');
         expect(screen.queryByTestId('pmp-decoded-text')).not.toBeInTheDocument();
-        // The panel carries its OWN copy/download over the decompressed bytes. The sibling Raw tab is not a
-        // substitute: that one serves the on-chain payload, so for a compressed document it would hand back the
-        // compressed bytes. Without this the Alert's "Copy or download it instead" would point at nothing.
         expect(oversized).toHaveTextContent(/use download\/copy/i);
         expect(screen.getByLabelText('Download')).toBeInTheDocument();
     });

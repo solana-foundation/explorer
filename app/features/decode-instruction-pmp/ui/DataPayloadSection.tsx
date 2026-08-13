@@ -314,7 +314,7 @@ function DecodedBody({
             <div className="flex flex-col gap-3" data-testid="pmp-payload-oversized">
                 <Alert variant="warning" className="!mb-0 whitespace-pre-wrap">
                     Payload too large to render ({describeSize(decoded.bytes.length, stored, compression)}, limit{' '}
-                    {decoded.budget}). Copy or download it instead.
+                    {decoded.budget}).
                 </Alert>
                 <RawDataField
                     data={decoded.bytes}
