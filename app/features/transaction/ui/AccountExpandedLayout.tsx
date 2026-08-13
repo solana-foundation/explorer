@@ -18,8 +18,8 @@ export function DetailRow({ children, className, label }: DetailRowProps) {
     return (
         <div
             className={cn(
-                'grid grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2 py-1.5',
-                flat ? 'px-4' : 'pr-3 md:pr-4',
+                'grid grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2',
+                flat && 'px-4',
                 className,
             )}
         >

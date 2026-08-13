@@ -23,7 +23,7 @@ const twVariantOptions = [
 
 type TwVariant = (typeof twVariantOptions)[number];
 
-const sizeOptions = ['default', 'sm', 'lg', 'icon', 'compact'] as const satisfies readonly ButtonSize[];
+const sizeOptions = ['default', 'sm', 'lg', 'icon', 'compact', 'tile'] as const satisfies readonly ButtonSize[];
 
 // Dashkit migration shim — emits raw Bootstrap `.btn` + `.btn-<variant>` classes via `ui="dashkit"`.
 // Stays until consumers migrate to the OKLCH-flavored `ui="tw"` surface.
@@ -95,8 +95,15 @@ export const AllSizes: Story = {
     render: () => (
         <div className="flex items-center gap-4">
             {sizeOptions.map(size => (
-                <Button key={size} size={size}>
-                    {size === 'icon' ? <Check /> : `Size ${size}`}
+                <Button key={size} size={size} className={size === 'tile' ? 'w-20' : undefined}>
+                    {size === 'icon' && <Check />}
+                    {size === 'tile' && (
+                        <>
+                            <Check />
+                            Tile
+                        </>
+                    )}
+                    {size !== 'icon' && size !== 'tile' && `Size ${size}`}
                 </Button>
             ))}
         </div>
@@ -175,6 +182,7 @@ export const VariantsBySize: Story = {
             icon: 'Icon',
             lg: 'Large',
             sm: 'Small',
+            tile: 'Tile',
         };
 
         return (
@@ -186,8 +194,20 @@ export const VariantsBySize: Story = {
                             {twVariantOptions.map(variant => {
                                 const Icon = twVariantIcons[variant];
                                 return (
-                                    <Button key={variant} size={size} variant={variant}>
-                                        {size === 'icon' ? <Icon /> : variant}
+                                    <Button
+                                        key={variant}
+                                        size={size}
+                                        variant={variant}
+                                        className={size === 'tile' ? 'w-24' : undefined}
+                                    >
+                                        {size === 'icon' && <Icon />}
+                                        {size === 'tile' && (
+                                            <>
+                                                <Icon />
+                                                {variant}
+                                            </>
+                                        )}
+                                        {size !== 'icon' && size !== 'tile' && variant}
                                     </Button>
                                 );
                             })}

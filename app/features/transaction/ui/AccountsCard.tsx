@@ -21,6 +21,13 @@ import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { AccountBadges } from './AccountBadges';
 import { AccountDetailSlideover } from './AccountDetailSlideover';
 import { AccountExpandedContent } from './AccountExpandedContent';
+import {
+    CELL_PADDING,
+    CONTENT_COL_SPAN,
+    DESKTOP_GRID_TEMPLATE,
+    GRID_GAP_X,
+    MOBILE_GRID_TEMPLATE,
+} from './accountsTableGrid';
 
 type TransactionAccountRowProps = {
     account: ParsedMessageAccount;
@@ -71,9 +78,12 @@ function TransactionAccountRow({
                 {/* Main row */}
                 <div
                     className={cn(
-                        'min-h-9 px-3 py-2.5 md:px-4',
-                        'grid items-start gap-x-0 gap-y-0.5 whitespace-nowrap text-sm md:gap-y-0 lg:gap-x-5 landscape:gap-x-5',
-                        'grid-cols-[minmax(auto,1.75rem)_minmax(100px,auto)_1fr] sm:grid-cols-[minmax(auto,1.75rem)_1fr_auto] lg:grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_1.5rem] landscape:grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_1.5rem]',
+                        'min-h-9',
+                        CELL_PADDING,
+                        'grid items-start gap-y-0.5 whitespace-nowrap text-sm md:gap-y-0',
+                        GRID_GAP_X,
+                        MOBILE_GRID_TEMPLATE,
+                        DESKTOP_GRID_TEMPLATE,
                         "[grid-template-areas:'number_address_delta'_'number_address_balance'_'number_address_size'] lg:[grid-template-areas:'number_address_delta_balance_expand'] landscape:[grid-template-areas:'number_address_delta_balance_expand']",
                         'cursor-pointer',
                     )}
@@ -94,7 +104,7 @@ function TransactionAccountRow({
                             </div>
                         </div>
                         {hasBadges && (
-                            <span className="mt-1 inline-flex flex-wrap gap-1">
+                            <span className="mb-0.5 mt-1 inline-flex flex-wrap gap-1">
                                 <AccountBadges index={index} message={message} pubkey={pubkey} account={account} />
                             </span>
                         )}
@@ -111,7 +121,7 @@ function TransactionAccountRow({
                         <Button
                             aria-expanded={expanded}
                             aria-label={expanded ? 'Collapse account details' : 'Expand account details'}
-                            className="!h-5 w-6"
+                            className="!h-5 !w-5 [&_svg]:size-4"
                             onClick={e => {
                                 e.stopPropagation();
                                 setExpanded(v => !v);
@@ -123,7 +133,7 @@ function TransactionAccountRow({
                                 size={16}
                                 className={cn(
                                     'text-outer-space-300 transition-transform duration-200 ease-in-out',
-                                    expanded ? 'rotate-0' : 'rotate-90',
+                                    expanded ? 'rotate-180' : 'rotate-0',
                                 )}
                             />
                         </Button>
@@ -212,8 +222,11 @@ export function AccountsCard({ signature }: SignatureProps) {
         <CollapsibleSection id="accounts" title="Accounts &amp; SOL balance">
             <div
                 className={cn(
-                    'hidden px-3 py-1.5 md:px-4 lg:grid landscape:grid',
-                    'grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)_2rem] gap-5 text-xs uppercase text-outer-space-300',
+                    'hidden lg:grid landscape:grid',
+                    CELL_PADDING,
+                    DESKTOP_GRID_TEMPLATE,
+                    GRID_GAP_X,
+                    'text-xs uppercase text-outer-space-300',
                     'border-1 border-b border-white/10 [border-bottom-style:solid]',
                 )}
             >
@@ -225,12 +238,24 @@ export function AccountsCard({ signature }: SignatureProps) {
             </div>
             {accountRows}
             {!loading && totalAccountSize > 0 && (
-                <div className="ml-7 flex items-baseline gap-2 px-3 py-2 text-sm text-outer-space-300 md:px-4 lg:ml-10">
-                    <div className="flex flex-col">
-                        <span className="text-sm uppercase leading-none">Total Account Size:</span>
-                        <span className="text-[10px] leading-none">reflects current state</span>
+                <div
+                    className={cn(
+                        'grid items-start px-3 py-3 text-sm text-outer-space-300',
+                        GRID_GAP_X,
+                        MOBILE_GRID_TEMPLATE,
+                        DESKTOP_GRID_TEMPLATE,
+                    )}
+                >
+                    <div className="mr-2 text-outer-space-300 lg:mr-0" />
+                    <div className={cn('flex flex-col', CONTENT_COL_SPAN)}>
+                        <div className="flex items-baseline gap-2">
+                            <span>Total Account Size:</span>
+                            <span className="text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
+                        </div>
+                        <span className="text-xs">
+                            Current data. This data may have been different at the time of the transaction.
+                        </span>
                     </div>
-                    <span className="text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
                 </div>
             )}
         </CollapsibleSection>

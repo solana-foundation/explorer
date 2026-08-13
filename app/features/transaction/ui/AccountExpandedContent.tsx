@@ -12,6 +12,7 @@ import { Code, Info } from 'react-feather';
 
 import { DetailRow, FlatContext } from './AccountExpandedLayout';
 import { ParsedSection } from './AccountExpandedSections';
+import { CONTENT_COL_SPAN, DESKTOP_GRID_TEMPLATE, GRID_GAP_X, MOBILE_GRID_TEMPLATE } from './accountsTableGrid';
 
 type InnerProps = {
     accountInfo?: AccountInfo;
@@ -26,7 +27,7 @@ export function AccountExpandedContentInner({ accountInfo, accountInfoLoading, a
         accountInfo && accountInfo.size > 0 ? (
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="ghost" className="h-auto !p-0 !text-sm">
+                    <Button variant="ghost" className="h-auto !items-baseline !p-0 !text-sm">
                         <Code size={11} />
                         <span>{accountInfo.size.toLocaleString('en-US')} byte(s)</span>
                     </Button>
@@ -40,25 +41,37 @@ export function AccountExpandedContentInner({ accountInfo, accountInfoLoading, a
         );
 
     return (
-        <div className={cn(flat ? 'pb-2.5' : 'ml-14 pb-10')}>
-            {data.data.parsed && <ParsedSection parsed={data.data.parsed} />}
-            <DetailRow label="Assigned Program Id">
-                <Address pubkey={data.owner} link />
-            </DetailRow>
-            <DetailRow label="Allocated Data Size">{dataSizeCell}</DetailRow>
-            <DetailRow label="Executable">{data.executable ? 'Yes' : 'No'}</DetailRow>
-            <DetailRow label="Balance">
-                <SolBalance lamports={data.lamports} />
-            </DetailRow>
+        <div
+            className={cn(
+                'pt-1',
+                flat
+                    ? 'pb-2.5'
+                    : cn('grid items-start px-3 pb-8', GRID_GAP_X, MOBILE_GRID_TEMPLATE, DESKTOP_GRID_TEMPLATE),
+            )}
+        >
+            {!flat && <div />}
+            <div className={cn(!flat && CONTENT_COL_SPAN)}>
+                <div className="flex flex-col gap-1.5">
+                    {data.data.parsed && <ParsedSection parsed={data.data.parsed} />}
+                    <DetailRow label="Assigned Program Id">
+                        <Address pubkey={data.owner} link />
+                    </DetailRow>
+                    <DetailRow label="Allocated Data Size">{dataSizeCell}</DetailRow>
+                    <DetailRow label="Executable">{data.executable ? 'Yes' : 'No'}</DetailRow>
+                    <DetailRow label="Balance">
+                        <SolBalance lamports={data.lamports} />
+                    </DetailRow>
+                </div>
 
-            <div
-                className={cn(
-                    'mt-3 flex items-center gap-1.5 text-xs text-outer-space-300',
-                    flat && '!items-start px-4',
-                )}
-            >
-                <Info size={13} />
-                <span>Current account data. This data may have been different at the time of the transaction.</span>
+                <div
+                    className={cn(
+                        'mt-4 flex items-center gap-1.5 text-xs text-outer-space-300',
+                        flat && '!items-start px-4',
+                    )}
+                >
+                    <Info size={16} className="shrink-0" />
+                    <span>Current account data. This data may have been different at the time of the transaction.</span>
+                </div>
             </div>
         </div>
     );
@@ -77,27 +90,50 @@ export function AccountExpandedContent({ accountInfo, accountInfoLoading, addres
 
     if (enabled && isLoading) {
         return (
-            <div className={cn(flat ? 'pb-2.5' : 'ml-14 pb-2.5')}>
-                {[120, 160, 100, 80].map((w, i) => (
-                    <div
-                        key={i}
-                        className={cn(
-                            'grid grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2 py-1.5',
-                            flat ? 'px-4' : 'pr-3 md:pr-4',
-                        )}
-                    >
-                        <Skeleton className="h-3.5 w-24" />
-                        <Skeleton className="h-3.5" style={{ width: w }} />
+            <div
+                className={cn(
+                    'pt-1',
+                    flat
+                        ? 'pb-2.5'
+                        : cn('grid items-start px-3 pb-8', GRID_GAP_X, MOBILE_GRID_TEMPLATE, DESKTOP_GRID_TEMPLATE),
+                )}
+            >
+                {!flat && <div />}
+                <div className={cn(!flat && CONTENT_COL_SPAN)}>
+                    <div className="flex flex-col gap-1.5">
+                        {[120, 160, 100, 80].map((w, i) => (
+                            <div
+                                key={i}
+                                className={cn(
+                                    'grid grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2 py-0.5',
+                                    flat && 'px-4',
+                                )}
+                            >
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-4" style={{ width: w }} />
+                            </div>
+                        ))}
                     </div>
-                ))}
+                    <div className={cn('mt-4 flex items-center gap-1.5 py-0.5', flat && '!items-start px-4')}>
+                        <Skeleton className="h-3" style={{ width: 460 }} />
+                    </div>
+                </div>
             </div>
         );
     }
 
     if (enabled && isError) {
         return (
-            <div className={cn(flat ? 'px-4 py-3' : 'ml-10 px-3 py-3 md:px-4', 'text-sm text-outer-space-300')}>
-                Failed to load account info
+            <div
+                className={cn(
+                    'py-3 text-sm text-outer-space-300',
+                    flat
+                        ? 'px-4'
+                        : cn('grid items-start px-3', GRID_GAP_X, MOBILE_GRID_TEMPLATE, DESKTOP_GRID_TEMPLATE),
+                )}
+            >
+                {!flat && <div />}
+                <div className={cn(!flat && CONTENT_COL_SPAN)}>Failed to load account info</div>
             </div>
         );
     }

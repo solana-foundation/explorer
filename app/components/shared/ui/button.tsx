@@ -15,20 +15,24 @@ const buttonVariants = cva([], {
         {
             class: cn(
                 'border-solid',
-                'inline-flex items-center justify-center gap-2',
-                'whitespace-nowrap rounded text-sm font-medium',
+                'inline-flex items-center justify-center',
+                'whitespace-nowrap text-sm font-medium',
                 'transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent focus-visible:ring-neutral-950',
                 'disabled:pointer-events-none disabled:opacity-50',
-                '[&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0',
+                '[&_svg]:pointer-events-none [&_svg]:shrink-0',
             ),
             ui: 'tw',
         },
-        { class: 'h-6 px-2 !text-[11px] !font-normal', size: 'compact', ui: 'tw' },
-        { class: 'h-9 px-2 text-xs', size: 'default', ui: 'tw' },
-        { class: 'h-7 w-7', size: 'icon', ui: 'tw' },
-        { class: 'h-10 px-8', size: 'lg', ui: 'tw' },
-        { class: 'h-7 px-2 text-xs', size: 'sm', ui: 'tw' },
+        // gap/rounding/svg sizing live on the size compounds (not the shared base) so a size
+        // can redefine them without fighting stylesheet order — cn() here does not dedupe.
+        { class: 'h-6 gap-2 rounded px-2 !text-[11px] !font-normal [&_svg]:size-3', size: 'compact', ui: 'tw' },
+        { class: 'h-9 gap-2 rounded px-2 text-xs [&_svg]:size-3', size: 'default', ui: 'tw' },
+        { class: 'h-7 w-7 gap-2 rounded [&_svg]:size-3', size: 'icon', ui: 'tw' },
+        { class: 'h-10 gap-2 rounded px-8 [&_svg]:size-3', size: 'lg', ui: 'tw' },
+        { class: 'h-7 gap-2 rounded px-2 text-xs [&_svg]:size-3', size: 'sm', ui: 'tw' },
+        // Tall icon-over-label action tile (e.g. slideover footer actions).
+        { class: 'h-16 flex-col gap-1 rounded-lg px-2 text-xs [&_svg]:size-4', size: 'tile', ui: 'tw' },
         { class: 'border-0 bg-accent text-gray-900 hover:bg-accent/90', ui: 'tw', variant: 'accent' },
         {
             class: 'border border-outer-space-800 bg-outer-space-900 text-neutral-200 rounded-sm leading-none tracking-[-0.44px]',
@@ -151,7 +155,7 @@ const buttonVariants = cva([], {
     },
     variants: {
         active: { false: '', true: '' },
-        size: { compact: '', default: '', icon: '', lg: '', sm: '' },
+        size: { compact: '', default: '', icon: '', lg: '', sm: '', tile: '' },
         ui: { dashkit: '', tw: '' },
         variant: {
             accent: '',

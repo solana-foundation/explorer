@@ -12,27 +12,27 @@ export function AccountBadges({ account, index, pubkey, message }: Props) {
     return (
         <>
             {index === 0 && (
-                <Badge ui="dashkit" variant="success" className="me-1">
+                <Badge ui="dashkit" variant="success">
                     Fee Payer
                 </Badge>
             )}
             {account.signer && (
-                <Badge ui="dashkit" variant="info" className="me-1">
+                <Badge ui="dashkit" variant="info">
                     Signer
                 </Badge>
             )}
             {account.writable && (
-                <Badge ui="dashkit" variant="danger" className="me-1">
+                <Badge ui="dashkit" variant="danger">
                     Writable
                 </Badge>
             )}
             {message.instructions.find(ix => ix.programId.equals(pubkey)) && (
-                <Badge ui="dashkit" variant="warning" className="me-1">
+                <Badge ui="dashkit" variant="warning">
                     Program
                 </Badge>
             )}
             {account.source === 'lookupTable' && (
-                <Badge ui="dashkit" variant="gray" className="me-1">
+                <Badge ui="dashkit" variant="gray">
                     Address Table Lookup
                 </Badge>
             )}
