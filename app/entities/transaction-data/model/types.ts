@@ -1,16 +1,10 @@
+import type { TransactionVersion } from '@solana/kit';
 import type {
     CompiledInnerInstruction,
     ParsedTransactionWithMeta,
     TransactionMessage,
     VersionedMessage,
 } from '@solana/web3.js';
-
-/**
- * Transaction message versions Explorer can render.
- *
- * web3.js stops at v0, so its `TransactionVersion` cannot describe a v1 transaction.
- */
-export type TransactionVersion = 'legacy' | 0 | 1;
 
 /**
  * Message-level resource limits carried by a v1 transaction.
@@ -31,10 +25,21 @@ export type TransactionConfig = {
  * A parsed transaction in the shape the transaction detail page consumes.
  *
  * Matches web3.js `ParsedTransactionWithMeta` so existing consumers are unaffected, with the
- * version widened to cover v1 and the v1 resource limits attached.
+ * version widened to cover v1, which web3.js `TransactionVersion` cannot describe.
  */
 export type TransactionWithMeta = Omit<ParsedTransactionWithMeta, 'version'> & {
     version?: TransactionVersion;
+};
+
+type RawTransactionBase = {
+    messageBytes: Uint8Array;
+    meta?: {
+        innerInstructions?: CompiledInnerInstruction[];
+        postBalances: number[];
+        preBalances: number[];
+    };
+    /** Base58-encoded in signer order; a signer slot that has not been signed is `undefined`. */
+    signatures: (string | undefined)[];
     /** Present only on v1 transactions that set at least one resource limit. */
     transactionConfig?: TransactionConfig;
 };
@@ -42,19 +47,12 @@ export type TransactionWithMeta = Omit<ParsedTransactionWithMeta, 'version'> & {
 /**
  * A transaction's wire bytes and the parts of its metadata the inspector needs.
  *
- * `message` and `transaction` are the web3.js views of the bytes and are absent on v1, whose
- * message web3.js cannot represent. `messageBytes` is always present, so anything that only
- * needs the bytes — the download button — works on every version.
+ * `message` and `transaction` are the web3.js views of the bytes, which web3.js can only build for
+ * legacy and v0. `messageBytes` is always present, so anything that only needs the bytes — the
+ * download button — works on every version.
  */
-export type RawTransaction = {
-    message?: VersionedMessage;
-    messageBytes: Uint8Array;
-    meta?: {
-        innerInstructions?: CompiledInnerInstruction[];
-        postBalances: number[];
-        preBalances: number[];
-    };
-    signatures: string[];
-    transaction?: TransactionMessage;
-    version: TransactionVersion;
-};
+export type RawTransaction = RawTransactionBase &
+    (
+        | { version: 'legacy' | 0; message: VersionedMessage; transaction: TransactionMessage }
+        | { version: 1; message?: undefined; transaction?: undefined }
+    );

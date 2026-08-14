@@ -23,7 +23,7 @@ The kit response SHALL be adapted into the web3.js-shaped `ParsedTransactionWith
 
 ### Requirement: v1 resource limits SHALL be decoded from the wire bytes and rendered distinctly
 
-v1 carries its compute unit limit, heap size, loaded accounts data size limit and total priority fee in a message-level config rather than in Compute Budget instructions. The RPC's `jsonParsed` encoding does not surface that config, so it SHALL be recovered by decoding the `base64` wire bytes with kit's compiled-message decoder. This second request SHALL be issued only for v1.
+v1 carries its compute unit limit, heap size, loaded accounts data size limit and total priority fee in a message-level config rather than in Compute Budget instructions. The RPC's `jsonParsed` encoding does not surface that config, so it SHALL be recovered by decoding the `base64` wire bytes with kit's compiled-message decoder. Those bytes are the ones the raw transaction fetch already retrieves for the download action and the inspector, so reading the config SHALL NOT cost an additional request.
 
 The priority fee SHALL be labelled as a total amount so it is not read as v0's per-compute-unit price in micro-lamports. The compute unit limit shown for a v1 transaction SHALL come from the config rather than from a scan of Compute Budget instructions, which v1 does not carry.
 
@@ -41,7 +41,7 @@ The priority fee SHALL be labelled as a total amount so it is not read as v0's p
 #### Scenario: Non-v1 transaction
 
 - **WHEN** the transaction is legacy or v0
-- **THEN** no second request SHALL be issued and the compute unit limit SHALL continue to be derived from its Compute Budget instructions
+- **THEN** no config SHALL be reported and the compute unit limit SHALL continue to be derived from its Compute Budget instructions
 
 ### Requirement: Raw transaction bytes SHALL be retained verbatim, and the inspector SHALL refuse versions it cannot render
 

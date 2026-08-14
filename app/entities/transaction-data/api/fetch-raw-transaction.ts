@@ -2,9 +2,11 @@ import { createSolanaRpc, signature as createSignature } from '@solana/kit';
 import { type DecompileArgs, type Finality, PublicKey, TransactionMessage, VersionedMessage } from '@solana/web3.js';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
+import { Logger } from '@/app/shared/lib/logger';
 
-import { decodeWireTransaction } from '../lib/decode-wire-transaction';
-import type { RawTransaction, TransactionVersion } from '../model/types';
+import { decodeTransactionConfig } from '../lib/decode-transaction-config';
+import { decodeWireTransaction, type WireTransaction } from '../lib/decode-wire-transaction';
+import type { RawTransaction, TransactionConfig } from '../model/types';
 import { MAX_SUPPORTED_TRANSACTION_VERSION } from './max-supported-transaction-version';
 
 /**
@@ -36,10 +38,9 @@ export async function fetchRawTransaction(
 
     const [base64Transaction] = response.transaction;
     const { compiledMessage, messageBytes, signatures } = decodeWireTransaction(fromBase64(base64Transaction));
-    const version = compiledMessage.version as TransactionVersion;
     const meta = response.meta;
 
-    return {
+    const base = {
         messageBytes,
         meta: meta
             ? {
@@ -57,9 +58,32 @@ export async function fetchRawTransaction(
               }
             : undefined,
         signatures,
-        version,
-        ...(version === 1 ? undefined : decodeWithWeb3(messageBytes, meta?.loadedAddresses)),
+        transactionConfig: readTransactionConfig(compiledMessage, signature),
     };
+
+    if (compiledMessage.version === 1) {
+        return { ...base, version: 1 };
+    }
+
+    return {
+        ...base,
+        ...decodeWithWeb3(messageBytes, meta?.loadedAddresses),
+        version: compiledMessage.version,
+    };
+}
+
+// The resource-limit rows are supplemental; the wire bytes still render, download, and inspect
+// without them.
+function readTransactionConfig(
+    compiledMessage: WireTransaction['compiledMessage'],
+    signature: string,
+): TransactionConfig | undefined {
+    try {
+        return decodeTransactionConfig(compiledMessage);
+    } catch (error) {
+        Logger.error(error, { module: '[transaction-data]', signature });
+        return undefined;
+    }
 }
 
 type RpcLoadedAddresses = Readonly<{ readonly: readonly string[]; writable: readonly string[] }>;
@@ -67,7 +91,7 @@ type RpcLoadedAddresses = Readonly<{ readonly: readonly string[]; writable: read
 function decodeWithWeb3(
     messageBytes: Uint8Array,
     loadedAddresses: RpcLoadedAddresses | undefined,
-): Pick<RawTransaction, 'message' | 'transaction'> {
+): { message: VersionedMessage; transaction: TransactionMessage } {
     const message = VersionedMessage.deserialize(messageBytes);
     const accountKeysFromLookups = loadedAddresses && {
         readonly: loadedAddresses.readonly.map(address => new PublicKey(address)),

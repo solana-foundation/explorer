@@ -1,3 +1,4 @@
+import type { TransactionVersion } from '@solana/kit';
 import {
     type ParsedInstruction,
     type ParsedMessageAccount,
@@ -7,7 +8,7 @@ import {
     type TransactionError,
 } from '@solana/web3.js';
 
-import type { TransactionVersion, TransactionWithMeta } from '../model/types';
+import type { TransactionWithMeta } from '../model/types';
 
 type RpcAccountKey = Readonly<{
     pubkey: string;

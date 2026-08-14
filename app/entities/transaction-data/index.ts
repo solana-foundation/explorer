@@ -13,4 +13,4 @@ export {
     type InstructionSummary,
 } from './lib/instruction-summary';
 export { mergeTransactionMap } from './lib/merge-transaction-map';
-export type { RawTransaction, TransactionConfig, TransactionVersion, TransactionWithMeta } from './model/types';
+export type { RawTransaction, TransactionConfig, TransactionWithMeta } from './model/types';

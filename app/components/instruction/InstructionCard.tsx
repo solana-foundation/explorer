@@ -1,4 +1,5 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
+import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React, { useCallback, useContext } from 'react';
@@ -47,8 +48,11 @@ export function InstructionCard({
     const fetchRaw = useFetchRawTransaction();
     const fetchRawTrigger = useCallback(() => fetchRaw(signature), [signature, fetchRaw]);
 
-    // Only allow fetching raw data if we have a valid signature (not in inspector mode)
-    const canFetchRaw = signature && !raw;
+    // Only allow fetching raw data if we have a valid signature (not in inspector mode), and only
+    // while a fetch could still produce it: a v1 transaction has no web3.js instruction view, so
+    // once its raw data has arrived, asking again would refetch on every open of the Raw view.
+    const rawUnavailable = rawDetails?.status === FetchStatus.Fetched && raw === undefined;
+    const canFetchRaw = signature && !raw && !rawUnavailable;
 
     return (
         <BaseInstructionCard

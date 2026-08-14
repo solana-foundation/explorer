@@ -1,63 +1,9 @@
-import {
-    appendTransactionMessageInstruction,
-    type Blockhash,
-    compileTransaction,
-    createTransactionMessage,
-    getAddressDecoder,
-    getCompiledTransactionMessageDecoder,
-    getTransactionEncoder,
-    pipe,
-    setTransactionMessageComputeUnitLimit,
-    setTransactionMessageFeePayer,
-    setTransactionMessageHeapSize,
-    setTransactionMessageLifetimeUsingBlockhash,
-    setTransactionMessageLoadedAccountsDataSizeLimit,
-    setTransactionMessagePriorityFeeLamports,
-} from '@solana/kit';
-import { PublicKey, SystemProgram, TransactionMessage } from '@solana/web3.js';
+import { getCompiledTransactionMessageDecoder } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
+import { createV1TransactionBytes, createWeb3TransactionMessage } from '../../__fixtures__/wire-transactions';
 import { decodeTransactionConfig } from '../decode-transaction-config';
 import { decodeWireTransaction } from '../decode-wire-transaction';
-
-const testAddress = (seed: number) => getAddressDecoder().decode(new Uint8Array(32).fill(seed));
-
-const FEE_PAYER = testAddress(1);
-const RECIPIENT = testAddress(2);
-const PROGRAM = testAddress(3);
-const BLOCKHASH = testAddress(9) as string as Blockhash;
-
-type ConfigOverrides = {
-    computeUnitLimit?: number;
-    heapSize?: number;
-    loadedAccountsDataSizeLimit?: number;
-    priorityFeeLamports?: bigint;
-};
-
-function createV1TransactionBytes(config: ConfigOverrides): Uint8Array {
-    const message = pipe(
-        // @ts-expect-error `createTransactionMessage` constrains its version parameter to
-        // `Exclude<TransactionVersion, 1>`. The runtime path is complete, so v1 messages compile and
-        // encode correctly; only the type gate is missing. Remove once kit lifts the exclusion.
-        createTransactionMessage({ version: 1 }),
-        m => setTransactionMessageFeePayer(FEE_PAYER, m),
-        m => setTransactionMessageLifetimeUsingBlockhash({ blockhash: BLOCKHASH, lastValidBlockHeight: 100n }, m),
-        m =>
-            appendTransactionMessageInstruction(
-                { accounts: [{ address: RECIPIENT, role: 1 }], data: new Uint8Array([1]), programAddress: PROGRAM },
-                m,
-            ),
-        // Every setter treats `undefined` as "leave unset", so omitted limits need no branching.
-        m => setTransactionMessageComputeUnitLimit(config.computeUnitLimit, m),
-        m => setTransactionMessageHeapSize(config.heapSize, m),
-        m => setTransactionMessageLoadedAccountsDataSizeLimit(config.loadedAccountsDataSizeLimit, m),
-        // The cast is needed only because the `@ts-expect-error` above leaves the message typed as
-        // `legacy | 0`; this setter is constrained to `{ version: 1 }`.
-        m => setTransactionMessagePriorityFeeLamports(config.priorityFeeLamports, m as typeof m & { version: 1 }),
-    );
-
-    return new Uint8Array(getTransactionEncoder().encode(compileTransaction(message)));
-}
 
 function decodeConfigFromWire(bytes: Uint8Array) {
     return decodeTransactionConfig(decodeWireTransaction(bytes).compiledMessage);
@@ -96,23 +42,11 @@ describe('decodeTransactionConfig', () => {
     });
 
     it.each([
-        ['legacy', (message: TransactionMessage) => message.compileToLegacyMessage()],
-        ['v0', (message: TransactionMessage) => message.compileToV0Message()],
+        ['legacy', (message: ReturnType<typeof createWeb3TransactionMessage>) => message.compileToLegacyMessage()],
+        ['v0', (message: ReturnType<typeof createWeb3TransactionMessage>) => message.compileToV0Message()],
     ])('should return undefined for a %s message, which carries no config', (_name, compile) => {
         const compiledMessage = getCompiledTransactionMessageDecoder().decode(
-            compile(
-                new TransactionMessage({
-                    instructions: [
-                        SystemProgram.transfer({
-                            fromPubkey: new PublicKey(FEE_PAYER),
-                            lamports: 1n,
-                            toPubkey: new PublicKey(RECIPIENT),
-                        }),
-                    ],
-                    payerKey: new PublicKey(FEE_PAYER),
-                    recentBlockhash: PublicKey.default.toBase58(),
-                }),
-            ).serialize(),
+            compile(createWeb3TransactionMessage()).serialize(),
         );
 
         expect(decodeTransactionConfig(compiledMessage)).toBeUndefined();
@@ -130,5 +64,11 @@ describe('decodeWireTransaction', () => {
         // v1 puts the message first in the envelope, followed by the signature array.
         expect(messageBytes.length).toBeLessThan(bytes.length);
         expect(bytes.subarray(0, messageBytes.length)).toEqual(messageBytes);
+    });
+
+    it('should leave an unsigned signer slot undefined rather than reporting a zero signature', () => {
+        const { signatures } = decodeWireTransaction(createV1TransactionBytes({}));
+
+        expect(signatures).toEqual([undefined]);
     });
 });

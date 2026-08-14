@@ -27,21 +27,21 @@ Alternatives considered:
 - **Keep web3.js and hand-roll a v1 decoder.** Rejected: re-implements what kit already ships and tests.
 - **Upgrade kit to 7.x for `decodeTransactionFromRpcResponse`.** Rejected as unnecessary: 6.5.0's `getCompiledTransactionMessageDecoder` + `decompileTransactionMessage` do the same job, and a major bump is its own risk with its own change.
 
-A second decision: **where the v1 config comes from.** The RPC serves it under `message.transactionConfig`, but kit's RPC types do not model that field (not in 6.5.0, not in 7.0.0), so reading it there would mean a hand-written validator against an untyped field. Decoding the base64 wire bytes instead goes through kit's typed decoder and needs no validator of our own. It costs a second round trip, paid only by v1.
+A second decision: **where the v1 config comes from.** The RPC serves it under `message.transactionConfig`, but kit's RPC types do not model that field (not in 6.5.0, not in 7.0.0), so reading it there would mean a hand-written validator against an untyped field. Decoding the base64 wire bytes instead goes through kit's typed decoder and needs no validator of our own — and those bytes are already fetched for the download action and the inspector, so the config rides along on that response rather than costing a request of its own.
 
 A third: **the Inspect page is gated, not adapted.** Its cards are built on `VersionedMessage`/`MessageV0` throughout. Synthesizing a `MessageV0` from a v1 message would make them render, but `serialize()` would then emit v0 bytes — so the Download button would hand the user a transaction that is not the one on chain. An explicit "not yet supported" card is honest; wrong bytes are not.
 
 ## What Changes
 
 - **New entity layer** under `app/entities/transaction-data/`: kit-backed `fetchTransactionDetails` and `fetchRawTransaction`, an `adaptParsedTransaction` boundary, and `decodeWireTransaction` / `decodeTransactionConfig` for the v1 limits. `MAX_SUPPORTED_TRANSACTION_VERSION = 1` is defined once and used by both fetchers.
-- **Providers** `app/providers/transactions/{parsed,raw}.tsx` drop `Connection` for those fetchers. `Details.raw` gains `messageBytes` (the exact wire bytes) and `version`; its `message` and `transaction` become optional, populated for legacy and v0 only.
+- **Providers** `app/providers/transactions/{parsed,raw}.tsx` drop `Connection` for those fetchers. `Details.raw` gains `messageBytes` (the exact wire bytes), `version` and the decoded v1 `transactionConfig`; it is a union on `version`, so `message` and `transaction` are present for legacy and v0 and absent on v1.
 - **Download** reads `messageBytes` rather than re-serializing a parsed message, so it is byte-exact on every version.
 - **Summary card** renders the v1 limits, labels the priority fee `Priority fee (total)` to distinguish it from v0's per-compute-unit price, sources the compute unit limit from the config on v1 (the Compute Budget scan it used before finds nothing there), and shows versions as `legacy` / `v0` / `v1`.
-- **Version type widened** to `'legacy' | 0 | 1` in `TransactionWithMeta`. Functions that never read the version — the receipt model, CU profiling, `collectTransferInstructions` — widen to match; web3.js's narrower type stays assignable, so the server-side receipt path is unaffected.
+- **Version type widened** in `TransactionWithMeta` to kit's `TransactionVersion` (`'legacy' | 0 | 1`); web3.js's own version type caps at v0. Functions that never read the version — the receipt model, CU profiling, `collectTransferInstructions` — widen to match; web3.js's narrower type stays assignable, so the server-side receipt path is unaffected.
 
 ## Impact
 
 - **Behaviour change on existing transactions:** the version row now reads `v0` where it previously read `0`. Deliberate, so `v1` does not sit next to a bare `0`.
 - **Out of scope, still on `maxSupportedTransactionVersion: 0`:** the block page (`app/providers/block.tsx`), address history (`app/features/transaction-history/`), and the server-side receipt fetch (`app/features/receipt/api/get-tx.ts`). They omit v1 entries rather than erroring; each needs the same web3.js→kit move and is worth its own change.
-- **Accepted risk:** v1 costs one extra RPC round trip for the config. Legacy and v0 are unchanged at one call.
+- **No extra requests:** the detail page issues the same two calls it did before — one parsed, one raw — on every version.
 - **Nodes that predate v1** compare the requested ceiling against the versions they actually hold, so sending `1` to them is inert. Submitting v1 wire bytes to an Agave 3.x node is a different path (`app/features/idl/interactive-idl/`) and is untouched here.

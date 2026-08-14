@@ -1,12 +1,14 @@
+import { gen } from '@__fixtures__/gen';
+import { SystemProgram } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { adaptParsedTransaction, type RpcParsedTransaction } from '../adapt-parsed-transaction';
 
-const FEE_PAYER = '11111111111111111111111111111112';
-const RECIPIENT = '11111111111111111111111111111113';
-const SYSTEM_PROGRAM = '11111111111111111111111111111111';
-const MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-const BLOCKHASH = '9vHo1dQ6H2XZ1g6TbsbT1T1zuHz39qrkAPGe2f4tXU5V';
+const FEE_PAYER = gen.address(1);
+const RECIPIENT = gen.address(2);
+const SYSTEM_PROGRAM = SystemProgram.programId.toBase58();
+const MINT = gen.address(3);
+const BLOCKHASH = gen.blockhash();
 
 type RpcMeta = NonNullable<RpcParsedTransaction['meta']>;
 
@@ -23,7 +25,7 @@ function createMeta(overrides: Partial<RpcMeta> = {}): RpcMeta {
             },
         ],
         loadedAddresses: { readonly: [RECIPIENT], writable: [FEE_PAYER] },
-        logMessages: ['Program 11111111111111111111111111111111 invoke [1]'],
+        logMessages: [`Program ${SYSTEM_PROGRAM} invoke [1]`],
         postBalances: [900_000_000n, 100_000_000n],
         postTokenBalances: [
             {
@@ -65,7 +67,7 @@ function createResponse(overrides: Partial<RpcParsedTransaction> = {}): RpcParse
                 ],
                 recentBlockhash: BLOCKHASH,
             },
-            signatures: ['5xyz'],
+            signatures: [gen.signature(1)],
         },
         version: 0n,
         ...overrides,

@@ -10,7 +10,6 @@ import { Button } from '@components/shared/ui/button';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
-import type { TransactionVersion } from '@entities/transaction-data';
 import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
 import { useCluster, useClusterInfo } from '@providers/cluster';
@@ -20,6 +19,7 @@ import {
     useTransactionDetails,
     useTransactionStatus,
 } from '@providers/transactions';
+import type { TransactionVersion } from '@solana/kit';
 import { ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
@@ -160,7 +160,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const fee = transactionWithMeta?.meta?.fee;
     const costUnits = transactionWithMeta?.meta?.costUnits;
     const computeUnitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed;
-    const transactionConfig = transactionWithMeta?.transactionConfig;
+    const transactionConfig = rawDetails?.data?.raw?.transactionConfig;
     // v1 declares its compute unit limit on the message; every earlier version has to have it
     // reconstructed from the Compute Budget instructions, which v1 does not carry.
     const reservedCUs =
