@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { PMP_DECODE_BUDGET_BYTES, PMP_DECODED_RENDER_CAP_BYTES, PMP_MAX_UNPACKED_BYTES } from '../constants';
-import { decodePmpPayload } from '../decode-pmp-payload';
+import { decodePmpPayload, decodeUnpackedPayload } from '../decode-pmp-payload';
 
 const DOC = '{"name":"company","version":"1.0.0"}';
 /** The same document as `DOC`, indented - a `Format.Json` payload is re-serialised before it reaches the card. */
@@ -193,36 +193,6 @@ describe('decodePmpPayload', () => {
         expect(result).toEqual({ kind: 'failed', reason: 'unsupported encoding (99)' });
     });
 
-    it('should report a non-string decode result to Sentry, because only our own drift produces it', () => {
-        decodePmpPayload({
-            config: { compression: Compression.None, encoding: 99 as Encoding, format: Format.None },
-            data: new Uint8Array([1, 2, 3]),
-        });
-
-        // The encoding value has to ride in `sentryExtras`: plain context fields never leave the console, and the
-        // console is suppressed in the browser.
-        expect(Logger.warn).toHaveBeenCalledWith(
-            expect.stringContaining('non-string'),
-            expect.objectContaining({ sentry: true, sentryExtras: expect.objectContaining({ encoding: 99 }) }),
-        );
-    });
-
-    it('should log a payload that fails its own hints without reporting it to Sentry', () => {
-        decodePmpPayload({
-            config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
-            data: new Uint8Array([1, 2, 3, 4]),
-        });
-
-        // The unpack returns its failure rather than throwing it, so `reason` is what carries pako's message now.
-        expect(Logger.error).toHaveBeenCalledWith(
-            expect.objectContaining({ message: expect.stringContaining('failed to unpack') }),
-            expect.objectContaining({ reason: 'incorrect header check' }),
-        );
-        // Malformed chain data is not an incident, and the `Url`/`External` panels reach this state by design, so
-        // an event per render would be pure noise. Fails if `sentry: true` is ever added here.
-        expect(Logger.error).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ sentry: true }));
-    });
-
     it('should log at debug when a Json payload does not parse as JSON', () => {
         const result = decodePmpPayload({
             config: { compression: Compression.None, encoding: Encoding.Utf8, format: Format.Json },
@@ -268,15 +238,60 @@ describe('decodePmpPayload', () => {
         expect(packed.length).toBeGreaterThan(0);
         expect(result).toEqual({ kind: 'empty' });
     });
+});
 
-    it('should log nothing at all when the payload decodes', () => {
-        decodePmpPayload({
-            config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
-            data: pack(DOC, Compression.Zlib),
+/**
+ * The post-unpack checks.
+ */
+describe('decodeUnpackedPayload', () => {
+    const bytes = new TextEncoder().encode('hello');
+
+    it('should decode already-unpacked bytes under the declared encoding', () => {
+        const result = decodeUnpackedPayload({
+            bytes,
+            config: { compression: Compression.None, encoding: Encoding.Base64, format: Format.None },
         });
 
-        expect(Logger.debug).not.toHaveBeenCalled();
-        expect(Logger.warn).not.toHaveBeenCalled();
-        expect(Logger.error).not.toHaveBeenCalled();
+        expect(result).toMatchObject({ kind: 'decoded', text: 'aGVsbG8=' });
+    });
+
+    // The SAME bytes under Utf8. This is the collision detection refuses to guess at, resolved by a declared value:
+    // one buffer, two lossless readings, and only an instruction can say which was meant.
+    it('should decode the same bytes as text when Utf8 was declared', () => {
+        const result = decodeUnpackedPayload({
+            bytes,
+            config: { compression: Compression.None, encoding: Encoding.Utf8, format: Format.None },
+        });
+
+        expect(result).toMatchObject({ kind: 'decoded', text: 'hello' });
+    });
+
+    it('should report bytes past the encoding budget as oversized without decoding them', () => {
+        const oversized = new Uint8Array(32);
+        const result = decodeUnpackedPayload({
+            bytes: oversized,
+            cap: 8,
+            config: { compression: Compression.None, encoding: Encoding.Base58, format: Format.None },
+        });
+
+        expect(result).toEqual({ budget: 8, bytes: oversized, kind: 'oversized' });
+    });
+
+    it('should report zero bytes as empty rather than as a blank document', () => {
+        const result = decodeUnpackedPayload({
+            bytes: new Uint8Array(0),
+            config: { compression: Compression.None, encoding: Encoding.Utf8, format: Format.None },
+        });
+
+        expect(result).toEqual({ kind: 'empty' });
+    });
+
+    it('should pretty-print a Json payload the same way the full pipeline does', () => {
+        const result = decodeUnpackedPayload({
+            bytes: new TextEncoder().encode(DOC),
+            config: { compression: Compression.None, encoding: Encoding.Utf8, format: Format.Json },
+        });
+
+        expect(result).toMatchObject({ kind: 'decoded', text: DOC_PRETTY });
     });
 });

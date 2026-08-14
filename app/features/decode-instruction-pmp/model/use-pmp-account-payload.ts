@@ -1,15 +1,13 @@
+import { decodePmpAccount, type PmpAccountDecodeResult, type PmpDecodeConfig } from '@entities/pmp-account';
 import { useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
-import { decodePmpBufferAccount } from '../lib/decode-pmp-buffer-account';
-import type { PmpAccountContent, PmpDecodeConfig } from '../lib/types';
-
 export type PmpAccountPayloadState =
     | { status: 'loading' }
     | { status: 'failed' }
-    | { status: 'ready'; content: PmpAccountContent };
+    | { status: 'ready'; content: PmpAccountDecodeResult };
 
 /**
  * Reads the payload a PMP account currently holds.
@@ -51,7 +49,7 @@ export function usePmpAccountPayload({
 
         const { data, lamports, owner } = entry.data;
         return {
-            content: decodePmpBufferAccount({
+            content: decodePmpAccount({
                 account: { data: data.raw, lamports, owner: owner.toBase58() },
                 cap,
                 config,

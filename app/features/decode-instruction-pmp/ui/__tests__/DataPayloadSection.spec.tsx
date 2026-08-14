@@ -289,9 +289,6 @@ describe('DataPayloadSection', () => {
         // uncompressed, so the two happen to match, but the number reported is the decoded one.
         expect(oversized).toHaveTextContent('2048 bytes');
         expect(screen.queryByTestId('pmp-decoded-text')).not.toBeInTheDocument();
-        // The panel carries its OWN copy/download over the decompressed bytes. The sibling Raw tab is not a
-        // substitute: that one serves the on-chain payload, so for a compressed document it would hand back the
-        // compressed bytes. Without this the Alert's "Copy or download it instead" would point at nothing.
         expect(oversized).toHaveTextContent(/use download\/copy/i);
         expect(screen.getByLabelText('Download')).toBeInTheDocument();
     });
@@ -324,10 +321,10 @@ describe('DataPayloadSection', () => {
 
         await userEvent.click(screen.getByRole('tab', { name: 'Raw' }));
 
-        expect(screen.getByTestId('pmp-bytes-badge-compressed')).toHaveTextContent('gzipped');
+        expect(screen.getByTestId('pmp-bytes-badge-compressed')).toHaveTextContent('gzip');
     });
 
-    it('should badge a Zlib payload by name rather than as gzipped', async () => {
+    it('should badge a Zlib payload as zlib rather than as gzip', async () => {
         renderSection({
             config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
             dataSource: DataSource.Direct,
@@ -468,6 +465,18 @@ describe('DataPayloadSection', () => {
         renderSection(DEFERRED_SET_DATA);
 
         expect(screen.getByTestId('pmp-account-absent')).toHaveTextContent(/does not exist on chain/i);
+        expect(screen.queryByTestId('pmp-account-unreadable')).not.toBeInTheDocument();
+    });
+
+    it('should say the referenced account is unwritten rather than warn that it cannot be read', () => {
+        // A PMP-owned account still carrying the Empty discriminator: created, never `allocate`d. `readPmpAccount`
+        // calls that ordinary, so `decodePmpAccount` passes it through instead of demoting it to `unreadable`.
+        const unwritten = bufferAccountData(new Uint8Array(0));
+        unwritten[0] = 0; // AccountDiscriminator.Empty
+        mockUseAccountInfo.mockReturnValue(fetchedEntry(unwritten));
+        renderSection(DEFERRED_SET_DATA);
+
+        expect(screen.getByTestId('pmp-account-empty')).toHaveTextContent(/has not been written yet/i);
         expect(screen.queryByTestId('pmp-account-unreadable')).not.toBeInTheDocument();
     });
 

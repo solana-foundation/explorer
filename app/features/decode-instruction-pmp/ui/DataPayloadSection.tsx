@@ -1,4 +1,11 @@
 import { RawDataField } from '@components/shared/RawDataField';
+import {
+    decodePmpPayload,
+    PMP_COMPRESSED_BYTES_LABELS,
+    PMP_UNCOMPRESSED_BYTES_LABEL,
+    type PmpAccountDecodeResult,
+    type PmpPayloadDecodeResult,
+} from '@entities/pmp-account';
 import { PublicKey } from '@solana/web3.js';
 import { Compression, DataSource } from '@solana-program/program-metadata';
 import React from 'react';
@@ -14,15 +21,12 @@ import { pmpAnalytics } from '../lib/analytics';
 import {
     PMP_ACCOUNT_RAW_DOWNLOAD_FILENAME,
     PMP_ANALYTICS_IX_NAMES,
-    PMP_COMPRESSED_BYTES_LABELS,
     PMP_DATA_SOURCE_ANALYTICS_NAMES,
     PMP_DECODED_DOWNLOAD_FILENAME,
     PMP_FORMAT_ANALYTICS_NAMES,
     PMP_RAW_DOWNLOAD_FILENAME,
-    PMP_UNCOMPRESSED_BYTES_LABEL,
 } from '../lib/constants';
-import { decodePmpPayload } from '../lib/decode-pmp-payload';
-import type { PmpAccountContent, PmpDecodedPayload, PmpPayloadInstruction } from '../lib/types';
+import type { PmpPayloadInstruction } from '../lib/types';
 import { usePmpAccountPayload } from '../model/use-pmp-account-payload';
 
 /** The card table has three columns, so every row in this section spans all of them. */
@@ -71,7 +75,7 @@ function PayloadBody({
 }: {
     cap: number | undefined;
     content: PmpPayloadInstruction;
-    decoded: PmpDecodedPayload | undefined;
+    decoded: PmpPayloadDecodeResult | undefined;
 }) {
     const { dataSource } = content;
 
@@ -189,12 +193,21 @@ function AccountContentBody({
 }: {
     content: PmpPayloadInstruction;
     dataSource: DataSource;
-    result: PmpAccountContent;
+    result: PmpAccountDecodeResult;
 }) {
     if (result.kind === 'absent') {
         return (
             <Alert variant="warning" data-testid="pmp-account-absent" className="!mb-0">
                 Account does not exist on chain.
+            </Alert>
+        );
+    }
+
+    // Not a warning: the account exists and is well formed, it simply has no payload yet.
+    if (result.kind === 'empty') {
+        return (
+            <Alert variant="default" data-testid="pmp-account-empty" className="!mb-0">
+                The account is allocated but has not been written yet.
             </Alert>
         );
     }
@@ -232,7 +245,7 @@ function DecodedTabs({
     compression: Compression;
     content: PmpPayloadInstruction;
     dataSource: DataSource;
-    decoded: PmpDecodedPayload;
+    decoded: PmpPayloadDecodeResult;
     payload: Uint8Array;
     source: 'account' | 'instruction';
 }) {
@@ -271,7 +284,7 @@ function DecodedBody({
     stored,
 }: {
     compression: Compression;
-    decoded: PmpDecodedPayload;
+    decoded: PmpPayloadDecodeResult;
     stored: number;
 }) {
     if (decoded.kind === 'failed') {
@@ -301,7 +314,7 @@ function DecodedBody({
             <div className="flex flex-col gap-3" data-testid="pmp-payload-oversized">
                 <Alert variant="warning" className="!mb-0 whitespace-pre-wrap">
                     Payload too large to render ({describeSize(decoded.bytes.length, stored, compression)}, limit{' '}
-                    {decoded.budget}). Copy or download it instead.
+                    {decoded.budget}).
                 </Alert>
                 <RawDataField
                     data={decoded.bytes}
@@ -331,7 +344,7 @@ function DecodedBody({
             </div>
             <pre
                 data-testid="pmp-decoded-text"
-                className="mb-0 max-h-80 overflow-auto whitespace-pre-wrap break-words bg-heavy-metal-900 p-3 pr-8 text-left text-xs"
+                className="mb-0 max-h-80 overflow-auto whitespace-pre-wrap bg-heavy-metal-900 p-3 pr-8 text-left text-xs [overflow-wrap:anywhere]"
             >
                 {decoded.text}
             </pre>

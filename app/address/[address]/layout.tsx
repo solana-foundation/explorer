@@ -19,6 +19,8 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
+// Deliberately import from `lib/program-address`, NOT from `index`, which pulls the client and pako.
+import { isPmpAccount } from '@entities/pmp-account/lib/program-address';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
     BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
@@ -146,6 +148,7 @@ export type AddressTabPath =
     | 'feature-gate'
     | 'token-extensions'
     | 'attestation'
+    | 'account-data'
     | 'subscriptions';
 
 type AddressTab = NavigationTab<AddressTabPath>;
@@ -464,6 +467,12 @@ function getNavigationTabs(pubkey: PublicKey, account: Account): AddressTab[] {
 
     if (isAttestationAccount(account)) {
         tabs.push(...TABS_LOOKUP['attestation']);
+    }
+
+    // account-data tab is to display decoded data of account.
+    // TODO: consider moving anchor-account tab to account-data and add support for Codama IDL accounts.
+    if (isPmpAccount(account)) {
+        tabs.push({ path: 'account-data', title: 'Account Data' });
     }
 
     if (isRedactedTokenAddress(address)) {

@@ -15,7 +15,7 @@ import { concat } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { PMP_ADDRESS } from '../constants';
-import { decodePmpBufferAccount } from '../decode-pmp-buffer-account';
+import { decodePmpAccount } from '../decode-pmp-account';
 import type { PmpDecodeConfig } from '../types';
 
 const PROGRAM = gen.address(1) as Address;
@@ -69,13 +69,13 @@ function metadataAccount({
 }
 
 function read(data: Uint8Array | undefined, overrides: { lamports?: number; owner?: string } = {}) {
-    return decodePmpBufferAccount({
+    return decodePmpAccount({
         account: { data, lamports: overrides.lamports ?? 1_000_000, owner: overrides.owner ?? PMP_ADDRESS },
         config: IX_CONFIG,
     });
 }
 
-describe('decodePmpBufferAccount', () => {
+describe('decodePmpAccount', () => {
     // The Logger is a global no-op mock (test-setup.specs.ts), so these read the calls the decode makes.
     beforeEach(() => {
         vi.clearAllMocks();
@@ -93,8 +93,18 @@ describe('decodePmpBufferAccount', () => {
         });
     });
 
+    it('should report a Buffer account unreadable when no decode config is supplied', () => {
+        // A Buffer header stores no encoding/compression/format, so without an instruction to take them from there
+        // is nothing to decode it with. Recovering them is PR 2's job, not a silent guess here.
+        const result = decodePmpAccount({
+            account: { data: bufferAccount(pack(DOC, Compression.None)), lamports: 1, owner: PMP_ADDRESS },
+        });
+
+        expect(result).toEqual({ kind: 'unreadable', reason: expect.stringContaining('no decode config') });
+    });
+
     it('should decompress a Buffer account body when the instruction says it is compressed', () => {
-        const result = decodePmpBufferAccount({
+        const result = decodePmpAccount({
             account: { data: bufferAccount(pack(DOC, Compression.Zlib)), lamports: 1, owner: PMP_ADDRESS },
             config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
         });
@@ -150,11 +160,11 @@ describe('decodePmpBufferAccount', () => {
         expect(result.kind === 'unreadable' && result.reason).not.toContain('96-byte');
     });
 
-    it('should report unreadable for a discriminator that carries no payload', () => {
+    it('should report an Empty discriminator as empty rather than demote it to a failure', () => {
         const empty = bufferAccount(pack(DOC, Compression.None));
         empty[0] = 0; // AccountDiscriminator.Empty
 
-        expect(read(empty)).toEqual({ kind: 'unreadable', reason: expect.stringContaining('discriminator 0') });
+        expect(read(empty)).toEqual({ kind: 'empty' });
     });
 
     it('should report unreadable when a Metadata header carries an out-of-range hint', () => {
@@ -167,7 +177,7 @@ describe('decodePmpBufferAccount', () => {
     it('should surface a body that does not decode as a payload failure, not an unreadable account', () => {
         // The account itself parses fine - it is the CONTENT that is not the zlib stream the hints promise. That
         // distinction is what the UI renders differently, so it must survive here.
-        const result = decodePmpBufferAccount({
+        const result = decodePmpAccount({
             account: { data: bufferAccount(new Uint8Array([1, 2, 3, 4])), lamports: 1, owner: PMP_ADDRESS },
             config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
         });
@@ -234,7 +244,7 @@ describe('decodePmpBufferAccount', () => {
 
     it('should report the payload oversized above the render cap without decoding it', () => {
         const body = pack('a'.repeat(4096), Compression.None);
-        const result = decodePmpBufferAccount({
+        const result = decodePmpAccount({
             account: { data: bufferAccount(body), lamports: 1, owner: PMP_ADDRESS },
             cap: 1024,
             config: { compression: Compression.None, encoding: Encoding.Utf8, format: Format.None },

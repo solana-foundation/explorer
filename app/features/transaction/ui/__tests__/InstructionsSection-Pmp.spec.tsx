@@ -1,6 +1,8 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
-import { PMP_ADDRESS } from '@features/decode-instruction-pmp';
+// From the literal's own library-free module: the feature no longer re-exports it, and this spec only needs the
+// program id to build a fixture instruction - not the decoders that `@entities/pmp-account` would pull in.
+import { PMP_ADDRESS } from '@entities/pmp-account/lib/program-address';
 import { type ParsedTransaction, PublicKey } from '@solana/web3.js';
 import {
     Compression,
