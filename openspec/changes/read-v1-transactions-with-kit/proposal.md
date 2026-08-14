@@ -33,7 +33,7 @@ A third: **the Inspect page is gated, not adapted.** Its cards are built on `Ver
 
 ## What Changes
 
-- **New entity layer** under `app/entities/transaction-data/`: kit-backed `fetchTransactionDetails` and `fetchRawTransaction`, an `adaptParsedTransaction` boundary, and `decodeWireTransaction` / `decodeTransactionConfig` for the v1 limits. `MAX_SUPPORTED_TRANSACTION_VERSION = 1` is defined once and used by both fetchers.
+- **New entity layer** under `app/entities/transaction-data/`: kit-backed `fetchTransactionDetails` and `fetchRawTransaction`, an `adaptParsedTransaction` boundary, and `decodeWireTransaction` / `decodeTransactionConfig` for the v1 limits. Both fetchers request kit's own `MAX_SUPPORTED_TRANSACTION_VERSION` ceiling.
 - **Providers** `app/providers/transactions/{parsed,raw}.tsx` drop `Connection` for those fetchers. `Details.raw` gains `messageBytes` (the exact wire bytes), `version` and the decoded v1 `transactionConfig`; it is a union on `version`, so `message` and `transaction` are present for legacy and v0 and absent on v1.
 - **Download** reads `messageBytes` rather than re-serializing a parsed message, so it is byte-exact on every version.
 - **Summary card** renders the v1 limits, labels the priority fee `Priority fee (total)` to distinguish it from v0's per-compute-unit price, sources the compute unit limit from the config on v1 (the Compute Budget scan it used before finds nothing there), and shows versions as `legacy` / `v0` / `v1`.

@@ -1,4 +1,4 @@
-import { createSolanaRpc, signature as createSignature } from '@solana/kit';
+import { createSolanaRpc, MAX_SUPPORTED_TRANSACTION_VERSION, signature as createSignature } from '@solana/kit';
 import { type DecompileArgs, type Finality, PublicKey, TransactionMessage, VersionedMessage } from '@solana/web3.js';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
@@ -7,7 +7,6 @@ import { Logger } from '@/app/shared/lib/logger';
 import { decodeTransactionConfig } from '../lib/decode-transaction-config';
 import { decodeWireTransaction, type WireTransaction } from '../lib/decode-wire-transaction';
 import type { RawTransaction, TransactionConfig } from '../model/types';
-import { MAX_SUPPORTED_TRANSACTION_VERSION } from './max-supported-transaction-version';
 
 /**
  * Fetches a transaction's wire bytes and metadata for the inspector and the download button.

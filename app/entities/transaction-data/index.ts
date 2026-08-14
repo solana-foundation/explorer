@@ -1,7 +1,6 @@
 export { type ByteArray } from '@/app/shared/lib/bytes';
 export { fetchRawTransaction } from './api/fetch-raw-transaction';
 export { fetchTransactionDetails } from './api/fetch-transaction-details';
-export { MAX_SUPPORTED_TRANSACTION_VERSION } from './api/max-supported-transaction-version';
 export { adaptParsedTransaction } from './lib/adapt-parsed-transaction';
 export { decodeTransactionConfig } from './lib/decode-transaction-config';
 export { decodeWireTransaction } from './lib/decode-wire-transaction';

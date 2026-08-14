@@ -1,8 +1,7 @@
-import { createSolanaRpc, signature as createSignature } from '@solana/kit';
+import { createSolanaRpc, MAX_SUPPORTED_TRANSACTION_VERSION, signature as createSignature } from '@solana/kit';
 
 import { adaptParsedTransaction } from '../lib/adapt-parsed-transaction';
 import type { TransactionWithMeta } from '../model/types';
-import { MAX_SUPPORTED_TRANSACTION_VERSION } from './max-supported-transaction-version';
 
 /**
  * Fetches a transaction for the detail page.
