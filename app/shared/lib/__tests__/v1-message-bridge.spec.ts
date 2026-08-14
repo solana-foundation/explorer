@@ -1,5 +1,5 @@
 import { getTransactionDecoder } from '@solana/kit';
-import { PublicKey, VersionedMessage, VersionedTransaction } from '@solana/web3.js';
+import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -10,7 +10,7 @@ import {
 } from '@/app/entities/transaction-data/__fixtures__/wire-transactions';
 
 import { parseTransactionBytes } from '../parse-transaction-bytes';
-import { bridgeV1MessageBytes, isV1MessageBytes, V1MessageView } from '../v1-message-bridge';
+import { bridgeV1MessageBytes, isV1MessageBytes, UnsignedV1WireTransaction, V1MessageView } from '../v1-message-bridge';
 
 function v1MessageBytes(config: Parameters<typeof createV1TransactionBytes>[0] = {}): Uint8Array {
     return parseTransactionBytes(createV1TransactionBytes(config)).messageBytes;
@@ -52,15 +52,30 @@ describe('bridgeV1MessageBytes', () => {
         expect(message.serialize()).toEqual(messageBytes);
     });
 
-    it('should produce a byte-exact unsigned v1 wire transaction through VersionedTransaction', () => {
+    it('should produce a message-first unsigned v1 wire transaction', () => {
         const messageBytes = v1MessageBytes({ computeUnitLimit: 300_000 });
         const { message } = bridgeV1MessageBytes(messageBytes);
 
-        const wireBytes = new VersionedTransaction(message).serialize();
+        const wireBytes = new UnsignedV1WireTransaction(message).serialize();
+
+        // The v1 envelope is [message][signatures] with no count prefix: nodes route on the
+        // version-flagged first byte, so anything else is rejected as an invalid message version.
+        expect(wireBytes[0]).toBe(0x81);
+        expect(wireBytes.slice(0, messageBytes.length)).toEqual(messageBytes);
+        expect(wireBytes).toHaveLength(messageBytes.length + 64);
+        expect(wireBytes.slice(messageBytes.length)).toEqual(new Uint8Array(64));
 
         const decoded = getTransactionDecoder().decode(wireBytes);
         expect(new Uint8Array(decoded.messageBytes)).toEqual(messageBytes);
         expect(Object.values(decoded.signatures)).toHaveLength(1);
+    });
+
+    it('should match the wire bytes kit itself encodes for the same unsigned transaction', () => {
+        const fixtureWireBytes = createV1TransactionBytes({ computeUnitLimit: 300_000 });
+        const { messageBytes } = parseTransactionBytes(fixtureWireBytes);
+        const { message } = bridgeV1MessageBytes(messageBytes);
+
+        expect(new UnsignedV1WireTransaction(message).serialize()).toEqual(fixtureWireBytes);
     });
 
     it('should extract the resource limits the message sets', () => {

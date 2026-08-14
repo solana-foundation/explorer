@@ -10,7 +10,7 @@ The deferred assessment assumed un-gating means re-rooting the inspector on kit'
 
 1. **A v1 message carries static accounts only.** `V1CompiledTransactionMessage` has no `addressTableLookups` field at all. Every structural fact the inspector renders — header role math, static keys, compiled instructions — therefore maps losslessly onto web3.js's `MessageV0` shape, with empty lookups and the lifetime token as the blockhash. Lookup hydration, the hardest part of the re-root, has no v1 case to handle.
 
-2. **The serialize hazard is one method.** The prior change rejected synthesizing a `MessageV0` because `message.serialize()` would emit v0 bytes that are not the real transaction — the simulator would simulate bytes the network never sees, and cache fingerprints would hash them. web3.js's `VersionedTransaction` constructor reads only `header.numRequiredSignatures`, and `Connection.simulateTransaction` does nothing with the message beyond `serialize()`. A `MessageV0` subclass whose `serialize()` returns the original v1 wire bytes therefore produces a byte-exact unsigned v1 wire transaction through the existing simulator path, verified by a round-trip spec through kit's transaction decoder.
+2. **The serialize hazard is two overrides, message and envelope.** The prior change rejected synthesizing a `MessageV0` because `message.serialize()` would emit v0 bytes that are not the real transaction — the simulator would simulate bytes the network never sees, and cache fingerprints would hash them. A `MessageV0` subclass whose `serialize()` returns the original v1 wire bytes closes the message half. The envelope needs its own override: v1 reorders the wire envelope to message-first with no signature-count prefix (the count is read from the message header), so web3.js's signatures-first `VersionedTransaction.serialize()` wraps even correct message bytes in an envelope a v1-aware node rejects as an invalid message version. The simulator therefore sends a `VersionedTransaction` subclass that encodes the envelope through kit's transaction encoder, pinned by a spec asserting byte-equality with kit's own encoding of the same unsigned transaction.
 
 The alternative — re-rooting the spine on kit's compiled message — remains the destination the kit migration will reach, but it renames header math, rebuilds lookup ordering, and changes the decode path for legacy and v0, all regression surface this change's goal ("v1 works, legacy/v0 untouched") does not need. The bridge is deliberately a shim: it is deleted, not extended, when the re-root lands.
 
@@ -24,10 +24,10 @@ The alternative — re-rooting the spine on kit's compiled message — remains t
 
 ## What Changes
 
-- **New `app/shared/lib/v1-message-bridge.ts`** — `isV1MessageBytes`, `V1MessageView` (the serialize-truthful `MessageV0` subclass), and `bridgeV1MessageBytes`, which decodes with kit and reads the resource-limit config off `decompileTransactionMessage`.
+- **New `app/shared/lib/v1-message-bridge.ts`** — `isV1MessageBytes`, `V1MessageView` (the serialize-truthful `MessageV0` subclass), `UnsignedV1WireTransaction` (the message-first envelope for simulation), and `bridgeV1MessageBytes`, which decodes with kit and reads the resource-limit config off `decompileTransactionMessage`.
 - **All three entry paths un-gate:** the permalink view bridges the v1 arm of `RawTransaction`, and the `?message=` URL and paste paths bridge before falling through to `VersionedMessage.deserialize` for legacy/v0.
 - **The overview card renders v1's version and resource limits** (compute unit limit, total priority fee, loaded accounts data size limit, heap size), mirroring the detail page's summary card.
-- The Squads path, every other inspector card, and the simulator are untouched.
+- **The simulator sends the v1 envelope for v1 messages** and the overview size row uses v1's envelope math and 4096-byte limit; the Squads path and every other inspector card are untouched.
 
 ## Impact
 

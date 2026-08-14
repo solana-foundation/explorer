@@ -27,8 +27,13 @@ A v1 message SHALL be accepted by the permalink fetch, the `?message=` URL param
 
 #### Scenario: simulating a v1 transaction
 
-- **WHEN** the simulator wraps the bridged message in a `VersionedTransaction`
-- **THEN** the serialized wire transaction SHALL contain the original v1 message bytes byte-for-byte
+- **WHEN** the simulator serializes a bridged v1 message for the RPC
+- **THEN** the wire transaction SHALL use the v1 message-first envelope, byte-equal to kit's encoding of the same unsigned transaction, never the legacy signatures-first envelope
+
+#### Scenario: reporting a v1 transaction's size
+
+- **WHEN** the overview card computes a v1 transaction's size
+- **THEN** it SHALL use the v1 envelope layout, which has no signature-count byte, and the v1 4096-byte limit
 
 ### Requirement: v1 resource limits SHALL render in the overview card
 

@@ -1,11 +1,14 @@
 import {
+    address,
     type CompiledTransactionMessage,
     type CompiledTransactionMessageWithLifetime,
     decompileTransactionMessage,
     getCompiledTransactionMessageDecoder,
+    getTransactionEncoder,
+    type Transaction,
     type TransactionMessage as KitTransactionMessage,
 } from '@solana/kit';
-import { MessageV0, PublicKey } from '@solana/web3.js';
+import { MessageV0, PublicKey, VersionedTransaction } from '@solana/web3.js';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -91,6 +94,48 @@ export function bridgeV1MessageBytes(messageBytes: Uint8Array): {
     );
 
     return { message, transactionConfig: readTransactionConfig(compiled) };
+}
+
+/**
+ * The maximum size of a v1 transaction in bytes. kit defines the same constant but
+ * intentionally does not export it.
+ */
+export const V1_TRANSACTION_SIZE_LIMIT = 4096;
+
+/**
+ * A `VersionedTransaction` over a bridged v1 message whose `serialize()` emits the v1 wire
+ * envelope.
+ *
+ * v1 reorders the transaction envelope: the message comes first, followed by the signatures
+ * with no count prefix — the count is read from the message header. The inherited
+ * `serialize()` would wrap the message in the legacy signatures-first envelope, which a
+ * v1-aware node rejects as an invalid message version, so this encodes through kit's
+ * transaction encoder instead. Signatures are zero-filled, which is sufficient for
+ * simulation.
+ */
+export class UnsignedV1WireTransaction extends VersionedTransaction {
+    private readonly view: V1MessageView;
+
+    constructor(message: V1MessageView) {
+        super(message);
+        this.view = message;
+    }
+
+    override serialize(): Uint8Array {
+        const signatures = Object.fromEntries(
+            this.view.staticAccountKeys
+                .slice(0, this.view.header.numRequiredSignatures)
+                // eslint-disable-next-line unicorn/no-null -- kit encodes a null signature as a zero-filled slot
+                .map(key => [address(key.toBase58()), null]),
+        ) as Transaction['signatures'];
+
+        return new Uint8Array(
+            getTransactionEncoder().encode({
+                messageBytes: this.view.serialize() as unknown as Transaction['messageBytes'],
+                signatures,
+            }),
+        );
+    }
 }
 
 function readTransactionConfig(

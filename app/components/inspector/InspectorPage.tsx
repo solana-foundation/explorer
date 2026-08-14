@@ -29,7 +29,12 @@ import { Button } from '@/app/components/shared/ui/button';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
-import { bridgeV1MessageBytes, isV1MessageBytes, type V1TransactionConfig } from '@/app/shared/lib/v1-message-bridge';
+import {
+    bridgeV1MessageBytes,
+    isV1MessageBytes,
+    V1_TRANSACTION_SIZE_LIMIT,
+    type V1TransactionConfig,
+} from '@/app/shared/lib/v1-message-bridge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -600,10 +605,12 @@ function OverviewCard({
     const fee = message.header.numRequiredSignatures * DEFAULT_FEES.lamportsPerSignature;
     const feePayerValidator = createFeePayerValidator(fee);
 
+    // The v1 wire envelope has no signature-count byte — the count is read from the message header.
     const size = React.useMemo(() => {
-        const sigBytes = 1 + 64 * message.header.numRequiredSignatures;
+        const sigBytes = (isV1 ? 0 : 1) + 64 * message.header.numRequiredSignatures;
         return sigBytes + raw.length;
-    }, [message, raw]);
+    }, [message, raw, isV1]);
+    const sizeLimit = isV1 ? V1_TRANSACTION_SIZE_LIMIT : PACKET_DATA_SIZE;
 
     return (
         <>
@@ -623,12 +630,8 @@ function OverviewCard({
                         <BaseTable.Cell className="text-right">
                             <div className="flex flex-col items-end">
                                 {size} bytes
-                                <span
-                                    className={
-                                        size <= PACKET_DATA_SIZE ? 'text-dk-gray-700' : 'text-dk-warning-on-dark'
-                                    }
-                                >
-                                    Max transaction size is {PACKET_DATA_SIZE} bytes
+                                <span className={size <= sizeLimit ? 'text-dk-gray-700' : 'text-dk-warning-on-dark'}>
+                                    Max transaction size is {sizeLimit} bytes
                                 </span>
                             </div>
                         </BaseTable.Cell>

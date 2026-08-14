@@ -11,6 +11,8 @@ import { VersionedTransaction } from '@solana/web3.js';
 import type { Cluster } from '@utils/cluster';
 import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 
+import { UnsignedV1WireTransaction, V1MessageView } from '@/app/shared/lib/v1-message-bridge';
+
 import { buildTokenBalances, type TokenBalanceData } from './build-token-balances';
 import { computeSolBalanceChanges } from './compute-sol-balance-changes';
 import { getMintDecimals } from './get-mint-decimals';
@@ -72,7 +74,11 @@ async function runSimulation(connection: Connection, message: VersionedMessage):
         connection.getEpochInfo(),
     ]);
 
-    const { value: simResult } = await connection.simulateTransaction(new VersionedTransaction(message), {
+    // A v1 message must be sent in the v1 wire envelope (message first); the stock
+    // VersionedTransaction envelope is signatures-first and nodes reject it for v1.
+    const transaction =
+        message instanceof V1MessageView ? new UnsignedV1WireTransaction(message) : new VersionedTransaction(message);
+    const { value: simResult } = await connection.simulateTransaction(transaction, {
         accounts: {
             addresses: accountKeys.map(key => key.toBase58()),
             encoding: 'base64',
