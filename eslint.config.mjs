@@ -32,6 +32,8 @@ export default tseslint.config(
             '.next-dev/**',
             'node_modules/**',
             '**/coverage/**',
+            'playwright-report/**',
+            'test-results/**',
             '.claude/**',
             '.worktrees/**',
             'packages/entity-inspector/**',
