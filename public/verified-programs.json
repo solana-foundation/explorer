@@ -450,6 +450,12 @@
     "verifiedAt": "2025-10-02T01:55:56"
   },
   {
+    "address": "826vc5KcqkX3wLR6bRLqVhi62ExF6SFrGUcJYGJpD2hs",
+    "name": "smart_bond_vishnu",
+    "repoUrl": "https://github.com/ConvertibleCapital/Convertible.Capital.Solana/tree/d8c164e35cf691eeb51d56b775d6991d27f7f732",
+    "verifiedAt": "2026-08-13T21:27:41"
+  },
+  {
     "address": "82qR3ftARSeXPBg9wnVrsLsAepfvimBUCPdNuiV9unhV",
     "name": "limo",
     "repoUrl": "https://github.com/swap-dot-io/swap-io-limit-orders-v1/tree/9009b26247d4db9c0256bc3ea92efcc8630a3220",
@@ -740,8 +746,8 @@
   {
     "address": "BQrR1sqG3HdMBtq5p2BRPz9qzyA42ZYCBcDXC3m6eVXY",
     "name": "listedterminal/listed-router-solana",
-    "repoUrl": "https://github.com/listedterminal/listed-router-solana/tree/d5865cd669aaa925acb92e995455088bcffa3cc1",
-    "verifiedAt": "2026-08-13T07:43:06"
+    "repoUrl": "https://github.com/listedterminal/listed-router-solana/tree/717ef85dbce839b97fc74067dd0b0458297c5c32",
+    "verifiedAt": "2026-08-13T13:43:32"
   },
   {
     "address": "BRoueHsu3h2SfEse9ohXipm1R9uRGRSe3zPYsAT8RySr",
@@ -1024,6 +1030,12 @@
     "name": "mikhd/test-program",
     "repoUrl": "https://github.com/mikhd/test-program/tree/df3d36fe5f9b24c8d2d2eecc1f7fc6c4bd8f681e",
     "verifiedAt": "2025-09-11T13:07:10"
+  },
+  {
+    "address": "EceYGg5RnnGZHGkC7BXZEVBaXba5KAS3yiSR6uXeUun4",
+    "name": "Curved-labs/caldax",
+    "repoUrl": "https://github.com/Curved-labs/caldax/tree/06d9a127fc3db8aa4732b3ebbb7611e0995a50db",
+    "verifiedAt": "2026-08-13T10:58:49"
   },
   {
     "address": "EcoFvY9tDz6kaxAQxNHga68sQm535DskDBCgKm3tziaT",
@@ -1434,12 +1446,6 @@
     "verifiedAt": "2024-10-01T10:58:14"
   },
   {
-    "address": "GsVBvFRcBCNUudsABSjBFCs8YzkmNFbnWU39CGouQcFS",
-    "name": "AnsemStrategyio/ansemstr-flywheel",
-    "repoUrl": "https://github.com/AnsemStrategyio/ansemstr-flywheel/tree/3562e02dd7ca8018002d55be6b4600e842e46e9e",
-    "verifiedAt": "2026-08-13T05:22:47"
-  },
-  {
     "address": "Gt1duB4bPj2CmW9y7eiGzekeCfiR1UckjiyPGSbyWRVU",
     "name": "koshak01/tidex6",
     "repoUrl": "https://github.com/koshak01/tidex6/tree/2965920f690e4695c24c6fc84bd31315a7cd967d",
@@ -1489,9 +1495,9 @@
   },
   {
     "address": "H2Ju7e1tvDf7Wmn8wQ1t3Ch4Yi8WZtTd9q1F1MxJX6qj",
-    "name": "Curved-labs/beacon",
-    "repoUrl": "https://github.com/Curved-labs/beacon/tree/f49b29783adf068ee4df7c02a6b952ff1eeb2693",
-    "verifiedAt": "2026-08-13T07:01:06"
+    "name": "beacon",
+    "repoUrl": "https://github.com/Curved-labs/beacon/tree/2fe07a0e83ede4ffbec5df85fe9876f57faa5a3d",
+    "verifiedAt": "2026-08-13T11:04:11"
   },
   {
     "address": "H59K28q5kyteWfAGqt34pwkduNwntcambE75tXVp3nZF",
