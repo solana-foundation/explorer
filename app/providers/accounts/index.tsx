@@ -182,27 +182,28 @@ type AccountsProviderProps = { children: React.ReactNode };
 export function AccountsProvider({ children }: AccountsProviderProps) {
     const { cluster, url } = useCluster();
     const [state, dispatch] = Cache.useReducer<Account>(url);
-    const [fetchers, setFetchers] = React.useState<Fetchers>(() => ({
-        parsed: new MultipleAccountFetcher(dispatch, cluster, url, 'parsed'),
-        raw: new MultipleAccountFetcher(dispatch, cluster, url, 'raw'),
-        skip: new MultipleAccountFetcher(dispatch, cluster, url, 'skip'),
-    }));
 
-    // Cancel pending timers on deps-change and unmount so a debounced batch can't fire into a stale tree.
-    React.useEffect(() => {
-        dispatch({ type: ActionType.Clear, url });
-        const next: Fetchers = {
+    const fetchers = React.useMemo<Fetchers>(
+        () => ({
             parsed: new MultipleAccountFetcher(dispatch, cluster, url, 'parsed'),
             raw: new MultipleAccountFetcher(dispatch, cluster, url, 'raw'),
             skip: new MultipleAccountFetcher(dispatch, cluster, url, 'skip'),
-        };
-        setFetchers(next);
+        }),
+        [dispatch, cluster, url],
+    );
+
+    React.useEffect(() => {
+        dispatch({ type: ActionType.Clear, url });
+    }, [dispatch, url]);
+
+    // Cancel pending timers on deps-change and unmount so a debounced batch can't fire into a stale tree.
+    React.useEffect(() => {
         return () => {
-            next.parsed.cancel();
-            next.raw.cancel();
-            next.skip.cancel();
+            fetchers.parsed.cancel();
+            fetchers.raw.cancel();
+            fetchers.skip.cancel();
         };
-    }, [dispatch, cluster, url]);
+    }, [fetchers]);
 
     return (
         <StateContext.Provider value={state}>

@@ -13,7 +13,7 @@ vi.mock('../../cluster', async importOriginal => {
     return { ...actual, useCluster: useClusterMock };
 });
 
-import { AccountsProvider, FetchersContext } from '..';
+import { AccountsProvider, FetchersContext, useFetchAccountInfo } from '..';
 
 type Captured = NonNullable<React.ContextType<typeof FetchersContext>>;
 
@@ -94,5 +94,65 @@ describe('AccountsProvider', () => {
         expect(parsedCancel).toHaveBeenCalledTimes(1);
         expect(rawCancel).toHaveBeenCalledTimes(1);
         expect(skipCancel).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('AccountsProvider: fetch and mount', () => {
+    /**
+     * Mimics a real consumer (`usePmpAccountPayload`, inspector's `AccountInfo`): fetches from a mount effect,
+     * which React flushes bottom-up, so it runs BEFORE the provider's own effect and sees the fetchers of the
+     * first render. It reports that set through `onFetch`, because the set the child fetched through is the
+     * subject of these tests, not whichever set the provider settles on afterwards.
+     */
+    function FetchOnMount({ onFetch }: { onFetch: (fetchers: Captured) => void }) {
+        const ctx = React.useContext(FetchersContext);
+        const fetchAccount = useFetchAccountInfo();
+        React.useEffect(() => {
+            if (ctx) onFetch(ctx);
+            fetchAccount(TEST_PUBKEY, 'skip');
+        }, []); // eslint-disable-line react-hooks/exhaustive-deps -- must observe the first commit only
+        return null;
+    }
+
+    beforeEach(() => {
+        useClusterMock.mockReturnValue({ cluster: Cluster.Devnet, customUrl: '', url: clusterUrl(Cluster.Devnet, '') });
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it('should cancel a first-commit fetch when the provider unmounts', async () => {
+        const onFetch = vi.fn<(fetchers: Captured) => void>();
+        const { unmount } = render(
+            <AccountsProvider>
+                <FetchOnMount onFetch={onFetch} />
+            </AccountsProvider>,
+        );
+        await waitFor(() => expect(onFetch).toHaveBeenCalledTimes(1));
+        const fetchers = onFetch.mock.calls[0][0];
+        expect(fetchers.skip.fetchTimeout).toBeDefined();
+
+        unmount();
+        // unhandled "window is not defined" rejection should not occur.
+        expect(fetchers.skip.fetchTimeout).toBeUndefined();
+    });
+
+    it('should not drop a first-commit fetch when React.StrictMode remounts the tree', async () => {
+        const onFetch = vi.fn<(fetchers: Captured) => void>();
+        render(
+            <React.StrictMode>
+                <AccountsProvider>
+                    <FetchOnMount onFetch={onFetch} />
+                </AccountsProvider>
+            </React.StrictMode>,
+        );
+        // StrictMode mounts, tears the tree down, then mounts again, which is also what App Router dev does, so the
+        // child's effect runs twice. The provider cleanup cancels the very set children fetch through, so that second
+        // run has to re-arm the debounce. If it does not, a dev page would sit on "Loading" forever.
+        await waitFor(() => expect(onFetch).toHaveBeenCalledTimes(2));
+        const fetchers = onFetch.mock.calls[0][0];
+
+        expect(fetchers.skip.fetchTimeout).toBeDefined();
     });
 });
