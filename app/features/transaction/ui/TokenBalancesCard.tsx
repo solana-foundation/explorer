@@ -16,6 +16,8 @@ import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
 import { getTokenInfos } from '@/app/utils/token-info';
 
+import { CELL_PADDING } from './accountsTableGrid';
+
 type TokenBalanceRow = {
     account: PublicKey;
     owner?: string;
@@ -76,7 +78,8 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
         <CollapsibleSection id="tokens" title="Tokens">
             <div
                 className={cn(
-                    'hidden px-3 py-1.5 md:px-4 lg:grid',
+                    'hidden lg:grid',
+                    CELL_PADDING,
                     'gap-5 text-xs uppercase text-outer-space-300',
                     'border-1 border-b border-white/10 [border-bottom-style:solid]',
                     GRID_TEMPLATE,
@@ -129,7 +132,7 @@ function TokenBalanceRow({
     return (
         <div className="border-1 border-b border-white/10 [border-bottom-style:solid] last:border-b-0">
             {/* Mobile layout */}
-            <div className="flex flex-col gap-1 px-3 py-3 text-sm md:px-4 lg:hidden">
+            <div className={cn('flex flex-col gap-1 text-sm lg:hidden', CELL_PADDING)}>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <span className="w-16 shrink-0 text-outer-space-300">Change</span>
@@ -166,7 +169,8 @@ function TokenBalanceRow({
             {/* Desktop layout */}
             <div
                 className={cn(
-                    'hidden min-h-9 px-3 py-2.5 md:px-4 lg:grid',
+                    'hidden min-h-9 lg:grid',
+                    CELL_PADDING,
                     'items-start gap-x-5 whitespace-nowrap text-sm',
                     "[grid-template-areas:'number_address_change_balance']",
                     GRID_TEMPLATE,

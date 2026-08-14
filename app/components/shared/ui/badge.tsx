@@ -130,6 +130,7 @@ const badgeVariants = cva([], {
     ],
     defaultVariants: {
         as: 'badge',
+        font: 'sans',
         pill: false,
         size: 'xs',
         status: 'inactive',
@@ -139,6 +140,7 @@ const badgeVariants = cva([], {
     },
     variants: {
         as: { badge: '', link: '' },
+        font: { mono: 'font-mono', sans: '' },
         pill: { false: '', true: '' },
         size: { lg: '', md: '', sm: '', xs: '' },
         status: { active: '', inactive: '' },
@@ -162,6 +164,7 @@ const badgeVariants = cva([], {
 function Badge({
     className,
     as,
+    font,
     pill,
     size,
     status,
@@ -177,7 +180,7 @@ function Badge({
         <Comp
             data-slot="badge"
             data-variant={variant ?? 'default'}
-            className={cn(badgeVariants({ as, pill, size, status, tone, ui, variant }), className)}
+            className={cn(badgeVariants({ as, font, pill, size, status, tone, ui, variant }), className)}
             {...props}
         />
     );

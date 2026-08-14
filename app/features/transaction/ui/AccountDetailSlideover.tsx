@@ -4,8 +4,9 @@ import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React, { useState } from 'react';
-import { CheckCircle, Copy, ExternalLink, Tag, X } from 'react-feather';
+import { ExternalLink, X } from 'react-feather';
 
+import { Copyable } from '@/app/components/common/Copyable';
 import {
     Slideover,
     SlideoverBody,
@@ -13,8 +14,7 @@ import {
     SlideoverContent,
     SlideoverTitle,
 } from '@/app/components/shared/ui/slideover';
-import { NicknameEditor, useNickname } from '@/app/features/nicknames';
-import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
+import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
 
 import { AccountBadges } from './AccountBadges';
 import { AccountExpandedContent } from './AccountExpandedContent';
@@ -42,7 +42,6 @@ export function AccountDetailSlideover({
     const address = pubkey.toBase58();
     const nickname = useNickname(address);
     const [nicknameOpen, setNicknameOpen] = useState(false);
-    const [copyState, copy] = useCopyToClipboard(1500);
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
     const handleOpenChange = (nextOpen: boolean) => {
         if (!nextOpen) setNicknameOpen(false);
@@ -59,8 +58,12 @@ export function AccountDetailSlideover({
     return (
         <>
             <Slideover open={open} onOpenChange={handleOpenChange}>
-                <SlideoverContent aria-describedby={undefined} onEscapeKeyDown={handleEscapeKeyDown}>
-                    <div className="space-y-2 px-4 pb-3 pt-4">
+                <SlideoverContent
+                    aria-describedby={undefined}
+                    className="border-t border-white/10 !bg-dk-gray-800-dark [border-top-style:solid]"
+                    onEscapeKeyDown={handleEscapeKeyDown}
+                >
+                    <div className="space-y-1.5 p-4">
                         <div className="min-w-0 flex-1">
                             <SlideoverTitle className="mb-1.5 tracking-wide !text-outer-space-300">
                                 Account {index + 1}
@@ -70,13 +73,13 @@ export function AccountDetailSlideover({
                             </div>
                             {nickname && <span className="break-all text-sm text-outer-space-300">{address}</span>}
                         </div>
-                        <div className="flex">
+                        <div className="flex flex-wrap gap-1">
                             <AccountBadges index={index} account={account} message={message} pubkey={pubkey} />
                         </div>
                     </div>
 
                     {/* Scrollable body */}
-                    <SlideoverBody className="border-t border-white/10 pt-2 [border-top-style:solid]">
+                    <SlideoverBody className="border-t border-white/10 py-2 [border-top-style:solid]">
                         <AccountExpandedContent
                             accountInfo={accountInfo}
                             accountInfoLoading={accountInfoLoading}
@@ -87,34 +90,25 @@ export function AccountDetailSlideover({
                     </SlideoverBody>
 
                     {/* Footer action bar */}
-                    <div className="flex shrink-0 gap-2 p-3 pb-6">
-                        <Button
-                            className="flex !h-16 w-1/4 flex-col gap-1.5"
-                            onClick={() => setNicknameOpen(true)}
-                            size="sm"
-                            variant="outline"
-                        >
-                            <Tag size={13} />
+                    <div className="flex shrink-0 gap-2 border-t border-white/10 px-3 pb-6 pt-3 [border-top-style:solid]">
+                        <Button className="w-1/4" onClick={() => setNicknameOpen(true)} size="tile" variant="outline">
+                            <EditIcon width={16} />
                             Nickname
                         </Button>
-                        <Button
-                            className="flex !h-16 w-1/4 flex-col gap-1.5"
-                            onClick={() => copy(address)}
-                            size="sm"
-                            variant="outline"
-                        >
-                            {copyState === 'copied' ? <CheckCircle size={13} /> : <Copy size={13} />}
-                            Copy
+                        {/* Copyable is built for inline rows (icon has mr-1.5); drop that margin so the
+                            icon stays centered over the label in the vertical tile layout. */}
+                        <Button className="w-1/4 [&>span]:mr-0" size="tile" variant="outline">
+                            <Copyable text={address}>Copy</Copyable>
                         </Button>
-                        <Button asChild className="flex !h-16 w-1/4 flex-col gap-1.5" size="sm" variant="accent">
+                        <Button asChild className="w-1/4" size="tile" variant="accent">
                             <Link href={addressPath} target="_blank">
-                                <ExternalLink size={13} />
+                                <ExternalLink size={16} />
                                 Open
                             </Link>
                         </Button>
                         <SlideoverClose asChild>
-                            <Button className="flex !h-16 w-1/4 flex-col gap-1.5" size="sm" variant="outline">
-                                <X size={13} />
+                            <Button className="w-1/4" size="tile" variant="outline">
+                                <X size={16} />
                                 Close
                             </Button>
                         </SlideoverClose>

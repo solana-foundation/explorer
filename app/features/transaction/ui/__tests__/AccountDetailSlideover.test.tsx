@@ -14,6 +14,7 @@ vi.mock('next/link', () => ({
 }));
 
 vi.mock('@/app/features/nicknames', () => ({
+    EditIcon: () => <svg />,
     NicknameEditor: ({ address, open, onClose }: { address: string; open: boolean; onClose: () => void }) =>
         open ? (
             <div>
