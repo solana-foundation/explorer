@@ -3,6 +3,9 @@ import { render, screen } from '@testing-library/react';
 import { ClusterStatus } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { createV1TransactionBytes } from '@/app/entities/transaction-data/__fixtures__/wire-transactions';
+import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
+
 import { PermalinkView } from '../InspectorPage';
 
 const fetchTransaction = vi.fn();
@@ -23,6 +26,30 @@ vi.mock('next/navigation', () => ({
     usePathname: () => '/tx/inspector',
     useRouter: () => ({ push: vi.fn() }),
     useSearchParams: () => new URLSearchParams(),
+}));
+// The v1 tests render LoadedView; stub its data-fetching children so the overview card —
+// the part under test — renders without providers.
+vi.mock('@providers/accounts', () => ({
+    useFetchAccountInfo: () => vi.fn(),
+}));
+vi.mock('@features/instruction-simulation', () => ({
+    SimulatorCard: () => <div data-testid="simulator-card" />,
+}));
+vi.mock('../AccountsCard', () => ({
+    AccountsCard: () => <div data-testid="accounts-card" />,
+}));
+vi.mock('../AddressTableLookupsCard', () => ({
+    AddressTableLookupsCard: () => <div data-testid="atl-card" />,
+}));
+vi.mock('../InstructionsSection', () => ({
+    InstructionsSection: () => <div data-testid="instructions-section" />,
+}));
+vi.mock('../SignaturesCard', () => ({
+    TransactionSignatures: () => <div data-testid="signatures-card" />,
+}));
+vi.mock('../AddressWithContext', () => ({
+    AddressWithContext: () => <div />,
+    createFeePayerValidator: () => () => undefined,
 }));
 
 // Minimal stand-in for a decoded raw tx; only the fields PermalinkView reads.
@@ -65,5 +92,41 @@ describe('PermalinkView', () => {
         cacheEntry = makeEntry(undefined, FetchStatus.FetchFailed);
         renderView();
         expect(screen.getByText('Failed to fetch transaction')).toBeInTheDocument();
+    });
+
+    it('should render a v1 transaction with its resource-limit rows', () => {
+        const { messageBytes } = parseTransactionBytes(
+            createV1TransactionBytes({ computeUnitLimit: 300_000, priorityFeeLamports: 50n }),
+        );
+        cacheEntry = makeEntry({
+            messageBytes,
+            signatures: [],
+            transactionConfig: { computeUnitLimit: 300_000, priorityFeeLamports: 50n },
+            version: 1,
+        });
+
+        renderView();
+
+        expect(screen.queryByText('The inspector does not support v1 transactions')).not.toBeInTheDocument();
+        expect(screen.getByText('Transaction Overview')).toBeInTheDocument();
+        expect(screen.getByText('v1')).toBeInTheDocument();
+        expect(screen.getByText('Compute unit limit')).toBeInTheDocument();
+        expect(screen.getByText('300,000')).toBeInTheDocument();
+        expect(screen.getByText('Priority fee (total)')).toBeInTheDocument();
+        expect(screen.getByTestId('instructions-section')).toBeInTheDocument();
+        // v1 messages carry static accounts only, so the lookups card is not rendered.
+        expect(screen.queryByTestId('atl-card')).not.toBeInTheDocument();
+    });
+
+    it('should keep the error card when v1 bytes cannot be decoded', () => {
+        cacheEntry = makeEntry({
+            messageBytes: new Uint8Array([0x81, 1, 2, 3]),
+            signatures: [],
+            version: 1,
+        });
+
+        renderView();
+
+        expect(screen.getByText('The inspector does not support v1 transactions')).toBeInTheDocument();
     });
 });

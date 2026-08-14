@@ -7,20 +7,27 @@ import { AlertCircle } from 'react-feather';
 import { Button } from '@/app/components/shared/ui/button';
 import { Logger } from '@/app/shared/lib/logger';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
+import { bridgeV1MessageBytes, isV1MessageBytes } from '@/app/shared/lib/v1-message-bridge';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { FormControl } from '@/app/shared/ui/FormControl';
 import { TabsContent, TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
 
-import type { InspectorData } from './InspectorPage';
+import type { InspectorData, TransactionData } from './InspectorPage';
 
 export { MIN_MESSAGE_LENGTH };
 
-function getTransactionDataFromUserSuppliedBytes(bytes: Uint8Array): {
-    message: VersionedMessage;
-    rawMessage: Uint8Array;
-    signatures?: (string | undefined)[];
-} {
+function getTransactionDataFromUserSuppliedBytes(bytes: Uint8Array): TransactionData {
     const { messageBytes, signatures } = parseTransactionBytes(bytes);
+    if (isV1MessageBytes(messageBytes)) {
+        const { message, transactionConfig } = bridgeV1MessageBytes(messageBytes);
+        return {
+            message,
+            rawMessage: messageBytes,
+            transactionConfig,
+            version: 1,
+            ...(signatures ? { signatures } : undefined),
+        };
+    }
     const message = VersionedMessage.deserialize(messageBytes);
     return {
         message,

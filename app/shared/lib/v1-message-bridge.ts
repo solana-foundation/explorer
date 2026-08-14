@@ -1,0 +1,106 @@
+import {
+    type CompiledTransactionMessage,
+    type CompiledTransactionMessageWithLifetime,
+    decompileTransactionMessage,
+    getCompiledTransactionMessageDecoder,
+    type TransactionMessage as KitTransactionMessage,
+} from '@solana/kit';
+import { MessageV0, PublicKey } from '@solana/web3.js';
+
+import { Logger } from '@/app/shared/lib/logger';
+
+/**
+ * Message-level resource limits carried by a v1 transaction.
+ *
+ * kit models this as `V1TransactionConfig` but does not export that type by name, so it is read
+ * off the v1 arm of kit's `TransactionMessage` to stay in step with kit's definition.
+ */
+export type V1TransactionConfig = NonNullable<Extract<KitTransactionMessage, { version: 1 }>['config']>;
+
+/**
+ * The wire version prefix of a v1 transaction message: the version flag bit (0x80) with
+ * version number 1. Legacy messages never set the flag bit, and a v0 message's first byte
+ * is 0x80, so this single byte identifies v1 unambiguously.
+ */
+const V1_MESSAGE_PREFIX = 0x81;
+
+export function isV1MessageBytes(bytes: Uint8Array): boolean {
+    return bytes.length > 0 && bytes[0] === V1_MESSAGE_PREFIX;
+}
+
+/**
+ * A web3.js view of a v1 compiled message.
+ *
+ * A v1 message is structurally a v0 message without address table lookups plus a config
+ * section, so every field web3.js consumers read — header, static keys, instructions —
+ * maps losslessly onto `MessageV0`. The one thing that cannot be synthesized is the wire
+ * encoding: re-serializing through `MessageV0` would emit v0 bytes that are not the real
+ * transaction. `serialize()` therefore returns the original v1 bytes, so signature
+ * verification, simulation (`new VersionedTransaction(message)`), and cache fingerprints
+ * all operate on the bytes the network sees.
+ *
+ * The inherited `version` getter still reports `0`; carry the true version alongside this
+ * object rather than reading it off the message.
+ */
+export class V1MessageView extends MessageV0 {
+    private readonly rawV1Bytes: Uint8Array;
+
+    constructor(args: ConstructorParameters<typeof MessageV0>[0], rawV1Bytes: Uint8Array) {
+        super(args);
+        this.rawV1Bytes = rawV1Bytes;
+    }
+
+    override serialize(): Uint8Array {
+        return this.rawV1Bytes;
+    }
+}
+
+/**
+ * Decodes v1 transaction message bytes into a web3.js-compatible view plus the message-level
+ * resource limits, when any are set.
+ *
+ * Throws if the bytes are not a valid v1 compiled message. The config is supplemental: if it
+ * cannot be decompiled the message still renders, so that failure is logged rather than thrown.
+ */
+export function bridgeV1MessageBytes(messageBytes: Uint8Array): {
+    message: V1MessageView;
+    transactionConfig?: V1TransactionConfig;
+} {
+    const compiled = getCompiledTransactionMessageDecoder().decode(messageBytes);
+    if (compiled.version !== 1) {
+        throw new Error(`Expected a v1 transaction message, got version ${compiled.version}`);
+    }
+
+    const message = new V1MessageView(
+        {
+            addressTableLookups: [],
+            compiledInstructions: compiled.instructionHeaders.map((header, i) => ({
+                accountKeyIndexes: [...compiled.instructionPayloads[i].instructionAccountIndices],
+                data: new Uint8Array(compiled.instructionPayloads[i].instructionData),
+                programIdIndex: header.programAccountIndex,
+            })),
+            header: {
+                numReadonlySignedAccounts: compiled.header.numReadonlySignerAccounts,
+                numReadonlyUnsignedAccounts: compiled.header.numReadonlyNonSignerAccounts,
+                numRequiredSignatures: compiled.header.numSignerAccounts,
+            },
+            recentBlockhash: compiled.lifetimeToken,
+            staticAccountKeys: compiled.staticAccounts.map(address => new PublicKey(address)),
+        },
+        messageBytes,
+    );
+
+    return { message, transactionConfig: readTransactionConfig(compiled) };
+}
+
+function readTransactionConfig(
+    compiled: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime & { version: 1 },
+): V1TransactionConfig | undefined {
+    try {
+        const { config } = decompileTransactionMessage(compiled);
+        return config && Object.values(config).some(value => value !== undefined) ? config : undefined;
+    } catch (error) {
+        Logger.error(error, { module: '[v1-message-bridge]' });
+        return undefined;
+    }
+}
