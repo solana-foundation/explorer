@@ -19,6 +19,21 @@ function RawDetailsLoader() {
 }
 
 /**
+ *  Stands in for the account and hex data rows when the transaction's instructions cannot be
+ *  reconstructed from its wire bytes — web3.js builds them from a `VersionedMessage`, which tops
+ *  out at v0.
+ */
+export function RawDetailsUnavailable() {
+    return (
+        <BaseTable.Row>
+            <BaseTable.Cell colSpan={2} className="text-center text-dark-muted-foreground">
+                Account list and hex data are not available for this transaction version
+            </BaseTable.Cell>
+        </BaseTable.Row>
+    );
+}
+
+/**
  *  Component that displays accounts from any Instruction.
  *
  *  VersionedMessage is optional as it will be present at inspector page only.

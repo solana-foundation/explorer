@@ -1,3 +1,4 @@
+import type { TransactionWithMeta } from '@entities/transaction-data';
 import {
     collectTransferInstructions,
     isTokenTransferInstruction,
@@ -5,7 +6,6 @@ import {
     type TokenTransferInstruction,
     type TokenTransferParsed,
 } from '@entities/transfer-instruction';
-import type { ParsedTransactionWithMeta } from '@solana/web3.js';
 import { validate } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -29,7 +29,7 @@ export type TokenReceiptOutcome =
     | { kind: 'not-applicable' };
 
 export async function createTokenTransferReceipt(
-    transaction: ParsedTransactionWithMeta,
+    transaction: TransactionWithMeta,
     getTokenInfo: (mint: string | undefined) => Promise<TokenInfo | undefined>,
 ): Promise<TokenReceiptOutcome> {
     const located = getTokenTransferInstructions(transaction);
@@ -77,7 +77,7 @@ export async function createTokenTransferReceipt(
 }
 
 function getTokenTransferInstructions(
-    transaction: ParsedTransactionWithMeta,
+    transaction: TransactionWithMeta,
 ): LocatedInstruction<TokenTransferInstruction>[] {
     return collectTransferInstructions(transaction, isTokenTransferInstruction);
 }
@@ -99,7 +99,7 @@ type PrimaryToken = {
 // then divides by 10^decimals once. Caller guarantees all instructions share a mint
 // (and therefore the same decimals).
 function buildTokenTransfers(
-    transaction: ParsedTransactionWithMeta,
+    transaction: TransactionWithMeta,
     located: LocatedInstruction<TokenTransferInstruction>[],
     primary: PrimaryToken,
 ): BuildTokenTransfersResult {
@@ -135,10 +135,7 @@ function buildTokenTransfers(
     };
 }
 
-function extractAmountInfo(
-    parsed: TokenTransferParsed,
-    transaction: ParsedTransactionWithMeta,
-): AmountInfo | undefined {
+function extractAmountInfo(parsed: TokenTransferParsed, transaction: TransactionWithMeta): AmountInfo | undefined {
     if (parsed.type === 'transferChecked' || parsed.type === 'transfer2') {
         const tokenAmount = parsed.info.tokenAmount;
         if (!tokenAmount?.amount || tokenAmount.decimals === undefined) return undefined;
@@ -150,7 +147,7 @@ function extractAmountInfo(
     return { decimals, rawAmount: parsed.info.amount };
 }
 
-function extractTokenTransferPayload(transaction: ParsedTransactionWithMeta, instruction: TokenTransferInstruction) {
+function extractTokenTransferPayload(transaction: TransactionWithMeta, instruction: TokenTransferInstruction) {
     const parsed = instruction.parsed;
     return {
         date: transaction.blockTime ?? undefined,
@@ -170,7 +167,7 @@ function extractTokenSender(info: TokenTransferParsed['info']): string | undefin
     return info.authority;
 }
 
-function extractTokenMint(transaction: ParsedTransactionWithMeta, parsed: TokenTransferParsed): string | undefined {
+function extractTokenMint(transaction: TransactionWithMeta, parsed: TokenTransferParsed): string | undefined {
     if ('mint' in parsed.info) {
         return parsed.info.mint?.toString();
     }
@@ -186,7 +183,7 @@ function extractTokenMint(transaction: ParsedTransactionWithMeta, parsed: TokenT
 }
 
 function extractTokenReceiver(
-    transaction: ParsedTransactionWithMeta,
+    transaction: TransactionWithMeta,
     destinationTokenAccount: string | undefined,
 ): string | undefined {
     if (!destinationTokenAccount) {
@@ -202,7 +199,7 @@ function extractTokenReceiver(
     return tokenBalance?.owner;
 }
 
-function extractTotal(parsed: TokenTransferParsed, transaction: ParsedTransactionWithMeta): number {
+function extractTotal(parsed: TokenTransferParsed, transaction: TransactionWithMeta): number {
     if (parsed.type === 'transferChecked' || parsed.type === 'transfer2') {
         return parseFloat(parsed.info.tokenAmount?.uiAmountString || '0');
     }
@@ -219,10 +216,7 @@ function extractTotal(parsed: TokenTransferParsed, transaction: ParsedTransactio
     return rawAmount;
 }
 
-function getTokenDecimals(
-    transaction: ParsedTransactionWithMeta,
-    tokenAccount: string | undefined,
-): number | undefined {
+function getTokenDecimals(transaction: TransactionWithMeta, tokenAccount: string | undefined): number | undefined {
     if (!tokenAccount) {
         return undefined;
     }

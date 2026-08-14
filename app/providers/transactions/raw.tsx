@@ -1,33 +1,17 @@
 'use client';
 
+import { fetchRawTransaction, type RawTransaction } from '@entities/transaction-data';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import {
-    type CompiledInnerInstruction,
-    Connection,
-    type DecompileArgs,
-    type Finality,
-    TransactionMessage,
-    type TransactionSignature,
-    type VersionedMessage,
-} from '@solana/web3.js';
+import { type Finality, type TransactionSignature } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 export interface Details {
-    raw?: {
-        message: VersionedMessage;
-        meta?: {
-            innerInstructions?: CompiledInnerInstruction[];
-            postBalances: number[];
-            preBalances: number[];
-        };
-        signatures: string[];
-        transaction: TransactionMessage;
-    } | null;
+    raw?: RawTransaction | null;
 }
 
 type State = Cache.State<Details>;
@@ -62,7 +46,7 @@ export function useRawTransactionDetails(signature: TransactionSignature): Cache
     return context.entries[signature];
 }
 
-async function fetchRawTransaction(
+async function loadRawTransaction(
     dispatch: Dispatch,
     signature: TransactionSignature,
     cluster: Cluster,
@@ -78,35 +62,11 @@ async function fetchRawTransaction(
 
     let fetchStatus;
     try {
-        const response = await new Connection(url).getTransaction(signature, {
-            commitment,
-            maxSupportedTransactionVersion: 0,
-        });
+        const raw = await fetchRawTransaction(url, signature, commitment);
         fetchStatus = FetchStatus.Fetched;
 
-        let data: Details = { raw: null };
-        if (response !== null) {
-            const { message, signatures } = response.transaction;
-            const accountKeysFromLookups = response.meta?.loadedAddresses;
-            const decompileArgs: DecompileArgs | undefined = accountKeysFromLookups && { accountKeysFromLookups };
-            data = {
-                raw: {
-                    message,
-                    meta: response.meta
-                        ? {
-                              innerInstructions: response.meta.innerInstructions ?? undefined,
-                              postBalances: response.meta.postBalances,
-                              preBalances: response.meta.preBalances,
-                          }
-                        : undefined,
-                    signatures,
-                    transaction: TransactionMessage.decompile(message, decompileArgs),
-                },
-            };
-        }
-
         dispatch({
-            data,
+            data: { raw },
             key: signature,
             status: fetchStatus,
             type: ActionType.Update,
@@ -134,7 +94,7 @@ export function useFetchRawTransaction() {
     const { cluster, url } = useCluster();
     return React.useCallback(
         (signature: TransactionSignature, commitment?: Finality) => {
-            url && fetchRawTransaction(dispatch, signature, cluster, url, commitment);
+            url && loadRawTransaction(dispatch, signature, cluster, url, commitment);
         },
         [dispatch, cluster, url],
     );

@@ -1,5 +1,5 @@
 import { truncateAddress } from '@entities/address';
-import { ParsedTransactionWithMeta } from '@solana/web3.js';
+import type { TransactionWithMeta } from '@entities/transaction-data';
 import { lamportsToSolString } from '@utils/index';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -25,7 +25,7 @@ export async function createReceipt(signature: string, cluster?: QueryCluster): 
     return extractReceiptData(data.transaction, data.cluster);
 }
 
-export async function extractReceiptData(tx: ParsedTransactionWithMeta, cluster: Cluster): Promise<ReceiptResult> {
+export async function extractReceiptData(tx: TransactionWithMeta, cluster: Cluster): Promise<ReceiptResult> {
     const tokenOutcome = await createTokenTransferReceipt(tx, (mint: string | undefined) =>
         getParsedTokenInfo(mint, cluster),
     );

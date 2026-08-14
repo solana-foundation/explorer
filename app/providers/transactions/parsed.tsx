@@ -1,16 +1,17 @@
 'use client';
 
+import { fetchTransactionDetails, type TransactionWithMeta } from '@entities/transaction-data';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { Connection, ParsedTransactionWithMeta, TransactionSignature } from '@solana/web3.js';
+import { TransactionSignature } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 export interface Details {
-    transactionWithMeta?: ParsedTransactionWithMeta | null;
+    transactionWithMeta?: TransactionWithMeta | null;
 }
 
 type State = Cache.State<Details>;
@@ -46,10 +47,7 @@ async function fetchDetails(dispatch: Dispatch, signature: TransactionSignature,
     let fetchStatus;
     let transactionWithMeta;
     try {
-        transactionWithMeta = await new Connection(url).getParsedTransaction(signature, {
-            commitment: 'confirmed',
-            maxSupportedTransactionVersion: 0,
-        });
+        transactionWithMeta = await fetchTransactionDetails(url, signature);
         fetchStatus = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {

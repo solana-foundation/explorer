@@ -1,14 +1,10 @@
-import {
-    ParsedInstruction,
-    type ParsedTransactionWithMeta,
-    type PartiallyDecodedInstruction,
-    PublicKey,
-} from '@solana/web3.js';
+import type { TransactionWithMeta } from '@entities/transaction-data';
+import { ParsedInstruction, type PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { MEMO_PROGRAM_ADDRESS } from '@solana-program/memo';
 
 import { isParsedInstruction } from './types';
 
-export function extractMemoFromTransaction(transaction: ParsedTransactionWithMeta): string | undefined {
+export function extractMemoFromTransaction(transaction: TransactionWithMeta): string | undefined {
     const { transaction: tx } = transaction;
     const memoInstruction = tx.message.instructions.find(isMemoProgram);
     return memoInstruction && extractMemoFromInstruction(memoInstruction);

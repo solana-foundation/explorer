@@ -488,12 +488,23 @@ export function PermalinkView({
         return <ErrorCard text="Transaction was not found" retry={reset} retryText="Reset" />;
     }
 
-    const { message, signatures, meta } = transaction;
+    const { message, messageBytes, signatures, meta } = transaction;
+    // The inspector renders a web3.js `VersionedMessage`, which cannot represent a v1 message.
+    if (!message) {
+        return (
+            <ErrorCard
+                text={`The inspector does not yet support v${transaction.version} transactions`}
+                retry={reset}
+                retryText="Reset"
+            />
+        );
+    }
+
     const tx = {
         accountBalances: meta,
         compiledInnerInstructions: meta?.innerInstructions,
         message,
-        rawMessage: message.serialize(),
+        rawMessage: messageBytes,
         signatures,
     };
     return <LoadedView transaction={tx} onClear={reset} showTokenBalanceChanges={showTokenBalanceChanges} />;
