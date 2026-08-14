@@ -34,6 +34,9 @@ const RPC_ENDPOINTS = {
     testnet: 'https://testnet.rpc.address',
 };
 
+/** The Foundation's PMP authority — the fallback lookup a frozen program's IDL lives under. */
+const FNDN_AUTHORITY = 'fndnu15PLXELbLsTqrfbiweBvsBj2o12RoVfkeCCbX2';
+
 const CODAMA_IDL = { kind: 'rootNode', program: { publicKey: gen.systemProgram } };
 const ANCHOR_IDL = { address: gen.systemProgram, instructions: [], metadata: { spec: '0.1.0' } };
 
@@ -93,38 +96,60 @@ describe('createProgramIdlDiscovery', () => {
         vi.clearAllMocks();
     });
 
-    it('should map a PMP-sourced client to pmp_canonical with detection and name', async () => {
+    it('should map a canonical PMP client to pmp_canonical with detection and name', async () => {
         fetchOnChainIdlClientMock.mockResolvedValue([
             undefined,
-            { client: fakeClient(CODAMA_IDL, 'My Program'), source: IdlSource.Pmp },
+            { authority: null, client: fakeClient(CODAMA_IDL, 'My Program'), source: IdlSource.Pmp },
         ]);
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
 
         await expect(discover('program-address', 'mainnet-beta')).resolves.toMatchObject({
             discovery: {
+                authority: null,
                 idl_type: 'codama',
                 program_name: 'My Program',
+                source: 'pmp',
                 source_type: 'pmp_canonical',
                 status: 'found',
             },
         });
     });
 
-    it('should map an anchor-PDA-sourced client to anchor_on_chain', async () => {
+    it('should map a fallback-authority PMP client to pmp_fallback, carrying the key', async () => {
+        // what a frozen program looks like: no upgrade authority, so only a fallback PDA can hold its IDL
+        fetchOnChainIdlClientMock.mockResolvedValue([
+            undefined,
+            { authority: FNDN_AUTHORITY, client: fakeClient(CODAMA_IDL, 'Token'), source: IdlSource.Pmp },
+        ]);
+        const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
+
+        await expect(discover('program-address', 'mainnet-beta')).resolves.toMatchObject({
+            discovery: {
+                authority: FNDN_AUTHORITY,
+                source: 'pmp',
+                source_type: 'pmp_fallback',
+                status: 'found',
+            },
+        });
+    });
+
+    it('should map an anchor-PDA-sourced client to anchor', async () => {
         fetchOnChainIdlClientMock.mockResolvedValue([
             undefined,
             { client: fakeClient(ANCHOR_IDL), source: IdlSource.Anchor },
         ]);
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
 
-        await expect(discover('program-address', 'mainnet-beta')).resolves.toMatchObject({
-            discovery: {
-                idl_type: 'anchor',
-                program_name: null,
-                source_type: 'anchor_on_chain',
-                status: 'found',
-            },
+        const { discovery } = await discover('program-address', 'mainnet-beta');
+
+        expect(discovery).toEqual({
+            idl_type: 'anchor',
+            program_name: null,
+            source: 'anchor',
+            source_type: 'anchor',
+            status: 'found',
         });
+        expect('authority' in discovery).toBe(false); // the anchor PDA has no authority to report
     });
 
     it('should report not_found when no leg publishes an IDL', async () => {

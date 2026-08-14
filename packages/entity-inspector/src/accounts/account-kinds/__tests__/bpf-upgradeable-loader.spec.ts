@@ -353,8 +353,10 @@ describe('bpf-upgradeable-loader account kind payload', () => {
                 instructions: [],
                 metadata: { name: 'test_program', spec: '0.1.0' },
             },
+            authority: null,
             idl_type: 'anchor' as const,
             program_name: 'test_program',
+            source: 'pmp' as const,
             source_type: 'pmp_canonical' as const,
             status: 'found' as const,
         };

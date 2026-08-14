@@ -20,7 +20,7 @@ import type { SupportedCluster } from '../config.js';
 import { type InspectorLogger, ns } from '../logger.js';
 import { RPC_REQUEST_TIMEOUT_MS } from '../shared/constants.js';
 import { resolveRpcEndpoint } from '../rpc/resolve-rpc-endpoint.js';
-import type { IdlDiscoveryResult } from './types.js';
+import type { IdlDiscoveryResult, IdlSourceType } from './types.js';
 
 export type ResolveIdlClient = (programAddress: string, cluster: SupportedCluster) => Promise<IdlClient | null>;
 
@@ -51,13 +51,27 @@ async function fetchOnChain(programAddress: string, rpc: IdlFetcherRpc): Promise
     }
 }
 
+// A switch, not a ternary: the declared return type makes an unhandled IdlSource a compile error rather
+// than a silent misattribution.
+function toSourceType({ authority, source }: PublishedIdlClient): IdlSourceType {
+    switch (source) {
+        case IdlSource.Pmp:
+            // an authority key means a fallback PDA served it; the canonical PDA derives from no authority
+            return authority ? 'pmp_fallback' : 'pmp_canonical';
+        case IdlSource.Anchor:
+            return 'anchor';
+    }
+}
+
 function toFoundDiscovery(fetched: PublishedIdlClient): IdlDiscoveryResult {
     return {
         // Legacy (pre-0.30) IDLs convert to Codama at client creation and report as codama here.
         idl_type: getIdlStandard(fetched.client.idl),
         program_name: fetched.client.programName() ?? null,
-        source_type: fetched.source === IdlSource.Pmp ? 'pmp_canonical' : 'anchor_on_chain',
+        source: fetched.source,
+        source_type: toSourceType(fetched),
         status: 'found',
+        ...('authority' in fetched ? { authority: fetched.authority } : {}),
     };
 }
 

@@ -1,4 +1,5 @@
 import type { IdlStandard } from '@explorer/idl-decode';
+import type { IdlSource } from '@explorer/idl-decode/fetch';
 import type { TokenProgram } from '@explorer/parsers';
 import type { SecurityTxtFields as ParsedSecurityTxtFields } from '@explorer/parsers/security-txt';
 
@@ -57,11 +58,23 @@ export type MultisigReferenceResult =
 // explorer-mcp's wider wire vocabulary (legacy converts to codama at client creation; shank is undetectable).
 export type IdlType = `${IdlStandard}` | 'anchor_legacy' | 'shank';
 
+/**
+ * The publication refined where one has variants: PMP resolves under the program's canonical PDA or
+ * under a fallback authority (the only lookup a frozen program can publish through), while the Anchor
+ * PDA has a single derivation and so refines to itself. Wire vocabulary — deliberately spelled here
+ * rather than derived from `IdlSource`, so an upstream rename cannot move these values.
+ */
+export type IdlSourceType = 'anchor' | 'pmp_canonical' | 'pmp_fallback';
+
 export type IdlDiscoveryResult =
     | {
           status: 'found';
           idl_type: IdlType;
-          source_type: 'pmp_canonical' | 'anchor_on_chain';
+          /** Where it was published, as the package reports it. */
+          source: IdlSource;
+          source_type: IdlSourceType;
+          /** PMP only: `null` when the canonical PDA served it, else the authority whose PDA did. */
+          authority?: string | null;
           program_name: string | null;
           // The source shipped the whole IDL json here; deliberately omitted — detection + name serve the tool.
           data?: Record<string, unknown>;
