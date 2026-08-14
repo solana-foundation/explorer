@@ -3,9 +3,9 @@
 import { type Address, address as assertAddress } from '@solana/kit';
 
 import type { IdlFetcher, IdlFetcherRpc } from '../types.js';
-import { fetchAnchorPdaIdl } from './anchor-pda.js';
-import { fetchPmpIdl } from './pmp.js';
 import { type PublishedIdl, toIdlRpc } from './solana-idl.js';
+import { fetchAnchorPdaIdl } from './source-anchor-pda.js';
+import { fetchPmpIdl } from './source-pmp.js';
 
 /** Which on-chain publication a fetched IDL came from. */
 export enum IdlSource {
