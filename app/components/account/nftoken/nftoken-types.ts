@@ -1,8 +1,16 @@
-import * as BufferLayout from '@solana/buffer-layout';
+import {
+    addDecoderSizePrefix,
+    fixDecoderSize,
+    getAddressDecoder,
+    getBytesDecoder,
+    getStructDecoder,
+    getU8Decoder,
+    getU32Decoder,
+    getUtf8Decoder,
+} from '@solana/kit';
 
-const publicKey = (property: string) => {
-    return BufferLayout.blob(32, property);
-};
+/** Borsh `String`: a u32 little-endian byte length followed by that many UTF-8 bytes. */
+const metadataUrlDecoder = () => addDecoderSizePrefix(getUtf8Decoder(), getU32Decoder());
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace NftokenTypes {
@@ -39,32 +47,31 @@ export namespace NftokenTypes {
 
     export type NftInfo = NftAccount & Partial<Metadata>;
 
-    export const nftAccountLayout = BufferLayout.struct([
-        BufferLayout.blob(8, 'discriminator'),
-        BufferLayout.u8('version'),
-        publicKey('holder'),
-        publicKey('authority'),
-        BufferLayout.u8('authority_can_update'),
-        publicKey('collection'),
-        publicKey('delegate'),
-        BufferLayout.u8('is_frozen'),
-        BufferLayout.u8('unused_1'),
-        BufferLayout.u8('unused_2'),
-        BufferLayout.u8('unused_3'),
-        BufferLayout.u32('metadata_url_length'),
-        BufferLayout.utf8(400, 'metadata_url'),
+    export const nftAccountDecoder = getStructDecoder([
+        ['discriminator', fixDecoderSize(getBytesDecoder(), 8)],
+        ['version', getU8Decoder()],
+        ['holder', getAddressDecoder()],
+        ['authority', getAddressDecoder()],
+        ['authority_can_update', getU8Decoder()],
+        ['collection', getAddressDecoder()],
+        ['delegate', getAddressDecoder()],
+        ['is_frozen', getU8Decoder()],
+        ['unused_1', getU8Decoder()],
+        ['unused_2', getU8Decoder()],
+        ['unused_3', getU8Decoder()],
+        ['unused_4', getU8Decoder()],
+        ['metadata_url', metadataUrlDecoder()],
     ]);
 
-    export const collectionAccountLayout = BufferLayout.struct([
-        BufferLayout.blob(8, 'discriminator'),
-        BufferLayout.u8('version'),
-        publicKey('authority'),
-        BufferLayout.u8('authority_can_update'),
-        BufferLayout.u8('unused_1'),
-        BufferLayout.u8('unused_2'),
-        BufferLayout.u8('unused_3'),
-        BufferLayout.u8('unused_4'),
-        BufferLayout.u32('metadata_url_length'),
-        BufferLayout.utf8(400, 'metadata_url'),
+    export const collectionAccountDecoder = getStructDecoder([
+        ['discriminator', fixDecoderSize(getBytesDecoder(), 8)],
+        ['version', getU8Decoder()],
+        ['authority', getAddressDecoder()],
+        ['authority_can_update', getU8Decoder()],
+        ['unused_1', getU8Decoder()],
+        ['unused_2', getU8Decoder()],
+        ['unused_3', getU8Decoder()],
+        ['unused_4', getU8Decoder()],
+        ['metadata_url', metadataUrlDecoder()],
     ]);
 }

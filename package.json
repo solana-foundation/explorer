@@ -81,7 +81,6 @@
         "@solana-program/system": "0.13.0",
         "@solana-program/token": "0.15.0",
         "@solana-program/token-2022": "0.13.0",
-        "@solana/buffer-layout": "3.0.0",
         "@solana/idl": "0.2.0",
         "@solana/kit": "7.0.0",
         "@solana/security-txt": "0.1.0",

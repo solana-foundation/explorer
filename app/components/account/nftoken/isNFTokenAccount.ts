@@ -1,5 +1,3 @@
-import { PublicKey } from '@solana/web3.js';
-
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
@@ -14,6 +12,17 @@ export function isNFTokenAccount(account: Account): boolean {
 
 const nftokenAccountDisc = 'IbRbNewPP2E=';
 
+/**
+ * Whether account data opens with the given 8-byte account discriminator.
+ *
+ * Checked before decoding: the NFT and collection accounts share an owner and a
+ * discriminator prefix but not a size, so decoding an account against the wrong
+ * layout runs off the end of the buffer and throws.
+ */
+function hasDiscriminator(data: Uint8Array, discriminator: string): boolean {
+    return data.length >= 8 && toBase64(data.slice(0, 8)) === discriminator;
+}
+
 export const parseNFTokenNFTAccount = (account: Account): NftokenTypes.NftAccount | null => {
     if (!isNFTokenAccount(account)) {
         return null;
@@ -21,27 +30,23 @@ export const parseNFTokenNFTAccount = (account: Account): NftokenTypes.NftAccoun
 
     try {
         invariant(account.data.raw, 'isNFTokenAccount guarantees raw account data');
-        const parsed = NftokenTypes.nftAccountLayout.decode(account.data.raw);
 
-        if (!parsed) {
+        if (!hasDiscriminator(account.data.raw, nftokenAccountDisc)) {
             return null;
         }
 
-        if (toBase64(new Uint8Array(parsed.discriminator)) !== nftokenAccountDisc) {
-            return null;
-        }
+        const parsed = NftokenTypes.nftAccountDecoder.decode(account.data.raw);
 
         return {
             address: account.pubkey.toBase58(),
-            authority: new PublicKey(parsed.authority).toBase58(),
+            authority: parsed.authority,
             authority_can_update: Boolean(parsed.authority_can_update),
-            collection: new PublicKey(parsed.collection).toBase58(),
+            collection: parsed.collection,
 
-            delegate: new PublicKey(parsed.delegate).toBase58(),
-            holder: new PublicKey(parsed.holder).toBase58(),
+            delegate: parsed.delegate,
+            holder: parsed.holder,
 
-            // eslint-disable-next-line no-restricted-syntax -- remove null bytes from metadata URL
-            metadata_url: parsed.metadata_url?.replace(/\0/g, '') ?? null,
+            metadata_url: parsed.metadata_url,
         };
     } catch (e) {
         Logger.error(e);
@@ -57,21 +62,18 @@ export const parseNFTokenCollectionAccount = (account: Account): NftokenTypes.Co
 
     try {
         invariant(account.data.raw, 'isNFTokenAccount guarantees raw account data');
-        const parsed = NftokenTypes.collectionAccountLayout.decode(account.data.raw);
 
-        if (!parsed) {
+        if (!hasDiscriminator(account.data.raw, collectionAccountDisc)) {
             return null;
         }
-        if (toBase64(new Uint8Array(parsed.discriminator)) !== collectionAccountDisc) {
-            return null;
-        }
+
+        const parsed = NftokenTypes.collectionAccountDecoder.decode(account.data.raw);
 
         return {
             address: account.pubkey.toBase58(),
             authority: parsed.authority,
             authority_can_update: Boolean(parsed.authority_can_update),
-            // eslint-disable-next-line no-restricted-syntax -- remove null bytes from metadata URL
-            metadata_url: parsed.metadata_url?.replace(/\0/g, '') ?? null,
+            metadata_url: parsed.metadata_url,
         };
     } catch (e) {
         Logger.error(e);

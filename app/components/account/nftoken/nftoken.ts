@@ -3,6 +3,7 @@ import bs58 from 'bs58';
 import pLimit from 'p-limit';
 
 import { fromHex } from '@/app/shared/lib/bytes';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { NftokenTypes } from './nftoken-types';
 
@@ -44,22 +45,24 @@ export namespace NftokenFetcher {
         });
 
         const parsed_accounts: NftokenTypes.NftAccount[] = accounts.flatMap(account => {
-            const parsed = NftokenTypes.nftAccountLayout.decode(account.account.data);
+            try {
+                const parsed = NftokenTypes.nftAccountDecoder.decode(account.account.data);
 
-            if (!parsed) {
+                return {
+                    address: account.pubkey.toBase58(),
+                    authority: parsed.authority,
+                    authority_can_update: Boolean(parsed.authority_can_update),
+                    collection: parsed.collection,
+
+                    delegate: parsed.delegate,
+                    holder: parsed.holder,
+
+                    metadata_url: parsed.metadata_url,
+                };
+            } catch (e) {
+                Logger.error(e);
                 return [];
             }
-            return {
-                address: account.pubkey.toBase58(),
-                authority: parsed.authority,
-                authority_can_update: Boolean(parsed.authority_can_update),
-                collection: parsed.collection,
-
-                delegate: parsed.delegate,
-                holder: parsed.holder,
-
-                metadata_url: parsed.metadata_url,
-            };
         });
 
         const metadata_urls = parsed_accounts.map(a => a.metadata_url);
