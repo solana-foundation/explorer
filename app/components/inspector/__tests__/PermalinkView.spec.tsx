@@ -98,10 +98,11 @@ describe('PermalinkView', () => {
         const { messageBytes } = parseTransactionBytes(
             createV1TransactionBytes({ computeUnitLimit: 300_000, priorityFeeLamports: 50n }),
         );
+        // No transactionConfig on the cache entry: the rows must come from decoding messageBytes,
+        // the same source every other entry path uses.
         cacheEntry = makeEntry({
             messageBytes,
             signatures: [],
-            transactionConfig: { computeUnitLimit: 300_000, priorityFeeLamports: 50n },
             version: 1,
         });
 

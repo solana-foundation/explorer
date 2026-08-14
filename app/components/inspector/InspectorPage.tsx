@@ -508,16 +508,17 @@ export function PermalinkView({
 
     const { message, messageBytes, signatures, meta } = transaction;
     // The inspector renders a web3.js `VersionedMessage`; a v1 message gets there through a
-    // bridged view over the wire bytes.
-    let bridgedMessage: VersionedMessage | undefined;
+    // bridged view over the wire bytes, which also carries the message's resource limits so
+    // every entry path derives them from the same decode.
+    let bridged: ReturnType<typeof bridgeV1MessageBytes> | undefined;
     if (!message && transaction.version === 1) {
         try {
-            bridgedMessage = bridgeV1MessageBytes(messageBytes).message;
+            bridged = bridgeV1MessageBytes(messageBytes);
         } catch (_err) {
             // Fall through to the error card below.
         }
     }
-    const resolvedMessage = message ?? bridgedMessage;
+    const resolvedMessage = message ?? bridged?.message;
     if (!resolvedMessage) {
         return (
             <ErrorCard
@@ -534,9 +535,7 @@ export function PermalinkView({
         message: resolvedMessage,
         rawMessage: messageBytes,
         signatures,
-        ...(transaction.version === 1
-            ? { transactionConfig: transaction.transactionConfig, version: 1 as const }
-            : undefined),
+        ...(bridged ? { transactionConfig: bridged.transactionConfig, version: 1 as const } : undefined),
     };
     return <LoadedView transaction={tx} onClear={reset} showTokenBalanceChanges={showTokenBalanceChanges} />;
 }
