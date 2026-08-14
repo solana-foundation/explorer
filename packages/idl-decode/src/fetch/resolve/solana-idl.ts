@@ -3,8 +3,8 @@
 import { type IdlResult, parseIdl, type PmpIdlResult, type SolanaRpcClient } from '@solana/idl';
 import type { Address } from '@solana/kit';
 
-import { IDL_ERROR__IDL_PARSE_FAILED, IdlError } from '../errors.js';
-import type { IdlFetcherRpc } from '../types.js';
+import { IDL_ERROR__IDL_PARSE_FAILED, IdlError } from '../../errors.js';
+import type { IdlFetcherRpc } from '../../types.js';
 
 /** Which publication served the IDL, NOT its format — PMP content is often Anchor-format (`IdlStandard`). */
 export const IdlSource = { Anchor: 'anchor', Pmp: 'pmp' } as const;

@@ -14,11 +14,10 @@ import {
     type Result,
 } from '../errors.js';
 import type { IdlFetcher, IdlFetcherRpc } from '../types.js';
-import { createLatestIdlFetcher, type LatestIdlFetcherOptions, resolveOnChainIdl } from './resolve-idl.js';
-import { IdlSource, type PublishedIdl } from './solana-idl.js';
+import { createOnChainIdlFetcher, IdlSource, type OnChainIdlOptions, resolveOnChainIdl } from './resolve/index.js';
 
-export type { IdlFetcherRpc, LatestIdlFetcherOptions };
-export { createLatestIdlFetcher, IdlSource };
+export type { IdlFetcherRpc, OnChainIdlOptions };
+export { createOnChainIdlFetcher, IdlSource };
 
 /** The create+verify tail shared by both fetch routes — every data outcome is a coded-IdlError Result. */
 function createVerifiedClient(
@@ -37,31 +36,48 @@ function createVerifiedClient(
     return ok(client);
 }
 
-export type FetchIdlClientOptions = IdlClientOptions & {
-    abortSignal?: AbortSignal;
-    /** Reject an IDL declaring a DIFFERENT program address (default true) — registries and custom fetchers can serve mislabeled ones. */
-    verifyAddress?: boolean;
-} & ({ fetcher?: undefined; rpc: IdlFetcherRpc } | { fetcher: IdlFetcher; rpc?: IdlFetcherRpc });
+/** What every fetch route takes: the client's own options, the lookup knobs, and the fetch contract's. */
+type FetchIdlOptionsBase = IdlClientOptions &
+    OnChainIdlOptions & {
+        abortSignal?: AbortSignal;
+        /** Reject an IDL declaring a DIFFERENT program address (default true) — registries and custom fetchers can serve mislabeled ones. */
+        verifyAddress?: boolean;
+    };
+
+/** {@link fetchOnChainIdlClient}'s options: `rpc`, since an on-chain publication is what it reads. */
+export type FetchOnChainIdlClientOptions = FetchIdlOptionsBase & { rpc: IdlFetcherRpc };
+
+/** {@link fetchIdlClient}'s options: the same, plus a `fetcher` in place of `rpc` for any other source. */
+export type FetchIdlClientOptions = FetchIdlOptionsBase &
+    ({ fetcher?: undefined; rpc: IdlFetcherRpc } | { fetcher: IdlFetcher; rpc?: IdlFetcherRpc });
+
+/** Strips the fetch-specific options, leaving what the client itself takes. */
+function clientOptionsOf({
+    abortSignal: _abortSignal,
+    anchor: _anchor,
+    authority: _authority,
+    fetcher: _fetcher,
+    rpc: _rpc,
+    verifyAddress: _verifyAddress,
+    ...clientOptions
+}: FetchIdlClientOptions): IdlClientOptions {
+    return clientOptions;
+}
 
 /**
- * Resolve a program's IDL by address and build a decode client over it, whatever standard the
- * program publishes. The fetcher defaults to {@link createLatestIdlFetcher} over `rpc` (pass
- * `fetcher` for any other source). Every data outcome is a coded-IdlError Result value —
- * only an abort REJECTS, with the abort reason. Use {@link fetchLatestIdlClient} when the
- * publication source matters — an arbitrary fetcher cannot report one.
+ * Runs a resolve step under the fetch contract: an abort REJECTS with its reason, a leg's own coded
+ * error passes through, any other throw becomes `IDL_ERROR__IDL_FETCH_FAILED`, and nothing resolved
+ * becomes `IDL_ERROR__IDL_NOT_FOUND`. Generic over what a step resolves — an attributed `PublishedIdl`
+ * on chain, a raw IDL from a consumer's `fetcher`.
  */
-export async function fetchIdlClient(
+async function resolvedOrErr<T>(
     programAddress: string,
-    options: FetchIdlClientOptions,
-): Promise<Result<IdlClient>> {
-    const { abortSignal, fetcher, rpc, verifyAddress = true, ...clientOptions } = options;
-    abortSignal?.throwIfAborted();
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- the options union guarantees `rpc` whenever `fetcher` is absent; TS drops that correlation on destructuring
-    const resolveIdl = fetcher ?? createLatestIdlFetcher(rpc as IdlFetcherRpc);
-
-    let idl: unknown;
+    resolve: () => Promise<T | undefined>,
+    abortSignal: AbortSignal | undefined,
+): Promise<Result<T>> {
+    let published: T | undefined;
     try {
-        idl = await resolveIdl(programAddress, abortSignal ? { abortSignal } : undefined);
+        published = await resolve();
     } catch (cause) {
         // caller-initiated — not a data outcome; the reason (always set once aborted), not whatever wrapper the transport rejected with
         if (abortSignal?.aborted) throw abortSignal.reason;
@@ -69,56 +85,78 @@ export async function fetchIdlClient(
         if (isIdlError(cause)) return err(cause);
         return err(new IdlError(IDL_ERROR__IDL_FETCH_FAILED, { cause }));
     }
-    if (idl === undefined) return err(new IdlError(IDL_ERROR__IDL_NOT_FOUND, { programAddress }));
-
-    return createVerifiedClient(programAddress, idl, verifyAddress, clientOptions);
+    if (published === undefined) return err(new IdlError(IDL_ERROR__IDL_NOT_FOUND, { programAddress }));
+    return ok(published);
 }
 
-/** A fetched decode client together with the publication that produced its IDL. */
-export type FetchedIdlClient = {
-    /** PMP authority that served the IDL — `null` canonical, an address for a fallback; absent off the anchor leg. */
+/** A decode client together with the publication that produced its IDL. */
+export type PublishedIdlClient = {
+    /** PMP authority that served the IDL — `null` canonical, an address for a fallback; absent off the PMP leg. */
     authority?: Address | null;
     client: IdlClient;
     source: IdlSource;
 };
 
-export type FetchLatestIdlClientOptions = IdlClientOptions &
-    LatestIdlFetcherOptions & {
-        abortSignal?: AbortSignal;
-        rpc: IdlFetcherRpc;
-        /** Reject an IDL declaring a DIFFERENT program address (default true). */
-        verifyAddress?: boolean;
-    };
-
 /**
- * {@link fetchIdlClient} under the latest-IDL policy (PMP first, Anchor PDA fallback) with the
- * winning {@link IdlSource} and PMP `authority` attributed. Same contract otherwise: every data
- * outcome is a coded-IdlError Result value; only an abort REJECTS, with the abort reason.
+ * Resolve a program's IDL from its on-chain publications and build a decode client over it, with the
+ * {@link IdlSource} and PMP `authority` that served it attributed: PMP canonical → fndn fallback, then
+ * the Anchor PDA. Every data outcome is a coded-IdlError Result value — only an abort REJECTS, with the
+ * abort reason; a malformed `programAddress` throws, since no lookup can be derived from it.
  */
-export async function fetchLatestIdlClient(
+export async function fetchOnChainIdlClient(
     programAddress: string,
-    options: FetchLatestIdlClientOptions,
-): Promise<Result<FetchedIdlClient>> {
-    const { abortSignal, anchor, authority, rpc, verifyAddress = true, ...clientOptions } = options;
+    options: FetchOnChainIdlClientOptions,
+): Promise<Result<PublishedIdlClient>> {
+    const { abortSignal, anchor, authority, rpc, verifyAddress = true } = options;
     abortSignal?.throwIfAborted();
     const program = assertAddress(programAddress);
 
-    let resolved: PublishedIdl | undefined;
-    try {
-        resolved = await resolveOnChainIdl(rpc, program, { anchor, authority }, abortSignal);
-    } catch (cause) {
-        if (abortSignal?.aborted) throw abortSignal.reason;
-        // a leg's own coded error (corruption → IDL_PARSE_FAILED) — pass it through, don't relabel it a transport failure
-        if (isIdlError(cause)) return err(cause);
-        return err(new IdlError(IDL_ERROR__IDL_FETCH_FAILED, { cause }));
-    }
-    if (resolved === undefined) return err(new IdlError(IDL_ERROR__IDL_NOT_FOUND, { programAddress }));
+    const [resolveError, published] = await resolvedOrErr(
+        programAddress,
+        () => resolveOnChainIdl(rpc, program, { anchor, authority }, abortSignal),
+        abortSignal,
+    );
+    if (resolveError) return err(resolveError);
 
-    const [error, client] = createVerifiedClient(programAddress, resolved.idl, verifyAddress, clientOptions);
-    if (error) return err(error);
+    const [createError, client] = createVerifiedClient(
+        programAddress,
+        published.idl,
+        verifyAddress,
+        clientOptionsOf(options),
+    );
+    if (createError) return err(createError);
     return ok({
         client,
-        source: resolved.source,
-        ...('authority' in resolved ? { authority: resolved.authority } : {}),
+        source: published.source,
+        ...('authority' in published ? { authority: published.authority } : {}),
     });
 }
+
+/**
+ * The bare decode client, whatever the source: {@link fetchOnChainIdlClient} with the publication
+ * envelope dropped, or the IDL a consumer's `fetcher` resolves (a registry, a cache, an anchor-provider
+ * wrap) — which reports no publication, so it cannot be attributed. Same Result contract either way.
+ */
+export async function fetchIdlClient(
+    programAddress: string,
+    options: FetchIdlClientOptions,
+): Promise<Result<IdlClient>> {
+    if (options.fetcher === undefined) {
+        const [error, published] = await fetchOnChainIdlClient(programAddress, options);
+        return error ? err(error) : ok(published.client);
+    }
+    const { abortSignal, fetcher, verifyAddress = true } = options;
+    abortSignal?.throwIfAborted();
+
+    const [error, idl] = await resolvedOrErr(
+        programAddress,
+        () => fetcher(programAddress, abortSignal ? { abortSignal } : undefined),
+        abortSignal,
+    );
+    if (error) return err(error);
+    return createVerifiedClient(programAddress, idl, verifyAddress, clientOptionsOf(options));
+}
+
+// Pre-rename names, so callers that learned them keep resolving; drop them once nothing reads them.
+export { createOnChainIdlFetcher as createLatestIdlFetcher, fetchOnChainIdlClient as fetchLatestIdlClient };
+export type { FetchOnChainIdlClientOptions as FetchLatestIdlClientOptions };

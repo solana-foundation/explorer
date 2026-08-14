@@ -1,5 +1,5 @@
-// On-chain IDL resolution seam over @explorer/idl-decode: one latest-IDL fetch (PMP → anchor PDA)
-// with the winning source attributed by the package.
+// On-chain IDL resolution seam over @explorer/idl-decode: one fetch across the publications
+// (PMP canonical → fndn fallback → anchor PDA) with the winning source attributed by the package.
 import {
     getIdlStandard,
     IDL_ERROR__IDL_ADDRESS_MISMATCH,
@@ -8,7 +8,12 @@ import {
     type IdlClient,
     type IdlError,
 } from '@explorer/idl-decode';
-import { type FetchedIdlClient, fetchLatestIdlClient, type IdlFetcherRpc, IdlSource } from '@explorer/idl-decode/fetch';
+import {
+    type PublishedIdlClient,
+    fetchOnChainIdlClient,
+    type IdlFetcherRpc,
+    IdlSource,
+} from '@explorer/idl-decode/fetch';
 import { createSolanaRpc } from '@solana/kit';
 
 import type { SupportedCluster } from '../config.js';
@@ -31,11 +36,11 @@ function createIdlRpc(cluster: SupportedCluster, rpcEndpoints: Record<SupportedC
     return createSolanaRpc(resolveRpcEndpoint(cluster, rpcEndpoints));
 }
 
-type FetchOutcome = { fetched: FetchedIdlClient } | { error: IdlError } | { rejected: unknown };
+type FetchOutcome = { fetched: PublishedIdlClient } | { error: IdlError } | { rejected: unknown };
 
-async function fetchLatest(programAddress: string, rpc: IdlFetcherRpc): Promise<FetchOutcome> {
+async function fetchOnChain(programAddress: string, rpc: IdlFetcherRpc): Promise<FetchOutcome> {
     try {
-        const [error, fetched] = await fetchLatestIdlClient(programAddress, {
+        const [error, fetched] = await fetchOnChainIdlClient(programAddress, {
             abortSignal: AbortSignal.timeout(RPC_REQUEST_TIMEOUT_MS),
             rpc,
         });
@@ -46,7 +51,7 @@ async function fetchLatest(programAddress: string, rpc: IdlFetcherRpc): Promise<
     }
 }
 
-function toFoundDiscovery(fetched: FetchedIdlClient): IdlDiscoveryResult {
+function toFoundDiscovery(fetched: PublishedIdlClient): IdlDiscoveryResult {
     return {
         // Legacy (pre-0.30) IDLs convert to Codama at client creation and report as codama here.
         idl_type: getIdlStandard(fetched.client.idl),
@@ -75,7 +80,7 @@ export function createIdlClientResolver(
     logger: InspectorLogger,
 ): ResolveIdlClient {
     return async (programAddress, cluster) => {
-        const outcome = await fetchLatest(programAddress, createIdlRpc(cluster, rpcEndpoints));
+        const outcome = await fetchOnChain(programAddress, createIdlRpc(cluster, rpcEndpoints));
         if ('fetched' in outcome) {
             return outcome.fetched.client;
         }
@@ -92,7 +97,7 @@ export function createProgramIdlDiscovery(
     logger: InspectorLogger,
 ): DiscoverProgramIdl {
     return async (programAddress, cluster) => {
-        const outcome = await fetchLatest(programAddress, createIdlRpc(cluster, rpcEndpoints));
+        const outcome = await fetchOnChain(programAddress, createIdlRpc(cluster, rpcEndpoints));
         if ('fetched' in outcome) {
             return { client: outcome.fetched.client, discovery: toFoundDiscovery(outcome.fetched) };
         }

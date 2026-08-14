@@ -388,9 +388,10 @@ Result:
 Any other source (a registry, a cache, an anchor-provider wrap) plugs in through the `fetcher` option:
 an `IdlFetcher` resolves the raw IDL JSON, `undefined` when the program has none, and throws only on
 transport failure or abort. With a `fetcher` the `rpc` requirement drops.
-`createLatestIdlFetcher(rpc, { anchor, authority })` — the default's building block — is exported too,
+`createOnChainIdlFetcher(rpc, { anchor, authority })` — the default's building block — is exported too,
 for skipping the Anchor leg (native programs) or pinning the PMP lookup to one authority (`null` for
-canonical only).
+canonical only). `fetchOnChainIdlClient` is the same resolution with the publication attributed
+(`source`, and the PMP `authority` that served it) instead of just the client.
 
 ## From a transaction
 
