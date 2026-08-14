@@ -2,8 +2,8 @@
 
 import { Address } from '@components/common/Address';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
-import { cn } from '@components/shared/utils';
 import { PublicKey } from '@solana/web3.js';
+import { cva } from 'class-variance-authority';
 import { useMemo } from 'react';
 
 import { Card } from '@/app/shared/ui/Card';
@@ -50,19 +50,37 @@ export function BaseDomainsCard({ domains }: { domains: DomainInfo[] }) {
 // tables: muted uppercase `text-xs` header, `text-sm` body, `outer-space-800` row separators (same tone
 // as the card border), transparent (card-matching) background, 10px/12px padding.
 //
+// `gridCellVariants` owns all cell styling. `role` picks header vs body chrome; `column` picks the
+// per-column body concerns (a `min-width` floor + wrapping on the domain cell, `min-w-0` + no-wrap on
+// the account cell) that used to be threaded in per cell. Header cells leave `column` at its `none`
+// default. `cva` layers the variants over the shared base, so no `cn`/clsx override juggling is needed.
+//
 // Domain column sizing — responsive, no JS. The account column always keeps the rest (`1fr`).
 // - Mobile (xs, sm — below `md`): content-aware within a px band. `fit-content(clamp(200px,50%,400px))`
 //   is the *ceiling* — the column grows with the domain content up to a 50% band (px-clamped 200–400),
-//   then the name wraps (`break-all`). `min-w-[clamp(120px,25%,200px)]` on the body cell is the *floor*,
-//   feeding `fit-content`'s minimum so short names rest at the ~25% band (px-clamped 120–240).
+//   then the name wraps (`break-all`). `min-w-[clamp(120px,25%,240px)]` (the `column: 'domain'` floor)
+//   feeds `fit-content`'s minimum so short names rest at the ~25% band (px-clamped 120–240).
 // - Tablet (md, lg) + desktop (xl, xxl): a fixed 25% band `clamp(120px,25%,240px)` — no content growth;
 //   the name wraps (`break-all`) inside it. Both tiers match, so one `md:` rule covers md→xxl; split it
 //   out (add an `xl:` variant) if desktop ever needs to diverge.
-const GRID_HEADER_CELL = 'flex items-center whitespace-nowrap px-3 py-2.5 text-xs uppercase text-outer-space-300';
-// Shared body-cell styling. `min-width` is set per cell below (a floor on the name, `0` on the account)
-// so it isn't baked in here — `cn` is clsx, so a base `min-w-*` couldn't be overridden per cell.
-const GRID_BODY_CELL = 'flex items-start border-t border-solid border-outer-space-800 px-3 py-2.5';
-const GRID_DOMAIN_FLOOR = 'min-w-[clamp(120px,25%,240px)]';
+const gridCellVariants = cva('flex px-3 py-2.5', {
+    defaultVariants: { column: 'none', role: 'body' },
+    variants: {
+        // Per-column body concerns. `domain` sets the mobile floor (matching the md+ track width) and
+        // wraps the spaceless name via `break-all`; `account` collapses to `min-w-0` and stays on one line.
+        column: {
+            account: 'min-w-0 whitespace-nowrap',
+            domain: 'min-w-[clamp(120px,25%,240px)] break-all',
+            none: '',
+        },
+        // Header vs body chrome. `header`: muted uppercase `text-xs`, centered, no-wrap labels. `body`:
+        // `outer-space-800` top border (same tone as the card border) as the row separator, top-aligned.
+        role: {
+            body: 'items-start border-t border-solid border-outer-space-800',
+            header: 'items-center whitespace-nowrap text-xs uppercase text-outer-space-300',
+        },
+    },
+});
 
 function DomainsGrid({ domains }: { domains: ValidDomain[] }) {
     return (
@@ -78,7 +96,7 @@ function DomainsGrid({ domains }: { domains: ValidDomain[] }) {
             >
                 <div role="row" className="contents">
                     {COLUMNS.map(label => (
-                        <div key={label} role="columnheader" className={GRID_HEADER_CELL}>
+                        <div key={label} role="columnheader" className={gridCellVariants({ role: 'header' })}>
                             {label}
                         </div>
                     ))}
@@ -88,10 +106,10 @@ function DomainsGrid({ domains }: { domains: ValidDomain[] }) {
                         {/* A domain name is a single spaceless token, so `break-all` is what lets it wrap —
                             on mobile once the column hits its `fit-content` ceiling, on md+ inside the fixed
                             25% track. `min-w` sets the mobile floor (and matches the md+ track width). */}
-                        <div role="cell" className={cn(GRID_BODY_CELL, GRID_DOMAIN_FLOOR, 'break-all')}>
+                        <div role="cell" className={gridCellVariants({ column: 'domain' })}>
                             {domain.name}
                         </div>
-                        <div role="cell" className={cn(GRID_BODY_CELL, 'min-w-0 whitespace-nowrap')}>
+                        <div role="cell" className={gridCellVariants({ column: 'account' })}>
                             <Address pubkey={domain.pubkey} link />
                         </div>
                     </div>
