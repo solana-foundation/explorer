@@ -5,6 +5,8 @@ import { ArrowRight, Check, ChevronDown, Download, ExternalLink, RefreshCw, X } 
 import { expect, within } from 'storybook/test';
 
 import { Button, buttonVariants } from './button';
+import { IconButton } from './icon-button';
+import { TileButton } from './tile-button';
 
 type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>['size']>;
 type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>['variant']>;
@@ -94,18 +96,23 @@ export const AllVariants: Story = {
 export const AllSizes: Story = {
     render: () => (
         <div className="flex items-center gap-4">
-            {sizeOptions.map(size => (
-                <Button key={size} size={size} className={size === 'tile' ? 'w-20' : undefined}>
-                    {size === 'icon' && <Check />}
-                    {size === 'tile' && (
-                        <>
-                            <Check />
+            {sizeOptions.map(size => {
+                if (size === 'icon') {
+                    return <IconButton key={size} aria-label="Confirm" icon={<Check />} />;
+                }
+                if (size === 'tile') {
+                    return (
+                        <TileButton key={size} icon={<Check />}>
                             Tile
-                        </>
-                    )}
-                    {size !== 'icon' && size !== 'tile' && `Size ${size}`}
-                </Button>
-            ))}
+                        </TileButton>
+                    );
+                }
+                return (
+                    <Button key={size} size={size}>
+                        Size {size}
+                    </Button>
+                );
+            })}
         </div>
     ),
 };
@@ -164,11 +171,7 @@ export const IconOnly: Story = {
         <div className="flex flex-wrap gap-4">
             {twVariantOptions.map(variant => {
                 const Icon = twVariantIcons[variant];
-                return (
-                    <Button key={variant} size="icon" variant={variant}>
-                        <Icon />
-                    </Button>
-                );
+                return <IconButton key={variant} aria-label={variant} variant={variant} icon={<Icon />} />;
             })}
         </div>
     ),
@@ -193,21 +196,26 @@ export const VariantsBySize: Story = {
                         <div className="flex flex-wrap gap-4">
                             {twVariantOptions.map(variant => {
                                 const Icon = twVariantIcons[variant];
+                                if (size === 'icon') {
+                                    return (
+                                        <IconButton
+                                            key={variant}
+                                            aria-label={variant}
+                                            variant={variant}
+                                            icon={<Icon />}
+                                        />
+                                    );
+                                }
+                                if (size === 'tile') {
+                                    return (
+                                        <TileButton key={variant} variant={variant} icon={<Icon />}>
+                                            {variant}
+                                        </TileButton>
+                                    );
+                                }
                                 return (
-                                    <Button
-                                        key={variant}
-                                        size={size}
-                                        variant={variant}
-                                        className={size === 'tile' ? 'w-24' : undefined}
-                                    >
-                                        {size === 'icon' && <Icon />}
-                                        {size === 'tile' && (
-                                            <>
-                                                <Icon />
-                                                {variant}
-                                            </>
-                                        )}
-                                        {size !== 'icon' && size !== 'tile' && variant}
+                                    <Button key={variant} size={size} variant={variant}>
+                                        {variant}
                                     </Button>
                                 );
                             })}

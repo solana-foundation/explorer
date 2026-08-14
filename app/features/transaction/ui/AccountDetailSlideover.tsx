@@ -4,8 +4,9 @@ import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React, { useState } from 'react';
-import { CheckCircle, Copy, ExternalLink, X } from 'react-feather';
+import { ExternalLink, X } from 'react-feather';
 
+import { Copyable } from '@/app/components/common/Copyable';
 import {
     Slideover,
     SlideoverBody,
@@ -14,7 +15,6 @@ import {
     SlideoverTitle,
 } from '@/app/components/shared/ui/slideover';
 import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
-import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
 import { AccountBadges } from './AccountBadges';
 import { AccountExpandedContent } from './AccountExpandedContent';
@@ -42,7 +42,6 @@ export function AccountDetailSlideover({
     const address = pubkey.toBase58();
     const nickname = useNickname(address);
     const [nicknameOpen, setNicknameOpen] = useState(false);
-    const [copyState, copy] = useCopyToClipboard(1500);
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
     const handleOpenChange = (nextOpen: boolean) => {
         if (!nextOpen) setNicknameOpen(false);
@@ -96,9 +95,10 @@ export function AccountDetailSlideover({
                             <EditIcon width={16} />
                             Nickname
                         </Button>
-                        <Button className="w-1/4" onClick={() => copy(address)} size="tile" variant="outline">
-                            {copyState === 'copied' ? <CheckCircle size={16} /> : <Copy size={16} />}
-                            Copy
+                        {/* Copyable is built for inline rows (icon has mr-1.5); drop that margin so the
+                            icon stays centered over the label in the vertical tile layout. */}
+                        <Button className="w-1/4 [&>span]:mr-0" size="tile" variant="outline">
+                            <Copyable text={address}>Copy</Copyable>
                         </Button>
                         <Button asChild className="w-1/4" size="tile" variant="accent">
                             <Link href={addressPath} target="_blank">

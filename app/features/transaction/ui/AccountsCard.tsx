@@ -238,6 +238,9 @@ export function AccountsCard({ signature }: SignatureProps) {
             </div>
             {accountRows}
             {!loading && totalAccountSize > 0 && (
+                // TODO: extract these repeated grid-row containers (header + this footer) into a
+                // cva-based component. cn keeps duplicate classes, so the ad-hoc composition here is
+                // hard to read and risks conflicting utilities.
                 <div
                     className={cn(
                         'grid items-start px-3 py-3 text-sm text-outer-space-300',
