@@ -1,10 +1,10 @@
+import { gen } from '@__fixtures__/gen';
 import {
-    type Address,
+    address,
     appendTransactionMessageInstruction,
-    type Blockhash,
+    blockhash,
     compileTransaction,
     createTransactionMessage,
-    getAddressDecoder,
     getTransactionEncoder,
     pipe,
     setTransactionMessageComputeUnitLimit,
@@ -16,12 +16,10 @@ import {
 } from '@solana/kit';
 import { PublicKey, SystemProgram, TransactionMessage } from '@solana/web3.js';
 
-const testAddress = (seed: number) => getAddressDecoder().decode(new Uint8Array(32).fill(seed));
-
-export const FEE_PAYER = testAddress(1);
-export const RECIPIENT = testAddress(2);
-export const PROGRAM = testAddress(3);
-export const BLOCKHASH = testAddress(9) as string as Blockhash;
+export const FEE_PAYER = address(gen.address(1));
+export const RECIPIENT = address(gen.address(2));
+const PROGRAM = address(gen.address(3));
+const BLOCKHASH = blockhash(gen.blockhash());
 
 export type V1ConfigOverrides = {
     computeUnitLimit?: number;
@@ -57,16 +55,16 @@ export function createV1TransactionBytes(config: V1ConfigOverrides): Uint8Array 
 }
 
 /** A single-transfer web3.js message, for the versions web3.js can build. */
-export function createWeb3TransactionMessage(feePayer: Address = FEE_PAYER): TransactionMessage {
+export function createWeb3TransactionMessage(): TransactionMessage {
     return new TransactionMessage({
         instructions: [
             SystemProgram.transfer({
-                fromPubkey: new PublicKey(feePayer),
+                fromPubkey: new PublicKey(FEE_PAYER),
                 lamports: 1n,
                 toPubkey: new PublicKey(RECIPIENT),
             }),
         ],
-        payerKey: new PublicKey(feePayer),
+        payerKey: new PublicKey(FEE_PAYER),
         recentBlockhash: PublicKey.default.toBase58(),
     });
 }

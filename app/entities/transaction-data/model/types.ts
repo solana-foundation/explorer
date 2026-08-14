@@ -40,8 +40,6 @@ type RawTransactionBase = {
     };
     /** Base58-encoded in signer order; a signer slot that has not been signed is `undefined`. */
     signatures: (string | undefined)[];
-    /** Present only on v1 transactions that set at least one resource limit. */
-    transactionConfig?: TransactionConfig;
 };
 
 /**
@@ -49,10 +47,16 @@ type RawTransactionBase = {
  *
  * `message` and `transaction` are the web3.js views of the bytes, which web3.js can only build for
  * legacy and v0. `messageBytes` is always present, so anything that only needs the bytes — the
- * download button — works on every version.
+ * download button — works on every version. Only v1 carries a message-level `transactionConfig`,
+ * and only when it sets at least one limit.
  */
 export type RawTransaction = RawTransactionBase &
     (
-        | { version: 'legacy' | 0; message: VersionedMessage; transaction: TransactionMessage }
-        | { version: 1; message?: undefined; transaction?: undefined }
+        | {
+              version: 'legacy' | 0;
+              message: VersionedMessage;
+              transaction: TransactionMessage;
+              transactionConfig?: undefined;
+          }
+        | { version: 1; message?: undefined; transaction?: undefined; transactionConfig?: TransactionConfig }
     );

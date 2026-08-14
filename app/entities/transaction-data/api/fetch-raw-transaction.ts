@@ -57,11 +57,10 @@ export async function fetchRawTransaction(
               }
             : undefined,
         signatures,
-        transactionConfig: readTransactionConfig(compiledMessage, signature),
     };
 
     if (compiledMessage.version === 1) {
-        return { ...base, version: 1 };
+        return { ...base, transactionConfig: readTransactionConfig(compiledMessage, signature), version: 1 };
     }
 
     return {
