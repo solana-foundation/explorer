@@ -20,6 +20,7 @@ import type { SupportedCluster } from '../config.js';
 import { type InspectorLogger, ns } from '../logger.js';
 import { RPC_REQUEST_TIMEOUT_MS } from '../shared/constants.js';
 import { resolveRpcEndpoint } from '../rpc/resolve-rpc-endpoint.js';
+import { PROGRAMS_WITHOUT_ANCHOR_IDL } from './programs-without-anchor-idl.js';
 import type { IdlDiscoveryResult, IdlSourceType } from './types.js';
 
 export type ResolveIdlClient = (programAddress: string, cluster: SupportedCluster) => Promise<IdlClient | null>;
@@ -42,6 +43,7 @@ async function fetchOnChain(programAddress: string, rpc: IdlFetcherRpc): Promise
     try {
         const [error, fetched] = await fetchOnChainIdlClient(programAddress, {
             abortSignal: AbortSignal.timeout(RPC_REQUEST_TIMEOUT_MS),
+            anchor: !PROGRAMS_WITHOUT_ANCHOR_IDL.has(programAddress),
             rpc,
         });
         return error ? { error } : { fetched };

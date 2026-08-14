@@ -65,7 +65,20 @@ describe('createIdlClientResolver', () => {
         await expect(resolve('program-address', 'devnet')).resolves.toBe(client);
         expect(fetchOnChainIdlClientMock).toHaveBeenCalledWith(
             'program-address',
-            expect.objectContaining({ abortSignal: expect.any(Object) }),
+            expect.objectContaining({ abortSignal: expect.any(Object), anchor: true }),
+        );
+    });
+
+    it('should skip the anchor leg for a program that cannot have an anchor IDL', async () => {
+        // the derived PDA read is the one some RPCs answer with a transient error instead of null
+        fetchOnChainIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_NOT_FOUND), undefined]);
+        const resolve = createIdlClientResolver(RPC_ENDPOINTS, createLoggerMock());
+
+        await resolve(gen.systemProgram, 'mainnet-beta');
+
+        expect(fetchOnChainIdlClientMock).toHaveBeenCalledWith(
+            gen.systemProgram,
+            expect.objectContaining({ anchor: false }),
         );
     });
 
