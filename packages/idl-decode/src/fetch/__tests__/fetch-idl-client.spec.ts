@@ -11,6 +11,7 @@ import {
     Format,
     getMetadataEncoder,
 } from '@solana-program/program-metadata';
+import { IDL_FALLBACK_PMP_AUTHORITIES } from '@solana/idl';
 import {
     address,
     type Address,
@@ -18,6 +19,8 @@ import {
     type GetAccountInfoApi,
     getProgramDerivedAddress,
     type Rpc,
+    SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR,
+    SolanaError,
 } from '@solana/kit';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -167,6 +170,14 @@ async function pmpIdlAddress(program: Address): Promise<Address> {
     return metadataAddress;
 }
 
+const FNDN_AUTHORITY = IDL_FALLBACK_PMP_AUTHORITIES[0];
+
+/** The fndn fallback lookup — the only PDA a frozen program (no upgrade authority) can publish under. */
+async function pmpFallbackIdlAddress(program: Address): Promise<Address> {
+    const [metadataAddress] = await findMetadataPda({ authority: FNDN_AUTHORITY, program, seed: 'idl' });
+    return metadataAddress;
+}
+
 describe('fetchIdlClient', () => {
     it('should build a working client from a custom fetcher', async () => {
         const tokenkeg = loadTokenkegIdl();
@@ -313,6 +324,20 @@ describe('createLatestIdlFetcher', () => {
         expect(data).toMatchObject({ amount: 42n });
     });
 
+    it('should resolve the PMP idl metadata under the fndn fallback authority', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        // a frozen program has no upgrade authority, so the canonical PDA cannot hold its IDL
+        const rpc = mockRpc({
+            [await pmpFallbackIdlAddress(program)]: pmpIdlAccount(program, tokenkeg, Format.Json, FNDN_AUTHORITY),
+        });
+
+        const client = unwrapResult(await fetchIdlClient(program, { rpc }));
+
+        const [, data] = client.decodeInstructionData<{ amount: bigint }>(transferIx(tokenkeg));
+        expect(data).toMatchObject({ amount: 42n });
+    });
+
     it('should fall back to the anchor idl account when PMP has none', async () => {
         const simple = loadSimpleIdl();
         const program = address(simple.address);
@@ -354,7 +379,7 @@ describe('createLatestIdlFetcher', () => {
         expect(error?.context).toMatchObject({ operation: 'pmp idl data' });
     });
 
-    it('should keep a url-sourced PMP payload failure a transport error', async () => {
+    it('should surface a url-sourced PMP payload failure as the typed parse error', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);
         const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpUrlIdlAccount(program, 'https://idl.invalid/x') });
@@ -366,8 +391,8 @@ describe('createLatestIdlFetcher', () => {
             const [error, client] = await fetchIdlClient(program, { rpc });
 
             expect(client).toBeUndefined();
-            // a url fetch failure is retryable transport, not data corruption
-            expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
+            // @solana/idl reports every non-SolanaError as corrupt bytes, so a url payload blip is not retryable here
+            expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
         } finally {
             vi.unstubAllGlobals();
         }
@@ -413,15 +438,15 @@ describe('createLatestIdlFetcher', () => {
         expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
     });
 
-    it('should surface a non-JSON PMP idl metadata as the typed parse error', async () => {
+    it('should resolve PMP idl content whatever format the metadata declares', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);
+        // the declared format is advisory — JSON-parseability of the content is what decides
         const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpIdlAccount(program, tokenkeg, Format.Toml) });
 
-        const [error, client] = await fetchIdlClient(program, { rpc });
+        const client = unwrapResult(await fetchIdlClient(program, { rpc }));
 
-        expect(client).toBeUndefined();
-        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        expect(client.programAddress()).toBe(tokenkeg.program.publicKey);
     });
 
     it('should surface unparseable PMP idl content as the typed parse error', async () => {
@@ -440,7 +465,7 @@ describe('createLatestIdlFetcher', () => {
         const program = address(simple.address);
         const rpc = mockRpc({
             [await anchorIdlAddress(program)]: anchorIdlAccount(simple), // a valid fallback that must NOT mask the corruption
-            [await pmpIdlAddress(program)]: pmpIdlAccount(program, simple, Format.Toml),
+            [await pmpIdlAddress(program)]: pmpCorruptIdlAccount(program),
         });
 
         const [error, client] = await fetchIdlClient(program, { rpc });
@@ -461,6 +486,55 @@ describe('fetchLatestIdlClient', () => {
         expect(source).toBe(IdlSource.Pmp);
         const [, data] = client.decodeInstructionData<{ amount: bigint }>(transferIx(tokenkeg));
         expect(data).toMatchObject({ amount: 42n });
+    });
+
+    it('should attribute the fndn fallback authority that served the IDL', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const rpc = mockRpc({
+            [await pmpFallbackIdlAddress(program)]: pmpIdlAccount(program, tokenkeg, Format.Json, FNDN_AUTHORITY),
+        });
+
+        const { authority, source } = unwrapResult(await fetchLatestIdlClient(program, { rpc }));
+
+        expect(source).toBe(IdlSource.Pmp);
+        expect(authority).toBe(FNDN_AUTHORITY);
+    });
+
+    it('should attribute the canonical authority when it holds the IDL', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const simple = loadSimpleIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const rpc = mockRpc({
+            [await pmpFallbackIdlAddress(program)]: pmpIdlAccount(program, simple, Format.Json, FNDN_AUTHORITY),
+            [await pmpIdlAddress(program)]: pmpIdlAccount(program, tokenkeg),
+        });
+
+        const { authority } = unwrapResult(await fetchLatestIdlClient(program, { rpc }));
+
+        expect(authority).toBeNull();
+    });
+
+    it('should skip the fndn fallback lookup when an authority is pinned', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const rpc = mockRpc({
+            [await pmpFallbackIdlAddress(program)]: pmpIdlAccount(program, tokenkeg, Format.Json, FNDN_AUTHORITY),
+        });
+
+        const [error] = await fetchLatestIdlClient(program, { anchor: false, authority: null, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_NOT_FOUND)).toBe(true);
+    });
+
+    it('should report no authority off the anchor leg', async () => {
+        const simple = loadSimpleIdl();
+        const program = address(simple.address);
+        const rpc = mockRpc({ [await anchorIdlAddress(program)]: anchorIdlAccount(simple) });
+
+        const fetched = unwrapResult(await fetchLatestIdlClient(program, { rpc }));
+
+        expect('authority' in fetched).toBe(false);
     });
 
     it('should attribute the anchor fallback as the anchor-pda source', async () => {
@@ -510,7 +584,12 @@ describe('fetchLatestIdlClient', () => {
     });
 
     it('should surface a transport failure as the typed fetch error with its cause', async () => {
-        const cause = new Error('rpc exploded');
+        // a real rpc reports transport failures as SolanaErrors — that is what keeps a blip retryable
+        const cause = new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
+            headers: new Headers(),
+            message: 'Bad Gateway',
+            statusCode: 502,
+        });
         const [error] = await fetchLatestIdlClient(gen.systemProgram, {
             rpc: mockRpc({}, () => {
                 throw cause;
@@ -519,6 +598,17 @@ describe('fetchLatestIdlClient', () => {
 
         expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
         expect(error?.cause).toBe(cause);
+    });
+
+    it('should surface a non-SolanaError rpc failure as the typed parse error', async () => {
+        // @solana/idl treats anything that is not a SolanaError as undecodable bytes, not a transport blip
+        const [error] = await fetchLatestIdlClient(gen.systemProgram, {
+            rpc: mockRpc({}, () => {
+                throw new Error('rpc exploded');
+            }),
+        });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
     });
 
     it('should reject an IDL declaring a different program address', async () => {

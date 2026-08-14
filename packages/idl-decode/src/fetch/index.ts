@@ -14,63 +14,16 @@ import {
     type Result,
 } from '../errors.js';
 import type { IdlFetcher, IdlFetcherRpc } from '../types.js';
-import { fetchAnchorPdaIdl } from './anchor-pda.js';
-import { fetchPmpIdl } from './pmp.js';
+import {
+    createLatestIdlFetcher,
+    IdlSource,
+    type LatestIdlFetcherOptions,
+    resolveOnChainIdl,
+    type ResolvedIdl,
+} from './resolve-idl.js';
 
-export type { IdlFetcherRpc };
-
-/** Which on-chain publication a fetched IDL came from. */
-export enum IdlSource {
-    AnchorPda = 'anchor-pda',
-    Pmp = 'pmp',
-}
-
-export type LatestIdlFetcherOptions = {
-    /** Set `false` to skip the Anchor-PDA leg — native/builtin programs cannot have one and some RPCs throw for the derived PDA. */
-    anchor?: boolean;
-    /** Non-canonical PMP metadata authority; canonical (`null`) by default. */
-    authority?: Address | null;
-};
-
-/** One publication leg of the latest-IDL policy: how to read it, and which source a hit attributes. */
-type FetchLeg = {
-    fetch: () => Promise<unknown>;
-    source: IdlSource;
-};
-
-// The latest-IDL policy as ordered legs — PMP first, Anchor PDA fallback (skipped when `anchor` is
-// false). Both fetch routes consume this one definition so the ordering can't drift between them.
-function latestIdlLegs(
-    rpc: IdlFetcherRpc,
-    program: Address,
-    authority: Address | null,
-    anchor: boolean,
-    abortSignal: AbortSignal | undefined,
-): FetchLeg[] {
-    return [
-        { fetch: () => fetchPmpIdl(rpc, program, authority, abortSignal), source: IdlSource.Pmp },
-        ...(anchor ? [{ fetch: () => fetchAnchorPdaIdl(rpc, program, abortSignal), source: IdlSource.AnchorPda }] : []),
-    ];
-}
-
-/**
- * A program's "latest" IDL: the PMP `idl` metadata first, the Anchor IDL PDA as the fallback.
- * Absent on both legs resolves `undefined`; corrupt data throws typed `IDL_ERROR__IDL_PARSE_FAILED`
- * without falling through (corruption is surfaced, not masked). The signal reaches both legs'
- * account reads; url-sourced PMP payloads go through global fetch and are not signal-bound.
- */
-export function createLatestIdlFetcher(rpc: IdlFetcherRpc, options: LatestIdlFetcherOptions = {}): IdlFetcher {
-    const { anchor = true, authority = null } = options;
-    return async (programAddress, config) => {
-        config?.abortSignal?.throwIfAborted();
-        const program = assertAddress(programAddress);
-        for (const leg of latestIdlLegs(rpc, program, authority, anchor, config?.abortSignal)) {
-            const idl = await leg.fetch();
-            if (idl !== undefined) return idl;
-        }
-        return undefined;
-    };
-}
+export type { IdlFetcherRpc, LatestIdlFetcherOptions };
+export { createLatestIdlFetcher, IdlSource };
 
 /** The create+verify tail shared by both fetch routes — every data outcome is a coded-IdlError Result. */
 function createVerifiedClient(
@@ -128,6 +81,8 @@ export async function fetchIdlClient(
 
 /** A fetched decode client together with the publication that produced its IDL. */
 export type FetchedIdlClient = {
+    /** PMP authority that served the IDL — `null` canonical, an address for a fallback; absent off the anchor leg. */
+    authority?: Address | null;
     client: IdlClient;
     source: IdlSource;
 };
@@ -142,33 +97,33 @@ export type FetchLatestIdlClientOptions = IdlClientOptions &
 
 /**
  * {@link fetchIdlClient} under the latest-IDL policy (PMP first, Anchor PDA fallback) with the
- * winning {@link IdlSource} attributed — one account read per leg. Same contract otherwise: every
- * data outcome is a coded-IdlError Result value; only an abort REJECTS, with the abort reason.
+ * winning {@link IdlSource} and PMP `authority` attributed. Same contract otherwise: every data
+ * outcome is a coded-IdlError Result value; only an abort REJECTS, with the abort reason.
  */
 export async function fetchLatestIdlClient(
     programAddress: string,
     options: FetchLatestIdlClientOptions,
 ): Promise<Result<FetchedIdlClient>> {
-    const { abortSignal, anchor = true, authority = null, rpc, verifyAddress = true, ...clientOptions } = options;
+    const { abortSignal, anchor, authority, rpc, verifyAddress = true, ...clientOptions } = options;
     abortSignal?.throwIfAborted();
     const program = assertAddress(programAddress);
 
-    for (const leg of latestIdlLegs(rpc, program, authority, anchor, abortSignal)) {
-        let idl: unknown;
-        try {
-            idl = await leg.fetch();
-        } catch (cause) {
-            if (abortSignal?.aborted) throw abortSignal.reason;
-            // corruption on a leg is surfaced, not masked by the next leg — same policy as createLatestIdlFetcher
-            if (isIdlError(cause)) return err(cause);
-            return err(new IdlError(IDL_ERROR__IDL_FETCH_FAILED, { cause }));
-        }
-        if (idl === undefined) continue;
-
-        const [error, client] = createVerifiedClient(programAddress, idl, verifyAddress, clientOptions);
-        if (error) return err(error);
-        return ok({ client, source: leg.source });
+    let resolved: ResolvedIdl | undefined;
+    try {
+        resolved = await resolveOnChainIdl(rpc, program, { anchor, authority }, abortSignal);
+    } catch (cause) {
+        if (abortSignal?.aborted) throw abortSignal.reason;
+        // a leg's own coded error (corruption → IDL_PARSE_FAILED) — pass it through, don't relabel it a transport failure
+        if (isIdlError(cause)) return err(cause);
+        return err(new IdlError(IDL_ERROR__IDL_FETCH_FAILED, { cause }));
     }
+    if (resolved === undefined) return err(new IdlError(IDL_ERROR__IDL_NOT_FOUND, { programAddress }));
 
-    return err(new IdlError(IDL_ERROR__IDL_NOT_FOUND, { programAddress }));
+    const [error, client] = createVerifiedClient(programAddress, resolved.idl, verifyAddress, clientOptions);
+    if (error) return err(error);
+    return ok({
+        client,
+        source: resolved.source,
+        ...('authority' in resolved ? { authority: resolved.authority } : {}),
+    });
 }
