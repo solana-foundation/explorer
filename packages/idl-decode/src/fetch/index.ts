@@ -14,13 +14,8 @@ import {
     type Result,
 } from '../errors.js';
 import type { IdlFetcher, IdlFetcherRpc } from '../types.js';
-import {
-    createLatestIdlFetcher,
-    IdlSource,
-    type LatestIdlFetcherOptions,
-    resolveOnChainIdl,
-    type ResolvedIdl,
-} from './resolve-idl.js';
+import { createLatestIdlFetcher, type LatestIdlFetcherOptions, resolveOnChainIdl } from './resolve-idl.js';
+import { IdlSource, type PublishedIdl } from './solana-idl.js';
 
 export type { IdlFetcherRpc, LatestIdlFetcherOptions };
 export { createLatestIdlFetcher, IdlSource };
@@ -108,7 +103,7 @@ export async function fetchLatestIdlClient(
     abortSignal?.throwIfAborted();
     const program = assertAddress(programAddress);
 
-    let resolved: ResolvedIdl | undefined;
+    let resolved: PublishedIdl | undefined;
     try {
         resolved = await resolveOnChainIdl(rpc, program, { anchor, authority }, abortSignal);
     } catch (cause) {

@@ -544,7 +544,7 @@ describe('fetchLatestIdlClient', () => {
 
         const { client, source } = unwrapResult(await fetchLatestIdlClient(program, { rpc }));
 
-        expect(source).toBe(IdlSource.AnchorPda);
+        expect(source).toBe(IdlSource.Anchor);
         const [, data] = client.decodeInstructionData<{ amount: bigint }>(incrementIx(simple));
         expect(data).toMatchObject({ amount: 42n });
     });

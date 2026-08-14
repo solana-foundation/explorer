@@ -15,5 +15,5 @@ export async function fetchPmpIdl(
     program: Address,
     authority: Address | null | undefined,
 ): Promise<PublishedIdl | undefined> {
-    return toPublishedIdl(await resolvePmpIdl(rpc, program, { authority }), 'pmp idl');
+    return toPublishedIdl(await resolvePmpIdl(rpc, program, { authority }));
 }

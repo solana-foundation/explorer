@@ -6,5 +6,5 @@ import { type PublishedIdl, toPublishedIdl } from './solana-idl.js';
 
 /** Resolve the program's Anchor IDL PDA account; `undefined` when none exists. */
 export async function fetchAnchorPdaIdl(rpc: SolanaRpcClient, program: Address): Promise<PublishedIdl | undefined> {
-    return toPublishedIdl(await fetchAnchorIdl(rpc, program), 'anchor idl');
+    return toPublishedIdl(await fetchAnchorIdl(rpc, program));
 }

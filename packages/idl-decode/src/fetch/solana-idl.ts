@@ -6,13 +6,18 @@ import type { Address } from '@solana/kit';
 import { IDL_ERROR__IDL_PARSE_FAILED, IdlError } from '../errors.js';
 import type { IdlFetcherRpc } from '../types.js';
 
-/** A resolved on-chain IDL with the PMP authority that served it — absent off the anchor leg. */
+/** Which publication served the IDL, NOT its format — PMP content is often Anchor-format (`IdlStandard`). */
+export const IdlSource = { Anchor: 'anchor', Pmp: 'pmp' } as const;
+export type IdlSource = (typeof IdlSource)[keyof typeof IdlSource];
+
+/** A resolved IDL, the publication that served it, and — PMP only — the authority that held it. */
 export type PublishedIdl = {
     authority?: Address | null;
     idl: unknown;
+    source: IdlSource;
 };
 
-/** @solana/idl takes no abort signal, so bind the caller's to the account reads it issues. */
+/** Binds the caller's abort signal to the account reads, which upstream never threads itself. */
 export function toIdlRpc(rpc: IdlFetcherRpc, abortSignal: AbortSignal | undefined): SolanaRpcClient {
     const bound = abortSignal
         ? {
@@ -28,16 +33,25 @@ export function toIdlRpc(rpc: IdlFetcherRpc, abortSignal: AbortSignal | undefine
 
 /**
  * A leg's outcome in our terms: `absent` resolves `undefined`, corrupt bytes and content that is no
- * JSON object throw `IDL_ERROR__IDL_PARSE_FAILED` — the fetch route turns those into a Result.
+ * JSON object throw `IDL_ERROR__IDL_PARSE_FAILED` — the fetch route turns those into a Result. The
+ * error's `operation` names the leg off the result's own `source`, so it cannot contradict it.
  */
-export function toPublishedIdl(result: IdlResult | PmpIdlResult, operation: string): PublishedIdl | undefined {
+export function toPublishedIdl(result: IdlResult | PmpIdlResult): PublishedIdl | undefined {
     if (result.status === 'absent') return undefined;
     if (result.status === 'corrupt') {
-        throw new IdlError(IDL_ERROR__IDL_PARSE_FAILED, { cause: result.cause, operation: `${operation} data` });
+        throw new IdlError(IDL_ERROR__IDL_PARSE_FAILED, {
+            cause: result.cause,
+            operation: `${result.source} idl data`,
+        });
     }
     const parsed = parseIdl(result.content);
     if (!parsed.ok) {
-        throw new IdlError(IDL_ERROR__IDL_PARSE_FAILED, { operation: `${operation} content` });
+        throw new IdlError(IDL_ERROR__IDL_PARSE_FAILED, { operation: `${result.source} idl content` });
     }
-    return { idl: parsed.idl, ...('authority' in result ? { authority: result.authority } : {}) };
+    // upstream's `source` verbatim — a value it adds would fail this assignment instead of drifting silently
+    return {
+        idl: parsed.idl,
+        source: result.source,
+        ...('authority' in result ? { authority: result.authority } : {}),
+    };
 }

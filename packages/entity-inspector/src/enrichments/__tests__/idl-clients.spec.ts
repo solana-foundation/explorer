@@ -113,7 +113,7 @@ describe('createProgramIdlDiscovery', () => {
     it('should map an anchor-PDA-sourced client to anchor_on_chain', async () => {
         fetchLatestIdlClientMock.mockResolvedValue([
             undefined,
-            { client: fakeClient(ANCHOR_IDL), source: IdlSource.AnchorPda },
+            { client: fakeClient(ANCHOR_IDL), source: IdlSource.Anchor },
         ]);
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
 
