@@ -99,8 +99,6 @@ overrides:
 
 packageExtensionsChecksum: sha256-yDlRdIJCvjGdwOnfbHeL0o4lSi94xy6bpKmyfsP5SuA=
 
-pnpmfileChecksum: sha256-BfkWczcQHe8lZlLbAuHsrj1b6UroZcYpYDwSzrgMhb8=
-
 patchedDependencies:
   '@codama/nodes-from-anchor@1.3.8':
     hash: 0998b86e7c34d80be23b8b33f9004bfbd53057bae5f6c8cfd6cd179e8f175199

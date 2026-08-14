@@ -213,7 +213,7 @@ export default tseslint.config(
         },
     },
 
-    // Allow console in logger, scripts, standalone files, pnpmfile
+    // Allow console in logger, scripts, standalone files
     {
         files: [
             'app/shared/lib/logger.ts',
