@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
-import { cn } from '@/app/components/shared/utils';
+import { cnPrefixed } from '@/app/components/shared/utils';
 
 // `ui` picks the visual lineage. Default is "tw" since most consumers already use Tailwind — pass ui="dashkit" explicitly when migrating Bootstrap `.card*` callsites; the "dashkit" branch + dk-* tokens get deleted once migration completes.
 type UI = 'dashkit' | 'tw';
@@ -42,7 +42,11 @@ export interface BaseCardProps extends React.HTMLAttributes<HTMLDivElement>, Var
 
 const BaseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
     ({ className, flex, marginBottom, ui, variant, ...props }, ref) => (
-        <div ref={ref} className={cn(cardVariants({ flex, marginBottom, ui, variant }), className)} {...props} />
+        <div
+            ref={ref}
+            className={cnPrefixed(cardVariants({ flex, marginBottom, ui, variant }), className)}
+            {...props}
+        />
     ),
 );
 BaseCard.displayName = 'BaseCard';
@@ -64,7 +68,7 @@ interface UIPropOverride {
 
 const BaseCardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & UIPropOverride>(
     ({ className, ui, ...props }, ref) => (
-        <div ref={ref} className={cn(headerVariants({ ui: ui }), className)} {...props} />
+        <div ref={ref} className={cnPrefixed(headerVariants({ ui }), className)} {...props} />
     ),
 );
 BaseCardHeader.displayName = 'BaseCardHeader';
@@ -81,7 +85,7 @@ const bodyVariants = cva([], {
 
 const BaseCardBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & UIPropOverride>(
     ({ className, ui, ...props }, ref) => (
-        <div ref={ref} className={cn(bodyVariants({ ui: ui }), className)} {...props} />
+        <div ref={ref} className={cnPrefixed(bodyVariants({ ui }), className)} {...props} />
     ),
 );
 BaseCardBody.displayName = 'BaseCardBody';
@@ -98,7 +102,7 @@ const footerVariants = cva([], {
 
 const BaseCardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & UIPropOverride>(
     ({ className, ui, ...props }, ref) => (
-        <div ref={ref} className={cn(footerVariants({ ui: ui }), className)} {...props} />
+        <div ref={ref} className={cnPrefixed(footerVariants({ ui }), className)} {...props} />
     ),
 );
 BaseCardFooter.displayName = 'BaseCardFooter';
@@ -141,8 +145,11 @@ interface BaseCardTitleProps extends React.HTMLAttributes<HTMLElement>, UIPropOv
 const BaseCardTitle = React.forwardRef<HTMLElement, BaseCardTitleProps>(
     ({ as = 'div', className, ui, ...props }, ref) => {
         const Element = as as React.ElementType;
+        // TODO: fold `sizeClass` into `titleVariants` as an `as` variant (a compound variant keyed on
+        // `ui: 'dashkit'` + `as`) so the dashkit size token is part of the CVA config instead of a
+        // separate class passed alongside it.
         const sizeClass = ui === 'dashkit' ? dashkitTitleSizeByAs[as] : '';
-        return <Element ref={ref} className={cn(titleVariants({ ui: ui }), sizeClass, className)} {...props} />;
+        return <Element ref={ref} className={cnPrefixed(titleVariants({ ui }), sizeClass, className)} {...props} />;
     },
 );
 BaseCardTitle.displayName = 'BaseCardTitle';
@@ -150,7 +157,7 @@ BaseCardTitle.displayName = 'BaseCardTitle';
 // OKLCH-only sub-component; no dashkit equivalent so it renders the same in both UIs.
 const BaseCardDescription = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
     ({ className, ...props }, ref) => (
-        <div ref={ref} className={cn('text-sm text-neutral-500', className)} {...props} />
+        <div ref={ref} className={cnPrefixed('text-sm text-neutral-500', className)} {...props} />
     ),
 );
 BaseCardDescription.displayName = 'BaseCardDescription';
