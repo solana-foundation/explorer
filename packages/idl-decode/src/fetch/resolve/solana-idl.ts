@@ -12,6 +12,8 @@ export type IdlSource = (typeof IdlSource)[keyof typeof IdlSource];
 
 /** A resolved IDL, the publication that served it, and — PMP only — the authority that held it. */
 export type PublishedIdl = {
+    /** The account it came from: the derived PDA, or the buffer address that was read. */
+    address: Address;
     authority?: Address | null;
     idl: unknown;
     source: IdlSource;
@@ -50,6 +52,7 @@ export function toPublishedIdl(result: IdlResult | PmpIdlResult): PublishedIdl |
     }
     // upstream's `source` verbatim — a value it adds would fail this assignment instead of drifting silently
     return {
+        address: result.address,
         idl: parsed.idl,
         source: result.source,
         ...('authority' in result ? { authority: result.authority } : {}),

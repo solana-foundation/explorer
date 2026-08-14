@@ -9,7 +9,9 @@ import {
     Encoding,
     findMetadataPda,
     Format,
+    getBufferEncoder,
     getMetadataEncoder,
+    PROGRAM_METADATA_PROGRAM_ADDRESS,
 } from '@solana-program/program-metadata';
 import { IDL_FALLBACK_PMP_AUTHORITIES } from '@solana/idl';
 import {
@@ -60,6 +62,8 @@ const provider = codamaProvider();
 function mockRpc(
     accounts: Record<string, Uint8Array>,
     onSend?: (config?: { abortSignal?: AbortSignal }) => void,
+    // a buffer read is dispatched on the account's OWNER (PMP program vs anything else), so it has to be settable
+    owners: Record<string, Address> = {},
 ): Rpc<GetAccountInfoApi> {
     return {
         getAccountInfo: (accountAddress: string) => ({
@@ -72,7 +76,7 @@ function mockRpc(
                               data: [Buffer.from(accounts[accountAddress]).toString('base64'), 'base64'],
                               executable: false,
                               lamports: 1n,
-                              owner: gen.systemProgram,
+                              owner: owners[accountAddress] ?? gen.systemProgram,
                               rentEpoch: 0n,
                               space: BigInt(accounts[accountAddress].length),
                           }
@@ -175,6 +179,19 @@ async function anchorIdlAddress(program: Address): Promise<Address> {
 async function pmpIdlAddress(program: Address): Promise<Address> {
     const [metadataAddress] = await findMetadataPda({ authority: null, program, seed: 'idl' });
     return metadataAddress;
+}
+
+/** A PMP `Buffer` account — the staging account `write` fills before `setData` commits it. */
+function pmpBufferAccount(program: Address, idl: object): Uint8Array {
+    return Uint8Array.from(
+        getBufferEncoder().encode({
+            authority: null,
+            canonical: true,
+            data: new TextEncoder().encode(JSON.stringify(idl)),
+            program,
+            seed: 'idl',
+        }),
+    );
 }
 
 const FNDN_AUTHORITY = IDL_FALLBACK_PMP_AUTHORITIES[0];
@@ -707,5 +724,99 @@ describe('fetchOnChainIdlClient', () => {
         await expect(fetchOnChainIdlClient(gen.systemProgram, { abortSignal: controller.signal, rpc })).rejects.toBe(
             reason,
         );
+    });
+});
+
+// `buffer` reads one named account instead of deriving anything — a staged IDL, either family. The
+// family comes off the account's owner, so `source` stays the publication vocabulary.
+describe('buffer resolution', () => {
+    it('should decode an anchor idl buffer as the anchor source', async () => {
+        const simple = loadSimpleIdl();
+        const program = address(simple.address);
+        const buffer = address(gen.systemProgram);
+        const rpc = mockRpc({ [buffer]: anchorIdlAccount(simple) });
+
+        const fetched = unwrapResult(await fetchOnChainIdlClient(program, { buffer, rpc }));
+
+        expect(fetched.source).toBe(IdlSource.Anchor);
+        expect(fetched.address).toBe(buffer);
+        const [, data] = fetched.client.decodeInstructionData<{ amount: bigint }>(incrementIx(simple));
+        expect(data).toMatchObject({ amount: 42n });
+    });
+
+    it('should decode a pmp idl buffer as the pmp source', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const buffer = address(gen.systemProgram);
+        const rpc = mockRpc({ [buffer]: pmpBufferAccount(program, tokenkeg) }, undefined, {
+            [buffer]: PROGRAM_METADATA_PROGRAM_ADDRESS,
+        });
+
+        const fetched = unwrapResult(await fetchOnChainIdlClient(program, { buffer, rpc }));
+
+        expect(fetched.source).toBe(IdlSource.Pmp);
+        expect(fetched.authority).toBeUndefined(); // a buffer carries no resolution authority
+        const [, data] = fetched.client.decodeInstructionData<{ amount: bigint }>(transferIx(tokenkeg));
+        expect(data).toMatchObject({ amount: 42n });
+    });
+
+    it('should derive nothing when a buffer is named', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const buffer = address(NTT_PROGRAM_ADDRESS);
+        // the canonical PMP PDA holds a valid IDL that must NOT be consulted
+        const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpIdlAccount(program, tokenkeg) });
+
+        const [error] = await fetchOnChainIdlClient(program, { buffer, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_NOT_FOUND)).toBe(true);
+    });
+
+    it('should surface buffer content that is no JSON as the typed parse error', async () => {
+        const simple = loadSimpleIdl();
+        const buffer = address(gen.systemProgram);
+        // a valid IdlAccount header whose payload inflates — to something that is not JSON
+        const rpc = mockRpc({ [buffer]: anchorCorruptIdlAccount() });
+
+        const [error] = await fetchOnChainIdlClient(address(simple.address), { buffer, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        expect(error?.context).toMatchObject({ operation: 'anchor idl content' });
+    });
+
+    it('should surface undecodable buffer bytes as the typed parse error', async () => {
+        const simple = loadSimpleIdl();
+        const buffer = address(gen.systemProgram);
+        // shorter than the IdlAccount header, and not PMP-owned — neither family can frame it
+        const rpc = mockRpc({ [buffer]: new Uint8Array(16) });
+
+        const [error] = await fetchOnChainIdlClient(address(simple.address), { buffer, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        // the label names the publication, not the account read — a buffer failure is indistinguishable here
+        expect(error?.context).toMatchObject({ operation: 'anchor idl data' });
+    });
+
+    it('should reject a buffer IDL declaring a different program address', async () => {
+        const tokenkeg = loadTokenkegIdl(); // declares TokenkegQfe… — not the requested program
+        const buffer = address(NTT_PROGRAM_ADDRESS);
+        const rpc = mockRpc({ [buffer]: pmpBufferAccount(address(gen.systemProgram), tokenkeg) }, undefined, {
+            [buffer]: PROGRAM_METADATA_PROGRAM_ADDRESS,
+        });
+
+        const [error] = await fetchOnChainIdlClient(gen.systemProgram, { buffer, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_ADDRESS_MISMATCH)).toBe(true);
+    });
+
+    it('should attribute the derived PDA address when no buffer is named', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const pda = await pmpIdlAddress(program);
+        const rpc = mockRpc({ [pda]: pmpIdlAccount(program, tokenkeg) });
+
+        const fetched = unwrapResult(await fetchOnChainIdlClient(program, { rpc }));
+
+        expect(fetched.address).toBe(pda);
     });
 });

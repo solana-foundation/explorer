@@ -7,6 +7,7 @@ import { type Address, address as assertAddress } from '@solana/kit';
 import type { IdlFetcher, IdlFetcherRpc } from '../../types.js';
 import { type PublishedIdl, toIdlRpc } from './solana-idl.js';
 import { fetchAnchorPdaIdl } from './source-anchor-pda.js';
+import { fetchBufferIdl } from './source-buffer.js';
 import { fetchPmpIdl } from './source-pmp.js';
 
 export { IdlSource } from './solana-idl.js';
@@ -40,6 +41,18 @@ export async function resolveOnChainIdl(
         if (published !== undefined) return published;
     }
     return undefined;
+}
+
+/**
+ * The IDL one named account holds — nothing derived, so the lookup knobs do not apply. Same throw
+ * policy as the legs: undecodable bytes surface as a coded `IdlError`.
+ */
+export async function resolveBufferIdl(
+    rpc: IdlFetcherRpc,
+    buffer: Address,
+    abortSignal: AbortSignal | undefined,
+): Promise<PublishedIdl | undefined> {
+    return fetchBufferIdl(toIdlRpc(rpc, abortSignal), buffer);
 }
 
 /**
