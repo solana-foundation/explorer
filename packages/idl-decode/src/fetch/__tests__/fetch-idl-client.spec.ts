@@ -346,7 +346,9 @@ describe('fetchIdlClient', () => {
     });
 });
 
-describe('createOnChainIdlFetcher', () => {
+// The resolution policy itself, driven through whichever surface reaches it — `fetchIdlClient` for the
+// default route, `createOnChainIdlFetcher` where the raw fetcher's own contract is what matters.
+describe('on-chain resolution', () => {
     it('should resolve the PMP idl metadata first', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);

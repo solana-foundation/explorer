@@ -385,13 +385,22 @@ Result:
 - an IDL declaring a **different** program address → `IDL_ERROR__IDL_ADDRESS_MISMATCH`; registries and
   custom fetchers serve mislabeled ones, so pass `verifyAddress: false` to accept it anyway
 
-Any other source (a registry, a cache, an anchor-provider wrap) plugs in through the `fetcher` option:
-an `IdlFetcher` resolves the raw IDL JSON, `undefined` when the program has none, and throws only on
-transport failure or abort. With a `fetcher` the `rpc` requirement drops.
-`createOnChainIdlFetcher(rpc, { anchor, authority })` — the default's building block — is exported too,
-for skipping the Anchor leg (native programs) or pinning the PMP lookup to one authority (`null` for
-canonical only). `fetchOnChainIdlClient` is the same resolution with the publication attributed
-(`source`, and the PMP `authority` that served it) instead of just the client.
+Only two things throw instead: an abort (with its reason), and a `programAddress` that is not an
+address — no lookup can be derived from one, so it is a caller bug rather than a data outcome. A
+`fetcher` receives the address unchecked, since a consumer's source need not key off a derivable one.
+
+Two options steer the lookups on either fetch call: `anchor: false` skips the Anchor PDA (native
+programs cannot have one, and some RPCs answer a transient error for the derived address), and
+`authority` pins the PMP lookup to a single one (`null` for canonical only) instead of canonical →
+fallback.
+
+`fetchOnChainIdlClient` is the same resolution with the publication attributed — `source`, plus the PMP
+`authority` that served it — instead of just the client. Any other source (a registry, a cache, an
+anchor-provider wrap) plugs into `fetchIdlClient` through the `fetcher` option: an `IdlFetcher` resolves
+the raw IDL JSON, `undefined` when the program has none, and throws only on transport failure or abort.
+With a `fetcher` the `rpc` requirement drops, and no publication is attributed. The on-chain resolution
+is also exported standalone as `createOnChainIdlFetcher(rpc, { anchor, authority })` — an `IdlFetcher`
+you can compose or wrap.
 
 ## From a transaction
 
