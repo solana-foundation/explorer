@@ -51,8 +51,11 @@ export function InstructionCard({
     // Only allow fetching raw data if we have a valid signature (not in inspector mode), and only
     // while a fetch could still produce it: a v1 transaction has no web3.js instruction view, so
     // once its raw data has arrived, asking again would refetch on every open of the Raw view.
-    const rawUnavailable = rawDetails?.status === FetchStatus.Fetched && raw === undefined;
-    const canFetchRaw = signature && !raw && !rawUnavailable;
+    const rawFetched = rawDetails?.status === FetchStatus.Fetched;
+    const canFetchRaw = signature && !raw && !rawFetched;
+    // Inner instructions never carry raw wire data, so their Raw view is the same with or without
+    // it; only the top-level list has rows to lose.
+    const rawUnavailable = rawFetched && raw === undefined && childIndex === undefined;
 
     return (
         <BaseInstructionCard
@@ -66,6 +69,7 @@ export function InstructionCard({
             childIndex={childIndex}
             raw={raw}
             onRequestRaw={canFetchRaw ? fetchRawTrigger : undefined}
+            rawUnavailable={rawUnavailable}
             headerButtons={headerButtons}
             collapsible={collapsible}
         >

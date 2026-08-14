@@ -11,7 +11,7 @@ import { Code } from 'react-feather';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { BaseRawDetails } from './BaseRawDetails';
+import { BaseRawDetails, RawDetailsUnavailable } from './BaseRawDetails';
 import { BaseRawParsedDetails } from './BaseRawParsedDetails';
 
 type InstructionProps = {
@@ -28,6 +28,8 @@ type InstructionProps = {
     raw?: TransactionInstruction;
     // will be triggered on requesting raw data for instruction, if present
     onRequestRaw?: () => void;
+    // set when no request can produce `raw`, so the Raw view says so instead of omitting its rows
+    rawUnavailable?: boolean;
     // Extra buttons rendered in the card header next to Raw
     headerButtons?: React.ReactNode;
     // Show a Collapse/Expand button that hides all card content
@@ -46,6 +48,7 @@ export function BaseInstructionCard({
     childIndex,
     raw,
     onRequestRaw,
+    rawUnavailable,
     headerButtons,
     collapsible = false,
 }: InstructionProps) {
@@ -108,7 +111,11 @@ export function BaseInstructionCard({
                             </BaseTable.Row>
                             {'parsed' in ix ? (
                                 <BaseRawParsedDetails ix={ix}>
-                                    {raw ? <BaseRawDetails ix={raw} /> : null}
+                                    {raw ? (
+                                        <BaseRawDetails ix={raw} />
+                                    ) : rawUnavailable ? (
+                                        <RawDetailsUnavailable />
+                                    ) : null}
                                 </BaseRawParsedDetails>
                             ) : (
                                 <BaseRawDetails ix={ix} />

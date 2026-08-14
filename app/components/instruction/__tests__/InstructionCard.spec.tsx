@@ -23,8 +23,18 @@ vi.mock('@providers/transactions/raw', () => ({
 // The real card renders a table of decoded accounts; only the Raw button's request behavior is
 // under test here, so stand in a button that reports what it was handed.
 vi.mock('@components/common/BaseInstructionCard', () => ({
-    BaseInstructionCard: ({ onRequestRaw }: { onRequestRaw?: () => void }) => (
-        <button data-can-request={onRequestRaw !== undefined} onClick={() => onRequestRaw?.()}>
+    BaseInstructionCard: ({
+        onRequestRaw,
+        rawUnavailable,
+    }: {
+        onRequestRaw?: () => void;
+        rawUnavailable?: boolean;
+    }) => (
+        <button
+            data-can-request={onRequestRaw !== undefined}
+            data-raw-unavailable={rawUnavailable === true}
+            onClick={() => onRequestRaw?.()}
+        >
             Raw
         </button>
     ),
@@ -71,6 +81,22 @@ describe('InstructionCard', () => {
 
         expect(screen.getByRole('button').dataset.canRequest).toBe('false');
         expect(fetchRaw).not.toHaveBeenCalled();
+    });
+
+    it('should mark raw data unavailable when a fetch has arrived without an instruction to show', () => {
+        rawDetails = { data: { raw: { transaction: undefined } }, status: FetchStatus.Fetched };
+
+        renderCard();
+
+        expect(screen.getByRole('button').dataset.rawUnavailable).toBe('true');
+    });
+
+    it('should not mark raw data unavailable for an inner instruction, which never carries it', () => {
+        rawDetails = legacyRawDetails();
+
+        renderCard({ childIndex: 0 });
+
+        expect(screen.getByRole('button').dataset.rawUnavailable).toBe('false');
     });
 
     it('should stop requesting raw data once the instruction is available', () => {
