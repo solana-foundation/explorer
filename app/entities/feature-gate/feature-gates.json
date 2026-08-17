@@ -2148,7 +2148,7 @@
     "simds": [
       "0525"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1006,
     "title": "SIMD-0525: Reduce Slot Time to 200ms"
   }
 ]
