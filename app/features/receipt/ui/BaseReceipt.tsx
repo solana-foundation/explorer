@@ -2,7 +2,6 @@
 
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
-import { ExternalLink } from '@components/shared/ui/external-link';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/shared/ui/tooltip';
 import { cn } from '@components/shared/utils';
 import { displayTimestamp } from '@utils/date';
@@ -179,7 +178,7 @@ function TransferRowItem({
                     <span className="flex items-center gap-1 whitespace-nowrap text-left font-mono text-white">
                         {logoURI &&
                             (tokenHref ? (
-                                <ExternalLink href={tokenHref} className="flex-shrink-0">
+                                <a href={tokenHref} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={logoURI}
@@ -188,7 +187,7 @@ function TransferRowItem({
                                         width="16"
                                         className="flex-shrink-0"
                                     />
-                                </ExternalLink>
+                                </a>
                             ) : (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={logoURI} alt="Token logo" height="16" width="16" className="flex-shrink-0" />
@@ -209,10 +208,15 @@ function AddressCell({ address, display, href }: { address: string; display: str
         <Tooltip>
             <TooltipTrigger asChild>
                 {href ? (
-                    <ExternalLink href={href} className="truncate font-mono text-green-400 hover:underline">
+                    <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="truncate font-mono text-green-400 hover:underline"
+                    >
                         <span className="hidden sm:inline">{display}</span>
                         <span className="truncate sm:hidden">{address}</span>
-                    </ExternalLink>
+                    </a>
                 ) : (
                     <span className="font-mono text-green-400">
                         <span className="hidden sm:inline">{display}</span>

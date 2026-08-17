@@ -1,10 +1,9 @@
 import { cva } from 'class-variance-authority';
 import { ReactNode } from 'react';
-import { ExternalLink as ExternalLinkIcon } from 'react-feather';
+import { ExternalLink } from 'react-feather';
 
 import { Copyable } from '@/app/components/common/Copyable';
 import { Badge } from '@/app/components/shared/ui/badge';
-import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { cn } from '@/app/components/shared/utils';
 
 import { formatLogTimestamp } from '../model/formatLogTimestamp';
@@ -39,7 +38,7 @@ export function StatusBar({ message, date, theme, badge, link }: StatusBarProps)
             {Boolean(link) && (
                 <>
                     {' '}
-                    <ExternalLinkIcon size={12} />
+                    <ExternalLink size={12} />
                 </>
             )}
         </Badge>
@@ -51,9 +50,9 @@ export function StatusBar({ message, date, theme, badge, link }: StatusBarProps)
                 <span className={timestampVariants({ theme })}>{formatLogTimestamp(date)}</span>
             </div>
             {link ? (
-                <ExternalLink href={link} className="ml-auto">
+                <a href={link} target="_blank" rel="noopener noreferrer" className="ml-auto">
                     {badgeNode}
-                </ExternalLink>
+                </a>
             ) : (
                 badgeNode
             )}

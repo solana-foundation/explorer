@@ -1,4 +1,3 @@
-import { ExternalLink } from '@components/shared/ui/external-link';
 import { cn } from '@components/shared/utils';
 import { ComponentProps, FC } from 'react';
 
@@ -12,8 +11,8 @@ type ExplorerLinkProps = Pick<ComponentProps<'div'>, 'className'> & {
 export const ExplorerLink: FC<ExplorerLinkProps> = ({ path, label, className }) => {
     const { link } = useExplorerLink(path);
     return (
-        <ExternalLink href={link} className={cn('font-mono', className)}>
+        <a href={link} target="_blank" rel="noopener noreferrer" className={cn('font-mono', className)}>
             {label}
-        </ExternalLink>
+        </a>
     );
 };
