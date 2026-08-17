@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createStore, Provider } from 'jotai';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -97,6 +97,21 @@ describe('PendingCustomUrlConsent', () => {
         // `replace`, so a refused prompt does not sit in the back history waiting to ask again.
         expect(nav.replace).toHaveBeenCalledWith('/?sort=fee');
         expect(nav.push).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a click on the backdrop', async () => {
+        // A security question needs an answer, and a stray click outside is not one. Only Escape, the X and
+        // Cancel dismiss it.
+        clusterState.pendingCustomUrl = rpcEndpoint(REMOTE_URL);
+        renderConsent();
+
+        // Radix attaches its outside-pointerdown listener from a `setTimeout`, so the click has to wait a
+        // tick. Fired sooner, nothing is listening and the assertions below hold for the wrong reason.
+        await act(() => new Promise(resolve => setTimeout(resolve, 0)));
+        fireEvent.pointerDown(document.body);
+
+        expect(screen.getByTestId('custom-url-consent')).toBeInTheDocument();
+        expect(nav.replace).not.toHaveBeenCalled();
     });
 
     it('should treat dismissal as a decline', () => {

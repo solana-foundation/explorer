@@ -28,11 +28,16 @@ type Props = {
 };
 
 export function CustomUrlConsentDialog({ request, onConfirm, onCancel }: Props) {
-    // Anything that closes the dialog — Escape, the X, a click outside — is a decline: the safe outcome
-    // has to be the default one.
+    // Anything that closes the dialog — Escape, the X, Cancel — is a decline: the safe outcome has to be
+    // the default one. A click outside closes nothing, though: this asks a security question, and a stray
+    // click on the backdrop is not an answer to it.
     return (
         <Dialog open={request !== undefined} onOpenChange={open => !open && onCancel()}>
-            <DialogContent data-testid="custom-url-consent" zIndex={CONSENT_Z_INDEX}>
+            <DialogContent
+                data-testid="custom-url-consent"
+                zIndex={CONSENT_Z_INDEX}
+                onInteractOutside={event => event.preventDefault()}
+            >
                 {request?.kind === 'endpoint' ? (
                     <EndpointConsent endpoint={request.endpoint} onConfirm={onConfirm} onCancel={onCancel} />
                 ) : (
