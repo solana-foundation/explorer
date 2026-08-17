@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { cn } from '@/app/components/shared/utils';
 
 import { getCookie, setCookie } from '../lib/cookie';
@@ -94,14 +95,12 @@ export function CookieConsent() {
 
 export function PrivacyPolicyLink({ children }: { children: React.ReactNode }) {
     return (
-        <a
+        <ExternalLink
             href={PRIVACY_POLICY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="text-white underline transition-opacity hover:text-white hover:opacity-70"
         >
             {children}
-        </a>
+        </ExternalLink>
     );
 }
 

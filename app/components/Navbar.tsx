@@ -10,6 +10,7 @@ import { useSelectedLayoutSegment, useSelectedLayoutSegments } from 'next/naviga
 import React, { ReactNode } from 'react';
 import { Menu } from 'react-feather';
 
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { NavbarItem, NavbarLink, NavbarList } from '@/app/shared/ui/Navbar';
 
 import { ClusterStatusButton } from './ClusterStatusButton';
@@ -82,11 +83,9 @@ export function Navbar({ children }: INavbarProps) {
                         </NavbarItem>
                         {/* Centred only in the lg row; the drawer stacks vertically, where centring breaks the left edge the text links share. */}
                         <NavbarItem className="flex items-center lg:justify-center">
-                            <a
+                            <ExternalLink
                                 aria-label="GitHub Repository"
                                 href="https://github.com/solana-foundation/explorer"
-                                target="_blank"
-                                rel="noopener noreferrer"
                                 // mx-2 matches the text links' px-2 so the drawer shares one left edge; lg restores the row spacing.
                                 className="mx-2 lg:mx-3"
                             >
@@ -98,7 +97,7 @@ export function Navbar({ children }: INavbarProps) {
                                         fill="#fff"
                                     />
                                 </svg>
-                            </a>
+                            </ExternalLink>
                         </NavbarItem>
                     </NavbarList>
                 </div>

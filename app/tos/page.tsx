@@ -2,6 +2,7 @@ import '@/app/styles/styles.css';
 
 import { Metadata } from 'next/types';
 
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 export const metadata: Metadata = {
@@ -23,14 +24,12 @@ export default function TermsOfServicePage() {
 
                 <p className="mb-8 text-gray-400">
                     Please refer to our Privacy Policy, available at{' '}
-                    <a
+                    <ExternalLink
                         href="https://solana.com/privacy-policy"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="text-accent underline hover:text-accent-600"
                     >
                         link
-                    </a>
+                    </ExternalLink>
                     , for information about how we collect, use, share and otherwise process information about you.
                 </p>
 
@@ -49,14 +48,12 @@ export default function TermsOfServicePage() {
                         including the www.solana.com website as well as any other media form, media channel, or mobile
                         website related, linked, or otherwise connected thereto (collectively, the &quot;
                         <strong>Site</strong>&quot;). Currently, the Foundation maintains and operates{' '}
-                        <a
+                        <ExternalLink
                             href="https://www.solana.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
                             className="text-accent underline hover:text-accent-600"
                         >
                             www.solana.com
-                        </a>{' '}
+                        </ExternalLink>{' '}
                         as a portal for news, information, and updates about the Solana protocol or blockchain (the
                         &quot;Solana Network&quot;) and the Solana ecosystem. For the avoidance of doubt, the Foundation
                         does not control the Solana Network and cannot control activity and data on the Solana Network,
@@ -430,14 +427,12 @@ export default function TermsOfServicePage() {
                         held in Zug, Switzerland. You and the Foundation agree that Disputes will be held in accordance
                         with the JAMS Streamlined Arbitration Rules and Procedures (&quot;<strong>JAMS Rules</strong>
                         &quot;). The most recent version of the JAMS Rules are available on the{' '}
-                        <a
+                        <ExternalLink
                             href="https://www.jamsadr.com/rules-streamlined-arbitration"
-                            target="_blank"
-                            rel="noopener noreferrer"
                             className="text-accent underline hover:text-accent-600"
                         >
                             JAMS website
-                        </a>{' '}
+                        </ExternalLink>{' '}
                         and are hereby incorporated by reference. You either acknowledge and agree that you have read
                         and understand the JAMS Rules or waive your opportunity to read the JAMS Rules and waive any
                         claim that the JAMS Rules are unfair or should not apply for any reason.

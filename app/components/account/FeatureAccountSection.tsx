@@ -11,6 +11,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { ClusterInfo, useCluster, useClusterInfo } from '@/app/providers/cluster';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { Cluster, clusterName } from '@/app/utils/cluster';
@@ -99,14 +100,9 @@ const BaseFeatureCard = ({
                     {featureInfo.simds.map((simd, index) => (
                         <div key={index}>
                             {simd && featureInfo.simd_link[index] ? (
-                                <a
-                                    href={featureInfo.simd_link[index]}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className=""
-                                >
+                                <ExternalLink href={featureInfo.simd_link[index]}>
                                     SIMD {simd} <ExternalLinkIcon className="align-text-top" size={13} />
-                                </a>
+                                </ExternalLink>
                             ) : (
                                 <code>No link</code>
                             )}

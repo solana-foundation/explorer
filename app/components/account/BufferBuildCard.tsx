@@ -5,9 +5,10 @@ import { TableCardBodyHeaded } from '@components/common/TableCardBody';
 import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 import React, { Fragment, useState } from 'react';
-import { ExternalLink } from 'react-feather';
+import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { useCluster } from '@/app/providers/cluster';
 import { Alert } from '@/app/shared/ui/Alert';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
@@ -115,9 +116,9 @@ export function BaseBufferBuildCard({
             <Alert className="mb-1.5 mt-1.5">
                 These are completed builds whose compiled output matches this buffer&apos;s binary. A match does not
                 imply that the program has been audited. For more details, refer to the{' '}
-                <a href={VERIFIED_BUILDS_GUIDE_URL} target="_blank" rel="noopener noreferrer">
-                    Verified Builds Guide <ExternalLink className="ml-[3px] align-text-top" size={13} />
-                </a>
+                <ExternalLink href={VERIFIED_BUILDS_GUIDE_URL}>
+                    Verified Builds Guide <ExternalLinkIcon className="ml-[3px] align-text-top" size={13} />
+                </ExternalLink>
                 .
             </Alert>
             <TableCardBodyHeaded layout="expanded" headerComponent={<BufferBuildHeader />}>
@@ -225,10 +226,10 @@ function RepositoryContent({ build }: { build: OsecBuild }) {
 
     if (repoUrl) {
         return (
-            <a className="font-mono" href={repoUrl} target="_blank" rel="noopener noreferrer">
+            <ExternalLink className="font-mono" href={repoUrl}>
                 {label}
-                <ExternalLink className="ml-1.5 inline-block align-text-top" size={13} />
-            </a>
+                <ExternalLinkIcon className="ml-1.5 inline-block align-text-top" size={13} />
+            </ExternalLink>
         );
     }
     return <span className="font-mono">{label || '-'}</span>;

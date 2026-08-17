@@ -2,11 +2,12 @@ import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { Suspense } from 'react';
-import { ChevronDown, ExternalLink } from 'react-feather';
+import { ChevronDown, ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
 import { Dropdown, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { getProxiedUri } from '@/app/features/metadata';
 import { useCluster } from '@/app/providers/cluster';
 import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
@@ -60,10 +61,10 @@ export function CompressedNftCard({ account }: { account: Account }) {
             <BaseTable.Row>
                 <BaseTable.Cell>Website</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <a rel="noopener noreferrer" target="_blank" href={compressedNft.content.links.external_url}>
+                    <ExternalLink href={compressedNft.content.links.external_url}>
                         {compressedNft.content.links.external_url}
-                        <ExternalLink className="ml-1.5 align-text-top" size={13} />
-                    </a>
+                        <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                    </ExternalLink>
                 </BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>

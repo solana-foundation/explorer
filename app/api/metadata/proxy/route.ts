@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { parseUrl as parseSharedUrl } from '@/app/shared/lib/url';
 
 import { CACHE_HEADERS, ERROR_CACHE_HEADERS, MAX_SIZE, SECURITY_HEADERS, TIMEOUT, USER_AGENT } from './config';
 import {
@@ -60,14 +61,14 @@ export async function GET(request: Request) {
     }
 }
 
+// Thin wrapper over the shared parser: same parse, plus the route's error log.
 function parseUrl(maybeUrl: string | null): URL | undefined {
     if (!maybeUrl) return undefined;
-    try {
-        return new URL(maybeUrl);
-    } catch (error) {
-        Logger.error(new Error('[api:metadata-proxy] Invalid URL', { cause: error }));
-        return undefined;
+    const url = parseSharedUrl(maybeUrl);
+    if (!url) {
+        Logger.error(new Error('[api:metadata-proxy] Invalid URL'));
     }
+    return url;
 }
 
 // Content-Length is intentionally omitted to avoid browser CORS issues:

@@ -1,6 +1,7 @@
 import { cva } from 'class-variance-authority';
 import { AlertCircle, Check, X } from 'react-feather';
 
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { cn } from '@/app/components/shared/utils';
 
 import { EVerificationSource, VerificationSource } from '../lib/types';
@@ -24,10 +25,8 @@ function RiskLevelText({ level, children }: { level?: ERiskLevel; children: Reac
 function VerificationBadge({ source }: { source: VerificationSource }) {
     if (source.name === EVerificationSource.RugCheck && source.score !== undefined) {
         return (
-            <a
+            <ExternalLink
                 href={source.url}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="flex items-center gap-1 rounded-md border border-solid border-heavy-metal-600 bg-heavy-metal-800 p-1 hover:border-heavy-metal-500 hover:bg-heavy-metal-700"
             >
                 <SourceIcon source={source.name} />
@@ -35,15 +34,13 @@ function VerificationBadge({ source }: { source: VerificationSource }) {
                     {source.name} risk: {source.score}/100 -{' '}
                     <RiskLevelText level={source.level as ERiskLevel}>{source.level}</RiskLevelText>
                 </span>
-            </a>
+            </ExternalLink>
         );
     }
 
     return (
-        <a
+        <ExternalLink
             href={source.url}
-            target="_blank"
-            rel="noopener noreferrer"
             className="flex items-center gap-1 rounded-md border border-solid border-heavy-metal-600 bg-heavy-metal-800 p-1 hover:border-heavy-metal-500 hover:bg-heavy-metal-700"
         >
             <SourceIcon source={source.name} />
@@ -53,7 +50,7 @@ function VerificationBadge({ source }: { source: VerificationSource }) {
             ) : (
                 <X className="text-red-400" size={16} />
             )}
-        </a>
+        </ExternalLink>
     );
 }
 
@@ -62,29 +59,22 @@ function ApplyForVerificationLink({ source }: { source: VerificationSource }) {
         source.name === EVerificationSource.RugCheck ? `${EVerificationSource.RugCheck} risk: Unknown` : source.name;
 
     return (
-        <a
-            href={source.applyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-white underline hover:text-gray-400"
-        >
+        <ExternalLink href={source.applyUrl} className="text-xs text-white underline hover:text-gray-400">
             {sourceName}
-        </a>
+        </ExternalLink>
     );
 }
 
 function RateLimitedBadge({ source }: { source: VerificationSource }) {
     return (
-        <a
+        <ExternalLink
             href={source.url}
-            target="_blank"
-            rel="noopener noreferrer"
             className="flex items-center gap-1 rounded-md border border-solid border-orange-600/50 bg-orange-900/20 p-1 hover:border-orange-500 hover:bg-orange-800/50"
         >
             <SourceIcon source={source.name} />
             <span className="text-xs text-orange-400">{source.name}</span>
             <AlertCircle className="text-orange-400" size={14} />
-        </a>
+        </ExternalLink>
     );
 }
 

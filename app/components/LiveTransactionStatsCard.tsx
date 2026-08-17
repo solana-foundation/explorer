@@ -10,6 +10,7 @@ import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 
 import { Button } from '@/app/components/shared/ui/button';
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { useReducedMotion } from '@/app/shared/lib/use-reduced-motion';
 import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -224,13 +225,8 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
                 <div className="mt-3 text-center text-dk-gray-700">
                     <p className="mb-0">
                         For transaction confirmation time statistics, please visit{' '}
-                        <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">
-                            validators.app
-                        </a>{' '}
-                        or{' '}
-                        <a href="https://solscan.io" target="_blank" rel="noopener noreferrer">
-                            solscan.io
-                        </a>
+                        <ExternalLink href="https://www.validators.app">validators.app</ExternalLink> or{' '}
+                        <ExternalLink href="https://solscan.io">solscan.io</ExternalLink>
                     </p>
                 </div>
             </CardBody>
