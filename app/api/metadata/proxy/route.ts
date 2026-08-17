@@ -62,11 +62,15 @@ export async function GET(request: Request) {
 }
 
 // Thin wrapper over the shared parser: same parse, plus the route's error log.
+// The shared parser swallows the `new URL` TypeError, so the offending value goes
+// into the log context instead — it carries the same diagnostic detail the old
+// `{ cause }` did (that TypeError's only real payload is the input) and matches how
+// the unsupported-protocol branch above reports.
 function parseUrl(maybeUrl: string | null): URL | undefined {
     if (!maybeUrl) return undefined;
     const url = parseSharedUrl(maybeUrl);
     if (!url) {
-        Logger.error(new Error('[api:metadata-proxy] Invalid URL'));
+        Logger.error(new Error('[api:metadata-proxy] Invalid URL'), { uri: maybeUrl });
     }
     return url;
 }
