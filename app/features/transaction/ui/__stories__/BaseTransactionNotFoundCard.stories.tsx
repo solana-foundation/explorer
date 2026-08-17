@@ -51,7 +51,7 @@ export const Found: Story = {
             <span>
                 <span className="align-middle">Transaction does not exist</span>
                 <br />
-                <a href="#" className="align-middle text-dk-info">
+                <a href="#" className="align-middle text-dk-info hover:text-dk-info">
                     Found on Devnet
                 </a>
             </span>

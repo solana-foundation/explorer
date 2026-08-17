@@ -15,7 +15,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
 import { Logger } from '@/app/shared/lib/logger';
-import { clusterUrl } from '@/app/utils/cluster';
 
 import { programAtom } from '../model/state-atoms';
 import { AnchorInterpreter } from './anchor/anchor-interpreter';
@@ -87,7 +86,8 @@ export function useInstruction({
 }: UseInstructionOptions): UseInstructionReturn {
     const interpreterName = interpreterNameOverride ?? detectInterpreterName(idl);
     const { publicKey, ...wallet } = useWallet();
-    const { cluster: currentCluster, customUrl } = useCluster();
+    // `url` is the active cluster already resolved to its RPC endpoint, so there is nothing to recompute.
+    const { url: currentClusterUrl } = useCluster();
 
     const [initializationError, setInitializationError] = useState<string>();
     const [isProgramLoading, setIsProgramLoading] = useState(false);
@@ -97,9 +97,9 @@ export function useInstruction({
 
     // Get connection for the specified cluster
     const connection = useMemo(() => {
-        const endpoint = cluster || clusterUrl(currentCluster, customUrl);
+        const endpoint = cluster || currentClusterUrl;
         return new Connection(endpoint);
-    }, [cluster, currentCluster, customUrl]);
+    }, [cluster, currentClusterUrl]);
 
     /// Allow to create Executor instance and update cluster-dependent connection
     const executorRef = useRef<IdlExecutor>(undefined);

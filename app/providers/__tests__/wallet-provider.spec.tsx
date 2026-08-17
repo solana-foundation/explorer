@@ -1,3 +1,4 @@
+import { DEFAULT_RPC_ENDPOINT } from '@entities/cluster';
 import { WalletError } from '@solana/wallet-adapter-base';
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
@@ -13,10 +14,11 @@ vi.mock('@components/shared/ui/sonner/use-toast', () => ({
     }),
 }));
 
+// `useCluster()` always reports a parsed endpoint. Mainnet ignores it, so the default one stands in.
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: () => ({
         cluster: 'mainnet-beta',
-        customUrl: undefined,
+        customUrl: DEFAULT_RPC_ENDPOINT,
     }),
 }));
 

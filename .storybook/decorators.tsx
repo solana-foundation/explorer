@@ -2,6 +2,7 @@ import { DispatchContext, FetchersContext, type State, StateContext } from '@pro
 import type { ClusterState } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
+import { type Cluster, clusterSelection } from '@utils/cluster';
 import React, { useLayoutEffect, useRef } from 'react';
 import { fn } from 'storybook/test';
 
@@ -43,11 +44,27 @@ export const withClusterModalOpen: Decorator = Story => (
 /**
  * Factory: seeds ClusterProvider with an explicit cluster `state` (cluster, customUrl, status) so consumers of
  * `useCluster()` render a specific cluster/status. Usage: `decorators: [withClusterState({ cluster, customUrl, status })]`
+ *
+ * `cluster` and `customUrl` are paired into a `ClusterSelection` here, so stories keep writing literals.
+ * A Custom story whose URL is not an http(s) endpoint throws: it describes a state `useCluster()` can
+ * never report.
+ *
+ * `modalOpen` seeds the cluster-modal atom, like `withClusterModalOpen`. A story that brings its own jotai
+ * store needs it here instead: the atom is seeded into whichever store is in scope where the provider
+ * sits, and `withClusterModalOpen` sits outside the story's own store.
  */
-export function withClusterState(state: ClusterState): Decorator {
+export function withClusterState({
+    cluster,
+    customUrl,
+    modalOpen,
+    ...state
+}: Omit<ClusterState, 'selection'> & { cluster: Cluster; customUrl?: string; modalOpen?: boolean }): Decorator {
     return function WithClusterState(Story) {
         return (
-            <ClusterProvider state={state}>
+            <ClusterProvider
+                modalOpen={modalOpen}
+                state={{ ...state, selection: clusterSelection(cluster, customUrl) }}
+            >
                 <Story />
             </ClusterProvider>
         );

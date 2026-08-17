@@ -1,8 +1,10 @@
 'use client';
 
-import { Cluster, clusterUrl } from '@utils/cluster';
+import { Cluster, type ClusterSelection, clusterUrl, type ServerCluster } from '@utils/cluster';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import { parseRpcEndpoint, type RpcEndpoint } from '../lib/rpc-endpoint';
 
 export type ClusterSearchStatus = 'idle' | 'searching' | 'found' | 'not-found';
 
@@ -18,9 +20,9 @@ export interface ClusterResourceSearch {
  */
 export type ClusterResourceProbe = (url: string, resourceId: string) => Promise<boolean>;
 
-// Canonical, durable public clusters. Cluster.Simd296 is a temporary surfnet, so matches there
-// aren't linkable later; Cluster.Custom is appended only when a custom RPC URL is configured.
-const PUBLIC_CLUSTERS = [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet];
+// Canonical, durable public clusters. Cluster.Simd296 is a temporary surfnet, so matches there aren't
+// linkable later; Cluster.Custom is appended only when a usable custom RPC endpoint is configured.
+const PUBLIC_CLUSTERS: ServerCluster[] = [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet];
 const PROBE_DELAY_MS = 700;
 
 /**
@@ -38,7 +40,10 @@ export function useClusterResourceSearch({
     probe: ClusterResourceProbe;
 }): ClusterResourceSearch {
     const searchParams = useSearchParams();
-    const customUrl = searchParams?.get('customUrl');
+    // Parsed rather than passed through raw: a junk `?customUrl=` would otherwise add a Custom probe step
+    // that shows "Searching Custom…" and never resolves.
+    const customUrlParam = searchParams?.get('customUrl');
+    const endpoint = useMemo(() => parseRpcEndpoint(customUrlParam), [customUrlParam]);
 
     const [status, setStatus] = useState<ClusterSearchStatus>('idle');
     const [searchingCluster, setSearchingCluster] = useState<Cluster | undefined>(undefined);
@@ -54,7 +59,7 @@ export function useClusterResourceSearch({
     useEffect(() => {
         const searchId = ++searchIdRef.current;
         const isStale = () => searchIdRef.current !== searchId;
-        const clusters = getClustersToProbe(currentCluster, customUrl);
+        const selections = getSelectionsToProbe(currentCluster, endpoint);
 
         async function searchClusters() {
             // Reset every output up front so a re-fired search never surfaces stale state, instead
@@ -63,13 +68,13 @@ export function useClusterResourceSearch({
             setSearchingCluster(undefined);
             setFoundCluster(undefined);
 
-            for (const [index, cluster] of clusters.entries()) {
+            for (const [index, selection] of selections.entries()) {
                 if (isStale()) return;
-                setSearchingCluster(cluster);
+                setSearchingCluster(selection.cluster);
 
                 let found: boolean;
                 try {
-                    found = await probeRef.current(clusterUrl(cluster, customUrl ?? ''), resourceId);
+                    found = await probeRef.current(clusterUrl(selection), resourceId);
                 } catch {
                     // Ignore probe errors (unreachable RPC, etc.) and try the next cluster
                     continue;
@@ -78,13 +83,13 @@ export function useClusterResourceSearch({
                 if (isStale()) return;
 
                 if (found) {
-                    setFoundCluster(cluster);
+                    setFoundCluster(selection.cluster);
                     setStatus('found');
                     return;
                 }
 
                 // Only pace between checks; skip the trailing delay so not-found shows immediately
-                const isLastCluster = index === clusters.length - 1;
+                const isLastCluster = index === selections.length - 1;
                 if (!isLastCluster) await sleep(PROBE_DELAY_MS);
             }
 
@@ -99,17 +104,20 @@ export function useClusterResourceSearch({
             // Invalidate this run so an in-flight probe cannot commit stale state after cleanup.
             if (!isStale()) searchIdRef.current += 1;
         };
-    }, [resourceId, currentCluster, customUrl]);
+    }, [resourceId, currentCluster, endpoint]);
 
     return { foundCluster, searchingCluster, status };
 }
 
-function getClustersToProbe(currentCluster: Cluster, customUrl: string | null | undefined): Cluster[] {
-    const clusters = PUBLIC_CLUSTERS.filter(cluster => cluster !== currentCluster);
-    if (customUrl) {
-        clusters.push(Cluster.Custom);
+// Pairs, so the decision to probe Custom and the endpoint it is probed at cannot disagree.
+function getSelectionsToProbe(currentCluster: Cluster, endpoint: RpcEndpoint | undefined): ClusterSelection[] {
+    const selections: ClusterSelection[] = PUBLIC_CLUSTERS.filter(cluster => cluster !== currentCluster).map(
+        cluster => ({ cluster }),
+    );
+    if (endpoint) {
+        selections.push({ cluster: Cluster.Custom, endpoint });
     }
-    return clusters;
+    return selections;
 }
 
 function sleep(ms: number): Promise<void> {

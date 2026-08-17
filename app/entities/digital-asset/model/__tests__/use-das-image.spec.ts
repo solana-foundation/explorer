@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Cluster, clusterSlug } from '@/app/utils/cluster';
+import { Cluster, clusterSelection, clusterSlug } from '@/app/utils/cluster';
 
 vi.mock('@/app/providers/cluster', () => ({ useCluster: vi.fn() }));
 vi.mock('swr', () => ({ default: vi.fn() }));
@@ -15,9 +15,9 @@ import { useDasImage } from '../use-das-image';
 describe('useDasImage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.MainnetBeta, customUrl: '' } as ReturnType<
-            typeof useCluster
-        >);
+        vi.mocked(useCluster).mockReturnValue({
+            ...clusterSelection(Cluster.MainnetBeta),
+        } as ReturnType<typeof useCluster>);
         vi.mocked(useSWR).mockReturnValue({ data: undefined } as ReturnType<typeof useSWR>);
     });
 
@@ -45,8 +45,7 @@ describe('useDasImage', () => {
 
     it('should pass an SWR key of cluster slug and mint, without any customUrl', () => {
         vi.mocked(useCluster).mockReturnValue({
-            cluster: Cluster.Custom,
-            customUrl: 'https://custom.rpc',
+            ...clusterSelection(Cluster.Custom, 'https://custom.rpc'),
         } as ReturnType<typeof useCluster>);
 
         renderHook(() => useDasImage('SomeMintAddress'));
@@ -62,8 +61,7 @@ describe('useDasImage', () => {
         const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({ image: undefined }), ok: true });
         vi.stubGlobal('fetch', fetchMock);
         vi.mocked(useCluster).mockReturnValue({
-            cluster: Cluster.Custom,
-            customUrl: 'https://custom.rpc',
+            ...clusterSelection(Cluster.Custom, 'https://custom.rpc'),
         } as ReturnType<typeof useCluster>);
 
         renderHook(() => useDasImage('SomeMintAddress'));

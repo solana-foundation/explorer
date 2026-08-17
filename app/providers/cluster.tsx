@@ -13,10 +13,18 @@ export function ClusterProvider({ children }: { children: ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
 
+    // `replace`, not `push`: this rewrite corrects the URL the app was given, it is not a place the user
+    // asked to go. `push` would trap Back — it returns to the URL that still carries the param, which is
+    // corrected and pushed again.
+    //
+    // The hash comes off the live location because `usePathname()` drops the fragment, and a corrective
+    // rewrite must not discard a deep link's anchor. `window` needs no SSR guard: the only caller is an
+    // effect in `useClusterUrl`, and effects never run on the server.
     const onReplaceSearchParams = useCallback(
         (next: URLSearchParams) => {
             const queryString = next.toString();
-            router.push(`${pathname}${queryString ? `?${queryString}` : ''}`);
+            const hash = window.location.hash;
+            router.replace(`${pathname}${queryString ? `?${queryString}` : ''}${hash}`);
         },
         [pathname, router],
     );
@@ -37,5 +45,4 @@ export {
     useCluster,
     useClusterInfo,
     useClusterModal,
-    useUpdateCustomUrl,
 } from '@entities/cluster';

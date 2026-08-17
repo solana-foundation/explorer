@@ -6,6 +6,8 @@ export {
     Cluster,
     clusterFromSlug,
     clusterName,
+    clusterSelection,
+    type ClusterSelection,
     clusterSlug,
     CLUSTERS,
     clusterUrl,

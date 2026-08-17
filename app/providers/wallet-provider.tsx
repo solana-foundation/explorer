@@ -11,7 +11,6 @@ import { ComponentProps, FC, PropsWithChildren, useCallback, useMemo } from 'rea
 
 import { useCluster } from '@/app/providers/cluster';
 import { Logger } from '@/app/shared/lib/logger';
-import { clusterUrl } from '@/app/utils/cluster';
 
 export const WalletProvider: FC<
     Pick<ComponentProps<typeof WalletAdapterProvider>, 'autoConnect'> &
@@ -19,8 +18,9 @@ export const WalletProvider: FC<
             skipToast?: boolean;
         }
 > = ({ children, autoConnect, skipToast = false }) => {
-    const { cluster, customUrl } = useCluster();
-    const endpoint = useMemo(() => clusterUrl(cluster, customUrl), [cluster, customUrl]);
+    // `useCluster()` already resolves the selection to its RPC URL, so this reads it rather than
+    // recomputing `clusterUrl` from the parts.
+    const { url: endpoint } = useCluster();
     const toast = useToast();
 
     const onError = useCallback(

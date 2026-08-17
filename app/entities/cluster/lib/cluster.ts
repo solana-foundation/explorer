@@ -1,3 +1,5 @@
+import { DEFAULT_CUSTOM_URL, type RpcEndpoint, rpcEndpoint } from './rpc-endpoint';
+
 export enum ClusterStatus {
     Connected,
     Connecting,
@@ -71,8 +73,18 @@ const modifyUrl = (url: string): string => {
     }
 };
 
-export function clusterUrl(cluster: Cluster, customUrl: string): string {
-    switch (cluster) {
+// Custom is the only cluster whose URL is not derivable; every other one resolves to a fixed configured
+// URL and ignores a custom endpoint. Keeping the endpoint inside the Custom arm makes that the shape of
+// the data, so no consumer has to re-derive "is this endpoint relevant?" for itself.
+//
+// `endpoint?: undefined` on the known-cluster arm lets consumers that want only `cluster` read it off a
+// selection without narrowing first.
+export type ClusterSelection =
+    | { cluster: ServerCluster; endpoint?: undefined }
+    | { cluster: Cluster.Custom; endpoint: RpcEndpoint };
+
+export function clusterUrl(selection: ClusterSelection): string {
+    switch (selection.cluster) {
         case Cluster.Devnet:
             return process.env.NEXT_PUBLIC_DEVNET_RPC_URL ?? modifyUrl(DEVNET_URL);
         case Cluster.MainnetBeta:
@@ -82,8 +94,19 @@ export function clusterUrl(cluster: Cluster, customUrl: string): string {
         case Cluster.Simd296:
             return process.env.NEXT_PUBLIC_SIMD296_RPC_URL ?? SIMD296_URL;
         case Cluster.Custom:
-            return customUrl;
+            // No fallback branch: the type guarantees an endpoint here.
+            return selection.endpoint.href;
     }
+}
+
+/**
+ * Pairs a cluster with a URL string, for callers that hold a string rather than an `RpcEndpoint`: tests,
+ * stories, raw query params. Throws on a Custom cluster with an unusable URL, so pass only literals and
+ * already-validated values. Code holding a parsed endpoint should write the selection directly.
+ */
+export function clusterSelection(cluster: Cluster, customUrl?: string): ClusterSelection {
+    if (cluster !== Cluster.Custom) return { cluster };
+    return { cluster, endpoint: rpcEndpoint(customUrl ?? DEFAULT_CUSTOM_URL) };
 }
 
 // The clusters the Explorer server may resolve to an endpoint. Custom is excluded on purpose: its URL

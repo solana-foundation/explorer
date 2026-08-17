@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import { MockClusterProvider } from '@storybook-config/__mocks__/MockClusterProvider';
 import { nextjsParameters } from '@storybook-config/decorators';
 import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
-import { Cluster, ClusterStatus } from '@utils/cluster';
+import { Cluster, clusterSelection, ClusterStatus } from '@utils/cluster';
 import { hashProgramData } from '@utils/verified-builds';
 import { SWRConfig } from 'swr';
 
@@ -51,14 +51,12 @@ const withMockedOsec = (outcome: OsecOutcome, state?: ClusterState): Decorator =
     };
 
 const devnetState: ClusterState = {
-    cluster: Cluster.Devnet,
-    customUrl: 'https://api.devnet.solana.com',
+    selection: clusterSelection(Cluster.Devnet),
     status: ClusterStatus.Connected,
 };
 
 const testnetState: ClusterState = {
-    cluster: Cluster.Testnet,
-    customUrl: 'https://api.testnet.solana.com',
+    selection: clusterSelection(Cluster.Testnet),
     status: ClusterStatus.Connected,
 };
 

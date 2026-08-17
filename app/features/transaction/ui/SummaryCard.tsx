@@ -21,12 +21,12 @@ import {
 } from '@providers/transactions';
 import type { TransactionVersion } from '@solana/kit';
 import { ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
-import { Cluster, ClusterStatus } from '@utils/cluster';
+import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
-import { useClusterPath } from '@utils/url';
+import { useBuildClusterPath, useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React, { useEffect } from 'react';
 import { ZoomIn } from 'react-feather';
@@ -105,9 +105,11 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
     const rawDetails = useRawTransactionDetails(signature);
-    const { cluster, name: clusterName, status: clusterStatus, url: clusterUrl } = useCluster();
+    const { cluster, status: clusterStatus } = useCluster();
     const clusterInfo = useClusterInfo();
     const inspectPath = useClusterPath({ pathname: `/tx/${signature}/inspect` });
+    // The error link's target is only known inside the render below, so this needs the callback form.
+    const buildClusterPath = useBuildClusterPath();
     const receiptPath = useClusterPath({
         additionalParams: new URLSearchParams({ view: 'receipt' }),
         pathname: `/tx/${signature}`,
@@ -200,10 +202,9 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         const err = getTransactionErrorReason(info, transaction);
         errorReason = err.errorReason;
         if (err.errorLink !== undefined) {
-            errorLink =
-                cluster === Cluster.MainnetBeta
-                    ? err.errorLink
-                    : `${err.errorLink}?cluster=${clusterName.toLowerCase()}${cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''}`;
+            // Hand-assembling the query here gets the cluster slug, the endpoint encoding and the
+            // pending-consent case wrong.
+            errorLink = buildClusterPath(err.errorLink);
         }
     } else if (info.confirmations !== 'max') {
         statusFinality = `${info.confirmations ?? 0} confirmation${info.confirmations === 1 ? '' : 's'}`;

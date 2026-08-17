@@ -2,15 +2,14 @@
 // SWR cache so consumers render epoch/schedule data without any network call.
 
 import { type ClusterInfo, clusterModalOpenAtom, type ClusterState, StateContext } from '@providers/cluster';
-import { Cluster, ClusterStatus, clusterUrl, MAINNET_BETA_URL } from '@utils/cluster';
+import { Cluster, clusterSelection, ClusterStatus, clusterUrl } from '@utils/cluster';
 import { useHydrateAtoms } from 'jotai/utils';
 import { type ReactNode, useState } from 'react';
 import { SWRConfig, unstable_serialize } from 'swr';
 
 const defaultState: ClusterState = {
-    cluster: Cluster.MainnetBeta,
-    customUrl: MAINNET_BETA_URL,
     genesisHash: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d',
+    selection: clusterSelection(Cluster.MainnetBeta),
     status: ClusterStatus.Connected,
 };
 
@@ -47,7 +46,7 @@ export function MockClusterProvider({
     const [current] = useState<ClusterState>(state);
     // Seed the modal atom into the ambient jotai store (the story's own store, or the default one).
     useHydrateAtoms([[clusterModalOpenAtom, modalOpen]]);
-    const url = clusterUrl(current.cluster, current.customUrl);
+    const url = clusterUrl(current.selection);
     const fallback = clusterInfo ? { [unstable_serialize(['cluster-info', url])]: clusterInfo } : {};
     return (
         <SWRConfig value={{ fallback }}>
