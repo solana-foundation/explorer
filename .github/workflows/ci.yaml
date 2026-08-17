@@ -97,6 +97,27 @@ jobs:
         run: |
           pnpm test:ci
 
+  Security-Audit:
+    # Gated on the build so the audit only runs once the code is known to compile.
+    needs: Build-And-Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install package manager
+        uses: pnpm/action-setup@v4
+
+      # `pnpm audit` resolves the tree from pnpm-lock.yaml and queries the registry — no
+      # `pnpm install`/node_modules needed, so this job skips install and caching entirely.
+      # Fails on any critical advisory; lower severities are reported but do not block.
+      # Baseline unfixable dev-only advisories via `auditConfig.ignoreGhsas` in
+      # pnpm-workspace.yaml rather than lowering this gate.
+      - name: Audit dependencies
+        run: pnpm audit:ci
+
   Sitemap-Check:
     needs: read-nvmrc
     runs-on: ubuntu-latest

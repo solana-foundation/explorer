@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "audit": "pnpm audit --audit-level high",
+        "audit:ci": "pnpm audit --audit-level critical",
         "audit:prod": "pnpm audit --prod --audit-level high",
         "build": "pnpm build:packages && next build",
         "build:info": "node scripts/update-build-info.js",
