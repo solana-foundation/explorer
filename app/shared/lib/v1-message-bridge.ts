@@ -104,7 +104,7 @@ export function bridgeV1MessageBytes(messageBytes: Uint8Array): {
         messageBytes,
     );
 
-    return { message, transactionConfig: readTransactionConfig(compiled) };
+    return { message, transactionConfig: readV1TransactionConfig(compiled) };
 }
 
 /**
@@ -149,14 +149,23 @@ export class UnsignedV1WireTransaction extends VersionedTransaction {
     }
 }
 
-function readTransactionConfig(
+/**
+ * Reads the message-level resource limits off a v1 compiled message.
+ *
+ * Returns `undefined` when the message sets no limits at all, so callers have no rows to render.
+ * The limits are supplemental — the wire bytes still render, download, and inspect without them —
+ * so a failure to decompile is logged and reported as absent rather than thrown. `logContext`
+ * carries the caller's module tag and any identifying fields into that log line.
+ */
+export function readV1TransactionConfig(
     compiled: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime & { version: 1 },
+    logContext: Record<string, unknown> = { module: '[v1-message-bridge]' },
 ): V1TransactionConfig | undefined {
     try {
         const { config } = decompileTransactionMessage(compiled);
         return config && Object.values(config).some(value => value !== undefined) ? config : undefined;
     } catch (error) {
-        Logger.error(error, { module: '[v1-message-bridge]' });
+        Logger.error(error, logContext);
         return undefined;
     }
 }

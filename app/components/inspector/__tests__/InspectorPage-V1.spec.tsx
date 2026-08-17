@@ -12,6 +12,7 @@ import { toBase64 } from '@/app/shared/lib/bytes';
 import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
+import { ADDRESS_TABLE_LOOKUPS_CARD_TITLE } from '../AddressTableLookupsCard';
 import { TransactionInspectorPage } from '../InspectorPage';
 
 vi.mock('next/navigation', () => ({
@@ -71,7 +72,9 @@ describe('TransactionInspectorPage with a v1 ?message= param', () => {
         expect(screen.getByText('Priority fee (total)')).toBeInTheDocument();
         // fee payer, recipient, program
         expect(screen.getByText('Account List (3)')).toBeInTheDocument();
-        // v1 messages carry static accounts only, so the lookups card is not rendered.
-        expect(screen.queryByText('Address Table Lookups')).toBeNull();
+        // v1 messages carry static accounts only, so neither the lookups card nor the
+        // lookup-derived account badges appear.
+        expect(screen.queryByText(ADDRESS_TABLE_LOOKUPS_CARD_TITLE)).toBeNull();
+        expect(screen.queryByText('Address Table Lookup')).toBeNull();
     });
 });
