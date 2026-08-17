@@ -1,9 +1,11 @@
 import {
     address,
+    bytesEqual,
     type CompiledTransactionMessage,
     type CompiledTransactionMessageWithLifetime,
     decompileTransactionMessage,
     getCompiledTransactionMessageDecoder,
+    getCompiledTransactionMessageEncoder,
     getTransactionEncoder,
     type Transaction,
     type TransactionMessage as KitTransactionMessage,
@@ -72,6 +74,15 @@ export function bridgeV1MessageBytes(messageBytes: Uint8Array): {
     const compiled = getCompiledTransactionMessageDecoder().decode(messageBytes);
     if (compiled.version !== 1) {
         throw new Error(`Expected a v1 transaction message, got version ${compiled.version}`);
+    }
+
+    // The decoder stops at the end of the message and ignores anything after it, so a full v1
+    // wire transaction — message followed by signatures — decodes as if it were a bare message.
+    // Re-encoding canonically catches that: the trailing bytes are dropped on re-encode. Without
+    // this the signatures would be counted as part of the message and every consumer of the raw
+    // bytes (size, signature verification, simulation) would be wrong.
+    if (!bytesEqual(getCompiledTransactionMessageEncoder().encode(compiled), messageBytes)) {
+        throw new Error('v1 transaction message bytes are not a canonical compiled message');
     }
 
     const message = new V1MessageView(

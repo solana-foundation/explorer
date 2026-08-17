@@ -95,6 +95,18 @@ describe('bridgeV1MessageBytes', () => {
         expect(() => bridgeV1MessageBytes(messageBytes)).toThrow();
     });
 
+    it('should throw on a full v1 wire transaction rather than treating the signatures as message bytes', () => {
+        expect(() => bridgeV1MessageBytes(createV1TransactionBytes({}))).toThrow();
+    });
+
+    it('should throw on message bytes with trailing junk', () => {
+        const messageBytes = v1MessageBytes();
+        const padded = new Uint8Array(messageBytes.length + 3);
+        padded.set(messageBytes);
+
+        expect(() => bridgeV1MessageBytes(padded)).toThrow();
+    });
+
     it('should return a V1MessageView so the true bytes survive any serialize call', () => {
         const { message } = bridgeV1MessageBytes(v1MessageBytes());
         expect(message).toBeInstanceOf(V1MessageView);

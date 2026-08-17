@@ -498,6 +498,21 @@ export function PermalinkView({
         }
     }, [transaction, fetchConfirmedTx, status]);
 
+    // The inspector renders a web3.js `VersionedMessage`; a v1 message gets there through a
+    // bridged view over the wire bytes, which also carries the message's resource limits so
+    // every entry path derives them from the same decode. The view is memoized because its
+    // identity keys the downstream account-fetching effects and memos.
+    const bridged = React.useMemo(() => {
+        if (!transaction || transaction.message || transaction.version !== 1) {
+            return undefined;
+        }
+        try {
+            return bridgeV1MessageBytes(transaction.messageBytes);
+        } catch {
+            return undefined;
+        }
+    }, [transaction]);
+
     if (!details || details.status === FetchStatus.Fetching) {
         return <LoadingCard />;
     } else if (details.status === FetchStatus.FetchFailed) {
@@ -507,17 +522,6 @@ export function PermalinkView({
     }
 
     const { message, messageBytes, signatures, meta } = transaction;
-    // The inspector renders a web3.js `VersionedMessage`; a v1 message gets there through a
-    // bridged view over the wire bytes, which also carries the message's resource limits so
-    // every entry path derives them from the same decode.
-    let bridged: ReturnType<typeof bridgeV1MessageBytes> | undefined;
-    if (!message && transaction.version === 1) {
-        try {
-            bridged = bridgeV1MessageBytes(messageBytes);
-        } catch (_err) {
-            // Fall through to the error card below.
-        }
-    }
     const resolvedMessage = message ?? bridged?.message;
     if (!resolvedMessage) {
         return (
