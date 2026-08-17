@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { Card, CardBody } from '@/app/shared/ui/Card';
 
 type Resource = {
@@ -46,10 +47,7 @@ export function DeveloperResources({ resources = DEFAULT_RESOURCES }: { resource
             <div className="flex justify-between border-0 border-b border-solid border-dark-border px-dk-4 py-3">
                 <div>Kickstart your development journey on Solana</div>
                 <div>
-                    Find more on{' '}
-                    <a href="https://solana.com/developers" target="_blank" rel="noreferrer">
-                        solana.com/developers
-                    </a>
+                    Find more on <ExternalLink href="https://solana.com/developers">solana.com/developers</ExternalLink>
                 </div>
             </div>
             <CardBody ui="dashkit">
@@ -69,7 +67,7 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
     return (
         <div className="flex flex-col" style={{ height: '200px', width: '250px' }}>
             <div className="mb-3 w-full">
-                <a href={link} target="_blank" rel="noopener noreferrer" className="hover:cursor-pointer">
+                <ExternalLink href={link} className="hover:cursor-pointer">
                     <div className="bg-heavy-metal-700" style={{ height: '120px', width: '250px' }}>
                         {image && (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -88,7 +86,7 @@ function ResourceCard({ title, description, image, link, imageBackground }: Reso
                             />
                         )}
                     </div>
-                </a>
+                </ExternalLink>
             </div>
             <div className="flex flex-col">
                 <p className="mb-[3px]">{title}</p>

@@ -163,14 +163,10 @@ export function IdlCard({ programId }: { programId: string }) {
                                 className="whitespace-nowrap"
                                 asChild
                             >
-                                <a
-                                    href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
+                                <ExternalLink href="https://github.com/solana-program/program-metadata?tab=readme-ov-file#commands">
                                     Full documentation
                                     <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
-                                </a>
+                                </ExternalLink>
                             </Button>
                         </div>
                     </div>

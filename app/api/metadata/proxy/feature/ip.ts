@@ -3,6 +3,7 @@ import Address, { parse } from 'ipaddr.js';
 import { type LookupFunction } from 'net';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { SAFE_EXTERNAL_PROTOCOLS } from '@/app/shared/lib/url';
 
 const dns = _dns.promises;
 
@@ -39,7 +40,7 @@ export function isPrivateIP(ip: string) {
 }
 
 export function isHTTPProtocol(url: URL) {
-    return ['http:', 'https:'].includes(url.protocol);
+    return SAFE_EXTERNAL_PROTOCOLS.includes(url.protocol);
 }
 
 function isLocalhostName(hostname: string): boolean {

@@ -7,6 +7,7 @@ import { PublicKey } from '@solana/web3.js';
 import { ConfigAccount, StakeConfigInfoAccount, ValidatorInfoAccount } from '@validators/accounts/config';
 import React from 'react';
 
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 const MAX_SLASH_PENALTY = Math.pow(2, 8);
@@ -88,9 +89,9 @@ function ValidatorInfoCard({ account, configAccount }: { account: Account; confi
                 <BaseTable.Row>
                     <BaseTable.Cell>Website</BaseTable.Cell>
                     <BaseTable.Cell className="text-right">
-                        <a href={configAccount.info.configData.website} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink href={configAccount.info.configData.website}>
                             {configAccount.info.configData.website}
-                        </a>
+                        </ExternalLink>
                     </BaseTable.Cell>
                 </BaseTable.Row>
             )}

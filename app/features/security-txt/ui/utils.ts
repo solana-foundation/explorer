@@ -1,4 +1,5 @@
 import { fromUtf8, toBase64 } from '@/app/shared/lib/bytes';
+import { getSafeExternalHref } from '@/app/shared/lib/url';
 
 export function securityTxtDataToBase64(data: Record<string, unknown>) {
     return toBase64(fromUtf8(JSON.stringify(data, null, 2)));
@@ -12,12 +13,7 @@ export function isValidLink(value: unknown) {
     if (typeof value !== 'string') {
         return false;
     }
-    try {
-        const url = new URL(value);
-        return ['http:', 'https:'].includes(url.protocol);
-    } catch {
-        return false;
-    }
+    return getSafeExternalHref(value) !== undefined;
 }
 
 export function tryParseContactString(str: string) {
