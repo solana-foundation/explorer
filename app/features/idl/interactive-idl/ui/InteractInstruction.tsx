@@ -8,11 +8,11 @@ import type {
     NestedInstructionAccountsData,
     SupportedIdl,
 } from '@entities/idl';
-import { useWallet } from '@solana/wallet-adapter-react';
 import { type ReactNode, useState } from 'react';
 import { Loader, Play, Send } from 'react-feather';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 
+import { useWallet } from '@/app/providers/wallet/use-wallet';
 import { Card, CardSection } from '@/app/shared/ui/Card';
 
 import { createGetAutocompleteItems } from '../model/account-autocomplete/createGetAutocompleteItems';

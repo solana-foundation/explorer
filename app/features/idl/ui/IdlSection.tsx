@@ -147,7 +147,7 @@ export function IdlSection({
             {info && <div className="mt-3">{info}</div>}
 
             <div className="mt-4 min-h-48">
-                <WalletProvider skipToast autoConnect>
+                <WalletProvider autoConnect>
                     <IdlRenderer
                         idl={idl}
                         collapsed={!isExpanded}

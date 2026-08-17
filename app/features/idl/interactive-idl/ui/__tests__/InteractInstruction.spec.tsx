@@ -22,8 +22,8 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
 
 const walletMock = vi.hoisted(() => ({ connected: false, publicKey: null as PublicKey | null }));
 
-// Mock wallet adapter
-vi.mock('@solana/wallet-adapter-react', () => ({
+// Mock wallet state
+vi.mock('@/app/providers/wallet/use-wallet', () => ({
     useWallet: () => walletMock,
 }));
 

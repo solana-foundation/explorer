@@ -1,7 +1,6 @@
 'use client';
 
 import { getIdlSpecType, type InstructionData } from '@entities/idl';
-import { useWallet } from '@solana/wallet-adapter-react';
 import {
     type Commitment,
     Connection,
@@ -14,6 +13,7 @@ import { useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
+import { useWallet } from '@/app/providers/wallet/use-wallet';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { programAtom } from '../model/state-atoms';
@@ -285,7 +285,7 @@ export const isEnabled = ({
 }: {
     idl: unknown;
     programId?: PublicKey | string | null;
-    publicKey: PublicKey | null;
+    publicKey: PublicKey | undefined;
     connected: boolean;
 }): boolean => {
     return Boolean(idl && programId && publicKey && connected === true);
