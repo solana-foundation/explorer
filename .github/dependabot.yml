@@ -1,0 +1,32 @@
+# Dependabot version updates. Opens PRs to keep dependency versions fresh.
+# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+updates:
+  # GitHub Actions used across .github/workflows/*. Once action refs are pinned to commit
+  # SHAs, this is what keeps those pins from rotting — it bumps them to newer released SHAs.
+  # All bumps are grouped into a single PR to keep review overhead low.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - '*'
+
+  # npm/pnpm workspace (root package.json + packages/*). Minor and patch bumps are grouped
+  # into one PR; majors are split out so each can be reviewed on its own. `cooldown` mirrors
+  # the 14-day `minimumReleaseAge` gate in pnpm-workspace.yaml so freshly published versions
+  # aren't proposed until they've aged the same amount.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 14
+    groups:
+      npm-minor-and-patch:
+        update-types:
+          - minor
+          - patch
