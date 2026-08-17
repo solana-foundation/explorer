@@ -25,12 +25,12 @@
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
-        "@solana-program/token": "0.13.0",
+        "@solana-program/token": "0.15.0",
         "typescript": "catalog:tooling",
         "vitest": "catalog:vitest"
     },
     "peerDependencies": {
-        "@solana/kit": "^6.5.0",
+        "@solana/kit": "^7.0.0",
         "@solana/web3.js": "^1.98.0"
     }
 }

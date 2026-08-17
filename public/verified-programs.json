@@ -96,6 +96,12 @@
     "verifiedAt": "2026-07-20T13:18:13"
   },
   {
+    "address": "2c2Qv6eTQ43tWHEnwmMwByjWUJoneAoUh2yY9zPghyx7",
+    "name": "contract",
+    "repoUrl": "https://github.com/AurasPay/auraspay-solana-program/tree/4311960cba26e593c125ecb0c527f7a7bf0aa863",
+    "verifiedAt": "2026-08-14T15:38:54"
+  },
+  {
     "address": "2gqLwAx2nA8WtwKsrEoMKS5DrkemCjAjhUJbC5yEQwV2",
     "name": "ripstr_amm",
     "repoUrl": "https://github.com/ripstr-dev/ripstr-programs/tree/21ecd5c9b8b9787b38aa26ee059c176ed613412e",
@@ -1346,8 +1352,8 @@
   {
     "address": "FyTBuifdJ1u3rF2bsK2NmjzogkCbNK3KtFfZyM3CUfv1",
     "name": "MrMinerSolana/Miner",
-    "repoUrl": "https://github.com/MrMinerSolana/Miner/tree/342cf486065a028d82801345f8850d607b232382",
-    "verifiedAt": "2026-08-10T17:32:20"
+    "repoUrl": "https://github.com/MrMinerSolana/Miner/tree/91a64026f73691b377ff4aa9cc6bb9056dee7378",
+    "verifiedAt": "2026-08-16T02:57:59"
   },
   {
     "address": "G1SRHec1Mig66xKJ169kmmVRy4WX81VLKCUfdExThQdo",
@@ -1492,12 +1498,6 @@
     "name": "wanesurf/meanwhile-treasury",
     "repoUrl": "https://github.com/wanesurf/meanwhile-treasury/tree/823633e8f4106aee54af8f1c3b62def13343138d",
     "verifiedAt": "2026-07-11T07:34:43"
-  },
-  {
-    "address": "H2Ju7e1tvDf7Wmn8wQ1t3Ch4Yi8WZtTd9q1F1MxJX6qj",
-    "name": "beacon",
-    "repoUrl": "https://github.com/Curved-labs/beacon/tree/2fe07a0e83ede4ffbec5df85fe9876f57faa5a3d",
-    "verifiedAt": "2026-08-13T11:04:11"
   },
   {
     "address": "H59K28q5kyteWfAGqt34pwkduNwntcambE75tXVp3nZF",
@@ -1982,8 +1982,8 @@
   {
     "address": "omnixgS8fnqHfCcTGKWj6JtKjzpJZ1Y5y9pyFkQDkYE",
     "name": "omnipair",
-    "repoUrl": "https://github.com/omnipair/omnipair-rs/tree/3e90a0bc8906975e25fb7789cdfaa5df716d053c",
-    "verifiedAt": "2026-05-31T10:44:31"
+    "repoUrl": "https://github.com/omnipair/omnipair-rs/tree/32a6d1691ed8fad156f1014b21661bdd07b6a193",
+    "verifiedAt": "2026-08-16T22:28:14"
   },
   {
     "address": "opre2VP8uvjq3YS15NRhRagsWvsY5DybitvCeLPAwbK",
