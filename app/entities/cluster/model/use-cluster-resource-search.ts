@@ -1,10 +1,7 @@
 'use client';
 
 import { Cluster, type ClusterSelection, clusterUrl, type ServerCluster } from '@utils/cluster';
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
-
-import { parseRpcEndpoint, type RpcEndpoint } from '../lib/rpc-endpoint';
+import { useEffect, useRef, useState } from 'react';
 
 export type ClusterSearchStatus = 'idle' | 'searching' | 'found' | 'not-found';
 
@@ -20,8 +17,8 @@ export interface ClusterResourceSearch {
  */
 export type ClusterResourceProbe = (url: string, resourceId: string) => Promise<boolean>;
 
-// Canonical, durable public clusters. Cluster.Simd296 is a temporary surfnet, so matches there aren't
-// linkable later; Cluster.Custom is appended only when a usable custom RPC endpoint is configured.
+// The clusters this searches, and the only ones it may. Cluster.Simd296 is a temporary surfnet, so matches
+// there aren't linkable later. Cluster.Custom is absent on purpose — see `getSelectionsToProbe`.
 const PUBLIC_CLUSTERS: ServerCluster[] = [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet];
 const PROBE_DELAY_MS = 700;
 
@@ -39,12 +36,6 @@ export function useClusterResourceSearch({
     currentCluster: Cluster;
     probe: ClusterResourceProbe;
 }): ClusterResourceSearch {
-    const searchParams = useSearchParams();
-    // Parsed rather than passed through raw: a junk `?customUrl=` would otherwise add a Custom probe step
-    // that shows "Searching Custom…" and never resolves.
-    const customUrlParam = searchParams?.get('customUrl');
-    const endpoint = useMemo(() => parseRpcEndpoint(customUrlParam), [customUrlParam]);
-
     const [status, setStatus] = useState<ClusterSearchStatus>('idle');
     const [searchingCluster, setSearchingCluster] = useState<Cluster | undefined>(undefined);
     const [foundCluster, setFoundCluster] = useState<Cluster | undefined>(undefined);
@@ -59,7 +50,7 @@ export function useClusterResourceSearch({
     useEffect(() => {
         const searchId = ++searchIdRef.current;
         const isStale = () => searchIdRef.current !== searchId;
-        const selections = getSelectionsToProbe(currentCluster, endpoint);
+        const selections = getSelectionsToProbe(currentCluster);
 
         async function searchClusters() {
             // Reset every output up front so a re-fired search never surfaces stale state, instead
@@ -104,20 +95,27 @@ export function useClusterResourceSearch({
             // Invalidate this run so an in-flight probe cannot commit stale state after cleanup.
             if (!isStale()) searchIdRef.current += 1;
         };
-    }, [resourceId, currentCluster, endpoint]);
+    }, [resourceId, currentCluster]);
 
     return { foundCluster, searchingCluster, status };
 }
 
-// Pairs, so the decision to probe Custom and the endpoint it is probed at cannot disagree.
-function getSelectionsToProbe(currentCluster: Cluster, endpoint: RpcEndpoint | undefined): ClusterSelection[] {
-    const selections: ClusterSelection[] = PUBLIC_CLUSTERS.filter(cluster => cluster !== currentCluster).map(
-        cluster => ({ cluster }),
-    );
-    if (endpoint) {
-        selections.push({ cluster: Cluster.Custom, endpoint });
-    }
-    return selections;
+/**
+ * Public clusters only, and deliberately never a custom endpoint.
+ *
+ * This hook MUST NOT read `?customUrl=`. It fires on a not-found card, where the resource id is whatever
+ * the visitor is looking at, and it probes with that id — so probing an endpoint from the query string
+ * hands the address or signature to whoever wrote the link, before the consent prompt has been answered.
+ * The param is still in the bar at that moment: a pending endpoint is kept on purpose, so the prompt keeps
+ * its subject. Trust is decided in exactly one place (`decideCustomUrl`, via `useClusterUrl`), and reading
+ * the param here would be a second, weaker answer.
+ *
+ * There is nothing to substitute from the cluster context either. An endpoint exists there only on the
+ * Custom cluster, which is the cluster that just reported not-found, and `currentCluster` is excluded
+ * below — so a context-sourced custom probe could never run. Left out rather than left dead.
+ */
+function getSelectionsToProbe(currentCluster: Cluster): ClusterSelection[] {
+    return PUBLIC_CLUSTERS.filter(cluster => cluster !== currentCluster).map(cluster => ({ cluster }));
 }
 
 function sleep(ms: number): Promise<void> {
