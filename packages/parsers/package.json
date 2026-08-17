@@ -56,10 +56,10 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@solana-program/system": "0.12.0",
-        "@solana-program/token": "0.13.0",
-        "@solana-program/token-2022": "0.9.0",
-        "@solana/kit": "6.5.0",
+        "@solana-program/system": "0.13.0",
+        "@solana-program/token": "0.15.0",
+        "@solana-program/token-2022": "0.13.0",
+        "@solana/kit": "7.0.0",
         "@solana/web3.js": "1.98.4",
         "superstruct": "0.15.3"
     },

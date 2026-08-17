@@ -80,6 +80,37 @@ describe('fetchRawTransaction', () => {
         expect(bytes.subarray(0, raw?.messageBytes.length)).toEqual(raw?.messageBytes);
     });
 
+    it('should read every resource limit a v1 message carries', async () => {
+        respondWith(
+            transactionResult(
+                createV1TransactionBytes({
+                    computeUnitLimit: 8442,
+                    heapSize: 262_144,
+                    loadedAccountsDataSizeLimit: 75_013,
+                    priorityFeeLamports: 10_000n,
+                }),
+            ),
+        );
+
+        const raw = await fetchRawTransaction(URL, SIGNATURE);
+
+        expect(raw?.transactionConfig).toEqual({
+            computeUnitLimit: 8442,
+            heapSize: 262_144,
+            loadedAccountsDataSizeLimit: 75_013,
+            priorityFeeLamports: 10_000n,
+        });
+    });
+
+    it('should leave the resource limits undefined for a v1 message that sets none', async () => {
+        respondWith(transactionResult(createV1TransactionBytes({})));
+
+        const raw = await fetchRawTransaction(URL, SIGNATURE);
+
+        expect(raw?.version).toBe(1);
+        expect(raw?.transactionConfig).toBeUndefined();
+    });
+
     it.each(['legacy' as const, 0 as const])(
         'should decode a %s transaction into the web3.js views the inspector renders',
         async version => {
