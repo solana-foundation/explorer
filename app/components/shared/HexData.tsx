@@ -1,7 +1,7 @@
 // TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Copyable } from '@components/common/Copyable';
 import { cva } from 'class-variance-authority';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { ByteArray, toHex } from '@/app/shared/lib/bytes';
 
@@ -88,6 +88,7 @@ export function HexData({
     align = 'end',
     spanSize = SPAN_SIZE,
     rowSize = ROW_SIZE,
+    wrap = false,
 }: {
     raw: ByteArray;
     copyableRaw?: ByteArray;
@@ -99,6 +100,13 @@ export function HexData({
     isCopyable?: boolean;
     spanSize?: number;
     rowSize?: number;
+    /**
+     * Flow the fixed-size groups so they wrap to fill the container width instead
+     * of laying out fixed-width rows. Removes horizontal overflow (no side scroll);
+     * each line then holds a whole number of `spanSize`-byte groups. Used by the
+     * mobile raw-data drawer.
+     */
+    wrap?: boolean;
 }) {
     if (!raw || raw.length === 0) {
         return (
@@ -133,6 +141,7 @@ export function HexData({
             spanSize={spanSize}
             rowSize={rowSize}
             isCopyable={isCopyable}
+            wrap={wrap}
         />
     );
 }
@@ -148,6 +157,81 @@ const hexSpanVariants = cva('', {
         },
     },
 });
+
+// Wrapping flow used by the mobile raw-data drawer. Unlike the fixed-row layout,
+// how many groups fit on a line depends on the responsive container width, so the
+// sequential primary/secondary alternation baked into `spans` would drift and the
+// bright/dim columns wouldn't line up vertically. Instead we measure how many
+// groups land on the first line (they all share the first group's `offsetTop`) and
+// recolour every group by its column index, so column 1 is always bright, column 2
+// dim, column 3 bright, … regardless of how many fit per line.
+function WrapContent({
+    spans,
+    className,
+    copyText,
+    inverted,
+    isCopyable,
+}: {
+    spans: HexSpan[];
+    className?: string;
+    copyText: string | null;
+    inverted: boolean;
+    isCopyable: boolean;
+}) {
+    const preRef = useRef<HTMLPreElement>(null);
+    const [cols, setCols] = useState(1);
+
+    useEffect(() => {
+        const el = preRef.current;
+        if (!el) return;
+        const measure = () => {
+            const groups = el.querySelectorAll<HTMLElement>('[data-hex-group]');
+            if (groups.length === 0) return;
+            const firstTop = groups[0].offsetTop;
+            let count = 0;
+            for (const g of groups) {
+                if (g.offsetTop !== firstTop) break;
+                count++;
+            }
+            setCols(Math.max(1, count));
+        };
+        measure();
+        const ro = new ResizeObserver(measure);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [spans]);
+
+    const first: HexSpan['variant'] = inverted ? 'secondary-old' : 'primary';
+    const second: HexSpan['variant'] = inverted ? 'primary' : 'secondary-old';
+
+    const content = (
+        // px-0 overrides the global `pre { padding: .33rem }` so the hex sits flush left.
+        <pre
+            ref={preRef}
+            className="mb-0 block whitespace-normal bg-heavy-metal-900 px-0 py-1.5 text-left font-mono text-xs"
+        >
+            {spans.map((span, i) => (
+                <React.Fragment key={i}>
+                    <span
+                        data-hex-group
+                        className={cn(
+                            'mr-3 inline-block whitespace-nowrap',
+                            hexSpanVariants({ tone: (i % cols) % 2 === 0 ? first : second }),
+                        )}
+                    >
+                        {span.text}
+                    </span>{' '}
+                </React.Fragment>
+            ))}
+        </pre>
+    );
+
+    return (
+        <div className={cn('w-full', className)}>
+            {isCopyable ? <Copyable text={copyText}>{content}</Copyable> : content}
+        </div>
+    );
+}
 
 function ColoredSpans({ spans }: { spans: HexSpan[] }) {
     return (
@@ -198,6 +282,7 @@ function FullContent({
     spanSize,
     rowSize,
     isCopyable,
+    wrap,
 }: {
     hexString: string;
     copyText: string | null;
@@ -207,9 +292,26 @@ function FullContent({
     spanSize: number;
     rowSize: number;
     isCopyable: boolean;
+    wrap: boolean;
 }) {
     const spans = formatHexSpans(splitHexPairs(hexString), { inverted }, spanSize);
     const rows = groupHexRows(spans, rowSize, spanSize);
+
+    // Wrapping flow: each fixed-size group is an atomic inline-block (never breaks
+    // mid-group; `mr-3` sets the inter-group gap) and the breakable space after it
+    // gives the browser a wrap point — so every line holds a multiple of `spanSize`
+    // values and nothing overflows sideways. No horizontal padding on the <pre>.
+    if (wrap) {
+        return (
+            <WrapContent
+                spans={spans}
+                className={className}
+                copyText={copyText}
+                inverted={inverted}
+                isCopyable={isCopyable}
+            />
+        );
+    }
 
     const divs = rows.map((row, rowIdx) => (
         <div key={rowIdx}>

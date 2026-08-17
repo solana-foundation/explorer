@@ -10,12 +10,11 @@ import {
     useSquadsMultisig,
     useSquadsMultisigLookup,
 } from '@/app/providers/squadsMultisig';
-import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { SectionCard } from '@/app/shared/ui/Card/SectionCard';
+import { KeyValue, LABEL_WIDTH } from '@/app/shared/ui/key-value';
 
 import { Address } from '../common/Address';
 import { LoadingCard } from '../common/LoadingCard';
-import { TableCardBody } from '../common/TableCardBody';
 
 export function ProgramMultisigCard({ data }: { data: UpgradeableLoaderAccountData }) {
     return (
@@ -47,59 +46,33 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
         members = squadInfo?.multisig.keys ?? [];
     }
 
+    const memberCount =
+        squadInfo?.version === 'v4' ? squadInfo?.multisig.members.length : squadInfo?.multisig.keys.length;
+
     return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit" className="flex items-center">
-                    Upgrade Authority Multisig Information
-                </CardTitle>
-            </CardHeader>
-            <TableCardBody>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Multisig Program</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        {squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Multisig Program Id</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address
-                            pubkey={
-                                new PublicKey(squadMapInfo?.version === 'v4' ? SQUADS_V4_ADDRESS : SQUADS_V3_ADDRESS)
-                            }
-                            alignRight
-                            link
-                        />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Multisig Account</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        {squadMapInfo?.isSquad ? (
-                            <Address pubkey={new PublicKey(squadMapInfo.multisig)} alignRight link />
-                        ) : null}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Multisig Approval Threshold</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        {squadInfo?.multisig.threshold}
-                        {' of '}
-                        {squadInfo?.version === 'v4'
-                            ? squadInfo?.multisig.members.length
-                            : squadInfo?.multisig.keys.length}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                {members.map((member, idx) => (
-                    <BaseTable.Row key={idx}>
-                        <BaseTable.Cell>Multisig Member {idx + 1}</BaseTable.Cell>
-                        <BaseTable.Cell className="text-right">
-                            <Address pubkey={member} alignRight link />
-                        </BaseTable.Cell>
-                    </BaseTable.Row>
-                ))}
-            </TableCardBody>
-        </Card>
+        <SectionCard title="Upgrade Authority Multisig Information">
+            <KeyValue label="Multisig Program" labelWidth={LABEL_WIDTH} row>
+                {squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}
+            </KeyValue>
+            <KeyValue label="Multisig Program Id" labelWidth={LABEL_WIDTH} row>
+                <Address
+                    pubkey={new PublicKey(squadMapInfo?.version === 'v4' ? SQUADS_V4_ADDRESS : SQUADS_V3_ADDRESS)}
+                    link
+                />
+            </KeyValue>
+            <KeyValue label="Multisig Account" labelWidth={LABEL_WIDTH} row>
+                {squadMapInfo?.isSquad && <Address pubkey={new PublicKey(squadMapInfo.multisig)} link />}
+            </KeyValue>
+            <KeyValue label="Multisig Approval Threshold" labelWidth={LABEL_WIDTH} row>
+                {squadInfo?.multisig.threshold}
+                {' of '}
+                {memberCount}
+            </KeyValue>
+            {members.map((member, idx) => (
+                <KeyValue key={idx} label={`Multisig Member ${idx + 1}`} labelWidth={LABEL_WIDTH} row>
+                    <Address pubkey={member} link />
+                </KeyValue>
+            ))}
+        </SectionCard>
     );
 }

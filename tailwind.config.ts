@@ -196,20 +196,46 @@ const config: Config = {
                 // Grid template for TokenExtensions
                 '12-ext': 'repeat(12, minmax(0, 1fr))',
             },
+            maxWidth: {
+                // Named content-column cap for the address page redesign. Pair with
+                // `mx-auto w-full` to center the content column inside PageContainer.
+                col: '960px',
+            },
             keyframes: {
                 'dropdown-menu': {
                     from: { opacity: '0' },
                     to: { opacity: '1' },
                 },
+                // Transaction History mobile details drawer: slide up on open, down on close.
+                'tx-drawer-in': {
+                    from: { transform: 'translateY(100%)' },
+                    to: { transform: 'translateY(0)' },
+                },
+                'tx-drawer-out': {
+                    from: { transform: 'translateY(0)' },
+                    to: { transform: 'translateY(100%)' },
+                },
+                // One-shot green blink over a copy tile the moment the copy lands.
+                'tx-copy-flash': {
+                    '0%': { backgroundColor: 'rgba(29, 215, 155, 0.45)', borderColor: '#1dd79b' },
+                    '100%': { backgroundColor: 'transparent', borderColor: 'transparent' },
+                },
             },
             animation: {
                 'dropdown-menu': 'dropdown-menu 0.15s',
+                'tx-copy-flash': 'tx-copy-flash 0.6s ease-out',
+                'tx-drawer-in': 'tx-drawer-in 0.15s ease-out',
+                'tx-drawer-out': 'tx-drawer-out 0.125s ease-in forwards',
             },
         },
 
         screens: {
             'max-sm': getScreenDim('sm', -1),
             'max-md': getScreenDim('md', -1),
+            // True max-width (< md) breakpoint. NOTE: `max-sm`/`max-md` above are min-width screens
+            // despite their names (a bare string value is a min-width in Tailwind); `lt-md` uses the
+            // object `{ max }` form so `lt-md:` actually emits `@media (max-width: …)`.
+            'lt-md': { max: getScreenDim('md', -1) },
             xxs: getScreenDim('xxs'),
             xs: getScreenDim('xs'),
             sm: getScreenDim('sm'),

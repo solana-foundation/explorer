@@ -193,14 +193,20 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
 
     return (
         <PageContainer variant="pulled-up">
-            <Header
-                address={address}
-                account={info?.data}
-                tokenInfo={fullTokenInfo}
-                isTokenInfoLoading={isTokenInfoLoading}
-            />
+            {/* Content is capped to a centered `col` (960px) column inside the fluid PageContainer;
+                the sticky tab bar (see MoreSection) spans full width but keeps its border col-width. */}
+            <div className="mx-auto w-full max-w-col">
+                <Header
+                    address={address}
+                    account={info?.data}
+                    tokenInfo={fullTokenInfo}
+                    isTokenInfoLoading={isTokenInfoLoading}
+                />
+            </div>
             {!pubkey ? (
-                <ErrorCard text={`Address "${address}" is not valid`} />
+                <div className="mx-auto w-full max-w-col">
+                    <ErrorCard text={`Address "${address}" is not valid`} />
+                </div>
             ) : (
                 <DetailsSections
                     info={info}
@@ -280,7 +286,9 @@ function DetailsSections({
     return (
         <>
             {FLAGGED_ACCOUNTS_WARNING[address] ?? null}
-            <InfoSection account={account} tokenInfo={tokenInfo} />
+            <div className="mx-auto w-full max-w-col">
+                <InfoSection account={account} tokenInfo={tokenInfo} />
+            </div>
             {notification}
             <MoreSection baseUrl={`/address/${address}`} tabs={navigationTabs} asyncChildren={asyncTabChildren}>
                 {children}
@@ -388,14 +396,20 @@ function MoreSection({
 
     return (
         <>
-            <StickyHeader>
+            {/* Cap the sticky bar (and its bottom border) to the `col` content-column width when
+                inline, so the border lines up with the Header/InfoSection column. When stuck the
+                bar goes full-bleed (StickyHeader forces maxWidth:none + 100vw). The inner
+                PageContainer cancels StickyHeader's gutter offset so the tabs sit on the column. */}
+            <StickyHeader className="mx-auto w-full max-w-col">
                 <PageContainer>
-                    <NavigationTabs buildHref={buildHref} tabs={tabs}>
-                        {asyncChildren}
-                    </NavigationTabs>
+                    <div className="mx-auto w-full max-w-col">
+                        <NavigationTabs buildHref={buildHref} tabs={tabs}>
+                            {asyncChildren}
+                        </NavigationTabs>
+                    </div>
                 </PageContainer>
             </StickyHeader>
-            {children}
+            <div className="mx-auto w-full max-w-col">{children}</div>
         </>
     );
 }

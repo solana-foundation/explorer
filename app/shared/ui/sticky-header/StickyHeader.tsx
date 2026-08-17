@@ -39,9 +39,14 @@ export function StickyHeader({ children, className }: Props) {
                     'sticky top-0 z-10 mb-8 border-0 border-b border-solid border-neutral-800 bg-heavy-metal-900',
                     className,
                 )}
-                style={isStuck ? { marginLeft: 'calc(50% - 50vw)', width: '100vw' } : undefined}
+                // When stuck, go full-bleed (100vw). `maxWidth: none` overrides any width cap a
+                // caller sets via className (e.g. `max-w-col`, used on the address page so the
+                // inline border matches the content column) so the stuck bar still spans the viewport.
+                style={isStuck ? { marginLeft: 'calc(50% - 50vw)', maxWidth: 'none', width: '100vw' } : undefined}
             >
-                <div className={cn(!isStuck && '-mx-3')}>{children}</div>
+                <div className={cn(!isStuck && '-mx-4 sm:-mx-5 md:-mx-6 lg:-mx-8 xl:-mx-10 xxl:-mx-12')}>
+                    {children}
+                </div>
             </div>
         </>
     );

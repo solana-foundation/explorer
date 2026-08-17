@@ -6,7 +6,7 @@ import { Slot } from '@components/common/Slot';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useRefreshAccount } from '@entities/account';
-import { AccountDownloadDropdown } from '@features/account';
+import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
@@ -20,7 +20,7 @@ import {
 } from '@validators/accounts/upgradeable-program';
 import Link from 'next/link';
 import React from 'react';
-import { ExternalLink, RefreshCw } from 'react-feather';
+import { RefreshCw } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
@@ -29,6 +29,7 @@ import { ProgramSecurityTXTLabel } from '@/app/features/security-txt/ui/Security
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { refreshAnalytics } from '@/app/shared/lib/analytics';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { KeyValue, LABEL_WIDTH } from '@/app/shared/ui/key-value';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
@@ -84,127 +85,79 @@ export function UpgradeableProgramSection({
     const label = addressLabel(account.pubkey.toBase58(), cluster);
 
     return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit" className="gap-2">
-                <CardTitle as="h3" ui="dashkit" className="flex items-center">
-                    {programData === undefined && 'Closed '}Program Account
-                </CardTitle>
-                <Button
-                    ui="dashkit"
-                    variant="white"
-                    size="sm"
-                    onClick={() => {
-                        refreshAnalytics.trackButtonClicked('program_section');
-                        refresh(account.pubkey, 'parsed');
-                    }}
-                >
-                    <RefreshCw className="mr-1.5 align-text-top" size={13} />
-                    Refresh
-                </Button>
-                <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
-            </CardHeader>
-
-            <TableCardBody>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Address</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={account.pubkey} alignRight raw />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                {label && (
-                    <BaseTable.Row>
-                        <BaseTable.Cell>Address Label</BaseTable.Cell>
-                        <BaseTable.Cell className="text-right">{label}</BaseTable.Cell>
-                    </BaseTable.Row>
-                )}
-                <BaseTable.Row>
-                    <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right uppercase">
-                        <SolBalance lamports={account.lamports} />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Executable</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">{programData !== undefined ? 'Yes' : 'No'}</BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Executable Data{programData === undefined && ' (Closed)'}</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={programAccount.programData} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                {programData !== undefined && (
-                    <>
-                        <BaseTable.Row>
-                            <BaseTable.Cell>Upgradeable</BaseTable.Cell>
-                            <BaseTable.Cell className="text-right">
-                                {programData.authority !== null ? 'Yes' : 'No'}
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                        <BaseTable.Row>
-                            <BaseTable.Cell>
-                                <VerifiedLabel />
-                            </BaseTable.Cell>
-                            <BaseTable.Cell className="text-right">
-                                <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                        <BaseTable.Row>
-                            <BaseTable.Cell>
-                                <ProgramSecurityTXTLabel programPubkey={account.pubkey} />
-                            </BaseTable.Cell>
-                            <BaseTable.Cell className="text-right">
-                                <ProgramSecurityTXTBadge programPubkey={account.pubkey} />
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                        <BaseTable.Row>
-                            <BaseTable.Cell>Last Deployed Slot</BaseTable.Cell>
-                            <BaseTable.Cell className="text-right">
-                                <Slot slot={programData.slot} link />
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                        {programData.authority !== null && (
-                            <>
-                                <BaseTable.Row>
-                                    <BaseTable.Cell>Upgrade Authority</BaseTable.Cell>
-                                    <BaseTable.Cell className="text-right">
-                                        {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad ? (
-                                            <MultisigBadge pubkey={account.pubkey} />
-                                        ) : null}
-                                        <Address pubkey={programData.authority} alignRight link />
-                                    </BaseTable.Cell>
-                                </BaseTable.Row>
-                            </>
-                        )}
-                    </>
-                )}
-            </TableCardBody>
-        </Card>
+        <AccountCard
+            title={`${programData === undefined ? 'Closed ' : ''}Program Account`}
+            account={account}
+            headerOutside
+            refresh={() => refresh(account.pubkey, 'parsed')}
+            analyticsSection="program_section"
+        >
+            <KeyValue label="Address" labelWidth={LABEL_WIDTH} row>
+                <Address pubkey={account.pubkey} raw />
+            </KeyValue>
+            {label && (
+                <KeyValue label="Address Label" labelWidth={LABEL_WIDTH} row>
+                    {label}
+                </KeyValue>
+            )}
+            <KeyValue label="Balance (SOL)" labelWidth={LABEL_WIDTH} row>
+                <SolBalance lamports={account.lamports} />
+            </KeyValue>
+            <KeyValue label="Executable" labelWidth={LABEL_WIDTH} row>
+                {programData !== undefined ? 'Yes' : 'No'}
+            </KeyValue>
+            <KeyValue
+                label={`Executable Data${programData === undefined ? ' (Closed)' : ''}`}
+                labelWidth={LABEL_WIDTH}
+                row
+            >
+                <Address pubkey={programAccount.programData} link />
+            </KeyValue>
+            {programData !== undefined && (
+                <>
+                    <KeyValue label="Upgradeable" labelWidth={LABEL_WIDTH} row>
+                        {programData.authority !== null ? 'Yes' : 'No'}
+                    </KeyValue>
+                    <KeyValue label={<VerifiedLabel />} labelWidth={LABEL_WIDTH} row>
+                        <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />
+                    </KeyValue>
+                    <KeyValue label={<ProgramSecurityTXTLabel />} labelWidth={LABEL_WIDTH} row>
+                        <ProgramSecurityTXTBadge programPubkey={account.pubkey} />
+                    </KeyValue>
+                    <KeyValue label="Last Deployed Slot" labelWidth={LABEL_WIDTH} row>
+                        <Slot slot={programData.slot} link />
+                    </KeyValue>
+                    {programData.authority !== null && (
+                        <KeyValue label="Upgrade Authority" labelWidth={LABEL_WIDTH} row>
+                            <div className="flex min-w-0 items-center gap-2">
+                                <span className="min-w-0">
+                                    <Address pubkey={programData.authority} link />
+                                </span>
+                                {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad && (
+                                    <MultisigBadge pubkey={account.pubkey} />
+                                )}
+                            </div>
+                        </KeyValue>
+                    )}
+                </>
+            )}
+        </AccountCard>
     );
 }
 
 function MultisigBadge({ pubkey }: { pubkey: PublicKey }) {
     const programMultisigTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/program-multisig` });
     return (
-        <CardTitle as="h3" ui="dashkit">
-            <Badge ui="dashkit" variant="success" asChild>
-                <Link href={programMultisigTabPath}>Program Multisig</Link>
-            </Badge>
-        </CardTitle>
+        <Badge ui="tw" tone="soft" variant="success" className="shrink-0" asChild>
+            <Link href={programMultisigTabPath}>Program Multisig</Link>
+        </Badge>
     );
 }
 
 function VerifiedLabel() {
     return (
         <InfoTooltip text="Verified builds allow users to ensure that the hash of the on-chain program matches the hash of the program of the given codebase (registry hosted by osec.io).">
-            <Link
-                rel="noopener noreferrer"
-                target="_blank"
-                href="https://github.com/Ellipsis-Labs/solana-verifiable-build"
-            >
-                <span className="text-dk-white">Verified Build</span>
-                <ExternalLink className="ml-1.5 align-text-top" size={13} />
-            </Link>
+            Verified Build
         </InfoTooltip>
     );
 }
