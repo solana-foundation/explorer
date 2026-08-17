@@ -98,8 +98,8 @@ jobs:
           pnpm test:ci
 
   Security-Audit:
-    # Gated on the build so the audit only runs once the code is known to compile.
-    needs: Build-And-Test
+    # Independent of the build: the audit resolves the tree from pnpm-lock.yaml and queries
+    # the registry, so it runs in parallel for faster, self-contained feedback.
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
