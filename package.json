@@ -107,7 +107,6 @@
         "codama": "1.5.0",
         "cross-spawn": "7.0.6",
         "date-fns": "4.1.0",
-        "disposablestack": "1.1.8",
         "fuse.js": "7.1.0",
         "humanize-duration-ts": "2.1.1",
         "ipaddr.js": "2.2.0",

@@ -1,8 +1,6 @@
 'use client';
 
-// Kit registers plugin cleanup through `DisposableStack`, which browsers only gained in 2025.
-// Installs the global only where it is missing.
-import 'disposablestack/auto';
+import './wallet/disposable-stack-polyfill';
 
 import { type Client, createClient } from '@solana/kit';
 import { type ClientWithWallet, walletSigner } from '@solana/kit-plugin-wallet';

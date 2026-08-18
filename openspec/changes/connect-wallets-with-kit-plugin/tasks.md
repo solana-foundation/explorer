@@ -10,6 +10,7 @@
 - [x] `app/providers/wallet-provider.tsx` — build the client with `walletSigner({ autoConnect, chain, storageKey })`, publish via `ClientProvider`, cache per chain (bounded, deliberately not disposed), give each chain its own storage key, export `useWalletClient`.
 - [x] `app/providers/wallet/cluster-chain.ts` — `Cluster` → Wallet Standard chain identifier; Custom/SIMD-296 map to `solana:localnet`, since the identifier reaches the wallet's signature prompt and drives which network it simulates against.
 - [x] Drop the `@solana/wallet-adapter-react-ui/styles.css` import and the `skipToast` prop; update the `IdlSection.tsx` call site.
+- [x] `app/providers/wallet/disposable-stack-polyfill.ts` — install `Symbol.dispose` and `DisposableStack` where the runtime lacks them, imported before any Kit client is created. In-repo rather than a `disposablestack` dependency.
 
 ## 3. Signing bridge
 
@@ -28,6 +29,7 @@
 
 - [x] Remove `app/providers/__tests__/wallet-provider.spec.tsx` (asserted the removed `onError`/`skipToast` behaviour).
 - [x] Add specs for the signing bridge (legacy and versioned round trips, the sign-and-send-only rejection, the empty-batch short circuit) and the cluster-to-chain mapping.
+- [x] Add specs for the `DisposableStack` polyfill.
 - [x] Retarget the two interactive-IDL specs' mocks onto the compat hook.
 
 ## 6. Follow-on type widening

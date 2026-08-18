@@ -303,9 +303,6 @@ importers:
       date-fns:
         specifier: 4.1.0
         version: 4.1.0
-      disposablestack:
-        specifier: 1.1.8
-        version: 1.1.8
       fuse.js:
         specifier: 7.1.0
         version: 7.1.0
@@ -6755,10 +6752,6 @@ packages:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
 
-  disposablestack@1.1.8:
-    resolution: {integrity: sha512-RE/u845Vl08TSUsGnS4+he35LSuKl7kfurFgrTbcRCJogS1icLr3T8TderQ17rCcXu/+iMTivv2UCpyI4c9ibw==}
-    engines: {node: '>= 0.4'}
-
   dlv@1.1.3:
     resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
 
@@ -9810,10 +9803,6 @@ packages:
 
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
-    engines: {node: '>= 0.4'}
-
-  suppressed-error@1.0.3:
-    resolution: {integrity: sha512-6+ZiCVUmDLFRyYRswTrDTYWaM/IT01W/cqQBLnnyg8T0njVrWj3tP+EXFevXk6qK61yDXnmZsOFVzFfYoUy/KA==}
     engines: {node: '>= 0.4'}
 
   svg-pathdata@6.0.3:
@@ -17001,21 +16990,6 @@ snapshots:
     dependencies:
       path-type: 4.0.0
 
-  disposablestack@1.1.8:
-    dependencies:
-      call-bind: 1.0.9
-      call-bound: 1.0.4
-      define-properties: 1.2.1
-      es-abstract: 1.24.2
-      es-errors: 1.3.0
-      es-set-tostringtag: 2.1.0
-      get-intrinsic: 1.3.0
-      globalthis: 1.0.4
-      has-symbols: 1.1.0
-      hasown: 2.0.4
-      internal-slot: 1.1.0
-      suppressed-error: 1.0.3
-
   dlv@1.1.3: {}
 
   doctrine@2.1.0:
@@ -20954,17 +20928,6 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
-
-  suppressed-error@1.0.3:
-    dependencies:
-      define-data-property: 1.1.4
-      define-properties: 1.2.1
-      es-abstract: 1.24.2
-      es-errors: 1.3.0
-      function-bind: 1.1.2
-      globalthis: 1.0.4
-      has-property-descriptors: 1.0.2
-      set-function-name: 2.0.2
 
   svg-pathdata@6.0.3:
     optional: true
