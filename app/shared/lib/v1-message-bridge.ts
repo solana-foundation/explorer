@@ -46,13 +46,23 @@ export function isV1MessageBytes(bytes: Uint8Array): boolean {
  *
  * The inherited `version` getter still reports `0`; carry the true version alongside this
  * object rather than reading it off the message.
+ *
+ * `transactionConfig` carries the message-level resource limits, which `MessageV0` has nowhere to
+ * put. It is absent when the message sets no limits at all — in v1 that means every limit is zero,
+ * not that a default applies.
  */
 export class V1MessageView extends MessageV0 {
     private readonly rawV1Bytes: Uint8Array;
+    readonly transactionConfig?: V1TransactionConfig;
 
-    constructor(args: ConstructorParameters<typeof MessageV0>[0], rawV1Bytes: Uint8Array) {
+    constructor(
+        args: ConstructorParameters<typeof MessageV0>[0],
+        rawV1Bytes: Uint8Array,
+        transactionConfig?: V1TransactionConfig,
+    ) {
         super(args);
         this.rawV1Bytes = rawV1Bytes;
+        this.transactionConfig = transactionConfig;
     }
 
     override serialize(): Uint8Array {
@@ -85,6 +95,7 @@ export function bridgeV1MessageBytes(messageBytes: Uint8Array): {
         throw new Error('v1 transaction message bytes are not a canonical compiled message');
     }
 
+    const transactionConfig = readV1TransactionConfig(compiled);
     const message = new V1MessageView(
         {
             addressTableLookups: [],
@@ -102,9 +113,10 @@ export function bridgeV1MessageBytes(messageBytes: Uint8Array): {
             staticAccountKeys: compiled.staticAccounts.map(address => new PublicKey(address)),
         },
         messageBytes,
+        transactionConfig,
     );
 
-    return { message, transactionConfig: readV1TransactionConfig(compiled) };
+    return { message, transactionConfig };
 }
 
 /**

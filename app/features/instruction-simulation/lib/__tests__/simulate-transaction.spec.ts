@@ -361,8 +361,8 @@ describe('simulateTransaction', () => {
 });
 
 describe('v1 transactions', () => {
-    function v1Message(): VersionedMessage {
-        return bridgeV1MessageBytes(parseTransactionBytes(createV1TransactionBytes({})).messageBytes).message;
+    function v1Message(config: Parameters<typeof createV1TransactionBytes>[0] = {}): VersionedMessage {
+        return bridgeV1MessageBytes(parseTransactionBytes(createV1TransactionBytes(config)).messageBytes).message;
     }
 
     function connectionWithFeature(activated: boolean, overrides?: Partial<Connection>): Connection {
@@ -387,6 +387,60 @@ describe('v1 transactions', () => {
         await simulate(connection, v1Message());
 
         expect(connection.simulateTransaction).toHaveBeenCalled();
+    });
+
+    describe('MaxLoadedAccountsDataSizeExceeded', () => {
+        // The fee payer is empty, the recipient does not exist, and the program holds 74,800 bytes:
+        // the runtime loads 74,800 + 64 for each of the two accounts that exist.
+        const OWNER = new PublicKey(SYSTEM_PROGRAM_ADDRESS);
+        const PARSED_ACCOUNTS = [
+            { data: Buffer.alloc(0), owner: OWNER },
+            undefined,
+            { data: { parsed: {}, program: 'memo', space: 74_800 }, owner: OWNER },
+        ];
+
+        function connectionRejectingForSize(): Connection {
+            return connectionWithFeature(true, {
+                getMultipleParsedAccounts: vi.fn().mockResolvedValue({ value: PARSED_ACCOUNTS }),
+                simulateTransaction: vi
+                    .fn()
+                    .mockResolvedValue(
+                        createSimulationResponse({ err: 'MaxLoadedAccountsDataSizeExceeded', logs: [] }),
+                    ),
+            } as Partial<Connection>);
+        }
+
+        it('should report the size the runtime loaded against the limit the message sets', async () => {
+            const message = v1Message({ loadedAccountsDataSizeLimit: 74_900 });
+
+            const result = await simulate(connectionRejectingForSize(), message);
+
+            expect(result.error).toContain('this transaction loads 74,928 bytes');
+            expect(result.error).toContain('74,800 bytes of account data');
+            expect(result.error).toContain('64 bytes of metadata for each of the 2 accounts that exist on chain');
+            expect(result.error).toContain('above the 74,900 byte limit set in the v1 message config');
+        });
+
+        it('should name the unset limit as zero when the message sets none', async () => {
+            const result = await simulate(connectionRejectingForSize(), v1Message());
+
+            expect(result.error).toContain('this transaction loads 74,928 bytes');
+            expect(result.error).toContain('sets no loaded accounts data size limit');
+        });
+
+        it('should surface the raw error for a non-v1 message', async () => {
+            const connection = createMockConnection({
+                simulateTransaction: vi
+                    .fn()
+                    .mockResolvedValue(
+                        createSimulationResponse({ err: 'MaxLoadedAccountsDataSizeExceeded', logs: [] }),
+                    ),
+            } as Partial<Connection>);
+
+            const result = await simulate(connection);
+
+            expect(result.error).toBe('MaxLoadedAccountsDataSizeExceeded');
+        });
     });
 
     it('should not read the feature gate for a non-v1 message', async () => {
