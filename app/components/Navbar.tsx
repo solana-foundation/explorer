@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@components/shared/utils';
+import { ClusterStatusButton } from '@features/cluster-switcher';
 import Logo from '@img/logos-solana/dark-explorer-logo.svg';
 import { useDisclosure } from '@mantine/hooks';
 import { useClusterPath } from '@utils/url';
@@ -12,8 +13,6 @@ import { Menu } from 'react-feather';
 
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { NavbarItem, NavbarLink, NavbarList } from '@/app/shared/ui/Navbar';
-
-import { ClusterStatusButton } from './ClusterStatusButton';
 
 export interface INavbarProps {
     children?: ReactNode;

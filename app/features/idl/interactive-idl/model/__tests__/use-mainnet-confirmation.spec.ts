@@ -1,6 +1,6 @@
 import { getCookie, setCookie } from '@features/cookie';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { Cluster, clusterName, ClusterStatus, clusterUrl } from '@utils/cluster';
+import { Cluster, clusterName, clusterSelection, ClusterStatus, clusterUrl } from '@utils/cluster';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useCluster } from '@/app/providers/cluster';
@@ -282,11 +282,12 @@ describe('useMainnetConfirmation', () => {
 });
 
 function setup(cluster: Cluster = Cluster.MainnetBeta) {
+    const selection = clusterSelection(cluster);
     vi.mocked(useCluster).mockReturnValue({
-        cluster,
-        customUrl: '',
+        ...selection,
         name: clusterName(cluster),
+        selection,
         status: ClusterStatus.Connected,
-        url: clusterUrl(cluster, ''),
+        url: clusterUrl(selection),
     });
 }

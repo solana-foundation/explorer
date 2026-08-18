@@ -78,21 +78,27 @@ describe('useClusterResourceSearch', () => {
         expect(probe).toHaveBeenCalledTimes(2);
     });
 
-    it('should probe the custom RPC URL with the resource id when customUrl is present', async () => {
+    it('should never probe an endpoint from the query string', async () => {
+        // The resource id is whatever the visitor is looking at, and the probe sends it. Probing a
+        // link-supplied endpoint would hand that address or signature to whoever wrote the link — and on a
+        // pending custom cluster the param is still in the bar, since the prompt needs its subject. Trust
+        // is decided once, in `decideCustomUrl`; this hook does not get a second, weaker vote.
         vi.mocked(useSearchParams).mockReturnValue(
-            new URLSearchParams('customUrl=https://my.custom.rpc') as ReturnType<typeof useSearchParams>,
+            new URLSearchParams('cluster=custom&customUrl=https://attacker.example/rpc') as ReturnType<
+                typeof useSearchParams
+            >,
         );
         const probe = vi.fn().mockResolvedValue(false);
 
-        renderHook(() =>
-            useClusterResourceSearch({ currentCluster: Cluster.MainnetBeta, probe, resourceId: RESOURCE_ID }),
-        );
+        renderHook(() => useClusterResourceSearch({ currentCluster: Cluster.Custom, probe, resourceId: RESOURCE_ID }));
 
         await act(async () => {
             await vi.advanceTimersByTimeAsync(3000);
         });
 
-        expect(probe).toHaveBeenCalledWith('https://my.custom.rpc', RESOURCE_ID);
+        expect(probe.mock.calls.map(([url]) => url)).not.toContain('https://attacker.example/rpc');
+        // The public clusters are still searched, so the card keeps working.
+        expect(probe).toHaveBeenCalledTimes(3);
     });
 
     it('should continue probing when a cluster probe throws', async () => {

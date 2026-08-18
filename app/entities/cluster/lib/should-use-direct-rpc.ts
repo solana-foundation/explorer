@@ -1,13 +1,16 @@
-import { Cluster } from './cluster';
+import { parseUrl } from '@shared/lib/url';
 
-/** Whether `url` points at a local RPC endpoint (localhost / 127.0.0.1). */
+import { Cluster } from './cluster';
+import { isLocalHostname } from './rpc-endpoint';
+
+/**
+ * Whether `url` points at a local RPC endpoint (localhost / 127.0.0.1). Takes a raw string, because it
+ * also sees *resolved* cluster URLs, which never pass through `parseRpcEndpoint`. For a custom endpoint
+ * read `RpcEndpoint.isLocal` instead: same answer, no re-parse.
+ */
 export function isLocalRpcUrl(url: string): boolean {
-    try {
-        const { hostname } = new URL(url);
-        return hostname === 'localhost' || hostname === '127.0.0.1';
-    } catch {
-        return false;
-    }
+    const parsed = parseUrl(url);
+    return parsed !== undefined && isLocalHostname(parsed.hostname);
 }
 
 /** Whether to resolve client-side via direct RPC instead of the server API routes (which only reach known clusters). */

@@ -147,10 +147,11 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
         receiptAnalytics.trackViewed(signature, receiptType);
     }, [signature, receiptType]);
 
-    const { cluster, customUrl } = useCluster();
+    // The selection goes in whole. It is memoised, so this callback stays stable while it does.
+    const { cluster, selection } = useCluster();
     const makeAddressHref = useCallback(
-        (address: string) => buildExplorerLink(cluster, customUrl, `/address/${address}`),
-        [cluster, customUrl],
+        (address: string) => buildExplorerLink(selection, `/address/${address}`),
+        [selection],
     );
 
     const senderDomain = usePrimaryDomain(receipt.sender.address);

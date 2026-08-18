@@ -293,6 +293,7 @@ function useEnrichedOsecInfo({
     const { program: accountAnchorProgram, isLoading: isIdlLoading } = useAnchorProgram(
         VERIFY_PROGRAM_ID,
         connection.rpcEndpoint,
+        cluster,
     );
     const signerAuthorities = useMemo(
         () =>

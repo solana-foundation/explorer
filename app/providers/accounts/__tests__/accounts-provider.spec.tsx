@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { render, waitFor } from '@testing-library/react';
-import { Cluster, clusterUrl } from '@utils/cluster';
+import { Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -31,7 +31,8 @@ function Capture() {
 describe('AccountsProvider', () => {
     beforeEach(() => {
         captured = undefined;
-        useClusterMock.mockReturnValue({ cluster: Cluster.Devnet, customUrl: '', url: clusterUrl(Cluster.Devnet, '') });
+        const selection = clusterSelection(Cluster.Devnet);
+        useClusterMock.mockReturnValue({ ...selection, selection, url: clusterUrl(selection) });
     });
 
     afterEach(() => {
@@ -80,7 +81,7 @@ describe('AccountsProvider', () => {
         useClusterMock.mockReturnValue({
             cluster: Cluster.Testnet,
             customUrl: '',
-            url: clusterUrl(Cluster.Testnet, ''),
+            url: clusterUrl(clusterSelection(Cluster.Testnet)),
         });
         rerender(
             <AccountsProvider>

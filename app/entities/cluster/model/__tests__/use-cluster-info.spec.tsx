@@ -7,7 +7,7 @@ vi.mock('@solana/kit', () => ({ createSolanaRpc: vi.fn() }));
 
 import { createSolanaRpc } from '@solana/kit';
 
-import { Cluster, ClusterStatus, MAINNET_BETA_URL } from '../../lib/cluster';
+import { Cluster, clusterSelection, ClusterStatus } from '../../lib/cluster';
 import { type ClusterState, StateContext } from '../cluster-provider';
 import { useClusterInfo } from '../use-cluster-info';
 
@@ -34,8 +34,7 @@ function mockRpc() {
 let rpc: ReturnType<typeof mockRpc>;
 
 const connectedState: ClusterState = {
-    cluster: Cluster.MainnetBeta,
-    customUrl: MAINNET_BETA_URL,
+    selection: clusterSelection(Cluster.MainnetBeta),
     status: ClusterStatus.Connected,
 };
 

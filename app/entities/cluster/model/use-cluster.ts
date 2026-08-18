@@ -1,11 +1,9 @@
 'use client';
 
-import { useSetAtom } from 'jotai';
 import { useContext } from 'react';
 
 import { clusterName, clusterUrl } from '../lib/cluster';
 import { StateContext } from './cluster-provider';
-import { rememberedCustomUrlAtom } from './cluster-storage';
 
 export function useCluster() {
     const context = useContext(StateContext);
@@ -14,11 +12,10 @@ export function useCluster() {
     }
     return {
         ...context,
-        name: clusterName(context.cluster),
-        url: clusterUrl(context.cluster, context.customUrl),
+        // Flattened so consumers that want only `cluster`, or only `endpoint`, read it directly. These
+        // are copies of one selection and cannot disagree; anything needing both takes `selection` whole.
+        ...context.selection,
+        name: clusterName(context.selection.cluster),
+        url: clusterUrl(context.selection),
     };
-}
-
-export function useUpdateCustomUrl() {
-    return useSetAtom(rememberedCustomUrlAtom);
 }

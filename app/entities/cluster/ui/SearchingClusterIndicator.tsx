@@ -1,5 +1,6 @@
 import { cn } from '@components/shared/utils';
-import { Cluster, clusterName } from '@utils/cluster';
+
+import { Cluster, clusterName } from '../lib/cluster';
 
 /** Spinner + "checking <cluster>" shown while probing other clusters for a missing resource. */
 export function SearchingClusterIndicator({ searchingCluster }: { searchingCluster: Cluster }) {

@@ -1,7 +1,7 @@
 import { FetchStatus } from '@providers/cache';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
-import { Cluster, clusterUrl } from '@utils/cluster';
+import { Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -64,11 +64,8 @@ function TestComponent() {
 
 describe('should fetch account token holdings without enrichment', () => {
     beforeEach(() => {
-        useClusterMock.mockReturnValue({
-            cluster: Cluster.Devnet,
-            customUrl: '',
-            url: clusterUrl(Cluster.Devnet, ''),
-        });
+        const selection = clusterSelection(Cluster.Devnet);
+        useClusterMock.mockReturnValue({ ...selection, selection, url: clusterUrl(selection) });
     });
 
     afterEach(() => {

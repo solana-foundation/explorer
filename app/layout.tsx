@@ -1,11 +1,10 @@
 import './styles/styles.css';
 
-import { ClusterModal } from '@components/ClusterModal';
-import { ClusterStatusButton } from '@components/ClusterStatusButton';
 import { Footer } from '@components/Footer';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
 import { Toaster } from '@components/shared/ui/sonner/toaster';
+import { ClusterModal, ClusterStatusButton, PendingCustomUrlConsent } from '@features/cluster-switcher';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { EXPLORER_BASE_URL, isEnvEnabled } from '@utils/env';
@@ -54,6 +53,7 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                             <VisibilityProvider>
                                 <TokenInfoBatchProvider>
                                     <ClusterModal />
+                                    <PendingCustomUrlConsent />
                                     <div className="flex min-h-screen flex-col">
                                         <div className="min-w-[292px] flex-1 pb-6">
                                             <Navbar>

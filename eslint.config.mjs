@@ -249,7 +249,6 @@ export default tseslint.config(
     {
         files: [
             // app/components (pre-FSD legacy)
-            'app/components/ClusterModalDeveloperSettings.tsx',
             'app/components/account/token-extensions/ScaledUiAmountMultiplierTooltip.tsx',
             'app/components/instruction/AnchorDetailsCard.tsx',
             'app/components/instruction/pyth/AddMappingDetailsCard.tsx',
@@ -554,8 +553,6 @@ export default tseslint.config(
             'app/api/search/route.ts',
 
             // app/components (pre-FSD legacy — to be migrated into features/entities)
-            'app/components/ClusterModal.tsx',
-            'app/components/ClusterModalDeveloperSettings.tsx',
             'app/components/LiveTransactionStatsCard.tsx',
             'app/components/MessageBanner.tsx',
             'app/components/account/AnchorAccountCard.tsx',
@@ -655,7 +652,6 @@ export default tseslint.config(
             'app/features/cookie/model/use-analytics-consent.ts',
             'app/features/cookie/ui/CookieConsent.tsx',
             'app/features/cu-profiling/ui/CUProfilingSection.tsx',
-            'app/features/custom-cluster/lib/cluster-storage.ts',
             'app/features/idl/formatted-idl/model/search.ts',
             'app/features/idl/formatted-idl/ui/BaseFormattedIdl.tsx',
             'app/features/idl/formatted-idl/ui/BaseIdlAccounts.tsx',

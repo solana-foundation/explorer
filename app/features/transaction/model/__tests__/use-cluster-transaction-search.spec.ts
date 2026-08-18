@@ -87,20 +87,26 @@ describe('useClusterTransactionSearch', () => {
         expect(vi.mocked(createSolanaRpc)).toHaveBeenCalledTimes(2);
     });
 
-    it('should probe the custom RPC URL when customUrl is present', async () => {
+    it('should never probe an endpoint from the query string', async () => {
+        // Sending the signature the visitor is viewing to a link-supplied node would disclose what they are
+        // looking at to whoever wrote the link, ahead of any consent. See the same case in
+        // `use-cluster-resource-search.spec.ts`.
         vi.mocked(useSearchParams).mockReturnValue(
-            new URLSearchParams('customUrl=https://my.custom.rpc') as ReturnType<typeof useSearchParams>,
+            new URLSearchParams('cluster=custom&customUrl=https://attacker.example/rpc') as ReturnType<
+                typeof useSearchParams
+            >,
         );
         const { createSolanaRpc } = await import('@solana/kit');
         const { useClusterTransactionSearch } = await import('../use-cluster-transaction-search');
 
-        renderHook(() => useClusterTransactionSearch(TEST_SIGNATURE, Cluster.MainnetBeta));
+        renderHook(() => useClusterTransactionSearch(TEST_SIGNATURE, Cluster.Custom));
 
         await act(async () => {
             await vi.advanceTimersByTimeAsync(3000);
         });
 
-        expect(vi.mocked(createSolanaRpc)).toHaveBeenCalledWith('https://my.custom.rpc');
+        expect(vi.mocked(createSolanaRpc).mock.calls.map(([url]) => url)).not.toContain('https://attacker.example/rpc');
+        expect(vi.mocked(createSolanaRpc)).toHaveBeenCalledTimes(3);
     });
 
     it('should continue probing when a cluster errors', async () => {
