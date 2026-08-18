@@ -72,7 +72,6 @@ export namespace NftokenFetcher {
             ...account,
             ...metadataMap.get(account.metadata_url),
         }));
-        nfts.sort();
         return nfts.sort((a, b) => {
             if (a.name && b.name) {
                 return a.name < b.name ? -1 : 1;
