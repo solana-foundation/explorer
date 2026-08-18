@@ -2,7 +2,7 @@
 
 ### Requirement: Wallets SHALL be discovered through Wallet Standard, not per-wallet adapters
 
-Explorer SHALL discover connectable wallets through the Wallet Standard registry exposed by `@solana/kit-plugin-wallet`, and SHALL NOT depend on `@solana/wallet-adapter-*`. The mobile wallet adapter chain those packages pull in carries a React Native toolchain into the runtime dependency graph, which is how the unpatched `image-size` advisories reach production.
+Explorer SHALL discover connectable wallets through the Wallet Standard registry exposed by `@solana/kit-plugin-wallet`, and SHALL NOT depend on `@solana/wallet-adapter-*`.
 
 #### Scenario: A user opens the connect dialog with wallets installed
 
@@ -17,7 +17,7 @@ Explorer SHALL discover connectable wallets through the Wallet Standard registry
 
 ### Requirement: The chain identifier SHALL describe the network the user is actually on
 
-Mainnet, devnet, and testnet SHALL map to their Wallet Standard chain identifiers. Custom and SIMD-296 clusters point at arbitrary endpoints and SHALL map to `solana:localnet`. The identifier is not only a discovery filter — it is sent with every signature request, and wallets use it to decide which network to simulate the transaction against — so a custom endpoint SHALL NOT be labelled `solana:mainnet`. The accepted cost is narrower discovery on those clusters.
+Mainnet, devnet, and testnet SHALL map to their Wallet Standard chain identifiers, and Custom and SIMD-296 clusters SHALL map to `solana:localnet`. The identifier is sent with every signature request and decides which network a wallet simulates against, so an arbitrary endpoint must not be labelled `solana:mainnet`.
 
 #### Scenario: A user selects a custom RPC endpoint
 
@@ -28,7 +28,7 @@ Mainnet, devnet, and testnet SHALL map to their Wallet Standard chain identifier
 
 ### Requirement: Wallet UI SHALL be held back until discovery settles
 
-Wallet Standard registration is asynchronous, and a persisted wallet is reconnected silently on load. Connect UI SHALL NOT be presented as actionable while the client is still in its `pending` or `reconnecting` warm-up, because a picker opened in that window reports no wallets installed when wallets are in fact present.
+Connect UI SHALL NOT be presented as actionable while the client is still in its `pending` or `reconnecting` warm-up. Wallet Standard registration is asynchronous, so a picker opened in that window reports no wallets installed when wallets are in fact present.
 
 #### Scenario: A returning user loads a program page
 
@@ -38,7 +38,7 @@ Wallet Standard registration is asynchronous, and a persisted wallet is reconnec
 
 ### Requirement: Each cluster SHALL persist its wallet selection separately
 
-A wallet client is created per chain, and each SHALL persist its selected account under its own storage key. Sharing one key would let a wallet connected on one cluster appear connected on another, and let a disconnect on either clear both.
+A wallet client is created per chain, and each SHALL persist its selected account under its own storage key.
 
 #### Scenario: A user connects on one cluster and switches to another
 
@@ -48,7 +48,7 @@ A wallet client is created per chain, and each SHALL persist its selected accoun
 
 ### Requirement: Wallet signatures SHALL be obtained from the bytes the wallet returns
 
-Interactive-IDL transactions are built with web3.js and broadcast through Explorer's own RPC connection, while the connected wallet is a Kit signer. The bridge between them SHALL hand the wallet the compiled message together with a signature slot per required signer, and SHALL rebuild the transaction from the bytes the wallet returned. A wallet exposing `solana:signTransaction` surfaces as a modifying signer and is free to alter the message it was given, so copying a signature back onto the original transaction would broadcast a message the signature does not cover.
+The bridge between Explorer's web3.js transactions and the Kit signer SHALL hand the wallet the compiled message with a signature slot per required signer, and SHALL rebuild the transaction from the bytes the wallet returned. A wallet exposing `solana:signTransaction` surfaces as a modifying signer and may alter the message, so a signature copied back onto the original would not cover what gets broadcast.
 
 #### Scenario: A wallet returns a modified message
 
