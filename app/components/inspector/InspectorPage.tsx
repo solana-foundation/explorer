@@ -29,6 +29,12 @@ import { Button } from '@/app/components/shared/ui/button';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
+import {
+    bridgeV1MessageBytes,
+    isV1MessageBytes,
+    V1_TRANSACTION_SIZE_LIMIT,
+    type V1TransactionConfig,
+} from '@/app/shared/lib/v1-message-bridge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -71,6 +77,13 @@ export function vaultMessageToVersionedMessage(message: typeof VaultTransaction.
 export type TransactionData = {
     rawMessage: Uint8Array;
     message: VersionedMessage;
+    /**
+     * Set when `rawMessage` holds a v1 message. `message` is then a bridged view whose
+     * `version` getter still reports 0, so version-dependent rendering must read this field.
+     */
+    version?: 1;
+    /** Message-level resource limits; v1 only, and only when the message sets at least one. */
+    transactionConfig?: V1TransactionConfig;
     signatures?: (string | undefined)[];
     accountBalances?: {
         preBalances: number[];
@@ -188,6 +201,11 @@ function decodeUrlParams(
 
         if (buffer.length < MIN_MESSAGE_LENGTH) {
             throw new Error('message buffer is too short');
+        }
+
+        if (isV1MessageBytes(buffer)) {
+            const { message, transactionConfig } = bridgeV1MessageBytes(buffer);
+            return [{ message, rawMessage: buffer, signatures, transactionConfig, version: 1 }, params, refreshUrl];
         }
 
         const message = VersionedMessage.deserialize(buffer);
@@ -480,6 +498,21 @@ export function PermalinkView({
         }
     }, [transaction, fetchConfirmedTx, status]);
 
+    // The inspector renders a web3.js `VersionedMessage`; a v1 message gets there through a
+    // bridged view over the wire bytes, which also carries the message's resource limits so
+    // every entry path derives them from the same decode. The view is memoized because its
+    // identity keys the downstream account-fetching effects and memos.
+    const bridged = React.useMemo(() => {
+        if (!transaction || transaction.message || transaction.version !== 1) {
+            return undefined;
+        }
+        try {
+            return bridgeV1MessageBytes(transaction.messageBytes);
+        } catch {
+            return undefined;
+        }
+    }, [transaction]);
+
     if (!details || details.status === FetchStatus.Fetching) {
         return <LoadingCard />;
     } else if (details.status === FetchStatus.FetchFailed) {
@@ -489,23 +522,24 @@ export function PermalinkView({
     }
 
     const { message, messageBytes, signatures, meta } = transaction;
-    // The inspector renders a web3.js `VersionedMessage`, which cannot represent a v1 message.
-    if (!message) {
+    const resolvedMessage = message ?? bridged?.message;
+    if (!resolvedMessage) {
         return (
             <ErrorCard
-                text={`The inspector does not yet support v${transaction.version} transactions`}
+                text={`The inspector does not support v${transaction.version} transactions`}
                 retry={reset}
                 retryText="Reset"
             />
         );
     }
 
-    const tx = {
+    const tx: TransactionData = {
         accountBalances: meta,
         compiledInnerInstructions: meta?.innerInstructions,
-        message,
+        message: resolvedMessage,
         rawMessage: messageBytes,
         signatures,
+        ...(bridged ? { transactionConfig: bridged.transactionConfig, version: 1 as const } : undefined),
     };
     return <LoadedView transaction={tx} onClear={reset} showTokenBalanceChanges={showTokenBalanceChanges} />;
 }
@@ -519,7 +553,8 @@ function LoadedView({
     onClear: () => void;
     showTokenBalanceChanges: boolean;
 }) {
-    const { message, rawMessage, signatures, accountBalances, compiledInnerInstructions } = transaction;
+    const { message, rawMessage, signatures, accountBalances, compiledInnerInstructions, version, transactionConfig } =
+        transaction;
 
     const fetchAccountInfo = useFetchAccountInfo();
     React.useEffect(() => {
@@ -530,7 +565,13 @@ function LoadedView({
 
     return (
         <>
-            <OverviewCard message={message} raw={rawMessage} onClear={onClear} />
+            <OverviewCard
+                message={message}
+                raw={rawMessage}
+                onClear={onClear}
+                isV1={version === 1}
+                transactionConfig={transactionConfig}
+            />
             <SimulatorCard
                 message={message}
                 showTokenBalanceChanges={showTokenBalanceChanges}
@@ -538,7 +579,8 @@ function LoadedView({
             />
             {signatures && <TransactionSignatures message={message} signatures={signatures} rawMessage={rawMessage} />}
             <AccountsCard message={message} />
-            <AddressTableLookupsCard message={message} />
+            {/* A v1 message carries static accounts only, so there are no lookups to render. */}
+            {version !== 1 && <AddressTableLookupsCard message={message} />}
             <InstructionsSection message={message} compiledInnerInstructions={compiledInnerInstructions} />
         </>
     );
@@ -553,19 +595,25 @@ function OverviewCard({
     raw,
     onClear,
     signature,
+    isV1,
+    transactionConfig,
 }: {
     message: VersionedMessage;
     raw: Uint8Array;
     onClear: () => void;
     signature?: string;
+    isV1?: boolean;
+    transactionConfig?: V1TransactionConfig;
 }) {
     const fee = message.header.numRequiredSignatures * DEFAULT_FEES.lamportsPerSignature;
     const feePayerValidator = createFeePayerValidator(fee);
 
+    // The v1 wire envelope has no signature-count byte — the count is read from the message header.
     const size = React.useMemo(() => {
-        const sigBytes = 1 + 64 * message.header.numRequiredSignatures;
+        const sigBytes = (isV1 ? 0 : 1) + 64 * message.header.numRequiredSignatures;
         return sigBytes + raw.length;
-    }, [message, raw]);
+    }, [message, raw, isV1]);
+    const sizeLimit = isV1 ? V1_TRANSACTION_SIZE_LIMIT : PACKET_DATA_SIZE;
 
     return (
         <>
@@ -585,12 +633,8 @@ function OverviewCard({
                         <BaseTable.Cell className="text-right">
                             <div className="flex flex-col items-end">
                                 {size} bytes
-                                <span
-                                    className={
-                                        size <= PACKET_DATA_SIZE ? 'text-dk-gray-700' : 'text-dk-warning-on-dark'
-                                    }
-                                >
-                                    Max transaction size is {PACKET_DATA_SIZE} bytes
+                                <span className={size <= sizeLimit ? 'text-dk-gray-700' : 'text-dk-warning-on-dark'}>
+                                    Max transaction size is {sizeLimit} bytes
                                 </span>
                             </div>
                         </BaseTable.Cell>
@@ -606,6 +650,45 @@ function OverviewCard({
                             </div>
                         </BaseTable.Cell>
                     </BaseTable.Row>
+
+                    {isV1 && (
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Transaction Version</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right uppercase">v1</BaseTable.Cell>
+                        </BaseTable.Row>
+                    )}
+                    {transactionConfig?.computeUnitLimit !== undefined && (
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Compute unit limit</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right">
+                                {transactionConfig.computeUnitLimit.toLocaleString('en-US')}
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                    )}
+                    {transactionConfig?.priorityFeeLamports !== undefined && (
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Priority fee (total)</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right">
+                                <SolBalance lamports={transactionConfig.priorityFeeLamports} />
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                    )}
+                    {transactionConfig?.loadedAccountsDataSizeLimit !== undefined && (
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Loaded accounts data size limit</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right">
+                                {transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                    )}
+                    {transactionConfig?.heapSize !== undefined && (
+                        <BaseTable.Row>
+                            <BaseTable.Cell>Heap size</BaseTable.Cell>
+                            <BaseTable.Cell className="text-right">
+                                {transactionConfig.heapSize.toLocaleString('en-US')}
+                            </BaseTable.Cell>
+                        </BaseTable.Row>
+                    )}
 
                     <BaseTable.Row>
                         <BaseTable.Cell>

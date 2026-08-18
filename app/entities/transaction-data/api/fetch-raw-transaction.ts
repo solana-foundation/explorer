@@ -1,9 +1,6 @@
 import {
-    type CompiledTransactionMessage,
-    type CompiledTransactionMessageWithLifetime,
     createSolanaRpc,
     decodeTransactionFromRpcResponse,
-    decompileTransactionMessage,
     getBase58Decoder,
     MAX_SUPPORTED_TRANSACTION_VERSION,
     signature as createSignature,
@@ -11,9 +8,9 @@ import {
 } from '@solana/kit';
 import { type DecompileArgs, type Finality, PublicKey, TransactionMessage, VersionedMessage } from '@solana/web3.js';
 
-import { Logger } from '@/app/shared/lib/logger';
+import { readV1TransactionConfig } from '@/app/shared/lib/v1-message-bridge';
 
-import type { RawTransaction, TransactionConfig } from '../model/types';
+import type { RawTransaction } from '../model/types';
 
 /**
  * Fetches a transaction's wire bytes and metadata for the inspector and the download button.
@@ -69,7 +66,11 @@ export async function fetchRawTransaction(
     };
 
     if (compiledMessage.version === 1) {
-        return { ...base, transactionConfig: readTransactionConfig(compiledMessage, signature), version: 1 };
+        return {
+            ...base,
+            transactionConfig: readV1TransactionConfig(compiledMessage, { module: '[transaction-data]', signature }),
+            version: 1,
+        };
     }
 
     return {
@@ -77,23 +78,6 @@ export async function fetchRawTransaction(
         ...decodeWithWeb3(messageBytes, meta?.loadedAddresses),
         version: compiledMessage.version,
     };
-}
-
-// The resource-limit rows are supplemental; the wire bytes still render, download, and inspect
-// without them.
-function readTransactionConfig(
-    compiledMessage: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime & { version: 1 },
-    signature: string,
-): TransactionConfig | undefined {
-    try {
-        const { config } = decompileTransactionMessage(compiledMessage);
-
-        // A v1 message may set no limits at all, in which case there are no rows to render.
-        return config && Object.values(config).some(value => value !== undefined) ? config : undefined;
-    } catch (error) {
-        Logger.error(error, { module: '[transaction-data]', signature });
-        return undefined;
-    }
 }
 
 /**

@@ -8,6 +8,8 @@ import React from 'react';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { BaseTable } from '@/app/shared/ui/Table';
 
+export const ADDRESS_TABLE_LOOKUPS_CARD_TITLE = 'Address Table Lookup(s)';
+
 export function AddressTableLookupsCard({ message }: { message: VersionedMessage }) {
     const lookupRows = React.useMemo(() => {
         let key = 0;
@@ -33,7 +35,7 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
     if (message.version === 'legacy') return null;
 
     return (
-        <CollapsibleCard title="Address Table Lookup(s)">
+        <CollapsibleCard title={ADDRESS_TABLE_LOOKUPS_CARD_TITLE}>
             <BaseTable ui="dashkit" variant="card" nowrap>
                 <BaseTable.Head>
                     <BaseTable.Row>

@@ -1,4 +1,4 @@
-import type { TransactionMessage as KitTransactionMessage, TransactionVersion } from '@solana/kit';
+import type { TransactionVersion } from '@solana/kit';
 import type {
     CompiledInnerInstruction,
     ParsedTransactionWithMeta,
@@ -6,16 +6,15 @@ import type {
     VersionedMessage,
 } from '@solana/web3.js';
 
+import type { V1TransactionConfig } from '@/app/shared/lib/v1-message-bridge';
+
 /**
  * Message-level resource limits carried by a v1 transaction.
  *
  * v1 moves these out of Compute Budget instructions and into the message itself. `priorityFee`
  * is a total amount in lamports, unlike v0's per-compute-unit price in micro-lamports.
- *
- * kit models this as `V1TransactionConfig` but does not export that type by name, so it is read
- * off the v1 arm of kit's `TransactionMessage` to stay in step with kit's definition.
  */
-export type TransactionConfig = NonNullable<Extract<KitTransactionMessage, { version: 1 }>['config']>;
+export type TransactionConfig = V1TransactionConfig;
 
 /**
  * A parsed transaction in the shape the transaction detail page consumes.
