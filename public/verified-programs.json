@@ -354,6 +354,12 @@
     "verifiedAt": "2026-07-21T10:38:51"
   },
   {
+    "address": "6GpoKXf12t4egf42cndn7qjurBLtNkP72fTpYSjuidLE",
+    "name": "solana_payment_splitter",
+    "repoUrl": "https://github.com/cendhq/solana-programs/tree/ce2182f8aa5c046c1c1dc9ce913836413f864fde",
+    "verifiedAt": "2026-08-17T20:56:08"
+  },
+  {
     "address": "6hFfJP3EgJe8mL9rhBjXWhruJWHBaWnt8gvej14xDUuz",
     "name": "x3_monsterball",
     "repoUrl": "https://github.com/pepememe-dev/contracts/tree/b0aa41a655ebb7cf9441377cd96165d286ad3ff6",
@@ -696,6 +702,12 @@
     "verifiedAt": "2024-10-04T13:12:27"
   },
   {
+    "address": "AS5iSCb1Z2zAyWMT61HKpQuNx9vPUEzafHMKfeUaBMcL",
+    "name": "pausable_model",
+    "repoUrl": "https://github.com/goliel/solana-pausable-model/tree/eea99598ee8dcdfd30bfe0e4a7e04a1960809167",
+    "verifiedAt": "2026-08-17T17:42:03"
+  },
+  {
     "address": "atq2FYuvww5EF6qeB28gj9tkao6Ld9mEGUzF4M93cCC",
     "name": "atomiqlabs/atomiq-contracts-solana",
     "repoUrl": "https://github.com/atomiqlabs/atomiq-contracts-solana/tree/fa3f14606014f467ee231b2588fd2829c275ce42",
@@ -748,6 +760,12 @@
     "name": "KamiFin/Dawae-LZ-Oapp",
     "repoUrl": "https://github.com/KamiFin/Dawae-LZ-Oapp/tree/01534aa2b64b65f276ddee3493b1d172d2c1f84e",
     "verifiedAt": "2025-02-27T14:45:22"
+  },
+  {
+    "address": "BQ7nDFGKN4cYqmBkMXFCEzk3zPJhR6bNK9Maf8sQXrQm",
+    "name": "usdai-foundation/solana-oft-deployment",
+    "repoUrl": "https://github.com/usdai-foundation/solana-oft-deployment/tree/7b3e659e224d06dac703b363df47dbe9f840eb42",
+    "verifiedAt": "2026-08-18T06:30:02"
   },
   {
     "address": "BQrR1sqG3HdMBtq5p2BRPz9qzyA42ZYCBcDXC3m6eVXY",
@@ -940,6 +958,12 @@
     "name": "flipdash_router",
     "repoUrl": "https://github.com/HuntlerX/flipdash-router/tree/85da7ef",
     "verifiedAt": "2026-05-01T02:48:18"
+  },
+  {
+    "address": "DBc9SEQghiJUj52YPqTKk8R4CMRgagBxi2LU1yBbeMpk",
+    "name": "detox267/moonz-launchpad",
+    "repoUrl": "https://github.com/detox267/moonz-launchpad/tree/91b5e18452e44d9889493cb788f3eae2536c9884",
+    "verifiedAt": "2026-08-17T14:35:21"
   },
   {
     "address": "De1egAFMkMWZSN5rYXRj9CAdheBamobVNubTsi9avR44",
@@ -1348,12 +1372,6 @@
     "name": "time_capsule_contract",
     "repoUrl": "https://github.com/patch75/time-capsule-contract/tree/8c8f3ea",
     "verifiedAt": "2025-08-07T13:04:30"
-  },
-  {
-    "address": "FyTBuifdJ1u3rF2bsK2NmjzogkCbNK3KtFfZyM3CUfv1",
-    "name": "MrMinerSolana/Miner",
-    "repoUrl": "https://github.com/MrMinerSolana/Miner/tree/91a64026f73691b377ff4aa9cc6bb9056dee7378",
-    "verifiedAt": "2026-08-16T02:57:59"
   },
   {
     "address": "G1SRHec1Mig66xKJ169kmmVRy4WX81VLKCUfdExThQdo",
@@ -2000,8 +2018,8 @@
   {
     "address": "oreV3EG1i9BEgiAJ8b177Z2S2rMarzak4NMv1kULvWv",
     "name": "regolith-labs/ore",
-    "repoUrl": "https://github.com/regolith-labs/ore/tree/e8e5b3b3b939c37e0581418af8a533c9df384c92",
-    "verifiedAt": "2026-08-13T01:25:46"
+    "repoUrl": "https://github.com/regolith-labs/ore/tree/2fd701723f24bfff22662c095364c588d35ea13e",
+    "verifiedAt": "2026-08-17T21:25:40"
   },
   {
     "address": "paxosVkYuJBKUQoZGAidRA47Qt4uidqG5fAt5kmr1nR",
@@ -2062,6 +2080,12 @@
     "name": "Ellipsis-Labs/phoenix-seat-manager-v1",
     "repoUrl": "https://github.com/Ellipsis-Labs/phoenix-seat-manager-v1",
     "verifiedAt": "2024-03-20T14:41:14"
+  },
+  {
+    "address": "pumpcoEZJNNneH9KjrpBSVCKpADVgJpBbtkGvbtFbuy",
+    "name": "pumpcofun/pumpco-router",
+    "repoUrl": "https://github.com/pumpcofun/pumpco-router/tree/09a5f609e960659c9b22846361de648d03298435",
+    "verifiedAt": "2026-08-17T22:34:01"
   },
   {
     "address": "pytcD8uUjPxSLMsNqoVnm9dXQw9tKJJf3CQnGwa8oL7",
