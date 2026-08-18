@@ -17,6 +17,7 @@ import { buildTokenBalances, type TokenBalanceData } from './build-token-balance
 import { computeSolBalanceChanges } from './compute-sol-balance-changes';
 import { getMintDecimals } from './get-mint-decimals';
 import { resolveAddressLookupTables } from './resolve-address-lookup-tables';
+import { ENABLE_TX_V1_FEATURE, isTxV1Active } from './tx-v1-feature';
 import type { SolBalanceChange } from './types';
 
 export type SimulationResult = {
@@ -66,6 +67,15 @@ type RawSimulation = {
  * state, and run the simulation. Returns raw data for interpretation.
  */
 async function runSimulation(connection: Connection, message: VersionedMessage): Promise<RawSimulation> {
+    // A node whose runtime predates the v1 feature gate rejects the transaction during sanitization
+    // and answers with a bare `UnsupportedVersion` error and no logs, which reads as a failure of
+    // the transaction rather than of the cluster. Check the gate first so the cause is explicit.
+    if (message instanceof V1MessageView && !(await isTxV1Active(connection))) {
+        throw new Error(
+            `this cluster does not support v1 transactions yet — feature gate ${ENABLE_TX_V1_FEATURE.toBase58()} is not active`,
+        );
+    }
+
     const lookupTables = await resolveAddressLookupTables(connection, message);
     const accountKeys = message.getAccountKeys({ addressLookupTableAccounts: lookupTables }).keySegments().flat();
 

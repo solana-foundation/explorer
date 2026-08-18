@@ -6,7 +6,10 @@ import type { InstructionLogs } from '@utils/program-logs';
 import BN from 'bn.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { createV1TransactionBytes } from '@/app/entities/transaction-data/__fixtures__/wire-transactions';
 import { alloc, toBase64, writeU64LE, writeUint32LE } from '@/app/shared/lib/bytes';
+import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
+import { bridgeV1MessageBytes } from '@/app/shared/lib/v1-message-bridge';
 
 // Mock VersionedTransaction so we don't need a real message header
 vi.mock('@solana/web3.js', async () => {
@@ -354,6 +357,44 @@ describe('simulateTransaction', () => {
                 uiTokenAmount: { amount: largeAmount.toString() },
             });
         });
+    });
+});
+
+describe('v1 transactions', () => {
+    function v1Message(): VersionedMessage {
+        return bridgeV1MessageBytes(parseTransactionBytes(createV1TransactionBytes({})).messageBytes).message;
+    }
+
+    function connectionWithFeature(activated: boolean, overrides?: Partial<Connection>): Connection {
+        return createMockConnection({
+            getAccountInfo: vi.fn().mockResolvedValue({
+                data: Buffer.from(activated ? [1, 42, 0, 0, 0, 0, 0, 0, 0] : new Uint8Array(9)),
+            }),
+            ...overrides,
+        } as Partial<Connection>);
+    }
+
+    it('should fail with the feature gate as the cause when the cluster has no v1 support', async () => {
+        const connection = connectionWithFeature(false);
+
+        await expect(simulate(connection, v1Message())).rejects.toThrow('does not support v1 transactions');
+        expect(connection.simulateTransaction).not.toHaveBeenCalled();
+    });
+
+    it('should simulate when the cluster has the v1 feature gate active', async () => {
+        const connection = connectionWithFeature(true);
+
+        await simulate(connection, v1Message());
+
+        expect(connection.simulateTransaction).toHaveBeenCalled();
+    });
+
+    it('should not read the feature gate for a non-v1 message', async () => {
+        const connection = connectionWithFeature(false);
+
+        await simulate(connection);
+
+        expect(connection.getAccountInfo).not.toHaveBeenCalled();
     });
 });
 
