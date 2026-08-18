@@ -22,7 +22,7 @@ App code that needs a kit rpc client SHALL obtain it from the cluster entity's a
 
 ### Requirement: Clients are memoized per URL
 
-`getRpc` MUST return the same client instance for repeated calls with the same URL, and distinct instances for distinct URLs. The returned identity MUST be stable enough to appear in a React hook dependency array without re-firing effects across renders for an unchanged URL. The cache MUST be bounded, evicting the least recently used entry once the bound is exceeded, so free-form custom endpoint URLs cannot grow it for the life of the tab; the bound MUST be generous enough that eviction never touches a URL in active use.
+`getRpc` MUST return the same client instance for repeated calls with the same URL, and distinct instances for distinct URLs. The returned identity MUST be stable enough to appear in a React hook dependency array without re-firing effects across renders for an unchanged URL. The cache MUST be bounded, evicting the oldest entry once the bound is exceeded, so free-form custom endpoint URLs cannot grow it for the life of the tab; the bound MUST be generous enough that eviction never touches a URL in active use. Looking up an already-cached URL MUST NOT mutate the cache, so the accessor is safe to call during a React render.
 
 #### Scenario: Repeated calls with one URL
 
@@ -37,5 +37,5 @@ App code that needs a kit rpc client SHALL obtain it from the cluster entity's a
 #### Scenario: A flood of one-off custom URLs
 
 - **WHEN** more distinct URLs than the cache bound are requested
-- **THEN** the least recently used clients are evicted
-- **AND** recently used clients keep their identity
+- **THEN** the oldest clients are evicted
+- **AND** clients cached within the bound keep their identity
