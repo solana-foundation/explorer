@@ -99,8 +99,6 @@ overrides:
 
 packageExtensionsChecksum: sha256-yDlRdIJCvjGdwOnfbHeL0o4lSi94xy6bpKmyfsP5SuA=
 
-pnpmfileChecksum: sha256-BfkWczcQHe8lZlLbAuHsrj1b6UroZcYpYDwSzrgMhb8=
-
 patchedDependencies:
   '@codama/nodes-from-anchor@1.3.8':
     hash: 0998b86e7c34d80be23b8b33f9004bfbd53057bae5f6c8cfd6cd179e8f175199
@@ -227,9 +225,6 @@ importers:
       '@solana-program/token-2022':
         specifier: 0.13.0
         version: 0.13.0(@solana/kit@7.0.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))(@solana/sysvars@7.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3))
-      '@solana/buffer-layout':
-        specifier: 3.0.0
-        version: 3.0.0
       '@solana/idl':
         specifier: 0.2.0
         version: 0.2.0(@solana/kit@7.0.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
@@ -4400,10 +4395,6 @@ packages:
   '@solana/buffer-layout-utils@0.2.0':
     resolution: {integrity: sha512-szG4sxgJGktbuZYDg2FfNmkMi0DYQoVjN2h7ta1W1hPrwzarcFLBq9UpX1UjNXsNpT9dn+chgprtWGioUAr4/g==}
     engines: {node: '>= 10'}
-
-  '@solana/buffer-layout@3.0.0':
-    resolution: {integrity: sha512-MVdgAKKL39tEs0l8je0hKaXLQFb7Rdfb0Xg2LjFZd8Lfdazkg6xiS98uAZrEKvaoF3i4M95ei9RydkGIDMeo3w==}
-    engines: {node: '>=5.10'}
 
   '@solana/buffer-layout@4.0.1':
     resolution: {integrity: sha512-E1ImOIAD1tBZFRdjeM4/pzTiTApC0AOBGwyAMS4fwIodCWArzJ3DWdoh8cKxeFM2fElkxBh2Aqts1BPC373rHA==}
@@ -14640,10 +14631,6 @@ snapshots:
       - encoding
       - typescript
       - utf-8-validate
-
-  '@solana/buffer-layout@3.0.0':
-    dependencies:
-      buffer: 6.0.3
 
   '@solana/buffer-layout@4.0.1':
     dependencies:
