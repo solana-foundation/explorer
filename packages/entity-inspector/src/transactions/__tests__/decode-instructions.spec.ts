@@ -1,3 +1,4 @@
+import { createIdlClient } from '@explorer/idl-decode';
 import { address, getBase58Decoder, isSignerRole, isWritableRole } from '@solana/kit';
 import { getBatchInstruction, getTransferInstruction, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -12,6 +13,65 @@ const logger: InspectorLogger = {
     info: vi.fn(),
     warn: vi.fn(),
 };
+
+const SOURCE = 'So11111111111111111111111111111111111111112';
+const MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+const DESTINATION = 'HrTf9CzXR1dRH4Sof5QrpmGWwpwAf3qZzwCsEjQpXcSq';
+const AUTHORITY = '4ZtXhPXLy1wuLkF8muzPkmNqZ1wganC3VryfzK1aHtqa';
+
+// transferChecked's node shape, minus the docs — a real root so the engine's own account naming and
+// the decimals-bearing arguments are exercised, without depending on another package's fixtures.
+const TRANSFER_CHECKED_IDL = {
+    additionalPrograms: [],
+    kind: 'rootNode',
+    program: {
+        accounts: [],
+        definedTypes: [],
+        errors: [],
+        instructions: [
+            {
+                accounts: [
+                    { isSigner: false, isWritable: true, kind: 'instructionAccountNode', name: 'source' },
+                    { isSigner: false, isWritable: false, kind: 'instructionAccountNode', name: 'mint' },
+                    { isSigner: false, isWritable: true, kind: 'instructionAccountNode', name: 'destination' },
+                    { isSigner: 'either', isWritable: false, kind: 'instructionAccountNode', name: 'authority' },
+                ],
+                arguments: [
+                    {
+                        defaultValue: { kind: 'numberValueNode', number: 12 },
+                        defaultValueStrategy: 'omitted',
+                        kind: 'instructionArgumentNode',
+                        name: 'discriminator',
+                        type: { endian: 'le', format: 'u8', kind: 'numberTypeNode' },
+                    },
+                    {
+                        kind: 'instructionArgumentNode',
+                        name: 'amount',
+                        type: { endian: 'le', format: 'u64', kind: 'numberTypeNode' },
+                    },
+                    {
+                        kind: 'instructionArgumentNode',
+                        name: 'decimals',
+                        type: { endian: 'le', format: 'u8', kind: 'numberTypeNode' },
+                    },
+                ],
+                discriminators: [{ kind: 'fieldDiscriminatorNode', name: 'discriminator', offset: 0 }],
+                kind: 'instructionNode',
+                name: 'transferChecked',
+            },
+        ],
+        kind: 'programNode',
+        name: 'token',
+        pdas: [],
+        publicKey: TOKEN_PROGRAM_ADDRESS,
+        version: '1.0.0',
+    },
+    standard: 'codama',
+    version: '1.0.0',
+} as const;
+
+// discriminator 12 · amount 100_000 (u64 le) · decimals 6
+const TRANSFER_CHECKED_DATA = getBase58Decoder().decode(new Uint8Array([12, 0xa0, 0x86, 0x01, 0, 0, 0, 0, 0, 6]));
 
 function staticAccount(accountAddress: string, roles: { signer?: boolean; writable?: boolean } = {}): ResolvedAccount {
     return {
@@ -235,11 +295,11 @@ describe('decodeTransactionInstructions', () => {
     });
 
     it('should decode through a resolved IDL client before every other rung', async () => {
-        const SOURCE = 'So11111111111111111111111111111111111111112';
         const PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
         const accounts = [staticAccount(SOURCE, { signer: true, writable: true }), staticAccount(PROGRAM)];
         const idlClient = {
-            decodeInstructionData: vi.fn().mockReturnValue([undefined, { amount: 42n }]),
+            decodeInstruction: vi.fn().mockReturnValue({ decoded: { amount: 42n }, kind: 'anchor' }),
+            getDecodedData: vi.fn().mockReturnValue({ amount: 42n }),
             instructionName: vi.fn().mockReturnValue('buy'),
             programName: vi.fn().mockReturnValue('pump'),
         } as never;
@@ -263,8 +323,61 @@ describe('decodeTransactionInstructions', () => {
         });
     });
 
+    it('should name the IDL-declared accounts and derive the token ui amount', async () => {
+        const accounts = [
+            staticAccount(SOURCE, { writable: true }),
+            staticAccount(MINT),
+            staticAccount(DESTINATION, { writable: true }),
+            staticAccount(AUTHORITY, { signer: true }),
+            staticAccount(TOKEN_PROGRAM_ADDRESS),
+        ];
+        const resolveIdlClient = vi.fn().mockResolvedValue(createIdlClient(TRANSFER_CHECKED_IDL));
+
+        const entries = await decodeTransactionInstructions(
+            makeContext({
+                accountKeys: accounts.map(account => account.address),
+                instructions: [{ accounts: [0, 1, 2, 3], data: TRANSFER_CHECKED_DATA, programIdIndex: 4 }],
+                resolvedAccounts: accounts,
+            }),
+            { logger, resolveIdlClient },
+        );
+
+        expect(entries[0]).toMatchObject({
+            decoded: {
+                accounts: { authority: AUTHORITY, destination: DESTINATION, mint: MINT, source: SOURCE },
+                info: { amount: 100_000n, decimals: 6, discriminator: 12 },
+                ui_amount: '0.1',
+            },
+            source: 'idl',
+        });
+    });
+
+    it('should leave accounts past the IDL-declared list out of the named set', async () => {
+        const EXTRA_SIGNER = '5KVJxNFPBGhZQZDQ7GFMExFtMmRh8TAjXzD4Jqr6SKwZ';
+        const accounts = [
+            staticAccount(SOURCE, { writable: true }),
+            staticAccount(MINT),
+            staticAccount(DESTINATION, { writable: true }),
+            staticAccount(AUTHORITY),
+            staticAccount(EXTRA_SIGNER, { signer: true }),
+            staticAccount(TOKEN_PROGRAM_ADDRESS),
+        ];
+        const resolveIdlClient = vi.fn().mockResolvedValue(createIdlClient(TRANSFER_CHECKED_IDL));
+
+        const entries = await decodeTransactionInstructions(
+            makeContext({
+                accountKeys: accounts.map(account => account.address),
+                instructions: [{ accounts: [0, 1, 2, 3, 4], data: TRANSFER_CHECKED_DATA, programIdIndex: 5 }],
+                resolvedAccounts: accounts,
+            }),
+            { logger, resolveIdlClient },
+        );
+
+        expect(entries[0].accounts).toContain(EXTRA_SIGNER);
+        expect(Object.values(entries[0].decoded?.accounts ?? {})).not.toContain(EXTRA_SIGNER);
+    });
+
     it('should resolve each unique program once across outer and inner instructions', async () => {
-        const SOURCE = 'So11111111111111111111111111111111111111112';
         const PROGRAM_A = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
         const PROGRAM_B = 'Vote111111111111111111111111111111111111111';
         const accounts = [
@@ -293,15 +406,14 @@ describe('decodeTransactionInstructions', () => {
     });
 
     it('should fall past the IDL rung when the client cannot decode or lacks a name', async () => {
-        const SOURCE = 'So11111111111111111111111111111111111111112';
         const PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
         const accounts = [staticAccount(SOURCE, { signer: true, writable: true }), staticAccount(PROGRAM)];
-        const decodeError = { code: 'IDL_ERROR__INSTRUCTION_DECODE_FAILED' };
         const idlClient = {
-            decodeInstructionData: vi
+            decodeInstruction: vi
                 .fn()
-                .mockReturnValueOnce([decodeError, undefined])
-                .mockReturnValueOnce([undefined, { ok: true }]),
+                .mockReturnValueOnce({ errors: [], kind: 'unknown' })
+                .mockReturnValueOnce({ decoded: { ok: true }, kind: 'anchor' }),
+            getDecodedData: vi.fn().mockReturnValue({ ok: true }),
             instructionName: vi.fn().mockReturnValue(undefined),
             programName: vi.fn().mockReturnValue(undefined),
         } as never;
@@ -328,11 +440,10 @@ describe('decodeTransactionInstructions', () => {
     });
 
     it('should warn and continue when the IDL client throws', async () => {
-        const SOURCE = 'So11111111111111111111111111111111111111112';
         const PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
         const accounts = [staticAccount(SOURCE, { signer: true, writable: true }), staticAccount(PROGRAM)];
         const idlClient = {
-            decodeInstructionData: vi.fn().mockImplementation(() => {
+            decodeInstruction: vi.fn().mockImplementation(() => {
                 throw new Error('client exploded');
             }),
         } as never;

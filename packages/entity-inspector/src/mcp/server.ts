@@ -31,6 +31,7 @@ const buildInspectEntityDescription = (clusterNames: EnabledClusterNames) =>
         '- "unknown": Unrecognized account type. When the owner program publishes an IDL, the account data is decoded through it and returned as "decoded" (source "idl").',
         '',
         'TRANSACTIONS: 64-byte signatures return entity.kind "transaction" — slot, block time, fee, status, error, signers, accounts (v0 lookup-table addresses attributed via source/lookupTableAddress), and instructions with inner instructions. Instructions decode through a cascade: programs publishing an on-chain IDL carry "decoded" with source "idl"; token batch and host-app-supported programs decode with source "bundled"; the rest stay base58 with source "raw".',
+        '  An IDL decode also names the accounts the IDL declares — "decoded.accounts" maps each declared role to its address, while the instruction\'s own "accounts" list stays positional and complete (extra accounts, such as a multisig\'s signers, appear only there). Token-program decodes carrying their own "decimals" add "decoded.ui_amount": the amount in whole tokens.',
         '',
         'OUTPUT: Responses use { payload: { entity: { kind, ...fields } }, errors: [] }. Unresolvable fields return explicit unknown markers instead of being silently omitted.',
     ].join('\n');
