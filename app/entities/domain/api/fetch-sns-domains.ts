@@ -1,6 +1,6 @@
-import { getHashedName, getNameAccountKey } from '@bonfida/spl-name-service';
 import { array, is, record, string, unknown } from 'superstruct';
 
+import { getHashedName, getNameAccountKey } from '../lib/sns-name-service';
 import type { DomainInfo } from '../model/types';
 import { SOL_TLD_AUTHORITY } from './constants';
 
@@ -20,9 +20,8 @@ export async function fetchSnsDomains(address: string): Promise<DomainInfo[] | u
 
     return Promise.all(
         domainNames.map(async name => {
-            const hashedName = await getHashedName(name);
-            const nameAccountKey = await getNameAccountKey(hashedName, undefined, SOL_TLD_AUTHORITY);
-            return { address: nameAccountKey.toBase58(), name: `${name}.sol` };
+            const nameAccountKey = await getNameAccountKey(getHashedName(name), { nameParent: SOL_TLD_AUTHORITY });
+            return { address: nameAccountKey, name: `${name}.sol` };
         }),
     );
 }

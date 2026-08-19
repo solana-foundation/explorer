@@ -1,10 +1,9 @@
-import { getHashedName, getNameAccountKey, NameRegistryState } from '@bonfida/spl-name-service';
 import { getDomainKey as getANSDomainKey, NameRecordHeader } from '@onsol/tldparser';
-import { Connection } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
-import { deserializeUnchecked } from 'borsh';
 import { type Infer, nullable, string, type } from 'superstruct';
 
+import { decodeNameRegistryOwner, getHashedName, getNameAccountKey } from '../lib/sns-name-service';
 import { SOL_TLD_AUTHORITY } from './constants';
 
 export const ResolvedDomainInfoSchema = nullable(
@@ -30,13 +29,13 @@ export async function resolveDomain(
 }
 
 async function resolveSnsDomain(domain: string, connection: Connection): Promise<ResolvedDomainInfo> {
-    const hashedName = await getHashedName(domain.slice(0, -4)); // remove .sol
-    const nameKey = await getNameAccountKey(hashedName, undefined, SOL_TLD_AUTHORITY);
-    const accountInfo = await connection.getAccountInfo(nameKey);
+    const hashedName = getHashedName(domain.slice(0, -4)); // remove .sol
+    const nameKey = await getNameAccountKey(hashedName, { nameParent: SOL_TLD_AUTHORITY });
+    const accountInfo = await connection.getAccountInfo(new PublicKey(nameKey));
     if (accountInfo === null) return null;
 
-    const registry = deserializeUnchecked(NameRegistryState.schema, NameRegistryState, accountInfo.data);
-    return registry.owner ? { address: nameKey.toString(), owner: registry.owner.toString() } : null;
+    const owner = decodeNameRegistryOwner(accountInfo.data);
+    return owner ? { address: nameKey, owner } : null;
 }
 
 async function resolveAnsDomain(domainTld: string, connection: Connection): Promise<ResolvedDomainInfo> {

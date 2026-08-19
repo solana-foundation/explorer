@@ -1,16 +1,16 @@
 import { Account, FetchersContext, StateContext } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import { NATIVE_MINT } from '@solana/spl-token';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 
 import { useAccountQuery } from '../use-account-query';
 
-const TEST_ADDRESS = NATIVE_MINT.toBase58();
+const TEST_ADDRESS = NATIVE_MINT_ADDRESS;
 
 function makeAccount(pubkey: string): Account {
     return {

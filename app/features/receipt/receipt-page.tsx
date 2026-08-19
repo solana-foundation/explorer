@@ -8,7 +8,6 @@ import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
-import { NATIVE_MINT } from '@solana/spl-token';
 import { TransactionSignature } from '@solana/web3.js';
 import { Cluster, clusterName, ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
@@ -22,6 +21,7 @@ import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { Logger } from '@/app/shared/lib/logger';
 import { AutoRefresh, useAutoRefreshInterval, type WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
+import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 
 import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
@@ -162,7 +162,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     const tokenLink = useExplorerLink(receiptMint ? `/address/${receiptMint}` : '');
     const logoURI = receipt.logoURI ? getProxiedUri(receipt.logoURI) : undefined;
 
-    const priceResult = useTokenPrice(receiptMint ?? NATIVE_MINT.toBase58());
+    const priceResult = useTokenPrice(receiptMint ?? NATIVE_MINT_ADDRESS);
     const isPriceLoading = priceResult?.status === PriceStatus.Loading;
     const amount = getReceiptAmount(receipt);
     const usdValue = priceResult?.price != null ? formatUsdValue(amount, priceResult.price, USD_FALLBACK) : undefined;

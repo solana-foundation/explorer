@@ -1,6 +1,5 @@
-import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
-import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -67,7 +66,7 @@ describe('createKnownAccountsPrefillDependency', () => {
         dependency.onValueChange(instruction.name, form);
 
         expect(form.getValues('accounts.testInstruction.associatedTokenProgram')).toBe(
-            ASSOCIATED_TOKEN_PROGRAM_ID.toBase58(),
+            ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
         );
     });
 

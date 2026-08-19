@@ -1,7 +1,6 @@
 import { truncateAddress } from '@entities/address';
-import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
@@ -661,7 +660,7 @@ describe('createReceipt', () => {
             const ataAddress = Keypair.generate().publicKey;
             const owner = Keypair.generate().publicKey;
             const mint = Keypair.generate().publicKey;
-            const ataProgram = new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID.toBase58());
+            const ataProgram = new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 
             const tx = buildParsedTransaction({
                 accountKeys: [feePayer, recipient, ataAddress, owner, mint, ataProgram, SystemProgram.programId],
@@ -705,7 +704,7 @@ describe('createReceipt', () => {
             const receiverOwner = Keypair.generate().publicKey;
             const mint = Keypair.generate().publicKey;
             const tokenProgram = new PublicKey(TOKEN_PROGRAM_ADDRESS);
-            const ataProgram = new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID.toBase58());
+            const ataProgram = new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 
             const accountKeys = [
                 feePayer,

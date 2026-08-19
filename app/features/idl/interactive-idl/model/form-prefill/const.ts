@@ -1,5 +1,6 @@
-import { NATIVE_MINT } from '@solana/spl-token';
 import { PROGRAM_NAMES } from '@utils/programs';
+
+import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 
 import { generateNameVariations } from './providers/utils/generate-name-variations';
 
@@ -33,7 +34,7 @@ export const KNOWN_PROGRAM_PATTERNS: Partial<Record<PROGRAM_NAMES, readonly stri
 
 // Known addresses for non-program accounts (e.g., well-known mints)
 export const KNOWN_ACCOUNT_PATTERNS: Record<string, readonly string[]> = {
-    [NATIVE_MINT.toBase58()]: generateNameVariations(WSOL, [WSOL[1]]),
+    [NATIVE_MINT_ADDRESS]: generateNameVariations(WSOL, [WSOL[1]]),
 };
 
 // Collect all known patterns for exclusion checks

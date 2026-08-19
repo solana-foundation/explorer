@@ -6,7 +6,6 @@ import { useRefreshAccount } from '@entities/account';
 import { formatUsdValue, PriceStatus, useTokenPrice } from '@entities/token-price';
 import { AccountCard } from '@features/account';
 import type { Account } from '@providers/accounts';
-import { NATIVE_MINT } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { capitalizeFirstLetter, lamportsToSol } from '@utils/index';
@@ -14,6 +13,7 @@ import React from 'react';
 
 import { Skeleton } from '@/app/components/shared/ui/skeleton';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
+import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 import { Alert } from '@/app/shared/ui/Alert';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -54,7 +54,7 @@ export function StakeAccountSection({
 }) {
     // Price is only fetched on Mainnet Beta (the hook returns undefined elsewhere), so USD values
     // simply don't render on other clusters.
-    const priceResult = useTokenPrice(NATIVE_MINT.toBase58());
+    const priceResult = useTokenPrice(NATIVE_MINT_ADDRESS);
     const solPrice = priceResult?.status === PriceStatus.Success ? priceResult.price : null;
     // Fetched here, alongside the price, so `DelegationCard` stays presentational.
     const totalReward = useTotalReward(toKitAddress(account.pubkey));
