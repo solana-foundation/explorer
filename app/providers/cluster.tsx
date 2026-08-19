@@ -41,8 +41,11 @@ export {
     type ClusterState,
     clusterModalOpenAtom,
     customUrlEnabledAtom,
+    getRpc,
+    type SolanaRpc,
     StateContext,
     useCluster,
     useClusterInfo,
     useClusterModal,
+    useSolanaRpc,
 } from '@entities/cluster';

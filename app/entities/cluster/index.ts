@@ -1,3 +1,4 @@
+export { getRpc, type SolanaRpc } from './api/get-rpc';
 export { clusterSelection, type ClusterSelection } from './lib/cluster';
 export type { ClusterInfo } from './lib/types';
 export { type CustomUrlDecision, decideCustomUrl, isCustomUrlCarryable } from './lib/resolve-cluster';
@@ -17,6 +18,7 @@ export {
 } from './model/use-cluster-resource-search';
 export { pickClusterParams, useBuildClusterPath, useClusterPath } from './model/use-cluster-path';
 export { buildExplorerLink, useExplorerLink } from './model/use-explorer-link';
+export { useSolanaRpc } from './model/use-solana-rpc';
 export { AdjacentClusterLink } from './ui/AdjacentClusterLink';
 export { ExplorerLink } from './ui/ExplorerLink';
 export { SearchingClusterIndicator } from './ui/SearchingClusterIndicator';
