@@ -73,6 +73,43 @@ const TRANSFER_CHECKED_IDL = {
 // discriminator 12 · amount 100_000 (u64 le) · decimals 6
 const TRANSFER_CHECKED_DATA = getBase58Decoder().decode(new Uint8Array([12, 0xa0, 0x86, 0x01, 0, 0, 0, 0, 0, 6]));
 
+// Tokenkeg's published batch node, trimmed to the discriminator and a remainder-bytes payload: enough to
+// claim a 0xff instruction and flatten its sub-instructions away, which is what the rung order prevents.
+const BATCH_IDL = {
+    additionalPrograms: [],
+    kind: 'rootNode',
+    program: {
+        accounts: [],
+        definedTypes: [],
+        errors: [],
+        instructions: [
+            {
+                accounts: [],
+                arguments: [
+                    {
+                        defaultValue: { kind: 'numberValueNode', number: 255 },
+                        defaultValueStrategy: 'omitted',
+                        kind: 'instructionArgumentNode',
+                        name: 'discriminator',
+                        type: { endian: 'le', format: 'u8', kind: 'numberTypeNode' },
+                    },
+                    { kind: 'instructionArgumentNode', name: 'data', type: { kind: 'bytesTypeNode' } },
+                ],
+                discriminators: [{ kind: 'fieldDiscriminatorNode', name: 'discriminator', offset: 0 }],
+                kind: 'instructionNode',
+                name: 'batch',
+            },
+        ],
+        kind: 'programNode',
+        name: 'token',
+        pdas: [],
+        publicKey: TOKEN_PROGRAM_ADDRESS,
+        version: '1.0.0',
+    },
+    standard: 'codama',
+    version: '1.0.0',
+} as const;
+
 function staticAccount(accountAddress: string, roles: { signer?: boolean; writable?: boolean } = {}): ResolvedAccount {
     return {
         address: accountAddress,
@@ -110,6 +147,40 @@ function makeContext(overrides: Partial<TransactionPayloadContext> = {}): Transa
         version: 'legacy',
         ...overrides,
     } as TransactionPayloadContext;
+}
+
+// A single batched Transfer of 7, wired as the transaction's only instruction.
+function makeBatchContext() {
+    const transfer = getTransferInstruction({
+        amount: 7n,
+        authority: address('SysvarC1ock11111111111111111111111111111111'),
+        destination: address('SysvarRent111111111111111111111111111111111'),
+        source: address(SOURCE),
+    });
+    const batch = getBatchInstruction([transfer]);
+    const accounts = [
+        ...(batch.accounts ?? []).map(meta => ({
+            address: meta.address,
+            signer: isSignerRole(meta.role),
+            source: 'static' as const,
+            writable: isWritableRole(meta.role),
+        })),
+        staticAccount(TOKEN_PROGRAM_ADDRESS),
+    ];
+    return {
+        context: makeContext({
+            accountKeys: accounts.map(account => account.address),
+            instructions: [
+                {
+                    accounts: accounts.slice(0, -1).map((_, index) => index),
+                    data: getBase58Decoder().decode(batch.data),
+                    programIdIndex: accounts.length - 1,
+                },
+            ],
+            resolvedAccounts: accounts,
+        }),
+        kitInstruction: { ...batch, data: new Uint8Array(batch.data) },
+    };
 }
 
 describe('decodeTransactionInstructions', () => {
@@ -250,38 +321,12 @@ describe('decodeTransactionInstructions', () => {
     });
 
     it('should decode token batch instructions in-package before consulting the fallback', async () => {
-        const transfer = getTransferInstruction({
-            amount: 7n,
-            authority: address('SysvarC1ock11111111111111111111111111111111'),
-            destination: address('SysvarRent111111111111111111111111111111111'),
-            source: address('So11111111111111111111111111111111111111112'),
-        });
-        const batch = getBatchInstruction([transfer]);
-        const accounts = [
-            ...(batch.accounts ?? []).map(meta => ({
-                address: meta.address,
-                signer: isSignerRole(meta.role),
-                source: 'static' as const,
-                writable: isWritableRole(meta.role),
-            })),
-            staticAccount(TOKEN_PROGRAM_ADDRESS),
-        ];
         const decodeInstructionFallback = vi.fn();
 
-        const entries = await decodeTransactionInstructions(
-            makeContext({
-                accountKeys: accounts.map(account => account.address),
-                instructions: [
-                    {
-                        accounts: accounts.slice(0, -1).map((_, index) => index),
-                        data: getBase58Decoder().decode(batch.data),
-                        programIdIndex: accounts.length - 1,
-                    },
-                ],
-                resolvedAccounts: accounts,
-            }),
-            { decodeInstructionFallback, logger },
-        );
+        const entries = await decodeTransactionInstructions(makeBatchContext().context, {
+            decodeInstructionFallback,
+            logger,
+        });
 
         expect(decodeInstructionFallback).not.toHaveBeenCalled();
         expect(entries[0]).toMatchObject({
@@ -294,7 +339,30 @@ describe('decodeTransactionInstructions', () => {
         });
     });
 
-    it('should decode through a resolved IDL client before every other rung', async () => {
+    it('should keep the batch sub-instruction expansion when the program publishes a batch-declaring IDL', async () => {
+        const { context } = makeBatchContext();
+        const resolveIdlClient = vi.fn().mockResolvedValue(createIdlClient(BATCH_IDL));
+
+        const entries = await decodeTransactionInstructions(context, { logger, resolveIdlClient });
+
+        expect(entries[0]).toMatchObject({
+            decoded: {
+                info: { instructions: [{ data: { amount: 7n, discriminator: 3 }, type: 'Transfer' }] },
+                program: 'spl-token',
+                type: 'batch',
+            },
+            source: 'bundled',
+        });
+    });
+
+    it('should confirm the batch-declaring IDL claims the instruction when consulted directly', () => {
+        const { kitInstruction } = makeBatchContext();
+
+        // Guards the rung-order test above from passing vacuously if the fixture stops matching 0xff.
+        expect(createIdlClient(BATCH_IDL).decodeInstruction(kitInstruction).kind).toBe('codama');
+    });
+
+    it('should decode through a resolved IDL client before the bundled rungs', async () => {
         const PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
         const accounts = [staticAccount(SOURCE, { signer: true, writable: true }), staticAccount(PROGRAM)];
         const idlClient = {

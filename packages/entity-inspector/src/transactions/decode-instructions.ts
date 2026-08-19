@@ -1,4 +1,4 @@
-// The per-instruction decode cascade: on-chain IDL → in-package token batch → bundled
+// The per-instruction decode cascade: in-package token batch → on-chain IDL → bundled
 // @explorer/parsers decoders → injected host-app fallback → raw, with source attribution.
 import { type IdlClient, IdlStandard } from '@explorer/idl-decode';
 
@@ -68,6 +68,20 @@ function runDecodeCascade(
     dependencies: DecodeInstructionsDependencies,
     idlClients: ReadonlyMap<string, IdlClient>,
 ): DecodeOutcome {
+    // Ahead of the IDL rung: Tokenkeg's published IDL declares batch as one opaque `data` blob, so an
+    // IDL-first order would drop the sub-instruction expansion. Self-gating — non-batch returns undefined.
+    try {
+        const batchDecoded = decodeTokenBatchInstruction(instruction);
+        if (batchDecoded) {
+            return { decoded: batchDecoded, source: 'bundled' };
+        }
+    } catch (error) {
+        dependencies.logger.warn(ns('token batch instruction decode failed'), {
+            error,
+            programId: instruction.programId,
+        });
+    }
+
     const idlClient = idlClients.get(instruction.programId);
     if (idlClient) {
         try {
@@ -81,18 +95,6 @@ function runDecodeCascade(
                 programId: instruction.programId,
             });
         }
-    }
-
-    try {
-        const batchDecoded = decodeTokenBatchInstruction(instruction);
-        if (batchDecoded) {
-            return { decoded: batchDecoded, source: 'bundled' };
-        }
-    } catch (error) {
-        dependencies.logger.warn(ns('token batch instruction decode failed'), {
-            error,
-            programId: instruction.programId,
-        });
     }
 
     try {
