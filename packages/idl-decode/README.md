@@ -394,8 +394,14 @@ programs cannot have one, and some RPCs answer a transient error for the derived
 `authority` pins the PMP lookup to a single one (`null` for canonical only) instead of canonical →
 fallback.
 
-`fetchOnChainIdlClient` is the same resolution with the publication attributed — `source`, plus the PMP
-`authority` that served it — instead of just the client. Any other source (a registry, a cache, an
+`buffer` reads **one named account** instead of deriving anything — a PMP or Anchor IDL staged but not
+committed (`anchor idl write-buffer`, PMP `write` before `setData`), or the committed account itself. The
+owner decides which layout is read, so either family needs a single lookup; `anchor` and `authority` are
+rejected alongside it, having nothing to steer. A buffer whose bytes do not decode reports the
+publication it was framed as (`anchor idl data`), not that a buffer was read.
+
+`fetchOnChainIdlClient` is the same resolution with the publication attributed — `source`, the account
+`address` that served it, plus the PMP `authority` — instead of just the client. Any other source (a registry, a cache, an
 anchor-provider wrap) plugs into `fetchIdlClient` through the `fetcher` option: an `IdlFetcher` resolves
 the raw IDL JSON, `undefined` when the program has none, and throws only on transport failure or abort.
 With a `fetcher` the `rpc` requirement drops, and no publication is attributed. The on-chain resolution
