@@ -11,6 +11,7 @@ import {
 } from '@components/shared/ui/dialog';
 import type { RpcEndpoint } from '@entities/cluster';
 import { Alert } from '@shared/ui/Alert';
+import { useRef } from 'react';
 
 // Two things share this dialog: a link supplying an endpoint nobody has agreed to, and the developer
 // toggle that stops asking altogether.
@@ -28,6 +29,10 @@ type Props = {
 };
 
 export function CustomUrlConsentDialog({ request, onConfirm, onCancel }: Props) {
+    // What the dialog shows, which outlives what it is asking: the same `undefined` that closes it would
+    // otherwise blank the body, and the content stays on screen for the whole exit animation.
+    const shown = useRetainedRequest(request);
+
     // Anything that closes the dialog — Escape, the X, Cancel — is a decline: the safe outcome has to be
     // the default one. A click outside closes nothing, though: this asks a security question, and a stray
     // click on the backdrop is not an answer to it.
@@ -38,11 +43,13 @@ export function CustomUrlConsentDialog({ request, onConfirm, onCancel }: Props) 
                 zIndex={CONSENT_Z_INDEX}
                 onInteractOutside={event => event.preventDefault()}
             >
-                {request?.kind === 'endpoint' ? (
-                    <EndpointConsent endpoint={request.endpoint} onConfirm={onConfirm} onCancel={onCancel} />
-                ) : (
+                {/* Per kind, never a two-way ternary: the request the dialog closed on is `undefined`, and an
+                    `else` branch would answer one question with the other one's copy. */}
+                {shown?.kind === 'endpoint' ? (
+                    <EndpointConsent endpoint={shown.endpoint} onConfirm={onConfirm} onCancel={onCancel} />
+                ) : shown?.kind === 'developer-bypass' ? (
                     <BypassConsent onConfirm={onConfirm} onCancel={onCancel} />
-                )}
+                ) : undefined}
             </DialogContent>
         </Dialog>
     );
@@ -119,4 +126,13 @@ function BypassConsent({ onConfirm, onCancel }: Pick<Props, 'onCancel' | 'onConf
             </DialogFooter>
         </>
     );
+}
+
+// Radix keeps the content mounted until the exit animation ends (`duration-200` on `DialogContent`), so the
+// request has to outlive the prop that cleared it. Retaining it also keeps the endpoint's host on screen
+// while the box fades, rather than collapsing it onto nothing.
+function useRetainedRequest(request: ConsentRequest | undefined) {
+    const retained = useRef(request);
+    if (request !== undefined) retained.current = request;
+    return retained.current;
 }
