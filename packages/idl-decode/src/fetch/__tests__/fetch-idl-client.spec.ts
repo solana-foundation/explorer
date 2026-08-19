@@ -445,7 +445,7 @@ describe('on-chain resolution', () => {
             const [error, client] = await fetchIdlClient(program, { rpc });
 
             expect(client).toBeUndefined();
-            // @solana/idl reports every non-SolanaError as corrupt bytes, so a url payload blip is not retryable here
+            // the url payload rides upstream's global fetch, not the rpc this package tags — the one blip left unretryable
             expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
         } finally {
             vi.unstubAllGlobals();
@@ -660,15 +660,17 @@ describe('fetchOnChainIdlClient', () => {
         expect(error?.cause).toBe(cause);
     });
 
-    it('should surface a non-SolanaError rpc failure as the typed parse error', async () => {
-        // @solana/idl treats anything that is not a SolanaError as undecodable bytes, not a transport blip
+    it('should surface a non-SolanaError rpc failure as the typed fetch error with its cause', async () => {
+        // @solana/idl reads any non-SolanaError throw as undecodable bytes; an unreachable rpc must stay retryable
+        const cause = new Error('rpc exploded');
         const [error] = await fetchOnChainIdlClient(gen.systemProgram, {
             rpc: mockRpc({}, () => {
-                throw new Error('rpc exploded');
+                throw cause;
             }),
         });
 
-        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
+        expect(error?.cause).toBe(cause);
     });
 
     it('should reject an IDL declaring a different program address', async () => {
