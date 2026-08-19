@@ -120,7 +120,7 @@ function StakingComponent() {
     const circulatingPercentage = percentage(supply.circulating, supply.total, 2).toFixed(1);
 
     let delinquentStakePercentage;
-    if (delinquentStake && activeStake) {
+    if (delinquentStake !== undefined && activeStake !== undefined) {
         delinquentStakePercentage = percentage(delinquentStake, activeStake, 2).toFixed(1);
     }
 
@@ -144,7 +144,7 @@ function StakingComponent() {
                 <Card ui="dashkit" className="mb-3 md:mb-6">
                     <CardBody ui="dashkit">
                         <h4>Active Stake</h4>
-                        {activeStake ? (
+                        {activeStake !== undefined ? (
                             <h1 className="mb-3">
                                 <em className="not-italic text-dark-accent">{displayLamports(activeStake)}</em> /{' '}
                                 <small className="text-base">{displayLamports(supply.total)}</small>
