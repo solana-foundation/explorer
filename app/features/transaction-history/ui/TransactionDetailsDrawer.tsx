@@ -148,7 +148,7 @@ export function TransactionDetailsDrawer({
                 </DrawerRow>
                 {/* No separate "Size (bytes)" label — the raw-data field carries its own "Size"
                     caption before the byte count. Full-width stacked row. */}
-                <div className="flex flex-col gap-2 border-0 border-b border-solid border-dark-border pb-1 pt-2">
+                <div className="flex flex-col gap-2 pb-1 pt-2">
                     <div className="min-w-0 text-white">
                         <RawDataField
                             data={transactionData}

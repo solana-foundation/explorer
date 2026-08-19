@@ -10,7 +10,6 @@ import { DrawerHeader } from './DrawerHeader';
 import { useEdgeFades } from './model/useEdgeFades';
 import { useSwipeToDismiss } from './model/useSwipeToDismiss';
 
-
 export type DrawerProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -42,7 +41,11 @@ export function Drawer({
     ...props
 }: DrawerProps) {
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
-    const { dragY, dragging, handleProps, bodyProps } = useSwipeToDismiss(scrollRef, () => onOpenChange(false));
+    const { dragY, dragging, closing, handleProps, bodyProps, onTransitionEnd } = useSwipeToDismiss(
+        scrollRef,
+        open,
+        () => onOpenChange(false),
+    );
     const { contentRef, maskImage, onScroll } = useEdgeFades(scrollRef, open);
 
     return (
@@ -55,7 +58,11 @@ export function Drawer({
                     className={cn(
                         'fixed inset-x-0 bottom-0 top-auto flex max-h-[85vh] w-full max-w-none flex-col',
                         'rounded-b-none rounded-t-2xl border-0 border-t border-solid border-dark-border bg-heavy-metal-900',
-                        'data-[state=closed]:animate-tx-drawer-out data-[state=open]:animate-tx-drawer-in',
+                        'data-[state=open]:animate-tx-drawer-in',
+                        // Suppress the out-keyframe during a swipe-close: the transform below slides the
+                        // sheet out from its drag offset, so the keyframe (which restarts from the open
+                        // position) would otherwise snap it back up first.
+                        !closing && 'data-[state=closed]:animate-tx-drawer-out',
                         className,
                     )}
                     style={{
@@ -63,6 +70,7 @@ export function Drawer({
                         transition: dragging ? 'none' : 'transform 0.2s ease-out',
                         zIndex: 1201,
                     }}
+                    onTransitionEnd={onTransitionEnd}
                     {...props}
                 >
                     {/* Grab handle: pinned to the top, never scrolls. The whole 28px zone is the grab area. */}
@@ -91,4 +99,3 @@ export function Drawer({
 
 Drawer.Footer = DrawerFooter;
 Drawer.Header = DrawerHeader;
-
