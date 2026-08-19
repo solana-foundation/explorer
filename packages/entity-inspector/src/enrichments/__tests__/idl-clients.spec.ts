@@ -82,13 +82,30 @@ describe('createIdlClientResolver', () => {
         );
     });
 
-    it('should resolve null on data errors without warning', async () => {
+    it('should resolve null without warning when no IDL is published', async () => {
         const logger = createLoggerMock();
         fetchOnChainIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_NOT_FOUND), undefined]);
         const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
 
         await expect(resolve('program-address', 'mainnet-beta')).resolves.toBeNull();
         expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ['a mislabeled IDL', IDL_ERROR__IDL_ADDRESS_MISMATCH],
+        ['corrupt IDL bytes', IDL_ERROR__IDL_PARSE_FAILED],
+        ['an unreachable source', IDL_ERROR__IDL_FETCH_FAILED],
+    ])('should resolve null and warn with the error on %s', async (_case, code) => {
+        const logger = createLoggerMock();
+        const error = idlError(code);
+        fetchOnChainIdlClientMock.mockResolvedValue([error, undefined]);
+        const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
+
+        await expect(resolve('program-address', 'mainnet-beta')).resolves.toBeNull();
+        expect(logger.warn).toHaveBeenCalledWith(
+            '[entity-inspector] idl client resolution failed',
+            expect.objectContaining({ error, programAddress: 'program-address' }),
+        );
     });
 
     it('should resolve null and warn when the fetch rejects', async () => {

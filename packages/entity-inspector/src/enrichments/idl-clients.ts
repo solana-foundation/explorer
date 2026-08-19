@@ -102,6 +102,11 @@ export function createIdlClientResolver(
         }
         if ('rejected' in outcome) {
             logger.warn(ns('idl client resolution timed out'), { cluster, programAddress });
+            return null;
+        }
+        // the cascade falls back to raw decoding either way, so only "no IDL published" is unremarkable
+        if (outcome.error.code !== IDL_ERROR__IDL_NOT_FOUND) {
+            logger.warn(ns('idl client resolution failed'), { cluster, error: outcome.error, programAddress });
         }
         return null;
     };
