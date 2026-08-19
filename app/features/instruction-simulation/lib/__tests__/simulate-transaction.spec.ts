@@ -390,18 +390,27 @@ describe('v1 transactions', () => {
     });
 
     describe('MaxLoadedAccountsDataSizeExceeded', () => {
-        // The fee payer is empty, the recipient does not exist, and the program holds 74,800 bytes:
-        // the runtime loads 74,800 + 64 for each of the two accounts that exist.
         const OWNER = new PublicKey(SYSTEM_PROGRAM_ADDRESS);
+        const UPGRADEABLE_LOADER = new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111');
+        const PROGRAM_DATA_KEY = Keypair.generate().publicKey;
+
+        // The fee payer is empty, the recipient does not exist, and the program holds 74,800 bytes:
+        // the runtime loads 74,800 bytes of data and charges 64 bytes for each of the two accounts.
         const PARSED_ACCOUNTS = [
             { data: Buffer.alloc(0), owner: OWNER },
             undefined,
             { data: { parsed: {}, program: 'memo', space: 74_800 }, owner: OWNER },
         ];
 
-        function connectionRejectingForSize(): Connection {
+        function connectionRejectingForSize(
+            accounts: unknown[] = PARSED_ACCOUNTS,
+            programData: unknown[] = [],
+        ): Connection {
             return connectionWithFeature(true, {
-                getMultipleParsedAccounts: vi.fn().mockResolvedValue({ value: PARSED_ACCOUNTS }),
+                getMultipleParsedAccounts: vi
+                    .fn()
+                    .mockResolvedValueOnce({ value: accounts })
+                    .mockResolvedValue({ value: programData }),
                 simulateTransaction: vi
                     .fn()
                     .mockResolvedValue(
@@ -417,8 +426,27 @@ describe('v1 transactions', () => {
 
             expect(result.error).toContain('this transaction loads 74,928 bytes');
             expect(result.error).toContain('74,800 bytes of account data');
-            expect(result.error).toContain('64 bytes of metadata for each of the 2 accounts that exist on chain');
+            expect(result.error).toContain('64 bytes of metadata for each of the 2 accounts it loads');
             expect(result.error).toContain('above the 74,900 byte limit set in the v1 message config');
+        });
+
+        it('should count the program data account of an upgradeable program', async () => {
+            const programAccount = {
+                data: { parsed: { info: { programData: PROGRAM_DATA_KEY.toBase58() } }, program: 'x', space: 36 },
+                owner: UPGRADEABLE_LOADER,
+            };
+            // The first lookup returns the message's accounts, the second the program data account
+            // behind the upgradeable program, which the message never lists
+            const connection = connectionRejectingForSize(
+                [{ data: Buffer.alloc(0), owner: OWNER }, programAccount],
+                [{ data: { parsed: {}, program: 'x', space: 500_000 }, owner: UPGRADEABLE_LOADER }],
+            );
+
+            const result = await simulate(connection, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
+
+            // 500,036 bytes of data across three accounts, each charged 64 bytes of metadata
+            expect(result.error).toContain('this transaction loads 500,228 bytes');
+            expect(result.error).toContain('for each of the 3 accounts it loads');
         });
 
         it('should name the unset limit as zero when the message sets none', async () => {
@@ -426,6 +454,20 @@ describe('v1 transactions', () => {
 
             expect(result.error).toContain('this transaction loads 74,928 bytes');
             expect(result.error).toContain('sets no loaded accounts data size limit');
+        });
+
+        it('should surface the raw error when the program data lookup fails', async () => {
+            const connection = connectionRejectingForSize([
+                {
+                    data: { parsed: { info: { programData: PROGRAM_DATA_KEY.toBase58() } }, program: 'x', space: 36 },
+                    owner: UPGRADEABLE_LOADER,
+                },
+            ]);
+            vi.mocked(connection.getMultipleParsedAccounts).mockRejectedValueOnce(new Error('rpc down'));
+
+            const result = await simulate(connection, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
+
+            expect(result.error).toBe('MaxLoadedAccountsDataSizeExceeded');
         });
 
         it('should surface the raw error for a non-v1 message', async () => {

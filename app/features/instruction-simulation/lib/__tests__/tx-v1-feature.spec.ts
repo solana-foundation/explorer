@@ -5,7 +5,6 @@ import { ENABLE_TX_V1_FEATURE, isTxV1Active } from '../tx-v1-feature';
 
 function connectionReturning(data: Uint8Array | null): Connection {
     return {
-         
         getAccountInfo: vi.fn().mockResolvedValue(data === null ? null : { data: Buffer.from(data) }),
     } as unknown as Connection;
 }
@@ -22,7 +21,6 @@ describe('isTxV1Active', () => {
     });
 
     it('should report inactive when the feature account does not exist', async () => {
-         
         await expect(isTxV1Active(connectionReturning(null))).resolves.toBe(false);
     });
 
