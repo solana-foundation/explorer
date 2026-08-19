@@ -52,7 +52,12 @@ function decodeWithIdlClient(instruction: FallbackInstruction, client: IdlClient
     }
     const info = client.getDecodedData(decode);
     const program = client.programName();
-    const named = decode.kind === IdlStandard.Codama ? toNamedAccounts(decode.decoded.accounts) : undefined;
+    // Gated on a non-empty list: an IDL naming no accounts (every ComputeBudget instruction) would
+    // otherwise ship an empty map on nearly every transaction, saying nothing that absence does not.
+    const named =
+        decode.kind === IdlStandard.Codama && decode.decoded.accounts.length > 0
+            ? toNamedAccounts(decode.decoded.accounts)
+            : undefined;
     const uiAmount = toTokenUiAmount(instruction.programId, info);
     return {
         info,

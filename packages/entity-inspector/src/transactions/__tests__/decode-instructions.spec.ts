@@ -18,6 +18,7 @@ const SOURCE = 'So11111111111111111111111111111111111111112';
 const MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 const DESTINATION = 'HrTf9CzXR1dRH4Sof5QrpmGWwpwAf3qZzwCsEjQpXcSq';
 const AUTHORITY = '4ZtXhPXLy1wuLkF8muzPkmNqZ1wganC3VryfzK1aHtqa';
+const COMPUTE_BUDGET_PROGRAM = 'ComputeBudget111111111111111111111111111111';
 
 // transferChecked's node shape, minus the docs — a real root so the engine's own account naming and
 // the decimals-bearing arguments are exercised, without depending on another package's fixtures.
@@ -109,6 +110,49 @@ const BATCH_IDL = {
     standard: 'codama',
     version: '1.0.0',
 } as const;
+
+// setComputeUnitLimit's node shape — a real instruction that declares no accounts at all.
+const SET_COMPUTE_UNIT_LIMIT_IDL = {
+    additionalPrograms: [],
+    kind: 'rootNode',
+    program: {
+        accounts: [],
+        definedTypes: [],
+        errors: [],
+        instructions: [
+            {
+                accounts: [],
+                arguments: [
+                    {
+                        defaultValue: { kind: 'numberValueNode', number: 2 },
+                        defaultValueStrategy: 'omitted',
+                        kind: 'instructionArgumentNode',
+                        name: 'discriminator',
+                        type: { endian: 'le', format: 'u8', kind: 'numberTypeNode' },
+                    },
+                    {
+                        kind: 'instructionArgumentNode',
+                        name: 'units',
+                        type: { endian: 'le', format: 'u32', kind: 'numberTypeNode' },
+                    },
+                ],
+                discriminators: [{ kind: 'fieldDiscriminatorNode', name: 'discriminator', offset: 0 }],
+                kind: 'instructionNode',
+                name: 'setComputeUnitLimit',
+            },
+        ],
+        kind: 'programNode',
+        name: 'computeBudget',
+        pdas: [],
+        publicKey: COMPUTE_BUDGET_PROGRAM,
+        version: '1.0.0',
+    },
+    standard: 'codama',
+    version: '1.0.0',
+} as const;
+
+// discriminator 2 · units 200_000 (u32 le)
+const SET_COMPUTE_UNIT_LIMIT_DATA = getBase58Decoder().decode(new Uint8Array([2, 0x40, 0x0d, 0x03, 0x00]));
 
 function staticAccount(accountAddress: string, roles: { signer?: boolean; writable?: boolean } = {}): ResolvedAccount {
     return {
@@ -443,6 +487,26 @@ describe('decodeTransactionInstructions', () => {
 
         expect(entries[0].accounts).toContain(EXTRA_SIGNER);
         expect(Object.values(entries[0].decoded?.accounts ?? {})).not.toContain(EXTRA_SIGNER);
+    });
+
+    it('should omit decoded accounts entirely when the IDL declares none', async () => {
+        const accounts = [
+            staticAccount(AUTHORITY, { signer: true, writable: true }),
+            staticAccount(COMPUTE_BUDGET_PROGRAM),
+        ];
+        const resolveIdlClient = vi.fn().mockResolvedValue(createIdlClient(SET_COMPUTE_UNIT_LIMIT_IDL));
+
+        const entries = await decodeTransactionInstructions(
+            makeContext({
+                accountKeys: accounts.map(account => account.address),
+                instructions: [{ accounts: [], data: SET_COMPUTE_UNIT_LIMIT_DATA, programIdIndex: 1 }],
+                resolvedAccounts: accounts,
+            }),
+            { logger, resolveIdlClient },
+        );
+
+        expect(entries[0]).toMatchObject({ decoded: { info: { units: 200_000 } }, source: 'idl' });
+        expect(entries[0].decoded).not.toHaveProperty('accounts');
     });
 
     it('should resolve each unique program once across outer and inner instructions', async () => {
