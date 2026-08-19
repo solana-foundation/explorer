@@ -39,21 +39,42 @@ export type BaseTransactionHistoryCardProps = {
     renderRow: (row: TransactionHistoryRowView, hasTimestamps: boolean) => ReactNode;
 };
 
-// Table styling + the mobile table→card transformation, expressed as scoped arbitrary variants on
-// the card wrapper (replaces the former transaction-history.css). Desktop: top-aligned cells, a
-// 12px uppercase caption header. Mobile (< md): the thead is hidden and each row collapses into its
-// own bordered, rounded, tappable card (which opens the details drawer).
+// Table styling + the table→card transformation, expressed as scoped arbitrary variants on the card
+// wrapper (replaces the former transaction-history.css). Mobile-first: the base (unprefixed) classes
+// build the MOBILE card layout — the thead is hidden and each row collapses into its own bordered,
+// rounded, tappable card (which opens the details drawer). Only the first cell renders — it carries
+// the full labelled card (Signature/Time/Block/Programs — see TransactionRow); the Time/Block/Size
+// cells are hidden because their data is re-shown, captioned, inside that card. The `lg:` classes
+// then REVERT everything back to a normal table on desktop (>= lg).
+//
+// NB: intentionally NOT `max-lg:` — this project overrides Tailwind's `screens` (tailwind.config.ts),
+// which disables the auto-generated `max-*` variants, so a max-width approach silently compiles to
+// nothing. Mobile-first base + `lg:` reverts is the reliable pattern here.
 const TABLE_CLASSES = cn(
-    // Desktop table
+    // Shared by both layouts: top-aligned cells, comfortable line-height, 12px uppercase header.
     '[&_tbody_td]:align-top [&_tbody_td]:leading-6 [&_thead_th]:!text-xs',
-    // Mobile (< md): stack rows into cards. `lt-md` is a true max-width screen (see tailwind.config).
-    'lt-md:overflow-x-clip lt-md:[&_.overflow-x-auto]:overflow-x-clip',
-    'lt-md:[&_thead]:hidden lt-md:[&_table]:block lt-md:[&_tbody]:block lt-md:[&_tr]:block',
-    // !w-auto overrides the desktop `w-px` (shrink-to-content) on the Time/Block/Size cells —
-    // once they're display:block, width:1px would collapse them and break their text per-character.
-    'lt-md:[&_tbody_td]:block lt-md:[&_tbody_td]:!w-auto lt-md:[&_tbody_td]:whitespace-normal lt-md:[&_tbody_td]:!border-0 lt-md:[&_tbody_td]:!px-0 lt-md:[&_tbody_td]:!py-0.5',
-    'lt-md:[&_tbody_tr]:mb-2 lt-md:[&_tbody_tr]:cursor-pointer lt-md:[&_tbody_tr]:rounded-lg lt-md:[&_tbody_tr]:border lt-md:[&_tbody_tr]:border-solid lt-md:[&_tbody_tr]:border-outer-space-800 lt-md:[&_tbody_tr]:bg-[#1e2423] lt-md:[&_tbody_tr]:px-3 lt-md:[&_tbody_tr]:py-2',
-    'lt-md:[&_tbody_tr:last-child]:mb-0',
+
+    // ── Mobile (base): table → stack of cards.
+    'overflow-x-clip [&_.overflow-x-auto]:overflow-x-clip',
+    '[&_thead]:hidden [&_table]:block [&_tbody]:block [&_tr]:block',
+    // Strip every cell's border — the row card owns the frame.
+    '[&_tbody_td]:!border-0',
+    // First cell becomes the full-width card body: fill the card (!w-auto), drop its padding (!p-0), wrap text.
+    '[&_tbody_td:first-child]:block [&_tbody_td:first-child]:!w-auto [&_tbody_td:first-child]:whitespace-normal [&_tbody_td:first-child]:!p-0',
+    '[&_tbody_td:not(:first-child)]:hidden',
+    '[&_tbody_tr]:mb-2 [&_tbody_tr]:cursor-pointer [&_tbody_tr]:rounded-lg [&_tbody_tr]:border [&_tbody_tr]:border-solid [&_tbody_tr]:border-outer-space-800 [&_tbody_tr]:bg-[#1e2423] [&_tbody_tr]:px-3 [&_tbody_tr]:py-2',
+    '[&_tbody_tr:last-child]:mb-0',
+
+    // ── Desktop (lg+): revert the card transformation back to a normal table.
+    'lg:overflow-x-visible lg:[&_.overflow-x-auto]:overflow-x-auto',
+    'lg:[&_thead]:table-header-group lg:[&_table]:table lg:[&_tbody]:table-row-group lg:[&_tr]:table-row',
+    // Restore the cell top-border (BaseTable's border-style/color survive — !border-0 only zeroed the width).
+    'lg:[&_tbody_td]:!border-t',
+    // First cell back to a normal table cell with BaseTable's subtle padding (px-3 py-2.5).
+    'lg:[&_tbody_td:first-child]:table-cell lg:[&_tbody_td:first-child]:whitespace-nowrap lg:[&_tbody_td:first-child]:!px-3 lg:[&_tbody_td:first-child]:!py-2.5',
+    'lg:[&_tbody_td:not(:first-child)]:table-cell',
+    // Undo the row-card chrome (padding on a table-row is ignored, so no need to reset px/py).
+    'lg:[&_tbody_tr]:mb-0 lg:[&_tbody_tr]:cursor-auto lg:[&_tbody_tr]:rounded-none lg:[&_tbody_tr]:border-0 lg:[&_tbody_tr]:bg-transparent',
 );
 
 export function BaseTransactionHistoryCard({
@@ -86,8 +107,13 @@ export function BaseTransactionHistoryCard({
             {headerSubRow && <div className="mb-3 flex flex-wrap gap-2">{headerSubRow}</div>}
 
             {/* On mobile each row becomes its own bordered card, so strip the outer Card's
-                border/background/shadow to avoid a doubled border around the row cards. */}
-            <Card ui="dashkit" marginBottom="none" className="lt-md:!border-0 lt-md:!bg-transparent lt-md:!shadow-none">
+                border/background/shadow (base) to avoid a doubled border around the row cards, then
+                restore dashkit's card chrome on desktop (>= lg) where it wraps the real table. */}
+            <Card
+                ui="dashkit"
+                marginBottom="none"
+                className="!border-0 !bg-transparent !shadow-none lg:!border lg:!bg-dk-gray-800-dark lg:!shadow-dk-card"
+            >
                 <BaseTable ui="dashkit" variant="card" head="subtle" body="subtle" nowrap>
                     {!isEmpty && (
                         <BaseTable.Head>
@@ -107,9 +133,11 @@ export function BaseTransactionHistoryCard({
                 </BaseTable>
                 <div
                     className={cn(
-                        // Divider above the footer, dropped on mobile where there's no outer card frame.
-                        'border-0 border-t border-solid border-dark-border p-3 lt-md:border-t-0 lt-md:px-0',
-                        isEmpty && 'border-t-0 py-12',
+                        // Mobile: no outer card frame, so no top divider and no horizontal padding.
+                        // Desktop: the footer sits inside the card, so add the top divider + padding.
+                        'border-0 border-solid border-dark-border px-0 py-3 lg:px-3',
+                        !isEmpty && 'lg:border-t',
+                        isEmpty && 'py-12',
                     )}
                 >
                     {foundOldest ? (

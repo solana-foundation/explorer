@@ -232,10 +232,6 @@ const config: Config = {
         screens: {
             'max-sm': getScreenDim('sm', -1),
             'max-md': getScreenDim('md', -1),
-            // True max-width (< md) breakpoint. NOTE: `max-sm`/`max-md` above are min-width screens
-            // despite their names (a bare string value is a min-width in Tailwind); `lt-md` uses the
-            // object `{ max }` form so `lt-md:` actually emits `@media (max-width: …)`.
-            'lt-md': { max: getScreenDim('md', -1) },
             xxs: getScreenDim('xxs'),
             xs: getScreenDim('xs'),
             sm: getScreenDim('sm'),

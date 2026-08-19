@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AccountDetailSlideover } from '../AccountDetailSlideover';
+import { AccountDetailDrawer } from '../AccountDetailDrawer';
 
 vi.mock('next/link', () => ({
     default: ({ children, href, ...props }: ComponentProps<'a'> & { href: string }) => (
@@ -78,7 +78,7 @@ describe('AccountDetailSlideover', () => {
 
 function renderSlideover({ onOpenChange = vi.fn() }: { onOpenChange?: (open: boolean) => void } = {}) {
     render(
-        <AccountDetailSlideover
+        <AccountDetailDrawer
             account={{
                 pubkey,
                 signer: false,

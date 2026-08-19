@@ -18,6 +18,7 @@ import { displayTimestampUtc } from '@utils/date';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
+import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { useVisibility } from '@/app/shared/lib/visibility';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -31,21 +32,6 @@ import { BaseTransactionHistoryCard, STATUS_BADGE, type TransactionHistoryRowVie
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
 import { TransactionDetailsDrawer } from './TransactionDetailsDrawer';
 
-// Tracks whether the viewport matches `(max-width: 767.98px)`. Gates the mobile-only
-// TransactionDetailsDrawer so desktop row clicks don't pop the drawer open.
-function useIsMobileViewport(): boolean {
-    const [isMobile, setIsMobile] = useState(false);
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        const mq = window.matchMedia('(max-width: 767.98px)');
-        const update = () => setIsMobile(mq.matches);
-        update();
-        mq.addEventListener('change', update);
-        return () => mq.removeEventListener('change', update);
-    }, []);
-    return isMobile;
-}
-
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
     const filters = useHistoryFilters();
@@ -54,10 +40,6 @@ export function TransactionHistoryCard({ address }: { address: string }) {
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory(25, filters);
     const resetHistory = useResetAccountHistory();
-    // Filtering needs gTFA. It's unavailable when the endpoint doesn't implement gTFA at all
-    // (endpoint-wide flag) or when gTFA is temporarily disabled for this specific address (which
-    // falls back to getSignaturesForAddress and can't honour filters). Both must drop active
-    // filters, otherwise the URL params survive and misleading chips render beside unfiltered rows.
     const filtersSupported = useHistoryFiltersSupported() && !isGtfaDisabled(address);
     const clearFilters = useClearHistoryFilters();
 
@@ -81,10 +63,6 @@ export function TransactionHistoryCard({ address }: { address: string }) {
         }
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Refetch from scratch when any filter changes. The cache is keyed by address
-    // only, so we reset this address's entry (which also supersedes any in-flight
-    // request for it) before refetching to avoid mixing pre- and post-filter results
-    // in combineFetched.
     const previousFiltersKey = useRef(filtersKey);
     useEffect(() => {
         if (previousFiltersKey.current !== filtersKey) {
@@ -94,8 +72,6 @@ export function TransactionHistoryCard({ address }: { address: string }) {
         }
     }, [filtersKey, address, resetHistory, refresh]);
 
-    // If the endpoint turns out not to support filtering, drop any active filters so the
-    // (unfiltered) results aren't shown alongside misleading filter chips.
     useEffect(() => {
         if (!filtersSupported && hasActiveFilters) {
             clearFilters();
@@ -129,11 +105,9 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView; hasTimestamps: boolean }) {
     const { signature, slot, blockTime, status } = row;
     const { isVisible, ref } = useVisibility<HTMLTableRowElement>(true);
-    // Per-instruction summaries (program + resolved instruction name) for this signature; the fetch is
-    // gated on row visibility. Returns undefined while loading, [] once fetched with nothing to show.
     const instructionNames = useResolvedInstructionSummaries(signature, isVisible);
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const isMobile = useIsMobileViewport();
+    const { isLg } = useBreakpoint();
     const badge = STATUS_BADGE[status];
 
     const programsBlock =
@@ -145,32 +119,52 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
             <span className="text-outer-space-300">---</span>
         );
 
+    const signatureLink = <Signature signature={signature} link />;
+    const statusBadge = (
+        <Badge ui="dashkit" tone="soft" variant={badge.variant}>
+            {badge.label}
+        </Badge>
+    );
+
     const handleRowClick = (e: React.MouseEvent) => {
         // Skip the drawer when the user actually clicked a real link/button in the row.
         if (e.target instanceof HTMLElement && e.target.closest('a, button')) return;
-        if (isMobile) setDrawerOpen(true);
+        if (!isLg) setDrawerOpen(true);
     };
 
     return (
         <>
-            <BaseTable.Row ref={ref} onClick={isMobile ? handleRowClick : undefined}>
+            <BaseTable.Row ref={ref} onClick={!isLg ? handleRowClick : undefined}>
+                {/* First cell carries the whole mobile card (the other cells are hidden < lg). */}
                 <BaseTable.Cell>
-                    <div>
+                    {/* Desktop: signature + status inline (14px), programs stacked beneath. */}
+                    <div className="hidden lg:block">
                         <div className="flex min-w-0 items-start gap-2">
-                            {/* The signature is always a real link: tapping it navigates (the row's
-                                click handler skips the drawer for taps on `a`/`button`), while
-                                tapping elsewhere on the card opens the drawer. */}
-                            <span className="min-w-0">
-                                <Signature signature={signature} link />
-                            </span>
+                            <span className="min-w-0 text-sm">{signatureLink}</span>
                             {/* top-1 drops the badge 4px so it sits lower against the signature,
                                 without affecting row height. */}
-                            <Badge ui="dashkit" tone="soft" variant={badge.variant} className="relative top-1">
-                                {badge.label}
-                            </Badge>
+                            <span className="relative top-1">{statusBadge}</span>
                         </div>
-                        {/* Programs always stacked under the signature (no separate Programs column). */}
                         <div className="mt-1">{programsBlock}</div>
+                    </div>
+
+                    {/* Mobile: the row becomes a labelled card. Every field is captioned and Programs
+                        sits at the end (agreed design — see PR #109). Tapping the card opens the drawer. */}
+                    <div className="flex flex-col gap-2 text-sm lg:hidden">
+                        <MobileField label="Signature">
+                            <div className="flex min-w-0 items-start gap-2">
+                                <span className="min-w-0">{signatureLink}</span>
+                                {statusBadge}
+                            </div>
+                        </MobileField>
+                        {blockTime ? (
+                            <MobileField label="Time">{displayTimestampUtc(blockTime * 1000, true)}</MobileField>
+                        ) : null}
+                        <MobileField label="Block">
+                            {/* Plain text on mobile — the drawer carries the block link. */}
+                            <Slot slot={slot} />
+                        </MobileField>
+                        <MobileField label="Programs">{programsBlock}</MobileField>
                     </div>
                 </BaseTable.Cell>
 
@@ -178,10 +172,9 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
                     <BaseTable.Cell className="w-px text-outer-space-300">
                         {blockTime ? (
                             // Two-line stack: absolute UTC timestamp on top, relative age beneath.
-                            // On mobile the relative line is hidden (the drawer carries the full detail).
                             <div className="flex flex-col">
                                 <span className="text-sm">{displayTimestampUtc(blockTime * 1000, true)}</span>
-                                <span className="text-sm lt-md:hidden">
+                                <span className="text-sm">
                                     <RelativeTime date={blockTime * 1000} />
                                 </span>
                             </div>
@@ -192,20 +185,19 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
                 )}
 
                 <BaseTable.Cell className="w-px">
-                    {/* Block link is dropped on mobile — Slot renders plain text (no copy, no link). */}
-                    <Slot slot={slot} link={!isMobile} />
+                    <span className="text-sm">
+                        <Slot slot={slot} link />
+                    </span>
                 </BaseTable.Cell>
 
-                {/* Size (bytes) is hidden on mobile — the drawer carries its own size row
-                    plus the raw-data view. */}
-                {!isMobile && (
+                {isLg && (
                     <BaseTable.Cell className="w-px">
                         <TransactionRawDataSize signature={signature} />
                     </BaseTable.Cell>
                 )}
             </BaseTable.Row>
 
-            {isMobile && (
+            {!isLg && (
                 <TransactionDetailsDrawer
                     open={drawerOpen}
                     onOpenChange={setDrawerOpen}
@@ -218,6 +210,17 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
                 />
             )}
         </>
+    );
+}
+
+// A captioned field for the mobile transaction card: muted label column + value. The 5rem label
+// column matches the drawer's DrawerRow so the card and its drawer read consistently.
+function MobileField({ label, children }: { label: string; children: React.ReactNode }) {
+    return (
+        <div className="flex gap-3">
+            <span className="w-20 shrink-0 text-outer-space-300">{label}</span>
+            <span className="min-w-0 flex-1 text-white">{children}</span>
+        </div>
     );
 }
 
@@ -240,8 +243,7 @@ function TransactionRawDataSize({ signature }: { signature: string }) {
             filename={signature}
             loading={loading}
             // Collapse the button's fixed height so the size sits on the same line as the other
-            // top-aligned cells; text-sm + top-0.5 keep it level with their text baseline.
-            buttonClassName="relative top-0.5 !h-auto !py-0 text-sm"
+            buttonClassName="relative top-0.5 !h-auto !py-0 !text-sm [&_svg]:!size-3.5"
         />
     );
 }

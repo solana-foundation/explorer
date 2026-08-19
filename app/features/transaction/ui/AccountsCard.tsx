@@ -19,7 +19,7 @@ import { ChevronDown } from 'react-feather';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 
 import { AccountBadges } from './AccountBadges';
-import { AccountDetailSlideover } from './AccountDetailSlideover';
+import { AccountDetailDrawer } from './AccountDetailDrawer';
 import { AccountExpandedContent } from './AccountExpandedContent';
 import {
     CELL_PADDING,
@@ -160,7 +160,7 @@ function TransactionAccountRow({
             </div>
 
             {/* Mobile: slideover */}
-            <AccountDetailSlideover
+            <AccountDetailDrawer
                 account={account}
                 accountInfo={accountInfo}
                 accountInfoLoading={accountInfoLoading}

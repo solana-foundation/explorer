@@ -40,7 +40,7 @@ export function AccountSizeField({ size, data, filename, loading, buttonClassNam
                     {/* `!px-0` drops the ghost button's default horizontal padding so its
                         content lines up with the "Size (bytes)" header's left edge. */}
                     <Button variant="ghost" className={cn('!px-0', buttonClassName)}>
-                        <Code size={12} />
+                        <Code size={14} />
                         <span>{size.toLocaleString('en-US')}</span>
                     </Button>
                 </PopoverTrigger>
