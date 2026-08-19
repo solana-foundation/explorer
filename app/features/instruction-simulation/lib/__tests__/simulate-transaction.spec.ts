@@ -6,7 +6,7 @@ import type { InstructionLogs } from '@utils/program-logs';
 import BN from 'bn.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createV1TransactionBytes } from '@/app/entities/transaction-data/__fixtures__/wire-transactions';
+import { createV1TransactionBytes, RECIPIENT } from '@/app/entities/transaction-data/__fixtures__/wire-transactions';
 import { alloc, toBase64, writeU64LE, writeUint32LE } from '@/app/shared/lib/bytes';
 import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { bridgeV1MessageBytes } from '@/app/shared/lib/v1-message-bridge';
@@ -374,19 +374,73 @@ describe('v1 transactions', () => {
         } as Partial<Connection>);
     }
 
-    it('should fail with the feature gate as the cause when the cluster has no v1 support', async () => {
-        const connection = connectionWithFeature(false);
+    it('should name the feature gate when the node rejects the simulation request outright', async () => {
+        const connection = connectionWithFeature(false, {
+            simulateTransaction: vi.fn().mockRejectedValue(new Error('invalid transaction: UnsupportedVersion')),
+        } as Partial<Connection>);
 
         await expect(simulate(connection, v1Message())).rejects.toThrow('does not support v1 transactions');
-        expect(connection.simulateTransaction).not.toHaveBeenCalled();
     });
 
-    it('should simulate when the cluster has the v1 feature gate active', async () => {
+    it('should name the feature gate when the node returns UnsupportedVersion as a simulation error', async () => {
+        const connection = connectionWithFeature(false, {
+            simulateTransaction: vi
+                .fn()
+                .mockResolvedValue(createSimulationResponse({ err: 'UnsupportedVersion', logs: [] })),
+        } as Partial<Connection>);
+
+        const result = await simulate(connection, v1Message());
+
+        expect(result.error).toContain('does not support v1 transactions');
+    });
+
+    it('should surface the original failure when the cluster does support v1', async () => {
+        const connection = connectionWithFeature(true, {
+            simulateTransaction: vi.fn().mockRejectedValue(new Error('rpc down')),
+        } as Partial<Connection>);
+
+        await expect(simulate(connection, v1Message())).rejects.toThrow('rpc down');
+    });
+
+    it('should surface the original failure when the feature gate cannot be read', async () => {
+        const connection = createMockConnection({
+            getAccountInfo: vi.fn().mockRejectedValue(new Error('gate unreadable')),
+            simulateTransaction: vi.fn().mockRejectedValue(new Error('rpc down')),
+        } as Partial<Connection>);
+
+        await expect(simulate(connection, v1Message())).rejects.toThrow('rpc down');
+    });
+
+    it('should name the feature gate when UnsupportedVersion arrives alongside logs', async () => {
+        const connection = connectionWithFeature(false, {
+            simulateTransaction: vi
+                .fn()
+                .mockResolvedValue(
+                    createSimulationResponse({ err: 'UnsupportedVersion', logs: ['Program log: something'] }),
+                ),
+        } as Partial<Connection>);
+
+        const result = await simulate(connection, v1Message());
+
+        expect(result.error).toContain('does not support v1 transactions');
+    });
+
+    it('should keep the original failure as the cause of the feature gate error', async () => {
+        const cause = new Error('429 Too Many Requests');
+        const connection = connectionWithFeature(false, {
+            simulateTransaction: vi.fn().mockRejectedValue(cause),
+        } as Partial<Connection>);
+
+        await expect(simulate(connection, v1Message())).rejects.toMatchObject({ cause });
+    });
+
+    it('should not read the feature gate when a v1 simulation succeeds', async () => {
         const connection = connectionWithFeature(true);
 
         await simulate(connection, v1Message());
 
         expect(connection.simulateTransaction).toHaveBeenCalled();
+        expect(connection.getAccountInfo).not.toHaveBeenCalled();
     });
 
     describe('MaxLoadedAccountsDataSizeExceeded', () => {
@@ -426,13 +480,14 @@ describe('v1 transactions', () => {
 
             expect(result.error).toContain('this transaction loads 74,928 bytes');
             expect(result.error).toContain('74,800 bytes of account data');
-            expect(result.error).toContain('64 bytes of metadata for each of the 2 accounts it loads');
+            expect(result.error).toContain('64 bytes of metadata for each of the 2 accounts it names');
             expect(result.error).toContain('above the 74,900 byte limit set in the v1 message config');
         });
 
         it('should count the program data account of an upgradeable program', async () => {
             const programAccount = {
                 data: { parsed: { info: { programData: PROGRAM_DATA_KEY.toBase58() } }, program: 'x', space: 36 },
+                executable: true,
                 owner: UPGRADEABLE_LOADER,
             };
             // The first lookup returns the message's accounts, the second the program data account
@@ -446,7 +501,70 @@ describe('v1 transactions', () => {
 
             // 500,036 bytes of data across three accounts, each charged 64 bytes of metadata
             expect(result.error).toContain('this transaction loads 500,228 bytes');
-            expect(result.error).toContain('for each of the 3 accounts it loads');
+            expect(result.error).toContain('for each of the 3 accounts it names');
+        });
+
+        it('should count a program data account the message lists only once', async () => {
+            const programAccount = {
+                data: { parsed: { info: { programData: RECIPIENT } }, program: 'x', space: 36 },
+                executable: true,
+                owner: UPGRADEABLE_LOADER,
+            };
+            // RECIPIENT is the message's second account key, so the program's program data account
+            // is already among the accounts the first lookup returned
+            const connection = connectionRejectingForSize([
+                programAccount,
+                { data: { parsed: {}, program: 'x', space: 500_000 }, owner: UPGRADEABLE_LOADER },
+            ]);
+
+            const result = await simulate(connection, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
+
+            // 500,036 bytes of data across two accounts, each charged 64 bytes of metadata
+            expect(result.error).toContain('this transaction loads 500,164 bytes');
+            expect(result.error).toContain('for each of the 2 accounts it names');
+        });
+
+        it('should not look up program data for a non-executable loader-owned account', async () => {
+            const connection = connectionRejectingForSize([
+                { data: Buffer.alloc(0), owner: OWNER },
+                { data: { parsed: {}, program: 'x', space: 500_000 }, executable: false, owner: UPGRADEABLE_LOADER },
+            ]);
+
+            const result = await simulate(connection, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
+
+            expect(connection.getMultipleParsedAccounts).toHaveBeenCalledTimes(1);
+            expect(result.error).toContain('this transaction loads 500,128 bytes');
+        });
+
+        it('should report the size as a floor when the accounts it can see fit under the limit', async () => {
+            const result = await simulate(
+                connectionRejectingForSize(),
+                v1Message({ loadedAccountsDataSizeLimit: 200_000 }),
+            );
+
+            expect(result.error).toContain('this transaction loads at least 74,928 bytes');
+            expect(result.error).toContain('within the 200,000 byte limit set in the v1 message config');
+            expect(result.error).toContain('accounts the message does not name');
+            expect(result.error).not.toContain('above the');
+        });
+
+        it('should explain the failure even when the RPC returns it alongside logs', async () => {
+            const connection = connectionWithFeature(true, {
+                getMultipleParsedAccounts: vi
+                    .fn()
+                    .mockResolvedValueOnce({ value: PARSED_ACCOUNTS })
+                    .mockResolvedValue({ value: [] }),
+                simulateTransaction: vi.fn().mockResolvedValue(
+                    createSimulationResponse({
+                        err: 'MaxLoadedAccountsDataSizeExceeded',
+                        logs: ['Program failed to load accounts'],
+                    }),
+                ),
+            } as Partial<Connection>);
+
+            const result = await simulate(connection, v1Message({ loadedAccountsDataSizeLimit: 74_900 }));
+
+            expect(result.error).toContain('this transaction loads 74,928 bytes');
         });
 
         it('should name the unset limit as zero when the message sets none', async () => {
@@ -460,6 +578,7 @@ describe('v1 transactions', () => {
             const connection = connectionRejectingForSize([
                 {
                     data: { parsed: { info: { programData: PROGRAM_DATA_KEY.toBase58() } }, program: 'x', space: 36 },
+                    executable: true,
                     owner: UPGRADEABLE_LOADER,
                 },
             ]);

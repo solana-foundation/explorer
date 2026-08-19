@@ -46,15 +46,75 @@ export async function simulateTransaction({
     cluster,
     accountBalances,
 }: SimulateOptions): Promise<SimulationResult> {
-    const raw = await runSimulation(connection, message);
+    let raw;
+    try {
+        raw = await runSimulation(connection, message);
+    } catch (cause) {
+        throw (await inactiveV1GateError(connection, message, cause)) ?? cause;
+    }
+
     const result = interpretSimulation(raw, cluster, accountBalances);
 
-    if (result.error === MAX_LOADED_ACCOUNTS_DATA_SIZE_EXCEEDED && message instanceof V1MessageView) {
-        const explained = await explainLoadedAccountsDataSize(connection, message, raw.parsedAccountsPre);
+    // Match the error the RPC returned rather than the interpreted one, which reports any failure
+    // carrying logs as a bare `TransactionError`.
+    if (raw.simResult.err === UNSUPPORTED_VERSION) {
+        const gate = await inactiveV1GateError(connection, message);
+        if (gate) {
+            return { ...result, error: gate.message };
+        }
+    }
+
+    if (raw.simResult.err === MAX_LOADED_ACCOUNTS_DATA_SIZE_EXCEEDED && message instanceof V1MessageView) {
+        const explained = await explainLoadedAccountsDataSize(
+            connection,
+            message,
+            raw.accountKeys,
+            raw.parsedAccountsPre,
+        );
         return explained ? { ...result, error: explained } : result;
     }
 
     return result;
+}
+
+const UNSUPPORTED_VERSION = 'UnsupportedVersion';
+
+/**
+ * The error to report in place of a failed v1 simulation when the cluster has no v1 support, or
+ * `undefined` when the cluster is not the reason the simulation failed.
+ *
+ * A node whose runtime predates the v1 feature gate rejects the transaction during sanitization and
+ * answers with a bare `UnsupportedVersion`, which reads as a failure of the transaction rather than
+ * of the cluster. Which side of the RPC boundary that answer arrives on depends on the node: some
+ * reject the request outright, others return it as a simulation error, so both paths land here.
+ *
+ * The gate is read only once a v1 simulation has already failed, so a cluster that supports v1
+ * costs no extra RPC call, and a cluster whose gate cannot be read reports its original failure.
+ * The failure that prompted the read is carried along as the cause, since a v1 simulation can fail
+ * for reasons of its own on a cluster that happens to lack the gate as well.
+ */
+async function inactiveV1GateError(
+    connection: Connection,
+    message: VersionedMessage,
+    cause?: unknown,
+): Promise<Error | undefined> {
+    if (!(message instanceof V1MessageView)) {
+        return undefined;
+    }
+
+    try {
+        if (await isTxV1Active(connection)) {
+            return undefined;
+        }
+    } catch (cause) {
+        Logger.error(new Error('Failed to read the transaction v1 feature gate', { cause }));
+        return undefined;
+    }
+
+    return new Error(
+        `this cluster does not support v1 transactions yet — feature gate ${ENABLE_TX_V1_FEATURE.toBase58()} is not active`,
+        { cause },
+    );
 }
 
 type RawSimulation = {
@@ -74,15 +134,6 @@ type RawSimulation = {
  * state, and run the simulation. Returns raw data for interpretation.
  */
 async function runSimulation(connection: Connection, message: VersionedMessage): Promise<RawSimulation> {
-    // A node whose runtime predates the v1 feature gate rejects the transaction during sanitization
-    // and answers with a bare `UnsupportedVersion` error and no logs, which reads as a failure of
-    // the transaction rather than of the cluster. Check the gate first so the cause is explicit.
-    if (message instanceof V1MessageView && !(await isTxV1Active(connection))) {
-        throw new Error(
-            `this cluster does not support v1 transactions yet — feature gate ${ENABLE_TX_V1_FEATURE.toBase58()} is not active`,
-        );
-    }
-
     const lookupTables = await resolveAddressLookupTables(connection, message);
     const accountKeys = message.getAccountKeys({ addressLookupTableAccounts: lookupTables }).keySegments().flat();
 
@@ -191,18 +242,26 @@ const UPGRADEABLE_LOADER_ID = new PublicKey('BPFLoaderUpgradeab1e111111111111111
  *
  * The runtime charges each account it loads 64 bytes of metadata plus its data, and charges nothing
  * for an account that does not exist. Calling an upgradeable program loads its program data account
- * as well, which the message never lists, so those are fetched here to be counted.
+ * as well, which the message usually does not list, so those are fetched here to be counted. A
+ * message that does list one is charged for it once, like any other account it names.
+ *
+ * The total is a floor rather than the figure the runtime reached: a program a message reaches by
+ * cross-program invocation is loaded and charged without ever being named, and cannot be found
+ * without executing the transaction. A total that already clears the limit explains the failure on
+ * its own; one that does not is reported as the floor it is, and names what the rest must be.
  */
 async function explainLoadedAccountsDataSize(
     connection: Connection,
     message: V1MessageView,
+    accountKeys: PublicKey[],
     parsedAccountsPre: (AccountInfo<ParsedAccountData | Buffer> | undefined)[],
 ): Promise<string | undefined> {
     const messageAccounts = parsedAccountsPre.filter(account => account !== undefined);
+    const listedAddresses = new Set(accountKeys.map(key => key.toBase58()));
 
     let programDataAccounts;
     try {
-        programDataAccounts = await fetchProgramDataAccounts(connection, messageAccounts);
+        programDataAccounts = await fetchProgramDataAccounts(connection, messageAccounts, listedAddresses);
     } catch (cause) {
         Logger.error(new Error('Failed to load program data accounts', { cause }));
         return undefined;
@@ -214,30 +273,52 @@ async function explainLoadedAccountsDataSize(
     const limit = message.transactionConfig?.loadedAccountsDataSizeLimit;
 
     const accountCount = `${loadedAccounts.length} account${loadedAccounts.length === 1 ? '' : 's'}`;
-    const loads = `this transaction loads ${format(loadedSize)} bytes (${format(dataSize)} bytes of account data, plus ${ACCOUNT_METADATA_SIZE} bytes of metadata for each of the ${accountCount} it loads)`;
-    const cap =
-        limit === undefined
-            ? 'this v1 message sets no loaded accounts data size limit, which v1 reads as a limit of zero bytes'
-            : `above the ${format(limit)} byte limit set in the v1 message config`;
+    const fitsUnderLimit = limit !== undefined && loadedSize <= limit;
+    const measured = fitsUnderLimit ? `at least ${format(loadedSize)}` : format(loadedSize);
+    const loads = `this transaction loads ${measured} bytes (${format(dataSize)} bytes of account data, plus ${ACCOUNT_METADATA_SIZE} bytes of metadata for each of the ${accountCount} it names)`;
+
+    let cap;
+    if (limit === undefined) {
+        cap = 'this v1 message sets no loaded accounts data size limit, which v1 reads as a limit of zero bytes';
+    } else if (fitsUnderLimit) {
+        cap = `within the ${format(limit)} byte limit set in the v1 message config, so the rest of the limit went to accounts the message does not name — a program reached by cross-program invocation, and the program data behind it, are loaded and charged the same way`;
+    } else {
+        cap = `above the ${format(limit)} byte limit set in the v1 message config`;
+    }
 
     return `${MAX_LOADED_ACCOUNTS_DATA_SIZE_EXCEEDED} — ${loads}, ${cap}.`;
 }
 
-/** The program data accounts behind whichever of `accounts` are upgradeable programs. */
+/**
+ * The program data accounts behind whichever of `accounts` are upgradeable programs, skipping any
+ * address in `listedAddresses` so that an account the message already names is not counted twice.
+ *
+ * The upgradeable loader owns program data and buffer accounts as well as the programs themselves,
+ * and only a program account holds a program data address, so the executable flag selects them.
+ */
 async function fetchProgramDataAccounts(
     connection: Connection,
     accounts: AccountInfo<ParsedAccountData | Buffer>[],
+    listedAddresses: Set<string>,
 ): Promise<AccountInfo<ParsedAccountData | Buffer>[]> {
-    const addresses = accounts
-        .filter(account => account.owner.equals(UPGRADEABLE_LOADER_ID))
-        .map(programDataAddress)
-        .filter(address => address !== undefined);
+    const addresses = new Map<string, PublicKey>();
 
-    if (addresses.length === 0) {
+    for (const account of accounts) {
+        if (!account.executable || !account.owner.equals(UPGRADEABLE_LOADER_ID)) {
+            continue;
+        }
+
+        const address = programDataAddress(account);
+        if (address !== undefined && !listedAddresses.has(address.toBase58())) {
+            addresses.set(address.toBase58(), address);
+        }
+    }
+
+    if (addresses.size === 0) {
         return [];
     }
 
-    const { value } = await connection.getMultipleParsedAccounts(addresses);
+    const { value } = await connection.getMultipleParsedAccounts([...addresses.values()]);
     return value.filter(account => account !== null);
 }
 
