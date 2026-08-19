@@ -151,9 +151,9 @@ class MultipleAccountFetcher {
 
     constructor(
         private dispatch: Dispatch,
-        private cluster: Cluster,
         private url: string,
         private dataMode: FetchAccountDataMode,
+        private onError: (error: unknown) => void,
     ) {}
     fetch = (pubkey: PublicKey) => {
         if (this.pubkeys !== undefined) this.pubkeys.add(pubkey.toBase58());
@@ -164,8 +164,8 @@ class MultipleAccountFetcher {
                     const pubkeys = Array.from(this.pubkeys).map(p => new PublicKey(p));
                     this.pubkeys.clear();
 
-                    const { dispatch, cluster, url, dataMode } = this;
-                    fetchMultipleAccounts({ cluster, dataMode, dispatch, pubkeys, url });
+                    const { dispatch, url, dataMode, onError } = this;
+                    fetchMultipleAccounts({ dataMode, dispatch, onError, pubkeys, url });
                 }
             }, 100);
         }
@@ -183,13 +183,30 @@ export function AccountsProvider({ children }: AccountsProviderProps) {
     const { cluster, url } = useCluster();
     const [state, dispatch] = Cache.useReducer<Account>(url);
 
+    // A saved custom endpoint can resolve to the same url as a preset cluster, so `cluster` must not take part
+    // in the fetcher identity below: rebuilding the fetchers cancels batches already in flight, and switching
+    // between two selections that share one endpoint changes nothing a batch depends on. The cluster only
+    // decides whether a failure is ours to report, so the reporter reads the current one through a ref.
+    const clusterRef = React.useRef(cluster);
+    clusterRef.current = cluster;
+
+    const reportFetchError = React.useCallback(
+        (error: unknown) => {
+            // A custom endpoint fails for reasons we do not control, so its failures are not ours to report.
+            if (clusterRef.current !== Cluster.Custom) {
+                Logger.error(error, { url });
+            }
+        },
+        [url],
+    );
+
     const fetchers = React.useMemo<Fetchers>(
         () => ({
-            parsed: new MultipleAccountFetcher(dispatch, cluster, url, 'parsed'),
-            raw: new MultipleAccountFetcher(dispatch, cluster, url, 'raw'),
-            skip: new MultipleAccountFetcher(dispatch, cluster, url, 'skip'),
+            parsed: new MultipleAccountFetcher(dispatch, url, 'parsed', reportFetchError),
+            raw: new MultipleAccountFetcher(dispatch, url, 'raw', reportFetchError),
+            skip: new MultipleAccountFetcher(dispatch, url, 'skip', reportFetchError),
         }),
-        [dispatch, cluster, url],
+        [dispatch, url, reportFetchError],
     );
 
     React.useEffect(() => {
@@ -224,13 +241,13 @@ async function fetchMultipleAccounts({
     dispatch,
     pubkeys,
     dataMode,
-    cluster,
+    onError,
     url,
 }: {
     dispatch: Dispatch;
     pubkeys: PublicKey[];
     dataMode: FetchAccountDataMode;
-    cluster: Cluster;
+    onError: (error: unknown) => void;
     url: string;
 }) {
     for (const pubkey of pubkeys) {
@@ -328,9 +345,7 @@ async function fetchMultipleAccounts({
                 });
             }
         } catch (error) {
-            if (cluster !== Cluster.Custom) {
-                Logger.error(error, { url });
-            }
+            onError(error);
 
             for (const pubkey of batch) {
                 dispatch({
