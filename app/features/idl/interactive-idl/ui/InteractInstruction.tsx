@@ -50,7 +50,7 @@ export function InteractInstruction({
     instruction: InstructionData;
     status: InstructionStatus;
 }) {
-    const { connected: walletConnected, publicKey } = useWallet();
+    const { canSign, publicKey } = useWallet();
     const [simulateBeforeExecute, setSimulateBeforeExecute] = useState(true);
 
     const { form, onSubmit, onSimulate, validationRules, fieldNames } = useInstructionForm({
@@ -76,7 +76,7 @@ export function InteractInstruction({
     });
     usePdaPrefill({ fieldNames, form, instruction, pdas });
 
-    const interactionDisabled = !walletConnected || status !== 'idle';
+    const interactionDisabled = !canSign || status !== 'idle';
 
     return (
         <Card variant="tight">
@@ -163,7 +163,7 @@ export function InteractInstruction({
                                 icon={<Send size={16} />}
                                 label="Execute"
                                 variant="accent"
-                                tooltipText={!walletConnected ? WALLET_CONNECT_TOOLTIP : ''}
+                                tooltipText={!canSign ? WALLET_CONNECT_TOOLTIP : ''}
                             />
                             <ActionButton
                                 onClick={onSimulate}
@@ -172,7 +172,7 @@ export function InteractInstruction({
                                 icon={<Play size={16} />}
                                 label="Simulate"
                                 variant="outline"
-                                tooltipText={!walletConnected ? WALLET_CONNECT_TOOLTIP : ''}
+                                tooltipText={!canSign ? WALLET_CONNECT_TOOLTIP : ''}
                             />
                         </div>
                         <div className="mt-4 flex items-center gap-2">

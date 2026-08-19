@@ -42,7 +42,7 @@ export function InteractWithIdl({
     const toast = useToast();
     const idl = useAtomValue(originalIdlAtom);
     const progId = useAtomValue(programIdAtom);
-    const { connected, publicKey, walletName } = useWallet();
+    const { canSign, connected, publicKey, walletName } = useWallet();
 
     const [currentInstruction, setCurrentInstruction] = useState<{ name: string; programId?: string } | null>(null);
     const [hasTrackedTabOpen, setHasTrackedTabOpen] = useState(false);
@@ -100,7 +100,7 @@ export function InteractWithIdl({
         lastExecutionResult,
         lastSimulationResult,
     } = useInstruction({
-        enabled: isEnabled({ connected, idl, programId: progId, publicKey }),
+        enabled: isEnabled({ canSign, idl, programId: progId, publicKey }),
         idl,
         onError: handleTransactionError,
         onSuccess: handleTransactionSuccess,

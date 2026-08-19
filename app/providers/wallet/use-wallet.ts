@@ -4,6 +4,8 @@ import { useConnectedWallet, useDisconnect, useWalletStatus } from '@solana/kit-
 import { PublicKey } from '@solana/web3.js';
 import { useMemo } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { useWalletClient } from '../wallet-provider';
 import { signWeb3jsTransaction, signWeb3jsTransactions, type Web3Transaction } from './sign-web3js-transaction';
 import { useLoggedWalletError } from './use-logged-wallet-error';
@@ -22,11 +24,20 @@ export function useWallet() {
     useLoggedWalletError(disconnectError);
 
     const signer = connectedWallet?.signer;
+    const walletAddress = connectedWallet?.account.address;
 
-    const publicKey = useMemo(
-        () => (connectedWallet ? new PublicKey(connectedWallet.account.address) : undefined),
-        [connectedWallet],
-    );
+    const publicKey = useMemo(() => {
+        if (!walletAddress) return undefined;
+        // A wallet is free to report an account address Explorer cannot parse. Throwing here would
+        // propagate out of render and blank the whole IDL tab, so the wallet is instead treated as
+        // having no usable account.
+        try {
+            return new PublicKey(walletAddress);
+        } catch (error) {
+            Logger.error(error, { sentry: true, walletAddress });
+            return undefined;
+        }
+    }, [walletAddress]);
 
     const { signAllTransactions, signTransaction } = useMemo(() => {
         if (!signer) return {};
@@ -38,9 +49,13 @@ export function useWallet() {
     }, [signer]);
 
     return {
-        // A watch-only wallet connects without a signer. Reporting it as connected would enable
-        // Execute, which then fails at signing time with a misleading "wallet not connected".
-        connected: status === 'connected' && Boolean(signer),
+        // A watch-only wallet connects without a signer. Anything that ends in a signature prompt
+        // has to gate on this rather than on `connected`, or Execute is offered and then fails at
+        // signing time with a misleading "wallet not connected".
+        canSign: Boolean(signer) && Boolean(publicKey),
+        // Connection status alone, so a wallet that connected without a signer can still be
+        // disconnected.
+        connected: status === 'connected',
         // `pending` covers the pre-hydration window before the stored-account check has run, when a
         // returning user is about to be reconnected.
         connecting: status === 'connecting' || status === 'reconnecting' || status === 'pending',

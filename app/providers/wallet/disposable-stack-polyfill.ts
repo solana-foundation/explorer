@@ -1,9 +1,9 @@
 /**
  * Installs `Symbol.dispose` and `DisposableStack` where the runtime does not provide them.
  *
- * Kit registers plugin cleanup through both, and browsers only gained them in 2025 (Chrome 134,
- * Firefox 137, Safari 26). Importing this module before any Kit client is created keeps Explorer
- * loading on older browsers.
+ * Kit registers plugin cleanup through both. Chromium shipped them in 134 and Firefox in 137;
+ * Safari still has not, so this is not only a concession to old browsers. Importing this module
+ * before any Kit client is created keeps Explorer loading wherever they are missing.
  */
 
 export {};

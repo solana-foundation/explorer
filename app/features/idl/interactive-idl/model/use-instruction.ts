@@ -281,14 +281,14 @@ export const isEnabled = ({
     idl,
     programId,
     publicKey,
-    connected,
+    canSign,
 }: {
     idl: unknown;
     programId?: PublicKey | string | null;
     publicKey: PublicKey | undefined;
-    connected: boolean;
+    canSign: boolean;
 }): boolean => {
-    return Boolean(idl && programId && publicKey && connected === true);
+    return Boolean(idl && programId && publicKey && canSign === true);
 };
 
 function handleInitializeError(error: unknown | Error, message = 'Failed to initialize program') {

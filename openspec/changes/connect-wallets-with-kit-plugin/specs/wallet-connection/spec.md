@@ -65,5 +65,6 @@ The bridge between Explorer's web3.js transactions and the Kit signer SHALL hand
 #### Scenario: A watch-only wallet connects
 
 - **WHEN** the connected wallet exposes no signing feature at all
-- **THEN** the feature SHALL treat it as not connected
+- **THEN** the feature SHALL report it as connected but unable to sign
 - **AND** SHALL keep Execute disabled rather than enabling it and failing at signing time
+- **AND** SHALL still allow the user to disconnect it
