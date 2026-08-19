@@ -1,9 +1,9 @@
 // The single place @solana/idl's conventions are flipped to ours: it types the whole rpc client and
 // threads no abort signal, and it reports data outcomes as values while we throw coded IdlErrors.
 import { type IdlResult, parseIdl, type PmpIdlResult, type SolanaRpcClient } from '@solana/idl';
-import { type Address, isSolanaError } from '@solana/kit';
+import type { Address } from '@solana/kit';
 
-import { IDL_ERROR__IDL_FETCH_FAILED, IDL_ERROR__IDL_PARSE_FAILED, IdlError, isIdlError } from '../../errors.js';
+import { IDL_ERROR__IDL_FETCH_FAILED, IDL_ERROR__IDL_PARSE_FAILED, IdlError } from '../../errors.js';
 import type { IdlFetcherRpc } from '../../types.js';
 
 /** Which publication served the IDL, NOT its format — PMP content is often Anchor-format (`IdlStandard`). */
@@ -19,25 +19,16 @@ export type PublishedIdl = {
     source: IdlSource;
 };
 
-/**
- * Binds the caller's abort signal to the account reads, which upstream never threads itself, and tags
- * transport rejections as `IDL_ERROR__IDL_FETCH_FAILED` — upstream reports any non-`SolanaError` throw
- * out of a read as corrupt bytes, which {@link toPublishedIdl} would otherwise call a parse failure.
- */
+/** Binds the caller's abort signal to the account reads, which upstream never threads itself. */
 export function toIdlRpc(rpc: IdlFetcherRpc, abortSignal: AbortSignal | undefined): SolanaRpcClient {
-    const bound = {
-        getAccountInfo: (...args: Parameters<IdlFetcherRpc['getAccountInfo']>) => ({
-            send: async (config?: { abortSignal?: AbortSignal }) => {
-                try {
-                    return await rpc.getAccountInfo(...args).send(abortSignal ? { ...config, abortSignal } : config);
-                } catch (cause) {
-                    // a SolanaError is upstream's own vocabulary — it classifies those itself (absent, corrupt framing)
-                    if (isSolanaError(cause)) throw cause;
-                    throw new IdlError(IDL_ERROR__IDL_FETCH_FAILED, { cause });
-                }
-            },
-        }),
-    };
+    const bound = abortSignal
+        ? {
+              getAccountInfo: (...args: Parameters<IdlFetcherRpc['getAccountInfo']>) => ({
+                  send: (config?: { abortSignal?: AbortSignal }) =>
+                      rpc.getAccountInfo(...args).send({ ...config, abortSignal }),
+              }),
+          }
+        : rpc;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- @solana/idl types the full createSolanaRpc client; its IDL fetchers read accounts and nothing else
     return bound as unknown as SolanaRpcClient;
 }
@@ -45,14 +36,18 @@ export function toIdlRpc(rpc: IdlFetcherRpc, abortSignal: AbortSignal | undefine
 /**
  * A leg's outcome in our terms: `absent` resolves `undefined`, corrupt bytes and content that is no
  * JSON object throw `IDL_ERROR__IDL_PARSE_FAILED` — the fetch route turns those into a Result. The
- * error's `operation` names the leg off the result's own `source`, so it cannot contradict it. A
- * transport failure tagged by {@link toIdlRpc} stays a fetch failure, not a verdict about the bytes.
+ * error's `operation` names the leg off the result's own `source`, so it cannot contradict it. Pass
+ * `retryablePayload` where upstream's `payload` reason is not a statement about the bytes.
  */
-export function toPublishedIdl(result: IdlResult | PmpIdlResult): PublishedIdl | undefined {
+export function toPublishedIdl(
+    result: IdlResult | PmpIdlResult,
+    { retryablePayload = false }: { retryablePayload?: boolean } = {},
+): PublishedIdl | undefined {
     if (result.status === 'absent') return undefined;
     if (result.status === 'corrupt') {
-        // an IdlError cause can only be ours: upstream classified our tagged transport throw as corrupt bytes
-        if (isIdlError(result.cause)) throw result.cause;
+        if (retryablePayload && result.reason === 'payload') {
+            throw new IdlError(IDL_ERROR__IDL_FETCH_FAILED, { cause: result.cause });
+        }
         throw new IdlError(IDL_ERROR__IDL_PARSE_FAILED, {
             cause: result.cause,
             operation: `${result.source} idl data`,

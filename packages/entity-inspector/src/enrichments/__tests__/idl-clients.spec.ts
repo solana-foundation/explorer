@@ -4,7 +4,7 @@ import {
     IDL_ERROR__IDL_NOT_FOUND,
     IDL_ERROR__IDL_PARSE_FAILED,
     type IdlClient,
-    type IdlError,
+    IdlError,
 } from '@explorer/idl-decode';
 import { IdlSource } from '@explorer/idl-decode/fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -45,7 +45,7 @@ function fakeClient(idl: unknown, programName?: string): IdlClient {
 }
 
 function idlError(code: number): IdlError {
-    return { code } as IdlError;
+    return { code, message: `idl error ${code}` } as IdlError;
 }
 
 function createLoggerMock(): InspectorLogger {
@@ -95,17 +95,31 @@ describe('createIdlClientResolver', () => {
         ['a mislabeled IDL', IDL_ERROR__IDL_ADDRESS_MISMATCH],
         ['corrupt IDL bytes', IDL_ERROR__IDL_PARSE_FAILED],
         ['an unreachable source', IDL_ERROR__IDL_FETCH_FAILED],
-    ])('should resolve null and warn with the error on %s', async (_case, code) => {
+    ])('should resolve null and warn with the error code on %s', async (_case, code) => {
         const logger = createLoggerMock();
-        const error = idlError(code);
-        fetchOnChainIdlClientMock.mockResolvedValue([error, undefined]);
+        fetchOnChainIdlClientMock.mockResolvedValue([idlError(code), undefined]);
         const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
 
         await expect(resolve('program-address', 'mainnet-beta')).resolves.toBeNull();
         expect(logger.warn).toHaveBeenCalledWith(
             '[entity-inspector] idl client resolution failed',
-            expect.objectContaining({ error, programAddress: 'program-address' }),
+            expect.objectContaining({
+                error: { code, message: `idl error ${code}` },
+                programAddress: 'program-address',
+            }),
         );
+    });
+
+    it('should keep the rpc endpoint out of the warning when a transport cause carries it', async () => {
+        // Node's fetch puts the whole url in its message; the endpoint holds the api key
+        const cause = new Error('Failed to parse URL from https://mainnet-beta.rpc.address/?api-key=SUPERSECRET');
+        const logger = createLoggerMock();
+        fetchOnChainIdlClientMock.mockResolvedValue([new IdlError(IDL_ERROR__IDL_FETCH_FAILED, { cause }), undefined]);
+        const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
+
+        await resolve('program-address', 'mainnet-beta');
+
+        expect(JSON.stringify(vi.mocked(logger.warn).mock.calls)).not.toContain('SUPERSECRET');
     });
 
     it('should resolve null and warn when the fetch rejects', async () => {

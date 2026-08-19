@@ -77,6 +77,12 @@ function toFoundDiscovery(fetched: PublishedIdlClient): IdlDiscoveryResult {
     };
 }
 
+// The coded fields only, never the error itself: a transport `cause` can carry the key-bearing rpc
+// endpoint, and `IdlError`'s own message is built from the package's codes and addresses.
+function toLoggedError({ code, message }: IdlError): { code: number; message: string } {
+    return { code, message };
+}
+
 function toErrorDiscovery(error: IdlError): IdlDiscoveryResult {
     switch (error.code) {
         case IDL_ERROR__IDL_NOT_FOUND:
@@ -106,7 +112,11 @@ export function createIdlClientResolver(
         }
         // the cascade falls back to raw decoding either way, so only "no IDL published" is unremarkable
         if (outcome.error.code !== IDL_ERROR__IDL_NOT_FOUND) {
-            logger.warn(ns('idl client resolution failed'), { cluster, error: outcome.error, programAddress });
+            logger.warn(ns('idl client resolution failed'), {
+                cluster,
+                error: toLoggedError(outcome.error),
+                programAddress,
+            });
         }
         return null;
     };

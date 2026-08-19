@@ -380,9 +380,10 @@ Result:
 
 - nothing published under any lookup → `IDL_ERROR__IDL_NOT_FOUND`
 - transport failure → `IDL_ERROR__IDL_FETCH_FAILED` with its cause, so a blip stays retryable and is
-  never mistaken for "no IDL" — including the non-`SolanaError` throws `@solana/idl` reports as corrupt
-  bytes; a url-hosted PMP payload is the exception, riding upstream's own `fetch`
-- undecodable bytes, or content that is no JSON object → `IDL_ERROR__IDL_PARSE_FAILED`
+  never mistaken for "no IDL" — including whatever `@solana/idl` files under its `payload` reason on the
+  PMP leg, which is where an unreachable RPC and a failed url download both land
+- an account that is no IDL container (upstream's `framing`), or content that is no JSON object →
+  `IDL_ERROR__IDL_PARSE_FAILED`
 - an IDL declaring a **different** program address → `IDL_ERROR__IDL_ADDRESS_MISMATCH`; registries and
   custom fetchers serve mislabeled ones, so pass `verifyAddress: false` to accept it anyway
 

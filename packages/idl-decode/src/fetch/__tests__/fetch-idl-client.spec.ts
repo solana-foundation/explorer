@@ -420,11 +420,11 @@ describe('on-chain resolution', () => {
         await expect(fetcher(gen.systemProgram)).resolves.toBeUndefined();
     });
 
-    it('should surface a corrupt direct PMP payload as the typed parse error', async () => {
+    it('should surface a metadata account that is no PMP container as the typed parse error', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);
-        // the metadata decodes fine, but its zlib-claimed payload is garbage — permanent data corruption
-        const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpCorruptIdlAccount(program) });
+        // bytes that do not decode as PMP metadata at all — upstream's `framing`, a fact about the account
+        const rpc = mockRpc({ [await pmpIdlAddress(program)]: Uint8Array.from([1, 2, 3]) });
 
         const [error, client] = await fetchIdlClient(program, { rpc });
 
@@ -433,7 +433,21 @@ describe('on-chain resolution', () => {
         expect(error?.context).toMatchObject({ operation: 'pmp idl data' });
     });
 
-    it('should surface a url-sourced PMP payload failure as the typed parse error', async () => {
+    it('should surface a corrupt direct PMP payload as the typed fetch error', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        // the metadata decodes fine, but its zlib-claimed payload is garbage
+        const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpCorruptIdlAccount(program) });
+
+        const [error, client] = await fetchIdlClient(program, { rpc });
+
+        expect(client).toBeUndefined();
+        // upstream's `payload` covers a failed read/download too, so it cannot be asserted as a data verdict
+        expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
+        expect(error?.cause).toBeDefined();
+    });
+
+    it('should surface a url-sourced PMP payload failure as the typed fetch error', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);
         const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpUrlIdlAccount(program, 'https://idl.invalid/x') });
@@ -445,8 +459,8 @@ describe('on-chain resolution', () => {
             const [error, client] = await fetchIdlClient(program, { rpc });
 
             expect(client).toBeUndefined();
-            // the url payload rides upstream's global fetch, not the rpc this package tags — the one blip left unretryable
-            expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+            // the download upstream owns is unreachable — a blip, not a program that publishes bad bytes
+            expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
         } finally {
             vi.unstubAllGlobals();
         }
@@ -525,7 +539,7 @@ describe('on-chain resolution', () => {
         const [error, client] = await fetchIdlClient(program, { rpc });
 
         expect(client).toBeUndefined();
-        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
     });
 });
 
@@ -640,7 +654,7 @@ describe('fetchOnChainIdlClient', () => {
         const [error, fetched] = await fetchOnChainIdlClient(program, { rpc });
 
         expect(fetched).toBeUndefined();
-        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
     });
 
     it('should surface a transport failure as the typed fetch error with its cause', async () => {
@@ -661,7 +675,7 @@ describe('fetchOnChainIdlClient', () => {
     });
 
     it('should surface a non-SolanaError rpc failure as the typed fetch error with its cause', async () => {
-        // @solana/idl reads any non-SolanaError throw as undecodable bytes; an unreachable rpc must stay retryable
+        // @solana/idl files any non-SolanaError throw under `payload`; an unreachable rpc must stay retryable
         const cause = new Error('rpc exploded');
         const [error] = await fetchOnChainIdlClient(gen.systemProgram, {
             rpc: mockRpc({}, () => {
