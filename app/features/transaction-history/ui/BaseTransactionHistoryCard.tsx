@@ -8,9 +8,6 @@ import { cn } from '@/app/components/shared/utils';
 import { Card, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-// Domain status → how the status badge renders it. The card owns this mapping so Badge's variant
-// names ('warning' for a failed tx) never leak into the row's data model. Exported so the mobile
-// drawer can label the same status without re-deriving the mapping.
 export const STATUS_BADGE = {
     failed: { label: 'Failed', variant: 'warning' },
     success: { label: 'Success', variant: 'success' },
@@ -31,25 +28,11 @@ export type BaseTransactionHistoryCardProps = {
     foundOldest: boolean;
     onRefresh: () => void;
     onLoadMore: () => void;
-    /** Filter trigger (and any other header actions) rendered in the external header row. */
     headerActions?: ReactNode;
-    /** Active-filter chips rendered under the header. */
     headerSubRow?: ReactNode;
-    /** Per-row renderer — owns the row's lazy hooks (instruction summaries, raw data, drawer). */
     renderRow: (row: TransactionHistoryRowView, hasTimestamps: boolean) => ReactNode;
 };
 
-// Table styling + the table→card transformation, expressed as scoped arbitrary variants on the card
-// wrapper (replaces the former transaction-history.css). Mobile-first: the base (unprefixed) classes
-// build the MOBILE card layout — the thead is hidden and each row collapses into its own bordered,
-// rounded, tappable card (which opens the details drawer). Only the first cell renders — it carries
-// the full labelled card (Signature/Time/Block/Programs — see TransactionRow); the Time/Block/Size
-// cells are hidden because their data is re-shown, captioned, inside that card. The `lg:` classes
-// then REVERT everything back to a normal table on desktop (>= lg).
-//
-// NB: intentionally NOT `max-lg:` — this project overrides Tailwind's `screens` (tailwind.config.ts),
-// which disables the auto-generated `max-*` variants, so a max-width approach silently compiles to
-// nothing. Mobile-first base + `lg:` reverts is the reliable pattern here.
 const TABLE_CLASSES = cn(
     // Shared by both layouts: top-aligned cells, comfortable line-height, 12px uppercase header.
     '[&_tbody_td]:align-top [&_tbody_td]:leading-6 [&_thead_th]:!text-xs',
@@ -88,15 +71,10 @@ export function BaseTransactionHistoryCard({
     renderRow,
 }: BaseTransactionHistoryCardProps) {
     const hasTimestamps = rows.some(row => row.blockTime);
-    // No rows → an empty account whose history is fully fetched. Hide the table header
-    // (nothing to label) and give the footer message room to breathe.
     const isEmpty = rows.length === 0;
 
     return (
         <div className={TABLE_CLASSES}>
-            {/* Title rendered OUTSIDE/above the card, with the refresh button + filter trigger
-                in the same row and the active-filter chips beneath it. min-h matches the tab cards'
-                external header so the gap to the card lines up across tabs. */}
             <div className="mb-3 flex min-h-[1.75rem] items-center gap-2">
                 <CardTitle as="h3" ui="dashkit" className="flex-1">
                     Transaction History
@@ -106,9 +84,6 @@ export function BaseTransactionHistoryCard({
             </div>
             {headerSubRow && <div className="mb-3 flex flex-wrap gap-2">{headerSubRow}</div>}
 
-            {/* On mobile each row becomes its own bordered card, so strip the outer Card's
-                border/background/shadow (base) to avoid a doubled border around the row cards, then
-                restore dashkit's card chrome on desktop (>= lg) where it wraps the real table. */}
             <Card
                 ui="dashkit"
                 marginBottom="none"

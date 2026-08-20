@@ -136,21 +136,15 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
     return (
         <>
             <BaseTable.Row ref={ref} onClick={!isLg ? handleRowClick : undefined}>
-                {/* First cell carries the whole mobile card (the other cells are hidden < lg). */}
                 <BaseTable.Cell>
-                    {/* Desktop: signature + status inline (14px), programs stacked beneath. */}
                     <div className="hidden lg:block">
                         <div className="flex min-w-0 items-start gap-2">
                             <span className="min-w-0 text-sm">{signatureLink}</span>
-                            {/* top-1 drops the badge 4px so it sits lower against the signature,
-                                without affecting row height. */}
                             <span className="relative top-1">{statusBadge}</span>
                         </div>
                         <div className="mt-1">{programsBlock}</div>
                     </div>
 
-                    {/* Mobile: the row becomes a labelled card. Every field is captioned and Programs
-                        sits at the end (agreed design — see PR #109). Tapping the card opens the drawer. */}
                     <div className="flex flex-col text-sm lg:hidden">
                         <MobileField label="Signature">
                             <div className="flex min-w-0 items-start gap-2">
@@ -214,9 +208,6 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
     );
 }
 
-// A captioned field for the mobile transaction card — a thin adapter over the shared KeyValue
-// primitive (compact, borderless). The 80px label column matches the drawer's DrawerRow so the
-// card and its details drawer read consistently.
 function MobileField({ label, children }: { label: string; children: React.ReactNode }) {
     return (
         <KeyValue density="compact" divider={false} labelWidth="w-20" valueClassName="text-white" label={label}>

@@ -4,11 +4,6 @@ import { ExternalLink } from 'react-feather';
 import { cn } from '@/app/components/shared/utils';
 
 /**
- * Left-aligned value primitives for the account/program cards' `KeyValue` rows. They mirror the
- * cell renderers the old BaseTable variants used but drop the `text-right` / `alignRight` /
- * `BaseTable.Cell` wrappers so the value sits at the start of the value column — the same
- * left-aligned treatment UpgradeableProgramSection gives its addresses and slots.
- *
  * Each primitive takes a `mono` flag: `true` renders in the monospace font (hashes, keys,
  * identifiers) and breaks on any char so a long run stays clipped; `false` uses the normal
  * body font and breaks on words (prose-y values like Message / dates / repo URLs).

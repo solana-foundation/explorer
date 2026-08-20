@@ -196,11 +196,6 @@ const config: Config = {
                 // Grid template for TokenExtensions
                 '12-ext': 'repeat(12, minmax(0, 1fr))',
             },
-            maxWidth: {
-                // Named content-column cap for the address page redesign. Pair with
-                // `mx-auto w-full` to center the content column inside PageContainer.
-                col: '960px',
-            },
             keyframes: {
                 'dropdown-menu': {
                     from: { opacity: '0' },

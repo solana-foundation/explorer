@@ -165,9 +165,6 @@ export function TransactionDetailsDrawer({
     );
 }
 
-// Thin adapter over the shared KeyValue primitive (compact density = the drawer/mobile row
-// treatment): an 80px muted label column, white value, and an optional trailing action pinned at
-// the row end. The bottom divider comes from KeyValue's default.
 function DrawerRow({
     label,
     trailing,

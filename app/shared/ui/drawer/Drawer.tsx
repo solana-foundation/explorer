@@ -13,23 +13,13 @@ import { useSwipeToDismiss } from './model/useSwipeToDismiss';
 export type DrawerProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    /** Fixed region under the grab handle (title, primary id, badges). Include a DialogTitle for a11y. */
     header?: React.ReactNode;
-    /** Fixed region pinned below the scroll area (action tiles). */
     footer?: React.ReactNode;
-    /** Scrollable body content. */
     children: React.ReactNode;
-    /** Extra classes on the sheet surface — e.g. a background/top-border matching the host card. */
     className?: string;
     onEscapeKeyDown?: (event: KeyboardEvent) => void;
 } & Pick<React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, 'aria-describedby' | 'aria-label'>;
 
-/**
- * Shared mobile bottom-sheet, used by both the address transaction-history detail popup and the
- * transaction-page account detail popup. Owns the sheet chrome (rounded top, slide animation), a
- * swipe-to-dismiss grab handle, and background-agnostic edge fades on the scroll body (a mask, so
- * it works on any surface colour). Pages supply their own header / body / footer content.
- */
 export function Drawer({
     open,
     onOpenChange,
@@ -73,7 +63,6 @@ export function Drawer({
                     onTransitionEnd={onTransitionEnd}
                     {...props}
                 >
-                    {/* Grab handle: pinned to the top, never scrolls. The whole 28px zone is the grab area. */}
                     <div className="shrink-0 cursor-grab pb-3 pt-3" style={{ touchAction: 'none' }} {...handleProps}>
                         <div className="mx-auto h-1 w-9 rounded-full bg-outer-space-700" />
                     </div>

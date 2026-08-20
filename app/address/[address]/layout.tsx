@@ -193,9 +193,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
 
     return (
         <PageContainer variant="pulled-up" className="pt-3 lg:pt-5">
-            {/* Content is capped to a centered `col` (960px) column inside the fluid PageContainer;
-                the sticky tab bar (see MoreSection) spans full width but keeps its border col-width. */}
-            <div className="mx-auto w-full max-w-col">
+            <div className="mx-auto w-full max-w-5xl">
                 <Header
                     address={address}
                     account={info?.data}
@@ -204,7 +202,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
                 />
             </div>
             {!pubkey ? (
-                <div className="mx-auto w-full max-w-col">
+                <div className="mx-auto w-full max-w-5xl">
                     <ErrorCard text={`Address "${address}" is not valid`} />
                 </div>
             ) : (
@@ -286,7 +284,7 @@ function DetailsSections({
     return (
         <>
             {FLAGGED_ACCOUNTS_WARNING[address] ?? null}
-            <div className="mx-auto w-full max-w-col">
+            <div className="mx-auto w-full max-w-5xl">
                 <InfoSection account={account} tokenInfo={tokenInfo} />
             </div>
             {notification}
@@ -396,20 +394,16 @@ function MoreSection({
 
     return (
         <>
-            {/* Cap the sticky bar (and its bottom border) to the `col` content-column width when
-                inline, so the border lines up with the Header/InfoSection column. When stuck the
-                bar goes full-bleed (StickyHeader forces maxWidth:none + 100vw). The inner
-                PageContainer cancels StickyHeader's gutter offset so the tabs sit on the column. */}
-            <StickyHeader className="mx-auto w-full max-w-col">
+            <StickyHeader className="mx-auto w-full max-w-5xl">
                 <PageContainer>
-                    <div className="mx-auto w-full max-w-col">
+                    <div className="mx-auto w-full max-w-5xl">
                         <NavigationTabs buildHref={buildHref} tabs={tabs}>
                             {asyncChildren}
                         </NavigationTabs>
                     </div>
                 </PageContainer>
             </StickyHeader>
-            <div className="mx-auto w-full max-w-col">{children}</div>
+            <div className="mx-auto w-full max-w-5xl">{children}</div>
         </>
     );
 }

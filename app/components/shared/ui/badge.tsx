@@ -5,13 +5,6 @@ import * as React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-// styles.css colors every anchor green (`a { color:#33a382 }`, `a:hover { color:#2b8a6e }`). When a
-// tw badge is itself an anchor (`asChild` → `<a>`) or wraps one, that global rule overrides the
-// variant's own text color on hover — a purple tag would flip to green. Each tw variant below
-// therefore re-asserts its text color for the badge-as-anchor (`[&[href]]:hover:`) and nested-anchor
-// (`[&_a]:` / `[&_a]:hover:`) cases so hovering a tag never shifts its palette. These must stay as
-// full literal class strings: Tailwind v3 scans raw source and won't emit classes assembled at runtime.
-
 // `ui` picks the visual lineage, mirroring BaseCard / BaseTable. `dashkit` emits the raw Bootstrap
 // `.badge` + `.bg-*-soft` / `.bg-*` classes that the rest of the app currently uses so migrations don't
 // change visuals; the dashkit branch + the dashkit-only variant values get deleted once the dashkit
@@ -97,10 +90,6 @@ const badgeVariants = cva([], {
             variant: 'warning',
         },
 
-        // --- tw / tone="soft" — the dashkit soft palette rebuilt on the clean tw badge.
-        // Same hues/values as the ui="dashkit" soft variants, but riding the tw base layout
-        // (rounded/px-1.5/py-0.5/text-xs) instead of the Bootstrap `.badge` sizing. When the
-        // dashkit lineage is deleted these carry the soft look forward on pure tw. ---
         {
             class: 'border-transparent text-neutral-200 [&_a]:text-neutral-200 [&[href]]:hover:text-neutral-200 [&_a]:hover:text-neutral-200',
             tone: 'soft',
@@ -108,43 +97,43 @@ const badgeVariants = cva([], {
             variant: 'default',
         },
         {
-            class: 'border-transparent bg-[#512965] text-[#b45be1] [&_a]:text-[#b45be1] [&[href]]:hover:text-[#b45be1] [&_a]:hover:text-[#b45be1]',
+            class: 'border-transparent bg-purple-900 text-purple-500 [&_a]:text-purple-500 [&[href]]:hover:text-purple-500 [&_a]:hover:text-purple-500',
             tone: 'soft',
             ui: 'tw',
             variant: 'destructive',
         },
         {
-            class: 'border-transparent bg-[#512965] text-[#b45be1] [&_a]:text-[#b45be1] [&[href]]:hover:text-[#b45be1] [&_a]:hover:text-[#b45be1]',
+            class: 'border-transparent bg-purple-900 text-purple-500 [&_a]:text-purple-500 [&[href]]:hover:text-purple-500 [&_a]:hover:text-purple-500',
             tone: 'soft',
             ui: 'tw',
             variant: 'danger',
         },
         {
-            class: 'border-transparent bg-[#1e5159] text-[#43b5c5] [&_a]:text-[#43b5c5] [&[href]]:hover:text-[#43b5c5] [&_a]:hover:text-[#43b5c5]',
+            class: 'border-transparent bg-teal-900 text-teal-400 [&_a]:text-teal-400 [&[href]]:hover:text-teal-400 [&_a]:hover:text-teal-400',
             tone: 'soft',
             ui: 'tw',
             variant: 'info',
         },
         {
-            class: 'border-transparent bg-[#2f3c3b] text-[#698582] [&_a]:text-[#698582] [&[href]]:hover:text-[#698582] [&_a]:hover:text-[#698582]',
+            class: 'border-transparent bg-gray-800 text-gray-500 [&_a]:text-gray-500 [&[href]]:hover:text-gray-500 [&_a]:hover:text-gray-500',
             tone: 'soft',
             ui: 'tw',
             variant: 'secondary',
         },
         {
-            class: 'border-transparent bg-[#3c5352] text-[#86b8b6] [&_a]:text-[#86b8b6] [&[href]]:hover:text-[#86b8b6] [&_a]:hover:text-[#86b8b6]',
+            class: 'border-transparent bg-gray-700 text-gray-400 [&_a]:text-gray-400 [&[href]]:hover:text-gray-400 [&_a]:hover:text-gray-400',
             tone: 'soft',
             ui: 'tw',
             variant: 'gray',
         },
         {
-            class: 'border-transparent bg-[#0c231c] text-[#1b4e3f] [&_a]:text-[#1b4e3f] [&[href]]:hover:text-[#1b4e3f] [&_a]:hover:text-[#1b4e3f]',
+            class: 'border-transparent bg-green-950 text-green-900 [&_a]:text-green-900 [&[href]]:hover:text-green-900 [&_a]:hover:text-green-900',
             tone: 'soft',
             ui: 'tw',
             variant: 'dark',
         },
         {
-            class: 'border-transparent bg-[#116939] text-[#26e97e] [&_a]:text-[#26e97e] [&[href]]:hover:text-[#26e97e] [&_a]:hover:text-[#26e97e]',
+            class: 'border-transparent bg-green-800 text-green-400 [&_a]:text-green-400 [&[href]]:hover:text-green-400 [&_a]:hover:text-green-400',
             tone: 'soft',
             ui: 'tw',
             variant: 'success',
@@ -156,7 +145,7 @@ const badgeVariants = cva([], {
             variant: 'transparent',
         },
         {
-            class: 'border-transparent bg-[#712c71] text-[#fa62fc] [&_a]:text-[#fa62fc] [&[href]]:hover:text-[#fa62fc] [&_a]:hover:text-[#fa62fc]',
+            class: 'border-transparent bg-fuchsia-900 text-fuchsia-400 [&_a]:text-fuchsia-400 [&[href]]:hover:text-fuchsia-400 [&_a]:hover:text-fuchsia-400',
             tone: 'soft',
             ui: 'tw',
             variant: 'warning',
@@ -178,64 +167,64 @@ const badgeVariants = cva([], {
         // → ≈10px). Useful when rendering a dashkit badge OUTSIDE a table while still wanting the compact look.
         { class: 'text-dk-xs', size: 'sm', ui: 'dashkit' },
         {
-            class: 'bg-[#116939] text-[#26e97e] [&[href]]:hover:bg-[#0d532d] [&[href]]:focus:bg-[#0d532d]',
+            class: 'bg-green-800 text-green-400 [&[href]]:hover:bg-green-900 [&[href]]:focus:bg-green-900',
             tone: 'soft',
             ui: 'dashkit',
             variant: 'success',
         },
         {
-            class: 'bg-[#1e5159] text-[#43b5c5] [&[href]]:hover:bg-[#184046] [&[href]]:focus:bg-[#184046]',
+            class: 'bg-teal-900 text-teal-400 [&[href]]:hover:bg-teal-950 [&[href]]:focus:bg-teal-950',
             tone: 'soft',
             ui: 'dashkit',
             variant: 'info',
         },
         {
-            class: 'bg-[#712c71] text-[#fa62fc] [&[href]]:hover:bg-[#5f255f] [&[href]]:focus:bg-[#5f255f]',
+            class: 'bg-fuchsia-900 text-fuchsia-400 [&[href]]:hover:bg-fuchsia-950 [&[href]]:focus:bg-fuchsia-950',
             tone: 'soft',
             ui: 'dashkit',
             variant: 'warning',
         },
         // `destructive` (TW-flavored) and `danger` (Bootstrap-flavored) both resolve to the danger-soft palette in dashkit mode.
         {
-            class: 'bg-[#512965] text-[#b45be1] [&[href]]:hover:bg-[#422253] [&[href]]:focus:bg-[#422253]',
+            class: 'bg-purple-900 text-purple-500 [&[href]]:hover:bg-purple-950 [&[href]]:focus:bg-purple-950',
             tone: 'soft',
             ui: 'dashkit',
             variant: 'destructive',
         },
         {
-            class: 'bg-[#512965] text-[#b45be1] [&[href]]:hover:bg-[#422253] [&[href]]:focus:bg-[#422253]',
+            class: 'bg-purple-900 text-purple-500 [&[href]]:hover:bg-purple-950 [&[href]]:focus:bg-purple-950',
             tone: 'soft',
             ui: 'dashkit',
             variant: 'danger',
         },
         {
-            class: 'bg-[#2f3c3b] text-[#698582] [&[href]]:hover:bg-[#242e2d] [&[href]]:focus:bg-[#242e2d]',
+            class: 'bg-gray-800 text-gray-500 [&[href]]:hover:bg-gray-900 [&[href]]:focus:bg-gray-900',
             tone: 'soft',
             ui: 'dashkit',
             variant: 'secondary',
         },
         {
-            class: 'bg-[#3c5352] text-[#86b8b6] [&[href]]:hover:bg-[#314443] [&[href]]:focus:bg-[#314443]',
+            class: 'bg-gray-700 text-gray-400 [&[href]]:hover:bg-gray-800 [&[href]]:focus:bg-gray-800',
             tone: 'soft',
             ui: 'dashkit',
             variant: 'gray',
         },
         // shade-55% of $dark (#1b4e3f) per dark-theme $bg-soft-scale; hover = darken 5% like the other softs
         {
-            class: 'bg-[#0c231c] text-[#1b4e3f] [&[href]]:hover:bg-[#05100d] [&[href]]:focus:bg-[#05100d]',
+            class: 'bg-green-950 text-green-900 [&[href]]:hover:bg-green-950 [&[href]]:focus:bg-green-950',
             tone: 'soft',
             ui: 'dashkit',
             variant: 'dark',
         },
-        // Solid success uses dark text (#1b4e3f) against bright green — unique among solids, which all use white.
-        { class: 'bg-[#26e97e] text-[#1b4e3f]', tone: 'solid', ui: 'dashkit', variant: 'success' },
-        { class: 'bg-[#43b5c5] text-white', tone: 'solid', ui: 'dashkit', variant: 'info' },
-        // Dark text on bright `$warning` (#fa62fc) — matches the legacy `bg-warning text-dark` pairing in FeatureAccountSection.
-        { class: 'bg-[#fa62fc] text-[#1b4e3f]', tone: 'solid', ui: 'dashkit', variant: 'warning' },
-        { class: 'bg-[#b45be1] text-white', tone: 'solid', ui: 'dashkit', variant: 'destructive' },
-        { class: 'bg-[#b45be1] text-white', tone: 'solid', ui: 'dashkit', variant: 'danger' },
-        { class: 'bg-[#698582] text-white', tone: 'solid', ui: 'dashkit', variant: 'secondary' },
-        { class: 'bg-[#1b4e3f] text-white', tone: 'solid', ui: 'dashkit', variant: 'dark' },
+        // Solid success uses dark text (green-900) against bright green — unique among solids, which all use white.
+        { class: 'bg-green-400 text-green-900', tone: 'solid', ui: 'dashkit', variant: 'success' },
+        { class: 'bg-teal-400 text-white', tone: 'solid', ui: 'dashkit', variant: 'info' },
+        // Dark text on bright `$warning` — matches the legacy `bg-warning text-dark` pairing in FeatureAccountSection.
+        { class: 'bg-fuchsia-400 text-green-900', tone: 'solid', ui: 'dashkit', variant: 'warning' },
+        { class: 'bg-purple-500 text-white', tone: 'solid', ui: 'dashkit', variant: 'destructive' },
+        { class: 'bg-purple-500 text-white', tone: 'solid', ui: 'dashkit', variant: 'danger' },
+        { class: 'bg-gray-500 text-white', tone: 'solid', ui: 'dashkit', variant: 'secondary' },
+        { class: 'bg-green-900 text-white', tone: 'solid', ui: 'dashkit', variant: 'dark' },
         // Pill must follow base so `px-[0.6em]` wins over the umbrella `px-2`.
         { class: 'rounded-[50rem] px-[0.6em]', pill: true, ui: 'dashkit' },
     ],

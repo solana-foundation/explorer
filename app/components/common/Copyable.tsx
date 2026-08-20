@@ -10,12 +10,6 @@ import { type CopyState, useCopyToClipboard } from '@/app/shared/lib/useCopyToCl
 type CopyableProps = {
     text: string | null;
     children?: ReactNode;
-    /**
-     * Render as a self-contained action tile (e.g. drawer footers) instead of the inline glyph.
-     * The whole button is the hit target — inline mode only made the 13px icon clickable, which
-     * is dead when nested in a `Button` (its `[&_svg]:pointer-events-none` swallows the icon click)
-     * — and it flashes green the moment the copy lands.
-     */
     asTile?: boolean;
     className?: string;
 };

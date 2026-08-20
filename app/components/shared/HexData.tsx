@@ -100,12 +100,6 @@ export function HexData({
     isCopyable?: boolean;
     spanSize?: number;
     rowSize?: number;
-    /**
-     * Flow the fixed-size groups so they wrap to fill the container width instead
-     * of laying out fixed-width rows. Removes horizontal overflow (no side scroll);
-     * each line then holds a whole number of `spanSize`-byte groups. Used by the
-     * mobile raw-data drawer.
-     */
     wrap?: boolean;
 }) {
     if (!raw || raw.length === 0) {
@@ -158,13 +152,6 @@ const hexSpanVariants = cva('', {
     },
 });
 
-// Wrapping flow used by the mobile raw-data drawer. Unlike the fixed-row layout,
-// how many groups fit on a line depends on the responsive container width, so the
-// sequential primary/secondary alternation baked into `spans` would drift and the
-// bright/dim columns wouldn't line up vertically. Instead we measure how many
-// groups land on the first line (they all share the first group's `offsetTop`) and
-// recolour every group by its column index, so column 1 is always bright, column 2
-// dim, column 3 bright, … regardless of how many fit per line.
 function WrapContent({
     spans,
     className,
@@ -297,10 +284,6 @@ function FullContent({
     const spans = formatHexSpans(splitHexPairs(hexString), { inverted }, spanSize);
     const rows = groupHexRows(spans, rowSize, spanSize);
 
-    // Wrapping flow: each fixed-size group is an atomic inline-block (never breaks
-    // mid-group; `mr-3` sets the inter-group gap) and the breakable space after it
-    // gives the browser a wrap point — so every line holds a multiple of `spanSize`
-    // values and nothing overflows sideways. No horizontal padding on the <pre>.
     if (wrap) {
         return (
             <WrapContent
