@@ -50,9 +50,9 @@ export const LIGHTHOUSE_INSTRUCTION_NAMES: Record<LighthouseInstruction, Lightho
 };
 
 /**
- * Resolve a Lighthouse instruction's display name from its program id + discriminator prefix (the
- * leading instruction-index byte), or `undefined` if it isn't a Lighthouse instruction — so it
- * composes with other name resolvers (`zkName(...) ?? lighthouseName(...) ?? idlName(...)`).
+ * Resolve a Lighthouse instruction's display name from its program id + the leading instruction bytes,
+ * or `undefined` if it isn't a Lighthouse instruction — so it composes with the other resolvers in
+ * `NAME_SOURCES`, first hit wins (see the `transaction-data` entity README).
  * Lets transaction-history name Lighthouse rows without the full decode path or an on-chain IDL.
  */
 export function resolveLighthouseInstructionName(programId: string, data: Uint8Array): string | undefined {
