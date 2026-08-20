@@ -26,7 +26,13 @@ export async function fetchScheduledFeatures(): Promise<{
     }
     const schedule = await response.json();
     const proposals = await fetchSimdProposals();
-    return { features: featuresFromSchedule(schedule, proposals), proposals };
+    const features = featuresFromSchedule(schedule, proposals);
+    // Zero pending rows is legitimate (everything queued reached mainnet), so it
+    // isn't an error — but it's also what a truncated upstream document looks
+    // like, and the two are indistinguishable from the document alone. Log the
+    // count so a drop to zero is visible in the run rather than silent.
+    console.log(`Parsed ${features.length} pending features from the Agave schedule.`);
+    return { features, proposals };
 }
 
 /**
