@@ -10,13 +10,18 @@ describe('toInstructionCUDisplay', () => {
             expect(display.label).toBe('Transfer Checked');
         });
 
-        it('should fall back to the position as the whole label when no name resolved', () => {
+        // The legend keeps the position prefix and names the row; the tooltip shows one row at a time,
+        // so there the position is the whole identity — "Unknown Instruction" alone would read
+        // identically on every unnamed row.
+        it('should name an unresolved row in the legend and identify it by position in the chart', () => {
             const display = toInstructionCUDisplay([cuData({}), cuData({}), cuData({})]);
 
-            expect(display[2].legendLabel).toBe('Instruction #3');
+            expect(display[2].legendLabel).toBe('#3 Unknown Instruction');
             expect(display[2].label).toBe('Instruction #3');
         });
 
+        // Every legend row carries `#N `, named or not. An unnamed row that dropped the prefix broke the
+        // shape of the list around it.
         it('should number each instruction from its own position', () => {
             const display = toInstructionCUDisplay([
                 cuData({ name: 'Set Compute Unit Limit' }),
@@ -26,7 +31,7 @@ describe('toInstructionCUDisplay', () => {
 
             expect(display.map(d => d.legendLabel)).toEqual([
                 '#1 Set Compute Unit Limit',
-                'Instruction #2',
+                '#2 Unknown Instruction',
                 '#3 Route V2',
             ]);
         });
