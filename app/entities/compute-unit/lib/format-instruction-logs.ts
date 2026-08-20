@@ -36,9 +36,11 @@ export function formatInstructionLogs({
     // No rows at all is a different failure, reported at its own source — calling it misalignment here
     // would send whoever triages it hunting a filtering bug that does not exist.
     if (instructions.length > 0 && invocations.length > instructions.length) {
+        // Console only: this runs inside the callers' render-phase `useMemo`, so a Sentry capture here
+        // fires again on every recompute — twice per page view once the IDL names land.
         Logger.warn('[compute-unit] more top-level invocations than instructions; CU figures would misalign', {
-            sentry: true,
-            sentryExtras: { instructionCount: instructions.length, invocationCount: invocations.length },
+            instructionCount: instructions.length,
+            invocationCount: invocations.length,
         });
     }
 
