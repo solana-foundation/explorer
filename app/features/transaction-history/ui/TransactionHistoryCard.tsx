@@ -219,7 +219,7 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
 // card and its details drawer read consistently.
 function MobileField({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <KeyValue row density="compact" divider={false} labelWidth="w-20" valueClassName="text-white" label={label}>
+        <KeyValue density="compact" divider={false} labelWidth="w-20" valueClassName="text-white" label={label}>
             {children}
         </KeyValue>
     );

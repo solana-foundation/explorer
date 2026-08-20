@@ -86,43 +86,39 @@ export function UpgradeableProgramSection({
             refresh={() => refresh(account.pubkey, 'parsed')}
             analyticsSection="program_section"
         >
-            <KeyValue label="Address" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Address" labelWidth={LABEL_WIDTH}>
                 <Address pubkey={account.pubkey} raw />
             </KeyValue>
             {label && (
-                <KeyValue label="Address Label" labelWidth={LABEL_WIDTH} row>
+                <KeyValue label="Address Label" labelWidth={LABEL_WIDTH}>
                     {label}
                 </KeyValue>
             )}
-            <KeyValue label="Balance (SOL)" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Balance (SOL)" labelWidth={LABEL_WIDTH}>
                 <SolBalance lamports={account.lamports} />
             </KeyValue>
-            <KeyValue label="Executable" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Executable" labelWidth={LABEL_WIDTH}>
                 {programData !== undefined ? 'Yes' : 'No'}
             </KeyValue>
-            <KeyValue
-                label={`Executable Data${programData === undefined ? ' (Closed)' : ''}`}
-                labelWidth={LABEL_WIDTH}
-                row
-            >
+            <KeyValue label={`Executable Data${programData === undefined ? ' (Closed)' : ''}`} labelWidth={LABEL_WIDTH}>
                 <Address pubkey={programAccount.programData} link />
             </KeyValue>
             {programData !== undefined && (
                 <>
-                    <KeyValue label="Upgradeable" labelWidth={LABEL_WIDTH} row>
+                    <KeyValue label="Upgradeable" labelWidth={LABEL_WIDTH}>
                         {programData.authority !== null ? 'Yes' : 'No'}
                     </KeyValue>
-                    <KeyValue label={<VerifiedLabel />} labelWidth={LABEL_WIDTH} row>
+                    <KeyValue label={<VerifiedLabel />} labelWidth={LABEL_WIDTH}>
                         <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />
                     </KeyValue>
-                    <KeyValue label={<ProgramSecurityTXTLabel />} labelWidth={LABEL_WIDTH} row>
+                    <KeyValue label={<ProgramSecurityTXTLabel />} labelWidth={LABEL_WIDTH}>
                         <ProgramSecurityTXTBadge programPubkey={account.pubkey} />
                     </KeyValue>
-                    <KeyValue label="Last Deployed Slot" labelWidth={LABEL_WIDTH} row>
+                    <KeyValue label="Last Deployed Slot" labelWidth={LABEL_WIDTH}>
                         <Slot slot={programData.slot} link />
                     </KeyValue>
                     {programData.authority !== null && (
-                        <KeyValue label="Upgrade Authority" labelWidth={LABEL_WIDTH} row>
+                        <KeyValue label="Upgrade Authority" labelWidth={LABEL_WIDTH}>
                             <div className="flex min-w-0 items-center gap-2">
                                 <span className="min-w-0">
                                     <Address pubkey={programData.authority} link />
@@ -172,27 +168,27 @@ export function UpgradeableProgramDataSection({
             refresh={() => refresh(account.pubkey, 'parsed')}
             analyticsSection="program_data_section"
         >
-            <KeyValue label="Address" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Address" labelWidth={LABEL_WIDTH}>
                 <Address pubkey={account.pubkey} raw />
             </KeyValue>
-            <KeyValue label="Balance (SOL)" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Balance (SOL)" labelWidth={LABEL_WIDTH}>
                 <SolBalance lamports={account.lamports} />
             </KeyValue>
             {account.space !== undefined && (
-                <KeyValue label="Data Size (Bytes)" labelWidth={LABEL_WIDTH} row>
+                <KeyValue label="Data Size (Bytes)" labelWidth={LABEL_WIDTH}>
                     <DownloadableIcon data={programData.data[0]} filename={`${account.pubkey.toString()}.bin`}>
                         <span className="mr-1.5">{account.space}</span>
                     </DownloadableIcon>
                 </KeyValue>
             )}
-            <KeyValue label="Upgradeable" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Upgradeable" labelWidth={LABEL_WIDTH}>
                 {programData.authority !== null ? 'Yes' : 'No'}
             </KeyValue>
-            <KeyValue label="Last Deployed Slot" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Last Deployed Slot" labelWidth={LABEL_WIDTH}>
                 <Slot slot={programData.slot} link />
             </KeyValue>
             {programData.authority !== null && (
-                <KeyValue label="Upgrade Authority" labelWidth={LABEL_WIDTH} row>
+                <KeyValue label="Upgrade Authority" labelWidth={LABEL_WIDTH}>
                     <Address pubkey={programData.authority} link />
                 </KeyValue>
             )}
@@ -217,30 +213,30 @@ export function UpgradeableProgramBufferSection({
             refresh={() => refresh(account.pubkey, 'parsed')}
             analyticsSection="program_buffer_section"
         >
-            <KeyValue label="Address" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Address" labelWidth={LABEL_WIDTH}>
                 <Address pubkey={account.pubkey} raw />
             </KeyValue>
-            <KeyValue label="Balance (SOL)" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Balance (SOL)" labelWidth={LABEL_WIDTH}>
                 <SolBalance lamports={account.lamports} />
             </KeyValue>
             {account.space !== undefined && (
-                <KeyValue label="Data Size (Bytes)" labelWidth={LABEL_WIDTH} row>
+                <KeyValue label="Data Size (Bytes)" labelWidth={LABEL_WIDTH}>
                     {account.space}
                 </KeyValue>
             )}
             {bufferHash && (
-                <KeyValue label={<BufferHashLabel />} labelWidth={LABEL_WIDTH} row>
+                <KeyValue label={<BufferHashLabel />} labelWidth={LABEL_WIDTH}>
                     <Copyable text={bufferHash}>
                         <span className="break-all font-mono">{bufferHash}</span>
                     </Copyable>
                 </KeyValue>
             )}
             {programBuffer.authority !== null && (
-                <KeyValue label="Deploy Authority" labelWidth={LABEL_WIDTH} row>
+                <KeyValue label="Deploy Authority" labelWidth={LABEL_WIDTH}>
                     <Address pubkey={programBuffer.authority} link />
                 </KeyValue>
             )}
-            <KeyValue label="Owner" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Owner" labelWidth={LABEL_WIDTH}>
                 <Address pubkey={account.owner} link />
             </KeyValue>
         </AccountCard>

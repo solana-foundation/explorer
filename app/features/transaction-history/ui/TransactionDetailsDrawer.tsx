@@ -178,7 +178,7 @@ function DrawerRow({
     children?: React.ReactNode;
 }) {
     return (
-        <KeyValue row density="compact" labelWidth="w-20" valueClassName="text-white" trailing={trailing} label={label}>
+        <KeyValue density="compact" labelWidth="w-20" valueClassName="text-white" trailing={trailing} label={label}>
             {children}
         </KeyValue>
     );

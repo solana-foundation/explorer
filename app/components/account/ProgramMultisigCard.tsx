@@ -51,25 +51,25 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
 
     return (
         <SectionCard title="Upgrade Authority Multisig Information">
-            <KeyValue label="Multisig Program" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Multisig Program" labelWidth={LABEL_WIDTH}>
                 {squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}
             </KeyValue>
-            <KeyValue label="Multisig Program Id" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Multisig Program Id" labelWidth={LABEL_WIDTH}>
                 <Address
                     pubkey={new PublicKey(squadMapInfo?.version === 'v4' ? SQUADS_V4_ADDRESS : SQUADS_V3_ADDRESS)}
                     link
                 />
             </KeyValue>
-            <KeyValue label="Multisig Account" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Multisig Account" labelWidth={LABEL_WIDTH}>
                 {squadMapInfo?.isSquad && <Address pubkey={new PublicKey(squadMapInfo.multisig)} link />}
             </KeyValue>
-            <KeyValue label="Multisig Approval Threshold" labelWidth={LABEL_WIDTH} row>
+            <KeyValue label="Multisig Approval Threshold" labelWidth={LABEL_WIDTH}>
                 {squadInfo?.multisig.threshold}
                 {' of '}
                 {memberCount}
             </KeyValue>
             {members.map((member, idx) => (
-                <KeyValue key={idx} label={`Multisig Member ${idx + 1}`} labelWidth={LABEL_WIDTH} row>
+                <KeyValue key={idx} label={`Multisig Member ${idx + 1}`} labelWidth={LABEL_WIDTH}>
                     <Address pubkey={member} link />
                 </KeyValue>
             ))}

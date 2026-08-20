@@ -2,20 +2,19 @@ import React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-import { Icon } from './Icon';
-import { Label } from './Label';
-import type { LabelSize, LineBox } from './tokens';
+// Label column width shared across the redesigned account/program cards: 20% of the card
+// width, clamped to [84px, 240px]. Shared across every row (the section rows and the Raw-view
+// rows) so their values line up in one column.
+export const LABEL_WIDTH = 'w-[clamp(84px,20%,240px)]';
 
+/**
+ * A key-value row: a fixed-width label column ("key") beside a flexible value column, aligned
+ * on the text baseline. `density="compact"` tightens the padding for drawer/mobile rows.
+ */
 export function KeyValue({
     label,
-    icon,
-    trailingIcon,
     trailing,
-    labelSize = 'm',
-    lineBox,
     labelWidth = 'sm:w-56',
-    align = 'start',
-    row = false,
     density = 'comfortable',
     divider = true,
     className,
@@ -23,14 +22,8 @@ export function KeyValue({
     children,
 }: {
     label: React.ReactNode;
-    icon?: React.ReactNode;
-    trailingIcon?: React.ReactNode;
     trailing?: React.ReactNode;
-    labelSize?: LabelSize;
-    lineBox?: LineBox;
     labelWidth?: string;
-    align?: 'start' | 'end';
-    row?: boolean;
     density?: 'comfortable' | 'compact';
     divider?: boolean;
     className?: string;
@@ -38,77 +31,36 @@ export function KeyValue({
     children: React.ReactNode;
 }) {
     const compact = density === 'compact';
-    const resolvedLineBox: LineBox = lineBox ?? (compact ? 20 : 24);
     return (
         <div
             className={cn(
-                'flex border-0 border-solid border-dark-border',
+                'flex flex-row items-baseline border-0 border-solid border-dark-border',
                 divider && 'border-b last:border-b-0',
-                compact ? 'py-2' : 'px-3 py-2',
-                row
-                    ? cn('flex-row items-baseline', compact ? 'gap-3' : 'gap-dk-4')
-                    : 'flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-dk-4',
+                compact ? 'gap-3 py-2' : 'gap-dk-4 px-3 py-2',
                 className,
             )}
         >
-            <div className={cn('flex min-w-0 items-start gap-1.5', row ? 'flex-none' : 'sm:flex-none', labelWidth)}>
-                {icon != undefined && (
-                    <Icon size={labelSize} lineBox={resolvedLineBox}>
-                        {icon}
-                    </Icon>
-                )}
-                <Label size={labelSize} lineBox={resolvedLineBox}>
-                    {trailingIcon == undefined
-                        ? label
-                        : withTrailingIcon(
-                              label,
-                              <Icon inline size={labelSize} className="ml-1.5">
-                                  {trailingIcon}
-                              </Icon>,
-                          )}
-                </Label>
-            </div>
             <div
-                className={cn(
-                    'flex min-w-0 flex-1 text-sm [overflow-wrap:anywhere]',
-                    align === 'end' && (row ? 'justify-end' : 'sm:justify-end'),
-                    valueClassName,
-                )}
+                className={cn('min-w-0 flex-none text-outer-space-300', labelWidth)}
+                style={{
+                    fontSize: 14,
+                    // Wrap a too-long key onto multiple lines: hyphenate per the document's
+                    // language rules first, then break an unbreakable run so it never overflows
+                    // the label column.
+                    hyphens: 'auto',
+                    lineHeight: '20px',
+                    overflowWrap: 'break-word',
+                    // Baseline shim: drop the 14px label's baseline onto the row baseline.
+                    // Comfortable rows sit in a 24px line-box (pt 3 / pb 1); compact rows fill
+                    // the 20px line-box exactly (no shim).
+                    paddingBottom: compact ? 0 : 1,
+                    paddingTop: compact ? 0 : 3,
+                }}
             >
-                {children}
+                {label}
             </div>
+            <div className={cn('flex min-w-0 flex-1 text-sm [overflow-wrap:anywhere]', valueClassName)}>{children}</div>
             {trailing}
         </div>
-    );
-}
-
-function withTrailingIcon(label: React.ReactNode, icon: React.ReactNode): React.ReactNode {
-    if (typeof label !== 'string') {
-        return (
-            <>
-                {label}
-                {icon}
-            </>
-        );
-    }
-    // eslint-disable-next-line no-restricted-syntax -- concise trailing-whitespace trim before locating the label's last word
-    const trimmed = label.replace(/\s+$/, '');
-    const cut = trimmed.lastIndexOf(' ');
-    if (cut === -1) {
-        return (
-            <span style={{ whiteSpace: 'nowrap' }}>
-                {trimmed}
-                {icon}
-            </span>
-        );
-    }
-    return (
-        <>
-            {trimmed.slice(0, cut)}{' '}
-            <span style={{ whiteSpace: 'nowrap' }}>
-                {trimmed.slice(cut + 1)}
-                {icon}
-            </span>
-        </>
     );
 }

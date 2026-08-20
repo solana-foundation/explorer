@@ -104,7 +104,7 @@ export function BaseVerifiedBuildCard({
                 }
             >
                 {ROWS.filter(x => x.key in registryInfo).map(x => (
-                    <KeyValue key={x.key} label={x.display} labelWidth={LABEL_WIDTH} row>
+                    <KeyValue key={x.key} label={x.display} labelWidth={LABEL_WIDTH}>
                         <RenderEntry value={registryInfo[x.key]} type={x.type} mono={x.mono ?? true} />
                     </KeyValue>
                 ))}
