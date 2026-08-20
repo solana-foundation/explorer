@@ -15,10 +15,11 @@ export { isIdlProgramIdMismatch, isInteractiveIdlSupported } from './model/inter
 export { IdlVariant } from './model/idl-variant';
 
 // Per-program names built from each program's IDL — a display name plus an instruction-name resolver
-// matched by discriminator (no Borsh decode) — used to label transaction-history rows the RPC leaves as
-// "Unknown Program" / "Unknown Instruction".
-export { useInstructionNameResolvers } from './model/use-instruction-name-resolvers';
-export type { InstructionNameResolver, ProgramIdlNames } from './model/use-instruction-name-resolvers';
+// matched by discriminator (no Borsh decode) — used to label transaction rows the RPC leaves as
+// "Unknown Program" / "Unknown Instruction". One of the name sources `transaction-data` tries, not the
+// whole of instruction naming.
+export { useProgramIdlNames } from './model/use-program-idl-names';
+export type { InstructionNameResolver, ProgramIdlNames } from './model/use-program-idl-names';
 export { buildProgramName } from './model/instruction-name-table';
 
 export { getIdlSpecType as getDisplayIdlSpecType } from './model/converters/convert-display-idl';

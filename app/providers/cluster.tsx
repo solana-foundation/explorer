@@ -46,6 +46,8 @@ export {
     StateContext,
     useCluster,
     useClusterInfo,
+    type ClusterInfoResult,
+    useClusterInfoResult,
     useClusterModal,
     useSolanaRpc,
 } from '@entities/cluster';
