@@ -122,8 +122,7 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                                 // on its own, so a miss means something else owns this id. Returning
                                 // without hiding would leave the previous instruction's figures on screen.
                                 Logger.warn('[compute-unit] CU tooltip element is missing its content node', {
-                                    sentry: true,
-                                    sentryExtras: { id: TOOLTIP_ELEMENT_ID },
+                                    id: TOOLTIP_ELEMENT_ID,
                                 });
                                 tooltipEl.style.opacity = '0';
                                 return;
@@ -179,9 +178,7 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                                 // Unreachable unless the template above is edited to drop these class
                                 // names. Kept so that edit degrades to a hidden tooltip rather than one
                                 // showing the previous instruction's figures.
-                                Logger.warn('[compute-unit] CU tooltip markup is missing its text nodes', {
-                                    sentry: true,
-                                });
+                                Logger.warn('[compute-unit] CU tooltip markup is missing its text nodes');
                                 tooltipEl.style.opacity = '0';
                                 return;
                             }

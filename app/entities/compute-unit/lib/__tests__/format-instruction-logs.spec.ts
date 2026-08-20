@@ -268,9 +268,25 @@ describe('formatInstructionLogs', () => {
                 instructions: [mockInstruction('TokenProgram')],
             });
 
+            expect(warn).toHaveBeenCalledWith(expect.stringContaining('misalign'), {
+                instructionCount: 1,
+                invocationCount: 2,
+            });
+        });
+
+        // Pinned because this runs in the callers' render-phase `useMemo`: a Sentry capture would re-fire
+        // on every recompute, so the counts stay console-only context rather than `sentryExtras`.
+        it('should not send the report to Sentry', () => {
+            formatInstructionLogs({
+                cluster: Cluster.MainnetBeta,
+                epoch: 0n,
+                instructionLogs: [mockInstructionLog(5000), mockInstructionLog(100)],
+                instructions: [mockInstruction('TokenProgram')],
+            });
+
             expect(warn).toHaveBeenCalledWith(
-                expect.stringContaining('misalign'),
-                expect.objectContaining({ sentry: true, sentryExtras: { instructionCount: 1, invocationCount: 2 } }),
+                expect.any(String),
+                expect.not.objectContaining({ sentry: expect.anything() }),
             );
         });
 
