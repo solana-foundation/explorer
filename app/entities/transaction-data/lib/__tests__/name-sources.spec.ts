@@ -224,6 +224,20 @@ describe('applyNameSourcesToSummaries', () => {
         expect(row).toBe(input);
     });
 
+    // The lookup is dropped on "a source resolved", not on "the name changed". A summary carries the
+    // sentinel in `name`, so an equality test would read this source as having resolved nothing and leave
+    // the row asking for an IDL it has already been given.
+    it('should drop the lookup when a source resolves the sentinel string itself', () => {
+        const [row] = applyNameSourcesToSummaries(
+            [summary('Prog1', 1)],
+            idlNames({
+                Prog1: { programName: 'Voting', resolveInstructionName: () => UNKNOWN_INSTRUCTION_NAME },
+            }),
+        );
+
+        expect(row.nameLookup).toBeUndefined();
+    });
+
     it('should leave a row that carries no lookup untouched', () => {
         const input: InstructionSummary = { name: 'Transfer', programName: 'System Program' };
 

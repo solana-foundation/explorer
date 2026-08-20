@@ -67,10 +67,13 @@ export function applyNameSources(names: InstructionNames, idlNames: Map<string, 
     const name = resolved.name ?? names.name;
     const programName = resolved.programName ?? names.programName;
 
-    // Dropped only once the row is named. Dropping it earlier strands the row — no later fetch has
+    // Dropped only once a source names the row. Dropping it earlier strands the row — no later fetch has
     // anything left to resolve; keeping it later invites a second pass that flips the name back to the
     // sentinel whenever that fetch is slow or fails.
-    if (name === names.name) return { name, nameLookup: names.nameLookup, programName };
+    // Keyed on whether a source resolved, not on whether the name changed: a summary carries the sentinel
+    // `Unknown Instruction` in `name`, so an equality test would read a source that happened to return
+    // that exact string as "still unnamed".
+    if (resolved.name === undefined) return { name, nameLookup: names.nameLookup, programName };
 
     return { name, programName };
 }

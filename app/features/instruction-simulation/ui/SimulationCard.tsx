@@ -101,7 +101,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
                     </CardBody>
                 )}
             </SimulationCardShell>
-            {logs &&
+            {hasLogs &&
                 (unresolvable ? (
                     // Logs exist, so this owes the user a card. Every CU figure would land on the wrong
                     // instruction, so saying why beats drawing it — or vanishing.

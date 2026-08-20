@@ -85,4 +85,20 @@ describe('SimulatorCard CU profiling', () => {
         expect(screen.queryByText(UNAVAILABLE)).not.toBeInTheDocument();
         expect(CUProfilingCard).not.toHaveBeenCalled();
     });
+
+    // `parseProgramLogs` returns [] for a simulation that logged nothing, and an empty array is truthy —
+    // so guarding on the array itself put the "unavailable" excuse on a page with nothing to profile.
+    it('should render neither the chart nor a reason when the log list is empty', () => {
+        useSimulation.mockReturnValue({
+            result: { accountKeys: [], epoch: 0n, error: undefined, logs: [] },
+            simulate: vi.fn(),
+            status: 'done',
+        });
+        useSimulationInstructionNames.mockReturnValue({ instructions: [], unresolvable: true });
+
+        render(<SimulatorCard message={MESSAGE} showTokenBalanceChanges={false} />);
+
+        expect(screen.queryByText(UNAVAILABLE)).not.toBeInTheDocument();
+        expect(CUProfilingCard).not.toHaveBeenCalled();
+    });
 });
