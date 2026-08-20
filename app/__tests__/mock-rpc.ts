@@ -1,10 +1,9 @@
 import { vi } from 'vitest';
 
+import { gen } from '@/app/__fixtures__/gen';
 import { GENESIS_HASHES } from '@/app/entities/chain-id';
 import type { ClusterInfo } from '@/app/providers/cluster';
 import type { EpochSchedule } from '@/app/utils/epoch-schedule';
-
-const randomBigint = (max: bigint) => BigInt(Math.floor(Math.random() * Number(max)));
 
 interface EpochInfo {
     absoluteSlot: bigint;
@@ -16,10 +15,10 @@ interface EpochInfo {
 
 export const mockEpochInfo = (overrides?: Partial<EpochInfo>): EpochInfo => {
     const slotsInEpoch = 432_000n;
-    const absoluteSlot = randomBigint(300_000_000n);
+    const absoluteSlot = gen.slot();
     return {
         absoluteSlot,
-        blockHeight: randomBigint(250_000_000n),
+        blockHeight: gen.blockHeight(),
         epoch: absoluteSlot / slotsInEpoch,
         slotIndex: absoluteSlot % slotsInEpoch,
         slotsInEpoch,
@@ -28,15 +27,15 @@ export const mockEpochInfo = (overrides?: Partial<EpochInfo>): EpochInfo => {
 };
 
 export const mockEpochSchedule = (overrides?: Partial<EpochSchedule>): EpochSchedule => ({
-    firstNormalEpoch: randomBigint(1_000n),
-    firstNormalSlot: randomBigint(300_000_000n),
+    firstNormalEpoch: gen.epoch(),
+    firstNormalSlot: gen.slot(),
     slotsPerEpoch: 432_000n,
     ...overrides,
 });
 
 export const mockGenesisHash = (hash?: string): string => hash ?? GENESIS_HASHES.MAINNET;
 
-export const mockFirstAvailableBlock = (block?: bigint): bigint => block ?? randomBigint(300_000_000n);
+export const mockFirstAvailableBlock = (block?: bigint): bigint => block ?? gen.slot();
 
 /** Creates a mock RPC object matching the shape returned by createSolanaRpc() */
 export const mockSolanaRpc = (overrides?: Partial<ClusterInfo> & { genesisHash?: string }) => ({

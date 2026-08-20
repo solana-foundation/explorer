@@ -801,4 +801,32 @@ export default tseslint.config(
             '@typescript-eslint/no-explicit-any': 'off',
         },
     },
+
+    // A vi.mock factory in the specs setup file must be self-contained: it runs while `@solana/kit` is
+    // still resolving, so dynamically importing app code from inside one makes the factory wait on a
+    // module that is waiting on the factory, and the whole specs project deadlocks with no error and no
+    // timeout. Static imports are fine — they finish before any factory runs.
+    {
+        files: ['test-setup.specs.ts'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                {
+                    selector: 'Literal[regex]',
+                    message:
+                        'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
+                },
+                {
+                    selector: 'RegExpLiteral',
+                    message:
+                        'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
+                },
+                {
+                    selector: 'ImportExpression',
+                    message:
+                        'Do not use dynamic import() in this file. A vi.mock factory that imports app code deadlocks the specs project with no error and no timeout. Import statically at the top of the file instead.',
+                },
+            ],
+        },
+    },
 );
