@@ -34,7 +34,7 @@ describe('BaseCUProfilingCard', () => {
             );
 
             expect(screen.getByText('#1 Transfer Checked: 105')).toBeInTheDocument();
-            expect(screen.getByText('Instruction #2: 150')).toBeInTheDocument();
+            expect(screen.getByText('#2 Unknown Instruction: 150')).toBeInTheDocument();
         });
 
         // The legend truncates long names with CSS, so the full text has to stay reachable on hover.

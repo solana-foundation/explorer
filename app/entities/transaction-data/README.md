@@ -150,8 +150,11 @@ Both of these look convincing and are wrong; they were argued and discarded, so 
 ## Two row shapes
 
 `InstructionNames` leaves an unresolved name `undefined`, so a consumer can render its own fallback — the
-CU chart uses the instruction's position. `InstructionSummary` substitutes `Unknown Instruction` /
-`Unknown Program` instead, so a summary row never needs one.
+CU chart builds one from the instruction's position, and picks a different one per surface: its legend
+shows every row at once, so an unnamed row reads `#4 Unknown Instruction` and keeps the shape of the rows
+around it, while its tooltip shows one row alone, where `Instruction #4` identifies which.
+`InstructionSummary` substitutes `Unknown Instruction` / `Unknown Program` instead, so a summary row never
+needs one.
 
 Within the pipeline, `summarizeInstruction` is the only place those sentinels are introduced — everything
 upstream of it returns `undefined`. `getProgramName` in `lib/get-program-name.ts` also defaults to

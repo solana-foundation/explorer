@@ -112,7 +112,7 @@ describe('CUProfilingSection', () => {
 
             renderSection();
 
-            expect(screen.getByText('Instruction #1: 159,483')).toBeInTheDocument();
+            expect(screen.getByText('#1 Unknown Instruction: 159,483')).toBeInTheDocument();
         });
     });
 

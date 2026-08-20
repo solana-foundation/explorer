@@ -32,8 +32,8 @@ export const TwoInstructions: Story = {
     },
 };
 
-// Resolved names replace the "Instruction #N" fallback: the legend prefixes #N, the tooltip
-// qualifies the name with its program.
+// Resolved names replace the "Unknown Instruction" fallback the legend shows otherwise. Both carry the
+// #N prefix either way; the tooltip qualifies the name with its program instead.
 export const WithInstructionNames: Story = {
     args: {
         instructions: [
