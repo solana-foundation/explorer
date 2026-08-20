@@ -2060,7 +2060,7 @@
     "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
     "devnet_activation_epoch": 1115,
     "key": "iBRL5RuWhw4yqaAZu96RUULHckHTZAoe2b77qaV38JZ",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1019,
     "min_agave_versions": [
       "v4.2.0-beta.1"
     ],
@@ -2174,5 +2174,135 @@
     ],
     "testnet_activation_epoch": null,
     "title": "SIMD-0392: Relaxation of post-execution min_balance check"
+  },
+  {
+    "comms_required": null,
+    "description": "This SIMD proposes replacing all IEEE-754 double-precision floating-point arithmetic within the Solana Stake Program & validator client's warmup/ cooldown logic with a fixed-point implementation using integer arithmetic. The new logic expresses the warmup/cooldown rate in basis\u2026",
+    "devnet_activation_epoch": null,
+    "key": "s51VGwCAgebo2745DSUris72RavoLkXGUmVJosESCXr",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.2.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v26.08.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "grod220"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0391-replace-stake-program-floating-point.md"
+    ],
+    "simds": [
+      "0391"
+    ],
+    "testnet_activation_epoch": 1011,
+    "title": "SIMD-0391: Upgrade BPF Stake Program to v5.1.0 (fixed-point warmup/cooldown)"
+  },
+  {
+    "comms_required": null,
+    "description": "Reduce lamports_per_byte incrementally from 6960 to 696 via five steps: 6333, 5080, 2575, 1322, and 696. This proposal supersedes SIMD-0436, providing a more granular reduction schedule.",
+    "devnet_activation_epoch": null,
+    "key": "4a6f7o7iTcA8hRDCrPLkSatnt5Ykxiu36wo5p1Tt12wC",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.2.0-beta.1"
+    ],
+    "min_fd_versions": [
+      "v26.08.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "igor56D"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0437-incremental-rent-reduction.md"
+    ],
+    "simds": [
+      "0437"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0437-1: Set lamports per byte to 6333"
+  },
+  {
+    "comms_required": null,
+    "description": "The current live transaction formats, v0 and legacy, have a number of limitations that make them unsuitable for efficient ingestion, processing, and unable to support developer features that are required for today's applications.",
+    "devnet_activation_epoch": null,
+    "key": "txv1aq4pp281K9um3tnPgkfX8UqtFT6wcVW3hNezGLL",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.2.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v26.08.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "apfitzge"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0385-transaction-v1.md"
+    ],
+    "simds": [
+      "0385"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0385: Transaction V1"
+  },
+  {
+    "comms_required": null,
+    "description": "Allow validators to specify custom commission collector accounts where block revenue and inflation rewards commissions will be deposited.",
+    "devnet_activation_epoch": null,
+    "key": "3HcSrCTGXTUnrTueHi4DAwNuMxZSsm5xui2Ax3mgxHqf",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.2.0-beta.0"
+    ],
+    "min_fd_versions": [
+      "v26.08.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "joncinque"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0232-custom-commission-collector.md"
+    ],
+    "simds": [
+      "0232"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0232: Custom Commission Collector"
+  },
+  {
+    "comms_required": null,
+    "description": "Reduce lamports_per_byte incrementally from 6960 to 696 via five steps: 6333, 5080, 2575, 1322, and 696. This proposal supersedes SIMD-0436, providing a more granular reduction schedule.",
+    "devnet_activation_epoch": null,
+    "key": "61BtM7BkDEE8Yq5fskEVAQT9mYA8qCejJWoLe5apqg81",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.2.0-beta.1"
+    ],
+    "min_fd_versions": [
+      "v26.08.0"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "igor56D"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0437-incremental-rent-reduction.md"
+    ],
+    "simds": [
+      "0437"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0437-2: Set lamports per byte to 5080"
   }
 ]
