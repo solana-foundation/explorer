@@ -1,6 +1,8 @@
-import bs58 from 'bs58';
+import { getBase58Decoder } from '@solana/kit';
 
 import { type ByteArray, toBase64, toHex } from '@/app/shared/lib/bytes';
+
+const BASE58_DECODER = getBase58Decoder();
 
 export type EncodingFormat = 'hex' | 'base58' | 'base64';
 
@@ -13,7 +15,7 @@ const hexProvider: EncodingProvider = {
 };
 
 const base58Provider: EncodingProvider = {
-    encode: data => bs58.encode(data),
+    encode: data => BASE58_DECODER.decode(data),
 };
 
 const base64Provider: EncodingProvider = {

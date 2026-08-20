@@ -1,3 +1,4 @@
+import { getBase58Decoder } from '@solana/kit';
 import {
     ComputeBudgetProgram,
     ParsedInstruction,
@@ -6,9 +7,10 @@ import {
     PublicKey,
     SystemProgram,
 } from '@solana/web3.js';
-import bs58 from 'bs58';
 
 import { getInstructionSummaries } from '../instruction-summary';
+
+const BASE58_DECODER = getBase58Decoder();
 
 function makeTx(instructions: (ParsedInstruction | PartiallyDecodedInstruction)[]): ParsedTransactionWithMeta {
     return {
@@ -78,7 +80,7 @@ describe('getInstructionSummaries', () => {
         it('should attach the program + discriminator as a coupled nameLookup hint alongside the placeholder', () => {
             const ix: PartiallyDecodedInstruction = {
                 accounts: [],
-                data: bs58.encode(new Uint8Array([1, 2, 3])),
+                data: BASE58_DECODER.decode(new Uint8Array([1, 2, 3])),
                 programId: SystemProgram.programId,
             };
 
@@ -97,7 +99,9 @@ describe('getInstructionSummaries', () => {
         it('should cap the discriminator hint at the leading 16 bytes', () => {
             const ix: PartiallyDecodedInstruction = {
                 accounts: [],
-                data: bs58.encode(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18])),
+                data: BASE58_DECODER.decode(
+                    new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]),
+                ),
                 programId: SystemProgram.programId,
             };
 
@@ -117,7 +121,7 @@ describe('getInstructionSummaries', () => {
         it('should defer naming to a resolver via the program + discriminator hint', () => {
             const ix: PartiallyDecodedInstruction = {
                 accounts: [],
-                data: bs58.encode(new Uint8Array([3])),
+                data: BASE58_DECODER.decode(new Uint8Array([3])),
                 programId: ZK_ELGAMAL_PROOF_PROGRAM_ID,
             };
 
@@ -145,7 +149,7 @@ describe('getInstructionSummaries', () => {
             const limitData = new Uint8Array([2, 0x40, 0x0d, 0x03, 0x00]);
             const setLimit: PartiallyDecodedInstruction = {
                 accounts: [],
-                data: bs58.encode(limitData),
+                data: BASE58_DECODER.decode(limitData),
                 programId: ComputeBudgetProgram.programId,
             };
 

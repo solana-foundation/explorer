@@ -1,8 +1,10 @@
+import { getBase58Encoder } from '@solana/kit';
 import { Keypair, PublicKey, SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
-import bs58 from 'bs58';
 import { describe, expect, it } from 'vitest';
 
 import { encodeTransactionData } from '../encoding';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 // Note: Buffer is used in tests for decoding since tests run in Node.js environment.
 // The production code uses only Uint8Array for browser compatibility.
@@ -102,7 +104,7 @@ describe('transaction-data encoding', () => {
                 it(`should encode ${msgName} message from ${inputName} correctly`, () => {
                     const original = convert(create());
                     const encoded = encodeTransactionData(original, 'base58');
-                    const decoded = bs58.decode(encoded);
+                    const decoded = new Uint8Array(BASE58_ENCODER.encode(encoded));
                     verifyDecodedMessage(decoded);
                 });
             });

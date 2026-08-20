@@ -270,9 +270,6 @@ importers:
       botid:
         specifier: 1.5.10
         version: 1.5.10(next@16.3.0(@babel/core@7.29.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(@types/node@22.15.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.53.0))(react@19.2.6)
-      bs58:
-        specifier: 4.0.1
-        version: 4.0.1
       change-case:
         specifier: 5.4.4
         version: 5.4.4
@@ -451,9 +448,6 @@ importers:
       '@types/bootstrap':
         specifier: 5.2.6
         version: 5.2.6
-      '@types/bs58':
-        specifier: 4.0.1
-        version: 4.0.1
       '@types/chart.js':
         specifier: 2.9.34
         version: 2.9.34
@@ -5380,9 +5374,6 @@ packages:
 
   '@types/bootstrap@5.2.6':
     resolution: {integrity: sha512-BlAc3YATdasbHoxMoBWODrSF6qwQO/E9X8wVxCCSa6rWjnaZfpkr2N6pUMCY6jj2+wf0muUtLySbvU9etX6YqA==}
-
-  '@types/bs58@4.0.1':
-    resolution: {integrity: sha512-yfAgiWgVLjFCmRv8zAcOIHywYATEwiTVccTLnRp6UxTNavT55M9d/uhK3T03St/+8/z/wW+CRjGKUNmEqoHHCA==}
 
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
@@ -15367,10 +15358,6 @@ snapshots:
   '@types/bootstrap@5.2.6':
     dependencies:
       '@popperjs/core': 2.11.7
-
-  '@types/bs58@4.0.1':
-    dependencies:
-      base-x: 3.0.11
 
   '@types/chai@5.2.3':
     dependencies:

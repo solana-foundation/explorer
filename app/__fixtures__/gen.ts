@@ -2,9 +2,12 @@
 // If generators proliferate, consider replacing with `fast-check` arbitraries
 // (e.g. fc.bigInt(), fc.sample()) for composability and shrinking support.
 
+import { getBase58Decoder, getBase58Encoder, type ReadonlyUint8Array } from '@solana/kit';
 import type { SecurityTxtFields, SecurityTxtSource } from '@solana/security-txt';
 import { PublicKey } from '@solana/web3.js';
-import bs58 from 'bs58';
+
+const BASE58_ENCODER = getBase58Encoder();
+const BASE58_DECODER = getBase58Decoder();
 
 export const gen = {
     /** base58 32-byte address; deterministic when seed provided so story fixtures stay pixel-stable. */
@@ -15,7 +18,7 @@ export const gen = {
         } else {
             for (let i = 0; i < bytes.length; i++) bytes[i] = (seed * 19 + i * 23 + 5) & 0xff;
         }
-        return bs58.encode(bytes);
+        return BASE58_DECODER.decode(bytes);
     },
     bigint: (max = 1_000_000n) => BigInt(Math.floor(Math.random() * Number(max))),
     blockHeight: () => gen.bigint(250_000_000n),
@@ -23,7 +26,7 @@ export const gen = {
     blockhash: (seed = 0) => {
         const bytes = new Uint8Array(32);
         for (let i = 0; i < bytes.length; i++) bytes[i] = (seed * 7 + i * 13) & 0xff;
-        return bs58.encode(bytes);
+        return BASE58_DECODER.decode(bytes);
     },
     epoch: () => gen.bigint(1_000n),
     /** Same as `address` but returns a `PublicKey` so callers needn't wrap it. */
@@ -38,7 +41,7 @@ export const gen = {
         } else {
             for (let i = 0; i < bytes.length; i++) bytes[i] = (seed * 11 + i * 17) & 0xff;
         }
-        return bs58.encode(bytes);
+        return BASE58_DECODER.decode(bytes);
     },
     /** Deterministic when seed provided (same seed → same value) so story fixtures stay pixel-stable. */
     slot: (seed?: number) =>
@@ -55,9 +58,9 @@ export const gen = {
     vanityAddress: (prefix: string) => {
         for (let pad = 0; pad <= 44; pad++) {
             const candidate = prefix + '1'.repeat(pad);
-            let bytes: Uint8Array;
+            let bytes: ReadonlyUint8Array;
             try {
-                bytes = bs58.decode(candidate);
+                bytes = BASE58_ENCODER.encode(candidate);
             } catch {
                 break; // a non-base58 character in `prefix` — more padding won't help
             }

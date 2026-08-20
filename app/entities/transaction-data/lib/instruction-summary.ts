@@ -1,3 +1,4 @@
+import { getBase58Encoder } from '@solana/kit';
 import {
     ComputeBudgetProgram,
     ParsedInstruction,
@@ -7,10 +8,11 @@ import {
 import { MEMO_PROGRAM_ADDRESS } from '@solana-program/memo';
 import { camelToTitleCase } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
-import bs58 from 'bs58';
 import { is } from 'superstruct';
 
 import { getProgramName } from './get-program-name';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 // Program + discriminator are one field since they only ever travel together.
 export type InstructionNameLookup = {
@@ -54,8 +56,9 @@ function summarizeInstruction(ix: ParsedInstruction | PartiallyDecodedInstructio
     const program = getProgramName(ix.programId);
 
     if (!('parsed' in ix)) {
-        // Normalize the bs58 Buffer to a Uint8Array, capped at the longest discriminator we might match.
-        const discriminator = Uint8Array.from(bs58.decode(ix.data).subarray(0, MAX_DISCRIMINATOR_BYTES));
+        // `slice` copies rather than views, capped at the longest discriminator we might match, so the full
+        // instruction payload is not retained.
+        const discriminator = BASE58_ENCODER.encode(ix.data).slice(0, MAX_DISCRIMINATOR_BYTES);
         return {
             name: 'Unknown Instruction',
             nameLookup: { discriminator, programId: ix.programId.toBase58() },

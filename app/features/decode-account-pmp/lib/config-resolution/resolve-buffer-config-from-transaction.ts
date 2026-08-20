@@ -5,9 +5,11 @@ import {
     PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX,
     type PmpInstructionData,
 } from '@entities/pmp-instruction';
+import { getBase58Encoder } from '@solana/kit';
 import type { VersionedTransactionResponse } from '@solana/web3.js';
 import type { DataSource } from '@solana-program/program-metadata';
-import bs58 from 'bs58';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 /**
  * A config recovered from transaction, and who it was declared for.
@@ -77,7 +79,7 @@ function collectPmpInstructions(tx: VersionedTransactionResponse): PmpInstructio
     const inner = (tx.meta?.innerInstructions ?? []).flatMap(group =>
         group.instructions.map(ix => ({
             accountKeyIndexes: ix.accounts,
-            data: bs58.decode(ix.data),
+            data: new Uint8Array(BASE58_ENCODER.encode(ix.data)),
             programIdIndex: ix.programIdIndex,
         })),
     );

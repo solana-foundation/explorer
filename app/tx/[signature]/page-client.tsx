@@ -10,10 +10,10 @@ import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
+import { getBase58Encoder } from '@solana/kit';
 import { TransactionSignature } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
-import bs58 from 'bs58';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 
@@ -27,6 +27,8 @@ import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
 import { useLogsPanelScrollSync } from '@/app/tx/[signature]/use-logs-scroll-sync';
 import useTabVisibility from '@/app/utils/use-tab-visibility';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 const ALL_TRANSACTION_TABS = [
     { path: 'summary', title: 'Summary' },
@@ -47,7 +49,7 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
     const searchParams = useSearchParams();
 
     try {
-        const decoded = bs58.decode(raw);
+        const decoded = BASE58_ENCODER.encode(raw);
         if (decoded.length === 64) {
             signature = raw;
         }

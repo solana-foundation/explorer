@@ -1,3 +1,4 @@
+import { getBase58Decoder } from '@solana/kit';
 import { ParsedTransaction, PublicKey } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -8,9 +9,10 @@ import {
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
-import bs58 from 'bs58';
 
 import { Ed25519DetailsCard } from '../Ed25519DetailsCard';
+
+const BASE58_DECODER = getBase58Decoder();
 
 const ix = {
     data: Buffer.from('01000c0001004c0001006e008a000100', 'hex'),
@@ -20,7 +22,7 @@ const ix = {
 
 const surroundingIx = {
     accounts: [],
-    data: bs58.encode(Buffer.alloc(256)),
+    data: BASE58_DECODER.decode(Buffer.alloc(256)),
     programId: new PublicKey('11111111111111111111111111111111'),
 } as any;
 

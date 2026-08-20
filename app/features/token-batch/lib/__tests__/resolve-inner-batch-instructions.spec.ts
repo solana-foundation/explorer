@@ -1,6 +1,6 @@
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
+import { getBase58Decoder } from '@solana/kit';
 import { Keypair, MessageAccountKeys, MessageV0, PublicKey } from '@solana/web3.js';
-import bs58 from 'bs58';
 import { describe, expect, it } from 'vitest';
 
 import { concatBytes, toBuffer } from '@/app/shared/lib/bytes';
@@ -8,6 +8,8 @@ import { concatBytes, toBuffer } from '@/app/shared/lib/bytes';
 import { BATCH_DISCRIMINATOR } from '../const';
 import { resolveInnerBatchInstructions } from '../resolve-inner-batch-instructions';
 import { encodeSubIx, makeTransferData } from './test-utils';
+
+const BASE58_DECODER = getBase58Decoder();
 
 describe('resolveInnerBatchInstructions', () => {
     it('should return batch instructions grouped by parent index', () => {
@@ -57,7 +59,7 @@ describe('resolveInnerBatchInstructions', () => {
                     instructions: [
                         {
                             accounts: [0, 1],
-                            data: bs58.encode(new Uint8Array([1, 2, 3])),
+                            data: BASE58_DECODER.decode(new Uint8Array([1, 2, 3])),
                             programIdIndex: 3,
                         },
                     ],
@@ -185,7 +187,7 @@ function makeMessage(
         addressTableLookups: [],
         compiledInstructions: [],
         header,
-        recentBlockhash: bs58.encode(new Uint8Array(32)),
+        recentBlockhash: BASE58_DECODER.decode(new Uint8Array(32)),
         staticAccountKeys: keys,
     });
 }
@@ -199,5 +201,5 @@ function makeBatchCompiledData(subIxs: { numAccounts: number; data: Uint8Array }
         new Uint8Array([BATCH_DISCRIMINATOR]),
         ...subIxs.map(s => encodeSubIx(s.numAccounts, s.data)),
     );
-    return bs58.encode(toBuffer(body));
+    return BASE58_DECODER.decode(toBuffer(body));
 }

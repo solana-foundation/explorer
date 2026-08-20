@@ -1,7 +1,7 @@
 import { createProgramClient, type ProgramClient } from '@codama/dynamic-client';
 import { getIdlSpecType, type SupportedIdl } from '@entities/idl';
+import { getBase58Encoder } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
-import bs58 from 'bs58';
 import { camelCase } from 'change-case';
 import type {
     BytesEncoding,
@@ -27,6 +27,8 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { convertValue } from '../codama/convert-value';
 import type { PdaFormAccounts, PdaFormArgs, PdaGenerationResult, PdaProvider } from './types';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 /**
  * PDA provider for Codama IDL format.
@@ -389,7 +391,7 @@ function decodeBytesValueToHex(data: string, encoding: BytesEncoding): string {
         case 'base16':
             return data;
         case 'base58':
-            return toHex(bs58.decode(data));
+            return toHex(new Uint8Array(BASE58_ENCODER.encode(data)));
         case 'base64':
             return toHex(fromBase64(data));
         case 'utf8':
