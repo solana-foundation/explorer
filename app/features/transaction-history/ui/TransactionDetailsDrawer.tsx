@@ -15,6 +15,7 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { Drawer } from '@/app/shared/ui/drawer';
+import { KeyValue } from '@/app/shared/ui/key-value';
 import { displayTimestampUtc } from '@/app/utils/date';
 import { useClusterPath } from '@/app/utils/url';
 
@@ -104,7 +105,7 @@ export function TransactionDetailsDrawer({
             {/* Property table — each row carries a bottom border. */}
             <div className="flex flex-col px-4 pb-4 text-sm">
                 {blockTime && (
-                    <DrawerRow label="Time" alignTop>
+                    <DrawerRow label="Time">
                         <div className="flex flex-col">
                             <span className="text-white">{displayTimestampUtc(blockTime * 1000, true)}</span>
                             <span className="text-white">
@@ -142,7 +143,7 @@ export function TransactionDetailsDrawer({
                         ) : instructionNames === undefined ? (
                             <InstructionListSkeleton />
                         ) : (
-                            <span className="text-muted">---</span>
+                            <span className="text-outer-space-300">---</span>
                         )}
                     </div>
                 </DrawerRow>
@@ -164,24 +165,21 @@ export function TransactionDetailsDrawer({
     );
 }
 
+// Thin adapter over the shared KeyValue primitive (compact density = the drawer/mobile row
+// treatment): an 80px muted label column, white value, and an optional trailing action pinned at
+// the row end. The bottom divider comes from KeyValue's default.
 function DrawerRow({
     label,
-    alignTop,
     trailing,
     children,
 }: {
     label: string;
-    alignTop?: boolean;
     trailing?: React.ReactNode;
     children?: React.ReactNode;
 }) {
     return (
-        <div
-            className={`flex gap-4 border-0 border-b border-solid border-dark-border py-2 ${alignTop ? 'items-start' : 'items-baseline'} `}
-        >
-            <span className="min-w-[5rem] text-outer-space-300">{label}</span>
-            <span className="min-w-0 flex-1 text-white">{children}</span>
-            {trailing}
-        </div>
+        <KeyValue row density="compact" labelWidth="w-20" valueClassName="text-white" trailing={trailing} label={label}>
+            {children}
+        </KeyValue>
     );
 }

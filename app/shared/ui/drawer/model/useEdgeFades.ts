@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 // Distance (px) over which each edge fade eases in/out.
 const FADE_RAMP = 24;

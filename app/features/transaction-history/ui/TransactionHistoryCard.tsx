@@ -21,6 +21,7 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { useVisibility } from '@/app/shared/lib/visibility';
 import { RelativeTime } from '@/app/shared/RelativeTime';
+import { KeyValue } from '@/app/shared/ui/key-value';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { isGtfaDisabled } from '../lib/gtfa-disabled-addresses';
@@ -150,7 +151,7 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
 
                     {/* Mobile: the row becomes a labelled card. Every field is captioned and Programs
                         sits at the end (agreed design — see PR #109). Tapping the card opens the drawer. */}
-                    <div className="flex flex-col gap-2 text-sm lg:hidden">
+                    <div className="flex flex-col text-sm lg:hidden">
                         <MobileField label="Signature">
                             <div className="flex min-w-0 items-start gap-2">
                                 <span className="min-w-0">{signatureLink}</span>
@@ -213,14 +214,14 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
     );
 }
 
-// A captioned field for the mobile transaction card: muted label column + value. The 5rem label
-// column matches the drawer's DrawerRow so the card and its drawer read consistently.
+// A captioned field for the mobile transaction card — a thin adapter over the shared KeyValue
+// primitive (compact, borderless). The 80px label column matches the drawer's DrawerRow so the
+// card and its details drawer read consistently.
 function MobileField({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <div className="flex gap-3">
-            <span className="w-20 shrink-0 text-outer-space-300">{label}</span>
-            <span className="min-w-0 flex-1 text-white">{children}</span>
-        </div>
+        <KeyValue row density="compact" divider={false} labelWidth="w-20" valueClassName="text-white" label={label}>
+            {children}
+        </KeyValue>
     );
 }
 

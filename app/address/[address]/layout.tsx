@@ -192,7 +192,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     }, [address, status, info]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <PageContainer variant="pulled-up" className='pt-3 lg:pt-5'>
+        <PageContainer variant="pulled-up" className="pt-3 lg:pt-5">
             {/* Content is capped to a centered `col` (960px) column inside the fluid PageContainer;
                 the sticky tab bar (see MoreSection) spans full width but keeps its border col-width. */}
             <div className="mx-auto w-full max-w-col">

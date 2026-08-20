@@ -49,7 +49,7 @@ function TransactionAccountRow({
     pre,
 }: TransactionAccountRowProps) {
     const [expanded, setExpanded] = useState(false);
-    const [slideoverOpen, setSlideoverOpen] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const { isLandscape, isLg } = useBreakpoint();
     const isDesktop = isLg || isLandscape;
 
@@ -68,7 +68,7 @@ function TransactionAccountRow({
         if (isDesktop) {
             setExpanded(v => !v);
         } else {
-            setSlideoverOpen(true);
+            setDrawerOpen(true);
         }
     };
 
@@ -159,15 +159,15 @@ function TransactionAccountRow({
                 </div>
             </div>
 
-            {/* Mobile: slideover */}
+            {/* Mobile: drawer */}
             <AccountDetailDrawer
                 account={account}
                 accountInfo={accountInfo}
                 accountInfoLoading={accountInfoLoading}
                 index={index}
                 message={message}
-                onOpenChange={setSlideoverOpen}
-                open={slideoverOpen}
+                onOpenChange={setDrawerOpen}
+                open={drawerOpen}
             />
         </>
     );

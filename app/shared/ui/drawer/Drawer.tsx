@@ -57,7 +57,7 @@ export function Drawer({
                     onEscapeKeyDown={onEscapeKeyDown}
                     className={cn(
                         'fixed inset-x-0 bottom-0 top-auto flex max-h-[85vh] w-full max-w-none flex-col',
-                        'rounded-b-none rounded-t-2xl border-0 border-t border-solid border-dark-border bg-heavy-metal-900',
+                        'rounded-b-none rounded-t-2xl border-0 border-t border-solid border-dark-border bg-dk-gray-800-dark',
                         'data-[state=open]:animate-tx-drawer-in',
                         // Suppress the out-keyframe during a swipe-close: the transform below slides the
                         // sheet out from its drag offset, so the keyframe (which restarts from the open

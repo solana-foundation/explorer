@@ -62,7 +62,7 @@ const TABLE_CLASSES = cn(
     // First cell becomes the full-width card body: fill the card (!w-auto), drop its padding (!p-0), wrap text.
     '[&_tbody_td:first-child]:block [&_tbody_td:first-child]:!w-auto [&_tbody_td:first-child]:whitespace-normal [&_tbody_td:first-child]:!p-0',
     '[&_tbody_td:not(:first-child)]:hidden',
-    '[&_tbody_tr]:mb-2 [&_tbody_tr]:cursor-pointer [&_tbody_tr]:rounded-lg [&_tbody_tr]:border [&_tbody_tr]:border-solid [&_tbody_tr]:border-outer-space-800 [&_tbody_tr]:bg-[#1e2423] [&_tbody_tr]:px-3 [&_tbody_tr]:py-2',
+    '[&_tbody_tr]:mb-2 [&_tbody_tr]:cursor-pointer [&_tbody_tr]:rounded-lg [&_tbody_tr]:border [&_tbody_tr]:border-solid [&_tbody_tr]:border-outer-space-800 [&_tbody_tr]:bg-dk-gray-800-dark [&_tbody_tr]:px-3 [&_tbody_tr]:py-2',
     '[&_tbody_tr:last-child]:mb-0',
 
     // ── Desktop (lg+): revert the card transformation back to a normal table.

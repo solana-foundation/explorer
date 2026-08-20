@@ -94,7 +94,6 @@ export function AccountDetailDrawer({
                 onOpenChange={handleOpenChange}
                 onEscapeKeyDown={handleEscapeKeyDown}
                 aria-describedby={undefined}
-                className="!bg-dk-gray-800-dark"
                 header={header}
                 footer={footer}
             >
