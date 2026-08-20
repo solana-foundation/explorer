@@ -31,7 +31,7 @@ afterEach(() => vi.clearAllMocks());
 
 describe('useInstructionSummaries', () => {
     it('should return the summaries for a fetched transaction', async () => {
-        const summaries = [{ name: 'Transfer', program: 'System Program' }];
+        const summaries = [{ name: 'Transfer', programName: 'System Program' }];
         mocks.getParsedTransaction.mockResolvedValue({ tx: true });
         mocks.getInstructionSummaries.mockReturnValue(summaries);
 

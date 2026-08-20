@@ -1,5 +1,1 @@
-export {
-    LIGHTHOUSE_INSTRUCTION_NAMES,
-    type LighthouseInstructionType,
-    resolveLighthouseInstructionName,
-} from './lib/instruction-names';
+export { LIGHTHOUSE_INSTRUCTION_NAMES, type LighthouseInstructionType } from './lib/instruction-names';

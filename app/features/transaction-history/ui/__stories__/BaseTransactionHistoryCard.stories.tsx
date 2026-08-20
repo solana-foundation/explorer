@@ -18,7 +18,7 @@ function makeRow(
 ): TransactionHistoryRowView {
     return {
         blockTime: undefined,
-        instructionsCell: <InstructionList instructions={[{ name: 'Transfer', program: 'System' }]} />,
+        instructionsCell: <InstructionList instructions={[{ name: 'Transfer', programName: 'System' }]} />,
         rawDataCell: <span className="text-dk-gray-700">Raw</span>,
         slot: 312_456_789,
         status: 'success',
