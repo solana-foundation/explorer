@@ -1,0 +1,71 @@
+{
+    "Fully Activated": [
+        {
+            "Description": null,
+            "Devnet Epoch": 798,
+            "Feature ID": "ABCkey1111111111111111111111111111111111111",
+            "Min Agave Versions": ["v2.1.6"],
+            "Min FD Versions": [""],
+            "Min Jito Versions": [""],
+            "Owners": ["foo"],
+            "SIMDs": ["148"],
+            "Testnet Epoch": 712,
+            "Title": "MoveStake and MoveLamports"
+        }
+    ],
+    "Pending Mainnet Beta Activation": [
+        {
+            "Description": "Validators receive the full priority fee instead of burning half of it.",
+            "Devnet Epoch": 950,
+            "Feature ID": "MAINkey111111111111111111111111111111111111",
+            "Min Agave Versions": ["v2.2.0"],
+            "Min FD Versions": ["v0.6.0"],
+            "Min FRD Versions": ["v0.503.20214"],
+            "Min Jito Versions": [""],
+            "Owners": ["bar"],
+            "SIMDs": ["200"],
+            "Testnet Epoch": 900,
+            "Title": "Reward full priority fee to validators"
+        }
+    ],
+    "Pending Devnet Activation": [
+        {
+            "Description": null,
+            "Devnet Epoch": null,
+            "Feature ID": "DEVkey1111111111111111111111111111111111111",
+            "Min Agave Versions": ["v2.3.0"],
+            "Min FD Versions": [""],
+            "Min Jito Versions": ["v0.5.0"],
+            "Owners": ["baz"],
+            "SIMDs": ["215", "216"],
+            "Testnet Epoch": 1000,
+            "Title": "Dual SIMD feature"
+        }
+    ],
+    "Pending Testnet Activation": [
+        {
+            "Description": null,
+            "Devnet Epoch": null,
+            "Feature ID": "TESTkey111111111111111111111111111111111111",
+            "Min Agave Versions": ["v2.4.0"],
+            "Min FD Versions": [""],
+            "Min Jito Versions": [""],
+            "Owners": [],
+            "SIMDs": ["300"],
+            "Testnet Epoch": "",
+            "Title": "Future testnet feature"
+        },
+        {
+            "Description": null,
+            "Devnet Epoch": null,
+            "Feature ID": "NOSIMDkey11111111111111111111111111111111111",
+            "Min Agave Versions": [""],
+            "Min FD Versions": [""],
+            "Min Jito Versions": [""],
+            "Owners": [],
+            "SIMDs": [""],
+            "Testnet Epoch": "",
+            "Title": "Feature with no SIMD"
+        }
+    ]
+}

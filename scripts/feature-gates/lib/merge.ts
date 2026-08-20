@@ -4,8 +4,8 @@ import type { FeatureProbeResult } from './rpc';
 export type RefreshMode = 'default' | 'refresh-activated';
 
 /**
- * Append wiki features we haven't persisted before. Existing records are left
- * as-is: wiki metadata (`title`, `simds`, version floors, owners) is
+ * Append schedule features we haven't persisted before. Existing records are
+ * left as-is: schedule metadata (`title`, `simds`, version floors, owners) is
  * deliberately not merged back into existing rows, because a failed
  * SIMD-proposals lookup yields empty links that would otherwise clobber good
  * persisted data. The exception is `simd_link`, whose empty slots are healed
