@@ -1,8 +1,4 @@
 > Sizes are gzipped, approximate, and rounded to reduce build-output noise. Next.js 16 (Turbopack) no longer prints sizes to stdout; these are derived by gzipping the first-load chunks listed in `.next/diagnostics/route-bundle-stats.json`. `Size` is First Load JS minus the chunks shared by all routes. Routes with no client JS (e.g. API routes) show `—`.
->
-> Generated at `f54dba6d8` on 2026-08-20, Next.js 16.3.0. Regenerate with `pnpm build:info`.
->
-> A row's change since the last commit of this file spans **every** commit in between, not one PR. This table was previously generated at `067a3390e`, so the deltas recorded here also include #1201 (`refactor(deps): decode legacy layouts with kit codecs`), which dropped `@solana/buffer-layout`. Do not attribute a delta to a single change without regenerating on that change's merge base.
 
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
