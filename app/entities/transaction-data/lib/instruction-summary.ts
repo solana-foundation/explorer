@@ -29,10 +29,11 @@ export function getInstructionSummaries(transactionWithMeta: ParsedTransactionWi
     );
 }
 
-// Discriminator lookup length. Anchor discriminators are 8 bytes; a Codama discriminator is one or more
-// contiguous constant fields and can be longer (two u64s = 16). Cap at 16 so the lookup holds any
-// realistic discriminator — matchInstructionName requires the data to be at least as long as the
-// discriminator it compares — without retaining the full instruction payload.
+// Discriminator lookup length. The longest any source reads today is 8 (Anchor); the IDL table's Codama
+// path tops out at 4, since it resolves only a single constant int field at offset 0. Cap at 16 for
+// headroom without retaining the full instruction payload.
+// A ceiling, not a guarantee: an IDL declaring a discriminator longer than 16 bytes is truncated here and
+// can never match, because the comparison requires the data to be at least as long as the discriminator.
 const MAX_DISCRIMINATOR_BYTES = 16;
 
 /**

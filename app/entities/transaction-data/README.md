@@ -60,13 +60,19 @@ Break one of these and something downstream misreads a transaction. They are wha
    IDL map arrives as an argument. `model/` is the only segment that calls `useProgramIdlNames`.
 2. **Naming never throws.** `identifyInstruction` turns every generated-client throw into `undefined`.
    Callers render with no error boundary, so failing to name an instruction must never take down a page.
-3. **`nameLookup` present ⟺ the row is still unnamed.** Set when nothing named the row, dropped the
+3. **`nameLookup` present ⇒ the row is still unnamed.** Set when nothing named the row, dropped the
    moment something does. `applyNameSources` is the single owner of that rule, for every row shape.
+   One direction only: an RPC-parsed instruction that is neither a typed instruction nor a memo is
+   unnamed *without* a lookup, because it carries no raw data to hand on — see the last branch of
+   `resolveInstructionNames`. So `!nameLookup` never means "this row has a name".
 4. **A name source returns `undefined` for "not mine", never a guess.** Program gate first, discriminator
    second. Every source has the shape `(lookup, idlNames) => string | undefined`.
 5. **Row count and order survive every stage.** Consumers pair row `i` with `instructionLogs[i]`, so a
-   dropped row shifts every later CU figure onto the wrong instruction. `getInstructionSummaries` is the
-   one filter, and it runs before anything pairs rows with logs.
+   dropped row shifts every later CU figure onto the wrong instruction. Two places change the row count,
+   and neither can shift an index. `getInstructionSummaries` filters Compute Budget out — safe because
+   summary rows are never paired with logs at all, not because of where it runs. `resolveRows` drops
+   *every* row on an out-of-range `programIdIndex` rather than leaving a gap. The two surfaces that do
+   pair rows with logs never filter.
 6. **Only bytes 0–15 name an instruction** (`MAX_DISCRIMINATOR_BYTES`). Nothing downstream sees the
    argument payload.
 7. **One instruction has one wording everywhere.** `rpcTypeOverrides` in `program-client-name.ts` makes
@@ -88,10 +94,21 @@ yet".
 ## Why not use the IDL for everything?
 
 The IDL **is** the default. It is the last entry in `NAME_SOURCES` and the catch-all for every program
-without a built-in source — Jupiter, marginfi and the rest all resolve that way, and a new program needs
-no code here at all. The built-in sources are a short list of exceptions, kept for three reasons.
+that reaches the fetch — Jupiter, marginfi and the rest all resolve that way, and a new program needs no
+code here at all.
 
-**1. Most of them have no IDL to switch to.** Checked against `/api/idl-latest` on mainnet, 2026-08-19:
+Two things are held back from it. The built-in sources below are one. The other is `NON_ANCHOR_PROGRAMS`
+(`entities/idl/api/config.ts`), which `useProgramIdlNames` filters out of the fetch entirely: those
+programs never reach the IDL source whether or not a built-in source names them. That set is why the ✅
+rows in the table below are not programs we *chose* not to read an IDL for — the fetch refuses them
+structurally. It also covers builtins with no built-in source at all (Vote, Config, Address Lookup Table,
+Ed25519, Secp256k1, the BPF loaders), which stay unnamed by design rather than by omission.
+
+The built-in sources are a short list of exceptions, kept for three reasons.
+
+**1. Most of them have no IDL to switch to.** A snapshot, not a property of the code — a PMP IDL is an
+on-chain account and can appear the day after this was checked. Re-check with
+`curl '/api/idl-latest?programAddress=<id>&cluster=<cluster>'`. Checked against mainnet, 2026-08-19:
 
 | Source | IDL |
 | --- | --- |
@@ -108,11 +125,14 @@ memo's entire instruction data is its UTF-8 text, so the program id is the whole
 `transferSol`; the RPC's `parsed.type` calls it `transfer`. A fetched transaction is named from
 `parsed.type` at stage 1 and never consults an IDL, so switching stage 3 to IDL wording would make the
 same instruction read `Transfer` on the tx page and `Transfer Sol` in the simulator — invariant 7. That
-is what the `rpcTypeOverrides` map in `program-client-name.ts` exists to prevent. Token needs no
-overrides precisely because its IDL already agrees with the RPC.
+is what the `rpcTypeOverrides` map in `program-client-name.ts` exists to prevent. Token and Token-2022
+carry no overrides because their *generated-client enum names* already match `parsed.type` for every
+instruction checked — not because of an IDL, which neither program's naming ever consults. Token-2022's
+extension groups are unverified against the RPC.
 
-**3. Cluster coverage.** A PMP IDL is an on-chain account, so it exists per cluster. The Compute Budget
-IDL account is present on mainnet and devnet, **absent on testnet**, and unreachable on custom/localhost —
+**3. Cluster coverage.** A PMP IDL is an on-chain account, so it exists per cluster. As of 2026-08-19 the
+Compute Budget IDL account is present on mainnet and devnet, **absent on testnet**, and unreachable on
+custom/localhost —
 `useProgramIdlNames` returns an empty map there, having no client-side fallback (unlike `useProgramIdls`).
 A discriminator lookup works on every cluster.
 
@@ -141,4 +161,5 @@ sibling, which returns `undefined`.
 ## Everything else
 
 `api/` fetches raw and parsed transactions. `lib/adapt-parsed-transaction.ts`, `lib/encoding.ts`, and
-`lib/merge-transaction-map.ts` are unrelated to naming and stand on their own doc comments.
+`lib/merge-transaction-map.ts` are unrelated to naming and stand on their own. `model/types.ts` holds the
+transaction types the barrel re-exports.

@@ -68,8 +68,8 @@ describe('identifyInstruction', () => {
             );
         });
 
-        // Routine misses reach this same branch on two of the five clients, so Sentry would bury every
-        // genuine defect under them.
+        // Naming runs during render, so a capture would re-fire on every recompute rather than once per
+        // defect. No routine miss reaches this branch — every configured client raises the standard error.
         it('should not send the report to Sentry', () => {
             identifyInstruction(identify, { data: UNRECOGNIZED, programId: PROGRAM_ID });
 
