@@ -16,7 +16,7 @@ import { array, type Infer, nullable, number, object, string } from 'superstruct
  * `nullable()` covers "present but empty", not "absent".
  *
  * `key` validates as a base58 address (the shared `AddressFromString` from
- * `app/validators/pubkey.ts`), so a malformed row from the wiki fails the
+ * `app/validators/pubkey.ts`), so a malformed upstream row fails the
  * schema test in CI — and `create()` in `feature-store.ts` at cron time —
  * rather than reaching a reader as an invalid address. The `Address` brand it
  * produces flows to every reader (the UI passes `feature.key` straight to
@@ -48,7 +48,8 @@ export type FeatureGate = Infer<typeof FeatureGateSchema>;
 /**
  * Producer-side shape: identical to {@link FeatureGate} but with an unvalidated
  * plain-string `key`. The update pipeline (`scripts/feature-gates/`) builds rows
- * from untrusted wiki text where the key isn't yet known to be a valid address;
+ * from an untrusted upstream document where the key isn't yet known to be a
+ * valid address;
  * `create(FeatureGatesArraySchema)` in `feature-store.ts` validates and brands
  * `key` to kit's `Address` as the rows are written.
  */

@@ -65,14 +65,14 @@ describe('resolveEpoch', () => {
 describe('appendNewFeatures', () => {
     it('should append only scraped features whose key is not already known', () => {
         const existing = [feature({ key: 'A', title: 'kept' })];
-        const scraped = [feature({ key: 'A', title: 'wiki-A' }), feature({ key: 'B', title: 'wiki-B' })];
+        const scraped = [feature({ key: 'A', title: 'schedule-A' }), feature({ key: 'B', title: 'schedule-B' })];
         const result = appendNewFeatures(existing, scraped);
         expect(result.map(f => f.key)).toEqual(['A', 'B']);
     });
 
-    it('should leave existing rows untouched (no wiki metadata merge-back)', () => {
+    it('should leave existing rows untouched (no schedule metadata merge-back)', () => {
         const existing = [feature({ key: 'A', title: 'kept' })];
-        const scraped = [feature({ key: 'A', title: 'wiki-overwrite' })];
+        const scraped = [feature({ key: 'A', title: 'schedule-overwrite' })];
         const result = appendNewFeatures(existing, scraped);
         expect(result).toHaveLength(1);
         expect(result[0]).toBe(existing[0]);
