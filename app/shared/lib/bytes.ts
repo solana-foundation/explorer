@@ -80,18 +80,6 @@ export function fromBase64(base64: string): Uint8Array {
 }
 
 /**
- * Byte length of a base64 payload, without decoding it.
- *
- * Four characters encode three bytes, and trailing '=' padding is not data. Tolerates unpadded
- * input, so a payload's size can be read straight off an RPC response with no allocation.
- */
-export function base64ByteLength(base64: string): number {
-    let end = base64.length;
-    while (end > 0 && base64[end - 1] === '=') end -= 1;
-    return Math.floor((end * 3) / 4);
-}
-
-/**
  * Encode Uint8Array to base64 string
  * Replaces: buffer.toString('base64')
  */

@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
     alloc,
-    base64ByteLength,
     bnToBytes,
     bytes,
     bytesToBn,
@@ -273,25 +272,6 @@ describe('bytes helpers', () => {
                 expect(isValidBase64(null as unknown as string)).toBe(false);
                 expect(isValidBase64(undefined as unknown as string)).toBe(false);
                 expect(isValidBase64(123 as unknown as string)).toBe(false);
-            });
-        });
-
-        describe('base64ByteLength', () => {
-            it.each(Object.entries(base64TestCases))('should size "%s" without decoding it', (base64, expected) => {
-                expect(base64ByteLength(base64)).toBe(expected.length);
-            });
-
-            it('should agree with the decoded length on every padding case', () => {
-                for (let size = 0; size < 32; size++) {
-                    const base64 = toBase64(new Uint8Array(size));
-                    expect(base64ByteLength(base64)).toBe(size);
-                }
-            });
-
-            it('should size unpadded input, which carries the same bytes', () => {
-                // 'SGVsbG8=' -> 'SGVsbG8'; base64url and hand-trimmed payloads drop the padding.
-                expect(base64ByteLength('SGVsbG8')).toBe(5);
-                expect(base64ByteLength('SGVsbG8gV29ybGQ')).toBe(11);
             });
         });
     });

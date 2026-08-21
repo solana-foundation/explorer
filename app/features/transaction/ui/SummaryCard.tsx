@@ -442,6 +442,10 @@ function formatTransactionVersion(version: TransactionVersion): string {
 /**
  * v1 raised the ceiling past the UDP packet size every earlier version is bounded by. Matches the
  * inspector's limit, so the same transaction reads the same on both pages.
+ *
+ * Deliberately not kit's `getTransactionSizeLimit`: that one masks the first message byte and treats
+ * `1` as v1, but a legacy message opens with its signer count — so every single-signer legacy
+ * transaction comes back as 4096. Keyed off the decoded version, which can't be confused that way.
  */
 function transactionSizeLimit(version: TransactionVersion | undefined): number {
     return version === 1 ? V1_TRANSACTION_SIZE_LIMIT : PACKET_DATA_SIZE;
