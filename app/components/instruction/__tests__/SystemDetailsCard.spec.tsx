@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+import { TxInstructionSurface } from '@entities/instruction-card';
 import {
     createInstructionParserDispatcher,
     isParsedInstruction,
@@ -42,7 +43,15 @@ describe('instruction::SystemDetailsCard', () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <SystemDetailsCard index={index} ix={parsedIx} raw={ti} result={{ err: null }} tx={tx} />
+                            <TxInstructionSurface result={{ err: null }}>
+                                <SystemDetailsCard
+                                    index={index}
+                                    ix={parsedIx}
+                                    raw={ti}
+                                    result={{ err: null }}
+                                    tx={tx}
+                                />
+                            </TxInstructionSurface>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
@@ -69,7 +78,15 @@ describe('instruction::SystemDetailsCard', () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <SystemDetailsCard index={index} ix={parsedIx} raw={ti} result={{ err: null }} tx={tx} />
+                            <TxInstructionSurface result={{ err: null }}>
+                                <SystemDetailsCard
+                                    index={index}
+                                    ix={parsedIx}
+                                    raw={ti}
+                                    result={{ err: null }}
+                                    tx={tx}
+                                />
+                            </TxInstructionSurface>
                         </AccountsProvider>
                     </TransactionsProvider>
                 </ClusterProvider>
