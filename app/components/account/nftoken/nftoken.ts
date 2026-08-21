@@ -1,11 +1,13 @@
+import { getBase58Decoder } from '@solana/kit';
 import { Connection, PublicKey } from '@solana/web3.js';
-import bs58 from 'bs58';
 import pLimit from 'p-limit';
 
 import { fromHex } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { NftokenTypes } from './nftoken-types';
+
+const BASE58_DECODER = getBase58Decoder();
 
 export const NFTOKEN_ADDRESS = 'nftokf9qcHSYkVSP3P2gUMmV6d4AwjMueXgUu43HyLL';
 
@@ -25,7 +27,7 @@ export namespace NftokenFetcher {
             filters: [
                 {
                     memcmp: {
-                        bytes: bs58.encode(fromHex(nftokenAccountDiscInHex)),
+                        bytes: BASE58_DECODER.decode(fromHex(nftokenAccountDiscInHex)),
                         offset: 0,
                     },
                 },

@@ -1,9 +1,11 @@
+import { getBase58Decoder } from '@solana/kit';
 import { ParsedTransaction, PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
-import bs58 from 'bs58';
 import { vi } from 'vitest';
 
 import { Ed25519DetailsCard } from '../Ed25519DetailsCard';
+
+const BASE58_DECODER = getBase58Decoder();
 
 // Mock the dependencies
 vi.mock('../../../common/Address', () => ({
@@ -51,7 +53,7 @@ describe('Ed25519DetailsCard', () => {
             programId: new PublicKey('Ed25519SigVerify111111111111111111111111111'),
         };
         const programIx = {
-            data: bs58.encode(
+            data: BASE58_DECODER.decode(
                 Buffer.from(
                     '3259784efe0f688cec00000037d6acf4b3c9628b3485f398ed7baa20c37c4dff8ebee937456adea100d27c923e097cb0f41c9ff752efc7ed06db3c28bcf867f3ca203cde9222e72d1e93d503395311d51c1b87fd56c3b5872d1041111e51f399b12d291d981a0ea3834072958a00303030313031303034303432306630303030303030303030303030303030303030303030303030303031303030303030303030303030303030303031633830313939353235653733313730303030303030313330646465643337313730303030303030303030633866373165313530303030303030303334373337303431353433343533343830303030',
                     'hex',

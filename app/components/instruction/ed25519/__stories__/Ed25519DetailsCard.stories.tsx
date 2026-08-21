@@ -1,3 +1,4 @@
+import { getBase58Decoder } from '@solana/kit';
 import { ParsedTransaction, PublicKey } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -7,9 +8,10 @@ import {
     withTokenInfoBatch,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
-import bs58 from 'bs58';
 
 import { Ed25519DetailsCard } from '../Ed25519DetailsCard';
+
+const BASE58_DECODER = getBase58Decoder();
 
 // Hex bytes encode a valid single-signature Ed25519 instruction layout.
 // Source: existing __tests__/Ed25519DetailsCard.test.tsx fixture.
@@ -20,11 +22,11 @@ const ix = {
 };
 
 // Surrounding instruction at index 1 — the offsets in `ix.data` point into this instruction's
-// bs58-encoded data for signature/pubkey/message bytes. 256 zeros render empty fields without
+// base58-encoded data for signature/pubkey/message bytes. 256 zeros render empty fields without
 // requiring a real signed payload.
 const surroundingIx = {
     accounts: [],
-    data: bs58.encode(Buffer.alloc(256)),
+    data: BASE58_DECODER.decode(Buffer.alloc(256)),
     programId: new PublicKey('11111111111111111111111111111111'),
 } as any;
 

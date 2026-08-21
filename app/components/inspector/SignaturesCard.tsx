@@ -1,13 +1,15 @@
 import { Address } from '@components/common/Address';
 import { Signature } from '@components/common/Signature';
+import { getBase58Encoder } from '@solana/kit';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
-import bs58 from 'bs58';
 import React from 'react';
 import * as nacl from 'tweetnacl';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 export function TransactionSignatures({
     signatures,
@@ -25,7 +27,7 @@ export function TransactionSignatures({
             let verified;
             if (signature) {
                 const key = publicKey.toBytes();
-                const rawSignature = bs58.decode(signature);
+                const rawSignature = new Uint8Array(BASE58_ENCODER.encode(signature));
                 verified = verifySignature({
                     key,
                     message: rawMessage,
