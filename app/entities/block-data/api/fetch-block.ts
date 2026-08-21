@@ -44,6 +44,8 @@ export async function fetchBlock(url: string, slot: number): Promise<BlockWithV1
         parentSlot: Number(response.parentSlot),
         previousBlockhash: response.previousBlockhash,
         rewards: response.rewards?.map(reward => ({
+            // Only staking and voting rewards carry a commission.
+            commission: 'commission' in reward ? reward.commission : undefined,
             lamports: Number(reward.lamports),
             postBalance: reward.postBalance === null ? null : Number(reward.postBalance),
             pubkey: reward.pubkey,

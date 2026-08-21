@@ -143,6 +143,21 @@ describe('fetchBlock', () => {
         expect(block?.blockTime).toBe(1_787_266_078);
     });
 
+    it('should carry a commission only on the rewards that have one', async () => {
+        respondWith({
+            ...V1_BLOCK_RESPONSE,
+            rewards: [
+                { commission: 5, lamports: 12, postBalance: 100, pubkey: 'Vote111', rewardType: 'Voting' },
+                { lamports: 3, postBalance: 50, pubkey: 'Fee111', rewardType: 'Fee' },
+            ],
+        });
+
+        const block = await fetchBlock(URL, SLOT);
+
+        expect(block?.rewards?.[0].commission).toBe(5);
+        expect(block?.rewards?.[1].commission).toBeUndefined();
+    });
+
     it('should render each transaction signature in signer order', async () => {
         respondWith(V1_BLOCK_RESPONSE);
 
