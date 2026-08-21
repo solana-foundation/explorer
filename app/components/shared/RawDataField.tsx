@@ -5,11 +5,12 @@ import { HexData } from '@components/shared/HexData';
 import { Button } from '@components/shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/shared/ui/tabs';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, CheckCircle, ChevronDown, Copy, Download } from 'react-feather';
+import { Check, ChevronDown, Copy, Download } from 'react-feather';
 
 import { DownloadDropdown, DownloadState } from '@/app/shared/components/DownloadDropdown';
 import { type ByteArray, toBase64, toHex } from '@/app/shared/lib/bytes';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
+import { CopyButton } from '@/app/shared/ui/CopyButton';
 
 import { cn } from './utils';
 
@@ -23,10 +24,8 @@ const BASE64_VISIBLE_CHARS = 192;
 // Copy is disabled, use the download button for large payloads.
 const MAX_INLINE_BYTES = 1024;
 
-// Bottom fade-out overlay for the `embedded` variant: the data dissolves into
-// the host background (heavy-metal-900) over its last 28px instead of being cut
-// off by a divider. Inline gradient because this project skips `@tailwind base`,
-// so Tailwind's gradient utilities don't resolve.
+// Bottom fade-out for the `embedded` variant: data dissolves into the host background over its
+// last 28px. Inline gradient because this project skips `@tailwind base` (no gradient utilities).
 const FADE_TO_BG =
     'linear-gradient(to bottom, oklch(21.275% 0.00721 164.22 / 0) 0%, oklch(21.275% 0.00721 164.22) 100%)';
 
@@ -147,16 +146,7 @@ export function RawDataField({
         );
 
         const copyButton = (
-            <Button
-                variant="outline"
-                size="sm"
-                className="border-outer-space-800"
-                aria-label={copyState === 'copied' ? 'Copied' : 'Copy'}
-                disabled={!hasData || loading}
-                onClick={() => copy(tab === 'base64' ? base64String : hexString)}
-            >
-                {copyState === 'copied' ? <CheckCircle size={12} className="text-dk-info" /> : <Copy size={12} />}
-            </Button>
+            <CopyButton value={tab === 'base64' ? base64String : hexString} disabled={!hasData || loading} />
         );
 
         // Icon-only trigger (no "Download" label): this layout is the mobile drawer.
@@ -285,7 +275,7 @@ export function RawDataField({
                     {data !== undefined && !loading && (
                         <span className="whitespace-nowrap text-xs text-outer-space-300">{data.length} bytes</span>
                     )}
-                    {Boolean(extraButton) && extraButton}
+                    {extraButton}
                     <Button
                         variant="outline"
                         size="sm"

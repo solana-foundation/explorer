@@ -51,8 +51,6 @@ const badgeVariants = cva([], {
             ui: 'tw',
             variant: 'destructive',
         },
-        // Soft counterpart to `destructive` (which is solid red/white) — mirrors the soft
-        // treatment success/warning already get, for error states that shouldn't shout.
         {
             class: 'border-transparent bg-red-950 text-red-400 [&_a]:text-red-400 [&[href]]:hover:text-red-400 [&_a]:hover:text-red-400',
             tone: 'original',
@@ -209,17 +207,14 @@ const badgeVariants = cva([], {
             ui: 'dashkit',
             variant: 'gray',
         },
-        // shade-55% of $dark (#1b4e3f) per dark-theme $bg-soft-scale; hover = darken 5% like the other softs
         {
             class: 'bg-green-950 text-green-900 [&[href]]:hover:bg-green-950 [&[href]]:focus:bg-green-950',
             tone: 'soft',
             ui: 'dashkit',
             variant: 'dark',
         },
-        // Solid success uses dark text (green-900) against bright green — unique among solids, which all use white.
         { class: 'bg-green-400 text-green-900', tone: 'solid', ui: 'dashkit', variant: 'success' },
         { class: 'bg-teal-400 text-white', tone: 'solid', ui: 'dashkit', variant: 'info' },
-        // Dark text on bright `$warning` — matches the legacy `bg-warning text-dark` pairing in FeatureAccountSection.
         { class: 'bg-fuchsia-400 text-green-900', tone: 'solid', ui: 'dashkit', variant: 'warning' },
         { class: 'bg-purple-500 text-white', tone: 'solid', ui: 'dashkit', variant: 'destructive' },
         { class: 'bg-purple-500 text-white', tone: 'solid', ui: 'dashkit', variant: 'danger' },

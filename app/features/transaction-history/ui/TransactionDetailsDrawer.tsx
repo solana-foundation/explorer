@@ -6,19 +6,19 @@ import { Button } from '@components/shared/ui/button';
 import { DialogClose, DialogTitle } from '@components/shared/ui/dialog';
 import Link from 'next/link';
 import React, { useEffect } from 'react';
-import { ArrowRight, CheckCircle, Copy, X } from 'react-feather';
+import { ArrowRight, X } from 'react-feather';
 
 import { Copyable } from '@/app/components/common/Copyable';
 import type { InstructionSummary } from '@/app/entities/transaction-data';
 import { FetchStatus } from '@/app/providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
-import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 import { RelativeTime } from '@/app/shared/RelativeTime';
+import { CopyButton } from '@/app/shared/ui/CopyButton';
 import { Drawer } from '@/app/shared/ui/drawer';
-import { KeyValue } from '@/app/shared/ui/key-value';
 import { displayTimestampUtc } from '@/app/utils/date';
 import { useClusterPath } from '@/app/utils/url';
 
+import { CompactKeyValue } from './CompactKeyValue';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
 
 export function TransactionDetailsDrawer({
@@ -42,8 +42,6 @@ export function TransactionDetailsDrawer({
 }) {
     const txPath = useClusterPath({ pathname: `/tx/${signature}` });
     const blockPath = useClusterPath({ pathname: `/block/${slot}` });
-    const [copyState, copy] = useCopyToClipboard();
-    const [blockCopyState, copyBlock] = useCopyToClipboard();
 
     const fetchRaw = useFetchRawTransaction();
     const rawDetails = useRawTransactionDetails(signature);
@@ -56,8 +54,6 @@ export function TransactionDetailsDrawer({
     const header = (
         <Drawer.Header>
             <DialogTitle className="!mt-0 text-base !text-outer-space-300">Transaction</DialogTitle>
-            {/* Big signature; the status badge drops to its own line below, with a copy button
-                pinned to the end of that line. */}
             <div className="mt-2 flex items-end gap-4 pb-2 text-white">
                 <div className="min-w-0 flex-1">
                     <span className="break-all font-mono text-xl">{signature}</span>
@@ -67,15 +63,7 @@ export function TransactionDetailsDrawer({
                         </Badge>
                     </div>
                 </div>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="my-[-4px] border-outer-space-800"
-                    aria-label={copyState === 'copied' ? 'Copied signature' : 'Copy signature'}
-                    onClick={() => copy(signature)}
-                >
-                    {copyState === 'copied' ? <CheckCircle size={12} className="text-dk-info" /> : <Copy size={12} />}
-                </Button>
+                <CopyButton value={signature} noun="signature" className="my-[-4px]" />
             </div>
         </Drawer.Header>
     );
@@ -102,41 +90,30 @@ export function TransactionDetailsDrawer({
 
     return (
         <Drawer open={open} onOpenChange={onOpenChange} header={header} footer={footer}>
-            {/* Property table — each row carries a bottom border. */}
             <div className="flex flex-col px-4 pb-4 text-sm">
                 {blockTime && (
-                    <DrawerRow label="Time">
+                    <CompactKeyValue label="Time">
                         <div className="flex flex-col">
-                            <span className="text-white">{displayTimestampUtc(blockTime * 1000, true)}</span>
-                            <span className="text-white">
-                                <RelativeTime date={blockTime * 1000} />
-                            </span>
+                            <span>{displayTimestampUtc(blockTime * 1000, true)}</span>
+                            <RelativeTime date={blockTime * 1000} />
                         </div>
-                    </DrawerRow>
+                    </CompactKeyValue>
                 )}
-                <DrawerRow
+                <CompactKeyValue
                     label="Block"
                     trailing={
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="relative top-[1px] my-[-4px] border-outer-space-800"
-                            aria-label={blockCopyState === 'copied' ? 'Copied block number' : 'Copy block number'}
-                            onClick={() => copyBlock(slot.toString())}
-                        >
-                            {blockCopyState === 'copied' ? (
-                                <CheckCircle size={12} className="text-dk-info" />
-                            ) : (
-                                <Copy size={12} />
-                            )}
-                        </Button>
+                        <CopyButton
+                            value={slot.toString()}
+                            noun="block number"
+                            className="relative top-[1px] my-[-4px]"
+                        />
                     }
                 >
                     <Link href={blockPath} className="font-mono text-sm">
                         {slot.toLocaleString('en-US')}
                     </Link>
-                </DrawerRow>
-                <DrawerRow label="Programs">
+                </CompactKeyValue>
+                <CompactKeyValue label="Programs">
                     <div className="min-w-0">
                         {instructionNames !== undefined && instructionNames.length > 0 ? (
                             <InstructionList instructions={instructionNames} />
@@ -146,37 +123,18 @@ export function TransactionDetailsDrawer({
                             <span className="text-outer-space-300">---</span>
                         )}
                     </div>
-                </DrawerRow>
-                {/* No separate "Size (bytes)" label — the raw-data field carries its own "Size"
-                    caption before the byte count. Full-width stacked row. */}
-                <div className="flex flex-col gap-2 pb-1 pt-2">
-                    <div className="min-w-0 text-white">
-                        <RawDataField
-                            data={transactionData}
-                            loading={rawDetails === undefined || rawLoading}
-                            filename={signature}
-                            variant="embedded"
-                            bytesPrefix="Size "
-                        />
-                    </div>
+                </CompactKeyValue>
+                {/* The raw-data field carries its own "Size" caption, so this row has no label. */}
+                <div className="flex flex-col gap-2 pb-1 pt-2 text-white">
+                    <RawDataField
+                        data={transactionData}
+                        loading={rawDetails === undefined || rawLoading}
+                        filename={signature}
+                        variant="embedded"
+                        bytesPrefix="Size "
+                    />
                 </div>
             </div>
         </Drawer>
-    );
-}
-
-function DrawerRow({
-    label,
-    trailing,
-    children,
-}: {
-    label: string;
-    trailing?: React.ReactNode;
-    children?: React.ReactNode;
-}) {
-    return (
-        <KeyValue density="compact" labelWidth="w-20" valueClassName="text-white" trailing={trailing} label={label}>
-            {children}
-        </KeyValue>
     );
 }

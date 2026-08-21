@@ -3,20 +3,14 @@ import * as React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-// Two axes:
-//   `variant`     — semantic colour (info / success / warning / danger / scam / default).
-//   `appearance`  — visual style. `filled` (default) is the solid Dashkit-dark `.alert-<color>`
-//                   look; `outlined` drops the background for a transparent block with a coloured
-//                   border + coloured text. Colours per axis are wired via compoundVariants below.
-// Base keeps `mb-6` (existing app-wide default spacing); callers that manage their own spacing
-// pass `!mb-0` (Alert uses plain clsx, so a non-important `mb-0` won't win the source-order tie).
+// Two axes: `variant` is the semantic colour; `appearance` is `filled` (solid) or `outlined`
+// (transparent/tinted). Colours are wired per pair via compoundVariants below.
+// Base keeps `mb-6`; callers managing their own spacing pass `!mb-0`.
 const alertVariants = cva(['relative', 'mb-6', 'rounded-dk', 'border', 'border-solid', 'px-4', 'py-3', 'text-sm'], {
     compoundVariants: [
-        // Filled — solid background (matches app/scss/dashkit/_alert.scss at runtime).
         { appearance: 'filled', class: 'border-dk-danger bg-dk-danger text-dk-white', variant: 'danger' },
         { appearance: 'filled', class: 'border-transparent', variant: 'default' },
         { appearance: 'filled', class: 'border-dk-info bg-dk-info text-dk-white', variant: 'info' },
-        // Louder pure-red override for flagged-account / scam warnings — see app/scss/_solana.scss `.alert-scam`.
         { appearance: 'filled', class: 'border-[red] bg-[red] text-dk-white', variant: 'scam' },
         {
             appearance: 'filled',
@@ -28,11 +22,8 @@ const alertVariants = cva(['relative', 'mb-6', 'rounded-dk', 'border', 'border-s
             class: 'border-dk-warning-on-dark bg-dk-warning-on-dark text-dk-white',
             variant: 'warning',
         },
-        // Outlined — no solid fill; each variant sets its own (transparent or lightly tinted) panel.
         { appearance: 'outlined', class: 'border-dk-danger text-dk-danger', variant: 'danger' },
         { appearance: 'outlined', class: 'border-outer-space-800', variant: 'default' },
-        // info + warning match the Security.txt / Verified-Build info panels: a semi-transparent
-        // tinted block (bg 10% / border 25%), light body text, a brighter icon, and anchor tints.
         {
             appearance: 'outlined',
             class: cn(

@@ -21,16 +21,16 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { useVisibility } from '@/app/shared/lib/visibility';
 import { RelativeTime } from '@/app/shared/RelativeTime';
-import { KeyValue } from '@/app/shared/ui/key-value';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { isGtfaDisabled } from '../lib/gtfa-disabled-addresses';
 import { useAccountHistory, useHistoryFiltersSupported, useResetAccountHistory } from '../model/use-account-history';
 import { useFetchAccountHistory } from '../model/use-fetch-account-history';
 import { useResolvedInstructionSummaries } from '../model/use-resolved-instruction-summaries';
-import { AccountSizeField } from './AccountSizeField';
 import { BaseTransactionHistoryCard, STATUS_BADGE, type TransactionHistoryRowView } from './BaseTransactionHistoryCard';
+import { CompactKeyValue } from './CompactKeyValue';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
+import { RawDataSizeField } from './RawDataSizeField';
 import { TransactionDetailsDrawer } from './TransactionDetailsDrawer';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
@@ -210,14 +210,14 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
 
 function MobileField({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <KeyValue density="compact" divider={false} labelWidth="w-20" valueClassName="text-white" label={label}>
+        <CompactKeyValue divider={false} label={label}>
             {children}
-        </KeyValue>
+        </CompactKeyValue>
     );
 }
 
-// Size (bytes) cell: a byte-size button that opens the raw data (hex/base64 + copy +
-// download) in a popover. Fetches on mount so the size shows without interaction.
+// Byte-size cell that opens the raw data (hex/base64 + copy + download) in a popover.
+// Fetches on mount so the size shows without interaction.
 function TransactionRawDataSize({ signature }: { signature: string }) {
     const fetchRaw = useFetchRawTransaction();
     const rawDetails = useRawTransactionDetails(signature);
@@ -229,12 +229,12 @@ function TransactionRawDataSize({ signature }: { signature: string }) {
     }, [signature]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <AccountSizeField
+        <RawDataSizeField
             size={transactionData?.length}
             data={transactionData}
             filename={signature}
             loading={loading}
-            // Collapse the button's fixed height so the size sits on the same line as the other
+            // Collapse the fixed button height so the size sits inline with the other cells.
             buttonClassName="relative top-0.5 !h-auto !py-0 !text-sm [&_svg]:!size-3.5"
         />
     );

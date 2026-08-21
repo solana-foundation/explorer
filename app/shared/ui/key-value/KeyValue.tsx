@@ -2,19 +2,17 @@ import React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-// Label column width shared across the redesigned account/program cards: 20% of the card
-// width, clamped to [84px, 240px]. Shared across every row (the section rows and the Raw-view
-// rows) so their values line up in one column.
+// Shared label-column width so values line up in one column across every card and Raw-view row.
 export const LABEL_WIDTH = 'w-[clamp(84px,20%,240px)]';
 
 /**
- * A key-value row: a fixed-width label column ("key") beside a flexible value column, aligned
- * on the text baseline. `density="compact"` tightens the padding for drawer/mobile rows.
+ * A key-value row: a fixed-width label column beside a flexible value column, aligned on the text
+ * baseline. `density="compact"` tightens the padding for drawer/mobile rows.
  */
 export function KeyValue({
     label,
     trailing,
-    labelWidth = 'sm:w-56',
+    labelWidth = LABEL_WIDTH,
     density = 'comfortable',
     divider = true,
     className,
@@ -41,21 +39,12 @@ export function KeyValue({
             )}
         >
             <div
-                className={cn('min-w-0 flex-none text-outer-space-300', labelWidth)}
-                style={{
-                    fontSize: 14,
-                    // Wrap a too-long key onto multiple lines: hyphenate per the document's
-                    // language rules first, then break an unbreakable run so it never overflows
-                    // the label column.
-                    hyphens: 'auto',
-                    lineHeight: '20px',
-                    overflowWrap: 'break-word',
-                    // Baseline shim: drop the 14px label's baseline onto the row baseline.
-                    // Comfortable rows sit in a 24px line-box (pt 3 / pb 1); compact rows fill
-                    // the 20px line-box exactly (no shim).
-                    paddingBottom: compact ? 0 : 1,
-                    paddingTop: compact ? 0 : 3,
-                }}
+                className={cn(
+                    'min-w-0 flex-none text-sm leading-5 text-outer-space-300 [hyphens:auto] [overflow-wrap:break-word]',
+                    // Baseline shim: nudge the label onto the row baseline (comfortable rows only).
+                    compact ? 'py-0' : 'pb-px pt-[3px]',
+                    labelWidth,
+                )}
             >
                 {label}
             </div>

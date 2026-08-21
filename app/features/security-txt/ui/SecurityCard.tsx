@@ -12,7 +12,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { triggerDownload } from '@/app/shared/lib/triggerDownload';
 import { Alert } from '@/app/shared/ui/Alert/Alert';
 import { SectionCard } from '@/app/shared/ui/Card/SectionCard';
-import { CodeBlock, ExternalLinkValue, KeyValue, LABEL_WIDTH, StackedList, TextValue } from '@/app/shared/ui/key-value';
+import { CodeBlock, ExternalLinkValue, KeyValue, StackedList, TextValue } from '@/app/shared/ui/key-value';
 
 import { type ResolvedSecurityTxt, useSecurityTxt } from '../model/useSecurityTxt';
 import { ContactInfo, SecurityTxtVersionBadge } from './common';
@@ -124,7 +124,7 @@ function NeodymeSecurityTxtRows({ data }: { data: NeodymeSecurityTxtFields }) {
     return (
         <>
             {NEODYME_ROWS.filter(x => x.key in data && data[x.key]).map(x => (
-                <KeyValue key={x.key} label={x.display} labelWidth={LABEL_WIDTH}>
+                <KeyValue key={x.key} label={x.display}>
                     {/* Only the Source Code Revision (a commit hash) stays monospace; every other
                         field renders in the normal body font. */}
                     <NeodymeValue value={data[x.key] as string} type={x.type} mono={x.key === 'source_revision'} />
@@ -206,7 +206,7 @@ function PmpSecurityTxtRows({ data }: { data: Record<string, any> }) {
     return (
         <>
             {entries.main.map(([key, value]) => (
-                <KeyValue key={key} label={key} labelWidth={LABEL_WIDTH}>
+                <KeyValue key={key} label={key}>
                     <PmpValue entryKey={key} value={value} mono={key === 'source_revision'} />
                 </KeyValue>
             ))}
@@ -216,7 +216,7 @@ function PmpSecurityTxtRows({ data }: { data: Record<string, any> }) {
                         <span className="font-semibold text-dk-gray-700">Additional</span>
                     </div>
                     {entries.additional.map(([key, value]) => (
-                        <KeyValue key={key} label={key} labelWidth={LABEL_WIDTH}>
+                        <KeyValue key={key} label={key}>
                             <PmpValue entryKey={key} value={value} mono={key === 'source_revision'} />
                         </KeyValue>
                     ))}

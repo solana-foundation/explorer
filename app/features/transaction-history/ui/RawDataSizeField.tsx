@@ -9,10 +9,10 @@ import { Code } from 'react-feather';
 
 import type { ByteArray } from '@/app/shared/lib/bytes';
 
-export type AccountSizeFieldProps = {
-    /** Account data size in bytes. `undefined` renders a placeholder (info unavailable). */
+export type RawDataSizeFieldProps = {
+    /** Payload size in bytes. `undefined` renders a placeholder (info unavailable). */
     size: number | undefined;
-    /** Raw account data shown in the popover (only relevant when `size > 0`). */
+    /** Raw bytes shown in the popover (only relevant when `size > 0`). */
     data: ByteArray | undefined;
     filename: string;
     loading?: boolean;
@@ -20,11 +20,7 @@ export type AccountSizeFieldProps = {
     buttonClassName?: string;
 };
 
-/**
- * Compact "size in bytes" control: shows the byte count and, when there's data,
- * opens the full RawDataField (hex/base64/copy/download) in a popover.
- */
-export function AccountSizeField({ size, data, filename, loading, buttonClassName }: AccountSizeFieldProps) {
+export function RawDataSizeField({ size, data, filename, loading, buttonClassName }: RawDataSizeFieldProps) {
     if (loading) {
         return <Skeleton className="tx-size-skeleton my-1 h-3.5 w-16" />;
     }
@@ -37,8 +33,6 @@ export function AccountSizeField({ size, data, filename, loading, buttonClassNam
         return (
             <Popover>
                 <PopoverTrigger asChild>
-                    {/* `!px-0` drops the ghost button's default horizontal padding so its
-                        content lines up with the "Size (bytes)" header's left edge. */}
                     <Button variant="ghost" className={cn('!px-0', buttonClassName)}>
                         <Code size={14} />
                         <span>{size.toLocaleString('en-US')}</span>

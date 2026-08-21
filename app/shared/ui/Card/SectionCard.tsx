@@ -3,16 +3,10 @@ import React from 'react';
 import { Card, CardTitle } from '@/app/shared/ui/Card';
 
 /**
- * The Overview-card treatment shared by every program-account tab card, lifted from
- * `UpgradeableProgramSection` (BaseAccountCard's `headerOutside` branch): the title —
- * plus any header actions — sits on the page background above the card, and the card
- * body is a single `overflow-x-clip` / `min-w-0` column so an unwrappable value
- * (address, hash, verify command) is clipped at the block edge instead of spilling
- * past the rounded border or turning the row into a horizontal scroll container.
- *
- * Unlike BaseAccountCard this drops the Raw toggle + download/refresh actions that only
- * make sense for a full Account — the tab cards render presentational data, so they get
- * the same frame without the account chrome.
+ * Presentational counterpart to BaseAccountCard for program-account tab cards: the title (and any
+ * header actions) sit on the page background above the card; the body is one `overflow-x-clip`
+ * column so unwrappable values (address, hash, command) are clipped at the block edge. Drops the
+ * Raw toggle and refresh/download chrome that only a full Account needs.
  */
 export function SectionCard({
     title,
@@ -24,24 +18,15 @@ export function SectionCard({
     title: React.ReactNode;
     /** Rendered to the right of the title in the outside header (e.g. a badge or Download button). */
     headerActions?: React.ReactNode;
-    /**
-     * Optional standalone note (e.g. an `Alert`) rendered in the gap between the outside
-     * header and the card — the treatment for the Security.txt caveat.
-     */
+    /** Standalone note (e.g. an `Alert`) rendered between the outside header and the card. */
     note?: React.ReactNode;
-    /**
-     * Drop the Card's built-in `mb-6` so the caller can control the gap to whatever it
-     * renders directly below the card. Applied as `!mb-0` because a non-important `mb-0`
-     * would lose the source-order tie and leave the 24px margin in place.
-     */
+    /** Drop the Card's built-in `mb-6` so the caller controls the gap below the card. */
     noCardMargin?: boolean;
     children: React.ReactNode;
 }) {
     return (
         <>
-            {/* min-h-[1.75rem] matches the Transaction History card's external header: a title-only
-                header is centered in the same 28px box, so the space above and below the title — and
-                thus the gap to the card — lines up across all tabs. */}
+            {/* min-h matches the Transaction History card's header so the gap to the card lines up across tabs. */}
             <div className="mb-3 flex min-h-[1.75rem] items-center gap-2">
                 <CardTitle as="h3" ui="dashkit" className="flex flex-1 items-center gap-2">
                     {title}

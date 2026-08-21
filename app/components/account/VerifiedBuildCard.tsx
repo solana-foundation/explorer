@@ -10,7 +10,7 @@ import { Alert } from '@/app/shared/ui/Alert/Alert';
 import { CardBody, CardTitle } from '@/app/shared/ui/Card';
 import { SectionCard } from '@/app/shared/ui/Card/SectionCard';
 import { CopyableCode } from '@/app/shared/ui/CopyableCode';
-import { ExternalLinkValue, KeyValue, LABEL_WIDTH, TextValue } from '@/app/shared/ui/key-value';
+import { ExternalLinkValue, KeyValue, TextValue } from '@/app/shared/ui/key-value';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 import { VERIFIED_BUILDS_GUIDE_URL } from '@/app/utils/verified-builds-url';
 
@@ -104,7 +104,7 @@ export function BaseVerifiedBuildCard({
                 }
             >
                 {ROWS.filter(x => x.key in registryInfo).map(x => (
-                    <KeyValue key={x.key} label={x.display} labelWidth={LABEL_WIDTH}>
+                    <KeyValue key={x.key} label={x.display}>
                         <RenderEntry value={registryInfo[x.key]} type={x.type} mono={x.mono ?? true} />
                     </KeyValue>
                 ))}

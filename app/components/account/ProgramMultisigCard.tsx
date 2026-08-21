@@ -11,7 +11,7 @@ import {
     useSquadsMultisigLookup,
 } from '@/app/providers/squadsMultisig';
 import { SectionCard } from '@/app/shared/ui/Card/SectionCard';
-import { KeyValue, LABEL_WIDTH } from '@/app/shared/ui/key-value';
+import { KeyValue } from '@/app/shared/ui/key-value';
 
 import { Address } from '../common/Address';
 import { LoadingCard } from '../common/LoadingCard';
@@ -51,25 +51,23 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
 
     return (
         <SectionCard title="Upgrade Authority Multisig Information">
-            <KeyValue label="Multisig Program" labelWidth={LABEL_WIDTH}>
-                {squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}
-            </KeyValue>
-            <KeyValue label="Multisig Program Id" labelWidth={LABEL_WIDTH}>
+            <KeyValue label="Multisig Program">{squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}</KeyValue>
+            <KeyValue label="Multisig Program Id">
                 <Address
                     pubkey={new PublicKey(squadMapInfo?.version === 'v4' ? SQUADS_V4_ADDRESS : SQUADS_V3_ADDRESS)}
                     link
                 />
             </KeyValue>
-            <KeyValue label="Multisig Account" labelWidth={LABEL_WIDTH}>
+            <KeyValue label="Multisig Account">
                 {squadMapInfo?.isSquad && <Address pubkey={new PublicKey(squadMapInfo.multisig)} link />}
             </KeyValue>
-            <KeyValue label="Multisig Approval Threshold" labelWidth={LABEL_WIDTH}>
+            <KeyValue label="Multisig Approval Threshold">
                 {squadInfo?.multisig.threshold}
                 {' of '}
                 {memberCount}
             </KeyValue>
             {members.map((member, idx) => (
-                <KeyValue key={idx} label={`Multisig Member ${idx + 1}`} labelWidth={LABEL_WIDTH}>
+                <KeyValue key={idx} label={`Multisig Member ${idx + 1}`}>
                     <Address pubkey={member} link />
                 </KeyValue>
             ))}
