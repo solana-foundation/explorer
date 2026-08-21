@@ -20,7 +20,7 @@ import {
     useTransactionStatus,
 } from '@providers/transactions';
 import type { TransactionVersion } from '@solana/kit';
-import { ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
+import { PACKET_DATA_SIZE, ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { SignatureProps } from '@utils/index';
@@ -34,6 +34,7 @@ import { ZoomIn } from 'react-feather';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
+import { V1_TRANSACTION_SIZE_LIMIT } from '@/app/shared/lib/v1-message-bridge';
 import { Card } from '@/app/shared/ui/Card';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -116,6 +117,10 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     });
 
     const serializedRawData = rawDetails?.data?.raw?.messageBytes;
+    const serializedSize = rawDetails?.data?.raw?.serializedSize;
+    // Read the version off the raw details rather than the parsed ones, so the size and the limit it
+    // is compared against always come from the same fetch.
+    const rawVersion = rawDetails?.data?.raw?.version;
 
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
@@ -380,6 +385,25 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     </Row>
                 )}
 
+                {/* Transaction size */}
+                {serializedSize !== undefined && (
+                    <Row divider>
+                        <Label className="overflow-visible">
+                            <InfoTooltip text="Size on the wire: signatures plus the compiled message">
+                                Transaction size
+                            </InfoTooltip>
+                        </Label>
+                        <Value className="flex flex-wrap items-baseline gap-x-2">
+                            {serializedSize.toLocaleString('en-US')} bytes
+                            {/* No over-limit styling here, unlike the inspector: a transaction that
+                                landed is necessarily within the limit. The cap is context for headroom. */}
+                            <span className="text-xs text-outer-space-300">
+                                Max is {transactionSizeLimit(rawVersion).toLocaleString('en-US')} bytes
+                            </span>
+                        </Value>
+                    </Row>
+                )}
+
                 {/* Timestamp */}
                 {info.timestamp !== 'unavailable' ? (
                     <>
@@ -413,4 +437,16 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
 
 function formatTransactionVersion(version: TransactionVersion): string {
     return version === 'legacy' ? version : `v${version}`;
+}
+
+/**
+ * v1 raised the ceiling past the UDP packet size every earlier version is bounded by. Matches the
+ * inspector's limit, so the same transaction reads the same on both pages.
+ *
+ * Deliberately not kit's `getTransactionSizeLimit`: that one masks the first message byte and treats
+ * `1` as v1, but a legacy message opens with its signer count — so every single-signer legacy
+ * transaction comes back as 4096. Keyed off the decoded version, which can't be confused that way.
+ */
+function transactionSizeLimit(version: TransactionVersion | undefined): number {
+    return version === 1 ? V1_TRANSACTION_SIZE_LIMIT : PACKET_DATA_SIZE;
 }
