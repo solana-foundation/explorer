@@ -20,6 +20,7 @@ import type { SupportedCluster } from '../config.js';
 import { type InspectorLogger, ns } from '../logger.js';
 import { RPC_REQUEST_TIMEOUT_MS } from '../shared/constants.js';
 import { resolveRpcEndpoint } from '../rpc/resolve-rpc-endpoint.js';
+import { raceWithTimeout } from '../rpc/timeout.js';
 import { PROGRAMS_WITHOUT_ANCHOR_IDL } from './programs-without-anchor-idl.js';
 import type { IdlDiscoveryResult, IdlSourceWire } from './types.js';
 
@@ -41,11 +42,17 @@ type FetchOutcome = { fetched: PublishedIdlClient } | { error: IdlError } | { re
 
 async function fetchOnChain(programAddress: string, rpc: IdlFetcherRpc): Promise<FetchOutcome> {
     try {
-        const [error, fetched] = await fetchOnChainIdlClient(programAddress, {
-            abortSignal: AbortSignal.timeout(RPC_REQUEST_TIMEOUT_MS),
-            anchor: !PROGRAMS_WITHOUT_ANCHOR_IDL.has(programAddress),
-            rpc,
-        });
+        // The signal binds the account reads only: a url-sourced PMP payload goes through global
+        // fetch, so the race is what keeps that leg from stalling the whole response.
+        const [error, fetched] = await raceWithTimeout(
+            fetchOnChainIdlClient(programAddress, {
+                abortSignal: AbortSignal.timeout(RPC_REQUEST_TIMEOUT_MS),
+                anchor: !PROGRAMS_WITHOUT_ANCHOR_IDL.has(programAddress),
+                rpc,
+            }),
+            RPC_REQUEST_TIMEOUT_MS,
+            'IDL resolution',
+        );
         return error ? { error } : { fetched };
     } catch (rejected) {
         // only aborts/timeouts reject — every data outcome is an error-first Result

@@ -27,6 +27,12 @@ vi.mock('@solana/kit', () => ({
     createSolanaRpc: vi.fn(() => ({})),
 }));
 
+// Shrinks the RPC timeout so the stalled-fetch cases do not wait 5s.
+vi.mock('../../shared/constants.js', async importOriginal => ({
+    ...(await importOriginal<Record<string, unknown>>()),
+    RPC_REQUEST_TIMEOUT_MS: 10,
+}));
+
 const RPC_ENDPOINTS = {
     devnet: 'https://devnet.rpc.address',
     'mainnet-beta': 'https://mainnet-beta.rpc.address',
@@ -125,6 +131,19 @@ describe('createIdlClientResolver', () => {
     it('should resolve null and warn when the fetch rejects', async () => {
         const logger = createLoggerMock();
         fetchOnChainIdlClientMock.mockRejectedValue(new Error('timed out'));
+        const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
+
+        await expect(resolve('program-address', 'testnet')).resolves.toBeNull();
+        expect(logger.warn).toHaveBeenCalledWith(
+            '[entity-inspector] idl client resolution timed out',
+            expect.objectContaining({ programAddress: 'program-address' }),
+        );
+    });
+
+    it('should resolve null and warn when the fetch never settles', async () => {
+        // a url-sourced PMP payload ignores the abort signal, so only the race ends this
+        const logger = createLoggerMock();
+        fetchOnChainIdlClientMock.mockReturnValue(new Promise(() => {}));
         const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
 
         await expect(resolve('program-address', 'testnet')).resolves.toBeNull();
@@ -236,6 +255,18 @@ describe('createProgramIdlDiscovery', () => {
     it('should warn and report source_unavailable when the fetch rejects', async () => {
         const logger = createLoggerMock();
         fetchOnChainIdlClientMock.mockRejectedValue(new Error('timed out'));
+        const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, logger);
+
+        await expect(discover('program-address', 'mainnet-beta')).resolves.toEqual({
+            client: null,
+            discovery: { reason: 'source_unavailable', status: 'unknown' },
+        });
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should warn and report source_unavailable when the fetch never settles', async () => {
+        const logger = createLoggerMock();
+        fetchOnChainIdlClientMock.mockReturnValue(new Promise(() => {}));
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, logger);
 
         await expect(discover('program-address', 'mainnet-beta')).resolves.toEqual({
