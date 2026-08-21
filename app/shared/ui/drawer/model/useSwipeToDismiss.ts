@@ -37,9 +37,17 @@ export function useSwipeToDismiss(
     onTransitionEnd: (e: React.TransitionEvent<HTMLDivElement>) => void;
 } {
     const dragStartY = React.useRef<number | undefined>(undefined);
-    const [dragY, setDragY] = React.useState(0);
+    const [dragY, setDragYState] = React.useState(0);
     const [dragging, setDragging] = React.useState(false);
     const [closing, setClosing] = React.useState(false);
+
+    // Mirror the live offset in a ref so `end` reads the value from the final pointermove, not the
+    // (possibly stale) one captured in the render that created the handler.
+    const dragYRef = React.useRef(0);
+    const setDragY = React.useCallback((y: number) => {
+        dragYRef.current = y;
+        setDragYState(y);
+    }, []);
 
     // Reset once the sheet has fully closed, so the next open starts from a clean, on-screen state.
     React.useEffect(() => {
@@ -49,11 +57,20 @@ export function useSwipeToDismiss(
             setClosing(false);
             dragStartY.current = undefined;
         }
-    }, [open]);
+    }, [open, setDragY]);
+
+    // Abandon a gesture whose pointerup we never saw (released off-element / interrupted): snap back to
+    // the open position and clear the armed start point so a later move can't drag from a stale origin.
+    const cancel = (e: React.PointerEvent<HTMLDivElement>) => {
+        dragStartY.current = undefined;
+        setDragging(false);
+        setDragY(0);
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+    };
 
     const end = (e: React.PointerEvent<HTMLDivElement>) => {
         if (dragStartY.current === undefined) return;
-        const dismiss = dragY > DISMISS_THRESHOLD;
+        const dismiss = dragYRef.current > DISMISS_THRESHOLD;
         dragStartY.current = undefined;
         setDragging(false);
         if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
@@ -84,6 +101,7 @@ export function useSwipeToDismiss(
         },
         onPointerMove: e => {
             if (dragStartY.current === undefined) return;
+            if (e.buttons === 0) return cancel(e);
             // Downward only — dragging up clamps to 0.
             setDragY(Math.max(0, e.clientY - dragStartY.current));
         },
@@ -100,6 +118,7 @@ export function useSwipeToDismiss(
         },
         onPointerMove: e => {
             if (dragStartY.current === undefined) return;
+            if (e.buttons === 0) return cancel(e);
             const delta = e.clientY - dragStartY.current;
             if (!dragging) {
                 if (delta > 0 && (scrollRef.current?.scrollTop ?? 0) <= 0) {

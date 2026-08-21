@@ -1,7 +1,5 @@
 'use client';
 
-import { Button } from '@components/shared/ui/button';
-import { cn } from '@components/shared/utils';
 import { type ReactNode, useEffect, useState } from 'react';
 import { CheckCircle, Copy, Loader, XCircle } from 'react-feather';
 
@@ -10,11 +8,11 @@ import { type CopyState, useCopyToClipboard } from '@/app/shared/lib/useCopyToCl
 type CopyableProps = {
     text: string | null;
     children?: ReactNode;
-    asTile?: boolean;
-    className?: string;
 };
 
-export function Copyable({ text, children, asTile = false, className }: CopyableProps) {
+// Inline copy affordance: a small glyph that sits next to `children`. For a standalone labeled copy
+// button (e.g. drawer footer actions) use `CopyButton` instead.
+export function Copyable({ text, children }: CopyableProps) {
     const [clipboardState, copy] = useCopyToClipboard(1000);
     const [loading, setLoading] = useState(false);
 
@@ -37,8 +35,7 @@ export function Copyable({ text, children, asTile = false, className }: Copyable
 
     const copyStrategy: Record<CopyState | 'loading', JSX.Element> = {
         copied: <CheckCircle className="align-text-top" size={13} />,
-        // In tile mode the enclosing Button owns the click; keep the inline glyph clickable otherwise.
-        copy: <Copy className="cursor-pointer align-text-top" onClick={asTile ? undefined : handleClick} size={13} />,
+        copy: <Copy className="cursor-pointer align-text-top" onClick={handleClick} size={13} />,
         errored: (
             <span title="Please check your browser's copy permissions.">
                 <XCircle className="align-text-top" size={13} />
@@ -56,24 +53,6 @@ export function Copyable({ text, children, asTile = false, className }: Copyable
         textColor = 'text-dk-info';
     } else if (state === 'errored') {
         textColor = 'text-dk-danger';
-    }
-
-    if (asTile) {
-        return (
-            <Button
-                type="button"
-                size="tile"
-                variant="outline"
-                onClick={handleClick}
-                aria-label={state === 'copied' ? 'Copied' : 'Copy'}
-                className={cn(className, state === 'copied' && 'animate-tx-copy-flash')}
-            >
-                <span className={textColor}>
-                    <CopyIcon />
-                </span>
-                {children}
-            </Button>
-        );
     }
 
     return (

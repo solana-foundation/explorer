@@ -32,7 +32,7 @@ export function BalanceDelta({ delta, isSol = false }: { delta: DeltaValue; isSo
     }
 
     return (
-        <Badge ui="dashkit" variant="secondary" className="font-mono">
+        <Badge ui="dashkit" variant="default" className="bg-outer-space-800 font-mono text-outer-space-300">
             +0
         </Badge>
     );

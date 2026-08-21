@@ -35,6 +35,9 @@ import { TransactionDetailsDrawer } from './TransactionDetailsDrawer';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
+    // One breakpoint subscription for the whole card — each row reads `isLg` as a prop rather than
+    // registering its own matchMedia listeners (25 rows × several media queries otherwise).
+    const { isLg } = useBreakpoint();
     const filters = useHistoryFilters();
     const hasActiveFilters = Object.values(filters).some(value => value !== undefined);
     const filtersKey = JSON.stringify(filters);
@@ -97,19 +100,34 @@ export function TransactionHistoryCard({ address }: { address: string }) {
             headerActions={<HistoryFilterTrigger address={address} {...filters} />}
             headerSubRow={hasActiveFilters ? <HistoryFilterChips {...filters} /> : undefined}
             renderRow={(row, hasTimestamps) => (
-                <TransactionRow key={row.signature} row={row} hasTimestamps={hasTimestamps} />
+                <TransactionRow key={row.signature} row={row} hasTimestamps={hasTimestamps} isLg={isLg} />
             )}
         />
     );
 }
 
-function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView; hasTimestamps: boolean }) {
+function TransactionRow({
+    row,
+    hasTimestamps,
+    isLg,
+}: {
+    row: TransactionHistoryRowView;
+    hasTimestamps: boolean;
+    isLg: boolean;
+}) {
     const { signature, slot, blockTime, status } = row;
     const { isVisible, ref } = useVisibility<HTMLTableRowElement>(true);
     const instructionNames = useResolvedInstructionSummaries(signature, isVisible);
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const { isLg } = useBreakpoint();
+    // Mount the mobile drawer only once the row is first tapped — otherwise every row would mount a
+    // closed drawer (with its own raw-tx subscription) up front.
+    const [drawerMounted, setDrawerMounted] = useState(false);
     const badge = STATUS_BADGE[status];
+
+    const openDrawer = () => {
+        setDrawerMounted(true);
+        setDrawerOpen(true);
+    };
 
     const programsBlock =
         instructionNames !== undefined && instructionNames.length > 0 ? (
@@ -130,7 +148,7 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
     const handleRowClick = (e: React.MouseEvent) => {
         // Skip the drawer when the user actually clicked a real link/button in the row.
         if (e.target instanceof HTMLElement && e.target.closest('a, button')) return;
-        if (!isLg) setDrawerOpen(true);
+        if (!isLg) openDrawer();
     };
 
     return (
@@ -187,12 +205,12 @@ function TransactionRow({ row, hasTimestamps }: { row: TransactionHistoryRowView
 
                 {isLg && (
                     <BaseTable.Cell className="w-px">
-                        <TransactionRawDataSize signature={signature} />
+                        <TransactionRawDataSize signature={signature} isVisible={isVisible} />
                     </BaseTable.Cell>
                 )}
             </BaseTable.Row>
 
-            {!isLg && (
+            {!isLg && drawerMounted && (
                 <TransactionDetailsDrawer
                     open={drawerOpen}
                     onOpenChange={setDrawerOpen}
@@ -217,16 +235,17 @@ function MobileField({ label, children }: { label: string; children: React.React
 }
 
 // Byte-size cell that opens the raw data (hex/base64 + copy + download) in a popover.
-// Fetches on mount so the size shows without interaction.
-function TransactionRawDataSize({ signature }: { signature: string }) {
+// Fetches once the row scrolls into view (gated on `isVisible`, like the instruction summaries) so the
+// page never fires a getTransaction for every row at once and batch-hammers the RPC into 429s.
+function TransactionRawDataSize({ signature, isVisible }: { signature: string; isVisible: boolean }) {
     const fetchRaw = useFetchRawTransaction();
     const rawDetails = useRawTransactionDetails(signature);
     const transactionData = rawDetails?.data?.raw?.messageBytes;
     const loading = rawDetails === undefined || rawDetails.status === FetchStatus.Fetching;
 
     useEffect(() => {
-        if (!transactionData && rawDetails === undefined) fetchRaw(signature);
-    }, [signature]); // eslint-disable-line react-hooks/exhaustive-deps
+        if (isVisible && !transactionData && rawDetails === undefined) fetchRaw(signature);
+    }, [isVisible, signature]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <RawDataSizeField

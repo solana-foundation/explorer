@@ -157,6 +157,14 @@ type AddressParams = { address: string };
 type Props = PropsWithChildren<{ params: Promise<AddressParams> }>;
 type InnerProps = PropsWithChildren<{ params: AddressParams }>;
 
+// Single source of truth for the page's centered content-column width — every section on the address
+// page aligns to this, so the max-width lives in one place rather than being copy-pasted per section.
+const CONTENT_WIDTH = 'mx-auto w-full max-w-5xl';
+
+function ContentWidth({ children }: { children: React.ReactNode }) {
+    return <div className={CONTENT_WIDTH}>{children}</div>;
+}
+
 function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const fetchAccount = useFetchAccountInfo();
     const { status, cluster, url, genesisHash } = useCluster();
@@ -193,18 +201,18 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
 
     return (
         <PageContainer variant="pulled-up" className="pt-3 lg:pt-5">
-            <div className="mx-auto w-full max-w-5xl">
+            <ContentWidth>
                 <Header
                     address={address}
                     account={info?.data}
                     tokenInfo={fullTokenInfo}
                     isTokenInfoLoading={isTokenInfoLoading}
                 />
-            </div>
+            </ContentWidth>
             {!pubkey ? (
-                <div className="mx-auto w-full max-w-5xl">
+                <ContentWidth>
                     <ErrorCard text={`Address "${address}" is not valid`} />
-                </div>
+                </ContentWidth>
             ) : (
                 <DetailsSections
                     info={info}
@@ -284,9 +292,9 @@ function DetailsSections({
     return (
         <>
             {FLAGGED_ACCOUNTS_WARNING[address] ?? null}
-            <div className="mx-auto w-full max-w-5xl">
+            <ContentWidth>
                 <InfoSection account={account} tokenInfo={tokenInfo} />
-            </div>
+            </ContentWidth>
             {notification}
             <MoreSection baseUrl={`/address/${address}`} tabs={navigationTabs} asyncChildren={asyncTabChildren}>
                 {children}
@@ -394,16 +402,16 @@ function MoreSection({
 
     return (
         <>
-            <StickyHeader className="mx-auto w-full max-w-5xl">
+            <StickyHeader className={CONTENT_WIDTH}>
                 <PageContainer>
-                    <div className="mx-auto w-full max-w-5xl">
+                    <ContentWidth>
                         <NavigationTabs buildHref={buildHref} tabs={tabs}>
                             {asyncChildren}
                         </NavigationTabs>
-                    </div>
+                    </ContentWidth>
                 </PageContainer>
             </StickyHeader>
-            <div className="mx-auto w-full max-w-5xl">{children}</div>
+            <ContentWidth>{children}</ContentWidth>
         </>
     );
 }

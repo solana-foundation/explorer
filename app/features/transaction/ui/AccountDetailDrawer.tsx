@@ -7,8 +7,8 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { ExternalLink, X } from 'react-feather';
 
-import { Copyable } from '@/app/components/common/Copyable';
 import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
+import { CopyButton } from '@/app/shared/ui/CopyButton';
 import { Drawer } from '@/app/shared/ui/drawer';
 
 import { AccountBadges } from './AccountBadges';
@@ -69,9 +69,9 @@ export function AccountDetailDrawer({
                 <EditIcon width={16} />
                 Nickname
             </Button>
-            <Copyable text={address} asTile className="flex-1">
+            <CopyButton value={address} noun="address" size="tile" flash className="flex-1">
                 Copy
-            </Copyable>
+            </CopyButton>
             <Button asChild className="flex-1" size="tile" variant="accent">
                 <Link href={addressPath} target="_blank">
                     <ExternalLink size={16} />

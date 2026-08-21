@@ -8,7 +8,6 @@ import Link from 'next/link';
 import React, { useEffect } from 'react';
 import { ArrowRight, X } from 'react-feather';
 
-import { Copyable } from '@/app/components/common/Copyable';
 import type { InstructionSummary } from '@/app/entities/transaction-data';
 import { FetchStatus } from '@/app/providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
@@ -70,9 +69,9 @@ export function TransactionDetailsDrawer({
 
     const footer = (
         <Drawer.Footer>
-            <Copyable text={signature} asTile className="flex-1">
+            <CopyButton value={signature} noun="signature" size="tile" flash className="flex-1">
                 Copy
-            </Copyable>
+            </CopyButton>
             <Button asChild size="tile" className="flex-1" variant="accent">
                 <Link href={txPath}>
                     <ArrowRight size={18} />

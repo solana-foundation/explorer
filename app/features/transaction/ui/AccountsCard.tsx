@@ -34,6 +34,7 @@ type TransactionAccountRowProps = {
     accountInfo?: AccountInfo;
     accountInfoLoading: boolean;
     index: number;
+    isDesktop: boolean;
     message: ParsedMessage;
     post: number;
     pre: number;
@@ -44,14 +45,16 @@ function TransactionAccountRow({
     accountInfo,
     accountInfoLoading,
     index,
+    isDesktop,
     message,
     post,
     pre,
 }: TransactionAccountRowProps) {
     const [expanded, setExpanded] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const { isLandscape, isLg } = useBreakpoint();
-    const isDesktop = isLg || isLandscape;
+    // Mount the mobile drawer only once the row is first tapped — otherwise every account row mounts a
+    // closed drawer up front.
+    const [drawerMounted, setDrawerMounted] = useState(false);
 
     const pubkey = account.pubkey;
     const key = pubkey.toBase58();
@@ -68,6 +71,7 @@ function TransactionAccountRow({
         if (isDesktop) {
             setExpanded(v => !v);
         } else {
+            setDrawerMounted(true);
             setDrawerOpen(true);
         }
     };
@@ -159,16 +163,18 @@ function TransactionAccountRow({
                 </div>
             </div>
 
-            {/* Mobile: drawer */}
-            <AccountDetailDrawer
-                account={account}
-                accountInfo={accountInfo}
-                accountInfoLoading={accountInfoLoading}
-                index={index}
-                message={message}
-                onOpenChange={setDrawerOpen}
-                open={drawerOpen}
-            />
+            {/* Mobile: drawer (mounted lazily on first open) */}
+            {!isDesktop && drawerMounted && (
+                <AccountDetailDrawer
+                    account={account}
+                    accountInfo={accountInfo}
+                    accountInfoLoading={accountInfoLoading}
+                    index={index}
+                    message={message}
+                    onOpenChange={setDrawerOpen}
+                    open={drawerOpen}
+                />
+            )}
         </>
     );
 }
@@ -176,6 +182,10 @@ function TransactionAccountRow({
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
+    // One breakpoint subscription for the whole card — rows read `isDesktop` as a prop instead of each
+    // registering its own matchMedia listeners.
+    const { isLandscape, isLg } = useBreakpoint();
+    const isDesktop = isLg || isLandscape;
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const message = transactionWithMeta?.transaction.message;
@@ -211,6 +221,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                 accountInfo={accounts.get(pubkeyStr)}
                 accountInfoLoading={loading}
                 index={index}
+                isDesktop={isDesktop}
                 message={message}
                 post={meta.postBalances[index]}
                 pre={meta.preBalances[index]}

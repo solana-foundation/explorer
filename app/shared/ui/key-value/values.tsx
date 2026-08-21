@@ -1,6 +1,7 @@
 import React from 'react';
-import { ExternalLink } from 'react-feather';
+import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
+import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { cn } from '@/app/components/shared/utils';
 
 /**
@@ -26,11 +27,13 @@ export function ExternalLinkValue({
 }) {
     return (
         <span className={cn('min-w-0', mono ? 'break-all font-mono' : 'break-words')}>
-            <a rel="noopener noreferrer" target="_blank" href={url}>
+            {/* Delegate to the safe ExternalLink, which scheme-checks the (on-chain, attacker-controlled)
+                url and owns rel/target — so a javascript:/data: href can never reach the DOM here. */}
+            <ExternalLink href={url}>
                 {children ?? url}
                 {/* Raise the external-link glyph 2px above the text baseline. */}
-                <ExternalLink className="relative -top-0.5 ml-1.5" size={13} />
-            </a>
+                <ExternalLinkIcon className="relative -top-0.5 ml-1.5" size={13} />
+            </ExternalLink>
         </span>
     );
 }

@@ -10,6 +10,11 @@ import { DrawerHeader } from './DrawerHeader';
 import { useEdgeFades } from './model/useEdgeFades';
 import { useSwipeToDismiss } from './model/useSwipeToDismiss';
 
+// The drawer sits above the legacy dashkit stacking contexts (the cluster sidebar is z-[1060] over a
+// z-[1050] overlay), so it needs an inline z-index that beats them — a Tailwind `z-*` class would be
+// left in place next to Radix's own z-50 and lose on stylesheet order. One constant, two layers.
+const DRAWER_Z_INDEX = 1201;
+
 export type DrawerProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -31,6 +36,7 @@ export function Drawer({
     ...props
 }: DrawerProps) {
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
+    const surfaceRef = React.useRef<HTMLDivElement | null>(null);
     const { dragY, dragging, closing, handleProps, bodyProps, onTransitionEnd } = useSwipeToDismiss(
         scrollRef,
         open,
@@ -41,24 +47,34 @@ export function Drawer({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogPortal>
-                <DialogOverlay style={{ zIndex: 1201 }} />
+                <DialogOverlay style={{ zIndex: DRAWER_Z_INDEX }} />
                 <DialogPrimitive.Content
-                    onOpenAutoFocus={e => e.preventDefault()}
+                    ref={surfaceRef}
+                    tabIndex={-1}
+                    onOpenAutoFocus={e => {
+                        // Radix would auto-focus the first interactive element, which on this sheet is
+                        // buried in the scrollable body (a copy button / link) — focusing it scroll-jumps
+                        // the body and can pop the mobile keyboard. Move focus to the sheet container
+                        // instead so screen readers announce it and Tab still starts from the top.
+                        e.preventDefault();
+                        surfaceRef.current?.focus();
+                    }}
                     onEscapeKeyDown={onEscapeKeyDown}
                     className={cn(
                         'fixed inset-x-0 bottom-0 top-auto flex max-h-[85vh] w-full max-w-none flex-col',
                         'rounded-b-none rounded-t-2xl border-0 border-t border-solid border-dark-border bg-dk-gray-800-dark',
-                        'data-[state=open]:animate-tx-drawer-in',
+                        'outline-none',
+                        'data-[state=open]:animate-drawer-in',
                         // Suppress the out-keyframe during a swipe-close: the transform below slides the
                         // sheet out from its drag offset, so the keyframe (which restarts from the open
                         // position) would otherwise snap it back up first.
-                        !closing && 'data-[state=closed]:animate-tx-drawer-out',
+                        !closing && 'data-[state=closed]:animate-drawer-out',
                         className,
                     )}
                     style={{
                         transform: `translateY(${dragY}px)`,
                         transition: dragging ? 'none' : 'transform 0.2s ease-out',
-                        zIndex: 1201,
+                        zIndex: DRAWER_Z_INDEX,
                     }}
                     onTransitionEnd={onTransitionEnd}
                     {...props}

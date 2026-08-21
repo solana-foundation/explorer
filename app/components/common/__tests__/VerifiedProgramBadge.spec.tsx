@@ -11,9 +11,6 @@ import { VerifiedProgramBadge } from '../VerifiedProgramBadge';
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: vi.fn(),
 }));
-vi.mock('@/app/utils/url', () => ({
-    useClusterPath: vi.fn(() => '/address/mock/verified-build'),
-}));
 
 // Mock only the useIsProgramVerified hook; keep the real cluster-support helpers.
 vi.mock('@/app/utils/verified-builds', async importOriginal => ({

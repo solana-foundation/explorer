@@ -57,24 +57,21 @@ export function InfoTooltip({ bottom, right, text, children, withHelpIcon = true
     // browser may break the line right before it; keeping the last word + icon in a single
     // `white-space: nowrap` run is the only reliable way to forbid that break (a WORD JOINER is
     // ignored across the element boundary). Earlier words still wrap on their spaces as normal.
+    // Only a string child can be split this way; an arbitrary node can't, so its icon may wrap.
     if (typeof children === 'string') {
-        // eslint-disable-next-line no-restricted-syntax -- concise trailing-whitespace trim before locating the label's last word
+        // eslint-disable-next-line no-restricted-syntax -- trim trailing whitespace before locating the label's last word
         const trimmed = children.replace(/\s+$/, '');
-        const cut = trimmed.lastIndexOf(' ');
-        if (cut === -1) {
-            // Single word: the whole label + icon is one unbreakable run.
-            return (
-                <span className={className} style={{ whiteSpace: 'nowrap' }}>
-                    {trimmed}
-                    {icon}
-                </span>
-            );
-        }
+        // eslint-disable-next-line no-restricted-syntax -- split off the last word on ANY whitespace (space/tab/NBSP) so the icon can be pinned to it
+        const match = trimmed.match(/^([\s\S]*\S\s+)(\S+)$/);
+        // `lead` keeps the trailing separator so earlier words still wrap normally; empty for a
+        // single word, in which case the whole label + icon becomes one unbreakable run.
+        const lead = match ? match[1] : '';
+        const lastWord = match ? match[2] : trimmed;
         return (
             <span className={className}>
-                {trimmed.slice(0, cut)}{' '}
+                {lead}
                 <span style={{ whiteSpace: 'nowrap' }}>
-                    {trimmed.slice(cut + 1)}
+                    {lastWord}
                     {icon}
                 </span>
             </span>
