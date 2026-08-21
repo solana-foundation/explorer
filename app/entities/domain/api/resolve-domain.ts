@@ -1,8 +1,8 @@
-import { getDomainKey as getANSDomainKey, NameRecordHeader } from '@onsol/tldparser';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { createSolanaRpc, type GetAccountInfoApi, getBase64Encoder, type Rpc } from '@solana/kit';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { type Infer, nullable, string, type } from 'superstruct';
 
+import { decodeAnsNameRecord, getAnsDomainAddress } from '../lib/ans-name-service';
 import { decodeNameRegistryOwner, getHashedName, getNameAccountKey } from '../lib/sns-name-service';
 import { SOL_TLD_AUTHORITY } from './constants';
 
@@ -15,38 +15,38 @@ export const ResolvedDomainInfoSchema = nullable(
 
 export type ResolvedDomainInfo = Infer<typeof ResolvedDomainInfoSchema>;
 
-// A new Connection is cheap — it's just a config object holding the URL, no socket/TCP is opened
+const base64Encoder = getBase64Encoder();
+
+// A new rpc client is cheap — it's just a config object holding the URL, no socket/TCP is opened
 // until an actual RPC call is made. Safe to create per-request in a short-lived API route handler.
 export async function resolveDomain(
     domain: string,
-    connection: Connection = new Connection(serverClusterUrl(Cluster.MainnetBeta), 'confirmed'),
+    rpc: Rpc<GetAccountInfoApi> = createSolanaRpc(serverClusterUrl(Cluster.MainnetBeta)),
 ): Promise<ResolvedDomainInfo> {
     // SNS/ANS registries store names hashed in lowercase; mixed-case input must be normalized.
     const normalized = domain.toLowerCase();
-    return normalized.endsWith('.sol')
-        ? resolveSnsDomain(normalized, connection)
-        : resolveAnsDomain(normalized, connection);
+    return normalized.endsWith('.sol') ? resolveSnsDomain(normalized, rpc) : resolveAnsDomain(normalized, rpc);
 }
 
-async function resolveSnsDomain(domain: string, connection: Connection): Promise<ResolvedDomainInfo> {
+async function resolveSnsDomain(domain: string, rpc: Rpc<GetAccountInfoApi>): Promise<ResolvedDomainInfo> {
     const hashedName = getHashedName(domain.slice(0, -4)); // remove .sol
     const nameKey = await getNameAccountKey(hashedName, { nameParent: SOL_TLD_AUTHORITY });
-    const accountInfo = await connection.getAccountInfo(new PublicKey(nameKey));
+    const { value: accountInfo } = await rpc.getAccountInfo(nameKey, { encoding: 'base64' }).send();
     if (accountInfo === null) return null;
 
-    const owner = decodeNameRegistryOwner(accountInfo.data);
+    const owner = decodeNameRegistryOwner(base64Encoder.encode(accountInfo.data[0]));
     return owner ? { address: nameKey, owner } : null;
 }
 
-async function resolveAnsDomain(domainTld: string, connection: Connection): Promise<ResolvedDomainInfo> {
-    const derivedDomainKey = await getANSDomainKey(domainTld.toLowerCase());
-    const accountInfo = await connection.getAccountInfo(derivedDomainKey.pubkey);
+async function resolveAnsDomain(domainTld: string, rpc: Rpc<GetAccountInfoApi>): Promise<ResolvedDomainInfo> {
+    const derivedDomainKey = await getAnsDomainAddress(domainTld);
+    if (!derivedDomainKey) return null;
+
+    const { value: accountInfo } = await rpc.getAccountInfo(derivedDomainKey, { encoding: 'base64' }).send();
     if (accountInfo === null) return null;
 
-    const nameRecord = NameRecordHeader.fromAccountInfo(accountInfo);
-    if (!nameRecord.isValid) return null;
+    const nameRecord = decodeAnsNameRecord(base64Encoder.encode(accountInfo.data[0]));
+    if (!nameRecord?.isValid) return null;
 
-    return nameRecord.owner
-        ? { address: derivedDomainKey.pubkey.toString(), owner: nameRecord.owner.toString() }
-        : null;
+    return nameRecord.owner ? { address: derivedDomainKey, owner: nameRecord.owner } : null;
 }
