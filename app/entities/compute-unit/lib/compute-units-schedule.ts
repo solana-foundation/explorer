@@ -184,10 +184,17 @@ export function estimateRequestedComputeUnits(
                 staticAccountKeys: PublicKey[];
             };
         };
+        transactionConfig?: { computeUnitLimit?: number };
+        version?: 'legacy' | 0 | 1;
     },
     epoch: bigint | undefined,
     cluster: Cluster,
 ): number {
+    // v1 carries its compute unit limit in the message config; an absent limit means zero.
+    if (tx.version === 1) {
+        return Math.min(tx.transactionConfig?.computeUnitLimit ?? 0, MAX_COMPUTE_UNITS);
+    }
+
     // First, check for explicit compute budget instructions
     let totalReservedUnits = 0;
     for (const instruction of tx.transaction.message.compiledInstructions) {

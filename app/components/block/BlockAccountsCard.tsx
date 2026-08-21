@@ -1,5 +1,6 @@
 import { Address } from '@components/common/Address';
-import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
+import type { BlockWithV1 } from '@entities/block-data';
+import { PublicKey } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
@@ -16,7 +17,7 @@ type AccountStats = {
 
 const PAGE_SIZE = 25;
 
-export function BlockAccountsCard({ block, blockSlot }: { block: VersionedBlockResponse; blockSlot: number }) {
+export function BlockAccountsCard({ block, blockSlot }: { block: BlockWithV1; blockSlot: number }) {
     const [numDisplayed, setNumDisplayed] = React.useState(10);
     const totalTransactions = block.transactions.length;
 

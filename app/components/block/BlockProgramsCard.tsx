@@ -1,13 +1,14 @@
 import { Address } from '@components/common/Address';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
+import type { BlockWithV1 } from '@entities/block-data';
+import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-export function BlockProgramsCard({ block }: { block: VersionedBlockResponse }) {
+export function BlockProgramsCard({ block }: { block: BlockWithV1 }) {
     const totalTransactions = block.transactions.length;
     const txSuccesses = new Map<string, number>();
     const txFrequency = new Map<string, number>();

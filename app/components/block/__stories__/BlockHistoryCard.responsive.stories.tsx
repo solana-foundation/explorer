@@ -1,4 +1,4 @@
-import type { VersionedBlockResponse } from '@solana/web3.js';
+import type { BlockWithV1 } from '@entities/block-data';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -11,7 +11,7 @@ const emptyBlock = {
     parentSlot: 0,
     previousBlockhash: 'GnPnX9Y6w6vYi3iWQGfh',
     transactions: [],
-} as unknown as VersionedBlockResponse;
+} as unknown as BlockWithV1;
 
 const meta: Meta<typeof BlockHistoryCard> = {
     component: BlockHistoryCard,

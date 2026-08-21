@@ -14,7 +14,7 @@ const meta: Meta<typeof BlockProgramsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Empty block exercises the wrapper without a full VersionedBlockResponse fixture.
+// Empty block exercises the wrapper without a full BlockWithV1 fixture.
 export const EmptyBlock: Story = {
     args: {
         block: { transactions: [] } as any,

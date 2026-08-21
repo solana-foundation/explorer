@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
-import { PublicKey, VersionedBlockResponse } from '@solana/web3.js';
+import type { BlockWithV1 } from '@entities/block-data';
+import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
@@ -9,7 +10,7 @@ import { BaseTable } from '@/app/shared/ui/Table';
 
 const PAGE_SIZE = 10;
 
-export function BlockRewardsCard({ block }: { block: VersionedBlockResponse }) {
+export function BlockRewardsCard({ block }: { block: BlockWithV1 }) {
     const [rewardsDisplayed, setRewardsDisplayed] = React.useState(PAGE_SIZE);
 
     if (!block.rewards || block.rewards.length < 1) {
