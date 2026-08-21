@@ -628,7 +628,6 @@ export default tseslint.config(
             // app/entities (FSD entities)
             'app/entities/account/model/use-accounts-info.ts',
             'app/entities/compute-unit/lib/compute-units-schedule.ts',
-            'app/entities/compute-unit/ui/CUProfilingCard.tsx',
             'app/entities/digital-asset/api.ts',
             'app/entities/domain/api/fetch-ans-domains.ts',
             'app/entities/domain/api/resolve-domain.ts',
@@ -651,7 +650,6 @@ export default tseslint.config(
             'app/features/cookie/lib/cookie.ts',
             'app/features/cookie/model/use-analytics-consent.ts',
             'app/features/cookie/ui/CookieConsent.tsx',
-            'app/features/cu-profiling/ui/CUProfilingSection.tsx',
             'app/features/idl/formatted-idl/model/search.ts',
             'app/features/idl/formatted-idl/ui/BaseFormattedIdl.tsx',
             'app/features/idl/formatted-idl/ui/BaseIdlAccounts.tsx',

@@ -1,19 +1,32 @@
 import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { BarElement, CategoryScale, Chart, type ChartData, type ChartOptions, LinearScale, Tooltip } from 'chart.js';
-import React from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Bar } from 'react-chartjs-2';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { baseCardVariants, CardBody } from '@/app/shared/ui/Card';
 
+import { formatTooltipTitle, toInstructionCUDisplay } from '../lib/instruction-display';
 import type { InstructionCUData } from '../lib/types';
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
+// Every mounted card shares one tooltip element, looked up by this id from four places: the Chart.js
+// external handler that creates and fills it, and the scroll/unmount cleanup that hides and removes it.
+const TOOLTIP_ELEMENT_ID = 'cu-chartjs-tooltip';
+
+/**
+ * The chart dataset, widened with the finished strings the tooltip renders. Chart.js carries these
+ * through untouched; `toInstructionCUDisplay` is the only place that derives them, so the tooltip never
+ * recomputes a CU figure the legend already worked out.
+ */
 type ExtendedBarDataset = ChartData<'bar'>['datasets'][number] & {
-    displayUnits?: number;
-    reservedValue?: number;
-    actualCU?: number;
-    minValue: number;
+    // Chart.js types its own `label` as optional. Required here because `toInstructionCUDisplay` always
+    // produces one, so the tooltip needs no empty-title branch.
+    label: string;
+    displayValue: string;
+    isEstimate: boolean;
+    programName?: string;
 };
 
 function getInstructionColor(index: number): string {
@@ -24,24 +37,24 @@ function getInstructionColor(index: number): string {
 }
 
 function useCUTooltipCleanup() {
-    React.useEffect(() => {
+    useEffect(() => {
         const hideTooltip = () => {
-            const tooltipEl = document.getElementById('cu-chartjs-tooltip');
+            const tooltipEl = document.getElementById(TOOLTIP_ELEMENT_ID);
             if (tooltipEl) tooltipEl.style.opacity = '0';
         };
         window.addEventListener('scroll', hideTooltip, true);
         return () => {
             window.removeEventListener('scroll', hideTooltip, true);
-            const tooltipEl = document.getElementById('cu-chartjs-tooltip');
+            const tooltipEl = document.getElementById(TOOLTIP_ELEMENT_ID);
             if (tooltipEl) tooltipEl.remove();
         };
     }, []);
 }
 
 function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
-    const posRef = React.useRef({ x: 0, y: 0 });
+    const posRef = useRef({ x: 0, y: 0 });
 
-    return React.useMemo<ChartOptions<'bar'>>(
+    return useMemo<ChartOptions<'bar'>>(
         () => ({
             animation: false,
             indexAxis: 'y',
@@ -77,11 +90,11 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                 tooltip: {
                     enabled: false,
                     external(context) {
-                        let tooltipEl = document.getElementById('cu-chartjs-tooltip');
+                        let tooltipEl = document.getElementById(TOOLTIP_ELEMENT_ID);
 
                         if (!tooltipEl) {
                             tooltipEl = document.createElement('div');
-                            tooltipEl.id = 'cu-chartjs-tooltip';
+                            tooltipEl.id = TOOLTIP_ELEMENT_ID;
                             tooltipEl.innerHTML = '<div class="content"></div>';
                             document.body.appendChild(tooltipEl);
                         }
@@ -94,19 +107,31 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
 
                         if (tooltipModel.body) {
                             const dataPoint = tooltipModel.dataPoints[0];
-                            const instructionLabel = dataPoint.dataset.label;
                             const color = dataPoint.dataset.backgroundColor;
                             const dataset = dataPoint.dataset as ExtendedBarDataset;
 
-                            const value = dataset.actualCU || dataset.reservedValue || dataset.displayUnits;
-
-                            const isReserved = !dataset.actualCU && !dataset.reservedValue && dataset.displayUnits;
-                            const cuValue = value?.toLocaleString();
-                            const cuText = isReserved ? 'CU reserved' : 'CU consumed';
+                            const cuText = dataset.isEstimate ? 'CU reserved' : 'CU consumed';
+                            const title = formatTooltipTitle({
+                                label: dataset.label,
+                                programName: dataset.programName,
+                            });
 
                             const tooltipContent = tooltipEl.querySelector('div');
-                            if (tooltipContent) {
-                                tooltipContent.innerHTML = `
+                            if (!tooltipContent) {
+                                // The content node is created with the tooltip element and never removed
+                                // on its own, so a miss means something else owns this id. Returning
+                                // without hiding would leave the previous instruction's figures on screen.
+                                Logger.warn('[compute-unit] CU tooltip element is missing its content node', {
+                                    id: TOOLTIP_ELEMENT_ID,
+                                });
+                                tooltipEl.style.opacity = '0';
+                                return;
+                            }
+
+                            // An IDL-derived name has no length limit. `overflow-wrap: anywhere` on the
+                            // title wraps it, and `max-width` on the outer div is what keeps the wrapped
+                            // tooltip from stretching off-screen — neither works without the other.
+                            tooltipContent.innerHTML = `
                                 <div style="
                                     background: rgba(30, 30, 30, 0.95);
                                     backdrop-filter: blur(10px);
@@ -114,10 +139,11 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                                     padding: 12px 16px;
                                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                                     min-width: 180px;
+                                    max-width: min(320px, calc(100vw - 32px));
                                 ">
                                     <div style="
                                         display: flex;
-                                        align-items: center;
+                                        align-items: flex-start;
                                         gap: 8px;
                                         margin-bottom: 6px;
                                     ">
@@ -126,21 +152,38 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
                                             height: 12px;
                                             border-radius: 2px;
                                             background-color: ${color};
+                                            flex-shrink: 0;
+                                            margin-top: 3px;
                                         "></div>
-                                        <div style="
+                                        <div class="cu-tooltip-title" style="
                                             color: white;
                                             font-size: 14px;
                                             font-weight: 600;
-                                        ">${instructionLabel}</div>
+                                            overflow-wrap: anywhere;
+                                        "></div>
                                     </div>
-                                    <div style="
+                                    <div class="cu-tooltip-cu" style="
                                         color: rgba(255, 255, 255, 0.9);
                                         font-size: 13px;
                                         padding-left: 20px;
-                                    ">${isReserved ? '~' : ''}${cuValue} ${cuText}</div>
+                                    "></div>
                                 </div>
                             `;
+                            // An instruction name can come from program-authored on-chain IDL metadata, so
+                            // it is written as text. Interpolating it into the markup above would let an
+                            // IDL author inject HTML into this page.
+                            const titleEl = tooltipContent.querySelector('.cu-tooltip-title');
+                            const cuEl = tooltipContent.querySelector('.cu-tooltip-cu');
+                            if (!titleEl || !cuEl) {
+                                // Unreachable unless the template above is edited to drop these class
+                                // names. Kept so that edit degrades to a hidden tooltip rather than one
+                                // showing the previous instruction's figures.
+                                Logger.warn('[compute-unit] CU tooltip markup is missing its text nodes');
+                                tooltipEl.style.opacity = '0';
+                                return;
                             }
+                            titleEl.textContent = title;
+                            cuEl.textContent = `${dataset.displayValue} ${cuText}`;
                         }
 
                         // Use captured mouse position with edge detection
@@ -189,22 +232,15 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
     );
 }
 
-type CUProfilingCardProps = {
+type BaseCUProfilingCardProps = {
     instructions: InstructionCUData[];
     unitsConsumed?: number;
 };
 
-export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCardProps) {
-    const instructionsWithDisplay = React.useMemo(
-        () =>
-            instructions.map(item => ({
-                ...item,
-                displayCU: item.computeUnits || item.reservedValue || item.displayUnits || item.minValue,
-            })),
-        [instructions],
-    );
+export function BaseCUProfilingCard({ instructions, unitsConsumed }: BaseCUProfilingCardProps) {
+    const instructionsWithDisplay = useMemo(() => toInstructionCUDisplay(instructions), [instructions]);
 
-    const totalDisplayCU = React.useMemo(
+    const totalDisplayCU = useMemo(
         () => instructionsWithDisplay.reduce((sum, item) => sum + item.displayCU, 0),
         [instructionsWithDisplay],
     );
@@ -213,10 +249,11 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
 
     const chartOptions = useCUProfileChartOptions(totalDisplayCU);
 
-    const chartData: ChartData<'bar'> = React.useMemo(
+    const chartData: ChartData<'bar'> = useMemo(
         () => ({
-            datasets: instructionsWithDisplay.map((item, i) => ({
-                actualCU: item.computeUnits,
+            // Annotated so the extra fields the tooltip reads are checked here, at the one place that
+            // writes them — a plain object literal would pass them through untyped.
+            datasets: instructionsWithDisplay.map<ExtendedBarDataset>((item, i) => ({
                 backgroundColor: getInstructionColor(i),
                 barThickness: 24,
                 // Apply border radius only to the outer edges of the stacked bar
@@ -230,18 +267,18 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
                 borderSkipped: false,
                 borderWidth: 0,
                 data: [item.displayCU],
-                displayUnits: item.displayUnits,
+                displayValue: item.displayValue,
                 hoverBackgroundColor: getInstructionColor(i),
-                label: `Instruction #${i + 1}`,
-                minValue: item.minValue,
-                reservedValue: item.reservedValue,
+                isEstimate: item.isEstimate,
+                label: item.label,
+                programName: item.programName,
             })),
             labels: [''],
         }),
         [instructionsWithDisplay],
     );
 
-    if (instructions.length === 0) return null;
+    if (instructions.length === 0) return undefined;
 
     return (
         <CollapsibleCard title="CU profiling" className={baseCardVariants({ ui: 'dashkit' })}>
@@ -254,24 +291,22 @@ export function CUProfilingCard({ instructions, unitsConsumed }: CUProfilingCard
 
                 {/* Legend */}
                 <div className="mt-3 flex flex-wrap gap-3 text-xs">
-                    {instructions.map((item, i) => {
-                        const isReserved = !item.computeUnits && !item.reservedValue && item.displayUnits;
-                        const value = item.computeUnits || item.reservedValue || item.displayUnits;
-
+                    {instructionsWithDisplay.map((item, i) => {
                         return (
-                            <div key={i} className="align-items-center flex">
+                            // min-w-0 lets a long resolved name truncate instead of overflowing the card.
+                            <div key={i} className="align-items-center flex min-w-0">
                                 <div
                                     style={{
                                         backgroundColor: getInstructionColor(i),
                                         borderRadius: '4px',
+                                        flexShrink: 0,
                                         height: '16px',
                                         marginRight: '8px',
                                         width: '16px',
                                     }}
                                 />
-                                <span>
-                                    Instruction #{i + 1}: {isReserved && '~'}
-                                    {value ? value.toLocaleString() : 'Unknown'}
+                                <span className="truncate" title={`${item.legendLabel}: ${item.displayValue}`}>
+                                    {item.legendLabel}: {item.displayValue}
                                 </span>
                             </div>
                         );

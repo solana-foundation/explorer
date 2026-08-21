@@ -1,5 +1,8 @@
 import { identifyLighthouseInstruction, LIGHTHOUSE_PROGRAM_ADDRESS, LighthouseInstruction } from 'lighthouse-sdk';
 
+import { toHex } from '@/app/shared/lib/bytes';
+import { Logger } from '@/app/shared/lib/logger';
+
 /** Human-readable title for each Lighthouse instruction; also the decoder's parsed `type`. */
 export type LighthouseInstructionType =
     | 'Memory Close'
@@ -47,16 +50,23 @@ export const LIGHTHOUSE_INSTRUCTION_NAMES: Record<LighthouseInstruction, Lightho
 };
 
 /**
- * Resolve a Lighthouse instruction's display name from its program id + discriminator prefix (the
- * leading instruction-index byte), or `undefined` if it isn't a Lighthouse instruction — so it
- * composes with other name resolvers (`zkName(...) ?? lighthouseName(...) ?? idlName(...)`).
+ * Resolve a Lighthouse instruction's display name from its program id + the leading instruction bytes,
+ * or `undefined` if it isn't a Lighthouse instruction — so it composes with the other resolvers in
+ * `NAME_SOURCES`, first hit wins (see the `transaction-data` entity README).
  * Lets transaction-history name Lighthouse rows without the full decode path or an on-chain IDL.
  */
-export function resolveLighthouseInstructionName(programId: string, discriminator: Uint8Array): string | undefined {
+export function resolveLighthouseInstructionName(programId: string, data: Uint8Array): string | undefined {
     if (programId !== LIGHTHOUSE_PROGRAM_ADDRESS) return undefined;
     try {
-        return LIGHTHOUSE_INSTRUCTION_NAMES[identifyLighthouseInstruction({ data: discriminator })];
-    } catch {
+        return LIGHTHOUSE_INSTRUCTION_NAMES[identifyLighthouseInstruction({ data })];
+    } catch (e) {
+        // The SDK throws a plain `Error` for an unrecognized discriminator, so this cannot tell that
+        // routine miss from a real defect. Logged anyway: an SDK signature change would otherwise leave
+        // every Lighthouse row unnamed with no trace. Console only, since the routine miss lands here too.
+        Logger.warn('[lighthouse] identify threw; instruction left unnamed', {
+            data: toHex(data),
+            error: String(e),
+        });
         return undefined;
     }
 }

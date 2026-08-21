@@ -5,10 +5,12 @@ import type { VersionedMessage } from '@solana/web3.js';
 import React, { useMemo } from 'react';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { CollapsibleCard } from '@/app/components/shared/ui/collapsible-card';
+import { baseCardVariants, Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { useSimulation } from '../model/use-simulation';
-import { SimulatorCUProfilingCard } from './SimulatorCUProfilingCard';
+import { useSimulationInstructionNames } from '../model/use-simulation-instruction-names';
+import { BaseSimulatorCUProfilingCard } from './BaseSimulatorCUProfilingCard';
 import { SolBalanceChangesCard } from './SolBalanceChangesCard';
 
 type SimulatorCardProps = {
@@ -23,6 +25,11 @@ type SimulatorCardProps = {
 export function SimulatorCard({ message, showTokenBalanceChanges, accountBalances }: SimulatorCardProps) {
     const { cluster, url } = useCluster();
     const simulation = useSimulation(message, accountBalances);
+    // Lookup-table-resolved keys only exist once the simulation has run, so naming waits for them.
+    const { instructions: namedInstructions, unresolvable } = useSimulationInstructionNames({
+        accountKeys: simulation.status === 'done' ? simulation.result.accountKeys : undefined,
+        message,
+    });
 
     const tokenBalanceData = simulation.status === 'done' ? simulation.result.tokenBalanceData : undefined;
     const tokenBalanceRows = useMemo(
@@ -94,15 +101,26 @@ export function SimulatorCard({ message, showTokenBalanceChanges, accountBalance
                     </CardBody>
                 )}
             </SimulationCardShell>
-            {logs && (
-                <SimulatorCUProfilingCard
-                    message={message}
-                    logs={logs}
-                    unitsConsumed={unitsConsumed}
-                    cluster={cluster}
-                    epoch={epoch}
-                />
-            )}
+            {hasLogs &&
+                (unresolvable ? (
+                    // Logs exist, so this owes the user a card. Every CU figure would land on the wrong
+                    // instruction, so saying why beats drawing it — or vanishing.
+                    <CollapsibleCard title="CU profiling" className={baseCardVariants({ ui: 'dashkit' })}>
+                        <CardBody ui="dashkit">
+                            <div className="text-xs text-muted">
+                                Unavailable: an instruction referenced an account this message does not resolve.
+                            </div>
+                        </CardBody>
+                    </CollapsibleCard>
+                ) : (
+                    <BaseSimulatorCUProfilingCard
+                        instructions={namedInstructions}
+                        logs={logs}
+                        unitsConsumed={unitsConsumed}
+                        cluster={cluster}
+                        epoch={epoch}
+                    />
+                ))}
             {succeeded && !!solBalanceChanges?.length && <SolBalanceChangesCard balanceChanges={solBalanceChanges} />}
             {succeeded && showTokenBalanceChanges && !!tokenBalanceRows?.length && (
                 <TokenBalancesCardInner rows={tokenBalanceRows} />
