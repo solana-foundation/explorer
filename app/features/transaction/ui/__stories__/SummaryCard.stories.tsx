@@ -9,6 +9,7 @@ import {
     MOCK_FAILED_STATUS,
     MOCK_FAILED_TX,
     MOCK_PARSED_TX,
+    MOCK_RAW_TX,
     MOCK_STATUS,
 } from '../__fixtures__/transaction';
 import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
@@ -36,6 +37,7 @@ export const Finalized: Story = {
             const Wrapper = withTransactionProviders(
                 { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
                 { [DEFAULT_SIGNATURE]: MOCK_STATUS },
+                { [DEFAULT_SIGNATURE]: MOCK_RAW_TX },
             );
             return (
                 <Wrapper>

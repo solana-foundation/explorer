@@ -8,6 +8,7 @@ import {
 } from '@solana/kit';
 import { type DecompileArgs, type Finality, PublicKey, TransactionMessage, VersionedMessage } from '@solana/web3.js';
 
+import { base64ByteLength } from '@/app/shared/lib/bytes';
 import { readV1TransactionConfig } from '@/app/shared/lib/v1-message-bridge';
 
 import type { RawTransaction } from '../model/types';
@@ -44,6 +45,7 @@ export async function fetchRawTransaction(
     const messageBytes = new Uint8Array(transaction.messageBytes);
     const signatures = toBase58Signatures(transaction.signatures);
     const meta = response.meta;
+    const [base64Transaction] = response.transaction;
 
     const base = {
         messageBytes,
@@ -62,6 +64,7 @@ export async function fetchRawTransaction(
                   preBalances: meta.preBalances.map(Number),
               }
             : undefined,
+        serializedSize: base64ByteLength(base64Transaction),
         signatures,
     };
 

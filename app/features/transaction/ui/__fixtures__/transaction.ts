@@ -1,7 +1,14 @@
 import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
+import { createWeb3TransactionBytes } from '@entities/transaction-data/__fixtures__/wire-transactions';
 import type { ParsedTransactionWithMeta } from '@solana/web3.js';
-import { PublicKey, SystemProgram } from '@solana/web3.js';
-import { mockParsedTransactionDetails, mockTransactionStatus } from '@storybook-config/__fixtures__/transactions';
+import { PublicKey, SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
+import {
+    mockParsedTransactionDetails,
+    mockRawTransactionDetails,
+    mockTransactionStatus,
+} from '@storybook-config/__fixtures__/transactions';
+
+import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 
 export { DEFAULT_SIGNATURE };
 
@@ -108,6 +115,23 @@ export const MOCK_FAILED_TX = mockParsedTransactionDetails({
                 'Program 11111111111111111111111111111111 failed: custom program error: 0x1',
             ],
         } as unknown as ParsedTransactionWithMeta['meta'],
+    },
+});
+
+// Built from real wire bytes rather than a hand-picked number, so the size the summary renders is
+// the size these bytes actually have.
+const RAW_TX_BYTES = createWeb3TransactionBytes('legacy');
+const RAW_MESSAGE_BYTES = parseTransactionBytes(RAW_TX_BYTES).messageBytes;
+const RAW_MESSAGE = VersionedMessage.deserialize(RAW_MESSAGE_BYTES);
+
+export const MOCK_RAW_TX = mockRawTransactionDetails({
+    raw: {
+        message: RAW_MESSAGE,
+        messageBytes: RAW_MESSAGE_BYTES,
+        serializedSize: RAW_TX_BYTES.length,
+        signatures: [DEFAULT_SIGNATURE],
+        transaction: TransactionMessage.decompile(RAW_MESSAGE),
+        version: 'legacy',
     },
 });
 
