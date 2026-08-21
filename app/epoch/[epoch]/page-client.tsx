@@ -61,6 +61,12 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
             fetchEpoch(epoch, currentEpoch, epochSchedule);
     }, [epoch, epochState, clusterInfo, status, fetchEpoch]);
 
+    // Ahead of the `clusterInfo` check, which is also unresolved on a failed connection: the epoch entry
+    // only reports a failure once something has actually failed, so it is the more specific answer.
+    if (epochState?.status === FetchStatus.FetchFailed) {
+        return <ErrorCard text={`Failed to fetch details for epoch ${epoch}`} />;
+    }
+
     if (!clusterInfo) {
         return <LoadingCard message="Connecting to cluster" />;
     }
@@ -70,9 +76,6 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
     if (epoch > currentEpoch) {
         return <ErrorCard text={`Epoch ${epoch} hasn't started yet`} />;
     } else if (!epochState?.data) {
-        if (epochState?.status === FetchStatus.FetchFailed) {
-            return <ErrorCard text={`Failed to fetch details for epoch ${epoch}`} />;
-        }
         return <LoadingCard message="Loading epoch" />;
     }
 

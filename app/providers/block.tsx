@@ -1,6 +1,7 @@
 'use client';
 
 import * as Cache from '@providers/cache';
+import { useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
 import { Connection, PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -57,7 +58,7 @@ export function useBlock(key: number): Cache.CacheEntry<Block> | undefined {
         throw new Error(`useBlock must be used within a BlockProvider`);
     }
 
-    return context.entries[key];
+    return useCacheEntry(context.entries, key);
 }
 
 export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Cluster, slot: number) {
