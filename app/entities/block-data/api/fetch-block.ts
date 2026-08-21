@@ -6,12 +6,18 @@ import {
     MAX_SUPPORTED_TRANSACTION_VERSION,
     type Slot,
     type Transaction,
-    type TransactionError,
 } from '@solana/kit';
-import { PublicKey, type TokenBalance, VersionedMessage } from '@solana/web3.js';
+import { PublicKey, VersionedMessage } from '@solana/web3.js';
+import { create } from 'superstruct';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { bridgeV1MessageBytes, isV1MessageBytes } from '@/app/shared/lib/v1-message-bridge';
 
+import {
+    BlockResponseSchema,
+    type BlockTransactionResponse,
+    BlockTransactionResponseSchema,
+} from '../model/block-response-schema';
 import type { BlockTransaction, BlockWithV1 } from '../model/types';
 
 /**
@@ -38,54 +44,44 @@ export async function fetchBlock(url: string, slot: number): Promise<BlockWithV1
         return null;
     }
 
+    // A block missing any of these fields cannot be rendered at all, so validation failure surfaces
+    // as a fetch error rather than a half-drawn page.
+    const block = create(response, BlockResponseSchema);
+
     return {
-        blockTime: response.blockTime === null ? null : Number(response.blockTime),
-        blockhash: response.blockhash,
-        parentSlot: Number(response.parentSlot),
-        previousBlockhash: response.previousBlockhash,
-        rewards: response.rewards?.map(reward => ({
+        blockTime: block.blockTime === null ? null : Number(block.blockTime),
+        blockhash: block.blockhash,
+        parentSlot: Number(block.parentSlot),
+        previousBlockhash: block.previousBlockhash,
+        rewards: block.rewards?.map(reward => ({
             // Only staking and voting rewards carry a commission.
-            commission: 'commission' in reward ? reward.commission : undefined,
+            commission: reward.commission,
             lamports: Number(reward.lamports),
             postBalance: reward.postBalance === null ? null : Number(reward.postBalance),
             pubkey: reward.pubkey,
             rewardType: reward.rewardType,
         })),
-        transactions: response.transactions.map(adaptTransaction),
+        transactions: block.transactions.flatMap((rpcTransaction, index) =>
+            adaptTransactionOrDrop(rpcTransaction, index, slot),
+        ),
     };
 }
 
-/** Numeric fields the RPC serves that kit's meta type does not declare. `costUnits` feeds the block
- *  history cost column and the block's cost total. */
-type UndeclaredMeta = Readonly<{ costUnits?: number | bigint }>;
+/**
+ * Adapts one transaction, dropping it if either its shape or its bytes cannot be read.
+ *
+ * A single unreadable transaction costs its own row rather than the whole block: the cards derive
+ * every position from the array this returns, so a shorter array stays internally consistent.
+ */
+function adaptTransactionOrDrop(rpcTransaction: unknown, index: number, slot: number): BlockTransaction[] {
+    try {
+        return [adaptTransaction(create(rpcTransaction, BlockTransactionResponseSchema))];
+    } catch (error) {
+        Logger.error(error, { index, sentry: true, slot });
 
-type RpcBlockTransaction = Readonly<{
-    meta:
-        | (Readonly<{
-              computeUnitsConsumed?: bigint;
-              err: TransactionError | null;
-              fee: bigint;
-              innerInstructions?:
-                  | readonly Readonly<{
-                        index: number;
-                        instructions: readonly Readonly<{
-                            accounts: readonly number[];
-                            data: string;
-                            programIdIndex: number;
-                        }>[];
-                    }>[]
-                  | null;
-              loadedAddresses?: Readonly<{ readonly: readonly string[]; writable: readonly string[] }> | null;
-              logMessages: readonly string[] | null;
-              postBalances: readonly bigint[];
-              postTokenBalances?: readonly TokenBalance[];
-              preBalances: readonly bigint[];
-              preTokenBalances?: readonly TokenBalance[];
-          }> &
-              UndeclaredMeta)
-        | null;
-    transaction: readonly [string, 'base64'];
-}>;
+        return [];
+    }
+}
 
 /**
  * Adapts one block transaction from its wire bytes into the web3.js-shaped view the cards read.
@@ -93,7 +89,7 @@ type RpcBlockTransaction = Readonly<{
  * The cards need web3.js's `VersionedMessage` for `getAccountKeys` and `isAccountWritable`;
  * `bridgeV1MessageBytes` supplies that interface for v1 and also yields the resource limits.
  */
-function adaptTransaction(rpcTransaction: RpcBlockTransaction): BlockTransaction {
+function adaptTransaction(rpcTransaction: BlockTransactionResponse): BlockTransaction {
     const wireBytes = new Uint8Array(getBase64Encoder().encode(rpcTransaction.transaction[0]));
     const transaction = getTransactionDecoder().decode(wireBytes);
     // The decoded bytes are a view over the response buffer; copy so the message owns its own.
@@ -111,7 +107,7 @@ function adaptTransaction(rpcTransaction: RpcBlockTransaction): BlockTransaction
 }
 
 /** Converts meta into web3.js `ConfirmedTransactionMeta`, whose numeric fields are all `number`. */
-function adaptMeta(meta: RpcBlockTransaction['meta']): BlockTransaction['meta'] {
+function adaptMeta(meta: BlockTransactionResponse['meta']): BlockTransaction['meta'] {
     if (meta === null) {
         // The cards distinguish "no meta recorded" from an empty one.
         return null;
@@ -139,9 +135,10 @@ function adaptMeta(meta: RpcBlockTransaction['meta']): BlockTransaction['meta'] 
             : undefined,
         logMessages: meta.logMessages === null ? null : [...meta.logMessages],
         postBalances: meta.postBalances.map(Number),
-        postTokenBalances: meta.postTokenBalances === undefined ? undefined : [...meta.postTokenBalances],
+        // The RPC serves `null` for blocks written before it recorded token balances.
+        postTokenBalances: meta.postTokenBalances ?? undefined,
         preBalances: meta.preBalances.map(Number),
-        preTokenBalances: meta.preTokenBalances === undefined ? undefined : [...meta.preTokenBalances],
+        preTokenBalances: meta.preTokenBalances ?? undefined,
     };
 }
 

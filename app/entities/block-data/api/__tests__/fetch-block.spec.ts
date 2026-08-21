@@ -158,6 +158,47 @@ describe('fetchBlock', () => {
         expect(block?.rewards?.[1].commission).toBeUndefined();
     });
 
+    it('should keep the readable transactions when one cannot be decoded', async () => {
+        const [transaction] = LEGACY_BLOCK_RESPONSE.transactions;
+        respondWith({
+            ...LEGACY_BLOCK_RESPONSE,
+            transactions: [{ ...transaction, transaction: ['not-base64-bytes', 'base64'] }, transaction],
+        });
+
+        const block = await fetchBlock(URL, SLOT);
+
+        expect(block?.transactions).toHaveLength(1);
+        expect(block?.transactions[0].version).toBe('legacy');
+    });
+
+    it('should drop a transaction whose meta does not match the shape the cards read', async () => {
+        const [transaction] = LEGACY_BLOCK_RESPONSE.transactions;
+        const meta = { ...transaction.meta, postBalances: 'not-an-array' };
+        respondWith({ ...LEGACY_BLOCK_RESPONSE, transactions: [{ ...transaction, meta }] });
+
+        const block = await fetchBlock(URL, SLOT);
+
+        expect(block?.transactions).toEqual([]);
+    });
+
+    it('should adapt a transaction whose meta records no token balances', async () => {
+        const [transaction] = LEGACY_BLOCK_RESPONSE.transactions;
+        const meta = { ...transaction.meta, postTokenBalances: null, preTokenBalances: null };
+        respondWith({ ...LEGACY_BLOCK_RESPONSE, transactions: [{ ...transaction, meta }] });
+
+        const block = await fetchBlock(URL, SLOT);
+
+        expect(block?.transactions[0].meta?.postTokenBalances).toBeUndefined();
+        expect(block?.transactions[0].meta?.preTokenBalances).toBeUndefined();
+    });
+
+    it('should reject a block that is missing the fields every subpage renders', async () => {
+        const withoutBlockhash = { ...V1_BLOCK_RESPONSE, blockhash: undefined };
+        respondWith(withoutBlockhash);
+
+        await expect(fetchBlock(URL, SLOT)).rejects.toThrow();
+    });
+
     it('should render each transaction signature in signer order', async () => {
         respondWith(V1_BLOCK_RESPONSE);
 
