@@ -196,7 +196,7 @@ function pmpBufferAccount(program: Address, idl: object): Uint8Array {
 
 const FNDN_AUTHORITY = IDL_FALLBACK_PMP_AUTHORITIES[0];
 
-/** The fndn fallback lookup — the only PDA a frozen program (no upgrade authority) can publish under. */
+/** The fndn fallback lookup — the PDA seeded with the Foundation's authority. */
 async function pmpFallbackIdlAddress(program: Address): Promise<Address> {
     const [metadataAddress] = await findMetadataPda({ authority: FNDN_AUTHORITY, program, seed: 'idl' });
     return metadataAddress;
@@ -381,7 +381,7 @@ describe('on-chain resolution', () => {
     it('should resolve the PMP idl metadata under the fndn fallback authority', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);
-        // a frozen program has no upgrade authority, so the canonical PDA cannot hold its IDL
+        // only the fallback PDA holds the idl; the canonical one is absent
         const rpc = mockRpc({
             [await pmpFallbackIdlAddress(program)]: pmpIdlAccount(program, tokenkeg, Format.Json, FNDN_AUTHORITY),
         });

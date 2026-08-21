@@ -371,8 +371,7 @@ if (!error) {
 Resolution order, first hit wins:
 
 1. the PMP `idl` metadata under the canonical PDA
-2. the same seed under the Foundation fallback authority — the only lookup a frozen program (no
-   upgrade authority) can publish under
+2. the same seed under the Foundation fallback authority
 3. the Anchor IDL PDA
 
 Both legs resolve through `@solana/idl`; this entry adds the abort signal and the coded-`IdlError`

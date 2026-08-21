@@ -34,7 +34,7 @@ const RPC_ENDPOINTS = {
     testnet: 'https://testnet.rpc.address',
 };
 
-/** The Foundation's PMP authority — the fallback lookup a frozen program's IDL lives under. */
+/** The Foundation's PMP authority — the fallback lookup's middle seed. */
 const FNDN_AUTHORITY = 'fndnu15PLXELbLsTqrfbiweBvsBj2o12RoVfkeCCbX2';
 
 const CODAMA_IDL = { kind: 'rootNode', program: { publicKey: gen.systemProgram } };
@@ -140,7 +140,7 @@ describe('createProgramIdlDiscovery', () => {
         vi.clearAllMocks();
     });
 
-    it('should map a canonical PMP client to pmp_canonical with detection and name', async () => {
+    it('should map a canonical PMP client to a null authority with detection and name', async () => {
         fetchOnChainIdlClientMock.mockResolvedValue([
             undefined,
             { authority: null, client: fakeClient(CODAMA_IDL, 'My Program'), source: IdlSource.Pmp },
@@ -153,14 +153,13 @@ describe('createProgramIdlDiscovery', () => {
                 idl_type: 'codama',
                 program_name: 'My Program',
                 source: 'pmp',
-                source_type: 'pmp_canonical',
                 status: 'found',
             },
         });
     });
 
-    it('should map a fallback-authority PMP client to pmp_fallback, carrying the key', async () => {
-        // what a frozen program looks like: no upgrade authority, so only a fallback PDA can hold its IDL
+    it('should carry the key when a fallback authority served the PMP client', async () => {
+        // a non-null authority is what makes the result a fallback rather than canonical
         fetchOnChainIdlClientMock.mockResolvedValue([
             undefined,
             { authority: FNDN_AUTHORITY, client: fakeClient(CODAMA_IDL, 'Token'), source: IdlSource.Pmp },
@@ -171,7 +170,6 @@ describe('createProgramIdlDiscovery', () => {
             discovery: {
                 authority: FNDN_AUTHORITY,
                 source: 'pmp',
-                source_type: 'pmp_fallback',
                 status: 'found',
             },
         });
@@ -190,7 +188,6 @@ describe('createProgramIdlDiscovery', () => {
             idl_type: 'anchor',
             program_name: null,
             source: 'anchor',
-            source_type: 'anchor',
             status: 'found',
         });
         expect('authority' in discovery).toBe(false); // the anchor PDA has no authority to report

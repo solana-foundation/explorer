@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import type { IdlDiscoveryResult } from '../../../enrichments/types.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../../shared/constants.js';
 import { asRecord } from '../../../shared/parse-helpers.js';
 import { buildBpfUpgradeableLoaderPayload } from '../bpf-upgradeable-loader.js';
@@ -347,18 +348,18 @@ describe('bpf-upgradeable-loader account kind payload', () => {
     });
 
     it('should pass idlDiscoveryResult through to entity when present in context', () => {
-        const idlDiscoveryResult = {
+        // annotated, so a field the wire no longer carries fails to compile here
+        const idlDiscoveryResult: IdlDiscoveryResult = {
             data: {
                 address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
                 instructions: [],
                 metadata: { name: 'test_program', spec: '0.1.0' },
             },
             authority: null,
-            idl_type: 'anchor' as const,
+            idl_type: 'anchor',
             program_name: 'test_program',
-            source: 'pmp' as const,
-            source_type: 'pmp_canonical' as const,
-            status: 'found' as const,
+            source: 'pmp',
+            status: 'found',
         };
 
         const result = buildBpfUpgradeableLoaderPayload({

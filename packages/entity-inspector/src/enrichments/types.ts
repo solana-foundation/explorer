@@ -1,5 +1,4 @@
 import type { IdlStandard } from '@explorer/idl-decode';
-import type { IdlSource } from '@explorer/idl-decode/fetch';
 import type { TokenProgram } from '@explorer/parsers';
 import type { SecurityTxtFields as ParsedSecurityTxtFields } from '@explorer/parsers/security-txt';
 
@@ -37,6 +36,7 @@ export type SecurityMetadataResult =
     | {
           status: 'present';
           data: SecurityTxtFields;
+          /** `pmp_canonical` names the only PDA this leg reads — it never consults a fallback authority. */
           source_type: 'pmp_canonical' | 'embedded_security_txt';
           security_expired?: true;
       }
@@ -59,20 +59,16 @@ export type MultisigReferenceResult =
 export type IdlType = `${IdlStandard}` | 'anchor_legacy' | 'shank';
 
 /**
- * The publication refined where one has variants: PMP resolves under the program's canonical PDA or
- * under a fallback authority (the only lookup a frozen program can publish through), while the Anchor
- * PDA has a single derivation and so refines to itself. Wire vocabulary — deliberately spelled here
- * rather than derived from `IdlSource`, so an upstream rename cannot move these values.
+ * Which publication served the IDL. Wire vocabulary — deliberately spelled here rather than derived
+ * from `IdlSource`, so an upstream rename cannot move these values.
  */
-export type IdlSourceType = 'anchor' | 'pmp_canonical' | 'pmp_fallback';
+export type IdlSourceWire = 'anchor' | 'pmp';
 
 export type IdlDiscoveryResult =
     | {
           status: 'found';
           idl_type: IdlType;
-          /** Where it was published, as the package reports it. */
-          source: IdlSource;
-          source_type: IdlSourceType;
+          source: IdlSourceWire;
           /** PMP only: `null` when the canonical PDA served it, else the authority whose PDA did. */
           authority?: string | null;
           program_name: string | null;
