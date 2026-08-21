@@ -1,26 +1,27 @@
 import {
-    address,
+    generateKeyPairSigner,
     getTransactionCodec,
     type ReadonlyUint8Array,
     type SignatureBytes,
+    signatureBytes,
+    signBytes,
     type Transaction as KitTransaction,
+    verifySignature,
 } from '@solana/kit';
 import type { WalletSigner } from '@solana/kit-plugin-wallet';
 import {
-    Keypair,
     PublicKey,
     Transaction,
     TransactionInstruction,
     TransactionMessage,
     VersionedTransaction,
 } from '@solana/web3.js';
-import nacl from 'tweetnacl';
 import { describe, expect, it } from 'vitest';
 
 import { signWeb3jsTransaction, signWeb3jsTransactions } from '../sign-web3js-transaction';
 
-const keypair = Keypair.generate();
-const signerAddress = address(keypair.publicKey.toBase58());
+const { address: signerAddress, keyPair } = await generateKeyPairSigner();
+const signerPublicKey = new PublicKey(signerAddress);
 const blockhash = PublicKey.default.toBase58();
 const transactionCodec = getTransactionCodec();
 
@@ -33,7 +34,7 @@ function makeInstruction(data: Uint8Array = Uint8Array.from([1])): TransactionIn
 
 function makeLegacyTransaction(): Transaction {
     const transaction = new Transaction();
-    transaction.feePayer = keypair.publicKey;
+    transaction.feePayer = signerPublicKey;
     transaction.recentBlockhash = blockhash;
     transaction.add(makeInstruction());
     return transaction;
@@ -42,14 +43,21 @@ function makeLegacyTransaction(): Transaction {
 function makeVersionedTransaction(): VersionedTransaction {
     const message = new TransactionMessage({
         instructions: [makeInstruction()],
-        payerKey: keypair.publicKey,
+        payerKey: signerPublicKey,
         recentBlockhash: blockhash,
     }).compileToV0Message();
     return new VersionedTransaction(message);
 }
 
-function sign(messageBytes: ReadonlyUint8Array): SignatureBytes {
-    return nacl.sign.detached(new Uint8Array(messageBytes), keypair.secretKey) as SignatureBytes;
+function sign(messageBytes: ReadonlyUint8Array): Promise<SignatureBytes> {
+    return signBytes(keyPair.privateKey, messageBytes);
+}
+
+async function attachSignature(transaction: KitTransaction): Promise<KitTransaction> {
+    return {
+        ...transaction,
+        signatures: { ...transaction.signatures, [signerAddress]: await sign(transaction.messageBytes) },
+    };
 }
 
 /**
@@ -71,26 +79,13 @@ function prependWalletInstruction(transaction: KitTransaction): KitTransaction {
 const modifyingSigner = {
     address: signerAddress,
     modifyAndSignTransactions: (transactions: readonly KitTransaction[]) =>
-        Promise.resolve(
-            transactions.map(transaction => {
-                const modified = prependWalletInstruction(transaction);
-                return {
-                    ...modified,
-                    signatures: { ...modified.signatures, [signerAddress]: sign(modified.messageBytes) },
-                };
-            }),
-        ),
+        Promise.all(transactions.map(transaction => attachSignature(prependWalletInstruction(transaction)))),
 } as unknown as WalletSigner;
 
 const signOnlySigner = {
     address: signerAddress,
     modifyAndSignTransactions: (transactions: readonly KitTransaction[]) =>
-        Promise.resolve(
-            transactions.map(transaction => ({
-                ...transaction,
-                signatures: { ...transaction.signatures, [signerAddress]: sign(transaction.messageBytes) },
-            })),
-        ),
+        Promise.all(transactions.map(attachSignature)),
 } as unknown as WalletSigner;
 
 const sendingOnlySigner = {
@@ -104,7 +99,7 @@ describe('signWeb3jsTransaction', () => {
 
         expect(signed).toBeInstanceOf(Transaction);
         expect(signed.verifySignatures()).toBe(true);
-        expect(signed.signatures[0]?.publicKey.equals(keypair.publicKey)).toBe(true);
+        expect(signed.signatures[0]?.publicKey.equals(signerPublicKey)).toBe(true);
         // The execution path broadcasts `signed.serialize()`, which throws unless every required
         // signature is present.
         expect(() => signed.serialize()).not.toThrow();
@@ -129,7 +124,7 @@ describe('signWeb3jsTransaction', () => {
         const [signature = new Uint8Array()] = signed.signatures;
 
         expect(signed).toBeInstanceOf(VersionedTransaction);
-        expect(nacl.sign.detached.verify(signed.message.serialize(), signature, keypair.publicKey.toBytes())).toBe(
+        expect(await verifySignature(keyPair.publicKey, signatureBytes(signature), signed.message.serialize())).toBe(
             true,
         );
     });
