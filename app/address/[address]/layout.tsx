@@ -295,7 +295,7 @@ function DetailsSections({
             <ContentWidth>
                 <InfoSection account={account} tokenInfo={tokenInfo} />
             </ContentWidth>
-            {notification}
+            <ContentWidth>{notification}</ContentWidth>
             <MoreSection baseUrl={`/address/${address}`} tabs={navigationTabs} asyncChildren={asyncTabChildren}>
                 {children}
             </MoreSection>

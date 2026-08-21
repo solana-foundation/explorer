@@ -156,9 +156,9 @@ function TransactionRow({
             <BaseTable.Row ref={ref} onClick={!isLg ? handleRowClick : undefined}>
                 <BaseTable.Cell>
                     <div className="hidden lg:block">
-                        <div className="flex min-w-0 items-start gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
                             <span className="min-w-0 text-sm">{signatureLink}</span>
-                            <span className="relative top-1">{statusBadge}</span>
+                            {statusBadge}
                         </div>
                         <div className="mt-1">{programsBlock}</div>
                     </div>
