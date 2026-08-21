@@ -390,9 +390,6 @@ importers:
       tailwind-merge:
         specifier: 2.6.1
         version: 2.6.1
-      tweetnacl:
-        specifier: 1.0.3
-        version: 1.0.3
       undici:
         specifier: 6.28.0
         version: 6.28.0
@@ -10055,9 +10052,6 @@ packages:
 
   tty-browserify@0.0.1:
     resolution: {integrity: sha512-C3TaO7K81YvjCgQH9Q1S3R3P3BtN3RIM8n+OvX4il1K1zgE8ZhI0op7kClgkxtutIE8hQrcrHBXvIheqKUUCxw==}
-
-  tweetnacl@1.0.3:
-    resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
 
   type-check@0.3.2:
     resolution: {integrity: sha512-ZCmOJdvOWDBYJlzAoFkC+Q0+bUyEOS1ltgp1MGU03fqHG+dbi9tBFU2Rd9QKiDZFAYrhPh2JUf7rZRIuHRKtOg==}
@@ -21137,8 +21131,6 @@ snapshots:
       fsevents: 2.3.3
 
   tty-browserify@0.0.1: {}
-
-  tweetnacl@1.0.3: {}
 
   type-check@0.3.2:
     dependencies:

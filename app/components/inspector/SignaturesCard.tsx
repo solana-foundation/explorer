@@ -1,15 +1,41 @@
 import { Address } from '@components/common/Address';
 import { Signature } from '@components/common/Signature';
-import { getBase58Encoder } from '@solana/kit';
+import {
+    getBase58Encoder,
+    getPublicKeyFromAddress,
+    isSolanaError,
+    signatureBytes,
+    SOLANA_ERROR__KEYS__INVALID_SIGNATURE_BYTE_LENGTH,
+    verifySignature,
+} from '@solana/kit';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
-import * as nacl from 'tweetnacl';
 
 import { Badge } from '@/app/components/shared/ui/badge';
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 const BASE58_ENCODER = getBase58Encoder();
+
+async function verifySignatures(
+    signatures: (string | undefined)[],
+    message: VersionedMessage,
+    rawMessage: Uint8Array,
+): Promise<(boolean | undefined)[]> {
+    return await Promise.all(
+        signatures.map(async (signature, index) => {
+            if (!signature) return undefined;
+            try {
+                const publicKey = await getPublicKeyFromAddress(toKitAddress(message.staticAccountKeys[index]));
+                const rawSignature = signatureBytes(new Uint8Array(BASE58_ENCODER.encode(signature)));
+                return await verifySignature(publicKey, rawSignature, rawMessage);
+            } catch (error) {
+                return isSolanaError(error, SOLANA_ERROR__KEYS__INVALID_SIGNATURE_BYTE_LENGTH) ? false : undefined;
+            }
+        }),
+    );
+}
 
 export function TransactionSignatures({
     signatures,
@@ -20,31 +46,44 @@ export function TransactionSignatures({
     message: VersionedMessage;
     rawMessage: Uint8Array;
 }) {
-    const signatureRows = React.useMemo(() => {
-        return signatures.map((signature, index) => {
-            const publicKey = message.staticAccountKeys[index];
+    const [verification, setVerification] = React.useState<{
+        message: VersionedMessage;
+        rawMessage: Uint8Array;
+        results: (boolean | undefined)[];
+        signatures: (string | undefined)[];
+    }>();
 
-            let verified;
-            if (signature) {
-                const key = publicKey.toBytes();
-                const rawSignature = new Uint8Array(BASE58_ENCODER.encode(signature));
-                verified = verifySignature({
-                    key,
-                    message: rawMessage,
-                    signature: rawSignature,
-                });
-            }
-
-            const props = {
-                index,
-                signature,
-                signer: publicKey,
-                verified,
-            };
-
-            return <SignatureRow key={publicKey.toBase58()} {...props} />;
+    React.useEffect(() => {
+        let cancelled = false;
+        verifySignatures(signatures, message, rawMessage).then(results => {
+            if (!cancelled) setVerification({ message, rawMessage, results, signatures });
         });
+        return () => {
+            cancelled = true;
+        };
     }, [signatures, message, rawMessage]);
+
+    const verificationResults =
+        verification &&
+        verification.signatures === signatures &&
+        verification.message === message &&
+        verification.rawMessage === rawMessage
+            ? verification.results
+            : undefined;
+
+    const signatureRows = signatures.map((signature, index) => {
+        const publicKey = message.staticAccountKeys[index];
+
+        const props = {
+            index,
+            pending: verificationResults === undefined,
+            signature,
+            signer: publicKey,
+            verified: verificationResults?.[index],
+        };
+
+        return <SignatureRow key={index} {...props} />;
+    });
 
     return (
         <Card ui="dashkit">
@@ -69,27 +108,36 @@ export function TransactionSignatures({
     );
 }
 
-function verifySignature({
-    message,
-    signature,
-    key,
-}: {
-    message: Uint8Array;
-    signature: Uint8Array;
-    key: Uint8Array;
-}): boolean {
-    return nacl.sign.detached.verify(message, signature, key);
+function renderValidity(
+    signature: string | undefined,
+    verified: boolean | undefined,
+    pending: boolean,
+): React.ReactNode {
+    if (!signature) return 'N/A';
+    if (pending) return undefined;
+    if (verified === undefined) return 'N/A';
+    return verified ? (
+        <Badge ui="dashkit" variant="success" className="mr-[3px]">
+            Valid
+        </Badge>
+    ) : (
+        <Badge ui="dashkit" variant="warning" className="mr-[3px]">
+            Invalid
+        </Badge>
+    );
 }
 
 function SignatureRow({
     signature,
     signer,
     verified,
+    pending,
     index,
 }: {
     signature: string | undefined;
     signer: PublicKey;
     verified?: boolean;
+    pending: boolean;
     index: number;
 }) {
     return (
@@ -103,19 +151,7 @@ function SignatureRow({
             <BaseTable.Cell>
                 <Address pubkey={signer} link />
             </BaseTable.Cell>
-            <BaseTable.Cell>
-                {verified === undefined ? (
-                    'N/A'
-                ) : verified ? (
-                    <Badge ui="dashkit" variant="success" className="mr-[3px]">
-                        Valid
-                    </Badge>
-                ) : (
-                    <Badge ui="dashkit" variant="warning" className="mr-[3px]">
-                        Invalid
-                    </Badge>
-                )}
-            </BaseTable.Cell>
+            <BaseTable.Cell>{renderValidity(signature, verified, pending)}</BaseTable.Cell>
             <BaseTable.Cell>
                 {index === 0 && (
                     <Badge ui="dashkit" variant="info" className="mr-[3px]">

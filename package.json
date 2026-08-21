@@ -136,7 +136,6 @@
         "superstruct": "0.15.3",
         "swr": "2.2.0",
         "tailwind-merge": "2.6.1",
-        "tweetnacl": "1.0.3",
         "undici": "6.28.0",
         "use-async-effect": "2.2.7"
     },
