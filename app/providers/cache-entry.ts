@@ -5,12 +5,8 @@ import { useClusterConnectionFailed } from '@entities/cluster';
 import { type CacheEntry, FetchStatus, type State } from './cache';
 
 /**
- * Reads one entry from a fetch cache.
- *
- * A missing entry normally means "not requested yet", which callers render as a loading state. That
- * reading is wrong once the cluster connection has failed: every provider gates its fetch on a connected
- * cluster, so nothing is ever requested and the loading state would never end. Report the failure
- * instead, so the caller's existing `FetchFailed` branch renders with its retry.
+ * Reads one entry from a fetch cache, reporting a cache miss as a failure while the cluster connection is
+ * down — see `entryOrConnectionFailure`.
  *
  * Recovery needs no extra wiring: when the connection comes back the entry is missing again, which
  * re-arms the caller's fetch-on-mount effect.
@@ -25,7 +21,7 @@ export function useCacheEntry<T>(
 
     if (key === undefined) return undefined;
 
-    return entries[key] ?? (connectionFailed ? CONNECTION_FAILED : undefined);
+    return entryOrConnectionFailure(entries[key], connectionFailed);
 }
 
 /** `useCacheEntry` for a set of keys. One hook call, so the key list may vary between renders. */
@@ -35,7 +31,24 @@ export function useCacheEntries<T>(
 ): (CacheEntry<T> | undefined)[] {
     const connectionFailed = useClusterConnectionFailed();
 
-    return keys.map(key => entries[key] ?? (connectionFailed ? CONNECTION_FAILED : undefined));
+    return keys.map(key => entryOrConnectionFailure(entries[key], connectionFailed));
+}
+
+/**
+ * A cache miss normally means "not requested yet", which callers render as a loading state. Only a failed
+ * connection changes that reading: every provider gates its fetch on a connected cluster, so nothing is
+ * ever requested and the loading state would never end. Reporting the miss as a failure puts the caller in
+ * the `FetchFailed` branch it already has, with its own message and retry.
+ *
+ * A hit is always returned as-is, so data fetched before the endpoint died keeps being shown.
+ */
+function entryOrConnectionFailure<T>(
+    entry: CacheEntry<T> | undefined,
+    connectionFailed: boolean,
+): CacheEntry<T> | undefined {
+    if (entry) return entry;
+    if (connectionFailed) return CONNECTION_FAILED;
+    return undefined;
 }
 
 // Stable identity, so a failed connection does not hand consumers a new object on every render.
