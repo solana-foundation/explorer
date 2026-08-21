@@ -47,8 +47,12 @@ export function SupplyProvider({ children }: Props) {
     React.useEffect(() => {
         // Reported even from idle, unlike the transitions below: `fetch` only runs on a connected cluster,
         // so a failed connection would otherwise leave consumers on a loading state forever.
+        //
+        // A synthesized failure never overwrites a request that settles on its own, nor supply already in
+        // hand. `loading` resolves either way — the in-flight response lands, or its own catch reports the
+        // failure — and overwriting it here would discard a response that arrives a moment later.
         if (clusterStatus === ClusterStatus.Failure) {
-            setState(FAILED_TO_FETCH);
+            setState(current => (current.kind === 'loading' || current.kind === 'ready' ? current : FAILED_TO_FETCH));
             return;
         }
         if (state.kind === 'idle') return;

@@ -56,14 +56,52 @@ describe('SupplyProvider', () => {
 
         await waitFor(() => expect(stateText()).toBe('failed: Failed to fetch supply'));
     });
+
+    it('should keep a supply response that lands after the health check failed', async () => {
+        // The health check and the supply request are separate calls: one can fail while the other is
+        // still in flight and about to succeed. Reporting the failure over `loading` would discard the
+        // response, leaving the home page on "Failed to fetch supply" with good data thrown away.
+        let landResponse: () => void = () => {};
+        getSupply.mockReturnValue({
+            send: () =>
+                new Promise(resolve => {
+                    landResponse = () => resolve({ value: { circulating: 1n, nonCirculating: 2n, total: 3n } });
+                }),
+        });
+
+        const { rerender } = renderProvider({ fetchOnMount: true });
+        await waitFor(() => expect(stateText()).toBe('loading'));
+
+        clusterStatus = ClusterStatus.Failure;
+        rerender(providerTree({ fetchOnMount: true }));
+        landResponse();
+
+        await waitFor(() => expect(stateText()).toBe('ready'));
+    });
+
+    it('should keep supply already in hand when the health check fails', async () => {
+        const { rerender } = renderProvider({ fetchOnMount: true });
+        await waitFor(() => expect(stateText()).toBe('ready'));
+
+        clusterStatus = ClusterStatus.Failure;
+        rerender(providerTree({ fetchOnMount: true }));
+
+        // Stale supply beats a synthesized failure, matching the rule in providers/cache-entry.
+        expect(stateText()).toBe('ready');
+    });
 });
 
-function renderProvider({ fetchOnMount = false } = {}) {
-    return render(
+function renderProvider(options = {}) {
+    return render(providerTree(options));
+}
+
+// Separate from `renderProvider` so a test can re-render the same tree after moving the cluster status.
+function providerTree({ fetchOnMount = false } = {}) {
+    return (
         <SupplyProvider>
             {fetchOnMount && <FetchOnMount />}
             <StateProbe />
-        </SupplyProvider>,
+        </SupplyProvider>
     );
 }
 
