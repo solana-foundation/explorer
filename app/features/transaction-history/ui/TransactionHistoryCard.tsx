@@ -124,6 +124,11 @@ function TransactionRow({
     const [drawerMounted, setDrawerMounted] = useState(false);
     const badge = STATUS_BADGE[status];
 
+    // If the viewport crosses to desktop while the drawer is open, close it gracefully
+    useEffect(() => {
+        if (isLg) setDrawerOpen(false);
+    }, [isLg]);
+
     const openDrawer = () => {
         setDrawerMounted(true);
         setDrawerOpen(true);
@@ -210,7 +215,7 @@ function TransactionRow({
                 )}
             </BaseTable.Row>
 
-            {!isLg && drawerMounted && (
+            {drawerMounted && (
                 <TransactionDetailsDrawer
                     open={drawerOpen}
                     onOpenChange={setDrawerOpen}

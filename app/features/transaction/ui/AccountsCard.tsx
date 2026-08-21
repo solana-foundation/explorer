@@ -13,7 +13,7 @@ import { useTransactionDetails } from '@providers/transactions';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
@@ -55,6 +55,12 @@ function TransactionAccountRow({
     // Mount the mobile drawer only once the row is first tapped — otherwise every account row mounts a
     // closed drawer up front.
     const [drawerMounted, setDrawerMounted] = useState(false);
+
+    // If the viewport crosses to desktop while the drawer is open, close it gracefully (Radix runs its
+    // exit animation + scroll-lock/focus teardown) instead of the render gate unmounting it abruptly.
+    useEffect(() => {
+        if (isDesktop) setDrawerOpen(false);
+    }, [isDesktop]);
 
     const pubkey = account.pubkey;
     const key = pubkey.toBase58();
@@ -163,8 +169,7 @@ function TransactionAccountRow({
                 </div>
             </div>
 
-            {/* Mobile: drawer (mounted lazily on first open) */}
-            {!isDesktop && drawerMounted && (
+            {drawerMounted && (
                 <AccountDetailDrawer
                     account={account}
                     accountInfo={accountInfo}

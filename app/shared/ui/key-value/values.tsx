@@ -10,9 +10,31 @@ import { cn } from '@/app/components/shared/utils';
  * body font and breaks on words (prose-y values like Message / dates / repo URLs).
  */
 
-/** Scalar text value. `mono` picks the monospace vs. the normal body font. */
-export function TextValue({ mono = true, children }: { mono?: boolean; children: React.ReactNode }) {
-    return <span className={cn('min-w-0', mono ? 'break-all font-mono' : 'break-words')}>{children}</span>;
+/**
+ * Scalar text value. `mono` picks the monospace vs. the normal body font. `preserveWhitespace` keeps
+ * significant spaces/newlines (whitespace-pre-wrap) instead of collapsing them — for values like a
+ * verified-build `message` where internal spacing is meaningful.
+ */
+export function TextValue({
+    mono = true,
+    preserveWhitespace = false,
+    children,
+}: {
+    mono?: boolean;
+    preserveWhitespace?: boolean;
+    children: React.ReactNode;
+}) {
+    return (
+        <span
+            className={cn(
+                'min-w-0',
+                mono ? 'break-all font-mono' : 'break-words',
+                preserveWhitespace && 'whitespace-pre-wrap',
+            )}
+        >
+            {children}
+        </span>
+    );
 }
 
 /** External link with a trailing open-in-new glyph. `mono` picks mono vs. the normal font. */

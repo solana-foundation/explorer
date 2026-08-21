@@ -16,6 +16,11 @@ import { KeyValue } from '@/app/shared/ui/key-value';
 import { Address } from '../common/Address';
 import { LoadingCard } from '../common/LoadingCard';
 
+// The Squads program ids are static constants — decode them once at module load instead of building a
+// fresh PublicKey (base58 decode + validation) on every render.
+const SQUADS_V3_PUBKEY = new PublicKey(SQUADS_V3_ADDRESS);
+const SQUADS_V4_PUBKEY = new PublicKey(SQUADS_V4_ADDRESS);
+
 export function ProgramMultisigCard({ data }: { data: UpgradeableLoaderAccountData }) {
     return (
         <Suspense fallback={<LoadingCard message="Loading multisig information" />}>
@@ -53,10 +58,7 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
         <SectionCard title="Upgrade Authority Multisig Information">
             <KeyValue label="Multisig Program">{squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}</KeyValue>
             <KeyValue label="Multisig Program Id">
-                <Address
-                    pubkey={new PublicKey(squadMapInfo?.version === 'v4' ? SQUADS_V4_ADDRESS : SQUADS_V3_ADDRESS)}
-                    link
-                />
+                <Address pubkey={squadMapInfo?.version === 'v4' ? SQUADS_V4_PUBKEY : SQUADS_V3_PUBKEY} link />
             </KeyValue>
             <KeyValue label="Multisig Account">
                 {squadMapInfo?.isSquad && <Address pubkey={new PublicKey(squadMapInfo.multisig)} link />}

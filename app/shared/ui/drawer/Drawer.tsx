@@ -37,10 +37,8 @@ export function Drawer({
 }: DrawerProps) {
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
     const surfaceRef = React.useRef<HTMLDivElement | null>(null);
-    const { dragY, dragging, closing, handleProps, bodyProps, onTransitionEnd } = useSwipeToDismiss(
-        scrollRef,
-        open,
-        () => onOpenChange(false),
+    const { dragY, dragging, closing, handleProps, bodyProps } = useSwipeToDismiss(scrollRef, open, () =>
+        onOpenChange(false),
     );
     const { contentRef, maskImage, onScroll } = useEdgeFades(scrollRef, open);
 
@@ -76,7 +74,6 @@ export function Drawer({
                         transition: dragging ? 'none' : 'transform 0.2s ease-out',
                         zIndex: DRAWER_Z_INDEX,
                     }}
-                    onTransitionEnd={onTransitionEnd}
                     {...props}
                 >
                     <div className="shrink-0 cursor-grab pb-3 pt-3" style={{ touchAction: 'none' }} {...handleProps}>

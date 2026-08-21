@@ -208,7 +208,11 @@ function RenderEntry({
                     </Badge>
                 );
             }
-            return <TextValue mono={mono}>{value && (value as string).length > 1 ? value : '-'}</TextValue>;
+            return (
+                <TextValue mono={mono} preserveWhitespace>
+                    {value && (value as string).length > 1 ? value : '-'}
+                </TextValue>
+            );
         case DisplayType.LongString:
             return value && (value as string).length > 1 ? (
                 <CopyableCode value={value as string} />

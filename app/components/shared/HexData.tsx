@@ -1,11 +1,16 @@
 // TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Copyable } from '@components/common/Copyable';
 import { cva } from 'class-variance-authority';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { ByteArray, toHex } from '@/app/shared/lib/bytes';
 
 import { cn } from './utils';
+
+// Measure the wrapped hex layout before the browser paints so the column-based checkerboard doesn't
+// flash from a flat single color on the first frame. Falls back to useEffect on the server, where
+// there is no layout to measure anyway (and useLayoutEffect would warn).
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type HexSpan = { text: string; variant: 'primary' | 'secondary' | 'secondary-old' };
 export type HexRow = HexSpan[];
@@ -168,7 +173,7 @@ function WrapContent({
     const preRef = useRef<HTMLPreElement>(null);
     const [cols, setCols] = useState(1);
 
-    useEffect(() => {
+    useIsomorphicLayoutEffect(() => {
         const el = preRef.current;
         if (!el) return;
         const measure = () => {

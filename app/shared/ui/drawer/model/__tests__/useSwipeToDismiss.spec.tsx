@@ -62,24 +62,25 @@ describe('useSwipeToDismiss', () => {
         expect(result.current.dragging).toBe(false);
     });
 
-    it('should dismiss after the slide-out transition when dragged past the threshold', () => {
-        const onDismiss = vi.fn();
-        const { result } = renderHook(() => useSwipeToDismiss(scrollRef, true, onDismiss));
+    it('should dismiss after the slide-out has played when dragged past the threshold', () => {
+        vi.useFakeTimers();
+        try {
+            const onDismiss = vi.fn();
+            const { result } = renderHook(() => useSwipeToDismiss(scrollRef, true, onDismiss));
 
-        act(() => result.current.handleProps.onPointerDown(pointerEvent(0)));
-        act(() => result.current.handleProps.onPointerMove(pointerEvent(120)));
-        act(() => result.current.handleProps.onPointerUp(pointerEvent(120)));
+            act(() => result.current.handleProps.onPointerDown(pointerEvent(0)));
+            act(() => result.current.handleProps.onPointerMove(pointerEvent(120)));
+            act(() => result.current.handleProps.onPointerUp(pointerEvent(120)));
 
-        expect(result.current.closing).toBe(true);
-        expect(onDismiss).not.toHaveBeenCalled();
+            expect(result.current.closing).toBe(true);
+            expect(onDismiss).not.toHaveBeenCalled();
 
-        act(() =>
-            result.current.onTransitionEnd({
-                propertyName: 'transform',
-            } as React.TransitionEvent<HTMLDivElement>),
-        );
+            act(() => vi.runAllTimers());
 
-        expect(onDismiss).toHaveBeenCalledTimes(1);
+            expect(onDismiss).toHaveBeenCalledTimes(1);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it('should snap back without dismissing below the threshold', () => {

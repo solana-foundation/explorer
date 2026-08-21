@@ -87,6 +87,18 @@ const badgeVariants = cva([], {
             ui: 'tw',
             variant: 'warning',
         },
+        {
+            class: 'border-transparent bg-green-950 text-green-900 [&_a]:text-green-900 [&[href]]:hover:text-green-900 [&_a]:hover:text-green-900',
+            tone: 'original',
+            ui: 'tw',
+            variant: 'dark',
+        },
+        {
+            class: 'border-transparent bg-gray-700 text-gray-400 [&_a]:text-gray-400 [&[href]]:hover:text-gray-400 [&_a]:hover:text-gray-400',
+            tone: 'original',
+            ui: 'tw',
+            variant: 'gray',
+        },
 
         {
             class: 'border-transparent text-neutral-200 [&_a]:text-neutral-200 [&[href]]:hover:text-neutral-200 [&_a]:hover:text-neutral-200',

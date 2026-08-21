@@ -267,7 +267,8 @@ function PmpValue({ entryKey, value, mono }: { entryKey: string; value: any; mon
         );
     }
     if (!isNaN(value)) {
-        return <TextValue mono={mono}>{value}</TextValue>;
+        // String() so booleans/numbers render visibly — React drops raw boolean children, leaving a blank.
+        return <TextValue mono={mono}>{String(value)}</TextValue>;
     }
     return <CodeBlock mono={mono}>{String(value)}</CodeBlock>;
 }
@@ -287,7 +288,7 @@ function PmpListItem({ value, mono }: { value: any; mono: boolean }) {
         return <>{value}</>;
     }
     if (!isNaN(value)) {
-        return <>{value}</>;
+        return <>{String(value)}</>;
     }
     return <CodeBlock mono={mono}>{String(value)}</CodeBlock>;
 }
