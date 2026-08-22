@@ -691,11 +691,14 @@ importers:
       '@codama/nodes-from-anchor':
         specifier: 1.3.8
         version: 1.3.8(patch_hash=0998b86e7c34d80be23b8b33f9004bfbd53057bae5f6c8cfd6cd179e8f175199)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
+      '@solana/idl':
+        specifier: 0.2.0
+        version: 0.2.0(@solana/kit@7.0.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana/kit':
         specifier: ^7.0.0
         version: 7.0.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
       codama:
-        specifier: ^1.5.0
+        specifier: ~1.5.0
         version: 1.5.0
     devDependencies:
       '@codama/dynamic-client':
@@ -705,7 +708,7 @@ importers:
         specifier: 1.1.30
         version: 1.1.30(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       '@codama/renderers-js':
-        specifier: ^1.7.0
+        specifier: ~1.7.0
         version: 1.7.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       '@coral-xyz/anchor':
         specifier: 0.30.1
@@ -762,7 +765,7 @@ importers:
         specifier: https://codeload.github.com/codama-idl/codama/tar.gz/008849ce88472dc1080ed9a71a897b631de82b98
         version: codama-monorepo@https://codeload.github.com/codama-idl/codama/tar.gz/008849ce88472dc1080ed9a71a897b631de82b98
       oxc-transform:
-        specifier: ^0.137.0
+        specifier: ~0.137.0
         version: 0.137.0
       oxfmt:
         specifier: ^0.56.0
@@ -11038,7 +11041,7 @@ snapshots:
       '@codama/visitors-core': 1.8.0
       '@solana/codecs-strings': 6.5.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       prettier: 3.8.4
-      semver: 7.8.1
+      semver: 7.8.5
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
       - typescript
@@ -15568,7 +15571,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.57.0
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.8.1
+      semver: 7.8.5
       tinyglobby: 0.2.15
       ts-api-utils: 2.4.0(typescript@5.7.3)
       typescript: 5.7.3
@@ -15583,7 +15586,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.57.1
       debug: 4.4.3
       minimatch: 10.2.4
-      semver: 7.8.1
+      semver: 7.8.5
       tinyglobby: 0.2.15
       ts-api-utils: 2.4.0(typescript@5.7.3)
       typescript: 5.7.3
@@ -15598,7 +15601,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.59.2
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.8.1
+      semver: 7.8.5
       tinyglobby: 0.2.15
       ts-api-utils: 2.5.0(typescript@5.7.3)
       typescript: 5.7.3
@@ -20438,8 +20441,7 @@ snapshots:
 
   semver@7.8.1: {}
 
-  semver@7.8.5:
-    optional: true
+  semver@7.8.5: {}
 
   send@1.2.1:
     dependencies:

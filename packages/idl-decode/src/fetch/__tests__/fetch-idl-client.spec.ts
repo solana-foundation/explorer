@@ -9,8 +9,11 @@ import {
     Encoding,
     findMetadataPda,
     Format,
+    getBufferEncoder,
     getMetadataEncoder,
+    PROGRAM_METADATA_PROGRAM_ADDRESS,
 } from '@solana-program/program-metadata';
+import { IDL_FALLBACK_PMP_AUTHORITIES } from '@solana/idl';
 import {
     address,
     type Address,
@@ -18,6 +21,8 @@ import {
     type GetAccountInfoApi,
     getProgramDerivedAddress,
     type Rpc,
+    SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR,
+    SolanaError,
 } from '@solana/kit';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -42,7 +47,14 @@ import {
     unwrapResult,
 } from '../../__tests__/fixtures';
 
-import { createLatestIdlFetcher, fetchIdlClient, fetchLatestIdlClient, IdlSource } from '../index';
+import {
+    createLatestIdlFetcher,
+    createOnChainIdlFetcher,
+    fetchIdlClient,
+    fetchLatestIdlClient,
+    fetchOnChainIdlClient,
+    IdlSource,
+} from '../index';
 
 const provider = codamaProvider();
 
@@ -50,6 +62,8 @@ const provider = codamaProvider();
 function mockRpc(
     accounts: Record<string, Uint8Array>,
     onSend?: (config?: { abortSignal?: AbortSignal }) => void,
+    // a buffer read is dispatched on the account's OWNER (PMP program vs anything else), so it has to be settable
+    owners: Record<string, Address> = {},
 ): Rpc<GetAccountInfoApi> {
     return {
         getAccountInfo: (accountAddress: string) => ({
@@ -62,7 +76,7 @@ function mockRpc(
                               data: [Buffer.from(accounts[accountAddress]).toString('base64'), 'base64'],
                               executable: false,
                               lamports: 1n,
-                              owner: gen.systemProgram,
+                              owner: owners[accountAddress] ?? gen.systemProgram,
                               rentEpoch: 0n,
                               space: BigInt(accounts[accountAddress].length),
                           }
@@ -167,6 +181,27 @@ async function pmpIdlAddress(program: Address): Promise<Address> {
     return metadataAddress;
 }
 
+/** A PMP `Buffer` account — the staging account `write` fills before `setData` commits it. */
+function pmpBufferAccount(program: Address, idl: object): Uint8Array {
+    return Uint8Array.from(
+        getBufferEncoder().encode({
+            authority: null,
+            canonical: true,
+            data: new TextEncoder().encode(JSON.stringify(idl)),
+            program,
+            seed: 'idl',
+        }),
+    );
+}
+
+const FNDN_AUTHORITY = IDL_FALLBACK_PMP_AUTHORITIES[0];
+
+/** The fndn fallback lookup — the PDA seeded with the Foundation's authority. */
+async function pmpFallbackIdlAddress(program: Address): Promise<Address> {
+    const [metadataAddress] = await findMetadataPda({ authority: FNDN_AUTHORITY, program, seed: 'idl' });
+    return metadataAddress;
+}
+
 describe('fetchIdlClient', () => {
     it('should build a working client from a custom fetcher', async () => {
         const tokenkeg = loadTokenkegIdl();
@@ -179,6 +214,34 @@ describe('fetchIdlClient', () => {
 
         const [, data] = client.decodeInstructionData<{ amount: bigint }>(transferIx(tokenkeg));
         expect(data).toMatchObject({ amount: 42n });
+    });
+
+    it('should take the leg options on the on-chain route', async () => {
+        const simple = loadSimpleIdl();
+        const program = address(simple.address);
+        const rpc = mockRpc({ [await anchorIdlAddress(program)]: anchorIdlAccount(simple) });
+
+        const [error] = await fetchIdlClient(program, { anchor: false, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_NOT_FOUND)).toBe(true);
+    });
+
+    it('should reject a malformed program address rather than report a fetch failure', async () => {
+        // no lookup can be derived from it — a caller bug, not a data outcome
+        await expect(fetchIdlClient('not-base58', { rpc: mockRpc({}) })).rejects.toThrow();
+    });
+
+    it('should not require a derivable address on the fetcher route', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const client = unwrapResult(
+            await fetchIdlClient('not-base58', {
+                fetcher: async () => JSON.parse(JSON.stringify(tokenkeg)) as unknown,
+                provider,
+                verifyAddress: false,
+            }),
+        );
+
+        expect(client.programAddress()).toBe(tokenkeg.program.publicKey);
     });
 
     it('should build a client from a fetched legacy IDL using the requested address', async () => {
@@ -300,13 +363,29 @@ describe('fetchIdlClient', () => {
     });
 });
 
-describe('createLatestIdlFetcher', () => {
+// The resolution policy itself, driven through whichever surface reaches it — `fetchIdlClient` for the
+// default route, `createOnChainIdlFetcher` where the raw fetcher's own contract is what matters.
+describe('on-chain resolution', () => {
     it('should resolve the PMP idl metadata first', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);
         const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpIdlAccount(program, tokenkeg) });
 
         // no provider passed — the codama engine is the default
+        const client = unwrapResult(await fetchIdlClient(program, { rpc }));
+
+        const [, data] = client.decodeInstructionData<{ amount: bigint }>(transferIx(tokenkeg));
+        expect(data).toMatchObject({ amount: 42n });
+    });
+
+    it('should resolve the PMP idl metadata under the fndn fallback authority', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        // only the fallback PDA holds the idl; the canonical one is absent
+        const rpc = mockRpc({
+            [await pmpFallbackIdlAddress(program)]: pmpIdlAccount(program, tokenkeg, Format.Json, FNDN_AUTHORITY),
+        });
+
         const client = unwrapResult(await fetchIdlClient(program, { rpc }));
 
         const [, data] = client.decodeInstructionData<{ amount: bigint }>(transferIx(tokenkeg));
@@ -328,7 +407,7 @@ describe('createLatestIdlFetcher', () => {
         const simple = loadSimpleIdl();
         const program = address(simple.address);
         const rpc = mockRpc({ [await anchorIdlAddress(program)]: anchorIdlAccount(simple) });
-        const fetcher = createLatestIdlFetcher(rpc, { anchor: false });
+        const fetcher = createOnChainIdlFetcher(rpc, { anchor: false });
 
         const [error] = await fetchIdlClient(program, { fetcher });
 
@@ -336,16 +415,16 @@ describe('createLatestIdlFetcher', () => {
     });
 
     it('should resolve undefined when neither source has an IDL', async () => {
-        const fetcher = createLatestIdlFetcher(mockRpc({}));
+        const fetcher = createOnChainIdlFetcher(mockRpc({}));
 
         await expect(fetcher(gen.systemProgram)).resolves.toBeUndefined();
     });
 
-    it('should surface a corrupt direct PMP payload as the typed parse error', async () => {
+    it('should surface a metadata account that is no PMP container as the typed parse error', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);
-        // the metadata decodes fine, but its zlib-claimed payload is garbage — permanent data corruption
-        const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpCorruptIdlAccount(program) });
+        // bytes that do not decode as PMP metadata at all — upstream's `framing`, a fact about the account
+        const rpc = mockRpc({ [await pmpIdlAddress(program)]: Uint8Array.from([1, 2, 3]) });
 
         const [error, client] = await fetchIdlClient(program, { rpc });
 
@@ -354,7 +433,21 @@ describe('createLatestIdlFetcher', () => {
         expect(error?.context).toMatchObject({ operation: 'pmp idl data' });
     });
 
-    it('should keep a url-sourced PMP payload failure a transport error', async () => {
+    it('should surface a corrupt direct PMP payload as the typed fetch error', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        // the metadata decodes fine, but its zlib-claimed payload is garbage
+        const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpCorruptIdlAccount(program) });
+
+        const [error, client] = await fetchIdlClient(program, { rpc });
+
+        expect(client).toBeUndefined();
+        // upstream's `payload` covers a failed read/download too, so it cannot be asserted as a data verdict
+        expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
+        expect(error?.cause).toBeDefined();
+    });
+
+    it('should surface a url-sourced PMP payload failure as the typed fetch error', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);
         const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpUrlIdlAccount(program, 'https://idl.invalid/x') });
@@ -366,7 +459,7 @@ describe('createLatestIdlFetcher', () => {
             const [error, client] = await fetchIdlClient(program, { rpc });
 
             expect(client).toBeUndefined();
-            // a url fetch failure is retryable transport, not data corruption
+            // the download upstream owns is unreachable — a blip, not a program that publishes bad bytes
             expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
         } finally {
             vi.unstubAllGlobals();
@@ -383,7 +476,7 @@ describe('createLatestIdlFetcher', () => {
         );
         const controller = new AbortController();
 
-        await createLatestIdlFetcher(rpc)(program, { abortSignal: controller.signal });
+        await createOnChainIdlFetcher(rpc)(program, { abortSignal: controller.signal });
 
         expect(seen.length).toBeGreaterThanOrEqual(2);
         for (const signal of seen) expect(signal).toBe(controller.signal);
@@ -395,7 +488,7 @@ describe('createLatestIdlFetcher', () => {
         const authority = address(NTT_PROGRAM_ADDRESS); // any address distinct from the canonical (null) authority
         const [metadataAddress] = await findMetadataPda({ authority, program, seed: 'idl' });
         const rpc = mockRpc({ [metadataAddress]: pmpIdlAccount(program, tokenkeg, Format.Json, authority) });
-        const fetcher = createLatestIdlFetcher(rpc, { authority });
+        const fetcher = createOnChainIdlFetcher(rpc, { authority });
 
         // the canonical PDA holds nothing — resolution only succeeds if the option reached the seeds
         await expect(fetcher(program)).resolves.toMatchObject({ program: { publicKey: program } });
@@ -413,15 +506,15 @@ describe('createLatestIdlFetcher', () => {
         expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
     });
 
-    it('should surface a non-JSON PMP idl metadata as the typed parse error', async () => {
+    it('should resolve PMP idl content whatever format the metadata declares', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);
+        // the declared format is advisory — JSON-parseability of the content is what decides
         const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpIdlAccount(program, tokenkeg, Format.Toml) });
 
-        const [error, client] = await fetchIdlClient(program, { rpc });
+        const client = unwrapResult(await fetchIdlClient(program, { rpc }));
 
-        expect(client).toBeUndefined();
-        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        expect(client.programAddress()).toBe(tokenkeg.program.publicKey);
     });
 
     it('should surface unparseable PMP idl content as the typed parse error', async () => {
@@ -440,27 +533,82 @@ describe('createLatestIdlFetcher', () => {
         const program = address(simple.address);
         const rpc = mockRpc({
             [await anchorIdlAddress(program)]: anchorIdlAccount(simple), // a valid fallback that must NOT mask the corruption
-            [await pmpIdlAddress(program)]: pmpIdlAccount(program, simple, Format.Toml),
+            [await pmpIdlAddress(program)]: pmpCorruptIdlAccount(program),
         });
 
         const [error, client] = await fetchIdlClient(program, { rpc });
 
         expect(client).toBeUndefined();
-        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
     });
 });
 
-describe('fetchLatestIdlClient', () => {
+describe('fetchOnChainIdlClient', () => {
+    it('should keep the pre-rename names resolving to the same functions', () => {
+        // nothing in the repo reads these; the aliases exist for callers that learned the old names
+        expect(fetchLatestIdlClient).toBe(fetchOnChainIdlClient);
+        expect(createLatestIdlFetcher).toBe(createOnChainIdlFetcher);
+    });
+
     it('should attribute a PMP hit as the pmp source with a working client', async () => {
         const tokenkeg = loadTokenkegIdl();
         const program = address(tokenkeg.program.publicKey);
         const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpIdlAccount(program, tokenkeg) });
 
-        const { client, source } = unwrapResult(await fetchLatestIdlClient(program, { rpc }));
+        const { client, source } = unwrapResult(await fetchOnChainIdlClient(program, { rpc }));
 
         expect(source).toBe(IdlSource.Pmp);
         const [, data] = client.decodeInstructionData<{ amount: bigint }>(transferIx(tokenkeg));
         expect(data).toMatchObject({ amount: 42n });
+    });
+
+    it('should attribute the fndn fallback authority that served the IDL', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const rpc = mockRpc({
+            [await pmpFallbackIdlAddress(program)]: pmpIdlAccount(program, tokenkeg, Format.Json, FNDN_AUTHORITY),
+        });
+
+        const { authority, source } = unwrapResult(await fetchOnChainIdlClient(program, { rpc }));
+
+        expect(source).toBe(IdlSource.Pmp);
+        expect(authority).toBe(FNDN_AUTHORITY);
+    });
+
+    it('should attribute the canonical authority when it holds the IDL', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const simple = loadSimpleIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const rpc = mockRpc({
+            [await pmpFallbackIdlAddress(program)]: pmpIdlAccount(program, simple, Format.Json, FNDN_AUTHORITY),
+            [await pmpIdlAddress(program)]: pmpIdlAccount(program, tokenkeg),
+        });
+
+        const { authority } = unwrapResult(await fetchOnChainIdlClient(program, { rpc }));
+
+        expect(authority).toBeNull();
+    });
+
+    it('should skip the fndn fallback lookup when an authority is pinned', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const rpc = mockRpc({
+            [await pmpFallbackIdlAddress(program)]: pmpIdlAccount(program, tokenkeg, Format.Json, FNDN_AUTHORITY),
+        });
+
+        const [error] = await fetchOnChainIdlClient(program, { anchor: false, authority: null, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_NOT_FOUND)).toBe(true);
+    });
+
+    it('should report no authority off the anchor leg', async () => {
+        const simple = loadSimpleIdl();
+        const program = address(simple.address);
+        const rpc = mockRpc({ [await anchorIdlAddress(program)]: anchorIdlAccount(simple) });
+
+        const fetched = unwrapResult(await fetchOnChainIdlClient(program, { rpc }));
+
+        expect('authority' in fetched).toBe(false);
     });
 
     it('should attribute the anchor fallback as the anchor-pda source', async () => {
@@ -468,15 +616,15 @@ describe('fetchLatestIdlClient', () => {
         const program = address(simple.address);
         const rpc = mockRpc({ [await anchorIdlAddress(program)]: anchorIdlAccount(simple) });
 
-        const { client, source } = unwrapResult(await fetchLatestIdlClient(program, { rpc }));
+        const { client, source } = unwrapResult(await fetchOnChainIdlClient(program, { rpc }));
 
-        expect(source).toBe(IdlSource.AnchorPda);
+        expect(source).toBe(IdlSource.Anchor);
         const [, data] = client.decodeInstructionData<{ amount: bigint }>(incrementIx(simple));
         expect(data).toMatchObject({ amount: 42n });
     });
 
     it('should surface an absent IDL on both legs as the typed not-found error', async () => {
-        const [error, fetched] = await fetchLatestIdlClient(gen.systemProgram, {
+        const [error, fetched] = await fetchOnChainIdlClient(gen.systemProgram, {
             rpc: mockRpc({}),
         });
 
@@ -489,7 +637,7 @@ describe('fetchLatestIdlClient', () => {
         const program = address(simple.address);
         const rpc = mockRpc({ [await anchorIdlAddress(program)]: anchorIdlAccount(simple) });
 
-        const [error, fetched] = await fetchLatestIdlClient(program, { anchor: false, rpc });
+        const [error, fetched] = await fetchOnChainIdlClient(program, { anchor: false, rpc });
 
         expect(fetched).toBeUndefined();
         expect(isIdlError(error, IDL_ERROR__IDL_NOT_FOUND)).toBe(true);
@@ -503,15 +651,33 @@ describe('fetchLatestIdlClient', () => {
             [await pmpIdlAddress(program)]: pmpCorruptIdlAccount(program),
         });
 
-        const [error, fetched] = await fetchLatestIdlClient(program, { rpc });
+        const [error, fetched] = await fetchOnChainIdlClient(program, { rpc });
 
         expect(fetched).toBeUndefined();
-        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
     });
 
     it('should surface a transport failure as the typed fetch error with its cause', async () => {
+        // a real rpc reports transport failures as SolanaErrors — that is what keeps a blip retryable
+        const cause = new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
+            headers: new Headers(),
+            message: 'Bad Gateway',
+            statusCode: 502,
+        });
+        const [error] = await fetchOnChainIdlClient(gen.systemProgram, {
+            rpc: mockRpc({}, () => {
+                throw cause;
+            }),
+        });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_FETCH_FAILED)).toBe(true);
+        expect(error?.cause).toBe(cause);
+    });
+
+    it('should surface a non-SolanaError rpc failure as the typed fetch error with its cause', async () => {
+        // @solana/idl files any non-SolanaError throw under `payload`; an unreachable rpc must stay retryable
         const cause = new Error('rpc exploded');
-        const [error] = await fetchLatestIdlClient(gen.systemProgram, {
+        const [error] = await fetchOnChainIdlClient(gen.systemProgram, {
             rpc: mockRpc({}, () => {
                 throw cause;
             }),
@@ -526,7 +692,7 @@ describe('fetchLatestIdlClient', () => {
         const requested = address(gen.systemProgram);
         const rpc = mockRpc({ [await pmpIdlAddress(requested)]: pmpIdlAccount(requested, tokenkeg) });
 
-        const [error, fetched] = await fetchLatestIdlClient(requested, { rpc });
+        const [error, fetched] = await fetchOnChainIdlClient(requested, { rpc });
 
         expect(fetched).toBeUndefined();
         expect(isIdlError(error, IDL_ERROR__IDL_ADDRESS_MISMATCH)).toBe(true);
@@ -537,7 +703,7 @@ describe('fetchLatestIdlClient', () => {
         const requested = address(gen.systemProgram);
         const rpc = mockRpc({ [await pmpIdlAddress(requested)]: pmpIdlAccount(requested, tokenkeg) });
 
-        const { client, source } = unwrapResult(await fetchLatestIdlClient(requested, { rpc, verifyAddress: false }));
+        const { client, source } = unwrapResult(await fetchOnChainIdlClient(requested, { rpc, verifyAddress: false }));
 
         expect(source).toBe(IdlSource.Pmp);
         expect(client.programAddress()).toBe(tokenkeg.program.publicKey);
@@ -547,7 +713,7 @@ describe('fetchLatestIdlClient', () => {
         const requested = address(gen.systemProgram);
         const rpc = mockRpc({ [await pmpIdlAddress(requested)]: pmpIdlAccount(requested, { not: 'an idl' }) });
 
-        const [error, fetched] = await fetchLatestIdlClient(requested, { rpc });
+        const [error, fetched] = await fetchOnChainIdlClient(requested, { rpc });
 
         expect(fetched).toBeUndefined();
         expect(isIdlError(error, IDL_ERROR__UNSUPPORTED_IDL_FORMAT)).toBe(true);
@@ -555,7 +721,7 @@ describe('fetchLatestIdlClient', () => {
 
     it('should reject with the abort reason instead of returning an error value', async () => {
         await expect(
-            fetchLatestIdlClient(gen.systemProgram, {
+            fetchOnChainIdlClient(gen.systemProgram, {
                 abortSignal: AbortSignal.abort(),
                 rpc: mockRpc({}),
             }),
@@ -571,8 +737,102 @@ describe('fetchLatestIdlClient', () => {
             throw new Error('transport wrapper');
         });
 
-        await expect(fetchLatestIdlClient(gen.systemProgram, { abortSignal: controller.signal, rpc })).rejects.toBe(
+        await expect(fetchOnChainIdlClient(gen.systemProgram, { abortSignal: controller.signal, rpc })).rejects.toBe(
             reason,
         );
+    });
+});
+
+// `buffer` reads one named account instead of deriving anything — a staged IDL, either family. The
+// family comes off the account's owner, so `source` stays the publication vocabulary.
+describe('buffer resolution', () => {
+    it('should decode an anchor idl buffer as the anchor source', async () => {
+        const simple = loadSimpleIdl();
+        const program = address(simple.address);
+        const buffer = address(gen.systemProgram);
+        const rpc = mockRpc({ [buffer]: anchorIdlAccount(simple) });
+
+        const fetched = unwrapResult(await fetchOnChainIdlClient(program, { buffer, rpc }));
+
+        expect(fetched.source).toBe(IdlSource.Anchor);
+        expect(fetched.address).toBe(buffer);
+        const [, data] = fetched.client.decodeInstructionData<{ amount: bigint }>(incrementIx(simple));
+        expect(data).toMatchObject({ amount: 42n });
+    });
+
+    it('should decode a pmp idl buffer as the pmp source', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const buffer = address(gen.systemProgram);
+        const rpc = mockRpc({ [buffer]: pmpBufferAccount(program, tokenkeg) }, undefined, {
+            [buffer]: PROGRAM_METADATA_PROGRAM_ADDRESS,
+        });
+
+        const fetched = unwrapResult(await fetchOnChainIdlClient(program, { buffer, rpc }));
+
+        expect(fetched.source).toBe(IdlSource.Pmp);
+        expect(fetched.authority).toBeUndefined(); // a buffer carries no resolution authority
+        const [, data] = fetched.client.decodeInstructionData<{ amount: bigint }>(transferIx(tokenkeg));
+        expect(data).toMatchObject({ amount: 42n });
+    });
+
+    it('should derive nothing when a buffer is named', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const buffer = address(NTT_PROGRAM_ADDRESS);
+        // the canonical PMP PDA holds a valid IDL that must NOT be consulted
+        const rpc = mockRpc({ [await pmpIdlAddress(program)]: pmpIdlAccount(program, tokenkeg) });
+
+        const [error] = await fetchOnChainIdlClient(program, { buffer, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_NOT_FOUND)).toBe(true);
+    });
+
+    it('should surface buffer content that is no JSON as the typed parse error', async () => {
+        const simple = loadSimpleIdl();
+        const buffer = address(gen.systemProgram);
+        // a valid IdlAccount header whose payload inflates — to something that is not JSON
+        const rpc = mockRpc({ [buffer]: anchorCorruptIdlAccount() });
+
+        const [error] = await fetchOnChainIdlClient(address(simple.address), { buffer, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        expect(error?.context).toMatchObject({ operation: 'anchor idl content' });
+    });
+
+    it('should surface undecodable buffer bytes as the typed parse error', async () => {
+        const simple = loadSimpleIdl();
+        const buffer = address(gen.systemProgram);
+        // shorter than the IdlAccount header, and not PMP-owned — neither family can frame it
+        const rpc = mockRpc({ [buffer]: new Uint8Array(16) });
+
+        const [error] = await fetchOnChainIdlClient(address(simple.address), { buffer, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_PARSE_FAILED)).toBe(true);
+        // the label names the publication, not the account read — a buffer failure is indistinguishable here
+        expect(error?.context).toMatchObject({ operation: 'anchor idl data' });
+    });
+
+    it('should reject a buffer IDL declaring a different program address', async () => {
+        const tokenkeg = loadTokenkegIdl(); // declares TokenkegQfe… — not the requested program
+        const buffer = address(NTT_PROGRAM_ADDRESS);
+        const rpc = mockRpc({ [buffer]: pmpBufferAccount(address(gen.systemProgram), tokenkeg) }, undefined, {
+            [buffer]: PROGRAM_METADATA_PROGRAM_ADDRESS,
+        });
+
+        const [error] = await fetchOnChainIdlClient(gen.systemProgram, { buffer, rpc });
+
+        expect(isIdlError(error, IDL_ERROR__IDL_ADDRESS_MISMATCH)).toBe(true);
+    });
+
+    it('should attribute the derived PDA address when no buffer is named', async () => {
+        const tokenkeg = loadTokenkegIdl();
+        const program = address(tokenkeg.program.publicKey);
+        const pda = await pmpIdlAddress(program);
+        const rpc = mockRpc({ [pda]: pmpIdlAccount(program, tokenkeg) });
+
+        const fetched = unwrapResult(await fetchOnChainIdlClient(program, { rpc }));
+
+        expect(fetched.address).toBe(pda);
     });
 });

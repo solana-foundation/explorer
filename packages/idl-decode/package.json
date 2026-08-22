@@ -53,12 +53,13 @@
     },
     "dependencies": {
         "@codama/dynamic-parsers": "1.1.30",
-        "@codama/nodes-from-anchor": "1.3.8"
+        "@codama/nodes-from-anchor": "1.3.8",
+        "@solana/idl": "0.2.0"
     },
     "devDependencies": {
         "@codama/dynamic-client": "0.1.0",
         "@codama/dynamic-codecs": "1.1.30",
-        "@codama/renderers-js": "^1.7.0",
+        "@codama/renderers-js": "~1.7.0",
         "@coral-xyz/anchor": "0.30.1",
         "@explorer/test-idl-program-amm-v3": "workspace:*",
         "@explorer/test-idl-program-dummy-transfer-hook": "workspace:*",
@@ -77,7 +78,7 @@
         "@vitest/coverage-v8": "catalog:vitest",
         "agadoo": "^3.0.0",
         "codama-fixtures": "https://codeload.github.com/codama-idl/codama/tar.gz/008849ce88472dc1080ed9a71a897b631de82b98",
-        "oxc-transform": "^0.137.0",
+        "oxc-transform": "~0.137.0",
         "oxfmt": "^0.56.0",
         "oxlint": "^1.71.0",
         "type-coverage": "^2.29.7",
@@ -86,14 +87,8 @@
     },
     "peerDependencies": {
         "@coral-xyz/anchor": "=0.30.1",
-        "@solana-program/program-metadata": "^0.8.0",
         "@solana/kit": "^7.0.0",
-        "codama": "^1.5.0"
-    },
-    "peerDependenciesMeta": {
-        "@solana-program/program-metadata": {
-            "optional": true
-        }
+        "codama": "~1.5.0"
     },
     "engines": {
         "node": ">=18"

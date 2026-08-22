@@ -23,6 +23,17 @@ export const MULTISIG_TOKEN_SUBTYPE = 'multisig';
 export const TOKEN_SUBTYPES = [ACCOUNT_TOKEN_SUBTYPE, MINT_TOKEN_SUBTYPE, MULTISIG_TOKEN_SUBTYPE] as const;
 export type TokenSubtype = (typeof TOKEN_SUBTYPES)[number];
 
+// Subtypes mirror the PMP program's own AccountDiscriminator — a closed set of three, not an open seed space.
+export const EMPTY_PROGRAM_METADATA_SUBTYPE = 'empty';
+export const BUFFER_PROGRAM_METADATA_SUBTYPE = 'buffer';
+export const METADATA_PROGRAM_METADATA_SUBTYPE = 'metadata';
+export const PROGRAM_METADATA_SUBTYPES = [
+    EMPTY_PROGRAM_METADATA_SUBTYPE,
+    BUFFER_PROGRAM_METADATA_SUBTYPE,
+    METADATA_PROGRAM_METADATA_SUBTYPE,
+] as const;
+export type ProgramMetadataSubtype = (typeof PROGRAM_METADATA_SUBTYPES)[number];
+
 // RPC-shared kinds — each kind IS its RPC label by construction (value aliases mirroring AccountEntityKind's Exclude derivation).
 export const ADDRESS_LOOKUP_TABLE_KIND = ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL;
 export const BPF_UPGRADEABLE_LOADER_KIND = BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL;
@@ -39,6 +50,12 @@ export const SPL_TOKEN_MULTISIG_KIND = `${SPL_TOKEN_PROGRAM_LABEL}:${MULTISIG_TO
 export const SPL_TOKEN_2022_ACCOUNT_KIND = `${SPL_TOKEN_2022_PROGRAM_LABEL}:${ACCOUNT_TOKEN_SUBTYPE}` as const;
 export const SPL_TOKEN_2022_MINT_KIND = `${SPL_TOKEN_2022_PROGRAM_LABEL}:${MINT_TOKEN_SUBTYPE}` as const;
 export const SPL_TOKEN_2022_MULTISIG_KIND = `${SPL_TOKEN_2022_PROGRAM_LABEL}:${MULTISIG_TOKEN_SUBTYPE}` as const;
+
+// PMP accounts are never jsonParsed, so the label has no @explorer/parsers counterpart to alias.
+export const PROGRAM_METADATA_LABEL = 'program-metadata';
+export const PROGRAM_METADATA_EMPTY_KIND = `${PROGRAM_METADATA_LABEL}:${EMPTY_PROGRAM_METADATA_SUBTYPE}` as const;
+export const PROGRAM_METADATA_BUFFER_KIND = `${PROGRAM_METADATA_LABEL}:${BUFFER_PROGRAM_METADATA_SUBTYPE}` as const;
+export const PROGRAM_METADATA_METADATA_KIND = `${PROGRAM_METADATA_LABEL}:${METADATA_PROGRAM_METADATA_SUBTYPE}` as const;
 
 // Inspector-invented account kinds (no RPC counterpart) — the RPC-shared members derive from @explorer/parsers in types.ts.
 export const BPF_LOADER_2_KIND = 'bpf-loader-2';

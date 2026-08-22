@@ -418,7 +418,7 @@ describe('inspect_entity handler', () => {
             discovery: {
                 idl_type: 'anchor',
                 program_name: 'My Program',
-                source_type: 'anchor_on_chain',
+                source: 'anchor',
                 status: 'found',
             },
         });
@@ -438,7 +438,7 @@ describe('inspect_entity handler', () => {
                     idl: {
                         idl_type: 'anchor',
                         program_name: 'My Program',
-                        source_type: 'anchor_on_chain',
+                        source: 'anchor',
                         status: 'found',
                     },
                     kind: 'bpf-upgradeable-loader',

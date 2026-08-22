@@ -33,6 +33,9 @@ const ALL_ACCOUNT_KINDS = [
     'feature',
     'solana-attestation-service',
     'compressed-nft',
+    'program-metadata:empty',
+    'program-metadata:buffer',
+    'program-metadata:metadata',
     'unknown',
 ] as const satisfies ReadonlyArray<AccountEntityKind>;
 

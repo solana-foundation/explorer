@@ -139,7 +139,7 @@ export type AccountHandlers<T extends SupportedIdlInput, R> = {
 /**
  * Loads a program's raw IDL JSON by address, whatever its source. Resolves `undefined` when the
  * program has no IDL; throws only on transport failure or abort — a blip stays retryable, never
- * mistaken for "no IDL". Reference implementation: `createLatestIdlFetcher` ('@explorer/idl-decode/fetch').
+ * mistaken for "no IDL". Reference implementation: `createOnChainIdlFetcher` ('@explorer/idl-decode/fetch').
  */
 export type IdlFetcher = (programAddress: string, config?: { abortSignal?: AbortSignal }) => Promise<unknown>;
 

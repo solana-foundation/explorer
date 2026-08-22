@@ -1,6 +1,6 @@
-// The per-instruction decode cascade: on-chain IDL → in-package token batch → bundled
+// The per-instruction decode cascade: in-package token batch → on-chain IDL → bundled
 // @explorer/parsers decoders → injected host-app fallback → raw, with source attribution.
-import type { IdlClient } from '@explorer/idl-decode';
+import { type IdlClient, IdlStandard } from '@explorer/idl-decode';
 
 import { type InspectorLogger, ns } from '../logger.js';
 import type { CompiledInstruction } from '../rpc/types.js';
@@ -15,6 +15,7 @@ import type {
 import { decodeBundledInstruction } from './bundled-parsers.js';
 import { decodeTokenBatchInstruction } from './token-batch.js';
 import { toKitInstruction } from './to-kit-instruction.js';
+import { toTokenUiAmount } from './token-ui-amount.js';
 
 export type DecodeInstructionsDependencies = {
     decodeInstructionFallback?: DecodeInstructionFallback;
@@ -36,17 +37,34 @@ type DecodeOutcome = {
     decoded?: DecodedInstructionInfo;
 };
 
+// The codama engine pairs every on-wire account with the name the IDL declares for it; anything past
+// the declared list (a multisig's extra signers) stays positional in the entry's own `accounts`.
+function toNamedAccounts(accounts: readonly { address: string; name: string }[]): Record<string, string> {
+    return Object.fromEntries(accounts.map(account => [account.name, account.address]));
+}
+
 function decodeWithIdlClient(instruction: FallbackInstruction, client: IdlClient): DecodedInstructionInfo | undefined {
     const kitInstruction = toKitInstruction(instruction);
-    const [error, info] = client.decodeInstructionData(kitInstruction);
-    if (error) {
+    // two-step: the envelope carries the engine's account naming, which decodeInstructionData drops
+    const decode = client.decodeInstruction(kitInstruction);
+    if (decode.kind === 'unknown') {
         return undefined;
     }
+    const info = client.getDecodedData(decode);
     const program = client.programName();
+    // Gated on a non-empty list: an IDL naming no accounts (every ComputeBudget instruction) would
+    // otherwise ship an empty map on nearly every transaction, saying nothing that absence does not.
+    const named =
+        decode.kind === IdlStandard.Codama && decode.decoded.accounts.length > 0
+            ? toNamedAccounts(decode.decoded.accounts)
+            : undefined;
+    const uiAmount = toTokenUiAmount(instruction.programId, info);
     return {
         info,
         type: client.instructionName(kitInstruction.data) ?? 'unknown',
         ...(program !== undefined ? { program } : {}),
+        ...(named ? { accounts: named } : {}),
+        ...(uiAmount !== undefined ? { ui_amount: uiAmount } : {}),
     };
 }
 
@@ -55,6 +73,20 @@ function runDecodeCascade(
     dependencies: DecodeInstructionsDependencies,
     idlClients: ReadonlyMap<string, IdlClient>,
 ): DecodeOutcome {
+    // Ahead of the IDL rung: Tokenkeg's published IDL declares batch as one opaque `data` blob, so an
+    // IDL-first order would drop the sub-instruction expansion. Self-gating — non-batch returns undefined.
+    try {
+        const batchDecoded = decodeTokenBatchInstruction(instruction);
+        if (batchDecoded) {
+            return { decoded: batchDecoded, source: 'bundled' };
+        }
+    } catch (error) {
+        dependencies.logger.warn(ns('token batch instruction decode failed'), {
+            error,
+            programId: instruction.programId,
+        });
+    }
+
     const idlClient = idlClients.get(instruction.programId);
     if (idlClient) {
         try {
@@ -68,18 +100,6 @@ function runDecodeCascade(
                 programId: instruction.programId,
             });
         }
-    }
-
-    try {
-        const batchDecoded = decodeTokenBatchInstruction(instruction);
-        if (batchDecoded) {
-            return { decoded: batchDecoded, source: 'bundled' };
-        }
-    } catch (error) {
-        dependencies.logger.warn(ns('token batch instruction decode failed'), {
-            error,
-            programId: instruction.programId,
-        });
     }
 
     try {
