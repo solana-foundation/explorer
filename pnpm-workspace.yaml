@@ -18,7 +18,7 @@ catalogs:
     storybook: 10.2.10
   tooling:
     prettier: 3.5.3
-    typescript: 5.7.3
+    typescript: 7.0.2
   vitest:
     '@vitest/browser': 4.1.10
     '@vitest/browser-playwright': 4.1.10
