@@ -5,6 +5,7 @@ import {
     getAddressEncoder,
     getProgramDerivedAddress,
     getStructDecoder,
+    type ReadonlyUint8Array,
 } from '@solana/kit';
 
 import { NAME_PROGRAM_ADDRESS } from '../api/constants';
@@ -53,7 +54,7 @@ const nameRegistryHeaderDecoder = getStructDecoder([
 export const NAME_REGISTRY_HEADER_SIZE = nameRegistryHeaderDecoder.fixedSize;
 
 /** Read the owner out of a registry account. Undefined when the data is too short to hold a header. */
-export function decodeNameRegistryOwner(data: Uint8Array): Address | undefined {
+export function decodeNameRegistryOwner(data: ReadonlyUint8Array | Uint8Array): Address | undefined {
     if (data.length < NAME_REGISTRY_HEADER_SIZE) return undefined;
     return nameRegistryHeaderDecoder.decode(data.subarray(0, NAME_REGISTRY_HEADER_SIZE)).owner;
 }

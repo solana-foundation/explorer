@@ -48,8 +48,6 @@ const nextConfig = {
     turbopack: {
         root: projectRoot,
         resolveAlias: {
-            // resolve-domain.ts uses deserializeUnchecked, removed in borsh@2 (also installed as borsh2).
-            borsh: './node_modules/borsh',
             // @coral-xyz/anchor's nodewallet/workspace require('fs'), but those paths never run in the browser.
             fs: { browser: './empty.ts' },
         },
