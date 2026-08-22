@@ -1,3 +1,4 @@
+import type { InstructionNode } from '@entities/instruction-card';
 import { ParsedInstruction, ParsedTransaction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
@@ -47,60 +48,72 @@ type DetailsProps = {
 };
 
 export function SystemDetailsCard(props: DetailsProps) {
+    // Transitional. Every System card now takes a single `node`, but the two
+    // `InstructionsSection`s still hand this component the old prop spread. This
+    // shim disappears once they build the node tree themselves.
+    const node: InstructionNode = {
+        childIndex: props.childIndex,
+        index: props.index,
+        innerCards: props.innerCards,
+        ix: props.ix,
+        programId: props.ix.programId,
+        raw: props.raw,
+    };
+
     try {
         const parsed = create(props.ix.parsed, ParsedInfo);
         switch (parsed.type) {
             case 'createAccount': {
                 const info = create(parsed.info, CreateAccountInfo);
-                return <CreateDetailsCard info={info} {...props} />;
+                return <CreateDetailsCard info={info} node={node} />;
             }
             case 'createAccountWithSeed': {
                 const info = create(parsed.info, CreateAccountWithSeedInfo);
-                return <CreateWithSeedDetailsCard info={info} {...props} />;
+                return <CreateWithSeedDetailsCard info={info} node={node} />;
             }
             case 'allocate': {
                 const info = create(parsed.info, AllocateInfo);
-                return <AllocateDetailsCard info={info} {...props} />;
+                return <AllocateDetailsCard info={info} node={node} />;
             }
             case 'allocateWithSeed': {
                 const info = create(parsed.info, AllocateWithSeedInfo);
-                return <AllocateWithSeedDetailsCard info={info} {...props} />;
+                return <AllocateWithSeedDetailsCard info={info} node={node} />;
             }
             case 'assign': {
                 const info = create(parsed.info, AssignInfo);
-                return <AssignDetailsCard info={info} {...props} />;
+                return <AssignDetailsCard info={info} node={node} />;
             }
             case 'assignWithSeed': {
                 const info = create(parsed.info, AssignWithSeedInfo);
-                return <AssignWithSeedDetailsCard info={info} {...props} />;
+                return <AssignWithSeedDetailsCard info={info} node={node} />;
             }
             case 'transfer': {
                 const info = create(parsed.info, TransferInfo);
-                return <TransferDetailsCard info={info} {...props} />;
+                return <TransferDetailsCard info={info} node={node} />;
             }
             case 'advanceNonce': {
                 const info = create(parsed.info, AdvanceNonceInfo);
-                return <NonceAdvanceDetailsCard info={info} {...props} />;
+                return <NonceAdvanceDetailsCard info={info} node={node} />;
             }
             case 'withdrawNonce': {
                 const info = create(parsed.info, WithdrawNonceInfo);
-                return <NonceWithdrawDetailsCard info={info} {...props} />;
+                return <NonceWithdrawDetailsCard info={info} node={node} />;
             }
             case 'authorizeNonce': {
                 const info = create(parsed.info, AuthorizeNonceInfo);
-                return <NonceAuthorizeDetailsCard info={info} {...props} />;
+                return <NonceAuthorizeDetailsCard info={info} node={node} />;
             }
             case 'initializeNonce': {
                 const info = create(parsed.info, InitializeNonceInfo);
-                return <NonceInitializeDetailsCard info={info} {...props} />;
+                return <NonceInitializeDetailsCard info={info} node={node} />;
             }
             case 'transferWithSeed': {
                 const info = create(parsed.info, TransferWithSeedInfo);
-                return <TransferWithSeedDetailsCard info={info} {...props} />;
+                return <TransferWithSeedDetailsCard info={info} node={node} />;
             }
             case 'upgradeNonce': {
                 const info = create(parsed.info, UpgradeNonceInfo);
-                return <UpgradeNonceDetailsCard info={info} {...props} />;
+                return <UpgradeNonceDetailsCard info={info} node={node} />;
             }
             default:
                 return <UnknownDetailsCard {...props} />;
