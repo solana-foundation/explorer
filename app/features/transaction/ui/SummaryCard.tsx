@@ -69,7 +69,7 @@ function Label({ children, className, ...props }: React.HTMLAttributes<HTMLDivEl
 
 function Value({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     return (
-        <div className={cn('break-all font-mono text-sm text-white', className)} {...props}>
+        <div className={cn('min-w-0 break-all font-mono text-sm text-white', className)} {...props}>
             {children}
         </div>
     );
@@ -261,7 +261,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                             <Badge
                                 ui="dashkit"
                                 variant={statusClass}
-                                className="whitespace-normal break-words text-left"
+                                className="min-w-0 max-w-full !whitespace-normal break-words !text-left"
                             >
                                 {errorLink ? <Link href={errorLink}>{errorReason}</Link> : errorReason}
                             </Badge>
