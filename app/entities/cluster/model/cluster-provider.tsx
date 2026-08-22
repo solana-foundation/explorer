@@ -57,12 +57,17 @@ export function ClusterProvider({ searchParams, onReplaceSearchParams, children 
     // loading card that self-heals via SWR retry — it does not fail the whole cluster.
     // eslint-disable-next-line unicorn/no-null -- SWR treats a null key, and only null, as "do not fetch"
     const connectionKey = pendingCustomUrl === undefined && customUrlDecided ? ['cluster-connection', url] : null;
+    // Revalidating on focus and on reconnect is what lets a failed connection recover: nothing in the UI
+    // retries the check, and a reachable endpoint answers from cache, so the cost falls on the failed case.
+    // `shouldRetryOnError` stays off — a down endpoint must not be hammered while the tab sits open.
     const { data: genesisHash, error } = useSWRImmutable(connectionKey, () => fetchGenesisHash(url), {
         onError: connectionError => {
             if (cluster !== Cluster.Custom) {
                 Logger.error(connectionError, { clusterUrl: url });
             }
         },
+        revalidateOnFocus: true,
+        revalidateOnReconnect: true,
         shouldRetryOnError: false,
     });
 

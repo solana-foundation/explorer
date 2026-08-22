@@ -22,6 +22,7 @@ import { HistoryProvider } from '@features/transaction-history/model/history-pro
 import { VoteAccount } from '@features/vote/lib/validators'; // deep import on purpose: this provider only needs the account schema, not the vote UI the barrel re-exports
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
+import { useCacheEntries, useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
 import { createSolanaRpc } from '@solana/kit';
 import {
@@ -466,16 +467,17 @@ export function useAccountInfo(address: string | undefined): Cache.CacheEntry<Ac
     if (!context) {
         throw new Error(`useAccountInfo must be used within a AccountsProvider`);
     }
-    if (address === undefined) return;
-    return context.entries[address];
+    return useCacheEntry(context.entries, address);
 }
 
-export function useAccountInfos(addresses: string[]): Cache.CacheEntry<Account>[] {
+// An address with nothing in the cache yields undefined, as it always did — the old signature just did
+// not say so.
+export function useAccountInfos(addresses: string[]): (Cache.CacheEntry<Account> | undefined)[] {
     const context = React.useContext(StateContext);
     if (!context) {
         throw new Error(`useAccountInfos must be used within a AccountsProvider`);
     }
-    return addresses.map(address => context.entries[address]);
+    return useCacheEntries(context.entries, addresses);
 }
 
 export function useMintAccountInfo(address: string | undefined): MintAccountInfo | undefined {

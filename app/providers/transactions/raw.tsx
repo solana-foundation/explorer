@@ -3,6 +3,7 @@
 import { fetchRawTransaction, type RawTransaction } from '@entities/transaction-data';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
+import { useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
 import { type Finality, type TransactionSignature } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -43,7 +44,7 @@ export function useRawTransactionDetails(signature: TransactionSignature): Cache
         throw new Error(`useRawTransactionDetails must be used within a TransactionsProvider`);
     }
 
-    return context.entries[signature];
+    return useCacheEntry(context.entries, signature);
 }
 
 async function loadRawTransaction(

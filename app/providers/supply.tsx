@@ -6,12 +6,6 @@ import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-export enum Status {
-    Idle,
-    Disconnected,
-    Connecting,
-}
-
 type Lamports = bigint;
 
 type Supply = Readonly<{
@@ -20,25 +14,50 @@ type Supply = Readonly<{
     total: Lamports;
 }>;
 
-export type State = Supply | Status | string;
+/**
+ * One variant per case a consumer has to tell apart, so none of them infers the state from the shape of
+ * the value. `idle` and `loading` render the same, but only `idle` means nothing has been asked for yet:
+ * the provider leaves the first fetch to whichever consumer mounts.
+ */
+export type SupplyState =
+    | { kind: 'idle' }
+    | { kind: 'disconnected' }
+    | { kind: 'loading' }
+    | { kind: 'failed'; message: string }
+    | { kind: 'ready'; supply: Supply };
+
 export type { Supply };
 
-type Dispatch = React.Dispatch<React.SetStateAction<State>>;
-export const StateContext: React.Context<State | undefined> = React.createContext<State | undefined>(undefined);
+// Both failure paths report the same thing, so the message has one home.
+const FAILED_TO_FETCH: SupplyState = { kind: 'failed', message: 'Failed to fetch supply' };
+
+type Dispatch = React.Dispatch<React.SetStateAction<SupplyState>>;
+export const StateContext: React.Context<SupplyState | undefined> = React.createContext<SupplyState | undefined>(
+    undefined,
+);
 export const DispatchContext: React.Context<Dispatch | undefined> = React.createContext<Dispatch | undefined>(
     undefined,
 );
 
 type Props = { children: React.ReactNode };
 export function SupplyProvider({ children }: Props) {
-    const [state, setState] = React.useState<State>(Status.Idle);
+    const [state, setState] = React.useState<SupplyState>({ kind: 'idle' });
     const { status: clusterStatus, cluster, url } = useCluster();
 
     React.useEffect(() => {
-        if (state !== Status.Idle) {
-            if (clusterStatus === ClusterStatus.Connecting) setState(Status.Disconnected);
-            if (clusterStatus === ClusterStatus.Connected) fetch(setState, cluster, url);
+        // Reported even from idle, unlike the transitions below: `fetch` only runs on a connected cluster,
+        // so a failed connection would otherwise leave consumers on a loading state forever.
+        //
+        // A synthesized failure never overwrites a request that settles on its own, nor supply already in
+        // hand. `loading` resolves either way — the in-flight response lands, or its own catch reports the
+        // failure — and overwriting it here would discard a response that arrives a moment later.
+        if (clusterStatus === ClusterStatus.Failure) {
+            setState(current => (current.kind === 'loading' || current.kind === 'ready' ? current : FAILED_TO_FETCH));
+            return;
         }
+        if (state.kind === 'idle') return;
+        if (clusterStatus === ClusterStatus.Connecting) setState({ kind: 'disconnected' });
+        if (clusterStatus === ClusterStatus.Connected) fetch(setState, cluster, url);
     }, [clusterStatus, cluster, url]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
@@ -49,7 +68,7 @@ export function SupplyProvider({ children }: Props) {
 }
 
 async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
-    dispatch(Status.Connecting);
+    dispatch({ kind: 'loading' });
 
     try {
         const rpc = getRpc(url);
@@ -63,16 +82,13 @@ async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
             total: supplyResponse.value.total,
         };
 
-        // Update state if still connecting
-        dispatch(state => {
-            if (state !== Status.Connecting) return state;
-            return supply;
-        });
+        // Land the result only if nothing moved the state on in the meantime.
+        dispatch(current => (current.kind === 'loading' ? { kind: 'ready', supply } : current));
     } catch (err) {
         if (cluster !== Cluster.Custom) {
             Logger.error(err, { url });
         }
-        dispatch('Failed to fetch supply');
+        dispatch(FAILED_TO_FETCH);
     }
 }
 

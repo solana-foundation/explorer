@@ -17,7 +17,7 @@ import {
     usePerformanceInfo,
     useStatsProvider,
 } from '@providers/stats/solanaClusterStats';
-import { Status, SupplyProvider, useFetchSupply, useSupply } from '@providers/supply';
+import { SupplyProvider, useFetchSupply, useSupply } from '@providers/supply';
 import { ClusterStatus } from '@utils/cluster';
 import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/index';
 import { percentage } from '@utils/math';
@@ -65,7 +65,7 @@ const LoadingStatsCard = ({ title }: { title: string }) => {
 
 function StakingComponent() {
     const { status } = useCluster();
-    const supply = useSupply();
+    const supplyState = useSupply();
     const fetchSupply = useFetchSupply();
     const { fetchVoteAccounts, voteAccounts } = useVoteAccounts();
 
@@ -95,21 +95,23 @@ function StakingComponent() {
         }
     }, [voteAccounts, delinquentStake]);
 
-    if (supply === Status.Disconnected) {
+    if (supplyState.kind === 'disconnected') {
         // we'll return here to prevent flicker
         return null;
     }
 
-    if (supply === Status.Idle || supply === Status.Connecting) {
+    if (supplyState.kind === 'idle' || supplyState.kind === 'loading') {
         return (
             <div className="flex flex-col md:flex-row md:gap-6">
                 <SimpleCardSkeleton title={<LoadingStatsCard title="Loading supply data" />} />
                 <SimpleCardSkeleton title={<LoadingStatsCard title="Loading staking data" />} />
             </div>
         );
-    } else if (typeof supply === 'string') {
-        return <ErrorCard text={supply} retry={fetchData} />;
+    } else if (supplyState.kind === 'failed') {
+        return <ErrorCard text={supplyState.message} retry={fetchData} />;
     }
+
+    const { supply } = supplyState;
 
     // Don't display the staking card if the supply is 0
     if (supply.circulating === BigInt(0) && supply.total === BigInt(0)) {

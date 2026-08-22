@@ -1,6 +1,7 @@
 'use client';
 
 import * as Cache from '@providers/cache';
+import { useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
 import { Connection } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -58,7 +59,7 @@ export function useEpoch(key: number): Cache.CacheEntry<Epoch> | undefined {
         throw new Error(`useEpoch must be used within a EpochProvider`);
     }
 
-    return context.entries[key];
+    return useCacheEntry(context.entries, key);
 }
 
 export async function fetchEpoch(
