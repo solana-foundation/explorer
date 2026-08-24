@@ -6,9 +6,6 @@ on:
   pull_request:
 
 env:
-  # cache affixes and folders
-  PNPM_CACHE_FOLDER: ~/.pnpm-store
-  PLAYWRIGHT_CACHE_AFFIX: pw
   PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
   SENTRY_TELEMETRY_DISABLE: true
   STORYBOOK_DISABLE_TELEMETRY: 1
@@ -20,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       node-version: ${{ steps.nvmrc.outputs.NODE_VERSION }}
+      shard-list: ${{ steps.shards.outputs.list }}
+      shard-total: ${{ steps.shards.outputs.total }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -31,6 +30,15 @@ jobs:
       - name: Read .nvmrc
         id: nvmrc
         run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+
+      # One source for the shard count: `strategy.matrix` cannot read `env`, and a matrix that
+      # disagrees with the `--shard` divisor passes green while silently skipping the missing slices.
+      - name: Plan specs shards
+        id: shards
+        run: |
+          total=2
+          echo "total=$total" >> $GITHUB_OUTPUT
+          echo "list=[$(seq -s, 1 $total)]" >> $GITHUB_OUTPUT
 
   Build-And-Test:
     needs: read-nvmrc
@@ -45,17 +53,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup pnpm and Node.js
-        uses: ./.github/actions/pnpm-setup
-        with:
-          node-version: ${{ matrix.node-version }}
-          store-dir: ${{ env.PNPM_CACHE_FOLDER }}
-          install: 'false'
-
-      # The pnpm store is dropped from this set: setup-node already caches it, so it was stored twice.
-      # A source hash suits the remaining paths, which are build artefacts a near miss still helps.
-      # Key shape mirrors setup-node's `node-cache-<os>-<arch>-<pm>-<hash>` so both read alike in the
-      # cache UI — setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 (v6.5.0) src/cache-restore.ts:43.
+      # The pnpm store is not here: setup-node caches it, and holding both stored the same tree twice.
+      # A source hash suits an incremental build cache, where a near miss still helps.
       - name: Setup Additional Cache
         uses: actions/cache@v5
         id: additional_cache
@@ -68,11 +67,10 @@ jobs:
             build-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
             build-cache-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Install dependencies
-        run: |
-          echo "Node version: $(node --version)"
-          echo "PNPM version: $(pnpm --version)"
-          pnpm install --frozen-lockfile
+      - name: Setup pnpm and Node.js
+        uses: ./.github/actions/pnpm-setup
+        with:
+          node-version: ${{ matrix.node-version }}
 
       - name: Format
         run: pnpm format:ci
@@ -83,13 +81,13 @@ jobs:
       - name: OpenSpec
         run: pnpm openspec:validate
 
+      # Mandatory, and the only `next build` in CI — Specs-Shards only generates types. A production
+      # build that breaks fails here or nowhere, so this step must not be weakened to typegen.
       - name: Build
         run: pnpm build
 
       # The app specs run in Specs-Shards; keeping them here would serialise ~4.5 min behind this job.
       - name: Test packages
-        env:
-          TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
         run: pnpm test:packages
 
   # Split off Build-And-Test so the specs sweep fans out without re-running format/lint/build per shard.
@@ -103,7 +101,7 @@ jobs:
       fail-fast: false
       matrix:
         node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '24.x']
-        shard: [1, 2]
+        shard: ${{ fromJSON(needs.read-nvmrc.outputs.shard-list) }}
 
     steps:
       - name: Checkout
@@ -113,16 +111,14 @@ jobs:
         uses: ./.github/actions/pnpm-setup
         with:
           node-version: ${{ matrix.node-version }}
-          store-dir: ${{ env.PNPM_CACHE_FOLDER }}
 
-      # The specs project typechecks, which reads the route types `next build` generates.
-      - name: Build
-        run: pnpm build
+      # Specs resolve sibling packages through dist. No `next build`: nothing here reads the generated
+      # route types now that the specs project no longer typechecks.
+      - name: Build packages
+        run: pnpm build:packages
 
-      - name: Test specs (shard ${{ matrix.shard }}/2)
-        env:
-          TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
-        run: pnpm test:ci:specs --shard=${{ matrix.shard }}/2
+      - name: Test specs (shard ${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }})
+        run: pnpm test:ci:specs --shard=${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }}
 
   Security-Audit:
     # Independent of the build: the audit resolves the tree from pnpm-lock.yaml and queries
@@ -158,7 +154,6 @@ jobs:
         uses: ./.github/actions/pnpm-setup
         with:
           node-version: ${{ needs.read-nvmrc.outputs.node-version }}
-          store-dir: ${{ env.PNPM_CACHE_FOLDER }}
 
       # scripts/update-sitemap.ts imports app/utils/programs.ts, which imports the built @explorer/decoder-mango.
       - name: Build workspace packages
@@ -198,14 +193,6 @@ jobs:
           sudo mkdir -p "$PLAYWRIGHT_BROWSERS_PATH" "$VITE_CACHE_PATH"
           sudo chown -R "$(id -u):$(id -g)" "$PLAYWRIGHT_BROWSERS_PATH" "$VITE_CACHE_PATH"
 
-      # install stays below, after the Playwright cache restore, to keep this job's step order intact.
-      - name: Setup pnpm and Node.js
-        uses: ./.github/actions/pnpm-setup
-        with:
-          node-version: ${{ matrix.node-version }}
-          store-dir: ${{ env.PNPM_CACHE_FOLDER }}
-          install: 'false'
-
       - name: Cache Playwright browsers
         uses: actions/cache@v5
         id: playwright_cache
@@ -215,10 +202,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ env.PLAYWRIGHT_CACHE_AFFIX }}-
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup pnpm and Node.js
+        uses: ./.github/actions/pnpm-setup
+        with:
+          node-version: ${{ matrix.node-version }}
 
-      # Drops store packages no longer referenced by the lockfile so the restored-then-saved cache stays bounded.
+      # No-op while setup-node restores by exact key only; kept in case the store ever regains restore-keys.
       - name: Prune pnpm store
         run: pnpm store prune
 
