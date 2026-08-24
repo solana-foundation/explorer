@@ -178,7 +178,6 @@ jobs:
     # The browser-mode sweep has repeatedly died on a full root partition ("No space left on device").
     # Browsers and the Vite dep-optimize cache live on the runner's ~65 GB /mnt scratch disk
     # (PLAYWRIGHT_BROWSERS_PATH / VITE_CACHE_PATH); the pnpm store stays on / so node_modules keeps hardlinking.
-    # The store's restore-keys snowball is gone with its cache — `pnpm store prune` below is now belt-and-braces.
     env:
       PLAYWRIGHT_CACHE_AFFIX: pw-mnt
       PLAYWRIGHT_BROWSERS_PATH: /mnt/cache/ms-playwright
