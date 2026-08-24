@@ -18,7 +18,9 @@ vi.mock('@entities/cluster', async importOriginal => ({
     getRpc: (...args: [string]) => getRpc(...args),
 }));
 
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
+// Silence Sentry, and keep a handle on it: the catch block only reports rooted mainnet slots.
+const loggerError = vi.fn();
+vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: (...args: unknown[]) => loggerError(...args) } }));
 
 function status(overrides: Record<string, unknown> = {}) {
     return {
@@ -79,6 +81,50 @@ describe('fetchTransactionStatus', () => {
         await fetchTransactionStatus(dispatch, DEFAULT_SIGNATURE, Cluster.MainnetBeta, MOCK_URL);
 
         expect(lastUpdate().data?.info?.confirmations).toBe('max');
+    });
+
+    it('should mark the timestamp unavailable when the block has no recorded time', async () => {
+        getSignatureStatuses.mockResolvedValue({ value: [status()] });
+        getBlockTime.mockResolvedValue(null);
+
+        await fetchTransactionStatus(dispatch, DEFAULT_SIGNATURE, Cluster.MainnetBeta, MOCK_URL);
+
+        expect(lastUpdate()).toMatchObject({
+            data: { info: { timestamp: 'unavailable' } },
+            status: FetchStatus.Fetched,
+        });
+    });
+
+    it('should drop a null confirmationStatus rather than leaking it downstream', async () => {
+        getSignatureStatuses.mockResolvedValue({ value: [status({ confirmationStatus: null })] });
+        getBlockTime.mockResolvedValue(1700000000n);
+
+        await fetchTransactionStatus(dispatch, DEFAULT_SIGNATURE, Cluster.MainnetBeta, MOCK_URL);
+
+        const info = lastUpdate().data?.info;
+        expect(info?.confirmationStatus).toBeUndefined();
+        expect(info && 'confirmationStatus' in info).toBe(true);
+    });
+
+    it('should report a rooted mainnet block with no time to Sentry', async () => {
+        getSignatureStatuses.mockResolvedValue({
+            value: [status({ confirmationStatus: 'finalized', confirmations: null })],
+        });
+        getBlockTime.mockRejectedValue(new Error('slot skipped'));
+
+        await fetchTransactionStatus(dispatch, DEFAULT_SIGNATURE, Cluster.MainnetBeta, MOCK_URL);
+
+        expect(loggerError).toHaveBeenCalledTimes(1);
+        expect(loggerError.mock.calls[0][1]).toStrictEqual({ slot: '1234' });
+    });
+
+    it('should not report an unrooted block with no time to Sentry', async () => {
+        getSignatureStatuses.mockResolvedValue({ value: [status()] });
+        getBlockTime.mockRejectedValue(new Error('slot skipped'));
+
+        await fetchTransactionStatus(dispatch, DEFAULT_SIGNATURE, Cluster.MainnetBeta, MOCK_URL);
+
+        expect(loggerError).not.toHaveBeenCalled();
     });
 
     it('should mark the timestamp unavailable when getBlockTime throws', async () => {

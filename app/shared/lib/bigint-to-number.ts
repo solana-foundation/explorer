@@ -1,7 +1,15 @@
 /**
- * Recursively replaces bigints with numbers for web3.js -> Kit migration
+ * Recursively replaces bigints with numbers in a JSON-RPC response payload.
  *
- * Precision above 2^53 is lost, exactly as it was when web3.js parsed the same response.
+ * kit upcasts every integral value in an RPC response to a bigint unless its key path is on an
+ * allow-list, and that list covers nothing inside a parsed instruction or a transaction error.
+ * Numbers are mandatory downstream: consumers `JSON.stringify` these payloads, which throws on a
+ * bigint, and validate them against superstruct `number()` schemas. Precision above 2^53 is lost,
+ * which is acceptable because no field reached by this helper — instruction indices, program error
+ * codes, account indices — comes close to that bound.
+ *
+ * Only plain JSON values are supported. `Uint8Array`, `Map`, `Set` and `Date` fail the array check
+ * and would be flattened into plain objects, so do not point this at decoded account data.
  */
 export function withNumbersInsteadOfBigInts<T>(value: T): T {
     if (typeof value === 'bigint') {
