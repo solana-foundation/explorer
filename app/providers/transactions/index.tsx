@@ -1,12 +1,15 @@
 'use client';
 
+import { getRpc } from '@entities/cluster';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { Connection, SignatureResult, TransactionConfirmationStatus, TransactionSignature } from '@solana/web3.js';
+import { signature as createSignature } from '@solana/kit';
+import type { SignatureResult, TransactionConfirmationStatus, TransactionSignature } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
+import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { DetailsProvider } from './parsed';
@@ -76,35 +79,36 @@ export async function fetchTransactionStatus(
     let fetchStatus;
     let data;
     try {
-        const connection = new Connection(url);
-        const { value } = await connection.getSignatureStatus(signature, {
-            searchTransactionHistory: true,
-        });
+        const rpc = getRpc(url);
+        const { value: statuses } = await rpc
+            .getSignatureStatuses([createSignature(signature)], {
+                searchTransactionHistory: true,
+            })
+            .send();
+        if (statuses.length !== 1) {
+            throw new Error(`expected 1 signature status, received ${statuses.length}`);
+        }
+        const value = statuses[0] ?? null;
 
         let info = null;
         if (value !== null) {
-            let confirmations: Confirmations;
-            if (typeof value.confirmations === 'number') {
-                confirmations = value.confirmations;
-            } else {
-                confirmations = 'max';
-            }
-
-            let blockTime = null;
+            const confirmations: Confirmations =
+                typeof value.confirmations === 'bigint' ? Number(value.confirmations) : 'max';
+            let blockTime: bigint | null = null;
             try {
-                blockTime = await connection.getBlockTime(value.slot);
+                blockTime = await rpc.getBlockTime(value.slot).send();
             } catch (error) {
                 if (cluster === Cluster.MainnetBeta && confirmations === 'max') {
                     Logger.error(error, { slot: `${value.slot}` });
                 }
             }
-            const timestamp: Timestamp = blockTime !== null ? blockTime : 'unavailable';
+            const timestamp: Timestamp = blockTime !== null ? Number(blockTime) : 'unavailable';
 
             info = {
-                confirmationStatus: value.confirmationStatus,
+                confirmationStatus: value.confirmationStatus ?? undefined,
                 confirmations,
-                result: { err: value.err },
-                slot: value.slot,
+                result: { err: withNumbersInsteadOfBigInts(value.err) },
+                slot: Number(value.slot),
                 timestamp,
             };
         }

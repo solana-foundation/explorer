@@ -103,7 +103,7 @@ export async function fetchEpoch(
 
         const [firstTimestamp, lastTimestamp] = await Promise.all<UnixTimestamp | null>([
             rpc.getBlockTime(firstBlock).send(),
-            lastBlock ? rpc.getBlockTime(lastBlock).send() : null,
+            lastBlock === undefined ? null : rpc.getBlockTime(lastBlock).send(),
         ]);
 
         data = {
