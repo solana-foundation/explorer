@@ -48,7 +48,7 @@
         "lint": "oxlint && oxfmt --check .",
         "lint:fix": "oxlint --fix",
         "pretest": "pnpm run build",
-        "test": "pnpm run typecheck && vitest run && pnpm run test:treeshakability && pnpm run test:node-esm && pnpm run test:coverage",
+        "test": "pnpm run typecheck && pnpm run test:treeshakability && pnpm run test:node-esm && pnpm run test:coverage",
         "test:coverage": "vitest run --config vitest.coverage.config.ts",
         "test:node-esm": "for entry in $(node -p \"Object.values(require('./package.json').exports).map(e=>e.import).join(' ')\"); do node --input-type=module -e \"import('$entry')\" || exit 1; done",
         "test:treeshakability": "agadoo dist/index.js",

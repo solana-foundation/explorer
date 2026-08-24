@@ -71,6 +71,8 @@ export default defineConfig({
                     setupFiles: ['./test-setup.specs.ts'],
                     typecheck: {
                         enabled: true,
+                        // `test.exclude` above does not govern typecheck globs, so packages/** leaks back in here.
+                        exclude: ['**/node_modules/**', '**/dist/**', '.claude/**', '.worktrees/**', 'packages/**'],
                     },
                 },
             },
