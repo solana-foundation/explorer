@@ -1,0 +1,43 @@
+name: pnpm setup
+description: Install pnpm, point its store at a cached directory, set up Node, and install dependencies.
+
+# Values come in as inputs rather than being read from the caller's `env`: expression access to
+# workflow-level env from inside a composite action is unreliable, while caller-side `with:` is not.
+inputs:
+  node-version:
+    description: Node version handed to actions/setup-node.
+    required: true
+  store-dir:
+    description: pnpm store directory.
+    default: ~/.pnpm-store
+  install:
+    description: Run `pnpm install --frozen-lockfile`.
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Install package manager
+      uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+
+    # Must precede setup-node, which caches whatever the store dir resolves to.
+    - name: Setup pnpm config
+      shell: bash
+      run: pnpm config set store-dir ${{ inputs.store-dir }}
+
+    # setup-node caches the store itself under `node-cache-<os>-<arch>-<pm>-<lockfile hash>`, restored
+    # by exact key only — its restore-keys branch is yarn-berry-only, so pnpm never falls back:
+    # setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 (v6.5.0) src/cache-restore.ts:43-61.
+    # Hence no second actions/cache here: that stored the same 262 MB twice, and its restore-keys were
+    # what let the archive grow run over run. Exact-key-only holds no more than one lockfile needs.
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'pnpm'
+        cache-dependency-path: pnpm-lock.yaml
+
+    - name: Install dependencies
+      if: inputs.install == 'true'
+      shell: bash
+      run: pnpm install --frozen-lockfile
