@@ -20,7 +20,7 @@
     ],
     "scripts": {
         "build": "tsc",
-        "test": "vitest run",
+        "test": "pnpm run typecheck && vitest run",
         "test:changed": "git diff --cached --name-only --diff-filter=ACMR -z --relative -- . | xargs -0 -r vitest related --run",
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit"
