@@ -21,7 +21,7 @@
     "scripts": {
         "build": "tsc",
         "test": "vitest run",
-        "test:changed": "vitest related --run $(git diff --cached --name-only --diff-filter=ACMR --relative -- .)",
+        "test:changed": "git diff --cached --name-only --diff-filter=ACMR -z --relative -- . | xargs -0 -r vitest related --run",
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit"
     },
