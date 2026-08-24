@@ -43,6 +43,7 @@
         "generate": "pnpm run generate:anchor-codama && node scripts/generate-codama-literals.mjs && node scripts/generate-codama-types.mjs && pnpm run build",
         "pretest": "pnpm run generate",
         "test": "pnpm run typecheck && pnpm run test:integration && pnpm run test:treeshakability && pnpm run test:node-esm && pnpm run test:coverage",
+        "test:changed": "vitest related --run $(git diff --cached --name-only --diff-filter=ACMR --relative -- .)",
         "test:coverage": "vitest run --config vitest.coverage.config.ts && pnpm run test:type-coverage",
         "test:integration": "vitest run --config vitest.integration.config.ts",
         "test:type-coverage": "type-coverage -p tsconfig.build.json --strict --at-least 99.5",

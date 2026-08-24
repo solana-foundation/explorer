@@ -6,8 +6,11 @@ staged() {
     '*.ts' '*.tsx' '*.mts' '*.mjs' '*.cjs' '*.js'
 }
 
-[ -z "$(staged)" ] && exit 0
+if [ -n "$(staged)" ]; then
+  staged | xargs -0 corepack pnpm pretty:format || exit 1
+  staged | xargs -0 corepack pnpm eslint:lint || exit 1
+  staged | xargs -0 corepack pnpm test:changed || exit 1
+fi
 
-staged | xargs -0 corepack pnpm pretty:format && \
-staged | xargs -0 corepack pnpm eslint:lint && \
-staged | xargs -0 corepack pnpm test:changed
+# Outside the guard above: it filters to JS/TS, so manifest-only package commits would skip this.
+exec corepack pnpm test:packages:changed

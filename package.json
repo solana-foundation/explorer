@@ -26,6 +26,7 @@
         "start": "next start",
         "test": "pnpm test:packages && vitest --project specs run",
         "test:changed": "pnpm vitest:test related --run",
+        "test:packages:changed": "pnpm --filter \"./packages/*\" run --if-present test:changed",
         "test:ci": "pnpm test:packages && vitest --project specs run",
         "test:e2e": "playwright test",
         "test:e2e:ci": "playwright test",
