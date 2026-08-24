@@ -1,13 +1,16 @@
 'use client';
 
 import { type BlockWithV1, fetchBlock as fetchBlockBySlot } from '@entities/block-data';
+import { getRpc } from '@entities/cluster';
 import * as Cache from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { Connection, PublicKey } from '@solana/web3.js';
+import type { Address } from '@solana/kit';
+import type { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
 export enum FetchStatus {
     Fetching,
@@ -73,26 +76,28 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
     let data: Block | undefined = undefined;
 
     try {
-        const connection = new Connection(url, 'confirmed');
+        const rpc = getRpc(url);
         const block = await fetchBlockBySlot(url, slot);
         if (block === null) {
             data = {};
             status = FetchStatus.Fetched;
         } else {
-            const childSlot = (await connection.getBlocks(slot + 1, slot + 100)).shift();
+            const childSlotBigint = (await rpc.getBlocks(BigInt(slot + 1), BigInt(slot + 100)).send()).at(0);
+            const childSlot = childSlotBigint === undefined ? undefined : Number(childSlotBigint);
             const firstLeaderSlot = block.parentSlot;
 
-            let leaders: PublicKey[] = [];
+            let leaders: Address[] = [];
             try {
                 const lastLeaderSlot = childSlot !== undefined ? childSlot : slot;
                 const slotLeadersLimit = lastLeaderSlot - block.parentSlot + 1;
-                leaders = await connection.getSlotLeaders(firstLeaderSlot, slotLeadersLimit);
+                leaders = await rpc.getSlotLeaders(BigInt(firstLeaderSlot), slotLeadersLimit).send();
             } catch (_err) {
                 // ignore errors
             }
 
-            const getLeader = (slot: number) => {
-                return leaders.at(slot - firstLeaderSlot);
+            const getLeader = (slot: number): PublicKey | undefined => {
+                const leader = leaders.at(slot - firstLeaderSlot);
+                return leader === undefined ? undefined : toLegacyPublicKey(leader);
             };
 
             data = {
