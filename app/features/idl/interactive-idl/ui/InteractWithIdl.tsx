@@ -1,11 +1,11 @@
 import { LoadingCard } from '@components/shared/LoadingCard';
 import { useToast } from '@components/shared/ui/sonner/use-toast';
 import type { InstructionData, SupportedIdl } from '@entities/idl';
-import { useWallet } from '@solana/wallet-adapter-react';
 import { useAtomValue } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';
 
 import { ExplorerLink } from '@/app/entities/cluster';
+import { useWallet } from '@/app/providers/wallet/use-wallet';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 
 import { originalIdlAtom, programIdAtom } from '../model/state-atoms';
@@ -42,7 +42,7 @@ export function InteractWithIdl({
     const toast = useToast();
     const idl = useAtomValue(originalIdlAtom);
     const progId = useAtomValue(programIdAtom);
-    const { connected, publicKey, wallet } = useWallet();
+    const { canSign, connected, publicKey, walletName } = useWallet();
 
     const [currentInstruction, setCurrentInstruction] = useState<{ name: string; programId?: string } | null>(null);
     const [hasTrackedTabOpen, setHasTrackedTabOpen] = useState(false);
@@ -57,11 +57,10 @@ export function InteractWithIdl({
 
     useEffect(() => {
         if (connected && !hasTrackedWalletConnect && progId) {
-            const walletType = wallet?.adapter?.name;
-            onWalletConnected?.(progId.toString(), walletType);
+            onWalletConnected?.(progId.toString(), walletName);
             setHasTrackedWalletConnect(true);
         }
-    }, [connected, progId, wallet, onWalletConnected, hasTrackedWalletConnect]);
+    }, [connected, progId, walletName, onWalletConnected, hasTrackedWalletConnect]);
 
     const handleTransactionSuccess = useCallback(
         (txSignature: string) => {
@@ -101,7 +100,7 @@ export function InteractWithIdl({
         lastExecutionResult,
         lastSimulationResult,
     } = useInstruction({
-        enabled: isEnabled({ connected, idl, programId: progId, publicKey }),
+        enabled: isEnabled({ canSign, idl, programId: progId, publicKey }),
         idl,
         onError: handleTransactionError,
         onSuccess: handleTransactionSuccess,

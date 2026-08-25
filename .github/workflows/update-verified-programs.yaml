@@ -9,9 +9,6 @@ permissions:
   contents: write
   pull-requests: write
 
-env:
-  PNPM_CACHE_FOLDER: ~/.pnpm-store
-
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -25,21 +22,10 @@ jobs:
         id: nvmrc
         run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
 
-      - name: Install package manager
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
-
-      - name: Setup pnpm config
-        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup pnpm and Node.js
+        uses: ./.github/actions/pnpm-setup
         with:
           node-version: ${{ steps.nvmrc.outputs.NODE_VERSION }}
-          cache: "pnpm"
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Fetch verified programs
         env:

@@ -1,6 +1,5 @@
 'use client';
 
-import { useWallet } from '@solana/wallet-adapter-react';
 import {
     type Connection,
     type Finality,
@@ -11,6 +10,7 @@ import {
 import { useCallback, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
+import { useWallet } from '@/app/providers/wallet/use-wallet';
 import { Logger } from '@/app/shared/lib/logger';
 
 import type { BaseIdl } from '../unified-program';

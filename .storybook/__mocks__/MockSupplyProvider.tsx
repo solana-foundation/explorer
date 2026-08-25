@@ -18,7 +18,7 @@ type Props = {
  */
 export function MockSupplyProvider({ children, supply = defaultSupply }: Props) {
     return (
-        <StateContext.Provider value={supply}>
+        <StateContext.Provider value={{ kind: 'ready', supply }}>
             <DispatchContext.Provider value={() => {}}>{children}</DispatchContext.Provider>
         </StateContext.Provider>
     );

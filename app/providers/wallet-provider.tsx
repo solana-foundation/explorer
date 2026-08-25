@@ -1,46 +1,46 @@
 'use client';
 
-// import wallet styles to not redeclare every style
-import '@solana/wallet-adapter-react-ui/styles.css';
+import './wallet/disposable-stack-polyfill';
 
-import { useToast } from '@components/shared/ui/sonner/use-toast';
-import { WalletError } from '@solana/wallet-adapter-base';
-import { ConnectionProvider, WalletProvider as WalletAdapterProvider } from '@solana/wallet-adapter-react';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { ComponentProps, FC, PropsWithChildren, useCallback, useMemo } from 'react';
+import { type Client, createClient } from '@solana/kit';
+import { type ClientWithWallet, walletSigner } from '@solana/kit-plugin-wallet';
+import { ClientProvider, useClient } from '@solana/react';
+import { FC, PropsWithChildren, useMemo } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
-import { Logger } from '@/app/shared/lib/logger';
 
-export const WalletProvider: FC<
-    Pick<ComponentProps<typeof WalletAdapterProvider>, 'autoConnect'> &
-        PropsWithChildren & {
-            skipToast?: boolean;
-        }
-> = ({ children, autoConnect, skipToast = false }) => {
-    // `useCluster()` already resolves the selection to its RPC URL, so this reads it rather than
-    // recomputing `clusterUrl` from the parts.
-    const { url: endpoint } = useCluster();
-    const toast = useToast();
+import { clusterToWalletChain, type WalletChain } from './wallet/cluster-chain';
 
-    const onError = useCallback(
-        (error: WalletError) => {
-            Logger.error(error);
-            if (!skipToast) {
-                toast.custom({ description: error.message, title: 'Wallet Error', type: 'error' });
-            }
-        },
-        [toast, skipToast],
-    );
+export type WalletClient = Client<ClientWithWallet>;
 
-    // use an empty array to allow detect wallets automatically
-    const wallets = useMemo(() => [], []);
+/**
+ * Wallet clients are cached per chain because each one runs its own Wallet Standard discovery and
+ * silent reconnect. Rebuilding on every mount — or on every hop between two clusters — would restart
+ * both and flash a disconnected UI. The chain is the only dimension of the key, so the cache is
+ * bounded by the number of values {@link clusterToWalletChain} can return, and the clients are held
+ * for the life of the page rather than disposed; disposing one would defeat the reconnect it exists
+ * to preserve.
+ */
+const walletClients = new Map<WalletChain, WalletClient>();
 
-    return (
-        <ConnectionProvider endpoint={endpoint}>
-            <WalletAdapterProvider wallets={wallets} onError={onError} autoConnect={autoConnect}>
-                <WalletModalProvider>{children}</WalletModalProvider>
-            </WalletAdapterProvider>
-        </ConnectionProvider>
-    );
+function getWalletClient(chain: WalletChain): WalletClient {
+    const cached = walletClients.get(chain);
+    if (cached) return cached;
+
+    // Each chain persists its own selection. Sharing one storage key would let a wallet connected on
+    // mainnet reappear as connected on devnet, and a disconnect on either clear both.
+    const client = createClient().use(walletSigner({ autoConnect: true, chain, storageKey: `kit-wallet:${chain}` }));
+    walletClients.set(chain, client);
+    return client;
+}
+
+export const WalletProvider: FC<PropsWithChildren> = ({ children }) => {
+    const { cluster } = useCluster();
+    const client = useMemo(() => getWalletClient(clusterToWalletChain(cluster)), [cluster]);
+
+    return <ClientProvider client={client}>{children}</ClientProvider>;
 };
+
+export function useWalletClient(): WalletClient {
+    return useClient<ClientWithWallet>();
+}

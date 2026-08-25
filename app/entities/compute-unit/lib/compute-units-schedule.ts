@@ -1,4 +1,4 @@
-import { address } from '@solana/kit';
+import { address, getBase58Encoder } from '@solana/kit';
 import {
     ComputeBudgetProgram,
     type ParsedInstruction,
@@ -12,7 +12,8 @@ import {
     parseSetComputeUnitLimitInstruction,
 } from '@solana-program/compute-budget';
 import { Cluster } from '@utils/cluster';
-import bs58 from 'bs58';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 /**
  * Built-in programs that have minimal reserved compute units (3k)
@@ -184,10 +185,17 @@ export function estimateRequestedComputeUnits(
                 staticAccountKeys: PublicKey[];
             };
         };
+        transactionConfig?: { computeUnitLimit?: number };
+        version?: 'legacy' | 0 | 1;
     },
     epoch: bigint | undefined,
     cluster: Cluster,
 ): number {
+    // v1 carries its compute unit limit in the message config; an absent limit means zero.
+    if (tx.version === 1) {
+        return Math.min(tx.transactionConfig?.computeUnitLimit ?? 0, MAX_COMPUTE_UNITS);
+    }
+
     // First, check for explicit compute budget instructions
     let totalReservedUnits = 0;
     for (const instruction of tx.transaction.message.compiledInstructions) {
@@ -231,7 +239,7 @@ export function estimateRequestedComputeUnitsForParsedTransaction(
         // For partially decoded instructions, we need the raw data
         if ('data' in instruction && typeof instruction.data === 'string') {
             const requestedUnits = extractComputeUnitsFromInstruction({
-                data: bs58.decode(instruction.data),
+                data: new Uint8Array(BASE58_ENCODER.encode(instruction.data)),
                 programId: instruction.programId,
             });
 

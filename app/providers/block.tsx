@@ -1,8 +1,10 @@
 'use client';
 
+import { type BlockWithV1, fetchBlock as fetchBlockBySlot } from '@entities/block-data';
 import * as Cache from '@providers/cache';
+import { useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
-import { Connection, PublicKey, VersionedBlockResponse } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
@@ -20,7 +22,7 @@ export enum ActionType {
 }
 
 type Block = {
-    block?: VersionedBlockResponse;
+    block?: BlockWithV1;
     blockLeader?: PublicKey;
     childSlot?: number;
     childLeader?: PublicKey;
@@ -57,7 +59,7 @@ export function useBlock(key: number): Cache.CacheEntry<Block> | undefined {
         throw new Error(`useBlock must be used within a BlockProvider`);
     }
 
-    return context.entries[key];
+    return useCacheEntry(context.entries, key);
 }
 
 export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Cluster, slot: number) {
@@ -73,9 +75,7 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
 
     try {
         const connection = new Connection(url, 'confirmed');
-        const block = await connection.getBlock(slot, {
-            maxSupportedTransactionVersion: 0,
-        });
+        const block = await fetchBlockBySlot(url, slot);
         if (block === null) {
             data = {};
             status = FetchStatus.Fetched;

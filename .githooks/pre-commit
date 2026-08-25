@@ -6,8 +6,10 @@ staged() {
     '*.ts' '*.tsx' '*.mts' '*.mjs' '*.cjs' '*.js'
 }
 
-[ -z "$(staged)" ] && exit 0
-
-staged | xargs -0 corepack pnpm pretty:format && \
-staged | xargs -0 corepack pnpm eslint:lint && \
-staged | xargs -0 corepack pnpm test:changed
+if [ -n "$(staged)" ]; then
+  staged | xargs -0 corepack pnpm pretty:format || exit 1
+  staged | xargs -0 corepack pnpm eslint:lint || exit 1
+  # Packages are upstream of the app, so their failures surface before the app specs they'd explain.
+  corepack pnpm test:packages:changed || exit 1
+  staged | xargs -0 corepack pnpm test:changed || exit 1
+fi

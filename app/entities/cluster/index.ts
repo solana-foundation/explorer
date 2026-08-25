@@ -8,6 +8,7 @@ export { approvedOriginsAtom, approveRpcOriginAtom } from './model/approved-orig
 export { ClusterProvider, type ClusterState, StateContext } from './model/cluster-provider';
 export { customUrlEnabledAtom } from './model/custom-url-enabled';
 export { useCluster } from './model/use-cluster';
+export { useClusterConnectionFailed } from './model/use-cluster-connection-failed';
 export { useClusterInfo } from './model/use-cluster-info';
 export { clusterModalOpenAtom, useClusterModal } from './model/use-cluster-modal';
 export {

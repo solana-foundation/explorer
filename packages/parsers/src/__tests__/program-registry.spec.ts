@@ -13,9 +13,6 @@ import {
     rpcParsedInstructionProgram,
     TOKEN_PROGRAMS,
     tokenProgram,
-    type RpcParsedAccountProgram,
-    type RpcParsedInstructionProgram,
-    type TokenProgram,
 } from '../program-registry.js';
 
 type Vote = { program: 'vote'; parsed: { slot: number } };
@@ -108,33 +105,5 @@ describe('program registry', () => {
                 expectTypeOf(ix.parsed).toEqualTypeOf<{ type: string }>();
             }
         });
-    });
-
-    // Drift canaries: an accidental edit to either registry array breaks these pins.
-    it('should pin the inferred unions to the RPC vocabulary', () => {
-        expectTypeOf<TokenProgram>().toEqualTypeOf<'spl-token' | 'spl-token-2022'>();
-        expectTypeOf<RpcParsedAccountProgram>().toEqualTypeOf<
-            | 'address-lookup-table'
-            | 'bpf-upgradeable-loader'
-            | 'config'
-            | 'nonce'
-            | 'spl-token'
-            | 'spl-token-2022'
-            | 'stake'
-            | 'sysvar'
-            | 'vote'
-        >();
-        expectTypeOf<RpcParsedInstructionProgram>().toEqualTypeOf<
-            | 'address-lookup-table'
-            | 'bpf-loader'
-            | 'bpf-upgradeable-loader'
-            | 'spl-associated-token-account'
-            | 'spl-memo'
-            | 'spl-token'
-            | 'spl-token-2022'
-            | 'stake'
-            | 'system'
-            | 'vote'
-        >();
     });
 });

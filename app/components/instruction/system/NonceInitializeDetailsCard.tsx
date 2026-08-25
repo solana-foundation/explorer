@@ -1,51 +1,8 @@
-import { Address } from '@components/common/Address';
-import { ParsedInstruction, SignatureResult, SystemProgram } from '@solana/web3.js';
-import React from 'react';
+import { address, defineInstructionCard } from '@entities/instruction-card';
 
-import { BaseTable } from '@/app/shared/ui/Table';
-
-import { InstructionCard } from '../InstructionCard';
 import { InitializeNonceInfo } from './types';
 
-export function NonceInitializeDetailsCard(props: {
-    ix: ParsedInstruction;
-    index: number;
-    result: SignatureResult;
-    info: InitializeNonceInfo;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-}) {
-    const { ix, index, result, info, innerCards, childIndex } = props;
-
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title="System Program: Initialize Nonce"
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <BaseTable.Row>
-                <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={SystemProgram.programId} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Nonce Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.nonceAccount} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Authority Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.nonceAuthority} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-        </InstructionCard>
-    );
-}
+export const NonceInitializeDetailsCard = defineInstructionCard<InitializeNonceInfo>({
+    fields: info => [address('Nonce Address', info.nonceAccount), address('Authority Address', info.nonceAuthority)],
+    title: 'System Program: Initialize Nonce',
+});

@@ -2,6 +2,7 @@ import {
     createSolanaRpc,
     decodeTransactionFromRpcResponse,
     getBase58Decoder,
+    getTransactionSize,
     MAX_SUPPORTED_TRANSACTION_VERSION,
     signature as createSignature,
     type Transaction,
@@ -62,6 +63,7 @@ export async function fetchRawTransaction(
                   preBalances: meta.preBalances.map(Number),
               }
             : undefined,
+        serializedSize: getTransactionSize(transaction),
         signatures,
     };
 

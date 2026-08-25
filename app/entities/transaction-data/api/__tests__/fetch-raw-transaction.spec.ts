@@ -126,6 +126,20 @@ describe('fetchRawTransaction', () => {
         },
     );
 
+    it.each(['legacy' as const, 0 as const, 1 as const])(
+        'should report the wire size of a %s transaction, signatures included',
+        async version => {
+            const bytes = version === 1 ? createV1TransactionBytes({}) : createWeb3TransactionBytes(version);
+            respondWith(transactionResult(bytes, null, version));
+
+            const raw = await fetchRawTransaction(URL, SIGNATURE);
+
+            // The whole payload, not just the message — that is what the size limit applies to.
+            expect(raw?.serializedSize).toBe(bytes.length);
+            expect(raw?.serializedSize).toBeGreaterThan(raw?.messageBytes.length ?? 0);
+        },
+    );
+
     it('should leave an unsigned signer slot undefined so it is not reported as an invalid signature', async () => {
         respondWith(transactionResult(createV1TransactionBytes({})));
 

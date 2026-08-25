@@ -34,14 +34,10 @@ minimumReleaseAge: 20160
 # this exclusion once 0.5.0 is older than `minimumReleaseAge`.
 minimumReleaseAgeExclude:
   - '@solana/subscriptions'
+  - '@codama/*'
+  - codama
 
 # Pin resolution to the public npm registry so it can't silently inherit a
 # global/org .npmrc mirror. Scoped keys (e.g. '@my-org') can be added here.
 registries:
   default: https://registry.npmjs.org/
-
-# @onsol/tldparser requires @metaplex-foundation/beet without declaring it, so it resolves only via hoisting.
-packageExtensions:
-  '@onsol/tldparser':
-    dependencies:
-      '@metaplex-foundation/beet': '>=0.1.0'

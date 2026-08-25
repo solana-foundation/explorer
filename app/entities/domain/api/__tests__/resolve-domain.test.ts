@@ -1,19 +1,20 @@
-import { getDomainKey } from '@onsol/tldparser';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { address, type GetAccountInfoApi, getAddressEncoder, type Rpc } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { makeAnsNameRecordData } from '../../__tests__/fixtures';
+import { getAnsDomainAddress } from '../../lib/ans-name-service';
 import { resolveDomain } from '../resolve-domain';
 
-vi.mock('@onsol/tldparser', async importOriginal => {
-    const mod = await importOriginal<typeof import('@onsol/tldparser')>();
+vi.mock('../../lib/ans-name-service', async importOriginal => {
+    const mod = await importOriginal<typeof import('../../lib/ans-name-service')>();
     return {
         ...mod,
-        getDomainKey: vi.fn(mod.getDomainKey),
+        getAnsDomainAddress: vi.fn(mod.getAnsDomainAddress),
     };
 });
 
-const KNOWN_OWNER = new PublicKey('86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdRrbukszb');
-const NAME_SERVICE_PROGRAM = new PublicKey('namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX');
+const KNOWN_OWNER = address('86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdRrbukszb');
+const addressEncoder = getAddressEncoder();
 
 describe('resolveDomain', () => {
     beforeEach(() => {
@@ -22,9 +23,9 @@ describe('resolveDomain', () => {
 
     describe('SNS domains (.sol)', () => {
         it('should resolve a .sol domain when account exists', async () => {
-            const connection = mockConnection(createSnsAccountData(KNOWN_OWNER));
+            const rpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
 
-            const result = await resolveDomain('test.sol', connection);
+            const result = await resolveDomain('test.sol', rpc);
 
             expect(result).not.toBeNull();
             expect(result?.owner).toBe(KNOWN_OWNER.toString());
@@ -32,42 +33,44 @@ describe('resolveDomain', () => {
         });
 
         it('should return null when account does not exist', async () => {
-            const connection = mockConnection(null);
+            const rpc = mockRpc(null);
 
-            const result = await resolveDomain('nonexistent.sol', connection);
+            const result = await resolveDomain('nonexistent.sol', rpc);
 
             expect(result).toBeNull();
         });
 
         it('should return null when no account info exists for SNS domain', async () => {
-            const connection = mockConnection(null);
+            const rpc = mockRpc(null);
 
-            const result = await resolveDomain('nonexistent.sol', connection);
+            const result = await resolveDomain('nonexistent.sol', rpc);
 
             expect(result).toBeNull();
-            expect(connection.getAccountInfo).toHaveBeenCalledTimes(1);
+            expect(rpc.getAccountInfo).toHaveBeenCalledTimes(1);
         });
 
         it('should strip .sol suffix before hashing', async () => {
-            const connection = mockConnection(createSnsAccountData(KNOWN_OWNER));
+            const rpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
 
-            const result1 = await resolveDomain('alice.sol', connection);
-            const result2 = await resolveDomain('bob.sol', connection);
+            const result1 = await resolveDomain('alice.sol', rpc);
+            const result2 = await resolveDomain('bob.sol', rpc);
 
             // Different domain names should derive different addresses
             expect(result1?.address).not.toBe(result2?.address);
         });
 
         it('should throw when getAccountInfo rejects for SNS domain', async () => {
-            const connection = mockConnection(null);
-            vi.mocked(connection.getAccountInfo).mockRejectedValueOnce(new Error('RPC failure'));
+            const rpc = mockRpc(null);
+            vi.mocked(rpc.getAccountInfo).mockReturnValueOnce({
+                send: () => Promise.reject(new Error('RPC failure')),
+            } as never);
 
-            await expect(resolveDomain('test.sol', connection)).rejects.toThrow('RPC failure');
+            await expect(resolveDomain('test.sol', rpc)).rejects.toThrow('RPC failure');
         });
 
         it('should resolve mixed-case .sol domains the same as lowercase', async () => {
-            const upper = mockConnection(createSnsAccountData(KNOWN_OWNER));
-            const lower = mockConnection(createSnsAccountData(KNOWN_OWNER));
+            const upper = mockRpc(createSnsAccountData(KNOWN_OWNER));
+            const lower = mockRpc(createSnsAccountData(KNOWN_OWNER));
 
             const result1 = await resolveDomain('Toly.sol', upper);
             const result2 = await resolveDomain('toly.sol', lower);
@@ -79,9 +82,9 @@ describe('resolveDomain', () => {
 
     describe('ANS domains (non-.sol)', () => {
         it('should resolve an ANS domain when account exists', async () => {
-            const connection = mockConnection(createAnsAccountData(KNOWN_OWNER));
+            const rpc = mockRpc(createAnsAccountData(KNOWN_OWNER));
 
-            const result = await resolveDomain('test.bonk', connection);
+            const result = await resolveDomain('test.bonk', rpc);
 
             expect(result).not.toBeNull();
             expect(result?.owner).toBe(KNOWN_OWNER.toString());
@@ -89,47 +92,64 @@ describe('resolveDomain', () => {
         });
 
         it('should return null when account does not exist', async () => {
-            const connection = mockConnection(null);
+            const rpc = mockRpc(null);
 
-            const result = await resolveDomain('nonexistent.bonk', connection);
+            const result = await resolveDomain('nonexistent.bonk', rpc);
 
             expect(result).toBeNull();
         });
 
         it('should return null when no account info exists for ANS domain', async () => {
-            const connection = mockConnection(null);
+            const rpc = mockRpc(null);
 
-            const result = await resolveDomain('test.co', connection);
+            const result = await resolveDomain('test.co', rpc);
 
             expect(result).toBeNull();
-            expect(connection.getAccountInfo).toHaveBeenCalledTimes(1);
+            expect(rpc.getAccountInfo).toHaveBeenCalledTimes(1);
         });
 
-        it('should throw when getDomainKey rejects for ANS domain', async () => {
-            vi.mocked(getDomainKey).mockRejectedValueOnce(new Error('ANS lookup failed'));
-            const connection = mockConnection(null);
+        it('should return null when the record has expired past the grace period', async () => {
+            const expiresAt = BigInt(Math.floor(Date.now() / 1000) - 46 * 24 * 60 * 60);
+            const rpc = mockRpc(createAnsAccountData(KNOWN_OWNER, expiresAt));
 
-            await expect(resolveDomain('test.bonk', connection)).rejects.toThrow('ANS lookup failed');
+            const result = await resolveDomain('test.bonk', rpc);
+
+            expect(result).toBeNull();
+        });
+
+        it('should throw when the domain derivation rejects for ANS domain', async () => {
+            vi.mocked(getAnsDomainAddress).mockRejectedValueOnce(new Error('ANS lookup failed'));
+            const rpc = mockRpc(null);
+
+            await expect(resolveDomain('test.bonk', rpc)).rejects.toThrow('ANS lookup failed');
         });
 
         it('should lowercase the domain before lookup', async () => {
-            const upper = mockConnection(createAnsAccountData(KNOWN_OWNER));
-            const lower = mockConnection(createAnsAccountData(KNOWN_OWNER));
+            const upper = mockRpc(createAnsAccountData(KNOWN_OWNER));
+            const lower = mockRpc(createAnsAccountData(KNOWN_OWNER));
 
             const result1 = await resolveDomain('TEST.BONK', upper);
             const result2 = await resolveDomain('test.bonk', lower);
 
             expect(result1?.address).toBe(result2?.address);
         });
+
+        it('should return null for label counts ANS cannot register', async () => {
+            const rpc = mockRpc(createAnsAccountData(KNOWN_OWNER));
+
+            expect(await resolveDomain('bonk', rpc)).toBeNull();
+            expect(await resolveDomain('a.b.c.d', rpc)).toBeNull();
+            expect(rpc.getAccountInfo).not.toHaveBeenCalled();
+        });
     });
 
     describe('routing', () => {
         it('should route .sol to SNS and non-.sol to ANS', async () => {
-            const snsConn = mockConnection(createSnsAccountData(KNOWN_OWNER));
-            const ansConn = mockConnection(createAnsAccountData(KNOWN_OWNER));
+            const snsRpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
+            const ansRpc = mockRpc(createAnsAccountData(KNOWN_OWNER));
 
-            const solResult = await resolveDomain('test.sol', snsConn);
-            const bonkResult = await resolveDomain('test.bonk', ansConn);
+            const solResult = await resolveDomain('test.sol', snsRpc);
+            const bonkResult = await resolveDomain('test.bonk', ansRpc);
 
             // Same name, different name services → different derived addresses
             expect(solResult).not.toBeNull();
@@ -139,34 +159,24 @@ describe('resolveDomain', () => {
     });
 });
 
-function mockConnection(accountData: Buffer | null): Connection {
-    const connection = new Connection('https://unused.test');
-    vi.spyOn(connection, 'getAccountInfo').mockResolvedValue(
-        accountData
-            ? {
-                  data: accountData,
-                  executable: false,
-                  lamports: 1_000_000,
-                  owner: NAME_SERVICE_PROGRAM,
-                  rentEpoch: 0,
-              }
-            : null,
-    );
-    return connection;
+function mockRpc(accountData: Uint8Array | null): Rpc<GetAccountInfoApi> {
+    return {
+        getAccountInfo: vi.fn().mockReturnValue({
+            send: () =>
+                Promise.resolve({
+                    value: accountData ? { data: [Buffer.from(accountData).toString('base64'), 'base64'] } : null,
+                }),
+        }),
+    } as unknown as Rpc<GetAccountInfoApi>;
 }
 
 // SNS layout: [parentName(32)] [owner(32)] [class(32)]
-function createSnsAccountData(owner: PublicKey): Buffer {
-    const data = Buffer.alloc(96);
-    owner.toBuffer().copy(new Uint8Array(data.buffer), 32);
+function createSnsAccountData(owner: ReturnType<typeof address>): Uint8Array {
+    const data = new Uint8Array(96);
+    data.set(addressEncoder.encode(owner), 32);
     return data;
 }
 
-// ANS layout: [discriminator(8)] [parentName(32)] [owner(32)] [nclass(32)] [expiresAt(8)] [createdAt(8)] [nonTransferable(1)] [padding(79)]
-function createAnsAccountData(owner: PublicKey): Buffer {
-    const data = Buffer.alloc(200);
-    // owner at offset 8 (discriminator) + 32 (parentName) = 40
-    owner.toBuffer().copy(new Uint8Array(data.buffer), 40);
-    // expiresAt = 0 means no expiry (always valid)
-    return data;
+function createAnsAccountData(owner: ReturnType<typeof address>, expiresAt = 0n): Uint8Array {
+    return makeAnsNameRecordData({ expiresAt, owner });
 }

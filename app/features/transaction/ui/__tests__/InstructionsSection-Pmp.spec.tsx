@@ -3,6 +3,7 @@ import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 // From the literal's own library-free module: the feature no longer re-exports it, and this spec only needs the
 // program id to build a fixture instruction - not the decoders that `@entities/pmp-account` would pull in.
 import { PMP_ADDRESS } from '@entities/pmp-account/lib/program-address';
+import { getBase58Decoder } from '@solana/kit';
 import { type ParsedTransaction, PublicKey } from '@solana/web3.js';
 import {
     Compression,
@@ -13,7 +14,6 @@ import {
 } from '@solana-program/program-metadata';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import bs58 from 'bs58';
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 
@@ -25,6 +25,8 @@ import { TransactionsProvider } from '@/app/providers/transactions';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
 import { InstructionsSection } from '../InstructionsSection';
+
+const BASE58_DECODER = getBase58Decoder();
 
 const SIGNATURE = DEFAULT_SIGNATURE;
 const AUTHORITY = gen.publicKey(0);
@@ -53,7 +55,7 @@ const PARSED_TX = {
         instructions: [
             {
                 accounts: [METADATA, AUTHORITY],
-                data: bs58.encode(SET_DATA),
+                data: BASE58_DECODER.decode(SET_DATA),
                 programId: new PublicKey(PMP_ADDRESS),
             },
         ],

@@ -3,15 +3,10 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
 import { cn } from '@components/shared/utils';
+import type { BlockWithV1 } from '@entities/block-data';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
-import {
-    ConfirmedTransactionMeta,
-    PublicKey,
-    TransactionSignature,
-    VersionedBlockResponse,
-    VOTE_PROGRAM_ID,
-} from '@solana/web3.js';
+import { ConfirmedTransactionMeta, PublicKey, TransactionSignature, VOTE_PROGRAM_ID } from '@solana/web3.js';
 import { parseProgramLogs } from '@utils/program-logs';
 import { displayAddress } from '@utils/tx';
 import { useBuildClusterPath } from '@utils/url';
@@ -67,7 +62,7 @@ type TransactionWithInvocations = {
     logTruncated: boolean;
 };
 
-export function BlockHistoryCard({ block, epoch }: { block: VersionedBlockResponse; epoch: bigint | undefined }) {
+export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: bigint | undefined }) {
     const [numDisplayed, setNumDisplayed] = React.useState(PAGE_SIZE);
     const currentPathname = usePathname();
     const currentSearchParams = useSearchParams();

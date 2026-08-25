@@ -3,12 +3,12 @@
 /**
  * Refresh the committed snapshots used by the scrape-pipeline e2e test:
  *
- *   - `real-agave-wiki.md`        the live Agave Feature-Gate-Tracker wiki page
+ *   - `real-agave-schedule.json`  the live Agave feature-gate schedule
  *   - `real-simd-proposals.json`  the live GitHub SIMD-proposals listing,
  *                                 trimmed to the `{ name, html_url }` fields
  *                                 the parser actually reads
  *
- * Run after the wiki format changes, then eyeball the diff and re-run the test:
+ * Run after the schedule format changes, then eyeball the diff and re-run the test:
  *   pnpm exec tsx scripts/feature-gates/refresh-test-fixtures.ts
  */
 
@@ -18,15 +18,16 @@ import { fileURLToPath } from 'node:url';
 
 import type { GithubContent } from './lib/simd-proposals';
 
-const WIKI_URL = 'https://raw.githubusercontent.com/wiki/anza-xyz/agave/Feature-Gate-Tracker-Schedule.md';
+const SCHEDULE_URL = 'https://raw.githubusercontent.com/wiki/anza-xyz/agave/feature-gate-tracker-schedule.json';
 const PROPOSALS_URL = 'https://api.github.com/repos/solana-foundation/solana-improvement-documents/contents/proposals';
 
 const FIXTURE_DIR = join(dirname(fileURLToPath(import.meta.url)), 'lib/__tests__/fixtures');
 
 async function main() {
-    const wiki = await fetchText(WIKI_URL);
-    writeFileSync(join(FIXTURE_DIR, 'real-agave-wiki.md'), wiki);
-    console.log(`Saved real-agave-wiki.md (${wiki.length} bytes)`);
+    const schedule = await fetchJson(SCHEDULE_URL);
+    // Minified for the same reason as the proposals listing below.
+    writeFileSync(join(FIXTURE_DIR, 'real-agave-schedule.json'), `${JSON.stringify(schedule)}\n`);
+    console.log(`Saved real-agave-schedule.json (${Object.keys(schedule).join(', ')})`);
 
     const proposals = await fetchProposals();
     // Minified: it's a machine-read fixture, not hand-edited — keep the committed diff and file size small.
@@ -34,12 +35,14 @@ async function main() {
     console.log(`Saved real-simd-proposals.json (${proposals.length} entries)`);
 }
 
-async function fetchText(url: string): Promise<string> {
+async function fetchJson(url: string): Promise<Record<string, unknown>> {
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`Failed to fetch ${url}: HTTP ${response.status}`);
     }
-    return response.text();
+    // Snapshot fixture: the parser under test is what validates the shape.
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- external document shape
+    return (await response.json()) as Record<string, unknown>;
 }
 
 async function fetchProposals(): Promise<GithubContent[]> {

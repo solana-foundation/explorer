@@ -45,6 +45,7 @@ export {
     type SolanaRpc,
     StateContext,
     useCluster,
+    useClusterConnectionFailed,
     useClusterInfo,
     useClusterModal,
     useSolanaRpc,

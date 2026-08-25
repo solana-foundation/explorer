@@ -66,12 +66,11 @@ export default defineConfig({
         projects: [
             {
                 extends: true,
+                // No `typecheck`: the only *.spec-d.ts files live in packages/, which self-typecheck, so
+                // enabling it here collected nothing and still reported "Type Errors no errors". `pnpm check` owns tsc.
                 test: {
                     name: 'specs',
                     setupFiles: ['./test-setup.specs.ts'],
-                    typecheck: {
-                        enabled: true,
-                    },
                 },
             },
             {

@@ -1,5 +1,6 @@
-import type { InstructionArgumentNode, RootNode, TypeNode } from 'codama';
+import type { InstructionArgumentNode, InstructionNode, RootNode, TypeNode } from 'codama';
 
+import { arrayOrEmpty } from '@/app/shared/lib/array';
 import { fromHex } from '@/app/shared/lib/bytes';
 
 type ConvertCtx = { value: unknown; str: string; root?: RootNode };
@@ -22,10 +23,8 @@ export function convertValue(value: unknown, typeNode: TypeNode, root?: RootNode
 /**
  * Get the non-omitted arguments from an instruction node.
  */
-export function getUserFacingArguments(instructionNode: {
-    arguments: InstructionArgumentNode[];
-}): InstructionArgumentNode[] {
-    return instructionNode.arguments.filter(arg => arg.defaultValueStrategy !== 'omitted');
+export function getUserFacingArguments(instructionNode: InstructionNode): InstructionArgumentNode[] {
+    return arrayOrEmpty(instructionNode.arguments).filter(arg => arg.defaultValueStrategy !== 'omitted');
 }
 
 // ---------------------------------------------------------------------------
@@ -142,7 +141,7 @@ function convertTuple({ value, str, root }: ConvertCtx, typeNode: TypeNode) {
 function convertDefinedTypeLink({ value, root }: ConvertCtx, typeNode: TypeNode) {
     if (!root) return value;
     const name = (typeNode as { name: string }).name;
-    const definedType = root.program.definedTypes.find(t => t.name === name);
+    const definedType = arrayOrEmpty(root.program.definedTypes).find(t => t.name === name);
     if (!definedType) throw new Error(`Defined type "${name}" not found in IDL`);
     return convertValue(value, definedType.type, root);
 }
