@@ -6,10 +6,6 @@ on:
   pull_request:
 
 env:
-  # cache affixes and folders
-  PNPM_CACHE_AFFIX: pnpm
-  PNPM_CACHE_FOLDER: ~/.pnpm-store
-  PLAYWRIGHT_CACHE_AFFIX: pw
   PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
   SENTRY_TELEMETRY_DISABLE: true
   STORYBOOK_DISABLE_TELEMETRY: 1
@@ -21,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       node-version: ${{ steps.nvmrc.outputs.NODE_VERSION }}
+      shard-list: ${{ steps.shards.outputs.list }}
+      shard-total: ${{ steps.shards.outputs.total }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -32,6 +30,15 @@ jobs:
       - name: Read .nvmrc
         id: nvmrc
         run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+
+      # One source for the shard count: `strategy.matrix` cannot read `env`, and a matrix that
+      # disagrees with the `--shard` divisor passes green while silently skipping the missing slices.
+      - name: Plan specs shards
+        id: shards
+        run: |
+          total=2
+          echo "total=$total" >> $GITHUB_OUTPUT
+          echo "list=[$(seq -s, 1 $total)]" >> $GITHUB_OUTPUT
 
   Build-And-Test:
     needs: read-nvmrc
@@ -46,38 +53,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install package manager
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
-
-      # Configure pnpm store directory BEFORE setup-node tries to cache it
-      - name: Setup pnpm config
-        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
-
+      # The pnpm store is not here: setup-node caches it, and holding both stored the same tree twice.
+      # A source hash suits an incremental build cache, where a near miss still helps.
       - name: Setup Additional Cache
         uses: actions/cache@v5
         id: additional_cache
         with:
           path: |
-            ${{ env.PNPM_CACHE_FOLDER }}
             ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
             ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
+          key: build-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
-            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-
+            build-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            build-cache-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Install dependencies
-        run: |
-          echo "Node version: $(node --version)"
-          echo "PNPM version: $(pnpm --version)"
-          pnpm install --frozen-lockfile
+      - name: Setup pnpm and Node.js
+        uses: ./.github/actions/pnpm-setup
+        with:
+          node-version: ${{ matrix.node-version }}
 
       - name: Format
         run: pnpm format:ci
@@ -88,14 +81,44 @@ jobs:
       - name: OpenSpec
         run: pnpm openspec:validate
 
+      # Mandatory, and the only `next build` in CI — Specs-Shards only generates types. A production
+      # build that breaks fails here or nowhere, so this step must not be weakened to typegen.
       - name: Build
         run: pnpm build
 
-      - name: Test
-        env:
-          TEST_SERIAL_TIMEOUT: ${{ vars.TEST_SERIAL_TIMEOUT }}
-        run: |
-          pnpm test:ci
+      # The app specs run in Specs-Shards; keeping them here would serialise ~4.5 min behind this job.
+      - name: Test packages
+        run: pnpm test:packages
+
+  # Split off Build-And-Test so the specs sweep fans out without re-running format/lint/build per shard.
+  # Sharded on both node versions: leaving 24.x whole would keep it the ~8 min critical path.
+  Specs-Shards:
+    needs: read-nvmrc
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '24.x']
+        shard: ${{ fromJSON(needs.read-nvmrc.outputs.shard-list) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm and Node.js
+        uses: ./.github/actions/pnpm-setup
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Specs resolve sibling packages through dist. No `next build`: nothing here reads the generated
+      # route types now that the specs project no longer typechecks.
+      - name: Build packages
+        run: pnpm build:packages
+
+      - name: Test specs (shard ${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }})
+        run: pnpm test:ci:specs --shard=${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }}
 
   Security-Audit:
     # Independent of the build: the audit resolves the tree from pnpm-lock.yaml and queries
@@ -127,29 +150,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install package manager
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
-
-      - name: Setup pnpm config
-        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup pnpm and Node.js
+        uses: ./.github/actions/pnpm-setup
         with:
           node-version: ${{ needs.read-nvmrc.outputs.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Cache pnpm store
-        uses: actions/cache@v5
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       # scripts/update-sitemap.ts imports app/utils/programs.ts, which imports the built @explorer/decoder-mango.
       - name: Build workspace packages
@@ -173,10 +177,8 @@ jobs:
 
     # The browser-mode sweep has repeatedly died on a full root partition ("No space left on device").
     # Browsers and the Vite dep-optimize cache live on the runner's ~65 GB /mnt scratch disk
-    # (PLAYWRIGHT_BROWSERS_PATH / VITE_CACHE_PATH); the pnpm store stays on / so node_modules keeps hardlinking,
-    # with `pnpm store prune` stopping the restore-keys snowball. Job-own cache affixes keep old archives out.
+    # (PLAYWRIGHT_BROWSERS_PATH / VITE_CACHE_PATH); the pnpm store stays on / so node_modules keeps hardlinking.
     env:
-      PNPM_CACHE_AFFIX: pnpm-sb
       PLAYWRIGHT_CACHE_AFFIX: pw-mnt
       PLAYWRIGHT_BROWSERS_PATH: /mnt/cache/ms-playwright
       VITE_CACHE_PATH: /mnt/cache/vite
@@ -190,27 +192,6 @@ jobs:
           sudo mkdir -p "$PLAYWRIGHT_BROWSERS_PATH" "$VITE_CACHE_PATH"
           sudo chown -R "$(id -u):$(id -g)" "$PLAYWRIGHT_BROWSERS_PATH" "$VITE_CACHE_PATH"
 
-      - name: Install package manager
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
-
-      - name: Setup pnpm config
-        run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Cache pnpm store
-        uses: actions/cache@v5
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.PNPM_CACHE_AFFIX }}-
-
       - name: Cache Playwright browsers
         uses: actions/cache@v5
         id: playwright_cache
@@ -220,10 +201,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ env.PLAYWRIGHT_CACHE_AFFIX }}-
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup pnpm and Node.js
+        uses: ./.github/actions/pnpm-setup
+        with:
+          node-version: ${{ matrix.node-version }}
 
-      # Drops store packages no longer referenced by the lockfile so the restored-then-saved cache stays bounded.
+      # No-op while setup-node restores by exact key only; kept in case the store ever regains restore-keys.
       - name: Prune pnpm store
         run: pnpm store prune
 

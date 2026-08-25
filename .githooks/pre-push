@@ -5,4 +5,4 @@
 export OPENSPEC_TELEMETRY=0
 
 # Mirrors the CI pipeline: format → lint → openspec → build → test
-corepack pnpm format:ci && corepack pnpm lint && corepack pnpm openspec:validate && corepack pnpm build && corepack pnpm test:ci
+corepack pnpm check
