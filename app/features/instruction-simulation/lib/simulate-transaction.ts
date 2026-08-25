@@ -21,6 +21,10 @@ import { ENABLE_TX_V1_FEATURE, isTxV1Active } from './tx-v1-feature';
 import type { SolBalanceChange } from './types';
 
 export type SimulationResult = {
+    // Every account key the message references, lookup tables resolved, in the order
+    // `compiledInstructions` indexes into. Callers that need an instruction's program id must read it
+    // from here: `message.staticAccountKeys` is missing any key sourced from a lookup table.
+    accountKeys: readonly PublicKey[];
     epoch: bigint;
     logs: InstructionLogs[] | undefined;
     error: string | undefined;
@@ -210,6 +214,7 @@ function interpretSimulation(
     }
 
     return {
+        accountKeys,
         epoch: BigInt(epochInfo.epoch),
         error,
         logs,

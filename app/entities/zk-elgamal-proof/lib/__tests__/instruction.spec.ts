@@ -60,8 +60,15 @@ describe('resolveZkElGamalProofName', () => {
         expect(resolveZkElGamalProofName(PublicKey.default.toBase58(), new Uint8Array([3]))).toBeUndefined();
     });
 
-    it('should fall back to Unknown Instruction for empty data on the ZK program', () => {
-        expect(resolveZkElGamalProofName(ZK_PROGRAM_ID.toBase58(), new Uint8Array([]))).toBe('Unknown Instruction');
+    // The resolver must not answer "Unknown Instruction" here. That is a caller's fallback label, and
+    // returning it as a name would both stop the rest of the chain and read as a resolved name to the
+    // CU chart, which renders its own positional fallback instead.
+    it('should return undefined for empty data on the ZK program', () => {
+        expect(resolveZkElGamalProofName(ZK_PROGRAM_ID.toBase58(), new Uint8Array([]))).toBeUndefined();
+    });
+
+    it('should return undefined for a discriminator past the known instructions', () => {
+        expect(resolveZkElGamalProofName(ZK_PROGRAM_ID.toBase58(), new Uint8Array([99]))).toBeUndefined();
     });
 });
 

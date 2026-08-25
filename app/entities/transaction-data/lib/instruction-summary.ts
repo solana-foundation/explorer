@@ -1,75 +1,93 @@
-import { getBase58Encoder } from '@solana/kit';
+import { getBase58Encoder, type ReadonlyUint8Array } from '@solana/kit';
 import {
     ComputeBudgetProgram,
     ParsedInstruction,
     ParsedTransactionWithMeta,
     PartiallyDecodedInstruction,
+    type PublicKey,
 } from '@solana/web3.js';
-import { MEMO_PROGRAM_ADDRESS } from '@solana-program/memo';
 import { camelToTitleCase } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import { is } from 'superstruct';
 
-import { getProgramName } from './get-program-name';
+import { findProgramName, UNKNOWN_PROGRAM_NAME } from './get-program-name';
+import { resolveMemoInstructionName } from './memo-name';
+import type { InstructionNames, InstructionSummary } from './types';
 
 const BASE58_ENCODER = getBase58Encoder();
 
-// Program + discriminator are one field since they only ever travel together.
-export type InstructionNameLookup = {
-    programId: string;
-    discriminator: Uint8Array;
-};
-
-export type InstructionSummary = {
-    name: string;
-    program: string;
-    // Set only on the "Unknown Instruction" fallback — the hint a name resolver (IDL, ZK ElGamal, …)
-    // uses to resolve the real name from the program + discriminator.
-    nameLookup?: InstructionNameLookup;
-};
+export const UNKNOWN_INSTRUCTION_NAME = 'Unknown Instruction';
 
 export function getInstructionSummaries(transactionWithMeta: ParsedTransactionWithMeta): InstructionSummary[] {
     return (
         transactionWithMeta.transaction.message.instructions
             // Drop ComputeBudget: fee/priority boilerplate on nearly every tx that says nothing about what
-            // it does. It has no IDL (it's in NON_ANCHOR_PROGRAMS), so keeping it would only add noisy
-            // "Unknown Instruction" rows to every summary.
+            // it does. The CU chart keeps it, because dropping a row there would misalign every later
+            // instruction against its logged CU figure.
             .filter(ix => !ix.programId.equals(ComputeBudgetProgram.programId))
             .map(summarizeInstruction)
     );
 }
 
-// SPL Memo renders its instruction as the bare memo text (a string `parsed`) rather than a typed
-// object, so it's matched by program id, not by that shape. v2 has a canonical export; v1 doesn't.
-const MEMO_PROGRAM_IDS: ReadonlySet<string> = new Set([
-    MEMO_PROGRAM_ADDRESS,
-    'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo',
-]);
-
-// Discriminator hint length. Anchor discriminators are 8 bytes; a Codama discriminator is one or more
-// contiguous constant fields and can be longer (two u64s = 16). Cap at 16 so the hint holds any realistic
-// discriminator — matchInstructionName requires the data to be at least as long as the discriminator it
-// compares — without retaining the full instruction payload.
+// Discriminator lookup length. The longest any source reads today is 8 (Anchor); the IDL table's Codama
+// path tops out at 4, since it resolves only a single constant int field at offset 0. Cap at 16 for
+// headroom without retaining the full instruction payload.
+// A ceiling, not a guarantee: an IDL declaring a discriminator longer than 16 bytes is truncated here and
+// can never match, because the comparison requires the data to be at least as long as the discriminator.
 const MAX_DISCRIMINATOR_BYTES = 16;
 
-function summarizeInstruction(ix: ParsedInstruction | PartiallyDecodedInstruction): InstructionSummary {
-    const program = getProgramName(ix.programId);
-
+/**
+ * The names one instruction resolves to from the transaction alone — no IDL fetch. Returns the raw
+ * program + data lookup instead of a name whenever only a resolver can name the instruction.
+ */
+export function resolveInstructionNames(ix: ParsedInstruction | PartiallyDecodedInstruction): InstructionNames {
     if (!('parsed' in ix)) {
-        // `slice` copies rather than views, capped at the longest discriminator we might match, so the full
-        // instruction payload is not retained.
-        const discriminator = BASE58_ENCODER.encode(ix.data).slice(0, MAX_DISCRIMINATOR_BYTES);
-        return {
-            name: 'Unknown Instruction',
-            nameLookup: { discriminator, programId: ix.programId.toBase58() },
-            program,
-        };
+        // A partially decoded instruction carries its data as base58, so encoding it yields the bytes.
+        return resolveNamesFromData({ data: BASE58_ENCODER.encode(ix.data), programId: ix.programId });
     }
 
+    const programName = findProgramName(ix.programId);
     if (is(ix.parsed, ParsedInfo)) {
-        return { name: camelToTitleCase(ix.parsed.type), program };
+        return { name: camelToTitleCase(ix.parsed.type), programName };
     }
-    if (MEMO_PROGRAM_IDS.has(ix.programId.toBase58())) return { name: 'Memo', program };
-    // Parsed but neither a typed instruction nor a memo — no raw data for a discriminator lookup.
-    return { name: 'Unknown Instruction', program };
+    // The RPC renders a memo as its bare text rather than a typed object, so it is matched by program id.
+    // Same call as the NAME_SOURCES entry, so parsed and raw memos cannot be named differently.
+    const memoName = resolveMemoInstructionName({ programId: ix.programId.toBase58() });
+    if (memoName !== undefined) return { name: memoName, programName };
+    // Parsed but neither a typed instruction nor a memo — no raw data for a discriminator lookup, so
+    // nothing can name it and there is no lookup to hand on either.
+    return { name: undefined, programName };
+}
+
+/**
+ * The names a raw instruction resolves to from its program and data alone — no IDL fetch. The entry
+ * point for callers holding decoded bytes (a compiled message, e.g. a simulation) rather than an
+ * RPC-parsed instruction. Compiled bytes carry no `parsed.type` to read a name from.
+ * @param programId - The instruction's program
+ * @param data - The raw instruction data
+ */
+export function resolveNamesFromData({
+    programId,
+    data,
+}: {
+    programId: PublicKey;
+    data: ReadonlyUint8Array;
+}): InstructionNames {
+    // Every byte-level resolver is a NAME_SOURCES entry, so nothing is named here — the lookup always
+    // goes out for a source to try. See InstructionNames.
+    return {
+        name: undefined,
+        nameLookup: { data: data.slice(0, MAX_DISCRIMINATOR_BYTES), programId: programId.toBase58() },
+        programName: findProgramName(programId),
+    };
+}
+
+function summarizeInstruction(ix: ParsedInstruction | PartiallyDecodedInstruction): InstructionSummary {
+    const { name, programName, nameLookup } = resolveInstructionNames(ix);
+
+    return {
+        name: name ?? UNKNOWN_INSTRUCTION_NAME,
+        programName: programName ?? UNKNOWN_PROGRAM_NAME,
+        ...(nameLookup ? { nameLookup } : {}),
+    };
 }
