@@ -26,8 +26,7 @@ const sectionTitleVariants = cva('px-6 py-4 text-[10px] font-medium uppercase tr
 });
 
 interface BaseCardSectionProps
-    extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
-        VariantProps<typeof sectionVariants> {
+    extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>, VariantProps<typeof sectionVariants> {
     title: string;
     children?: React.ReactNode;
 }

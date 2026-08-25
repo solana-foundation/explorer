@@ -80,8 +80,7 @@ const modifyUrl = (url: string): string => {
 // `endpoint?: undefined` on the known-cluster arm lets consumers that want only `cluster` read it off a
 // selection without narrowing first.
 export type ClusterSelection =
-    | { cluster: ServerCluster; endpoint?: undefined }
-    | { cluster: Cluster.Custom; endpoint: RpcEndpoint };
+    { cluster: ServerCluster; endpoint?: undefined } | { cluster: Cluster.Custom; endpoint: RpcEndpoint };
 
 export function clusterUrl(selection: ClusterSelection): string {
     switch (selection.cluster) {

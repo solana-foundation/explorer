@@ -17,8 +17,7 @@ import { hasTransfers, isSolReceipt, isTokenReceipt, type Receipt } from './type
 export type ReceiptUnavailabilityReason = 'inner-transfers' | 'mixed-mint' | 'no-transfers';
 
 export type ReceiptResult =
-    | { kind: 'ok'; receipt: FormattedReceipt }
-    | { kind: 'unavailable'; reason: ReceiptUnavailabilityReason };
+    { kind: 'ok'; receipt: FormattedReceipt } | { kind: 'unavailable'; reason: ReceiptUnavailabilityReason };
 
 export async function createReceipt(signature: string, cluster?: QueryCluster): Promise<ReceiptResult> {
     const data = await getTx(signature, undefined, cluster);

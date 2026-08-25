@@ -20,8 +20,7 @@ export function isRentFundingProgram(programId: PublicKey): boolean {
 type TransactionInstructionSource = {
     meta?: {
         innerInstructions?:
-            | { index: number; instructions: (ParsedInstruction | PartiallyDecodedInstruction)[] }[]
-            | null;
+            { index: number; instructions: (ParsedInstruction | PartiallyDecodedInstruction)[] }[] | null;
     } | null;
     transaction: { message: { instructions: (ParsedInstruction | PartiallyDecodedInstruction)[] } };
 };

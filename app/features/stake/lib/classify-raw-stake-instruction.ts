@@ -7,9 +7,7 @@ import { identifyStakeInstruction, StakeInstruction } from '@solana-program/stak
 //   - invalid:              identifyStakeInstruction() threw — discriminator didn't
 //                           match any known stake instruction
 export type RawStakeInstructionClassification =
-    | { kind: 'getMinimumDelegation' }
-    | { kind: 'unsupported' }
-    | { kind: 'invalid'; error: unknown };
+    { kind: 'getMinimumDelegation' } | { kind: 'unsupported' } | { kind: 'invalid'; error: unknown };
 
 export function classifyRawStakeInstruction(data: Buffer): RawStakeInstructionClassification {
     let instructionType: StakeInstruction;

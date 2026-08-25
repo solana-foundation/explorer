@@ -48,8 +48,7 @@ function isLocalhostName(hostname: string): boolean {
 }
 
 export type LookupResult =
-    | { kind: 'public'; lookup: LookupFunction; addresses: LookupAddress[] }
-    | { kind: 'private'; reason: string };
+    { kind: 'public'; lookup: LookupFunction; addresses: LookupAddress[] } | { kind: 'private'; reason: string };
 
 /**
  * Resolve a hostname once, validate every returned address against the private

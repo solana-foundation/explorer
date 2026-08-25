@@ -43,7 +43,7 @@ export function formatHexSpans(pairs: string[], options: { inverted?: boolean } 
     const spans: HexSpan[] = [];
     let pairIndex = 0;
 
-    for (let i = 0; i < pairs.length; ) {
+    for (let i = 0; i < pairs.length;) {
         if (pairs[i] === '\u2026') {
             spans.push({ text: '\u2026', variant: second });
             i++;

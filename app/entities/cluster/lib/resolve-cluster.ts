@@ -19,9 +19,7 @@ export function parseQuery(searchParams: URLSearchParams | null): Cluster {
 // The usable outcomes carry an `RpcEndpoint`, not a string. This is the app's only parse of an inbound
 // endpoint, so it passes the result on instead of making every consumer redo it.
 export type CustomUrlDecision =
-    | { kind: 'honored'; endpoint: RpcEndpoint }
-    | { kind: 'pending'; endpoint: RpcEndpoint }
-    | { kind: 'refused' };
+    { kind: 'honored'; endpoint: RpcEndpoint } | { kind: 'pending'; endpoint: RpcEndpoint } | { kind: 'refused' };
 
 // `candidateUrl` MUST be the URL the caller will actually use. Checking one URL and using another turns
 // this into an on/off switch instead of a decision about a specific endpoint.
