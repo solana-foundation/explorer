@@ -29,14 +29,6 @@ ignoreScripts: true
 
 minimumReleaseAge: 20160
 
-# @solana/subscriptions 0.5.0 is the first release built against @solana/kit 7; every older release
-# imports `getMinimumBalanceForRentExemption`, which kit 7 removed, and fails at import time. Drop
-# this exclusion once 0.5.0 is older than `minimumReleaseAge`.
-minimumReleaseAgeExclude:
-  - '@solana/subscriptions'
-  - '@codama/*'
-  - codama
-
 # Pin resolution to the public npm registry so it can't silently inherit a
 # global/org .npmrc mirror. Scoped keys (e.g. '@my-org') can be added here.
 registries:

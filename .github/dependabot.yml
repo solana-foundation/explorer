@@ -4,7 +4,8 @@ version: 2
 updates:
   # GitHub Actions used across .github/workflows/*. Once action refs are pinned to commit
   # SHAs, this is what keeps those pins from rotting — it bumps them to newer released SHAs.
-  # All bumps are grouped into a single PR to keep review overhead low.
+  # Minor and patch bumps are grouped into one PR; majors are split out so each can be
+  # reviewed on its own, the same split the npm entry below uses.
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -15,6 +16,9 @@ updates:
       github-actions:
         patterns:
           - '*'
+        update-types:
+          - minor
+          - patch
 
   # npm/pnpm workspace (root package.json + packages/*). Minor and patch bumps are grouped
   # into one PR; majors are split out so each can be reviewed on its own. `cooldown` mirrors
