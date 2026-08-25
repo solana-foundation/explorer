@@ -60,6 +60,18 @@ describe('CookieConsent', () => {
         expect(setCookie).not.toHaveBeenCalled();
     });
 
+    it('should sit below modal dialogs so one dims the banner', async () => {
+        // Radix disables pointer events outside an open modal, so a dialog turns these buttons off. The
+        // banner has to stay under the dialog overlay's `z-50` (`components/shared/ui/dialog`), or it keeps
+        // full contrast while answering nothing — what the RPC consent prompt showed.
+        render(<CookieConsent />);
+        const banner = await screen.findByTestId('cookie-consent');
+
+        // jsdom loads no stylesheet, so Tailwind's `z-*` reaches the DOM as a class name only. `z-40` is
+        // the highest step of Tailwind's scale that stays under the overlay.
+        expect(banner.className).toContain('z-40');
+    });
+
     it('should handle accept click', async () => {
         render(<CookieConsent />);
         const btn = await screen.findByText('ACCEPT', {}, { timeout: 3000 });
