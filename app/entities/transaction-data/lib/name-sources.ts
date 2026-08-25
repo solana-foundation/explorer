@@ -55,27 +55,20 @@ export function resolveNamesFromLookup(
  * `names` with every gap a source can fill filled in. An unresolved field leaves the existing name
  * standing, so this is safe to apply to every row. Returns names only — a caller carrying a `programId`
  * re-attaches it.
- *
- * The single owner of the `nameLookup` rule; both row shapes go through here, so neither can drift.
  * @param names - The names resolved from the transaction alone
  * @param idlNames - IDL-derived names per program id, for the programs in this transaction
  */
 export function applyNameSources(names: InstructionNames, idlNames: Map<string, ProgramIdlNames>): InstructionNames {
+    // No lookup means the row is already named, and nothing here can improve it.
     if (!names.nameLookup) return { name: names.name, programName: names.programName };
 
     const resolved = resolveNamesFromLookup(names.nameLookup, idlNames);
-    const name = resolved.name ?? names.name;
-    const programName = resolved.programName ?? names.programName;
 
-    // Dropped only once a source names the row. Dropping it earlier strands the row — no later fetch has
-    // anything left to resolve; keeping it later invites a second pass that flips the name back to the
-    // sentinel whenever that fetch is slow or fails.
-    // Keyed on whether a source resolved, not on whether the name changed: a summary carries the sentinel
-    // `Unknown Instruction` in `name`, so an equality test would read a source that happened to return
-    // that exact string as "still unnamed".
-    if (resolved.name === undefined) return { name, nameLookup: names.nameLookup, programName };
-
-    return { name, programName };
+    return {
+        name: resolved.name ?? names.name,
+        ...keptLookup(resolved, names.nameLookup),
+        programName: resolved.programName ?? names.programName,
+    };
 }
 
 /**
@@ -91,17 +84,39 @@ export function applyNameSourcesToSummaries(
     return summaries.map(summary => {
         if (!summary.nameLookup) return summary;
 
-        const {
-            name = summary.name,
-            programName = summary.programName,
-            nameLookup,
-        } = applyNameSources(summary, idlNames);
-        // Identity is preserved while nothing resolves, so a memoizing consumer does not re-render on
-        // every IDL fetch that lands without naming this row.
-        if (name === summary.name && programName === summary.programName) return summary;
+        const resolved = resolveNamesFromLookup(summary.nameLookup, idlNames);
+        // Identity is preserved while no source resolves either name, so a memoizing consumer does not
+        // re-render on every IDL fetch that lands without improving this row. Keyed on what the sources
+        // returned, never on whether the strings changed: a summary already carries the sentinel
+        // `Unknown Instruction` in `name`, so an equality test would read a source returning that exact
+        // string as "resolved nothing" and hand back a named row still carrying its lookup.
+        if (resolved.name === undefined && resolved.programName === undefined) return summary;
 
-        return nameLookup ? { name, nameLookup, programName } : { name, programName };
+        return {
+            name: resolved.name ?? summary.name,
+            ...keptLookup(resolved, summary.nameLookup),
+            programName: resolved.programName ?? summary.programName,
+        };
     });
+}
+
+/**
+ * The `nameLookup` a row still carries once `resolved` is applied: its own while the instruction is
+ * unnamed, and no field at all the moment a source names it. Spread into the row, so a named row carries
+ * no `nameLookup` key rather than an undefined one. The one place that rule lives, so no row shape can
+ * drift from it.
+ *
+ * Dropping the lookup while the row is unnamed strands it — no later fetch has anything left to resolve.
+ * Keeping it after a source names the row invites a second pass that flips the name back to the sentinel
+ * whenever that fetch is slow or fails.
+ *
+ * The two names resolve independently — a source can name the program while nothing names the
+ * instruction — so only `name` decides.
+ * @param resolved - What the name sources returned for `lookup`
+ * @param lookup - The lookup the row currently carries
+ */
+function keptLookup(resolved: ResolvedNames, lookup: InstructionNameLookup): { nameLookup?: InstructionNameLookup } {
+    return resolved.name === undefined ? { nameLookup: lookup } : {};
 }
 
 function resolveName(lookup: InstructionNameLookup, idlNames: Map<string, ProgramIdlNames>): string | undefined {

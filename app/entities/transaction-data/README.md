@@ -61,7 +61,9 @@ Break one of these and something downstream misreads a transaction. They are wha
 2. **Naming never throws.** `identifyInstruction` turns every generated-client throw into `undefined`.
    Callers render with no error boundary, so failing to name an instruction must never take down a page.
 3. **`nameLookup` present ⇒ the row is still unnamed.** Set when nothing named the row, dropped the
-   moment something does. `applyNameSources` is the single owner of that rule, for every row shape.
+   moment something does. `keptLookup` is the single owner of that rule, for every row shape, and it
+   keys the decision on what the sources returned — never on whether the name string changed, since a
+   summary row already carries the sentinel `Unknown Instruction`.
    One direction only: an RPC-parsed instruction that is neither a typed instruction nor a memo is
    unnamed *without* a lookup, because it carries no raw data to hand on — see the last branch of
    `resolveInstructionNames`. So `!nameLookup` never means "this row has a name".

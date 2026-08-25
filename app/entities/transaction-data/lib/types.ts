@@ -35,9 +35,9 @@ export type ResolvedNames = {
  * the CU chart falls back to the instruction's position in the transaction.
  *
  * `nameLookup` is set instead of `name` when only a resolver can name the instruction, and is dropped
- * once one does — so `nameLookup` present always means "still unnamed". `applyNameSources` owns that rule
- * for every row shape, and is the only thing that resolves a lookup; callers read `nameLookup.programId`
- * to decide which IDLs to fetch.
+ * once one does — so `nameLookup` present always means "still unnamed". `keptLookup` in `name-sources`
+ * owns that rule for every row shape, and that module is the only thing that resolves a lookup; callers
+ * read `nameLookup.programId` to decide which IDLs to fetch.
  */
 export type InstructionNames = ResolvedNames & {
     nameLookup?: InstructionNameLookup;
@@ -54,6 +54,6 @@ export type InstructionSummary = {
     name: string;
     programName: string;
     // Set only while the instruction is still unnamed — the lookup a name resolver (IDL, ZK ElGamal, …)
-    // needs to resolve the real name. `applyNameSources` drops it from every row it names.
+    // needs to resolve the real name. `name-sources` drops it from every row it names.
     nameLookup?: InstructionNameLookup;
 };

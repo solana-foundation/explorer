@@ -137,8 +137,8 @@ describe('resolveNamesFromLookup', () => {
 
 /**
  * `nameLookup` present means "still unnamed"; a row that loses it while unnamed can never be named.
- * `applyNameSources` owns that rule for every row shape, so these pin it directly and the summary block
- * below pins only the shape difference.
+ * `keptLookup` owns that rule for every row shape, so these pin it through the simpler shape and the
+ * summary block below pins the shape difference plus the identity it preserves.
  */
 describe('applyNameSources', () => {
     it('should name a row and drop the lookup it no longer needs', () => {
@@ -224,18 +224,22 @@ describe('applyNameSourcesToSummaries', () => {
         expect(row).toBe(input);
     });
 
-    // The lookup is dropped on "a source resolved", not on "the name changed". A summary carries the
-    // sentinel in `name`, so an equality test would read this source as having resolved nothing and leave
-    // the row asking for an IDL it has already been given.
-    it('should drop the lookup when a source resolves the sentinel string itself', () => {
+    /**
+     * The lookup is dropped on "a source resolved", not on "the name changed". A summary already carries
+     * the sentinel in `name`, so a source returning that exact string leaves every string equal to what
+     * the row held; an equality test reads that as "resolved nothing" and hands back a named row still
+     * asking for the IDL it has already been given. `programName` is left unresolved on purpose — with it
+     * resolved, a string comparison differs on that field alone and passes for the wrong reason.
+     */
+    it('should drop the lookup when a source resolves the sentinel string and nothing else', () => {
         const [row] = applyNameSourcesToSummaries(
             [summary('Prog1', 1)],
             idlNames({
-                Prog1: { programName: 'Voting', resolveInstructionName: () => UNKNOWN_INSTRUCTION_NAME },
+                Prog1: { programName: undefined, resolveInstructionName: () => UNKNOWN_INSTRUCTION_NAME },
             }),
         );
 
-        expect(row.nameLookup).toBeUndefined();
+        expect(row).toEqual({ name: UNKNOWN_INSTRUCTION_NAME, programName: UNKNOWN_PROGRAM_NAME });
     });
 
     it('should leave a row that carries no lookup untouched', () => {
