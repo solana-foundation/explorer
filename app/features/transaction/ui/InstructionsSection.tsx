@@ -24,6 +24,7 @@ import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { ZkElGamalProofDetailsCard } from '@components/instruction/ZkElGamalProofDetailsCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
+import { TxInstructionSurface } from '@entities/instruction-card';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
 import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
@@ -140,40 +141,42 @@ export function InstructionsSection({ signature }: SignatureProps) {
 
     return (
         <CollapsibleSection id="programs" title="Programs" className="">
-            <React.Suspense fallback={<LoadingCard message="Loading Instructions" />}>
-                {transaction.message.instructions.map((instruction, index) => {
-                    const innerCards: JSX.Element[] = [];
+            <TxInstructionSurface result={result}>
+                <React.Suspense fallback={<LoadingCard message="Loading Instructions" />}>
+                    {transaction.message.instructions.map((instruction, index) => {
+                        const innerCards: JSX.Element[] = [];
 
-                    if (index in innerInstructions) {
-                        innerInstructions[index].forEach((ix, childIndex) => {
-                            const res = (
-                                <InstructionCard
-                                    key={`${index}-${childIndex}`}
-                                    index={index}
-                                    ix={ix}
-                                    result={result}
-                                    signature={signature}
-                                    tx={transaction}
-                                    childIndex={childIndex}
-                                />
-                            );
-                            innerCards.push(res);
-                        });
-                    }
+                        if (index in innerInstructions) {
+                            innerInstructions[index].forEach((ix, childIndex) => {
+                                const res = (
+                                    <InstructionCard
+                                        key={`${index}-${childIndex}`}
+                                        index={index}
+                                        ix={ix}
+                                        result={result}
+                                        signature={signature}
+                                        tx={transaction}
+                                        childIndex={childIndex}
+                                    />
+                                );
+                                innerCards.push(res);
+                            });
+                        }
 
-                    return (
-                        <InstructionCard
-                            key={`${index}`}
-                            index={index}
-                            ix={instruction}
-                            result={result}
-                            signature={signature}
-                            tx={transaction}
-                            innerCards={innerCards}
-                        />
-                    );
-                })}
-            </React.Suspense>
+                        return (
+                            <InstructionCard
+                                key={`${index}`}
+                                index={index}
+                                ix={instruction}
+                                result={result}
+                                signature={signature}
+                                tx={transaction}
+                                innerCards={innerCards}
+                            />
+                        );
+                    })}
+                </React.Suspense>
+            </TxInstructionSurface>
         </CollapsibleSection>
     );
 }
