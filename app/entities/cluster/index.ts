@@ -9,7 +9,7 @@ export { ClusterProvider, type ClusterState, StateContext } from './model/cluste
 export { customUrlEnabledAtom } from './model/custom-url-enabled';
 export { useCluster } from './model/use-cluster';
 export { useClusterConnectionFailed } from './model/use-cluster-connection-failed';
-export { useClusterInfo } from './model/use-cluster-info';
+export { type ClusterInfoResult, useClusterInfo, useClusterInfoResult } from './model/use-cluster-info';
 export { clusterModalOpenAtom, useClusterModal } from './model/use-cluster-modal';
 export {
     type ClusterResourceProbe,

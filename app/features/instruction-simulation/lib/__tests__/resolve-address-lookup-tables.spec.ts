@@ -50,17 +50,21 @@ describe('resolveAddressLookupTables', () => {
         expect(result[1].state.addresses.map(a => a.toBase58())).toEqual(ALT_2_EXPECTED_ADDRESSES);
     });
 
-    it('should skip lookup tables where account info is null', async () => {
+    /**
+     * A partial list would leave `message.getAccountKeys` to notice, which throws a generic "Failed to
+     * find address lookup table account" — losing which table failed and why. `useSimulation` renders
+     * this message to the user, so it has to name the table and say what happened.
+     */
+    it('should throw naming the table when the RPC returns no account for one', async () => {
         const connection = mockConnection([null, accountInfo(ALT_2_ADDRS)]);
         const msg = message([
             { accountKey: ALT_KEY_1, readonlyIndexes: [0], writableIndexes: [] },
             { accountKey: ALT_KEY_2, readonlyIndexes: [0], writableIndexes: [] },
         ]);
 
-        const result = await resolveAddressLookupTables(connection, msg);
-
-        expect(result).toHaveLength(1);
-        expect(result[0].key.toBase58()).toBe(ALT_KEY_2.toBase58());
+        await expect(resolveAddressLookupTables(connection, msg)).rejects.toThrow(
+            `Address lookup table ${ALT_KEY_1.toBase58()} could not be loaded`,
+        );
     });
 
     it('should batch all keys into a single RPC call', async () => {
@@ -76,16 +80,17 @@ describe('resolveAddressLookupTables', () => {
         expect(connection.getMultipleAccountsInfo).toHaveBeenCalledWith([ALT_KEY_1, ALT_KEY_2]);
     });
 
-    it('should return empty array when all account infos are null', async () => {
+    // Reports the first missing table rather than a count, so the message points at something actionable.
+    it('should throw on the first table when none of them load', async () => {
         const connection = mockConnection([null, null]);
         const msg = message([
             { accountKey: ALT_KEY_1, readonlyIndexes: [0], writableIndexes: [] },
             { accountKey: ALT_KEY_2, readonlyIndexes: [0], writableIndexes: [] },
         ]);
 
-        const result = await resolveAddressLookupTables(connection, msg);
-
-        expect(result).toEqual([]);
+        await expect(resolveAddressLookupTables(connection, msg)).rejects.toThrow(
+            `Address lookup table ${ALT_KEY_1.toBase58()} could not be loaded`,
+        );
     });
 });
 

@@ -31,7 +31,7 @@ export function InstructionListSkeleton() {
 function InstructionLine({ instruction }: { instruction: InstructionSummary }) {
     return (
         <span className="cursor-default text-xs">
-            <span className="text-muted">{instruction.program}: </span>
+            <span className="text-muted">{instruction.programName}: </span>
             <span className="text-white">{instruction.name}</span>
         </span>
     );

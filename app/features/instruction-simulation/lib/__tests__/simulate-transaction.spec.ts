@@ -1,4 +1,10 @@
-import { type Connection, Keypair, PublicKey, type VersionedMessage } from '@solana/web3.js';
+import {
+    type AddressLookupTableAccount,
+    type Connection,
+    Keypair,
+    PublicKey,
+    type VersionedMessage,
+} from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { Cluster } from '@utils/cluster';
@@ -217,9 +223,13 @@ describe('simulateTransaction', () => {
             ]),
         });
 
-        await simulate(connection, message);
+        const result = await simulate(connection, message);
 
         expect(connection.getMultipleAccountsInfo).toHaveBeenCalledWith([lookupTableKey]);
+        // The resolved keys are what names each instruction's program downstream. A lookup-table address
+        // appears only here, never in `staticAccountKeys`, so reading the program id from the message
+        // alone would name the wrong program.
+        expect(result.accountKeys).toEqual([ACCOUNT_KEY_1, ACCOUNT_KEY_2, lookupAddress]);
     });
 
     it('should return epoch from epochInfo', async () => {
@@ -633,8 +643,16 @@ function createMockConnection(overrides?: Partial<Connection>): Connection {
 function createMockMessage(overrides?: Partial<Record<string, unknown>>): VersionedMessage {
     return {
         addressTableLookups: [],
-        getAccountKeys: () => ({
-            keySegments: () => [[ACCOUNT_KEY_1, ACCOUNT_KEY_2]],
+        // Mirrors MessageV0: the static keys first, then a segment per resolved lookup table. The
+        // argument has to matter here — a mock that always returns the static keys cannot tell a
+        // caller reading `staticAccountKeys` apart from one reading the resolved keys.
+        getAccountKeys: ({
+            addressLookupTableAccounts = [],
+        }: { addressLookupTableAccounts?: AddressLookupTableAccount[] } = {}) => ({
+            keySegments: () => [
+                [ACCOUNT_KEY_1, ACCOUNT_KEY_2],
+                ...addressLookupTableAccounts.map(table => table.state.addresses),
+            ],
         }),
         ...overrides,
     } as unknown as VersionedMessage;

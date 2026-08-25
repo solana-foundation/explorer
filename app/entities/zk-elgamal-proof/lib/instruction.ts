@@ -45,10 +45,18 @@ export function getZkElGamalProofInstructionName(discriminator: number): string 
  * Resolve an instruction's name from its program id + raw data, or `undefined` if it isn't a ZK ElGamal
  * Proof instruction — so a caller can compose it with other name resolvers (`zkName(...) ?? idlName(...)`)
  * without knowing the program id or that the name lives in the leading discriminator byte.
+ *
+ * Returns undefined for an unrecognized discriminator too, rather than the "Unknown Instruction" label
+ * `getZkElGamalProofInstructionName` renders: a resolver in a chain must report "I cannot name this" so
+ * later sources still get a turn and the caller keeps its own fallback.
  */
 export function resolveZkElGamalProofName(programId: string, data: Uint8Array): string | undefined {
     if (!isZkElGamalProofProgram(programId)) return undefined;
-    return getZkElGamalProofInstructionName(data[0] ?? -1);
+
+    // Widened to make the out-of-range read honest: `INSTRUCTION_NAMES` is a `string[]`, so indexing it
+    // types as `string` while an unrecognized discriminator — or empty data — yields undefined.
+    const names: Record<number, string | undefined> = INSTRUCTION_NAMES;
+    return names[data[0] ?? -1];
 }
 
 // Instruction data layout: [discriminator (1 byte), ...raw_proof_bytes]. For verify variants using a
