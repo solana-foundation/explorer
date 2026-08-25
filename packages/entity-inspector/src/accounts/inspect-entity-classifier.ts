@@ -10,6 +10,7 @@ import {
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
 import { hasAddressLookupTableLayout } from '@explorer/parsers/programs/address-lookup-table';
+import { AccountDiscriminator, PROGRAM_METADATA_PROGRAM_ADDRESS } from '@solana-program/program-metadata';
 import { isAddress, isSignature } from '@solana/kit';
 
 import {
@@ -37,6 +38,9 @@ import {
     NATIVE_PROGRAM_KIND,
     NFTOKEN_KIND,
     NONCE_KIND,
+    PROGRAM_METADATA_BUFFER_KIND,
+    PROGRAM_METADATA_EMPTY_KIND,
+    PROGRAM_METADATA_METADATA_KIND,
     SOLANA_ATTESTATION_SERVICE_KIND,
     STAKE_KIND,
     SYSVAR_KIND,
@@ -71,6 +75,22 @@ export function extractTokenSubtype(parsedData: unknown): TokenSubtype | null {
         return null;
     }
     return TOKEN_SUBTYPES.find(candidate => candidate === subtype) ?? null;
+}
+
+// The PMP program owns three account shapes; its leading byte is the program's own AccountDiscriminator.
+// An unrecognised or absent byte stays `null` so the caller falls through to `unknown` rather than
+// mislabelling a shape this vocabulary does not cover.
+function classifyProgramMetadataKind(account: NormalizedAccountInfo): BaseAccountEntityKind | null {
+    switch (account.rawDataBytes?.[0]) {
+        case AccountDiscriminator.Empty:
+            return PROGRAM_METADATA_EMPTY_KIND;
+        case AccountDiscriminator.Buffer:
+            return PROGRAM_METADATA_BUFFER_KIND;
+        case AccountDiscriminator.Metadata:
+            return PROGRAM_METADATA_METADATA_KIND;
+        default:
+            return null;
+    }
 }
 
 // RPC-shared kinds intentionally equal the *_PROGRAM_LABEL strings — enforced by AccountEntityKind's Exclude derivation, not by convention.
@@ -133,6 +153,12 @@ export function classifyAccountKindBase(account: NormalizedAccountInfo): BaseAcc
     }
     if (account.owner === SOLANA_ATTESTATION_SERVICE_PROGRAM_ID) {
         return SOLANA_ATTESTATION_SERVICE_KIND;
+    }
+    if (account.owner === PROGRAM_METADATA_PROGRAM_ADDRESS) {
+        const programMetadataKind = classifyProgramMetadataKind(account);
+        if (programMetadataKind) {
+            return programMetadataKind;
+        }
     }
 
     return UNKNOWN_KIND;

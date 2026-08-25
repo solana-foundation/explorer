@@ -1,3 +1,4 @@
+import { PROGRAM_METADATA_PROGRAM_ADDRESS } from '@solana-program/program-metadata';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -17,6 +18,14 @@ import {
     normalizeDasOutcome,
     promoteAccountKindWithDas,
 } from '../inspect-entity-classifier.js';
+
+const classifyProgramMetadata = (rawDataBytes: Uint8Array | null) =>
+    classifyAccountKindBase({
+        owner: PROGRAM_METADATA_PROGRAM_ADDRESS,
+        parsedData: null,
+        parsedProgram: null,
+        rawDataBytes,
+    });
 
 const ACCOUNT_IDENTIFIER = '11111111111111111111111111111111';
 const TRANSACTION_IDENTIFIER =
@@ -179,6 +188,30 @@ describe('inspect-entity classifier', () => {
         expect(shortKind).toBe('unknown');
         expect(foreignOwnerKind).toBe('unknown');
         expect(noRawBytesKind).toBe('unknown');
+    });
+
+    it('should subtype program-metadata accounts by their own discriminator byte', () => {
+        expect(classifyProgramMetadata(new Uint8Array([0]))).toBe('program-metadata:empty');
+        expect(classifyProgramMetadata(new Uint8Array([1]))).toBe('program-metadata:buffer');
+        expect(classifyProgramMetadata(new Uint8Array([2]))).toBe('program-metadata:metadata');
+    });
+
+    it('should leave program-metadata accounts unknown when the discriminator is unrecognized or absent', () => {
+        // A future discriminator must not be mislabelled as one of the three shapes this vocabulary covers.
+        expect(classifyProgramMetadata(new Uint8Array([3]))).toBe('unknown');
+        expect(classifyProgramMetadata(new Uint8Array())).toBe('unknown');
+        expect(classifyProgramMetadata(null)).toBe('unknown');
+    });
+
+    it('should not classify a foreign-owned account by the program-metadata discriminator alone', () => {
+        expect(
+            classifyAccountKindBase({
+                owner: 'SomeOwner',
+                parsedData: null,
+                parsedProgram: null,
+                rawDataBytes: new Uint8Array([2]),
+            }),
+        ).toBe('unknown');
     });
 
     it('should classify address-lookup-table from parsed program directly', () => {

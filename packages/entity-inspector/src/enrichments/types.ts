@@ -36,6 +36,7 @@ export type SecurityMetadataResult =
     | {
           status: 'present';
           data: SecurityTxtFields;
+          /** `pmp_canonical` names the only PDA this leg reads — it never consults a fallback authority. */
           source_type: 'pmp_canonical' | 'embedded_security_txt';
           security_expired?: true;
       }
@@ -57,11 +58,19 @@ export type MultisigReferenceResult =
 // explorer-mcp's wider wire vocabulary (legacy converts to codama at client creation; shank is undetectable).
 export type IdlType = `${IdlStandard}` | 'anchor_legacy' | 'shank';
 
+/**
+ * Which publication served the IDL. Wire vocabulary — deliberately spelled here rather than derived
+ * from `IdlSource`, so an upstream rename cannot move these values.
+ */
+export type IdlSourceWire = 'anchor' | 'pmp';
+
 export type IdlDiscoveryResult =
     | {
           status: 'found';
           idl_type: IdlType;
-          source_type: 'pmp_canonical' | 'anchor_on_chain';
+          source: IdlSourceWire;
+          /** PMP only: `null` when the canonical PDA served it, else the authority whose PDA did. */
+          authority?: string | null;
           program_name: string | null;
           // The source shipped the whole IDL json here; deliberately omitted — detection + name serve the tool.
           data?: Record<string, unknown>;

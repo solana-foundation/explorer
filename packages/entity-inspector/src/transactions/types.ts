@@ -47,6 +47,10 @@ export type DecodedInstructionInfo = {
     program?: string;
     type: string;
     info: unknown;
+    /** IDL-declared role → address; absent off the codama arm and when the IDL names no accounts. */
+    accounts?: Record<string, string>;
+    /** Token-program amounts in whole tokens, derived from the decode's own `decimals`. */
+    ui_amount?: string;
 };
 
 type TransactionInstructionEntryBase = {

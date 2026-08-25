@@ -6,6 +6,7 @@ import { buildFeaturePayload } from './account-kinds/feature.js';
 import { buildNativeProgramPayload } from './account-kinds/native-program.js';
 import { buildNftokenPayload } from './account-kinds/nftoken.js';
 import { buildNoncePayload } from './account-kinds/nonce.js';
+import { buildProgramMetadataPayload } from './account-kinds/program-metadata.js';
 import { type AccountKindBuilder, assertUnreachable, buildUnsupportedKindPayload } from './account-kinds/shared.js';
 import { buildSolanaAttestationServicePayload } from './account-kinds/solana-attestation-service.js';
 import { buildSplToken2022AccountPayload } from './account-kinds/spl-token-2022-account.js';
@@ -30,6 +31,9 @@ import {
     NATIVE_PROGRAM_KIND,
     NFTOKEN_KIND,
     NONCE_KIND,
+    PROGRAM_METADATA_BUFFER_KIND,
+    PROGRAM_METADATA_EMPTY_KIND,
+    PROGRAM_METADATA_METADATA_KIND,
     SOLANA_ATTESTATION_SERVICE_KIND,
     SPL_TOKEN_2022_ACCOUNT_KIND,
     SPL_TOKEN_2022_MINT_KIND,
@@ -87,6 +91,10 @@ function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
             return buildSolanaAttestationServicePayload;
         case COMPRESSED_NFT_KIND:
             return buildCompressedNftPayload;
+        case PROGRAM_METADATA_EMPTY_KIND:
+        case PROGRAM_METADATA_BUFFER_KIND:
+        case PROGRAM_METADATA_METADATA_KIND:
+            return buildProgramMetadataPayload;
         case UNKNOWN_KIND:
             return buildUnknownPayload;
         default:

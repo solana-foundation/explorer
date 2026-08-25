@@ -4,7 +4,7 @@ import {
     IDL_ERROR__IDL_NOT_FOUND,
     IDL_ERROR__IDL_PARSE_FAILED,
     type IdlClient,
-    type IdlError,
+    IdlError,
 } from '@explorer/idl-decode';
 import { IdlSource } from '@explorer/idl-decode/fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -13,18 +13,24 @@ import { gen } from '../../__tests__/gen.js';
 import type { InspectorLogger } from '../../logger.js';
 import { createIdlClientResolver, createProgramIdlDiscovery } from '../idl-clients.js';
 
-const { fetchLatestIdlClientMock } = vi.hoisted(() => ({
-    fetchLatestIdlClientMock: vi.fn(),
+const { fetchOnChainIdlClientMock } = vi.hoisted(() => ({
+    fetchOnChainIdlClientMock: vi.fn(),
 }));
 
 vi.mock('@explorer/idl-decode/fetch', async importOriginal => ({
     ...(await importOriginal<Record<string, unknown>>()),
-    fetchLatestIdlClient: fetchLatestIdlClientMock,
+    fetchOnChainIdlClient: fetchOnChainIdlClientMock,
 }));
 
 vi.mock('@solana/kit', () => ({
     address: vi.fn((value: string) => value),
     createSolanaRpc: vi.fn(() => ({})),
+}));
+
+// Shrinks the RPC timeout so the stalled-fetch cases do not wait 5s.
+vi.mock('../../shared/constants.js', async importOriginal => ({
+    ...(await importOriginal<Record<string, unknown>>()),
+    RPC_REQUEST_TIMEOUT_MS: 10,
 }));
 
 const RPC_ENDPOINTS = {
@@ -34,6 +40,9 @@ const RPC_ENDPOINTS = {
     testnet: 'https://testnet.rpc.address',
 };
 
+/** The Foundation's PMP authority — the fallback lookup's middle seed. */
+const FNDN_AUTHORITY = 'fndnu15PLXELbLsTqrfbiweBvsBj2o12RoVfkeCCbX2';
+
 const CODAMA_IDL = { kind: 'rootNode', program: { publicKey: gen.systemProgram } };
 const ANCHOR_IDL = { address: gen.systemProgram, instructions: [], metadata: { spec: '0.1.0' } };
 
@@ -42,7 +51,7 @@ function fakeClient(idl: unknown, programName?: string): IdlClient {
 }
 
 function idlError(code: number): IdlError {
-    return { code } as IdlError;
+    return { code, message: `idl error ${code}` } as IdlError;
 }
 
 function createLoggerMock(): InspectorLogger {
@@ -56,28 +65,85 @@ describe('createIdlClientResolver', () => {
 
     it('should resolve the client on a successful fetch', async () => {
         const client = fakeClient(CODAMA_IDL);
-        fetchLatestIdlClientMock.mockResolvedValue([undefined, { client, source: IdlSource.Pmp }]);
+        fetchOnChainIdlClientMock.mockResolvedValue([undefined, { client, source: IdlSource.Pmp }]);
         const resolve = createIdlClientResolver(RPC_ENDPOINTS, createLoggerMock());
 
         await expect(resolve('program-address', 'devnet')).resolves.toBe(client);
-        expect(fetchLatestIdlClientMock).toHaveBeenCalledWith(
+        expect(fetchOnChainIdlClientMock).toHaveBeenCalledWith(
             'program-address',
-            expect.objectContaining({ abortSignal: expect.any(Object) }),
+            expect.objectContaining({ abortSignal: expect.any(Object), anchor: true }),
         );
     });
 
-    it('should resolve null on data errors without warning', async () => {
+    it('should skip the anchor leg for a program that cannot have an anchor IDL', async () => {
+        // the derived PDA read is the one some RPCs answer with a transient error instead of null
+        fetchOnChainIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_NOT_FOUND), undefined]);
+        const resolve = createIdlClientResolver(RPC_ENDPOINTS, createLoggerMock());
+
+        await resolve(gen.systemProgram, 'mainnet-beta');
+
+        expect(fetchOnChainIdlClientMock).toHaveBeenCalledWith(
+            gen.systemProgram,
+            expect.objectContaining({ anchor: false }),
+        );
+    });
+
+    it('should resolve null without warning when no IDL is published', async () => {
         const logger = createLoggerMock();
-        fetchLatestIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_NOT_FOUND), undefined]);
+        fetchOnChainIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_NOT_FOUND), undefined]);
         const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
 
         await expect(resolve('program-address', 'mainnet-beta')).resolves.toBeNull();
         expect(logger.warn).not.toHaveBeenCalled();
     });
 
+    it.each([
+        ['a mislabeled IDL', IDL_ERROR__IDL_ADDRESS_MISMATCH],
+        ['corrupt IDL bytes', IDL_ERROR__IDL_PARSE_FAILED],
+        ['an unreachable source', IDL_ERROR__IDL_FETCH_FAILED],
+    ])('should resolve null and warn with the error code on %s', async (_case, code) => {
+        const logger = createLoggerMock();
+        fetchOnChainIdlClientMock.mockResolvedValue([idlError(code), undefined]);
+        const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
+
+        await expect(resolve('program-address', 'mainnet-beta')).resolves.toBeNull();
+        expect(logger.warn).toHaveBeenCalledWith(
+            '[entity-inspector] idl client resolution failed',
+            expect.objectContaining({
+                error: { code, message: `idl error ${code}` },
+                programAddress: 'program-address',
+            }),
+        );
+    });
+
+    it('should keep the rpc endpoint out of the warning when a transport cause carries it', async () => {
+        // Node's fetch puts the whole url in its message; the endpoint holds the api key
+        const cause = new Error('Failed to parse URL from https://mainnet-beta.rpc.address/?api-key=SUPERSECRET');
+        const logger = createLoggerMock();
+        fetchOnChainIdlClientMock.mockResolvedValue([new IdlError(IDL_ERROR__IDL_FETCH_FAILED, { cause }), undefined]);
+        const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
+
+        await resolve('program-address', 'mainnet-beta');
+
+        expect(JSON.stringify(vi.mocked(logger.warn).mock.calls)).not.toContain('SUPERSECRET');
+    });
+
     it('should resolve null and warn when the fetch rejects', async () => {
         const logger = createLoggerMock();
-        fetchLatestIdlClientMock.mockRejectedValue(new Error('timed out'));
+        fetchOnChainIdlClientMock.mockRejectedValue(new Error('timed out'));
+        const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
+
+        await expect(resolve('program-address', 'testnet')).resolves.toBeNull();
+        expect(logger.warn).toHaveBeenCalledWith(
+            '[entity-inspector] idl client resolution timed out',
+            expect.objectContaining({ programAddress: 'program-address' }),
+        );
+    });
+
+    it('should resolve null and warn when the fetch never settles', async () => {
+        // a url-sourced PMP payload ignores the abort signal, so only the race ends this
+        const logger = createLoggerMock();
+        fetchOnChainIdlClientMock.mockReturnValue(new Promise(() => {}));
         const resolve = createIdlClientResolver(RPC_ENDPOINTS, logger);
 
         await expect(resolve('program-address', 'testnet')).resolves.toBeNull();
@@ -93,42 +159,61 @@ describe('createProgramIdlDiscovery', () => {
         vi.clearAllMocks();
     });
 
-    it('should map a PMP-sourced client to pmp_canonical with detection and name', async () => {
-        fetchLatestIdlClientMock.mockResolvedValue([
+    it('should map a canonical PMP client to a null authority with detection and name', async () => {
+        fetchOnChainIdlClientMock.mockResolvedValue([
             undefined,
-            { client: fakeClient(CODAMA_IDL, 'My Program'), source: IdlSource.Pmp },
+            { authority: null, client: fakeClient(CODAMA_IDL, 'My Program'), source: IdlSource.Pmp },
         ]);
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
 
         await expect(discover('program-address', 'mainnet-beta')).resolves.toMatchObject({
             discovery: {
+                authority: null,
                 idl_type: 'codama',
                 program_name: 'My Program',
-                source_type: 'pmp_canonical',
+                source: 'pmp',
                 status: 'found',
             },
         });
     });
 
-    it('should map an anchor-PDA-sourced client to anchor_on_chain', async () => {
-        fetchLatestIdlClientMock.mockResolvedValue([
+    it('should carry the key when a fallback authority served the PMP client', async () => {
+        // a non-null authority is what makes the result a fallback rather than canonical
+        fetchOnChainIdlClientMock.mockResolvedValue([
             undefined,
-            { client: fakeClient(ANCHOR_IDL), source: IdlSource.AnchorPda },
+            { authority: FNDN_AUTHORITY, client: fakeClient(CODAMA_IDL, 'Token'), source: IdlSource.Pmp },
         ]);
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
 
         await expect(discover('program-address', 'mainnet-beta')).resolves.toMatchObject({
             discovery: {
-                idl_type: 'anchor',
-                program_name: null,
-                source_type: 'anchor_on_chain',
+                authority: FNDN_AUTHORITY,
+                source: 'pmp',
                 status: 'found',
             },
         });
+    });
+
+    it('should map an anchor-PDA-sourced client to anchor', async () => {
+        fetchOnChainIdlClientMock.mockResolvedValue([
+            undefined,
+            { client: fakeClient(ANCHOR_IDL), source: IdlSource.Anchor },
+        ]);
+        const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
+
+        const { discovery } = await discover('program-address', 'mainnet-beta');
+
+        expect(discovery).toEqual({
+            idl_type: 'anchor',
+            program_name: null,
+            source: 'anchor',
+            status: 'found',
+        });
+        expect('authority' in discovery).toBe(false); // the anchor PDA has no authority to report
     });
 
     it('should report not_found when no leg publishes an IDL', async () => {
-        fetchLatestIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_NOT_FOUND), undefined]);
+        fetchOnChainIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_NOT_FOUND), undefined]);
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
 
         await expect(discover('program-address', 'mainnet-beta')).resolves.toEqual({
@@ -138,7 +223,7 @@ describe('createProgramIdlDiscovery', () => {
     });
 
     it('should map transport failures to unknown/source_unavailable', async () => {
-        fetchLatestIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_FETCH_FAILED), undefined]);
+        fetchOnChainIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_FETCH_FAILED), undefined]);
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
 
         await expect(discover('program-address', 'mainnet-beta')).resolves.toEqual({
@@ -148,7 +233,7 @@ describe('createProgramIdlDiscovery', () => {
     });
 
     it('should map an address mismatch to unknown/address_unverified', async () => {
-        fetchLatestIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_ADDRESS_MISMATCH), undefined]);
+        fetchOnChainIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_ADDRESS_MISMATCH), undefined]);
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
 
         await expect(discover('program-address', 'mainnet-beta')).resolves.toEqual({
@@ -158,7 +243,7 @@ describe('createProgramIdlDiscovery', () => {
     });
 
     it('should map corrupt IDLs to unknown/idl_invalid', async () => {
-        fetchLatestIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_PARSE_FAILED), undefined]);
+        fetchOnChainIdlClientMock.mockResolvedValue([idlError(IDL_ERROR__IDL_PARSE_FAILED), undefined]);
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, createLoggerMock());
 
         await expect(discover('program-address', 'mainnet-beta')).resolves.toEqual({
@@ -169,7 +254,19 @@ describe('createProgramIdlDiscovery', () => {
 
     it('should warn and report source_unavailable when the fetch rejects', async () => {
         const logger = createLoggerMock();
-        fetchLatestIdlClientMock.mockRejectedValue(new Error('timed out'));
+        fetchOnChainIdlClientMock.mockRejectedValue(new Error('timed out'));
+        const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, logger);
+
+        await expect(discover('program-address', 'mainnet-beta')).resolves.toEqual({
+            client: null,
+            discovery: { reason: 'source_unavailable', status: 'unknown' },
+        });
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should warn and report source_unavailable when the fetch never settles', async () => {
+        const logger = createLoggerMock();
+        fetchOnChainIdlClientMock.mockReturnValue(new Promise(() => {}));
         const discover = createProgramIdlDiscovery(RPC_ENDPOINTS, logger);
 
         await expect(discover('program-address', 'mainnet-beta')).resolves.toEqual({
