@@ -25,7 +25,7 @@
 ## Related Issues
 
 <!-- Link to any related issues this PR addresses -->
-<!-- Example: Fixes #123, Addresses #456 -->
+<!-- Example: Fixes #<issue-number>, Addresses #<issue-number> -->
 
 ## Checklist
 
