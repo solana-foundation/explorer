@@ -9,15 +9,15 @@ frozenLockfile: true
 
 catalogs:
   storybook:
-    '@storybook/addon-a11y': 10.2.10
-    '@storybook/addon-docs': 10.2.10
-    '@storybook/addon-vitest': 10.2.10
-    '@storybook/nextjs-vite': 10.2.10
-    '@storybook/react': 10.2.10
-    eslint-plugin-storybook: 10.2.10
-    storybook: 10.2.10
+    '@storybook/addon-a11y': 10.5.7
+    '@storybook/addon-docs': 10.5.7
+    '@storybook/addon-vitest': 10.5.7
+    '@storybook/nextjs-vite': 10.5.7
+    '@storybook/react': 10.5.7
+    eslint-plugin-storybook: 10.5.7
+    storybook: 10.5.7
   tooling:
-    prettier: 3.5.3
+    prettier: 3.9.6
     typescript: 5.7.3
   vitest:
     '@vitest/browser': 4.1.10
