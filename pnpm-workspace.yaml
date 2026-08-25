@@ -34,9 +34,10 @@ minimumReleaseAge: 20160
 # this exclusion once 0.5.0 is older than `minimumReleaseAge`.
 minimumReleaseAgeExclude:
   - '@solana/subscriptions'
+  - '@codama/*'
+  - codama
 
 # Pin resolution to the public npm registry so it can't silently inherit a
 # global/org .npmrc mirror. Scoped keys (e.g. '@my-org') can be added here.
 registries:
   default: https://registry.npmjs.org/
-
