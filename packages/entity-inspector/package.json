@@ -64,8 +64,8 @@
     "devDependencies": {
         "@vitest/coverage-v8": "catalog:vitest",
         "agadoo": "^3.0.0",
-        "oxfmt": "^0.56.0",
-        "oxlint": "^1.71.0",
+        "oxfmt": "catalog:oxc",
+        "oxlint": "catalog:oxc",
         "prettier": "catalog:tooling",
         "typescript": "catalog:tooling",
         "vitest": "catalog:vitest"

@@ -8,6 +8,9 @@ autoInstallPeers: true
 frozenLockfile: true
 
 catalogs:
+  oxc:
+    oxfmt: ^0.56.0
+    oxlint: ^1.71.0
   storybook:
     '@storybook/addon-a11y': 10.5.7
     '@storybook/addon-docs': 10.5.7
@@ -17,12 +20,15 @@ catalogs:
     eslint-plugin-storybook: 10.5.7
     storybook: 10.5.7
   tooling:
+    '@eslint/js': 9.39.4
+    eslint: 9.39.4
     prettier: 3.9.6
     typescript: 5.7.3
   vitest:
     '@vitest/browser': 4.1.10
     '@vitest/browser-playwright': 4.1.10
     '@vitest/coverage-v8': 4.1.10
+    jsdom: 26.0.0
     vitest: 4.1.10
 
 ignoreScripts: true
