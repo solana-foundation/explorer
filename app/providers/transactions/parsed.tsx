@@ -3,6 +3,7 @@
 import { fetchTransactionDetails, type TransactionWithMeta } from '@entities/transaction-data';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
+import { useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
 import { TransactionSignature } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -86,7 +87,7 @@ export function useTransactionDetails(signature: TransactionSignature): Cache.Ca
         throw new Error(`useTransactionDetails must be used within a TransactionsProvider`);
     }
 
-    return context.entries[signature];
+    return useCacheEntry(context.entries, signature);
 }
 
 export type TransactionDetailsCache = {

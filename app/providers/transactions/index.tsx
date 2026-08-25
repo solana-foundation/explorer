@@ -2,6 +2,7 @@
 
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
+import { useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
 import { Connection, SignatureResult, TransactionConfirmationStatus, TransactionSignature } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -135,11 +136,7 @@ export function useTransactionStatus(
         throw new Error(`useTransactionStatus must be used within a TransactionsProvider`);
     }
 
-    if (signature === undefined) {
-        return undefined;
-    }
-
-    return context.entries[signature];
+    return useCacheEntry(context.entries, signature);
 }
 
 export function useFetchTransactionStatus() {
