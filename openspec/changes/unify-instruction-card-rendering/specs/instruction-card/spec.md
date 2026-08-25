@@ -4,7 +4,7 @@
 
 One rendering layer for instruction cards, shared by `/tx/[signature]` and `/tx/(inspector)/inspector`. A card declares what an instruction means; the surface it renders on owns the chrome. Adding a field is one descriptor; adding a surface is one Context value.
 
-**Scope.** These requirements bind every card that has migrated to the surface, and every card that migrates from here on. They are not a description of the current tree: System (13 cards) is the only migrated program, and the remaining 58 frame-drawing cards still take their chrome as props. Each requirement below therefore reads as the rule a migration must satisfy, not as an invariant that already holds repo-wide.
+**Scope.** These requirements bind every card that has migrated to the surface, and every card that migrates from here on. They are not a description of the current tree: System (13 cards) is the only migrated program, and the remaining 58 frame-drawing cards still resolve their own chrome — 49 hardcode `InstructionCard`, 7 take it as a prop, 2 hardcode it while being inspector-reachable. Each requirement below therefore reads as the rule a migration must satisfy, not as an invariant that already holds repo-wide.
 
 ## ADDED Requirements
 
@@ -12,7 +12,7 @@ One rendering layer for instruction cards, shared by `/tx/[signature]` and `/tx/
 
 Instruction cards MUST NOT receive surface chrome as props. The card frame, the address renderer, whether the leading `Program` row is emitted, and the transaction's `SignatureResult` SHALL be supplied by an `InstructionSurface` value through React Context.
 
-This supersedes the `InstructionCardComponent`, `AddressComponent`, and `showProgramField` injection props, and the inspector's `INSPECTOR_RESULT` / `INSPECTOR_SIGNATURE` placeholder constants — for migrated cards. All five still exist for the unmigrated ones and are removed program by program, the constants last. `useInstructionSurface` fails loudly rather than falling back to a default, matching `useInstructionParser`.
+This supersedes the `InstructionCardComponent`, `AddressComponent`, and `showProgramField` injection props, and the inspector's `INSPECTOR_RESULT` / `INSPECTOR_SIGNATURE` placeholder constants — for migrated cards. All five still exist for the unmigrated ones; the props go program by program, and the constants go last, once the shared `UnknownDetailsCard` fallback stops requiring `result` as well. `useInstructionSurface` fails loudly rather than falling back to a default, matching `useInstructionParser`.
 
 #### Scenario: Same card on both surfaces
 
@@ -37,7 +37,7 @@ A card's rows SHALL be declared as `InstructionField` descriptors rather than as
 
 The union is closed: `address`, `sol`, `bytes`, `seed`, `text`, `custom`. `text` MUST accept only `string | number`, and `custom` MUST be the sole markup door. `custom` MUST take a `ReactElement` rather than a `ReactNode`, so that a labelled row with nothing in it is not representable; a field with no value to show MUST be omitted from the list instead.
 
-`InstructionFieldList` MUST admit `false` and `undefined` so optional rows read as `cond && address(...)`, and MUST NOT admit `null`, which `unicorn/no-null` forbids callers from writing anywhere under `app/**`.
+`InstructionFieldList` MUST admit `false` and `undefined` so optional rows read as `cond && address(...)`, and MUST NOT admit `null`, which `unicorn/no-null` forbids in card sources under `app/**` (the rule is off for tests and stories, and for a per-file legacy list that a migrated card MUST NOT join).
 
 #### Scenario: Field kind with no renderer
 
