@@ -1,5 +1,6 @@
 import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { createWeb3TransactionBytes } from '@entities/transaction-data/__fixtures__/wire-transactions';
+import { getBase58Decoder } from '@solana/kit';
 import type { ParsedTransactionWithMeta } from '@solana/web3.js';
 import { ComputeBudgetProgram, PublicKey, SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
 import {
@@ -7,12 +8,13 @@ import {
     mockRawTransactionDetails,
     mockTransactionStatus,
 } from '@storybook-config/__fixtures__/transactions';
-import bs58 from 'bs58';
 
 import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
 import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 
 export { DEFAULT_SIGNATURE };
+
+const BASE58_DECODER = getBase58Decoder();
 
 export const FEE_PAYER = new PublicKey('9noXzpXnkyEcKF3AeXqUHTdR59V5uvrRBUZ9bwfQwxNq');
 export const RECIPIENT = new PublicKey('GsbwXfJraMomNxBcpR3DBr9yoWR2PmN93PEaYJz7MSTN');
@@ -128,7 +130,7 @@ function withComputeUnitLimit(units: number) {
                     ...BASE_TX.transaction.message.instructions,
                     {
                         accounts: [],
-                        data: bs58.encode(data),
+                        data: BASE58_DECODER.decode(data),
                         programId: ComputeBudgetProgram.programId,
                     },
                 ],
