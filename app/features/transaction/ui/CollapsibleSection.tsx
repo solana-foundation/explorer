@@ -1,4 +1,3 @@
-// TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Button } from '@components/shared/ui/button';
 import { cn } from '@components/shared/utils';
 import { ReactNode, useId, useState } from 'react';
