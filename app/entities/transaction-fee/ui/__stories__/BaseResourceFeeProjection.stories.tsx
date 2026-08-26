@@ -6,7 +6,7 @@ import { BaseResourceFeeProjection } from '../BaseResourceFeeProjection';
 const meta = {
     args: {
         currentFeeLamports: 5_000,
-        projections: projectResourceAndInclusionFees({ priorityFeeLamports: 0, requestedCostUnits: 1_481 }),
+        projections: projectResourceAndInclusionFees({ priorityFeeLamports: 0, requestedCostUnits: 2_331 }),
     },
     component: BaseResourceFeeProjection,
     tags: ['autodocs', 'test'],
@@ -16,13 +16,13 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** A lean SOL transfer: cheap enough that even the terminal rate undercuts today's flat base fee. */
+/** An accurately budgeted transfer: cheap enough that even the terminal rate undercuts today's flat base fee. */
 export const LeanTransfer: Story = {};
 
 /** A wallet that left the default 200,000 compute unit request in place. */
-export const OverRequestedComputeBudget: Story = {
+export const LooseComputeBudget: Story = {
     args: {
-        projections: projectResourceAndInclusionFees({ priorityFeeLamports: 0, requestedCostUnits: 201_481 }),
+        projections: projectResourceAndInclusionFees({ priorityFeeLamports: 0, requestedCostUnits: 201_331 }),
     },
 };
 
@@ -32,7 +32,7 @@ export const WithLargePriorityFee: Story = {
         currentFeeLamports: 1_005_000,
         projections: projectResourceAndInclusionFees({
             priorityFeeLamports: 1_000_000,
-            requestedCostUnits: 201_481,
+            requestedCostUnits: 201_331,
         }),
     },
 };

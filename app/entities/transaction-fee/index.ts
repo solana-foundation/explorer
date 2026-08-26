@@ -2,6 +2,7 @@ export { isSimd0553FeeEnabled } from './env';
 export {
     BASE_INCLUSION_FEE_LAMPORTS,
     derivePriorityFeeLamports,
+    estimateRequestedCostUnits,
     getResourceFeeLamports,
     LAMPORTS_PER_SIGNATURE,
     type ProjectedFee,

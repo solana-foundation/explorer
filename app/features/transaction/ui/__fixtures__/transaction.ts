@@ -1,13 +1,15 @@
 import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { createWeb3TransactionBytes } from '@entities/transaction-data/__fixtures__/wire-transactions';
 import type { ParsedTransactionWithMeta } from '@solana/web3.js';
-import { PublicKey, SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
+import { ComputeBudgetProgram, PublicKey, SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
 import {
     mockParsedTransactionDetails,
     mockRawTransactionDetails,
     mockTransactionStatus,
 } from '@storybook-config/__fixtures__/transactions';
+import bs58 from 'bs58';
 
+import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
 import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 
 export { DEFAULT_SIGNATURE };
@@ -23,8 +25,9 @@ export const MOCK_FAILED_STATUS = mockTransactionStatus({ err: { InstructionErro
 const BASE_TX = {
     blockTime: 1_716_000_000,
     meta: {
-        computeUnitsConsumed: 5000,
-        // The cost model's total for a single-signer SOL transfer, as mainnet reports it.
+        // A System transfer consumes 150 units, and `costUnits` is the *executed* cost, so it has to
+        // contain them. The pair is what mainnet reports for a single-signer transfer.
+        computeUnitsConsumed: 150,
         costUnits: 1481,
         err: null,
         fee: 5000,
@@ -106,17 +109,46 @@ const BASE_TX = {
 export const MOCK_PARSED_TX = mockParsedTransactionDetails({ transactionWithMeta: BASE_TX });
 
 /**
- * A transaction that left a wallet's default 200,000 compute unit request in place. Its requested
- * cost units — and so its projected SIMD-0553 fee — dwarf what it actually paid.
+ * A Compute Budget `SetComputeUnitLimit` instruction in the shape the RPC serves it: a partially
+ * decoded instruction whose data is base58, which is what the requested-CU estimator reads.
  */
-export const MOCK_OVER_REQUESTED_CU_TX = mockParsedTransactionDetails({
-    transactionWithMeta: {
+function withComputeUnitLimit(units: number) {
+    const data = alloc(5);
+    data[0] = 2; // SetComputeUnitLimit
+    writeUint32LE(data, units, 1);
+
+    return {
         ...BASE_TX,
-        meta: {
-            ...BASE_TX.meta,
-            costUnits: 201_481,
-        } as unknown as ParsedTransactionWithMeta['meta'],
-    },
+        transaction: {
+            ...BASE_TX.transaction,
+            message: {
+                ...BASE_TX.transaction.message,
+                // Appended, not prepended: the summary card reads instruction 0 to detect a nonce.
+                instructions: [
+                    ...BASE_TX.transaction.message.instructions,
+                    {
+                        accounts: [],
+                        data: bs58.encode(data),
+                        programId: ComputeBudgetProgram.programId,
+                    },
+                ],
+            },
+        },
+    } as unknown as ParsedTransactionWithMeta;
+}
+
+/** Accurately budgeted: requests 1,000 compute units and consumes 150 of them. */
+export const MOCK_TIGHT_BUDGET_TX = mockParsedTransactionDetails({
+    transactionWithMeta: withComputeUnitLimit(1_000),
+});
+
+/**
+ * A wallet's default 200,000 compute unit request left in place over a transfer that uses 150. The
+ * executed cost the RPC reports is unchanged — only the *requested* cost, which SIMD-0553 charges
+ * on, blows up.
+ */
+export const MOCK_LOOSE_BUDGET_TX = mockParsedTransactionDetails({
+    transactionWithMeta: withComputeUnitLimit(200_000),
 });
 
 export const MOCK_FAILED_TX = mockParsedTransactionDetails({

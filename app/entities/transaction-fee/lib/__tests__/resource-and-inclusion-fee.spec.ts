@@ -1,6 +1,7 @@
 import {
     BASE_INCLUSION_FEE_LAMPORTS,
     derivePriorityFeeLamports,
+    estimateRequestedCostUnits,
     getResourceFeeLamports,
     projectResourceAndInclusionFees,
     RESOURCE_FEE_RATES,
@@ -54,18 +55,18 @@ describe('projectResourceAndInclusionFees', () => {
         }
     });
 
-    it('should leave a lean single-signer transfer cheaper than the flat 5,000-lamport base fee', () => {
-        // A plain SOL transfer costs 1,481 cost units, so even the terminal rate stays under today's fee.
-        const projections = projectResourceAndInclusionFees({ priorityFeeLamports: 0, requestedCostUnits: 1_481 });
+    it('should leave an accurately budgeted transfer cheaper than the flat 5,000-lamport base fee', () => {
+        // A transfer requesting 1,000 units: 1,481 executed cost less 150 consumed plus 1,000 requested.
+        const projections = projectResourceAndInclusionFees({ priorityFeeLamports: 0, requestedCostUnits: 2_331 });
 
-        expect(projections.at(-1)?.totalFeeLamports).toEqual(3_241);
+        expect(projections.at(-1)?.totalFeeLamports).toEqual(3_666);
     });
 
-    it('should make an over-requested compute budget more expensive than today', () => {
-        // The default 200k CU request a wallet leaves in place, at the terminal rate.
-        const projections = projectResourceAndInclusionFees({ priorityFeeLamports: 0, requestedCostUnits: 201_481 });
+    it('should make a loose compute budget more expensive than today', () => {
+        // The same transfer with a wallet's default 200,000 unit request left in place.
+        const projections = projectResourceAndInclusionFees({ priorityFeeLamports: 0, requestedCostUnits: 201_331 });
 
-        expect(projections.at(-1)?.totalFeeLamports).toEqual(103_241);
+        expect(projections.at(-1)?.totalFeeLamports).toEqual(103_166);
     });
 });
 
@@ -84,5 +85,48 @@ describe('derivePriorityFeeLamports', () => {
         // Precompile signatures push the real base fee above the signature count's worth, so the
         // subtraction can go negative on transactions this cannot see into.
         expect(derivePriorityFeeLamports({ feeLamports: 5_000, signatureCount: 3 })).toEqual(0);
+    });
+});
+
+describe('estimateRequestedCostUnits', () => {
+    it('should swap the consumed compute units out for the requested limit', () => {
+        // The executed cost of a SOL transfer, against a wallet's default 200,000 unit request.
+        expect(
+            estimateRequestedCostUnits({
+                computeUnitsConsumed: 150,
+                executedCostUnits: 1_481,
+                requestedComputeUnits: 200_000,
+            }),
+        ).toEqual(201_331);
+    });
+
+    it('should leave the cost alone when the request was consumed exactly', () => {
+        expect(
+            estimateRequestedCostUnits({
+                computeUnitsConsumed: 150,
+                executedCostUnits: 1_481,
+                requestedComputeUnits: 150,
+            }),
+        ).toEqual(1_481);
+    });
+
+    it('should never project below the cost the transaction already incurred', () => {
+        // A real transaction cannot consume more than it requested; the clamp covers a requested
+        // limit that could not be read rather than trusting the subtraction to stay positive.
+        expect(
+            estimateRequestedCostUnits({
+                computeUnitsConsumed: 4_644,
+                executedCostUnits: 6_306,
+                requestedComputeUnits: 0,
+            }),
+        ).toEqual(6_306);
+    });
+
+    it('should scale the correction with the size of the over-request', () => {
+        const shared = { computeUnitsConsumed: 150, executedCostUnits: 1_481 };
+
+        expect(estimateRequestedCostUnits({ ...shared, requestedComputeUnits: 1_400_000 })).toEqual(
+            estimateRequestedCostUnits({ ...shared, requestedComputeUnits: 10_000 }) + 1_390_000,
+        );
     });
 });

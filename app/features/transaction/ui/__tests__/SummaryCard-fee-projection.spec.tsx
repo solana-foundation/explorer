@@ -5,10 +5,11 @@ import { AutoRefresh } from '@/app/shared/lib/use-auto-refresh';
 
 import {
     DEFAULT_SIGNATURE,
-    MOCK_OVER_REQUESTED_CU_TX,
+    MOCK_LOOSE_BUDGET_TX,
     MOCK_PARSED_TX,
     MOCK_RAW_TX,
     MOCK_STATUS,
+    MOCK_TIGHT_BUDGET_TX,
 } from '../__fixtures__/transaction';
 import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
 import { SummaryCard } from '../SummaryCard';
@@ -60,22 +61,25 @@ describe('SummaryCard SIMD-0553 fee projection', () => {
         expect(screen.getByText('at the 1/2 rate')).toBeInTheDocument();
     });
 
-    it('should project a lean transfer below the flat base fee it paid', async () => {
+    it('should project an accurately budgeted transfer below the flat base fee it paid', async () => {
         vi.stubEnv('NEXT_PUBLIC_SIMD_0553_FEE_ENABLED', 'true');
 
-        renderSummary();
+        renderSummary(MOCK_TIGHT_BUDGET_TX);
 
-        // 1,481 cost units at the terminal rate: 2,500 inclusion + ceil(1481/2) = 3,241 lamports,
-        // against the 5,000 the transaction actually paid.
-        expect(await screen.findByText('◎0.000003241')).toBeInTheDocument();
+        // Requested cost 1,481 - 150 + 1,000 = 2,331. Terminal rate: 2,500 + ceil(2331/2) = 3,666
+        // lamports, against the 5,000 the transaction actually paid.
+        expect(await screen.findByText('◎0.000003666')).toBeInTheDocument();
     });
 
-    it('should project a loose compute budget above the fee it paid', async () => {
+    it('should charge a loose compute budget on what it requested, not what it used', async () => {
         vi.stubEnv('NEXT_PUBLIC_SIMD_0553_FEE_ENABLED', 'true');
 
-        renderSummary(MOCK_OVER_REQUESTED_CU_TX);
+        renderSummary(MOCK_LOOSE_BUDGET_TX);
 
-        // 201,481 cost units at the terminal rate: 2,500 + ceil(201481/2) = 103,241 lamports.
-        expect(await screen.findByText('◎0.000103241')).toBeInTheDocument();
+        // Same transfer, same 1,481 executed cost, but 200,000 units requested: 201,331 requested
+        // cost, so 2,500 + ceil(201331/2) = 103,166 lamports at the terminal rate. Projecting off
+        // the executed cost instead would have shown ◎0.000003241 here.
+        expect(await screen.findByText('◎0.000103166')).toBeInTheDocument();
+        expect(screen.queryByText('◎0.000003241')).not.toBeInTheDocument();
     });
 });

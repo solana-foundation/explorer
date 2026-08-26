@@ -13,6 +13,7 @@ import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/com
 import {
     BaseResourceFeeProjection,
     derivePriorityFeeLamports,
+    estimateRequestedCostUnits,
     isSimd0553FeeEnabled,
     projectResourceAndInclusionFees,
 } from '@entities/transaction-fee';
@@ -194,11 +195,23 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         feeLamports: fee,
         signatureCount: transaction?.signatures.length,
     });
-    // SIMD-0553 charges on requested cost units, which is what `costUnits` reports — the same
-    // quantity the scheduler packs blocks with.
+    // SIMD-0553 charges the cost units a transaction *requested*, while `costUnits` reports what it
+    // executed, so the requested compute limit is needed to correct it. Without one there is nothing
+    // honest to project, and the row is left out.
     const feeProjections =
-        isSimd0553FeeEnabled() && costUnits !== undefined && priorityFeeLamports !== undefined
-            ? projectResourceAndInclusionFees({ priorityFeeLamports, requestedCostUnits: costUnits })
+        isSimd0553FeeEnabled() &&
+        costUnits !== undefined &&
+        computeUnitsConsumed !== undefined &&
+        reservedCUs !== undefined &&
+        priorityFeeLamports !== undefined
+            ? projectResourceAndInclusionFees({
+                  priorityFeeLamports,
+                  requestedCostUnits: estimateRequestedCostUnits({
+                      computeUnitsConsumed,
+                      executedCostUnits: costUnits,
+                      requestedComputeUnits: reservedCUs,
+                  }),
+              })
             : undefined;
 
     const isNonce = (() => {
@@ -348,7 +361,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                 {fee !== undefined && feeProjections !== undefined && (
                     <Row divider>
                         <Label className="overflow-visible">
-                            <InfoTooltip text="Not active yet. SIMD-0553 would replace the flat 5,000-lamport-per-signature base fee with a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units this transaction requested, leaving the priority fee unchanged. Shown at each of the three staged rates, against what this transaction actually paid.">
+                            <InfoTooltip text="Not active yet. SIMD-0553 would charge a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units a transaction requests, replacing today's flat 5,000-per-signature base fee and leaving the priority fee unchanged. Estimated by swapping this transaction's consumed compute units for its requested limit; the loaded-accounts-data-size term still reflects what it loaded, so each figure is a floor.">
                                 Fee under SIMD-0553
                             </InfoTooltip>
                         </Label>

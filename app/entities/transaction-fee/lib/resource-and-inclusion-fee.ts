@@ -63,6 +63,36 @@ export function projectResourceAndInclusionFees({
 }
 
 /**
+ * Estimates the cost units SIMD-0553 would charge on, given the cost the RPC reports.
+ *
+ * `meta.costUnits` is Agave's *executed* transaction cost, not its requested one: a committed
+ * transaction's cost is recomputed through `calculate_cost_for_executed_transaction`, whose
+ * program-execution term is the compute units actually consumed. SIMD-0553 charges the requested
+ * cost, so the consumed compute units are swapped back out for the requested limit — the dominant
+ * term, and the whole point of the model: a transaction that requests 200,000 compute units and
+ * uses 5,000 is charged for the 200,000.
+ *
+ * The loaded-accounts-data-size term cannot be corrected the same way. The RPC reports neither the
+ * bytes actually loaded nor, before v1, the requested limit, so that term stays at its executed
+ * value. A transaction leaving the default 64 MiB limit in place is projected low by up to ~16,000
+ * cost units on that term alone, so every figure derived from this is a floor, not an exact charge.
+ */
+export function estimateRequestedCostUnits({
+    computeUnitsConsumed,
+    executedCostUnits,
+    requestedComputeUnits,
+}: {
+    computeUnitsConsumed: number;
+    executedCostUnits: number;
+    requestedComputeUnits: number;
+}): number {
+    // A transaction cannot consume more than it requested, so the swap can only add cost. The clamp
+    // keeps an under-read requested limit, or an inconsistent triple, from projecting below the cost
+    // the transaction is already known to have incurred.
+    return Math.max(executedCostUnits, executedCostUnits - computeUnitsConsumed + requestedComputeUnits);
+}
+
+/**
  * The burned half of the model. The SIMD specifies `ceil_div` over integers, so a transaction that
  * requests any cost at all is charged for it; float division is exact here because a transaction's
  * cost units are bounded by the block limit, orders of magnitude below the safe-integer ceiling.

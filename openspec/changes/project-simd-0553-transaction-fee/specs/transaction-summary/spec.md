@@ -22,13 +22,32 @@ The transaction summary card SHALL render a "Fee under SIMD-0553" row directly b
 
 #### Scenario: transaction reporting cost units
 
-- **WHEN** the flag is enabled and a transaction's metadata carries both `fee` and `costUnits`
+- **WHEN** the flag is enabled and a transaction's metadata carries `fee`, `costUnits` and `computeUnitsConsumed`, and its requested compute limit can be reconstructed
 - **THEN** the summary card SHALL render one projected total per staged rate, each labelled with its rate
 
 #### Scenario: transaction without cost units
 
 - **WHEN** a transaction's metadata omits `costUnits`
 - **THEN** the summary card SHALL omit the row rather than project from an estimate
+
+### Requirement: The charge base SHALL be the requested cost, corrected off the executed cost the RPC reports
+
+`meta.costUnits` is the cost of the transaction as executed, whose compute term is the units actually consumed. The projection SHALL charge on the requested cost instead, replacing the consumed compute units with the transaction's requested compute limit, and SHALL never project below the executed cost. Where a requested limit cannot be reconstructed, the row SHALL be omitted rather than projected from the executed cost.
+
+#### Scenario: a loose compute budget
+
+- **WHEN** a transfer reports 1,481 cost units and 150 consumed units while requesting 200,000
+- **THEN** the charge base SHALL be 201,331 cost units, not 1,481
+
+#### Scenario: a budget consumed exactly
+
+- **WHEN** a transaction consumed precisely the compute units it requested
+- **THEN** the charge base SHALL equal the executed cost the RPC reported
+
+#### Scenario: no reconstructable compute request
+
+- **WHEN** the transaction reports no consumed compute units, or no requested limit can be reconstructed
+- **THEN** the summary card SHALL omit the row
 
 ### Requirement: A projected total SHALL be the inclusion fee plus the unchanged priority fee plus the burned resource fee
 
@@ -62,12 +81,12 @@ The projection SHALL take the priority fee from the message where the transactio
 
 Each projected total SHALL carry a signed percentage against the fee the transaction actually paid, distinguishing cheaper from costlier, so a reader can tell which side of the model's redistribution the transaction falls on. The comparison SHALL be omitted when there is no fee to compare against.
 
-#### Scenario: a lean transaction
+#### Scenario: an accurately budgeted transaction
 
-- **WHEN** a single-signer transfer requesting 1,481 cost units paid the flat 5,000-lamport fee
-- **THEN** the terminal-rate projection SHALL be 3,241 lamports and SHALL be marked as cheaper
+- **WHEN** a single-signer transfer requesting 1,000 compute units paid the flat 5,000-lamport fee
+- **THEN** the terminal-rate projection SHALL be 3,666 lamports and SHALL be marked as cheaper
 
 #### Scenario: a loose compute budget
 
-- **WHEN** a transaction left a default 200,000 compute unit request in place
-- **THEN** every staged projection SHALL be marked as costlier
+- **WHEN** the same transfer left a default 200,000 compute unit request in place
+- **THEN** the terminal-rate projection SHALL be 103,166 lamports and every staged projection SHALL be marked as costlier
