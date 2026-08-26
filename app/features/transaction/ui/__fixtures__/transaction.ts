@@ -24,6 +24,8 @@ const BASE_TX = {
     blockTime: 1_716_000_000,
     meta: {
         computeUnitsConsumed: 5000,
+        // The cost model's total for a single-signer SOL transfer, as mainnet reports it.
+        costUnits: 1481,
         err: null,
         fee: 5000,
         innerInstructions: [],
@@ -102,6 +104,20 @@ const BASE_TX = {
 } as unknown as ParsedTransactionWithMeta;
 
 export const MOCK_PARSED_TX = mockParsedTransactionDetails({ transactionWithMeta: BASE_TX });
+
+/**
+ * A transaction that left a wallet's default 200,000 compute unit request in place. Its requested
+ * cost units — and so its projected SIMD-0553 fee — dwarf what it actually paid.
+ */
+export const MOCK_OVER_REQUESTED_CU_TX = mockParsedTransactionDetails({
+    transactionWithMeta: {
+        ...BASE_TX,
+        meta: {
+            ...BASE_TX.meta,
+            costUnits: 201_481,
+        } as unknown as ParsedTransactionWithMeta['meta'],
+    },
+});
 
 export const MOCK_FAILED_TX = mockParsedTransactionDetails({
     transactionWithMeta: {

@@ -10,6 +10,12 @@ import { Button } from '@components/shared/ui/button';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
+import {
+    BaseResourceFeeProjection,
+    derivePriorityFeeLamports,
+    isSimd0553FeeEnabled,
+    projectResourceAndInclusionFees,
+} from '@entities/transaction-fee';
 import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
 import { useCluster, useClusterInfo } from '@providers/cluster';
@@ -183,6 +189,17 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const blockhash = transaction?.message.recentBlockhash;
     const version = transactionWithMeta?.version;
     const feePayer = transaction?.message.accountKeys[0]?.pubkey;
+    const priorityFeeLamports = readPriorityFeeLamports({
+        declared: transactionConfig?.priorityFeeLamports,
+        feeLamports: fee,
+        signatureCount: transaction?.signatures.length,
+    });
+    // SIMD-0553 charges on requested cost units, which is what `costUnits` reports — the same
+    // quantity the scheduler packs blocks with.
+    const feeProjections =
+        isSimd0553FeeEnabled() && costUnits !== undefined && priorityFeeLamports !== undefined
+            ? projectResourceAndInclusionFees({ priorityFeeLamports, requestedCostUnits: costUnits })
+            : undefined;
 
     const isNonce = (() => {
         if (!transaction || transaction.message.instructions.length < 1) return false;
@@ -327,6 +344,20 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     </Row>
                 )}
 
+                {/* Projected fee under SIMD-0553's inclusion + burned resource fee model */}
+                {fee !== undefined && feeProjections !== undefined && (
+                    <Row divider>
+                        <Label className="overflow-visible">
+                            <InfoTooltip text="Not active yet. SIMD-0553 would replace the flat 5,000-lamport-per-signature base fee with a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units this transaction requested, leaving the priority fee unchanged. Shown at each of the three staged rates, against what this transaction actually paid.">
+                                Fee under SIMD-0553
+                            </InfoTooltip>
+                        </Label>
+                        <Value>
+                            <BaseResourceFeeProjection currentFeeLamports={fee} projections={feeProjections} />
+                        </Value>
+                    </Row>
+                )}
+
                 {/* Transaction cost */}
                 {costUnits !== undefined && (
                     <Row divider>
@@ -433,6 +464,29 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
             </Card>
         </section>
     );
+}
+
+/**
+ * SIMD-0553 carries priority fees over unchanged, so projecting a total needs them split out of the
+ * single summed `fee` the RPC reports. v1 declares its total priority fee on the message; every
+ * earlier version has to have it backed out of the total.
+ */
+function readPriorityFeeLamports({
+    declared,
+    feeLamports,
+    signatureCount,
+}: {
+    declared: bigint | number | undefined;
+    feeLamports: number | undefined;
+    signatureCount: number | undefined;
+}): number | undefined {
+    if (declared !== undefined) {
+        return Number(declared);
+    }
+    if (feeLamports === undefined || signatureCount === undefined) {
+        return undefined;
+    }
+    return derivePriorityFeeLamports({ feeLamports, signatureCount });
 }
 
 function formatTransactionVersion(version: TransactionVersion): string {
