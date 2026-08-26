@@ -10,6 +10,13 @@ import { Button } from '@components/shared/ui/button';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
+import {
+    BaseResourceFeeProjection,
+    derivePriorityFeeLamports,
+    estimateRequestedCostUnits,
+    isSimd0553FeeEnabled,
+    projectResourceAndInclusionFees,
+} from '@entities/transaction-fee';
 import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
 import { useCluster, useClusterInfo } from '@providers/cluster';
@@ -183,6 +190,29 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const blockhash = transaction?.message.recentBlockhash;
     const version = transactionWithMeta?.version;
     const feePayer = transaction?.message.accountKeys[0]?.pubkey;
+    const priorityFeeLamports = readPriorityFeeLamports({
+        declared: transactionConfig?.priorityFeeLamports,
+        feeLamports: fee,
+        signatureCount: transaction?.signatures.length,
+    });
+    // SIMD-0553 charges the cost units a transaction *requested*, while `costUnits` reports what it
+    // executed, so the requested compute limit is needed to correct it. Without one there is nothing
+    // honest to project, and the row is left out.
+    const feeProjections =
+        isSimd0553FeeEnabled() &&
+        costUnits !== undefined &&
+        computeUnitsConsumed !== undefined &&
+        reservedCUs !== undefined &&
+        priorityFeeLamports !== undefined
+            ? projectResourceAndInclusionFees({
+                  priorityFeeLamports,
+                  requestedCostUnits: estimateRequestedCostUnits({
+                      computeUnitsConsumed,
+                      executedCostUnits: costUnits,
+                      requestedComputeUnits: reservedCUs,
+                  }),
+              })
+            : undefined;
 
     const isNonce = (() => {
         if (!transaction || transaction.message.instructions.length < 1) return false;
@@ -327,6 +357,20 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     </Row>
                 )}
 
+                {/* Projected fee under SIMD-0553's inclusion + burned resource fee model */}
+                {fee !== undefined && feeProjections !== undefined && (
+                    <Row divider>
+                        <Label className="overflow-visible">
+                            <InfoTooltip text="Not active yet. SIMD-0553 would charge a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units a transaction requests, replacing today's flat 5,000-per-signature base fee and leaving the priority fee unchanged. Estimated by swapping this transaction's consumed compute units for its requested limit; the loaded-accounts-data-size term still reflects what it loaded, so each figure is a floor.">
+                                Fee under SIMD-0553
+                            </InfoTooltip>
+                        </Label>
+                        <Value>
+                            <BaseResourceFeeProjection currentFeeLamports={fee} projections={feeProjections} />
+                        </Value>
+                    </Row>
+                )}
+
                 {/* Transaction cost */}
                 {costUnits !== undefined && (
                     <Row divider>
@@ -433,6 +477,29 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
             </Card>
         </section>
     );
+}
+
+/**
+ * SIMD-0553 carries priority fees over unchanged, so projecting a total needs them split out of the
+ * single summed `fee` the RPC reports. v1 declares its total priority fee on the message; every
+ * earlier version has to have it backed out of the total.
+ */
+function readPriorityFeeLamports({
+    declared,
+    feeLamports,
+    signatureCount,
+}: {
+    declared: bigint | number | undefined;
+    feeLamports: number | undefined;
+    signatureCount: number | undefined;
+}): number | undefined {
+    if (declared !== undefined) {
+        return Number(declared);
+    }
+    if (feeLamports === undefined || signatureCount === undefined) {
+        return undefined;
+    }
+    return derivePriorityFeeLamports({ feeLamports, signatureCount });
 }
 
 function formatTransactionVersion(version: TransactionVersion): string {

@@ -8,6 +8,7 @@ import {
     DEFAULT_SIGNATURE,
     MOCK_FAILED_STATUS,
     MOCK_FAILED_TX,
+    MOCK_LOOSE_BUDGET_TX,
     MOCK_PARSED_TX,
     MOCK_RAW_TX,
     MOCK_STATUS,
@@ -94,6 +95,30 @@ export const NoTimestamp: Story = {
             const Wrapper = withTransactionProviders(
                 { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
                 { [DEFAULT_SIGNATURE]: mockTransactionStatus({ timestamp: 'unavailable' }) },
+            );
+            return (
+                <Wrapper>
+                    <Story />
+                </Wrapper>
+            );
+        },
+    ],
+};
+
+/**
+ * A 200,000 compute unit request over a transfer that uses 150, where every staged SIMD-0553 rate
+ * costs more than the flat base fee.
+ *
+ * The fee projection row needs `NEXT_PUBLIC_SIMD_0553_FEE_ENABLED=true` in the environment
+ * Storybook was built with; without it this renders as the plain finalized card.
+ */
+export const LooseComputeBudget: Story = {
+    decorators: [
+        Story => {
+            const Wrapper = withTransactionProviders(
+                { [DEFAULT_SIGNATURE]: MOCK_LOOSE_BUDGET_TX },
+                { [DEFAULT_SIGNATURE]: MOCK_STATUS },
+                { [DEFAULT_SIGNATURE]: MOCK_RAW_TX },
             );
             return (
                 <Wrapper>
