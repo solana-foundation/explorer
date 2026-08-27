@@ -2,21 +2,25 @@
 
 import { Copyable } from '@components/common/Copyable';
 import { SolBalance } from '@components/common/SolBalance';
+import { cn } from '@components/shared/utils';
 import type { PublicKey } from '@solana/web3.js';
+import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { compactFields, type InstructionField, type InstructionFieldList } from '../model/fields';
+import { compactFields, type FieldAddress, type InstructionField, type InstructionFieldList } from '../model/fields';
 import { useInstructionSurface } from '../model/surface';
 import { ProgramField } from './ProgramField';
 
 /**
  * Renders field descriptors as card rows. This is the only place that knows the
- * row markup, the right-alignment, and which address renderer the current
- * surface uses. The leading `Program` row is the one exception — `ProgramField`
- * owns it, because the inspector needs its own validator on that row.
+ * row markup, the cell styling, how each kind formats its value, and which
+ * address renderer the current surface uses. The leading `Program` row is the one
+ * exception — `ProgramField` owns it, because the inspector needs its own
+ * validator on that row.
  */
 export function InstructionFields({ fields, programId }: { fields: InstructionFieldList; programId: PublicKey }) {
     const { showProgramField } = useInstructionSurface();
@@ -31,11 +35,22 @@ export function InstructionFields({ fields, programId }: { fields: InstructionFi
     );
 }
 
+/** Keyed by every kind, so a new one must state its cell styling or fail the build. */
+const CELL_CLASS: Record<InstructionField['kind'], string | undefined> = {
+    address: undefined,
+    bytes: undefined,
+    custom: undefined,
+    seed: undefined,
+    sol: undefined,
+    text: undefined,
+    timestamp: 'font-mono',
+};
+
 function FieldRow({ field }: { field: InstructionField }) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>{field.label}</BaseTable.Cell>
-            <BaseTable.Cell className="text-right">
+            <BaseTable.Cell className={cn('text-right', CELL_CLASS[field.kind])}>
                 <FieldValue field={field} />
             </BaseTable.Cell>
         </BaseTable.Row>
@@ -48,7 +63,7 @@ function FieldValue({ field }: { field: InstructionField }) {
 
     switch (field.kind) {
         case 'address':
-            return <Address pubkey={field.pubkey} />;
+            return <Address pubkey={toPublicKey(field.pubkey)} />;
         case 'sol':
             return <SolBalance lamports={field.lamports} />;
         case 'bytes':
@@ -61,11 +76,18 @@ function FieldValue({ field }: { field: InstructionField }) {
             );
         case 'text':
             return <>{field.value}</>;
+        case 'timestamp':
+            return <>{displayTimestampUtc(unixTimestampToMs(field.unixSeconds))}</>;
         case 'custom':
             return field.value;
         default:
             return reportUnrenderedKind(field);
     }
+}
+
+/** The surface's address prop is `PublicKey`; Kit's `Address` is a branded string, so `typeof` narrows it. */
+function toPublicKey(pubkey: FieldAddress): PublicKey {
+    return typeof pubkey === 'string' ? toLegacyPublicKey(pubkey) : pubkey;
 }
 
 /**

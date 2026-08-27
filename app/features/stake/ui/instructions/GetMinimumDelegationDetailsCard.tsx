@@ -1,34 +1,11 @@
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import type { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import React, { type ReactNode } from 'react';
+import { InstructionCardView, InstructionFields, type InstructionNode } from '@entities/instruction-card';
 
-import { StakeProgramRow } from './DetailRow';
-
-type GetMinimumDelegationDetailsCardProps = {
-    ix: ParsedInstruction | TransactionInstruction;
-    index: number;
-    result: SignatureResult;
-    innerCards?: ReactNode[];
-    childIndex?: number;
-};
-
-export function GetMinimumDelegationDetailsCard({
-    ix,
-    index,
-    result,
-    innerCards,
-    childIndex,
-}: GetMinimumDelegationDetailsCardProps) {
+/** Hand-written: this instruction decodes to no payload, so the card factory has nothing to take. */
+export function GetMinimumDelegationDetailsCard({ node }: { node: InstructionNode }) {
     return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title="Stake Program: Get Minimum Delegation"
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <StakeProgramRow />
-        </InstructionCard>
+        <InstructionCardView node={node} title="Stake Program: Get Minimum Delegation">
+            {/* Empty list — the Program row comes from the surface, not from a field. */}
+            <InstructionFields fields={[]} programId={node.programId} />
+        </InstructionCardView>
     );
 }

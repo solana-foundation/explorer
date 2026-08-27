@@ -1,5 +1,9 @@
+import type { Address } from '@solana/kit';
 import type { PublicKey } from '@solana/web3.js';
 import type { ReactElement } from 'react';
+
+/** Kit-native slices hold `Address`, older ones `PublicKey`. Rows coerce, so cards need not. */
+export type FieldAddress = PublicKey | Address;
 
 /**
  * A row in an instruction card, described as data.
@@ -9,11 +13,12 @@ import type { ReactElement } from 'react';
  * every card taking an `AddressComponent` prop.
  */
 export type InstructionField =
-    | { kind: 'address'; label: string; pubkey: PublicKey }
+    | { kind: 'address'; label: string; pubkey: FieldAddress }
     | { kind: 'sol'; label: string; lamports: number | bigint }
     | { kind: 'bytes'; label: string; size: number }
     | { kind: 'seed'; label: string; seed: string }
     | { kind: 'text'; label: string; value: string | number }
+    | { kind: 'timestamp'; label: string; unixSeconds: number }
     | { kind: 'custom'; label: string; value: ReactElement };
 
 /**
@@ -26,7 +31,7 @@ export type InstructionField =
 export type InstructionFieldList = ReadonlyArray<InstructionField | false | undefined>;
 
 /** An account address. Links out on the tx page, resolves in-transaction in the inspector. */
-export function address(label: string, pubkey: PublicKey): InstructionField {
+export function address(label: string, pubkey: FieldAddress): InstructionField {
     return { kind: 'address', label, pubkey };
 }
 
@@ -48,6 +53,11 @@ export function seed(label: string, value: string): InstructionField {
 /** Plain text or a number. Deliberately not `ReactElement` — use `custom` for markup. */
 export function text(label: string, value: string | number): InstructionField {
     return { kind: 'text', label, value };
+}
+
+/** A unix-seconds instant. The row owns the UTC formatting so cards hold the raw value. */
+export function timestamp(label: string, unixSeconds: number): InstructionField {
+    return { kind: 'timestamp', label, unixSeconds };
 }
 
 /**
