@@ -1,5 +1,6 @@
 'use client';
 
+import { getRpc, type SolanaRpc } from '@entities/cluster';
 import { fetchNftData } from '@entities/nft';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
@@ -24,12 +25,10 @@ import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCacheEntries, useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
-import { createSolanaRpc } from '@solana/kit';
+import type { AccountInfoWithJsonData } from '@solana/kit';
 import {
     AddressLookupTableAccount,
     AddressLookupTableProgram,
-    Connection,
-    ParsedAccountData,
     PublicKey,
     StakeActivationData,
     SystemProgram,
@@ -49,8 +48,10 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
-import { alloc } from '@/app/shared/lib/bytes';
+import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
+import { alloc, fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
+import { toKitAddress, toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
 import { RewardsProvider } from './rewards';
 import { TokensProvider } from './tokens';
@@ -261,7 +262,7 @@ async function fetchMultipleAccounts({
     }
 
     const BATCH_SIZE = 100;
-    const connection = new Connection(url, 'confirmed');
+    const rpc = getRpc(url);
 
     let nextBatchStart = 0;
     while (nextBatchStart < pubkeys.length) {
@@ -269,16 +270,19 @@ async function fetchMultipleAccounts({
         nextBatchStart += BATCH_SIZE;
 
         try {
-            let results;
-            if (dataMode === 'parsed') {
-                results = (await connection.getMultipleParsedAccounts(batch)).value;
-            } else if (dataMode === 'raw') {
-                results = await connection.getMultipleAccountsInfo(batch);
-            } else {
-                results = await connection.getMultipleAccountsInfo(batch, {
-                    dataSlice: { length: 0, offset: 0 },
-                });
-            }
+            const addresses = batch.map(toKitAddress);
+            const { value: results } =
+                dataMode === 'parsed'
+                    ? await rpc
+                          .getMultipleAccounts(addresses, { commitment: 'confirmed', encoding: 'jsonParsed' })
+                          .send()
+                    : await rpc
+                          .getMultipleAccounts(addresses, {
+                              commitment: 'confirmed',
+                              encoding: 'base64',
+                              ...(dataMode === 'skip' && { dataSlice: { length: 0, offset: 0 } }),
+                          })
+                          .send();
 
             for (let i = 0; i < batch.length; i++) {
                 const pubkey = batch[i];
@@ -297,17 +301,12 @@ async function fetchMultipleAccounts({
                 } else {
                     let space: number | undefined = undefined;
                     let parsedData: ParsedData | undefined;
-                    if ('parsed' in result.data) {
-                        const accountData: ParsedAccountData = result.data;
-                        space = result.data.space;
+                    // jsonParsed answers with base64 data for any account its parsers don't cover,
+                    // so an array here means "no parsed representation", not "raw mode".
+                    if (!Array.isArray(result.data)) {
+                        space = Number(result.data.space);
                         try {
-                            parsedData = await handleParsedAccountData(
-                                connection,
-                                pubkey,
-                                accountData,
-                                url,
-                                result.lamports,
-                            );
+                            parsedData = await handleParsedAccountData(rpc, pubkey, result.data, url, result.lamports);
                         } catch (error) {
                             Logger.error(error, {
                                 address: pubkey.toBase58(),
@@ -319,9 +318,9 @@ async function fetchMultipleAccounts({
                     // If we cannot parse account layout as native spl account
                     // then keep raw data for other components to decode
                     let rawData: Uint8Array | undefined;
-                    if (!parsedData && !('parsed' in result.data) && dataMode !== 'skip') {
-                        space = result.data.length;
-                        rawData = result.data;
+                    if (!parsedData && Array.isArray(result.data) && dataMode !== 'skip') {
+                        rawData = fromBase64(result.data[0]);
+                        space = rawData.length;
                     }
 
                     account = {
@@ -330,8 +329,8 @@ async function fetchMultipleAccounts({
                             raw: rawData,
                         },
                         executable: result.executable,
-                        lamports: result.lamports,
-                        owner: result.owner,
+                        lamports: Number(result.lamports),
+                        owner: toLegacyPublicKey(result.owner),
                         pubkey,
                         space,
                     };
@@ -360,14 +359,20 @@ async function fetchMultipleAccounts({
     }
 }
 
+// The kit-typed shape of a jsonParsed account's `data` when the RPC could parse it — the
+// `[base64, 'base64']` tuple fallback is excluded (callers branch on `Array.isArray` first).
+type ParsedAccountData = Exclude<AccountInfoWithJsonData['data'], readonly [string, string]>;
+
 async function handleParsedAccountData(
-    connection: Connection,
+    rpc: SolanaRpc,
     accountKey: PublicKey,
     accountData: ParsedAccountData,
     url: string,
-    lamports: number,
+    lamports: bigint,
 ): Promise<ParsedData | undefined> {
-    const info = create(accountData.parsed, ParsedInfo);
+    // kit upcasts every integral value in the jsonParsed payload to a bigint; the superstruct
+    // validators below expect plain-JSON numbers.
+    const info = create(withNumbersInsteadOfBigInts(accountData.parsed), ParsedInfo);
     // TODO: adopt @explorer/entity-inspector's accounts module (src/accounts: classifyAccountKindBase + kinds.ts; needs a browser-safe ./accounts subpath) instead of this inline kind switch
     switch (accountData.program) {
         case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL: {
@@ -376,9 +381,18 @@ async function handleParsedAccountData(
             // Fetch program data to get program upgradeability info
             let programData: ProgramDataAccountInfo | undefined;
             if (parsed.type === 'program') {
-                const result = (await connection.getParsedAccountInfo(parsed.info.programData)).value;
-                if (result && 'parsed' in result.data && result.data.program === BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL) {
-                    const info = create(result.data.parsed, ParsedInfo);
+                const { value: result } = await rpc
+                    .getAccountInfo(toKitAddress(parsed.info.programData), {
+                        commitment: 'confirmed',
+                        encoding: 'jsonParsed',
+                    })
+                    .send();
+                if (
+                    result &&
+                    !Array.isArray(result.data) &&
+                    result.data.program === BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL
+                ) {
+                    const info = create(withNumbersInsteadOfBigInts(result.data.parsed), ParsedInfo);
                     programData = create(info, ProgramDataAccount).info;
                 }
             }
@@ -396,9 +410,9 @@ async function handleParsedAccountData(
 
             const activation =
                 parsed.type === 'delegated' && stakeInfo.stake !== null
-                    ? await getStakeActivation(createSolanaRpc(url), {
+                    ? await getStakeActivation(rpc, {
                           delegation: stakeInfo.stake.delegation,
-                          lamports: BigInt(lamports),
+                          lamports,
                           rentExemptReserve: stakeInfo.meta.rentExemptReserve,
                       })
                     : undefined;
