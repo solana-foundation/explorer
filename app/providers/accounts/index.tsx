@@ -273,9 +273,12 @@ async function fetchMultipleAccounts({
             const addresses = batch.map(toKitAddress);
             const { value: results } =
                 dataMode === 'parsed'
-                    ? await rpc.getMultipleAccounts(addresses, { encoding: 'jsonParsed' }).send()
+                    ? await rpc
+                          .getMultipleAccounts(addresses, { commitment: 'confirmed', encoding: 'jsonParsed' })
+                          .send()
                     : await rpc
                           .getMultipleAccounts(addresses, {
+                              commitment: 'confirmed',
                               encoding: 'base64',
                               ...(dataMode === 'skip' && { dataSlice: { length: 0, offset: 0 } }),
                           })
@@ -379,7 +382,10 @@ async function handleParsedAccountData(
             let programData: ProgramDataAccountInfo | undefined;
             if (parsed.type === 'program') {
                 const { value: result } = await rpc
-                    .getAccountInfo(toKitAddress(parsed.info.programData), { encoding: 'jsonParsed' })
+                    .getAccountInfo(toKitAddress(parsed.info.programData), {
+                        commitment: 'confirmed',
+                        encoding: 'jsonParsed',
+                    })
                     .send();
                 if (
                     result &&

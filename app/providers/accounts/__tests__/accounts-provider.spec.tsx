@@ -177,7 +177,7 @@ describe('AccountsProvider: fetch and mount', () => {
         const [addresses, config] = getMultipleAccounts.mock.calls[0];
         expect(addresses).toEqual([TEST_PUBKEY.toBase58()]);
         // 'skip' mode must never download account data.
-        expect(config).toEqual({ dataSlice: { length: 0, offset: 0 }, encoding: 'base64' });
+        expect(config).toEqual({ commitment: 'confirmed', dataSlice: { length: 0, offset: 0 }, encoding: 'base64' });
     });
 
     it('should not drop a first-commit fetch when React.StrictMode remounts the tree', async () => {
