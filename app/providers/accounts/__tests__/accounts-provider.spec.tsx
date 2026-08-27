@@ -1,18 +1,32 @@
-import { Connection, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { act, render, waitFor } from '@testing-library/react';
 import { Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import React from 'react';
-import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 vi.mock('next/navigation');
 
-const { useClusterMock } = vi.hoisted(() => ({ useClusterMock: vi.fn() }));
+const { useClusterMock, getMultipleAccounts, getRpc } = vi.hoisted(() => {
+    const getMultipleAccounts = vi.fn();
+    return {
+        getMultipleAccounts,
+        getRpc: vi.fn((_url: string) => ({
+            getMultipleAccounts: (...args: unknown[]) => ({ send: () => getMultipleAccounts(...args) }),
+        })),
+        useClusterMock: vi.fn(),
+    };
+});
 
 vi.mock('../../cluster', async importOriginal => {
     const actual = await importOriginal<typeof import('../../cluster')>();
     return { ...actual, useCluster: useClusterMock };
+});
+
+vi.mock('@entities/cluster', async importOriginal => {
+    const actual = await importOriginal<typeof import('@entities/cluster')>();
+    return { ...actual, getRpc };
 });
 
 import { AccountsProvider, FetchersContext, useFetchAccountInfo } from '..';
@@ -106,8 +120,6 @@ describe('AccountsProvider', () => {
 });
 
 describe('AccountsProvider: fetch and mount', () => {
-    let getMultipleAccountsInfo: MockInstance<typeof Connection.prototype.getMultipleAccountsInfo>;
-
     /**
      * Fetches from a mount effect, the shape real consumers use (the inspector's `AccountInfo`,
      * `usePmpAccountPayload`). React flushes effects bottom-up, so this runs BEFORE the provider's own effect
@@ -138,12 +150,11 @@ describe('AccountsProvider: fetch and mount', () => {
         mockCluster(Cluster.Devnet, DEVNET_ENDPOINT);
         // Every 'skip' batch lands here. Stubbing it keeps these assertions off the network and lets each test
         // read back the batch the provider actually sent.
-        getMultipleAccountsInfo = vi.spyOn(Connection.prototype, 'getMultipleAccountsInfo').mockResolvedValue([null]);
+        getMultipleAccounts.mockResolvedValue({ value: [null] });
     });
 
     afterEach(() => {
         vi.useRealTimers();
-        vi.restoreAllMocks();
     });
 
     it('should not fetch a first-commit request after the provider unmounts', async () => {
@@ -153,7 +164,7 @@ describe('AccountsProvider: fetch and mount', () => {
         await flushDebounce();
 
         // Without the cancel this batch fired into a torn-down tree and rejected with "window is not defined".
-        expect(getMultipleAccountsInfo).not.toHaveBeenCalled();
+        expect(getMultipleAccounts).not.toHaveBeenCalled();
     });
 
     it('should fetch a first-commit request once while the provider stays mounted', async () => {
@@ -161,9 +172,12 @@ describe('AccountsProvider: fetch and mount', () => {
 
         await flushDebounce();
 
-        expect(getMultipleAccountsInfo).toHaveBeenCalledTimes(1);
-        const [batch] = getMultipleAccountsInfo.mock.calls[0];
-        expect(batch.map(pubkey => pubkey.toBase58())).toEqual([TEST_PUBKEY.toBase58()]);
+        expect(getRpc).toHaveBeenCalledWith(DEVNET_ENDPOINT);
+        expect(getMultipleAccounts).toHaveBeenCalledTimes(1);
+        const [addresses, config] = getMultipleAccounts.mock.calls[0];
+        expect(addresses).toEqual([TEST_PUBKEY.toBase58()]);
+        // 'skip' mode must never download account data.
+        expect(config).toEqual({ dataSlice: { length: 0, offset: 0 }, encoding: 'base64' });
     });
 
     it('should not drop a first-commit fetch when React.StrictMode remounts the tree', async () => {
@@ -180,7 +194,7 @@ describe('AccountsProvider: fetch and mount', () => {
         // that second run has to re-arm the debounce. If it does not, a dev page sits on "Loading" forever.
         await flushDebounce();
 
-        expect(getMultipleAccountsInfo).toHaveBeenCalledTimes(1);
+        expect(getMultipleAccounts).toHaveBeenCalledTimes(1);
     });
 
     it('should keep a pending batch when the cluster changes but the url does not', async () => {
@@ -196,11 +210,11 @@ describe('AccountsProvider: fetch and mount', () => {
         );
         await flushDebounce();
 
-        expect(getMultipleAccountsInfo).toHaveBeenCalledTimes(1);
+        expect(getMultipleAccounts).toHaveBeenCalledTimes(1);
     });
 
     it('should report a failed batch on a preset cluster', async () => {
-        getMultipleAccountsInfo.mockRejectedValue(new Error('rpc unreachable'));
+        getMultipleAccounts.mockRejectedValue(new Error('rpc unreachable'));
 
         renderProvider();
         await flushDebounce();
@@ -210,7 +224,7 @@ describe('AccountsProvider: fetch and mount', () => {
 
     it('should stay quiet about a failed batch on a custom cluster', async () => {
         mockCluster(Cluster.Custom, DEVNET_ENDPOINT);
-        getMultipleAccountsInfo.mockRejectedValue(new Error('rpc unreachable'));
+        getMultipleAccounts.mockRejectedValue(new Error('rpc unreachable'));
 
         renderProvider();
         await flushDebounce();
