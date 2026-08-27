@@ -2,7 +2,8 @@ import { renderHook } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Cluster, clusterSelection, ClusterStatus } from '@/app/entities/cluster/lib/cluster';
+import { Cluster, clusterSelection, ClusterStatus, clusterUrl } from '@/app/entities/cluster/lib/cluster';
+import { toConnectableUrl } from '@/app/entities/cluster/lib/connectable-url';
 import { type ClusterState, StateContext } from '@/app/entities/cluster/model/cluster-provider';
 import { type CacheEntry, FetchStatus } from '@/app/providers/cache';
 import { useCacheEntries, useCacheEntry } from '@/app/providers/cache-entry';
@@ -73,7 +74,8 @@ describe('useCacheEntries', () => {
 });
 
 function makeWrapper(status: ClusterStatus) {
-    const state: ClusterState = { selection: clusterSelection(Cluster.MainnetBeta), status };
+    const selection = clusterSelection(Cluster.MainnetBeta);
+    const state: ClusterState = { connectableUrl: toConnectableUrl(clusterUrl(selection)), selection, status };
     return function Wrapper({ children }: { children: ReactNode }) {
         return createElement(StateContext.Provider, { value: state }, children);
     };

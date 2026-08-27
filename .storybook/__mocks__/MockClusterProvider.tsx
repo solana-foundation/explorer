@@ -1,15 +1,19 @@
 // Skips ClusterProvider's mount-time health check (getGenesisHash) and seeds useClusterInfo()'s
 // SWR cache so consumers render epoch/schedule data without any network call.
 
+import { toConnectableUrl } from '@entities/cluster';
 import { type ClusterInfo, clusterModalOpenAtom, type ClusterState, StateContext } from '@providers/cluster';
 import { Cluster, clusterSelection, ClusterStatus, clusterUrl } from '@utils/cluster';
 import { useHydrateAtoms } from 'jotai/utils';
 import { type ReactNode, useState } from 'react';
 import { SWRConfig, unstable_serialize } from 'swr';
 
+const defaultSelection = clusterSelection(Cluster.MainnetBeta);
+
 const defaultState: ClusterState = {
+    connectableUrl: toConnectableUrl(clusterUrl(defaultSelection)),
     genesisHash: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d',
-    selection: clusterSelection(Cluster.MainnetBeta),
+    selection: defaultSelection,
     status: ClusterStatus.Connected,
 };
 

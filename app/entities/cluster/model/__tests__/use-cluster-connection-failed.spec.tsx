@@ -2,7 +2,8 @@ import { renderHook } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 
-import { Cluster, clusterSelection, ClusterStatus } from '../../lib/cluster';
+import { Cluster, clusterSelection, ClusterStatus, clusterUrl } from '../../lib/cluster';
+import { toConnectableUrl } from '../../lib/connectable-url';
 import { type ClusterState, StateContext } from '../cluster-provider';
 import { useClusterConnectionFailed } from '../use-cluster-connection-failed';
 
@@ -35,7 +36,8 @@ describe('useClusterConnectionFailed', () => {
 });
 
 function makeWrapper(status: ClusterStatus) {
-    const state: ClusterState = { selection: clusterSelection(Cluster.MainnetBeta), status };
+    const selection = clusterSelection(Cluster.MainnetBeta);
+    const state: ClusterState = { connectableUrl: toConnectableUrl(clusterUrl(selection)), selection, status };
     return function Wrapper({ children }: { children: ReactNode }) {
         return createElement(StateContext.Provider, { value: state }, children);
     };

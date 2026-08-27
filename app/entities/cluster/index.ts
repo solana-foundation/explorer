@@ -1,5 +1,6 @@
 export { getRpc, type SolanaRpc } from './api/get-rpc';
 export { clusterSelection, type ClusterSelection } from './lib/cluster';
+export { type ConnectableUrl, toConnectableUrl } from './lib/connectable-url';
 export type { ClusterInfo } from './lib/types';
 export { type CustomUrlDecision, decideCustomUrl, isCustomUrlCarryable } from './lib/resolve-cluster';
 export { DEFAULT_RPC_ENDPOINT, parseRpcEndpoint, rpcEndpoint, type RpcEndpoint } from './lib/rpc-endpoint';

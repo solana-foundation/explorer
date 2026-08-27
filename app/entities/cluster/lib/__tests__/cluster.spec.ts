@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
     Cluster,
@@ -9,6 +9,17 @@ import {
     serverClusterUrl,
 } from '../cluster';
 import { DEFAULT_CUSTOM_URL, rpcEndpoint } from '../rpc-endpoint';
+
+// In a hook, not a test body: a failed assertion would otherwise leave a blanked env var to decide what
+// the describes below resolve, turning one failure into a cascade.
+afterEach(() => vi.unstubAllEnvs());
+
+const BLANKABLE_ENDPOINTS: [string, ServerCluster, string][] = [
+    ['mainnet-beta', Cluster.MainnetBeta, 'NEXT_PUBLIC_MAINNET_RPC_URL'],
+    ['testnet', Cluster.Testnet, 'NEXT_PUBLIC_TESTNET_RPC_URL'],
+    ['devnet', Cluster.Devnet, 'NEXT_PUBLIC_DEVNET_RPC_URL'],
+    ['simd296', Cluster.Simd296, 'NEXT_PUBLIC_SIMD296_RPC_URL'],
+];
 
 describe('ClusterSelection', () => {
     it('should refuse to pair an endpoint with a cluster that would ignore it', () => {
@@ -43,6 +54,20 @@ describe('clusterUrl', () => {
             expect(url).not.toBe('http://localhost:8900');
         }
     });
+
+    // A deploy can leave one of these set but blank. An empty string is not an endpoint, and every
+    // consumer keys its request on this value, reading an empty one as "no endpoint decided yet" — so a
+    // blank var would leave the cards loading for good, with nothing logged and nothing to retry.
+    //
+    // Every arm, because the fix is per-arm: reverting one leaves that cluster alone broken.
+    it.each(BLANKABLE_ENDPOINTS)(
+        'should fall back to the public endpoint when %s is configured but blank',
+        (_name, cluster, envVar) => {
+            vi.stubEnv(envVar, '');
+
+            expect(clusterUrl({ cluster })).toBeTruthy();
+        },
+    );
 });
 
 describe('clusterSelection', () => {

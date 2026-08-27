@@ -7,7 +7,8 @@ vi.mock('@solana/kit', () => ({ createSolanaRpc: vi.fn() }));
 
 import { createSolanaRpc } from '@solana/kit';
 
-import { Cluster, clusterSelection, ClusterStatus } from '../../lib/cluster';
+import { Cluster, clusterSelection, ClusterStatus, clusterUrl } from '../../lib/cluster';
+import { toConnectableUrl } from '../../lib/connectable-url';
 import { type ClusterState, StateContext } from '../cluster-provider';
 import { useClusterInfo } from '../use-cluster-info';
 
@@ -33,8 +34,11 @@ function mockRpc() {
 
 let rpc: ReturnType<typeof mockRpc>;
 
+const connectedSelection = clusterSelection(Cluster.MainnetBeta);
+
 const connectedState: ClusterState = {
-    selection: clusterSelection(Cluster.MainnetBeta),
+    connectableUrl: toConnectableUrl(clusterUrl(connectedSelection)),
+    selection: connectedSelection,
     status: ClusterStatus.Connected,
 };
 

@@ -1,8 +1,9 @@
+import { toConnectableUrl } from '@entities/cluster';
 import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
 import type { ClusterState } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { TransactionsProvider } from '@providers/transactions';
-import { type Cluster, clusterSelection } from '@utils/cluster';
+import { type Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import React, { useLayoutEffect, useRef } from 'react';
 import { fn } from 'storybook/test';
 
@@ -13,7 +14,6 @@ import { MockAccountsProvider } from './__mocks__/MockAccountsProvider';
 import { MockClusterProvider as ClusterProvider } from './__mocks__/MockClusterProvider';
 import { MockHistoryProvider } from './__mocks__/MockHistoryProvider';
 import { MockStatsProvider } from './__mocks__/MockStatsProvider';
-import { MockSupplyProvider } from './__mocks__/MockSupplyProvider';
 import { MockTokenInfoBatchProvider } from './__mocks__/MockTokenInfoBatchProvider';
 import { MockTransactionsProvider } from './__mocks__/MockTransactionsProvider';
 import type { Decorator, Parameters } from './types';
@@ -58,12 +58,19 @@ export function withClusterState({
     customUrl,
     modalOpen,
     ...state
-}: Omit<ClusterState, 'selection'> & { cluster: Cluster; customUrl?: string; modalOpen?: boolean }): Decorator {
+}: Omit<ClusterState, 'connectableUrl' | 'selection'> & {
+    cluster: Cluster;
+    customUrl?: string;
+    modalOpen?: boolean;
+}): Decorator {
     return function WithClusterState(Story) {
+        // Derived here rather than asked of the story: a state describing a settled cluster has an endpoint
+        // to connect to, and leaving it out is what makes a hook keyed on it wait for good.
+        const selection = clusterSelection(cluster, customUrl);
         return (
             <ClusterProvider
                 modalOpen={modalOpen}
-                state={{ ...state, selection: clusterSelection(cluster, customUrl) }}
+                state={{ ...state, connectableUrl: toConnectableUrl(clusterUrl(selection)), selection }}
             >
                 <Story />
             </ClusterProvider>
@@ -149,15 +156,6 @@ export const withClusterAccountsAndTokenInfo: Decorator = Story => (
                 <Story />
             </MockAccountsProvider>
         </MockTokenInfoBatchProvider>
-    </ClusterProvider>
-);
-
-/** Wraps stories with ClusterProvider and MockSupplyProvider. Usage: `decorators: [withSupply]` */
-export const withSupply: Decorator = Story => (
-    <ClusterProvider>
-        <MockSupplyProvider>
-            <Story />
-        </MockSupplyProvider>
     </ClusterProvider>
 );
 

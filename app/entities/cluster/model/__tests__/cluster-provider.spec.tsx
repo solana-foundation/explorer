@@ -18,9 +18,18 @@ function mockGenesis(send: () => Promise<string>) {
     } as unknown as ReturnType<typeof createSolanaRpc>);
 }
 
+// A sentinel, not an empty string: the failure to catch is the endpoint being absent from the context
+// altogether, which every fetching hook reads as "wait".
+const NOTHING_TO_CONNECT_TO = 'nothing-to-connect-to';
+
 function Probe() {
-    const { status } = useCluster();
-    return <div data-testid="status">{ClusterStatus[status]}</div>;
+    const { connectableUrl, status } = useCluster();
+    return (
+        <>
+            <div data-testid="status">{ClusterStatus[status]}</div>
+            <div data-testid="connectable">{connectableUrl ?? NOTHING_TO_CONNECT_TO}</div>
+        </>
+    );
 }
 
 // Renders the real ClusterProvider with a shared SWR cache and jotai store so re-rendering with new
@@ -47,10 +56,49 @@ function renderProvider(search: string) {
 }
 
 const statusText = () => screen.getByTestId('status').textContent;
+const connectableText = () => screen.getByTestId('connectable').textContent;
 
 beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    // Approvals live in sessionStorage, so one test's approved origin would otherwise carry into the next.
+    sessionStorage.clear();
+});
+
+// Three consumers now gate their requests on this one context field, and its type is optional, so
+// dropping it from the provider value fails nothing at the type level: the home page would simply wait
+// for an endpoint that never arrives, on every cluster.
+describe('ClusterProvider connectable endpoint', () => {
+    it('should publish the endpoint for a cluster that needs no decision', async () => {
+        mockGenesis(() => Promise.resolve('genesis'));
+
+        renderProvider('cluster=devnet');
+
+        await waitFor(() => expect(statusText()).toBe(ClusterStatus[ClusterStatus.Connected]));
+        expect(connectableText()).toContain('devnet');
+    });
+
+    it('should publish nothing, and connect to nothing, while a custom URL awaits consent', async () => {
+        mockGenesis(() => Promise.resolve('genesis'));
+
+        renderProvider('cluster=custom&customUrl=https://my-node.example/rpc');
+
+        expect(connectableText()).toBe(NOTHING_TO_CONNECT_TO);
+        // The gate, not just the value: without it the health check contacts the fallback endpoint — a
+        // node the visitor never chose — while the consent prompt is still on screen.
+        expect(createSolanaRpc).not.toHaveBeenCalled();
+        expect(statusText()).toBe(ClusterStatus[ClusterStatus.Connecting]);
+    });
+
+    it('should publish a custom endpoint once its origin is approved', async () => {
+        mockGenesis(() => Promise.resolve('genesis'));
+        sessionStorage.setItem('explorer:approvedRpcOrigins', JSON.stringify(['https://my-node.example']));
+
+        renderProvider('cluster=custom&customUrl=https://my-node.example/rpc');
+
+        await waitFor(() => expect(connectableText()).toBe('https://my-node.example/rpc'));
+        expect(createSolanaRpc).toHaveBeenCalledWith('https://my-node.example/rpc');
+    });
 });
 
 describe('ClusterProvider connection status', () => {
