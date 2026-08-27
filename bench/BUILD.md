@@ -25,7 +25,7 @@
 | Dynamic | `/address/[address]/security` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/slot-hashes` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/stake-history` | 470 kB | 870 kB |
-| Dynamic | `/address/[address]/subscriptions` | 470 kB | 860 kB |
+| Dynamic | `/address/[address]/subscriptions` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/token-extensions` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/tokens` | 480 kB | 880 kB |
 | Dynamic | `/address/[address]/transfers` | 480 kB | 880 kB |
@@ -60,7 +60,7 @@
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
-| Static | `/tos` | 890 B | 410 kB |
+| Static | `/tos` | 880 B | 410 kB |
 | Dynamic | `/tx/[signature]` | 510 kB | 910 kB |
 | Dynamic | `/tx/[signature]/inspect` | 450 kB | 850 kB |
 | Static | `/tx/inspector` | 450 kB | 850 kB |
