@@ -1,7 +1,8 @@
 import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
+import type { InstructionNode } from '@entities/instruction-card';
 import type { ParsedInstruction, ParsedTransaction, SignatureResult } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { create } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -26,7 +27,7 @@ import {
 } from '../../lib/instruction-types';
 import { AuthorizeCheckedDetailsCard } from './AuthorizeCheckedDetailsCard';
 import { AuthorizeDetailsCard } from './AuthorizeDetailsCard';
-import { AuthorizeWithSeedDetailsCard } from './AuthorizeWithSeedDetailsCard';
+import { AuthorizeCheckedWithSeedDetailsCard, AuthorizeWithSeedDetailsCard } from './AuthorizeWithSeedDetailsCard';
 import { DeactivateDelinquentDetailsCard } from './DeactivateDelinquentDetailsCard';
 import { DeactivateDetailsCard } from './DeactivateDetailsCard';
 import { DelegateDetailsCard } from './DelegateDetailsCard';
@@ -34,8 +35,8 @@ import { GetMinimumDelegationDetailsCard } from './GetMinimumDelegationDetailsCa
 import { InitializeCheckedDetailsCard } from './InitializeCheckedDetailsCard';
 import { InitializeDetailsCard } from './InitializeDetailsCard';
 import { MergeDetailsCard } from './MergeDetailsCard';
-import { MoveDetailsCard } from './MoveDetailsCard';
-import { SetLockupDetailsCard } from './SetLockupDetailsCard';
+import { MoveLamportsDetailsCard, MoveStakeDetailsCard } from './MoveDetailsCard';
+import { SetLockupCheckedDetailsCard, SetLockupDetailsCard } from './SetLockupDetailsCard';
 import { SplitDetailsCard } from './SplitDetailsCard';
 import { WithdrawDetailsCard } from './WithdrawDetailsCard';
 
@@ -44,11 +45,19 @@ type DetailsProps = {
     ix: ParsedInstruction;
     result: SignatureResult;
     index: number;
-    innerCards?: ReactNode[];
+    innerCards?: JSX.Element[];
     childIndex?: number;
 };
 
 export function StakeDetailsCard(props: DetailsProps) {
+    const node: InstructionNode = {
+        childIndex: props.childIndex,
+        index: props.index,
+        innerCards: props.innerCards,
+        ix: props.ix,
+        programId: props.ix.programId,
+    };
+
     // TODO: Replace this try/catch + Logger with a React error boundary one level up
     // (e.g. in InstructionCard). Reasons:
     //   1. try/catch in render code is a smell — error boundaries are React's answer.
@@ -64,78 +73,70 @@ export function StakeDetailsCard(props: DetailsProps) {
         switch (parsed.type) {
             case 'initialize': {
                 const info = create(parsed.info, InitializeInfo);
-                return <InitializeDetailsCard info={info} {...props} />;
+                return <InitializeDetailsCard info={info} node={node} />;
             }
             case 'delegate': {
                 const info = create(parsed.info, DelegateInfo);
-                return <DelegateDetailsCard info={info} {...props} />;
+                return <DelegateDetailsCard info={info} node={node} />;
             }
             case 'authorize': {
                 const info = create(parsed.info, AuthorizeInfo);
-                return <AuthorizeDetailsCard info={info} {...props} />;
+                return <AuthorizeDetailsCard info={info} node={node} />;
             }
             case 'split': {
                 const info = create(parsed.info, SplitInfo);
-                return <SplitDetailsCard info={info} {...props} />;
+                return <SplitDetailsCard info={info} node={node} />;
             }
             case 'withdraw': {
                 const info = create(parsed.info, WithdrawInfo);
-                return <WithdrawDetailsCard info={info} {...props} />;
+                return <WithdrawDetailsCard info={info} node={node} />;
             }
             case 'deactivate': {
                 const info = create(parsed.info, DeactivateInfo);
-                return <DeactivateDetailsCard info={info} {...props} />;
+                return <DeactivateDetailsCard info={info} node={node} />;
             }
             case 'merge': {
                 const info = create(parsed.info, MergeInfo);
-                return <MergeDetailsCard info={info} {...props} />;
+                return <MergeDetailsCard info={info} node={node} />;
             }
             case 'setLockup': {
                 const info = create(parsed.info, SetLockupInfo);
-                return <SetLockupDetailsCard info={info} title="Stake Program: Set Lockup" {...props} />;
+                return <SetLockupDetailsCard info={info} node={node} />;
             }
             case 'setLockupChecked': {
                 const info = create(parsed.info, SetLockupCheckedInfo);
-                return <SetLockupDetailsCard info={info} title="Stake Program: Set Lockup Checked" {...props} />;
+                return <SetLockupCheckedDetailsCard info={info} node={node} />;
             }
             case 'authorizeWithSeed': {
                 const info = create(parsed.info, AuthorizeWithSeedInfo);
-                return (
-                    <AuthorizeWithSeedDetailsCard info={info} title="Stake Program: Authorize With Seed" {...props} />
-                );
+                return <AuthorizeWithSeedDetailsCard info={info} node={node} />;
             }
             case 'authorizeCheckedWithSeed': {
                 const info = create(parsed.info, AuthorizeCheckedWithSeedInfo);
-                return (
-                    <AuthorizeWithSeedDetailsCard
-                        info={info}
-                        title="Stake Program: Authorize Checked With Seed"
-                        {...props}
-                    />
-                );
+                return <AuthorizeCheckedWithSeedDetailsCard info={info} node={node} />;
             }
             case 'initializeChecked': {
                 const info = create(parsed.info, InitializeCheckedInfo);
-                return <InitializeCheckedDetailsCard info={info} {...props} />;
+                return <InitializeCheckedDetailsCard info={info} node={node} />;
             }
             case 'authorizeChecked': {
                 const info = create(parsed.info, AuthorizeCheckedInfo);
-                return <AuthorizeCheckedDetailsCard info={info} {...props} />;
+                return <AuthorizeCheckedDetailsCard info={info} node={node} />;
             }
             case 'moveStake': {
                 const info = create(parsed.info, MoveStakeInfo);
-                return <MoveDetailsCard info={info} variant="stake" {...props} />;
+                return <MoveStakeDetailsCard info={info} node={node} />;
             }
             case 'moveLamports': {
                 const info = create(parsed.info, MoveLamportsInfo);
-                return <MoveDetailsCard info={info} variant="lamports" {...props} />;
+                return <MoveLamportsDetailsCard info={info} node={node} />;
             }
             case 'deactivateDelinquent': {
                 const info = create(parsed.info, DeactivateDelinquentInfo);
-                return <DeactivateDelinquentDetailsCard info={info} {...props} />;
+                return <DeactivateDelinquentDetailsCard info={info} node={node} />;
             }
             case 'getMinimumDelegation': {
-                return <GetMinimumDelegationDetailsCard {...props} />;
+                return <GetMinimumDelegationDetailsCard node={node} />;
             }
             default:
                 return <UnknownDetailsCard {...props} />;

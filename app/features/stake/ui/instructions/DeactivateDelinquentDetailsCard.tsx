@@ -1,31 +1,12 @@
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import React from 'react';
+import { address, defineInstructionCard } from '@entities/instruction-card';
 
 import type { DeactivateDelinquentInfo } from '../../lib/instruction-types';
-import { DetailRow, StakeProgramRow } from './DetailRow';
-import type { StakeCardProps } from './types';
 
-export function DeactivateDelinquentDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    innerCards,
-    childIndex,
-}: StakeCardProps<DeactivateDelinquentInfo>) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title="Stake Program: Deactivate Delinquent"
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <StakeProgramRow />
-            <DetailRow label="Stake Address" pubkey={info.stakeAccount} />
-            <DetailRow label="Delinquent Vote Account" pubkey={info.voteAccount} />
-            <DetailRow label="Reference Vote Account" pubkey={info.referenceVoteAccount} />
-        </InstructionCard>
-    );
-}
+export const DeactivateDelinquentDetailsCard = defineInstructionCard<DeactivateDelinquentInfo>({
+    fields: info => [
+        address('Stake Address', info.stakeAccount),
+        address('Delinquent Vote Account', info.voteAccount),
+        address('Reference Vote Account', info.referenceVoteAccount),
+    ],
+    title: 'Stake Program: Deactivate Delinquent',
+});

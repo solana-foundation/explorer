@@ -1,6 +1,7 @@
 import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
+import type { InstructionNode } from '@entities/instruction-card';
 import type { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import React, { type ReactNode } from 'react';
+import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -11,7 +12,7 @@ type RawStakeDetailsCardProps = {
     ix: TransactionInstruction;
     index: number;
     result: SignatureResult;
-    innerCards?: ReactNode[];
+    innerCards?: JSX.Element[];
     childIndex?: number;
     signature?: string;
 };
@@ -24,8 +25,16 @@ export function RawStakeDetailsCard(props: RawStakeDetailsCardProps) {
     const { ix, signature, ...rest } = props;
     const classification = classifyRawStakeInstruction(ix.data);
     switch (classification.kind) {
-        case 'getMinimumDelegation':
-            return <GetMinimumDelegationDetailsCard ix={ix} {...rest} />;
+        case 'getMinimumDelegation': {
+            const node: InstructionNode = {
+                childIndex: props.childIndex,
+                index: props.index,
+                innerCards: props.innerCards,
+                ix,
+                programId: ix.programId,
+            };
+            return <GetMinimumDelegationDetailsCard node={node} />;
+        }
         case 'invalid':
             Logger.warn('[stake] Unrecognized stake instruction discriminator', {
                 error: classification.error,

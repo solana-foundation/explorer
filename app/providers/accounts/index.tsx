@@ -16,7 +16,10 @@ import {
     type TokenProgram,
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
-import { getStakeActivation, StakeAccount } from '@features/stake';
+// deep imports on purpose: the barrel also re-exports the stake instruction cards, which import the
+// instruction-card entity — and that reaches back here, closing an import cycle
+import { getStakeActivation } from '@features/stake/api/stake-activation';
+import { StakeAccount } from '@features/stake/lib/validators';
 // deep imports on purpose: this provider only needs the history provider and read hook,
 // not the transaction-history UI that the feature barrel re-exports
 import { HistoryProvider } from '@features/transaction-history/model/history-provider';

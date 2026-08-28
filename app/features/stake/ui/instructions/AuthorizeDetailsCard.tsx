@@ -1,33 +1,14 @@
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import React from 'react';
+import { address, defineInstructionCard, text } from '@entities/instruction-card';
 
 import type { AuthorizeInfo } from '../../lib/instruction-types';
-import { DetailRow, StakeProgramRow } from './DetailRow';
-import type { StakeCardProps } from './types';
 
-export function AuthorizeDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    innerCards,
-    childIndex,
-}: StakeCardProps<AuthorizeInfo>) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title="Stake Program: Authorize"
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <StakeProgramRow />
-            <DetailRow label="Stake Address" pubkey={info.stakeAccount} />
-            <DetailRow label="Old Authority Address" pubkey={info.authority} />
-            <DetailRow label="New Authority Address" pubkey={info.newAuthority} />
-            <DetailRow label="Authority Type">{info.authorityType}</DetailRow>
-            {info.custodian && <DetailRow label="Lockup Custodian" pubkey={info.custodian} />}
-        </InstructionCard>
-    );
-}
+export const AuthorizeDetailsCard = defineInstructionCard<AuthorizeInfo>({
+    fields: info => [
+        address('Stake Address', info.stakeAccount),
+        address('Old Authority Address', info.authority),
+        address('New Authority Address', info.newAuthority),
+        text('Authority Type', info.authorityType),
+        info.custodian && address('Lockup Custodian', info.custodian),
+    ],
+    title: 'Stake Program: Authorize',
+});

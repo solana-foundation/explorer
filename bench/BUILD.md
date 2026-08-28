@@ -2,12 +2,12 @@
 
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
-| Static | `/` | 130 kB | 520 kB |
-| Static | `/_not-found` | 0 B | 400 kB |
-| Dynamic | `/address/[address]` | 500 kB | 890 kB |
+| Static | `/` | 130 kB | 530 kB |
+| Static | `/_not-found` | 0 B | 410 kB |
+| Dynamic | `/address/[address]` | 500 kB | 900 kB |
 | Dynamic | `/address/[address]/account-data` | 510 kB | 910 kB |
 | Dynamic | `/address/[address]/anchor-account` | 470 kB | 870 kB |
-| Dynamic | `/address/[address]/anchor-program` | 470 kB | 860 kB |
+| Dynamic | `/address/[address]/anchor-program` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/attestation` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/attributes` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/blockhashes` | 470 kB | 870 kB |
@@ -15,9 +15,9 @@
 | Dynamic | `/address/[address]/concurrent-merkle-tree` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/domains` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/entries` | 470 kB | 870 kB |
-| Dynamic | `/address/[address]/feature-gate` | 470 kB | 860 kB |
+| Dynamic | `/address/[address]/feature-gate` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/idl` | 590 kB | 990 kB |
-| Dynamic | `/address/[address]/instructions` | 480 kB | 870 kB |
+| Dynamic | `/address/[address]/instructions` | 480 kB | 880 kB |
 | Dynamic | `/address/[address]/metadata` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/program-multisig` | 470 kB | 870 kB |
@@ -49,10 +49,10 @@
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
-| Dynamic | `/block/[slot]` | 280 kB | 680 kB |
-| Dynamic | `/block/[slot]/accounts` | 270 kB | 670 kB |
-| Dynamic | `/block/[slot]/programs` | 270 kB | 670 kB |
-| Dynamic | `/block/[slot]/rewards` | 270 kB | 670 kB |
+| Dynamic | `/block/[slot]` | 260 kB | 660 kB |
+| Dynamic | `/block/[slot]/accounts` | 250 kB | 650 kB |
+| Dynamic | `/block/[slot]/programs` | 250 kB | 650 kB |
+| Dynamic | `/block/[slot]/rewards` | 250 kB | 650 kB |
 | Dynamic | `/epoch/[epoch]` | 10 kB | 410 kB |
 | Static | `/feature-gates` | 40 kB | 440 kB |
 | Dynamic | `/mcp` | — | — |
@@ -62,5 +62,5 @@
 | Static | `/opengraph-image.png` | — | — |
 | Static | `/tos` | 880 B | 410 kB |
 | Dynamic | `/tx/[signature]` | 510 kB | 910 kB |
-| Dynamic | `/tx/[signature]/inspect` | 450 kB | 850 kB |
-| Static | `/tx/inspector` | 450 kB | 850 kB |
+| Dynamic | `/tx/[signature]/inspect` | 440 kB | 840 kB |
+| Static | `/tx/inspector` | 440 kB | 840 kB |
