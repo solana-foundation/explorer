@@ -5,6 +5,7 @@ import { useAtomValue } from 'jotai';
 import { useEffect, useMemo } from 'react';
 
 import { Cluster, type ClusterSelection, clusterUrl } from '../lib/cluster';
+import { type ConnectableUrl, toConnectableUrl } from '../lib/connectable-url';
 import { decideCustomUrl } from '../lib/resolve-cluster';
 import { DEFAULT_RPC_ENDPOINT, type RpcEndpoint } from '../lib/rpc-endpoint';
 import { approvedOriginsAtom } from './approved-origins';
@@ -21,10 +22,10 @@ type UseClusterUrlParams = {
 // query string is the only source for *which* endpoint, which keeps a custom cluster shareable, but
 // anyone can write a link, so it is not evidence of consent.
 //
-// The caller must not connect to `url` while `pendingCustomUrl` is set or `customUrlDecided` is false.
-// In both cases `url` is the fallback endpoint, not an answer.
+// `url` always resolves, but it is only an *answer* when `connectableUrl` is set — otherwise it holds
+// the fallback endpoint. Fetch through `connectableUrl`; read `url` to display or link.
 export function useClusterUrl({ cluster, searchParams, onReplaceSearchParams }: UseClusterUrlParams): {
-    customUrlDecided: boolean;
+    connectableUrl: ConnectableUrl | undefined;
     pendingCustomUrl?: RpcEndpoint;
     selection: ClusterSelection;
     url: string;
@@ -90,7 +91,12 @@ export function useClusterUrl({ cluster, searchParams, onReplaceSearchParams }: 
         onReplaceSearchParams(nextSearchParams);
     }, [strip, searchParams, onReplaceSearchParams]);
 
-    return { customUrlDecided, pendingCustomUrl, selection, url: clusterUrl(selection) };
+    const url = clusterUrl(selection);
+
+    // Both halves in one value, because neither implies the other and a caller checking one would miss.
+    const connectableUrl = pendingCustomUrl === undefined && customUrlDecided ? toConnectableUrl(url) : undefined;
+
+    return { connectableUrl, pendingCustomUrl, selection, url };
 }
 
 // Stable empty list, so the memo above does not see a new array on every render.

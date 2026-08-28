@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 
-export const NO_STORE_HEADERS = { 'Cache-Control': 'no-store, max-age=0' };
+import { UPSTREAM_TIMEOUT_MS } from './timeouts';
 
-export const UPSTREAM_TIMEOUT_MS = 30_000;
+export const NO_STORE_HEADERS = { 'Cache-Control': 'no-store, max-age=0' };
 
 export const CACHE_MAX_AGE = 14400; // 4 hours
 export const ERROR_CACHE_MAX_AGE = 30; // seconds
@@ -11,6 +11,9 @@ export const CACHE_HEADERS = {
     'Cache-Control': `public, max-age=${CACHE_MAX_AGE}, s-maxage=${CACHE_MAX_AGE}, stale-while-revalidate=3600`,
 };
 
+// `max-age` is the half that bounds a retry storm: the shared cache takes only a handful of status codes,
+// and no error status is among them, so `s-maxage` does nothing for a 5xx and the visitor's own cache is
+// all that stands between a failing upstream and one request per retry per visitor.
 export const ERROR_CACHE_HEADERS = {
     'Cache-Control': `public, max-age=${ERROR_CACHE_MAX_AGE}, s-maxage=${ERROR_CACHE_MAX_AGE}`,
 };

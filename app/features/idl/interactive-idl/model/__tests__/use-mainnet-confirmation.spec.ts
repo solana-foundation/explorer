@@ -1,3 +1,4 @@
+import { toConnectableUrl } from '@entities/cluster';
 import { getCookie, setCookie } from '@features/cookie';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { Cluster, clusterName, clusterSelection, ClusterStatus, clusterUrl } from '@utils/cluster';
@@ -285,6 +286,7 @@ function setup(cluster: Cluster = Cluster.MainnetBeta) {
     const selection = clusterSelection(cluster);
     vi.mocked(useCluster).mockReturnValue({
         ...selection,
+        connectableUrl: toConnectableUrl(clusterUrl(selection)),
         name: clusterName(cluster),
         selection,
         status: ClusterStatus.Connected,

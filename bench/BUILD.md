@@ -41,6 +41,7 @@
 | Dynamic | `/api/security-txt` | — | — |
 | Dynamic | `/api/sns-domains/[address]` | — | — |
 | Dynamic | `/api/stake-rewards/[address]` | — | — |
+| Dynamic | `/api/supply` | — | — |
 | Dynamic | `/api/token-image/[mintAddress]` | — | — |
 | Dynamic | `/api/token-info` | — | — |
 | Dynamic | `/api/token-market-data/[address]` | — | — |
@@ -49,7 +50,7 @@
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
-| Dynamic | `/block/[slot]` | 260 kB | 660 kB |
+| Dynamic | `/block/[slot]` | 250 kB | 660 kB |
 | Dynamic | `/block/[slot]/accounts` | 250 kB | 650 kB |
 | Dynamic | `/block/[slot]/programs` | 250 kB | 650 kB |
 | Dynamic | `/block/[slot]/rewards` | 250 kB | 650 kB |
