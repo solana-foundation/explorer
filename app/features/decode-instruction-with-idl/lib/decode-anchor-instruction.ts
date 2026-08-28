@@ -52,8 +52,7 @@ export function decodeAnchorInstruction(
             decodedIxData = coder.decode(encodedInstructionData) ?? undefined;
         }
         const ixEventDef = anchorProgram.idl.events?.find(event => event.name === decodedIxData?.name) as
-            | IdlEvent
-            | undefined;
+            IdlEvent | undefined;
 
         // The decoded event may not resolve to a known IDL event (unknown/mismatched discriminator). Leave
         // the decode fields undefined so the card shows the "failed to decode" row rather than dereferencing

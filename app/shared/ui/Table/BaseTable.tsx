@@ -103,8 +103,7 @@ const wrapperVariants = cva([], {
 });
 
 export interface BaseTableProps
-    extends React.TableHTMLAttributes<HTMLTableElement>,
-        VariantProps<typeof tableVariants> {}
+    extends React.TableHTMLAttributes<HTMLTableElement>, VariantProps<typeof tableVariants> {}
 
 const BaseTableRoot = React.forwardRef<HTMLTableElement, BaseTableProps>(
     ({ body, className, head, nowrap, ui, variant, ...props }, ref) => {

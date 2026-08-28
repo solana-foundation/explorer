@@ -37,8 +37,7 @@ const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(({ className, .
 TabsList.displayName = 'TabsList';
 
 export interface TabsTriggerProps
-    extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-        VariantProps<typeof tabsTriggerVariants> {
+    extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof tabsTriggerVariants> {
     active?: boolean;
 }
 

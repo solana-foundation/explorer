@@ -10,9 +10,7 @@ import type { ConfigResolutionOnchainResult } from '../api/find-config-in-transa
 import { findConfigInTransactions } from '../api/find-config-in-transactions';
 
 export type ConfigResolutionOnchainState =
-    | { status: 'skipped' }
-    | { status: 'loading' }
-    | { status: 'ready'; result: ConfigResolutionOnchainResult };
+    { status: 'skipped' } | { status: 'loading' } | { status: 'ready'; result: ConfigResolutionOnchainResult };
 
 function swrKey(url: string, address: string, fingerprint: string, enabled: boolean): string | null {
     // eslint-disable-next-line unicorn/no-null -- SWR uses a null key to disable the request

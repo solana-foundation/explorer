@@ -7,9 +7,7 @@ import { bytes } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 export type MetadataPayloadDecodeResult =
-    | { status: 'idle' }
-    | { status: 'failed' }
-    | { status: 'ready'; payload: PmpPayloadDecodeResult };
+    { status: 'idle' } | { status: 'failed' } | { status: 'ready'; payload: PmpPayloadDecodeResult };
 
 /**
  * Decodes the payload of a Metadata account.

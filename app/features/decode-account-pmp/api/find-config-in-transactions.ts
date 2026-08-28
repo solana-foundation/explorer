@@ -19,9 +19,7 @@ export const PMP_LOOKUP_MAX_SIGNATURES = 8;
  * config does not exist on chain yet, the other is a buffer whose commit fell off the end of the scan.
  */
 export type ConfigResolutionOnchainResult =
-    | ConfigResolutionFromTxResult
-    | { kind: 'max-signatures-limit' }
-    | { kind: 'failed'; reason: string };
+    ConfigResolutionFromTxResult | { kind: 'max-signatures-limit' } | { kind: 'failed'; reason: string };
 
 /**
  * Walks a buffer's recent history newest-first and returns the first config any transaction resolved.

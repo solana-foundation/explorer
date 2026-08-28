@@ -24,7 +24,8 @@ const copyLabelByState: Record<CopyState, string> = {
 
 export interface BaseCodeBlockProps
     // `dangerouslySetInnerHTML` is excluded alongside `children`: it spreads onto the div that renders them.
-    extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'dangerouslySetInnerHTML'>,
+    extends
+        Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'dangerouslySetInnerHTML'>,
         Omit<VariantProps<typeof preVariants>, 'wrap'> {
     caption?: string;
     code: string;

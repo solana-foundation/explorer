@@ -5,9 +5,7 @@ import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
 export type PmpAccountPayloadState =
-    | { status: 'loading' }
-    | { status: 'failed' }
-    | { status: 'ready'; content: PmpAccountDecodeResult };
+    { status: 'loading' } | { status: 'failed' } | { status: 'ready'; content: PmpAccountDecodeResult };
 
 /**
  * Reads the payload a PMP account currently holds.
