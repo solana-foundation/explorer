@@ -1,16 +1,19 @@
 'use client';
 
+import { getRpc } from '@entities/cluster';
 import { useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { TokenAccountInfo } from '@validators/accounts/token';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
 import { Logger } from '@/app/shared/lib/logger';
+import { toKitAddress, toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 import { getCurrentTokenScaledUiAmountMultiplier } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
@@ -63,22 +66,27 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
     let status;
     let data;
     try {
-        const { value: tokenAccounts } = await new Connection(url, 'processed').getParsedTokenAccountsByOwner(pubkey, {
-            programId: TOKEN_PROGRAM_ID,
-        });
-        const { value: token2022Accounts } = await new Connection(url, 'processed').getParsedTokenAccountsByOwner(
-            pubkey,
-            {
-                programId: TOKEN_2022_PROGRAM_ID,
-            },
-        );
+        const rpc = getRpc(url);
+        const owner = toKitAddress(pubkey);
+        const fetchByProgram = (programId: PublicKey) =>
+            rpc
+                .getTokenAccountsByOwner(
+                    owner,
+                    { programId: toKitAddress(programId) },
+                    { commitment: 'processed', encoding: 'jsonParsed' },
+                )
+                .send();
+
+        const [{ value: tokenAccounts }, { value: token2022Accounts }] = await Promise.all([
+            fetchByProgram(TOKEN_PROGRAM_ID),
+            fetchByProgram(TOKEN_2022_PROGRAM_ID),
+        ]);
 
         // Return raw holdings only. Symbol/logo/name are enriched lazily per visible row via useTokenInfo
         // (the app-wide batched token-info provider), so there is no upfront bulk metadata fetch and no cap.
-        const tokens: TokenInfoWithPubkey[] = tokenAccounts.concat(token2022Accounts).map(accountInfo => {
-            const parsedInfo = accountInfo.account.data.parsed.info;
-            const info = create(parsedInfo, TokenAccountInfo);
-            return { info, pubkey: accountInfo.pubkey };
+        const tokens: TokenInfoWithPubkey[] = [...tokenAccounts, ...token2022Accounts].map(accountInfo => {
+            const info = create(withNumbersInsteadOfBigInts(accountInfo.account.data.parsed.info), TokenAccountInfo);
+            return { info, pubkey: toLegacyPublicKey(accountInfo.pubkey) };
         });
 
         data = {
