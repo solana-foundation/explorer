@@ -23,9 +23,9 @@ import { UnknownAccountCard } from './UnknownAccountCard';
 export function CompressedNftCard({ account }: { account: Account }) {
     const { url } = useCluster();
     const compressedNft = useCompressedNft({ address: account.pubkey.toString(), url });
-    // getAsset also resolves regular mints, whose fields this card cannot render (an empty
-    // owner, no collection group). Only a compressed asset is safe here.
-    if (!compressedNft?.compression.compressed) return <UnknownAccountCard account={account} />;
+    // getAsset resolves fungible tokens too, and those have no single owner: DAS returns an empty
+    // string, which is not a public key. Without an owner this card has nothing to describe.
+    if (!compressedNft?.ownership.owner) return <UnknownAccountCard account={account} />;
 
     const collectionGroup = compressedNft.grouping.find(group => group.group_key === 'collection');
     const updateAuthority = compressedNft.authorities.find(authority => authority.scopes.includes('full'))?.address;

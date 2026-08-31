@@ -80,6 +80,18 @@ function makeFungibleAsset(overrides: Partial<CompressedNft> = {}): CompressedNf
     };
 }
 
+// A non-compressed asset that does have an owner, so the card can still describe it.
+function makeCoreAsset(overrides: Partial<CompressedNft> = {}): CompressedNft {
+    const base = makeFungibleAsset();
+    return {
+        ...base,
+        grouping: [{ group_key: 'collection', group_value: PublicKey.default.toBase58() }],
+        interface: 'MplCoreAsset',
+        ownership: { ...base.ownership, owner: PublicKey.default.toBase58(), ownership_model: 'single' },
+        ...overrides,
+    };
+}
+
 function makeCompressedNft(overrides: Partial<CompressedNft> = {}): CompressedNft {
     const base = makeFungibleAsset();
     return {
@@ -93,12 +105,22 @@ function makeCompressedNft(overrides: Partial<CompressedNft> = {}): CompressedNf
 }
 
 describe('CompressedNftCard', () => {
-    it('should fall back to the unknown-account card for an uncompressed asset', () => {
+    it('should fall back to the unknown-account card for an asset with no owner', () => {
         useCompressedNft.mockReturnValue(makeFungibleAsset());
 
         render(<CompressedNftCard account={makeAccount()} />);
 
         expect(screen.getByTestId('unknown-account-card')).toBeDefined();
+    });
+
+    it('should still describe a non-compressed asset that has an owner', () => {
+        useCompressedNft.mockReturnValue(makeCoreAsset());
+
+        render(<CompressedNftCard account={makeAccount()} />);
+
+        expect(screen.queryByTestId('unknown-account-card')).toBeNull();
+        expect(screen.getByText('Owner')).toBeDefined();
+        expect(screen.getByText('Update Authority')).toBeDefined();
     });
 });
 
