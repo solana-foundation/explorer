@@ -193,7 +193,7 @@ export function McpDocsOverviewView() {
                 </p>
                 {/* Snippet as the card's bottom segment behind a full-width divider (no nested card). */}
                 <div className="border-0 border-t border-solid border-white/10">
-                    <CodeBlock variant="flush" code={AGENT_INSTRUCTIONS_SNIPPET} />
+                    <CodeBlock variant="flush" wrap code={AGENT_INSTRUCTIONS_SNIPPET} />
                 </div>
             </Card>
 

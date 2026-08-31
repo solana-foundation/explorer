@@ -8,15 +8,20 @@ import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 /**
  * Multiline code snippet with a copy affordance (`Copyable` is inline-only, hence a dedicated block).
  * `flush` drops the own border/rounding for use as a full-bleed segment inside a card.
+ *
+ * `wrap` soft-wraps long lines — right for prose-like snippets. The default keeps lines intact and
+ * scrolls horizontally instead, so structured code (JSON, commands) doesn't break mid-token on mobile.
  */
 export function CodeBlock({
     code,
     className,
     variant = 'panel',
+    wrap = false,
 }: {
     code: string;
     className?: string;
     variant?: 'panel' | 'flush';
+    wrap?: boolean;
 }) {
     const [state, copy] = useCopyToClipboard(1000);
 
@@ -50,7 +55,10 @@ export function CodeBlock({
             </button>
             <pre
                 className={cn(
-                    'm-0 whitespace-pre-wrap font-mono text-xs leading-relaxed text-neutral-200 [overflow-wrap:anywhere]',
+                    'm-0 font-mono text-xs leading-relaxed text-neutral-200',
+                    wrap
+                        ? 'whitespace-pre-wrap [overflow-wrap:anywhere]'
+                        : 'overflow-x-auto whitespace-pre [scrollbar-width:thin]',
                     // Flush segments sit inside a p-6 card section — match its padding.
                     variant === 'flush' ? 'p-4 pr-10 sm:p-6 sm:pr-10' : 'p-4 pr-10',
                 )}

@@ -8,41 +8,89 @@ import { Card } from '@/app/shared/ui/Card';
 
 import { scrollSectionToTop, useStickyRelease } from '../lib/useStickyTabs';
 
-/** Table inside an example answer, mirroring the tables the agent printed. */
-function AnswerTable({ head, rows }: { head: string[]; rows: string[][] }) {
+/**
+ * Table inside an example answer, mirroring the tables the agent printed.
+ *
+ * `breakAnywhere` controls the wrapping mode. Default (`false`) wraps at word
+ * boundaries (`break-words`): each column keeps a min-content width equal to its
+ * longest word, so auto-layout sizes columns to content instead of starving them
+ * to one character per line. Set it for tables whose cells hold long unbreakable
+ * values (base58 addresses) that must break mid-token to keep the table narrow.
+ */
+function AnswerTable({
+    head,
+    rows,
+    breakAnywhere = false,
+}: {
+    head: string[];
+    rows: string[][];
+    breakAnywhere?: boolean;
+}) {
+    const wrap = breakAnywhere ? '[overflow-wrap:anywhere]' : 'break-words';
     return (
-        // The rounded outer border lives on the wrapper (kept intact by the scroll container's clipping); cells
-        // draw only the inner grid lines, so no border is lost at the corners.
-        <div className="overflow-x-auto rounded-lg border border-solid border-white/10">
-            <table className="w-full border-collapse text-xs">
-                <thead>
-                    <tr>
-                        {head.map(title => (
-                            <th
-                                key={title}
-                                className="border-0 border-b border-r border-solid border-white/10 px-2.5 py-1.5 text-left font-medium text-neutral-400 last:border-r-0"
-                            >
-                                {title}
-                            </th>
+        <>
+            {/* Mobile: a real multi-column table can't fit a phone, so stack each row as labelled
+                key/value pairs — readable without horizontal scroll. */}
+            <div className="rounded-lg border border-solid border-white/10 sm:hidden">
+                {rows.map((row, rowIndex) => (
+                    <div
+                        key={row[0]}
+                        className={cn(
+                            'flex flex-col gap-2 p-3',
+                            rowIndex > 0 && 'border-0 border-t border-solid border-white/10',
+                        )}
+                    >
+                        {row.map((cell, columnIndex) => (
+                            <div key={head[columnIndex]} className="flex flex-col gap-0.5">
+                                <span className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+                                    {head[columnIndex]}
+                                </span>
+                                <span className={cn('text-xs text-neutral-300', wrap)}>{cell}</span>
+                            </div>
                         ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows.map(row => (
-                        <tr key={row[0]}>
-                            {row.map(cell => (
-                                <td
-                                    key={cell}
-                                    className="border-0 border-r border-t border-solid border-white/10 px-2.5 py-1.5 align-top text-neutral-300 [overflow-wrap:anywhere] last:border-r-0"
+                    </div>
+                ))}
+            </div>
+
+            {/* Desktop: the real table. The rounded outer border lives on the wrapper (kept intact by the
+                scroll container's clipping); cells draw only the inner grid lines, so no corner border is lost. */}
+            <div className="hidden overflow-x-auto rounded-lg border border-solid border-white/10 sm:block">
+                <table className="w-full border-collapse text-xs">
+                    <thead>
+                        <tr>
+                            {head.map(title => (
+                                <th
+                                    key={title}
+                                    className={cn(
+                                        'border-0 border-b border-r border-solid border-white/10 px-2.5 py-1.5 text-left font-medium text-neutral-400 last:border-r-0',
+                                        wrap,
+                                    )}
                                 >
-                                    {cell}
-                                </td>
+                                    {title}
+                                </th>
                             ))}
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        {rows.map(row => (
+                            <tr key={row[0]}>
+                                {row.map(cell => (
+                                    <td
+                                        key={cell}
+                                        className={cn(
+                                            'border-0 border-r border-t border-solid border-white/10 px-2.5 py-1.5 align-top text-neutral-300 last:border-r-0',
+                                            wrap,
+                                        )}
+                                    >
+                                        {cell}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </>
     );
 }
 
@@ -59,6 +107,7 @@ const EXAMPLES: { answer: React.ReactNode; label: string; more?: React.ReactNode
             <>
                 <p className="m-0">{'USDC (EPjFWdd5...) — SPL Token mint on mainnet-beta:'}</p>
                 <AnswerTable
+                    breakAnywhere
                     head={['Field', 'Value']}
                     rows={[
                         ['Mint authority', 'BJE5MMbqXjVwjAF7oxwPYXnTXDyspzZyt4vwenNw5ruG'],

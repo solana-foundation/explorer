@@ -43,6 +43,15 @@ function mcpJsonConfig(origin: string, isRestricted: boolean): string {
     );
 }
 
+// `codex mcp add` has no header flag; a gated deployment is configured via config.toml `http_headers`.
+function codexTomlConfig(origin: string): string {
+    return [
+        '[mcp_servers.solana-explorer]',
+        `url = "${origin}/mcp"`,
+        `http_headers = { "Authorization" = "Bearer ${ACCESS_KEY_PLACEHOLDER}" }`,
+    ].join('\n');
+}
+
 // VS Code's `mcp.json` keys servers under `servers` (not `mcpServers`).
 function vsCodeJsonConfig(origin: string): string {
     return JSON.stringify(
@@ -86,8 +95,11 @@ export const SETUP_CLIENTS: SetupClient[] = [
     {
         id: 'codex',
         label: 'Codex',
+        // `codex mcp add` only takes --bearer-token-env-var (no --header), so a gated deployment
+        // uses the config-file form with a literal header instead.
+        restrictedWhere: 'Add to ~/.codex/config.toml (project-scoped .codex/config.toml also works):',
         snippet: (origin, isRestricted) =>
-            `codex mcp add solana-explorer --url ${origin}/mcp${isRestricted ? authHeaderFlag : ''}`,
+            isRestricted ? codexTomlConfig(origin) : `codex mcp add solana-explorer --url ${origin}/mcp`,
         verify: 'codex mcp list shows solana-explorer.',
         where: 'Run in a terminal:',
     },
