@@ -119,7 +119,7 @@ export function McpDocsOverviewView() {
                 id="setup"
                 subtitle={
                     isRestricted
-                        ? 'Pick your tool, copy the config — snippets already point at this deployment. This deployment requires an access key; add your authorization to the config before connecting.'
+                        ? 'Pick your tool, copy the config — snippets already point at this deployment and carry an Authorization header. Replace <access-key> with the key this deployment was configured with before connecting.'
                         : 'Pick your tool, copy the config — snippets already point at this deployment. No API key needed.'
                 }
             >
@@ -132,8 +132,9 @@ export function McpDocsOverviewView() {
             >
                 {isRestricted && (
                     <div className="-mx-4 mb-4 rounded-t-[11px] border-0 border-b border-solid border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-200 sm:-mx-6 sm:px-6">
-                        This endpoint is gated — the key-less snippets below will be rejected until you add your access
-                        key.{' '}
+                        This endpoint is gated — the snippets below include an <InlineCode>Authorization</InlineCode>{' '}
+                        header; swap <InlineCode>&lt;access-key&gt;</InlineCode> for the key this deployment was
+                        configured with.{' '}
                         <a
                             href="https://github.com/solana-foundation/explorer/blob/master/app/mcp/README.md"
                             target="_blank"
@@ -165,8 +166,10 @@ export function McpDocsOverviewView() {
                     </TabsList>
                     {SETUP_CLIENTS.map(setupClient => (
                         <TabsContent key={setupClient.id} value={setupClient.id}>
-                            <p className="mb-3 mt-0 text-sm text-neutral-300">{setupClient.where}</p>
-                            <CodeBlock code={setupClient.snippet(origin)} />
+                            <p className="mb-3 mt-0 text-sm text-neutral-300">
+                                {isRestricted ? (setupClient.restrictedWhere ?? setupClient.where) : setupClient.where}
+                            </p>
+                            <CodeBlock code={setupClient.snippet(origin, isRestricted)} />
                             <p className="mb-0 mt-3 text-sm leading-relaxed text-neutral-300">
                                 <span className="font-medium text-neutral-300">Verify:</span> {setupClient.verify}
                             </p>
