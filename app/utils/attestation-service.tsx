@@ -1,11 +1,8 @@
 import { Account } from '@providers/accounts';
-import { deserialize } from 'borsh2';
 import {
-    convertSasSchemaToBorshSchema,
     decodeAttestation,
     decodeCredential,
     decodeSchema,
-    Schema as SasSchema,
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID,
 } from 'sas-lib';
 
@@ -55,13 +52,4 @@ export function isAttestationAccount(account: Account) {
     } catch (_e) {
         return false;
     }
-}
-
-// Helper function to deserialize attestation data using the borsh@2.0.0 API
-export function deserializeAttestationDataWithBorsh200(schema: SasSchema, data: Uint8Array) {
-    // Use sas-lib to convert its schema into a borsh-compatible format.
-    const sasBorshSchema = convertSasSchemaToBorshSchema(schema);
-
-    // @ts-expect-error borsh@2.0.0 actually exposes private schema field, even though it's not typed
-    return deserialize(sasBorshSchema.schema, data);
 }

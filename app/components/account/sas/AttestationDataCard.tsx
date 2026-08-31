@@ -2,21 +2,17 @@ import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/account
 import React from 'react';
 import {
     Attestation as SasAttestation,
-    convertSasSchemaToBorshSchema,
     decodeSchema,
+    deserializeAttestationData,
     Schema as SasSchema,
+    SchemaDataType,
 } from 'sas-lib';
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import { toBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import {
-    decodeAccount,
-    decodeWithType,
-    deserializeAttestationDataWithBorsh200,
-    isAttestationAccount,
-} from '@/app/utils/attestation-service';
+import { decodeAccount, decodeWithType, isAttestationAccount } from '@/app/utils/attestation-service';
 import { mapToPublicKey } from '@/app/utils/kit-wrapper';
 
 export function AttestationDataCard({ account, onNotFound }: { account?: Account; onNotFound: () => never }) {
@@ -35,18 +31,18 @@ export function AttestationDataCard({ account, onNotFound }: { account?: Account
 }
 
 function SchemaCard({ schema }: { schema: SasSchema }) {
-    const borshSchema = convertSasSchemaToBorshSchema(schema);
+    const layout = Object.fromEntries(schema.fieldNames.map((name, i) => [name, SchemaDataType[schema.layout[i]]]));
     return (
         <Card ui="dashkit">
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit">
-                    Schema Layout (Borsh)
+                    Schema Layout
                 </CardTitle>
             </CardHeader>
 
             {/* .string-value is emitted by the ReactJson library — the arbitrary variant scopes the break-all rule to its descendant nodes only. */}
             <Card ui="dashkit" className="m-6 [&_.string-value]:break-all">
-                <ReactJson src={borshSchema['schema']} style={{ padding: 25 }} name={false} />
+                <ReactJson src={layout} style={{ padding: 25 }} name={false} />
             </Card>
         </Card>
     );
@@ -65,7 +61,7 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
     try {
         if (schemaAccountInfo?.data) {
             const schema: SasSchema = decodeWithType(schemaAccountInfo.data, 'schema', decodeSchema)?.data.data;
-            decoded = deserializeAttestationDataWithBorsh200(schema, Uint8Array.from(attestation.data));
+            decoded = deserializeAttestationData(schema, Uint8Array.from(attestation.data));
         }
     } catch (e) {
         Logger.error(e);
