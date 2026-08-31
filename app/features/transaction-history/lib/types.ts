@@ -1,6 +1,7 @@
-import { ConfirmedSignatureInfo, ParsedTransactionWithMeta } from '@solana/web3.js';
+import type { TransactionWithMeta } from '@entities/transaction-data';
+import type { ConfirmedSignatureInfo } from '@solana/web3.js';
 
-export type TransactionMap = Map<string, ParsedTransactionWithMeta>;
+export type TransactionMap = Map<string, TransactionWithMeta>;
 export type FailedTransactionSignatures = Set<string>;
 
 // `getTransactionsForAddress` returns a transaction's position within its slot; the standard

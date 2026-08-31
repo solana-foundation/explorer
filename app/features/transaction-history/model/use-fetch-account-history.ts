@@ -1,8 +1,9 @@
 'use client';
 
+import type { TransactionWithMeta } from '@entities/transaction-data';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { ParsedTransactionWithMeta, PublicKey } from '@solana/web3.js';
+import type { Address } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import { fetchOnce } from '@utils/fetch-once';
 import React from 'react';
@@ -44,17 +45,16 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
     const blockTimeLte = blockTime?.lte;
 
     return React.useCallback(
-        (pubkey: PublicKey, fetchTransactions?: boolean, refresh?: boolean) => {
+        (address: Address, fetchTransactions?: boolean, refresh?: boolean) => {
             const activeFilters: HistoryFilters = {
                 blockTime: { gte: blockTimeGte, lte: blockTimeLte },
                 slot: { gte: slotGte, lte: slotLte },
                 status,
             };
-            const key = pubkey.toBase58();
             // Snapshot the generation at dispatch time; if it advances before the
             // response lands (a filter change), the result is treated as stale.
-            const generation = generations.get(key) ?? 0;
-            const isCurrent = () => (generations.get(key) ?? 0) === generation;
+            const generation = generations.get(address) ?? 0;
+            const isCurrent = () => (generations.get(address) ?? 0) === generation;
 
             // Latch entries are keyed by endpoint as well as address. Index coverage is a
             // property of the endpoint, and a request still in flight when the cluster changes
@@ -62,7 +62,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
             // generation guard can't help because it resets to 0 at the same moment. Scoping
             // the key makes such a late write inert instead of skipping a working gTFA path on
             // the new endpoint.
-            const latchKey = `${url}:${key}`;
+            const latchKey = `${url}:${address}`;
 
             // The latch only governs the unfiltered path. getSignaturesForAddress can't honour
             // filters, so once a filter is active getTransactionsForAddress is the only method
@@ -72,6 +72,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
             const forceSignatures = signaturesOnly.has(latchKey) && !hasActiveFilters(activeFilters);
 
             const common = {
+                address,
                 cluster,
                 dispatch,
                 fetchTransactions,
@@ -85,11 +86,10 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                 // return an empty gTFA page for this address, so the next unfiltered request
                 // should still skip it. Cross-endpoint leakage is handled by latchKey above.
                 onSignaturesOnly: () => signaturesOnly.add(latchKey),
-                pubkey,
                 url,
             };
 
-            const cached = state.entries[key];
+            const cached = state.entries[address];
             const isLoadMore = !refresh && Boolean(cached?.data?.fetched?.length);
             if (isLoadMore && cached?.data) {
                 if (cached.data.foundOldest) return;
@@ -97,7 +97,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                 // Cursor for the next page: paginationToken drives getTransactionsForAddress,
                 // the trailing signature drives the getSignaturesForAddress fallback.
                 const oldest = cached.data.fetched[cached.data.fetched.length - 1].signature;
-                fetchOnce(key, inFlight, () =>
+                fetchOnce(address, inFlight, () =>
                     fetchAccountHistory({
                         ...common,
                         additionalSignatures: fetchTransactions ? getUnfetchedSignatures(cached.data) : [],
@@ -107,7 +107,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
                     }),
                 ).catch(e => Logger.error(e));
             } else {
-                fetchOnce(key, inFlight, () => fetchAccountHistory({ ...common, append: false })).catch(e =>
+                fetchOnce(address, inFlight, () => fetchAccountHistory({ ...common, append: false })).catch(e =>
                     Logger.error(e),
                 );
             }
@@ -133,7 +133,7 @@ export function useFetchAccountHistory(limit = 25, filters: HistoryFilters = {})
 
 type FetchAccountHistoryOptions = {
     dispatch: Dispatch;
-    pubkey: PublicKey;
+    address: Address;
     cluster: Cluster;
     url: string;
     limit: number;
@@ -157,7 +157,7 @@ type FetchAccountHistoryOptions = {
 // reporting; `fetchHistoryPage` owns which RPC method answers the page.
 async function fetchAccountHistory({
     dispatch,
-    pubkey,
+    address,
     cluster,
     url,
     limit,
@@ -173,7 +173,7 @@ async function fetchAccountHistory({
     onSignaturesOnly,
 }: FetchAccountHistoryOptions) {
     dispatch({
-        key: pubkey.toBase58(),
+        key: address,
         status: FetchStatus.Fetching,
         type: ActionType.Update,
         url,
@@ -184,13 +184,13 @@ async function fetchAccountHistory({
 
     try {
         const page = await fetchHistoryPage({
+            address,
             before,
             filters,
             forceSignatures,
             limit,
             onMethodNotFound,
             paginationToken,
-            pubkey,
             url,
         });
         history = page.history;
@@ -232,7 +232,7 @@ async function fetchAccountHistory({
             history,
             transactionMap,
         },
-        key: pubkey.toBase58(),
+        key: address,
         status,
         type: ActionType.Update,
         url,
@@ -243,7 +243,7 @@ async function fetchAccountHistory({
 // previously fail), so a Load More can top up the transaction map in the same request.
 function getUnfetchedSignatures(history: AccountHistory | undefined): string[] {
     if (!history) return [];
-    const existingMap = history.transactionMap ?? new Map<string, ParsedTransactionWithMeta>();
+    const existingMap = history.transactionMap ?? new Map<string, TransactionWithMeta>();
     const failedSigs = history.failedTransactionSignatures ?? new Set<string>();
     return history.fetched.map(row => row.signature).filter(sig => !existingMap.has(sig) && !failedSigs.has(sig));
 }

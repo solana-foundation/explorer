@@ -1,15 +1,10 @@
 import { getBase58Encoder, type ReadonlyUint8Array } from '@solana/kit';
-import {
-    ComputeBudgetProgram,
-    ParsedInstruction,
-    ParsedTransactionWithMeta,
-    PartiallyDecodedInstruction,
-    type PublicKey,
-} from '@solana/web3.js';
+import { ComputeBudgetProgram, ParsedInstruction, PartiallyDecodedInstruction, type PublicKey } from '@solana/web3.js';
 import { camelToTitleCase } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import { is } from 'superstruct';
 
+import type { TransactionWithMeta } from '../model/types';
 import { findProgramName, UNKNOWN_PROGRAM_NAME } from './get-program-name';
 import { resolveMemoInstructionName } from './memo-name';
 import type { InstructionNames, InstructionSummary } from './types';
@@ -18,7 +13,7 @@ const BASE58_ENCODER = getBase58Encoder();
 
 export const UNKNOWN_INSTRUCTION_NAME = 'Unknown Instruction';
 
-export function getInstructionSummaries(transactionWithMeta: ParsedTransactionWithMeta): InstructionSummary[] {
+export function getInstructionSummaries(transactionWithMeta: TransactionWithMeta): InstructionSummary[] {
     return (
         transactionWithMeta.transaction.message.instructions
             // Drop ComputeBudget: fee/priority boilerplate on nearly every tx that says nothing about what

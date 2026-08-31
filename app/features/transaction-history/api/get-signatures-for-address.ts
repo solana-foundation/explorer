@@ -1,5 +1,8 @@
-import { Connection, PublicKey, TransactionSignature } from '@solana/web3.js';
+import { getRpc, type SolanaRpc } from '@entities/cluster';
+import type { Address, Signature } from '@solana/kit';
 import { withBackoff } from '@utils/with-backoff';
+
+import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
 
 import type { AccountHistory, HistoryRow } from '../lib/types';
 
@@ -12,16 +15,46 @@ import type { AccountHistory, HistoryRow } from '../lib/types';
 const EMPTY_FIRST_PAGE_RETRIES = 2;
 const EMPTY_FIRST_PAGE_RETRY_DELAY_MS = 300;
 
+// Element of kit's getSignaturesForAddress response, stated structurally so the mapping below
+// documents what it relies on.
+type RpcSignatureInfo = Readonly<{
+    blockTime: bigint | null;
+    confirmationStatus: 'confirmed' | 'finalized' | 'processed' | null;
+    err: unknown;
+    memo: string | null;
+    signature: string;
+    slot: bigint;
+    transactionIndex?: number;
+}>;
+
+// Kit upcasts integers outside its allow-list to bigints: `slot`/`blockTime` arrive as bigints, and
+// so does every index inside an `err` payload — which downstream consumers JSON.stringify and do
+// arithmetic on. The recursive sweep brings every field back to the numeric HistoryRow shape at the
+// boundary, so a field kit upcasts later cannot leak a bigint past it. `confirmationStatus` is the
+// one shape difference left: the row contract wants undefined where the wire says null.
+function toHistoryRow(item: RpcSignatureInfo): HistoryRow {
+    return {
+        ...(withNumbersInsteadOfBigInts(item) as unknown as HistoryRow),
+        confirmationStatus: item.confirmationStatus ?? undefined,
+    };
+}
+
 export async function fetchSignatures(
-    connection: Connection,
-    pubkey: PublicKey,
-    options: { before?: TransactionSignature; limit: number },
+    rpc: SolanaRpc,
+    address: Address,
+    options: { before?: string; limit: number },
 ): Promise<HistoryRow[]> {
     const isFirstPage = options.before === undefined;
+    const config = {
+        // The cursor is a signature handed back by a previous page, so it is asserted-by-origin
+        // rather than re-validated here.
+        before: options.before as Signature | undefined,
+        limit: options.limit,
+    };
     for (let attempt = 0; ; attempt++) {
-        const fetched = await withBackoff(() => connection.getSignaturesForAddress(pubkey, options));
+        const fetched = await withBackoff(() => rpc.getSignaturesForAddress(address, config).send());
         if (fetched.length > 0 || !isFirstPage || attempt >= EMPTY_FIRST_PAGE_RETRIES) {
-            return fetched;
+            return fetched.map(toHistoryRow);
         }
         await new Promise(resolve => setTimeout(resolve, EMPTY_FIRST_PAGE_RETRY_DELAY_MS));
     }
@@ -35,17 +68,16 @@ export async function fetchSignatures(
  */
 export async function fetchViaSignatures({
     url,
-    pubkey,
+    address,
     limit,
     before,
 }: {
     url: string;
-    pubkey: PublicKey;
+    address: Address;
     limit: number;
     before?: string;
 }): Promise<AccountHistory> {
-    const connection = new Connection(url);
-    const fetched = await fetchSignatures(connection, pubkey, { before, limit });
+    const fetched = await fetchSignatures(getRpc(url), address, { before, limit });
     // No paginationToken on this path: getSignaturesForAddress pages by trailing signature.
     return {
         fetched,
