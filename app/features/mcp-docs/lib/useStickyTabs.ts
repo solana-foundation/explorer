@@ -11,7 +11,9 @@ export function useStickyRelease(tailPx = 320) {
     const stripRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        const mq = window.matchMedia('(max-width: 575.98px)');
+        // Must match the CSS `sm:static` release exactly. Tailwind's `sm` is min-width 577px (the config
+        // shifts the 576px token up by 1px — see getScreenDim), so the strip stays sticky below 577px.
+        const mq = window.matchMedia('(max-width: 576.98px)');
         let raf = 0;
         const update = () => {
             raf = 0;

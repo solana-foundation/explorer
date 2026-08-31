@@ -18,6 +18,12 @@ import { InlineCode } from './InlineCode';
 import { SectionTitle } from './SectionTitle';
 import { ToolsShowcase } from './ToolsShowcase';
 
+function probeState(status: number): EndpointStatus['state'] {
+    if (status >= 500) return 'disabled';
+    if (status === 401 || status === 403) return 'restricted';
+    return 'ready';
+}
+
 export function McpDocsOverviewView() {
     const origin = useDeploymentOrigin();
     const [client, setClient] = useState(SETUP_CLIENTS[0].id);
@@ -25,15 +31,18 @@ export function McpDocsOverviewView() {
     const setupSticky = useStickyRelease();
 
     // Live health probe: a bare GET to /mcp answers 4xx when the endpoint is up (it wants a POST with
-    // MCP headers) — that still means "reachable". Only a 5xx counts as not serving: 503 is the explicit
-    // "MCP disabled" sentinel (route.ts), and other 5xx / a network error mean it can't be reached.
+    // MCP headers) — that still means "reachable". But 401/403 mean the deployment gates access
+    // (MCP_ACCESS_KEYS set or the IP blocked, per route.ts): the endpoint is up yet the open, key-less
+    // config this page shows would be rejected, so surface it as "restricted" rather than "ready". Only
+    // a 5xx counts as not serving: 503 is the explicit "MCP disabled" sentinel (route.ts), and other 5xx
+    // / a network error mean it can't be reached.
     useEffect(() => {
         const started = performance.now();
         fetch('/mcp')
             .then(response =>
                 setStatus({
                     ms: Math.round(performance.now() - started),
-                    state: response.status >= 500 ? 'disabled' : 'ready',
+                    state: probeState(response.status),
                 }),
             )
             .catch(() => setStatus({ state: 'disabled' }));

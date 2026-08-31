@@ -1,11 +1,28 @@
 import { ExternalLink } from 'react-feather';
 
-export type EndpointStatus = { state: 'checking' | 'ready' | 'disabled'; ms?: number };
+export type EndpointStatus = { state: 'checking' | 'ready' | 'restricted' | 'disabled'; ms?: number };
 
-/** Renders the live health-probe result: checking spinner text, a ready dot with latency, or a disabled state. */
+/** Renders the live health-probe result: checking spinner text, a ready dot with latency, a restricted state, or a disabled state. */
 export function EndpointStatusValue({ status }: { status: EndpointStatus }) {
     if (status.state === 'checking') {
         return <span className="text-neutral-500">Checking…</span>;
+    }
+    if (status.state === 'restricted') {
+        return (
+            <span className="flex items-center gap-1.5">
+                <span className="size-1.5 rounded-full bg-amber-400" aria-hidden />
+                Restricted — access key required
+                <a
+                    href="https://github.com/solana-foundation/explorer/blob/master/app/mcp/README.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-dark-accent no-underline"
+                >
+                    How to run
+                    <ExternalLink size={12} aria-hidden />
+                </a>
+            </span>
+        );
     }
     if (status.state === 'disabled') {
         return (
