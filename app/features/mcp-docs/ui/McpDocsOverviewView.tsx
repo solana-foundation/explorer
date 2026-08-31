@@ -75,7 +75,7 @@ export function McpDocsOverviewView() {
                     </a>
                 </Button>
             </div>
-            <Card variant="tight" className="mb-12 !bg-transparent">
+            <Card variant="tight" className="mb-12 !border-white/10 !bg-transparent">
                 <div className="grid gap-x-8 gap-y-4 p-4 sm:grid-cols-2 sm:p-6">
                     <HeroFact label="Status">
                         <EndpointStatusValue status={status} />
@@ -125,7 +125,11 @@ export function McpDocsOverviewView() {
             >
                 Setup
             </SectionTitle>
-            <Card variant="tight" ref={setupSticky.sectionRef} className="mb-12 px-4 pb-4 pt-0 sm:px-6 sm:pb-6">
+            <Card
+                variant="tight"
+                ref={setupSticky.sectionRef}
+                className="mb-12 !border-white/10 px-4 pb-4 pt-0 sm:px-6 sm:pb-6"
+            >
                 {isRestricted && (
                     <div className="-mx-4 mb-4 rounded-t-[11px] border-0 border-b border-solid border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-200 sm:-mx-6 sm:px-6">
                         This endpoint is gated — the key-less snippets below will be rejected until you add your access
@@ -175,7 +179,7 @@ export function McpDocsOverviewView() {
             <SectionTitle subtitle="Teach the agent to reach for the Explorer instead of guessing — add the block below to the instructions file your tool reads.">
                 Agent instructions
             </SectionTitle>
-            <Card variant="tight" className="mb-12 overflow-hidden">
+            <Card variant="tight" className="mb-12 overflow-hidden !border-white/10">
                 <p className="m-0 p-4 text-sm text-neutral-300 sm:p-6">
                     {AGENT_INSTRUCTIONS_TARGETS.map((target, index) => (
                         <React.Fragment key={target.file}>

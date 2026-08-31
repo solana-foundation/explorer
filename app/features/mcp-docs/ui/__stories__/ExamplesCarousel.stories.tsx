@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 
 import { ExamplesCarousel } from '../ExamplesCarousel';
 
@@ -23,9 +23,7 @@ export const SelectConversation: Story = {
 
         await userEvent.click(canvas.getByRole('tab', { name: 'Program inspection' }));
         // Assert on a phrase unique to this answer — "Squads Multisig Program" appears twice in it.
-        const answer = await canvas.findByText('BPF upgradeable-loader program', { exact: false });
-        // The conversation cross-fades in over a 500ms opacity transition; poll until it's fully visible.
-        await waitFor(() => expect(answer).toBeVisible());
+        await expect(await canvas.findByText('BPF upgradeable-loader program', { exact: false })).toBeVisible();
     },
 };
 
@@ -36,8 +34,6 @@ export const ExpandMessage: Story = {
 
         await userEvent.click(canvas.getByRole('tab', { name: 'Transaction walkthrough' }));
         await userEvent.click(await canvas.findByRole('button', { name: 'Expand message' }));
-        const tail = await canvas.findByText('Instruction 1 — ComputeBudget', { exact: false });
-        // The conversation cross-fades in over a 500ms opacity transition; poll until it's fully visible.
-        await waitFor(() => expect(tail).toBeVisible());
+        await expect(await canvas.findByText('Instruction 1 — ComputeBudget', { exact: false })).toBeVisible();
     },
 };

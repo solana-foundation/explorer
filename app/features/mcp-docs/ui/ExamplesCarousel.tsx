@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Tool } from 'react-feather';
 
 import { cn } from '@/app/components/shared/utils';
@@ -212,59 +212,22 @@ const EXAMPLES: { answer: React.ReactNode; label: string; more?: React.ReactNode
     },
 ];
 
-const EXAMPLE_ROTATION_MS = 6000;
-
 /**
  * Chat-app layout: example titles as a "chat list" beside a vertical divider,
- * the selected conversation on the right. Auto-advances; hovering the card
- * pauses the rotation, and any tap/click (a chat or "Expand message") parks it
- * until the section scrolls out of view — important on touch devices with no
- * hover. Long conversations start collapsed behind "Expand message" and
- * collapse again on every conversation change.
+ * the selected conversation on the right. Click a title to switch conversations.
+ * Long conversations start collapsed behind "Expand message" and collapse again
+ * on every conversation change.
  */
 export function ExamplesCarousel() {
     const [index, setIndex] = useState(0);
-    const [hovered, setHovered] = useState(false);
-    const [engaged, setEngaged] = useState(false);
     const [expanded, setExpanded] = useState(false);
-    const rootRef = useRef<HTMLDivElement | null>(null);
     const sticky = useStickyRelease();
 
-    useEffect(() => {
-        if (hovered || engaged) {
-            return;
-        }
-        const timer = setInterval(() => setIndex(current => (current + 1) % EXAMPLES.length), EXAMPLE_ROTATION_MS);
-        return () => clearInterval(timer);
-        // `index` restarts the timer after an auto-advance so every conversation gets a full period.
-    }, [hovered, engaged, index]);
-
-    // Every newly shown conversation starts collapsed — including returning to one expanded before.
-    useEffect(() => setExpanded(false), [index]);
-
-    // A tap/click parks the rotation; leaving the viewport re-arms it.
-    useEffect(() => {
-        if (!engaged || rootRef.current === null) {
-            return;
-        }
-        const observer = new IntersectionObserver(([entry]) => {
-            if (!entry.isIntersecting) {
-                setEngaged(false);
-            }
-        });
-        observer.observe(rootRef.current);
-        return () => observer.disconnect();
-    }, [engaged]);
+    const active = EXAMPLES[index];
 
     return (
-        <Card
-            variant="tight"
-            ref={sticky.sectionRef}
-            className="mb-12 !bg-transparent"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-        >
-            <div ref={rootRef} className="flex flex-col sm:flex-row">
+        <Card variant="tight" ref={sticky.sectionRef} className="mb-12 !border-white/10 !bg-transparent">
+            <div className="flex flex-col sm:flex-row">
                 {/* Chat list — mobile: a sticky, horizontal, scrollable underline tab strip (like Setup/Tools);
                     desktop: a static vertical sidebar with a left-bar active marker. */}
                 <div
@@ -277,26 +240,24 @@ export function ExamplesCarousel() {
                     )}
                 >
                     {EXAMPLES.map((example, exampleIndex) => {
-                        const active = exampleIndex === index;
+                        const isActive = exampleIndex === index;
                         return (
                             <button
                                 key={example.label}
                                 type="button"
                                 role="tab"
-                                aria-selected={active}
+                                aria-selected={isActive}
                                 onClick={() => {
                                     setIndex(exampleIndex);
-                                    // Re-selecting the current chat won't change `index` — collapse explicitly.
+                                    // Switching chats collapses the long tail and resets scroll to the top.
                                     setExpanded(false);
-                                    setEngaged(true);
-                                    // Switching chats resets scroll to the top of the new conversation.
                                     scrollSectionToTop(sticky.sectionRef.current);
                                 }}
                                 className={cn(
                                     'cursor-pointer whitespace-nowrap border-0 bg-transparent px-0 py-4 text-left text-sm transition-colors sm:px-4 sm:py-3',
                                     // Active marker: underline on mobile, left bar on the desktop sidebar.
                                     'border-b-2 border-solid sm:border-b-0 sm:border-l-2',
-                                    active
+                                    isActive
                                         ? 'border-dark-accent text-white sm:bg-heavy-metal-900'
                                         : 'border-transparent text-neutral-400 hover:text-neutral-200 sm:hover:bg-heavy-metal-900',
                                 )}
@@ -307,53 +268,34 @@ export function ExamplesCarousel() {
                     })}
                 </div>
 
-                {/* Conversation view: the active conversation defines the height (no inner scroll);
-                    inactive ones sit absolutely on top of it, kept mounted for the cross-fade. */}
-                <div className="relative min-w-0 grow">
-                    {EXAMPLES.map((example, exampleIndex) => {
-                        const active = exampleIndex === index;
-                        return (
-                            <div
-                                key={example.label}
-                                aria-hidden={!active}
-                                className={cn(
-                                    'flex flex-col gap-2 p-4 transition-opacity duration-500 sm:p-6',
-                                    active
-                                        ? 'opacity-100'
-                                        : 'pointer-events-none absolute inset-0 overflow-hidden opacity-0',
-                                )}
-                            >
-                                <div className="max-w-[85%] self-end rounded-2xl rounded-br-md border border-solid border-white/10 bg-white/10 px-4 py-2.5 text-sm leading-relaxed text-white [overflow-wrap:anywhere]">
-                                    {example.question}
-                                </div>
-                                <div className="flex items-center gap-1.5 self-start px-1 text-xs text-neutral-500">
-                                    <Tool size={12} aria-hidden />
-                                    <span>
-                                        Ran <span className="font-mono text-neutral-400">{example.tool}</span> ·
-                                        Explorer MCP
-                                    </span>
-                                </div>
-                                <div className="flex max-w-[85%] flex-col gap-3 self-start rounded-2xl rounded-bl-md border border-solid border-white/10 bg-white/5 px-4 py-2.5 text-sm leading-relaxed text-neutral-300 [overflow-wrap:anywhere]">
-                                    {example.answer}
-                                    {expanded && example.more}
-                                    {example.more !== undefined && !expanded && (
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setExpanded(true);
-                                                setEngaged(true);
-                                            }}
-                                            // Match the link hover: `<a>` darkens via the global `a:hover`;
-                                            // a `<button>` isn't covered by it, so set the same token explicitly.
-                                            className="cursor-pointer self-start border-0 bg-transparent p-0 text-xs font-medium text-dark-accent hover:text-dark-accent-hover"
-                                        >
-                                            Expand message
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
+                {/* Conversation view: only the selected conversation is rendered. */}
+                <div className="min-w-0 grow">
+                    <div className="flex flex-col gap-2 p-4 sm:p-6">
+                        <div className="max-w-[85%] self-end rounded-2xl rounded-br-md border border-solid border-white/10 bg-white/10 px-4 py-2.5 text-sm leading-relaxed text-white [overflow-wrap:anywhere]">
+                            {active.question}
+                        </div>
+                        <div className="flex items-center gap-1.5 self-start px-1 text-xs text-neutral-500">
+                            <Tool size={12} aria-hidden />
+                            <span>
+                                Ran <span className="font-mono text-neutral-400">{active.tool}</span> · Explorer MCP
+                            </span>
+                        </div>
+                        <div className="flex max-w-[85%] flex-col gap-3 self-start rounded-2xl rounded-bl-md border border-solid border-white/10 bg-white/5 px-4 py-2.5 text-sm leading-relaxed text-neutral-300 [overflow-wrap:anywhere]">
+                            {active.answer}
+                            {expanded && active.more}
+                            {active.more !== undefined && !expanded && (
+                                <button
+                                    type="button"
+                                    onClick={() => setExpanded(true)}
+                                    // Match the link hover: `<a>` darkens via the global `a:hover`;
+                                    // a `<button>` isn't covered by it, so set the same token explicitly.
+                                    className="cursor-pointer self-start border-0 bg-transparent p-0 text-xs font-medium text-dark-accent hover:text-dark-accent-hover"
+                                >
+                                    Expand message
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </Card>

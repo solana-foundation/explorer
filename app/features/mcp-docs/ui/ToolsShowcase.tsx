@@ -51,7 +51,7 @@ export function ToolsShowcase() {
     const sticky = useStickyRelease();
 
     return (
-        <Card variant="tight" ref={sticky.sectionRef} className="mb-12 px-4 pb-4 pt-0 sm:px-6 sm:pb-6">
+        <Card variant="tight" ref={sticky.sectionRef} className="mb-12 !border-white/10 px-4 pb-4 pt-0 sm:px-6 sm:pb-6">
             <Tabs
                 value={tool}
                 onValueChange={value => {
