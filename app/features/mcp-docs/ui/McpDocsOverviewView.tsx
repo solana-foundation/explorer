@@ -48,6 +48,10 @@ export function McpDocsOverviewView() {
             .catch(() => setStatus({ state: 'disabled' }));
     }, []);
 
+    // A gated deployment (401/403) rejects the open, key-less config this page documents, so the copy
+    // must stop asserting "no key required" and tell the visitor an access key is needed.
+    const isRestricted = status.state === 'restricted';
+
     return (
         <div className="mx-auto w-full max-w-3xl px-4 py-10">
             {/* Hero */}
@@ -95,7 +99,11 @@ export function McpDocsOverviewView() {
                         <span className="text-sm">Streamable HTTP, stateless</span>
                     </HeroFact>
                     <HeroFact label="Auth">
-                        <span className="text-sm">Open — no key required</span>
+                        {isRestricted ? (
+                            <span className="text-sm text-amber-400">Access key required</span>
+                        ) : (
+                            <span className="text-sm">Open — no key required</span>
+                        )}
                     </HeroFact>
                     <HeroFact label="Clusters">
                         <span className="text-sm">mainnet-beta · devnet · testnet · simd296</span>
@@ -109,11 +117,29 @@ export function McpDocsOverviewView() {
             {/* Setup */}
             <SectionTitle
                 id="setup"
-                subtitle="Pick your tool, copy the config — snippets already point at this deployment. No API key needed."
+                subtitle={
+                    isRestricted
+                        ? 'Pick your tool, copy the config — snippets already point at this deployment. This deployment requires an access key; add your authorization to the config before connecting.'
+                        : 'Pick your tool, copy the config — snippets already point at this deployment. No API key needed.'
+                }
             >
                 Setup
             </SectionTitle>
             <Card variant="tight" ref={setupSticky.sectionRef} className="mb-12 px-4 pb-4 pt-0 sm:px-6 sm:pb-6">
+                {isRestricted && (
+                    <div className="-mx-4 mb-4 rounded-t-[11px] border-0 border-b border-solid border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-200 sm:-mx-6 sm:px-6">
+                        This endpoint is gated — the key-less snippets below will be rejected until you add your access
+                        key.{' '}
+                        <a
+                            href="https://github.com/solana-foundation/explorer/blob/master/app/mcp/README.md"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-dark-accent no-underline"
+                        >
+                            How to run
+                        </a>
+                    </div>
+                )}
                 <Tabs
                     value={client}
                     onValueChange={value => {
