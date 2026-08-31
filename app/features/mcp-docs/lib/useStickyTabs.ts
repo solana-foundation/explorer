@@ -12,15 +12,18 @@ export function useStickyRelease(tailPx = 320) {
 
     useEffect(() => {
         // Must match the CSS `sm:static` release exactly. Tailwind's `sm` is min-width 577px (the config
-        // shifts the 576px token up by 1px — see getScreenDim), so the strip stays sticky below 577px.
-        const mq = window.matchMedia('(max-width: 576.98px)');
+        // shifts the 576px token up by 1px — see getScreenDim), so `sm:static` compiles to this very query
+        // and the strip stays sticky below 577px. Key off the identical `min-width: 577px` boundary (not a
+        // `max-width` sibling) so there's no sub-pixel gap where release logic stops but sticky positioning
+        // hasn't yet — e.g. at 576.99px, still sticky in CSS.
+        const mq = window.matchMedia('(min-width: 577px)');
         let raf = 0;
         const update = () => {
             raf = 0;
             const section = sectionRef.current;
             const strip = stripRef.current;
             if (!section || !strip) return;
-            if (!mq.matches) {
+            if (mq.matches) {
                 strip.style.top = '';
                 return;
             }
