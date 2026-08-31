@@ -20,7 +20,10 @@ import { ToolsShowcase } from './ToolsShowcase';
 
 function probeState(status: number): EndpointStatus['state'] {
     if (status >= 500) return 'disabled';
-    if (status === 401 || status === 403) return 'restricted';
+    // 403 is only ever a blocked IP (route.ts rejects it before the key check), so no access key
+    // or config change helps — keep it distinct from 401, which genuinely wants an access key.
+    if (status === 403) return 'blocked';
+    if (status === 401) return 'restricted';
     return 'ready';
 }
 
@@ -31,11 +34,12 @@ export function McpDocsOverviewView() {
     const setupSticky = useStickyRelease();
 
     // Live health probe: a bare GET to /mcp answers 4xx when the endpoint is up (it wants a POST with
-    // MCP headers) — that still means "reachable". But 401/403 mean the deployment gates access
-    // (MCP_ACCESS_KEYS set or the IP blocked, per route.ts): the endpoint is up yet the open, key-less
-    // config this page shows would be rejected, so surface it as "restricted" rather than "ready". Only
-    // a 5xx counts as not serving: 503 is the explicit "MCP disabled" sentinel (route.ts), and other 5xx
-    // / a network error mean it can't be reached.
+    // MCP headers) — that still means "reachable". 401 means the deployment gates access with a key
+    // (MCP_ACCESS_KEYS set, per route.ts): the endpoint is up yet the open, key-less config this page
+    // shows would be rejected, so surface it as "restricted". 403 is only a blocked IP (route.ts rejects
+    // it before the key check), which no config fixes — surface it as "blocked". Only a 5xx counts as not
+    // serving: 503 is the explicit "MCP disabled" sentinel (route.ts), and other 5xx / a network error
+    // mean it can't be reached.
     useEffect(() => {
         const started = performance.now();
         fetch('/mcp')

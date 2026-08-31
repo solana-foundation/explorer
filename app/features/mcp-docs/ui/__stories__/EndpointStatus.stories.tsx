@@ -22,9 +22,14 @@ export const Ready: Story = {
     args: { status: { ms: 42, state: 'ready' } },
 };
 
-/** A 401/403 — the endpoint is up but gated (access key required or IP blocked). */
+/** A 401 — the endpoint is up but gated behind an access key. */
 export const Restricted: Story = {
     args: { status: { state: 'restricted' } },
+};
+
+/** A 403 — the endpoint is up but this visitor's IP is blocked; no key or config helps. */
+export const Blocked: Story = {
+    args: { status: { state: 'blocked' } },
 };
 
 /** A 5xx / network error — falls back to the "How to run" link. */
