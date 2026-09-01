@@ -13,11 +13,7 @@ import {
     UNKNOWN_KIND,
 } from '../../accounts/kinds.js';
 import { enrichUpgradeableProgramData, normalizeAccountProbe } from '../../accounts/account-normalizer.js';
-import {
-    decodeLoaderV4State,
-    LOADER_V4_PROGRAM_DATA_OFFSET,
-    loaderV4SigningAuthority,
-} from '../../accounts/loader-v4-state.js';
+import { decodeLoaderV4State, loaderV4ProgramBytes, loaderV4SigningAuthority } from '../../accounts/loader-v4-state.js';
 import { buildAccountPayloadWithRouter } from '../../accounts/inspect-entity-account-router.js';
 import {
     classifyAccountKindBase,
@@ -238,7 +234,7 @@ function resolveProgramAuthorityContext(
     const authority = loaderV4SigningAuthority(state);
     return {
         authority,
-        verificationData: authority === null ? null : bytes.subarray(LOADER_V4_PROGRAM_DATA_OFFSET),
+        verificationData: authority === null ? null : loaderV4ProgramBytes(bytes),
     };
 }
 

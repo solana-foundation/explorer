@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { decodeLoaderV4State, LOADER_V4_PROGRAM_DATA_OFFSET } from '../loader-v4-state.js';
+import { decodeLoaderV4State, loaderV4ProgramBytes } from '../loader-v4-state.js';
 import { loaderV4StateBytes } from './account-fixtures.js';
 
 const AUTHORITY = 'AeLnXCBPaQHGWRLr2saFsEVfnMNuKixRAbWCT9P5twgZ';
@@ -12,7 +12,7 @@ describe('decodeLoaderV4State', () => {
         const [error, state] = decodeLoaderV4State(bytes);
 
         expect(error).toBeUndefined();
-        expect(state).toEqual({ authority: AUTHORITY, slot: 395847597, status: 'deployed' });
+        expect(state).toEqual({ authority: AUTHORITY, slot: 395847597n, status: 'deployed' });
     });
 
     it('should decode a header-only account with a zero-length program', () => {
@@ -20,7 +20,7 @@ describe('decodeLoaderV4State', () => {
 
         const [error, state] = decodeLoaderV4State(bytes);
 
-        expect(bytes.length).toBe(LOADER_V4_PROGRAM_DATA_OFFSET);
+        expect(loaderV4ProgramBytes(bytes).length).toBe(0);
         expect(error).toBeUndefined();
         expect(state?.status).toBe('retracted');
     });

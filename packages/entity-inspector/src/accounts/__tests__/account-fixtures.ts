@@ -1,8 +1,8 @@
-import { address, getAddressEncoder } from '@solana/kit';
+import { address } from '@solana/kit';
 
 import { ADDRESS_LOOKUP_TABLE_PROGRAM_ID, BPF_UPGRADEABLE_LOADER_PROGRAM_ID } from '../../shared/constants.js';
+import { encodeLoaderV4StateHeader, type LoaderV4Status } from '../loader-v4-state.js';
 import type { AccountProbeEnvelope } from '../../rpc/types.js';
-import type { LoaderV4Status } from '../loader-v4-state.js';
 import type { NormalizedAccountInfo, NormalizedProgramDataInfo } from '../types.js';
 
 // Constructors for account fixtures (RPC probe envelopes + normalized accounts) so specs assert behavior instead of hand-building raw shapes.
@@ -98,9 +98,7 @@ export function legacyLoaderProgramProbe(owner: string, bytes: Uint8Array): Acco
     };
 }
 
-const LOADER_V4_STATUS_VALUES: Record<LoaderV4Status, bigint> = { deployed: 1n, finalized: 2n, retracted: 0n };
-
-/** LoaderV4State header (slot u64 LE, authority pubkey, status u64 LE) followed by the ELF bytes. */
+/** LoaderV4State header followed by the ELF bytes. */
 export function loaderV4StateBytes({
     authority,
     status,
@@ -112,12 +110,10 @@ export function loaderV4StateBytes({
     elf?: Uint8Array;
     slot?: number;
 }): Uint8Array {
-    const bytes = new Uint8Array(48 + elf.length);
-    const view = new DataView(bytes.buffer);
-    view.setBigUint64(0, BigInt(slot), true);
-    bytes.set(getAddressEncoder().encode(address(authority)), 8);
-    view.setBigUint64(40, LOADER_V4_STATUS_VALUES[status], true);
-    bytes.set(elf, 48);
+    const header = encodeLoaderV4StateHeader({ authority: address(authority), slot: BigInt(slot), status });
+    const bytes = new Uint8Array(header.length + elf.length);
+    bytes.set(header);
+    bytes.set(elf, header.length);
     return bytes;
 }
 
