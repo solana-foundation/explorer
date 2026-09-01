@@ -2,6 +2,7 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
 import type { BlockWithV1 } from '@entities/block-data';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
@@ -14,12 +15,19 @@ import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from
 import React, { useMemo } from 'react';
 import { ChevronDown, ChevronUp, Filter, Search, X } from 'react-feather';
 
-import { LabeledField, LoadMoreButton, TIGHT_CARD } from '@/app/components/block/shared';
+import {
+    DEFAULT_DIRECTION,
+    isSortMode,
+    nextSortParams,
+    type SortDirection,
+    type SortMode,
+    sortTransactions,
+} from '@/app/components/block/block-history-sort';
+import { LoadMoreButton, type ResponsiveCell, ResponsiveGridRow, TIGHT_CARD } from '@/app/components/block/shared';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { Input } from '@/app/components/shared/ui/input';
-import { CollapsibleSection } from '@/app/features/transaction/ui/CollapsibleSection';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card } from '@/app/shared/ui/Card';
 
@@ -42,30 +50,9 @@ const useQueryAccountFilter = (query: ReadonlyURLSearchParams): PublicKey | null
     return null;
 };
 
-type SortMode = 'index' | 'compute' | 'txnCost' | 'fee' | 'reservedCUs';
-type SortDirection = 'asc' | 'desc';
-
-// Each column's natural first-click direction — index reads low→high, the numeric columns high→low.
-const DEFAULT_DIRECTION: Record<SortMode, SortDirection> = {
-    compute: 'desc',
-    fee: 'desc',
-    index: 'asc',
-    reservedCUs: 'desc',
-    txnCost: 'desc',
-};
-
 const useQuerySort = (query: ReadonlyURLSearchParams): { mode: SortMode; direction: SortDirection } => {
     const sort = query.get('sort');
-    const mode: SortMode =
-        sort === 'compute'
-            ? 'compute'
-            : sort === 'txnCost'
-              ? 'txnCost'
-              : sort === 'fee'
-                ? 'fee'
-                : sort === 'reservedCUs'
-                  ? 'reservedCUs'
-                  : 'index';
+    const mode: SortMode = isSortMode(sort) ? sort : 'index';
     const dir = query.get('dir');
     const direction: SortDirection = dir === 'asc' || dir === 'desc' ? dir : DEFAULT_DIRECTION[mode];
     return { direction, mode };
@@ -92,31 +79,20 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
     const router = useRouter();
     const { cluster } = useCluster();
 
-    // Sort is driven by URL params (`sort` + `dir`); the grid variant's sortable headers push through here.
+    // Sort is driven by URL params (`sort` + `dir`); the grid's sortable headers push through here.
     // Clicking the active column flips its direction; clicking another column selects it at its natural
-    // default direction. `index` ascending is the default view, so it's written as no params (clean URL);
-    // passing no key clears the sort entirely (the old table's "#" reset). The mobile sort menu passes an
-    // explicit direction (its rows are per-direction) which short-circuits the toggle. We build the URL
-    // from a copy of the current params so a `delete` drops the keys — `pickClusterParams` only overrides.
+    // default direction. The mobile sort menu passes an explicit direction (its rows are per-direction),
+    // which skips the toggle. `index` ascending is the default view, so it's written as a clean URL with
+    // no sort params. We copy the current params so a `delete` drops the keys while other params survive.
     const pushSort = React.useCallback(
-        (sortKey?: SortMode, explicitDirection?: SortDirection) => {
-            const nextParams = new URLSearchParams(currentSearchParams?.toString());
-            const nextDirection: SortDirection =
-                explicitDirection ??
-                (sortKey && sortKey === sortMode
-                    ? sortDirection === 'asc'
-                        ? 'desc'
-                        : 'asc'
-                    : sortKey
-                      ? DEFAULT_DIRECTION[sortKey]
-                      : 'asc');
-            if (sortKey && !(sortKey === 'index' && nextDirection === 'asc')) {
-                nextParams.set('sort', sortKey);
-                nextParams.set('dir', nextDirection);
-            } else {
-                nextParams.delete('sort');
-                nextParams.delete('dir');
-            }
+        (sortKey: SortMode, explicitDirection?: SortDirection) => {
+            const nextParams = nextSortParams(
+                new URLSearchParams(currentSearchParams?.toString()),
+                sortKey,
+                sortMode,
+                sortDirection,
+                explicitDirection,
+            );
             const queryString = nextParams.toString();
             router.push(`${currentPathname}${queryString ? `?${queryString}` : ''}`);
         },
@@ -223,21 +199,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
 
         const showComputeUnits = filteredTxs.every(tx => tx.computeUnits !== undefined);
 
-        // Base comparators are ascending; `dir` flips them so a repeat click reverses the order.
-        const dir = sortDirection === 'asc' ? 1 : -1;
-        if (sortMode === 'index') {
-            filteredTxs.sort((a, b) => dir * (a.index - b.index));
-        } else if (sortMode === 'compute' && showComputeUnits) {
-            filteredTxs.sort((a, b) => dir * ((a.computeUnits ?? 0) - (b.computeUnits ?? 0)));
-        } else if (sortMode === 'txnCost') {
-            filteredTxs.sort((a, b) => dir * ((a.costUnits ?? 0) - (b.costUnits ?? 0)));
-        } else if (sortMode === 'fee') {
-            filteredTxs.sort((a, b) => dir * ((a.meta?.fee || 0) - (b.meta?.fee || 0)));
-        } else if (sortMode === 'reservedCUs') {
-            filteredTxs.sort((a, b) => dir * ((a.reservedComputeUnits || 0) - (b.reservedComputeUnits || 0)));
-        }
-
-        return [filteredTxs, showComputeUnits];
+        return [sortTransactions(filteredTxs, sortMode, sortDirection, showComputeUnits), showComputeUnits];
     }, [block.transactions, transactions, programFilter, accountFilter, sortMode, sortDirection]);
 
     // Shared by the filter dropdown (menu options + active row) and the removable chip below the title.
@@ -275,7 +237,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                 </>
             }
             className=""
-            titleClassName="!items-end gap-4"
+            titleClassName="items-end gap-4"
             belowTitle={
                 isProgramFilterSet ? (
                     <div className="-mt-1 mb-0.5 flex flex-wrap items-center gap-2">
@@ -334,7 +296,9 @@ const HISTORY_STATUS = {
     success: { label: 'Success', variant: 'success' },
 } as const;
 
-const numberFmt = (n: number) => new Intl.NumberFormat('en-US').format(n);
+// One shared formatter instance — constructing `Intl.NumberFormat` per call is needlessly expensive.
+const NUMBER_FORMAT = new Intl.NumberFormat('en-US');
+const numberFmt = (n: number) => NUMBER_FORMAT.format(n);
 
 // A dim up/down chevron pair marking a sortable header; the arrow for the active direction lights up
 // white. Absolutely positioned in an `h-4`/`w-1` box so the taller glyph stack doesn't grow the row.
@@ -368,7 +332,7 @@ function BlockHistoryGrid({
 }: {
     rows: TransactionWithInvocations[];
     showComputeUnits: boolean;
-    onSort: (sortKey?: SortMode) => void;
+    onSort: (sortKey: SortMode) => void;
     sortMode: SortMode;
     sortDirection: SortDirection;
 }) {
@@ -403,23 +367,23 @@ function BlockHistoryGrid({
                 className="hidden gap-4 border-b border-solid border-white/10 px-4 py-2.5 text-xs uppercase text-outer-space-300 md:grid"
             >
                 {headers.map(header => {
-                    const sortable = header.sortKey !== undefined;
-                    const active = sortable && sortMode === header.sortKey;
+                    const sortKey = header.sortKey;
+                    const active = sortKey !== undefined && sortMode === sortKey;
                     return (
                         <div
                             key={header.label}
                             className={cn(
                                 header.numeric && 'text-right',
-                                sortable && 'cursor-pointer select-none',
+                                sortKey !== undefined && 'cursor-pointer select-none',
                                 active && 'text-white',
                             )}
-                            onClick={sortable ? () => onSort(header.sortKey) : undefined}
+                            onClick={sortKey !== undefined ? () => onSort(sortKey) : undefined}
                         >
                             {/* The chevron pair always follows the label (right-aligned numeric columns keep it
                                 to the right of the label too). */}
                             <span className="inline-flex items-center gap-2">
                                 {header.label}
-                                {sortable && (
+                                {sortKey !== undefined && (
                                     <SortIndicator active={active} direction={active ? sortDirection : 'desc'} />
                                 )}
                             </span>
@@ -427,8 +391,13 @@ function BlockHistoryGrid({
                     );
                 })}
             </div>
-            {rows.map((tx, i) => (
-                <BlockHistoryGridRow key={i} tx={tx} showComputeUnits={showComputeUnits} gridStyle={gridStyle} />
+            {rows.map(tx => (
+                <BlockHistoryGridRow
+                    key={tx.signature ?? `index-${tx.index}`}
+                    tx={tx}
+                    showComputeUnits={showComputeUnits}
+                    gridStyle={gridStyle}
+                />
             ))}
         </div>
     );
@@ -483,39 +452,45 @@ function BlockHistoryGridRow({
             {badge}
         </div>
     );
-    const signatureBlock = (
-        <div className="min-w-0">
-            {signatureHeader}
-            <div className="mt-1">{invokedNode}</div>
-        </div>
-    );
+    // Signature cell: on desktop the invoked programs stack beneath the signature+badge header; on mobile
+    // they move to their own labelled "Programs" field, so each layout renders the signature differently.
+    const cells: ResponsiveCell[] = [
+        {
+            children: tx.index + 1,
+            desktopClassName: 'text-outer-space-300',
+            hideMobile: true,
+            key: 'index',
+            label: '#',
+        },
+        {
+            desktop: (
+                <>
+                    {signatureHeader}
+                    <div className="mt-1">{invokedNode}</div>
+                </>
+            ),
+            desktopClassName: 'min-w-0',
+            key: 'signature',
+            label: 'Signature',
+            mobile: <div className="pr-10">{signatureHeader}</div>,
+        },
+        { children: feeNode, desktopClassName: 'text-right', key: 'fee', label: 'Fee' },
+        ...(showComputeUnits
+            ? [{ children: compute, desktopClassName: 'text-right', key: 'compute', label: 'CUs Consumed' }]
+            : []),
+        { children: reserved, desktopClassName: 'text-right', key: 'reserved', label: 'CUs Reserved' },
+        { children: txnCost, desktopClassName: 'text-right', key: 'cost', label: 'Cost' },
+        { children: invokedNode, hideDesktop: true, key: 'programs', label: 'Programs', mobileAlign: 'start' },
+    ];
 
     return (
-        <div className="border-b border-solid border-white/10 last:border-b-0">
-            {/* Mobile — stacked labelled rows with the index pinned to the top-right corner. */}
-            <div className="relative flex flex-col gap-1.5 px-4 py-3 md:hidden">
-                <span className="absolute right-4 top-3 text-outer-space-300">#{tx.index + 1}</span>
-                <LabeledField label="Signature">
-                    <div className="pr-10">{signatureHeader}</div>
-                </LabeledField>
-                <LabeledField label="Fee">{feeNode}</LabeledField>
-                {showComputeUnits && <LabeledField label="CUs Consumed">{compute}</LabeledField>}
-                <LabeledField label="CUs Reserved">{reserved}</LabeledField>
-                <LabeledField label="Cost">{txnCost}</LabeledField>
-                <LabeledField label="Programs" align="start">
-                    {invokedNode}
-                </LabeledField>
-            </div>
-
-            <div style={gridStyle} className="hidden items-start gap-4 px-4 py-3 md:grid">
-                <div className="text-outer-space-300">{tx.index + 1}</div>
-                {signatureBlock}
-                <div className="text-right">{feeNode}</div>
-                {showComputeUnits && <div className="text-right">{compute}</div>}
-                <div className="text-right">{reserved}</div>
-                <div className="text-right">{txnCost}</div>
-            </div>
-        </div>
+        <ResponsiveGridRow
+            cells={cells}
+            gridStyle={gridStyle}
+            mobileClassName="relative gap-1.5 px-4"
+            desktopClassName="gap-4 px-4 py-3"
+            pinnedTopRight={<span className="absolute right-4 top-3 text-outer-space-300">#{tx.index + 1}</span>}
+        />
     );
 }
 

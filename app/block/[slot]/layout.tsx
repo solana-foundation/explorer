@@ -63,6 +63,9 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
         );
     }
     return (
+        // Translucent-green text-selection highlight, matched exactly to the transaction page
+        // (app/tx/[signature]/page-client.tsx). `#13d89b` is a one-off selection colour (not a token),
+        // and `40` is its alpha (25%), kept as a literal so both pages stay visually in step.
         <div className="mx-auto flex max-w-5xl flex-col px-4 pt-3 selection:bg-[#13d89b40] selection:text-inherit lg:px-6 lg:pt-5">
             <header className="mb-3 flex flex-col gap-1.5 py-6">
                 <span className="text-xs font-normal uppercase text-muted">Details</span>

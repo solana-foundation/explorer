@@ -30,6 +30,7 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 import { ZoomIn } from 'react-feather';
 
+import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
@@ -37,7 +38,6 @@ import { V1_TRANSACTION_SIZE_LIMIT } from '@/app/shared/lib/v1-message-bridge';
 import { Card } from '@/app/shared/ui/Card';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
-import { Label, Row, Value } from './DetailRow';
 import { TransactionNotFoundCard } from './TransactionNotFoundCard';
 
 function getTransactionErrorReason(

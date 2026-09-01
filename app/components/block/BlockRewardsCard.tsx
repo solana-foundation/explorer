@@ -1,11 +1,17 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import type { BlockWithV1 } from '@entities/block-data';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
-import { GridHeaderRow, LabeledField, LoadMoreButton, TIGHT_CARD } from '@/app/components/block/shared';
-import { CollapsibleSection } from '@/app/features/transaction/ui/CollapsibleSection';
+import {
+    GridHeaderRow,
+    LoadMoreButton,
+    type ResponsiveCell,
+    ResponsiveGridRow,
+    TIGHT_CARD,
+} from '@/app/components/block/shared';
 import { Card } from '@/app/shared/ui/Card';
 
 const PAGE_SIZE = 10;
@@ -55,44 +61,40 @@ export function BlockRewardsCard({ block }: { block: BlockWithV1 }) {
                     {visible.map(reward => {
                         const pct = percentChange(reward);
                         const pubkey = new PublicKey(reward.pubkey);
+                        const cells: ResponsiveCell[] = [
+                            {
+                                children: <Address pubkey={pubkey} link />,
+                                desktopClassName: 'min-w-0',
+                                key: 'address',
+                                label: 'Address',
+                            },
+                            { children: reward.rewardType, key: 'type', label: 'Type' },
+                            {
+                                children: <SolBalance lamports={reward.lamports} />,
+                                desktopClassName: 'text-right',
+                                key: 'amount',
+                                label: 'Amount',
+                            },
+                            {
+                                children: reward.postBalance ? <SolBalance lamports={reward.postBalance} /> : '-',
+                                desktopClassName: 'text-right',
+                                key: 'postBalance',
+                                label: 'Post Balance',
+                            },
+                            {
+                                children: pct ?? '-',
+                                desktopClassName: 'break-all text-right',
+                                key: 'pctChange',
+                                label: '% Change',
+                                mobile: <span className="break-all">{pct ?? '-'}</span>,
+                            },
+                        ];
                         return (
-                            <div
+                            <ResponsiveGridRow
                                 key={reward.pubkey + reward.rewardType}
-                                className="border-b border-solid border-white/10 last:border-b-0"
-                            >
-                                <div className="flex flex-col gap-1 px-3 py-3 md:hidden md:px-4">
-                                    <LabeledField label="Address">
-                                        <Address pubkey={pubkey} link />
-                                    </LabeledField>
-                                    <LabeledField label="Type">{reward.rewardType}</LabeledField>
-                                    <LabeledField label="Amount">
-                                        <SolBalance lamports={reward.lamports} />
-                                    </LabeledField>
-                                    <LabeledField label="Post Balance">
-                                        {reward.postBalance ? <SolBalance lamports={reward.postBalance} /> : '-'}
-                                    </LabeledField>
-                                    <LabeledField label="% Change">
-                                        <span className="break-all">{pct ?? '-'}</span>
-                                    </LabeledField>
-                                </div>
-
-                                <div
-                                    style={GRID_TEMPLATE}
-                                    className="hidden items-start gap-5 px-3 py-2.5 md:grid md:px-4"
-                                >
-                                    <div className="min-w-0">
-                                        <Address pubkey={pubkey} link />
-                                    </div>
-                                    <div>{reward.rewardType}</div>
-                                    <div className="text-right">
-                                        <SolBalance lamports={reward.lamports} />
-                                    </div>
-                                    <div className="text-right">
-                                        {reward.postBalance ? <SolBalance lamports={reward.postBalance} /> : '-'}
-                                    </div>
-                                    <div className="break-all text-right">{pct ?? '-'}</div>
-                                </div>
-                            </div>
+                                cells={cells}
+                                gridStyle={GRID_TEMPLATE}
+                            />
                         );
                     })}
 

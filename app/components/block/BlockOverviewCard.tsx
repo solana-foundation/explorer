@@ -5,16 +5,15 @@ import { ExternalLinkWarning } from '@components/common/ExternalLinkWarning';
 import { Slot } from '@components/common/Slot';
 import { cn } from '@components/shared/utils';
 import type { BlockWithV1 } from '@entities/block-data';
-import { estimateRequestedComputeUnits } from '@entities/compute-unit';
+import { summarizeBlockComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
 import { ExternalLink } from 'react-feather';
 
-import { Label, Row, Value } from '@/app/features/transaction/ui/DetailRow';
+import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { Card } from '@/app/shared/ui/Card';
-import { getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
 
 type BlockOverviewCardProps = {
     block: BlockWithV1;
@@ -39,18 +38,15 @@ export function BlockOverviewCard({
 }: BlockOverviewCardProps) {
     const { cluster } = useCluster();
 
-    let totalCUs = 0;
-    let totalRequestedCUs = 0;
-    let totalCostUnits = 0;
-    for (const tx of block.transactions) {
-        totalRequestedCUs += estimateRequestedComputeUnits(tx, epoch, cluster);
-        totalCUs += tx.meta?.computeUnitsConsumed ?? 0;
-        totalCostUnits += tx.meta?.costUnits ?? 0;
-    }
+    const {
+        consumed: totalCUs,
+        requested: totalRequestedCUs,
+        cost: totalCostUnits,
+        max: maxComputeUnits,
+    } = summarizeBlockComputeUnits({ block, cluster, epoch });
 
     const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
     const successfulTxs = block.transactions.filter(tx => tx.meta?.err === null);
-    const maxComputeUnits = getMaxComputeUnitsInBlock({ cluster, epoch });
 
     return (
         <section className={cn('flex flex-col gap-3', className)}>

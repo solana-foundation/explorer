@@ -1,6 +1,6 @@
 // TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Button } from '@components/shared/ui/button';
-import { cn } from '@components/shared/utils';
+import { cn, cnPrefixed } from '@components/shared/utils';
 import { ReactNode, useId, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
@@ -43,7 +43,7 @@ export function CollapsibleSection({
         <section id={id} aria-labelledby={headingId} className={cn('flex flex-col gap-3', sectionClassName)}>
             {/* Title (plus optional `belowTitle`) forms the first column; actions and the collapse toggle
                 form a second. Without `belowTitle` the title stays a direct child, untouched. */}
-            <div data-section-title className={cn('flex items-center justify-between', titleClassName)}>
+            <div data-section-title className={cnPrefixed('flex items-center justify-between', titleClassName)}>
                 {belowTitle ? (
                     <div className="flex min-w-0 flex-col gap-2">
                         <h2 id={headingId} className="m-0 text-lg font-normal text-white">

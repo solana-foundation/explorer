@@ -1,11 +1,18 @@
 import { Address } from '@components/common/Address';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import type { BlockWithV1 } from '@entities/block-data';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
-import { BracketedFigure, GridHeaderRow, LabeledField, TIGHT_CARD } from '@/app/components/block/shared';
-import { CollapsibleSection } from '@/app/features/transaction/ui/CollapsibleSection';
-import { Label, Row, Value } from '@/app/features/transaction/ui/DetailRow';
+import {
+    CountWithPercent,
+    GridHeaderRow,
+    percentOf,
+    type ResponsiveCell,
+    ResponsiveGridRow,
+    TIGHT_CARD,
+} from '@/app/components/block/shared';
+import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card } from '@/app/shared/ui/Card';
 
@@ -135,54 +142,82 @@ function ProgramsCollapsible({ stats }: { stats: ProgramStats }) {
                 <div className="text-sm text-white">
                     <GridHeaderRow headers={headers} style={gridStyle} rightAlignFrom={1} />
 
-                    {programEntries.map(([programId, txFreq]) => {
-                        const ixFreq = ixFrequency.get(programId) as number;
-                        const successes = txSuccesses.get(programId) || 0;
-                        const txPct = `${((100 * txFreq) / totalTransactions).toFixed(2)}%`;
-                        const ixPct = `${((100 * ixFreq) / totalInstructions).toFixed(2)}%`;
-                        const successRate = showSuccessRate ? `${((100 * successes) / txFreq).toFixed(0)}%` : undefined;
-                        const fields: { count: string; label: string; pct?: string }[] = [
-                            { count: `${txFreq}`, label: 'Transactions', pct: txPct },
-                            { count: `${ixFreq}`, label: 'Instructions', pct: ixPct },
-                        ];
-                        if (successRate !== undefined) {
-                            fields.push({ count: successRate, label: 'Success' });
-                        }
-                        return (
-                            <div key={programId} className="border-b border-solid border-white/10 last:border-b-0">
-                                <div className="flex flex-col gap-1 px-3 py-3 md:hidden">
-                                    <LabeledField label="Program" align="center">
-                                        <Address pubkey={new PublicKey(programId)} link />
-                                    </LabeledField>
-                                    {fields.map((f, i) => (
-                                        <LabeledField key={i} label={f.label} align="center">
-                                            {f.pct === undefined ? (
-                                                f.count
-                                            ) : (
-                                                <>
-                                                    {f.count}
-                                                    <span className="text-outer-space-300"> ({f.pct})</span>
-                                                </>
-                                            )}
-                                        </LabeledField>
-                                    ))}
-                                </div>
-
-                                <div style={gridStyle} className="hidden items-start gap-5 px-3 py-2.5 md:grid md:px-4">
-                                    <div className="min-w-0">
-                                        <Address pubkey={new PublicKey(programId)} link />
-                                    </div>
-                                    <BracketedFigure count={`${txFreq}`} percent={txPct} />
-                                    <BracketedFigure count={`${ixFreq}`} percent={ixPct} />
-                                    {successRate !== undefined && (
-                                        <div className="text-right tabular-nums">{successRate}</div>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
+                    {programEntries.map(([programId, txFreq]) => (
+                        <ProgramRow
+                            key={programId}
+                            programId={programId}
+                            txFreq={txFreq}
+                            ixFreq={ixFrequency.get(programId) as number}
+                            successes={txSuccesses.get(programId) || 0}
+                            totalTransactions={totalTransactions}
+                            totalInstructions={totalInstructions}
+                            showSuccessRate={showSuccessRate}
+                            gridStyle={gridStyle}
+                        />
+                    ))}
                 </div>
             </Card>
         </CollapsibleSection>
     );
+}
+
+// One program's usage row: a CSS grid on md+, stacked labelled fields below md. Each figure pairs its
+// count with a percentage — transactions/instructions as a share of the block, success as a share of
+// the program's own transactions.
+function ProgramRow({
+    programId,
+    txFreq,
+    ixFreq,
+    successes,
+    totalTransactions,
+    totalInstructions,
+    showSuccessRate,
+    gridStyle,
+}: {
+    programId: string;
+    txFreq: number;
+    ixFreq: number;
+    successes: number;
+    totalTransactions: number;
+    totalInstructions: number;
+    showSuccessRate: boolean;
+    gridStyle: React.CSSProperties;
+}) {
+    const txPct = percentOf(txFreq, totalTransactions);
+    const ixPct = percentOf(ixFreq, totalInstructions);
+    const successRate = showSuccessRate ? percentOf(successes, txFreq, 0) : undefined;
+    const cells: ResponsiveCell[] = [
+        {
+            children: <Address pubkey={new PublicKey(programId)} link />,
+            desktopClassName: 'min-w-0',
+            key: 'program',
+            label: 'Program',
+            mobileAlign: 'center',
+        },
+        {
+            children: <CountWithPercent count={txFreq} percent={txPct} />,
+            desktopClassName: 'text-right tabular-nums',
+            key: 'transactions',
+            label: 'Transactions',
+            mobileAlign: 'center',
+        },
+        {
+            children: <CountWithPercent count={ixFreq} percent={ixPct} />,
+            desktopClassName: 'text-right tabular-nums',
+            key: 'instructions',
+            label: 'Instructions',
+            mobileAlign: 'center',
+        },
+    ];
+    if (successRate !== undefined) {
+        cells.push({
+            children: successRate,
+            desktopClassName: 'text-right tabular-nums',
+            key: 'success',
+            label: 'Success',
+            mobileAlign: 'center',
+        });
+    }
+
+    return <ResponsiveGridRow cells={cells} gridStyle={gridStyle} />;
 }

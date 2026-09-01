@@ -1,3 +1,5 @@
+export { summarizeBlockComputeUnits } from './lib/block-compute-units';
+export type { BlockComputeUnitsSummary } from './lib/block-compute-units';
 export {
     estimateRequestedComputeUnits,
     estimateRequestedComputeUnitsForParsedTransaction,

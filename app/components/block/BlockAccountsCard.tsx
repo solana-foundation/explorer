@@ -1,4 +1,5 @@
 import { Address } from '@components/common/Address';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import type { BlockWithV1 } from '@entities/block-data';
 import { PublicKey } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
@@ -6,13 +7,14 @@ import Link from 'next/link';
 import React from 'react';
 
 import {
-    BracketedFigure,
+    CountWithPercent,
     GridHeaderRow,
-    LabeledField,
     LoadMoreButton,
+    percentOf,
+    type ResponsiveCell,
+    ResponsiveGridRow,
     TIGHT_CARD,
 } from '@/app/components/block/shared';
-import { CollapsibleSection } from '@/app/features/transaction/ui/CollapsibleSection';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card } from '@/app/shared/ui/Card';
 
@@ -132,40 +134,22 @@ function AccountsGridRow({
         pathname: `/block/${blockSlot}`,
     });
     const total = writes + reads;
-    const totalPct = `${((100 * total) / totalTransactions).toFixed(2)}%`;
-    const plainFields = [
-        { label: 'Read-Write', value: `${writes}` },
-        { label: 'Read-Only', value: `${reads}` },
-    ];
+    const totalPct = percentOf(total, totalTransactions);
     const accountLink = (
         <Link href={accountPath} className="block min-w-0">
             <Address pubkey={new PublicKey(address)} />
         </Link>
     );
-    return (
-        <div className="border-b border-solid border-white/10 last:border-b-0">
-            <div className="flex flex-col gap-1 px-3 py-3 md:hidden md:px-4">
-                <LabeledField label="Account">{accountLink}</LabeledField>
-                {plainFields.map((f, i) => (
-                    <LabeledField key={i} label={f.label}>
-                        {f.value}
-                    </LabeledField>
-                ))}
-                <LabeledField label="Total">
-                    {total}
-                    <span className="text-outer-space-300"> ({totalPct})</span>
-                </LabeledField>
-            </div>
-
-            <div style={ACCOUNTS_GRID} className="hidden items-start gap-5 px-3 py-2.5 md:grid md:px-4">
-                <div className="min-w-0">{accountLink}</div>
-                {plainFields.map((f, i) => (
-                    <div key={i} className="text-right">
-                        {f.value}
-                    </div>
-                ))}
-                <BracketedFigure count={`${total}`} percent={totalPct} />
-            </div>
-        </div>
-    );
+    const cells: ResponsiveCell[] = [
+        { children: accountLink, desktopClassName: 'min-w-0', key: 'account', label: 'Account' },
+        { children: `${writes}`, desktopClassName: 'text-right', key: 'writes', label: 'Read-Write' },
+        { children: `${reads}`, desktopClassName: 'text-right', key: 'reads', label: 'Read-Only' },
+        {
+            children: <CountWithPercent count={total} percent={totalPct} />,
+            desktopClassName: 'text-right tabular-nums',
+            key: 'total',
+            label: 'Total',
+        },
+    ];
+    return <ResponsiveGridRow cells={cells} gridStyle={ACCOUNTS_GRID} />;
 }

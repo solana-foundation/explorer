@@ -1,4 +1,4 @@
-import type { AccountHistory } from '@features/transaction-history/lib/types';
+import type { AccountHistory } from '@features/transaction-history';
 import {
     DispatchContext as TokensDispatch,
     type State as TokensState,
