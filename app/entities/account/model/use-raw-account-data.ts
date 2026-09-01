@@ -31,6 +31,8 @@ export function useRawAccountDataOnMount(pubkey: PublicKey): { data: Uint8Array 
 }
 
 async function fetchRawAccountData(rpc: SolanaRpc, accountAddress: string): Promise<Uint8Array | undefined> {
-    const { value } = await rpc.getAccountInfo(address(accountAddress), { encoding: 'base64' }).send();
+    const { value } = await rpc
+        .getAccountInfo(address(accountAddress), { commitment: 'confirmed', encoding: 'base64' })
+        .send();
     return value ? fromBase64(value.data[0]) : undefined;
 }
