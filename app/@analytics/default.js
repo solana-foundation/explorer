@@ -2,6 +2,7 @@
 
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import Script from 'next/script';
+import { useState } from 'react';
 
 import { useAnalyticsConsent } from '@/app/features/cookie';
 
@@ -19,17 +20,18 @@ export default function Analytics() {
             {/* Ungated: Speed Insights writes nothing to the device, so the cookie
                 banner's scope does not reach it. Everything below feeds gtag. */}
             <SpeedInsights sampleRate={SPEED_INSIGHTS_SAMPLE_RATE} />
-            {isConsentGiven && (
-                <>
-                    <WebVitalsReporter />
-                    <GoogleTags />
-                </>
-            )}
+            {isConsentGiven && <GoogleTags />}
         </>
     );
 }
 
 function GoogleTags() {
+    // The reporter waits for gtag rather than mounting alongside it: buffered vitals
+    // arrive the instant it subscribes, which beats an afterInteractive script, and
+    // trackEvent drops silently when no provider is up. Subscribing late costs
+    // nothing, since PerformanceObserver replays what it already saw.
+    const [isGtagReady, setIsGtagReady] = useState(false);
+    const markGtagReady = () => setIsGtagReady(true);
     const safeAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.replace("'", "\\'");
     const safeTagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID?.replace("'", "\\'");
 
@@ -40,7 +42,8 @@ function GoogleTags() {
     if (safeTagId) {
         return (
             <>
-                <Script id="google-tag-initialization">
+                {isGtagReady && <WebVitalsReporter />}
+                <Script id="google-tag-initialization" onReady={markGtagReady}>
                     {`
                     (function(w,d,s,l,i){w[l] = w[l] || [];w[l].push({
                             'gtm.start': new Date().getTime(),
@@ -70,13 +73,14 @@ function GoogleTags() {
     // Fallback to Google Analytics if no Tag ID is provided
     return (
         <>
+            {isGtagReady && <WebVitalsReporter />}
             {/* Global site tag (gtag.js) - Google Analytics  */}
             <Script
                 async
                 src={`https://www.googletagmanager.com/gtag/js?id=${safeAnalyticsId}`}
                 strategy="afterInteractive"
             />
-            <Script id="google-analytics-initialization" strategy="afterInteractive">
+            <Script id="google-analytics-initialization" strategy="afterInteractive" onReady={markGtagReady}>
                 {`
                     window.dataLayer = window.dataLayer || [];
                     function gtag(){dataLayer.push(arguments);}

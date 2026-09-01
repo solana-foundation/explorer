@@ -12,14 +12,14 @@ tab_opened → [wallet_connected ↔ sections_expanded] → transaction_submitte
 
 ### Events
 
-| Event | Parameters |
-|-------|------------|
-| `tab_opened` | `program_id` |
-| `wallet_connected` | `program_id`, `wallet_type` |
-| `sections_expanded` | `program_id`, `expanded_sections`, `expanded_sections_count` |
-| `transaction_submitted` | `program_id`, `instruction_name` |
-| `transaction_confirmed` | `program_id`, `instruction_name`, `transaction_signature` |
-| `transaction_failed` | `program_id`, `instruction_name`, `error_message` |
+| Event                   | Parameters                                                   |
+| ----------------------- | ------------------------------------------------------------ |
+| `tab_opened`            | `program_id`                                                 |
+| `wallet_connected`      | `program_id`, `wallet_type`                                  |
+| `sections_expanded`     | `program_id`, `expanded_sections`, `expanded_sections_count` |
+| `transaction_submitted` | `program_id`, `instruction_name`                             |
+| `transaction_confirmed` | `program_id`, `instruction_name`, `transaction_signature`    |
+| `transaction_failed`    | `program_id`, `instruction_name`, `error_message`            |
 
 All events are prefixed with `iidl_anchor_`.
 
@@ -35,12 +35,12 @@ button_clicked → receipt_viewed / no_receipt → view_tx_clicked
 
 ### Events
 
-| Event | Parameters |
-|-------|------------|
-| `button_clicked` | `signature` |
-| `viewed` | `signature`, `receipt_type` (sol/token) |
-| `no_receipt` | `signature` |
-| `view_tx_clicked` | `signature` |
+| Event             | Parameters                              |
+| ----------------- | --------------------------------------- |
+| `button_clicked`  | `signature`                             |
+| `viewed`          | `signature`, `receipt_type` (sol/token) |
+| `no_receipt`      | `signature`                             |
+| `view_tx_clicked` | `signature`                             |
 
 All events are prefixed with `rcpt_`.
 
@@ -68,9 +68,9 @@ Tracks usage of the Refresh button across the Explorer.
 
 ### Events
 
-| Event | Parameters |
-|-------|------------|
-| `button_clicked` | `section` |
+| Event            | Parameters |
+| ---------------- | ---------- |
+| `button_clicked` | `section`  |
 
 All events are prefixed with `rfsh_`.
 
@@ -84,6 +84,8 @@ Real-user performance is reported to two independent sinks from the `app/@analyt
 - **GA4** — `useReportWebVitals` from `next/web-vitals`, unsampled, so the vitals sit alongside the funnels above.
 
 The two sit on opposite sides of the cookie consent gate. Speed Insights writes nothing to the device — no cookie, no storage, no client-generated identifier — so the banner, which exists to cover cookies, does not reach it and it runs ungated. The GA4 path feeds gtag, so it stays behind consent along with the GA and GTM scripts.
+
+The GA4 reporter also waits for the tag script's `onReady` before it subscribes. `trackEvent` drops an event when neither `gtag` nor `dataLayer` exists yet, and buffered vitals arrive the instant the reporter subscribes — earlier than an `afterInteractive` script can load. Waiting costs nothing, because `PerformanceObserver` replays entries it already saw.
 
 ### Events
 
