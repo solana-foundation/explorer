@@ -35,6 +35,10 @@ ignoreScripts: true
 
 minimumReleaseAge: 20160
 
+# TODO: remove exclusion 
+minimumReleaseAgeExclude:
+  - sas-lib
+
 # Pin resolution to the public npm registry so it can't silently inherit a
 # global/org .npmrc mirror. Scoped keys (e.g. '@my-org') can be added here.
 registries:
