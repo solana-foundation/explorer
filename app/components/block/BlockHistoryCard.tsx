@@ -556,7 +556,10 @@ const FilterDropdown = ({
 }) => {
     const [query, setQuery] = React.useState('');
     const trimmed = query.trim().toLowerCase();
-    const visibleOptions = trimmed === '' ? options : options.filter(o => o.name.toLowerCase().includes(trimmed));
+    const visibleOptions = React.useMemo(
+        () => (trimmed === '' ? options : options.filter(o => o.name.toLowerCase().includes(trimmed))),
+        [options, trimmed],
+    );
 
     return (
         <Dropdown className="mr-1.5">
