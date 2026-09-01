@@ -5,6 +5,7 @@ import {
     assertUnreachable,
     buildMintOverviewFields,
     buildTokenEntityFields,
+    buildUnsupportedKindPayload,
     resolveProgramAddressLabel,
     unknownMarker,
 } from '../shared.js';
@@ -40,6 +41,18 @@ describe('account kind shared helpers', () => {
 
         // A missing address yields null
         expect(resolveProgramAddressLabel({ account, kind: 'unknown' })).toBeNull();
+    });
+
+    it('should build the kind-only unsupported payload with a builder-level error', () => {
+        expect(
+            buildUnsupportedKindPayload({
+                account: { owner: 'owner', parsedData: null, parsedProgram: null, rawDataBytes: null },
+                kind: 'nftoken',
+            }),
+        ).toEqual({
+            entity: { kind: 'nftoken' },
+            errors: ['nftoken accounts are not supported yet'],
+        });
     });
 
     it('should build deterministic unknown markers', () => {

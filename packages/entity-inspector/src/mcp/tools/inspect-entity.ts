@@ -3,7 +3,14 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { EnabledClusterNames, SupportedCluster } from '../../config.js';
 import { consoleLogger, type InspectorLogger, ns } from '../../logger.js';
 import { unknownMarker } from '../../accounts/account-kinds/shared.js';
-import { ACCOUNT_IDENTIFIER_KIND, BPF_UPGRADEABLE_LOADER_KIND, UNKNOWN_KIND } from '../../accounts/kinds.js';
+import {
+    ACCOUNT_IDENTIFIER_KIND,
+    BPF_LOADER_2_KIND,
+    BPF_LOADER_KIND,
+    BPF_UPGRADEABLE_LOADER_KIND,
+    LOADER_V4_KIND,
+    UNKNOWN_KIND,
+} from '../../accounts/kinds.js';
 import { enrichUpgradeableProgramData, normalizeAccountProbe } from '../../accounts/account-normalizer.js';
 import { buildAccountPayloadWithRouter } from '../../accounts/inspect-entity-account-router.js';
 import {
@@ -17,11 +24,17 @@ import type { ResolveSecurityMetadata } from '../../enrichments/security.js';
 import type { ResolveProgramVerification } from '../../enrichments/verification.js';
 import type { DiscoverProgramIdl, ResolveIdlClient } from '../../enrichments/idl-clients.js';
 import { asRecord, asString } from '../../shared/parse-helpers.js';
+import { base64Decoder } from '../../rpc/codecs.js';
 import { isSourceUnavailableError, type RpcClient } from '../../rpc/rpc.js';
 import { buildTransactionPayload } from '../../transactions/build-payload.js';
 import { decodeTransactionInstructions } from '../../transactions/decode-instructions.js';
 import { normalizeTransactionProbe } from '../../transactions/normalizer.js';
-import type { AccountPayloadContext, DasClassificationOutcome, NormalizedAccountInfo } from '../../accounts/types.js';
+import type {
+    AccountEntityKind,
+    AccountPayloadContext,
+    DasClassificationOutcome,
+    NormalizedAccountInfo,
+} from '../../accounts/types.js';
 import type { DecodeInstructionFallback } from '../../transactions/types.js';
 import type { McpAnalyticsEvent } from '../../types.js';
 import {
@@ -86,6 +99,14 @@ export function splitBuilderErrors(routedPayload: Record<string, unknown>): {
     return { errors, payload };
 }
 
+// Legacy loaders have no programdata account: enrichments run with a null authority (frozen verification path).
+const PROGRAM_LOADER_KINDS: ReadonlySet<AccountEntityKind> = new Set([
+    BPF_LOADER_2_KIND,
+    BPF_LOADER_KIND,
+    BPF_UPGRADEABLE_LOADER_KIND,
+    LOADER_V4_KIND,
+]);
+
 async function resolveAccount(
     identifier: string,
     cluster: SupportedCluster,
@@ -124,11 +145,10 @@ async function resolveAccount(
 
         const finalKind = promoteAccountKindWithDas(baseKind, dasOutcome);
 
-        // Program enrichments are only consumed by the upgradeable-loader builder — resolve them just there.
-        const enrichments =
-            finalKind === BPF_UPGRADEABLE_LOADER_KIND
-                ? await resolveProgramEnrichments(identifier, enrichedAccount, cluster, dependencies, logger)
-                : null;
+        // Program enrichments only apply to loader-owned program accounts — resolve them just there.
+        const enrichments = PROGRAM_LOADER_KINDS.has(finalKind)
+            ? await resolveProgramEnrichments(identifier, enrichedAccount, cluster, dependencies, logger)
+            : null;
 
         const routedPayload = buildAccountPayloadWithRouter({
             account: enrichedAccount,
@@ -192,7 +212,7 @@ async function resolveProgramEnrichments(
     logger: InspectorLogger,
 ): Promise<ProgramEnrichments> {
     const authority = account.programData?.authority ?? null;
-    const programDataBase64 = account.programDataRawBase64 ?? null;
+    const programDataBase64 = account.programDataRawBase64 ?? accountRawBase64(account);
 
     const [idlDiscovery, verification, security, multisig] = await Promise.all([
         dependencies.discoverProgramIdl
@@ -235,6 +255,11 @@ async function resolveProgramEnrichments(
         ...(security ? { securityMetadataResult: security } : {}),
         ...(multisig ? { multisigReferenceResult: multisig } : {}),
     };
+}
+
+// Legacy loaders keep the ELF in the program account itself; upgradeable probes are jsonParsed, so rawDataBytes stays null there.
+function accountRawBase64(account: NormalizedAccountInfo): string | null {
+    return account.rawDataBytes ? base64Decoder().decode(account.rawDataBytes) : null;
 }
 
 // Unknown-kind accounts get one shot at an IDL decode: resolve the owner program's IDL and decode

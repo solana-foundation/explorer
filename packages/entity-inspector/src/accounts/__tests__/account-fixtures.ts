@@ -83,6 +83,18 @@ export function upgradeableProgramDataProbe({
     });
 }
 
+/** Legacy-loader program probe: no jsonParsed shape exists, so the RPC serves the ELF as raw base64. */
+export function legacyLoaderProgramProbe(owner: string, bytes: Uint8Array): AccountProbeEnvelope {
+    return {
+        value: {
+            data: [btoa(String.fromCharCode(...bytes)), 'base64'],
+            executable: true,
+            lamports: 1141440,
+            owner,
+        },
+    };
+}
+
 type UpgradeableAccountOverrides = {
     address?: string;
     parsedProgram?: string;

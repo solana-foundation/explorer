@@ -6,6 +6,7 @@ import { gen } from '../../../__tests__/gen.js';
 import {
     addressLookupTableRawProbe,
     compressedNftDasAsset,
+    legacyLoaderProgramProbe,
     notFoundAccountProbe,
     parsedAccountProbe,
     rawAccountProbe,
@@ -13,6 +14,7 @@ import {
     upgradeableProgramDataProbe,
     upgradeableProgramProbe,
 } from '../../../accounts/__tests__/account-fixtures.js';
+import { BPF_LOADER_2_PROGRAM_ID, BPF_LOADER_PROGRAM_ID, LOADER_V4_PROGRAM_ID } from '../../../shared/constants.js';
 import { asRecord } from '../../../shared/parse-helpers.js';
 import { SourceUnavailableError } from '../../../rpc/rpc.js';
 import { handleInspectEntity, type InspectEntityDependencies, splitBuilderErrors } from '../inspect-entity.js';
@@ -492,6 +494,80 @@ describe('inspect_entity handler', () => {
                 },
             },
         });
+    });
+
+    it('should resolve legacy-loader enrichments through the frozen path with the program account bytes', async () => {
+        const bytes = new Uint8Array([1, 2, 3]);
+        const dataBase64 = btoa(String.fromCharCode(...bytes));
+        const discoverProgramIdl = vi.fn().mockResolvedValue({ client: null, discovery: { status: 'not_found' } });
+        const resolveProgramVerification = vi.fn().mockResolvedValue({ status: 'unverified' });
+        const resolveSecurityMetadata = vi.fn().mockResolvedValue({ status: 'missing' });
+        const resolveMultisigReference = vi.fn().mockResolvedValue({ status: 'not_multisig' });
+        const fetchAccountInfo = vi.fn().mockResolvedValue(legacyLoaderProgramProbe(BPF_LOADER_2_PROGRAM_ID, bytes));
+        const dependencies = createDependencies({
+            discoverProgramIdl,
+            fetchAccountInfo,
+            resolveMultisigReference,
+            resolveProgramVerification,
+            resolveSecurityMetadata,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(result.isError).toBe(false);
+        expect(fetchAccountInfo).toHaveBeenCalledTimes(1);
+        expect(discoverProgramIdl).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, 'mainnet-beta');
+        expect(resolveProgramVerification).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, null, dataBase64, 'mainnet-beta');
+        expect(resolveSecurityMetadata).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, dataBase64, 'mainnet-beta');
+        expect(resolveMultisigReference).toHaveBeenCalledWith(null, 'mainnet-beta');
+        expect(envelope).toMatchObject({
+            errors: [],
+            payload: {
+                entity: {
+                    address: ACCOUNT_IDENTIFIER,
+                    executable: true,
+                    idl: { status: 'not_found' },
+                    kind: 'bpf-loader-2',
+                    multisig: { status: 'not_multisig' },
+                    owner_program: BPF_LOADER_2_PROGRAM_ID,
+                    security_metadata: { status: 'missing' },
+                    verification: { status: 'unverified' },
+                },
+            },
+        });
+    });
+
+    it('should mark legacy-loader enrichments unknown when no resolvers are injected', async () => {
+        const cases = [
+            { kind: 'bpf-loader', owner: BPF_LOADER_PROGRAM_ID },
+            { kind: 'bpf-loader-2', owner: BPF_LOADER_2_PROGRAM_ID },
+            { kind: 'loader-v4', owner: LOADER_V4_PROGRAM_ID },
+        ] as const;
+
+        for (const { kind, owner } of cases) {
+            const fetchAccountInfo = vi.fn().mockResolvedValue(legacyLoaderProgramProbe(owner, new Uint8Array(4)));
+            const result = await handleInspectEntity(
+                { identifier: ACCOUNT_IDENTIFIER },
+                createDependencies({ fetchAccountInfo }),
+            );
+            const envelope = parseEnvelope(result);
+
+            const unknown = { reason: 'source_unavailable', status: 'unknown', value: null };
+            expect(envelope).toMatchObject({
+                errors: [],
+                payload: {
+                    entity: {
+                        idl: unknown,
+                        kind,
+                        multisig: unknown,
+                        owner_program: owner,
+                        security_metadata: unknown,
+                        verification: unknown,
+                    },
+                },
+            });
+        }
     });
 
     it('should degrade each rejecting enrichment resolver to unknown without failing the payload', async () => {

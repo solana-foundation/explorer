@@ -1,7 +1,6 @@
 import { LOADER_V4_PROGRAM_ID } from '../../shared/constants.js';
 import { type AccountKindBuilder, resolveProgramAddressLabel, unknownMarker } from './shared.js';
 
-// Not routed yet — the router serves buildUnsupportedKindPayload for this kind until the @explorer/idl-decode PR wires the enrichments.
 export const buildLoaderV4Payload: AccountKindBuilder = context => {
     const entity: Record<string, unknown> = {
         address: context.account.address ?? null,

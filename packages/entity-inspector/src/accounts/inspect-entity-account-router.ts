@@ -1,13 +1,15 @@
 import { buildAddressLookupTablePayload } from './account-kinds/address-lookup-table.js';
+import { buildBpfLoader2Payload, buildBpfLoaderPayload } from './account-kinds/bpf-loader.js';
 import { buildBpfUpgradeableLoaderPayload } from './account-kinds/bpf-upgradeable-loader.js';
 import { buildCompressedNftPayload } from './account-kinds/compressed-nft.js';
 import { buildConfigPayload } from './account-kinds/config.js';
 import { buildFeaturePayload } from './account-kinds/feature.js';
+import { buildLoaderV4Payload } from './account-kinds/loader.js';
 import { buildNativeProgramPayload } from './account-kinds/native-program.js';
 import { buildNftokenPayload } from './account-kinds/nftoken.js';
 import { buildNoncePayload } from './account-kinds/nonce.js';
 import { buildProgramMetadataPayload } from './account-kinds/program-metadata.js';
-import { type AccountKindBuilder, assertUnreachable, buildUnsupportedKindPayload } from './account-kinds/shared.js';
+import { type AccountKindBuilder, assertUnreachable } from './account-kinds/shared.js';
 import { buildSolanaAttestationServicePayload } from './account-kinds/solana-attestation-service.js';
 import { buildSplToken2022AccountPayload } from './account-kinds/spl-token-2022-account.js';
 import { buildSplToken2022MintPayload } from './account-kinds/spl-token-2022-mint.js';
@@ -52,11 +54,12 @@ function selectBuilder(kind: AccountEntityKind): AccountKindBuilder {
     switch (kind) {
         case BPF_UPGRADEABLE_LOADER_KIND:
             return buildBpfUpgradeableLoaderPayload;
-        // Full builders exist (account-kinds/{bpf-loader,loader}.ts) but the verification/security/multisig enrichment pipeline only runs for upgradeable programs — routed as unsupported until it widens.
         case BPF_LOADER_KIND:
+            return buildBpfLoaderPayload;
         case BPF_LOADER_2_KIND:
+            return buildBpfLoader2Payload;
         case LOADER_V4_KIND:
-            return buildUnsupportedKindPayload;
+            return buildLoaderV4Payload;
         case NATIVE_PROGRAM_KIND:
             return buildNativeProgramPayload;
         case STAKE_KIND:
