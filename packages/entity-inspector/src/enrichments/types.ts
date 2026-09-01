@@ -20,7 +20,7 @@ export type VerificationEvidence = {
 export type VerificationResult =
     | { status: 'verified'; evidence: VerificationEvidence }
     | { status: 'unverified' }
-    | { status: 'unknown'; reason: 'source_unavailable' | 'verification_invalid' };
+    | { status: 'unknown'; reason: 'source_unavailable' | 'verification_invalid' | 'loader_state_undecoded' };
 
 // The byte-parser's fields (source of truth in @explorer/parsers) plus the PMP-only extras the
 // canonical metadata path populates — extends rather than re-spells so a new parser field propagates.
@@ -52,7 +52,7 @@ export type MultisigReferenceResult =
           members: string[] | null;
       }
     | { status: 'not_multisig' }
-    | { status: 'unknown'; reason: 'source_unavailable' };
+    | { status: 'unknown'; reason: 'source_unavailable' | 'loader_state_undecoded' };
 
 // Derived from @explorer/idl-decode's detection vocabulary; the extra members are the source
 // explorer-mcp's wider wire vocabulary (legacy converts to codama at client creation; shank is undetectable).

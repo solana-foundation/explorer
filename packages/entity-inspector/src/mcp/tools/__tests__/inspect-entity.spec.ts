@@ -7,6 +7,7 @@ import {
     addressLookupTableRawProbe,
     compressedNftDasAsset,
     legacyLoaderProgramProbe,
+    loaderV4StateBytes,
     notFoundAccountProbe,
     parsedAccountProbe,
     rawAccountProbe,
@@ -499,8 +500,8 @@ describe('inspect_entity handler', () => {
     const LEGACY_LOADER_CASES = [
         { kind: 'bpf-loader', owner: BPF_LOADER_PROGRAM_ID },
         { kind: 'bpf-loader-2', owner: BPF_LOADER_2_PROGRAM_ID },
-        { kind: 'loader-v4', owner: LOADER_V4_PROGRAM_ID },
     ] as const;
+    const V4_AUTHORITY = 'AeLnXCBPaQHGWRLr2saFsEVfnMNuKixRAbWCT9P5twgZ';
 
     it.each(LEGACY_LOADER_CASES)(
         'should resolve $kind enrichments through the frozen path with the program account bytes',
@@ -551,6 +552,168 @@ describe('inspect_entity handler', () => {
             });
         },
     );
+
+    it('should verify a deployed loader-v4 program through the authority path with the sliced ELF', async () => {
+        const elf = new Uint8Array([1, 2, 3]);
+        const bytes = loaderV4StateBytes({ authority: V4_AUTHORITY, elf, slot: 42, status: 'deployed' });
+        const resolveProgramVerification = vi.fn().mockResolvedValue({ status: 'unverified' });
+        const resolveMultisigReference = vi.fn().mockResolvedValue({ status: 'not_multisig' });
+        const fetchAccountInfo = vi.fn().mockResolvedValue(legacyLoaderProgramProbe(LOADER_V4_PROGRAM_ID, bytes));
+        const dependencies = createDependencies({
+            fetchAccountInfo,
+            resolveMultisigReference,
+            resolveProgramVerification,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(result.isError).toBe(false);
+        expect(resolveProgramVerification).toHaveBeenCalledWith(
+            ACCOUNT_IDENTIFIER,
+            V4_AUTHORITY,
+            btoa(String.fromCharCode(...elf)),
+            'mainnet-beta',
+        );
+        expect(resolveMultisigReference).toHaveBeenCalledWith(V4_AUTHORITY, 'mainnet-beta');
+        expect(envelope).toMatchObject({
+            errors: [],
+            payload: {
+                entity: {
+                    kind: 'loader-v4',
+                    last_state_change_slot: 42,
+                    status: 'deployed',
+                    upgrade_authority: V4_AUTHORITY,
+                    upgradeable: true,
+                },
+            },
+        });
+    });
+
+    it('should keep the authority path for a retracted loader-v4 program and scan the full account for security', async () => {
+        const elf = new Uint8Array([9, 8, 7]);
+        const bytes = loaderV4StateBytes({ authority: V4_AUTHORITY, elf, status: 'retracted' });
+        const resolveProgramVerification = vi.fn().mockResolvedValue({ status: 'unverified' });
+        const resolveSecurityMetadata = vi.fn().mockResolvedValue({ status: 'missing' });
+        const fetchAccountInfo = vi.fn().mockResolvedValue(legacyLoaderProgramProbe(LOADER_V4_PROGRAM_ID, bytes));
+        const dependencies = createDependencies({
+            fetchAccountInfo,
+            resolveProgramVerification,
+            resolveSecurityMetadata,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(resolveProgramVerification).toHaveBeenCalledWith(
+            ACCOUNT_IDENTIFIER,
+            V4_AUTHORITY,
+            btoa(String.fromCharCode(...elf)),
+            'mainnet-beta',
+        );
+        // Security scans the whole account (header included) — the verification slice must not leak here.
+        expect(resolveSecurityMetadata).toHaveBeenCalledWith(
+            ACCOUNT_IDENTIFIER,
+            btoa(String.fromCharCode(...bytes)),
+            'mainnet-beta',
+        );
+        expect(envelope).toMatchObject({
+            errors: [],
+            payload: {
+                entity: {
+                    kind: 'loader-v4',
+                    status: 'retracted',
+                    upgrade_authority: V4_AUTHORITY,
+                    upgradeable: true,
+                },
+            },
+        });
+    });
+
+    it('should pass an empty string, not null, for a loader-v4 program with a zero-length ELF', async () => {
+        const bytes = loaderV4StateBytes({ authority: V4_AUTHORITY, elf: new Uint8Array(0), status: 'deployed' });
+        const resolveProgramVerification = vi.fn().mockResolvedValue({ status: 'unverified' });
+        const fetchAccountInfo = vi.fn().mockResolvedValue(legacyLoaderProgramProbe(LOADER_V4_PROGRAM_ID, bytes));
+        const dependencies = createDependencies({ fetchAccountInfo, resolveProgramVerification });
+
+        await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+
+        // '' means "authority path over an empty program"; null would reroute to the frozen path.
+        expect(resolveProgramVerification).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, V4_AUTHORITY, '', 'mainnet-beta');
+    });
+
+    it('should verify a finalized loader-v4 program through the frozen path', async () => {
+        const bytes = loaderV4StateBytes({ authority: V4_AUTHORITY, status: 'finalized' });
+        const resolveProgramVerification = vi.fn().mockResolvedValue({ status: 'unverified' });
+        const resolveMultisigReference = vi.fn().mockResolvedValue({ status: 'not_multisig' });
+        const fetchAccountInfo = vi.fn().mockResolvedValue(legacyLoaderProgramProbe(LOADER_V4_PROGRAM_ID, bytes));
+        const dependencies = createDependencies({
+            fetchAccountInfo,
+            resolveMultisigReference,
+            resolveProgramVerification,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(resolveProgramVerification).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, null, null, 'mainnet-beta');
+        expect(resolveMultisigReference).toHaveBeenCalledWith(null, 'mainnet-beta');
+        expect(envelope).toMatchObject({
+            errors: [],
+            payload: {
+                entity: {
+                    kind: 'loader-v4',
+                    status: 'finalized',
+                    upgrade_authority: null,
+                    upgradeable: false,
+                },
+            },
+        });
+    });
+
+    it('should degrade loader-v4 verification and multisig to undecoded markers instead of the frozen path', async () => {
+        const logger = createLoggerMock();
+        const discoverProgramIdl = vi.fn().mockResolvedValue({ client: null, discovery: { status: 'not_found' } });
+        const resolveProgramVerification = vi.fn();
+        const resolveSecurityMetadata = vi.fn().mockResolvedValue({ status: 'missing' });
+        const resolveMultisigReference = vi.fn();
+        const fetchAccountInfo = vi
+            .fn()
+            .mockResolvedValue(legacyLoaderProgramProbe(LOADER_V4_PROGRAM_ID, new Uint8Array(4)));
+        const dependencies = createDependencies({
+            discoverProgramIdl,
+            fetchAccountInfo,
+            logger,
+            resolveMultisigReference,
+            resolveProgramVerification,
+            resolveSecurityMetadata,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+        const envelope = parseEnvelope(result);
+
+        expect(result.isError).toBe(false);
+        expect(resolveProgramVerification).not.toHaveBeenCalled();
+        expect(resolveMultisigReference).not.toHaveBeenCalled();
+        expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] loader-v4 state undecoded', {
+            error: new Error('loader-v4 account data shorter than the state header'),
+            identifier: ACCOUNT_IDENTIFIER,
+        });
+        expect(discoverProgramIdl).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, 'mainnet-beta');
+        expect(resolveSecurityMetadata).toHaveBeenCalledTimes(1);
+        const undecoded = { reason: 'loader_state_undecoded', status: 'unknown' };
+        expect(envelope).toMatchObject({
+            errors: [],
+            payload: {
+                entity: {
+                    kind: 'loader-v4',
+                    multisig: undecoded,
+                    status: { ...undecoded, value: null },
+                    verification: undecoded,
+                },
+            },
+        });
+    });
 
     it('should not resolve program enrichments for non-program account kinds', async () => {
         const discoverProgramIdl = vi.fn();
