@@ -10,7 +10,7 @@ import { getTransactionRows } from '@components/account/HistoryCardComponents';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { FetchStatus } from '@providers/cache';
-import { PublicKey } from '@solana/web3.js';
+import { address as toAddress } from '@solana/kit';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { isGtfaDisabled } from '../lib/gtfa-disabled-addresses';
@@ -21,7 +21,7 @@ import { InstructionsCell } from './InstructionsCell';
 import { TransactionRawDataCell } from './TransactionRawDataCell';
 
 export function TransactionHistoryCard({ address }: { address: string }) {
-    const pubkey = useMemo(() => new PublicKey(address), [address]);
+    const historyAddress = useMemo(() => toAddress(address), [address]);
     const filters = useHistoryFilters();
     const hasActiveFilters = Object.values(filters).some(value => value !== undefined);
     const filtersKey = JSON.stringify(filters);
@@ -37,8 +37,14 @@ export function TransactionHistoryCard({ address }: { address: string }) {
 
     // Signatures only — the parsed transactions for instruction names are fetched lazily per row, one at a
     // time (see InstructionsCell), so the page never batch-hammers the RPC into 429s.
-    const refresh = useCallback(() => fetchAccountHistory(pubkey, false, true), [fetchAccountHistory, pubkey]);
-    const loadMore = useCallback(() => fetchAccountHistory(pubkey, false), [fetchAccountHistory, pubkey]);
+    const refresh = useCallback(
+        () => fetchAccountHistory(historyAddress, false, true),
+        [fetchAccountHistory, historyAddress],
+    );
+    const loadMore = useCallback(
+        () => fetchAccountHistory(historyAddress, false),
+        [fetchAccountHistory, historyAddress],
+    );
 
     const rows: TransactionHistoryRowView[] = history?.data?.fetched
         ? getTransactionRows(history.data.fetched).map(row => ({
