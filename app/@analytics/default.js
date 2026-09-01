@@ -1,19 +1,39 @@
 'use client';
 
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import Script from 'next/script';
 
 import { useAnalyticsConsent } from '@/app/features/cookie';
 
+import { WebVitalsReporter } from './WebVitalsReporter';
+
+// At full rate Explorer traffic would run far past the included Speed Insights
+// allowance; 10% still leaves ample volume for per-route percentiles.
+const SPEED_INSIGHTS_SAMPLE_RATE = 0.1;
+
 export default function Analytics() {
     const { isConsentGiven } = useAnalyticsConsent();
+
+    return (
+        <>
+            {/* Ungated: Speed Insights writes nothing to the device, so the cookie
+                banner's scope does not reach it. Everything below feeds gtag. */}
+            <SpeedInsights sampleRate={SPEED_INSIGHTS_SAMPLE_RATE} />
+            {isConsentGiven && (
+                <>
+                    <WebVitalsReporter />
+                    <GoogleTags />
+                </>
+            )}
+        </>
+    );
+}
+
+function GoogleTags() {
     const safeAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.replace("'", "\\'");
     const safeTagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID?.replace("'", "\\'");
 
     if (!safeAnalyticsId && !safeTagId) {
-        return null;
-    }
-
-    if (!isConsentGiven) {
         return null;
     }
 

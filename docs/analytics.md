@@ -23,7 +23,7 @@ tab_opened → [wallet_connected ↔ sections_expanded] → transaction_submitte
 
 All events are prefixed with `iidl_anchor_`.
 
-> GA4 event names must be <= 40 characters. This is enforced at compile time via the `GA4EventName` type in ../app/shared/lib/analytics/types.d.ts
+> GA4 event names must be <= 40 characters. This is enforced at compile time via the `GA4EventName` type in ../app/shared/lib/analytics/types.ts
 
 ## Receipt Feature Funnel
 
@@ -75,3 +75,35 @@ Tracks usage of the Refresh button across the Explorer.
 All events are prefixed with `rfsh_`.
 
 The `section` parameter identifies the page surface where the button was clicked. Each call site provides a hardcoded literal (e.g. `transaction_card`, `token_mint_card`, `vote_account_section`, `token_history_card`). Shared components (`AccountHeader`, `HistoryCardHeader`) accept an explicit `analyticsSection` prop so the tracked value is decoupled from display text.
+
+## Web Vitals
+
+Real-user performance is reported to two independent sinks from the `app/@analytics/` slot:
+
+- **Vercel Speed Insights** — `@vercel/speed-insights/next`, sampled at 10%. Core Web Vitals with route, country, and element breakdowns in the Vercel dashboard. Requires Speed Insights Plus for the individual metrics, which is included on the Enterprise plan.
+- **GA4** — `useReportWebVitals` from `next/web-vitals`, unsampled, so the vitals sit alongside the funnels above.
+
+The two sit on opposite sides of the cookie consent gate. Speed Insights writes nothing to the device — no cookie, no storage, no client-generated identifier — so the banner, which exists to cover cookies, does not reach it and it runs ungated. The GA4 path feeds gtag, so it stays behind consent along with the GA and GTM scripts.
+
+### Events
+
+| Event     | Parameters                      |
+| --------- | ------------------------------- |
+| `wv_lcp`  | `metric_rating`, `metric_value` |
+| `wv_inp`  | `metric_rating`, `metric_value` |
+| `wv_cls`  | `metric_rating`, `metric_value` |
+| `wv_fcp`  | `metric_rating`, `metric_value` |
+| `wv_ttfb` | `metric_rating`, `metric_value` |
+
+All events are prefixed with `wv_`.
+
+- `metric_rating`: `good`, `needs-improvement`, or `poor`, as classified by the `web-vitals` library
+- `metric_value`: milliseconds rounded to a whole number, except `wv_cls`, which is a unitless ratio kept to four decimal places
+
+`useReportWebVitals` also emits the deprecated FID; INP replaced it, so it is dropped rather than given an event name.
+
+### Reading the numbers
+
+Speed Insights sees every visitor, so its numbers are the ones to trust for country and route comparisons.
+
+The GA4 events are a consent-gated subset. Non-EU visitors are auto-granted, but an EU visitor who ignores the banner never grants consent and contributes nothing, so the EU slice is thin and skewed toward people who click. Consent granted part-way through a page load loses less than it looks: `web-vitals` registers buffered `PerformanceObserver`s, so paint and layout entries from before the mount still arrive.
