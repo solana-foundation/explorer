@@ -1,6 +1,7 @@
+import type { SolanaRpc } from '@entities/cluster';
+import type { Address, Base64EncodedWireTransaction } from '@solana/kit';
 import type {
     AccountInfo,
-    Connection,
     ParsedAccountData,
     SimulatedTransactionAccountInfo,
     TransactionError,
@@ -10,8 +11,11 @@ import { PublicKey, VersionedTransaction } from '@solana/web3.js';
 import type { Cluster } from '@utils/cluster';
 import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 
+import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
+import { toBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { UnsignedV1WireTransaction, V1MessageView } from '@/app/shared/lib/v1-message-bridge';
+import { toKitAddress, toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
 import { buildTokenBalances, type TokenBalanceData } from './build-token-balances';
 import { computeSolBalanceChanges } from './compute-sol-balance-changes';
@@ -34,27 +38,27 @@ export type SimulationResult = {
 };
 
 type SimulateOptions = {
-    connection: Connection;
+    rpc: SolanaRpc;
     message: VersionedMessage;
     cluster: Cluster;
     accountBalances?: { preBalances: number[]; postBalances: number[] };
 };
 
 /**
- * Run a transaction simulation against the given RPC connection and return
+ * Run a transaction simulation against the given RPC and return
  * parsed results (logs, SOL changes, token balance rows, etc.).
  */
 export async function simulateTransaction({
-    connection,
+    rpc,
     message,
     cluster,
     accountBalances,
 }: SimulateOptions): Promise<SimulationResult> {
     let raw;
     try {
-        raw = await runSimulation(connection, message);
+        raw = await runSimulation(rpc, message);
     } catch (cause) {
-        throw (await inactiveV1GateError(connection, message, cause)) ?? cause;
+        throw (await inactiveV1GateError(rpc, message, cause)) ?? cause;
     }
 
     const result = interpretSimulation(raw, cluster, accountBalances);
@@ -62,19 +66,14 @@ export async function simulateTransaction({
     // Match the error the RPC returned rather than the interpreted one, which reports any failure
     // carrying logs as a bare `TransactionError`.
     if (raw.simResult.err === UNSUPPORTED_VERSION) {
-        const gate = await inactiveV1GateError(connection, message);
+        const gate = await inactiveV1GateError(rpc, message);
         if (gate) {
             return { ...result, error: gate.message };
         }
     }
 
     if (raw.simResult.err === MAX_LOADED_ACCOUNTS_DATA_SIZE_EXCEEDED && message instanceof V1MessageView) {
-        const explained = await explainLoadedAccountsDataSize(
-            connection,
-            message,
-            raw.accountKeys,
-            raw.parsedAccountsPre,
-        );
+        const explained = await explainLoadedAccountsDataSize(rpc, message, raw.accountKeys, raw.parsedAccountsPre);
         return explained ? { ...result, error: explained } : result;
     }
 
@@ -98,7 +97,7 @@ const UNSUPPORTED_VERSION = 'UnsupportedVersion';
  * for reasons of its own on a cluster that happens to lack the gate as well.
  */
 async function inactiveV1GateError(
-    connection: Connection,
+    rpc: SolanaRpc,
     message: VersionedMessage,
     cause?: unknown,
 ): Promise<Error | undefined> {
@@ -107,7 +106,7 @@ async function inactiveV1GateError(
     }
 
     try {
-        if (await isTxV1Active(connection)) {
+        if (await isTxV1Active(rpc)) {
             return undefined;
         }
     } catch (cause) {
@@ -116,14 +115,14 @@ async function inactiveV1GateError(
     }
 
     return new Error(
-        `this cluster does not support v1 transactions yet — feature gate ${ENABLE_TX_V1_FEATURE.toBase58()} is not active`,
+        `this cluster does not support v1 transactions yet — feature gate ${ENABLE_TX_V1_FEATURE} is not active`,
         { cause },
     );
 }
 
 type RawSimulation = {
     accountKeys: PublicKey[];
-    epochInfo: { epoch: number };
+    epoch: bigint;
     parsedAccountsPre: (AccountInfo<ParsedAccountData | Buffer> | undefined)[];
     simResult: {
         accounts: (SimulatedTransactionAccountInfo | undefined)[];
@@ -137,26 +136,31 @@ type RawSimulation = {
  * Execute the RPC calls: resolve lookup tables, fetch pre-simulation account
  * state, and run the simulation. Returns raw data for interpretation.
  */
-async function runSimulation(connection: Connection, message: VersionedMessage): Promise<RawSimulation> {
-    const lookupTables = await resolveAddressLookupTables(connection, message);
+async function runSimulation(rpc: SolanaRpc, message: VersionedMessage): Promise<RawSimulation> {
+    const lookupTables = await resolveAddressLookupTables(rpc, message);
     const accountKeys = message.getAccountKeys({ addressLookupTableAccounts: lookupTables }).keySegments().flat();
+    const addresses = accountKeys.map(key => toKitAddress(key));
 
     const [parsedAccountsPre, epochInfo] = await Promise.all([
-        connection.getMultipleParsedAccounts(accountKeys),
-        connection.getEpochInfo(),
+        getMultipleParsedAccounts(rpc, addresses),
+        rpc.getEpochInfo({ commitment: 'confirmed' }).send(),
     ]);
 
     // A v1 message must be sent in the v1 wire envelope (message first); the stock
     // VersionedTransaction envelope is signatures-first and nodes reject it for v1.
     const transaction =
         message instanceof V1MessageView ? new UnsignedV1WireTransaction(message) : new VersionedTransaction(message);
-    const { value: simResult } = await connection.simulateTransaction(transaction, {
-        accounts: {
-            addresses: accountKeys.map(key => key.toBase58()),
+    const { value: simResult } = await rpc
+        .simulateTransaction(toBase64(transaction.serialize()) as Base64EncodedWireTransaction, {
+            accounts: {
+                addresses,
+                encoding: 'base64',
+            },
+            commitment: 'confirmed',
             encoding: 'base64',
-        },
-        replaceRecentBlockhash: true,
-    });
+            replaceRecentBlockhash: true,
+        })
+        .send();
 
     if (!simResult.accounts) {
         throw new Error('RPC did not return account data after simulation');
@@ -170,14 +174,77 @@ async function runSimulation(connection: Connection, message: VersionedMessage):
 
     return {
         accountKeys,
-        epochInfo,
-        parsedAccountsPre: parsedAccountsPre.value.map(a => a ?? undefined),
+        epoch: epochInfo.epoch,
+        parsedAccountsPre,
         simResult: {
-            accounts: simResult.accounts.map(a => a ?? undefined),
-            err: simResult.err,
-            logs: simResult.logs,
-            unitsConsumed: simResult.unitsConsumed,
+            accounts: simResult.accounts.map(account => (account ? toLegacySimulatedAccountInfo(account) : undefined)),
+            // The RPC reports integers inside a transaction error (instruction index, custom program
+            // error code) which kit upcasts to bigint; downstream consumers expect the web3.js shape.
+            err: withNumbersInsteadOfBigInts(simResult.err) as TransactionError | null,
+            logs: [...simResult.logs],
+            unitsConsumed:
+                simResult.unitsConsumed !== null && simResult.unitsConsumed !== undefined
+                    ? Number(simResult.unitsConsumed)
+                    : undefined,
         },
+    };
+}
+
+type KitParsedAccount = {
+    data: { parsed: unknown; program: string; space: bigint } | readonly [string, string];
+    executable: boolean;
+    lamports: bigint;
+    owner: Address;
+};
+
+type KitSimulatedAccount = {
+    data: readonly [string, string];
+    executable: boolean;
+    lamports: bigint;
+    owner: Address;
+};
+
+/**
+ * Fetch accounts in `jsonParsed` encoding and restate them in the web3.js
+ * `getMultipleParsedAccounts` shape the interpretation helpers still consume: parsed JSON with
+ * numbers where kit reports bigints, and raw data as a `Buffer` where the RPC could not parse.
+ */
+async function getMultipleParsedAccounts(
+    rpc: SolanaRpc,
+    addresses: Address[],
+): Promise<(AccountInfo<ParsedAccountData | Buffer> | undefined)[]> {
+    const { value } = await rpc
+        .getMultipleAccounts(addresses, { commitment: 'confirmed', encoding: 'jsonParsed' })
+        .send();
+    return value.map(account => (account ? toLegacyAccountInfo(account) : undefined));
+}
+
+function isBase64Data(data: KitParsedAccount['data']): data is readonly [string, string] {
+    return Array.isArray(data);
+}
+
+function toLegacyAccountInfo(account: KitParsedAccount): AccountInfo<ParsedAccountData | Buffer> {
+    const data = isBase64Data(account.data)
+        ? Buffer.from(account.data[0], 'base64')
+        : {
+              parsed: withNumbersInsteadOfBigInts(account.data.parsed),
+              program: account.data.program,
+              space: Number(account.data.space),
+          };
+    return {
+        data,
+        executable: account.executable,
+        lamports: Number(account.lamports),
+        owner: toLegacyPublicKey(account.owner),
+    };
+}
+
+function toLegacySimulatedAccountInfo(account: KitSimulatedAccount): SimulatedTransactionAccountInfo {
+    return {
+        data: [account.data[0], account.data[1]],
+        executable: account.executable,
+        lamports: Number(account.lamports),
+        owner: account.owner,
     };
 }
 
@@ -186,7 +253,7 @@ async function runSimulation(connection: Connection, message: VersionedMessage):
  * SOL balance changes, and parsed program logs.
  */
 function interpretSimulation(
-    { accountKeys, epochInfo, parsedAccountsPre, simResult }: RawSimulation,
+    { accountKeys, epoch, parsedAccountsPre, simResult }: RawSimulation,
     cluster: Cluster,
     accountBalances?: { preBalances: number[]; postBalances: number[] },
 ): SimulationResult {
@@ -215,7 +282,7 @@ function interpretSimulation(
 
     return {
         accountKeys,
-        epoch: BigInt(epochInfo.epoch),
+        epoch,
         error,
         logs,
         solBalanceChanges: solChanges.length > 0 ? solChanges : undefined,
@@ -256,7 +323,7 @@ const UPGRADEABLE_LOADER_ID = new PublicKey('BPFLoaderUpgradeab1e111111111111111
  * its own; one that does not is reported as the floor it is, and names what the rest must be.
  */
 async function explainLoadedAccountsDataSize(
-    connection: Connection,
+    rpc: SolanaRpc,
     message: V1MessageView,
     accountKeys: PublicKey[],
     parsedAccountsPre: (AccountInfo<ParsedAccountData | Buffer> | undefined)[],
@@ -266,7 +333,7 @@ async function explainLoadedAccountsDataSize(
 
     let programDataAccounts;
     try {
-        programDataAccounts = await fetchProgramDataAccounts(connection, messageAccounts, listedAddresses);
+        programDataAccounts = await fetchProgramDataAccounts(rpc, messageAccounts, listedAddresses);
     } catch (cause) {
         Logger.error(new Error('Failed to load program data accounts', { cause }));
         return undefined;
@@ -302,7 +369,7 @@ async function explainLoadedAccountsDataSize(
  * and only a program account holds a program data address, so the executable flag selects them.
  */
 async function fetchProgramDataAccounts(
-    connection: Connection,
+    rpc: SolanaRpc,
     accounts: AccountInfo<ParsedAccountData | Buffer>[],
     listedAddresses: Set<string>,
 ): Promise<AccountInfo<ParsedAccountData | Buffer>[]> {
@@ -323,8 +390,11 @@ async function fetchProgramDataAccounts(
         return [];
     }
 
-    const { value } = await connection.getMultipleParsedAccounts([...addresses.values()]);
-    return value.filter(account => account !== null);
+    const value = await getMultipleParsedAccounts(
+        rpc,
+        [...addresses.values()].map(key => toKitAddress(key)),
+    );
+    return value.filter(account => account !== undefined);
 }
 
 /**

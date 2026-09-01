@@ -1,8 +1,9 @@
 'use client';
 
+import { getRpc } from '@entities/cluster';
 import { sha256 } from '@noble/hashes/sha256';
 import { useCluster } from '@providers/cluster';
-import { Connection, type VersionedMessage } from '@solana/web3.js';
+import { type VersionedMessage } from '@solana/web3.js';
 import { useCallback, useMemo } from 'react';
 import useSWRMutation from 'swr/mutation';
 
@@ -28,8 +29,6 @@ type SimulationArg = {
 export function useSimulation(message: VersionedMessage, accountBalances?: AccountBalances): SimulationState {
     const { cluster, url } = useCluster();
 
-    const connection = useMemo(() => new Connection(url, 'confirmed'), [url]);
-
     // Fingerprint the message so the SWR key changes when the transaction changes,
     // preventing stale cached data from flashing for a different transaction.
     const messageFingerprint = useMemo(() => messageToFingerprint(message), [message]);
@@ -40,8 +39,8 @@ export function useSimulation(message: VersionedMessage, accountBalances?: Accou
             simulateTransaction({
                 accountBalances: arg.accountBalances,
                 cluster: arg.cluster,
-                connection,
                 message: arg.message,
+                rpc: getRpc(url),
             }),
         {
             onError: (cause: unknown) => {
