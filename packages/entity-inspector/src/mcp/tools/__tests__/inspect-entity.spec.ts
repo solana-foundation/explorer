@@ -496,14 +496,68 @@ describe('inspect_entity handler', () => {
         });
     });
 
-    it('should resolve legacy-loader enrichments through the frozen path with the program account bytes', async () => {
-        const bytes = new Uint8Array([1, 2, 3]);
-        const dataBase64 = btoa(String.fromCharCode(...bytes));
-        const discoverProgramIdl = vi.fn().mockResolvedValue({ client: null, discovery: { status: 'not_found' } });
-        const resolveProgramVerification = vi.fn().mockResolvedValue({ status: 'unverified' });
-        const resolveSecurityMetadata = vi.fn().mockResolvedValue({ status: 'missing' });
-        const resolveMultisigReference = vi.fn().mockResolvedValue({ status: 'not_multisig' });
-        const fetchAccountInfo = vi.fn().mockResolvedValue(legacyLoaderProgramProbe(BPF_LOADER_2_PROGRAM_ID, bytes));
+    const LEGACY_LOADER_CASES = [
+        { kind: 'bpf-loader', owner: BPF_LOADER_PROGRAM_ID },
+        { kind: 'bpf-loader-2', owner: BPF_LOADER_2_PROGRAM_ID },
+        { kind: 'loader-v4', owner: LOADER_V4_PROGRAM_ID },
+    ] as const;
+
+    it.each(LEGACY_LOADER_CASES)(
+        'should resolve $kind enrichments through the frozen path with the program account bytes',
+        async ({ kind, owner }) => {
+            const bytes = new Uint8Array([1, 2, 3]);
+            const dataBase64 = btoa(String.fromCharCode(...bytes));
+            const discoverProgramIdl = vi.fn().mockResolvedValue({ client: null, discovery: { status: 'not_found' } });
+            const resolveProgramVerification = vi.fn().mockResolvedValue({ status: 'unverified' });
+            const resolveSecurityMetadata = vi.fn().mockResolvedValue({ status: 'missing' });
+            const resolveMultisigReference = vi.fn().mockResolvedValue({ status: 'not_multisig' });
+            const fetchAccountInfo = vi.fn().mockResolvedValue(legacyLoaderProgramProbe(owner, bytes));
+            const dependencies = createDependencies({
+                discoverProgramIdl,
+                fetchAccountInfo,
+                resolveMultisigReference,
+                resolveProgramVerification,
+                resolveSecurityMetadata,
+            });
+
+            const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+            const envelope = parseEnvelope(result);
+
+            expect(result.isError).toBe(false);
+            expect(fetchAccountInfo).toHaveBeenCalledTimes(1);
+            expect(discoverProgramIdl).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, 'mainnet-beta');
+            expect(resolveProgramVerification).toHaveBeenCalledWith(
+                ACCOUNT_IDENTIFIER,
+                null,
+                dataBase64,
+                'mainnet-beta',
+            );
+            expect(resolveSecurityMetadata).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, dataBase64, 'mainnet-beta');
+            expect(resolveMultisigReference).toHaveBeenCalledWith(null, 'mainnet-beta');
+            expect(envelope).toMatchObject({
+                errors: [],
+                payload: {
+                    entity: {
+                        address: ACCOUNT_IDENTIFIER,
+                        executable: true,
+                        idl: { status: 'not_found' },
+                        kind,
+                        multisig: { status: 'not_multisig' },
+                        owner_program: owner,
+                        security_metadata: { status: 'missing' },
+                        verification: { status: 'unverified' },
+                    },
+                },
+            });
+        },
+    );
+
+    it('should not resolve program enrichments for non-program account kinds', async () => {
+        const discoverProgramIdl = vi.fn();
+        const resolveProgramVerification = vi.fn();
+        const resolveSecurityMetadata = vi.fn();
+        const resolveMultisigReference = vi.fn();
+        const fetchAccountInfo = vi.fn().mockResolvedValue(unknownProgramAccountProbe());
         const dependencies = createDependencies({
             discoverProgramIdl,
             fetchAccountInfo,
@@ -513,39 +567,35 @@ describe('inspect_entity handler', () => {
         });
 
         const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
-        const envelope = parseEnvelope(result);
 
         expect(result.isError).toBe(false);
-        expect(fetchAccountInfo).toHaveBeenCalledTimes(1);
-        expect(discoverProgramIdl).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, 'mainnet-beta');
-        expect(resolveProgramVerification).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, null, dataBase64, 'mainnet-beta');
-        expect(resolveSecurityMetadata).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, dataBase64, 'mainnet-beta');
-        expect(resolveMultisigReference).toHaveBeenCalledWith(null, 'mainnet-beta');
-        expect(envelope).toMatchObject({
-            errors: [],
-            payload: {
-                entity: {
-                    address: ACCOUNT_IDENTIFIER,
-                    executable: true,
-                    idl: { status: 'not_found' },
-                    kind: 'bpf-loader-2',
-                    multisig: { status: 'not_multisig' },
-                    owner_program: BPF_LOADER_2_PROGRAM_ID,
-                    security_metadata: { status: 'missing' },
-                    verification: { status: 'unverified' },
-                },
-            },
+        expect(discoverProgramIdl).not.toHaveBeenCalled();
+        expect(resolveProgramVerification).not.toHaveBeenCalled();
+        expect(resolveSecurityMetadata).not.toHaveBeenCalled();
+        expect(resolveMultisigReference).not.toHaveBeenCalled();
+    });
+
+    it('should pass null program bytes to resolvers when a legacy-loader probe carries no base64 data', async () => {
+        const resolveProgramVerification = vi.fn().mockResolvedValue({ status: 'unverified' });
+        const resolveSecurityMetadata = vi.fn().mockResolvedValue({ status: 'missing' });
+        const fetchAccountInfo = vi.fn().mockResolvedValue({
+            value: { data: ['zzz', 'base58'], executable: true, lamports: 1, owner: BPF_LOADER_2_PROGRAM_ID },
         });
+        const dependencies = createDependencies({
+            fetchAccountInfo,
+            resolveProgramVerification,
+            resolveSecurityMetadata,
+        });
+
+        const result = await handleInspectEntity({ identifier: ACCOUNT_IDENTIFIER }, dependencies);
+
+        expect(result.isError).toBe(false);
+        expect(resolveProgramVerification).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, null, null, 'mainnet-beta');
+        expect(resolveSecurityMetadata).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, null, 'mainnet-beta');
     });
 
     it('should mark legacy-loader enrichments unknown when no resolvers are injected', async () => {
-        const cases = [
-            { kind: 'bpf-loader', owner: BPF_LOADER_PROGRAM_ID },
-            { kind: 'bpf-loader-2', owner: BPF_LOADER_2_PROGRAM_ID },
-            { kind: 'loader-v4', owner: LOADER_V4_PROGRAM_ID },
-        ] as const;
-
-        for (const { kind, owner } of cases) {
+        for (const { kind, owner } of LEGACY_LOADER_CASES) {
             const fetchAccountInfo = vi.fn().mockResolvedValue(legacyLoaderProgramProbe(owner, new Uint8Array(4)));
             const result = await handleInspectEntity(
                 { identifier: ACCOUNT_IDENTIFIER },

@@ -24,7 +24,6 @@ import type { ResolveSecurityMetadata } from '../../enrichments/security.js';
 import type { ResolveProgramVerification } from '../../enrichments/verification.js';
 import type { DiscoverProgramIdl, ResolveIdlClient } from '../../enrichments/idl-clients.js';
 import { asRecord, asString } from '../../shared/parse-helpers.js';
-import { base64Decoder } from '../../rpc/codecs.js';
 import { isSourceUnavailableError, type RpcClient } from '../../rpc/rpc.js';
 import { buildTransactionPayload } from '../../transactions/build-payload.js';
 import { decodeTransactionInstructions } from '../../transactions/decode-instructions.js';
@@ -99,7 +98,7 @@ export function splitBuilderErrors(routedPayload: Record<string, unknown>): {
     return { errors, payload };
 }
 
-// Legacy loaders have no programdata account: enrichments run with a null authority (frozen verification path).
+// The legacy members have no programdata account, so their enrichments run with a null authority (frozen verification path).
 const PROGRAM_LOADER_KINDS: ReadonlySet<AccountEntityKind> = new Set([
     BPF_LOADER_2_KIND,
     BPF_LOADER_KIND,
@@ -212,7 +211,8 @@ async function resolveProgramEnrichments(
     logger: InspectorLogger,
 ): Promise<ProgramEnrichments> {
     const authority = account.programData?.authority ?? null;
-    const programDataBase64 = account.programDataRawBase64 ?? accountRawBase64(account);
+    // Legacy loaders keep the ELF in the program account itself, so its own base64 is the fallback; upgradeable probes are jsonParsed and carry none.
+    const programDataBase64 = account.programDataRawBase64 ?? account.rawDataBase64 ?? null;
 
     const [idlDiscovery, verification, security, multisig] = await Promise.all([
         dependencies.discoverProgramIdl
@@ -255,11 +255,6 @@ async function resolveProgramEnrichments(
         ...(security ? { securityMetadataResult: security } : {}),
         ...(multisig ? { multisigReferenceResult: multisig } : {}),
     };
-}
-
-// Legacy loaders keep the ELF in the program account itself; upgradeable probes are jsonParsed, so rawDataBytes stays null there.
-function accountRawBase64(account: NormalizedAccountInfo): string | null {
-    return account.rawDataBytes ? base64Decoder().decode(account.rawDataBytes) : null;
 }
 
 // Unknown-kind accounts get one shot at an IDL decode: resolve the owner program's IDL and decode
