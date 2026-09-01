@@ -26,16 +26,12 @@ export namespace NftokenFetcher {
         const accounts = await getRpc(rpcUrl)
             .getProgramAccounts(address(NFTOKEN_ADDRESS), {
                 encoding: 'base64',
-                // Offsets are typed as bigint, but the BigInt toJSON polyfill in app/types/bigint.ts
-                // (loaded by the address layout) turns bigints into JSON strings before kit's
-                // serializer can handle them, and the RPC rejects string offsets. Plain numbers
-                // serialize correctly either way.
                 filters: [
                     {
                         memcmp: {
                             bytes: BASE58_DECODER.decode(fromHex(nftokenAccountDiscInHex)) as Base58EncodedBytes,
                             encoding: 'base58',
-                            offset: 0 as unknown as bigint,
+                            offset: 0n,
                         },
                     },
                     {
@@ -43,11 +39,12 @@ export namespace NftokenFetcher {
                             // authority_can_update
                             bytes: collection as Base58EncodedBytes,
                             encoding: 'base58',
-                            offset: (8 + // discriminator
-                                1 + // version
-                                32 + // holder
-                                32 + // authority
-                                1) as unknown as bigint,
+                            offset:
+                                8n + // discriminator
+                                1n + // version
+                                32n + // holder
+                                32n + // authority
+                                1n,
                         },
                     },
                 ],
