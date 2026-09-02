@@ -34,6 +34,15 @@ const NO_REGEXP_SELECTORS = [
     },
 ];
 
+// `'use client'` turns the module into a client reference, which silently neutralises `client-only`:
+// the pair reads as guarded while a server caller still fails at runtime instead of at build time.
+const CLIENT_MARKER_CONFLICT = {
+    selector:
+        "Program:has(ExpressionStatement > Literal[value='use client']):has(ImportDeclaration[source.value='client-only'])",
+    message:
+        "Do not combine 'use client' with `import 'client-only'` — the directive makes the module a client reference, so the marker stops failing the build and a server caller degrades to a runtime error instead. Keep the directive for components; keep only the marker for hooks and plain modules.",
+};
+
 export default tseslint.config(
     // Global ignores.
     // packages/* are intentionally not ignored: root `eslint .` (like prettier's `**/*.ts` glob) lints their source with this shared config — only built output is excluded.
@@ -116,7 +125,7 @@ export default tseslint.config(
             'no-unused-vars': 'off',
             'simple-import-sort/imports': 'error',
             'no-restricted-globals': ['error', 'RegExp'],
-            'no-restricted-syntax': ['error', ...NO_REGEXP_SELECTORS],
+            'no-restricted-syntax': ['error', ...NO_REGEXP_SELECTORS, CLIENT_MARKER_CONFLICT],
             'sort-keys-fix/sort-keys-fix': 'error',
             '@eslint-community/eslint-comments/no-unlimited-disable': 'error',
             'no-console': 'error',
@@ -433,6 +442,7 @@ export default tseslint.config(
             'no-restricted-syntax': [
                 'error',
                 ...NO_REGEXP_SELECTORS,
+                CLIENT_MARKER_CONFLICT,
                 {
                     selector: "ExpressionStatement > Literal[value='use client']",
                     message:
@@ -855,6 +865,7 @@ export default tseslint.config(
             'no-restricted-syntax': [
                 'error',
                 ...NO_REGEXP_SELECTORS,
+                CLIENT_MARKER_CONFLICT,
                 {
                     selector: 'ImportExpression',
                     message:
