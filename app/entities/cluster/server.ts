@@ -1,3 +1,5 @@
+import 'server-only';
+
 export { getRpc, type SolanaRpc } from './api/get-rpc';
 export {
     clusterFromParam,
