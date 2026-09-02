@@ -1,7 +1,7 @@
-import { getRpc, serverClusterUrlFromParam } from '@entities/cluster/server';
+import { serverClusterUrlFromParam } from '@entities/cluster/server';
 import { resolveProgramIdls } from '@entities/idl/server';
 import { isRetryableError } from '@shared/lib/errors';
-import { type Address, address } from '@solana/kit';
+import { type Address, address, createSolanaRpc } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -14,6 +14,8 @@ const CACHE_HEADERS = {
 
 // Resolve IDLs with a few retries. The RPC itself is reliable, but resolving a large IDL through the
 // server runtime occasionally premature-closes the response body; a fresh client per attempt clears it.
+// That is why this constructs its own client rather than taking the shared one from `getRpc` — reusing
+// the cached client would retry through the transport that just failed.
 async function resolveProgramIdlsWithRetry(
     url: string,
     programId: Address,
@@ -22,7 +24,7 @@ async function resolveProgramIdlsWithRetry(
     let lastError: unknown;
     for (let attempt = 0; attempt < attempts; attempt++) {
         try {
-            return await resolveProgramIdls(getRpc(url), programId);
+            return await resolveProgramIdls(createSolanaRpc(url), programId);
         } catch (error) {
             lastError = error;
             if (attempt < attempts - 1 && isRetryableError(error)) {
