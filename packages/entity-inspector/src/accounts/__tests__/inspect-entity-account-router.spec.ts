@@ -137,14 +137,18 @@ describe('inspect-entity account router', () => {
         }
     });
 
-    it('should report legacy-loader accounts as unsupported', () => {
+    it('should route legacy-loader accounts to their builders', () => {
         const loaderKinds = ['bpf-loader', 'bpf-loader-2', 'loader-v4'] as const;
 
         for (const kind of loaderKinds) {
-            expect(buildAccountPayloadWithRouter(contextForKind(kind))).toEqual({
-                entity: { kind },
-                errors: [`${kind} accounts are not supported yet`],
+            const payload = buildAccountPayloadWithRouter(contextForKind(kind));
+            expect(payload).toMatchObject({
+                entity: {
+                    idl: { reason: 'source_unavailable', status: 'unknown', value: null },
+                    kind,
+                },
             });
+            expect(payload).not.toHaveProperty('errors');
         }
     });
 

@@ -64,8 +64,8 @@ through them. Reports lag creation by 24–48h.
 GA4 warns about high-cardinality dimensions (>500 unique values a day, condensed into an `(other)` row). None apply
 here: every value comes from a closed set, not caller input. `entity_kind` is the widest — the 22 account kinds in
 [`src/accounts/kinds.ts`](./src/accounts/kinds.ts), plus `transaction` and the bare `account` a not-found reply carries.
-Legacy-loader kinds still arrive: `buildUnsupportedKindPayload` returns an entity, so they pair a kind with a
-`CURRENTLY_UNSUPPORTED` `error_code`. The caller-supplied `identifier` is deliberately never a parameter.
+Legacy-loader kinds arrive as ordinary entity payloads with no `error_code` — they route to real builders since
+legacy-loader support landed. The caller-supplied `identifier` is deliberately never a parameter.
 
 | Register as      | Event parameter / Dimension | Scope | Unit         | Carried by      | Values                                                                                                                                                                                     |
 | ---------------- | --------------------------- | ----- | ------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

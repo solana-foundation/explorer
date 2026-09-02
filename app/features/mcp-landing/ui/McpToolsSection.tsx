@@ -26,7 +26,7 @@ const SAMPLE_RESPONSE = `{
 
 const COVERAGE: readonly string[] = [
     'SPL Token and Token-2022 mints, token accounts and multisigs, including parsed Token-2022 extensions.',
-    'Upgradeable programs, enriched with IDL discovery, verified-build status, security.txt metadata and upgrade-authority multisig.',
+    'Programs — upgradeable and legacy-loader — enriched with IDL discovery, verified-build status, security.txt metadata and upgrade-authority multisig.',
     'Stake, vote, nonce, sysvar, config, address lookup table, feature and native program accounts.',
     'Compressed NFTs, nftoken accounts and Solana Attestation Service accounts.',
     'Transactions — signers, fee, status and instructions with inner instructions, decoded through IDL, bundled and raw sources.',
