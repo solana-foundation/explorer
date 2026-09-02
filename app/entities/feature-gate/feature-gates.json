@@ -2084,7 +2084,7 @@
     "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
     "devnet_activation_epoch": 1118,
     "key": "iBRLL3k18HST852F1Mf3Lv83waTNQmmqvKDxvYGwQFL",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1023,
     "min_agave_versions": [
       "v4.2.0-beta.1"
     ],
@@ -2130,7 +2130,7 @@
   {
     "comms_required": null,
     "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1128,
     "key": "iBRLjhJnkmDZgNoZRDMW11d8ZV7HvsL3vAyRjZB5npW",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
@@ -2154,7 +2154,7 @@
   {
     "comms_required": null,
     "description": "To allow for non-disruptive rent increases, the Solana runtime relaxes post-execution minimum balance checks and adjusts stake delegations during epoch rewards calculations.",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1132,
     "key": "BY4JhHLahVzS9ynfDz4exzGPbVXhFmJvEyMWsXbDBqME",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
@@ -2172,13 +2172,13 @@
     "simds": [
       "0392"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1018,
     "title": "SIMD-0392: Relaxation of post-execution min_balance check"
   },
   {
     "comms_required": null,
     "description": "This SIMD proposes replacing all IEEE-754 double-precision floating-point arithmetic within the Solana Stake Program & validator client's warmup/ cooldown logic with a fixed-point implementation using integer arithmetic. The new logic expresses the warmup/cooldown rate in basis\u2026",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1131,
     "key": "s51VGwCAgebo2745DSUris72RavoLkXGUmVJosESCXr",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
@@ -2204,7 +2204,7 @@
   {
     "comms_required": null,
     "description": "Reduce lamports_per_byte incrementally from 6960 to 696 via five steps: 6333, 5080, 2575, 1322, and 696. This proposal supersedes SIMD-0436, providing a more granular reduction schedule.",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1137,
     "key": "4a6f7o7iTcA8hRDCrPLkSatnt5Ykxiu36wo5p1Tt12wC",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
@@ -2224,7 +2224,7 @@
     "simds": [
       "0437"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1019,
     "title": "SIMD-0437-1: Set lamports per byte to 6333"
   },
   {
@@ -2256,7 +2256,7 @@
   {
     "comms_required": null,
     "description": "Allow validators to specify custom commission collector accounts where block revenue and inflation rewards commissions will be deposited.",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1138,
     "key": "3HcSrCTGXTUnrTueHi4DAwNuMxZSsm5xui2Ax3mgxHqf",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
@@ -2276,7 +2276,7 @@
     "simds": [
       "0232"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1020,
     "title": "SIMD-0232: Custom Commission Collector"
   },
   {
