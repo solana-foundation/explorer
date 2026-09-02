@@ -555,6 +555,25 @@ export default tseslint.config(
         },
     },
 
+    // A `server.ts` barrel declares which exports are for server consumers; without the marker that
+    // declaration is unenforced, and a client importer is only found at runtime. Universal code stays
+    // reachable through the slice's `index.ts`.
+    {
+        files: ['app/**/server.[jt]s?(x)'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                ...NO_REGEXP_SELECTORS,
+                CLIENT_MARKER_CONFLICT,
+                {
+                    selector: "Program:not(:has(ImportDeclaration[source.value='server-only']))",
+                    message:
+                        "A `server.ts` barrel must `import 'server-only'` so a client importer fails `next build` instead of at runtime.",
+                },
+            ],
+        },
+    },
+
     // TODO: `boundaries/dependencies` cleanup. Each path below crosses an FSD boundary
     // (cross-feature, cross-entity without `@x`, reverse-layer, or deep import bypassing the
     // barrel). Per-file so any *new* file in these areas is still subject to the rule. Remove a
