@@ -19,6 +19,21 @@ const TEST_AND_STORY_FILES = [
     '**/*.stories.[jt]s?(x)',
 ];
 
+// Flat config replaces `no-restricted-syntax` options wholesale, so every override must spread these
+// back in or it silently drops the RegExp ban for its own files.
+const NO_REGEXP_SELECTORS = [
+    {
+        selector: 'Literal[regex]',
+        message:
+            'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
+    },
+    {
+        selector: 'RegExpLiteral',
+        message:
+            'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
+    },
+];
+
 export default tseslint.config(
     // Global ignores.
     // packages/* are intentionally not ignored: root `eslint .` (like prettier's `**/*.ts` glob) lints their source with this shared config — only built output is excluded.
@@ -101,19 +116,7 @@ export default tseslint.config(
             'no-unused-vars': 'off',
             'simple-import-sort/imports': 'error',
             'no-restricted-globals': ['error', 'RegExp'],
-            'no-restricted-syntax': [
-                'error',
-                {
-                    selector: 'Literal[regex]',
-                    message:
-                        'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
-                },
-                {
-                    selector: 'RegExpLiteral',
-                    message:
-                        'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
-                },
-            ],
+            'no-restricted-syntax': ['error', ...NO_REGEXP_SELECTORS],
             'sort-keys-fix/sort-keys-fix': 'error',
             '@eslint-community/eslint-comments/no-unlimited-disable': 'error',
             'no-console': 'error',
@@ -429,6 +432,7 @@ export default tseslint.config(
         rules: {
             'no-restricted-syntax': [
                 'error',
+                ...NO_REGEXP_SELECTORS,
                 {
                     selector: "ExpressionStatement > Literal[value='use client']",
                     message:
@@ -850,16 +854,7 @@ export default tseslint.config(
         rules: {
             'no-restricted-syntax': [
                 'error',
-                {
-                    selector: 'Literal[regex]',
-                    message:
-                        'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
-                },
-                {
-                    selector: 'RegExpLiteral',
-                    message:
-                        'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
-                },
+                ...NO_REGEXP_SELECTORS,
                 {
                     selector: 'ImportExpression',
                     message:
