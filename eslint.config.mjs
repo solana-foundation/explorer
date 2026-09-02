@@ -329,6 +329,10 @@ export default tseslint.config(
         plugins: { boundaries },
         settings: {
             'boundaries/elements': [
+                // Route handlers only. Pages are excluded on purpose: a server page may import a
+                // client component to render it, which is the intended RSC pattern, while a handler
+                // renders nothing and only ever calls what it imports.
+                { type: 'route', pattern: 'app/**/route.[jt]s?(x)', mode: 'file' },
                 { type: 'feature', pattern: 'app/features/*', mode: 'folder', capture: ['name'] },
                 // Must precede the broader `entity` pattern — element types are matched in
                 // declaration order, so `@x` folders would otherwise be classified as `entity`.
@@ -348,6 +352,21 @@ export default tseslint.config(
                 {
                     default: 'disallow',
                     rules: [
+                        {
+                            // Only through `server.ts` — that barrel exists to declare what a slice
+                            // offers the server. `index.ts` is server-safe only by accident: add one
+                            // client export to it later and a client boundary lands on a server call
+                            // path silently. A deep path into `api/` or `lib/` drags in whatever that
+                            // module happens to import, with the same result.
+                            from: { type: 'route' },
+                            allow: {
+                                to: [
+                                    { type: 'shared' },
+                                    { type: 'entity', internalPath: 'server.ts' },
+                                    { type: 'feature', internalPath: 'server.ts' },
+                                ],
+                            },
+                        },
                         {
                             from: { type: 'feature' },
                             allow: {
@@ -393,6 +412,29 @@ export default tseslint.config(
         files: TEST_AND_STORY_FILES,
         rules: {
             'boundaries/dependencies': 'off',
+        },
+    },
+
+    // A slice's data-access layer is shared by both graphs: route handlers call it on the server,
+    // components call it in the browser. `'use client'` here compiles fine and then throws
+    // "is on the client" the first time a server caller invokes it. Put the boundary on the hook or
+    // component that consumes the module instead.
+    {
+        files: [
+            'app/entities/*/api/**/*.[jt]s?(x)',
+            'app/entities/*/@x/**/*.[jt]s?(x)',
+            'app/features/*/api/**/*.[jt]s?(x)',
+        ],
+        ignores: TEST_AND_STORY_FILES,
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                {
+                    selector: "ExpressionStatement > Literal[value='use client']",
+                    message:
+                        "Do not mark a slice's api/ or @x/ module 'use client' — server code imports it, and the directive turns those calls into a client-reference error at runtime. Move the boundary to the consuming hook or component.",
+                },
+            ],
         },
     },
 

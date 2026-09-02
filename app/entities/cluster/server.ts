@@ -1,3 +1,4 @@
+export { getRpc, type SolanaRpc } from './api/get-rpc';
 export {
     clusterFromParam,
     resolveServerClusterUrl,

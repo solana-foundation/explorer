@@ -1,4 +1,4 @@
-import { fetchAnsDomains } from '@entities/domain/api/fetch-ans-domains';
+import { fetchAnsDomains } from '@entities/domain/server';
 import { PublicKey } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 

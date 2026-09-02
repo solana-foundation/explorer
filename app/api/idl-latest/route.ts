@@ -1,7 +1,7 @@
-import { serverClusterUrlFromParam } from '@entities/cluster/server';
+import { getRpc, serverClusterUrlFromParam } from '@entities/cluster/server';
 import { resolveProgramIdls } from '@entities/idl/server';
 import { isRetryableError } from '@shared/lib/errors';
-import { type Address, address, createSolanaRpc } from '@solana/kit';
+import { type Address, address } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -22,7 +22,7 @@ async function resolveProgramIdlsWithRetry(
     let lastError: unknown;
     for (let attempt = 0; attempt < attempts; attempt++) {
         try {
-            return await resolveProgramIdls(createSolanaRpc(url), programId);
+            return await resolveProgramIdls(getRpc(url), programId);
         } catch (error) {
             lastError = error;
             if (attempt < attempts - 1 && isRetryableError(error)) {
