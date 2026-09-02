@@ -9,7 +9,7 @@ import {
 } from 'sas-lib';
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
-import { toBase64 } from '@/app/shared/lib/bytes';
+import { toBase64, toHex } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { decodeAccount, decodeWithType, isAttestationAccount } from '@/app/utils/attestation-service';
@@ -48,6 +48,21 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
     );
 }
 
+/**
+ * `VecU8` fields hold binary blobs such as hashes, which decode to number
+ * arrays and render as one row per byte. Hex keeps them readable and matches
+ * how sas-lib surfaces the same content in a `String` field.
+ */
+function withByteFieldsAsHex(schema: SasSchema, data: Record<string, unknown>): Record<string, unknown> {
+    return Object.fromEntries(
+        schema.fieldNames.map((name, index) => {
+            const value = data[name];
+            const isByteVector = schema.layout[index] === SchemaDataType.VecU8 && Array.isArray(value);
+            return [name, isByteVector ? `0x${toHex(Uint8Array.from(value as number[]))}` : value];
+        }),
+    );
+}
+
 function AttestationCard({ attestation }: { attestation: SasAttestation }) {
     const schemaAccountInfo = useAccountInfo(mapToPublicKey(attestation.schema).toBase58());
     const fetchAccountInfo = useFetchAccountInfo();
@@ -61,7 +76,10 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
     try {
         if (schemaAccountInfo?.data) {
             const schema: SasSchema = decodeWithType(schemaAccountInfo.data, 'schema', decodeSchema)?.data.data;
-            decoded = deserializeAttestationData(schema, Uint8Array.from(attestation.data));
+            decoded = withByteFieldsAsHex(
+                schema,
+                deserializeAttestationData<Record<string, unknown>>(schema, Uint8Array.from(attestation.data)),
+            );
         }
     } catch (e) {
         Logger.error(e);
