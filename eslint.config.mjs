@@ -477,6 +477,9 @@ export default tseslint.config(
                                 to: [
                                     { type: 'shared' },
                                     { type: 'entity', internalPath: 'index.ts' },
+                                    // Hooks an entity keeps off `index.ts` so that barrel stays callable
+                                    // from a route handler; the `client-only` marker on it catches misuse.
+                                    { type: 'entity', internalPath: 'client.ts' },
                                     { type: 'entity-public-api' },
                                     { type: 'feature', captured: { name: '{{ name }}' } },
                                 ],
