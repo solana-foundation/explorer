@@ -39,6 +39,7 @@
 | Dynamic | `/api/ping/[network]` | — | — |
 | Dynamic | `/api/search` | — | — |
 | Dynamic | `/api/security-txt` | — | — |
+| Dynamic | `/api/slot-time` | — | — |
 | Dynamic | `/api/sns-domains/[address]` | — | — |
 | Dynamic | `/api/stake-rewards/[address]` | — | — |
 | Dynamic | `/api/supply` | — | — |
