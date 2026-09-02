@@ -1,4 +1,5 @@
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
+import { FetchStatus } from '@providers/cache';
 import React from 'react';
 import {
     Attestation as SasAttestation,
@@ -9,6 +10,7 @@ import {
 } from 'sas-lib';
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
+import { LoadingCard } from '@/app/components/common/LoadingCard';
 import { toBase64, toHex } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
@@ -71,6 +73,11 @@ function AttestationCard({ attestation }: { attestation: SasAttestation }) {
             fetchAccountInfo(mapToPublicKey(attestation.schema), 'parsed');
         }
     }, [schemaAccountInfo?.data, fetchAccountInfo, attestation.schema]);
+
+    const isFetchingSchema = !schemaAccountInfo || schemaAccountInfo.status === FetchStatus.Fetching;
+    if (isFetchingSchema) {
+        return <LoadingCard message="Loading attestation data" />;
+    }
 
     let decoded: any | null = null;
     try {
