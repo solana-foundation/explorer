@@ -1,9 +1,7 @@
-import { getInstructionSummaries, type InstructionSummary } from '@entities/transaction-data';
+import { fetchTransactionDetails, getInstructionSummaries, type InstructionSummary } from '@entities/transaction-data';
 import { useCluster } from '@providers/cluster';
-import { Connection } from '@solana/web3.js';
 import { withBackoff } from '@utils/with-backoff';
 import pLimit from 'p-limit';
-import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
 // One global slot: requests run one at a time to avoid rate-limit (429) errors.
@@ -17,7 +15,6 @@ const limit = pLimit(1);
  */
 export function useInstructionSummaries(signature: string, enabled = true): InstructionSummary[] | undefined {
     const { url } = useCluster();
-    const connection = useMemo(() => new Connection(url), [url]);
     // A finalized parsed transaction never changes, so treat it as immutable: fetch once,
     // then serve from cache on remount (e.g. tab switches) without re-fetching.
     const { data } = useSWRImmutable(
@@ -27,15 +24,7 @@ export function useInstructionSummaries(signature: string, enabled = true): Inst
             // Shallow inner backoff: it holds the single slot during its sleeps, so a rate-limited
             // signature here head-of-line blocks every other row. Keep that window short and let SWR's
             // errorRetryCount do the longer recovery — those retries run with the slot already freed.
-            const tx = await limit(() =>
-                withBackoff(
-                    () =>
-                        connection.getParsedTransaction(signature, {
-                            maxSupportedTransactionVersion: 0,
-                        }),
-                    { maxRetries: 2 },
-                ),
-            );
+            const tx = await limit(() => withBackoff(() => fetchTransactionDetails(url, signature), { maxRetries: 2 }));
             // A null tx is a transient miss (a load-balanced node that hasn't indexed the signature
             // yet), not "no instructions" — throw so SWR retries instead of caching [] permanently.
             // Under useSWRImmutable a returned value is a permanent success, so caching that empty

@@ -1,4 +1,4 @@
-import { PublicKey } from '@solana/web3.js';
+import type { Address } from '@solana/kit';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -27,7 +27,7 @@ export type HistoryPage = {
  */
 export async function fetchHistoryPage({
     url,
-    pubkey,
+    address,
     limit,
     // Trailing-signature cursor used only by the getSignaturesForAddress path.
     before,
@@ -42,7 +42,7 @@ export async function fetchHistoryPage({
     onMethodNotFound,
 }: {
     url: string;
-    pubkey: PublicKey;
+    address: Address;
     limit: number;
     before?: string;
     paginationToken?: string;
@@ -53,14 +53,14 @@ export async function fetchHistoryPage({
     // gTFA is disabled up front for a few hot addresses because it times out upstream. Unlike a
     // real method-not-found this is scoped to the address: onMethodNotFound is deliberately NOT
     // called, so filtering stays available for every other account in the session.
-    if (forceSignatures || isGtfaDisabled(pubkey.toBase58())) {
-        return { history: await fetchViaSignatures({ before, limit, pubkey, url }), signaturesOnly: false };
+    if (forceSignatures || isGtfaDisabled(address)) {
+        return { history: await fetchViaSignatures({ address, before, limit, url }), signaturesOnly: false };
     }
 
     let result;
     try {
         result = await getTransactionsForAddress({
-            address: pubkey.toBase58(),
+            address,
             filters,
             limit,
             paginationToken,
@@ -71,7 +71,7 @@ export async function fetchHistoryPage({
         // Endpoint doesn't implement getTransactionsForAddress: disable filtering
         // and fall back to the standard getSignaturesForAddress path.
         onMethodNotFound?.();
-        return { history: await fetchViaSignatures({ before, limit, pubkey, url }), signaturesOnly: false };
+        return { history: await fetchViaSignatures({ address, before, limit, url }), signaturesOnly: false };
     }
 
     const history: AccountHistory = {
@@ -108,10 +108,10 @@ export async function fetchHistoryPage({
     // pre-existing behaviour and a refresh re-runs the check.
     let confirmed;
     try {
-        confirmed = await fetchViaSignatures({ before, limit, pubkey, url });
+        confirmed = await fetchViaSignatures({ address, before, limit, url });
     } catch (error) {
         Logger.warn('[transaction-history] getSignaturesForAddress confirmation failed', {
-            address: pubkey.toBase58(),
+            address,
             error,
             url,
         });

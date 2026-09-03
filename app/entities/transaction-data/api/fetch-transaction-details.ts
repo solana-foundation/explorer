@@ -1,4 +1,5 @@
-import { createSolanaRpc, MAX_SUPPORTED_TRANSACTION_VERSION, signature as createSignature } from '@solana/kit';
+import { getRpc } from '@entities/cluster/@x/transaction-data';
+import { MAX_SUPPORTED_TRANSACTION_VERSION, signature as createSignature } from '@solana/kit';
 
 import { adaptParsedTransaction } from '../lib/adapt-parsed-transaction';
 import type { TransactionWithMeta } from '../model/types';
@@ -11,7 +12,7 @@ import type { TransactionWithMeta } from '../model/types';
  * button and the inspector.
  */
 export async function fetchTransactionDetails(url: string, signature: string): Promise<TransactionWithMeta | null> {
-    const response = await createSolanaRpc(url)
+    const response = await getRpc(url)
         .getTransaction(createSignature(signature), {
             commitment: 'confirmed',
             encoding: 'jsonParsed',

@@ -5,7 +5,7 @@
 | Static | `/` | 130 kB | 530 kB |
 | Static | `/_not-found` | 0 B | 410 kB |
 | Dynamic | `/address/[address]` | 500 kB | 900 kB |
-| Dynamic | `/address/[address]/account-data` | 510 kB | 910 kB |
+| Dynamic | `/address/[address]/account-data` | 510 kB | 920 kB |
 | Dynamic | `/address/[address]/anchor-account` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/anchor-program` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/attestation` | 470 kB | 870 kB |
@@ -22,14 +22,14 @@
 | Dynamic | `/address/[address]/nftoken-collection-nfts` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/program-multisig` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/rewards` | 470 kB | 870 kB |
-| Dynamic | `/address/[address]/security` | 470 kB | 870 kB |
+| Dynamic | `/address/[address]/security` | 470 kB | 880 kB |
 | Dynamic | `/address/[address]/slot-hashes` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/stake-history` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/subscriptions` | 470 kB | 870 kB |
-| Dynamic | `/address/[address]/token-extensions` | 470 kB | 870 kB |
-| Dynamic | `/address/[address]/tokens` | 480 kB | 880 kB |
+| Dynamic | `/address/[address]/token-extensions` | 470 kB | 880 kB |
+| Dynamic | `/address/[address]/tokens` | 480 kB | 890 kB |
 | Dynamic | `/address/[address]/transfers` | 480 kB | 880 kB |
-| Dynamic | `/address/[address]/verified-build` | 470 kB | 870 kB |
+| Dynamic | `/address/[address]/verified-build` | 470 kB | 880 kB |
 | Dynamic | `/address/[address]/vote-history` | 470 kB | 870 kB |
 | Dynamic | `/api/ans-domains/[address]` | — | — |
 | Dynamic | `/api/domain-info/[domain]` | — | — |
@@ -39,6 +39,7 @@
 | Dynamic | `/api/ping/[network]` | — | — |
 | Dynamic | `/api/search` | — | — |
 | Dynamic | `/api/security-txt` | — | — |
+| Dynamic | `/api/slot-time` | — | — |
 | Dynamic | `/api/sns-domains/[address]` | — | — |
 | Dynamic | `/api/stake-rewards/[address]` | — | — |
 | Dynamic | `/api/supply` | — | — |
@@ -50,12 +51,12 @@
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
-| Dynamic | `/block/[slot]` | 250 kB | 660 kB |
+| Dynamic | `/block/[slot]` | 260 kB | 660 kB |
 | Dynamic | `/block/[slot]/accounts` | 250 kB | 650 kB |
 | Dynamic | `/block/[slot]/programs` | 250 kB | 650 kB |
 | Dynamic | `/block/[slot]/rewards` | 250 kB | 650 kB |
-| Dynamic | `/epoch/[epoch]` | 10 kB | 410 kB |
-| Static | `/feature-gates` | 40 kB | 440 kB |
+| Dynamic | `/epoch/[epoch]` | 10 kB | 420 kB |
+| Static | `/feature-gates` | 40 kB | 450 kB |
 | Dynamic | `/mcp` | — | — |
 | Static | `/mcp/start` | 20 kB | 420 kB |
 | Dynamic | `/og/feature-gate/[address]` | — | — |

@@ -1,4 +1,4 @@
-import { Domain, resolveDomain } from '@entities/domain';
+import { Domain, resolveDomain } from '@entities/domain/server';
 import { NextResponse } from 'next/server';
 import { is } from 'superstruct';
 

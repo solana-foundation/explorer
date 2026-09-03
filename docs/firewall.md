@@ -82,8 +82,11 @@ Both are pages, not images. `Bypass OG image routes` already serves `/og/receipt
 crawler reaches those only after reading `og:image` off the page — so without these two the preview never starts.
 Anchored at both ends because `Starts with /address/` would exempt every account page.
 
-`getFeatureGateOpenGraph` also sets `og:image` on the bare `/address/<addr>`, which no rule covers. Scoping one to it
-means exempting all account pages; redirect that form to `/feature-gate` instead if the short link matters.
+`getFeatureGateOpenGraph` also sets `og:image` on the bare `/address/<addr>`, where it is unreachable: that page is
+challenged, so no crawler reads the tag. Nothing cheap fixes it. A rule cannot tell a feature address from any other
+from the path alone, so it would either exempt every account page or enumerate the 100 keys in
+`feature-gates.json` — 4.5 kB of alternation, stale on the next SIMD. A redirect does not work either: routing runs
+after the firewall, so the request is challenged before anything can redirect it. Share the `/feature-gate` URL.
 
 ## Under attack
 

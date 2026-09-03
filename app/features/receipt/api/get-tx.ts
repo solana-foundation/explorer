@@ -1,4 +1,5 @@
-import { Connection, type ParsedTransactionWithMeta } from '@solana/web3.js';
+import { fetchTransactionDetails, type TransactionWithMeta } from '@entities/transaction-data';
+import { createSolanaRpc, signature as createSignature } from '@solana/kit';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterSlug, type ServerCluster, serverClusterUrl } from '@/app/utils/cluster';
@@ -12,19 +13,19 @@ const CLUSTERS_TO_PROBE: ProbeCluster[] = [Cluster.Devnet, Cluster.Testnet];
 
 export type ApiData = {
     cluster: Cluster;
-    transaction: ParsedTransactionWithMeta;
+    transaction: TransactionWithMeta;
 };
 
 export async function getTx(
     signature: string,
     dependencies?: {
         findCluster?: (signature: string) => Promise<ServerCluster | undefined>;
-        fetchDetails?: (signature: string, rpcUrl: string) => Promise<ParsedTransactionWithMeta>;
+        fetchDetails?: (signature: string, rpcUrl: string) => Promise<TransactionWithMeta>;
     },
     cluster?: ServerCluster,
 ): Promise<ApiData> {
     const findClusterFn = dependencies?.findCluster ?? findTransactionCluster;
-    const fetchDetailsFn = dependencies?.fetchDetails ?? fetchTransactionDetails;
+    const fetchDetailsFn = dependencies?.fetchDetails ?? fetchReceiptTransaction;
 
     // If cluster is provided, fetch directly without probing
     if (cluster !== undefined) {
@@ -98,30 +99,22 @@ type SignatureStatusResult = { left: Error } | { right: boolean };
 
 async function getSignatureStatus(signature: string, cluster: ServerCluster): Promise<SignatureStatusResult> {
     const rpcUrl = serverClusterUrl(cluster);
-    const connection = new Connection(rpcUrl, 'confirmed');
+    const rpc = createSolanaRpc(rpcUrl);
 
     try {
-        const status = await connection.getSignatureStatus(signature, {
-            searchTransactionHistory: true,
-        });
-        return { right: status?.value !== null };
+        const { value } = await rpc
+            .getSignatureStatuses([createSignature(signature)], { searchTransactionHistory: true })
+            .send();
+        return { right: Boolean(value[0]) };
     } catch (error) {
         Logger.error(error, { cluster, signature });
         return { left: error instanceof Error ? error : new Error(String(error)) };
     }
 }
 
-async function fetchTransactionDetails(signature: string, rpcUrl: string): Promise<ParsedTransactionWithMeta> {
-    const rpcRequestConfig = {
-        maxSupportedTransactionVersion: 0,
-    };
-    const connection = new Connection(rpcUrl, 'confirmed');
-
+async function fetchReceiptTransaction(signature: string, rpcUrl: string): Promise<TransactionWithMeta> {
     try {
-        const transaction = await connection.getParsedTransaction(signature, {
-            ...rpcRequestConfig,
-            commitment: 'confirmed',
-        });
+        const transaction = await fetchTransactionDetails(rpcUrl, signature);
 
         if (!transaction) {
             throw new ReceiptError('Transaction not found', { status: 404 });

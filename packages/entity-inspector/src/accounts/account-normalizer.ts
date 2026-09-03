@@ -85,6 +85,8 @@ export function normalizeAccountProbe(address: string, envelope: AccountProbeEnv
     const normalizedProgramData = extractProgramDataInfo(parsedData);
     // Malformed base64 → error branch (value undefined); treated as absent like a non-base64 shape.
     const [, rawDataBytes] = extractRawDataBytesFromAccountData(data);
+    // Kept even when the byte decode fails — downstream parsers judge the string themselves.
+    const [rawEncoded, rawEncoding] = Array.isArray(data) ? data : [];
 
     const base = {
         address,
@@ -94,6 +96,7 @@ export function normalizeAccountProbe(address: string, envelope: AccountProbeEnv
         parsedData,
         parsedProgram: parsedDataContainer?.program ?? null,
         programDataAddress: extractProgramDataAddress(parsedData),
+        rawDataBase64: typeof rawEncoded === 'string' && rawEncoding === 'base64' ? rawEncoded : null,
         rawDataBytes: rawDataBytes ?? null,
     };
 

@@ -56,6 +56,10 @@ export default defineConfig({
             '@utils': path.resolve(__dirname, './app/utils'),
             '@storybook-config': path.resolve(__dirname, './.storybook'),
             '@validators': path.resolve(__dirname, './app/validators'),
+
+            // `server-only` throws under the `default` condition set below; only Next's RSC build
+            // resolves it to a no-op, so specs importing a `server.ts` barrel need the stub.
+            'server-only': path.resolve(__dirname, './empty.ts'),
         },
         conditions: ['browser', 'default'],
     },

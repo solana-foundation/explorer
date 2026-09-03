@@ -1,4 +1,4 @@
-import { Connection, ParsedTransactionWithMeta } from '@solana/web3.js';
+import { fetchTransactionDetails, type TransactionWithMeta } from '@entities/transaction-data';
 import { Cluster } from '@utils/cluster';
 import { fetchAll } from '@utils/fetch-all';
 import { withBackoff } from '@utils/with-backoff';
@@ -20,16 +20,11 @@ export async function fetchParsedTransactions({
     cluster: Cluster;
     signatures: string[];
 }): Promise<{ transactionMap: TransactionMap; failedTransactionSignatures: FailedTransactionSignatures }> {
-    const connection = new Connection(url);
     const results = await fetchAll(signatures, async signature => {
         try {
-            const transaction = await withBackoff(() =>
-                connection.getParsedTransaction(signature, {
-                    maxSupportedTransactionVersion: 0,
-                }),
-            );
+            const transaction = await withBackoff(() => fetchTransactionDetails(url, signature));
 
-            return { signature, transaction };
+            return { signature, transaction: transaction ?? undefined };
         } catch (error) {
             if (cluster !== Cluster.Custom) {
                 Logger.error(error, { signature, url });
@@ -38,7 +33,7 @@ export async function fetchParsedTransactions({
         }
     });
 
-    const transactionMap = new Map<string, ParsedTransactionWithMeta>();
+    const transactionMap = new Map<string, TransactionWithMeta>();
     const failedTransactionSignatures = new Set<string>();
 
     results.forEach(({ signature, transaction }) => {

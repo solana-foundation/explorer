@@ -1,4 +1,4 @@
-import { TransactionConfirmationStatus } from '@solana/web3.js';
+import type { TransactionConfirmationStatus } from '@solana/web3.js';
 import { array, create, Infer, nullable, number, optional, string, type, union } from 'superstruct';
 
 import { buildRpcFilters, type HistoryFilters } from '../lib/history-filters';

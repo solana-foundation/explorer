@@ -1,5 +1,6 @@
 'use client';
 
+import { useSlotTime } from '@entities/slot-time';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 
@@ -20,16 +21,21 @@ import { EmptyStateCard, FeatureGateTable } from './FeatureGateTable';
 
 type TabValue = 'activated' | 'upcoming';
 
-type EpochScheduleInfo = {
+/** Everything a countdown needs but the target epoch. Absent until the whole set is in hand. */
+type CountdownInput = {
     currentEpoch: bigint;
     slotIndex: bigint;
     slotsInEpoch: bigint;
     slotsPerEpoch: bigint;
+    msPerSlot: number;
 };
 
 export function FeatureGatesView() {
     const { cluster } = useCluster();
     const clusterInfo = useClusterInfo();
+    // A custom cluster gets no table below, so its rate would be measured at the visitor's own node for
+    // a countdown nothing renders.
+    const msPerSlot = useSlotTime({ enabled: cluster !== Cluster.Custom });
     const { activated, upcoming } = useMemo(() => partitionFeatures(cluster), [cluster]);
     const [tab, setTab] = useState<TabValue>('activated');
 
@@ -49,14 +55,16 @@ export function FeatureGatesView() {
         );
     }
 
-    const epochScheduleInfo: EpochScheduleInfo | undefined = clusterInfo
-        ? {
-              currentEpoch: clusterInfo.epochInfo.epoch,
-              slotIndex: clusterInfo.epochInfo.slotIndex,
-              slotsInEpoch: clusterInfo.epochInfo.slotsInEpoch,
-              slotsPerEpoch: clusterInfo.epochSchedule.slotsPerEpoch,
-          }
-        : undefined;
+    const countdownInput: CountdownInput | undefined =
+        clusterInfo && msPerSlot !== undefined
+            ? {
+                  currentEpoch: clusterInfo.epochInfo.epoch,
+                  msPerSlot,
+                  slotIndex: clusterInfo.epochInfo.slotIndex,
+                  slotsInEpoch: clusterInfo.epochInfo.slotsInEpoch,
+                  slotsPerEpoch: clusterInfo.epochSchedule.slotsPerEpoch,
+              }
+            : undefined;
 
     return (
         <div className="mx-auto max-w-screen-xl px-4 py-4">
@@ -91,7 +99,7 @@ export function FeatureGatesView() {
                                 <ActivationCell
                                     cluster={cluster}
                                     epoch={feature.clusterActivationEpoch}
-                                    epochScheduleInfo={epochScheduleInfo}
+                                    countdownInput={countdownInput}
                                 />
                             ),
                         }}
@@ -123,15 +131,13 @@ export function FeatureGatesView() {
 function ActivationCell({
     cluster,
     epoch,
-    epochScheduleInfo,
+    countdownInput,
 }: {
     cluster: Cluster;
     epoch: number;
-    epochScheduleInfo: EpochScheduleInfo | undefined;
+    countdownInput: CountdownInput | undefined;
 }) {
-    const countdown = epochScheduleInfo
-        ? estimateTimeUntilEpoch({ ...epochScheduleInfo, targetEpoch: epoch })
-        : undefined;
+    const countdown = countdownInput ? estimateTimeUntilEpoch({ ...countdownInput, targetEpoch: epoch }) : undefined;
     return (
         <>
             <Link

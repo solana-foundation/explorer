@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { isGDPRCountry } from '@/app/entities/geo-location';
+import { isGDPRCountry } from '@/app/entities/geo-location/server';
 
 export async function GET(request: NextRequest) {
     const country = request.headers.get('x-vercel-ip-country');

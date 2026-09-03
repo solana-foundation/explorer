@@ -1,4 +1,5 @@
-import { type InstructionSummary, useResolvedSummaryNames } from '@entities/transaction-data';
+import { type InstructionSummary } from '@entities/transaction-data';
+import { useResolvedSummaryNames } from '@entities/transaction-data/client';
 
 import { useInstructionSummaries } from './use-instruction-summaries';
 

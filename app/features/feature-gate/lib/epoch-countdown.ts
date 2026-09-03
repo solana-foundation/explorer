@@ -1,4 +1,4 @@
-import { MS_PER_SLOT, slotsToHumanString } from '@/app/utils';
+import { slotsToHumanString } from '@/app/utils';
 
 type EpochCountdownInput = {
     targetEpoch: number;
@@ -6,7 +6,7 @@ type EpochCountdownInput = {
     slotIndex: bigint;
     slotsInEpoch: bigint;
     slotsPerEpoch: bigint;
-    msPerSlot?: number;
+    msPerSlot: number;
 };
 
 /**
@@ -15,7 +15,7 @@ type EpochCountdownInput = {
  * the future (already activated or activating in the current epoch).
  */
 export function estimateTimeUntilEpoch(input: EpochCountdownInput): string | undefined {
-    const { targetEpoch, currentEpoch, slotIndex, slotsInEpoch, slotsPerEpoch, msPerSlot = MS_PER_SLOT } = input;
+    const { targetEpoch, currentEpoch, slotIndex, slotsInEpoch, slotsPerEpoch, msPerSlot } = input;
 
     const target = BigInt(targetEpoch);
     if (target <= currentEpoch) return undefined;

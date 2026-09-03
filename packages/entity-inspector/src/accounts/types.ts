@@ -63,6 +63,8 @@ export type NormalizedAccountInfo = {
     parsedProgram: string | null;
     parsedData: unknown;
     rawDataBytes: ReadonlyUint8Array | null;
+    // The RPC's own base64 payload, kept verbatim so consumers never re-encode rawDataBytes.
+    rawDataBase64?: string | null;
     address?: string;
     lamports?: SafeNumeric;
     executable?: boolean;

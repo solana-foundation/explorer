@@ -6,13 +6,15 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { TokenInstructionType, Transfer, TransferChecked } from '@components/instruction/token/types';
+import { type TransactionWithMeta } from '@entities/transaction-data';
 import { useFetchAccountHistory } from '@features/transaction-history/model/use-fetch-account-history';
 import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
 import { useScaledUiAmountForMint } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { HistoryCardFooter, HistoryCardHeader } from '@shared/ui/HistoryCard';
-import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
+import { address as toAddress } from '@solana/kit';
+import { ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
@@ -109,8 +111,8 @@ export function TokenTransfersCard({ address }: { address: string }) {
     const pubkey = useMemo(() => new PublicKey(address), [address]);
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory();
-    const refresh = () => fetchAccountHistory(pubkey, true, true);
-    const loadMore = () => fetchAccountHistory(pubkey, true);
+    const refresh = () => fetchAccountHistory(toAddress(address), true, true);
+    const loadMore = () => fetchAccountHistory(toAddress(address), true);
     const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
     const { data: tokenInfo, isLoading: tokenInfoLoading } = useSWR(swrKey, fetchTokenInfo);
 
@@ -128,7 +130,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
     }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const { allTransfers, hasTimestamps } = React.useMemo(() => {
-        const detailedHistoryMap = history?.data?.transactionMap || new Map<string, ParsedTransactionWithMeta>();
+        const detailedHistoryMap = history?.data?.transactionMap || new Map<string, TransactionWithMeta>();
         const hasTimestamps = transactionRows.some(element => element.blockTime);
         const mintMap = new Map<string, MintDetails>();
         const allTransfers: TransferData[] = [];

@@ -56,7 +56,10 @@ describe('inspect-entity account normalizer', () => {
             },
         };
 
-        expect(normalizeAccountProbe('addr', envelope)?.rawDataBytes).toBeNull();
+        const normalized = normalizeAccountProbe('addr', envelope);
+        expect(normalized?.rawDataBytes).toBeNull();
+        // The undecodable string is still passed through — downstream parsers judge it themselves.
+        expect(normalized?.rawDataBase64).toBe('@@invalid@@');
     });
 
     it('should return null when envelope value is null', () => {

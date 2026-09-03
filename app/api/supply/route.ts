@@ -1,6 +1,5 @@
-import { resolveServerClusterUrl } from '@entities/cluster/server';
+import { getRpc, resolveServerClusterUrl } from '@entities/cluster/server';
 import { isRetryableError, isRpcMisconfigError } from '@shared/lib/errors';
-import { createSolanaRpc } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
 import { toSupplyPayload } from '@/app/features/supply/server';
@@ -52,7 +51,7 @@ export async function GET(request: Request) {
     }
 
     try {
-        const rpc = createSolanaRpc(resolved.url);
+        const rpc = getRpc(resolved.url);
         // A wedged node would otherwise hold the function open long past any useful answer.
         const { value } = await rpc
             .getSupply({ commitment: 'finalized', excludeNonCirculatingAccountsList: true })

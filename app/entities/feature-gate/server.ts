@@ -1,3 +1,5 @@
+import 'server-only';
+
 import featureGatesJson from './feature-gates.json';
 import type { FeatureGate } from './lib/feature-gates-schema';
 
