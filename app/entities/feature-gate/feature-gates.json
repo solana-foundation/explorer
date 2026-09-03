@@ -2156,7 +2156,7 @@
     "description": "To allow for non-disruptive rent increases, the Solana runtime relaxes post-execution minimum balance checks and adjusts stake delegations during epoch rewards calculations.",
     "devnet_activation_epoch": 1132,
     "key": "BY4JhHLahVzS9ynfDz4exzGPbVXhFmJvEyMWsXbDBqME",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1027,
     "min_agave_versions": [
       "v4.2.0"
     ],
@@ -2180,7 +2180,7 @@
     "description": "This SIMD proposes replacing all IEEE-754 double-precision floating-point arithmetic within the Solana Stake Program & validator client's warmup/ cooldown logic with a fixed-point implementation using integer arithmetic. The new logic expresses the warmup/cooldown rate in basis\u2026",
     "devnet_activation_epoch": 1131,
     "key": "s51VGwCAgebo2745DSUris72RavoLkXGUmVJosESCXr",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1026,
     "min_agave_versions": [
       "v4.2.0-beta.0"
     ],
@@ -2250,7 +2250,7 @@
     "simds": [
       "0385"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1025,
     "title": "SIMD-0385: Transaction V1"
   },
   {
