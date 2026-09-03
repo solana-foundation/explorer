@@ -247,7 +247,7 @@ describe('inspect-entity account normalizer', () => {
 
         expect(enriched.programDataStatus).toBe('source_unavailable');
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] program data enrichment source unavailable', {
-            error: rpcError,
+            error: { message: 'RPC down', name: 'SourceUnavailableError' },
             programAddress: 'Program111111111111111111111111111111111111',
         });
     });
@@ -262,7 +262,7 @@ describe('inspect-entity account normalizer', () => {
         expect(enriched.programDataStatus).toBe('source_unavailable');
         expect(logger.warn).toHaveBeenCalledWith(
             '[entity-inspector] program data enrichment failed',
-            expect.objectContaining({ error: expect.any(TypeError) }),
+            expect.objectContaining({ error: { message: 'unexpected shape', name: 'TypeError' } }),
         );
     });
 });

@@ -527,19 +527,19 @@ describe('inspect_entity handler', () => {
             },
         });
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] program idl enrichment failed', {
-            error: new Error('idl boom'),
+            error: { message: 'idl boom', name: 'Error' },
             identifier: ACCOUNT_IDENTIFIER,
         });
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] verification enrichment failed', {
-            error: new Error('verification boom'),
+            error: { message: 'verification boom', name: 'Error' },
             identifier: ACCOUNT_IDENTIFIER,
         });
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] security metadata enrichment failed', {
-            error: new Error('security boom'),
+            error: { message: 'security boom', name: 'Error' },
             identifier: ACCOUNT_IDENTIFIER,
         });
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] multisig reference enrichment failed', {
-            error: new Error('multisig boom'),
+            error: { message: 'multisig boom', name: 'Error' },
             identifier: ACCOUNT_IDENTIFIER,
         });
     });

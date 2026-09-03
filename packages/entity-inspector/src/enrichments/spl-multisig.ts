@@ -4,6 +4,7 @@ import type { SupportedCluster } from '../config.js';
 import { type InspectorLogger, ns } from '../logger.js';
 import { normalizeAccountProbe } from '../accounts/account-normalizer.js';
 import { asRecord, asSafeNumeric, asString } from '../shared/parse-helpers.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import type { RpcClient } from '../rpc/rpc.js';
 import type { MultisigReferenceResult } from './types.js';
 
@@ -54,7 +55,7 @@ export async function resolveSplMultisigReference(
             version: parsedProgram,
         };
     } catch (error) {
-        logger.warn(ns('spl multisig resolve failed'), { address, error });
+        logger.warn(ns('spl multisig resolve failed'), { address, error: toLoggedError(error) });
         return { reason: 'source_unavailable', status: 'unknown' };
     }
 }

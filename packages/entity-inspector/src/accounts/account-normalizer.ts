@@ -7,6 +7,7 @@ import { base64Encoder } from '../rpc/codecs.js';
 import { isSourceUnavailableError } from '../rpc/rpc.js';
 import type { AccountProbeEnvelope } from '../rpc/types.js';
 import { asRecord, asSafeNumeric, asString } from '../shared/parse-helpers.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import { err, ok, type Result, toError } from '../shared/result.js';
 import type { NormalizedAccountInfo, NormalizedProgramDataInfo } from './types.js';
 
@@ -147,14 +148,14 @@ export async function enrichUpgradeableProgramData(
     } catch (error) {
         if (isSourceUnavailableError(error)) {
             logger.warn(ns('program data enrichment source unavailable'), {
-                error,
+                error: toLoggedError(error),
                 programAddress: account.address,
             });
             return { ...account, programDataStatus: 'source_unavailable' };
         }
 
         logger.warn(ns('program data enrichment failed'), {
-            error,
+            error: toLoggedError(error),
             programAddress: account.address,
         });
         return { ...account, programDataStatus: 'source_unavailable' };

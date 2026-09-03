@@ -2,6 +2,7 @@ import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/
 
 import { SUPPORTED_CLUSTERS } from '../config.js';
 import { consoleLogger, ns } from '../logger.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import { createMultisigResolver } from '../enrichments/multisig.js';
 import { createSecurityMetadataResolver } from '../enrichments/security.js';
 import { createVerificationResolver } from '../enrichments/verification.js';
@@ -21,8 +22,14 @@ export type McpRequestHandler = (request: Request) => Promise<Response>;
 export function createMcpRequestHandler(config: EntityInspectorConfig): McpRequestHandler {
     const logger = config.logger ?? consoleLogger;
     for (const cluster of config.enabledClusterNames ?? SUPPORTED_CLUSTERS) {
-        if (!config.rpcEndpoints[cluster]) {
+        const endpoint = config.rpcEndpoints[cluster];
+        if (!endpoint) {
             throw new Error(ns(`enabledClusterNames lists ${cluster} but rpcEndpoints has no endpoint for it`));
+        }
+        // Names the cluster, never the endpoint: undici reports an unparseable one as
+        // `Failed to parse URL from <url>`, which puts a key-bearing URL straight into the logs.
+        if (!URL.canParse(endpoint)) {
+            throw new Error(ns(`rpcEndpoints[${cluster}] is not a valid URL`));
         }
     }
     const rpcClient = createRpcClient(config.rpcEndpoints);
@@ -56,8 +63,12 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
             await server.connect(transport);
             return await transport.handleRequest(request);
         } finally {
-            await transport.close().catch(error => logger.warn(ns('transport close failed'), { error }));
-            await server.close().catch(error => logger.warn(ns('server close failed'), { error }));
+            await transport
+                .close()
+                .catch(error => logger.warn(ns('transport close failed'), { error: toLoggedError(error) }));
+            await server
+                .close()
+                .catch(error => logger.warn(ns('server close failed'), { error: toLoggedError(error) }));
         }
     };
 }

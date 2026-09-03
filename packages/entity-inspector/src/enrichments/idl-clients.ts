@@ -19,6 +19,7 @@ import { createSolanaRpc } from '@solana/kit';
 import type { SupportedCluster } from '../config.js';
 import { type InspectorLogger, ns } from '../logger.js';
 import { RPC_REQUEST_TIMEOUT_MS } from '../shared/constants.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import { resolveRpcEndpoint } from '../rpc/resolve-rpc-endpoint.js';
 import { raceWithTimeout } from '../rpc/timeout.js';
 import { PROGRAMS_WITHOUT_ANCHOR_IDL } from './programs-without-anchor-idl.js';
@@ -80,12 +81,6 @@ function toFoundDiscovery(fetched: PublishedIdlClient): IdlDiscoveryResult {
         status: 'found',
         ...('authority' in fetched ? { authority: fetched.authority } : {}),
     };
-}
-
-// The coded fields only, never the error itself: a transport `cause` can carry the key-bearing rpc
-// endpoint, and `IdlError`'s own message is built from the package's codes and addresses.
-function toLoggedError({ code, message }: IdlError): { code: number; message: string } {
-    return { code, message };
 }
 
 function toErrorDiscovery(error: IdlError): IdlDiscoveryResult {

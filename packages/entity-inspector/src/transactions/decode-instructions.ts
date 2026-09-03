@@ -3,6 +3,7 @@
 import { type IdlClient, IdlStandard } from '@explorer/idl-decode';
 
 import { type InspectorLogger, ns } from '../logger.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import type { CompiledInstruction } from '../rpc/types.js';
 import type {
     DecodedInstructionInfo,
@@ -82,7 +83,7 @@ function runDecodeCascade(
         }
     } catch (error) {
         dependencies.logger.warn(ns('token batch instruction decode failed'), {
-            error,
+            error: toLoggedError(error),
             programId: instruction.programId,
         });
     }
@@ -96,7 +97,7 @@ function runDecodeCascade(
             }
         } catch (error) {
             dependencies.logger.warn(ns('idl instruction decode failed'), {
-                error,
+                error: toLoggedError(error),
                 programId: instruction.programId,
             });
         }
@@ -109,7 +110,7 @@ function runDecodeCascade(
         }
     } catch (error) {
         dependencies.logger.warn(ns('bundled instruction decode failed'), {
-            error,
+            error: toLoggedError(error),
             programId: instruction.programId,
         });
     }
@@ -122,7 +123,7 @@ function runDecodeCascade(
             }
         } catch (error) {
             dependencies.logger.warn(ns('fallback instruction decode failed'), {
-                error,
+                error: toLoggedError(error),
                 programId: instruction.programId,
             });
         }

@@ -37,7 +37,7 @@ describe('createTelemetry', () => {
 
         expect(healthy.send).toHaveBeenCalledWith(EVENT, CONTEXT);
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] telemetry provider ga4 failed', {
-            error: new Error('boom'),
+            error: { message: 'boom', name: 'Error' },
             event: 'mcp_tool_call',
         });
     });
@@ -55,7 +55,7 @@ describe('createTelemetry', () => {
         await expect(telemetry.track(EVENT, CONTEXT)).resolves.toBeUndefined();
 
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] telemetry provider sync failed', {
-            error: new Error('sync boom'),
+            error: { message: 'sync boom', name: 'Error' },
             event: 'mcp_tool_call',
         });
     });
@@ -68,7 +68,7 @@ describe('createTelemetry', () => {
         await telemetry.track(EVENT, CONTEXT);
 
         expect(warnSpy).toHaveBeenCalledWith('[entity-inspector] telemetry provider ga4 failed', {
-            error: new Error('boom'),
+            error: { message: 'boom', name: 'Error' },
             event: 'mcp_tool_call',
         });
     });

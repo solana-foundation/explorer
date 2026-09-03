@@ -3,6 +3,7 @@ import { parseSecurityTxt } from '@explorer/parsers/security-txt';
 import type { SupportedCluster } from '../config.js';
 import { type InspectorLogger, ns } from '../logger.js';
 import { asRecord } from '../shared/parse-helpers.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import type { SecurityMetadataResult, SecurityTxtFields } from './types.js';
 import { fetchPmpSecurityMetadata } from './pmp-security.js';
 
@@ -63,7 +64,7 @@ async function tryPmpSource(
     try {
         content = await fetchPmpSecurityMetadata(programAddress, cluster, rpcEndpoints);
     } catch (error) {
-        logger.warn(ns('security pmp fetch failed'), { error, programAddress });
+        logger.warn(ns('security pmp fetch failed'), { error: toLoggedError(error), programAddress });
         return { reason: 'source_unavailable', status: 'unknown' };
     }
 
@@ -73,7 +74,7 @@ async function tryPmpSource(
     try {
         raw = JSON.parse(content);
     } catch (error) {
-        logger.error(ns('security pmp parse failed'), { error, programAddress });
+        logger.error(ns('security pmp parse failed'), { error: toLoggedError(error), programAddress });
         return { reason: 'security_invalid', status: 'unknown' };
     }
 

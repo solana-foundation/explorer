@@ -17,6 +17,7 @@ import type { ResolveSecurityMetadata } from '../../enrichments/security.js';
 import type { ResolveProgramVerification } from '../../enrichments/verification.js';
 import type { DiscoverProgramIdl, ResolveIdlClient } from '../../enrichments/idl-clients.js';
 import { asRecord, asString } from '../../shared/parse-helpers.js';
+import { toLoggedError } from '../../shared/logged-error.js';
 import { isSourceUnavailableError, type RpcClient } from '../../rpc/rpc.js';
 import { buildTransactionPayload } from '../../transactions/build-payload.js';
 import { decodeTransactionInstructions } from '../../transactions/decode-instructions.js';
@@ -117,7 +118,7 @@ async function resolveAccount(
             try {
                 dasOutcome = normalizeDasOutcome(await dependencies.fetchAsset(identifier, cluster));
             } catch (error) {
-                logger.warn(ns('inspect_entity DAS lookup failed'), { error, identifier });
+                logger.warn(ns('inspect_entity DAS lookup failed'), { error: toLoggedError(error), identifier });
                 dasOutcome = null;
             }
         }
@@ -148,7 +149,7 @@ async function resolveAccount(
         const { errors, payload } = splitBuilderErrors(routedPayload);
         return toToolResult({ errors, payload });
     } catch (error) {
-        logger.error(ns('inspect_entity account resolution failed'), { error, identifier });
+        logger.error(ns('inspect_entity account resolution failed'), { error: toLoggedError(error), identifier });
 
         if (isSourceUnavailableError(error)) {
             return toToolResult({
@@ -177,7 +178,7 @@ function catchEnrichment<T>(
     logger: InspectorLogger,
 ): Promise<T | { status: 'unknown'; reason: 'source_unavailable' }> {
     return promise.catch(error => {
-        logger.warn(ns(`${label} enrichment failed`), { error, identifier });
+        logger.warn(ns(`${label} enrichment failed`), { error: toLoggedError(error), identifier });
         return { reason: 'source_unavailable', status: 'unknown' } as const;
     });
 }
@@ -276,7 +277,7 @@ async function resolveTransaction(
             // Confirmation detail is best-effort — its outage must not take down the whole lookup.
             dependencies.fetchSignatureStatus(identifier, cluster).catch(error => {
                 logger.warn(ns('inspect_entity signature status fetch failed'), {
-                    error,
+                    error: toLoggedError(error),
                     identifier,
                 });
                 return null;
@@ -315,7 +316,7 @@ async function resolveTransaction(
             payload: buildTransactionPayload(transactionContext, instructions),
         });
     } catch (error) {
-        logger.error(ns('inspect_entity transaction resolution failed'), { error, identifier });
+        logger.error(ns('inspect_entity transaction resolution failed'), { error: toLoggedError(error), identifier });
 
         if (isSourceUnavailableError(error)) {
             return toToolResult({

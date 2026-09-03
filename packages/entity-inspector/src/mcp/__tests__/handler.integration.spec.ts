@@ -203,6 +203,19 @@ describe('createMcpRequestHandler — a deployment that enables one cluster', ()
             }),
         ).toThrow(/devnet/);
     });
+
+    it('should refuse to start on an unparseable endpoint without echoing it', () => {
+        const create = () =>
+            createMcpRequestHandler({
+                ...TEST_CONFIG,
+                enabledClusterNames: ['devnet'],
+                // Scheme-less: undici reports this one as `Failed to parse URL from <url>`, api key included.
+                rpcEndpoints: { ...TEST_CONFIG.rpcEndpoints, devnet: 'devnet.rpc.address/?api-key=SUPERSECRET' },
+            });
+
+        expect(create).toThrow(/devnet/);
+        expect(create).not.toThrow(/SUPERSECRET/);
+    });
 });
 
 // The initialized NOTIFICATION (not the initialize request) is what fires `oninitialized` — real
@@ -284,11 +297,11 @@ describe('createMcpRequestHandler — analytics and server wrapping', () => {
             result: { content: [{ text: 'pong', type: 'text' }] },
         });
         expect(warn).toHaveBeenCalledWith('[entity-inspector] analytics track failed', {
-            error: expect.any(Error),
+            error: expect.objectContaining({ name: 'Error' }),
             tool: 'initialize',
         });
         expect(warn).toHaveBeenCalledWith('[entity-inspector] analytics track failed', {
-            error: expect.any(Error),
+            error: expect.objectContaining({ name: 'Error' }),
             tool: 'ping',
         });
     });
@@ -350,7 +363,7 @@ describe('createMcpRequestHandler — analytics and server wrapping', () => {
         server.server.oninitialized?.();
 
         expect(warnSpy).toHaveBeenCalledWith('[entity-inspector] analytics track failed', {
-            error: expect.any(Error),
+            error: expect.objectContaining({ name: 'Error' }),
             tool: 'initialize',
         });
         warnSpy.mockRestore();
@@ -392,7 +405,11 @@ describe('createMcpRequestHandler — real MCP SDK transport, close failures', (
         const response = await handler(initializeRequest(1));
 
         expect(response.status).toBe(200);
-        expect(warn).toHaveBeenCalledWith('[entity-inspector] transport close failed', { error: expect.any(Error) });
-        expect(warn).toHaveBeenCalledWith('[entity-inspector] server close failed', { error: expect.any(Error) });
+        expect(warn).toHaveBeenCalledWith('[entity-inspector] transport close failed', {
+            error: expect.objectContaining({ name: 'Error' }),
+        });
+        expect(warn).toHaveBeenCalledWith('[entity-inspector] server close failed', {
+            error: expect.objectContaining({ name: 'Error' }),
+        });
     });
 });
