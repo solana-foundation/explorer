@@ -1,11 +1,7 @@
 import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { BaseCUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
-import {
-    type NamedInstruction,
-    resolveInstructionNames,
-    type TransactionWithMeta,
-    useResolvedInstructionNames,
-} from '@entities/transaction-data';
+import { type NamedInstruction, resolveInstructionNames, type TransactionWithMeta } from '@entities/transaction-data';
+import { useResolvedInstructionNames } from '@entities/transaction-data/client';
 import { useCluster, useClusterInfoResult } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import type { Cluster } from '@utils/cluster';

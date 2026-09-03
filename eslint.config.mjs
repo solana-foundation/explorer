@@ -19,6 +19,122 @@ const TEST_AND_STORY_FILES = [
     '**/*.stories.[jt]s?(x)',
 ];
 
+// Flat config replaces `no-restricted-syntax` options wholesale, so every override must spread these
+// back in or it silently drops the RegExp ban for its own files.
+const NO_REGEXP_SELECTORS = [
+    {
+        selector: 'Literal[regex]',
+        message:
+            'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
+    },
+    {
+        selector: 'RegExpLiteral',
+        message:
+            'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
+    },
+];
+
+// `'use client'` turns the module into a client reference, which silently neutralises `client-only`:
+// the pair reads as guarded while a server caller still fails at runtime instead of at build time.
+const CLIENT_MARKER_CONFLICT = {
+    selector:
+        "Program:has(ExpressionStatement > Literal[value='use client']):has(ImportDeclaration[source.value='client-only'])",
+    message:
+        "Do not combine 'use client' with `import 'client-only'` — the directive makes the module a client reference, so the marker stops failing the build and a server caller degrades to a runtime error instead. Keep the directive for components; keep only the marker for hooks and plain modules.",
+};
+
+// Hooks still on `'use client'`. Per-file so any *new* hook is subject to the rule. This list only
+// ever shrinks — a PR that adds an entry is opting a new hook out of the one guard that catches a
+// server caller at build time. Removing an entry means swapping the directive for
+// `import 'client-only'` and confirming `next build` still passes; a failure names a barrel that
+// re-exports the hook onto a server path.
+const HOOKS_PENDING_CLIENT_ONLY = [
+    'app/entities/account/model/use-account-query.ts',
+    'app/entities/cluster/model/use-cluster-connection-failed.ts',
+    'app/entities/cluster/model/use-cluster-info.ts',
+    'app/entities/cluster/model/use-cluster-modal.ts',
+    'app/entities/cluster/model/use-cluster-resource-search.ts',
+    'app/entities/cluster/model/use-cluster-url.ts',
+    'app/entities/cluster/model/use-cluster.ts',
+    'app/entities/cluster/model/use-solana-rpc.ts',
+    'app/entities/domain/model/use-user-ans-domains.ts',
+    'app/entities/domain/model/use-user-sns-domains.ts',
+    'app/entities/idl/model/anchor/use-anchor-program.ts',
+    'app/entities/idl/model/anchor/use-format-anchor-idl.ts',
+    'app/entities/idl/model/use-format-codama-idl.ts',
+    'app/entities/idl/model/use-program-idl-names.ts',
+    'app/entities/idl/model/use-program-idls.ts',
+    'app/entities/nft/model/use-token-metadata.ts',
+    'app/entities/program-metadata/model/use-program-metadata-idl.tsx',
+    'app/entities/slot-time/model/use-slot-time.ts',
+    'app/entities/token-info/model/use-token-info.ts',
+    'app/entities/transaction-data/model/use-resolved-instruction-names.ts',
+    'app/features/cluster-switcher/model/use-cluster-href.ts',
+    'app/features/cluster-switcher/model/use-custom-url-draft.ts',
+    'app/features/cookie/model/use-analytics-consent.ts',
+    'app/features/decode-account-pmp/model/use-decode-buffer-payload.ts',
+    'app/features/decode-account-pmp/model/use-decode-metadata-payload.ts',
+    'app/features/decode-account-pmp/model/use-resolve-buffer-config-from-bytes.ts',
+    'app/features/decode-account-pmp/model/use-resolve-buffer-config-onchain.ts',
+    'app/features/idl/interactive-idl/model/transaction/use-execute-transaction.ts',
+    'app/features/idl/interactive-idl/model/transaction/use-simulate-transaction.ts',
+    'app/features/idl/interactive-idl/model/use-instruction.ts',
+    'app/features/idl/model/use-tabs.tsx',
+    'app/features/instruction-simulation/model/use-simulation.ts',
+    'app/features/nicknames/model/use-nickname.ts',
+    'app/features/receipt/lib/use-primary-domain.ts',
+    'app/features/stake/model/use-total-reward.ts',
+    'app/features/supply/model/use-supply.ts',
+    'app/features/token-batch/model/use-sub-instruction-mint-info.ts',
+    'app/features/transaction-history/model/use-account-history.ts',
+    'app/features/transaction-history/model/use-fetch-account-history.ts',
+    'app/features/transaction/model/use-cluster-transaction-search.ts',
+    'app/providers/wallet/use-logged-wallet-error.ts',
+    'app/providers/wallet/use-wallet.ts',
+    'app/shared/lib/use-auto-refresh.ts',
+    'app/shared/lib/use-breakpoint.ts',
+    'app/shared/lib/use-can-native-share.ts',
+    'app/shared/lib/use-hydrated.ts',
+    'app/shared/lib/use-reduced-motion.ts',
+];
+
+// A hook is never a component, so it never needs to *be* a client boundary — and `'use client'` costs
+// it the only build-time guard available: a server caller of a directive-carrying module gets a
+// client reference and fails at runtime, while `client-only` fails `next build` with an import trace.
+const clientBoundaryPlugin = {
+    rules: {
+        'prefer-client-only-in-hooks': {
+            create(context) {
+                return {
+                    Program(node) {
+                        for (const statement of node.body) {
+                            // Directives only count in the leading prologue, so stop at the first real statement.
+                            if (statement.type !== 'ExpressionStatement' || statement.expression.type !== 'Literal') {
+                                return;
+                            }
+                            if (statement.expression.value !== 'use client') continue;
+                            context.report({
+                                messageId: 'preferClientOnly',
+                                node: statement,
+                            });
+                            return;
+                        }
+                    },
+                };
+            },
+            meta: {
+                docs: { description: "Suggest `import 'client-only'` over 'use client' for hook modules." },
+                messages: {
+                    preferClientOnly:
+                        "Prefer `import 'client-only'` over 'use client' in a hook module: a server caller then fails `next build` with an import trace instead of throwing at runtime. Verify with a build — a failure means something in the server graph reaches this module, usually a barrel re-export worth splitting.",
+                },
+                schema: [],
+                type: 'suggestion',
+            },
+        },
+    },
+};
+
 export default tseslint.config(
     // Global ignores.
     // packages/* are intentionally not ignored: root `eslint .` (like prettier's `**/*.ts` glob) lints their source with this shared config — only built output is excluded.
@@ -101,19 +217,7 @@ export default tseslint.config(
             'no-unused-vars': 'off',
             'simple-import-sort/imports': 'error',
             'no-restricted-globals': ['error', 'RegExp'],
-            'no-restricted-syntax': [
-                'error',
-                {
-                    selector: 'Literal[regex]',
-                    message:
-                        'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
-                },
-                {
-                    selector: 'RegExpLiteral',
-                    message:
-                        'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
-                },
-            ],
+            'no-restricted-syntax': ['error', ...NO_REGEXP_SELECTORS, CLIENT_MARKER_CONFLICT],
             'sort-keys-fix/sort-keys-fix': 'error',
             '@eslint-community/eslint-comments/no-unlimited-disable': 'error',
             'no-console': 'error',
@@ -329,6 +433,10 @@ export default tseslint.config(
         plugins: { boundaries },
         settings: {
             'boundaries/elements': [
+                // Route handlers only. Pages are excluded on purpose: a server page may import a
+                // client component to render it, which is the intended RSC pattern, while a handler
+                // renders nothing and only ever calls what it imports.
+                { type: 'route', pattern: 'app/**/route.[jt]s?(x)', mode: 'file' },
                 { type: 'feature', pattern: 'app/features/*', mode: 'folder', capture: ['name'] },
                 // Must precede the broader `entity` pattern — element types are matched in
                 // declaration order, so `@x` folders would otherwise be classified as `entity`.
@@ -349,11 +457,29 @@ export default tseslint.config(
                     default: 'disallow',
                     rules: [
                         {
+                            // Only through `server.ts` — that barrel exists to declare what a slice
+                            // offers the server. `index.ts` is server-safe only by accident: add one
+                            // client export to it later and a client boundary lands on a server call
+                            // path silently. A deep path into `api/` or `lib/` drags in whatever that
+                            // module happens to import, with the same result.
+                            from: { type: 'route' },
+                            allow: {
+                                to: [
+                                    { type: 'shared' },
+                                    { type: 'entity', internalPath: 'server.ts' },
+                                    { type: 'feature', internalPath: 'server.ts' },
+                                ],
+                            },
+                        },
+                        {
                             from: { type: 'feature' },
                             allow: {
                                 to: [
                                     { type: 'shared' },
                                     { type: 'entity', internalPath: 'index.ts' },
+                                    // Hooks an entity keeps off `index.ts` so that barrel stays callable
+                                    // from a route handler; the `client-only` marker on it catches misuse.
+                                    { type: 'entity', internalPath: 'client.ts' },
                                     { type: 'entity-public-api' },
                                     { type: 'feature', captured: { name: '{{ name }}' } },
                                 ],
@@ -393,6 +519,61 @@ export default tseslint.config(
         files: TEST_AND_STORY_FILES,
         rules: {
             'boundaries/dependencies': 'off',
+        },
+    },
+
+    // A slice's data-access layer is shared by both graphs: route handlers call it on the server,
+    // components call it in the browser. `'use client'` here compiles fine and then throws
+    // "is on the client" the first time a server caller invokes it. Put the boundary on the hook or
+    // component that consumes the module instead.
+    {
+        files: [
+            'app/entities/*/api/**/*.[jt]s?(x)',
+            'app/entities/*/@x/**/*.[jt]s?(x)',
+            'app/features/*/api/**/*.[jt]s?(x)',
+        ],
+        ignores: TEST_AND_STORY_FILES,
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                ...NO_REGEXP_SELECTORS,
+                CLIENT_MARKER_CONFLICT,
+                {
+                    selector: "ExpressionStatement > Literal[value='use client']",
+                    message:
+                        "Do not mark a slice's api/ or @x/ module 'use client' — server code imports it, and the directive turns those calls into a client-reference error at runtime. Move the boundary to the consuming hook or component.",
+                },
+            ],
+        },
+    },
+
+    // Deliberately its own rule name: configuring `no-restricted-syntax` here would replace the
+    // error-level selectors for these files and silently downgrade them.
+    {
+        files: ['app/**/use-*.[jt]s?(x)'],
+        ignores: [...TEST_AND_STORY_FILES, ...HOOKS_PENDING_CLIENT_ONLY],
+        plugins: { boundary: clientBoundaryPlugin },
+        rules: {
+            'boundary/prefer-client-only-in-hooks': 'error',
+        },
+    },
+
+    // A `server.ts` barrel declares which exports are for server consumers; without the marker that
+    // declaration is unenforced, and a client importer is only found at runtime. Universal code stays
+    // reachable through the slice's `index.ts`.
+    {
+        files: ['app/**/server.[jt]s?(x)'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                ...NO_REGEXP_SELECTORS,
+                CLIENT_MARKER_CONFLICT,
+                {
+                    selector: "Program:not(:has(ImportDeclaration[source.value='server-only']))",
+                    message:
+                        "A `server.ts` barrel must `import 'server-only'` so a client importer fails `next build` instead of at runtime.",
+                },
+            ],
         },
     },
 
@@ -808,16 +989,8 @@ export default tseslint.config(
         rules: {
             'no-restricted-syntax': [
                 'error',
-                {
-                    selector: 'Literal[regex]',
-                    message:
-                        'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
-                },
-                {
-                    selector: 'RegExpLiteral',
-                    message:
-                        'RegExps are not recommended. If you sure regexp is needed - please use eslint-disable-next no-restricted-syntax -- %comment%  to explain why',
-                },
+                ...NO_REGEXP_SELECTORS,
+                CLIENT_MARKER_CONFLICT,
                 {
                     selector: 'ImportExpression',
                     message:

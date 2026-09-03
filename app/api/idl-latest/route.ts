@@ -14,6 +14,8 @@ const CACHE_HEADERS = {
 
 // Resolve IDLs with a few retries. The RPC itself is reliable, but resolving a large IDL through the
 // server runtime occasionally premature-closes the response body; a fresh client per attempt clears it.
+// That is why this constructs its own client rather than taking the shared one from `getRpc` — reusing
+// the cached client would retry through the transport that just failed.
 async function resolveProgramIdlsWithRetry(
     url: string,
     programId: Address,

@@ -1,10 +1,9 @@
-import { resolveServerClusterUrl } from '@entities/cluster/server';
+import { getRpc, resolveServerClusterUrl } from '@entities/cluster/server';
 import { MEASURED_SAMPLES, toSlotTimePayload } from '@entities/slot-time/server';
 import { isRetryableError, isRpcMisconfigError } from '@shared/lib/errors';
 import { ERROR_CACHE_HEADERS, isTimeoutError, NO_STORE_HEADERS } from '@shared/lib/http-utils';
 import { Logger } from '@shared/lib/logger';
 import { UPSTREAM_TIMEOUT_MS } from '@shared/lib/timeouts';
-import { createSolanaRpc } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
 // The rate moves only when a slot-time feature gate activates, at an epoch boundary. A few minutes of
@@ -51,7 +50,7 @@ export async function GET(request: Request) {
     }
 
     try {
-        const rpc = createSolanaRpc(resolved.url);
+        const rpc = getRpc(resolved.url);
         const samples = await rpc
             .getRecentPerformanceSamples(MEASURED_SAMPLES)
             // A wedged node would otherwise hold the function open long past any useful answer.

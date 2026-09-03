@@ -1,4 +1,5 @@
-import { type NamedInstruction, resolveNamesFromData, useResolvedInstructionNames } from '@entities/transaction-data';
+import { type NamedInstruction, resolveNamesFromData } from '@entities/transaction-data';
+import { useResolvedInstructionNames } from '@entities/transaction-data/client';
 import type { PublicKey, VersionedMessage } from '@solana/web3.js';
 import { useEffect, useMemo } from 'react';
 

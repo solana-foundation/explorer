@@ -3,7 +3,7 @@ import { PUBLIC_KEY_LENGTH } from '@solana/web3.js';
 import { Cluster, clusterFromSlug, clusterSlug, type ServerCluster } from '@utils/cluster';
 import { NextResponse } from 'next/server';
 
-import { GENESIS_HASHES } from '@/app/entities/chain-id/lib/const';
+import { GENESIS_HASHES } from '@/app/entities/chain-id/server';
 import { resolveSearchTokens, SEARCH_CACHE_HEADERS } from '@/app/features/search/server';
 import { NO_STORE_HEADERS } from '@/app/shared/lib/http-utils';
 

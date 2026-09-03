@@ -1,7 +1,7 @@
-import { serverClusterUrlFromParam } from '@entities/cluster/server';
+import { getRpc, serverClusterUrlFromParam } from '@entities/cluster/server';
 import { errors } from '@entities/program-metadata/server';
 import { isRetryableError } from '@shared/lib/errors';
-import { type Address, address, createSolanaRpc } from '@solana/kit';
+import { type Address, address } from '@solana/kit';
 import { fetchSecurityTxt, type SecurityTxtFields, type SecurityTxtSource } from '@solana/security-txt';
 import { NextResponse } from 'next/server';
 
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     const context = { cluster: clusterProp, programAddress };
 
     try {
-        const rpc = createSolanaRpc(url);
+        const rpc = getRpc(url);
         let securityTxt: { type: SecurityTxtSource; fields: SecurityTxtFields } | undefined;
         // eslint-disable-next-line unicorn/no-null -- library API: null = canonical-only PMP lookup (no fndn fallback)
         const result = await fetchSecurityTxt(rpc, programId, { authority: null });

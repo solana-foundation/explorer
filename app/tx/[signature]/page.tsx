@@ -1,8 +1,12 @@
 import '../../styles/styles.css';
 
-import { getClusterParam } from '@features/receipt';
-import { isReceiptEnabled, RECEIPT_BASE_URL, RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/env';
-import { buildCompositeSignature } from '@features/receipt/server';
+import {
+    buildCompositeSignature,
+    getClusterParam,
+    isReceiptEnabled,
+    RECEIPT_BASE_URL,
+    RECEIPT_OG_IMAGE_VERSION,
+} from '@features/receipt/server';
 import { Cluster, CLUSTERS, clusterSlug } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
 import { Metadata } from 'next/types';
