@@ -5,9 +5,11 @@
  * are intentionally not re-exported — use the Logger instead:
  * - `Logger.panic(error)` for exceptions
  * - `Logger.error(msg, { sentry: true })` or `Logger.warn(msg, { sentry: true })` for notable events
+ *   (server-only; `sentry: 'always'` also reports from the browser)
  */
 export {
     addBreadcrumb,
+    captureFeedback,
     startSpan,
     setTag,
     setExtra,
