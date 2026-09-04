@@ -216,7 +216,7 @@ describe('createSecurityMetadataResolver', () => {
 
         expect(result).toMatchObject({ source_type: 'embedded_security_txt', status: 'present' });
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] security pmp fetch failed', {
-            error,
+            error: { message: 'network error', name: 'Error' },
             programAddress: PROGRAM_ADDRESS,
         });
     });
@@ -236,7 +236,7 @@ describe('createSecurityMetadataResolver', () => {
 
         expect(result).toMatchObject({ source_type: 'embedded_security_txt', status: 'present' });
         expect(logger.error).toHaveBeenCalledWith('[entity-inspector] security pmp parse failed', {
-            error: expect.any(SyntaxError),
+            error: expect.objectContaining({ name: 'SyntaxError' }),
             programAddress: PROGRAM_ADDRESS,
         });
     });

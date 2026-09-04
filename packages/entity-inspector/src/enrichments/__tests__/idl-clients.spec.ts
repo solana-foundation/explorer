@@ -51,7 +51,9 @@ function fakeClient(idl: unknown, programName?: string): IdlClient {
 }
 
 function idlError(code: number): IdlError {
-    return { code, message: `idl error ${code}` } as IdlError;
+    // A real Error (the log path reduces errors through `toLoggedError`), built by hand because
+    // `new IdlError(code)` needs a per-code context to render its message.
+    return Object.assign(new Error(`idl error ${code}`), { code, name: 'IdlError' }) as unknown as IdlError;
 }
 
 function createLoggerMock(): InspectorLogger {
@@ -110,7 +112,7 @@ describe('createIdlClientResolver', () => {
         expect(logger.warn).toHaveBeenCalledWith(
             '[entity-inspector] idl client resolution failed',
             expect.objectContaining({
-                error: { code, message: `idl error ${code}` },
+                error: expect.objectContaining({ code, name: 'IdlError' }),
                 programAddress: 'program-address',
             }),
         );

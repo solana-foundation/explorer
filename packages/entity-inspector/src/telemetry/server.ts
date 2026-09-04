@@ -1,5 +1,6 @@
 // Usage-event fan-out over pluggable providers — kept import-free from the MCP core; hosts adapt `track` into `EntityInspectorConfig.track` themselves (supplying the context).
 import { consoleLogger, type InspectorLogger, ns } from '../logger.js';
+import { toLoggedError } from '../shared/logged-error.js';
 
 // Scalar-only params: GA4's Measurement Protocol silently discards nested values.
 export type TelemetryEvent = { name: string; params: Record<string, string | number | boolean> };
@@ -32,7 +33,7 @@ export function createTelemetry(providers: readonly TelemetryProvider[], options
                         .catch((error: unknown) => {
                             // warn, not debug: this line is the only signal for a persistently broken provider (e.g. a bad GA secret).
                             logger.warn(ns(`telemetry provider ${provider.name} failed`), {
-                                error,
+                                error: toLoggedError(error),
                                 event: event.name,
                             });
                         }),

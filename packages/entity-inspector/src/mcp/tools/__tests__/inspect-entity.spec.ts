@@ -696,7 +696,7 @@ describe('inspect_entity handler', () => {
         expect(resolveProgramVerification).not.toHaveBeenCalled();
         expect(resolveMultisigReference).not.toHaveBeenCalled();
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] loader-v4 state undecoded', {
-            error: new Error('loader-v4 account data shorter than the state header'),
+            error: { message: 'loader-v4 account data shorter than the state header', name: 'Error' },
             identifier: ACCOUNT_IDENTIFIER,
         });
         expect(discoverProgramIdl).toHaveBeenCalledWith(ACCOUNT_IDENTIFIER, 'mainnet-beta');
@@ -816,19 +816,19 @@ describe('inspect_entity handler', () => {
             },
         });
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] program idl enrichment failed', {
-            error: new Error('idl boom'),
+            error: { message: 'idl boom', name: 'Error' },
             identifier: ACCOUNT_IDENTIFIER,
         });
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] verification enrichment failed', {
-            error: new Error('verification boom'),
+            error: { message: 'verification boom', name: 'Error' },
             identifier: ACCOUNT_IDENTIFIER,
         });
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] security metadata enrichment failed', {
-            error: new Error('security boom'),
+            error: { message: 'security boom', name: 'Error' },
             identifier: ACCOUNT_IDENTIFIER,
         });
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] multisig reference enrichment failed', {
-            error: new Error('multisig boom'),
+            error: { message: 'multisig boom', name: 'Error' },
             identifier: ACCOUNT_IDENTIFIER,
         });
     });

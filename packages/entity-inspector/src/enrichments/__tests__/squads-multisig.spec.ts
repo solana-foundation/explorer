@@ -89,7 +89,10 @@ describe('resolveSquadsMultisigReference', () => {
             });
             expect(dependencies.logger.warn).toHaveBeenCalledWith(
                 expect.stringContaining('squads lambda lookup failed'),
-                expect.objectContaining({ error: expect.any(Error), upgradeAuthority: AUTHORITY }),
+                expect.objectContaining({
+                    error: expect.objectContaining({ name: 'Error' }),
+                    upgradeAuthority: AUTHORITY,
+                }),
             );
         });
 

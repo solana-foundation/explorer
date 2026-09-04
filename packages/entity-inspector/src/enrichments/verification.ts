@@ -3,6 +3,7 @@
 import type { SupportedCluster } from '../config.js';
 import { ns } from '../logger.js';
 import { asRecord } from '../shared/parse-helpers.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import type { VerificationResult } from './types.js';
 import { hashProgramData } from './hash-program-data.js';
 import { type BuildParams, fetchOtterVerifyBuildParams, type OtterVerifyDependencies } from './otter-verify.js';
@@ -124,7 +125,7 @@ export function createVerificationResolver(dependencies: OtterVerifyDependencies
         try {
             raw = await fetchOsecStatusAll(programAddress);
         } catch (error) {
-            logger.warn(ns('verification osec fetch failed'), { error, programAddress });
+            logger.warn(ns('verification osec fetch failed'), { error: toLoggedError(error), programAddress });
             return { reason: 'source_unavailable', status: 'unknown' };
         }
 

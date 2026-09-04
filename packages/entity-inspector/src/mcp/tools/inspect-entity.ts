@@ -26,6 +26,7 @@ import type { ResolveSecurityMetadata } from '../../enrichments/security.js';
 import type { ResolveProgramVerification } from '../../enrichments/verification.js';
 import type { DiscoverProgramIdl, ResolveIdlClient } from '../../enrichments/idl-clients.js';
 import { asRecord, asString } from '../../shared/parse-helpers.js';
+import { toLoggedError } from '../../shared/logged-error.js';
 import { base64Decoder } from '../../rpc/codecs.js';
 import { isSourceUnavailableError, type RpcClient } from '../../rpc/rpc.js';
 import { buildTransactionPayload } from '../../transactions/build-payload.js';
@@ -140,7 +141,7 @@ async function resolveAccount(
             try {
                 dasOutcome = normalizeDasOutcome(await dependencies.fetchAsset(identifier, cluster));
             } catch (error) {
-                logger.warn(ns('inspect_entity DAS lookup failed'), { error, identifier });
+                logger.warn(ns('inspect_entity DAS lookup failed'), { error: toLoggedError(error), identifier });
                 dasOutcome = null;
             }
         }
@@ -170,7 +171,7 @@ async function resolveAccount(
         const { errors, payload } = splitBuilderErrors(routedPayload);
         return toToolResult({ errors, payload });
     } catch (error) {
-        logger.error(ns('inspect_entity account resolution failed'), { error, identifier });
+        logger.error(ns('inspect_entity account resolution failed'), { error: toLoggedError(error), identifier });
 
         if (isSourceUnavailableError(error)) {
             return toToolResult({
@@ -199,7 +200,7 @@ function catchEnrichment<T>(
     logger: InspectorLogger,
 ): Promise<T | { status: 'unknown'; reason: 'source_unavailable' }> {
     return promise.catch(error => {
-        logger.warn(ns(`${label} enrichment failed`), { error, identifier });
+        logger.warn(ns(`${label} enrichment failed`), { error: toLoggedError(error), identifier });
         return { reason: 'source_unavailable', status: 'unknown' } as const;
     });
 }
@@ -250,7 +251,7 @@ async function resolveProgramEnrichments(
 ): Promise<ProgramEnrichments> {
     const { authority, stateError, verificationData } = resolveProgramAuthorityContext(kind, account);
     if (stateError) {
-        logger.warn(ns('loader-v4 state undecoded'), { error: stateError, identifier });
+        logger.warn(ns('loader-v4 state undecoded'), { error: toLoggedError(stateError), identifier });
     }
     const stateUndecoded = Boolean(stateError);
     const securityDataBase64 = account.programDataRawBase64 ?? account.rawDataBase64 ?? null;
@@ -349,7 +350,7 @@ async function resolveTransaction(
             // Confirmation detail is best-effort — its outage must not take down the whole lookup.
             dependencies.fetchSignatureStatus(identifier, cluster).catch(error => {
                 logger.warn(ns('inspect_entity signature status fetch failed'), {
-                    error,
+                    error: toLoggedError(error),
                     identifier,
                 });
                 return null;
@@ -388,7 +389,7 @@ async function resolveTransaction(
             payload: buildTransactionPayload(transactionContext, instructions),
         });
     } catch (error) {
-        logger.error(ns('inspect_entity transaction resolution failed'), { error, identifier });
+        logger.error(ns('inspect_entity transaction resolution failed'), { error: toLoggedError(error), identifier });
 
         if (isSourceUnavailableError(error)) {
             return toToolResult({

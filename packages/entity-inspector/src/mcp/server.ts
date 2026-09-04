@@ -3,6 +3,7 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 import { defaultCluster, type EnabledClusterNames, SUPPORTED_CLUSTERS } from '../config.js';
 import { consoleLogger, ns } from '../logger.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import { buildToolCallEvent } from './analytics-event.js';
 import { internalError, toToolResult } from './errors.js';
 import { inspectEntityInputSchema, pingInputSchema } from './schemas.js';
@@ -54,7 +55,7 @@ function withToolTracking<TInput>(
         try {
             track(buildToolCallEvent(tool, input, result, Date.now() - started));
         } catch (error) {
-            logger.warn(ns('analytics track failed'), { error, tool });
+            logger.warn(ns('analytics track failed'), { error: toLoggedError(error), tool });
         }
         return result;
     };
@@ -71,7 +72,7 @@ function withErrorGuard<TInput>(
         try {
             return await handler(input);
         } catch (error) {
-            logger.error(ns(`${tool} failed`), { error });
+            logger.error(ns(`${tool} failed`), { error: toLoggedError(error) });
             return toToolResult({ errors: [internalError()], payload: {} });
         }
     };
@@ -93,7 +94,7 @@ export function createMcpServer(dependencies: InspectEntityDependencies): McpSer
             try {
                 track({ name: 'mcp_initialize', params: {} });
             } catch (error) {
-                logger.warn(ns('analytics track failed'), { error, tool: 'initialize' });
+                logger.warn(ns('analytics track failed'), { error: toLoggedError(error), tool: 'initialize' });
             }
         };
     }
