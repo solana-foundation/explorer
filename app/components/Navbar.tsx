@@ -22,7 +22,6 @@ export function Navbar({ children }: INavbarProps) {
     const [navOpened, navHandlers] = useDisclosure(false);
     const homePath = useClusterPath({ pathname: '/' });
     const featureGatesPath = useClusterPath({ pathname: '/feature-gates' });
-    const mcpDocsPath = useClusterPath({ pathname: '/mcp/docs' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const selectedLayoutSegments = useSelectedLayoutSegments();
@@ -60,12 +59,6 @@ export function Navbar({ children }: INavbarProps) {
                         <NavbarItem>
                             <NavbarLink asChild active={selectedLayoutSegment === 'feature-gates'}>
                                 <Link href={featureGatesPath}>Feature Gates</Link>
-                            </NavbarLink>
-                        </NavbarItem>
-                        <NavbarItem>
-                            {/* `/mcp` itself is the MCP endpoint (route.ts), so the only page under the segment is the docs. */}
-                            <NavbarLink asChild active={selectedLayoutSegment === 'mcp'}>
-                                <Link href={mcpDocsPath}>MCP</Link>
                             </NavbarLink>
                         </NavbarItem>
                         <NavbarItem>
