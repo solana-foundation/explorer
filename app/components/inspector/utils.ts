@@ -99,14 +99,18 @@ export function intoTransactionInstructionFromVersionedMessage(
 
     // When we're deserializing Squads vault transactions, an "outer" programIdIndex can be found in the addressTableLookups
     // (You never need to lookup outer programIds for normal messages)
-    let programId: PublicKey | undefined;
-    if (compiledInstruction.programIdIndex < originalMessage.staticAccountKeys.length) {
-        programId = originalMessage.staticAccountKeys.at(compiledInstruction.programIdIndex);
-    } else {
-        // This is only needed for Squads vault transactions, in normal messages, outer program IDs cannot be in addressTableLookups
-        const lookupIndex = compiledInstruction.programIdIndex - originalMessage.staticAccountKeys.length;
-        programId = addressTableLookups[lookupIndex].accountKey;
-    }
+    //
+    // Resolved through the same helper the account metas use. Indexing
+    // addressTableLookups directly is wrong: an account key index past the
+    // static keys addresses the flattened writable-then-readonly accounts, not
+    // the tables. The two only line up when every table contributes exactly one
+    // index, so a single table with two entries already resolves to the wrong
+    // table or, past the end, throws.
+    const { lookup: programId } = findLookupAddressByIndex(
+        compiledInstruction.programIdIndex,
+        originalMessage,
+        lookupAccounts,
+    );
     if (!programId) throw new Error('Program ID not found');
 
     const accountMetas = fillAccountMetas(accountKeyIndexes, originalMessage, lookupAccounts);
