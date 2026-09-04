@@ -127,7 +127,11 @@ export function getReservedComputeUnits({
 
     for (const config of COMPUTE_UNIT_RESERVE_CONFIGS) {
         const activationEpoch = config.activations[cluster];
-        if (activationEpoch <= epochNumber && activationEpoch > highestActivationEpoch) {
+        // `>=`, not `>`: configs are listed oldest first, so when two share an
+        // activation epoch the later one is the current behaviour. Simd296
+        // activates every config at epoch 0, and a strict `>` left it pinned to
+        // the initial config forever.
+        if (activationEpoch <= epochNumber && activationEpoch >= highestActivationEpoch) {
             applicableConfig = config;
             highestActivationEpoch = activationEpoch;
         }
