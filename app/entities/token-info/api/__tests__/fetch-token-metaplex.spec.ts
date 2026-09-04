@@ -30,15 +30,11 @@ vi.mock('@metaplex-foundation/mpl-token-metadata', async () => {
     };
 });
 
-vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    return {
-        ...actual,
-        createSolanaRpc: vi.fn(() => ({
-            getMultipleAccounts: (...args: unknown[]) => ({ send: () => mocks.getMultipleAccounts(...args) }),
-        })),
-    };
-});
+vi.mock('@entities/cluster/@x/token-info', () => ({
+    getRpc: vi.fn(() => ({
+        getMultipleAccounts: (...args: unknown[]) => ({ send: () => mocks.getMultipleAccounts(...args) }),
+    })),
+}));
 
 vi.mock('@/app/entities/nft/lib/umi', () => ({ getUmi: mocks.getUmi }));
 // The off-chain JSON is read through the metadata proxy's hardened fetcher, in process.

@@ -1,3 +1,4 @@
+import { getRpc } from '@entities/cluster/@x/token-info';
 import { getUmi } from '@entities/nft/@x/token-info';
 import {
     findMetadataPda,
@@ -6,7 +7,7 @@ import {
     TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import { publicKey, unwrapOption } from '@metaplex-foundation/umi';
-import { address, createSolanaRpc } from '@solana/kit';
+import { address } from '@solana/kit';
 import { fetchAll } from '@utils/fetch-all';
 
 import { MAX_SIZE, USER_AGENT } from '@/app/api/metadata/proxy/config';
@@ -79,7 +80,7 @@ async function fetchDecimals(
     const decimals = new Map<string, number>();
     if (mints.length === 0) return decimals;
 
-    const rpc = createSolanaRpc(rpcEndpoint);
+    const rpc = getRpc(rpcEndpoint);
 
     await Promise.all(
         chunk(mints, ACCOUNTS_CHUNK_SIZE).map(async batch => {
