@@ -5,6 +5,7 @@ import {
     type ClusterSelection,
     clusterSelection,
     clusterUrl,
+    modifyUrl,
     type ServerCluster,
     serverClusterUrl,
 } from '../cluster';
@@ -37,6 +38,32 @@ describe('ClusterSelection', () => {
         const wrong: ClusterSelection = { cluster: Cluster.Custom };
 
         expect(wrong.cluster).toBe(Cluster.Custom);
+    });
+});
+
+describe('modifyUrl', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it('should return the url unchanged when hostname is localhost', () => {
+        vi.stubGlobal('location', { hostname: 'localhost' });
+
+        expect(modifyUrl('https://api.mainnet.solana.com')).toBe('https://api.mainnet.solana.com');
+        expect(modifyUrl('https://api.devnet.solana.com')).toBe('https://api.devnet.solana.com');
+    });
+
+    it('should replace "api" with "explorer-api" when hostname is not localhost', () => {
+        vi.stubGlobal('location', { hostname: 'explorer.solana.com' });
+
+        expect(modifyUrl('https://api.mainnet.solana.com')).toBe('https://explorer-api.mainnet.solana.com');
+        expect(modifyUrl('https://api.devnet.solana.com')).toBe('https://explorer-api.devnet.solana.com');
+    });
+
+    it('should return the url unchanged when it has no "api" and hostname is not localhost', () => {
+        vi.stubGlobal('location', { hostname: 'explorer.solana.com' });
+
+        expect(modifyUrl('https://simd-0296.surfnet.dev:8899')).toBe('https://simd-0296.surfnet.dev:8899');
     });
 });
 

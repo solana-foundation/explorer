@@ -46,12 +46,12 @@ export function clusterName(cluster: Cluster): string {
     }
 }
 
-export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
+export const MAINNET_BETA_URL = 'https://api.mainnet.solana.com';
 export const TESTNET_URL = 'https://api.testnet.solana.com';
 export const DEVNET_URL = 'https://api.devnet.solana.com';
 export const SIMD296_URL = 'https://simd-0296.surfnet.dev:8899';
 
-// On localhost we use the default public Solana RPCs (e.g. api.mainnet-beta.solana.com)
+// On localhost we use the default public Solana RPCs (e.g. api.mainnet.solana.com)
 // unless custom ones (server + client) are specified via env vars.
 // In deployed environments (production/preview) we rewrite to the explorer-api subdomain
 // so the request goes to our own RPC instance.
@@ -65,7 +65,7 @@ export const SIMD296_URL = 'https://simd-0296.surfnet.dev:8899';
 // so there is no need to set it.
 // For custom RPCs that differ from the defaults you must set both:
 // NEXT_PUBLIC_*_RPC_URL (client) and *_RPC_URL (server).
-const modifyUrl = (url: string): string => {
+export const modifyUrl = (url: string): string => {
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
         return url;
     } else {
