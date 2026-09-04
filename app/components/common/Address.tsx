@@ -166,7 +166,7 @@ export function Address({
     );
 
     return (
-        <span ref={visibilityRef} className="block w-full">
+        <span ref={visibilityRef} className="block w-full min-w-0">
             <div ref={rowRef} className={rowVariants({ alignRight: Boolean(alignRight) })} aria-label={ariaLabel}>
                 {/* Hidden span for measuring the natural text width — absolutely positioned so it doesn't affect layout */}
                 {isMidTruncateCandidate && (
