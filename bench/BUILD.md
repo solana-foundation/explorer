@@ -1,10 +1,10 @@
-> Sizes are gzipped, approximate, and rounded to reduce build-output noise. Next.js 16 (Turbopack) no longer prints sizes to stdout; these are derived by gzipping the first-load chunks listed in `.next/diagnostics/route-bundle-stats.json`. `Size` is First Load JS minus the chunks shared by all routes. Routes with no client JS (e.g. API routes) show `—`.
+> Sizes are gzipped, approximate, and rounded to reduce build-output noise. Next.js 16 (Turbopack) no longer prints sizes to stdout; these are derived by gzipping the first-load chunks listed in `.next/diagnostics/route-bundle-stats.json`. `Size` is First Load JS minus the chunks shared by all routes. Routes with no client JS (e.g. API routes) show `—`. A cell keeps its previous value while the fresh bytes round within one step of it, so edge-of-rounding builds stay stable.
 
 | Type | Route | Size | First Load JS |
 |------|-------|------|---------------|
 | Static | `/` | 130 kB | 530 kB |
 | Static | `/_not-found` | 0 B | 410 kB |
-| Dynamic | `/address/[address]` | 500 kB | 900 kB |
+| Dynamic | `/address/[address]` | 520 kB | 920 kB |
 | Dynamic | `/address/[address]/account-data` | 510 kB | 920 kB |
 | Dynamic | `/address/[address]/anchor-account` | 470 kB | 870 kB |
 | Dynamic | `/address/[address]/anchor-program` | 470 kB | 870 kB |
@@ -51,7 +51,7 @@
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
-| Dynamic | `/block/[slot]` | 260 kB | 660 kB |
+| Dynamic | `/block/[slot]` | 240 kB | 640 kB |
 | Dynamic | `/block/[slot]/accounts` | 250 kB | 650 kB |
 | Dynamic | `/block/[slot]/programs` | 250 kB | 650 kB |
 | Dynamic | `/block/[slot]/rewards` | 250 kB | 650 kB |
@@ -63,6 +63,6 @@
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Static | `/opengraph-image.png` | — | — |
 | Static | `/tos` | 880 B | 410 kB |
-| Dynamic | `/tx/[signature]` | 510 kB | 910 kB |
+| Dynamic | `/tx/[signature]` | 530 kB | 930 kB |
 | Dynamic | `/tx/[signature]/inspect` | 440 kB | 840 kB |
 | Static | `/tx/inspector` | 440 kB | 840 kB |
