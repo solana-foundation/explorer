@@ -1,10 +1,5 @@
-import {
-    type AddressLookupTableAccount,
-    type Connection,
-    Keypair,
-    PublicKey,
-    type VersionedMessage,
-} from '@solana/web3.js';
+import type { SolanaRpc } from '@entities/cluster';
+import { type AddressLookupTableAccount, Keypair, PublicKey, type VersionedMessage } from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { Cluster } from '@utils/cluster';
@@ -16,6 +11,7 @@ import { createV1TransactionBytes, RECIPIENT } from '@/app/entities/transaction-
 import { alloc, toBase64, writeU64LE, writeUint32LE } from '@/app/shared/lib/bytes';
 import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { bridgeV1MessageBytes } from '@/app/shared/lib/v1-message-bridge';
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 
 // Mock VersionedTransaction so we don't need a real message header
 vi.mock('@solana/web3.js', async () => {
@@ -23,7 +19,7 @@ vi.mock('@solana/web3.js', async () => {
     return {
         ...actual,
         VersionedTransaction: vi.fn().mockImplementation(function (msg: unknown) {
-            return { message: msg };
+            return { message: msg, serialize: () => new Uint8Array(0) };
         }),
     };
 });
@@ -59,19 +55,19 @@ describe('simulateTransaction', () => {
         ];
         mockParseProgramLogs.mockReturnValue(mockLogs);
 
-        const result = await simulate(createMockConnection());
+        const result = await simulate(createMockRpc());
 
         expect(result).toMatchObject({ error: undefined, logs: mockLogs });
     });
 
     it('should return units consumed from simulation response', async () => {
-        const result = await simulate(createMockConnection());
+        const result = await simulate(createMockRpc());
 
         expect(result).toMatchObject({ unitsConsumed: 150 });
     });
 
     it('should compute SOL balance changes from simulation data', async () => {
-        const result = await simulate(createMockConnection());
+        const result = await simulate(createMockRpc());
 
         expect(result.solBalanceChanges).toHaveLength(2);
 
@@ -90,7 +86,7 @@ describe('simulateTransaction', () => {
             preBalances: [2_000_000_000, 4_000_000_000],
         };
 
-        const result = await simulate(createMockConnection(), undefined, accountBalances);
+        const result = await simulate(createMockRpc(), undefined, accountBalances);
 
         const change1 = result.solBalanceChanges?.find(c => c.pubkey.equals(ACCOUNT_KEY_1));
         expect(change1?.delta.eq(new BN(3_000_000_000))).toBe(true);
@@ -100,33 +96,33 @@ describe('simulateTransaction', () => {
     });
 
     it('should return undefined solBalanceChanges when all deltas are zero', async () => {
-        const connection = createMockConnection({
-            getMultipleParsedAccounts: vi.fn().mockResolvedValue({
+        const rpc = createMockRpc({
+            getMultipleAccounts: rpcCall({
                 value: [
-                    { data: {}, lamports: 2_000_000_000, owner: new PublicKey(SYSTEM_PROGRAM_ADDRESS) },
-                    { data: {}, lamports: 500_000_000, owner: new PublicKey(SYSTEM_PROGRAM_ADDRESS) },
+                    { data: {}, lamports: 2_000_000_000n, owner: SYSTEM_PROGRAM_ADDRESS },
+                    { data: {}, lamports: 500_000_000n, owner: SYSTEM_PROGRAM_ADDRESS },
                 ],
             }),
         });
 
-        const result = await simulate(connection);
+        const result = await simulate(rpc);
 
         expect(result.solBalanceChanges).toBeUndefined();
     });
 
     it('should throw when simulation response has no accounts', async () => {
-        const connection = createMockConnection({
-            simulateTransaction: vi.fn().mockResolvedValue({
+        const rpc = createMockRpc({
+            simulateTransaction: rpcCall({
                 value: { accounts: null, err: null, logs: [] },
             }),
         });
 
-        await expect(simulate(connection)).rejects.toThrow('RPC did not return account data after simulation');
+        await expect(simulate(rpc)).rejects.toThrow('RPC did not return account data after simulation');
     });
 
     it('should return raw error string when simulation returns error with empty logs', async () => {
-        const connection = createMockConnection({
-            simulateTransaction: vi.fn().mockResolvedValue(
+        const rpc = createMockRpc({
+            simulateTransaction: rpcCall(
                 createSimulationResponse({
                     err: 'AccountNotFound',
                     logs: [],
@@ -134,7 +130,7 @@ describe('simulateTransaction', () => {
             ),
         });
 
-        const result = await simulate(connection);
+        const result = await simulate(rpc);
 
         expect(result).toMatchObject({ error: 'AccountNotFound', logs: undefined });
     });
@@ -151,8 +147,8 @@ describe('simulateTransaction', () => {
         ];
         mockParseProgramLogs.mockReturnValue(mockLogs);
 
-        const connection = createMockConnection({
-            simulateTransaction: vi.fn().mockResolvedValue(
+        const rpc = createMockRpc({
+            simulateTransaction: rpcCall(
                 createSimulationResponse({
                     err: { InstructionError: [0, 'Custom'] },
                     logs: [`Program ${SYSTEM_PROGRAM_ADDRESS} invoke [1]`, 'Program failed'],
@@ -160,27 +156,50 @@ describe('simulateTransaction', () => {
             ),
         });
 
-        const result = await simulate(connection);
+        const result = await simulate(rpc);
 
         expect(result).toMatchObject({ error: 'TransactionError', logs: mockLogs });
     });
 
+    it('should replace bigints inside a transaction error with numbers', async () => {
+        mockParseProgramLogs.mockReturnValue([]);
+
+        const rpc = createMockRpc({
+            simulateTransaction: rpcCall(
+                createSimulationResponse({
+                    err: { InstructionError: [2n, { Custom: 6001n }] },
+                    logs: ['Program failed'],
+                }),
+            ),
+        });
+
+        await simulate(rpc);
+
+        expect(mockParseProgramLogs).toHaveBeenCalledWith(
+            expect.any(Array),
+            { InstructionError: [2, { Custom: 6001 }] },
+            Cluster.Devnet,
+        );
+    });
+
     it('should pass logs, error, and cluster to parseProgramLogs', async () => {
-        const connection = createMockConnection();
-        await simulate(connection);
+        const rpc = createMockRpc();
+        await simulate(rpc);
 
         expect(mockParseProgramLogs).toHaveBeenCalledWith(expect.any(Array), null, Cluster.Devnet);
     });
 
     it('should request simulation with replaceRecentBlockhash and account addresses', async () => {
-        const connection = createMockConnection();
-        await simulate(connection);
+        const rpc = createMockRpc();
+        await simulate(rpc);
 
-        expect(connection.simulateTransaction).toHaveBeenCalledWith(expect.anything(), {
+        expect(rpc.simulateTransaction).toHaveBeenCalledWith(expect.any(String), {
             accounts: {
-                addresses: [ACCOUNT_KEY_1.toBase58(), ACCOUNT_KEY_2.toBase58()],
+                addresses: [toKitAddress(ACCOUNT_KEY_1), toKitAddress(ACCOUNT_KEY_2)],
                 encoding: 'base64',
             },
+            commitment: 'confirmed',
+            encoding: 'base64',
             replaceRecentBlockhash: true,
         });
     });
@@ -211,21 +230,30 @@ describe('simulateTransaction', () => {
         // Addresses start at offset 56
         buf.set(lookupAddress.toBytes(), 56);
 
-        const connection = createMockConnection({
-            getMultipleAccountsInfo: vi.fn().mockResolvedValue([
-                {
-                    data: buf,
-                    executable: false,
-                    lamports: 1,
-                    owner: new PublicKey('AddressLookupTab1e1111111111111111111111111'),
-                    rentEpoch: 0,
-                },
-            ]),
-        });
+        const rpc = createMockRpc();
+        // The first getMultipleAccounts call resolves the lookup table (base64); the second
+        // fetches the parsed pre-simulation accounts and falls through to the factory default.
+        vi.mocked(rpc.getMultipleAccounts).mockReturnValueOnce(
+            sendResult({
+                value: [
+                    {
+                        data: [toBase64(buf), 'base64'],
+                        executable: false,
+                        lamports: 1n,
+                        owner: 'AddressLookupTab1e1111111111111111111111111',
+                        rentEpoch: 0n,
+                        space: 88n,
+                    },
+                ],
+            }),
+        );
 
-        const result = await simulate(connection, message);
+        const result = await simulate(rpc, message);
 
-        expect(connection.getMultipleAccountsInfo).toHaveBeenCalledWith([lookupTableKey]);
+        expect(rpc.getMultipleAccounts).toHaveBeenCalledWith(
+            [toKitAddress(lookupTableKey)],
+            expect.objectContaining({ encoding: 'base64' }),
+        );
         // The resolved keys are what names each instruction's program downstream. A lookup-table address
         // appears only here, never in `staticAccountKeys`, so reading the program id from the message
         // alone would name the wrong program.
@@ -233,11 +261,11 @@ describe('simulateTransaction', () => {
     });
 
     it('should return epoch from epochInfo', async () => {
-        const connection = createMockConnection({
-            getEpochInfo: vi.fn().mockResolvedValue({ epoch: 42 }),
+        const rpc = createMockRpc({
+            getEpochInfo: rpcCall({ epoch: 42n }),
         });
 
-        const result = await simulate(connection);
+        const result = await simulate(rpc);
 
         expect(result.epoch).toBe(42n);
     });
@@ -247,12 +275,12 @@ describe('simulateTransaction', () => {
         const MINT_KEY = MOCK_MINT;
         const OWNER_KEY = MOCK_OWNER;
 
-        function setupTokenAccountConnection(preAmount: bigint, postAmount: bigint, decimals = 6): Connection {
+        function setupTokenAccountRpc(preAmount: bigint, postAmount: bigint, decimals = 6): SolanaRpc {
             const postTokenAccountBase64 = encodeTokenAccountBase64(MINT_KEY, OWNER_KEY, postAmount);
             const mintBase64 = encodeMintAccountBase64(decimals);
 
-            return createMockConnection({
-                getMultipleParsedAccounts: vi.fn().mockResolvedValue({
+            return createMockRpc({
+                getMultipleAccounts: rpcCall({
                     value: [
                         {
                             data: {
@@ -270,9 +298,10 @@ describe('simulateTransaction', () => {
                                     type: 'account',
                                 },
                                 program: 'spl-token',
+                                space: 165n,
                             },
-                            lamports: 2_039_280,
-                            owner: new PublicKey(TOKEN_PROGRAM_ADDRESS),
+                            lamports: 2_039_280n,
+                            owner: TOKEN_PROGRAM_ADDRESS,
                         },
                         {
                             data: {
@@ -281,28 +310,29 @@ describe('simulateTransaction', () => {
                                     type: 'mint',
                                 },
                                 program: 'spl-token',
+                                space: 82n,
                             },
-                            lamports: 1_000_000,
-                            owner: new PublicKey(TOKEN_PROGRAM_ADDRESS),
+                            lamports: 1_000_000n,
+                            owner: TOKEN_PROGRAM_ADDRESS,
                         },
                     ],
                 }),
-                simulateTransaction: vi.fn().mockResolvedValue({
+                simulateTransaction: rpcCall({
                     value: {
                         accounts: [
                             {
                                 data: [postTokenAccountBase64, 'base64'],
                                 executable: false,
-                                lamports: 2_039_280,
+                                lamports: 2_039_280n,
                                 owner: TOKEN_PROGRAM_ADDRESS,
-                                rentEpoch: 0,
+                                rentEpoch: 0n,
                             },
                             {
                                 data: [mintBase64, 'base64'],
                                 executable: false,
-                                lamports: 1_000_000,
+                                lamports: 1_000_000n,
                                 owner: TOKEN_PROGRAM_ADDRESS,
-                                rentEpoch: 0,
+                                rentEpoch: 0n,
                             },
                         ],
                         err: null,
@@ -310,7 +340,7 @@ describe('simulateTransaction', () => {
                             `Program ${TOKEN_PROGRAM_ADDRESS} invoke [1]`,
                             `Program ${TOKEN_PROGRAM_ADDRESS} success`,
                         ],
-                        unitsConsumed: 200,
+                        unitsConsumed: 200n,
                     },
                 }),
             });
@@ -327,9 +357,9 @@ describe('simulateTransaction', () => {
         it('should decode post-simulation token account data and return token balance data', async () => {
             const preAmount = 1_000_000n;
             const postAmount = 2_500_000n;
-            const connection = setupTokenAccountConnection(preAmount, postAmount);
+            const rpc = setupTokenAccountRpc(preAmount, postAmount);
 
-            const result = await simulate(connection, createTokenMessage());
+            const result = await simulate(rpc, createTokenMessage());
 
             expect(result).toMatchObject({ error: undefined });
             if (!result.tokenBalanceData) throw new Error('expected tokenBalanceData');
@@ -348,9 +378,9 @@ describe('simulateTransaction', () => {
         });
 
         it('should handle token accounts with zero amount', async () => {
-            const connection = setupTokenAccountConnection(0n, 0n);
+            const rpc = setupTokenAccountRpc(0n, 0n);
 
-            const result = await simulate(connection, createTokenMessage());
+            const result = await simulate(rpc, createTokenMessage());
 
             expect(result).toMatchObject({ error: undefined });
             expect(result.tokenBalanceData?.postTokenBalances[0]).toMatchObject({ uiTokenAmount: { amount: '0' } });
@@ -358,9 +388,9 @@ describe('simulateTransaction', () => {
 
         it('should handle large token amounts without overflow', async () => {
             const largeAmount = 9_000_000_000_000_000n;
-            const connection = setupTokenAccountConnection(0n, largeAmount);
+            const rpc = setupTokenAccountRpc(0n, largeAmount);
 
-            const result = await simulate(connection, createTokenMessage());
+            const result = await simulate(rpc, createTokenMessage());
 
             expect(result).toMatchObject({ error: undefined });
             expect(result.tokenBalanceData?.postTokenBalances[0]).toMatchObject({
@@ -375,118 +405,113 @@ describe('v1 transactions', () => {
         return bridgeV1MessageBytes(parseTransactionBytes(createV1TransactionBytes(config)).messageBytes).message;
     }
 
-    function connectionWithFeature(activated: boolean, overrides?: Partial<Connection>): Connection {
-        return createMockConnection({
-            getAccountInfo: vi.fn().mockResolvedValue({
-                data: Buffer.from(activated ? [1, 42, 0, 0, 0, 0, 0, 0, 0] : new Uint8Array(9)),
+    function rpcWithFeature(activated: boolean, overrides?: Partial<Record<string, unknown>>): SolanaRpc {
+        return createMockRpc({
+            getAccountInfo: rpcCall({
+                value: {
+                    data: [
+                        toBase64(activated ? new Uint8Array([1, 42, 0, 0, 0, 0, 0, 0, 0]) : new Uint8Array(9)),
+                        'base64',
+                    ],
+                },
             }),
             ...overrides,
-        } as Partial<Connection>);
+        });
     }
 
     it('should name the feature gate when the node rejects the simulation request outright', async () => {
-        const connection = connectionWithFeature(false, {
-            simulateTransaction: vi.fn().mockRejectedValue(new Error('invalid transaction: UnsupportedVersion')),
-        } as Partial<Connection>);
+        const rpc = rpcWithFeature(false, {
+            simulateTransaction: rpcReject(new Error('invalid transaction: UnsupportedVersion')),
+        });
 
-        await expect(simulate(connection, v1Message())).rejects.toThrow('does not support v1 transactions');
+        await expect(simulate(rpc, v1Message())).rejects.toThrow('does not support v1 transactions');
     });
 
     it('should name the feature gate when the node returns UnsupportedVersion as a simulation error', async () => {
-        const connection = connectionWithFeature(false, {
-            simulateTransaction: vi
-                .fn()
-                .mockResolvedValue(createSimulationResponse({ err: 'UnsupportedVersion', logs: [] })),
-        } as Partial<Connection>);
+        const rpc = rpcWithFeature(false, {
+            simulateTransaction: rpcCall(createSimulationResponse({ err: 'UnsupportedVersion', logs: [] })),
+        });
 
-        const result = await simulate(connection, v1Message());
+        const result = await simulate(rpc, v1Message());
 
         expect(result.error).toContain('does not support v1 transactions');
     });
 
     it('should surface the original failure when the cluster does support v1', async () => {
-        const connection = connectionWithFeature(true, {
-            simulateTransaction: vi.fn().mockRejectedValue(new Error('rpc down')),
-        } as Partial<Connection>);
+        const rpc = rpcWithFeature(true, {
+            simulateTransaction: rpcReject(new Error('rpc down')),
+        });
 
-        await expect(simulate(connection, v1Message())).rejects.toThrow('rpc down');
+        await expect(simulate(rpc, v1Message())).rejects.toThrow('rpc down');
     });
 
     it('should surface the original failure when the feature gate cannot be read', async () => {
-        const connection = createMockConnection({
-            getAccountInfo: vi.fn().mockRejectedValue(new Error('gate unreadable')),
-            simulateTransaction: vi.fn().mockRejectedValue(new Error('rpc down')),
-        } as Partial<Connection>);
+        const rpc = createMockRpc({
+            getAccountInfo: rpcReject(new Error('gate unreadable')),
+            simulateTransaction: rpcReject(new Error('rpc down')),
+        });
 
-        await expect(simulate(connection, v1Message())).rejects.toThrow('rpc down');
+        await expect(simulate(rpc, v1Message())).rejects.toThrow('rpc down');
     });
 
     it('should name the feature gate when UnsupportedVersion arrives alongside logs', async () => {
-        const connection = connectionWithFeature(false, {
-            simulateTransaction: vi
-                .fn()
-                .mockResolvedValue(
-                    createSimulationResponse({ err: 'UnsupportedVersion', logs: ['Program log: something'] }),
-                ),
-        } as Partial<Connection>);
+        const rpc = rpcWithFeature(false, {
+            simulateTransaction: rpcCall(
+                createSimulationResponse({ err: 'UnsupportedVersion', logs: ['Program log: something'] }),
+            ),
+        });
 
-        const result = await simulate(connection, v1Message());
+        const result = await simulate(rpc, v1Message());
 
         expect(result.error).toContain('does not support v1 transactions');
     });
 
     it('should keep the original failure as the cause of the feature gate error', async () => {
         const cause = new Error('429 Too Many Requests');
-        const connection = connectionWithFeature(false, {
-            simulateTransaction: vi.fn().mockRejectedValue(cause),
-        } as Partial<Connection>);
+        const rpc = rpcWithFeature(false, {
+            simulateTransaction: rpcReject(cause),
+        });
 
-        await expect(simulate(connection, v1Message())).rejects.toMatchObject({ cause });
+        await expect(simulate(rpc, v1Message())).rejects.toMatchObject({ cause });
     });
 
     it('should not read the feature gate when a v1 simulation succeeds', async () => {
-        const connection = connectionWithFeature(true);
+        const rpc = rpcWithFeature(true);
 
-        await simulate(connection, v1Message());
+        await simulate(rpc, v1Message());
 
-        expect(connection.simulateTransaction).toHaveBeenCalled();
-        expect(connection.getAccountInfo).not.toHaveBeenCalled();
+        expect(rpc.simulateTransaction).toHaveBeenCalled();
+        expect(rpc.getAccountInfo).not.toHaveBeenCalled();
     });
 
     describe('MaxLoadedAccountsDataSizeExceeded', () => {
-        const OWNER = new PublicKey(SYSTEM_PROGRAM_ADDRESS);
         const UPGRADEABLE_LOADER = new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111');
         const PROGRAM_DATA_KEY = Keypair.generate().publicKey;
 
         // The fee payer is empty, the recipient does not exist, and the program holds 74,800 bytes:
         // the runtime loads 74,800 bytes of data and charges 64 bytes for each of the two accounts.
         const PARSED_ACCOUNTS = [
-            { data: Buffer.alloc(0), owner: OWNER },
-            undefined,
-            { data: { parsed: {}, program: 'memo', space: 74_800 }, owner: OWNER },
+            { data: ['', 'base64'], owner: SYSTEM_PROGRAM_ADDRESS },
+            null,
+            { data: { parsed: {}, program: 'memo', space: 74_800n }, owner: SYSTEM_PROGRAM_ADDRESS },
         ];
 
-        function connectionRejectingForSize(
-            accounts: unknown[] = PARSED_ACCOUNTS,
-            programData: unknown[] = [],
-        ): Connection {
-            return connectionWithFeature(true, {
-                getMultipleParsedAccounts: vi
+        function rpcRejectingForSize(accounts: unknown[] = PARSED_ACCOUNTS, programData: unknown[] = []): SolanaRpc {
+            return rpcWithFeature(true, {
+                getMultipleAccounts: vi
                     .fn()
-                    .mockResolvedValueOnce({ value: accounts })
-                    .mockResolvedValue({ value: programData }),
-                simulateTransaction: vi
-                    .fn()
-                    .mockResolvedValue(
-                        createSimulationResponse({ err: 'MaxLoadedAccountsDataSizeExceeded', logs: [] }),
-                    ),
-            } as Partial<Connection>);
+                    .mockReturnValueOnce(sendResult({ value: accounts }))
+                    .mockReturnValue(sendResult({ value: programData })),
+                simulateTransaction: rpcCall(
+                    createSimulationResponse({ err: 'MaxLoadedAccountsDataSizeExceeded', logs: [] }),
+                ),
+            });
         }
 
         it('should report the size the runtime loaded against the limit the message sets', async () => {
             const message = v1Message({ loadedAccountsDataSizeLimit: 74_900 });
 
-            const result = await simulate(connectionRejectingForSize(), message);
+            const result = await simulate(rpcRejectingForSize(), message);
 
             expect(result.error).toContain('this transaction loads 74,928 bytes');
             expect(result.error).toContain('74,800 bytes of account data');
@@ -496,18 +521,18 @@ describe('v1 transactions', () => {
 
         it('should count the program data account of an upgradeable program', async () => {
             const programAccount = {
-                data: { parsed: { info: { programData: PROGRAM_DATA_KEY.toBase58() } }, program: 'x', space: 36 },
+                data: { parsed: { info: { programData: PROGRAM_DATA_KEY.toBase58() } }, program: 'x', space: 36n },
                 executable: true,
-                owner: UPGRADEABLE_LOADER,
+                owner: UPGRADEABLE_LOADER.toBase58(),
             };
             // The first lookup returns the message's accounts, the second the program data account
             // behind the upgradeable program, which the message never lists
-            const connection = connectionRejectingForSize(
-                [{ data: Buffer.alloc(0), owner: OWNER }, programAccount],
-                [{ data: { parsed: {}, program: 'x', space: 500_000 }, owner: UPGRADEABLE_LOADER }],
+            const rpc = rpcRejectingForSize(
+                [{ data: ['', 'base64'], owner: SYSTEM_PROGRAM_ADDRESS }, programAccount],
+                [{ data: { parsed: {}, program: 'x', space: 500_000n }, owner: UPGRADEABLE_LOADER.toBase58() }],
             );
 
-            const result = await simulate(connection, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
+            const result = await simulate(rpc, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
 
             // 500,036 bytes of data across three accounts, each charged 64 bytes of metadata
             expect(result.error).toContain('this transaction loads 500,228 bytes');
@@ -516,18 +541,18 @@ describe('v1 transactions', () => {
 
         it('should count a program data account the message lists only once', async () => {
             const programAccount = {
-                data: { parsed: { info: { programData: RECIPIENT } }, program: 'x', space: 36 },
+                data: { parsed: { info: { programData: RECIPIENT } }, program: 'x', space: 36n },
                 executable: true,
-                owner: UPGRADEABLE_LOADER,
+                owner: UPGRADEABLE_LOADER.toBase58(),
             };
             // RECIPIENT is the message's second account key, so the program's program data account
             // is already among the accounts the first lookup returned
-            const connection = connectionRejectingForSize([
+            const rpc = rpcRejectingForSize([
                 programAccount,
-                { data: { parsed: {}, program: 'x', space: 500_000 }, owner: UPGRADEABLE_LOADER },
+                { data: { parsed: {}, program: 'x', space: 500_000n }, owner: UPGRADEABLE_LOADER.toBase58() },
             ]);
 
-            const result = await simulate(connection, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
+            const result = await simulate(rpc, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
 
             // 500,036 bytes of data across two accounts, each charged 64 bytes of metadata
             expect(result.error).toContain('this transaction loads 500,164 bytes');
@@ -535,22 +560,23 @@ describe('v1 transactions', () => {
         });
 
         it('should not look up program data for a non-executable loader-owned account', async () => {
-            const connection = connectionRejectingForSize([
-                { data: Buffer.alloc(0), owner: OWNER },
-                { data: { parsed: {}, program: 'x', space: 500_000 }, executable: false, owner: UPGRADEABLE_LOADER },
+            const rpc = rpcRejectingForSize([
+                { data: ['', 'base64'], owner: SYSTEM_PROGRAM_ADDRESS },
+                {
+                    data: { parsed: {}, program: 'x', space: 500_000n },
+                    executable: false,
+                    owner: UPGRADEABLE_LOADER.toBase58(),
+                },
             ]);
 
-            const result = await simulate(connection, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
+            const result = await simulate(rpc, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
 
-            expect(connection.getMultipleParsedAccounts).toHaveBeenCalledTimes(1);
+            expect(rpc.getMultipleAccounts).toHaveBeenCalledTimes(1);
             expect(result.error).toContain('this transaction loads 500,128 bytes');
         });
 
         it('should report the size as a floor when the accounts it can see fit under the limit', async () => {
-            const result = await simulate(
-                connectionRejectingForSize(),
-                v1Message({ loadedAccountsDataSizeLimit: 200_000 }),
-            );
+            const result = await simulate(rpcRejectingForSize(), v1Message({ loadedAccountsDataSizeLimit: 200_000 }));
 
             expect(result.error).toContain('this transaction loads at least 74,928 bytes');
             expect(result.error).toContain('within the 200,000 byte limit set in the v1 message config');
@@ -559,83 +585,103 @@ describe('v1 transactions', () => {
         });
 
         it('should explain the failure even when the RPC returns it alongside logs', async () => {
-            const connection = connectionWithFeature(true, {
-                getMultipleParsedAccounts: vi
+            const rpc = rpcWithFeature(true, {
+                getMultipleAccounts: vi
                     .fn()
-                    .mockResolvedValueOnce({ value: PARSED_ACCOUNTS })
-                    .mockResolvedValue({ value: [] }),
-                simulateTransaction: vi.fn().mockResolvedValue(
+                    .mockReturnValueOnce(sendResult({ value: PARSED_ACCOUNTS }))
+                    .mockReturnValue(sendResult({ value: [] })),
+                simulateTransaction: rpcCall(
                     createSimulationResponse({
                         err: 'MaxLoadedAccountsDataSizeExceeded',
                         logs: ['Program failed to load accounts'],
                     }),
                 ),
-            } as Partial<Connection>);
+            });
 
-            const result = await simulate(connection, v1Message({ loadedAccountsDataSizeLimit: 74_900 }));
+            const result = await simulate(rpc, v1Message({ loadedAccountsDataSizeLimit: 74_900 }));
 
             expect(result.error).toContain('this transaction loads 74,928 bytes');
         });
 
         it('should name the unset limit as zero when the message sets none', async () => {
-            const result = await simulate(connectionRejectingForSize(), v1Message());
+            const result = await simulate(rpcRejectingForSize(), v1Message());
 
             expect(result.error).toContain('this transaction loads 74,928 bytes');
             expect(result.error).toContain('sets no loaded accounts data size limit');
         });
 
         it('should surface the raw error when the program data lookup fails', async () => {
-            const connection = connectionRejectingForSize([
+            const rpc = rpcRejectingForSize([
                 {
-                    data: { parsed: { info: { programData: PROGRAM_DATA_KEY.toBase58() } }, program: 'x', space: 36 },
+                    data: { parsed: { info: { programData: PROGRAM_DATA_KEY.toBase58() } }, program: 'x', space: 36n },
                     executable: true,
-                    owner: UPGRADEABLE_LOADER,
+                    owner: UPGRADEABLE_LOADER.toBase58(),
                 },
             ]);
-            vi.mocked(connection.getMultipleParsedAccounts).mockRejectedValueOnce(new Error('rpc down'));
+            // The queue holds the message accounts first; this makes the second call — the
+            // program data lookup — fail.
+            vi.mocked(rpc.getMultipleAccounts).mockReturnValueOnce(sendError(new Error('rpc down')));
 
-            const result = await simulate(connection, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
+            const result = await simulate(rpc, v1Message({ loadedAccountsDataSizeLimit: 1024 }));
 
             expect(result.error).toBe('MaxLoadedAccountsDataSizeExceeded');
         });
 
         it('should surface the raw error for a non-v1 message', async () => {
-            const connection = createMockConnection({
-                simulateTransaction: vi
-                    .fn()
-                    .mockResolvedValue(
-                        createSimulationResponse({ err: 'MaxLoadedAccountsDataSizeExceeded', logs: [] }),
-                    ),
-            } as Partial<Connection>);
+            const rpc = createMockRpc({
+                simulateTransaction: rpcCall(
+                    createSimulationResponse({ err: 'MaxLoadedAccountsDataSizeExceeded', logs: [] }),
+                ),
+            });
 
-            const result = await simulate(connection);
+            const result = await simulate(rpc);
 
             expect(result.error).toBe('MaxLoadedAccountsDataSizeExceeded');
         });
     });
 
     it('should not read the feature gate for a non-v1 message', async () => {
-        const connection = connectionWithFeature(false);
+        const rpc = rpcWithFeature(false);
 
-        await simulate(connection);
+        await simulate(rpc);
 
-        expect(connection.getAccountInfo).not.toHaveBeenCalled();
+        expect(rpc.getAccountInfo).not.toHaveBeenCalled();
     });
 });
 
-function createMockConnection(overrides?: Partial<Connection>): Connection {
+/** A pending kit rpc call: `rpc.method(...)` returns an object whose `send()` resolves the result. */
+function sendResult(result: unknown) {
+    return { send: vi.fn().mockResolvedValue(result) } as never;
+}
+
+/** Mock of a kit rpc method whose `send()` resolves `result` on every call. */
+function rpcCall(result: unknown) {
+    return vi.fn().mockReturnValue(sendResult(result));
+}
+
+/** A pending kit rpc call whose `send()` rejects with `error`. */
+function sendError(error: Error) {
+    return { send: vi.fn().mockRejectedValue(error) } as never;
+}
+
+/** Mock of a kit rpc method whose `send()` rejects with `error` on every call. */
+function rpcReject(error: Error) {
+    return vi.fn().mockReturnValue(sendError(error));
+}
+
+function createMockRpc(overrides?: Partial<Record<string, unknown>>): SolanaRpc {
     return {
-        getEpochInfo: vi.fn().mockResolvedValue({ epoch: 100 }),
-        getMultipleAccountsInfo: vi.fn().mockResolvedValue([]),
-        getMultipleParsedAccounts: vi.fn().mockResolvedValue({
+        getAccountInfo: rpcCall({ value: null }),
+        getEpochInfo: rpcCall({ epoch: 100n }),
+        getMultipleAccounts: rpcCall({
             value: [
-                { data: {}, lamports: 1_000_000_000, owner: new PublicKey(SYSTEM_PROGRAM_ADDRESS) },
-                { data: {}, lamports: 1_000_000_000, owner: new PublicKey(SYSTEM_PROGRAM_ADDRESS) },
+                { data: {}, lamports: 1_000_000_000n, owner: SYSTEM_PROGRAM_ADDRESS },
+                { data: {}, lamports: 1_000_000_000n, owner: SYSTEM_PROGRAM_ADDRESS },
             ],
         }),
-        simulateTransaction: vi.fn().mockResolvedValue(createSimulationResponse()),
+        simulateTransaction: rpcCall(createSimulationResponse()),
         ...overrides,
-    } as unknown as Connection;
+    } as unknown as SolanaRpc;
 }
 
 // Partial<VersionedMessage> is too strict for test mocks — getAccountKeys
@@ -665,36 +711,36 @@ function createSimulationResponse(overrides?: Record<string, unknown>) {
                 {
                     data: ['', 'base64'],
                     executable: false,
-                    lamports: 2_000_000_000,
+                    lamports: 2_000_000_000n,
                     owner: SYSTEM_PROGRAM_ADDRESS,
-                    rentEpoch: 0,
+                    rentEpoch: 0n,
                 },
                 {
                     data: ['', 'base64'],
                     executable: false,
-                    lamports: 500_000_000,
+                    lamports: 500_000_000n,
                     owner: SYSTEM_PROGRAM_ADDRESS,
-                    rentEpoch: 0,
+                    rentEpoch: 0n,
                 },
             ],
             err: null,
             logs: [`Program ${SYSTEM_PROGRAM_ADDRESS} invoke [1]`, `Program ${SYSTEM_PROGRAM_ADDRESS} success`],
-            unitsConsumed: 150,
+            unitsConsumed: 150n,
             ...overrides,
         },
     };
 }
 
 function simulate(
-    connection: Connection,
+    rpc: SolanaRpc,
     message?: VersionedMessage,
     accountBalances?: { preBalances: number[]; postBalances: number[] },
 ) {
     return simulateTransaction({
         accountBalances,
         cluster: Cluster.Devnet,
-        connection,
         message: message ?? createMockMessage(),
+        rpc,
     });
 }
 

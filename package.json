@@ -77,6 +77,7 @@
         "@sentry/core": "10.39.0",
         "@sentry/nextjs": "10.39.0",
         "@solana-developers/helpers": "=2.8.1",
+        "@solana-program/address-lookup-table": "0.13.0",
         "@solana-program/compute-budget": "0.17.0",
         "@solana-program/memo": "0.12.0",
         "@solana-program/program-metadata": "0.8.0",

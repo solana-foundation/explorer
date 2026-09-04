@@ -1,4 +1,5 @@
-import type { AccountInfo, Connection, VersionedMessage } from '@solana/web3.js';
+import type { SolanaRpc } from '@entities/cluster';
+import type { VersionedMessage } from '@solana/web3.js';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -8,7 +9,7 @@ import {
     ALT_3_ADDRS,
     ALT_3_EXPECTED_ADDRESSES,
 } from '@/app/fixtures/address-lookup-tables';
-import { fromBase64 } from '@/app/shared/lib/bytes';
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 
 import { resolveAddressLookupTables } from '../resolve-address-lookup-tables';
 
@@ -17,18 +18,18 @@ const ALT_KEY_2 = Keypair.generate().publicKey;
 
 describe('resolveAddressLookupTables', () => {
     it('should return empty array when message has no lookups', async () => {
-        const connection = mockConnection([]);
-        const result = await resolveAddressLookupTables(connection, message([]));
+        const rpc = mockRpc([]);
+        const result = await resolveAddressLookupTables(rpc, message([]));
 
         expect(result).toEqual([]);
-        expect(connection.getMultipleAccountsInfo).not.toHaveBeenCalled();
+        expect(rpc.getMultipleAccounts).not.toHaveBeenCalled();
     });
 
     it('should resolve a single lookup table', async () => {
-        const connection = mockConnection([accountInfo(ALT_3_ADDRS)]);
+        const rpc = mockRpc([accountInfo(ALT_3_ADDRS)]);
         const msg = message([{ accountKey: ALT_KEY_1, readonlyIndexes: [0, 1, 2], writableIndexes: [] }]);
 
-        const result = await resolveAddressLookupTables(connection, msg);
+        const result = await resolveAddressLookupTables(rpc, msg);
 
         expect(result).toHaveLength(1);
         expect(result[0].key.toBase58()).toBe(ALT_KEY_1.toBase58());
@@ -36,13 +37,13 @@ describe('resolveAddressLookupTables', () => {
     });
 
     it('should resolve multiple lookup tables', async () => {
-        const connection = mockConnection([accountInfo(ALT_3_ADDRS), accountInfo(ALT_2_ADDRS)]);
+        const rpc = mockRpc([accountInfo(ALT_3_ADDRS), accountInfo(ALT_2_ADDRS)]);
         const msg = message([
             { accountKey: ALT_KEY_1, readonlyIndexes: [], writableIndexes: [0] },
             { accountKey: ALT_KEY_2, readonlyIndexes: [0], writableIndexes: [] },
         ]);
 
-        const result = await resolveAddressLookupTables(connection, msg);
+        const result = await resolveAddressLookupTables(rpc, msg);
 
         expect(result).toHaveLength(2);
         expect(result[0].key.toBase58()).toBe(ALT_KEY_1.toBase58());
@@ -56,59 +57,65 @@ describe('resolveAddressLookupTables', () => {
      * this message to the user, so it has to name the table and say what happened.
      */
     it('should throw naming the table when the RPC returns no account for one', async () => {
-        const connection = mockConnection([null, accountInfo(ALT_2_ADDRS)]);
+        const rpc = mockRpc([null, accountInfo(ALT_2_ADDRS)]);
         const msg = message([
             { accountKey: ALT_KEY_1, readonlyIndexes: [0], writableIndexes: [] },
             { accountKey: ALT_KEY_2, readonlyIndexes: [0], writableIndexes: [] },
         ]);
 
-        await expect(resolveAddressLookupTables(connection, msg)).rejects.toThrow(
+        await expect(resolveAddressLookupTables(rpc, msg)).rejects.toThrow(
             `Address lookup table ${ALT_KEY_1.toBase58()} could not be loaded`,
         );
     });
 
     it('should batch all keys into a single RPC call', async () => {
-        const connection = mockConnection([accountInfo(ALT_3_ADDRS), accountInfo(ALT_2_ADDRS)]);
+        const rpc = mockRpc([accountInfo(ALT_3_ADDRS), accountInfo(ALT_2_ADDRS)]);
         const msg = message([
             { accountKey: ALT_KEY_1, readonlyIndexes: [], writableIndexes: [0] },
             { accountKey: ALT_KEY_2, readonlyIndexes: [], writableIndexes: [0] },
         ]);
 
-        await resolveAddressLookupTables(connection, msg);
+        await resolveAddressLookupTables(rpc, msg);
 
-        expect(connection.getMultipleAccountsInfo).toHaveBeenCalledTimes(1);
-        expect(connection.getMultipleAccountsInfo).toHaveBeenCalledWith([ALT_KEY_1, ALT_KEY_2]);
+        expect(rpc.getMultipleAccounts).toHaveBeenCalledTimes(1);
+        expect(rpc.getMultipleAccounts).toHaveBeenCalledWith(
+            [toKitAddress(ALT_KEY_1), toKitAddress(ALT_KEY_2)],
+            expect.objectContaining({ encoding: 'base64' }),
+        );
     });
 
     // Reports the first missing table rather than a count, so the message points at something actionable.
     it('should throw on the first table when none of them load', async () => {
-        const connection = mockConnection([null, null]);
+        const rpc = mockRpc([null, null]);
         const msg = message([
             { accountKey: ALT_KEY_1, readonlyIndexes: [0], writableIndexes: [] },
             { accountKey: ALT_KEY_2, readonlyIndexes: [0], writableIndexes: [] },
         ]);
 
-        await expect(resolveAddressLookupTables(connection, msg)).rejects.toThrow(
+        await expect(resolveAddressLookupTables(rpc, msg)).rejects.toThrow(
             `Address lookup table ${ALT_KEY_1.toBase58()} could not be loaded`,
         );
     });
 });
 
-function accountInfo(base64Data: string): AccountInfo<Uint8Array> {
+function accountInfo(base64Data: string) {
     return {
-        data: fromBase64(base64Data),
+        data: [base64Data, 'base64'] as const,
         executable: false,
-        lamports: 1_000_000,
-        owner: new PublicKey('AddressLookupTab1e1111111111111111111111111'),
-        rentEpoch: 0,
+        lamports: 1_000_000n,
+        owner: new PublicKey('AddressLookupTab1e1111111111111111111111111').toBase58(),
+        rentEpoch: 0n,
+        space: 0n,
     };
 }
 
-function mockConnection(results: (AccountInfo<Uint8Array> | null)[]): Connection {
-    // Partial mock — only getMultipleAccountsInfo is called
+function mockRpc(results: (ReturnType<typeof accountInfo> | null)[]): SolanaRpc {
+    // Partial mock — only getMultipleAccounts is called
     return {
-        getMultipleAccountsInfo: vi.fn().mockResolvedValue(results),
-    } as unknown as Connection;
+        getMultipleAccounts: vi.fn().mockReturnValue({
+            send: vi.fn().mockResolvedValue({ value: results }),
+        }),
+    } as unknown as SolanaRpc;
 }
 
 function message(lookups: { accountKey: PublicKey; writableIndexes: number[]; readonlyIndexes: number[] }[]) {
