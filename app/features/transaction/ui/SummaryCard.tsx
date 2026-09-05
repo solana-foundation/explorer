@@ -8,8 +8,14 @@ import { SolBalance } from '@components/common/SolBalance';
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
-import { cn } from '@components/shared/utils';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
+import {
+    BaseResourceFeeProjection,
+    derivePriorityFeeLamports,
+    estimateRequestedCostUnits,
+    isSimd0553FeeEnabled,
+    projectResourceAndInclusionFees,
+} from '@entities/transaction-fee';
 import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
 import { useCluster, useClusterInfo } from '@providers/cluster';
@@ -20,7 +26,7 @@ import {
     useTransactionStatus,
 } from '@providers/transactions';
 import type { TransactionVersion } from '@solana/kit';
-import { ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
+import { PACKET_DATA_SIZE, ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { SignatureProps } from '@utils/index';
@@ -28,51 +34,18 @@ import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useBuildClusterPath, useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { ZoomIn } from 'react-feather';
 
+import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
+import { V1_TRANSACTION_SIZE_LIMIT } from '@/app/shared/lib/v1-message-bridge';
 import { Card } from '@/app/shared/ui/Card';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
 import { TransactionNotFoundCard } from './TransactionNotFoundCard';
-
-type RowProps = React.HTMLAttributes<HTMLDivElement> & { divider?: boolean };
-export function Row({ children, className, divider, ...props }: RowProps) {
-    return (
-        <div
-            className={cn(
-                'grid min-h-9 grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2 px-3 py-2.5 md:px-4',
-                divider && 'border-1 border-b border-white/10 [border-bottom-style:solid]',
-                className,
-            )}
-            {...props}
-        >
-            {children}
-        </div>
-    );
-}
-
-function Label({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-    return (
-        <div
-            className={cn('flex flex-wrap items-center gap-1 overflow-hidden text-sm text-outer-space-300', className)}
-            {...props}
-        >
-            {children}
-        </div>
-    );
-}
-
-function Value({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-    return (
-        <div className={cn('break-all font-mono text-sm text-white', className)} {...props}>
-            {children}
-        </div>
-    );
-}
 
 function getTransactionErrorReason(
     info: TransactionStatusInfo,
@@ -116,6 +89,10 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     });
 
     const serializedRawData = rawDetails?.data?.raw?.messageBytes;
+    const serializedSize = rawDetails?.data?.raw?.serializedSize;
+    // Read the version off the raw details rather than the parsed ones, so the size and the limit it
+    // is compared against always come from the same fetch.
+    const rawVersion = rawDetails?.data?.raw?.version;
 
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
@@ -178,6 +155,29 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const blockhash = transaction?.message.recentBlockhash;
     const version = transactionWithMeta?.version;
     const feePayer = transaction?.message.accountKeys[0]?.pubkey;
+    const priorityFeeLamports = readPriorityFeeLamports({
+        declared: transactionConfig?.priorityFeeLamports,
+        feeLamports: fee,
+        signatureCount: transaction?.signatures.length,
+    });
+    // SIMD-0553 charges the cost units a transaction *requested*, while `costUnits` reports what it
+    // executed, so the requested compute limit is needed to correct it. Without one there is nothing
+    // honest to project, and the row is left out.
+    const feeProjections =
+        isSimd0553FeeEnabled() &&
+        costUnits !== undefined &&
+        computeUnitsConsumed !== undefined &&
+        reservedCUs !== undefined &&
+        priorityFeeLamports !== undefined
+            ? projectResourceAndInclusionFees({
+                  priorityFeeLamports,
+                  requestedCostUnits: estimateRequestedCostUnits({
+                      computeUnitsConsumed,
+                      executedCostUnits: costUnits,
+                      requestedComputeUnits: reservedCUs,
+                  }),
+              })
+            : undefined;
 
     const isNonce = (() => {
         if (!transaction || transaction.message.instructions.length < 1) return false;
@@ -322,6 +322,20 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     </Row>
                 )}
 
+                {/* Projected fee under SIMD-0553's inclusion + burned resource fee model */}
+                {fee !== undefined && feeProjections !== undefined && (
+                    <Row divider>
+                        <Label className="overflow-visible">
+                            <InfoTooltip text="Not active yet. SIMD-0553 would charge a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units a transaction requests, replacing today's flat 5,000-per-signature base fee and leaving the priority fee unchanged. Estimated by swapping this transaction's consumed compute units for its requested limit; the loaded-accounts-data-size term still reflects what it loaded, so each figure is a floor.">
+                                Fee under SIMD-0553
+                            </InfoTooltip>
+                        </Label>
+                        <Value>
+                            <BaseResourceFeeProjection currentFeeLamports={fee} projections={feeProjections} />
+                        </Value>
+                    </Row>
+                )}
+
                 {/* Transaction cost */}
                 {costUnits !== undefined && (
                     <Row divider>
@@ -380,6 +394,25 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     </Row>
                 )}
 
+                {/* Transaction size */}
+                {serializedSize !== undefined && (
+                    <Row divider>
+                        <Label className="overflow-visible">
+                            <InfoTooltip text="Size on the wire: signatures plus the compiled message">
+                                Transaction size
+                            </InfoTooltip>
+                        </Label>
+                        <Value className="flex flex-wrap items-baseline gap-x-2">
+                            {serializedSize.toLocaleString('en-US')} bytes
+                            {/* No over-limit styling here, unlike the inspector: a transaction that
+                                landed is necessarily within the limit. The cap is context for headroom. */}
+                            <span className="text-xs text-outer-space-300">
+                                Max is {transactionSizeLimit(rawVersion).toLocaleString('en-US')} bytes
+                            </span>
+                        </Value>
+                    </Row>
+                )}
+
                 {/* Timestamp */}
                 {info.timestamp !== 'unavailable' ? (
                     <>
@@ -411,6 +444,41 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     );
 }
 
+/**
+ * SIMD-0553 carries priority fees over unchanged, so projecting a total needs them split out of the
+ * single summed `fee` the RPC reports. v1 declares its total priority fee on the message; every
+ * earlier version has to have it backed out of the total.
+ */
+function readPriorityFeeLamports({
+    declared,
+    feeLamports,
+    signatureCount,
+}: {
+    declared: bigint | number | undefined;
+    feeLamports: number | undefined;
+    signatureCount: number | undefined;
+}): number | undefined {
+    if (declared !== undefined) {
+        return Number(declared);
+    }
+    if (feeLamports === undefined || signatureCount === undefined) {
+        return undefined;
+    }
+    return derivePriorityFeeLamports({ feeLamports, signatureCount });
+}
+
 function formatTransactionVersion(version: TransactionVersion): string {
     return version === 'legacy' ? version : `v${version}`;
+}
+
+/**
+ * v1 raised the ceiling past the UDP packet size every earlier version is bounded by. Matches the
+ * inspector's limit, so the same transaction reads the same on both pages.
+ *
+ * Deliberately not kit's `getTransactionSizeLimit`: that one masks the first message byte and treats
+ * `1` as v1, but a legacy message opens with its signer count — so every single-signer legacy
+ * transaction comes back as 4096. Keyed off the decoded version, which can't be confused that way.
+ */
+function transactionSizeLimit(version: TransactionVersion | undefined): number {
+    return version === 1 ? V1_TRANSACTION_SIZE_LIMIT : PACKET_DATA_SIZE;
 }

@@ -13,6 +13,7 @@ import { useClusterUrl } from '../use-cluster-url';
 const DEFAULT_CUSTOM_URL = 'http://localhost:8899';
 const WHITELISTED_URL = 'https://rpc.example.com/rpc';
 const REMOTE_URL = 'https://my-node.example/rpc';
+const NOTHING_TO_CONNECT_TO = 'nothing-to-connect-to';
 
 function renderUseClusterUrl({
     cluster,
@@ -59,6 +60,17 @@ describe('useClusterUrl', () => {
             expect(onReplaceSearchParams).not.toHaveBeenCalled();
         });
 
+        it('should offer nothing to connect to, so no fetch reaches the fallback endpoint', () => {
+            // `url` still resolves, because the prompt renders against it.
+            const { result } = renderUseClusterUrl({
+                cluster: Cluster.Custom,
+                search: `cluster=custom&customUrl=${REMOTE_URL}`,
+            });
+
+            expect(result.current.connectableUrl).toBeUndefined();
+            expect(result.current.url).toBe(DEFAULT_CUSTOM_URL);
+        });
+
         it('should honor an origin approved before this page load', () => {
             // The reload case, which is why approvals live in sessionStorage: the endpoint is still in the
             // address bar after a refresh, so asking again on every one would be the whole friction.
@@ -72,6 +84,8 @@ describe('useClusterUrl', () => {
 
             expect(result.current.pendingCustomUrl).toBeUndefined();
             expect(result.current.selection.endpoint?.href).toBe(REMOTE_URL);
+            // Settled, so a fetching hook may key on it now.
+            expect(result.current.connectableUrl).toBe(REMOTE_URL);
         });
 
         it('should honor it once its origin is approved', () => {
@@ -341,12 +355,29 @@ describe('useClusterUrl', () => {
             return createElement('span', undefined, selection.endpoint?.href);
         }
 
+        // Renders what a fetching hook would key on.
+        function ConnectableProbe({
+            onReplaceSearchParams,
+            search,
+        }: {
+            onReplaceSearchParams: () => void;
+            search: string;
+        }) {
+            const { connectableUrl } = useClusterUrl({
+                cluster: Cluster.Custom,
+                onReplaceSearchParams,
+                searchParams: new URLSearchParams(search),
+            });
+            // A sentinel, not an empty string: the failure to catch is the *fallback* being offered.
+            return createElement('span', undefined, connectableUrl ?? NOTHING_TO_CONNECT_TO);
+        }
+
         // Two stores, because that asymmetry is the bug: `getOnInit` has the developer bypass on before
         // the client's first render, and the server never had it.
-        function renderThenHydrate(search: string) {
+        function renderThenHydrate(search: string, Probe: typeof EndpointProbe = EndpointProbe) {
             const onReplaceSearchParams = vi.fn();
             const tree = (store: ReturnType<typeof createStore>) =>
-                createElement(Provider, { store }, createElement(EndpointProbe, { onReplaceSearchParams, search }));
+                createElement(Provider, { store }, createElement(Probe, { onReplaceSearchParams, search }));
 
             // eslint-disable-next-line testing-library/render-result-naming-convention -- an HTML string, not a testing-library render result
             const serverMarkup = renderToString(tree(createStore()));
@@ -393,6 +424,21 @@ describe('useClusterUrl', () => {
             expect(serverMarkup).toContain('http://localhost:8900');
             expect(onRecoverableError).not.toHaveBeenCalled();
             expect(container.textContent).toBe('http://localhost:8900');
+        });
+
+        it('should offer nothing to connect to until the browser has judged the endpoint', () => {
+            // While hydrating, neither half of the rule is set, so a guard reading only one lets a
+            // fetch through — at the fallback endpoint.
+            const { container, onRecoverableError, serverMarkup } = renderThenHydrate(
+                `cluster=custom&customUrl=${REMOTE_URL}`,
+                ConnectableProbe,
+            );
+
+            expect(serverMarkup).toContain(NOTHING_TO_CONNECT_TO);
+            // No mismatch, so the hydrating render offered nothing either.
+            expect(onRecoverableError).not.toHaveBeenCalled();
+            // Deferred, not dropped: the bypass still applies, one render later.
+            expect(container.textContent).toBe(REMOTE_URL);
         });
 
         it('should keep the param it has not judged yet', () => {

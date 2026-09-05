@@ -103,6 +103,7 @@ function createMockMessage(): VersionedMessage {
 
 function createSuccessResult(overrides?: Partial<SimulationResult>): SimulationResult {
     return {
+        accountKeys: [],
         epoch: 100n,
         error: undefined,
         logs: [],

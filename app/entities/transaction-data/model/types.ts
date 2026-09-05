@@ -33,6 +33,13 @@ type RawTransactionBase = {
         postBalances: number[];
         preBalances: number[];
     };
+    /**
+     * Wire size in bytes: signatures plus the compiled message, as the network holds it.
+     *
+     * Kit's `getTransactionSize` over the decoded transaction, so it needs no per-version knowledge
+     * of the envelope — v1 drops the signature-count byte that earlier versions carry.
+     */
+    serializedSize: number;
     /** Base58-encoded in signer order; a signer slot that has not been signed is `undefined`. */
     signatures: (string | undefined)[];
 };

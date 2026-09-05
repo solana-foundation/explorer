@@ -20,10 +20,10 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
     } as unknown as typeof ResizeObserver;
 }
 
-const walletMock = vi.hoisted(() => ({ connected: false, publicKey: null as PublicKey | null }));
+const walletMock = vi.hoisted(() => ({ canSign: false, publicKey: null as PublicKey | null }));
 
-// Mock wallet adapter
-vi.mock('@solana/wallet-adapter-react', () => ({
+// Mock wallet state
+vi.mock('@/app/providers/wallet/use-wallet', () => ({
     useWallet: () => walletMock,
 }));
 
@@ -34,7 +34,7 @@ vi.mock('../../model/use-pdas', () => ({
 
 describe('InteractInstruction', () => {
     beforeEach(() => {
-        walletMock.connected = false;
+        walletMock.canSign = false;
         walletMock.publicKey = null;
     });
 
@@ -231,7 +231,7 @@ describe('InteractInstruction', () => {
         });
 
         it('should call onSimulateInstruction when Simulate is clicked', async () => {
-            walletMock.connected = true;
+            walletMock.canSign = true;
             walletMock.publicKey = PublicKey.default;
             const onSimulate = vi.fn();
             const user = userEvent.setup();
@@ -243,7 +243,7 @@ describe('InteractInstruction', () => {
         });
 
         it('should call onExecuteInstruction when Execute is clicked', async () => {
-            walletMock.connected = true;
+            walletMock.canSign = true;
             walletMock.publicKey = PublicKey.default;
             const onExecute = vi.fn();
             const user = userEvent.setup();
@@ -255,7 +255,7 @@ describe('InteractInstruction', () => {
         });
 
         it('should disable both buttons while executing', () => {
-            walletMock.connected = true;
+            walletMock.canSign = true;
             walletMock.publicKey = PublicKey.default;
             renderInteractInstruction(createInstruction(), { status: 'executing' });
 
@@ -264,7 +264,7 @@ describe('InteractInstruction', () => {
         });
 
         it('should disable both buttons while simulating', () => {
-            walletMock.connected = true;
+            walletMock.canSign = true;
             walletMock.publicKey = PublicKey.default;
             renderInteractInstruction(createInstruction(), { status: 'simulating' });
 
@@ -272,8 +272,8 @@ describe('InteractInstruction', () => {
             expect(screen.getByRole('button', { name: /simulate/i })).toBeDisabled();
         });
 
-        it('should disable both buttons when wallet is not connected', () => {
-            walletMock.connected = false;
+        it('should disable both buttons when the wallet cannot sign', () => {
+            walletMock.canSign = false;
             renderInteractInstruction(createInstruction());
 
             expect(screen.getByRole('button', { name: /execute/i })).toBeDisabled();
@@ -283,7 +283,7 @@ describe('InteractInstruction', () => {
 
     describe('simulate-before-execute toggle', () => {
         beforeEach(() => {
-            walletMock.connected = true;
+            walletMock.canSign = true;
             walletMock.publicKey = PublicKey.default;
         });
 

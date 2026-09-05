@@ -1,22 +1,22 @@
 import { formatTokenAmount, tokenAmountToNumber } from '@entities/token-amount';
 import { isTokenProgramId } from '@providers/accounts/tokens';
-import { AccountLayout } from '@solana/spl-token';
-import {
-    type AccountInfo,
-    type ParsedAccountData,
-    type ParsedMessageAccount,
+import type {
+    AccountInfo,
+    ParsedAccountData,
+    ParsedMessageAccount,
     PublicKey,
-    type SimulatedTransactionAccountInfo,
-    type TokenBalance,
+    SimulatedTransactionAccountInfo,
+    TokenBalance,
 } from '@solana/web3.js';
-import { getTokenSize } from '@solana-program/token';
+import { getTokenDecoder, getTokenSize } from '@solana-program/token';
 
-import { fromBase64, readU64LE, toBuffer } from '@/app/shared/lib/bytes';
+import { fromBase64 } from '@/app/shared/lib/bytes';
 import { isTokenProgramAddress } from '@/app/shared/model/token-program';
 
 import { ACCOUNT_TYPE_TOKEN } from './token-layout';
 
 const TOKEN_ACCOUNT_SIZE = getTokenSize();
+const tokenDecoder = getTokenDecoder();
 import { toParsedData } from './token-program';
 import type { MintDecimalsMap } from './types';
 
@@ -91,17 +91,22 @@ function extractPostTokenBalance(
     // Token-2022: accounts > 165 bytes carry a type discriminator — skip mints (1), keep accounts (2)
     if (bytes.length > TOKEN_ACCOUNT_SIZE && bytes[TOKEN_ACCOUNT_SIZE] !== ACCOUNT_TYPE_TOKEN) return undefined;
 
-    // AccountLayout.decode uses @solana/buffer-layout which requires Buffer
-    const decoded = AccountLayout.decode(toBuffer(bytes));
-    const mint = new PublicKey(decoded.mint);
-    const tokenOwner = new PublicKey(decoded.owner);
-    const rawAmount = readU64LE(decoded.amount, 0);
+    // The decoder validates the account-state enum and throws on anything that isn't a
+    // real token account — a Token-2022 multisig can reach here by passing the size and
+    // discriminator filters above.
+    let decoded;
+    try {
+        decoded = tokenDecoder.decode(bytes.subarray(0, TOKEN_ACCOUNT_SIZE));
+    } catch {
+        return undefined;
+    }
+    const { amount, mint, owner: tokenOwner } = decoded;
 
-    const decimals = mintToDecimals[mint.toBase58()];
+    const decimals = mintToDecimals[mint];
     if (decimals === undefined) return undefined;
 
-    const amountStr = rawAmount.toString();
-    const tokenAmount = { amount: rawAmount, decimals };
+    const amountStr = amount.toString();
+    const tokenAmount = { amount, decimals };
     const uiAmountString = formatTokenAmount(tokenAmount);
     // uiAmount is a legacy numeric field — precision loss beyond Number.MAX_SAFE_INTEGER
     // is acceptable here because downstream code uses uiAmountString
@@ -109,8 +114,8 @@ function extractPostTokenBalance(
 
     return {
         accountIndex,
-        mint: mint.toBase58(),
-        owner: tokenOwner.toBase58(),
+        mint,
+        owner: tokenOwner,
         uiTokenAmount: {
             amount: amountStr,
             decimals,

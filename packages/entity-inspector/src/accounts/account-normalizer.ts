@@ -7,6 +7,7 @@ import { base64Encoder } from '../rpc/codecs.js';
 import { isSourceUnavailableError } from '../rpc/rpc.js';
 import type { AccountProbeEnvelope } from '../rpc/types.js';
 import { asRecord, asSafeNumeric, asString } from '../shared/parse-helpers.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import { err, ok, type Result, toError } from '../shared/result.js';
 import type { NormalizedAccountInfo, NormalizedProgramDataInfo } from './types.js';
 
@@ -84,6 +85,8 @@ export function normalizeAccountProbe(address: string, envelope: AccountProbeEnv
     const normalizedProgramData = extractProgramDataInfo(parsedData);
     // Malformed base64 → error branch (value undefined); treated as absent like a non-base64 shape.
     const [, rawDataBytes] = extractRawDataBytesFromAccountData(data);
+    // Kept even when the byte decode fails — downstream parsers judge the string themselves.
+    const [rawEncoded, rawEncoding] = Array.isArray(data) ? data : [];
 
     const base = {
         address,
@@ -93,6 +96,7 @@ export function normalizeAccountProbe(address: string, envelope: AccountProbeEnv
         parsedData,
         parsedProgram: parsedDataContainer?.program ?? null,
         programDataAddress: extractProgramDataAddress(parsedData),
+        rawDataBase64: typeof rawEncoded === 'string' && rawEncoding === 'base64' ? rawEncoded : null,
         rawDataBytes: rawDataBytes ?? null,
     };
 
@@ -147,14 +151,14 @@ export async function enrichUpgradeableProgramData(
     } catch (error) {
         if (isSourceUnavailableError(error)) {
             logger.warn(ns('program data enrichment source unavailable'), {
-                error,
+                error: toLoggedError(error),
                 programAddress: account.address,
             });
             return { ...account, programDataStatus: 'source_unavailable' };
         }
 
         logger.warn(ns('program data enrichment failed'), {
-            error,
+            error: toLoggedError(error),
             programAddress: account.address,
         });
         return { ...account, programDataStatus: 'source_unavailable' };

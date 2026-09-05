@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
 import { Slot } from '@components/common/Slot';
 import { type FeatureInfoType, getFeatureInfo } from '@entities/feature-gate';
+import { useSlotTime } from '@entities/slot-time';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
@@ -165,8 +166,6 @@ const BaseFeatureCard = ({
     );
 };
 
-const AVERAGE_SLOT_TIME_MS = 400;
-
 function formatCountdown(totalSeconds: number): string {
     if (totalSeconds <= 0) return 'any moment now';
     const hours = Math.floor(totalSeconds / 3600);
@@ -179,8 +178,8 @@ function formatCountdown(totalSeconds: number): string {
     return `~${parts.join(' ')}`;
 }
 
-function EpochCountdown({ remainingSlots }: { remainingSlots: bigint }) {
-    const estimatedSeconds = Math.ceil((Number(remainingSlots) * AVERAGE_SLOT_TIME_MS) / 1000);
+function EpochCountdown({ remainingSlots, msPerSlot }: { remainingSlots: bigint; msPerSlot: number }) {
+    const estimatedSeconds = Math.ceil((Number(remainingSlots) * msPerSlot) / 1000);
     const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
 
     useEffect(() => {
@@ -199,6 +198,22 @@ function EpochCountdown({ remainingSlots }: { remainingSlots: bigint }) {
         <span className="text-dk-warning-on-dark" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {secondsLeft > 0 ? `${label} remaining` : label}
         </span>
+    );
+}
+
+/**
+ * Owns the slot-time request, so it is made where the countdown is about to render. Only a pending
+ * feature has one, and a custom cluster never gets this far — asking higher up would put a request on
+ * every feature account page, and on a custom cluster it would reach the visitor's own node for nothing.
+ */
+function PendingEpochCountdown({ remainingSlots }: { remainingSlots: bigint }) {
+    const msPerSlot = useSlotTime();
+    if (msPerSlot === undefined) return null;
+
+    return (
+        <div className="mt-[3px]">
+            <EpochCountdown remainingSlots={remainingSlots} msPerSlot={msPerSlot} />
+        </div>
     );
 }
 
@@ -232,9 +247,7 @@ function ClusterActivationEpochAtCluster({
                 <Link href={`/epoch/${nextEpoch}?cluster=${cluster}`}>
                     {clusterName(cluster)} Epoch {nextEpoch.toString()}
                 </Link>
-                <div className="mt-[3px]">
-                    <EpochCountdown remainingSlots={remainingSlots} />
-                </div>
+                <PendingEpochCountdown remainingSlots={remainingSlots} />
             </div>
         );
     }

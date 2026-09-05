@@ -1,3 +1,4 @@
+import { getBase58Encoder } from '@solana/kit';
 import {
     ParsedTransaction,
     PartiallyDecodedInstruction,
@@ -5,7 +6,6 @@ import {
     SignatureResult,
     TransactionInstruction,
 } from '@solana/web3.js';
-import bs58 from 'bs58';
 import React from 'react';
 
 import { readUint8, readUint16LE, toBase64 } from '@/app/shared/lib/bytes';
@@ -15,6 +15,8 @@ import { Address } from '../../common/Address';
 import { Copyable } from '../../common/Copyable';
 import { InstructionCard } from '../InstructionCard';
 import { PROGRAM_ID as ED25519_PROGRAM_ID } from './types';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 const ED25519_SELF_REFERENCE_INSTRUCTION_INDEX = 65535;
 
@@ -74,7 +76,7 @@ const extractData = (
 
     const targetIx = tx.message.instructions[instructionIndex] as PartiallyDecodedInstruction;
     try {
-        return bs58.decode(targetIx.data).slice(dataOffset, dataOffset + dataLength);
+        return BASE58_ENCODER.encode(targetIx.data).slice(dataOffset, dataOffset + dataLength);
     } catch (_err) {
         return null;
     }

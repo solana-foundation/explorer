@@ -1,3 +1,5 @@
+export { summarizeBlockComputeUnits } from './lib/block-compute-units';
+export type { BlockComputeUnitsSummary } from './lib/block-compute-units';
 export {
     estimateRequestedComputeUnits,
     estimateRequestedComputeUnitsForParsedTransaction,
@@ -6,4 +8,4 @@ export {
 export { getDefaultComputeUnits, PROGRAM_DEFAULT_COMPUTE_UNITS } from './lib/default-compute-units';
 export { formatInstructionLogs } from './lib/format-instruction-logs';
 export type { InstructionCUData } from './lib/types';
-export { CUProfilingCard } from './ui/CUProfilingCard';
+export { BaseCUProfilingCard } from './ui/BaseCUProfilingCard';

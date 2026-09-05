@@ -1,9 +1,11 @@
-import bs58 from 'bs58';
+import { getBase58Encoder } from '@solana/kit';
 
 import { fromBase64, toBase64 } from '@/app/shared/lib/bytes';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 
 import type { SearchOptions, SearchProvider } from '../lib/types';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 /**
  * Fallback search provider that detects base64-encoded Solana transactions.
@@ -30,7 +32,7 @@ export const base64TxSearchProvider: SearchProvider = {
         // Many valid bs58 strings (pubkeys, signatures) are also valid base64.
         // Skip them so they aren't misinterpreted as transactions.
         try {
-            bs58.decode(query);
+            BASE58_ENCODER.encode(query);
             return [];
         } catch {
             // Not valid bs58 — continue with base64 attempt

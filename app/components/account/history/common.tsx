@@ -1,11 +1,11 @@
-import { ParsedTransactionWithMeta } from '@solana/web3.js';
+import type { TransactionWithMeta } from '@entities/transaction-data';
 
 export type MintDetails = {
     decimals: number;
     mint: string;
 };
 
-export function extractMintDetails(transactionWithMeta: ParsedTransactionWithMeta, mintMap: Map<string, MintDetails>) {
+export function extractMintDetails(transactionWithMeta: TransactionWithMeta, mintMap: Map<string, MintDetails>) {
     if (transactionWithMeta.meta?.preTokenBalances) {
         transactionWithMeta.meta.preTokenBalances.forEach(balance => {
             const account = transactionWithMeta.transaction.message.accountKeys[balance.accountIndex];

@@ -1,5 +1,5 @@
-import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -144,7 +144,7 @@ describe('collectTransferInstructions location metadata', () => {
 
 describe('isRentFundingProgram', () => {
     it('should recognize the Associated Token Account program', () => {
-        expect(isRentFundingProgram(ASSOCIATED_TOKEN_PROGRAM_ID)).toBe(true);
+        expect(isRentFundingProgram(new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ADDRESS))).toBe(true);
     });
 
     it('should not flag the System program', () => {

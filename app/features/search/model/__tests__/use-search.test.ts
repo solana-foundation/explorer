@@ -1,3 +1,4 @@
+import { toConnectableUrl } from '@entities/cluster';
 import { useCluster, useClusterInfo } from '@providers/cluster';
 import { renderHook } from '@testing-library/react';
 import useSWR from 'swr';
@@ -231,6 +232,7 @@ describe('useSearch', () => {
     const selection = clusterSelection(Cluster.MainnetBeta);
     const clusterState = {
         ...selection,
+        connectableUrl: toConnectableUrl('https://rpc.example'),
         genesisHash: 'genesis-hash',
         name: 'Mainnet Beta',
         selection,

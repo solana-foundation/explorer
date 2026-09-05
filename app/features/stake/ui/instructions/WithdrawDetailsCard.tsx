@@ -1,29 +1,14 @@
-import { SolBalance } from '@components/common/SolBalance';
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import React from 'react';
+import { address, defineInstructionCard, sol } from '@entities/instruction-card';
 
 import type { WithdrawInfo } from '../../lib/instruction-types';
-import { DetailRow, StakeProgramRow } from './DetailRow';
-import type { StakeCardProps } from './types';
 
-export function WithdrawDetailsCard({ ix, index, result, info, innerCards, childIndex }: StakeCardProps<WithdrawInfo>) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title="Stake Program: Withdraw Stake"
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <StakeProgramRow />
-            <DetailRow label="Stake Address" pubkey={info.stakeAccount} />
-            <DetailRow label="Authority Address" pubkey={info.withdrawAuthority} />
-            <DetailRow label="To Address" pubkey={info.destination} />
-            <DetailRow label="Withdraw Amount (SOL)">
-                <SolBalance lamports={info.lamports} />
-            </DetailRow>
-            {info.custodian && <DetailRow label="Lockup Custodian" pubkey={info.custodian} />}
-        </InstructionCard>
-    );
-}
+export const WithdrawDetailsCard = defineInstructionCard<WithdrawInfo>({
+    fields: info => [
+        address('Stake Address', info.stakeAccount),
+        address('Authority Address', info.withdrawAuthority),
+        address('To Address', info.destination),
+        sol('Withdraw Amount (SOL)', info.lamports),
+        info.custodian && address('Lockup Custodian', info.custodian),
+    ],
+    title: 'Stake Program: Withdraw Stake',
+});

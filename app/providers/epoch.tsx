@@ -1,8 +1,10 @@
 'use client';
 
+import { getRpc } from '@entities/cluster';
 import * as Cache from '@providers/cache';
+import { useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
-import { Connection } from '@solana/web3.js';
+import type { UnixTimestamp } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
@@ -58,7 +60,7 @@ export function useEpoch(key: number): Cache.CacheEntry<Epoch> | undefined {
         throw new Error(`useEpoch must be used within a EpochProvider`);
     }
 
-    return context.entries[key];
+    return useCacheEntry(context.entries, key);
 }
 
 export async function fetchEpoch(
@@ -80,17 +82,17 @@ export async function fetchEpoch(
     let data: Epoch | undefined = undefined;
 
     try {
-        const connection = new Connection(url, 'confirmed');
+        const rpc = getRpc(url);
         const firstSlot = getFirstSlotInEpoch(epochSchedule, BigInt(epoch));
         const lastSlot = getLastSlotInEpoch(epochSchedule, BigInt(epoch));
         const [firstBlock, lastBlock] = await Promise.all([
             (async () => {
-                const firstBlocks = await connection.getBlocks(Number(firstSlot), Number(firstSlot + 100n));
-                return firstBlocks.shift();
+                const firstBlocks = await rpc.getBlocks(firstSlot, firstSlot + 100n).send();
+                return firstBlocks.at(0);
             })(),
             (async () => {
-                const lastBlocks = await connection.getBlocks(Math.max(0, Number(lastSlot - 100n)), Number(lastSlot));
-                return lastBlocks.pop();
+                const lastBlocks = await rpc.getBlocks(lastSlot > 100n ? lastSlot - 100n : 0n, lastSlot).send();
+                return lastBlocks.at(-1);
             })(),
         ]);
 
@@ -100,16 +102,16 @@ export async function fetchEpoch(
             throw new Error(`failed to find confirmed block at end of epoch ${epoch}`);
         }
 
-        const [firstTimestamp, lastTimestamp] = await Promise.all([
-            connection.getBlockTime(firstBlock),
-            lastBlock ? connection.getBlockTime(lastBlock) : null,
+        const [firstTimestamp, lastTimestamp] = await Promise.all<UnixTimestamp | null>([
+            rpc.getBlockTime(firstBlock).send(),
+            lastBlock === undefined ? null : rpc.getBlockTime(lastBlock).send(),
         ]);
 
         data = {
-            firstBlock,
-            firstTimestamp,
-            lastBlock,
-            lastTimestamp,
+            firstBlock: Number(firstBlock),
+            firstTimestamp: firstTimestamp === null ? null : Number(firstTimestamp),
+            lastBlock: lastBlock === undefined ? undefined : Number(lastBlock),
+            lastTimestamp: lastTimestamp === null ? null : Number(lastTimestamp),
         };
         status = FetchStatus.Fetched;
     } catch (err) {

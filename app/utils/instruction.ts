@@ -4,15 +4,11 @@ import {
     parseTokenLendingInstructionTitle,
 } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
+import { type TransactionWithMeta } from '@entities/transaction-data';
 import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
 import { isTokenProgram } from '@explorer/parsers';
 import { isTokenProgramId } from '@providers/accounts/tokens';
-import {
-    ConfirmedSignatureInfo,
-    ParsedInstruction,
-    ParsedTransactionWithMeta,
-    PartiallyDecodedInstruction,
-} from '@solana/web3.js';
+import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';
 import { intoTransactionInstruction } from '@utils/tx';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
@@ -32,11 +28,11 @@ export interface InstructionItem {
 export class InstructionContainer {
     readonly instructions: InstructionItem[];
 
-    static create(transactionWithMeta: ParsedTransactionWithMeta) {
+    static create(transactionWithMeta: TransactionWithMeta) {
         return new InstructionContainer(transactionWithMeta);
     }
 
-    constructor(transactionWithMeta: ParsedTransactionWithMeta) {
+    constructor(transactionWithMeta: TransactionWithMeta) {
         this.instructions = transactionWithMeta.transaction.message.instructions.map(instruction => {
             if ('parsed' in instruction) {
                 if (typeof instruction.parsed === 'object') {
@@ -73,7 +69,7 @@ export function getTokenProgramInstructionName(ix: ParsedInstruction, signatureI
 }
 
 export function getTokenInstructionName(
-    transactionWithMeta: ParsedTransactionWithMeta,
+    transactionWithMeta: TransactionWithMeta,
     ix: ParsedInstruction | PartiallyDecodedInstruction,
     signatureInfo: ConfirmedSignatureInfo,
 ) {
@@ -118,7 +114,7 @@ export function getTokenInstructionName(
 }
 
 export function getTokenInstructionType(
-    transactionWithMeta: ParsedTransactionWithMeta,
+    transactionWithMeta: TransactionWithMeta,
     ix: ParsedInstruction | PartiallyDecodedInstruction,
     signatureInfo: ConfirmedSignatureInfo,
     index: number,

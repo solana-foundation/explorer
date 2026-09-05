@@ -1,137 +1,119 @@
-import { PublicKey } from '@solana/web3.js';
+import { type Address, address } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Stable key pair for deterministic tests
+import { makeAnsNameRecordData, makeTldHouseData } from '../../__tests__/fixtures';
+import { TLD_HOUSE_PROGRAM_ADDRESS } from '../../lib/ans-name-service';
+
+// Stable keys for deterministic tests
 const USER_ADDRESS = '86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdRrbukszb';
-const PARENT_ACCOUNT = new PublicKey('BV9TTYfzBiSMz3JCjqMoHqN62gFJDKPJmRhxjgqKH1N4');
-const TLD_HOUSE = new PublicKey('6NSfSKTJghNFHy9B9Z5JciDPUJPVKRAm1HGNpksvbfz8');
-const NAME_RECORD_HEADER_SIZE = 200;
+const USER = address(USER_ADDRESS);
+const PARENT_ACCOUNT = address('BV9TTYfzBiSMz3JCjqMoHqN62gFJDKPJmRhxjgqKH1N4');
+// The real .bonk and .poor TLD house PDAs; fetchTlds verifies each house lives at its canonical PDA.
+const BONK_TLD_HOUSE = address('FfCuWsnY8bstAWqY4E4Rk9qRoBcMHykjTwLrjupSpUqu');
+const POOR_TLD_HOUSE = address('ANgPRMKQHgH5Snx2K3VHCvHqFmrABcjTZUrqZBzDCtfA');
+// Reverse-lookup PDA for a name account whose pubkey equals USER_ADDRESS under the .bonk TLD house,
+// locked against @onsol/tldparser 0.6.5.
+const EXPECTED_REVERSE_PDA = '8Az3w476HXK9hs3ho2sRK3VZeFKaN4gC9yriwG6jBtjh';
 
 const mockGetProgramAccounts = vi.fn();
-const mockGetMultipleAccountsInfo = vi.fn();
+const mockGetMultipleAccounts = vi.fn();
 
 vi.mock('@utils/cluster', () => ({
     Cluster: { MainnetBeta: 'mainnet-beta' },
     serverClusterUrl: () => 'https://unused.test',
 }));
 
-vi.mock('next/cache', () => ({
-    unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
-}));
-
-vi.mock('@onsol/tldparser', async importOriginal => {
-    const actual = await importOriginal<typeof import('@onsol/tldparser')>();
+vi.mock('@solana/kit', async importOriginal => {
+    const actual = await importOriginal<typeof import('@solana/kit')>();
     return {
         ...actual,
-        ANS_PROGRAM_ID: new PublicKey('TLDHkysf5pCnKsVA4gXpNQmy7PSj8ByrtuLwFBFSdvB'),
-        MULTIPLE_ACCOUNT_INFO_MAX: 100,
-        findTldHouse: (tldName: string) => {
-            // Return deterministic keys per TLD name
-            if (tldName === '.bonk') return [TLD_HOUSE];
-            return [PublicKey.default];
-        },
-        getAllTld: vi.fn(),
-        getHashedName: vi.fn().mockResolvedValue(Buffer.alloc(32)),
-        getNameAccountKeyWithBump: vi.fn().mockReturnValue([PublicKey.default, 255]),
-    };
-});
-
-vi.mock('@solana/web3.js', async () => {
-    const actual = await vi.importActual<typeof import('@solana/web3.js')>('@solana/web3.js');
-    return {
-        ...actual,
-        Connection: vi.fn().mockImplementation(function () {
-            return {
-                getMultipleAccountsInfo: mockGetMultipleAccountsInfo,
-                getProgramAccounts: mockGetProgramAccounts,
-            };
+        createSolanaRpc: () => ({
+            getMultipleAccounts: mockGetMultipleAccounts,
+            getProgramAccounts: mockGetProgramAccounts,
         }),
     };
 });
-
-const { getAllTld, getHashedName, getNameAccountKeyWithBump } = await import('@onsol/tldparser');
 
 const { fetchAnsDomains } = await import('../fetch-ans-domains');
 
 describe('fetchAnsDomains', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(getAllTld).mockResolvedValue(makeTlds([{ name: '.bonk', parentAccount: PARENT_ACCOUNT }]));
+        setupProgramAccounts({
+            tldHouses: [makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE)],
+            userAccounts: [],
+        });
+        mockGetMultipleAccounts.mockReturnValue(sendable({ value: [] }));
     });
 
     it('should return empty array when user has no name accounts', async () => {
-        mockGetProgramAccounts.mockResolvedValue([]);
-
         const result = await fetchAnsDomains(USER_ADDRESS);
 
         expect(result).toEqual([]);
-        expect(mockGetMultipleAccountsInfo).not.toHaveBeenCalled();
+        expect(mockGetMultipleAccounts).not.toHaveBeenCalled();
     });
 
     it('should return domains with name and address', async () => {
-        const nameAccountPubkey = PublicKey.unique();
-
-        mockGetProgramAccounts.mockResolvedValue([
-            {
-                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
-                pubkey: nameAccountPubkey,
-            },
-        ]);
-
-        const reversePda = PublicKey.unique();
-        vi.mocked(getNameAccountKeyWithBump).mockReturnValue([reversePda, 255]);
-
-        mockGetMultipleAccountsInfo.mockResolvedValue([makeReverseAccountInfo('alice')]);
+        setupProgramAccounts({
+            tldHouses: [makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE)],
+            userAccounts: [makeNameAccount('nameAccount1', PARENT_ACCOUNT)],
+        });
+        mockGetMultipleAccounts.mockReturnValue(sendable({ value: [makeReverseAccountInfo('alice')] }));
 
         const result = await fetchAnsDomains(USER_ADDRESS);
 
         expect(result).toEqual([
             {
-                address: nameAccountPubkey.toBase58(),
+                address: 'nameAccount1',
                 name: 'alice.bonk',
             },
         ]);
     });
 
     it('should filter out accounts whose parent does not match any TLD', async () => {
-        const unknownParent = PublicKey.unique();
-
-        mockGetProgramAccounts.mockResolvedValue([
-            {
-                account: { data: makeNameAccountData(unknownParent, new PublicKey(USER_ADDRESS)) },
-                pubkey: PublicKey.unique(),
-            },
-        ]);
+        const unknownParent = address('6NSfSKTJghNFHy9B9Z5JciDPUJPVKRAm1HGNpksvbfz8');
+        setupProgramAccounts({
+            tldHouses: [makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE)],
+            userAccounts: [makeNameAccount('nameAccount1', unknownParent)],
+        });
 
         const result = await fetchAnsDomains(USER_ADDRESS);
 
         expect(result).toEqual([]);
-        expect(mockGetMultipleAccountsInfo).not.toHaveBeenCalled();
+        expect(mockGetMultipleAccounts).not.toHaveBeenCalled();
+    });
+
+    it('should skip malformed TLD house accounts without failing the whole fetch', async () => {
+        setupProgramAccounts({
+            tldHouses: [
+                { account: { data: toBase64Data(new Uint8Array(50)) }, pubkey: BONK_TLD_HOUSE }, // too short to parse
+                makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE),
+            ],
+            userAccounts: [makeNameAccount('nameAccount1', PARENT_ACCOUNT)],
+        });
+        mockGetMultipleAccounts.mockReturnValue(sendable({ value: [makeReverseAccountInfo('alice')] }));
+
+        const result = await fetchAnsDomains(USER_ADDRESS);
+
+        expect(result).toEqual([{ address: 'nameAccount1', name: 'alice.bonk' }]);
     });
 
     it('should skip reverse-lookup accounts that return null', async () => {
-        const nameAccount1 = PublicKey.unique();
-        const nameAccount2 = PublicKey.unique();
-
-        mockGetProgramAccounts.mockResolvedValue([
-            {
-                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
-                pubkey: nameAccount1,
-            },
-            {
-                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
-                pubkey: nameAccount2,
-            },
-        ]);
-
-        vi.mocked(getNameAccountKeyWithBump)
-            .mockReturnValueOnce([PublicKey.unique(), 255])
-            .mockReturnValueOnce([PublicKey.unique(), 255]);
-
-        mockGetMultipleAccountsInfo.mockResolvedValue([
-            null, // first account's reverse lookup doesn't exist
-            makeReverseAccountInfo('bob'),
-        ]);
+        setupProgramAccounts({
+            tldHouses: [makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE)],
+            userAccounts: [
+                makeNameAccount('nameAccount1', PARENT_ACCOUNT),
+                makeNameAccount('nameAccount2', PARENT_ACCOUNT),
+            ],
+        });
+        mockGetMultipleAccounts.mockReturnValue(
+            sendable({
+                value: [
+                    null, // first account's reverse lookup doesn't exist
+                    makeReverseAccountInfo('bob'),
+                ],
+            }),
+        );
 
         const result = await fetchAnsDomains(USER_ADDRESS);
 
@@ -140,28 +122,21 @@ describe('fetchAnsDomains', () => {
     });
 
     it('should skip reverse-lookup accounts with empty domain names (only null bytes)', async () => {
-        const nameAccount1 = PublicKey.unique();
-        const nameAccount2 = PublicKey.unique();
-
-        mockGetProgramAccounts.mockResolvedValue([
-            {
-                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
-                pubkey: nameAccount1,
-            },
-            {
-                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
-                pubkey: nameAccount2,
-            },
-        ]);
-
-        vi.mocked(getNameAccountKeyWithBump)
-            .mockReturnValueOnce([PublicKey.unique(), 255])
-            .mockReturnValueOnce([PublicKey.unique(), 255]);
-
-        mockGetMultipleAccountsInfo.mockResolvedValue([
-            makeReverseAccountInfo(''), // empty name — only null bytes after header
-            makeReverseAccountInfo('alice'),
-        ]);
+        setupProgramAccounts({
+            tldHouses: [makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE)],
+            userAccounts: [
+                makeNameAccount('nameAccount1', PARENT_ACCOUNT),
+                makeNameAccount('nameAccount2', PARENT_ACCOUNT),
+            ],
+        });
+        mockGetMultipleAccounts.mockReturnValue(
+            sendable({
+                value: [
+                    makeReverseAccountInfo(''), // empty name — only null bytes after header
+                    makeReverseAccountInfo('alice'),
+                ],
+            }),
+        );
 
         const result = await fetchAnsDomains(USER_ADDRESS);
 
@@ -170,17 +145,12 @@ describe('fetchAnsDomains', () => {
     });
 
     it('should strip trailing null bytes from domain names', async () => {
-        mockGetProgramAccounts.mockResolvedValue([
-            {
-                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
-                pubkey: PublicKey.unique(),
-            },
-        ]);
-
-        vi.mocked(getNameAccountKeyWithBump).mockReturnValue([PublicKey.unique(), 255]);
-
+        setupProgramAccounts({
+            tldHouses: [makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE)],
+            userAccounts: [makeNameAccount('nameAccount1', PARENT_ACCOUNT)],
+        });
         // makeReverseLookupData pads with 10 extra \0 bytes after the name
-        mockGetMultipleAccountsInfo.mockResolvedValue([makeReverseAccountInfo('padded')]);
+        mockGetMultipleAccounts.mockReturnValue(sendable({ value: [makeReverseAccountInfo('padded')] }));
 
         const result = await fetchAnsDomains(USER_ADDRESS);
 
@@ -189,86 +159,96 @@ describe('fetchAnsDomains', () => {
         expect(result[0].name.length).toBe('padded.bonk'.length);
     });
 
-    it('should batch getMultipleAccountsInfo calls when entries exceed max', async () => {
-        const count = 150; // exceeds MULTIPLE_ACCOUNT_INFO_MAX of 100
-        const accounts = Array.from({ length: count }, () => ({
-            account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
-            pubkey: PublicKey.unique(),
-        }));
-
-        mockGetProgramAccounts.mockResolvedValue(accounts);
-        vi.mocked(getNameAccountKeyWithBump).mockReturnValue([PublicKey.unique(), 255]);
-
-        mockGetMultipleAccountsInfo
-            .mockResolvedValueOnce(Array.from({ length: 100 }, () => makeReverseAccountInfo('domain')))
-            .mockResolvedValueOnce(Array.from({ length: 50 }, () => makeReverseAccountInfo('domain')));
+    it('should batch getMultipleAccounts calls when entries exceed max', async () => {
+        const count = 150; // exceeds the 100-account getMultipleAccounts limit
+        setupProgramAccounts({
+            tldHouses: [makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE)],
+            userAccounts: Array.from({ length: count }, (_, i) => makeNameAccount(`nameAccount${i}`, PARENT_ACCOUNT)),
+        });
+        mockGetMultipleAccounts
+            .mockReturnValueOnce(
+                sendable({ value: Array.from({ length: 100 }, () => makeReverseAccountInfo('domain')) }),
+            )
+            .mockReturnValueOnce(
+                sendable({ value: Array.from({ length: 50 }, () => makeReverseAccountInfo('domain')) }),
+            );
 
         const result = await fetchAnsDomains(USER_ADDRESS);
 
-        expect(mockGetMultipleAccountsInfo).toHaveBeenCalledTimes(2);
-        expect(mockGetMultipleAccountsInfo.mock.calls[0][0]).toHaveLength(100);
-        expect(mockGetMultipleAccountsInfo.mock.calls[1][0]).toHaveLength(50);
+        expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(2);
+        expect(mockGetMultipleAccounts.mock.calls[0][0]).toHaveLength(100);
+        expect(mockGetMultipleAccounts.mock.calls[1][0]).toHaveLength(50);
         expect(result).toHaveLength(150);
     });
 
-    it('should hash each name account pubkey for reverse PDA derivation', async () => {
-        const nameAccountPubkey = PublicKey.unique();
-
-        mockGetProgramAccounts.mockResolvedValue([
-            {
-                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS)) },
-                pubkey: nameAccountPubkey,
-            },
-        ]);
-
-        vi.mocked(getNameAccountKeyWithBump).mockReturnValue([PublicKey.unique(), 255]);
-        mockGetMultipleAccountsInfo.mockResolvedValue([makeReverseAccountInfo('test')]);
+    it('should derive the reverse-lookup PDA from the name account pubkey and TLD house', async () => {
+        setupProgramAccounts({
+            tldHouses: [makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE)],
+            userAccounts: [makeNameAccount(USER_ADDRESS, PARENT_ACCOUNT)],
+        });
+        mockGetMultipleAccounts.mockReturnValue(sendable({ value: [makeReverseAccountInfo('test')] }));
 
         await fetchAnsDomains(USER_ADDRESS);
 
-        expect(getHashedName).toHaveBeenCalledWith(nameAccountPubkey.toBase58());
+        expect(mockGetMultipleAccounts.mock.calls[0][0]).toEqual([EXPECTED_REVERSE_PDA]);
     });
 
     it('should handle multiple TLDs correctly', async () => {
-        const parentAbc = PublicKey.unique();
-        const parentBonk = PARENT_ACCOUNT;
+        const parentPoor = address('6NSfSKTJghNFHy9B9Z5JciDPUJPVKRAm1HGNpksvbfz8');
 
-        vi.mocked(getAllTld).mockResolvedValue(
-            makeTlds([
-                { name: '.abc', parentAccount: parentAbc },
-                { name: '.bonk', parentAccount: parentBonk },
-            ]),
+        setupProgramAccounts({
+            tldHouses: [
+                makeTldHouseAccount('.poor', parentPoor, POOR_TLD_HOUSE),
+                makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE),
+            ],
+            userAccounts: [
+                makeNameAccount('nameAccount1', parentPoor),
+                makeNameAccount('nameAccount2', PARENT_ACCOUNT),
+            ],
+        });
+        mockGetMultipleAccounts.mockReturnValue(
+            sendable({ value: [makeReverseAccountInfo('alice'), makeReverseAccountInfo('bob')] }),
         );
-
-        const nameAccount1 = PublicKey.unique();
-        const nameAccount2 = PublicKey.unique();
-
-        mockGetProgramAccounts.mockResolvedValue([
-            {
-                account: { data: makeNameAccountData(parentAbc, new PublicKey(USER_ADDRESS)) },
-                pubkey: nameAccount1,
-            },
-            {
-                account: { data: makeNameAccountData(parentBonk, new PublicKey(USER_ADDRESS)) },
-                pubkey: nameAccount2,
-            },
-        ]);
-
-        vi.mocked(getNameAccountKeyWithBump)
-            .mockReturnValueOnce([PublicKey.unique(), 255])
-            .mockReturnValueOnce([PublicKey.unique(), 255]);
-
-        mockGetMultipleAccountsInfo.mockResolvedValue([makeReverseAccountInfo('alice'), makeReverseAccountInfo('bob')]);
 
         const result = await fetchAnsDomains(USER_ADDRESS);
 
         expect(result).toHaveLength(2);
         const names = result.map(d => d.name).sort();
-        expect(names).toEqual(['alice.abc', 'bob.bonk']);
+        expect(names).toEqual(['alice.poor', 'bob.bonk']);
+    });
+
+    it('should skip TLD house accounts not at the canonical PDA for their declared TLD', async () => {
+        setupProgramAccounts({
+            tldHouses: [
+                // Claims to be .bonk but lives at the .poor house address — a spoofed account.
+                makeTldHouseAccount('.bonk', PARENT_ACCOUNT, POOR_TLD_HOUSE),
+            ],
+            userAccounts: [makeNameAccount('nameAccount1', PARENT_ACCOUNT)],
+        });
+
+        const result = await fetchAnsDomains(USER_ADDRESS);
+
+        expect(result).toEqual([]);
+        expect(mockGetMultipleAccounts).not.toHaveBeenCalled();
+    });
+
+    it('should query both programs with their memcmp filters', async () => {
+        await fetchAnsDomains(USER_ADDRESS);
+
+        const calls = mockGetProgramAccounts.mock.calls;
+        const tldHouseCall = calls.find(([program]) => program === TLD_HOUSE_PROGRAM_ADDRESS);
+        const nameRecordCall = calls.find(([program]) => program !== TLD_HOUSE_PROGRAM_ADDRESS);
+
+        expect(tldHouseCall?.[1].filters).toEqual([
+            { memcmp: { bytes: 'iQgos3SdaVE', encoding: 'base58', offset: 0n } },
+        ]);
+        expect(nameRecordCall?.[1].filters).toEqual([
+            { memcmp: { bytes: USER_ADDRESS, encoding: 'base58', offset: 40n } },
+        ]);
     });
 
     it('should propagate RPC errors', async () => {
-        mockGetProgramAccounts.mockRejectedValue(new Error('RPC timeout'));
+        mockGetProgramAccounts.mockReturnValue({ send: () => Promise.reject(new Error('RPC timeout')) });
 
         await expect(fetchAnsDomains(USER_ADDRESS)).rejects.toThrow('RPC timeout');
     });
@@ -278,74 +258,59 @@ describe('fetchAnsDomains', () => {
         const future = BigInt(Math.floor(Date.now() / 1000) + 86400);
         const noExpiry = 0n;
 
-        const expiredAccount = PublicKey.unique();
-        const activeAccount = PublicKey.unique();
-        const permanentAccount = PublicKey.unique();
-
-        mockGetProgramAccounts.mockResolvedValue([
-            {
-                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS), past) },
-                pubkey: expiredAccount,
-            },
-            {
-                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS), future) },
-                pubkey: activeAccount,
-            },
-            {
-                account: { data: makeNameAccountData(PARENT_ACCOUNT, new PublicKey(USER_ADDRESS), noExpiry) },
-                pubkey: permanentAccount,
-            },
-        ]);
-
-        vi.mocked(getNameAccountKeyWithBump)
-            .mockReturnValueOnce([PublicKey.unique(), 255])
-            .mockReturnValueOnce([PublicKey.unique(), 255]);
-
-        mockGetMultipleAccountsInfo.mockResolvedValue([
-            makeReverseAccountInfo('active'),
-            makeReverseAccountInfo('permanent'),
-        ]);
+        setupProgramAccounts({
+            tldHouses: [makeTldHouseAccount('.bonk', PARENT_ACCOUNT, BONK_TLD_HOUSE)],
+            userAccounts: [
+                makeNameAccount('expiredAccount', PARENT_ACCOUNT, past),
+                makeNameAccount('activeAccount', PARENT_ACCOUNT, future),
+                makeNameAccount('permanentAccount', PARENT_ACCOUNT, noExpiry),
+            ],
+        });
+        mockGetMultipleAccounts.mockReturnValue(
+            sendable({ value: [makeReverseAccountInfo('active'), makeReverseAccountInfo('permanent')] }),
+        );
 
         const result = await fetchAnsDomains(USER_ADDRESS);
 
         expect(result).toHaveLength(2);
         const names = result.map(d => d.name).sort();
         expect(names).toEqual(['active.bonk', 'permanent.bonk']);
-        expect(result.find(d => d.address === expiredAccount.toBase58())).toBeUndefined();
+        expect(result.find(d => d.address === 'expiredAccount')).toBeUndefined();
     });
 });
 
-function makeTlds(tlds: { name: string; parentAccount: PublicKey }[]) {
-    return tlds.map(({ name, parentAccount }) => ({
-        parentAccount,
-        tld: new String(name),
-    }));
+function sendable<T>(value: T) {
+    return { send: () => Promise.resolve(value) };
 }
 
-function makeNameAccountData(parentName: PublicKey, owner: PublicKey, expiresAt = 0n): Buffer {
-    // Layout: [8 discriminator][32 parentName][32 owner][32 nclass][8 expiresAt][8 createdAt][1 nonTransferable][79 padding]
-    const data = Buffer.alloc(NAME_RECORD_HEADER_SIZE);
-    // discriminator
-    Buffer.from([68, 72, 88, 44, 15, 167, 103, 243]).copy(new Uint8Array(data.buffer), 0);
-    parentName.toBuffer().copy(new Uint8Array(data.buffer), 8);
-    owner.toBuffer().copy(new Uint8Array(data.buffer), 40);
-    data.writeBigInt64LE(expiresAt, 104);
-    return data;
+// Routes getProgramAccounts by program: TLD house queries get the TLD list, ANS queries the user's accounts.
+function setupProgramAccounts({ tldHouses, userAccounts }: { tldHouses: unknown[]; userAccounts: unknown[] }) {
+    mockGetProgramAccounts.mockImplementation((programAddress: string) =>
+        sendable(programAddress === TLD_HOUSE_PROGRAM_ADDRESS ? tldHouses : userAccounts),
+    );
 }
 
-function makeReverseLookupData(domainName: string): Buffer {
-    const nameBytes = Buffer.from(domainName);
-    const data = Buffer.alloc(NAME_RECORD_HEADER_SIZE + nameBytes.length + 10); // extra bytes become trailing nulls
-    nameBytes.copy(new Uint8Array(data.buffer), NAME_RECORD_HEADER_SIZE);
-    return data;
+function toBase64Data(data: Uint8Array): [string, string] {
+    return [Buffer.from(data).toString('base64'), 'base64'];
+}
+
+function makeTldHouseAccount(tldName: string, parentAccount: Address, tldHouse: Address) {
+    return { account: { data: toBase64Data(makeTldHouseData(tldName, parentAccount)) }, pubkey: tldHouse };
+}
+
+function makeNameAccount(pubkey: string, parentName: Address, expiresAt = 0n) {
+    const data = makeAnsNameRecordData({ expiresAt, owner: USER, parentName });
+    return { account: { data: toBase64Data(data) }, pubkey };
+}
+
+function makeReverseLookupData(domainName: string): Uint8Array {
+    const nameBytes = new TextEncoder().encode(domainName);
+    // 10 extra bytes become trailing nulls
+    const payload = new Uint8Array(nameBytes.length + 10);
+    payload.set(nameBytes, 0);
+    return makeAnsNameRecordData({ payload });
 }
 
 function makeReverseAccountInfo(domainName: string) {
-    return {
-        data: makeReverseLookupData(domainName),
-        executable: false,
-        lamports: 1_000_000,
-        owner: PublicKey.default,
-        rentEpoch: 0,
-    };
+    return { data: toBase64Data(makeReverseLookupData(domainName)) };
 }

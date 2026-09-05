@@ -7,6 +7,7 @@ import { type InspectorLogger, ns } from '../logger.js';
 import { normalizeAccountProbe } from '../accounts/account-normalizer.js';
 import type { ResolveIdlClient } from './idl-clients.js';
 import { asSafeNumeric, asString } from '../shared/parse-helpers.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import type { RpcClient } from '../rpc/rpc.js';
 
 export const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
@@ -77,7 +78,7 @@ export async function fetchOtterVerifyBuildParams(
 
         return toBuildParams(decoded);
     } catch (error) {
-        logger.warn(ns('otter verify fetch failed'), { error, programAddress });
+        logger.warn(ns('otter verify fetch failed'), { error: toLoggedError(error), programAddress });
         return null;
     }
 }

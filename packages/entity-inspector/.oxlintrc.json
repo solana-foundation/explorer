@@ -6,9 +6,33 @@
         "suspicious": "error"
     },
     "rules": {
-        "typescript/consistent-type-assertions": ["error", { "assertionStyle": "never" }],
+        "typescript/consistent-type-assertions": [
+            "error",
+            {
+                "assertionStyle": "never"
+            }
+        ],
         "typescript/no-explicit-any": "error",
-        "typescript/no-non-null-assertion": "error"
+        "typescript/no-non-null-assertion": "error",
+        "no-restricted-imports": [
+            "error",
+            {
+                "patterns": [
+                    {
+                        "group": [
+                            "**/app/**",
+                            "@/*",
+                            "@components/*",
+                            "@providers/*",
+                            "@utils/*",
+                            "@entities/*",
+                            "@features/*"
+                        ],
+                        "message": "must never import app code — the inspector takes host behaviour via EntityInspectorConfig"
+                    }
+                ]
+            }
+        ]
     },
     "overrides": [
         {

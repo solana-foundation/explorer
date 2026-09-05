@@ -1,4 +1,7 @@
+import { address } from '@solana/kit';
+
 import { ADDRESS_LOOKUP_TABLE_PROGRAM_ID, BPF_UPGRADEABLE_LOADER_PROGRAM_ID } from '../../shared/constants.js';
+import { encodeLoaderV4StateHeader, type LoaderV4Status } from '../loader-v4-state.js';
 import type { AccountProbeEnvelope } from '../../rpc/types.js';
 import type { NormalizedAccountInfo, NormalizedProgramDataInfo } from '../types.js';
 
@@ -81,6 +84,37 @@ export function upgradeableProgramDataProbe({
         },
         program: 'bpf-upgradeable-loader',
     });
+}
+
+/** Legacy-loader program probe: no jsonParsed shape exists, so the RPC serves the account data as raw base64. */
+export function legacyLoaderProgramProbe(owner: string, bytes: Uint8Array): AccountProbeEnvelope {
+    return {
+        value: {
+            data: [btoa(String.fromCharCode(...bytes)), 'base64'],
+            executable: true,
+            lamports: 1141440,
+            owner,
+        },
+    };
+}
+
+/** LoaderV4State header followed by the ELF bytes. */
+export function loaderV4StateBytes({
+    authority,
+    status,
+    elf = new Uint8Array([1, 2, 3]),
+    slot = 0,
+}: {
+    authority: string;
+    status: LoaderV4Status;
+    elf?: Uint8Array;
+    slot?: number;
+}): Uint8Array {
+    const header = encodeLoaderV4StateHeader({ authority: address(authority), slot: BigInt(slot), status });
+    const bytes = new Uint8Array(header.length + elf.length);
+    bytes.set(header);
+    bytes.set(elf, header.length);
+    return bytes;
 }
 
 type UpgradeableAccountOverrides = {

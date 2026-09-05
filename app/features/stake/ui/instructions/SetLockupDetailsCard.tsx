@@ -1,44 +1,33 @@
 import { Epoch } from '@components/common/Epoch';
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
-import React from 'react';
+import {
+    address,
+    custom,
+    defineInstructionCard,
+    type InstructionFieldList,
+    timestamp,
+} from '@entities/instruction-card';
 
 import type { SetLockupCheckedInfo, SetLockupInfo } from '../../lib/instruction-types';
-import { DetailRow, StakeProgramRow } from './DetailRow';
-import type { StakeCardProps } from './types';
 
-export function SetLockupDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    title,
-    innerCards,
-    childIndex,
-}: StakeCardProps<SetLockupInfo | SetLockupCheckedInfo> & { title: string }) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title={title}
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <StakeProgramRow />
-            <DetailRow label="Stake Address" pubkey={info.stakeAccount} />
-            <DetailRow label="Lockup Authority" pubkey={info.custodian} />
-            {info.lockup.epoch !== undefined && (
-                <DetailRow label="New Lockup Expiry Epoch">
-                    <Epoch epoch={info.lockup.epoch} link />
-                </DetailRow>
-            )}
-            {info.lockup.unixTimestamp !== undefined && (
-                <DetailRow label="New Lockup Expiry Timestamp" monospace>
-                    {displayTimestampUtc(unixTimestampToMs(info.lockup.unixTimestamp))}
-                </DetailRow>
-            )}
-            {info.lockup.custodian && <DetailRow label="New Lockup Custodian" pubkey={info.lockup.custodian} />}
-        </InstructionCard>
-    );
+type Info = SetLockupInfo | SetLockupCheckedInfo;
+
+export const SetLockupDetailsCard = defineInstructionCard<Info>({
+    fields,
+    title: 'Stake Program: Set Lockup',
+});
+
+export const SetLockupCheckedDetailsCard = defineInstructionCard<Info>({
+    fields,
+    title: 'Stake Program: Set Lockup Checked',
+});
+
+/** Both variants carry the same payload, so one field list serves both cards. */
+function fields(info: Info): InstructionFieldList {
+    return [
+        address('Stake Address', info.stakeAccount),
+        address('Lockup Authority', info.custodian),
+        info.lockup.epoch !== undefined && custom('New Lockup Expiry Epoch', <Epoch epoch={info.lockup.epoch} link />),
+        info.lockup.unixTimestamp !== undefined && timestamp('New Lockup Expiry Timestamp', info.lockup.unixTimestamp),
+        info.lockup.custodian && address('New Lockup Custodian', info.lockup.custodian),
+    ];
 }

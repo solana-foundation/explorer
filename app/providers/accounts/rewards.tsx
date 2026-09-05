@@ -1,14 +1,16 @@
 'use client';
 
+import { getRpc } from '@entities/cluster';
 import { ActionType } from '@providers/block';
 import * as Cache from '@providers/cache';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { Connection, InflationReward, PublicKey } from '@solana/web3.js';
+import { InflationReward, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 
 const REWARDS_AVAILABLE_EPOCH = new Map<Cluster, number>([
     [Cluster.MainnetBeta, 132],
@@ -89,12 +91,13 @@ async function fetchRewards(
     });
 
     const lowestAvailableEpoch = REWARDS_AVAILABLE_EPOCH.get(cluster) || 0;
-    const connection = new Connection(url);
+    const rpc = getRpc(url);
+    const address = toKitAddress(pubkey);
 
     if (!fromEpoch) {
         try {
-            const epochInfo = await connection.getEpochInfo();
-            fromEpoch = epochInfo.epoch - 1;
+            const epochInfo = await rpc.getEpochInfo().send();
+            fromEpoch = Number(epochInfo.epoch) - 1;
         } catch (error) {
             if (cluster !== Cluster.Custom) {
                 Logger.error(error, { url });
@@ -113,10 +116,20 @@ async function fetchRewards(
         }
     }
 
-    const getInflationReward = async (epoch: number) => {
+    const getInflationReward = async (epoch: number): Promise<InflationReward | null> => {
         try {
-            const result = await connection.getInflationReward([pubkey], epoch);
-            return result[0];
+            const [reward] = await rpc.getInflationReward([address], { epoch: BigInt(epoch) }).send();
+            // kit returns lamports, slots and epochs as bigints; the cached `Rewards` shape and
+            // `reconcile`'s epoch-keyed Map are numbers, as the RPC's own JSON is.
+            return reward
+                ? {
+                      amount: Number(reward.amount),
+                      commission: reward.commission,
+                      effectiveSlot: Number(reward.effectiveSlot),
+                      epoch: Number(reward.epoch),
+                      postBalance: Number(reward.postBalance),
+                  }
+                : null;
         } catch (error) {
             if (cluster !== Cluster.Custom) {
                 Logger.error(error, { url });

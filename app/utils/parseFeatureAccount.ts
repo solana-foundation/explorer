@@ -1,7 +1,12 @@
 import { Account } from '@providers/accounts';
-import * as BufferLayout from '@solana/buffer-layout';
+import { getU64Decoder } from '@solana/kit';
+
+import { readU8 } from '@/app/shared/lib/bytes';
 
 export const FEATURE_PROGRAM_ID = 'Feature111111111111111111111111111111111111';
+
+/** Tag byte marking a feature account whose activation slot follows as a u64. */
+const ACTIVATED_TAG = 1;
 
 type FeatureAccount = {
     address: string;
@@ -23,17 +28,10 @@ export const parseFeatureAccount = (account: Account): FeatureAccount => {
     if (!isFeatureAccount(account) || account.data.raw == null) {
         throw new Error(`Failed to parse ${account} as a feature account`);
     }
-    const address = account.pubkey.toBase58();
-    const parsed = BufferLayout.struct([
-        ((): BufferLayout.Union => {
-            const union = BufferLayout.union(BufferLayout.u8('isActivated'), null, 'activatedAt');
-            union.addVariant(0, BufferLayout.constant(null), 'value');
-            union.addVariant(1, BufferLayout.nu64(), 'value');
-            return union;
-        })(),
-    ]).decode(account.data.raw);
+    const raw = account.data.raw;
+    const isActivated = readU8(raw, 0) === ACTIVATED_TAG;
     return {
-        activatedAt: parsed.activatedAt.value,
-        address,
+        activatedAt: isActivated ? Number(getU64Decoder().decode(raw, 1)) : null,
+        address: account.pubkey.toBase58(),
     };
 };

@@ -1,5 +1,6 @@
 import {
     bytesEqual,
+    getBase58Encoder,
     getCompiledTransactionMessageDecoder,
     getCompiledTransactionMessageEncoder,
     getTransactionDecoder,
@@ -12,10 +13,11 @@ import {
     VersionedMessage,
     VersionedTransaction,
 } from '@solana/web3.js';
-import bs58 from 'bs58';
 import { describe, expect, it } from 'vitest';
 
 import { parseTransactionBytes } from '../parse-transaction-bytes';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 describe('parseTransactionBytes', () => {
     it.each([
@@ -43,7 +45,7 @@ describe('parseTransactionBytes', () => {
             throw new Error('Expected at least one signature');
         }
         // 64-byte ed25519 signature roundtrips through base58
-        expect(bs58.decode(result.signatures[0])).toHaveLength(64);
+        expect(BASE58_ENCODER.encode(result.signatures[0])).toHaveLength(64);
         expect(VersionedMessage.deserialize(result.messageBytes).header.numRequiredSignatures).toBe(1);
     });
 
@@ -93,7 +95,7 @@ describe('parseTransactionBytes', () => {
 
         const firstSig = result.signatures?.[0];
         if (!firstSig) throw new Error('Expected first signature to be defined');
-        expect(new Uint8Array(bs58.decode(firstSig))).toEqual(knownSigBytes);
+        expect(new Uint8Array(BASE58_ENCODER.encode(firstSig))).toEqual(knownSigBytes);
     });
 
     it('should fall back when signature count mismatches message header', () => {

@@ -1,7 +1,6 @@
 import { BPF_LOADER_2_PROGRAM_ID, BPF_LOADER_PROGRAM_ID } from '../../shared/constants.js';
 import { type AccountKindBuilder, resolveProgramAddressLabel, unknownMarker } from './shared.js';
 
-// Not routed yet — the router serves buildUnsupportedKindPayload for these kinds until the @explorer/idl-decode PR wires the enrichments.
 function buildPayload(ownerProgram: string): AccountKindBuilder {
     return context => {
         const entity: Record<string, unknown> = {

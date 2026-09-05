@@ -1,9 +1,20 @@
 import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
+import { createWeb3TransactionBytes } from '@entities/transaction-data/__fixtures__/wire-transactions';
+import { getBase58Decoder } from '@solana/kit';
 import type { ParsedTransactionWithMeta } from '@solana/web3.js';
-import { PublicKey, SystemProgram } from '@solana/web3.js';
-import { mockParsedTransactionDetails, mockTransactionStatus } from '@storybook-config/__fixtures__/transactions';
+import { ComputeBudgetProgram, PublicKey, SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
+import {
+    mockParsedTransactionDetails,
+    mockRawTransactionDetails,
+    mockTransactionStatus,
+} from '@storybook-config/__fixtures__/transactions';
+
+import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
+import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 
 export { DEFAULT_SIGNATURE };
+
+const BASE58_DECODER = getBase58Decoder();
 
 export const FEE_PAYER = new PublicKey('9noXzpXnkyEcKF3AeXqUHTdR59V5uvrRBUZ9bwfQwxNq');
 export const RECIPIENT = new PublicKey('GsbwXfJraMomNxBcpR3DBr9yoWR2PmN93PEaYJz7MSTN');
@@ -16,7 +27,10 @@ export const MOCK_FAILED_STATUS = mockTransactionStatus({ err: { InstructionErro
 const BASE_TX = {
     blockTime: 1_716_000_000,
     meta: {
-        computeUnitsConsumed: 5000,
+        // A System transfer consumes 150 units, and `costUnits` is the *executed* cost, so it has to
+        // contain them. The pair is what mainnet reports for a single-signer transfer.
+        computeUnitsConsumed: 150,
+        costUnits: 1481,
         err: null,
         fee: 5000,
         innerInstructions: [],
@@ -96,6 +110,49 @@ const BASE_TX = {
 
 export const MOCK_PARSED_TX = mockParsedTransactionDetails({ transactionWithMeta: BASE_TX });
 
+/**
+ * A Compute Budget `SetComputeUnitLimit` instruction in the shape the RPC serves it: a partially
+ * decoded instruction whose data is base58, which is what the requested-CU estimator reads.
+ */
+function withComputeUnitLimit(units: number) {
+    const data = alloc(5);
+    data[0] = 2; // SetComputeUnitLimit
+    writeUint32LE(data, units, 1);
+
+    return {
+        ...BASE_TX,
+        transaction: {
+            ...BASE_TX.transaction,
+            message: {
+                ...BASE_TX.transaction.message,
+                // Appended, not prepended: the summary card reads instruction 0 to detect a nonce.
+                instructions: [
+                    ...BASE_TX.transaction.message.instructions,
+                    {
+                        accounts: [],
+                        data: BASE58_DECODER.decode(data),
+                        programId: ComputeBudgetProgram.programId,
+                    },
+                ],
+            },
+        },
+    } as unknown as ParsedTransactionWithMeta;
+}
+
+/** Accurately budgeted: requests 1,000 compute units and consumes 150 of them. */
+export const MOCK_TIGHT_BUDGET_TX = mockParsedTransactionDetails({
+    transactionWithMeta: withComputeUnitLimit(1_000),
+});
+
+/**
+ * A wallet's default 200,000 compute unit request left in place over a transfer that uses 150. The
+ * executed cost the RPC reports is unchanged — only the *requested* cost, which SIMD-0553 charges
+ * on, blows up.
+ */
+export const MOCK_LOOSE_BUDGET_TX = mockParsedTransactionDetails({
+    transactionWithMeta: withComputeUnitLimit(200_000),
+});
+
 export const MOCK_FAILED_TX = mockParsedTransactionDetails({
     transactionWithMeta: {
         ...BASE_TX,
@@ -108,6 +165,23 @@ export const MOCK_FAILED_TX = mockParsedTransactionDetails({
                 'Program 11111111111111111111111111111111 failed: custom program error: 0x1',
             ],
         } as unknown as ParsedTransactionWithMeta['meta'],
+    },
+});
+
+// Built from real wire bytes rather than a hand-picked number, so the size the summary renders is
+// the size these bytes actually have.
+const RAW_TX_BYTES = createWeb3TransactionBytes('legacy');
+const RAW_MESSAGE_BYTES = parseTransactionBytes(RAW_TX_BYTES).messageBytes;
+const RAW_MESSAGE = VersionedMessage.deserialize(RAW_MESSAGE_BYTES);
+
+export const MOCK_RAW_TX = mockRawTransactionDetails({
+    raw: {
+        message: RAW_MESSAGE,
+        messageBytes: RAW_MESSAGE_BYTES,
+        serializedSize: RAW_TX_BYTES.length,
+        signatures: [DEFAULT_SIGNATURE],
+        transaction: TransactionMessage.decompile(RAW_MESSAGE),
+        version: 'legacy',
     },
 });
 

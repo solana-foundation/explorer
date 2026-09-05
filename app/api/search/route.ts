@@ -1,11 +1,13 @@
+import { getBase58Encoder } from '@solana/kit';
 import { PUBLIC_KEY_LENGTH } from '@solana/web3.js';
 import { Cluster, clusterFromSlug, clusterSlug, type ServerCluster } from '@utils/cluster';
-import bs58 from 'bs58';
 import { NextResponse } from 'next/server';
 
-import { GENESIS_HASHES } from '@/app/entities/chain-id/lib/const';
+import { GENESIS_HASHES } from '@/app/entities/chain-id/server';
 import { resolveSearchTokens, SEARCH_CACHE_HEADERS } from '@/app/features/search/server';
 import { NO_STORE_HEADERS } from '@/app/shared/lib/http-utils';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 const SEARCH_QUERY_MAX_LENGTH = 200;
 
@@ -24,7 +26,7 @@ function clusterFromGenesisHash(genesisHash: string): ServerCluster | null {
 
 function detectQueryType(query: string): 'address' | 'text' {
     try {
-        const decoded = bs58.decode(query);
+        const decoded = BASE58_ENCODER.encode(query);
         return decoded.length === PUBLIC_KEY_LENGTH ? 'address' : 'text';
     } catch {
         return 'text';

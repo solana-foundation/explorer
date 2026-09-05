@@ -1,8 +1,19 @@
-import * as BufferLayout from '@solana/buffer-layout';
-import { Layout } from '@solana/buffer-layout';
+import {
+    addDecoderSizePrefix,
+    type Decoder,
+    fixDecoderSize,
+    getAddressDecoder,
+    getArrayDecoder,
+    getBytesDecoder,
+    getI32Decoder,
+    getI64Decoder,
+    getStructDecoder,
+    getU8Decoder,
+    getU32Decoder,
+    getU64Decoder,
+    getUtf8Decoder,
+} from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-
-import { toUtf8 } from '@/app/shared/lib/bytes';
 
 /**
  * An enumeration of valid PythInstructionTypes
@@ -23,14 +34,29 @@ export type PythInstructionType =
     | 'SetMinPublishers'
     | 'UpdatePriceNoFailOnError';
 
-export function headerLayout(property = 'header') {
-    return BufferLayout.struct([BufferLayout.u32('version'), BufferLayout.u32('type')], property);
-}
+const headerDecoder = () =>
+    getStructDecoder([
+        ['version', getU32Decoder()],
+        ['type', getU32Decoder()],
+    ] as const);
 
-function decodeData(type: any, buffer: Uint8Array): any {
+/** A uint8 length-prefixed UTF-8 string. */
+const lpStringDecoder = () => addDecoderSizePrefix(getUtf8Decoder(), getU8Decoder());
+
+/** A list of key/value pairs filling all the space remaining in the instruction data. */
+const attributesDecoder = () =>
+    getArrayDecoder(
+        getStructDecoder([
+            ['key', lpStringDecoder()],
+            ['value', lpStringDecoder()],
+        ] as const),
+        { size: 'remainder' },
+    );
+
+function decodeData(type: { index: number; decoder: Decoder<any> }, buffer: Uint8Array): any {
     let data;
     try {
-        data = type.layout.decode(buffer);
+        data = type.decoder.decode(buffer);
     } catch (err) {
         throw new Error(`invalid instruction; ${err}`);
     }
@@ -43,132 +69,102 @@ function decodeData(type: any, buffer: Uint8Array): any {
 }
 
 /**
- * An uint8 length-prefixed UTF-8 string.
- */
-class LPString extends Layout {
-    getSpan(b: Uint8Array, offset?: number): number {
-        return 1 + b[offset || 0];
-    }
-
-    decode(b: Uint8Array, offset?: number): string {
-        if (offset === undefined) {
-            offset = 0;
-        }
-        return toUtf8(b.slice(offset + 1, offset + b[offset] + 1));
-    }
-}
-
-/**
- * A list that fills up all the available space with its elements.
- */
-class GreedyList extends Layout {
-    private element: Layout;
-
-    constructor(element: Layout, property?: string) {
-        super(-1, property);
-        this.element = element;
-    }
-
-    getSpan(b: Uint8Array, offset?: number): number {
-        return b.length - (offset || 0);
-    }
-
-    decode(b: Uint8Array, offset?: number): string[] {
-        if (offset === undefined) {
-            offset = 0;
-        }
-        const strs = [];
-        while (offset < b.length) {
-            strs.push(this.element.decode(b, offset));
-            offset += this.element.getSpan(b, offset);
-        }
-        return strs;
-    }
-}
-
-/**
- * An enumeration of valid Pyth instruction layouts
+ * An enumeration of valid Pyth instruction decoders
  * @internal
  */
-export const PYTH_INSTRUCTION_LAYOUTS: {
-    [type in PythInstructionType]: any;
+export const PYTH_INSTRUCTION_DECODERS: {
+    [type in PythInstructionType]: { index: number; decoder: Decoder<any> };
 } = Object.freeze({
     AddMapping: {
+        decoder: getStructDecoder([['header', headerDecoder()]]),
         index: 1,
-        layout: BufferLayout.struct([headerLayout()]),
     },
     AddPrice: {
+        decoder: getStructDecoder([
+            ['header', headerDecoder()],
+            ['exponent', getI32Decoder()],
+            ['priceType', getU32Decoder()],
+        ]),
         index: 4,
-        layout: BufferLayout.struct([headerLayout(), BufferLayout.s32('exponent'), BufferLayout.u32('priceType')]),
     },
     AddProduct: {
+        decoder: getStructDecoder([['header', headerDecoder()]]),
         index: 2,
-        layout: BufferLayout.struct([headerLayout()]),
     },
     AddPublisher: {
+        decoder: getStructDecoder([
+            ['header', headerDecoder()],
+            ['publisherPubkey', getAddressDecoder()],
+        ]),
         index: 5,
-        layout: BufferLayout.struct([headerLayout(), BufferLayout.blob(32, 'publisherPubkey')]),
     },
     AggregatePrice: {
+        decoder: getStructDecoder([['header', headerDecoder()]]),
         index: 8,
-        layout: BufferLayout.struct([headerLayout()]),
     },
     DeletePublisher: {
+        decoder: getStructDecoder([
+            ['header', headerDecoder()],
+            ['publisherPubkey', getAddressDecoder()],
+        ]),
         index: 6,
-        layout: BufferLayout.struct([headerLayout(), BufferLayout.blob(32, 'publisherPubkey')]),
     },
     InitMapping: {
+        decoder: getStructDecoder([['header', headerDecoder()]]),
         index: 0,
-        layout: BufferLayout.struct([headerLayout()]),
     },
     InitPrice: {
+        decoder: getStructDecoder([
+            ['header', headerDecoder()],
+            ['exponent', getI32Decoder()],
+            ['priceType', getU32Decoder()],
+        ]),
         index: 9,
-        layout: BufferLayout.struct([headerLayout(), BufferLayout.s32('exponent'), BufferLayout.u32('priceType')]),
     },
     InitTest: {
+        decoder: getStructDecoder([['header', headerDecoder()]]),
         index: 10,
-        layout: BufferLayout.struct([headerLayout()]),
     },
     SetMinPublishers: {
-        index: 12,
-        layout: BufferLayout.struct([
-            headerLayout(),
-            BufferLayout.u8('minPublishers'),
-            BufferLayout.blob(3, 'unused1'),
+        decoder: getStructDecoder([
+            ['header', headerDecoder()],
+            ['minPublishers', getU8Decoder()],
+            ['unused1', fixDecoderSize(getBytesDecoder(), 3)],
         ]),
+        index: 12,
     },
     UpdatePrice: {
-        index: 7,
-        layout: BufferLayout.struct([
-            headerLayout(),
-            BufferLayout.u32('status'),
-            BufferLayout.u32('unused1'),
-            BufferLayout.ns64('price'),
-            BufferLayout.nu64('conf'),
-            BufferLayout.nu64('publishSlot'),
+        decoder: getStructDecoder([
+            ['header', headerDecoder()],
+            ['status', getU32Decoder()],
+            ['unused1', getU32Decoder()],
+            ['price', getI64Decoder()],
+            ['conf', getU64Decoder()],
+            ['publishSlot', getU64Decoder()],
         ]),
+        index: 7,
     },
     UpdatePriceNoFailOnError: {
-        index: 13,
-        layout: BufferLayout.struct([
-            headerLayout(),
-            BufferLayout.u32('status'),
-            BufferLayout.u32('unused1'),
-            BufferLayout.ns64('price'),
-            BufferLayout.nu64('conf'),
-            BufferLayout.nu64('publishSlot'),
+        decoder: getStructDecoder([
+            ['header', headerDecoder()],
+            ['status', getU32Decoder()],
+            ['unused1', getU32Decoder()],
+            ['price', getI64Decoder()],
+            ['conf', getU64Decoder()],
+            ['publishSlot', getU64Decoder()],
         ]),
+        index: 13,
     },
     UpdateProduct: {
-        index: 3,
-        layout: BufferLayout.struct([
-            headerLayout(),
-            new GreedyList(BufferLayout.struct([new LPString(-1, 'key'), new LPString(-1, 'value')]), 'attributes'),
+        decoder: getStructDecoder([
+            ['header', headerDecoder()],
+            ['attributes', attributesDecoder()],
         ]),
+        index: 3,
     },
     UpdateTest: {
+        decoder: getStructDecoder([['header', headerDecoder()]]),
         index: 11,
-        layout: BufferLayout.struct([headerLayout()]),
     },
 });
 
@@ -256,15 +252,15 @@ export class PythInstruction {
      * Decode a Pyth instruction and retrieve the instruction type.
      */
     static decodeInstructionType(instruction: TransactionInstruction): PythInstructionType {
-        const header = headerLayout().decode(instruction.data);
+        const header = headerDecoder().decode(instruction.data);
         if (header.version !== 2) {
             throw new Error(`Unsupported Pyth version: ${header.version}`);
         }
         const typeIndex = header.type;
 
         let type: PythInstructionType | undefined;
-        for (const [ixType, layout] of Object.entries(PYTH_INSTRUCTION_LAYOUTS)) {
-            if (layout.index === typeIndex) {
+        for (const [ixType, { index }] of Object.entries(PYTH_INSTRUCTION_DECODERS)) {
+            if (index === typeIndex) {
                 type = ixType as PythInstructionType;
                 break;
             }
@@ -281,7 +277,7 @@ export class PythInstruction {
      * Decode an "init mapping" instruction and retrieve the instruction params.
      */
     static decodeInitMapping(instruction: TransactionInstruction): InitMappingParams {
-        decodeData(PYTH_INSTRUCTION_LAYOUTS.InitMapping, instruction.data);
+        decodeData(PYTH_INSTRUCTION_DECODERS.InitMapping, instruction.data);
         return {
             fundingPubkey: instruction.keys[0].pubkey,
             mappingPubkey: instruction.keys[1].pubkey,
@@ -292,7 +288,7 @@ export class PythInstruction {
      * Decode an "add mapping" instruction and retrieve the instruction params.
      */
     static decodeAddMapping(instruction: TransactionInstruction): AddMappingParams {
-        decodeData(PYTH_INSTRUCTION_LAYOUTS.AddMapping, instruction.data);
+        decodeData(PYTH_INSTRUCTION_DECODERS.AddMapping, instruction.data);
         return {
             fundingPubkey: instruction.keys[0].pubkey,
             mappingPubkey: instruction.keys[1].pubkey,
@@ -304,7 +300,7 @@ export class PythInstruction {
      * Decode an "add product" instruction and retrieve the instruction params.
      */
     static decodeAddProduct(instruction: TransactionInstruction): AddProductParams {
-        decodeData(PYTH_INSTRUCTION_LAYOUTS.AddProduct, instruction.data);
+        decodeData(PYTH_INSTRUCTION_DECODERS.AddProduct, instruction.data);
         return {
             fundingPubkey: instruction.keys[0].pubkey,
             mappingPubkey: instruction.keys[1].pubkey,
@@ -316,7 +312,7 @@ export class PythInstruction {
      * Decode an "add product" instruction and retrieve the instruction params.
      */
     static decodeUpdateProduct(instruction: TransactionInstruction): UpdateProductParams {
-        const { attributes } = decodeData(PYTH_INSTRUCTION_LAYOUTS.UpdateProduct, instruction.data);
+        const { attributes } = decodeData(PYTH_INSTRUCTION_DECODERS.UpdateProduct, instruction.data);
         return {
             attributes: new Map(attributes.map((kv: { key: string; value: string }) => [kv.key, kv.value])),
             fundingPubkey: instruction.keys[0].pubkey,
@@ -328,7 +324,7 @@ export class PythInstruction {
      * Decode an "add price" instruction and retrieve the instruction params.
      */
     static decodeAddPrice(instruction: TransactionInstruction): AddPriceParams {
-        const { exponent, priceType } = decodeData(PYTH_INSTRUCTION_LAYOUTS.AddPrice, instruction.data);
+        const { exponent, priceType } = decodeData(PYTH_INSTRUCTION_DECODERS.AddPrice, instruction.data);
         return {
             exponent,
             fundingPubkey: instruction.keys[0].pubkey,
@@ -342,7 +338,7 @@ export class PythInstruction {
      * Decode an "add publisher" instruction and retrieve the instruction params.
      */
     static decodeAddPublisher(instruction: TransactionInstruction): BasePublisherOperationParams {
-        const { publisherPubkey } = decodeData(PYTH_INSTRUCTION_LAYOUTS.AddPublisher, instruction.data);
+        const { publisherPubkey } = decodeData(PYTH_INSTRUCTION_DECODERS.AddPublisher, instruction.data);
 
         return {
             pricePubkey: instruction.keys[1].pubkey,
@@ -355,7 +351,7 @@ export class PythInstruction {
      * Decode an "delete publisher" instruction and retrieve the instruction params.
      */
     static decodeDeletePublisher(instruction: TransactionInstruction): BasePublisherOperationParams {
-        const { publisherPubkey } = decodeData(PYTH_INSTRUCTION_LAYOUTS.DeletePublisher, instruction.data);
+        const { publisherPubkey } = decodeData(PYTH_INSTRUCTION_DECODERS.DeletePublisher, instruction.data);
 
         return {
             pricePubkey: instruction.keys[1].pubkey,
@@ -368,13 +364,16 @@ export class PythInstruction {
      * Decode an "update price" instruction and retrieve the instruction params.
      */
     static decodeUpdatePrice(instruction: TransactionInstruction): UpdatePriceParams {
-        const { status, price, conf, publishSlot } = decodeData(PYTH_INSTRUCTION_LAYOUTS.UpdatePrice, instruction.data);
+        const { status, price, conf, publishSlot } = decodeData(
+            PYTH_INSTRUCTION_DECODERS.UpdatePrice,
+            instruction.data,
+        );
 
         return {
-            conf,
-            price,
+            conf: Number(conf),
+            price: Number(price),
             pricePubkey: instruction.keys[1].pubkey,
-            publishSlot,
+            publishSlot: Number(publishSlot),
             publisherPubkey: instruction.keys[0].pubkey,
             status,
         };
@@ -385,15 +384,15 @@ export class PythInstruction {
      */
     static decodeUpdatePriceNoFailOnError(instruction: TransactionInstruction): UpdatePriceParams {
         const { status, price, conf, publishSlot } = decodeData(
-            PYTH_INSTRUCTION_LAYOUTS.UpdatePriceNoFailOnError,
+            PYTH_INSTRUCTION_DECODERS.UpdatePriceNoFailOnError,
             instruction.data,
         );
 
         return {
-            conf,
-            price,
+            conf: Number(conf),
+            price: Number(price),
             pricePubkey: instruction.keys[1].pubkey,
-            publishSlot,
+            publishSlot: Number(publishSlot),
             publisherPubkey: instruction.keys[0].pubkey,
             status,
         };
@@ -403,7 +402,7 @@ export class PythInstruction {
      * Decode an "aggregate price" instruction and retrieve the instruction params.
      */
     static decodeAggregatePrice(instruction: TransactionInstruction): AggregatePriceParams {
-        decodeData(PYTH_INSTRUCTION_LAYOUTS.AggregatePrice, instruction.data);
+        decodeData(PYTH_INSTRUCTION_DECODERS.AggregatePrice, instruction.data);
 
         return {
             fundingPubkey: instruction.keys[0].pubkey,
@@ -415,7 +414,7 @@ export class PythInstruction {
      * Decode an "init price" instruction and retrieve the instruction params.
      */
     static decodeInitPrice(instruction: TransactionInstruction): InitPriceParams {
-        const { exponent, priceType } = decodeData(PYTH_INSTRUCTION_LAYOUTS.InitPrice, instruction.data);
+        const { exponent, priceType } = decodeData(PYTH_INSTRUCTION_DECODERS.InitPrice, instruction.data);
         return {
             exponent,
             fundingPubkey: instruction.keys[0].pubkey,
@@ -428,7 +427,7 @@ export class PythInstruction {
      * Decode an "set min publishers" instruction and retrieve the instruction params.
      */
     static decodeSetMinPublishers(instruction: TransactionInstruction): SetMinPublishersParams {
-        const { minPublishers } = decodeData(PYTH_INSTRUCTION_LAYOUTS.SetMinPublishers, instruction.data);
+        const { minPublishers } = decodeData(PYTH_INSTRUCTION_DECODERS.SetMinPublishers, instruction.data);
         return {
             fundingPubkey: instruction.keys[0].pubkey,
             minPublishers,

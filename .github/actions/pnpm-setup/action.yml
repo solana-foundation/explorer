@@ -1,0 +1,31 @@
+name: pnpm setup
+description: Install pnpm, point its store at a cached directory, set up Node, and install dependencies.
+
+inputs:
+  node-version:
+    description: Node version handed to actions/setup-node.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install package manager
+      uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+    # Must precede setup-node, which caches whatever the store dir resolves to.
+    - name: Setup pnpm config
+      shell: bash
+      run: pnpm config set store-dir ~/.pnpm-store
+
+    # Sole store cache: setup-node restores by exact lockfile key only, so it cannot grow run over run
+    # the way a restore-keys cache does. See setup-node src/cache-restore.ts (restoreCache).
+    - name: Setup Node.js
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'pnpm'
+        cache-dependency-path: pnpm-lock.yaml
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

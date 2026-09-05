@@ -1,5 +1,5 @@
+import { getBase58Encoder } from '@solana/kit';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
-import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { AlertCircle } from 'react-feather';
@@ -13,6 +13,8 @@ import { FormControl } from '@/app/shared/ui/FormControl';
 import { TabsContent, TabsList, TabsTrigger } from '@/app/shared/ui/Tabs';
 
 import type { InspectorData, TransactionData } from './InspectorPage';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 export { MIN_MESSAGE_LENGTH };
 
@@ -200,7 +202,7 @@ export function RawInput({
 
         try {
             // Try base58 decode, use result as Uint8Array
-            buffer = new Uint8Array(base58.decode(input));
+            buffer = new Uint8Array(BASE58_ENCODER.encode(input));
         } catch (_err) {
             // If base58 fails, try base64
             try {

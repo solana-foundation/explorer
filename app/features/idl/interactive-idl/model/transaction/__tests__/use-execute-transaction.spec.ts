@@ -1,13 +1,14 @@
-import { useWallet } from '@solana/wallet-adapter-react';
 import type { Connection } from '@solana/web3.js';
 import { Keypair, PublicKey, SendTransactionError, Transaction, TransactionInstruction } from '@solana/web3.js';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { useWallet } from '@/app/providers/wallet/use-wallet';
+
 import type { BroadcastFailedResult, ExecutionOkResult, PreBroadcastFailedResult } from '../types';
 import { useExecuteTransaction } from '../use-execute-transaction';
 
-vi.mock('@solana/wallet-adapter-react');
+vi.mock('@/app/providers/wallet/use-wallet');
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: () => ({ cluster: 'devnet' }),
 }));

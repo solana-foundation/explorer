@@ -2,7 +2,7 @@ import { type Address, address } from '@solana/kit';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { NextResponse } from 'next/server';
-import { deriveAttestationPda, deriveSchemaPda } from 'sas-lib';
+import { findAttestationPda, findSchemaPda } from 'sas-lib';
 
 import { CACHE_HEADERS, ERROR_CACHE_HEADERS, isTimeoutError } from '@/app/shared/lib/http-utils';
 import { Logger } from '@/app/shared/lib/logger';
@@ -23,7 +23,7 @@ const connection = new Connection(serverClusterUrl(Cluster.MainnetBeta), {
 async function getSchemaVersionPdas(credentialAddress: Address, schemaName: string): Promise<Address[]> {
     const versions = await Promise.all(
         Array.from({ length: MAX_SCHEMA_VERSIONS }, (_, version) =>
-            deriveSchemaPda({
+            findSchemaPda({
                 credential: credentialAddress,
                 name: schemaName,
                 version,
@@ -56,7 +56,7 @@ export async function GET(_request: Request, props: Params) {
 
         const attestationPdas = await Promise.all(
             schemaPdas.map(schema =>
-                deriveAttestationPda({
+                findAttestationPda({
                     credential: credentialAddr,
                     nonce: mintAddr,
                     schema,

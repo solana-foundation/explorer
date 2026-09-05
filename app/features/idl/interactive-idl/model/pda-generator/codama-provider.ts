@@ -1,7 +1,7 @@
 import { createProgramClient, type ProgramClient } from '@codama/dynamic-client';
 import { getIdlSpecType, type SupportedIdl } from '@entities/idl';
+import { getBase58Encoder } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
-import bs58 from 'bs58';
 import { camelCase } from 'change-case';
 import type {
     BytesEncoding,
@@ -22,11 +22,14 @@ import {
     visit,
 } from 'codama';
 
+import { arrayOrEmpty } from '@/app/shared/lib/array';
 import { fromBase64, fromUtf8, toHex } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { convertValue } from '../codama/convert-value';
 import type { PdaFormAccounts, PdaFormArgs, PdaGenerationResult, PdaProvider } from './types';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 /**
  * PDA provider for Codama IDL format.
@@ -48,7 +51,7 @@ export function createCodamaPdaProvider(): PdaProvider {
                 clientCache.set(root, client);
             }
 
-            const ixNode = root.program.instructions.find(i => camelCase(i.name) === instructionName);
+            const ixNode = arrayOrEmpty(root.program.instructions).find(i => camelCase(i.name) === instructionName);
             if (!ixNode) return {};
 
             return deriveInstructionPdas(client, root, ixNode, formArgs, formAccounts);
@@ -78,11 +81,11 @@ async function deriveInstructionPdas(
     formArgs: PdaFormArgs,
     formAccounts: PdaFormAccounts,
 ): Promise<Record<string, PdaGenerationResult>> {
-    const pdaMap = new Map<string, PdaNode>(root.program.pdas.map(p => [p.name, p]));
+    const pdaMap = new Map<string, PdaNode>(arrayOrEmpty(root.program.pdas).map(p => [p.name, p]));
     const results: Record<string, PdaGenerationResult> = {};
     const recursiveAccounts = findRecursivePdaAccounts(instruction);
 
-    for (const acc of instruction.accounts) {
+    for (const acc of arrayOrEmpty(instruction.accounts)) {
         const pdaInfo = getAccountPdaInfo(acc, pdaMap, formArgs, formAccounts);
         if (!pdaInfo) continue;
 
@@ -277,6 +280,7 @@ function expectedConditionValueAsString(valueNode: NonNullable<ConditionalValueN
             return valueNode.value ? expectedConditionValueAsString(valueNode.value) : null;
         case 'arrayValueNode':
         case 'bytesValueNode':
+        case 'injectedValueNode':
         case 'mapValueNode':
         case 'noneValueNode':
         case 'setValueNode':
@@ -313,7 +317,7 @@ function buildSeedInputs(
     const seedInfo: PdaGenerationResult['seeds'] = [];
     let allResolved = true;
 
-    for (const seed of pdaNode.seeds) {
+    for (const seed of arrayOrEmpty(pdaNode.seeds)) {
         if (seed.kind === 'constantPdaSeedNode') {
             // Constant seeds are handled by the library automatically.
             // Just add display info.
@@ -323,7 +327,7 @@ function buildSeedInputs(
         }
 
         // Variable seed — find the mapping to determine the form value source
-        const mapping = seedMappings.find(m => m.name === seed.name);
+        const mapping = arrayOrEmpty(seedMappings).find(m => m.name === seed.name);
         let formValue: string | null = null;
 
         if (mapping) {
@@ -389,7 +393,7 @@ function decodeBytesValueToHex(data: string, encoding: BytesEncoding): string {
         case 'base16':
             return data;
         case 'base58':
-            return toHex(bs58.decode(data));
+            return toHex(new Uint8Array(BASE58_ENCODER.encode(data)));
         case 'base64':
             return toHex(fromBase64(data));
         case 'utf8':

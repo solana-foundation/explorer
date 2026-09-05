@@ -7,11 +7,18 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { fetchGenesisHash } from '../api/fetch-genesis-hash';
 import { Cluster, type ClusterSelection, ClusterStatus } from '../lib/cluster';
+import type { ConnectableUrl } from '../lib/connectable-url';
 import { parseQuery } from '../lib/resolve-cluster';
 import type { RpcEndpoint } from '../lib/rpc-endpoint';
 import { useClusterUrl } from './use-cluster-url';
 
 interface State {
+    // The endpoint a consumer may connect to, or `undefined` until a custom URL is settled. Fetching
+    // hooks key on this; `url` stays the value to display.
+    //
+    // Required rather than optional, because absent and "not settled yet" are the same value to every
+    // consumer: a provider that forgot the field would leave all of them waiting, and say nothing.
+    connectableUrl: ConnectableUrl | undefined;
     // Chain identity, resolved by the connection health check. Cheap and static per cluster.
     genesisHash?: string;
     // A valid custom endpoint from the query string that the user has not agreed to yet. Nothing connects
@@ -38,7 +45,7 @@ type ClusterProviderProps = {
 };
 export function ClusterProvider({ searchParams, onReplaceSearchParams, children }: ClusterProviderProps) {
     const cluster = parseQuery(searchParams);
-    const { customUrlDecided, pendingCustomUrl, selection, url } = useClusterUrl({
+    const { connectableUrl, pendingCustomUrl, selection, url } = useClusterUrl({
         cluster,
         onReplaceSearchParams,
         searchParams,
@@ -46,30 +53,32 @@ export function ClusterProvider({ searchParams, onReplaceSearchParams, children 
 
     // The connection health check IS the fetch. Keying by URL means a cluster switch abandons the
     // in-flight request (SWR writes it to the old key, never the current one), and a new key resets `data`
-    // to undefined, i.e. back to Connecting.
-    //
-    // The key is null while consent is pending or the custom URL is undecided (see `useClusterUrl`): `url`
-    // is the fallback endpoint then, so connecting would contact a node nobody chose and defeat the prompt
-    // asking about a different one. Status reads Connecting until the user answers.
-    //
-    // Status tracks ONLY genesis-hash reachability. Live ledger info (epoch/schedule/first block) is
-    // fetched separately and lazily by useClusterInfo(), so a partial RPC failure there degrades to a
-    // loading card that self-heals via SWR retry — it does not fail the whole cluster.
-    // eslint-disable-next-line unicorn/no-null -- SWR treats a null key, and only null, as "do not fetch"
-    const connectionKey = pendingCustomUrl === undefined && customUrlDecided ? ['cluster-connection', url] : null;
-    const { data: genesisHash, error } = useSWRImmutable(connectionKey, () => fetchGenesisHash(url), {
-        onError: connectionError => {
-            if (cluster !== Cluster.Custom) {
-                Logger.error(connectionError, { clusterUrl: url });
-            }
+    // to undefined, i.e. back to Connecting. A falsy key waits, which is what an unsettled custom URL
+    // should do: connecting would contact a node nobody chose.
+    const { data: genesisHash, error } = useSWRImmutable(
+        connectableUrl && (['cluster-connection', connectableUrl] as const),
+        ([, endpoint]: readonly ['cluster-connection', ConnectableUrl]) => fetchGenesisHash(endpoint),
+        {
+            onError: connectionError => {
+                if (cluster !== Cluster.Custom) {
+                    Logger.error(connectionError, { clusterUrl: url });
+                }
+            },
+            // What lets a failed connection recover: nothing in the UI retries the check, and a reachable
+            // endpoint answers from cache, so the cost falls on the failed case.
+            revalidateOnFocus: true,
+            revalidateOnReconnect: true,
+            // A down endpoint must not be hammered while the tab sits open.
+            shouldRetryOnError: false,
         },
-        shouldRetryOnError: false,
-    });
+    );
 
+    // Genesis-hash reachability only. Live ledger info is fetched separately and lazily, so a partial RPC
+    // failure there degrades to a loading card that self-heals — it does not fail the whole cluster.
     const status = deriveConnectionStatus({ error, genesisHash });
 
     return (
-        <StateContext.Provider value={{ genesisHash, pendingCustomUrl, selection, status }}>
+        <StateContext.Provider value={{ connectableUrl, genesisHash, pendingCustomUrl, selection, status }}>
             {children}
         </StateContext.Provider>
     );

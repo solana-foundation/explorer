@@ -1,7 +1,6 @@
 'use client';
 
 import { getIdlSpecType, type InstructionData } from '@entities/idl';
-import { useWallet } from '@solana/wallet-adapter-react';
 import {
     type Commitment,
     Connection,
@@ -14,6 +13,7 @@ import { useAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCluster } from '@/app/providers/cluster';
+import { useWallet } from '@/app/providers/wallet/use-wallet';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { programAtom } from '../model/state-atoms';
@@ -281,14 +281,14 @@ export const isEnabled = ({
     idl,
     programId,
     publicKey,
-    connected,
+    canSign,
 }: {
     idl: unknown;
     programId?: PublicKey | string | null;
-    publicKey: PublicKey | null;
-    connected: boolean;
+    publicKey: PublicKey | undefined;
+    canSign: boolean;
 }): boolean => {
-    return Boolean(idl && programId && publicKey && connected === true);
+    return Boolean(idl && programId && publicKey && canSign === true);
 };
 
 function handleInitializeError(error: unknown | Error, message = 'Failed to initialize program') {

@@ -19,8 +19,7 @@ function findLookupAddressByIndex(
     let lookup: PublicKey;
     // dynamic means that lookups are taken based not on staticAccountKeys
     let dynamicLookups:
-        | { isStatic: true; lookups: undefined }
-        | { isStatic: false; lookups: LookupsForAccountKeyIndex };
+        { isStatic: true; lookups: undefined } | { isStatic: false; lookups: LookupsForAccountKeyIndex };
 
     if (accountIndex >= message.staticAccountKeys.length) {
         const lookupIndex = accountIndex - message.staticAccountKeys.length;

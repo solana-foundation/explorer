@@ -30,8 +30,7 @@ const NavbarItem = React.forwardRef<HTMLLIElement, NavbarItemProps>(({ className
 NavbarItem.displayName = 'NavbarItem';
 
 export interface NavbarLinkProps
-    extends React.AnchorHTMLAttributes<HTMLAnchorElement>,
-        VariantProps<typeof navbarLinkVariants> {
+    extends React.AnchorHTMLAttributes<HTMLAnchorElement>, VariantProps<typeof navbarLinkVariants> {
     active?: boolean;
     /** Render styles onto the child element (e.g., Next.js `<Link>`) via Radix Slot. */
     asChild?: boolean;

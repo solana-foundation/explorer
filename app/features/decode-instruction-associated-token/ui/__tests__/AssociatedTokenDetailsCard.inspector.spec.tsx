@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import * as spl from '@solana/spl-token';
 import { TransactionMessage } from '@solana/web3.js';
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe } from 'vitest';
 
@@ -27,7 +27,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         const ti = TransactionMessage.decompile(m, {
             addressLookupTableAccounts: lookups,
         }).instructions[index];
-        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 
         const ix = dispatcher.fromTransactionInstruction(ti);
         if (!isParsedInstruction(ix)) throw new Error('AT slice did not recognise fixture');
@@ -71,7 +71,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         const ti = TransactionMessage.decompile(m, {
             addressLookupTableAccounts: lookups,
         }).instructions[index];
-        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 
         const ix = dispatcher.fromTransactionInstruction(ti);
         if (!isParsedInstruction(ix)) throw new Error('AT slice did not recognise fixture');
@@ -112,7 +112,7 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
         const ti = TransactionMessage.decompile(m, {
             addressLookupTableAccounts: lookups,
         }).instructions[index];
-        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 
         const ix = dispatcher.fromTransactionInstruction(ti);
         if (!isParsedInstruction(ix)) throw new Error('AT slice did not recognise fixture');
@@ -157,7 +157,7 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
             addressLookupTableAccounts: lookups,
         }).instructions[index];
 
-        expect(ti.programId.equals(spl.ASSOCIATED_TOKEN_PROGRAM_ID)).toBeTruthy();
+        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
 
         const ix = dispatcher.fromTransactionInstruction(ti);
         if (!isParsedInstruction(ix)) throw new Error('AT slice did not recognise fixture');

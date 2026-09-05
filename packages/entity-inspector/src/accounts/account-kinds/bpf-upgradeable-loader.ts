@@ -33,7 +33,6 @@ function buildUpgradeableLoaderOverviewFields(context: AccountPayloadContext): R
     return fields;
 }
 
-// Not routed yet — the router serves buildUnsupportedKindPayload for this kind until the @explorer/idl-decode PR wires the enrichments.
 export const buildBpfUpgradeableLoaderPayload: AccountKindBuilder = context => {
     const entity: Record<string, unknown> = {
         kind: context.kind,

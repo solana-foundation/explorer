@@ -41,7 +41,7 @@ function SolanaSchemaCard({ schema }: { schema: SasSchema }) {
         <>
             <BaseTable.Row>
                 <BaseTable.Cell>Schema Name</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{decodeString(schema.name)}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{schema.name}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Credential</BaseTable.Cell>
@@ -51,7 +51,7 @@ function SolanaSchemaCard({ schema }: { schema: SasSchema }) {
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Description</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{decodeString(schema.description)}</BaseTable.Cell>
+                <BaseTable.Cell className="text-right">{schema.description}</BaseTable.Cell>
             </BaseTable.Row>
             <BaseTable.Row>
                 <BaseTable.Cell>Is Paused</BaseTable.Cell>

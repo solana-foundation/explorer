@@ -1,10 +1,19 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import type { ReadonlyUint8Array } from '@solana/kit';
 
 import type { EnabledClusterNames, SupportedCluster } from '../../config.js';
 import { consoleLogger, type InspectorLogger, ns } from '../../logger.js';
 import { unknownMarker } from '../../accounts/account-kinds/shared.js';
-import { ACCOUNT_IDENTIFIER_KIND, BPF_UPGRADEABLE_LOADER_KIND, UNKNOWN_KIND } from '../../accounts/kinds.js';
+import {
+    ACCOUNT_IDENTIFIER_KIND,
+    BPF_LOADER_2_KIND,
+    BPF_LOADER_KIND,
+    BPF_UPGRADEABLE_LOADER_KIND,
+    LOADER_V4_KIND,
+    UNKNOWN_KIND,
+} from '../../accounts/kinds.js';
 import { enrichUpgradeableProgramData, normalizeAccountProbe } from '../../accounts/account-normalizer.js';
+import { decodeLoaderV4State, loaderV4ProgramBytes, loaderV4SigningAuthority } from '../../accounts/loader-v4-state.js';
 import { buildAccountPayloadWithRouter } from '../../accounts/inspect-entity-account-router.js';
 import {
     classifyAccountKindBase,
@@ -17,11 +26,18 @@ import type { ResolveSecurityMetadata } from '../../enrichments/security.js';
 import type { ResolveProgramVerification } from '../../enrichments/verification.js';
 import type { DiscoverProgramIdl, ResolveIdlClient } from '../../enrichments/idl-clients.js';
 import { asRecord, asString } from '../../shared/parse-helpers.js';
+import { toLoggedError } from '../../shared/logged-error.js';
+import { base64Decoder } from '../../rpc/codecs.js';
 import { isSourceUnavailableError, type RpcClient } from '../../rpc/rpc.js';
 import { buildTransactionPayload } from '../../transactions/build-payload.js';
 import { decodeTransactionInstructions } from '../../transactions/decode-instructions.js';
 import { normalizeTransactionProbe } from '../../transactions/normalizer.js';
-import type { AccountPayloadContext, DasClassificationOutcome, NormalizedAccountInfo } from '../../accounts/types.js';
+import type {
+    AccountEntityKind,
+    AccountPayloadContext,
+    DasClassificationOutcome,
+    NormalizedAccountInfo,
+} from '../../accounts/types.js';
 import type { DecodeInstructionFallback } from '../../transactions/types.js';
 import type { McpAnalyticsEvent } from '../../types.js';
 import {
@@ -86,6 +102,14 @@ export function splitBuilderErrors(routedPayload: Record<string, unknown>): {
     return { errors, payload };
 }
 
+// The kinds whose accounts are programs — the only kinds the program enrichments apply to.
+const PROGRAM_LOADER_KINDS: ReadonlySet<AccountEntityKind> = new Set([
+    BPF_LOADER_2_KIND,
+    BPF_LOADER_KIND,
+    BPF_UPGRADEABLE_LOADER_KIND,
+    LOADER_V4_KIND,
+]);
+
 async function resolveAccount(
     identifier: string,
     cluster: SupportedCluster,
@@ -117,18 +141,17 @@ async function resolveAccount(
             try {
                 dasOutcome = normalizeDasOutcome(await dependencies.fetchAsset(identifier, cluster));
             } catch (error) {
-                logger.warn(ns('inspect_entity DAS lookup failed'), { error, identifier });
+                logger.warn(ns('inspect_entity DAS lookup failed'), { error: toLoggedError(error), identifier });
                 dasOutcome = null;
             }
         }
 
         const finalKind = promoteAccountKindWithDas(baseKind, dasOutcome);
 
-        // Program enrichments are only consumed by the upgradeable-loader builder — resolve them just there.
-        const enrichments =
-            finalKind === BPF_UPGRADEABLE_LOADER_KIND
-                ? await resolveProgramEnrichments(identifier, enrichedAccount, cluster, dependencies, logger)
-                : null;
+        // Program enrichments only apply to loader-owned program accounts — resolve them just there.
+        const enrichments = PROGRAM_LOADER_KINDS.has(finalKind)
+            ? await resolveProgramEnrichments(identifier, finalKind, enrichedAccount, cluster, dependencies, logger)
+            : null;
 
         const routedPayload = buildAccountPayloadWithRouter({
             account: enrichedAccount,
@@ -148,7 +171,7 @@ async function resolveAccount(
         const { errors, payload } = splitBuilderErrors(routedPayload);
         return toToolResult({ errors, payload });
     } catch (error) {
-        logger.error(ns('inspect_entity account resolution failed'), { error, identifier });
+        logger.error(ns('inspect_entity account resolution failed'), { error: toLoggedError(error), identifier });
 
         if (isSourceUnavailableError(error)) {
             return toToolResult({
@@ -177,22 +200,69 @@ function catchEnrichment<T>(
     logger: InspectorLogger,
 ): Promise<T | { status: 'unknown'; reason: 'source_unavailable' }> {
     return promise.catch(error => {
-        logger.warn(ns(`${label} enrichment failed`), { error, identifier });
+        logger.warn(ns(`${label} enrichment failed`), { error: toLoggedError(error), identifier });
         return { reason: 'source_unavailable', status: 'unknown' } as const;
     });
+}
+
+type ProgramAuthorityContext = {
+    authority: string | null;
+    // What the verification hash runs over: the verbatim RPC base64 where one exists, or the raw
+    // bytes past loader-v4's state header (encoded lazily so a codec throw degrades only that field).
+    verificationData: string | ReadonlyUint8Array | null;
+    stateError?: Error;
+};
+
+// v1/v2 programs have no authority; upgradeable ones carry it in programdata; loader-v4 decodes it from its own state header.
+function resolveProgramAuthorityContext(
+    kind: AccountEntityKind,
+    account: NormalizedAccountInfo,
+): ProgramAuthorityContext {
+    if (kind !== LOADER_V4_KIND) {
+        return {
+            authority: account.programData?.authority ?? null,
+            // Legacy loaders keep the ELF in the program account itself; upgradeable probes are jsonParsed and carry none.
+            verificationData: account.programDataRawBase64 ?? account.rawDataBase64 ?? null,
+        };
+    }
+
+    const bytes = account.rawDataBytes;
+    const [stateError, state] = decodeLoaderV4State(bytes);
+    if (!bytes || !state) {
+        return { authority: null, stateError, verificationData: null };
+    }
+    // A null authority (finalized) routes verification down the frozen registry path, which never reads bytes.
+    const authority = loaderV4SigningAuthority(state);
+    return {
+        authority,
+        verificationData: authority === null ? null : loaderV4ProgramBytes(bytes),
+    };
 }
 
 // All four program enrichments resolve in parallel; a missing dep leaves its field absent so the
 // builder falls back to its own unknown marker.
 async function resolveProgramEnrichments(
     identifier: string,
+    kind: AccountEntityKind,
     account: NormalizedAccountInfo,
     cluster: SupportedCluster,
     dependencies: InspectEntityDependencies,
     logger: InspectorLogger,
 ): Promise<ProgramEnrichments> {
-    const authority = account.programData?.authority ?? null;
-    const programDataBase64 = account.programDataRawBase64 ?? null;
+    const { authority, stateError, verificationData } = resolveProgramAuthorityContext(kind, account);
+    if (stateError) {
+        logger.warn(ns('loader-v4 state undecoded'), { error: toLoggedError(stateError), identifier });
+    }
+    const stateUndecoded = Boolean(stateError);
+    const securityDataBase64 = account.programDataRawBase64 ?? account.rawDataBase64 ?? null;
+    // An undecodable loader-v4 state must not masquerade as a frozen program — degrade both authority-driven fields.
+    const loaderStateUnknown = { reason: 'loader_state_undecoded', status: 'unknown' } as const;
+    const resolveVerification = dependencies.resolveProgramVerification;
+    // Encoded inside the guarded promise: kit's browser base64 codec throws on ELF-sized arrays, and a throw here must cost one field, not the payload.
+    const verificationBase64 = async (): Promise<string | null> =>
+        typeof verificationData === 'string' || verificationData === null
+            ? verificationData
+            : base64Decoder().decode(verificationData);
 
     const [idlDiscovery, verification, security, multisig] = await Promise.all([
         dependencies.discoverProgramIdl
@@ -203,30 +273,34 @@ async function resolveProgramEnrichments(
                   logger,
               )
             : null,
-        dependencies.resolveProgramVerification
-            ? catchEnrichment(
-                  dependencies.resolveProgramVerification(identifier, authority, programDataBase64, cluster),
-                  'verification',
-                  identifier,
-                  logger,
-              )
-            : null,
+        stateUndecoded
+            ? loaderStateUnknown
+            : resolveVerification
+              ? catchEnrichment(
+                    verificationBase64().then(data => resolveVerification(identifier, authority, data, cluster)),
+                    'verification',
+                    identifier,
+                    logger,
+                )
+              : null,
         dependencies.resolveSecurityMetadata
             ? catchEnrichment(
-                  dependencies.resolveSecurityMetadata(identifier, programDataBase64, cluster),
+                  dependencies.resolveSecurityMetadata(identifier, securityDataBase64, cluster),
                   'security metadata',
                   identifier,
                   logger,
               )
             : null,
-        dependencies.resolveMultisigReference
-            ? catchEnrichment(
-                  dependencies.resolveMultisigReference(authority, cluster),
-                  'multisig reference',
-                  identifier,
-                  logger,
-              )
-            : null,
+        stateUndecoded
+            ? loaderStateUnknown
+            : dependencies.resolveMultisigReference
+              ? catchEnrichment(
+                    dependencies.resolveMultisigReference(authority, cluster),
+                    'multisig reference',
+                    identifier,
+                    logger,
+                )
+              : null,
     ]);
 
     return {
@@ -276,7 +350,7 @@ async function resolveTransaction(
             // Confirmation detail is best-effort — its outage must not take down the whole lookup.
             dependencies.fetchSignatureStatus(identifier, cluster).catch(error => {
                 logger.warn(ns('inspect_entity signature status fetch failed'), {
-                    error,
+                    error: toLoggedError(error),
                     identifier,
                 });
                 return null;
@@ -315,7 +389,7 @@ async function resolveTransaction(
             payload: buildTransactionPayload(transactionContext, instructions),
         });
     } catch (error) {
-        logger.error(ns('inspect_entity transaction resolution failed'), { error, identifier });
+        logger.error(ns('inspect_entity transaction resolution failed'), { error: toLoggedError(error), identifier });
 
         if (isSourceUnavailableError(error)) {
             return toToolResult({

@@ -271,13 +271,13 @@ describe('createCodamaPdaProvider', () => {
             // Create an IDL with a pdaLinkNode reference instead of inline pdaNode
             const idlWithPdaLink = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
             // Move the inline PDA to the program.pdas array and replace with a link
-            const initCandidateIx = idlWithPdaLink.program.instructions.find(i => i.name === 'initializePoll');
-            const pollAccount = initCandidateIx?.accounts.find(a => a.name === 'poll');
+            const initCandidateIx = idlWithPdaLink.program.instructions?.find(i => i.name === 'initializePoll');
+            const pollAccount = initCandidateIx?.accounts?.find(a => a.name === 'poll');
             const pdaValue = (pollAccount as any).defaultValue;
             const inlinePda = pdaValue.pda;
 
             // Add PDA to program.pdas
-            idlWithPdaLink.program.pdas.push(inlinePda);
+            idlWithPdaLink.program.pdas?.push(inlinePda);
 
             // Replace inline pdaNode with pdaLinkNode
             pdaValue.pda = { kind: 'pdaLinkNode', name: 'poll' };
@@ -377,8 +377,8 @@ describe('createCodamaPdaProvider', () => {
 
         it('should handle constant seed with bytesValueNode (base16)', async () => {
             const idlWithBytesSeed = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            const constSeedIx = idlWithBytesSeed.program.instructions.find(i => i.name === 'instructionWithConstSeed');
-            const pdaAccount = constSeedIx?.accounts.find(a => a.name === 'pdaAccount');
+            const constSeedIx = idlWithBytesSeed.program.instructions?.find(i => i.name === 'instructionWithConstSeed');
+            const pdaAccount = constSeedIx?.accounts?.find(a => a.name === 'pdaAccount');
             const pdaNode = (pdaAccount as any).defaultValue.pda;
 
             // Replace the string seed with a bytes seed
@@ -402,8 +402,8 @@ describe('createCodamaPdaProvider', () => {
 
         it('should handle constant seed with bytesValueNode (base58)', async () => {
             const idlWithBytesSeed = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            const constSeedIx = idlWithBytesSeed.program.instructions.find(i => i.name === 'instructionWithConstSeed');
-            const pdaAccount = constSeedIx?.accounts.find(a => a.name === 'pdaAccount');
+            const constSeedIx = idlWithBytesSeed.program.instructions?.find(i => i.name === 'instructionWithConstSeed');
+            const pdaAccount = constSeedIx?.accounts?.find(a => a.name === 'pdaAccount');
             const pdaNode = (pdaAccount as any).defaultValue.pda;
 
             // base58 for bytes [1, 2, 3] is "Ldp"
@@ -428,8 +428,8 @@ describe('createCodamaPdaProvider', () => {
 
         it('should handle constant seed with bytesValueNode (base64)', async () => {
             const idlWithBytesSeed = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            const constSeedIx = idlWithBytesSeed.program.instructions.find(i => i.name === 'instructionWithConstSeed');
-            const pdaAccount = constSeedIx?.accounts.find(a => a.name === 'pdaAccount');
+            const constSeedIx = idlWithBytesSeed.program.instructions?.find(i => i.name === 'instructionWithConstSeed');
+            const pdaAccount = constSeedIx?.accounts?.find(a => a.name === 'pdaAccount');
             const pdaNode = (pdaAccount as any).defaultValue.pda;
 
             // base64 for "hello" is "aGVsbG8="
@@ -454,8 +454,8 @@ describe('createCodamaPdaProvider', () => {
 
         it('should handle constant seed with bytesValueNode (utf8)', async () => {
             const idlWithBytesSeed = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            const constSeedIx = idlWithBytesSeed.program.instructions.find(i => i.name === 'instructionWithConstSeed');
-            const pdaAccount = constSeedIx?.accounts.find(a => a.name === 'pdaAccount');
+            const constSeedIx = idlWithBytesSeed.program.instructions?.find(i => i.name === 'instructionWithConstSeed');
+            const pdaAccount = constSeedIx?.accounts?.find(a => a.name === 'pdaAccount');
             const pdaNode = (pdaAccount as any).defaultValue.pda;
 
             pdaNode.seeds[0] = {
@@ -479,8 +479,10 @@ describe('createCodamaPdaProvider', () => {
 
         it('should handle constant seed with publicKeyValueNode', async () => {
             const idlWithPubkeySeed = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            const constSeedIx = idlWithPubkeySeed.program.instructions.find(i => i.name === 'instructionWithConstSeed');
-            const pdaAccount = constSeedIx?.accounts.find(a => a.name === 'pdaAccount');
+            const constSeedIx = idlWithPubkeySeed.program.instructions?.find(
+                i => i.name === 'instructionWithConstSeed',
+            );
+            const pdaAccount = constSeedIx?.accounts?.find(a => a.name === 'pdaAccount');
             const pdaNode = (pdaAccount as any).defaultValue.pda;
 
             const pubkey = PublicKey.default.toBase58();
@@ -505,8 +507,10 @@ describe('createCodamaPdaProvider', () => {
 
         it('should handle constant seed with programIdValueNode', async () => {
             const idlWithProgIdSeed = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            const constSeedIx = idlWithProgIdSeed.program.instructions.find(i => i.name === 'instructionWithConstSeed');
-            const pdaAccount = constSeedIx?.accounts.find(a => a.name === 'pdaAccount');
+            const constSeedIx = idlWithProgIdSeed.program.instructions?.find(
+                i => i.name === 'instructionWithConstSeed',
+            );
+            const pdaAccount = constSeedIx?.accounts?.find(a => a.name === 'pdaAccount');
             const pdaNode = (pdaAccount as any).defaultValue.pda;
 
             pdaNode.seeds[0] = {
@@ -543,9 +547,9 @@ describe('createCodamaPdaProvider', () => {
 
         const cloneWithConditional = (conditional: ReturnType<typeof conditionalValueNode>): RootNode => {
             const idl = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            idl.program.pdas.push(emptyPda);
-            const ix = idl.program.instructions.find(i => i.name === ixName);
-            const pollAcc = ix?.accounts.find(a => a.name === 'poll');
+            idl.program.pdas?.push(emptyPda);
+            const ix = idl.program.instructions?.find(i => i.name === ixName);
+            const pollAcc = ix?.accounts?.find(a => a.name === 'poll');
             (pollAcc as any).defaultValue = conditional;
             return idl;
         };
@@ -564,10 +568,10 @@ describe('createCodamaPdaProvider', () => {
                 name: 'eqFalseBranch',
                 seeds: [constantPdaSeedNodeFromString('utf8', 'FALSE')],
             });
-            idl.program.pdas.push(truePda, falsePda);
+            idl.program.pdas?.push(truePda, falsePda);
 
-            const ix = idl.program.instructions.find(i => i.name === 'initializePoll');
-            const pollAcc = ix?.accounts.find(a => a.name === 'poll');
+            const ix = idl.program.instructions?.find(i => i.name === 'initializePoll');
+            const pollAcc = ix?.accounts?.find(a => a.name === 'poll');
             (pollAcc as any).defaultValue = conditionalValueNode({
                 condition,
                 ifFalse: pdaValueNode(pdaLinkNode('eqFalseBranch')),
@@ -588,8 +592,8 @@ describe('createCodamaPdaProvider', () => {
         it('should evaluate condition.value equality and select the correct branch', async () => {
             // Two branches with different seed lists.
             const idl = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            const ix = idl.program.instructions.find(i => i.name === ixName);
-            const pollAcc = ix?.accounts.find(a => a.name === 'poll');
+            const ix = idl.program.instructions?.find(i => i.name === ixName);
+            const pollAcc = ix?.accounts?.find(a => a.name === 'poll');
             const basePda = (pollAcc as any).defaultValue.pda;
             const baseSeedValues = (pollAcc as any).defaultValue.seeds;
 
@@ -606,7 +610,7 @@ describe('createCodamaPdaProvider', () => {
                 ifTrue: pdaValueNode(ifTruePda, baseSeedValues),
                 value: numberValueNode(7),
             });
-            idl.program.pdas.push(ifTruePda, ifFalsePda);
+            idl.program.pdas?.push(ifTruePda, ifFalsePda);
 
             const provider = createCodamaPdaProvider();
             const ifTrueBranch = await provider.computePdas(
@@ -822,8 +826,8 @@ describe('createCodamaPdaProvider', () => {
 
         it('should fallback to the only available branch when condition is unknown', async () => {
             const idlWithConditional = JSON.parse(JSON.stringify(votingIdl)) as RootNode;
-            const initPollIx = idlWithConditional.program.instructions.find(i => i.name === 'initializePoll');
-            const pollAccount = initPollIx?.accounts.find(a => a.name === 'poll');
+            const initPollIx = idlWithConditional.program.instructions?.find(i => i.name === 'initializePoll');
+            const pollAccount = initPollIx?.accounts?.find(a => a.name === 'poll');
             const originalDefault = (pollAccount as any).defaultValue;
 
             // resolverValueNode is unevaluable from form state — provider falls back to the only populated branch (ifFalse here).

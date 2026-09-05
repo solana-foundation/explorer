@@ -383,4 +383,41 @@ describe('estimateRequestedComputeUnits', () => {
             expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(500_000);
         });
     });
+
+    describe('v1 transactions', () => {
+        // Every case carries a ComputeBudget instruction, so the config has to win to pass.
+        const createV1Transaction = (transactionConfig?: {
+            computeUnitLimit?: number;
+        }): Parameters<typeof estimateRequestedComputeUnits>[0] => {
+            const data = alloc(5);
+            data[0] = 2; // SetComputeUnitLimit
+            writeUint32LE(data, 999_999, 1);
+
+            return {
+                ...createMockTransaction([{ data, programId: ComputeBudgetProgram.programId.toBase58() }]),
+                transactionConfig,
+                version: 1,
+            };
+        };
+
+        it('should read the limit from the message config rather than the instructions', () => {
+            const tx = createV1Transaction({ computeUnitLimit: 10_000 });
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(10_000);
+        });
+
+        it('should report zero when the config sets no compute unit limit', () => {
+            const tx = createV1Transaction({});
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(0);
+        });
+
+        it('should report zero when the message carries no config at all', () => {
+            const tx = createV1Transaction(undefined);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(0);
+        });
+
+        it('should respect the 1.4M compute unit cap', () => {
+            const tx = createV1Transaction({ computeUnitLimit: 5_000_000 });
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(1_400_000);
+        });
+    });
 });

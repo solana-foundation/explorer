@@ -2,27 +2,27 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { featuresFromSchedule } from '../schedule';
 import { parseProposals } from '../simd-proposals';
-import { extractTables, featuresFromWikiMarkdown } from '../wiki';
 
-// End-to-end coverage of the wiki/SIMD scrape pipeline against committed
-// snapshots of the *real* Agave Feature-Gate-Tracker wiki and the real GitHub
+// End-to-end coverage of the schedule/SIMD scrape pipeline against committed
+// snapshots of the *real* Agave feature-gate schedule and the real GitHub
 // SIMD-proposals listing. The on-chain RPC path is covered separately. Refresh
 // the snapshots with `pnpm exec tsx scripts/feature-gates/refresh-test-fixtures.ts`.
 const FIXTURE_DIR = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
-const realWiki = readFileSync(join(FIXTURE_DIR, 'real-agave-wiki.md'), 'utf8');
+const realSchedule = JSON.parse(readFileSync(join(FIXTURE_DIR, 'real-agave-schedule.json'), 'utf8'));
 const realProposals = parseProposals(JSON.parse(readFileSync(join(FIXTURE_DIR, 'real-simd-proposals.json'), 'utf8')));
 
 const PUBKEY_MIN_LENGTH = 32;
 const PUBKEY_MAX_LENGTH = 44;
 
-function isPendingHeading(heading: string | undefined): boolean {
-    return heading?.toLowerCase().startsWith('pending') ?? false;
+function isPendingSection(section: string): boolean {
+    return section.toLowerCase().startsWith('pending');
 }
 
-describe('feature-gate scrape pipeline (real wiki snapshot)', () => {
-    const tables = extractTables(realWiki);
-    const features = featuresFromWikiMarkdown(realWiki, realProposals);
+describe('feature-gate scrape pipeline (real schedule snapshot)', () => {
+    const sections = Object.entries<unknown[]>(realSchedule);
+    const features = featuresFromSchedule(realSchedule, realProposals);
 
     it('should parse the real SIMD listing into a non-empty lookup of GitHub URLs', () => {
         expect(realProposals.size).toBeGreaterThan(0);
@@ -31,18 +31,18 @@ describe('feature-gate scrape pipeline (real wiki snapshot)', () => {
         }
     });
 
-    it('should find both pending and non-pending sections, so the heading filter is exercised', () => {
-        const pending = tables.filter(table => isPendingHeading(table.heading));
-        const other = tables.filter(table => !isPendingHeading(table.heading));
+    it('should find both pending and non-pending sections, so the section filter is exercised', () => {
+        const pending = sections.filter(([section]) => isPendingSection(section));
+        const other = sections.filter(([section]) => !isPendingSection(section));
         expect(pending.length).toBeGreaterThanOrEqual(1);
-        // e.g. the "Version Floor" / "Activated" tables, which must be excluded.
+        // e.g. the "Fully Activated" section, which must be excluded.
         expect(other.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should import exactly the rows from the pending sections and nothing else', () => {
-        const pendingRows = tables
-            .filter(table => isPendingHeading(table.heading))
-            .reduce((sum, table) => sum + table.rows.length, 0);
+        const pendingRows = sections
+            .filter(([section]) => isPendingSection(section))
+            .reduce((sum, [, rows]) => sum + rows.length, 0);
         expect(features.length).toBeGreaterThan(0);
         expect(features).toHaveLength(pendingRows);
     });
@@ -54,7 +54,7 @@ describe('feature-gate scrape pipeline (real wiki snapshot)', () => {
         }
     });
 
-    it('should leave activation epochs as integers or null, with mainnet never set from the wiki', () => {
+    it('should leave activation epochs as integers or null, with mainnet never set from the schedule', () => {
         for (const feature of features) {
             const epochs = [
                 feature.devnet_activation_epoch,
@@ -77,8 +77,16 @@ describe('feature-gate scrape pipeline (real wiki snapshot)', () => {
         }
     });
 
-    it('should resolve at least one real SIMD link and one multi-SIMD row from the live data', () => {
+    // Not asserted here: a multi-SIMD row. Whether one is currently pending is
+    // upstream's business — `schedule.spec.ts` covers that mapping on the
+    // synthetic fixture instead.
+    it('should resolve at least one real SIMD link from the live data', () => {
         expect(features.some(feature => feature.simd_link.some(link => link !== ''))).toBe(true);
-        expect(features.some(feature => feature.simds.length >= 2)).toBe(true);
+    });
+
+    it('should keep simd_link index-aligned with simds on every imported row', () => {
+        for (const feature of features) {
+            expect(feature.simd_link).toHaveLength(feature.simds.length);
+        }
     });
 });

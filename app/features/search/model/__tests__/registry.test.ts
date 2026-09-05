@@ -33,4 +33,12 @@ describe('searchProviders registry', () => {
             expect(new Set(priorities).size).toBe(priorities.length);
         },
     );
+
+    // A SIMD number is often an epoch or block number too, and the epoch or
+    // block is the likelier intent.
+    it('should rank feature gates below blocks and epochs', () => {
+        const names = searchProviders.local.map(p => p.name);
+        expect(names.indexOf('feature-gate')).toBeGreaterThan(names.indexOf('block'));
+        expect(names.indexOf('feature-gate')).toBeGreaterThan(names.indexOf('epoch'));
+    });
 });

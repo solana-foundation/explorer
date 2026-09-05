@@ -6,7 +6,7 @@ import type { AutocompleteItem } from './types';
 type AccountName = string;
 export function createGetAutocompleteItems(deps: {
     pdas: Record<AccountName, { generated: string | null; seeds: { value: string | null; name: string }[] }>;
-    publicKey: PublicKey | null;
+    publicKey: PublicKey | undefined;
     defaultItems?: AutocompleteItem[];
 }) {
     const { pdas, publicKey, defaultItems = DEFAULT_AUTOCOMPLETE_ITEMS } = deps;

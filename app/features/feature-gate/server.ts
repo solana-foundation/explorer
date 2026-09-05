@@ -1,3 +1,5 @@
+import 'server-only';
+
 export { fetchFeatureGateInformation } from './api/fetch-feature-gate-information';
 export { isFeatureGateOgEnabled } from './env';
 export { isFeatureActivated } from './lib/is-feature-activated';

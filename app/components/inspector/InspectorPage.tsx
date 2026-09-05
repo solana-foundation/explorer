@@ -9,6 +9,7 @@ import { useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import usePrevious from '@react-hook/previous';
+import { getBase58Decoder, getBase58Encoder } from '@solana/kit';
 import {
     type CompiledInnerInstruction,
     Connection,
@@ -19,7 +20,6 @@ import {
 } from '@solana/web3.js';
 import { generated, getBatchTransactionPda, PROGRAM_ADDRESS as SQUADS_V4_PROGRAM_ADDRESS } from '@sqds/multisig';
 import { ClusterStatus } from '@utils/cluster';
-import bs58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import useSWR from 'swr';
@@ -47,6 +47,9 @@ import { InstructionsSection } from './InstructionsSection';
 import { MIN_MESSAGE_LENGTH, RawInput } from './RawInputCard';
 import { TransactionSignatures } from './SignaturesCard';
 
+const BASE58_ENCODER = getBase58Encoder();
+const BASE58_DECODER = getBase58Decoder();
+
 const { Batch, VaultBatchTransaction, VaultTransaction, batchDiscriminator } = generated;
 
 // Convert a Squads VaultTransactionMessage (shared by VaultTransaction and the inner
@@ -69,7 +72,7 @@ export function vaultMessageToVersionedMessage(message: typeof VaultTransaction.
                 message.accountKeys.length - message.numSigners - message.numWritableNonSigners,
             numRequiredSignatures: message.numSigners,
         },
-        recentBlockhash: bs58.encode(Uint8Array.from(new Array(32).fill(0))),
+        recentBlockhash: BASE58_DECODER.decode(Uint8Array.from(new Array(32).fill(0))),
         staticAccountKeys: message.accountKeys,
     });
 }
@@ -139,7 +142,7 @@ function decodeSignatures(signaturesParam: string): (string | undefined)[] {
         }
 
         try {
-            bs58.decode(signature);
+            BASE58_ENCODER.encode(signature);
             validSignatures.push(signature);
         } catch (_err) {
             throw new Error('Signature is not valid base58');

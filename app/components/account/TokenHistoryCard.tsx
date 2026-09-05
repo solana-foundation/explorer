@@ -38,6 +38,7 @@ import { Button } from '@/app/components/shared/ui/button';
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import { Logger } from '@/app/shared/lib/logger';
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -100,7 +101,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     const fetchHistories = React.useCallback(
         (refresh?: boolean) => {
             tokensToFetch.forEach(token => {
-                fetchAccountHistory(token.pubkey, false, refresh);
+                fetchAccountHistory(toKitAddress(token.pubkey), false, refresh);
             });
         },
         [tokensToFetch, fetchAccountHistory],
@@ -115,7 +116,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
             newTokens.forEach(token => {
                 const address = token.pubkey.toBase58();
                 if (!accountHistories[address]) {
-                    fetchAccountHistory(token.pubkey, false, true);
+                    fetchAccountHistory(toKitAddress(token.pubkey), false, true);
                 }
             });
             prevTokensToFetchCount.current = tokensToFetchCount;

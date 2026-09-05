@@ -16,12 +16,14 @@ import type {
     LOADER_V4_KIND,
     NATIVE_PROGRAM_KIND,
     NFTOKEN_KIND,
+    PROGRAM_METADATA_LABEL,
+    ProgramMetadataSubtype,
     SOLANA_ATTESTATION_SERVICE_KIND,
     TokenSubtype,
     UNKNOWN_KIND,
 } from './kinds.js';
 
-export type { IdentifierKind, TokenSubtype } from './kinds.js';
+export type { IdentifierKind, ProgramMetadataSubtype, TokenSubtype } from './kinds.js';
 
 // All jsonParsed account programs except the token pair (those appear only subtyped) — zero re-spelled literals.
 type RpcSharedAccountKind = Exclude<RpcParsedAccountProgram, TokenProgram>;
@@ -29,6 +31,7 @@ type RpcSharedAccountKind = Exclude<RpcParsedAccountProgram, TokenProgram>;
 export type AccountEntityKind =
     | RpcSharedAccountKind
     | `${TokenProgram}:${TokenSubtype}`
+    | `${typeof PROGRAM_METADATA_LABEL}:${ProgramMetadataSubtype}`
     | typeof BPF_LOADER_KIND
     | typeof BPF_LOADER_2_KIND
     | typeof LOADER_V4_KIND
@@ -60,6 +63,8 @@ export type NormalizedAccountInfo = {
     parsedProgram: string | null;
     parsedData: unknown;
     rawDataBytes: ReadonlyUint8Array | null;
+    // The RPC's own base64 payload, kept verbatim so consumers never re-encode rawDataBytes.
+    rawDataBase64?: string | null;
     address?: string;
     lamports?: SafeNumeric;
     executable?: boolean;

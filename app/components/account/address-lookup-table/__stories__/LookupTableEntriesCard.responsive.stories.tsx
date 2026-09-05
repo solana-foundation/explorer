@@ -1,6 +1,6 @@
 import { DEFAULT_SLOT } from '@__fixtures__/gen';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { PublicKey, SYSVAR_CLOCK_PUBKEY, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -25,7 +25,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<ParsedArgs>;
 
-const samplePubkeys = [TOKEN_PROGRAM_ID, PublicKey.default, SYSVAR_RENT_PUBKEY, SYSVAR_CLOCK_PUBKEY];
+const samplePubkeys = [
+    new PublicKey(TOKEN_PROGRAM_ADDRESS),
+    PublicKey.default,
+    SYSVAR_RENT_PUBKEY,
+    SYSVAR_CLOCK_PUBKEY,
+];
 
 const args = {
     parsedLookupTable: {

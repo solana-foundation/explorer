@@ -1,14 +1,12 @@
 'use client';
 
 import { Epoch } from '@components/common/Epoch';
-import { ErrorCard } from '@components/common/ErrorCard';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { TimestampToggle } from '@components/common/TimestampToggle';
 import { LiveTransactionStatsCard } from '@components/LiveTransactionStatsCard';
 import { StatsNotReady } from '@components/StatsNotReady';
 import { UpcomingFeatures } from '@features/feature-gate';
-import { useVoteAccounts } from '@features/vote/model/vote-accounts'; // deep import on purpose: the barrel pulls vote instruction cards (~100 kB) into the home bundle for one hook
 import { useCluster } from '@providers/cluster';
 import { StatsProvider } from '@providers/stats';
 import {
@@ -17,39 +15,35 @@ import {
     usePerformanceInfo,
     useStatsProvider,
 } from '@providers/stats/solanaClusterStats';
-import { Status, SupplyProvider, useFetchSupply, useSupply } from '@providers/supply';
-import { ClusterStatus } from '@utils/cluster';
-import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/index';
+import { slotsToHumanString } from '@utils/index';
 import { percentage } from '@utils/math';
 import React from 'react';
 
-import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 import { DeveloperResources } from './components/DeveloperResources';
-import { SimpleCardSkeleton } from './components/shared/Skeletons';
+import { StakingSection } from './components/StakingSection';
 
 export default function Page() {
     return (
         <StatsProvider>
-            <SupplyProvider>
-                <PageContainer className="mt-4">
-                    <StakingComponent />
+            <PageContainer className="mt-4">
+                <StakingSection />
 
-                    <div className="flex flex-col lg:flex-row lg:gap-6">
-                        <div className="w-full lg:w-1/2">
-                            <StatsCardBody />
-                        </div>
-                        <div className="w-full lg:w-1/2">
-                            <LiveTransactionStatsCard />
-                        </div>
+                <div className="flex flex-col lg:flex-row lg:gap-6">
+                    <div className="w-full lg:w-1/2">
+                        <StatsCardBody />
                     </div>
+                    <div className="w-full lg:w-1/2">
+                        <LiveTransactionStatsCard />
+                    </div>
+                </div>
 
-                    <DeveloperResources />
+                <DeveloperResources />
 
-                    <UpcomingFeatures />
-                </PageContainer>
-            </SupplyProvider>
+                <UpcomingFeatures />
+            </PageContainer>
         </StatsProvider>
     );
 }

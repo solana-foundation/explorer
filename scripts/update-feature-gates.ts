@@ -5,8 +5,8 @@
  * for the daily `update-feature-gates` workflow — reads the JSON once, runs the
  * full pipeline in memory, and writes once:
  *
- *   1. Scrape the "pending mainnet/devnet/testnet" tables from the Agave
- *      Feature-Gate-Tracker wiki page, resolve the SIMD column to GitHub URLs,
+ *   1. Read the "pending mainnet/devnet/testnet" sections from the Agave
+ *      feature-gate schedule JSON, resolve the SIMD numbers to GitHub URLs,
  *      and merge any newly-listed features into the persisted set.
  *   2. Back-fill any `simd_link` slots that are still empty on already-stored
  *      rows (recovery path for first-import runs where the proposals fetch
@@ -32,9 +32,9 @@ import type { FeatureGateDraft } from '../app/entities/feature-gate/server';
 import { readFeatureGates, writeFeatureGates } from './feature-gates/lib/feature-store';
 import { appendNewFeatures, hasDescription, type RefreshMode, resolveEpoch } from './feature-gates/lib/merge';
 import { connectCluster, type FeatureProbeResult, probeFeatureActivation } from './feature-gates/lib/rpc';
+import { fetchScheduledFeatures } from './feature-gates/lib/schedule';
 import { resolveMissingSimdLinks } from './feature-gates/lib/simd-proposals';
 import { fetchSimdSummary } from './feature-gates/lib/simd-summary';
-import { fetchWikiFeatures } from './feature-gates/lib/wiki';
 
 const DEVNET_RPC_URL = process.env.SOLANA_DEVNET_RPC ?? 'https://api.devnet.solana.com';
 const TESTNET_RPC_URL = process.env.SOLANA_TESTNET_RPC ?? 'https://api.testnet.solana.com';
@@ -47,8 +47,8 @@ async function main() {
         console.log('Refresh mode: re-reading every feature on every cluster; stale values will be cleared.');
     }
 
-    const { features: wikiFeatures, proposals } = await fetchWikiFeatures();
-    const seeded = appendNewFeatures(readFeatureGates(), wikiFeatures);
+    const { features: scheduledFeatures, proposals } = await fetchScheduledFeatures();
+    const seeded = appendNewFeatures(readFeatureGates(), scheduledFeatures);
     const relinked = resolveMissingSimdLinks(seeded, proposals);
     const withEpochs = await refreshAllEpochs(relinked, mode);
     const enriched = await enrichDescriptions(withEpochs);

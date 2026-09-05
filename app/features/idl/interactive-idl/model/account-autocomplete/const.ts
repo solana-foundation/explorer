@@ -1,5 +1,6 @@
-import { NATIVE_MINT } from '@solana/spl-token';
 import { PROGRAM_INFO_BY_ID, PROGRAM_NAMES, SPECIAL_IDS, SYSVAR_IDS, TOKEN_IDS } from '@utils/programs';
+
+import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 
 import type { AutocompleteItem } from './types';
 
@@ -69,7 +70,7 @@ const mintItems: AutocompleteItem[] = [
         group: 'Mint',
         keywords: ['wsol', 'wrapped', 'sol'],
         label: 'Wrapped SOL',
-        value: NATIVE_MINT.toBase58(),
+        value: NATIVE_MINT_ADDRESS,
     },
     {
         group: 'Mint',

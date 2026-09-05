@@ -1,39 +1,29 @@
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import React from 'react';
+import { address, defineInstructionCard, type InstructionFieldList, seed, text } from '@entities/instruction-card';
 
 import type { AuthorizeCheckedWithSeedInfo, AuthorizeWithSeedInfo } from '../../lib/instruction-types';
-import { DetailRow, StakeProgramRow } from './DetailRow';
-import type { StakeCardProps } from './types';
 
-export function AuthorizeWithSeedDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    title,
-    innerCards,
-    childIndex,
-}: StakeCardProps<AuthorizeWithSeedInfo | AuthorizeCheckedWithSeedInfo> & { title: string }) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title={title}
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <StakeProgramRow />
-            <DetailRow label="Stake Address" pubkey={info.stakeAccount} />
-            <DetailRow label="Authority Base" pubkey={info.authorityBase} />
-            <DetailRow label="Authority Owner" pubkey={info.authorityOwner} />
-            <DetailRow label="Authority Seed" monospace>
-                {info.authoritySeed}
-            </DetailRow>
-            <DetailRow label="New Authority Address" pubkey={info.newAuthorized} />
-            <DetailRow label="Authority Type">{info.authorityType}</DetailRow>
-            {info.clockSysvar && <DetailRow label="Clock Sysvar" pubkey={info.clockSysvar} />}
-            {info.custodian && <DetailRow label="Lockup Custodian" pubkey={info.custodian} />}
-        </InstructionCard>
-    );
+type Info = AuthorizeWithSeedInfo | AuthorizeCheckedWithSeedInfo;
+
+export const AuthorizeWithSeedDetailsCard = defineInstructionCard<Info>({
+    fields,
+    title: 'Stake Program: Authorize With Seed',
+});
+
+export const AuthorizeCheckedWithSeedDetailsCard = defineInstructionCard<Info>({
+    fields,
+    title: 'Stake Program: Authorize Checked With Seed',
+});
+
+/** One field list serves both cards. The checked variant only makes the clock sysvar required. */
+function fields(info: Info): InstructionFieldList {
+    return [
+        address('Stake Address', info.stakeAccount),
+        address('Authority Base', info.authorityBase),
+        address('Authority Owner', info.authorityOwner),
+        seed('Authority Seed', info.authoritySeed),
+        address('New Authority Address', info.newAuthorized),
+        text('Authority Type', info.authorityType),
+        info.clockSysvar && address('Clock Sysvar', info.clockSysvar),
+        info.custodian && address('Lockup Custodian', info.custodian),
+    ];
 }

@@ -56,7 +56,10 @@ describe('inspect-entity account normalizer', () => {
             },
         };
 
-        expect(normalizeAccountProbe('addr', envelope)?.rawDataBytes).toBeNull();
+        const normalized = normalizeAccountProbe('addr', envelope);
+        expect(normalized?.rawDataBytes).toBeNull();
+        // The undecodable string is still passed through — downstream parsers judge it themselves.
+        expect(normalized?.rawDataBase64).toBe('@@invalid@@');
     });
 
     it('should return null when envelope value is null', () => {
@@ -247,7 +250,7 @@ describe('inspect-entity account normalizer', () => {
 
         expect(enriched.programDataStatus).toBe('source_unavailable');
         expect(logger.warn).toHaveBeenCalledWith('[entity-inspector] program data enrichment source unavailable', {
-            error: rpcError,
+            error: { message: 'RPC down', name: 'SourceUnavailableError' },
             programAddress: 'Program111111111111111111111111111111111111',
         });
     });
@@ -262,7 +265,7 @@ describe('inspect-entity account normalizer', () => {
         expect(enriched.programDataStatus).toBe('source_unavailable');
         expect(logger.warn).toHaveBeenCalledWith(
             '[entity-inspector] program data enrichment failed',
-            expect.objectContaining({ error: expect.any(TypeError) }),
+            expect.objectContaining({ error: { message: 'unexpected shape', name: 'TypeError' } }),
         );
     });
 });

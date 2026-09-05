@@ -1,17 +1,11 @@
-import { PublicKey } from '@solana/web3.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { fetchSnsDomains } from '../fetch-sns-domains';
 
 const USER_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 
 const mockFetchFn = vi.fn();
 vi.stubGlobal('fetch', mockFetchFn);
-
-vi.mock('@bonfida/spl-name-service', () => ({
-    getHashedName: vi.fn().mockImplementation(() => Promise.resolve(Buffer.alloc(32))),
-    getNameAccountKey: vi.fn().mockImplementation(() => Promise.resolve(PublicKey.unique())),
-}));
-
-const { fetchSnsDomains } = await import('../fetch-sns-domains');
 
 describe('fetchSnsDomains', () => {
     beforeEach(() => {

@@ -13,7 +13,7 @@ import { traverseInstructionAccounts } from './traverse-accounts';
  */
 export function createWalletPrefillDependency(
     instruction: InstructionData,
-    publicKey: PublicKey | null,
+    publicKey: PublicKey | undefined,
     fieldNames: Pick<InstructionFormFieldNames, 'account'>,
 ): ExternalDependency<PublicKey> {
     const signerPaths: ReturnType<InstructionFormFieldNames['account']>[] = [];

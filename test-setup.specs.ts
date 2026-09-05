@@ -3,6 +3,8 @@ import { vi } from 'vitest';
 
 import type * as TokenInfoBatchProvider from '@/app/entities/token-info/model/token-info-batch-provider';
 
+import { mockSolanaRpc } from './app/__tests__/mock-rpc';
+
 // Global no-op mock for Logger to suppress console output in all tests.
 vi.mock('@/app/shared/lib/logger', () => ({
     Logger: { debug: vi.fn(), error: vi.fn(), info: vi.fn(), panic: vi.fn(), warn: vi.fn() },
@@ -31,7 +33,6 @@ vi.mock('@/app/entities/token-info/model/token-info-batch-provider', async () =>
 // Tests that need custom RPC behavior should override with a local vi.mock().
 vi.mock('@solana/kit', async () => {
     const actual = await vi.importActual<typeof SolanaKit>('@solana/kit');
-    const { mockSolanaRpc } = await import('./app/__tests__/mock-rpc');
     return {
         ...actual,
         createSolanaRpc: vi.fn(() => mockSolanaRpc()),

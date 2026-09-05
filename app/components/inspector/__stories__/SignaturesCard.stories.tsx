@@ -30,7 +30,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Bogus signatures will fail nacl verification → Invalid badges.
+// Bogus signatures fail verification → Invalid badges.
 export const Invalid: Story = {
     args: {
         message: baseMessage,

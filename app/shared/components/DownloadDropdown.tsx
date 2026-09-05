@@ -8,9 +8,11 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@components/shared/ui/dropdown-menu';
-import { type ByteArray, encodeTransactionData as encodeBytes, type EncodingFormat } from '@entities/transaction-data';
+import { encodeTransactionData as encodeBytes, type EncodingFormat } from '@entities/transaction-data';
 import React from 'react';
 import { Download } from 'react-feather';
+
+import { type ByteArray } from '@/app/shared/lib/bytes';
 
 export enum DownloadState {
     Downloaded = 'downloaded',

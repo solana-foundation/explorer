@@ -8,9 +8,9 @@ describe('InstructionList', () => {
         render(
             <InstructionList
                 instructions={[
-                    { name: 'Transfer', program: 'System' },
-                    { name: 'Mint To', program: 'Token' },
-                    { name: 'Burn', program: 'Token' },
+                    { name: 'Transfer', programName: 'System' },
+                    { name: 'Mint To', programName: 'Token' },
+                    { name: 'Burn', programName: 'Token' },
                 ]}
             />,
         );
@@ -24,11 +24,11 @@ describe('InstructionList', () => {
 
     it('should render first 3 instructions and overflow badge when instructions.length > 3', () => {
         const instructions = [
-            { name: 'Transfer', program: 'System' },
-            { name: 'Mint To', program: 'Token' },
-            { name: 'Burn', program: 'Token' },
-            { name: 'Transfer Checked', program: 'Token' },
-            { name: 'Set Compute Unit Limit', program: 'Compute Budget' },
+            { name: 'Transfer', programName: 'System' },
+            { name: 'Mint To', programName: 'Token' },
+            { name: 'Burn', programName: 'Token' },
+            { name: 'Transfer Checked', programName: 'Token' },
+            { name: 'Set Compute Unit Limit', programName: 'Compute Budget' },
         ];
         render(<InstructionList instructions={instructions} />);
 
@@ -41,7 +41,7 @@ describe('InstructionList', () => {
     });
 
     it('should render single instruction without overflow', () => {
-        render(<InstructionList instructions={[{ name: 'Transfer', program: 'System' }]} />);
+        render(<InstructionList instructions={[{ name: 'Transfer', programName: 'System' }]} />);
 
         expect(screen.getByText('Transfer')).toBeInTheDocument();
         // eslint-disable-next-line no-restricted-syntax -- regex needed to match any "more" text
@@ -52,10 +52,10 @@ describe('InstructionList', () => {
         render(
             <InstructionList
                 instructions={[
-                    { name: 'Transfer', program: 'System' },
-                    { name: 'Mint To', program: 'Token' },
-                    { name: 'Burn', program: 'Token' },
-                    { name: 'Transfer Checked', program: 'Token' },
+                    { name: 'Transfer', programName: 'System' },
+                    { name: 'Mint To', programName: 'Token' },
+                    { name: 'Burn', programName: 'Token' },
+                    { name: 'Transfer Checked', programName: 'Token' },
                 ]}
             />,
         );

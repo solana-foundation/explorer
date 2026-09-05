@@ -80,19 +80,20 @@ const modifyUrl = (url: string): string => {
 // `endpoint?: undefined` on the known-cluster arm lets consumers that want only `cluster` read it off a
 // selection without narrowing first.
 export type ClusterSelection =
-    | { cluster: ServerCluster; endpoint?: undefined }
-    | { cluster: Cluster.Custom; endpoint: RpcEndpoint };
+    { cluster: ServerCluster; endpoint?: undefined } | { cluster: Cluster.Custom; endpoint: RpcEndpoint };
 
+// `||`, not `??`: a var set to `""` is a blank setting rather than an endpoint, and an empty string
+// reaches every consumer as "no endpoint decided yet" and waits there for good.
 export function clusterUrl(selection: ClusterSelection): string {
     switch (selection.cluster) {
         case Cluster.Devnet:
-            return process.env.NEXT_PUBLIC_DEVNET_RPC_URL ?? modifyUrl(DEVNET_URL);
+            return process.env.NEXT_PUBLIC_DEVNET_RPC_URL || modifyUrl(DEVNET_URL);
         case Cluster.MainnetBeta:
-            return process.env.NEXT_PUBLIC_MAINNET_RPC_URL ?? modifyUrl(MAINNET_BETA_URL);
+            return process.env.NEXT_PUBLIC_MAINNET_RPC_URL || modifyUrl(MAINNET_BETA_URL);
         case Cluster.Testnet:
-            return process.env.NEXT_PUBLIC_TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
+            return process.env.NEXT_PUBLIC_TESTNET_RPC_URL || modifyUrl(TESTNET_URL);
         case Cluster.Simd296:
-            return process.env.NEXT_PUBLIC_SIMD296_RPC_URL ?? SIMD296_URL;
+            return process.env.NEXT_PUBLIC_SIMD296_RPC_URL || SIMD296_URL;
         case Cluster.Custom:
             // No fallback branch: the type guarantees an endpoint here.
             return selection.endpoint.href;

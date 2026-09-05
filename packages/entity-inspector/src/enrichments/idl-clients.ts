@@ -1,5 +1,5 @@
-// On-chain IDL resolution seam over @explorer/idl-decode: one latest-IDL fetch (PMP → anchor PDA)
-// with the winning source attributed by the package.
+// On-chain IDL resolution seam over @explorer/idl-decode: one fetch across the publications
+// (PMP canonical → fndn fallback → anchor PDA) with the winning source attributed by the package.
 import {
     getIdlStandard,
     IDL_ERROR__IDL_ADDRESS_MISMATCH,
@@ -8,14 +8,22 @@ import {
     type IdlClient,
     type IdlError,
 } from '@explorer/idl-decode';
-import { type FetchedIdlClient, fetchLatestIdlClient, type IdlFetcherRpc, IdlSource } from '@explorer/idl-decode/fetch';
+import {
+    type PublishedIdlClient,
+    fetchOnChainIdlClient,
+    type IdlFetcherRpc,
+    IdlSource,
+} from '@explorer/idl-decode/fetch';
 import { createSolanaRpc } from '@solana/kit';
 
 import type { SupportedCluster } from '../config.js';
 import { type InspectorLogger, ns } from '../logger.js';
 import { RPC_REQUEST_TIMEOUT_MS } from '../shared/constants.js';
+import { toLoggedError } from '../shared/logged-error.js';
 import { resolveRpcEndpoint } from '../rpc/resolve-rpc-endpoint.js';
-import type { IdlDiscoveryResult } from './types.js';
+import { raceWithTimeout } from '../rpc/timeout.js';
+import { PROGRAMS_WITHOUT_ANCHOR_IDL } from './programs-without-anchor-idl.js';
+import type { IdlDiscoveryResult, IdlSourceWire } from './types.js';
 
 export type ResolveIdlClient = (programAddress: string, cluster: SupportedCluster) => Promise<IdlClient | null>;
 
@@ -31,14 +39,21 @@ function createIdlRpc(cluster: SupportedCluster, rpcEndpoints: Record<SupportedC
     return createSolanaRpc(resolveRpcEndpoint(cluster, rpcEndpoints));
 }
 
-type FetchOutcome = { fetched: FetchedIdlClient } | { error: IdlError } | { rejected: unknown };
+type FetchOutcome = { fetched: PublishedIdlClient } | { error: IdlError } | { rejected: unknown };
 
-async function fetchLatest(programAddress: string, rpc: IdlFetcherRpc): Promise<FetchOutcome> {
+async function fetchOnChain(programAddress: string, rpc: IdlFetcherRpc): Promise<FetchOutcome> {
     try {
-        const [error, fetched] = await fetchLatestIdlClient(programAddress, {
-            abortSignal: AbortSignal.timeout(RPC_REQUEST_TIMEOUT_MS),
-            rpc,
-        });
+        // The signal binds the account reads only: a url-sourced PMP payload goes through global
+        // fetch, so the race is what keeps that leg from stalling the whole response.
+        const [error, fetched] = await raceWithTimeout(
+            fetchOnChainIdlClient(programAddress, {
+                abortSignal: AbortSignal.timeout(RPC_REQUEST_TIMEOUT_MS),
+                anchor: !PROGRAMS_WITHOUT_ANCHOR_IDL.has(programAddress),
+                rpc,
+            }),
+            RPC_REQUEST_TIMEOUT_MS,
+            'IDL resolution',
+        );
         return error ? { error } : { fetched };
     } catch (rejected) {
         // only aborts/timeouts reject — every data outcome is an error-first Result
@@ -46,13 +61,25 @@ async function fetchLatest(programAddress: string, rpc: IdlFetcherRpc): Promise<
     }
 }
 
-function toFoundDiscovery(fetched: FetchedIdlClient): IdlDiscoveryResult {
+// A switch over our own spelling, not a pass-through: an upstream rename of IdlSource is then a compile
+// error here instead of a silent change to the wire value.
+function toSource(source: IdlSource): IdlSourceWire {
+    switch (source) {
+        case IdlSource.Pmp:
+            return 'pmp';
+        case IdlSource.Anchor:
+            return 'anchor';
+    }
+}
+
+function toFoundDiscovery(fetched: PublishedIdlClient): IdlDiscoveryResult {
     return {
         // Legacy (pre-0.30) IDLs convert to Codama at client creation and report as codama here.
         idl_type: getIdlStandard(fetched.client.idl),
         program_name: fetched.client.programName() ?? null,
-        source_type: fetched.source === IdlSource.Pmp ? 'pmp_canonical' : 'anchor_on_chain',
+        source: toSource(fetched.source),
         status: 'found',
+        ...('authority' in fetched ? { authority: fetched.authority } : {}),
     };
 }
 
@@ -75,12 +102,21 @@ export function createIdlClientResolver(
     logger: InspectorLogger,
 ): ResolveIdlClient {
     return async (programAddress, cluster) => {
-        const outcome = await fetchLatest(programAddress, createIdlRpc(cluster, rpcEndpoints));
+        const outcome = await fetchOnChain(programAddress, createIdlRpc(cluster, rpcEndpoints));
         if ('fetched' in outcome) {
             return outcome.fetched.client;
         }
         if ('rejected' in outcome) {
             logger.warn(ns('idl client resolution timed out'), { cluster, programAddress });
+            return null;
+        }
+        // the cascade falls back to raw decoding either way, so only "no IDL published" is unremarkable
+        if (outcome.error.code !== IDL_ERROR__IDL_NOT_FOUND) {
+            logger.warn(ns('idl client resolution failed'), {
+                cluster,
+                error: toLoggedError(outcome.error),
+                programAddress,
+            });
         }
         return null;
     };
@@ -92,7 +128,7 @@ export function createProgramIdlDiscovery(
     logger: InspectorLogger,
 ): DiscoverProgramIdl {
     return async (programAddress, cluster) => {
-        const outcome = await fetchLatest(programAddress, createIdlRpc(cluster, rpcEndpoints));
+        const outcome = await fetchOnChain(programAddress, createIdlRpc(cluster, rpcEndpoints));
         if ('fetched' in outcome) {
             return { client: outcome.fetched.client, discovery: toFoundDiscovery(outcome.fetched) };
         }

@@ -1,5 +1,6 @@
 import { gen } from '@__fixtures__/gen';
 import { PMP_ADDRESS } from '@entities/pmp-account';
+import { getBase58Decoder } from '@solana/kit';
 import type { Connection } from '@solana/web3.js';
 import {
     Compression,
@@ -9,10 +10,11 @@ import {
     getInitializeInstructionDataEncoder,
     getSetDataInstructionDataEncoder,
 } from '@solana-program/program-metadata';
-import bs58 from 'bs58';
 import { describe, expect, it, vi } from 'vitest';
 
 import { findConfigInTransactions, PMP_LOOKUP_MAX_SIGNATURES } from '../find-config-in-transactions';
+
+const BASE58_DECODER = getBase58Decoder();
 
 // Generated rather than borrowed from the devnet fixtures. Every assertion here turns on WHICH INDEX an account
 // occupies, never on the account itself, so a real address would imply a dependency the scan does not have - and it
@@ -53,7 +55,12 @@ function transaction({
         meta: {
             err,
             innerInstructions: inner
-                ? [{ index: 0, instructions: [{ accounts: [0, 1, 2], data: bs58.encode(data), programIdIndex }] }]
+                ? [
+                      {
+                          index: 0,
+                          instructions: [{ accounts: [0, 1, 2], data: BASE58_DECODER.decode(data), programIdIndex }],
+                      },
+                  ]
                 : [],
             loadedAddresses: undefined,
         },

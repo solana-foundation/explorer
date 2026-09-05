@@ -1,6 +1,6 @@
 import { DEFAULT_SLOT } from '@__fixtures__/gen';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -10,7 +10,7 @@ import { toBase64 } from '@/app/shared/lib/bytes';
 import { SecurityCard } from '../SecurityCard';
 
 // Known: switching between Mobile/Tablet variants has a brief lag from viewport addon iframe resize + remount.
-const PUBKEY = TOKEN_PROGRAM_ID;
+const PUBKEY = new PublicKey(TOKEN_PROGRAM_ADDRESS);
 const AUTHORITY = PublicKey.default;
 
 const NEODYME_HEADER = '=======BEGIN SECURITY.TXT V1=======\0';

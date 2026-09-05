@@ -1,3 +1,4 @@
+import { getBase58Encoder } from '@solana/kit';
 import {
     type AccountMeta,
     type CompiledInstruction,
@@ -5,9 +6,10 @@ import {
     TransactionInstruction,
     type VersionedMessage,
 } from '@solana/web3.js';
-import bs58 from 'bs58';
 
 import { Logger } from '@/app/shared/lib/logger';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 // Converts a CompiledInstruction (index-based) into a TransactionInstruction
 // (pubkey-based) using VersionedMessage helpers for signer/writable resolution.
@@ -41,7 +43,7 @@ export function compiledToTransactionInstruction(
     }
 
     return new TransactionInstruction({
-        data: bs58.decode(ix.data),
+        data: Buffer.from(BASE58_ENCODER.encode(ix.data)),
         keys,
         programId,
     });

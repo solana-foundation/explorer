@@ -1,8 +1,10 @@
+import { getBase58Encoder } from '@solana/kit';
 import { PUBLIC_KEY_LENGTH } from '@solana/web3.js';
-import bs58 from 'bs58';
 
 import { SearchGroup } from '../lib/filter-tabs';
 import type { SearchOptions, SearchProvider } from '../lib/types';
+
+const BASE58_ENCODER = getBase58Encoder();
 
 /**
  * Fallback search provider that matches valid Solana account addresses.
@@ -24,7 +26,7 @@ export const accountSearchProvider: SearchProvider = {
     search(query: string): SearchOptions[] {
         let decoded;
         try {
-            decoded = bs58.decode(query);
+            decoded = BASE58_ENCODER.encode(query);
         } catch {
             return [];
         }

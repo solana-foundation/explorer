@@ -13,15 +13,15 @@ type Story = StoryObj<typeof meta>;
 
 export const SingleInstruction: Story = {
     args: {
-        instructions: [{ name: 'Transfer', program: 'System' }],
+        instructions: [{ name: 'Transfer', programName: 'System' }],
     },
 };
 
 export const FewInstructions: Story = {
     args: {
         instructions: [
-            { name: 'Transfer', program: 'System' },
-            { name: 'Transfer Checked', program: 'Token' },
+            { name: 'Transfer', programName: 'System' },
+            { name: 'Transfer Checked', programName: 'Token' },
         ],
     },
 };
@@ -30,9 +30,9 @@ export const FewInstructions: Story = {
 export const ExactlyThree: Story = {
     args: {
         instructions: [
-            { name: 'Set Compute Unit Limit', program: 'Compute Budget' },
-            { name: 'Set Compute Unit Price', program: 'Compute Budget' },
-            { name: 'Transfer', program: 'System' },
+            { name: 'Set Compute Unit Limit', programName: 'Compute Budget' },
+            { name: 'Set Compute Unit Price', programName: 'Compute Budget' },
+            { name: 'Transfer', programName: 'System' },
         ],
     },
 };
@@ -41,11 +41,11 @@ export const ExactlyThree: Story = {
 export const ManyInstructions: Story = {
     args: {
         instructions: [
-            { name: 'Set Compute Unit Limit', program: 'Compute Budget' },
-            { name: 'Set Compute Unit Price', program: 'Compute Budget' },
-            { name: 'Transfer', program: 'System' },
-            { name: 'Transfer Checked', program: 'Token' },
-            { name: 'Create', program: 'Associated Token Account' },
+            { name: 'Set Compute Unit Limit', programName: 'Compute Budget' },
+            { name: 'Set Compute Unit Price', programName: 'Compute Budget' },
+            { name: 'Transfer', programName: 'System' },
+            { name: 'Transfer Checked', programName: 'Token' },
+            { name: 'Create', programName: 'Associated Token Account' },
         ],
     },
 };
@@ -53,10 +53,10 @@ export const ManyInstructions: Story = {
 export const WithUnknown: Story = {
     args: {
         instructions: [
-            { name: 'Advance Nonce', program: 'System Program' },
-            { name: 'Set Compute Unit Price', program: 'Compute Budget Program' },
-            { name: 'Unknown Instruction', program: 'Some Program' },
-            { name: 'Unknown Instruction', program: 'Other Program' },
+            { name: 'Advance Nonce', programName: 'System Program' },
+            { name: 'Set Compute Unit Price', programName: 'Compute Budget Program' },
+            { name: 'Unknown Instruction', programName: 'Some Program' },
+            { name: 'Unknown Instruction', programName: 'Other Program' },
         ],
     },
 };

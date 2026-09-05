@@ -39,14 +39,17 @@ const sampleReward = (i: number) => ({
     rewardType: i % 2 === 0 ? 'Staking' : 'Voting',
 });
 
+const rewards = (n: number) => ({ rewards: Array.from({ length: n }, (_, i) => sampleReward(i)) }) as any;
+
 export const WithRewards: Story = {
     args: {
-        block: { rewards: Array.from({ length: 8 }, (_, i) => sampleReward(i)) } as any,
+        block: rewards(8),
     },
 };
 
+// More than one page (PAGE_SIZE = 10) so the "Load More" footer shows.
 export const WithManyRewards: Story = {
     args: {
-        block: { rewards: Array.from({ length: 25 }, (_, i) => sampleReward(i)) } as any,
+        block: rewards(25),
     },
 };
