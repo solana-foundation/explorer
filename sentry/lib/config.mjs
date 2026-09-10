@@ -4,6 +4,7 @@ import {
     clientSentryDsn,
     sentryEnvironment,
     serverSentryDsn,
+    sourcemapUploadsDisabled,
     traceSampleRateMultiplier,
 } from './env.mjs';
 import { vitalsTraceSampleRate } from './vitals.mjs';
@@ -122,10 +123,8 @@ export function createSentryBuildConfig() {
         },
 
         // Previews don't need symbolicated traces — uploading 800+ maps × 3 runtimes added ~90s/build.
-        // ENABLE_SENTRY_SOURCEMAPS_AT_PREVIEW (internal) temporarily opts previews into uploads.
         sourcemaps: {
-            disable:
-                process.env.VERCEL_ENV !== 'production' && process.env.ENABLE_SENTRY_SOURCEMAPS_AT_PREVIEW !== 'true',
+            disable: sourcemapUploadsDisabled(),
         },
 
         // Off: widening pulls node_modules chunks into the upload.
