@@ -1,8 +1,17 @@
-import { CLIENT_REPORT_ALLOWED, CLIENT_REPORT_TAG } from './client-report.mjs';
+import { CLIENT_REPORT_ALLOWED, CLIENT_REPORT_TAG } from '../client-report.mjs';
+import { clientErrorsEnabled, clientSentryDsn, serverSentryDsn, traceSampleRateMultiplier } from './env.mjs';
+import { vitalsTraceSampleRate } from './vitals.mjs';
 
 /**
  * @typedef {'client' | 'server' | 'edge'} RuntimeContext
  */
+
+// Error events are rare and load-bearing; every runtime keeps them all.
+const SAMPLE_RATES = {
+    client: 1,
+    edge: 1,
+    server: 1,
+};
 
 // Server traces are ~5 spans each; browser pageloads emit hundreds, so client/edge stay near zero.
 const TRACE_SAMPLE_RATES = {
@@ -18,27 +27,20 @@ const TRACE_SAMPLE_RATES = {
  */
 export function createSentryConfig(context) {
     return {
-        // Next.js inlines only NEXT_PUBLIC_* variables into client bundles. Server and edge accept
-        // either DSN, so NEXT_PUBLIC_SENTRY_DSN alone configures every runtime.
-        dsn:
-            context === 'client'
-                ? process.env.NEXT_PUBLIC_SENTRY_DSN
-                : process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
+        dsn: context === 'client' ? clientSentryDsn() : serverSentryDsn(),
 
         // The flag allows the feedback form to run without browser error reporting.
         // The tag drops SDK auto-captures and direct captureException calls, which bot traffic triggers.
         // beforeSend receives error events only, so feedback events skip this check.
-        // The flag check matches isEnvEnabled, which this file cannot import.
         ...(context === 'client' && {
             beforeSend: (/** @type {import('@sentry/core').ErrorEvent} */ event) =>
-                process.env.NEXT_PUBLIC_SENTRY_CLIENT_ERRORS === 'true' &&
-                event.tags?.[CLIENT_REPORT_TAG] === CLIENT_REPORT_ALLOWED
+                clientErrorsEnabled() && event.tags?.[CLIENT_REPORT_TAG] === CLIENT_REPORT_ALLOWED
                     ? event
                     : // eslint-disable-next-line unicorn/no-null -- Sentry's drop signal is null
                       null,
         }),
 
-        sampleRate: 1,
+        sampleRate: SAMPLE_RATES[context],
 
         // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
         tracesSampler: (/** @type {import('@sentry/core').TracesSamplerSamplingContext} */ samplingContext) => {
@@ -53,17 +55,23 @@ export function createSentryConfig(context) {
                 return 0;
             }
 
-            // Don't sample health checks or monitoring endpoints
-            if (samplingContext.name.includes('/api/ping')) {
-                return 0;
+            // Vitals sampling off → the baseline map rate applies.
+            if (context === 'client') {
+                const vitalsRate = vitalsTraceSampleRate(samplingContext);
+                if (vitalsRate !== undefined) {
+                    return vitalsRate;
+                }
             }
 
-            // Don't sample all other api endpoints as we should rely on logging
-            if (samplingContext.name.includes('/api/')) {
-                return 0;
-            }
+            // TODO: enable once a client DSN exists so a sampled client trace keeps its server half; callers
+            // can force sampling via sentry-trace headers, so weigh that first:
+            // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/sampling/#inheritance
+            // if (samplingContext.parentSampled !== undefined) {
+            //     return samplingContext.parentSampled;
+            // }
 
-            return TRACE_SAMPLE_RATES[context];
+            // Env multiplier dampens a runtime's baseline in an emergency (0 mutes); unset = unchanged.
+            return TRACE_SAMPLE_RATES[context] * (traceSampleRateMultiplier(context) ?? 1);
         },
 
         // Enable logs to be sent to Sentry
