@@ -38,7 +38,7 @@ import { fetchSimdSummary } from './feature-gates/lib/simd-summary';
 
 const DEVNET_RPC_URL = process.env.SOLANA_DEVNET_RPC ?? 'https://api.devnet.solana.com';
 const TESTNET_RPC_URL = process.env.SOLANA_TESTNET_RPC ?? 'https://api.testnet.solana.com';
-const MAINNET_RPC_URL = process.env.SOLANA_MAINNET_RPC ?? 'https://api.mainnet-beta.solana.com';
+const MAINNET_RPC_URL = process.env.SOLANA_MAINNET_RPC ?? 'https://api.mainnet.solana.com';
 const DESCRIPTION_FETCH_CONCURRENCY = 6;
 
 async function main() {
