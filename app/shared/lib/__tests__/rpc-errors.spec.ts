@@ -9,13 +9,13 @@ describe('isMethodNotFound', () => {
 
     it('should not classify another structured error code as method-not-found', () => {
         // A numeric code is authoritative: a proxy error page whose message happens to say
-        // "method not found" must not permanently disable filtering for the session.
+        // "method not found" must not get an endpoint written off as too old.
         expect(isMethodNotFound({ code: -32000, message: 'method not found' })).toBe(false);
     });
 
     it('should recognise an unknown method reported as a generic internal error', () => {
         // Helius answers an unknown method with -32603 rather than -32601, putting the real
-        // reason in the message. Without this the getSignaturesForAddress fallback never fires.
+        // reason in the message. Without this, every caller reads that endpoint as failing.
         expect(isMethodNotFound({ code: -32603, message: 'Method not found' })).toBe(true);
     });
 

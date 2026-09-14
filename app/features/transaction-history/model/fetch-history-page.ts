@@ -1,12 +1,12 @@
 import type { Address } from '@solana/kit';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { isMethodNotFound } from '@/app/shared/lib/rpc-errors';
 
 import { fetchViaSignatures } from '../api/get-signatures-for-address';
 import { getTransactionsForAddress } from '../api/get-transactions-for-address';
 import { isGtfaDisabled } from '../lib/gtfa-disabled-addresses';
 import { hasActiveFilters, type HistoryFilters } from '../lib/history-filters';
-import { isMethodNotFound } from '../lib/rpc-errors';
 import type { AccountHistory } from '../lib/types';
 
 export type HistoryPage = {
