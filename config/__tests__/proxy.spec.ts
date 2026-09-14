@@ -50,6 +50,7 @@ describe('Next.js proxy', () => {
                 const response = await proxy(createRequest(pathname));
 
                 expect(response.status).toBe(404);
+                expect(response.headers.get('Content-Type')).toBe('text/plain; charset=utf-8');
                 expect(botIdMiddleware).not.toHaveBeenCalled();
             },
         );
