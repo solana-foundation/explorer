@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { GET } from '../route';
 
@@ -9,10 +9,6 @@ function createRequest(headers?: HeadersInit): Request {
 }
 
 describe('GET /robots.txt', () => {
-    beforeEach(() => {
-        vi.unstubAllEnvs();
-    });
-
     afterEach(() => {
         vi.unstubAllEnvs();
     });
@@ -42,9 +38,7 @@ describe('GET /robots.txt', () => {
         const body = await response.text();
 
         expect(response.status).toBe(200);
-        expect(body).toContain('Disallow: /');
-        expect(body).not.toContain('Allow: /');
-        expect(body).not.toContain('Sitemap:');
+        expect(body).toBe('User-agent: *\nDisallow: /\n');
     });
 
     it('should set Cache-Control, Content-Type and ETag headers', () => {
@@ -75,7 +69,7 @@ describe('GET /robots.txt', () => {
         expect(response.status).toBe(200);
     });
 
-    it('should serve different ETags per policy so a flag flip invalidates cached copies', () => {
+    it('should serve a distinct ETag per policy', () => {
         const allowEtag = GET(createRequest()).headers.get('ETag');
 
         vi.stubEnv('SEO_DISALLOW_BOTS', 'true');

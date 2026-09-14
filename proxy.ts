@@ -19,7 +19,9 @@ export async function proxy(request: NextRequest) {
     }
 
     if (SITEMAP_PATHS.has(request.nextUrl.pathname)) {
-        return isSeoDisallowBots() ? new NextResponse('Not Found', { status: 404 }) : NextResponse.next();
+        return isSeoDisallowBots()
+            ? new NextResponse('Not Found', { headers: { 'Content-Type': 'text/plain; charset=utf-8' }, status: 404 })
+            : NextResponse.next();
     }
 
     const blocked = await botIdMiddleware(request);

@@ -5,7 +5,8 @@ import { NextResponse } from 'next/server';
 
 import { ifNoneMatchMatches, notModifiedResponse } from '@/app/shared/lib/http-utils';
 
-// Same policy the static file had via next.config seoFileHeaders; the route owns it now.
+// s-maxage is explicit but redundant: max-age already governs the shared cache. A flag flip waits
+// out the freshness window either way, and the ETag only saves bytes once the entry goes stale.
 const ROBOTS_CACHE_HEADERS = {
     'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
 };
