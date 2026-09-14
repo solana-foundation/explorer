@@ -10,7 +10,7 @@ const SAMPLES_PER_MINUTE = 1;
 export type DashboardInfo = {
     status: ClusterStatsStatus;
     msPerSlot_1h: number;
-    msPerSlot_1min: number;
+    msPerSlot_1min?: number;
     epochInfo: EpochInfo;
     blockTime?: number;
     lastBlockTime?: BlockTimeInfo;
@@ -84,9 +84,9 @@ export function dashboardInfoReducer(state: DashboardInfo, action: DashboardInfo
             const msPerSlot_1h = measureMsPerSlot(action.data, SAMPLES_PER_HOUR);
             const msPerSlot_1min = measureMsPerSlot(action.data, SAMPLES_PER_MINUTE);
 
-            // Rather than label an older minute "1min" when the newest one produced no slot, the last
-            // figures stand until the next poll.
-            if (msPerSlot_1h === undefined || msPerSlot_1min === undefined) {
+            // A stalled cluster produces no slot for the newest minute while the hour still states a
+            // rate. Labelling an older minute "1min" would misreport it, so it goes absent instead.
+            if (msPerSlot_1h === undefined) {
                 return state;
             }
 
