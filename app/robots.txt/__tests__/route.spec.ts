@@ -23,6 +23,13 @@ describe('GET /robots.txt', () => {
         expect(body).toContain('Sitemap: https://explorer.solana.com/sitemap.xml');
     });
 
+    it('should keep the MCP endpoint closed and its landing page open', async () => {
+        const body = await GET(createRequest()).text();
+
+        expect(body).toContain('Disallow: /mcp\n');
+        expect(body).toContain('Allow: /mcp/start\n');
+    });
+
     it('should serve the allow policy when the flag is explicitly false', async () => {
         vi.stubEnv('SEO_DISALLOW_BOTS', 'false');
 

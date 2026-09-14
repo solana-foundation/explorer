@@ -11,9 +11,12 @@ const ROBOTS_CACHE_HEADERS = {
     'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
 };
 
+// Google resolves a path by longest match, not by order, so `/mcp/start` stays reachable.
 const ALLOW_BOTS_CONTENT = `User-agent: *
 Allow: /
+Allow: /mcp/start
 Disallow: /api/
+Disallow: /mcp
 
 Sitemap: ${EXPLORER_BASE_URL}/sitemap.xml
 `;
