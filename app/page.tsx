@@ -6,6 +6,7 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { TimestampToggle } from '@components/common/TimestampToggle';
 import { LiveTransactionStatsCard } from '@components/LiveTransactionStatsCard';
 import { StatsNotReady } from '@components/StatsNotReady';
+import { AlpenglowCard } from '@features/alpenglow';
 import { UpcomingFeatures } from '@features/feature-gate';
 import { useCluster } from '@providers/cluster';
 import { StatsProvider } from '@providers/stats';
@@ -39,6 +40,8 @@ export default function Page() {
                         <LiveTransactionStatsCard />
                     </div>
                 </div>
+
+                <AlpenglowCard />
 
                 <DeveloperResources />
 
