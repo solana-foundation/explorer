@@ -50,7 +50,6 @@ const initialDashboardInfo: DashboardInfo = {
         slotsInEpoch: BigInt(0),
     },
     msPerSlot_1h: 0,
-    msPerSlot_1min: 0,
     status: ClusterStatsStatus.Loading,
 };
 

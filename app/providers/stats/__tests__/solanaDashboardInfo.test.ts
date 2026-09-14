@@ -21,7 +21,6 @@ describe('dashboardInfoReducer', () => {
             slotsInEpoch: BigInt(0),
         },
         msPerSlot_1h: 0,
-        msPerSlot_1min: 0,
         status: ClusterStatsStatus.Loading,
         ...overrides,
     });
@@ -234,8 +233,8 @@ describe('dashboardInfoReducer', () => {
         });
 
         // Reporting the minute before it as the "1min" figure would label a measurement as something it
-        // is not, so the last poll's figures stand until the next one.
-        it('should keep the previous figures when the newest minute produced no slot', () => {
+        // is not, so the figure goes absent rather than naming the wrong minute.
+        it('should drop the 1min figure when the newest minute produced no slot', () => {
             const initialState = createInitialState({ msPerSlot_1h: 400, msPerSlot_1min: 400 });
             const action: DashboardInfoAction = {
                 data: [
@@ -255,7 +254,44 @@ describe('dashboardInfoReducer', () => {
 
             const result = dashboardInfoReducer(initialState, action);
 
-            expect(result).toBe(initialState);
+            expect(result.msPerSlot_1min).toBeUndefined();
+            expect(result.msPerSlot_1h).toBe(6000); // 60 s / 10 slots
+        });
+
+        // A stalled cluster serves a zero-slot newest sample on every poll, so a first load has no
+        // earlier figure to fall back on. Holding the state here left the card at 0 ms per slot, which
+        // never reaches Ready.
+        it('should report the hour when the newest minute produced no slot and nothing was measured yet', () => {
+            const initialState = createInitialState({
+                epochInfo: {
+                    absoluteSlot: BigInt(440004500),
+                    blockHeight: BigInt(391818092),
+                    epoch: BigInt(1031),
+                    slotIndex: BigInt(136244),
+                    slotsInEpoch: BigInt(432000),
+                },
+            });
+            const action: DashboardInfoAction = {
+                data: [
+                    {
+                        numSlots: BigInt(0),
+                        numTransactions: BigInt(0),
+                        samplePeriodSecs: 60,
+                    },
+                    {
+                        numSlots: BigInt(310),
+                        numTransactions: BigInt(70284),
+                        samplePeriodSecs: 60,
+                    },
+                ],
+                type: DashboardInfoActionType.SetPerfSamples,
+            };
+
+            const result = dashboardInfoReducer(initialState, action);
+
+            expect(result.msPerSlot_1h).toBe(194); // 60 s / 310 slots
+            expect(result.msPerSlot_1min).toBeUndefined();
+            expect(result.status).toBe(ClusterStatsStatus.Ready);
         });
 
         it('should set status to Ready when epochInfo.absoluteSlot is not zero', () => {

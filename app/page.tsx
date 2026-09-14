@@ -101,10 +101,12 @@ function StatsCardBody() {
                         </td>
                     </tr>
                 )}
-                <tr>
-                    <td className="w-full">Slot time (1min average)</td>
-                    <td className="text-right font-mono">{msPerSlot_1min}ms</td>
-                </tr>
+                {msPerSlot_1min !== undefined && (
+                    <tr>
+                        <td className="w-full">Slot time (1min average)</td>
+                        <td className="text-right font-mono">{msPerSlot_1min}ms</td>
+                    </tr>
+                )}
                 <tr>
                     <td className="w-full">Slot time (1hr average)</td>
                     <td className="text-right font-mono">{msPerSlot_1h}ms</td>
