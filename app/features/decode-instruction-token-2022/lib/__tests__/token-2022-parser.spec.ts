@@ -143,13 +143,11 @@ describe('parseToken2022Instruction — SPL interface instructions', () => {
         expect(parse(new Uint8Array([255, 255, 255, 255]), [METADATA])).toBeUndefined();
     });
 
-    // Regression guard: if this ever stops throwing, upstream has fixed the
-    // Codama discriminator bug and this slice's local parsers can be dropped.
-    test('should still fail to decode with the upstream data decoder', () => {
+    test('should decode with the upstream data decoder', () => {
         const data = getUpdateTokenMetadataFieldInstructionDataEncoder().encode({
             field: { __kind: 'Name' },
             value: 'X',
         });
-        expect(() => getUpdateTokenMetadataFieldInstructionDataDecoder().decode(data)).toThrow();
+        expect(getUpdateTokenMetadataFieldInstructionDataDecoder().decode(data)).toMatchObject({ value: 'X' });
     });
 });

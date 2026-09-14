@@ -38,6 +38,10 @@ minimumReleaseAge: 20160
 # TODO: remove exclusion 
 minimumReleaseAgeExclude:
   - sas-lib
+  # kit 8.3.0 pins 27 subpackages to its own release day, and one of them pulls a
+  # types-only package published in the same window. Removable from 2026-09-23.
+  - '@solana/*'
+  - 'undici-types'
 
 # Pin resolution to the public npm registry so it can't silently inherit a
 # global/org .npmrc mirror. Scoped keys (e.g. '@my-org') can be added here.
