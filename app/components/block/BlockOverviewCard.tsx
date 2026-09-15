@@ -4,7 +4,7 @@ import { Epoch } from '@components/common/Epoch';
 import { ExternalLinkWarning } from '@components/common/ExternalLinkWarning';
 import { Slot } from '@components/common/Slot';
 import { cn } from '@components/shared/utils';
-import type { BlockWithV1 } from '@entities/block-data';
+import { type BlockWithV1, summarizeBlockTransactionVersions } from '@entities/block-data';
 import { summarizeBlockComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
@@ -44,6 +44,8 @@ export function BlockOverviewCard({
         cost: totalCostUnits,
         max: maxComputeUnits,
     } = summarizeBlockComputeUnits({ block, cluster, epoch });
+
+    const { entries: versionEntries } = summarizeBlockTransactionVersions(block);
 
     const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
     const successfulTxs = block.transactions.filter(tx => tx.meta?.err === null);
@@ -141,6 +143,18 @@ export function BlockOverviewCard({
                 <Row divider>
                     <Label>Processed Transactions</Label>
                     <Value mono={false}>{block.transactions.length}</Value>
+                </Row>
+                <Row divider>
+                    <Label>Transaction Versions</Label>
+                    <Value mono={false} breakAll={false}>
+                        {versionEntries.map(({ count, label, share, version }, index) => (
+                            <span key={String(version)}>
+                                {index > 0 && <span className="text-outer-space-300"> &middot; </span>}
+                                {label}: {count.toLocaleString()}{' '}
+                                <span className="text-outer-space-300">({Math.round(share * 100)}%)</span>
+                            </span>
+                        ))}
+                    </Value>
                 </Row>
                 {showSuccessfulCount && (
                     <Row divider>
