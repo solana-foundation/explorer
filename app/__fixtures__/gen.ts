@@ -88,3 +88,6 @@ export const DEFAULT_SIGNATURE = gen.signature(0);
 
 /** Stable single-placeholder unix timestamp (seconds since epoch). */
 export const DEFAULT_TIMESTAMP = gen.timestamp(0);
+
+/** Stable rpc url placeholder. */
+export const DEFAULT_RPC_URL = 'https://rpc.example.com';
