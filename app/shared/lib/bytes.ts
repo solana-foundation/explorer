@@ -440,3 +440,14 @@ export function bytes(input: string | ArrayLike<number> | ArrayBufferLike, encod
     // Handle array-like (number[])
     return new Uint8Array(input as ArrayLike<number>);
 }
+
+/**
+ * Parse an RPC-reported byte count. `space` arrives as a bigint from kit, as a number from web3.js, and
+ * is absent from a node that does not report it. Returning `undefined` keeps that absence a variant
+ * instead of spreading NaN through the UI.
+ */
+export function toByteCount(value: number | bigint | null | undefined): number | undefined {
+    if (typeof value !== 'number' && typeof value !== 'bigint') return undefined;
+    const count = Number(value);
+    return Number.isSafeInteger(count) && count >= 0 ? count : undefined;
+}

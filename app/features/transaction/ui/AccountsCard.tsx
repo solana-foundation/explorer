@@ -7,7 +7,7 @@ import { SolBalance } from '@components/common/SolBalance';
 import { Button } from '@components/shared/ui/button';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
-import { AccountInfo, useAccountsInfo } from '@entities/account';
+import { useAccountSizes } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
@@ -31,23 +31,13 @@ import {
 
 type TransactionAccountRowProps = {
     account: ParsedMessageAccount;
-    accountInfo?: AccountInfo;
-    accountInfoLoading: boolean;
     index: number;
     message: ParsedMessage;
     post: number;
     pre: number;
 };
 
-function TransactionAccountRow({
-    account,
-    accountInfo,
-    accountInfoLoading,
-    index,
-    message,
-    post,
-    pre,
-}: TransactionAccountRowProps) {
+function TransactionAccountRow({ account, index, message, post, pre }: TransactionAccountRowProps) {
     const [expanded, setExpanded] = useState(false);
     const [slideoverOpen, setSlideoverOpen] = useState(false);
     const { isLandscape, isLg } = useBreakpoint();
@@ -149,12 +139,7 @@ function TransactionAccountRow({
                     )}
                 >
                     <div className="min-h-0 overflow-hidden">
-                        <AccountExpandedContent
-                            accountInfo={accountInfo}
-                            accountInfoLoading={accountInfoLoading}
-                            address={key}
-                            enabled={expanded}
-                        />
+                        <AccountExpandedContent address={key} enabled={expanded} />
                     </div>
                 </div>
             </div>
@@ -162,8 +147,6 @@ function TransactionAccountRow({
             {/* Mobile: slideover */}
             <AccountDetailSlideover
                 account={account}
-                accountInfo={accountInfo}
-                accountInfoLoading={accountInfoLoading}
                 index={index}
                 message={message}
                 onOpenChange={setSlideoverOpen}
@@ -183,11 +166,13 @@ export function AccountsCard({ signature }: SignatureProps) {
 
     const pubkeys = useMemo(() => message?.accountKeys.map(a => a.pubkey) ?? [], [message?.accountKeys]);
 
-    const { accounts, error, loading } = useAccountsInfo(pubkeys, url);
+    // Sizes feed the footer total only, so a failed fetch drops the footer and leaves the rows
+    // untouched.
+    const { sizes, loading } = useAccountSizes(pubkeys, url);
 
     const totalAccountSize = useMemo(
-        () => Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0),
-        [accounts],
+        () => Array.from(sizes.values()).reduce((total, size) => total + size, 0),
+        [sizes],
     );
 
     if (!transactionWithMeta) {
@@ -198,18 +183,11 @@ export function AccountsCard({ signature }: SignatureProps) {
         return <ErrorCard text="Transaction metadata is missing" />;
     }
 
-    if (error) {
-        return <ErrorCard text="Failed to fetch accounts info" />;
-    }
-
     const accountRows = message.accountKeys.map((account, index) => {
-        const pubkeyStr = account.pubkey.toBase58();
         return (
             <TransactionAccountRow
-                key={pubkeyStr}
+                key={account.pubkey.toBase58()}
                 account={account}
-                accountInfo={accounts.get(pubkeyStr)}
-                accountInfoLoading={loading}
                 index={index}
                 message={message}
                 post={meta.postBalances[index]}
