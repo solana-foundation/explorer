@@ -105,6 +105,21 @@ describe('fetchTransactionDetails', () => {
         expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
+    it('should reject the request once the caller deadline fires', async () => {
+        const controller = new AbortController();
+        fetchMock.mockImplementationOnce(
+            (_url: string, init: RequestInit) =>
+                new Promise((_resolve, reject) => {
+                    init.signal?.addEventListener('abort', () => reject(new Error('The operation was aborted')));
+                }),
+        );
+
+        const pending = fetchTransactionDetails(URL, SIGNATURE, { abortSignal: controller.signal });
+        controller.abort();
+
+        await expect(pending).rejects.toThrow();
+    });
+
     it('should reject when the RPC call fails, so the provider can report the failure', async () => {
         fetchMock.mockResolvedValueOnce({
             headers: new Headers(),

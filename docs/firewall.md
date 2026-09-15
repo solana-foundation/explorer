@@ -16,7 +16,7 @@ switched on only during a spike.
 | `Allow static assets`                      | root icons, manifest      | Tab icons, PWA install, and the site preview all fail                                 | [below](#rules-to-configure)      |
 | `Bypass crawler files`                     | robots and sitemaps       | Unverified crawlers and SEO tooling cannot read either                                | [below](#rules-to-configure)      |
 | `Bypass OG image routes`                   | all of `/og/`             | Link previews render blank — crawlers cannot solve a challenge                        | [`app/og`](../app/og/README.md)   |
-| `Bypass receipt view of transaction pages` | `/tx/` + `view=receipt`   | Shared receipt links do not unfurl — the crawler fetches the page, not just the image | [below](#rules-to-configure)      |
+| `Bypass transaction pages` | `/tx/`        | Shared Transaction links do not unfurl — the crawler fetches the page, not just the image | [below](#rules-to-configure)      |
 | `Bypass feature gate pages`                | `/address/…/feature-gate` | Shared feature gate links do not unfurl, for the same reason                          | [below](#rules-to-configure)      |
 | `Bypass MCP endpoint`                      | `/mcp`                    | Unreachable to every MCP client                                                       | [`app/mcp`](../app/mcp/README.md) |
 | `Rate limit MCP` (disabled)                | `/mcp`                    | No way to throttle a spike without closing the endpoint                               | [`app/mcp`](../app/mcp/README.md) |
@@ -62,11 +62,10 @@ Bot Filter auto-allows Vercel's verified-bot directory, so Googlebot may already
 not user-agent, so that cannot be tested from here. Unverified crawlers and SEO tooling are challenged today.
 
 ```
-Name: Bypass receipt view of transaction pages
-Description: Receipt is an alternative view of the /tx/ page, not its own route; social crawlers unfurl it: `^/tx/.*?view=receipt`
+Name: Bypass transaction pages
+Description: Transaction /tx/<sig> pages
 Rule:
-    If `Request Path` `Starts with` `/tx/`
-    AND `Query` `view` `Equals` `receipt`
+    If `Request Path` `Matches expression` `^/tx/[1-9A-HJ-NP-Za-km-z]{86,88}/?$`
     Then `Bypass`
 ```
 
@@ -78,7 +77,7 @@ Rule:
     Then `Bypass`
 ```
 
-Both are pages, not images. `Bypass OG image routes` already serves `/og/receipt/` and `/og/feature-gate/`, but a
+Both are pages, not images. `Bypass OG image routes` already serves `/og/receipt/`, `/og/feature-gate/` and `/og/tx/`, but a
 crawler reaches those only after reading `og:image` off the page — so without these two the preview never starts.
 Anchored at both ends because `Starts with /address/` would exempt every account page.
 

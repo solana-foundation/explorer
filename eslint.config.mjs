@@ -470,6 +470,11 @@ export default tseslint.config(
                                     // Hooks an entity keeps off `index.ts` so that barrel stays callable
                                     // from a route handler; the `client-only` marker on it catches misuse.
                                     { type: 'entity', internalPath: 'client.ts' },
+                                    // `server.ts` is an entity's server-only public API - the split AGENTS.md
+                                    // mandates for server code in a slice - so it is as much a barrel as
+                                    // `index.ts`. Needed because some entity exports must never reach a client
+                                    // bundle: `@entities/idl/server` pulls in `@solana/idl` (~40 KB gzip).
+                                    { type: 'entity', internalPath: 'server.ts' },
                                     { type: 'entity-public-api' },
                                     { type: 'feature', captured: { name: '{{ name }}' } },
                                 ],
@@ -581,8 +586,6 @@ export default tseslint.config(
             'app/features/idl/interactive-idl/model/use-mainnet-confirmation.ts',
             'app/features/instruction-simulation/ui/SimulationCard.tsx',
             'app/features/receipt/receipt-page.tsx',
-            'app/features/search/api/discover-with-utl.ts',
-            'app/features/search/api/resolve-search-tokens.ts',
             'app/features/stake/ui/StakeAccountSection.tsx',
             'app/features/transaction/ui/AccountDetailSlideover.tsx',
             'app/features/transaction/ui/AccountExpandedSections.tsx',

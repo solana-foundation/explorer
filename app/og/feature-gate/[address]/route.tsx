@@ -1,12 +1,11 @@
 import { getFeatureInfo } from '@entities/feature-gate/server';
-import { BaseFeatureGateImage, isFeatureGateOgEnabled, OG_IMAGE_SIZE } from '@features/feature-gate/server';
+import { BaseFeatureGateImage, isFeatureGateOgEnabled } from '@features/feature-gate/server';
+import { IMAGE_SIZE } from '@shared/lib/og/image-size';
 import { isAddress } from '@solana/kit';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
-
-export const runtime = 'edge';
 
 const CACHE_DURATION = 24 * 60 * 60; // 24 hours — feature gate data rarely changes
 const CACHE_HEADERS = {
@@ -28,7 +27,7 @@ export async function GET(_request: NextRequest, props: Props) {
 
     try {
         const imageResponse = new ImageResponse(<BaseFeatureGateImage title={feature.title} simds={feature.simds} />, {
-            ...OG_IMAGE_SIZE,
+            ...IMAGE_SIZE,
         });
         const imageBuffer = await imageResponse.arrayBuffer();
 
