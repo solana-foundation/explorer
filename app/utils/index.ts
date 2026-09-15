@@ -132,9 +132,14 @@ export function abbreviatedNumber(value: number, fixed = 1) {
     if (value >= 1e12) return `${+(value / 1e12).toFixed(fixed)}T`;
 }
 
-export function pluralUnits(n: number | bigint, unit: 'hour' | 'second'): string {
+type PluralUnit = 'hour' | 'instruction' | 'second';
+export function pluralWord(n: number | bigint, unit: PluralUnit): string {
     const isOne = typeof n === 'bigint' ? n === 1n : n === 1;
-    return `${n.toString()} ${isOne ? unit : `${unit}s`}`;
+    return isOne ? unit : `${unit}s`;
+}
+
+export function pluralUnits(n: number | bigint, unit: PluralUnit): string {
+    return `${n.toString()} ${pluralWord(n, unit)}`;
 }
 
 export const pubkeyToString = (key: PublicKey | string = '') => {

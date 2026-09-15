@@ -17,7 +17,6 @@ vi.mock('@features/receipt/server', async importOriginal => {
     return {
         ...actual,
         BaseReceiptImage: vi.fn(() => null),
-        OG_IMAGE_SIZE: { height: 630, width: 1200 },
         createReceipt: vi.fn(),
         isReceiptEnabled: true,
     };

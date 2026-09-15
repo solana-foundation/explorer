@@ -26,7 +26,7 @@ import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 import { generateReceiptCsv } from './lib/generate-receipt-csv';
 import { generateReceiptPdf, loadPdfDeps } from './lib/generate-receipt-pdf';
 import { usePrimaryDomain } from './lib/use-primary-domain';
-import { extractReceiptData, type ReceiptUnavailabilityReason } from './model/create-receipt';
+import { extractReceiptData, type ReceiptUnavailabilityReason } from './model/receipt-data';
 import type { FormattedReceipt } from './types';
 import { NoReceipt } from './ui/BaseReceipt';
 import { ReceiptView } from './ui/ReceiptView';

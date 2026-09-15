@@ -1,7 +1,7 @@
+import { IMAGE_SIZE } from '@shared/lib/og/image-size';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
-import { IMAGE_SIZE } from '../../constants';
 import { BaseFeatureGateImage, MAX_TITLE_LENGTH } from '../BaseFeatureGateImage';
 
 const meta: Meta<typeof BaseFeatureGateImage> = {

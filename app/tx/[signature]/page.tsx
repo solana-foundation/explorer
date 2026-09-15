@@ -1,13 +1,10 @@
 import '../../styles/styles.css';
 
-import {
-    buildCompositeSignature,
-    getClusterParam,
-    isReceiptEnabled,
-    RECEIPT_BASE_URL,
-    RECEIPT_OG_IMAGE_VERSION,
-} from '@features/receipt/server';
-import { Cluster, CLUSTERS, clusterSlug } from '@utils/cluster';
+import { isReceiptEnabled, RECEIPT_BASE_URL, RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/server';
+import { buildCompositeSignature, getClusterParam } from '@features/receipt/server';
+import { getTxOgImageUrl, getTxOpenGraph } from '@features/transaction-share/server';
+import { IMAGE_SIZE } from '@shared/lib/og/image-size';
+import { Cluster, CLUSTERS, clusterSlug, type ServerCluster } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
 import { Metadata } from 'next/types';
 import React from 'react';
@@ -19,12 +16,15 @@ type Props = Readonly<{
     searchParams: Promise<Record<string, string | string[] | undefined>>;
 }>;
 
-// Custom clusters use user-specific RPCs that the receipt API cannot access
-const SHAREABLE_CLUSTERS = CLUSTERS.filter(c => c !== Cluster.Custom);
+// Custom clusters use user-specific RPCs that no server-side route can reach.
+const SHAREABLE_CLUSTERS = CLUSTERS.filter((c): c is ServerCluster => c !== Cluster.Custom);
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
     const searchParams = await props.searchParams;
     const { signature } = await props.params;
+
+    const cluster = getClusterParam(searchParams);
+    const clusterEnum = SHAREABLE_CLUSTERS.find(c => clusterSlug(c) === cluster);
 
     const isReceiptView = searchParams.view === 'receipt' && isReceiptEnabled;
 
@@ -33,8 +33,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         const description = `Transaction receipt for ${signature} on Solana blockchain`;
 
         const baseUrl = RECEIPT_BASE_URL;
-        const cluster = getClusterParam(searchParams);
-        const clusterEnum = SHAREABLE_CLUSTERS.find(c => clusterSlug(c) === cluster);
 
         const pageParams = new URLSearchParams();
         pageParams.set('view', 'receipt');
@@ -51,14 +49,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
             description,
             openGraph: {
                 description,
-                images: [
-                    {
-                        alt: 'Solana Transaction Receipt',
-                        height: 630,
-                        url: ogImageUrl,
-                        width: 1200,
-                    },
-                ],
+                images: [{ ...IMAGE_SIZE, alt: 'Solana Transaction Receipt', url: ogImageUrl }],
                 title,
                 type: 'website',
                 url: pageUrl,
@@ -74,9 +65,23 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         };
     }
 
+    const description = `Details of the Solana transaction with signature ${signature}`;
+    const title = `Transaction | ${signature} | Solana`;
+
     return {
-        description: `Details of the Solana transaction with signature ${signature}`,
-        title: `Transaction | ${signature} | Solana`,
+        description,
+        openGraph: {
+            ...getTxOpenGraph(signature, clusterEnum),
+            description,
+            title,
+        },
+        title,
+        twitter: {
+            card: 'summary_large_image',
+            description,
+            images: [getTxOgImageUrl(signature, clusterEnum)],
+            title,
+        },
     };
 }
 
