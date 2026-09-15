@@ -85,7 +85,6 @@ function renderSlideover({ onOpenChange = vi.fn() }: { onOpenChange?: (open: boo
                 source: 'transaction',
                 writable: false,
             }}
-            accountInfoLoading={false}
             index={0}
             message={{} as ParsedMessage}
             onOpenChange={onOpenChange}

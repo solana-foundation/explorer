@@ -1,5 +1,4 @@
 import { Button } from '@components/shared/ui/button';
-import type { AccountInfo } from '@entities/account';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
@@ -21,23 +20,13 @@ import { AccountExpandedContent } from './AccountExpandedContent';
 
 type Props = {
     account: ParsedMessageAccount;
-    accountInfo?: AccountInfo;
-    accountInfoLoading: boolean;
     index: number;
     message: ParsedMessage;
     onOpenChange: (open: boolean) => void;
     open: boolean;
 };
 
-export function AccountDetailSlideover({
-    account,
-    accountInfo,
-    accountInfoLoading,
-    index,
-    message,
-    onOpenChange,
-    open,
-}: Props) {
+export function AccountDetailSlideover({ account, index, message, onOpenChange, open }: Props) {
     const pubkey = account.pubkey;
     const address = pubkey.toBase58();
     const nickname = useNickname(address);
@@ -80,13 +69,7 @@ export function AccountDetailSlideover({
 
                     {/* Scrollable body */}
                     <SlideoverBody className="border-t border-white/10 py-2 [border-top-style:solid]">
-                        <AccountExpandedContent
-                            accountInfo={accountInfo}
-                            accountInfoLoading={accountInfoLoading}
-                            address={address}
-                            enabled={open}
-                            flat
-                        />
+                        <AccountExpandedContent address={address} enabled={open} flat />
                     </SlideoverBody>
 
                     {/* Footer action bar */}

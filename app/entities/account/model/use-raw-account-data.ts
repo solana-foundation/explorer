@@ -9,14 +9,41 @@ import { fromBase64 } from '@/app/shared/lib/bytes';
 
 export const rawAccountDataKey = (url: string, address: string) => ['raw-account-data', url, address] as const;
 
+const LAZY_SWR = {
+    // Without a cap SWR retries a dead RPC forever. The viewer now renders the failure, so a caller
+    // sees a settled answer instead of a spinner that alternates with it.
+    errorRetryCount: 3,
+    revalidateOnFocus: false,
+    revalidateOnMount: false,
+    revalidateOnReconnect: false,
+} as const;
+
 export function useRawAccountData(accountAddress: string) {
     const { url } = useCluster();
 
-    return useSWR(rawAccountDataKey(url, accountAddress), () => fetchRawAccountData(getRpc(url), accountAddress), {
-        revalidateOnFocus: false,
-        revalidateOnMount: false,
-        revalidateOnReconnect: false,
-    });
+    return useSWR<Uint8Array | undefined, Error>(
+        rawAccountDataKey(url, accountAddress),
+        () => fetchRawAccountData(getRpc(url), accountAddress),
+        LAZY_SWR,
+    );
+}
+
+/**
+ * Raw bytes for a viewer that lives behind a popover or dropdown. The fetch runs on the first open —
+ * listing accounts costs nothing — and the bytes are kept, so reopening does not download them again.
+ * A failed open retries, because nothing else will.
+ */
+export function useRawAccountDataOnOpen(accountAddress: string) {
+    const { data, error, isLoading, mutate } = useRawAccountData(accountAddress);
+
+    return {
+        data,
+        error,
+        loading: isLoading,
+        onOpenChange: (open: boolean) => {
+            if (open && data === undefined) void mutate();
+        },
+    };
 }
 
 /** Eager variant — fetches immediately on mount. Used by RawAccountRows in AccountCard. */

@@ -19,18 +19,21 @@ const VISIBLE_ROWS = 3;
 
 const BASE64_VISIBLE_CHARS = 192;
 
-// Inline string conversion (hex/base64) is skipped above this threshold.
-// Copy is disabled, use the download button for large payloads.
+// Above this size the tab bodies say "too large" instead of rendering the payload, and no inline
+// string is built for it. Copy and Download still serve it, converting on demand.
 const MAX_INLINE_BYTES = 1024;
+
+const LOAD_FAILED = 'Failed to load account data.';
 
 export type RawDataFieldProps = {
     data: ByteArray | undefined;
+    error?: Error;
     loading?: boolean;
     filename: string;
     extraButton?: React.ReactNode;
 };
 
-export function RawDataField({ data, loading, filename, extraButton }: RawDataFieldProps) {
+export function RawDataField({ data, error, loading, filename, extraButton }: RawDataFieldProps) {
     const [tab, setTab] = useState<'hex' | 'base64'>('hex');
     const [expanded, setExpanded] = useState(false);
     const [copyState, copy] = useCopyToClipboard();
@@ -43,23 +46,31 @@ export function RawDataField({ data, loading, filename, extraButton }: RawDataFi
         }
     }, [downloadState]);
 
+    const view = viewState({ data, error, loading });
+    const bytes = 'data' in view ? view.data : undefined;
+    const hasData = view.kind === 'ready' || view.kind === 'tooLarge';
+    const failure = view.kind === 'failed' ? view.error : undefined;
+
     useEffect(() => {
         setExpanded(false);
-    }, [data]);
+    }, [bytes]);
 
-    const hasData = data !== undefined && data.length > 0;
-    const tooLarge = data !== undefined && data.length > MAX_INLINE_BYTES;
+    const inlineBytes = view.kind === 'ready' ? view.data : undefined;
+    const base64String = useMemo(() => (inlineBytes ? toBase64(new Uint8Array(inlineBytes)) : ''), [inlineBytes]);
 
-    const hexString = useMemo(() => (data && data.length > 0 ? toHex(data) : ''), [data]);
-    const base64String = useMemo(() => (data && data.length > 0 ? toBase64(new Uint8Array(data)) : ''), [data]);
-
-    const hasMoreHex = data !== undefined && data.length > VISIBLE_ROWS * HEX_ROW_BYTES;
-    const visibleData = !expanded && hasMoreHex ? data.subarray(0, VISIBLE_ROWS * HEX_ROW_BYTES) : data;
+    const hasMoreHex = bytes !== undefined && bytes.length > VISIBLE_ROWS * HEX_ROW_BYTES;
+    const visibleData =
+        bytes !== undefined && !expanded && hasMoreHex ? bytes.subarray(0, VISIBLE_ROWS * HEX_ROW_BYTES) : bytes;
 
     const hasMoreBase64 = base64String.length > BASE64_VISIBLE_CHARS;
     const visibleBase64 = expanded ? base64String : base64String.slice(0, BASE64_VISIBLE_CHARS);
 
     const hasMore = (tab === 'hex' && hasMoreHex) || (tab === 'base64' && hasMoreBase64);
+
+    const handleCopy = () => {
+        if (bytes === undefined) return;
+        copy(tab === 'base64' ? toBase64(new Uint8Array(bytes)) : toHex(bytes));
+    };
 
     const handleTabChange = (value: string) => {
         if (value === 'hex' || value === 'base64') {
@@ -85,29 +96,24 @@ export function RawDataField({ data, loading, filename, extraButton }: RawDataFi
                     </TabsTrigger>
                 </TabsList>
                 <div className="flex items-center gap-2">
-                    {data !== undefined && !loading && (
-                        <span className="whitespace-nowrap text-xs text-outer-space-300">{data.length} bytes</span>
+                    {bytes !== undefined && (
+                        <span className="whitespace-nowrap text-xs text-outer-space-300">{bytes.length} bytes</span>
                     )}
                     {Boolean(extraButton) && extraButton}
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        aria-label="Copy"
-                        disabled={!hasData || loading}
-                        onClick={() => copy(tab === 'base64' ? base64String : hexString)}
-                    >
+                    <Button variant="outline" size="sm" aria-label="Copy" disabled={!hasData} onClick={handleCopy}>
                         {copyState === 'copied' ? <Check size={12} /> : <Copy size={12} />}
                         <span className="hidden md:inline">{copyState === 'copied' ? 'Copied!' : 'Copy'}</span>
                     </Button>
                     <DownloadDropdown
                         filename={filename}
-                        data={data}
-                        loading={loading}
+                        data={bytes}
+                        error={failure}
+                        loading={view.kind === 'loading'}
                         disabled={!hasData}
                         encodings={[tab]}
                         onDownload={() => setDownloadState(DownloadState.Downloaded)}
                     >
-                        <Button variant="outline" size="sm" aria-label="Download" disabled={!hasData || loading}>
+                        <Button variant="outline" size="sm" aria-label="Download" disabled={!hasData}>
                             {downloadState === DownloadState.Downloaded ? <Check size={12} /> : <Download size={12} />}
                             <span className="hidden md:inline">
                                 {downloadState === DownloadState.Downloaded ? 'Downloaded!' : 'Download'}
@@ -119,11 +125,17 @@ export function RawDataField({ data, loading, filename, extraButton }: RawDataFi
 
             <TabsContent
                 value="hex"
-                className={cn('max-h-80 overflow-y-auto p-1.5 text-start', loading && 'p-3', tooLarge && 'px-3 py-2')}
+                className={cn(
+                    'max-h-80 overflow-y-auto p-1.5 text-start',
+                    view.kind === 'loading' && 'p-3',
+                    view.kind === 'tooLarge' && 'px-3 py-2',
+                )}
             >
-                {loading ? (
+                {view.kind === 'loading' ? (
                     <span className="spinner-grow spinner-grow-sm" />
-                ) : tooLarge ? (
+                ) : view.kind === 'failed' ? (
+                    <span className="text-sm text-outer-space-200">{LOAD_FAILED}</span>
+                ) : view.kind === 'tooLarge' ? (
                     <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>
                 ) : (
                     <HexData
@@ -136,15 +148,14 @@ export function RawDataField({ data, loading, filename, extraButton }: RawDataFi
                 )}
             </TabsContent>
 
-            <TabsContent
-                value="base64"
-                className={cn('max-h-80 overflow-y-auto p-3 text-start', !loading && data?.length && 'py-2')}
-            >
-                {loading ? (
+            <TabsContent value="base64" className={cn('max-h-80 overflow-y-auto p-3 text-start', hasData && 'py-2')}>
+                {view.kind === 'loading' ? (
                     <span className="spinner-grow spinner-grow-sm" />
+                ) : view.kind === 'failed' ? (
+                    <span className="text-sm text-outer-space-200">{LOAD_FAILED}</span>
                 ) : !hasData ? (
                     <span className="text-sm text-outer-space-200">No data</span>
-                ) : tooLarge ? (
+                ) : view.kind === 'tooLarge' ? (
                     <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>
                 ) : (
                     <span className="text-wrap break-all font-mono text-xs text-white">
@@ -154,7 +165,7 @@ export function RawDataField({ data, loading, filename, extraButton }: RawDataFi
                 )}
             </TabsContent>
 
-            {hasMore && !tooLarge && !loading && hasData && (
+            {hasMore && view.kind === 'ready' && (
                 <div className="mt-1 flex justify-center border-t border-outer-space-800 [border-top-style:solid]">
                     <Button
                         variant="ghost"
@@ -172,4 +183,21 @@ export function RawDataField({ data, loading, filename, extraButton }: RawDataFi
             )}
         </Tabs>
     );
+}
+
+type ViewState =
+    | { kind: 'loading' }
+    | { error: Error; kind: 'failed' }
+    | { kind: 'idle' }
+    | { data: ByteArray; kind: 'empty' }
+    | { data: ByteArray; kind: 'tooLarge' }
+    | { data: ByteArray; kind: 'ready' };
+
+// One answer for the toolbar, both tab bodies and the expander. A caller that fetches on open has
+// nowhere else to report a failure, but bytes in hand outrank one — they still copy and download.
+function viewState({ data, error, loading }: Pick<RawDataFieldProps, 'data' | 'error' | 'loading'>): ViewState {
+    if (loading) return { kind: 'loading' };
+    if (data === undefined) return error !== undefined ? { error, kind: 'failed' } : { kind: 'idle' };
+    if (data.length === 0) return { data, kind: 'empty' };
+    return data.length > MAX_INLINE_BYTES ? { data, kind: 'tooLarge' } : { data, kind: 'ready' };
 }
