@@ -63,5 +63,5 @@
 | Static | `/opengraph-image.png` | — | — |
 | Static | `/tos` | 10 kB | 410 kB |
 | Dynamic | `/tx/[signature]` | 540 kB | 940 kB |
-| Dynamic | `/tx/[signature]/inspect` | 450 kB | 850 kB |
-| Static | `/tx/inspector` | 450 kB | 850 kB |
+| Dynamic | `/tx/[signature]/inspect` | 450 kB | 870 kB |
+| Static | `/tx/inspector` | 450 kB | 870 kB |
