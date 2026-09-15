@@ -120,6 +120,12 @@
     "verifiedAt": "2026-07-30T01:22:36"
   },
   {
+    "address": "2KRqqGA47Pg2ML7Q8WJyaVAmEL8DaRx1sKxqzpVyNnkg",
+    "name": "cfsumbach/dom-vault",
+    "repoUrl": "https://github.com/cfsumbach/dom-vault/tree/b682de96f985d48915cf8b4918499a4cb1665dea",
+    "verifiedAt": "2026-09-15T02:38:01"
+  },
+  {
     "address": "2kZqCjGfKgVR8dUkv4PCogFsFgN3EoSSNX41HN1cBfBA",
     "name": "juancanero03-hue/wagon-program",
     "repoUrl": "https://github.com/juancanero03-hue/wagon-program/tree/a398c7a4fb7d7b13411bc0390546624d8d02c17a",
@@ -156,10 +162,10 @@
     "verifiedAt": "2026-09-01T09:33:46"
   },
   {
-    "address": "2zz7bEA4TzSJFvvGBgdVAdFBpAfkZHK3fCFBQk63MiBG",
-    "name": "stable-com/solana-smart-contracts",
-    "repoUrl": "https://github.com/stable-com/solana-smart-contracts/tree/57f09a71e4cc55112a3ee9cd586b2de874ab6c0f",
-    "verifiedAt": "2026-05-28T09:50:55"
+    "address": "2uNHeSLiNn6dLLtiGrpCd8UZKBfV36kap57eg9kV39Fj",
+    "name": "KEKBULL-ICHOR-DAO/kekbull-governance",
+    "repoUrl": "https://github.com/KEKBULL-ICHOR-DAO/kekbull-governance/tree/619afa3abb2af9b77525fef47578cb8c81dbfde2",
+    "verifiedAt": "2026-09-07T16:30:51"
   },
   {
     "address": "32Jr4JnXWvqq9GqPQynkooHsszaucUUvZfNLh2hdX2L5",
@@ -324,16 +330,16 @@
     "verifiedAt": "2026-03-01T02:34:09"
   },
   {
-    "address": "64e3qPrkVWfXbp8VVBLpxBymbqzkrNgHeNZGxq5gR2eD",
-    "name": "lougerone/thereap-escrow",
-    "repoUrl": "https://github.com/lougerone/thereap-escrow/tree/81c1f6f6afdfbd31a2844df4a64fbfb8e6301fb5",
-    "verifiedAt": "2026-09-04T03:54:39"
-  },
-  {
     "address": "65BeAsYduu3X91yWbF9TQFj6EqD5TpqFyfWMEkrpdNZv",
     "name": "reward_keys",
     "repoUrl": "https://github.com/smt50dev/reward-keys",
     "verifiedAt": "2024-10-04T15:04:30"
+  },
+  {
+    "address": "65cX8gGch8x4vQvU4gnpPcepwKadDSAtJ4ZgZg3hp61t",
+    "name": "holder_locker",
+    "repoUrl": "https://github.com/mad-cook/caged/tree/12642dd9fa2079a1d35f6a1b5caf9ae78078a4ad",
+    "verifiedAt": "2026-09-14T13:25:28"
   },
   {
     "address": "67g5HhrzQ2eqqEDJTEogHGBjAfwRD8evD3wg6LTDV8GK",
@@ -346,6 +352,12 @@
     "name": "listedterminal/listed-router-solana",
     "repoUrl": "https://github.com/listedterminal/listed-router-solana/tree/67d6e7cf9e4d3ba2d86fd4c9d65cd26bcaae2ac1",
     "verifiedAt": "2026-08-20T10:55:31"
+  },
+  {
+    "address": "6aYP8MQt44Zn91McAT7BU4gfoFoGxZ8H1jdNJuFVnS9R",
+    "name": "blocfone_market",
+    "repoUrl": "https://github.com/ParisMind/blocfone-market-program/tree/f0abae6f8fee92bf14742bdcc947db50ca50ce45",
+    "verifiedAt": "2026-09-11T09:43:51"
   },
   {
     "address": "6bdJpVRqvStcE7DJjdpRRHGUSKXE82ym9KMYbeKxC6td",
@@ -390,12 +402,6 @@
     "verifiedAt": "2024-12-30T19:18:24"
   },
   {
-    "address": "6nTTJwtDuxjv8C1JMsajYQapmPAGrC3QF1w5nu9LXJvt",
-    "name": "NOC-tura/noctura-presale-contracts",
-    "repoUrl": "https://github.com/NOC-tura/noctura-presale-contracts/tree/4eab475",
-    "verifiedAt": "2026-02-02T07:11:48"
-  },
-  {
     "address": "6ste36Y7fcbzJXkVQj3ApEqYb3wFZsZX63gT6wymhy3s",
     "name": "oft",
     "repoUrl": "https://github.com/4626fun/oft-solana-6ste-verifiable/tree/601f68a06934b7f0c40fea5e12b3985d4311d86a",
@@ -432,6 +438,12 @@
     "verifiedAt": "2026-07-09T02:40:28"
   },
   {
+    "address": "7c5oPs9GvX8vrC5jVFketNx1ZLuPs7HeH8Qc4XJx7b7i",
+    "name": "hub",
+    "repoUrl": "https://github.com/OTCHUB/hubconnect/tree/6a904cd2844715dacefc76b411e6afbed1103b87",
+    "verifiedAt": "2026-09-13T02:56:38"
+  },
+  {
     "address": "7db6vHi6uoKvFA5zP7YkadBQmnThhYJYJ2ova2S16JpJ",
     "name": "sbarter_token_programs",
     "repoUrl": "https://github.com/sbarter/blockchain-token-solana-program/tree/8fad8b5b13b398aff9b8618ed9e9133536fd7358",
@@ -448,6 +460,12 @@
     "name": "raelbob/bull-or-bear",
     "repoUrl": "https://github.com/raelbob/bull-or-bear/tree/c397b939be91c5d528542218095c80566f30a9f4",
     "verifiedAt": "2025-12-03T12:52:28"
+  },
+  {
+    "address": "7gusxR8KKXLyAHgwCJ1zvg92dkb7aJJCAQ8BFZm2CJ7m",
+    "name": "go-equitize/synthesys-token-solana",
+    "repoUrl": "https://github.com/go-equitize/synthesys-token-solana/tree/dbb0e475d996dc2b07a877722b8a110470dea597",
+    "verifiedAt": "2026-09-11T09:57:22"
   },
   {
     "address": "7hzRVxm83D5vrFvwLHd8HGcbZkFdwisfHgPu3JipG8xt",
@@ -726,6 +744,12 @@
     "verifiedAt": "2024-10-04T13:12:27"
   },
   {
+    "address": "ARaYNWtmxKtW9JHhLpQpSV89y9BTF9LaBA7TDZv6yvM4",
+    "name": "seedsower/soundpump",
+    "repoUrl": "https://github.com/seedsower/soundpump/tree/ba6ce90062778d9996d94f1dfa3a6cfd0dd6a413",
+    "verifiedAt": "2026-09-13T14:49:22"
+  },
+  {
     "address": "atq2FYuvww5EF6qeB28gj9tkao6Ld9mEGUzF4M93cCC",
     "name": "atomiqlabs/atomiq-contracts-solana",
     "repoUrl": "https://github.com/atomiqlabs/atomiq-contracts-solana/tree/fa3f14606014f467ee231b2588fd2829c275ce42",
@@ -778,6 +802,12 @@
     "name": "Trappyonchain/smartburn.fun",
     "repoUrl": "https://github.com/Trappyonchain/smartburn.fun/tree/f09e15064e4f140e1b62f59e63571e79d3f296f6",
     "verifiedAt": "2026-08-31T13:26:01"
+  },
+  {
+    "address": "Bff6QTTezbcfzhNtP6Gao2VtRVzXR9jdaof7aSzzAWGT",
+    "name": "blocfone_escrow",
+    "repoUrl": "https://github.com/ParisMind/blocfone-escrow-program/tree/608e89aaa1b46e39f30ba6351e1fe460b2b7e879",
+    "verifiedAt": "2026-09-11T10:13:37"
   },
   {
     "address": "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY",
@@ -842,8 +872,8 @@
   {
     "address": "C5JTCJ5K9uhCkQHqCzFLw5MHTdYjTqvU9F5kxZXjDWJ9",
     "name": "Goodgrek/mai_presale_native",
-    "repoUrl": "https://github.com/Goodgrek/mai_presale_native/tree/327b0e7a0767b27696fc21362ebac851ad65f267",
-    "verifiedAt": "2026-09-04T08:10:56"
+    "repoUrl": "https://github.com/Goodgrek/mai_presale_native/tree/0588396b0f09c0ce491ae0d543116a0c6ec1e681",
+    "verifiedAt": "2026-09-13T16:10:58"
   },
   {
     "address": "CaWcaw5YfBYQZ1jraTPqiLx2CJc5CwBL8J4Z1DN5neVs",
@@ -1038,12 +1068,6 @@
     "verifiedAt": "2026-01-28T14:44:33"
   },
   {
-    "address": "DFmU9mwDbHkGRZ5J2f9zi59ZyDapaEv8qHhKsx8KpwAj",
-    "name": "forge_coinflip",
-    "repoUrl": "https://github.com/chiDevtet/babylenji-coinflip/tree/05e6daeeaebe6f485a729c73ea766f0d76e2e17e",
-    "verifiedAt": "2026-07-10T21:50:02"
-  },
-  {
     "address": "DLv3NggMiSaef97YCkew5xKUHDh13tVGZ7tydt3ZeAru",
     "name": "svm_spoke",
     "repoUrl": "https://github.com/across-protocol/contracts/tree/d8da3000f1aba2593e712a9942a3249bf8e8205b",
@@ -1054,6 +1078,12 @@
     "name": "Vermont-Secure-Computing/bitbet",
     "repoUrl": "https://github.com/Vermont-Secure-Computing/bitbet/tree/9c4fe5391e12d6b6a8a578bcfdfb672e7ecca8f1",
     "verifiedAt": "2025-06-03T03:02:02"
+  },
+  {
+    "address": "DmnfCzQNbx4ZAWEwBoAKqTALgwuUXwYxZL1dRqXoZ1Md",
+    "name": "KEKBULL-ICHOR-DAO/ichor",
+    "repoUrl": "https://github.com/KEKBULL-ICHOR-DAO/ichor/tree/c48af44453e026ac93650cde3999888100686193",
+    "verifiedAt": "2026-09-07T16:25:05"
   },
   {
     "address": "DNScf1sutG7Aaq9KNjTejgJPyntTCXH1ntvY3K3LDekt",
@@ -1562,8 +1592,8 @@
   {
     "address": "govYkyQ3ePtGULAtY6V75qjWE8UH4vCUVQ1W4HdCAZU",
     "name": "svmgov_program",
-    "repoUrl": "https://github.com/solana-foundation/solana-governance/tree/95b4960ddeaaf5758ff0bbfed1996fbf37bb3eff",
-    "verifiedAt": "2026-08-24T18:07:16"
+    "repoUrl": "https://github.com/solana-foundation/solana-governance/tree/4be0e49d4e7f9ddccaae8269bb5b0695603a1cb0",
+    "verifiedAt": "2026-09-10T14:45:55"
   },
   {
     "address": "GqaTGY2s6PesfziBiQC5dVxaAagyZoFHHoFfQxe5VsRg",
@@ -1576,6 +1606,12 @@
     "name": "token_migrator",
     "repoUrl": "https://github.com/metaDAOproject/token-migrator/tree/6b736cf65eb2296faf1f0af9bce0976715a6ba58",
     "verifiedAt": "2026-06-25T22:47:06"
+  },
+  {
+    "address": "gram5fpWcCWgE65u3DGKncvnxKqFPdbeRZqQg9joE8L",
+    "name": "grams",
+    "repoUrl": "https://github.com/regolith-labs/grams/tree/cd001acfd504167fb52023a2810486c8772baa9f",
+    "verifiedAt": "2026-09-12T20:39:45"
   },
   {
     "address": "GsSCS3vPWrtJ5Y9aEVVT65fmrex5P5RGHXdZvsdbWgfo",
@@ -1618,12 +1654,6 @@
     "name": "mint_governor",
     "repoUrl": "https://github.com/metaDAOproject/programs/tree/496db48d11b7b025b69bd1b223be304a0d840168",
     "verifiedAt": "2026-05-29T21:56:21"
-  },
-  {
-    "address": "GXn1b7LVSwb7xwenDycdmn71hJPz2fYfM73FjdBj6ekH",
-    "name": "thereap_escrow",
-    "repoUrl": "https://github.com/lougerone/thereap-escrow/tree/c20ae27b2b3a1e8c95e4b7a3eeddd3e14a251bf5",
-    "verifiedAt": "2026-09-01T15:46:05"
   },
   {
     "address": "GXYY8m1oddHVaUKjQoZkDL3QYrv3c16sethk2BpKktfN",
@@ -1676,8 +1706,8 @@
   {
     "address": "HDTbJM8xLj9LbWGxG7BqZqtACoKmwVmXvFLpCQBgLztU",
     "name": "pockless-ai/contracts",
-    "repoUrl": "https://github.com/pockless-ai/contracts/tree/30b7ba9feaf3787139dfc8141aa2605f514bc70b",
-    "verifiedAt": "2026-09-02T23:21:02"
+    "repoUrl": "https://github.com/pockless-ai/contracts/tree/1fd34f85d08374d1de34754a8e5abfef90c58e99",
+    "verifiedAt": "2026-09-13T15:24:18"
   },
   {
     "address": "HEBAUSMDyqBGbEr74ywsctAJJYiJpWarNWgRCyGgkffN",
@@ -1770,6 +1800,12 @@
     "verifiedAt": "2026-02-13T03:25:01"
   },
   {
+    "address": "J6oeUYbGXSdKyH4d1YhtHoCuEA79d9FQurmsim82KN5A",
+    "name": "sol_shop_escrow",
+    "repoUrl": "https://github.com/Vermont-Secure-Computing/simple-solana-escrow/tree/0660ec1c17b7bd9131ea8b27e4bc89c2c0a09125",
+    "verifiedAt": "2026-09-15T05:51:24"
+  },
+  {
     "address": "JAZWcGrpSWNPTBj8QtJ9UyQqhJCDhG9GJkDeMf5NQBiq",
     "name": "svm_spoke",
     "repoUrl": "https://github.com/across-protocol/contracts/tree/83558702cafdef1325ea93ab29d5041cdd7c374a",
@@ -1819,9 +1855,9 @@
   },
   {
     "address": "LendVMybdnkGL9yX9VFJamrtCSzL3izpUoB9JDhSU6M",
-    "name": "FDR-3/lending_protocol",
-    "repoUrl": "https://github.com/FDR-3/lending_protocol/tree/f96df0cf212e19f75d5d12785172314e400ea42e",
-    "verifiedAt": "2026-07-24T23:27:43"
+    "name": "lending_protocol",
+    "repoUrl": "https://github.com/FDR-3/lending_protocol/tree/1f2386a35c6516858671788f8dcbfe867db937db",
+    "verifiedAt": "2026-09-08T04:18:35"
   },
   {
     "address": "LFfJcgJCCXkGG9hLn8yRKeqm7yK9WHSHAvXzkbgZGmW",
@@ -2156,8 +2192,8 @@
   {
     "address": "oreV3EG1i9BEgiAJ8b177Z2S2rMarzak4NMv1kULvWv",
     "name": "regolith-labs/ore",
-    "repoUrl": "https://github.com/regolith-labs/ore/tree/c71b4193e2f4b4817f369d7d804b51ffbd0030c1",
-    "verifiedAt": "2026-09-06T00:05:09"
+    "repoUrl": "https://github.com/regolith-labs/ore/tree/13ac04f2ed33168680894bb2998948bf5a4317e3",
+    "verifiedAt": "2026-09-14T23:19:32"
   },
   {
     "address": "paxosVkYuJBKUQoZGAidRA47Qt4uidqG5fAt5kmr1nR",
@@ -2353,13 +2389,13 @@
   },
   {
     "address": "stakecNP3FpiExZPCgZfqRgumVzi6dNqnfrjwXyTgeH",
-    "name": "regolith-labs/ore-stake",
+    "name": "ore-stake",
     "repoUrl": "https://github.com/regolith-labs/ore-stake/tree/7628af733d9338e9560b353ef731a66efe9db3c8",
     "verifiedAt": "2026-06-19T19:38:56"
   },
   {
     "address": "storeD7bEkywTTMrje19WRoyrkEhbhrvyjVnLxWih6a",
-    "name": "regolith-labs/ore-lst",
+    "name": "ore-lst",
     "repoUrl": "https://github.com/regolith-labs/ore-lst/tree/308df3539bdc073200d4a4024093a236866c899f",
     "verifiedAt": "2026-06-19T19:53:36"
   },
@@ -2554,12 +2590,6 @@
     "name": "DimensionDev/solana-redpacket",
     "repoUrl": "https://github.com/DimensionDev/solana-redpacket/tree/23ed5c60a2b5a574999415de4e20c26c30049790",
     "verifiedAt": "2025-01-24T06:44:26"
-  },
-  {
-    "address": "Z2JAck8LPeRvUQp4Pn34FcYAHAGiBZg6FYtnF8Poker",
-    "name": "bhu1tyagi/solpoker",
-    "repoUrl": "https://github.com/bhu1tyagi/solpoker/tree/df071631f27abf35071ff8265e2efaa20b877ee3",
-    "verifiedAt": "2026-08-31T18:17:55"
   },
   {
     "address": "zauthsTeNbEN69fEmMVm48D2K3cEHJAtf7vnaU2uBeC",
