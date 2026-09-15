@@ -2,6 +2,7 @@ import { withSentryConfig } from '@sentry/nextjs';
 import { withBotId } from 'botid/next/config';
 import { fileURLToPath } from 'url';
 
+import { buildHeaders } from './config/headers.mjs';
 import { buildRedirects } from './config/redirects.mjs';
 import { createSentryBuildConfig } from './sentry/config.mjs';
 
@@ -28,19 +29,7 @@ const nextConfig = {
     // path — bundling it breaks that lookup and forces the pure-JS fallback warning.
     serverExternalPackages: ['bigint-buffer'],
     async headers() {
-        const seoFileHeaders = [
-            {
-                key: 'Cache-Control',
-                value: 'public, max-age=3600, stale-while-revalidate=86400',
-            },
-        ];
-
-        return [
-            { source: '/robots.txt', headers: seoFileHeaders },
-            { source: '/sitemap.xml', headers: seoFileHeaders },
-            { source: '/default-sitemap.xml', headers: seoFileHeaders },
-            { source: '/accounts-sitemap.xml', headers: seoFileHeaders },
-        ];
+        return buildHeaders();
     },
     async redirects() {
         return buildRedirects();
