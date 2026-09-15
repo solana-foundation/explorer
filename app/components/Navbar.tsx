@@ -63,13 +63,11 @@ export function Navbar({ children }: INavbarProps) {
                                 <Link href={featureGatesPath}>Feature Gates</Link>
                             </NavbarLink>
                         </NavbarItem>
-                        {/* Hidden until the MCP endpoint is announced; /mcp/start stays reachable by direct link.
-                            The href is a plain path, not useClusterPath — the page documents a cluster-agnostic endpoint.
                         <NavbarItem>
                             <NavbarLink asChild active={selectedLayoutSegment === 'mcp'}>
                                 <Link href="/mcp/start">MCP</Link>
                             </NavbarLink>
-                        </NavbarItem> */}
+                        </NavbarItem>
                         <NavbarItem>
                             <NavbarLink
                                 asChild
