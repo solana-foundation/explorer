@@ -150,7 +150,7 @@ export function BlockOverviewCard({
                         {versionEntries.map(({ count, label, share, version }, index) => (
                             <span key={String(version)}>
                                 {index > 0 && <span className="text-outer-space-300"> &middot; </span>}
-                                {label} {count.toLocaleString()}{' '}
+                                {label}: {count.toLocaleString()}{' '}
                                 <span className="text-outer-space-300">({Math.round(share * 100)}%)</span>
                             </span>
                         ))}

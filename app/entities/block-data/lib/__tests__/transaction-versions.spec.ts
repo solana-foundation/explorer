@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import type { BlockTransaction, BlockWithV1 } from '../../model/types';
-import { summarizeBlockTransactionVersions } from '../transaction-versions';
+import type { BlockTransaction } from '../../model/types';
+import { summarizeBlockTransactionVersions, type VersionedBlockTransactions } from '../transaction-versions';
 
-function blockWithVersions(versions: BlockTransaction['version'][]): BlockWithV1 {
-    return { transactions: versions.map(version => ({ version })) } as BlockWithV1;
+function blockWithVersions(versions: BlockTransaction['version'][]): VersionedBlockTransactions {
+    return { transactions: versions.map(version => ({ version })) };
 }
 
 describe('summarizeBlockTransactionVersions', () => {
