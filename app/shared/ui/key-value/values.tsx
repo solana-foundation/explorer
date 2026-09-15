@@ -1,14 +1,59 @@
+import { cva } from 'class-variance-authority';
 import React from 'react';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
-import { cn } from '@/app/components/shared/utils';
 
 /**
  * Each primitive takes a `mono` flag: `true` renders in the monospace font (hashes, keys,
  * identifiers) and breaks on any char so a long run stays clipped; `false` uses the normal
  * body font and breaks on words (prose-y values like Message / dates / repo URLs).
  */
+
+// The shared `mono` split: monospace + break-on-any-char vs. body font + break-on-words.
+const textValueVariants = cva('min-w-0', {
+    defaultVariants: { mono: true, preserveWhitespace: false },
+    variants: {
+        mono: {
+            false: 'break-words',
+            true: 'break-all font-mono',
+        },
+        preserveWhitespace: {
+            false: '',
+            true: 'whitespace-pre-wrap',
+        },
+    },
+});
+
+const linkValueVariants = cva('min-w-0', {
+    defaultVariants: { mono: true },
+    variants: {
+        mono: {
+            false: 'break-words',
+            true: 'break-all font-mono',
+        },
+    },
+});
+
+const stackedListVariants = cva('m-0 flex list-none flex-col gap-1 pl-0', {
+    defaultVariants: { mono: true },
+    variants: {
+        mono: {
+            false: '',
+            true: 'font-mono',
+        },
+    },
+});
+
+const codeBlockVariants = cva('mb-0 min-w-0 overflow-x-auto whitespace-pre-wrap break-words', {
+    defaultVariants: { mono: true },
+    variants: {
+        mono: {
+            false: '',
+            true: 'font-mono',
+        },
+    },
+});
 
 /**
  * Scalar text value. `mono` picks the monospace vs. the normal body font. `preserveWhitespace` keeps
@@ -24,17 +69,7 @@ export function TextValue({
     preserveWhitespace?: boolean;
     children: React.ReactNode;
 }) {
-    return (
-        <span
-            className={cn(
-                'min-w-0',
-                mono ? 'break-all font-mono' : 'break-words',
-                preserveWhitespace && 'whitespace-pre-wrap',
-            )}
-        >
-            {children}
-        </span>
-    );
+    return <span className={textValueVariants({ mono, preserveWhitespace })}>{children}</span>;
 }
 
 /** External link with a trailing open-in-new glyph. `mono` picks mono vs. the normal font. */
@@ -48,7 +83,7 @@ export function ExternalLinkValue({
     children?: React.ReactNode;
 }) {
     return (
-        <span className={cn('min-w-0', mono ? 'break-all font-mono' : 'break-words')}>
+        <span className={linkValueVariants({ mono })}>
             {/* Delegate to the safe ExternalLink, which scheme-checks the (on-chain, attacker-controlled)
                 url and owns rel/target — so a javascript:/data: href can never reach the DOM here. */}
             <ExternalLink href={url}>
@@ -62,14 +97,10 @@ export function ExternalLinkValue({
 
 /** Vertical list of values (contacts, auditors) — one per line, left aligned. */
 export function StackedList({ mono = true, children }: { mono?: boolean; children: React.ReactNode }) {
-    return <ul className={cn('m-0 flex list-none flex-col gap-1 pl-0', mono && 'font-mono')}>{children}</ul>;
+    return <ul className={stackedListVariants({ mono })}>{children}</ul>;
 }
 
 /** Preformatted block for PGP keys / code with no copy affordance. */
 export function CodeBlock({ mono = true, children }: { mono?: boolean; children: React.ReactNode }) {
-    return (
-        <pre className={cn('mb-0 min-w-0 overflow-x-auto whitespace-pre-wrap break-words', mono && 'font-mono')}>
-            {children}
-        </pre>
-    );
+    return <pre className={codeBlockVariants({ mono })}>{children}</pre>;
 }

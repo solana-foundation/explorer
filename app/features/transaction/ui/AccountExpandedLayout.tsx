@@ -5,6 +5,9 @@ import { cn } from '@components/shared/utils';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
+import { KeyValue } from '@/app/shared/ui/key-value';
+
+// `flat` (the drawer layout) adds the horizontal gutter the inline table row gets from its grid.
 export const FlatContext = React.createContext(false);
 
 type DetailRowProps = {
@@ -16,16 +19,9 @@ type DetailRowProps = {
 export function DetailRow({ children, className, label }: DetailRowProps) {
     const flat = React.useContext(FlatContext);
     return (
-        <div
-            className={cn(
-                'grid grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2',
-                flat && 'px-4',
-                className,
-            )}
-        >
-            <div className="text-sm text-outer-space-300">{label}</div>
-            <div className="min-w-0 break-words text-sm">{children}</div>
-        </div>
+        <KeyValue label={label} density="flat" divider={false} className={cn(flat && 'px-4', className)}>
+            {children}
+        </KeyValue>
     );
 }
 

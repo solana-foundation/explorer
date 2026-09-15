@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, screen, userEvent, within } from 'storybook/test';
 
-import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { cn } from '@/app/components/shared/utils';
+import { KeyValue, TextValue } from '@/app/shared/ui/key-value';
 
 import { Timestamp } from './timestamp';
 import { setPinnedTimestampDisplay } from './use-timestamp-display';
@@ -45,31 +45,26 @@ export const OpenDropdown: Story = {
     },
 };
 
-// A faithful slice of the transaction Overview card, built from the card's own Row/Label/Value
-// primitives (app/components/shared/ui/detail-row.tsx) so it stays in sync with production —
-// with the two legacy "Timestamp (Local)" / "Timestamp (UTC)" rows collapsed into a single
-// clickable Timestamp. Rendered here to check the fit — especially on mobile.
+// A faithful slice of the transaction Overview card, built from the shared KeyValue primitives so it
+// stays in sync with production — with the two legacy "Timestamp (Local)" / "Timestamp (UTC)" rows
+// collapsed into a single clickable Timestamp. Rendered here to check the fit — especially on mobile.
 function TransactionOverviewSlice({ unixTimestamp: ts }: { unixTimestamp: number }) {
     return (
         <div className="max-w-xl overflow-hidden rounded-lg border border-solid border-outer-space-800">
-            <Row divider>
-                <Label>Signature</Label>
-                <Value>5Nf3xW8pQ7mKd2rBvLhTq9YzJ4cHs6UgAe1oPnR8tXwVbM3kD7yFjZ2uNqW5aCgE9iShL4rT6xUvB1nYmK</Value>
-            </Row>
-            <Row divider>
-                <Label>Block</Label>
-                <Value>312049876</Value>
-            </Row>
-            <Row divider>
-                <Label>Timestamp</Label>
-                <Value>
-                    <Timestamp unixTimestamp={ts} />
-                </Value>
-            </Row>
-            <Row>
-                <Label>Fee</Label>
-                <Value>0.000005 SOL</Value>
-            </Row>
+            <KeyValue label="Signature">
+                <TextValue>
+                    5Nf3xW8pQ7mKd2rBvLhTq9YzJ4cHs6UgAe1oPnR8tXwVbM3kD7yFjZ2uNqW5aCgE9iShL4rT6xUvB1nYmK
+                </TextValue>
+            </KeyValue>
+            <KeyValue label="Block">
+                <TextValue>312049876</TextValue>
+            </KeyValue>
+            <KeyValue label="Timestamp">
+                <Timestamp unixTimestamp={ts} />
+            </KeyValue>
+            <KeyValue label="Fee" divider={false}>
+                <TextValue>0.000005 SOL</TextValue>
+            </KeyValue>
         </div>
     );
 }

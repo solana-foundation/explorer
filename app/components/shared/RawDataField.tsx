@@ -164,41 +164,34 @@ export function RawDataField({
             </DownloadDropdown>
         );
 
-        const renderPanes = (paneClassName: string) => (
-            <>
-                <TabsContent value="hex" className={cn('overflow-y-auto text-start', paneClassName)}>
-                    {loading ? (
-                        <span className="spinner-grow spinner-grow-sm" />
-                    ) : !hasData ? (
-                        // Explicit empty state (flush-left) instead of HexData's own "No data",
-                        // whose p-1.5 would indent the text past the byte-count label.
-                        <span className="text-sm text-outer-space-200">No data</span>
-                    ) : tooLarge ? (
-                        <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>
-                    ) : (
-                        <HexData
-                            className="w-full"
-                            raw={data ?? new Uint8Array(0)}
-                            isCopyable={false}
-                            rowSize={HEX_ROW_BYTES}
-                            align="start"
-                            wrap
-                        />
-                    )}
+        // Both tabs share the same loading / empty / too-large states; only the decoded body differs.
+        // The empty state is rendered flush-left instead of HexData's own "No data", whose p-1.5 would
+        // indent the text past the byte-count label.
+        const panes: { value: 'hex' | 'base64'; content: React.ReactNode }[] = [
+            {
+                content: <HexData className="w-full" raw={data ?? new Uint8Array(0)} isCopyable={false} layout="fit" />,
+                value: 'hex',
+            },
+            {
+                content: <span className="text-wrap break-all font-mono text-sm text-white">{base64String}</span>,
+                value: 'base64',
+            },
+        ];
+
+        const renderPaneBody = (content: React.ReactNode) => {
+            if (loading) return <span className="spinner-grow spinner-grow-sm" />;
+            if (!hasData) return <span className="text-sm text-outer-space-200">No data</span>;
+            if (tooLarge)
+                return <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>;
+            return content;
+        };
+
+        const renderPanes = (paneClassName: string) =>
+            panes.map(({ value, content }) => (
+                <TabsContent key={value} value={value} className={cn('overflow-y-auto text-start', paneClassName)}>
+                    {renderPaneBody(content)}
                 </TabsContent>
-                <TabsContent value="base64" className={cn('overflow-y-auto text-start', paneClassName)}>
-                    {loading ? (
-                        <span className="spinner-grow spinner-grow-sm" />
-                    ) : !hasData ? (
-                        <span className="text-sm text-outer-space-200">No data</span>
-                    ) : tooLarge ? (
-                        <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>
-                    ) : (
-                        <span className="text-wrap break-all font-mono text-sm text-white">{base64String}</span>
-                    )}
-                </TabsContent>
-            </>
-        );
+            ));
 
         return (
             <Tabs value={tab} onValueChange={handleTabChange} className="w-full overflow-hidden">
@@ -321,6 +314,7 @@ export function RawDataField({
                         className="w-full"
                         raw={visibleData ?? new Uint8Array(0)}
                         isCopyable={false}
+                        layout="fixed"
                         rowSize={HEX_ROW_BYTES}
                         align="start"
                     />

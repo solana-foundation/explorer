@@ -11,6 +11,8 @@ import { cva } from 'class-variance-authority';
 import React from 'react';
 import { Code, Info } from 'react-feather';
 
+import { KeyValue } from '@/app/shared/ui/key-value';
+
 import { DetailRow, FlatContext } from './AccountExpandedLayout';
 import { ParsedSection } from './AccountExpandedSections';
 import { CONTENT_COL_SPAN, DESKTOP_GRID_TEMPLATE, GRID_GAP_X, MOBILE_GRID_TEMPLATE } from './accountsTableGrid';
@@ -58,13 +60,6 @@ const skeletonNote = cva('mt-4 flex items-center gap-1.5 py-0.5', {
     defaultVariants: { flat: false },
     variants: {
         flat: { false: '', true: '!items-start px-4' },
-    },
-});
-
-const skeletonRow = cva('grid grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2 py-0.5', {
-    defaultVariants: { flat: false },
-    variants: {
-        flat: { false: '', true: 'px-4' },
     },
 });
 
@@ -137,10 +132,15 @@ export function AccountExpandedContent({ accountInfo, accountInfoLoading, addres
                 <div className={contentColumn({ flat })}>
                     <div className="flex flex-col gap-1.5">
                         {[120, 160, 100, 80].map((w, i) => (
-                            <div key={i} className={skeletonRow({ flat })}>
-                                <Skeleton className="h-4 w-24" />
+                            <KeyValue
+                                key={i}
+                                density="flat"
+                                divider={false}
+                                className={cn('py-0.5', flat && 'px-4')}
+                                label={<Skeleton className="h-4 w-24" />}
+                            >
                                 <Skeleton className="h-4" style={{ width: w }} />
-                            </div>
+                            </KeyValue>
                         ))}
                     </div>
                     <div className={skeletonNote({ flat })}>

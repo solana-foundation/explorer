@@ -66,7 +66,7 @@ export const FullLegacyAligned: Story = {
 // ── Truncated mode ───────────────────────────────────────────────────
 
 export const TruncatedShort: Story = {
-    args: { raw: truncateShortData, truncate: true },
+    args: { layout: 'truncated', raw: truncateShortData },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getByText('fe ab cd')).toBeInTheDocument();
@@ -76,7 +76,7 @@ export const TruncatedShort: Story = {
 };
 
 export const TruncatedLong: Story = {
-    args: { raw: truncateLongData, truncate: true },
+    args: { layout: 'truncated', raw: truncateLongData },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getAllByText('00 01 02 03').length).toBeGreaterThan(0);
@@ -88,7 +88,7 @@ export const TruncatedLong: Story = {
 };
 
 export const TruncatedAtThreshold: Story = {
-    args: { raw: atThresholdData, truncate: true },
+    args: { layout: 'truncated', raw: atThresholdData },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getAllByText('a0 a1 a2 a3').length).toBeGreaterThan(0);
@@ -101,7 +101,7 @@ export const TruncatedAtThreshold: Story = {
 };
 
 export const TruncatedInverted: Story = {
-    args: { inverted: true, raw: truncateLongData, truncate: true },
+    args: { inverted: true, layout: 'truncated', raw: truncateLongData },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getAllByText('00 01 02 03').length).toBeGreaterThan(0);

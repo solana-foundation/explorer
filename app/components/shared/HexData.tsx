@@ -83,30 +83,38 @@ const fullContentVariants = cva('items-center', {
     },
 });
 
-export function HexData({
-    raw,
-    className,
-    copyableRaw,
-    truncate = false,
-    inverted = false,
-    isCopyable = true,
-    align = 'end',
-    spanSize = SPAN_SIZE,
-    rowSize = ROW_SIZE,
-    wrap = false,
-}: {
+type HexDataBase = {
     raw: ByteArray;
     copyableRaw?: ByteArray;
     className?: string;
-    truncate?: boolean;
     inverted?: boolean;
-    // 'end' is the legacy default (right-aligned in table cells).
-    align?: 'start' | 'end';
     isCopyable?: boolean;
     spanSize?: number;
-    rowSize?: number;
-    wrap?: boolean;
-}) {
+};
+
+// The layout is a discriminated union: `rowSize` / `align` shape the default `fixed` grid only.
+// The `fit` (responsive wrap) and `truncated` layouts ignore them, so the types forbid passing
+// them there rather than silently dropping them.
+//   - `fixed`     (default): grouped rows; `align` right/left-aligns, `rowSize` sets bytes/row.
+//   - `fit`      : reflows the hex to the container width (mobile drawer / full-width panes).
+//   - `truncated`: head … tail preview with a trailing byte count.
+type HexDataLayout =
+    { layout?: 'fixed'; align?: 'start' | 'end'; rowSize?: number } | { layout: 'fit' } | { layout: 'truncated' };
+
+export type HexDataProps = HexDataBase & HexDataLayout;
+
+export function HexData(props: HexDataProps) {
+    const { raw, className, copyableRaw, inverted = false, isCopyable = true, spanSize = SPAN_SIZE } = props;
+
+    // `align` / `rowSize` are meaningful only for the fixed grid ('end' is the legacy default,
+    // right-aligned in table cells); the other layouts fall back to these harmless defaults.
+    let align: 'start' | 'end' = 'end';
+    let rowSize = ROW_SIZE;
+    if (props.layout === undefined || props.layout === 'fixed') {
+        align = props.align ?? 'end';
+        rowSize = props.rowSize ?? ROW_SIZE;
+    }
+
     if (!raw || raw.length === 0) {
         return (
             <div className={cn('p-1.5', fullContentVariants({ align }), className)}>
@@ -118,7 +126,7 @@ export function HexData({
     const hexString = toHex(raw);
     const copyText = copyableRaw ? toHex(copyableRaw) : hexString;
 
-    if (truncate) {
+    if (props.layout === 'truncated') {
         return (
             <TruncatedContent
                 hexString={hexString}
@@ -140,7 +148,7 @@ export function HexData({
             spanSize={spanSize}
             rowSize={rowSize}
             isCopyable={isCopyable}
-            wrap={wrap}
+            wrap={props.layout === 'fit'}
         />
     );
 }
