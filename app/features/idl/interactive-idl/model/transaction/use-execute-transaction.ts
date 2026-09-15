@@ -1,5 +1,6 @@
 'use client';
 
+import { MAX_SUPPORTED_TRANSACTION_VERSION } from '@solana/kit';
 import {
     type Connection,
     type Finality,
@@ -71,7 +72,7 @@ export function useExecuteTransaction(opts: {
                 );
                 const published = await connection.getTransaction(signature, {
                     commitment,
-                    maxSupportedTransactionVersion: 0,
+                    maxSupportedTransactionVersion: MAX_SUPPORTED_TRANSACTION_VERSION,
                 });
                 const finalLogs = published?.meta?.logMessages ?? [];
 

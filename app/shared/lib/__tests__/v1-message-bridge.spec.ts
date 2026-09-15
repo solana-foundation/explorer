@@ -1,5 +1,5 @@
 import { getTransactionDecoder } from '@solana/kit';
-import { PublicKey, VersionedMessage } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -110,11 +110,5 @@ describe('bridgeV1MessageBytes', () => {
     it('should return a V1MessageView so the true bytes survive any serialize call', () => {
         const { message } = bridgeV1MessageBytes(v1MessageBytes());
         expect(message).toBeInstanceOf(V1MessageView);
-    });
-});
-
-describe('web3.js v1 behavior the bridge exists for', () => {
-    it('should throw from VersionedMessage.deserialize on v1 bytes', () => {
-        expect(() => VersionedMessage.deserialize(v1MessageBytes())).toThrow();
     });
 });

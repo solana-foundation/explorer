@@ -38,6 +38,7 @@ minimumReleaseAge: 20160
 # TODO: remove exclusion 
 minimumReleaseAgeExclude:
   - sas-lib
+  - "@solana/web3.js"
 
 # Pin resolution to the public npm registry so it can't silently inherit a
 # global/org .npmrc mirror. Scoped keys (e.g. '@my-org') can be added here.
