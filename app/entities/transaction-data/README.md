@@ -19,10 +19,11 @@ STAGE 1 — sync, no I/O                                        per instruction
        (simulation)                                          { programName  }
                     both call findProgramName → programName   { nameLookup? }
 
-STAGE 2 — async, the ONLY I/O in the pipeline        per transaction, 1 SWR entry
+STAGE 2 — async, the ONLY I/O in the pipeline                    per transaction, one batch
 ─────────────────────────────────────────────────────────────────────────────
   rows still carrying a nameLookup ──→ their programIds
-        └──→ useProgramIdlNames ──→ Map<programId, ProgramIdlNames>
+        ├──→ useProgramIdlNames (client, one SWR entry) ──→ Map<programId, ProgramIdlNames>
+        └──→ getIdlNames        (server, the OG image)  ──→ Map<programId, ProgramIdlNames>
 
 STAGE 3 — sync, no I/O                                        per instruction
 ─────────────────────────────────────────────────────────────────────────────
@@ -41,10 +42,24 @@ Stages 2 and 3 are wrapped together by the two hooks the barrel exports, so a co
 | account-page transaction history | `getInstructionSummaries` | `useResolvedSummaryNames` |
 | CU profiling chart | `resolveInstructionNames` | `useResolvedInstructionNames` |
 | instruction simulation | `resolveNamesFromData` | `useResolvedInstructionNames` |
+| transaction-share OG image | `getInstructionSummaries` | `getIdlNames` + `applyNameSourcesToSummaries` |
 
-Those three are the only consumers. `getInstructionSummaries` calls `resolveInstructionNames` per
+Those four are the only consumers. `getInstructionSummaries` calls `resolveInstructionNames` per
 instruction and adds the sentinels; the CU chart calls `resolveInstructionNames` itself, so it keeps the
 `undefined` and falls back to the row's position.
+
+The OG image is the first consumer that runs **server side**. Every other one reaches stages 2 and 3
+through a hook, which a route handler cannot call, so it runs both itself: stage 2 through `getIdlNames`
+(`features/transaction-share/api/get-idl-names.ts`), which batches the `idl` entity's server-side
+`resolveProgramIdlNames` over the programs still carrying a `nameLookup`, and stage 3 through
+`applyNameSourcesToSummaries` as usual. Invariant 1 still holds: the fetch is stage 2, outside `lib/`,
+exactly as it is for every other consumer.
+
+Two things that consumer does differently, both because it renders one image rather than a live page. It
+resolves only the programs in the rows the image draws, since rows past `MAX_INSTRUCTION_ROWS` collapse
+into "and N more". And a resolution that still fails after the entity's retry costs that program its name
+rather than failing the request - an unfurl with byte-level names beats no image at all - so the image is
+never worse than the empty-map render this consumer started out with.
 
 The `/tx/[signature]` instruction cards do **not** use this pipeline. They render through
 `app/features/transaction/ui/InstructionsSection.tsx` and the `instruction-parser` dispatcher, which
@@ -100,10 +115,10 @@ that reaches the fetch — Jupiter, marginfi and the rest all resolve that way, 
 code here at all.
 
 Two things are held back from it. The built-in sources below are one. The other is `NON_ANCHOR_PROGRAMS`
-(`entities/idl/api/config.ts`), which `useProgramIdlNames` filters out of the fetch entirely: those
-programs never reach the IDL source whether or not a built-in source names them. That set is why the ✅
-rows in the table below are not programs we *chose* not to read an IDL for — the fetch refuses them
-structurally. It also covers builtins with no built-in source at all (Vote, Config, Address Lookup Table,
+(`entities/idl/api/config.ts`), which `useProgramIdlNames` and its server-side counterpart
+`resolveProgramIdlNames` both filter out of the fetch entirely: those programs never reach the IDL source
+whether or not a built-in source names them. That set is why the ✅ rows in the table below are not
+programs we *chose* not to read an IDL for — the fetch refuses them structurally. It also covers builtins with no built-in source at all (Vote, Config, Address Lookup Table,
 Ed25519, Secp256k1, the BPF loaders), which stay unnamed by design rather than by omission.
 
 The built-in sources are a short list of exceptions, kept for three reasons.

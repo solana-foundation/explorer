@@ -1,6 +1,6 @@
 # OG image routes
 
-`app/og/` holds the OG image routes: `receipt/[signature]` and `feature-gate/[address]`.
+`app/og/` holds the OG image routes: `tx/[signature]`, `receipt/[signature]` and `feature-gate/[address]`.
 
 ## Firewall
 
@@ -36,3 +36,6 @@ prefix, and unreachable while it sits below it.
 Receipt keys, documented inline in [`.env.example`](../../.env.example): `NEXT_PUBLIC_RECEIPT_ENABLED`,
 `RECEIPT_CLUSTER_PROBE_ENABLED`, `RECEIPT_BASE_URL`, `RECEIPT_OG_IMAGE_VERSION`, `RECEIPT_CACHE_HEADERS`, and
 `NEXT_PUBLIC_RECEIPT_JITO_ACCOUNTS`.
+
+Transaction key: `TX_CLUSTER_PROBE_ENABLED`, the `/og/tx/` counterpart of `RECEIPT_CLUSTER_PROBE_ENABLED`.
+Both default off, so a link carrying no `?cluster=` resolves on mainnet alone rather than walking devnet and testnet.
