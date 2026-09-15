@@ -63,6 +63,44 @@ export const Loading: Story = {
         filename: 'account',
         loading: true,
     },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByRole('button', { name: 'Copy' })).toBeDisabled();
+        await expect(canvas.getByRole('button', { name: 'Download' })).toBeDisabled();
+    },
+};
+
+/** The fetch failed — say so rather than showing an empty viewer. */
+export const LoadFailed: Story = {
+    args: {
+        data: undefined,
+        error: new Error('RPC request failed'),
+        filename: 'account',
+        loading: false,
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText('Failed to load account data.')).toBeInTheDocument();
+        await expect(canvas.getByRole('button', { name: 'Copy' })).toBeDisabled();
+        await expect(canvas.getByRole('button', { name: 'Download' })).toBeDisabled();
+    },
+};
+
+/** A refetch failed while the previous bytes are still held — show the bytes, not the error. */
+export const RefetchFailedWithData: Story = {
+    args: {
+        data: mockSmallData,
+        error: new Error('RPC request failed'),
+        filename: 'account',
+        loading: false,
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.queryByText('Failed to load account data.')).not.toBeInTheDocument();
+        await expect(canvas.getByText('16 bytes')).toBeInTheDocument();
+        await expect(canvas.getByRole('button', { name: 'Copy' })).toBeEnabled();
+        await expect(canvas.getByRole('button', { name: 'Download' })).toBeEnabled();
+    },
 };
 
 /** Empty data — "No data" message. */

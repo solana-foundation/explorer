@@ -1,6 +1,5 @@
 import { Button } from '@components/shared/ui/button';
 import { DialogClose, DialogTitle } from '@components/shared/ui/dialog';
-import type { AccountInfo } from '@entities/account';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
@@ -16,23 +15,13 @@ import { AccountExpandedContent } from './AccountExpandedContent';
 
 type Props = {
     account: ParsedMessageAccount;
-    accountInfo?: AccountInfo;
-    accountInfoLoading: boolean;
     index: number;
     message: ParsedMessage;
     onOpenChange: (open: boolean) => void;
     open: boolean;
 };
 
-export function AccountDetailDrawer({
-    account,
-    accountInfo,
-    accountInfoLoading,
-    index,
-    message,
-    onOpenChange,
-    open,
-}: Props) {
+export function AccountDetailDrawer({ account, index, message, onOpenChange, open }: Props) {
     const pubkey = account.pubkey;
     const address = pubkey.toBase58();
     const nickname = useNickname(address);
@@ -98,13 +87,7 @@ export function AccountDetailDrawer({
                 footer={footer}
             >
                 <div className="overflow-x-hidden py-2">
-                    <AccountExpandedContent
-                        accountInfo={accountInfo}
-                        accountInfoLoading={accountInfoLoading}
-                        address={address}
-                        enabled={open}
-                        flat
-                    />
+                    <AccountExpandedContent address={address} enabled={open} flat />
                 </div>
             </Drawer>
             <NicknameEditor address={address} open={nicknameOpen} onClose={() => setNicknameOpen(false)} />

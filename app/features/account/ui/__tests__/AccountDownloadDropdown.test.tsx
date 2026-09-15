@@ -10,7 +10,12 @@ const mockRawData: Uint8Array | undefined = undefined;
 let mockIsLoading = false;
 
 vi.mock('@entities/account', () => ({
-    useRawAccountData: () => ({ data: mockRawData, isLoading: mockIsLoading, mutate: mockMutate }),
+    useLazyRawAccountData: () => ({
+        data: mockRawData,
+        error: undefined,
+        load: () => mockMutate(),
+        loading: mockIsLoading,
+    }),
 }));
 
 vi.mock('@/app/shared/components/DownloadDropdown', () => ({

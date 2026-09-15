@@ -22,6 +22,7 @@ import {
     startsWith,
     toBase64,
     toBuffer,
+    toByteCount,
     toHex,
     toLeBytes,
     toUint8Array,
@@ -1045,5 +1046,40 @@ describe('startsWith', () => {
     it('should match a single-byte prefix only at the start', () => {
         expect(startsWith(new Uint8Array([0, 1, 2]), new Uint8Array([0]))).toBe(true);
         expect(startsWith(new Uint8Array([5]), new Uint8Array([0]))).toBe(false);
+    });
+});
+
+describe('toByteCount', () => {
+    it('should read the bigint kit reports', () => {
+        expect(toByteCount(165n)).toBe(165);
+    });
+
+    it('should read the number web3.js reports', () => {
+        expect(toByteCount(165)).toBe(165);
+    });
+
+    it('should keep a zero count instead of reporting absence', () => {
+        expect(toByteCount(0n)).toBe(0);
+        expect(toByteCount(0)).toBe(0);
+    });
+
+    it('should report absence for a missing or null count', () => {
+        expect(toByteCount(undefined)).toBeUndefined();
+        expect(toByteCount(null)).toBeUndefined();
+    });
+
+    // Number() rounds past 2^53, so a count that large would render a wrong figure rather than none.
+    it('should reject a count beyond the safe integer range', () => {
+        expect(toByteCount(18_446_744_073_709_551_615n)).toBeUndefined();
+        expect(toByteCount(Number.MAX_SAFE_INTEGER + 1)).toBeUndefined();
+    });
+
+    it('should reject a negative count', () => {
+        expect(toByteCount(-1n)).toBeUndefined();
+        expect(toByteCount(-1)).toBeUndefined();
+    });
+
+    it('should reject a fractional count', () => {
+        expect(toByteCount(1.5)).toBeUndefined();
     });
 });
