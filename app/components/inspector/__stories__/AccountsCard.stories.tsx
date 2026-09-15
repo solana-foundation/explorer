@@ -117,5 +117,8 @@ export const Default: Story = {
         // the mobile card and the desktop row emit them, so there is at least one of each.
         await expect(canvas.getAllByText('Signer').length).toBeGreaterThan(0);
         await expect(canvas.getAllByText('Writable').length).toBeGreaterThan(0);
+        // Summed from the seeded accounts; the card makes no size request of its own.
+        await expect(canvas.getByText('Total Account Size:')).toBeInTheDocument();
+        await expect(canvas.getAllByText('36 bytes').length).toBeGreaterThan(0);
     },
 };

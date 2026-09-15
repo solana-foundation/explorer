@@ -1,26 +1,24 @@
 'use client';
 
-import { useRawAccountData } from '@entities/account';
+import { useRawAccountDataOnOpen } from '@entities/account';
 import { PublicKey } from '@solana/web3.js';
 
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 
-// FIXME: missing Storybook story — needs useRawAccountData SWR mock + useConnection.
+// FIXME: missing Storybook story — needs useRawAccountDataOnOpen SWR mock + useConnection.
 export function AccountDownloadDropdown({ pubkey, space }: { pubkey: PublicKey; space?: number }) {
     const address = pubkey.toBase58();
-    const { data: rawData, error, mutate, isLoading } = useRawAccountData(address);
+    const { data: rawData, error, loading, onOpenChange } = useRawAccountDataOnOpen(address);
 
     if (space === 0) return null;
 
     return (
         <DownloadDropdown
             data={rawData}
-            loading={isLoading}
+            loading={loading}
             error={error}
             filename={address}
-            // Lazy-fetch: raw data is only fetched when the dropdown opens to avoid unnecessary RPC calls.
-            // Trade-off: the first open shows "Loading…" items instead of being instant.
-            onOpenChange={open => open && mutate()}
+            onOpenChange={onOpenChange}
         />
     );
 }

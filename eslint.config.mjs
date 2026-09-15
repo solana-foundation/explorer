@@ -821,7 +821,6 @@ export default tseslint.config(
             'app/shared/ui/navigation-tabs/ui/NavigationTabLink.tsx',
 
             // app/entities (FSD entities)
-            'app/entities/account/model/use-accounts-info.ts',
             'app/entities/compute-unit/lib/compute-units-schedule.ts',
             'app/entities/digital-asset/api.ts',
             'app/entities/domain/api/fetch-ans-domains.ts',
