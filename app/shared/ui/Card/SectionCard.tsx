@@ -20,7 +20,7 @@ export function SectionCard({
     headerActions?: React.ReactNode;
     /** Standalone note (e.g. an `Alert`) rendered between the outside header and the card. */
     note?: React.ReactNode;
-    /** Drop the Card's built-in `mb-6` so the caller controls the gap below the card. */
+    /** Drop the Card's built-in `mb-6` (via its `marginBottom="none"` variant) so the caller controls the gap below. */
     noCardMargin?: boolean;
     children: React.ReactNode;
 }) {
@@ -34,7 +34,7 @@ export function SectionCard({
                 {headerActions}
             </div>
             {note && <div className="mb-3">{note}</div>}
-            <Card ui="dashkit" className={noCardMargin ? '!mb-0' : undefined}>
+            <Card ui="dashkit" marginBottom={noCardMargin ? 'none' : undefined}>
                 <div className="flex min-w-0 flex-col overflow-x-clip">{children}</div>
             </Card>
         </>

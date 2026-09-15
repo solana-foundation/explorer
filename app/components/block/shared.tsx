@@ -4,6 +4,7 @@ import { HelpCircle } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
+import { KeyValue } from '@/app/shared/ui/key-value';
 
 // Data-table card surface, shared by the block grid cards (matches BaseDomainsCard's list surface). Set
 // on a `variant="tight"` Card: `rounded-lg` (8px) tightens the tw base's `rounded-xl` (12px) and the
@@ -61,10 +62,8 @@ export function GridHeaderRow({
     );
 }
 
-// Stacked, labelled key/value field for the block cards' mobile layouts. The label column width mirrors
-// the Overview card's key/value grid so the cards line up.
-const FIELD_ALIGN = { baseline: 'items-baseline', center: 'items-center', start: 'items-start' } as const;
-
+// Stacked, labelled key/value field for the block cards' mobile layouts: the shared KeyValue in its
+// flat (padding-less) form so the cards line up with every other detail row.
 export function LabeledField({
     label,
     children,
@@ -72,13 +71,12 @@ export function LabeledField({
 }: {
     label: string;
     children: React.ReactNode;
-    align?: keyof typeof FIELD_ALIGN;
+    align?: 'baseline' | 'center' | 'start';
 }) {
     return (
-        <div className={cn('grid grid-cols-[clamp(100px,25%,200px)_1fr] gap-2', FIELD_ALIGN[align])}>
-            <span className="text-outer-space-300">{label}</span>
-            <span className="min-w-0">{children}</span>
-        </div>
+        <KeyValue label={label} density="flat" divider={false} align={align}>
+            {children}
+        </KeyValue>
     );
 }
 
@@ -110,7 +108,7 @@ export type ResponsiveCell = {
     mobile?: React.ReactNode;
     desktop?: React.ReactNode;
     // Mobile field alignment (see LabeledField); defaults to 'baseline'.
-    mobileAlign?: keyof typeof FIELD_ALIGN;
+    mobileAlign?: 'baseline' | 'center' | 'start';
     // Extra classes on the desktop grid cell, e.g. 'text-right', 'min-w-0', 'tabular-nums'.
     desktopClassName?: string;
     // Drop the cell from one layout: a desktop-only column (pinned/first cell) or a mobile-only field

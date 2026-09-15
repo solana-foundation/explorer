@@ -12,9 +12,9 @@ import {
     ResponsiveGridRow,
     TIGHT_CARD,
 } from '@/app/components/block/shared';
-import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card } from '@/app/shared/ui/Card';
+import { KeyValue } from '@/app/shared/ui/key-value';
 
 type ProgramStats = {
     ixFrequency: Map<string, number>;
@@ -105,10 +105,9 @@ function ProgramStatsCollapsible({ stats }: { stats: ProgramStats }) {
         <CollapsibleSection title="Block Program Stats" collapsible={false} className="">
             <Card variant="tight" className={TIGHT_CARD}>
                 {rows.map(([label, value], i) => (
-                    <Row key={label} divider={i < rows.length - 1}>
-                        <Label>{label}</Label>
-                        <Value mono={false}>{value}</Value>
-                    </Row>
+                    <KeyValue key={label} label={label} divider={i < rows.length - 1}>
+                        {value}
+                    </KeyValue>
                 ))}
             </Card>
         </CollapsibleSection>

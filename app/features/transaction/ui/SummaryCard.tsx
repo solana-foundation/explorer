@@ -37,12 +37,12 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 import { ZoomIn } from 'react-feather';
 
-import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 import { V1_TRANSACTION_SIZE_LIMIT } from '@/app/shared/lib/v1-message-bridge';
 import { Card } from '@/app/shared/ui/Card';
+import { KeyValue, TextValue } from '@/app/shared/ui/key-value';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
 import { TransactionNotFoundCard } from './TransactionNotFoundCard';
@@ -245,199 +245,155 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
             </div>
 
             <Card ui="dashkit">
-                {/* Status */}
-                <Row divider>
-                    <Label>Status</Label>
-                    <Value className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                        <Badge ui="dashkit" variant={statusClass}>
-                            {statusText}
+                <KeyValue label="Status" valueClassName="flex-wrap items-center gap-x-3 gap-y-2">
+                    <Badge ui="dashkit" variant={statusClass}>
+                        {statusText}
+                    </Badge>
+                    {errorReason && (
+                        <Badge
+                            ui="dashkit"
+                            variant={statusClass}
+                            className="min-w-0 max-w-full !whitespace-normal break-words !text-left"
+                        >
+                            {errorLink ? <Link href={errorLink}>{errorReason}</Link> : errorReason}
                         </Badge>
-                        {errorReason && (
-                            <Badge
-                                ui="dashkit"
-                                variant={statusClass}
-                                className="min-w-0 max-w-full !whitespace-normal break-words !text-left"
-                            >
-                                {errorLink ? <Link href={errorLink}>{errorReason}</Link> : errorReason}
-                            </Badge>
-                        )}
-                    </Value>
-                </Row>
+                    )}
+                </KeyValue>
 
-                {/* Confirmation */}
-                <Row divider>
-                    <Label>Confirmation</Label>
-                    <Value>{statusFinality}</Value>
-                </Row>
+                <KeyValue label="Confirmation">
+                    <TextValue>{statusFinality}</TextValue>
+                </KeyValue>
 
-                {/* Signature */}
-                <Row divider>
-                    <Label>Signature</Label>
-                    <Value>
-                        <Signature signature={signature} alignItems="start" noTruncate />
-                    </Value>
-                </Row>
+                <KeyValue label="Signature">
+                    <Signature signature={signature} alignItems="start" noTruncate />
+                </KeyValue>
 
-                {/* Signed by (fee payer) */}
                 {feePayer && (
-                    <Row divider>
-                        <Label>Fee payer</Label>
-                        <Value>
-                            <Address pubkey={feePayer} link noTruncate />
-                        </Value>
-                    </Row>
+                    <KeyValue label="Fee payer">
+                        <Address pubkey={feePayer} link noTruncate />
+                    </KeyValue>
                 )}
 
-                {/* Slot */}
-                <Row divider>
-                    <Label>Slot</Label>
-                    <Value>
-                        <Slot slot={info.slot} link />
-                    </Value>
-                </Row>
+                <KeyValue label="Slot">
+                    <Slot slot={info.slot} link />
+                </KeyValue>
 
-                {/* Recent Blockhash / Nonce */}
                 {blockhash && (
-                    <Row divider>
-                        <Label className="overflow-visible">
-                            {isNonce ? (
+                    <KeyValue
+                        label={
+                            isNonce ? (
                                 'Nonce'
                             ) : (
                                 <InfoTooltip text="Transactions use a previously confirmed blockhash as a nonce to prevent double spends">
                                     Recent Blockhash
                                 </InfoTooltip>
-                            )}
-                        </Label>
-                        <Value>{blockhash}</Value>
-                    </Row>
+                            )
+                        }
+                    >
+                        <TextValue>{blockhash}</TextValue>
+                    </KeyValue>
                 )}
 
-                {/* Fee */}
                 {fee !== undefined && (
-                    <Row divider>
-                        <Label>Fee</Label>
-                        <Value>
-                            <SolBalance lamports={fee} />
-                        </Value>
-                    </Row>
+                    <KeyValue label="Fee">
+                        <SolBalance lamports={fee} />
+                    </KeyValue>
                 )}
 
                 {/* Projected fee under SIMD-0553's inclusion + burned resource fee model */}
                 {fee !== undefined && feeProjections !== undefined && (
-                    <Row divider>
-                        <Label className="overflow-visible">
+                    <KeyValue
+                        label={
                             <InfoTooltip text="Not active yet. SIMD-0553 would charge a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units a transaction requests, replacing today's flat 5,000-per-signature base fee and leaving the priority fee unchanged. Estimated by swapping this transaction's consumed compute units for its requested limit; the loaded-accounts-data-size term still reflects what it loaded, so each figure is a floor.">
                                 Fee under SIMD-0553
                             </InfoTooltip>
-                        </Label>
-                        <Value>
-                            <BaseResourceFeeProjection currentFeeLamports={fee} projections={feeProjections} />
-                        </Value>
-                    </Row>
+                        }
+                    >
+                        <BaseResourceFeeProjection currentFeeLamports={fee} projections={feeProjections} />
+                    </KeyValue>
                 )}
 
-                {/* Transaction cost */}
                 {costUnits !== undefined && (
-                    <Row divider>
-                        <Label>Transaction cost</Label>
-                        <Value>{costUnits.toLocaleString('en-US')}</Value>
-                    </Row>
+                    <KeyValue label="Transaction cost">
+                        <TextValue>{costUnits.toLocaleString('en-US')}</TextValue>
+                    </KeyValue>
                 )}
 
-                {/* CUs Consumed / Limit */}
                 {computeUnitsConsumed !== undefined && reservedCUs !== undefined && (
-                    <Row divider>
-                        <Label>CUs Consumed / Limit</Label>
-                        <Value>
+                    <KeyValue label="CUs Consumed / Limit">
+                        <TextValue>
                             {computeUnitsConsumed.toLocaleString('en-US')} / {reservedCUs.toLocaleString('en-US')}
-                        </Value>
-                    </Row>
+                        </TextValue>
+                    </KeyValue>
                 )}
                 {computeUnitsConsumed !== undefined && reservedCUs === undefined && (
-                    <Row divider>
-                        <Label>CUs Consumed</Label>
-                        <Value>{computeUnitsConsumed.toLocaleString('en-US')}</Value>
-                    </Row>
+                    <KeyValue label="CUs Consumed">
+                        <TextValue>{computeUnitsConsumed.toLocaleString('en-US')}</TextValue>
+                    </KeyValue>
                 )}
 
                 {/* v1 message-level resource limits */}
                 {transactionConfig?.priorityFeeLamports !== undefined && (
-                    <Row divider>
-                        <Label className="overflow-visible">
+                    <KeyValue
+                        label={
                             <InfoTooltip text="A total amount paid for prioritization, unlike the per-compute-unit price used before v1">
                                 Priority fee (total)
                             </InfoTooltip>
-                        </Label>
-                        <Value>
-                            <SolBalance lamports={transactionConfig.priorityFeeLamports} />
-                        </Value>
-                    </Row>
+                        }
+                    >
+                        <SolBalance lamports={transactionConfig.priorityFeeLamports} />
+                    </KeyValue>
                 )}
                 {transactionConfig?.loadedAccountsDataSizeLimit !== undefined && (
-                    <Row divider>
-                        <Label>Loaded accounts data size limit</Label>
-                        <Value>{transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}</Value>
-                    </Row>
+                    <KeyValue label="Loaded accounts data size limit">
+                        <TextValue>{transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}</TextValue>
+                    </KeyValue>
                 )}
                 {transactionConfig?.heapSize !== undefined && (
-                    <Row divider>
-                        <Label>Heap size</Label>
-                        <Value>{transactionConfig.heapSize.toLocaleString('en-US')}</Value>
-                    </Row>
+                    <KeyValue label="Heap size">
+                        <TextValue>{transactionConfig.heapSize.toLocaleString('en-US')}</TextValue>
+                    </KeyValue>
                 )}
 
-                {/* Transaction Version */}
                 {version !== undefined && (
-                    <Row divider>
-                        <Label>Transaction Version</Label>
-                        <Value className="uppercase">{formatTransactionVersion(version)}</Value>
-                    </Row>
+                    <KeyValue label="Transaction Version" valueClassName="font-mono uppercase">
+                        {formatTransactionVersion(version)}
+                    </KeyValue>
                 )}
 
-                {/* Transaction size */}
                 {serializedSize !== undefined && (
-                    <Row divider>
-                        <Label className="overflow-visible">
+                    <KeyValue
+                        label={
                             <InfoTooltip text="Size on the wire: signatures plus the compiled message">
                                 Transaction size
                             </InfoTooltip>
-                        </Label>
-                        <Value className="flex flex-wrap items-baseline gap-x-2">
-                            {serializedSize.toLocaleString('en-US')} bytes
-                            {/* No over-limit styling here, unlike the inspector: a transaction that
-                                landed is necessarily within the limit. The cap is context for headroom. */}
-                            <span className="text-xs text-outer-space-300">
-                                Max is {transactionSizeLimit(rawVersion).toLocaleString('en-US')} bytes
-                            </span>
-                        </Value>
-                    </Row>
+                        }
+                        valueClassName="flex-wrap items-baseline gap-x-2 font-mono"
+                    >
+                        {serializedSize.toLocaleString('en-US')} bytes
+                        {/* No over-limit styling here, unlike the inspector: a transaction that landed is
+                            necessarily within the limit. The cap is context for headroom. */}
+                        <span className="text-xs text-outer-space-300">
+                            Max is {transactionSizeLimit(rawVersion).toLocaleString('en-US')} bytes
+                        </span>
+                    </KeyValue>
                 )}
 
-                {/* Timestamp */}
                 {info.timestamp !== 'unavailable' ? (
                     <>
-                        <Row divider>
-                            <Label>Timestamp (Local)</Label>
-                            <Value>
-                                <span className="font-mono">{displayTimestamp(info.timestamp * 1000, true)}</span>
-                            </Value>
-                        </Row>
-                        <Row>
-                            <Label>Timestamp (UTC)</Label>
-                            <Value>
-                                <span className="font-mono">{displayTimestampUtc(info.timestamp * 1000, true)}</span>
-                            </Value>
-                        </Row>
+                        <KeyValue label="Timestamp (Local)">
+                            <span className="font-mono">{displayTimestamp(info.timestamp * 1000, true)}</span>
+                        </KeyValue>
+                        <KeyValue label="Timestamp (UTC)" divider={false}>
+                            <span className="font-mono">{displayTimestampUtc(info.timestamp * 1000, true)}</span>
+                        </KeyValue>
                     </>
                 ) : (
-                    <Row>
-                        <Label>Timestamp</Label>
-                        <Value>
-                            <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
-                                Unavailable
-                            </InfoTooltip>
-                        </Value>
-                    </Row>
+                    <KeyValue label="Timestamp" divider={false}>
+                        <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
+                            Unavailable
+                        </InfoTooltip>
+                    </KeyValue>
                 )}
             </Card>
         </section>

@@ -3,7 +3,6 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SolBalance } from '@components/common/SolBalance';
-import { cn } from '@components/shared/utils';
 import { useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
@@ -38,6 +37,7 @@ import {
     type V1TransactionConfig,
 } from '@/app/shared/lib/v1-message-bridge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
+import { KeyValue } from '@/app/shared/ui/key-value';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { useClusterPath } from '@/app/utils/url';
@@ -738,105 +738,60 @@ function OverviewCard({
                 </div>
             </div>
             <Card ui="dashkit">
-                <OverviewRow divider>
-                    <OverviewLabel>Serialized Size / Limit</OverviewLabel>
-                    <OverviewValue>
-                        <span className={size > sizeLimit ? 'text-dk-warning-on-dark' : undefined}>
-                            {size} / {sizeLimit} bytes
-                        </span>
-                    </OverviewValue>
-                </OverviewRow>
-                <OverviewRow divider>
-                    <OverviewLabel>Fees</OverviewLabel>
-                    <OverviewValue>
-                        <SolBalance lamports={fee} />
-                    </OverviewValue>
-                </OverviewRow>
+                <KeyValue label="Serialized Size / Limit">
+                    <span className={size > sizeLimit ? 'text-dk-warning-on-dark' : undefined}>
+                        {size} / {sizeLimit} bytes
+                    </span>
+                </KeyValue>
+                <KeyValue label="Fees">
+                    <SolBalance lamports={fee} />
+                </KeyValue>
                 {isV1 && (
-                    <OverviewRow divider>
-                        <OverviewLabel>Transaction Version</OverviewLabel>
-                        <OverviewValue>
-                            <span className="uppercase">v1</span>
-                        </OverviewValue>
-                    </OverviewRow>
+                    <KeyValue label="Transaction Version">
+                        <span className="uppercase">v1</span>
+                    </KeyValue>
                 )}
                 {transactionConfig?.computeUnitLimit !== undefined && (
-                    <OverviewRow divider>
-                        <OverviewLabel>Compute unit limit</OverviewLabel>
-                        <OverviewValue>{transactionConfig.computeUnitLimit.toLocaleString('en-US')}</OverviewValue>
-                    </OverviewRow>
+                    <KeyValue label="Compute unit limit">
+                        {transactionConfig.computeUnitLimit.toLocaleString('en-US')}
+                    </KeyValue>
                 )}
                 {transactionConfig?.priorityFeeLamports !== undefined && (
-                    <OverviewRow divider>
-                        <OverviewLabel>Priority fee (total)</OverviewLabel>
-                        <OverviewValue>
-                            <SolBalance lamports={transactionConfig.priorityFeeLamports} />
-                        </OverviewValue>
-                    </OverviewRow>
+                    <KeyValue label="Priority fee (total)">
+                        <SolBalance lamports={transactionConfig.priorityFeeLamports} />
+                    </KeyValue>
                 )}
                 {transactionConfig?.loadedAccountsDataSizeLimit !== undefined && (
-                    <OverviewRow divider>
-                        <OverviewLabel>Loaded accounts data size limit</OverviewLabel>
-                        <OverviewValue>
-                            {transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}
-                        </OverviewValue>
-                    </OverviewRow>
+                    <KeyValue label="Loaded accounts data size limit">
+                        {transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}
+                    </KeyValue>
                 )}
                 {transactionConfig?.heapSize !== undefined && (
-                    <OverviewRow divider>
-                        <OverviewLabel>Heap size</OverviewLabel>
-                        <OverviewValue>{transactionConfig.heapSize.toLocaleString('en-US')}</OverviewValue>
-                    </OverviewRow>
+                    <KeyValue label="Heap size">{transactionConfig.heapSize.toLocaleString('en-US')}</KeyValue>
                 )}
-                <OverviewRow>
-                    <OverviewLabel>Fee payer</OverviewLabel>
-                    <OverviewValue>
-                        {message.staticAccountKeys.length === 0 ? (
-                            'No Fee Payer'
-                        ) : (
-                            <AddressWithContext
-                                pubkey={message.staticAccountKeys[0]}
-                                validator={feePayerValidator}
-                                align="left"
-                                hideInfo
-                                badges={
-                                    <span className="mt-1 flex flex-wrap gap-1.5">
-                                        <Badge ui="dashkit" variant="info">
-                                            Signer
-                                        </Badge>
-                                        <Badge ui="dashkit" variant="destructive">
-                                            Writable
-                                        </Badge>
-                                    </span>
-                                }
-                            />
-                        )}
-                    </OverviewValue>
-                </OverviewRow>
+                <KeyValue label="Fee payer">
+                    {message.staticAccountKeys.length === 0 ? (
+                        'No Fee Payer'
+                    ) : (
+                        <AddressWithContext
+                            pubkey={message.staticAccountKeys[0]}
+                            validator={feePayerValidator}
+                            align="left"
+                            hideInfo
+                            badges={
+                                <span className="mt-1 flex flex-wrap gap-1.5">
+                                    <Badge ui="dashkit" variant="info">
+                                        Signer
+                                    </Badge>
+                                    <Badge ui="dashkit" variant="destructive">
+                                        Writable
+                                    </Badge>
+                                </span>
+                            }
+                        />
+                    )}
+                </KeyValue>
             </Card>
         </section>
     );
-}
-
-// Mirrors the Summary card rows on the transaction details page (features/transaction/ui/SummaryCard): a
-// label | value grid with 12px horizontal / 10px vertical padding and top-aligned content.
-function OverviewRow({ children, divider }: { children: React.ReactNode; divider?: boolean }) {
-    return (
-        <div
-            className={cn(
-                'grid min-h-9 grid-cols-[clamp(100px,25%,200px)_1fr] items-start gap-2 px-3 py-2.5',
-                divider && 'border-1 border-b border-white/10 [border-bottom-style:solid]',
-            )}
-        >
-            {children}
-        </div>
-    );
-}
-
-function OverviewLabel({ children }: { children: React.ReactNode }) {
-    return <div className="flex flex-wrap items-center gap-1 text-sm text-outer-space-300">{children}</div>;
-}
-
-function OverviewValue({ children }: { children: React.ReactNode }) {
-    return <div className="break-all text-sm text-white">{children}</div>;
 }

@@ -16,15 +16,14 @@ import { DialogClose, DialogTitle } from '@/app/components/shared/ui/dialog';
 import { EditIcon, NicknameEditor, useNickname } from '@/app/features/nicknames';
 import { CopyButton } from '@/app/shared/ui/CopyButton';
 import { Drawer } from '@/app/shared/ui/drawer';
+import { KeyValue } from '@/app/shared/ui/key-value';
 
-// A label | value row in the drawer body — mirrors the tx page's DetailRow (AccountExpandedLayout).
-// Vertical rhythm comes from the parent's `flex flex-col gap-1.5`, so the row carries no own padding.
+// A label | value row in the drawer body: the shared KeyValue in its compact, white-value form.
 function DrawerField({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <div className="grid grid-cols-[clamp(100px,25%,200px)_1fr] items-baseline gap-2 px-4">
-            <div className="text-sm text-outer-space-300">{label}</div>
-            <div className="min-w-0 break-words text-sm text-white">{children}</div>
-        </div>
+        <KeyValue label={label} density="compact" divider={false} valueClassName="text-white" className="px-4">
+            {children}
+        </KeyValue>
     );
 }
 
