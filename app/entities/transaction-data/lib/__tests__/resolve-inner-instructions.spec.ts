@@ -144,7 +144,28 @@ describe('resolveInnerInstructions', () => {
         expect(result.get(0)).toEqual([undefined]);
     });
 
-    it('should return an empty object for empty input', () => {
+    it('should concatenate groups that report the same parent index', () => {
+        const keys = makeKeys(3);
+        const message = makeMessage(keys, {
+            numReadonlySignedAccounts: 0,
+            numReadonlyUnsignedAccounts: 1,
+            numRequiredSignatures: 1,
+        });
+
+        const result = resolveInnerInstructions(
+            [
+                { index: 0, instructions: [{ accounts: [0], data: encodeData([1]), programIdIndex: 2 }] },
+                { index: 0, instructions: [{ accounts: [1], data: encodeData([2]), programIdIndex: 2 }] },
+            ],
+            new MessageAccountKeys(keys),
+            message,
+        );
+
+        // The later group must not replace the earlier one, which would drop CPIs with no trace.
+        expect(result.get(0)?.map(ix => ix?.data)).toEqual([Buffer.from([1]), Buffer.from([2])]);
+    });
+
+    it('should return an empty map for empty input', () => {
         const keys = makeKeys(2);
         const message = makeMessage(keys, {
             numReadonlySignedAccounts: 0,

@@ -34,7 +34,6 @@ export const Default: Story = {
     args: {
         index: 0,
         ix: sampleIx,
-        programName: 'Unknown',
     },
 };
 
@@ -52,6 +51,5 @@ export const WithInnerCards: Story = {
             </div>,
         ],
         ix: sampleIx,
-        programName: 'Unknown',
     },
 };

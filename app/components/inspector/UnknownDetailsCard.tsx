@@ -1,8 +1,10 @@
 import { TableCardBody } from '@components/common/TableCardBody';
 import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { ProgramField } from '@entities/instruction-card';
+import { useCluster } from '@providers/cluster';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import { TransactionInstruction } from '@solana/web3.js';
+import { getProgramName } from '@utils/tx';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -14,17 +16,16 @@ export function UnknownDetailsCard({
     index,
     childIndex,
     ix,
-    programName,
     innerCards,
 }: {
     index: number;
     childIndex?: number;
     ix: TransactionInstruction;
-    programName: string;
     innerCards?: React.ReactNode[];
 }) {
+    const { cluster } = useCluster();
     const scrollAnchorRef = useScrollAnchor(
-        getInstructionCardScrollAnchorId(childIndex === undefined ? [index + 1] : [index + 1, childIndex + 1]),
+        getInstructionCardScrollAnchorId(childIndex !== undefined ? [index + 1, childIndex + 1] : [index + 1]),
     );
 
     return (
@@ -38,7 +39,7 @@ export function UnknownDetailsCard({
                         {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </Badge>
                     <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                        {programName}
+                        {getProgramName(ix.programId.toBase58(), cluster)}
                     </span>
                     <span className="ml-1.5 flex-none">Instruction</span>
                 </span>

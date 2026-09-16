@@ -12,6 +12,9 @@ import { compiledToTransactionInstruction } from './compiled-to-transaction-inst
  * instruction that invoked them. A `Map` because most instructions invoke nothing, and
  * a record would type the misses as hits.
  *
+ * Nothing forbids the source from reporting one parent index over several groups, so the
+ * groups concatenate in arrival order rather than the later one replacing the earlier.
+ *
  * A child that cannot be resolved stays in place as `undefined` rather than being
  * dropped, so it does not renumber the siblings after it.
  */
@@ -20,10 +23,17 @@ export function resolveInnerInstructions(
     accountKeys: MessageAccountKeys,
     message: VersionedMessage,
 ): Map<number, (TransactionInstruction | undefined)[]> {
-    return new Map(
-        compiledInnerInstructions.map(inner => [
-            inner.index,
-            inner.instructions.map(ix => compiledToTransactionInstruction(ix, accountKeys, message)),
-        ]),
-    );
+    const byParentIndex = new Map<number, (TransactionInstruction | undefined)[]>();
+
+    for (const inner of compiledInnerInstructions) {
+        const resolved = inner.instructions.map(ix => compiledToTransactionInstruction(ix, accountKeys, message));
+        const group = byParentIndex.get(inner.index);
+        if (group) {
+            group.push(...resolved);
+        } else {
+            byParentIndex.set(inner.index, resolved);
+        }
+    }
+
+    return byParentIndex;
 }
