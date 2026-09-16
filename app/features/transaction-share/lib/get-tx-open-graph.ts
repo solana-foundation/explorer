@@ -11,8 +11,12 @@ export function getTxOpenGraph(signature: string, cluster?: ServerCluster): Meta
     return {
         images: [{ ...IMAGE_SIZE, alt: 'Solana Transaction', url: getTxOgImageUrl(signature, cluster) }],
         type: 'website',
-        url: `${TX_OG_BASE_URL}/tx/${signature}${clusterQuery(cluster)}`,
+        url: getTxPageUrl(signature, cluster),
     };
+}
+
+export function getTxPageUrl(signature: string, cluster?: ServerCluster): string {
+    return `${TX_OG_BASE_URL}/tx/${signature}${clusterQuery(cluster)}`;
 }
 
 /** Exported so `page.tsx` can aim `twitter.images` at the same URL instead of rebuilding it. */
