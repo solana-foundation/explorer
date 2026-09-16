@@ -2,9 +2,9 @@ import '../../styles/styles.css';
 
 import { isReceiptEnabled, RECEIPT_BASE_URL, RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/server';
 import { buildCompositeSignature, getClusterParam } from '@features/receipt/server';
-import { getTxOgImageUrl, getTxOpenGraph } from '@features/transaction-share/server';
+import { getTxOgImageUrl, getTxOpenGraph, getTxPageUrl } from '@features/transaction-share/server';
 import { IMAGE_SIZE } from '@shared/lib/og/image-size';
-import { Cluster, CLUSTERS, clusterSlug, type ServerCluster } from '@utils/cluster';
+import { Cluster, clusterFromSlug, clusterSlug } from '@utils/cluster';
 import { SignatureProps } from '@utils/index';
 import { Metadata } from 'next/types';
 import React from 'react';
@@ -16,15 +16,15 @@ type Props = Readonly<{
     searchParams: Promise<Record<string, string | string[] | undefined>>;
 }>;
 
-// Custom clusters use user-specific RPCs that no server-side route can reach.
-const SHAREABLE_CLUSTERS = CLUSTERS.filter((c): c is ServerCluster => c !== Cluster.Custom);
-
 export async function generateMetadata(props: Props): Promise<Metadata> {
     const searchParams = await props.searchParams;
     const { signature } = await props.params;
 
-    const cluster = getClusterParam(searchParams);
-    const clusterEnum = SHAREABLE_CLUSTERS.find(c => clusterSlug(c) === cluster);
+    const clusterParam = getClusterParam(searchParams);
+    const cluster = clusterParam === undefined ? undefined : clusterFromSlug(clusterParam);
+    // A custom cluster is the visitor's own RPC, which no server route may reach, so no OG route can read it.
+    const isCustomCluster = cluster === Cluster.Custom;
+    const clusterEnum = cluster === Cluster.Custom ? undefined : cluster;
 
     const isReceiptView = searchParams.view === 'receipt' && isReceiptEnabled;
 
@@ -44,21 +44,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
             RECEIPT_OG_IMAGE_VERSION || undefined,
             clusterEnum,
         );
-        const ogImageUrl = `${baseUrl}/og/receipt/${compositeSignature}`;
+        const ogImageUrl = isCustomCluster ? undefined : `${baseUrl}/og/receipt/${compositeSignature}`;
         return {
             description,
             openGraph: {
                 description,
-                images: [{ ...IMAGE_SIZE, alt: 'Solana Transaction Receipt', url: ogImageUrl }],
+                ...(ogImageUrl && { images: [{ ...IMAGE_SIZE, alt: 'Solana Transaction Receipt', url: ogImageUrl }] }),
                 title,
                 type: 'website',
                 url: pageUrl,
             },
             title,
             twitter: {
-                card: 'summary_large_image',
+                card: ogImageUrl ? 'summary_large_image' : 'summary',
                 description,
-                images: [ogImageUrl],
+                ...(ogImageUrl && { images: [ogImageUrl] }),
                 site: baseUrl,
                 title,
             },
@@ -67,6 +67,16 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
     const description = `Details of the Solana transaction with signature ${signature}`;
     const title = `Transaction | ${signature} | Solana`;
+
+    if (isCustomCluster) {
+        return {
+            description,
+            // NOTE: url stays custom-cluster free to avoid exposing it (same as for receipts).
+            openGraph: { description, title, type: 'website', url: getTxPageUrl(signature) },
+            title,
+            twitter: { card: 'summary', description, title },
+        };
+    }
 
     return {
         description,

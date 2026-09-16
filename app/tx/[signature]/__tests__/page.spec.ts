@@ -44,6 +44,62 @@ describe('should generate transaction page metadata', () => {
         });
     });
 
+    it('should keep the tags but drop the image on a custom cluster', async () => {
+        const { generateMetadata } = await import('../page');
+
+        const metadata = await generateMetadata({
+            params: Promise.resolve({ signature: SIGNATURE }),
+            searchParams: Promise.resolve({ cluster: 'custom', customUrl: 'http://localhost:8899' }),
+        });
+
+        expect(metadata.openGraph).toMatchObject({
+            description: `Details of the Solana transaction with signature ${SIGNATURE}`,
+            title: `Transaction | ${SIGNATURE} | Solana`,
+            type: 'website',
+            url: `${BASE_URL}/tx/${SIGNATURE}`,
+        });
+        expect(metadata.openGraph).not.toHaveProperty('images');
+        expect(metadata.twitter).toMatchObject({ card: 'summary' });
+        expect(metadata.twitter).not.toHaveProperty('images');
+        expect(JSON.stringify(metadata)).not.toContain('localhost');
+    });
+
+    it('should show the mainnet image on an unknown cluster slug', async () => {
+        const { generateMetadata } = await import('../page');
+
+        const metadata = await generateMetadata({
+            params: Promise.resolve({ signature: SIGNATURE }),
+            searchParams: Promise.resolve({ cluster: 'bogus' }),
+        });
+
+        expect(metadata.openGraph).toMatchObject({
+            images: [{ url: `${BASE_URL}/og/tx/${SIGNATURE}` }],
+        });
+    });
+
+    it('should drop the receipt image on a custom cluster', async () => {
+        vi.stubEnv('NEXT_PUBLIC_RECEIPT_ENABLED', 'true');
+        const { generateMetadata } = await import('../page');
+
+        const metadata = await generateMetadata({
+            params: Promise.resolve({ signature: SIGNATURE }),
+            searchParams: Promise.resolve({
+                cluster: 'custom',
+                customUrl: 'http://localhost:8899',
+                view: 'receipt',
+            }),
+        });
+
+        expect(metadata.openGraph).toMatchObject({
+            type: 'website',
+            url: `${BASE_URL}/tx/${SIGNATURE}?view=receipt`,
+        });
+        expect(metadata.openGraph).not.toHaveProperty('images');
+        expect(metadata.twitter).toMatchObject({ card: 'summary' });
+        expect(metadata.twitter).not.toHaveProperty('images');
+        expect(JSON.stringify(metadata)).not.toContain('localhost');
+    });
+
     it('should set a large summary twitter card pointing at the same image', async () => {
         const { generateMetadata } = await import('../page');
 
