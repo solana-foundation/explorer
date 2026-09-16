@@ -22,7 +22,7 @@ export type BlockTransactionVersionSummary = {
     total: number;
 };
 
-const VERSION_LABELS: { label: string; version: TransactionVersion }[] = [
+export const BLOCK_TRANSACTION_VERSIONS: { label: string; version: TransactionVersion }[] = [
     { label: 'Legacy', version: 'legacy' },
     { label: 'v0', version: 0 },
     { label: 'v1', version: 1 },
@@ -38,7 +38,7 @@ export function summarizeBlockTransactionVersions(block: VersionedBlockTransacti
     }
 
     const total = block.transactions.length;
-    const entries = VERSION_LABELS.map(({ label, version }) => {
+    const entries = BLOCK_TRANSACTION_VERSIONS.map(({ label, version }) => {
         const count = counts.get(version) ?? 0;
         return { count, label, share: total === 0 ? 0 : count / total, version };
     });

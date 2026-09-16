@@ -4,9 +4,10 @@ import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
-import type { BlockWithV1 } from '@entities/block-data';
+import { BLOCK_TRANSACTION_VERSIONS, type BlockWithV1 } from '@entities/block-data';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
+import type { TransactionVersion } from '@solana/kit';
 import { ConfirmedTransactionMeta, PublicKey, TransactionSignature, VOTE_PROGRAM_ID } from '@solana/web3.js';
 import { parseProgramLogs } from '@utils/program-logs';
 import { displayAddress } from '@utils/tx';
@@ -50,6 +51,13 @@ const useQueryAccountFilter = (query: ReadonlyURLSearchParams): PublicKey | null
     return null;
 };
 
+const useQueryVersionFilter = (query: ReadonlyURLSearchParams): TransactionVersion | null => {
+    const filter = query.get(VERSION_PARAM);
+    if (filter === null) return null;
+    const match = BLOCK_TRANSACTION_VERSIONS.find(({ version }) => versionParam(version) === filter);
+    return match ? match.version : null;
+};
+
 const useQuerySort = (query: ReadonlyURLSearchParams): { mode: SortMode; direction: SortDirection } => {
     const sort = query.get('sort');
     const mode: SortMode = isSortMode(sort) ? sort : 'index';
@@ -67,6 +75,7 @@ type TransactionWithInvocations = {
     costUnits?: number;
     reservedComputeUnits?: number;
     logTruncated: boolean;
+    version: TransactionVersion;
 };
 
 export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: bigint | undefined }) {
@@ -75,6 +84,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
     const currentSearchParams = useSearchParams();
     const programFilter = useQueryProgramFilter(currentSearchParams);
     const accountFilter = useQueryAccountFilter(currentSearchParams);
+    const versionFilter = useQueryVersionFilter(currentSearchParams);
     const { direction: sortDirection, mode: sortMode } = useQuerySort(currentSearchParams);
     const router = useRouter();
     const { cluster } = useCluster();
@@ -165,6 +175,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                 meta: tx.meta,
                 reservedComputeUnits,
                 signature,
+                version: tx.version,
             };
         });
         return { invokedPrograms, transactions };
@@ -195,12 +206,13 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                     .keySegments()
                     .flat()
                     .find(key => key.equals(accountFilter));
-            });
+            })
+            .filter(({ version }) => versionFilter === null || version === versionFilter);
 
         const showComputeUnits = filteredTxs.every(tx => tx.computeUnits !== undefined);
 
         return [sortTransactions(filteredTxs, sortMode, sortDirection, showComputeUnits), showComputeUnits];
-    }, [block.transactions, transactions, programFilter, accountFilter, sortMode, sortDirection]);
+    }, [block.transactions, transactions, programFilter, accountFilter, versionFilter, sortMode, sortDirection]);
 
     // Shared by the filter dropdown (menu options + active row) and the removable chip below the title.
     // "Set" means anything other than "All Transactions": the empty-param default ("All Except Votes")
@@ -210,6 +222,8 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
         [programFilter, invokedPrograms, cluster, transactions.length],
     );
     const isProgramFilterSet = programFilter !== ALL_TRANSACTIONS;
+    const versionOptions = React.useMemo(() => buildVersionOptions(transactions), [transactions]);
+    const versionLabel = BLOCK_TRANSACTION_VERSIONS.find(({ version }) => version === versionFilter)?.label;
 
     if (transactions.length === 0) {
         return <ErrorCard text="This block has no transactions" />;
@@ -232,16 +246,31 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                         breaking mid-phrase when it can't sit beside the title. */}
                     <span className="inline-block text-sm font-normal text-outer-space-300">
                         {filteredTransactions.length}{' '}
-                        {isProgramFilterSet || accountFilter !== null ? 'filtered records' : 'records'}
+                        {isProgramFilterSet || accountFilter !== null || versionFilter !== null
+                            ? 'filtered records'
+                            : 'records'}
                     </span>
                 </>
             }
             className=""
             titleClassName="items-end gap-4"
             belowTitle={
-                isProgramFilterSet ? (
+                isProgramFilterSet || versionLabel !== undefined ? (
                     <div className="-mt-1 mb-0.5 flex flex-wrap items-center gap-2">
-                        <FilterChip label={filterModel.current.name} />
+                        {isProgramFilterSet && (
+                            <FilterChip
+                                field="Program"
+                                label={filterModel.current.name}
+                                applyReset={params => params.set('filter', ALL_TRANSACTIONS)}
+                            />
+                        )}
+                        {versionLabel !== undefined && (
+                            <FilterChip
+                                field="Version"
+                                label={versionLabel}
+                                applyReset={params => params.delete(VERSION_PARAM)}
+                            />
+                        )}
                     </div>
                 ) : undefined
             }
@@ -257,7 +286,9 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                     <FilterDropdown
                         options={filterModel.options}
                         currentFilter={programFilter}
-                        isFilterSet={isProgramFilterSet}
+                        isFilterSet={isProgramFilterSet || versionFilter !== null}
+                        versionOptions={versionOptions}
+                        currentVersion={versionFilter}
                     />
                 </>
             }
@@ -419,6 +450,11 @@ function BlockHistoryGridRow({
             {status.label}
         </Badge>
     );
+    const versionBadge = (
+        <Badge ui="dashkit" variant="secondary">
+            {BLOCK_TRANSACTION_VERSIONS.find(({ version }) => version === tx.version)?.label ?? String(tx.version)}
+        </Badge>
+    );
     const signatureNode = tx.signature ? <Signature signature={tx.signature} link /> : '-';
     const feeNode = tx.meta !== null ? <SolBalance lamports={tx.meta.fee} /> : 'Unknown';
     const reserved = tx.reservedComputeUnits !== undefined ? numberFmt(tx.reservedComputeUnits) : 'Unknown';
@@ -450,6 +486,7 @@ function BlockHistoryGridRow({
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
             <span className="min-w-0">{signatureNode}</span>
             {badge}
+            {versionBadge}
         </div>
     );
     // Signature cell: on desktop the invoked programs stack beneath the signature+badge header; on mobile
@@ -496,6 +533,25 @@ function BlockHistoryGridRow({
 
 const ALL_TRANSACTIONS = 'all';
 const HIDE_VOTES = '';
+const VERSION_PARAM = 'version';
+
+function versionParam(version: TransactionVersion): string {
+    return String(version);
+}
+
+type VersionOption = {
+    label: string;
+    transactionCount: number;
+    version: TransactionVersion;
+};
+
+function buildVersionOptions(transactions: { version: TransactionVersion }[]): VersionOption[] {
+    return BLOCK_TRANSACTION_VERSIONS.map(({ label, version }) => ({
+        label,
+        transactionCount: transactions.filter(tx => tx.version === version).length,
+        version,
+    }));
+}
 
 type FilterOption = {
     name: string;
@@ -549,10 +605,14 @@ const FilterDropdown = ({
     options,
     currentFilter,
     isFilterSet,
+    versionOptions,
+    currentVersion,
 }: {
     options: FilterOption[];
     currentFilter: string;
     isFilterSet: boolean;
+    versionOptions: VersionOption[];
+    currentVersion: TransactionVersion | null;
 }) => {
     const [query, setQuery] = React.useState('');
     const trimmed = query.trim().toLowerCase();
@@ -598,6 +658,19 @@ const FilterDropdown = ({
                         />
                     </div>
                 </div>
+                <div className="border-b border-solid border-white/10 pb-1.5">
+                    <div className="px-6 pb-1 text-xs uppercase text-outer-space-300">Transaction Version</div>
+                    <VersionFilterLink currentVersion={currentVersion} label="Any version" version={null} />
+                    {versionOptions.map(({ label, transactionCount, version }) => (
+                        <VersionFilterLink
+                            currentVersion={currentVersion}
+                            key={versionParam(version)}
+                            label={`${label} (${transactionCount})`}
+                            version={version}
+                        />
+                    ))}
+                </div>
+                <div className="px-6 pb-1 pt-2 text-xs uppercase text-outer-space-300">Program</div>
                 <div className="max-h-72 overflow-y-auto">
                     {visibleOptions.length === 0 ? (
                         <div className="px-6 py-1.5 text-dk-base text-dark-muted-foreground">No matches</div>
@@ -714,30 +787,74 @@ const SortDropdown = ({
     );
 };
 
-// The active filter shown as a removable chip below the block title. Clearing it resets to
-// "All Transactions" (the "no filter" state), so the trailing param lands on `filter=all`.
-function FilterChip({ label }: { label: string }) {
+function FilterChip({
+    field,
+    label,
+    applyReset,
+}: {
+    field: string;
+    label: string;
+    applyReset: (params: URLSearchParams) => void;
+}) {
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
     const resetHref = useMemo(() => {
         const params = new URLSearchParams(currentSearchParams?.toString());
-        params.set('filter', ALL_TRANSACTIONS);
+        applyReset(params);
         const nextQueryString = params.toString();
         return `${currentPathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
-    }, [currentPathname, currentSearchParams]);
+    }, [applyReset, currentPathname, currentSearchParams]);
 
     return (
         <div className="inline-flex max-w-full items-center rounded-full border border-solid border-outer-space-800 bg-outer-space-900 py-0.5 pl-2.5 pr-0.5 text-sm text-white">
-            <span className="mr-1.5 shrink-0 text-outer-space-300">Program</span>
+            <span className="mr-1.5 shrink-0 text-outer-space-300">{field}</span>
             <span className="min-w-0 truncate">{label}</span>
             <Link
                 href={resetHref}
-                aria-label="Clear filter"
+                aria-label={`Clear ${field.toLowerCase()} filter`}
                 className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-outer-space-300 hover:bg-white/10 hover:text-white"
             >
                 <X size={13} />
             </Link>
         </div>
+    );
+}
+
+function VersionFilterLink({
+    currentVersion,
+    label,
+    version,
+}: {
+    currentVersion: TransactionVersion | null;
+    label: string;
+    version: TransactionVersion | null;
+}) {
+    const currentSearchParams = useSearchParams();
+    const currentPathname = usePathname();
+    const href = useMemo(() => {
+        const params = new URLSearchParams(currentSearchParams?.toString());
+        if (version === null) {
+            params.delete(VERSION_PARAM);
+        } else {
+            params.set(VERSION_PARAM, versionParam(version));
+        }
+        const nextQueryString = params.toString();
+        return `${currentPathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
+    }, [currentPathname, currentSearchParams, version]);
+
+    const active = version === currentVersion;
+    return (
+        <DropdownItem asChild className={cn(active && 'active')}>
+            <Link href={href} className="relative">
+                {active && (
+                    <span
+                        aria-hidden
+                        className="absolute left-2.5 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-current"
+                    />
+                )}
+                {label}
+            </Link>
+        </DropdownItem>
     );
 }
 
