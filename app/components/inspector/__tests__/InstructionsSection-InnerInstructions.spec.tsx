@@ -89,8 +89,8 @@ describe('Inspector InstructionsSection with inner instructions', () => {
 
     test('should render an inner token batch as a batch card, not through the IDL tier', async () => {
         // The Token program resolves an IDL on mainnet, and the tier never answers undefined — it
-        // returns `{ kind: 'unknown' }` for a discriminator the IDL does not declare. If that tier ran
-        // first, a batch would draw a raw card instead of the curated one.
+        // returns `{ kind: 'unknown' }` for a discriminator the IDL does not declare. Read as a hit,
+        // that draws a raw card over the curated batch card.
         vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'unknown' });
 
         render(
@@ -134,6 +134,89 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         const rendered = document.body.textContent ?? '';
         expect(rendered).toContain('#1.1');
         expect(rendered).toContain('#1.3');
+    });
+
+    test('should fall through to the curated card when the IDL declares nothing for the instruction', async () => {
+        // Same `{ kind: 'unknown' }` the batch test uses, on a top-level instruction the dispatcher
+        // knows. Reading it as a hit replaces every curated card in the switch with a raw dump.
+        vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'unknown' });
+
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection message={buildMessage()} />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        expect(await screen.findByText(/Create Idempotent/i)).toBeInTheDocument();
+    });
+
+    test('should anchor a child it cannot decompile so a link to its number resolves', async () => {
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection
+                                    message={buildMessage()}
+                                    compiledInnerInstructions={INNER_WITH_BAD_ACCOUNT}
+                                />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        await screen.findByText(/Could not display instruction #1\.2, please report/i);
+
+        // The hole registers its anchor like the siblings around it, so `#ix-1-2` is not a dead link.
+        // Read from the DOM directly: the anchor id is the thing under test and no query exposes it.
+        /* eslint-disable testing-library/no-node-access -- the anchor id is what is under test */
+        expect(document.getElementById('ix-1-1')).not.toBeNull();
+        expect(document.getElementById('ix-1-2')).not.toBeNull();
+        expect(document.getElementById('ix-1-3')).not.toBeNull();
+        /* eslint-enable testing-library/no-node-access */
+    });
+
+    test('should hand the IDL tier the same instructions across a re-render', async () => {
+        const message = buildMessage();
+        const tree = () => (
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection message={message} compiledInnerInstructions={INNER_INSTRUCTIONS} />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>
+        );
+
+        const { rerender } = render(tree());
+        await screen.findByText(/Inner Instructions/i);
+
+        vi.mocked(useIdlInstructionDecode).mockClear();
+        rerender(tree());
+        const first = vi.mocked(useIdlInstructionDecode).mock.calls.map(call => call[0].raw);
+        vi.mocked(useIdlInstructionDecode).mockClear();
+        rerender(tree());
+        const second = vi.mocked(useIdlInstructionDecode).mock.calls.map(call => call[0].raw);
+
+        // One top-level instruction plus its four CPIs. `useIdlInstructionDecode` memoizes on this
+        // identity, so a fresh one per render rebuilds an Anchor Program for every one of them.
+        expect(first).toHaveLength(5);
+        expect(second.every((raw, position) => raw === first[position])).toBe(true);
     });
 
     test('should render no inner cards when the transaction carries no metadata', async () => {
