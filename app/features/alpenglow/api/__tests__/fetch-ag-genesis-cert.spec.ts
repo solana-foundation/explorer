@@ -2,8 +2,8 @@ import type * as SolanaKit from '@solana/kit';
 import { getBase58Encoder } from '@solana/kit';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// The spec setup stubs `createSolanaRpc` so no test reaches a real node. Everything here is about
-// what kit does with a node's answer, so this file needs the real one and fakes the wire instead.
+// The spec setup stubs `createSolanaRpc`, but these tests cover what kit does with a node's
+// answer, so this file uses the real one and fakes the transport instead.
 vi.mock('@solana/kit', async () => await vi.importActual<typeof SolanaKit>('@solana/kit'));
 
 import { toConnectableUrl } from '@/app/entities/cluster/lib/connectable-url';
@@ -60,7 +60,7 @@ describe('fetchAgGenesisCert', () => {
         expect(JSON.parse(init.body)).toMatchObject({ jsonrpc: '2.0', method: 'getAgGenesisCert', params: [] });
     });
 
-    // A connection accepted and never answered would otherwise leave the card waiting for good.
+    // An accepted connection that never answers would otherwise hang forever.
     it('should bound the wait on the node', async () => {
         const timeout = vi.spyOn(AbortSignal, 'timeout');
         respondWith(rpcResult(null));
@@ -72,13 +72,13 @@ describe('fetchAgGenesisCert', () => {
         timeout.mockRestore();
     });
 
-    it('should read a null result as "no certificate yet"', async () => {
+    it('should read a null result as an absent certificate', async () => {
         respondWith(rpcResult(null));
 
         await expect(fetchAgGenesisCert(URL)).resolves.toEqual({ kind: 'absent' });
     });
 
-    it('should read a certificate as the migration having happened', async () => {
+    it('should read a certificate as a completed migration', async () => {
         respondWith(rpcResult(CERT));
 
         await expect(fetchAgGenesisCert(URL)).resolves.toEqual({
@@ -96,31 +96,30 @@ describe('fetchAgGenesisCert', () => {
         await expect(fetchAgGenesisCert(URL)).resolves.toEqual({ kind: 'unsupported' });
     });
 
-    // Helius answers a method it does not serve with a 404, and kit throws on the status before the
-    // body saying so is read — so the status is the only signal left, and it has to be enough.
+    // Some providers answer an unsupported method with a 404, and kit throws on the status before
+    // the body is read, so the status is the only signal available.
     it('should read a 404 as the node not implementing the call', async () => {
         respondWith(rpcError({ code: -32603, message: 'Method not found' }), { status: 404 });
 
         await expect(fetchAgGenesisCert(URL)).resolves.toEqual({ kind: 'unsupported' });
     });
 
-    // Observed on explorer-api.mainnet-beta, which answers getEpochInfo from the same caller in the
-    // same second. Retrying is the one thing that cannot help: the retries are what is limited.
-    it('should carry a rate limit as an answer, not a failure', async () => {
+    // Some endpoints rate-limit this method alone while still serving others. Retrying makes the
+    // limit worse.
+    it('should return a rate limit as a settled answer rather than throw', async () => {
         respondWith(rpcError({ code: 429, message: 'Too many requests' }), { status: 429 });
 
         await expect(fetchAgGenesisCert(URL)).resolves.toEqual({ kind: 'refused' });
     });
 
-    // Whatever stands in front of a node answers a bare 429, often with an HTML page — so there is
-    // no JSON to read, and the status is the only signal that retrying cannot help.
-    it('should carry a 429 carrying an HTML page as a refusal', async () => {
+    // A bare 429 carries no JSON body, so the status is the only signal.
+    it('should return a 429 with an HTML body as a refusal', async () => {
         respondWithRaw('<html>rate limited</html>', { status: 429 });
 
         await expect(fetchAgGenesisCert(URL)).resolves.toEqual({ kind: 'refused' });
     });
 
-    // A wrong or missing key on a custom RPC. Retrying spends three more attempts on the same wall.
+    // A custom RPC has a wrong or missing key, and the next request carries the same key.
     it.each([
         ['401', 401],
         ['403', 403],
@@ -130,15 +129,15 @@ describe('fetchAgGenesisCert', () => {
         await expect(fetchAgGenesisCert(URL)).resolves.toEqual({ kind: 'refused' });
     });
 
-    // The status is the stronger signal: a node behind a limiter can echo a cached-looking body.
-    it('should prefer a 429 status over a result the body still carries', async () => {
+    // A rate-limited node can still return a cached response, so the status is the stronger signal.
+    it('should prefer a 429 status over a cached response body', async () => {
         respondWith(rpcResult(null), { status: 429 });
 
         await expect(fetchAgGenesisCert(URL)).resolves.toEqual({ kind: 'refused' });
     });
 
-    // A limit is something a person can raise, unlike a node that simply predates the method.
-    it('should record a refusal and stay quiet about an unimplemented method', async () => {
+    // A rate limit can be raised, unlike an unsupported method.
+    it('should log a refusal but not an unsupported method', async () => {
         respondWith(rpcError({ code: 429, message: 'Too many requests' }), { status: 429 });
         await fetchAgGenesisCert(URL);
         expect(Logger.warn).toHaveBeenCalledWith(expect.stringContaining('refused'), expect.anything());
@@ -149,7 +148,7 @@ describe('fetchAgGenesisCert', () => {
         expect(Logger.warn).not.toHaveBeenCalled();
     });
 
-    it('should throw on an RPC error that is not about the method', async () => {
+    it('should throw on an RPC error unrelated to the method', async () => {
         respondWith(rpcError({ code: -32005, message: 'Node is unhealthy' }));
 
         await expect(fetchAgGenesisCert(URL)).rejects.toThrow('Node is unhealthy');
@@ -161,8 +160,8 @@ describe('fetchAgGenesisCert', () => {
         await expect(fetchAgGenesisCert(URL)).rejects.toThrow('503');
     });
 
-    // The node answered, and will answer the same way next time. Throwing would spend the caller's
-    // whole retry budget re-reading one body.
+    // The node will answer the same way next time, so throwing would spend the retry budget on one
+    // unchanging body.
     it.each([
         ['a block id the parser refuses', rpcResult({ block: { blockId: [1, 2, 3], slot: 1 } })],
         ['a bare string', rpcResult('not-a-cert')],
@@ -175,8 +174,7 @@ describe('fetchAgGenesisCert', () => {
         await expect(fetchAgGenesisCert(URL)).resolves.toEqual({ kind: 'unreadable' });
     });
 
-    // Unlike a node that simply predates the method, a node minting a certificate this app cannot
-    // read is someone's bug.
+    // Unlike an unsupported method, a malformed certificate is a bug worth logging.
     it('should record an unreadable certificate', async () => {
         respondWith(rpcResult({ block: { blockId: [1, 2, 3], slot: 1 } }));
 

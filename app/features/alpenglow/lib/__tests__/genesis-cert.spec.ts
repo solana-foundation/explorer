@@ -36,8 +36,7 @@ describe('parseGenesisCert', () => {
         expect(() => parseGenesisCert(certPayload({ block: { blockId, slot: 1n } }))).toThrow();
     });
 
-    // kit upcasts every integer it reads, so a slot still carrying a number is one it would not
-    // touch — and a number is exactly what the card must not print as a slot.
+    // kit upcasts every integer it reads, so a slot still typed as a number never came from kit.
     it.each([
         ['negative', -1n],
         ['fractional', 1.5],
@@ -47,8 +46,8 @@ describe('parseGenesisCert', () => {
         expect(() => parseGenesisCert(certPayload({ block: { blockId: BLOCK_ID_BYTES, slot } }))).toThrow();
     });
 
-    // A block id that is the wrong kind of thing, not merely the wrong length. The card reads a
-    // base58 string straight out of this, and every one of these would decode to something.
+    // Block ids must be a 32-byte array, not merely the right length. Each of these would
+    // otherwise base58-encode to something.
     it.each([
         ['a base58 string', { block: { blockId: 'Hnvmb...', slot: 1n } }],
         ['an index object', { block: { blockId: { 0: 1, 1: 2 }, slot: 1n } }],

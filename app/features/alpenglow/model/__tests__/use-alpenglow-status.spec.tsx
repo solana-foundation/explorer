@@ -4,7 +4,7 @@ import { type ReactNode } from 'react';
 import { SWRConfig, type SWRConfiguration } from 'swr';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Both from their own modules rather than the entity barrel, which this file mocks.
+// Imported from their own modules because this file mocks the entity barrel.
 import { toConnectableUrl } from '@/app/entities/cluster/lib/connectable-url';
 import type { useCluster } from '@/app/entities/cluster/model/use-cluster';
 import { Logger } from '@/app/shared/lib/logger';
@@ -24,9 +24,8 @@ const mocks = vi.hoisted(() => ({
     fetchAgGenesisCert: vi.fn(),
 }));
 
-// The real return type, not a hand-written stand-in: a stand-in weaker than the context lets the hook
-// read a field the provider no longer publishes, and types the endpoint as the plain string the brand
-// exists to refuse.
+// The real return type, not a hand-written stand-in. A weaker stand-in would let the hook read a
+// field the provider no longer publishes, and would type the endpoint as an unbranded string.
 type ClusterContext = ReturnType<typeof useCluster>;
 
 vi.mock('@entities/cluster', () => ({ useCluster: () => mocks.cluster }));
@@ -36,8 +35,8 @@ describe('useAlpenglowStatus', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mocks.cluster = clusterContext({ connectableUrl: MAINNET_URL });
-        // `shouldAdvanceTime` keeps `waitFor` and the fetcher's own promises settling while SWR's
-        // polling timer is under this test's control.
+        // `shouldAdvanceTime` keeps `waitFor` and the fetcher's promises settling while this test
+        // controls SWR's polling timer.
         vi.useFakeTimers({ shouldAdvanceTime: true });
     });
 
@@ -56,7 +55,7 @@ describe('useAlpenglowStatus', () => {
         expect(mocks.fetchAgGenesisCert).not.toHaveBeenCalled();
     });
 
-    it('should ask the endpoint the cluster says is usable', async () => {
+    it('should call the endpoint the cluster context provides', async () => {
         answerWith({ kind: 'absent' });
 
         renderStatus();
@@ -64,7 +63,7 @@ describe('useAlpenglowStatus', () => {
         await waitFor(() => expect(mocks.fetchAgGenesisCert).toHaveBeenCalledWith(toConnectableUrl(MAINNET_URL)));
     });
 
-    it('should report a certificate as the migration having happened', async () => {
+    it('should report a certificate as a completed migration', async () => {
         answerWith({ cert: CERT, kind: 'present' });
 
         const { result } = renderStatus();
@@ -123,8 +122,8 @@ describe('useAlpenglowStatus', () => {
         await waitFor(() => expect(result.current).toEqual({ kind: 'unavailable' }));
     });
 
-    // Supply shipped this bug once: an unkeyed fetch left the previous cluster's figures on screen
-    // through a switch. The endpoint is in the key here, so the new cluster starts from nothing.
+    // An unkeyed fetch would leave the previous cluster's figures on screen through a switch. The
+    // endpoint is in the key, so the new cluster starts from nothing.
     it('should not show one cluster answer while another is still loading', async () => {
         answerWith({ cert: CERT, kind: 'present' });
         const { result, rerender } = renderHook(() => useAlpenglowStatus(), { wrapper: swrWrapper() });
@@ -137,8 +136,8 @@ describe('useAlpenglowStatus', () => {
         expect(result.current).toEqual({ kind: 'loading' });
     });
 
-    // SWR retries forever when `errorRetryCount` is unset, backing off to ~21 min between tries. A
-    // tab can sit open all day, and an endpoint failing this often will not answer the next one.
+    // SWR retries forever when `errorRetryCount` is unset, backing off to ~21 min between tries.
+    // An endpoint failing this often will not answer the next attempt either.
     it('should stop retrying a failure that keeps repeating', async () => {
         mocks.fetchAgGenesisCert.mockRejectedValue(new Error('node is unhealthy'));
 
@@ -149,25 +148,23 @@ describe('useAlpenglowStatus', () => {
         expect(mocks.fetchAgGenesisCert).toHaveBeenCalledTimes(ERROR_RETRY_COUNT + 1);
     });
 
-    // The card is already right; a blip on the poll must not take it down. Data is read before
-    // error for exactly this.
+    // SWR reports the last data alongside a new error, and the hook reads data first.
     it('should keep showing pending when a poll fails', async () => {
         mocks.fetchAgGenesisCert.mockResolvedValueOnce({ kind: 'absent' });
         const { result } = renderStatus({ dedupingInterval: 0 });
         await waitFor(() => expect(result.current.kind).toBe('pending'));
 
-        mocks.fetchAgGenesisCert.mockRejectedValue(new Error('node blipped'));
+        mocks.fetchAgGenesisCert.mockRejectedValue(new Error('poll failed'));
         await advanceBy(POLL_INTERVAL_MS + 1000);
 
         expect(result.current).toEqual({ kind: 'pending' });
     });
 
-    // Navigating away and back inside one session: the cache answers instantly, and the poll has to
-    // pick up again or the card sits on a pending answer that never updates.
+    // A remount reads the cached answer without fetching, so the poll must restart on its own.
     it('should resume polling a pending cluster after a remount', async () => {
         answerWith({ kind: 'absent' });
-        // One cache across both mounts, or the second one fetches for that reason alone and the
-        // poll is never what this measures.
+        // Both mounts share one cache, because otherwise the second mount fetches for that reason
+        // alone and this measures nothing about the poll.
         const cache = new Map();
         const session = { dedupingInterval: 0, provider: () => cache };
         const view = renderStatus(session);
@@ -182,8 +179,8 @@ describe('useAlpenglowStatus', () => {
         expect(mocks.fetchAgGenesisCert.mock.calls.length).toBeGreaterThan(before);
     });
 
-    // Console only: this fires once per visitor with no cache in front of it.
-    it('should record a failed lookup without paging anyone', async () => {
+    // This fires once per visitor with no cache in front of it, so it logs to the console.
+    it('should log a failed lookup without reporting it to Sentry', async () => {
         mocks.fetchAgGenesisCert.mockRejectedValue(new Error('node is unhealthy'));
 
         const { result } = renderStatus({ errorRetryCount: 0 });
@@ -193,8 +190,7 @@ describe('useAlpenglowStatus', () => {
         expect(Logger.error).not.toHaveBeenCalled();
     });
 
-    // The certificate is minted once and never changes, so only a cluster still waiting for one is
-    // worth asking again.
+    // `refreshInterval` returns 0 for every answer except an absent certificate.
     it('should ask again while the cluster is still waiting for its certificate', async () => {
         answerWith({ kind: 'absent' });
 
@@ -214,7 +210,7 @@ describe('useAlpenglowStatus', () => {
         expect(mocks.fetchAgGenesisCert).toHaveBeenCalledTimes(1);
     });
 
-    // A settled answer cannot change, and a tab may sit open all day being switched to and from.
+    // A settled answer cannot change, so focus and reconnect must not refetch.
     it.each([
         ['the cluster has migrated', { cert: CERT, kind: 'present' } as const],
         ['the node does not implement the call', { kind: 'unsupported' } as const],
@@ -228,7 +224,7 @@ describe('useAlpenglowStatus', () => {
         expect(mocks.fetchAgGenesisCert).toHaveBeenCalledTimes(1);
     });
 
-    it('should not ask again when the connection comes back', async () => {
+    it('should not refetch on reconnect', async () => {
         answerWith({ kind: 'unsupported' });
 
         await renderAndSettle({ dedupingInterval: 0 });

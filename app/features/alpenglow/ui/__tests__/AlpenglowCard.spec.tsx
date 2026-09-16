@@ -21,7 +21,7 @@ function renderWith(status: AlpenglowStatus) {
 describe('AlpenglowCard', () => {
     beforeEach(() => vi.clearAllMocks());
 
-    // A placeholder would promise a card that an endpoint without the method never delivers.
+    // An endpoint without the method never delivers a card, so a placeholder would mislead.
     it.each([
         ['the answer is outstanding', { kind: 'loading' } as const],
         ['the endpoint cannot answer', { kind: 'unavailable' } as const],
@@ -31,10 +31,10 @@ describe('AlpenglowCard', () => {
         expect(container).toBeEmptyDOMElement();
     });
 
-    it('should name the cluster and the consensus it is still running', () => {
+    it('should name the cluster and the consensus in force', () => {
         renderWith({ kind: 'pending' });
 
-        // Substring: the title carries a leading icon in its own element.
+        // Substring match: the title carries a leading icon in its own element.
         expect(screen.getByText('Alpenglow on Mainnet Beta', { exact: false })).toBeInTheDocument();
         expect(screen.getByText('TowerBFT — Alpenglow not activated')).toBeInTheDocument();
     });

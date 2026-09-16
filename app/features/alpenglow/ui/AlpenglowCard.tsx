@@ -6,9 +6,10 @@ import { useAlpenglowStatus } from '../model/use-alpenglow-status';
 import { BaseAlpenglowCard } from './BaseAlpenglowCard';
 
 /**
- * Renders nothing until a node has answered, and nothing at all where one cannot: an endpoint that
- * predates the method has no migration to report, so a skeleton there would promise a card that
- * never arrives.
+ * Renders nothing until the first response, and nothing at all where the endpoint lacks the method.
+ *
+ * An endpoint without the method has no migration to report, so no card ever arrives and a
+ * skeleton would mislead.
  */
 export function AlpenglowCard() {
     const { cluster } = useCluster();
