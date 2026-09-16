@@ -47,6 +47,8 @@ type PanicContext = LogContext & {
  *
  * `sentry: true` is a no-op in the browser, by design: bot-heavy client traffic must not page Sentry.
  * Browser captures are tagged so the client config's `beforeSend` can drop anything not routed through here.
+ * That `beforeSend` drops every browser error event, tagged ones included, until
+ * `NEXT_PUBLIC_SENTRY_CLIENT_ERRORS` is `true` — so a browser panic reaches Sentry only once the flag is on.
  *
  * Use `sentryExtras` to attach data exclusively to the Sentry event.
  * Context fields outside `sentryExtras` are only sent to the console.
