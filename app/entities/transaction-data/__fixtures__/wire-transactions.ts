@@ -31,9 +31,6 @@ export type V1ConfigOverrides = {
 /** Wire bytes of an unsigned v1 transaction carrying whichever resource limits are passed. */
 export function createV1TransactionBytes(config: V1ConfigOverrides): Uint8Array {
     const message = pipe(
-        // @ts-expect-error `createTransactionMessage` constrains its version parameter to
-        // `Exclude<TransactionVersion, 1>`. The runtime path is complete, so v1 messages compile and
-        // encode correctly; only the type gate is missing. Remove once kit lifts the exclusion.
         createTransactionMessage({ version: 1 }),
         m => setTransactionMessageFeePayer(FEE_PAYER, m),
         m => setTransactionMessageLifetimeUsingBlockhash({ blockhash: BLOCKHASH, lastValidBlockHeight: 100n }, m),
