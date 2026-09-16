@@ -261,7 +261,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                 </KeyValue>
 
                 <KeyValue label="Confirmation">
-                    <TextValue>{statusFinality}</TextValue>
+                    <TextValue mono={false}>{statusFinality}</TextValue>
                 </KeyValue>
 
                 <KeyValue label="Signature">

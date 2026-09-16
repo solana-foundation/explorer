@@ -1,11 +1,17 @@
 import React from 'react';
 
+import { useReducedMotion } from '@/app/shared/lib/use-reduced-motion';
+
 // Downward drag past this (px) dismisses the sheet on release.
 const DISMISS_THRESHOLD = 80;
 
-// How long to let the slide-out play before firing the dismiss. Matches the surface's transform
-// transition (Drawer.tsx uses `transform 0.2s`), with a little slack so the sheet is fully off-screen.
-const DISMISS_ANIM_MS = 260;
+// Duration of the surface's slide transition. Single source of truth shared with the inline
+// transform transition in Drawer.tsx so the swipe-out slide and the dismiss timer can't drift apart.
+export const DRAWER_SLIDE_MS = 200;
+
+// How long to let the slide-out play before firing the dismiss: the slide duration plus a little slack
+// so the sheet is fully off-screen when it unmounts.
+const DISMISS_ANIM_MS = DRAWER_SLIDE_MS + 60;
 
 type PointerHandlers = {
     onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void;
@@ -39,6 +45,7 @@ export function useSwipeToDismiss(
     handleProps: PointerHandlers;
     bodyProps: PointerHandlers;
 } {
+    const reducedMotion = useReducedMotion();
     const dragStartY = React.useRef<number | undefined>(undefined);
     const [dragY, setDragYState] = React.useState(0);
     const [dragging, setDragging] = React.useState(false);
@@ -93,10 +100,15 @@ export function useSwipeToDismiss(
         setDragging(false);
         if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
         if (dismiss) {
+            // Reduced motion: skip the slide-out entirely and dismiss right away.
+            if (reducedMotion) {
+                onDismiss();
+                return;
+            }
             // Continue the swipe: slide the sheet the rest of the way down from where the finger let
             // go (both grab zones are direct children of the sheet, so parentElement is the surface).
             // Dismiss once the slide-out has had time to play; a timer (not transitionend) so it still
-            // fires when there's no transition to end — reduced-motion, interrupted, unmounted.
+            // fires when there's no transition to end — interrupted, unmounted.
             const distance = e.currentTarget.parentElement?.offsetHeight || window.innerHeight;
             setClosing(true);
             setDragY(distance);

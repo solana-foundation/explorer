@@ -8,7 +8,7 @@ import * as React from 'react';
 import { DrawerFooter } from './DrawerFooter';
 import { DrawerHeader } from './DrawerHeader';
 import { useEdgeFades } from './model/useEdgeFades';
-import { useSwipeToDismiss } from './model/useSwipeToDismiss';
+import { DRAWER_SLIDE_MS, useSwipeToDismiss } from './model/useSwipeToDismiss';
 
 // The drawer sits above the legacy dashkit stacking contexts (the cluster sidebar is z-[1060] over a
 // z-[1050] overlay), so it needs an inline z-index that beats them — a Tailwind `z-*` class would be
@@ -71,7 +71,7 @@ export function Drawer({
                     )}
                     style={{
                         transform: `translateY(${dragY}px)`,
-                        transition: dragging ? 'none' : 'transform 0.2s ease-out',
+                        transition: dragging ? 'none' : `transform ${DRAWER_SLIDE_MS}ms ease-out`,
                         zIndex: DRAWER_Z_INDEX,
                     }}
                     {...props}

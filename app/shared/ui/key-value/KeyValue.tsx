@@ -29,20 +29,17 @@ const rowVariants = cva('flex flex-row border-0 border-solid border-dark-border'
     },
 });
 
-const labelVariants = cva(
-    'min-w-0 flex-none text-sm leading-5 text-outer-space-300 [overflow-wrap:normal]',
-    {
-        defaultVariants: { density: 'comfortable' },
-        variants: {
-            // Baseline shim: nudge the label onto the row baseline (comfortable rows only).
-            density: {
-                comfortable: 'pb-px pt-[3px]',
-                compact: 'py-0',
-                flat: 'py-0',
-            },
+const labelVariants = cva('min-w-0 flex-none text-sm leading-5 text-outer-space-300 [overflow-wrap:normal]', {
+    defaultVariants: { density: 'comfortable' },
+    variants: {
+        // Baseline shim: nudge the label onto the row baseline (comfortable rows only).
+        density: {
+            comfortable: 'pb-px pt-[3px]',
+            compact: 'py-0',
+            flat: 'py-0',
         },
     },
-);
+});
 
 /**
  * A key-value row: a fixed-width label column beside a flexible value column. `density` sets the

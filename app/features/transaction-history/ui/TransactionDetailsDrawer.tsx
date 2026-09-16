@@ -88,7 +88,7 @@ export function TransactionDetailsDrawer({
     );
 
     return (
-        <Drawer open={open} onOpenChange={onOpenChange} header={header} footer={footer}>
+        <Drawer open={open} onOpenChange={onOpenChange} header={header} footer={footer} aria-describedby={undefined}>
             <div className="flex flex-col px-4 pb-4 text-sm">
                 {blockTime && (
                     <CompactKeyValue label="Time">

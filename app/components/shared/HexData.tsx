@@ -93,13 +93,11 @@ type HexDataBase = {
 };
 
 // The layout is a discriminated union: `rowSize` / `align` shape the default `fixed` grid only.
-// The `fit` (responsive wrap) and `truncated` layouts ignore them, so the types forbid passing
-// them there rather than silently dropping them.
-//   - `fixed`     (default): grouped rows; `align` right/left-aligns, `rowSize` sets bytes/row.
-//   - `fit`      : reflows the hex to the container width (mobile drawer / full-width panes).
-//   - `truncated`: head … tail preview with a trailing byte count.
-type HexDataLayout =
-    { layout?: 'fixed'; align?: 'start' | 'end'; rowSize?: number } | { layout: 'fit' } | { layout: 'truncated' };
+// The `fit` (responsive wrap) layout ignores them, so the types forbid passing them there rather
+// than silently dropping them.
+//   - `fixed` (default): grouped rows; `align` right/left-aligns, `rowSize` sets bytes/row.
+//   - `fit`           : reflows the hex to the container width (mobile drawer / full-width panes).
+type HexDataLayout = { layout?: 'fixed'; align?: 'start' | 'end'; rowSize?: number } | { layout: 'fit' };
 
 export type HexDataProps = HexDataBase & HexDataLayout;
 
@@ -125,18 +123,6 @@ export function HexData(props: HexDataProps) {
 
     const hexString = toHex(raw);
     const copyText = copyableRaw ? toHex(copyableRaw) : hexString;
-
-    if (props.layout === 'truncated') {
-        return (
-            <TruncatedContent
-                hexString={hexString}
-                copyText={copyText}
-                raw={raw}
-                inverted={inverted}
-                spanSize={spanSize}
-            />
-        );
-    }
 
     return (
         <FullContent
@@ -230,46 +216,6 @@ function WrapContent({
         <div className={cn('w-full', className)}>
             {isCopyable ? <Copyable text={copyText}>{content}</Copyable> : content}
         </div>
-    );
-}
-
-function ColoredSpans({ spans }: { spans: HexSpan[] }) {
-    return (
-        <>
-            {spans.map((span, i) => (
-                <span key={i} className={hexSpanVariants({ tone: span.variant })}>
-                    {span.text}{' '}
-                </span>
-            ))}
-        </>
-    );
-}
-
-function TruncatedContent({
-    hexString,
-    copyText,
-    raw,
-    inverted,
-    spanSize,
-}: {
-    hexString: string;
-    copyText: string | null;
-    raw: ByteArray;
-    inverted: boolean;
-    spanSize: number;
-}) {
-    const { pairs: truncatedPairs, truncated } = truncateHexPairs(splitHexPairs(hexString));
-    const spans = formatHexSpans(truncatedPairs, { inverted }, spanSize);
-
-    return (
-        <span className="inline-flex items-center gap-2 text-sm">
-            <Copyable text={copyText}>
-                <span className="font-mono text-xs">
-                    <ColoredSpans spans={spans} />
-                </span>
-            </Copyable>
-            {truncated && <span className="text-xs text-neutral-500">({raw.length} bytes)</span>}
-        </span>
     );
 }
 

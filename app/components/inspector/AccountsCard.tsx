@@ -29,7 +29,6 @@ import { type SimulationState } from '@/app/features/instruction-simulation/mode
 import { LastSimulatedAtLabel } from '@/app/features/instruction-simulation/ui/LastSimulatedAt';
 import { SimulateButton } from '@/app/features/instruction-simulation/ui/SimulateButton';
 import { SimulatedBadge } from '@/app/features/instruction-simulation/ui/SimulatedBadge';
-import { Section } from '@/app/features/transaction/ui/Section';
 import { DataListCard, DataListRow } from '@/app/shared/ui/DataListCard';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
@@ -190,9 +189,9 @@ export function AccountsCard({
 
     if (fetchError) {
         return (
-            <Section title="Account List" className="">
+            <DataListCard title="Account List" collapsible={false}>
                 <ErrorCard text="Failed to fetch accounts info" />
-            </Section>
+            </DataListCard>
         );
     }
 
