@@ -2,6 +2,7 @@ import { Compression, decodeData, Format } from '@solana-program/program-metadat
 import { Inflate } from 'pako';
 
 import { bytes, concat } from '@/app/shared/lib/bytes';
+import { sha256Hex } from '@/app/shared/lib/hash';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { PMP_DECODE_BUDGET_BYTES, PMP_MAX_UNPACKED_BYTES } from './constants';
@@ -85,9 +86,9 @@ export function decodeUnpackedPayload({
     cap?: number;
 }): PmpPayloadDecodeResult {
     const budget = cap ?? PMP_DECODE_BUDGET_BYTES[config.encoding];
-
+    const dataHash = sha256Hex(bytes);
     if (bytes.length > budget) {
-        return { budget, bytes, kind: 'oversized' };
+        return { budget, bytes, dataHash, kind: 'oversized' };
     }
 
     // Zero payload bytes come back as `empty`, never as `decoded`. Every encoding decodes nothing to the empty
@@ -106,10 +107,10 @@ export function decodeUnpackedPayload({
                 sentry: true,
                 sentryExtras: { compression: config.compression, encoding: config.encoding },
             });
-            return { kind: 'failed', reason: `unsupported encoding (${config.encoding})` };
+            return { dataHash, kind: 'failed', reason: `unsupported encoding (${config.encoding})` };
         }
 
-        return { bytes, kind: 'decoded', text: toDocumentText(text, config.format) };
+        return { bytes, dataHash, kind: 'decoded', text: toDocumentText(text, config.format) };
     } catch (error) {
         const reason = toErrorReason(error, 'unknown decode error');
         Logger.error(new Error('[pmp:decode-payload] failed to decode', { cause: error }), {
@@ -117,8 +118,12 @@ export function decodeUnpackedPayload({
             encoding: config.encoding,
             reason,
         });
-        return { kind: 'failed', reason };
+        return { dataHash, kind: 'failed', reason };
     }
+}
+
+export function getPayloadDataHash(payload: PmpPayloadDecodeResult): string | undefined {
+    return payload.kind === 'empty' || payload.kind === 'unpack-overflow' ? undefined : payload.dataHash;
 }
 
 /**

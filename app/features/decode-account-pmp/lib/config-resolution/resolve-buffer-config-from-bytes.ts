@@ -6,10 +6,14 @@ import {
 } from '@entities/pmp-account';
 import { Compression, Format } from '@solana-program/program-metadata';
 
+import { sha256Hex } from '@/app/shared/lib/hash';
+
 export type ConfigResolutionFromBytesResult =
     | {
           kind: 'text';
           compression: Compression;
+          /** sha256 over the UNPACKED bytes. User can reproduce it off-chain from the document. */
+          dataHash: string;
           /** The unpacked bytes, carried so a declared-config upgrade never inflates the body a second time. */
           payload: Uint8Array;
           text: string;
@@ -17,11 +21,21 @@ export type ConfigResolutionFromBytesResult =
           format: Format.Json | undefined;
       }
     /** Fails a strict UTF-8 decode, so there is no document to show. Renders through `RawDataField`. */
-    | { kind: 'binary'; compression: Compression; payload: Uint8Array }
+    | {
+          kind: 'binary';
+          compression: Compression;
+          dataHash: string;
+          payload: Uint8Array;
+      }
     | { kind: 'empty' }
     | { kind: 'incomplete' }
     | { kind: 'unpack-error'; reason: string }
-    | { kind: 'oversized'; bytes: Uint8Array; budget: number }
+    | {
+          kind: 'oversized';
+          bytes: Uint8Array;
+          budget: number;
+          dataHash: string;
+      }
     | { kind: 'overflow'; limit: number };
 
 /** The two arms that carry bytes a decode config could describe. */
@@ -72,11 +86,16 @@ export function resolveBufferConfigFromBytes(body: Uint8Array): ConfigResolution
 
     if (payload.length === 0) return { kind: 'empty' };
     if (payload.length > PMP_DECODED_RENDER_CAP_BYTES) {
-        return { budget: PMP_DECODED_RENDER_CAP_BYTES, bytes: payload, kind: 'oversized' };
+        return {
+            budget: PMP_DECODED_RENDER_CAP_BYTES,
+            bytes: payload,
+            dataHash: sha256Hex(payload),
+            kind: 'oversized',
+        };
     }
 
     const text = toStrictUtf8(payload);
-    if (text === undefined) return { compression, kind: 'binary', payload };
+    if (text === undefined) return { compression, dataHash: sha256Hex(payload), kind: 'binary', payload };
 
     const isJsonFormat = isJson(text);
     // Self-validating slack trim, for an UNCOMPRESSED payload only. A Buffer has no `data_length`, so an
@@ -92,6 +111,7 @@ export function resolveBufferConfigFromBytes(body: Uint8Array): ConfigResolution
         if (trimmedText !== undefined && isJson(trimmedText)) {
             return {
                 compression,
+                dataHash: sha256Hex(trimmed),
                 format: Format.Json,
                 kind: 'text',
                 payload: trimmed,
@@ -101,7 +121,14 @@ export function resolveBufferConfigFromBytes(body: Uint8Array): ConfigResolution
     }
 
     const format = isJsonFormat ? Format.Json : undefined;
-    return { compression, format, kind: 'text', payload, text: toDocumentText(text, format ?? Format.None) };
+    return {
+        compression,
+        dataHash: sha256Hex(payload),
+        format,
+        kind: 'text',
+        payload,
+        text: toDocumentText(text, format ?? Format.None),
+    };
 }
 
 /**

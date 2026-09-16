@@ -4,7 +4,14 @@ import { nextjsParameters, withClusterAndAccounts, withTokenInfoBatch } from '@s
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { resolveBufferConfigFromBytes } from '../../lib/config-resolution/resolve-buffer-config-from-bytes';
-import { bufferAccountData, IDL_DOC, pack, readAs, YAML_DOC } from '../__fixtures__/pmp-account-fixtures';
+import {
+    bufferAccountData,
+    IDL_DOC,
+    OVERSIZED_DOC,
+    pack,
+    readAs,
+    YAML_DOC,
+} from '../__fixtures__/pmp-account-fixtures';
 import { BaseBufferAccountCard } from '../BaseBufferAccountCard';
 
 function bufferArgsFor(body: Uint8Array) {
@@ -100,4 +107,9 @@ export const BufferLookupFailed: Story = {
         ...bufferArgsFor(pack(YAML_DOC, Compression.Gzip)),
         configFromOnchain: { result: { kind: 'failed', reason: 'fetch failed' }, status: 'ready' },
     },
+};
+
+/** Payload past the decode budget. */
+export const BufferOversizedPayload: Story = {
+    args: bufferArgsFor(pack(OVERSIZED_DOC, Compression.Gzip)),
 };

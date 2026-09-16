@@ -1,8 +1,15 @@
-import type { PmpAccountReadResult } from '@entities/pmp-account';
+import { getPayloadDataHash, PayloadHashRow, type PmpAccountReadResult } from '@entities/pmp-account';
 
 import { METADATA_CONFIG_FIELDS, METADATA_HEADER_FIELDS } from '../lib/pmp-field-descriptors';
 import type { MetadataPayloadDecodeResult } from '../model/use-decode-metadata-payload';
-import { BasePmpAccountDataCard, FieldRows, NoteRow, PendingRow, PMP_CARD_TITLE } from './BasePmpAccountDataCard';
+import {
+    BasePmpAccountDataCard,
+    CARD_TABLE_COLUMNS,
+    FieldRows,
+    NoteRow,
+    PendingRow,
+    PMP_CARD_TITLE,
+} from './BasePmpAccountDataCard';
 import { PayloadRows } from './payload-rows';
 
 export type MetadataAccountRead = Extract<PmpAccountReadResult, { kind: 'metadata' }>;
@@ -45,5 +52,12 @@ function MetadataPayloadRow({ payloadResult }: { payloadResult: MetadataPayloadD
         );
     }
 
-    return <PayloadRows payload={payloadResult.payload} />;
+    const hash = getPayloadDataHash(payloadResult.payload);
+
+    return (
+        <>
+            {hash !== undefined && <PayloadHashRow columns={CARD_TABLE_COLUMNS} hash={hash} />}
+            <PayloadRows payload={payloadResult.payload} />
+        </>
+    );
 }

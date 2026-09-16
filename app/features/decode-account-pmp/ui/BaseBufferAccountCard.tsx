@@ -1,5 +1,5 @@
 import { Signature } from '@components/common/Signature';
-import { decodeUnpackedPayload, type PmpAccountReadResult } from '@entities/pmp-account';
+import { decodeUnpackedPayload, PayloadHashRow, type PmpAccountReadResult } from '@entities/pmp-account';
 import { useMemo } from 'react';
 
 import {
@@ -11,6 +11,7 @@ import { ConfigResolutionFromBytesState } from '../model/use-resolve-buffer-conf
 import type { ConfigResolutionOnchainState } from '../model/use-resolve-buffer-config-onchain';
 import {
     BasePmpAccountDataCard,
+    CARD_TABLE_COLUMNS,
     FieldRows,
     InfoRow,
     NoteRow,
@@ -97,6 +98,7 @@ function BufferDataContentRows({
     if (resultFromBytes.kind === 'oversized') {
         return (
             <>
+                <PayloadHashRow columns={CARD_TABLE_COLUMNS} hash={resultFromBytes.dataHash} />
                 <PayloadTooLargeRow budget={resultFromBytes.budget} size={resultFromBytes.bytes.length} />
                 <RawPayloadRow bytes={resultFromBytes.bytes} />
             </>
@@ -118,6 +120,7 @@ function BufferDataContentRows({
                         (resultFromBytes.kind === 'text' ? resultFromBytes.format : undefined),
                 }}
             />
+            <PayloadHashRow columns={CARD_TABLE_COLUMNS} hash={resultFromBytes.dataHash} />
             <BufferPayloadRow foundConfig={foundConfig} fromBytesConfig={resultFromBytes} />
         </>
     );
@@ -184,6 +187,7 @@ function BufferPayloadRow({
     foundConfig: ReturnType<typeof toFoundConfig>;
     fromBytesConfig: BufferConfigFromBytesPayload;
 }) {
+    // Decode the payload using the found on-chain config.
     const payload = useMemo(
         () => foundConfig && decodeUnpackedPayload({ bytes: fromBytesConfig.payload, config: foundConfig.config }),
         [foundConfig, fromBytesConfig],
@@ -193,6 +197,7 @@ function BufferPayloadRow({
         return <PayloadRows payload={payload} />;
     }
 
+    // If config not found or payload could not be decoded, fall back to rendering whatever we decoded from bytes.
     // Rendered as a document directly rather than through `PayloadRows`. The `text` arm was produced BY a strict UTF-8
     // decode of these very bytes, so the binary test inside `PayloadRows` would re-run a decode whose answer is known.
     if (fromBytesConfig.kind === 'text') {

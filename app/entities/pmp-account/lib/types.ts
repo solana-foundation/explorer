@@ -31,13 +31,15 @@ export type PmpDecodeConfig = {
  *
  * `text` is display-ready: a `Json` payload arrives pretty-printed, everything else verbatim. The card renders it
  * as-is, so nothing downstream has to know which format produced it.
+ *
+ * `dataHash` is a sha256 hex digest over the UNPACKED bytes.
  */
 export type PmpPayloadDecodeResult =
-    | { kind: 'decoded'; text: string; bytes: Uint8Array }
+    | { kind: 'decoded'; text: string; bytes: Uint8Array; dataHash: string }
     | { kind: 'empty' }
-    | { kind: 'oversized'; bytes: Uint8Array; budget: number }
+    | { kind: 'oversized'; bytes: Uint8Array; budget: number; dataHash: string }
     | { kind: 'unpack-overflow'; limit: number }
-    | { kind: 'failed'; reason: string };
+    | { kind: 'failed'; reason: string; dataHash?: string };
 
 /** Which PMP account layout the body was read from. A Buffer carries no hints of its own, a Metadata does. */
 export type PmpAccountKind = 'buffer' | 'metadata';

@@ -23,7 +23,13 @@ export {
     PMP_UNCOMPRESSED_BYTES_LABEL,
 } from './lib/constants';
 export { decodePmpAccount } from './lib/decode-pmp-account';
-export { decodePmpPayload, decodeUnpackedPayload, toDocumentText, unpackBounded } from './lib/decode-pmp-payload';
+export {
+    decodePmpPayload,
+    decodeUnpackedPayload,
+    getPayloadDataHash,
+    toDocumentText,
+    unpackBounded,
+} from './lib/decode-pmp-payload';
 export type { BoundedUnpackResult } from './lib/decode-pmp-payload';
 export { toErrorReason } from './lib/errors';
 export { isPmpAccount } from './lib/program-address';
@@ -39,3 +45,4 @@ export type {
     PmpPayloadDecodeResult,
 } from './lib/types';
 export { PmpDecodeConfigStruct } from './lib/validators';
+export { PayloadHashRow } from './ui/PayloadHashRow';

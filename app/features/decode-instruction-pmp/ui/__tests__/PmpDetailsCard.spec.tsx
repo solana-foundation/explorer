@@ -94,6 +94,7 @@ describe('PmpDetailsCard', () => {
         expect(screen.getByTestId('pmp-config-format')).toHaveTextContent('JSON');
         expect(screen.getByTestId('pmp-config-data-source')).toHaveTextContent('Direct');
         expect(screen.getByTestId('pmp-decoded-text')).toHaveTextContent('company');
+        expect(screen.getByTestId('pmp-payload-data-hash')).toBeInTheDocument();
     });
 
     it('should render the updated hints and the header-only note for a 4-byte setData', () => {
@@ -101,7 +102,7 @@ describe('PmpDetailsCard', () => {
 
         expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('ProgramMetadata: SetData');
         expect(screen.getByTestId('pmp-config-format')).toHaveTextContent('JSON');
-        expect(screen.getByTestId('pmp-header-only-note')).toBeInTheDocument();
+        expect(screen.getByTestId('pmp-no-payload')).toBeInTheDocument();
         expect(screen.queryByTestId('pmp-config-data-source')).not.toBeInTheDocument();
     });
 
