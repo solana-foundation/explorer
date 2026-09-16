@@ -4,8 +4,8 @@ import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
-export type PmpAccountPayloadState =
-    { status: 'loading' } | { status: 'failed' } | { status: 'ready'; content: PmpAccountDecodeResult };
+export type PmpAccountPayloadResult =
+    { status: 'loading' } | { status: 'failed' } | { status: 'ready'; result: PmpAccountDecodeResult };
 
 /**
  * Reads the payload a PMP account currently holds.
@@ -21,10 +21,10 @@ export function usePmpAccountPayload({
     config,
     cap,
 }: {
-    address: string;
+    address: string | undefined;
     config: PmpDecodeConfig;
     cap?: number;
-}): PmpAccountPayloadState {
+}): PmpAccountPayloadResult {
     const fetchAccountInfo = useFetchAccountInfo();
     const entry = useAccountInfo(address);
 
@@ -35,7 +35,7 @@ export function usePmpAccountPayload({
         entry === undefined || (entry.status === FetchStatus.Fetched && entry.data?.data.raw === undefined);
 
     React.useEffect(() => {
-        if (!needsBytes) return;
+        if (!needsBytes || !address) return;
         fetchAccountInfo(new PublicKey(address), 'raw');
     }, [address, fetchAccountInfo, needsBytes]);
 
@@ -47,7 +47,7 @@ export function usePmpAccountPayload({
 
         const { data, lamports, owner } = entry.data;
         return {
-            content: decodePmpAccount({
+            result: decodePmpAccount({
                 account: { data: data.raw, lamports, owner: owner.toBase58() },
                 cap,
                 config,

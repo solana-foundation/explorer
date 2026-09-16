@@ -4,6 +4,8 @@ import { Compression, Format } from '@solana-program/program-metadata';
 import { deflate, gzip } from 'pako';
 import { describe, expect, it } from 'vitest';
 
+import { concat } from '@/app/shared/lib/bytes';
+
 import {
     hasPmpPayload,
     isBinaryPayload,
@@ -15,6 +17,7 @@ import {
 
 const utf8 = (text: string) => new TextEncoder().encode(text);
 const JSON_DOC = '{"name":"orbit","version":"1.0.0"}';
+const JSON_DOC_HASH = 'ba0a2df00866d7ef32684e6440b97da5aa84443bf915d7004586260a46044446';
 
 describe('resolveBufferConfigFromBytes', () => {
     it('should report gzip text with a resolved Json format', () => {
@@ -165,6 +168,16 @@ describe('resolveBufferConfigFromBytes', () => {
             kind: 'oversized',
         });
     });
+
+    it('should return dataHash from the unpacked bytes (zlib and plain)', () => {
+        expect(resolveBufferConfigFromBytes(deflate(utf8(JSON_DOC)))).toMatchObject({ dataHash: JSON_DOC_HASH });
+        expect(resolveBufferConfigFromBytes(utf8(JSON_DOC))).toMatchObject({ dataHash: JSON_DOC_HASH });
+    });
+
+    it('should return dataHash from the trimmed bytes', () => {
+        const body = concat([utf8(JSON_DOC), new Uint8Array(64)]);
+        expect(resolveBufferConfigFromBytes(body)).toMatchObject({ dataHash: JSON_DOC_HASH, kind: 'text' });
+    });
 });
 
 describe('isZlibStream', () => {
@@ -256,7 +269,9 @@ describe('hasPmpPayload', () => {
     it('should reject the outcomes that carry no payload', () => {
         expect(hasPmpPayload({ kind: 'empty' })).toBe(false);
         expect(hasPmpPayload({ kind: 'incomplete' })).toBe(false);
-        expect(hasPmpPayload({ budget: 1, bytes: new Uint8Array(2), kind: 'oversized' })).toBe(false);
+        expect(hasPmpPayload({ budget: 1, bytes: new Uint8Array(2), dataHash: 'deadbeef', kind: 'oversized' })).toBe(
+            false,
+        );
         expect(hasPmpPayload({ kind: 'overflow', limit: 1 })).toBe(false);
     });
 });

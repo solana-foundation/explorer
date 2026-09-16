@@ -72,7 +72,6 @@ const HOOKS_PENDING_CLIENT_ONLY = [
     'app/features/cluster-switcher/model/use-cluster-href.ts',
     'app/features/cluster-switcher/model/use-custom-url-draft.ts',
     'app/features/cookie/model/use-analytics-consent.ts',
-    'app/features/decode-account-pmp/model/use-decode-buffer-payload.ts',
     'app/features/decode-account-pmp/model/use-decode-metadata-payload.ts',
     'app/features/decode-account-pmp/model/use-resolve-buffer-config-from-bytes.ts',
     'app/features/decode-account-pmp/model/use-resolve-buffer-config-onchain.ts',

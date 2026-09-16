@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { trackEvent } from '@/app/shared/lib/analytics';
 
+import { resolveBufferConfigFromBytes } from '../../lib/config-resolution/resolve-buffer-config-from-bytes';
 import { bufferAccountData, metadataAccountData, pack } from '../__fixtures__/pmp-account-fixtures';
 import { PmpAccountCard } from '../PmpAccountCard';
 
@@ -56,7 +57,12 @@ function toAccount(raw: Uint8Array): Account {
     };
 }
 
-const DECODED: PmpPayloadDecodeResult = { bytes: new TextEncoder().encode(DOC), kind: 'decoded', text: DOC_PRETTY };
+const DECODED: PmpPayloadDecodeResult = {
+    bytes: new TextEncoder().encode(DOC),
+    dataHash: 'f'.repeat(64),
+    kind: 'decoded',
+    text: DOC_PRETTY,
+};
 
 const METADATA_ACCOUNT = metadataAccountData(pack(DOC, Compression.Zlib));
 
@@ -87,11 +93,30 @@ describe('PmpAccountCard', () => {
         expect(screen.getByTestId('pmp-account-dataSource')).toHaveTextContent('Direct');
         expect(screen.getByTestId('pmp-account-dataLength')).toHaveTextContent('byte(s)');
         expect(screen.queryByTestId('pmp-account-decoded-pending')).not.toBeInTheDocument();
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(DECODED.dataHash);
+    });
+
+    it('should show the payload data hash for an oversized Metadata payload', async () => {
+        mockDecodePmpPayload.mockReturnValue({
+            budget: 1,
+            bytes: new Uint8Array([1, 2, 3]),
+            dataHash: 'deadbeef',
+            kind: 'oversized',
+        } satisfies PmpPayloadDecodeResult);
+
+        render(<PmpAccountCard account={toAccount(METADATA_ACCOUNT)} />);
+
+        expect(await screen.findByTestId('pmp-payload-data-hash')).toHaveTextContent('deadbeef');
     });
 
     it('should render a binary Metadata payload as raw bytes rather than as a document', async () => {
         const binary = Uint8Array.from({ length: 64 }, (_, index) => 128 + ((index * 37) % 128));
-        mockDecodePmpPayload.mockReturnValue({ bytes: binary, kind: 'decoded', text: 'gKXK75S53oOozfKX' });
+        mockDecodePmpPayload.mockReturnValue({
+            bytes: binary,
+            dataHash: 'f'.repeat(64),
+            kind: 'decoded',
+            text: 'gKXK75S53oOozfKX',
+        });
 
         render(<PmpAccountCard account={toAccount(METADATA_ACCOUNT)} />);
 
@@ -131,15 +156,21 @@ describe('PmpAccountCard', () => {
         );
         // A failed decode degrades to the header rows, it does not take out the tab.
         expect(screen.getByTestId('pmp-account-mutable')).toBeInTheDocument();
+        expect(screen.queryByTestId('pmp-payload-data-hash')).not.toBeInTheDocument();
     });
 
     it('should decode a Buffer account from its bytes and say the config was resolved from them', async () => {
-        render(<PmpAccountCard account={toAccount(bufferAccountData(pack(DOC, Compression.Zlib)))} />);
+        const body = pack(DOC, Compression.Zlib);
+        const resolved = resolveBufferConfigFromBytes(body);
+        if (resolved.kind !== 'text') throw new Error(`expected a text payload, got "${resolved.kind}"`);
+
+        render(<PmpAccountCard account={toAccount(bufferAccountData(body))} />);
 
         expect(await screen.findByTestId('pmp-account-buffer-note')).toHaveTextContent('resolved from bytes');
         expect(screen.getByTestId('pmp-account-compression')).toHaveTextContent('Zlib');
         expect(screen.getByTestId('pmp-account-format')).toHaveTextContent('JSON');
         expect(screen.getByTestId('pmp-account-document')).toHaveTextContent('company');
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(resolved.dataHash);
 
         expect(screen.queryByTestId('pmp-account-encoding')).not.toBeInTheDocument();
         expect(screen.queryByTestId('pmp-account-dataSource')).not.toBeInTheDocument();

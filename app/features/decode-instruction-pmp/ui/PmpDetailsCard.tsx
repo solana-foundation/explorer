@@ -71,9 +71,9 @@ function PmpDetailsCardBody({
     InstructionCardComponent = InstructionCard,
     fallback,
 }: PmpDetailsCardProps) {
-    const content = React.useMemo(() => decodePmpContentInstruction(ix), [ix]);
+    const contentInstruction = React.useMemo(() => decodePmpContentInstruction(ix), [ix]);
 
-    if (!content) {
+    if (!contentInstruction) {
         return <>{fallback}</>;
     }
 
@@ -82,7 +82,7 @@ function PmpDetailsCardBody({
 
     return (
         <InstructionCardComponent
-            title={`${PMP_CODAMA_PROGRAM_NAME}: ${PMP_IX_TITLES[content.kind]}`}
+            title={`${PMP_CODAMA_PROGRAM_NAME}: ${PMP_IX_TITLES[contentInstruction.kind]}`}
             ix={ix}
             index={index}
             result={result}
@@ -93,14 +93,14 @@ function PmpDetailsCardBody({
                 programId={ix.programId}
                 programName={PMP_CODAMA_PROGRAM_NAME}
                 accounts={kitIx.accounts}
-                accountNames={PMP_ACCOUNT_NAMES[content.kind]}
+                accountNames={PMP_ACCOUNT_NAMES[contentInstruction.kind]}
             />
-            {content.kind === 'write' ? (
-                <WriteRows content={content} />
+            {contentInstruction.kind === 'write' ? (
+                <WriteRows pmpIx={contentInstruction} />
             ) : (
                 <>
-                    <ConfigRows content={content} />
-                    <DataPayloadSection content={content} />
+                    <ConfigRows pmpIx={contentInstruction} />
+                    <DataPayloadSection pmpIx={contentInstruction} />
                 </>
             )}
         </InstructionCardComponent>
@@ -115,27 +115,27 @@ function PmpDetailsCardBody({
  * 4-byte header-only shape is narrowed by `PmpDecodeConfigStruct`. Both reject by falling through to the card's
  * `fallback` instead. Adding a library variant breaks the build at the label maps, which is the intent.
  */
-function ConfigRows({ content }: { content: PmpPayloadInstruction }) {
+function ConfigRows({ pmpIx }: { pmpIx: PmpPayloadInstruction }) {
     return (
         <>
             <ArgumentHeaderRow />
-            {content.kind === 'initialize' && <ValueRow testId="pmp-config-seed" label="Seed" value={content.seed} />}
+            {pmpIx.kind === 'initialize' && <ValueRow testId="pmp-config-seed" label="Seed" value={pmpIx.seed} />}
             <ValueRow
                 testId="pmp-config-encoding"
                 label="Encoding"
-                value={PMP_ENCODING_LABELS[content.config.encoding]}
+                value={PMP_ENCODING_LABELS[pmpIx.config.encoding]}
             />
             <ValueRow
                 testId="pmp-config-compression"
                 label="Compression"
-                value={PMP_COMPRESSION_LABELS[content.config.compression]}
+                value={PMP_COMPRESSION_LABELS[pmpIx.config.compression]}
             />
-            <ValueRow testId="pmp-config-format" label="Format" value={PMP_FORMAT_LABELS[content.config.format]} />
-            {content.dataSource !== undefined && (
+            <ValueRow testId="pmp-config-format" label="Format" value={PMP_FORMAT_LABELS[pmpIx.config.format]} />
+            {pmpIx.dataSource !== undefined && (
                 <ValueRow
                     testId="pmp-config-data-source"
                     label="Data Source"
-                    value={PMP_DATA_SOURCE_LABELS[content.dataSource]}
+                    value={PMP_DATA_SOURCE_LABELS[pmpIx.dataSource]}
                 />
             )}
         </>
@@ -143,31 +143,31 @@ function ConfigRows({ content }: { content: PmpPayloadInstruction }) {
 }
 
 /** `write` is a fragment with no hints, so it can never be decoded to a document on its own. */
-function WriteRows({ content }: { content: Extract<PmpContentInstruction, { kind: 'write' }> }) {
+function WriteRows({ pmpIx }: { pmpIx: Extract<PmpContentInstruction, { kind: 'write' }> }) {
     return (
         <>
             <ArgumentHeaderRow />
             {/* The wire `offset` is LOGICAL, 0-based inside the payload. The 96-byte header offset is a raw
                 account-slicing detail and must not be added here. */}
-            <ValueRow testId="pmp-write-offset" label="Offset" value={String(content.offset)} />
+            <ValueRow testId="pmp-write-offset" label="Offset" value={String(pmpIx.offset)} />
 
-            {content.chunk !== undefined && (
+            {pmpIx.chunk !== undefined && (
                 <BaseTable.Row data-testid="pmp-write-chunk">
                     <BaseTable.Cell colSpan={CARD_TABLE_COLUMNS}>
                         <div className="mb-1.5">Chunk</div>
                         {/* A chunk runs to ~1 KB, so it gets the same field the raw payload does: hex/base64
                             tabs, byte count, copy, download and show-more, rather than a bare HexData grid. */}
-                        <RawDataField data={content.chunk} filename={PMP_WRITE_CHUNK_DOWNLOAD_FILENAME} />
+                        <RawDataField data={pmpIx.chunk} filename={PMP_WRITE_CHUNK_DOWNLOAD_FILENAME} />
                     </BaseTable.Cell>
                 </BaseTable.Row>
             )}
 
-            {content.chunk === undefined && content.sourceBuffer !== undefined && (
+            {pmpIx.chunk === undefined && pmpIx.sourceBuffer !== undefined && (
                 <BaseTable.Row data-testid="pmp-write-source-buffer">
                     <BaseTable.Cell>Source Buffer</BaseTable.Cell>
                     <BaseTable.Cell colSpan={2} className="text-right">
                         <div className="flex flex-col items-end gap-1.5">
-                            <Address pubkey={new PublicKey(content.sourceBuffer)} alignRight link />
+                            <Address pubkey={new PublicKey(pmpIx.sourceBuffer)} alignRight link />
                             <span className="text-xs text-neutral-500">
                                 The chunk was copied from this buffer, so it is not in this instruction.
                             </span>
