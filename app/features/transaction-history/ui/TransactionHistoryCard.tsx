@@ -12,6 +12,7 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
 import { Badge } from '@components/shared/ui/badge';
+import { cn } from '@components/shared/utils';
 import { FetchStatus } from '@providers/cache';
 import { address as toAddress } from '@solana/kit';
 import { displayTimestampUtc } from '@utils/date';
@@ -21,13 +22,19 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { useVisibility } from '@/app/shared/lib/visibility';
 import { RelativeTime } from '@/app/shared/RelativeTime';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { DataListRow } from '@/app/shared/ui/DataListCard';
+import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
 import { isGtfaDisabled } from '../lib/gtfa-disabled-addresses';
 import { useAccountHistory, useHistoryFiltersSupported, useResetAccountHistory } from '../model/use-account-history';
 import { useFetchAccountHistory } from '../model/use-fetch-account-history';
 import { useResolvedInstructionSummaries } from '../model/use-resolved-instruction-summaries';
-import { BaseTransactionHistoryCard, STATUS_BADGE, type TransactionHistoryRowView } from './BaseTransactionHistoryCard';
+import {
+    BaseTransactionHistoryCard,
+    historyGridCols,
+    STATUS_BADGE,
+    type TransactionHistoryRowView,
+} from './BaseTransactionHistoryCard';
 import { CompactKeyValue } from './CompactKeyValue';
 import { InstructionList, InstructionListSkeleton } from './InstructionList';
 import { RawDataSizeField } from './RawDataSizeField';
@@ -122,7 +129,7 @@ function TransactionRow({
     isLg: boolean;
 }) {
     const { signature, slot, blockTime, status } = row;
-    const { isVisible, ref } = useVisibility<HTMLTableRowElement>(true);
+    const { isVisible, ref } = useVisibility<HTMLDivElement>(true);
     const instructionNames = useResolvedInstructionSummaries(signature, isVisible);
     const [drawerOpen, setDrawerOpen] = useState(false);
     // Mount the mobile drawer only once the row is first tapped — otherwise every row would mount a
@@ -164,9 +171,30 @@ function TransactionRow({
 
     return (
         <>
-            <BaseTable.Row ref={ref} onClick={!isLg ? handleRowClick : undefined}>
-                <BaseTable.Cell>
-                    <div className="hidden lg:block">
+            <DataListRow
+                ref={ref}
+                onClick={!isLg ? handleRowClick : undefined}
+                className="cursor-pointer lg:cursor-auto"
+            >
+                <div className={cn('flex flex-col text-sm lg:hidden', ROW_PADDING)}>
+                    <MobileField label="Signature">
+                        <div className="flex min-w-0 items-start gap-2">
+                            <span className="min-w-0">{signatureLink}</span>
+                            {statusBadge}
+                        </div>
+                    </MobileField>
+                    {blockTime ? (
+                        <MobileField label="Time">{displayTimestampUtc(blockTime * 1000, true)}</MobileField>
+                    ) : null}
+                    <MobileField label="Block">
+                        {/* Plain text on mobile — the drawer carries the block link. */}
+                        <Slot slot={slot} />
+                    </MobileField>
+                    <MobileField label="Programs">{programsBlock}</MobileField>
+                </div>
+
+                <div className={cn('hidden items-baseline gap-4 lg:grid', ROW_PADDING, historyGridCols(hasTimestamps))}>
+                    <div className="min-w-0">
                         <div className="flex min-w-0 items-center gap-2">
                             <span className="min-w-0 text-sm">{signatureLink}</span>
                             {statusBadge}
@@ -174,52 +202,35 @@ function TransactionRow({
                         <div className="mt-1">{programsBlock}</div>
                     </div>
 
-                    <div className="flex flex-col text-sm lg:hidden">
-                        <MobileField label="Signature">
-                            <div className="flex min-w-0 items-start gap-2">
-                                <span className="min-w-0">{signatureLink}</span>
-                                {statusBadge}
-                            </div>
-                        </MobileField>
-                        {blockTime ? (
-                            <MobileField label="Time">{displayTimestampUtc(blockTime * 1000, true)}</MobileField>
-                        ) : null}
-                        <MobileField label="Block">
-                            {/* Plain text on mobile — the drawer carries the block link. */}
-                            <Slot slot={slot} />
-                        </MobileField>
-                        <MobileField label="Programs">{programsBlock}</MobileField>
+                    {hasTimestamps && (
+                        <div className="text-outer-space-300">
+                            {blockTime ? (
+                                // Two-line stack: absolute UTC timestamp on top, relative age beneath.
+                                <div className="flex flex-col">
+                                    <span className="text-sm">{displayTimestampUtc(blockTime * 1000, true)}</span>
+                                    <span className="text-sm">
+                                        <RelativeTime date={blockTime * 1000} />
+                                    </span>
+                                </div>
+                            ) : (
+                                '---'
+                            )}
+                        </div>
+                    )}
+
+                    <div>
+                        <span className="text-sm">
+                            <Slot slot={slot} link />
+                        </span>
                     </div>
-                </BaseTable.Cell>
 
-                {hasTimestamps && (
-                    <BaseTable.Cell className="w-px text-outer-space-300">
-                        {blockTime ? (
-                            // Two-line stack: absolute UTC timestamp on top, relative age beneath.
-                            <div className="flex flex-col">
-                                <span className="text-sm">{displayTimestampUtc(blockTime * 1000, true)}</span>
-                                <span className="text-sm">
-                                    <RelativeTime date={blockTime * 1000} />
-                                </span>
-                            </div>
-                        ) : (
-                            '---'
-                        )}
-                    </BaseTable.Cell>
-                )}
-
-                <BaseTable.Cell className="w-px">
-                    <span className="text-sm">
-                        <Slot slot={slot} link />
-                    </span>
-                </BaseTable.Cell>
-
-                {isLg && (
-                    <BaseTable.Cell className="w-px">
-                        <TransactionRawDataSize signature={signature} isVisible={isVisible} />
-                    </BaseTable.Cell>
-                )}
-            </BaseTable.Row>
+                    {isLg && (
+                        <div>
+                            <TransactionRawDataSize signature={signature} isVisible={isVisible} />
+                        </div>
+                    )}
+                </div>
+            </DataListRow>
 
             {drawerMounted && (
                 <TransactionDetailsDrawer

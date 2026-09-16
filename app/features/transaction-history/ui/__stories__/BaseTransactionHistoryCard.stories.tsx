@@ -5,10 +5,13 @@ import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { Signature } from '@/app/components/common/Signature';
 import { Slot } from '@/app/components/common/Slot';
 import { Badge } from '@/app/components/shared/ui/badge';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { cn } from '@/app/components/shared/utils';
+import { DataListRow } from '@/app/shared/ui/DataListCard';
+import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
 import {
     BaseTransactionHistoryCard,
+    historyGridCols,
     STATUS_BADGE,
     type TransactionHistoryRowView,
 } from '../BaseTransactionHistoryCard';
@@ -36,36 +39,44 @@ function makeRow(
 // Real InstructionList keeps the programs cell representative without clipboard/download wiring.
 function renderRow(row: TransactionHistoryRowView, hasTimestamps: boolean) {
     const badge = STATUS_BADGE[row.status];
+    const signatureLink = <Signature signature={row.signature} link />;
+    const statusBadge = (
+        <Badge ui="dashkit" tone="soft" variant={badge.variant}>
+            {badge.label}
+        </Badge>
+    );
+    const programs = <InstructionList instructions={[{ name: 'Transfer', programName: 'System' }]} />;
     return (
-        <BaseTable.Row key={row.signature}>
-            <BaseTable.Cell>
-                <div>
-                    <div className="flex min-w-0 items-start gap-2">
-                        <span className="min-w-0">
-                            <Signature signature={row.signature} link />
-                        </span>
-                        <Badge ui="dashkit" tone="soft" variant={badge.variant} className="relative top-1">
-                            {badge.label}
-                        </Badge>
-                    </div>
-                    {/* Programs stacked under the signature (no separate Programs column). */}
-                    <div className="mt-1">
-                        <InstructionList instructions={[{ name: 'Transfer', programName: 'System' }]} />
-                    </div>
+        <DataListRow key={row.signature}>
+            <div className={cn('flex flex-col gap-1 text-sm lg:hidden', ROW_PADDING)}>
+                <div className="flex min-w-0 items-start gap-2">
+                    <span className="min-w-0">{signatureLink}</span>
+                    {statusBadge}
                 </div>
-            </BaseTable.Cell>
-            {hasTimestamps && (
-                <BaseTable.Cell className="w-px text-outer-space-300">
-                    {row.blockTime ? displayTimestampUtc(unixTimestampToMs(row.blockTime), true) : '---'}
-                </BaseTable.Cell>
-            )}
-            <BaseTable.Cell className="w-px">
-                <Slot slot={row.slot} link />
-            </BaseTable.Cell>
-            <BaseTable.Cell className="w-px">
-                <span className="text-dk-gray-700">Raw</span>
-            </BaseTable.Cell>
-        </BaseTable.Row>
+                <div>{programs}</div>
+            </div>
+
+            <div className={cn('hidden items-baseline gap-4 lg:grid', ROW_PADDING, historyGridCols(hasTimestamps))}>
+                <div className="min-w-0">
+                    <div className="flex min-w-0 items-center gap-2">
+                        <span className="min-w-0 text-sm">{signatureLink}</span>
+                        {statusBadge}
+                    </div>
+                    <div className="mt-1">{programs}</div>
+                </div>
+                {hasTimestamps && (
+                    <div className="text-outer-space-300">
+                        {row.blockTime ? displayTimestampUtc(unixTimestampToMs(row.blockTime), true) : '---'}
+                    </div>
+                )}
+                <div>
+                    <Slot slot={row.slot} link />
+                </div>
+                <div>
+                    <span className="text-dk-gray-700">Raw</span>
+                </div>
+            </div>
+        </DataListRow>
     );
 }
 

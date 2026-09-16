@@ -125,14 +125,16 @@ export function BlockOverviewCard({
                 {showSuccessfulCount && <KeyValue label="Successful Transactions">{successfulTxs.length}</KeyValue>}
                 <KeyValue label="Total CUs Consumed">{totalCUs.toLocaleString()}</KeyValue>
                 <KeyValue label="Transaction Cost Utilization">
-                    {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()}{' '}
-                    <span className="text-outer-space-300">
+                    {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()}
+                    {/* ml-1 (not {' '}) because the KeyValue value column is flex, which strips a whitespace-only node between children. */}
+                    <span className="ml-1 text-outer-space-300">
                         ({Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
                     </span>
                 </KeyValue>
                 <KeyValue label="Reserved Compute Units" divider={false}>
-                    {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()}{' '}
-                    <span className="text-outer-space-300">
+                    {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()}
+                    {/* ml-1 (not {' '}) because the KeyValue value column is flex, which strips a whitespace-only node between children. */}
+                    <span className="ml-1 text-outer-space-300">
                         ({Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)
                     </span>
                 </KeyValue>

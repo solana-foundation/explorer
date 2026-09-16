@@ -10,11 +10,3 @@ export const CARD_TABLE_HEADER = cn(
     '[&_thead_th]:!text-xs',
     '[&_tbody_tr:first-child_td]:!border-t-0',
 );
-
-// Card chrome gated to lg+. On mobile each row renders as its own card, so the section wrapper must NOT
-// add a card surface there (otherwise per-row cards sit inside a second card). At lg+ the rows form a
-// grid table, so the dashkit card surface frames it. Used by the Account List and Address Lookups.
-export const LG_ONLY_CARD = cn(
-    'lg:rounded-lg lg:border lg:border-solid lg:border-dk-card-outline-dark',
-    'lg:bg-dk-gray-800-dark lg:shadow-dk-card',
-);

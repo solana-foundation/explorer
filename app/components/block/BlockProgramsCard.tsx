@@ -14,6 +14,7 @@ import {
 } from '@/app/components/block/shared';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card } from '@/app/shared/ui/Card';
+import { DataListCard } from '@/app/shared/ui/DataListCard';
 import { KeyValue } from '@/app/shared/ui/key-value';
 
 type ProgramStats = {
@@ -136,27 +137,25 @@ function ProgramsCollapsible({ stats }: { stats: ProgramStats }) {
     if (showSuccessRate) headers.push({ help: successHelp, label: 'Success' });
 
     return (
-        <CollapsibleSection title="Block Programs" collapsible={false} className="">
-            <Card variant="tight" className={TIGHT_CARD}>
-                <div className="text-sm text-white">
-                    <GridHeaderRow headers={headers} style={gridStyle} rightAlignFrom={1} />
+        <DataListCard title="Block Programs" collapsible={false} breakpoint="md">
+            <div className="text-sm text-white">
+                <GridHeaderRow headers={headers} style={gridStyle} rightAlignFrom={1} />
 
-                    {programEntries.map(([programId, txFreq]) => (
-                        <ProgramRow
-                            key={programId}
-                            programId={programId}
-                            txFreq={txFreq}
-                            ixFreq={ixFrequency.get(programId) as number}
-                            successes={txSuccesses.get(programId) || 0}
-                            totalTransactions={totalTransactions}
-                            totalInstructions={totalInstructions}
-                            showSuccessRate={showSuccessRate}
-                            gridStyle={gridStyle}
-                        />
-                    ))}
-                </div>
-            </Card>
-        </CollapsibleSection>
+                {programEntries.map(([programId, txFreq]) => (
+                    <ProgramRow
+                        key={programId}
+                        programId={programId}
+                        txFreq={txFreq}
+                        ixFreq={ixFrequency.get(programId) as number}
+                        successes={txSuccesses.get(programId) || 0}
+                        totalTransactions={totalTransactions}
+                        totalInstructions={totalInstructions}
+                        showSuccessRate={showSuccessRate}
+                        gridStyle={gridStyle}
+                    />
+                ))}
+            </div>
+        </DataListCard>
     );
 }
 

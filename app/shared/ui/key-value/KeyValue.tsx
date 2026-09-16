@@ -2,6 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
+import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
 // Shared label-column width so values line up in one column across every card and Raw-view row.
 export const LABEL_WIDTH = 'w-[clamp(84px,20%,240px)]';
@@ -15,7 +16,7 @@ const rowVariants = cva('flex flex-row border-0 border-solid border-dark-border'
             start: 'items-start',
         },
         density: {
-            comfortable: 'gap-dk-4 px-3 py-2',
+            comfortable: `gap-dk-4 ${ROW_PADDING}`,
             compact: 'gap-2 py-1',
             // `flat` carries no padding of its own — the parent controls the rhythm (used by the
             // gap-driven expanded-account rows and the block tables' mobile cells).
@@ -29,7 +30,7 @@ const rowVariants = cva('flex flex-row border-0 border-solid border-dark-border'
 });
 
 const labelVariants = cva(
-    'min-w-0 flex-none text-sm leading-5 text-outer-space-300 [hyphens:auto] [overflow-wrap:break-word]',
+    'min-w-0 flex-none text-sm leading-5 text-outer-space-300 [overflow-wrap:normal]',
     {
         defaultVariants: { density: 'comfortable' },
         variants: {
