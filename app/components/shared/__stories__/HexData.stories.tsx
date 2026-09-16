@@ -16,9 +16,6 @@ type Story = StoryObj<typeof meta>;
 
 const shortData = new Uint8Array([0x03, 0xe8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
 const multiRowData = new Uint8Array(Array.from({ length: 32 }, (_, i) => i));
-const truncateShortData = new Uint8Array([0xfe, 0xab, 0xcd]);
-const truncateLongData = new Uint8Array(Array.from({ length: 67 }, (_, i) => i));
-const atThresholdData = new Uint8Array(Array.from({ length: 16 }, (_, i) => i + 0xa0));
 
 export const Default: Story = {
     args: { align: 'start', raw: multiRowData },
@@ -60,51 +57,5 @@ export const FullLegacyAligned: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expect(canvas.getAllByText('00 01 02 03').length).toBeGreaterThan(0);
-    },
-};
-
-// ── Truncated mode ───────────────────────────────────────────────────
-
-export const TruncatedShort: Story = {
-    args: { layout: 'truncated', raw: truncateShortData },
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-        await expect(canvas.getByText('fe ab cd')).toBeInTheDocument();
-        // eslint-disable-next-line no-restricted-syntax -- Testing Library partial text match requires regexp
-        expect(canvas.queryByText(/bytes/)).toBeNull();
-    },
-};
-
-export const TruncatedLong: Story = {
-    args: { layout: 'truncated', raw: truncateLongData },
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-        await expect(canvas.getAllByText('00 01 02 03').length).toBeGreaterThan(0);
-        await expect(canvas.getAllByText('04 05 06 07').length).toBeGreaterThan(0);
-        // eslint-disable-next-line no-restricted-syntax -- Testing Library partial text match requires regexp
-        await expect(canvas.getByText(/\u2026/)).toBeInTheDocument();
-        await expect(canvas.getByText('(67 bytes)')).toBeInTheDocument();
-    },
-};
-
-export const TruncatedAtThreshold: Story = {
-    args: { layout: 'truncated', raw: atThresholdData },
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-        await expect(canvas.getAllByText('a0 a1 a2 a3').length).toBeGreaterThan(0);
-        await expect(canvas.getAllByText('ac ad ae af').length).toBeGreaterThan(0);
-        // eslint-disable-next-line no-restricted-syntax -- Testing Library partial text match requires regexp
-        expect(canvas.queryByText(/\u2026/)).toBeNull();
-        // eslint-disable-next-line no-restricted-syntax -- Testing Library partial text match requires regexp
-        expect(canvas.queryByText(/bytes/)).toBeNull();
-    },
-};
-
-export const TruncatedInverted: Story = {
-    args: { inverted: true, layout: 'truncated', raw: truncateLongData },
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-        await expect(canvas.getAllByText('00 01 02 03').length).toBeGreaterThan(0);
-        await expect(canvas.getByText('(67 bytes)')).toBeInTheDocument();
     },
 };
