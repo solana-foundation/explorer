@@ -14,6 +14,7 @@ import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@compone
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
 import { useTokenInfo } from '@entities/token-info';
+import { trustedInnerInstructions } from '@entities/transaction-data';
 import { isMangoInstruction, parseMangoInstructionTitle } from '@explorer/decoder-mango/detection';
 import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
 import { useAccountHistories } from '@features/transaction-history/model/use-account-history';
@@ -25,7 +26,6 @@ import { useCluster } from '@providers/cluster';
 import { Details, useFetchTransactionDetails, useTransactionDetailsCache } from '@providers/transactions/parsed';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
 import { getTokenProgramInstructionName, InstructionType } from '@utils/instruction';
 import { displayAddress, intoTransactionInstruction, TokenLabelInfo } from '@utils/tx';
 import Link from 'next/link';
@@ -481,11 +481,12 @@ function InstructionDetailsCell({
 
             const innerInstructions: (ParsedInstruction | PartiallyDecodedInstruction)[] = [];
 
-            if (
-                transactionWithMeta.meta?.innerInstructions &&
-                (cluster !== Cluster.MainnetBeta || transactionWithMeta.slot >= INNER_INSTRUCTIONS_START_SLOT)
-            ) {
-                transactionWithMeta.meta.innerInstructions.forEach(innerIx => {
+            const trusted = trustedInnerInstructions(transactionWithMeta.meta?.innerInstructions, {
+                cluster,
+                slot: transactionWithMeta.slot,
+            });
+            if (trusted) {
+                trusted.forEach(innerIx => {
                     if (innerIx.index === index) {
                         innerIx.instructions.forEach(inner => {
                             innerInstructions.push(inner);
