@@ -6,6 +6,7 @@ export { getProgramName } from './lib/get-program-name';
 export { getInstructionSummaries, resolveInstructionNames, resolveNamesFromData } from './lib/instruction-summary';
 export { mergeTransactionMap } from './lib/merge-transaction-map';
 export { resolveInnerInstructions } from './lib/resolve-inner-instructions';
+export { trustedInnerInstructions } from './lib/trusted-inner-instructions';
 export type { InstructionSummary, NamedInstruction } from './lib/types';
 // The second half of instruction naming — `resolveInstructionNames` / `resolveNamesFromData` above —
 // is on `client.ts`, since the hooks cannot join a server caller of this barrel. README.md has the
