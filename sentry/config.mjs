@@ -18,13 +18,19 @@ export function createSentryConfig(context) {
                 ? process.env.NEXT_PUBLIC_SENTRY_DSN
                 : process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-        // Browser error events must carry the Logger's opt-in tag; everything else — a stray
-        // captureException, a `sentry: true` written with the server in mind, SDK auto-captures — is
-        // dropped, so bot-heavy client traffic cannot page Sentry. Feedback events bypass beforeSend.
+        // A browser error event needs both the flag and the Logger's opt-in tag. The flag keeps error
+        // reporting off while a DSN is present, so the feedback widget can ship on its own and browser
+        // sources are adopted one at a time. The tag then drops anything that bypassed the Logger — a
+        // stray captureException, a `sentry: true` written with the server in mind, SDK auto-captures —
+        // so bot-heavy client traffic cannot page Sentry. Feedback events go through beforeSendFeedback
+        // and are unaffected by either. Matches isEnvEnabled, which this file cannot import.
         ...(context === 'client' && {
             beforeSend: (/** @type {import('@sentry/core').ErrorEvent} */ event) =>
-                // eslint-disable-next-line unicorn/no-null -- Sentry's drop signal is null
-                event.tags?.[CLIENT_REPORT_TAG] === CLIENT_REPORT_ALLOWED ? event : null,
+                process.env.NEXT_PUBLIC_SENTRY_CLIENT_ERRORS === 'true' &&
+                event.tags?.[CLIENT_REPORT_TAG] === CLIENT_REPORT_ALLOWED
+                    ? event
+                    : // eslint-disable-next-line unicorn/no-null -- Sentry's drop signal is null
+                      null,
         }),
 
         sampleRate: 1,
