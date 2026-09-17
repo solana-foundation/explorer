@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 import {
@@ -9,7 +9,7 @@ import {
 } from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
 import { useTabOverflow } from '@/app/shared/ui/navigation-tabs/model/useTabOverflow';
-import { useStickyHeaderHeight } from '@/app/shared/ui/sticky-header/useStickyHeaderHeight';
+import { useSticky } from '@/app/shared/ui/sticky-header/useSticky';
 
 import { MobileMoreDropdown } from './MobileMoreDropdown';
 import { TabLink } from './TabLink';
@@ -51,8 +51,7 @@ export function BaseNavigationTabs({
     const isSticky = scrollSpy || Boolean(sticky);
     const { registeredTabs, registerTab, unregisterTab } = useTabRegistration();
 
-    const wrapperRef = useRef<HTMLDivElement>(null);
-    const [stuck, setStuck] = useState(false);
+    const { stuck, wrapperRef } = useSticky(isSticky);
     const [spyActive, setSpyActive] = useState(() => tabs[0]?.path ?? '');
 
     const staticPaths = useMemo(() => new Set(tabs.map(t => t.path)), [tabs]);
@@ -82,7 +81,7 @@ export function BaseNavigationTabs({
                 top: naturalTop - offset - SCROLL_OFFSET,
             });
         },
-        [tablistRef],
+        [tablistRef, wrapperRef],
     );
 
     const scrollSpyTabClick = useCallback(
@@ -92,23 +91,6 @@ export function BaseNavigationTabs({
         },
         [scrollToSection],
     );
-
-    useEffect(() => {
-        if (!isSticky) return;
-        const update = () => {
-            // Stuck = the sticky bar has reached the top of the viewport (top: 0). Deriving this from the
-            // bar's vertical position — rather than an IntersectionObserver with threshold 1 — keeps the
-            // shadow correct even when the bar is full-bleed (100vw): a hairline of horizontal overflow
-            // would otherwise drop the intersection ratio below 1 and pin `stuck` on permanently.
-            const el = wrapperRef.current;
-            if (el) setStuck(el.getBoundingClientRect().top <= 0);
-        };
-        window.addEventListener('scroll', update, { passive: true });
-        update();
-        return () => window.removeEventListener('scroll', update);
-    }, [isSticky]);
-
-    useStickyHeaderHeight(wrapperRef, !!isSticky);
 
     useEffect(() => {
         if (!scrollSpy) return;
@@ -128,7 +110,7 @@ export function BaseNavigationTabs({
         window.addEventListener('scroll', update, { passive: true });
         update();
         return () => window.removeEventListener('scroll', update);
-    }, [scrollSpy, tabs, tablistRef]);
+    }, [scrollSpy, tabs, tablistRef, wrapperRef]);
 
     const activeValue = scrollSpy ? spyActive : (activeValueProp ?? '');
     const onTabClick = scrollSpy ? scrollSpyTabClick : onTabClickProp;
