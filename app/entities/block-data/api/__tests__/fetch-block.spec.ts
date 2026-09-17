@@ -94,6 +94,14 @@ describe('fetchBlock', () => {
         expect(block?.blockTime).toBe(1_787_266_078n);
     });
 
+    it("should preserve cost units that kit's transaction meta type does not expose", async () => {
+        const [transaction] = LEGACY_BLOCK_RESPONSE.transactions;
+        const meta = { ...transaction.meta, costUnits: 2_500 };
+        respondWith({ ...LEGACY_BLOCK_RESPONSE, transactions: [{ ...transaction, meta }] });
+
+        expect(getTransaction(await fetchBlock(URL, SLOT)).meta?.costUnits).toBe(2_500n);
+    });
+
     it('should ignore token balances that the block pages do not consume', async () => {
         const [transaction] = LEGACY_BLOCK_RESPONSE.transactions;
         const tokenBalance = {
