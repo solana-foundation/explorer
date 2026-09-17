@@ -4,16 +4,16 @@ import { Epoch } from '@components/common/Epoch';
 import { ExternalLinkWarning } from '@components/common/ExternalLinkWarning';
 import { Slot } from '@components/common/Slot';
 import { cn } from '@components/shared/utils';
-import { type BlockData, isBlockTransaction } from '@entities/block-data';
+import { type BlockData, isBlockTransaction, summarizeBlockTransactionVersions } from '@entities/block-data';
 import { summarizeBlockComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
 import { Alert } from '@shared/ui/Alert';
 import type { Address as KitAddress, Slot as KitSlot } from '@solana/kit';
-import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
 import { ExternalLink } from 'react-feather';
 
 import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { Card } from '@/app/shared/ui/Card';
 
 type BlockOverviewCardProps = {
@@ -49,6 +49,8 @@ export function BlockOverviewCard({
     const maxCostUnits = BigInt(maxComputeUnits);
     const totalCostPercent = ((totalCostUnits * 100n + maxCostUnits / 2n) / maxCostUnits).toString();
 
+    const { entries: versionEntries, incomplete: versionsIncomplete } = summarizeBlockTransactionVersions(block);
+
     const showSuccessfulCount = block.transactions.every(tx => isBlockTransaction(tx) && tx.meta !== null);
     const successfulTxs = block.transactions.filter(tx => isBlockTransaction(tx) && tx.meta?.err === null);
 
@@ -65,9 +67,10 @@ export function BlockOverviewCard({
                     </ExternalLinkWarning>
                 )}
             </div>
-            {computeTotalsIncomplete && (
+            {(computeTotalsIncomplete || versionsIncomplete) && (
                 <Alert variant="warning" className="mb-0">
-                    Some transactions could not be parsed. Compute and cost totals include only readable transactions.
+                    Some transactions could not be parsed. Version counts and compute totals include only readable
+                    transactions.
                 </Alert>
             )}
             <Card ui="dashkit">
@@ -95,23 +98,12 @@ export function BlockOverviewCard({
                         </Value>
                     </Row>
                 )}
-                {block.blockTime ? (
-                    <>
-                        <Row divider>
-                            <Label>Timestamp (Local)</Label>
-                            <Value mono={false}>{displayTimestamp(Number(block.blockTime) * 1000, true)}</Value>
-                        </Row>
-                        <Row divider>
-                            <Label>Timestamp (UTC)</Label>
-                            <Value mono={false}>{displayTimestampUtc(Number(block.blockTime) * 1000, true)}</Value>
-                        </Row>
-                    </>
-                ) : (
-                    <Row divider>
-                        <Label>Timestamp</Label>
-                        <Value>Unavailable</Value>
-                    </Row>
-                )}
+                <Row divider>
+                    <Label>Timestamp</Label>
+                    <Value mono={false}>
+                        {block.blockTime ? <Timestamp unixTimestamp={Number(block.blockTime)} /> : 'Unavailable'}
+                    </Value>
+                </Row>
                 {epoch !== undefined && (
                     <Row divider>
                         <Label>Epoch</Label>
@@ -161,6 +153,19 @@ export function BlockOverviewCard({
                 <Row divider>
                     <Label>Processed Transactions</Label>
                     <Value mono={false}>{block.transactions.length}</Value>
+                </Row>
+                <Row divider>
+                    <Label>Transaction Versions</Label>
+                    <Value mono={false} breakAll={false}>
+                        {versionEntries.map(({ count, label, share, version }, index) => (
+                            <span key={String(version)}>
+                                {index > 0 && <span className="text-outer-space-300"> &middot; </span>}
+                                {label}: {count.toLocaleString()}{' '}
+                                <span className="text-outer-space-300">({Math.round(share * 100)}%)</span>
+                            </span>
+                        ))}{' '}
+                        {versionsIncomplete && <span className="text-outer-space-300">(incomplete)</span>}
+                    </Value>
                 </Row>
                 {showSuccessfulCount && (
                     <Row divider>
