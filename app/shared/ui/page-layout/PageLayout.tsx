@@ -4,7 +4,10 @@ import * as React from 'react';
 import { cnPrefixed } from '@/app/components/shared/utils';
 
 const pageLayoutVariants = cva(
-    'mx-auto flex flex-col px-4 pt-3 selection:bg-accent/25 selection:text-inherit lg:px-6 lg:pt-5',
+    // `::selection` can't resolve the `accent` token's opacity form (it compiles to a color-mix/CSS
+    // variable the pseudo-element drops), so the highlight is spelled as the literal accent hex at 25%
+    // (`#13d89b` === the `accent` token) to keep the translucent selection consistent across pages.
+    'mx-auto flex flex-col px-4 pt-3 selection:bg-[#13d89b40] selection:text-inherit lg:px-6 lg:pt-5',
     {
         defaultVariants: { width: 'default' },
         variants: {
