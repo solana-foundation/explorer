@@ -82,6 +82,6 @@ export const Linked: Story = {
     ],
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
-        expect(canvas.getByRole('link', { name: '70398…c965b' })).toHaveAttribute('href', '/tx/example');
+        expect(canvas.getByRole('link', { name: EXAMPLE_HASH })).toHaveAttribute('href', '/tx/example');
     },
 };
