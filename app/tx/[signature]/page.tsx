@@ -66,7 +66,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     }
 
     const description = `Details of the Solana transaction with signature ${signature}`;
-    const title = `Transaction | ${signature} | Solana`;
+    const title = `Transaction | ${signature.slice(0, 16)}... | Solana`;
 
     if (isCustomCluster) {
         return {
