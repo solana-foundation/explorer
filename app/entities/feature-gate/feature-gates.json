@@ -2108,7 +2108,7 @@
     "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
     "devnet_activation_epoch": 1123,
     "key": "iBRLMc81UjRa8fn8A6eE8bJTnRbgQoPTynM51akENCV",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1036,
     "min_agave_versions": [
       "v4.2.0-beta.1"
     ],
@@ -2232,7 +2232,7 @@
     "description": "The current live transaction formats, v0 and legacy, have a number of limitations that make them unsuitable for efficient ingestion, processing, and unable to support developer features that are required for today's applications.",
     "devnet_activation_epoch": 1140,
     "key": "txv1aq4pp281K9um3tnPgkfX8UqtFT6wcVW3hNezGLL",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1035,
     "min_agave_versions": [
       "v4.2.0-beta.0"
     ],
@@ -2284,7 +2284,7 @@
     "description": "Reduce lamports_per_byte incrementally from 6960 to 696 via five steps: 6333, 5080, 2575, 1322, and 696. This proposal supersedes SIMD-0436, providing a more granular reduction schedule.",
     "devnet_activation_epoch": 1141,
     "key": "61BtM7BkDEE8Yq5fskEVAQT9mYA8qCejJWoLe5apqg81",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1033,
     "min_agave_versions": [
       "v4.2.0-beta.1"
     ],
