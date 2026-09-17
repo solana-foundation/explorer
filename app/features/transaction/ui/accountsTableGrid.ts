@@ -15,6 +15,3 @@ export const GRID_GAP_X = 'gap-x-0 lg:gap-x-5 landscape:gap-x-5';
 
 // A full-width cell under everything but the number column, footer-style.
 export const CONTENT_COL_SPAN = 'col-span-2 lg:col-span-4 landscape:col-span-4';
-
-// Shared padding for the header and rows of the table.
-export const CELL_PADDING = 'px-3 py-2.5';

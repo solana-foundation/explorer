@@ -1,5 +1,4 @@
 import { Address } from '@components/common/Address';
-import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
 import { useAddressLookupTable } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
@@ -7,20 +6,22 @@ import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
 import { Badge } from '@/app/components/shared/ui/badge';
-
-import { LG_ONLY_CARD } from './inspector-table';
+import { DataListCard, DataListRow } from '@/app/shared/ui/DataListCard';
+import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
 // Desktop-only grid (lg+): a single 4-column row driven by the header labels. Below lg the row uses the
 // mobile card layout instead — the `nowrap` table used previously overflowed narrow viewports.
 const COLS = 'grid-cols-[minmax(0,1fr)_minmax(auto,90px)_minmax(0,1.4fr)_minmax(auto,90px)]';
 const ROW_GRID_DESKTOP = cn(
-    'hidden min-h-9 px-3 py-2.5 md:px-4 lg:grid',
+    'hidden min-h-9 lg:grid',
+    ROW_PADDING,
     'items-start gap-x-5 text-sm',
     "[grid-template-areas:'table_index_resolved_details']",
     COLS,
 );
 const HEADER_GRID = cn(
-    'hidden gap-5 px-3 py-2.5 md:px-4 lg:grid',
+    'hidden gap-5 lg:grid',
+    ROW_PADDING,
     COLS,
     'text-xs uppercase text-outer-space-300',
     'border-1 border-b border-white/10 [border-bottom-style:solid]',
@@ -56,7 +57,7 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
     if (message.addressTableLookups.length === 0) return null;
 
     return (
-        <CollapsibleSection id="address-lookups" title={ADDRESS_TABLE_LOOKUPS_CARD_TITLE} className={LG_ONLY_CARD}>
+        <DataListCard id="address-lookups" title={ADDRESS_TABLE_LOOKUPS_CARD_TITLE}>
             <div className={HEADER_GRID}>
                 <div>Address Lookup Table Address</div>
                 <div>Table Index</div>
@@ -64,7 +65,7 @@ export function AddressTableLookupsCard({ message }: { message: VersionedMessage
                 <div>Details</div>
             </div>
             {lookupRows}
-        </CollapsibleSection>
+        </DataListCard>
     );
 }
 
@@ -112,11 +113,9 @@ function LookupRow({
     ) : undefined;
 
     return (
-        // Row divider is desktop-only; on mobile each entry is a standalone card instead.
-        <div className="lg:border-1 lg:border-b lg:border-white/10 lg:[border-bottom-style:solid] lg:last:border-b-0">
-            {/* Mobile layout (below lg): a card leading with the resolved address, then the lookup table +
-                index as labelled fields. Addresses mid-truncate to fit, so nothing overflows. */}
-            <div className="mb-3 flex flex-col gap-1 rounded-lg border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3 text-sm lg:hidden">
+        <DataListRow>
+            {/* Mobile: card leading with the resolved address, then the lookup table + index as fields. */}
+            <div className="flex flex-col gap-1 p-3 text-sm lg:hidden">
                 <div className="flex items-start justify-between gap-2">
                     <span className="min-w-0">{resolvedKeyComponent}</span>
                     {writableBadge && <span className="shrink-0">{writableBadge}</span>}
@@ -142,6 +141,6 @@ function LookupRow({
                 <div className="min-w-0 [grid-area:resolved]">{resolvedKeyComponent}</div>
                 <div className="[grid-area:details]">{writableBadge}</div>
             </div>
-        </div>
+        </DataListRow>
     );
 }

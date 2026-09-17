@@ -3,7 +3,6 @@
 import ScaledUiAmountMultiplierTooltip from '@components/account/token-extensions/ScaledUiAmountMultiplierTooltip';
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
-import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
 import { getChainId } from '@entities/token-info';
 import { useTransactionDetails } from '@providers/transactions';
@@ -15,9 +14,9 @@ import useSWRImmutable from 'swr/immutable';
 
 import { useScaledUiAmountForMint } from '@/app/providers/accounts/tokens';
 import { useCluster } from '@/app/providers/cluster';
+import { DataListCard, DataListRow } from '@/app/shared/ui/DataListCard';
+import { ROW_PADDING } from '@/app/shared/ui/spacing';
 import { getTokenInfos } from '@/app/utils/token-info';
-
-import { CELL_PADDING } from './accountsTableGrid';
 
 type TokenBalanceRow = {
     account: PublicKey;
@@ -27,8 +26,6 @@ type TokenBalanceRow = {
     delta: BigNumber;
     accountIndex: number;
 };
-
-const GRID_TEMPLATE = 'grid-cols-[minmax(auto,1.25rem)_1fr_minmax(auto,170px)_minmax(auto,180px)]';
 
 export function TokenBalancesCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
@@ -72,21 +69,7 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     );
 
     return (
-        <CollapsibleSection id="tokens" title="Tokens">
-            <div
-                className={cn(
-                    'hidden lg:grid',
-                    CELL_PADDING,
-                    'gap-5 text-xs uppercase text-outer-space-300',
-                    'border-1 border-b border-white/10 [border-bottom-style:solid]',
-                    GRID_TEMPLATE,
-                )}
-            >
-                <div>#</div>
-                <div>Owner / Address / Token</div>
-                <div className="text-right">Change</div>
-                <div className="text-right">Post Balance</div>
-            </div>
+        <DataListCard id="tokens" title="Tokens" className="mb-6">
             {rows.map((row, index) => (
                 <TokenBalanceRow
                     index={index}
@@ -99,7 +82,7 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
                     units={tokenSymbols?.get(row.mint) || 'tokens'}
                 />
             ))}
-        </CollapsibleSection>
+        </DataListCard>
     );
 }
 
@@ -138,19 +121,28 @@ function TokenBalanceRow({
     const ownerPubkey = owner ? new PublicKey(owner) : undefined;
 
     return (
-        <div className="border-1 border-b border-white/10 [border-bottom-style:solid] last:border-b-0">
-            {/* Mobile layout */}
-            <div className={cn('flex flex-col gap-1 text-sm lg:hidden', CELL_PADDING)}>
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className="w-16 shrink-0 text-outer-space-300">Change</span>
-                        <BalanceDelta delta={scaledDelta} />
+        <DataListRow>
+            <div className={cn('flex min-h-9 items-start gap-3 text-sm', ROW_PADDING)}>
+                <div className="shrink-0 text-outer-space-300">{index + 1}</div>
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    {ownerPubkey && (
+                        <div className="flex items-center gap-3">
+                            <span className="w-14 shrink-0 text-outer-space-300">Owner</span>
+                            <Address pubkey={ownerPubkey} link />
+                        </div>
+                    )}
+                    <div className="flex items-center gap-3">
+                        <span className="w-14 shrink-0 text-outer-space-300">Addr</span>
+                        <Address pubkey={account} link />
                     </div>
-                    <span className="text-outer-space-300">{index + 1}</span>
+                    <div className="flex items-center gap-3">
+                        <span className="w-14 shrink-0 text-outer-space-300">Token</span>
+                        <Address pubkey={mintPubkey} link fetchTokenLabelInfo />
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="w-16 shrink-0 text-outer-space-300">Balance</span>
-                    <span className="whitespace-nowrap">
+                <div className="flex shrink-0 flex-col items-end gap-0.5 whitespace-nowrap text-right">
+                    <BalanceDelta delta={scaledDelta} />
+                    <span>
                         {scaledBalance} {units}
                         <ScaledUiAmountMultiplierTooltip
                             rawAmount={balance}
@@ -158,61 +150,8 @@ function TokenBalanceRow({
                         />
                     </span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="w-16 shrink-0 text-outer-space-300">Token</span>
-                    <Address pubkey={mintPubkey} link fetchTokenLabelInfo />
-                </div>
-                {ownerPubkey && (
-                    <div className="flex items-center gap-2">
-                        <span className="w-16 shrink-0 text-outer-space-300">Owner</span>
-                        <Address pubkey={ownerPubkey} link />
-                    </div>
-                )}
-                <div className="flex items-center gap-2">
-                    <span className="w-16 shrink-0 text-outer-space-300">Addr</span>
-                    <Address pubkey={account} link />
-                </div>
             </div>
-
-            {/* Desktop layout */}
-            <div
-                className={cn(
-                    'hidden min-h-9 lg:grid',
-                    CELL_PADDING,
-                    'items-start gap-x-5 whitespace-nowrap text-sm',
-                    "[grid-template-areas:'number_address_change_balance']",
-                    GRID_TEMPLATE,
-                )}
-            >
-                <div className="text-outer-space-300 [grid-area:number]">{index + 1}</div>
-                <div className="flex flex-col [grid-area:address]">
-                    {ownerPubkey && (
-                        <div className="flex items-center gap-3">
-                            <span className="min-w-11 text-sm text-outer-space-300">Owner</span>
-                            <Address pubkey={ownerPubkey} link />
-                        </div>
-                    )}
-                    <div className="flex items-center gap-3">
-                        <span className="min-w-11 text-sm text-outer-space-300">Addr</span>
-                        <Address pubkey={account} link />
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className="min-w-11 text-sm text-outer-space-300">Token</span>
-                        <Address pubkey={mintPubkey} link fetchTokenLabelInfo />
-                    </div>
-                </div>
-                <div className="justify-self-end [grid-area:change]">
-                    <BalanceDelta delta={scaledDelta} />
-                </div>
-                <div className="justify-self-end [grid-area:balance]">
-                    {scaledBalance} {units}
-                    <ScaledUiAmountMultiplierTooltip
-                        rawAmount={balance}
-                        scaledUiAmountMultiplier={scaledUiAmountMultiplier}
-                    />
-                </div>
-            </div>
-        </div>
+        </DataListRow>
     );
 }
 

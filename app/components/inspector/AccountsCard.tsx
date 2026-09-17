@@ -29,11 +29,11 @@ import { type SimulationState } from '@/app/features/instruction-simulation/mode
 import { LastSimulatedAtLabel } from '@/app/features/instruction-simulation/ui/LastSimulatedAt';
 import { SimulateButton } from '@/app/features/instruction-simulation/ui/SimulateButton';
 import { SimulatedBadge } from '@/app/features/instruction-simulation/ui/SimulatedBadge';
-import { Section } from '@/app/features/transaction/ui/Section';
+import { DataListCard, DataListRow } from '@/app/shared/ui/DataListCard';
+import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
-import { AccountDetailSlideover } from './AccountDetailSlideover';
+import { AccountDetailDrawer } from './AccountDetailDrawer';
 import { AddressFromLookupTableWithContext } from './AddressWithContext';
-import { LG_ONLY_CARD } from './inspector-table';
 import { hasReliableChanges, simulationFailureMessage } from './simulation-changes';
 import { SimulationHint } from './SimulationHint';
 
@@ -49,7 +49,8 @@ const COLS =
 // Desktop-only body row (lg+); the merged "Change" column sits between Owner and Post Balance. Below lg
 // the row uses the mobile layout (AccountRowLayout).
 const ROW_GRID_DESKTOP = cn(
-    'hidden min-h-9 px-3 py-2.5 md:px-4 lg:grid',
+    'hidden min-h-9 lg:grid',
+    ROW_PADDING,
     'items-start gap-x-5 whitespace-nowrap text-sm',
     "[grid-template-areas:'number_address_owned_change_balance_size']",
     COLS,
@@ -60,7 +61,8 @@ const MOBILE_LABEL = 'w-16 shrink-0 text-outer-space-300';
 
 // Header row (lg+ only).
 const HEADER_GRID = cn(
-    'hidden gap-5 px-3 py-2.5 md:px-4 lg:grid',
+    'hidden gap-5 lg:grid',
+    ROW_PADDING,
     COLS,
     'text-xs uppercase text-outer-space-300',
     'border-1 border-b border-white/10 [border-bottom-style:solid]',
@@ -187,9 +189,9 @@ export function AccountsCard({
 
     if (fetchError) {
         return (
-            <Section title="Account List" className="">
+            <DataListCard title="Account List" collapsible={false}>
                 <ErrorCard text="Failed to fetch accounts info" />
-            </Section>
+            </DataListCard>
         );
     }
 
@@ -198,7 +200,7 @@ export function AccountsCard({
     }
 
     return (
-        <Section title="Account List" className={LG_ONLY_CARD} belowTitle={<SimulationHint simulation={simulation} />}>
+        <DataListCard title="Account List" collapsible={false} belowTitle={<SimulationHint simulation={simulation} />}>
             <div className={HEADER_GRID}>
                 <div>#</div>
                 <div>Address</div>
@@ -214,7 +216,7 @@ export function AccountsCard({
             </div>
             {accountRows}
             {!loading && totalAccountSize > 0 && (
-                <div className="py-3 text-sm text-outer-space-300 lg:ml-10 lg:px-4">
+                <div className="py-2.5 text-sm text-outer-space-300 lg:ml-10 lg:px-3">
                     <div className="flex flex-col">
                         <div className="flex items-baseline gap-2">
                             <span>Total Account Size:</span>
@@ -226,7 +228,7 @@ export function AccountsCard({
                     </div>
                 </div>
             )}
-        </Section>
+        </DataListCard>
     );
 }
 
@@ -340,8 +342,8 @@ function ChangeDash() {
 //
 // `interactive` controls whether the reason is shown here via a tooltip:
 //   • desktop rows and the mobile detail drawer pass `interactive` — the tooltip carries the reason
-//     (hover on desktop, tap on touch). In the drawer it must sit above the Slideover, so its content is
-//     lifted past the slideover's z-index.
+//     (hover on desktop, tap on touch). In the drawer it must sit above the Drawer, so its content is
+//     lifted past the drawer's z-index.
 //   • the mobile list summary leaves it off — there the whole card is a tap target, so the label stays a
 //     plain, non-interactive marker and a tap falls through to open the detail drawer (which shows the
 //     full reason).
@@ -360,7 +362,7 @@ function ChangeFailed({ message, interactive = false }: { message: string; inter
             <TooltipTrigger asChild>
                 <span className="inline-flex cursor-default">{label}</span>
             </TooltipTrigger>
-            {/* z above the mobile detail Slideover (z-[1201]) so the reason is visible when the tooltip
+            {/* z above the mobile detail Drawer (z-[1201]) so the reason is visible when the tooltip
                 lives inside the drawer. */}
             <TooltipContent side="top" className="z-[1300] max-w-56 break-words">
                 {message}
@@ -526,19 +528,11 @@ function AccountRowLayout({
     }
 
     return (
-        // Row divider is desktop-only; on mobile each entry is a standalone card instead.
-        <div className="lg:border-1 group lg:border-b lg:border-white/10 lg:[border-bottom-style:solid] lg:last:border-b-0">
-            {/* Mobile layout: a tappable card (address + badges, ordinal, change, balance). The card
-                framing makes it clear the whole entry is tappable. Owner and size drop out here and move
-                into the detail drawer, mirroring the TX page. Tapping anywhere opens the drawer. */}
+        // `group` lets the desktop Change cell reveal its Simulate button on row hover.
+        <DataListRow className="group">
+            {/* Mobile: tapping opens the detail drawer; Owner and Size drop out here and live there. */}
             <div
-                className={cn(
-                    // Full-width like the other page cards (no horizontal inset), same dashkit surface
-                    // (bg-dk-gray-800-dark + outer-space border); `mb-3` keeps the vertical gap between
-                    // entries. Hidden at lg+ where rows form the table.
-                    'mb-3 flex flex-col gap-1 rounded-lg border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3 text-sm lg:hidden',
-                    pubkey && 'cursor-pointer',
-                )}
+                className={cn('flex flex-col gap-1 p-3 text-sm lg:hidden', pubkey && 'cursor-pointer')}
                 onClick={() => pubkey && setDrawerOpen(true)}
             >
                 <div className="flex items-start justify-between gap-2">
@@ -584,7 +578,7 @@ function AccountRowLayout({
                 same fields as the list — Owner, Change, Balance, Size — with the Simulate button living in
                 its Change row (`mode="action"`). */}
             {pubkey && (
-                <AccountDetailSlideover
+                <AccountDetailDrawer
                     open={drawerOpen}
                     onOpenChange={setDrawerOpen}
                     index={index}
@@ -598,7 +592,7 @@ function AccountRowLayout({
                     sizeSlot={sizeNode}
                 />
             )}
-        </div>
+        </DataListRow>
     );
 }
 

@@ -4,11 +4,15 @@ import { HelpCircle } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
+import { DataListRow } from '@/app/shared/ui/DataListCard';
+import { KeyValue } from '@/app/shared/ui/key-value';
+import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
-// Data-table card surface, shared by the block grid cards (matches BaseDomainsCard's list surface). Set
-// on a `variant="tight"` Card: `rounded-lg` (8px) tightens the tw base's `rounded-xl` (12px) and the
+// Data-table card surface for a single always-framed card (e.g. the Block Program Stats KeyValue card).
+// Set on a `variant="tight"` Card: `rounded-lg` (8px) tightens the tw base's `rounded-xl` (12px) and the
 // outer-space border/bg recolour it. No `!important` needed — BaseCard composes className through
-// `cnPrefixed` (tailwind-merge), so these later utilities win over the base card's own.
+// `cnPrefixed` (tailwind-merge), so these later utilities win over the base card's own. Per-item lists
+// use `DataListCard` (its frame) + `ResponsiveGridRow` (its rows) instead.
 export const TIGHT_CARD = 'overflow-hidden rounded-lg border-outer-space-800 bg-outer-space-900';
 
 // Muted uppercase grid header cell, matching the transaction tables.
@@ -47,10 +51,7 @@ export function GridHeaderRow({
     return (
         <div
             style={style}
-            className={cn(
-                'hidden gap-5 border-b border-solid border-white/10 px-3 py-2.5 md:grid md:px-4',
-                GRID_HEADER_CELL,
-            )}
+            className={cn('hidden gap-5 border-b border-solid border-white/10 md:grid', ROW_PADDING, GRID_HEADER_CELL)}
         >
             {headers.map((h, i) => (
                 <div key={i} className={cn(i >= rightAlignFrom && 'text-right')}>
@@ -61,10 +62,8 @@ export function GridHeaderRow({
     );
 }
 
-// Stacked, labelled key/value field for the block cards' mobile layouts. The label column width mirrors
-// the Overview card's key/value grid so the cards line up.
-const FIELD_ALIGN = { baseline: 'items-baseline', center: 'items-center', start: 'items-start' } as const;
-
+// Stacked, labelled key/value field for the block cards' mobile layouts: the shared KeyValue in its
+// flat (padding-less) form so the cards line up with every other detail row.
 export function LabeledField({
     label,
     children,
@@ -72,13 +71,12 @@ export function LabeledField({
 }: {
     label: string;
     children: React.ReactNode;
-    align?: keyof typeof FIELD_ALIGN;
+    align?: 'baseline' | 'center' | 'start';
 }) {
     return (
-        <div className={cn('grid grid-cols-[clamp(100px,25%,200px)_1fr] gap-2', FIELD_ALIGN[align])}>
-            <span className="text-outer-space-300">{label}</span>
-            <span className="min-w-0">{children}</span>
-        </div>
+        <KeyValue label={label} density="flat" divider={false} align={align}>
+            {children}
+        </KeyValue>
     );
 }
 
@@ -96,7 +94,9 @@ export function CountWithPercent({ count, percent }: { count: React.ReactNode; p
     return (
         <>
             {count}
-            <span className="text-outer-space-300"> ({percent})</span>
+            {/* Non-breaking space, not a plain " ", so the gap survives the flex value column in the mobile
+                LabeledField (flexbox strips a whitespace-only node between children). */}
+            <span className="text-outer-space-300">&nbsp;({percent})</span>
         </>
     );
 }
@@ -110,7 +110,7 @@ export type ResponsiveCell = {
     mobile?: React.ReactNode;
     desktop?: React.ReactNode;
     // Mobile field alignment (see LabeledField); defaults to 'baseline'.
-    mobileAlign?: keyof typeof FIELD_ALIGN;
+    mobileAlign?: 'baseline' | 'center' | 'start';
     // Extra classes on the desktop grid cell, e.g. 'text-right', 'min-w-0', 'tabular-nums'.
     desktopClassName?: string;
     // Drop the cell from one layout: a desktop-only column (pinned/first cell) or a mobile-only field
@@ -138,8 +138,8 @@ export function ResponsiveGridRow({
     desktopClassName?: string;
 }) {
     return (
-        <div className="border-b border-solid border-white/10 last:border-b-0">
-            <div className={cnPrefixed('flex flex-col gap-1 px-3 py-3 md:hidden md:px-4', mobileClassName)}>
+        <DataListRow>
+            <div className={cnPrefixed('flex flex-col gap-1 md:hidden', ROW_PADDING, mobileClassName)}>
                 {pinnedTopRight}
                 {cells
                     .filter(cell => !cell.hideMobile)
@@ -152,7 +152,7 @@ export function ResponsiveGridRow({
 
             <div
                 style={gridStyle}
-                className={cnPrefixed('hidden items-start gap-5 px-3 py-2.5 md:grid md:px-4', desktopClassName)}
+                className={cnPrefixed('hidden items-start gap-5 md:grid', ROW_PADDING, desktopClassName)}
             >
                 {cells
                     .filter(cell => !cell.hideDesktop)
@@ -162,14 +162,14 @@ export function ResponsiveGridRow({
                         </div>
                     ))}
             </div>
-        </div>
+        </DataListRow>
     );
 }
 
 // "Load More" footer shared by the paginated block grid cards.
 export function LoadMoreButton({ onClick }: { onClick: () => void }) {
     return (
-        <div className="border-t border-solid border-white/10 px-3 py-4 md:px-4">
+        <div className="px-3 py-4 md:border-t md:border-solid md:border-white/10">
             <Button ui="dashkit" variant="primary" className="w-full" onClick={onClick}>
                 Load More
             </Button>

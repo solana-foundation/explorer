@@ -12,9 +12,10 @@ import {
     ResponsiveGridRow,
     TIGHT_CARD,
 } from '@/app/components/block/shared';
-import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Card } from '@/app/shared/ui/Card';
+import { DataListCard } from '@/app/shared/ui/DataListCard';
+import { KeyValue } from '@/app/shared/ui/key-value';
 
 type ProgramStats = {
     ixFrequency: Map<string, number>;
@@ -105,10 +106,9 @@ function ProgramStatsCollapsible({ stats }: { stats: ProgramStats }) {
         <CollapsibleSection title="Block Program Stats" collapsible={false} className="">
             <Card variant="tight" className={TIGHT_CARD}>
                 {rows.map(([label, value], i) => (
-                    <Row key={label} divider={i < rows.length - 1}>
-                        <Label>{label}</Label>
-                        <Value mono={false}>{value}</Value>
-                    </Row>
+                    <KeyValue key={label} label={label} divider={i < rows.length - 1}>
+                        {value}
+                    </KeyValue>
                 ))}
             </Card>
         </CollapsibleSection>
@@ -137,27 +137,25 @@ function ProgramsCollapsible({ stats }: { stats: ProgramStats }) {
     if (showSuccessRate) headers.push({ help: successHelp, label: 'Success' });
 
     return (
-        <CollapsibleSection title="Block Programs" collapsible={false} className="">
-            <Card variant="tight" className={TIGHT_CARD}>
-                <div className="text-sm text-white">
-                    <GridHeaderRow headers={headers} style={gridStyle} rightAlignFrom={1} />
+        <DataListCard title="Block Programs" collapsible={false} breakpoint="md">
+            <div className="text-sm text-white">
+                <GridHeaderRow headers={headers} style={gridStyle} rightAlignFrom={1} />
 
-                    {programEntries.map(([programId, txFreq]) => (
-                        <ProgramRow
-                            key={programId}
-                            programId={programId}
-                            txFreq={txFreq}
-                            ixFreq={ixFrequency.get(programId) as number}
-                            successes={txSuccesses.get(programId) || 0}
-                            totalTransactions={totalTransactions}
-                            totalInstructions={totalInstructions}
-                            showSuccessRate={showSuccessRate}
-                            gridStyle={gridStyle}
-                        />
-                    ))}
-                </div>
-            </Card>
-        </CollapsibleSection>
+                {programEntries.map(([programId, txFreq]) => (
+                    <ProgramRow
+                        key={programId}
+                        programId={programId}
+                        txFreq={txFreq}
+                        ixFreq={ixFrequency.get(programId) as number}
+                        successes={txSuccesses.get(programId) || 0}
+                        totalTransactions={totalTransactions}
+                        totalInstructions={totalInstructions}
+                        showSuccessRate={showSuccessRate}
+                        gridStyle={gridStyle}
+                    />
+                ))}
+            </div>
+        </DataListCard>
     );
 }
 

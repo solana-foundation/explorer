@@ -1,25 +1,25 @@
 'use client';
 
-import { Signature } from '@components/common/Signature';
-import { Slot } from '@components/common/Slot';
-import { HistoryCardFooter, HistoryCardHeader } from '@shared/ui/HistoryCard';
-import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { type ReactNode } from 'react';
 
-import { Badge } from '@/app/components/shared/ui/badge';
-import { RelativeTime } from '@/app/shared/RelativeTime';
-import { Card } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { cn } from '@/app/components/shared/utils';
+import { DataListCard } from '@/app/shared/ui/DataListCard';
+import { HistoryCardFooterContent } from '@/app/shared/ui/HistoryCard';
+import { ROW_PADDING } from '@/app/shared/ui/spacing';
+
+export const STATUS_BADGE = {
+    failed: { label: 'Failed', variant: 'warning' },
+    success: { label: 'Success', variant: 'success' },
+} as const;
+
+export type TransactionStatus = keyof typeof STATUS_BADGE;
 
 export type TransactionHistoryRowView = {
     signature: string;
     slot: number;
     blockTime: number | null | undefined;
-    status: 'success' | 'failed';
-    // Cells whose content needs per-row hooks (lazy, on-visible / on-hover fetching), injected by the
-    // container so this card stays pure.
-    instructionsCell: ReactNode;
-    rawDataCell: ReactNode;
+    status: TransactionStatus;
 };
 
 export type BaseTransactionHistoryCardProps = {
@@ -30,7 +30,18 @@ export type BaseTransactionHistoryCardProps = {
     onLoadMore: () => void;
     headerActions?: ReactNode;
     headerSubRow?: ReactNode;
+    renderRow: (row: TransactionHistoryRowView, hasTimestamps: boolean) => ReactNode;
 };
+
+// Desktop (lg+) column track shared by the header and every row so they stay aligned: the signature
+// column takes the slack; Time (only when a row has a timestamp), Block and Size are fixed-share tracks
+// mirroring the previous table's column widths. Below lg the rows render as stacked cards, so this is
+// scoped to `lg:`.
+export function historyGridCols(hasTimestamps: boolean): string {
+    return hasTimestamps
+        ? 'lg:grid-cols-[minmax(0,1fr)_minmax(190px,26%)_minmax(150px,19%)_minmax(120px,16%)]'
+        : 'lg:grid-cols-[minmax(0,1fr)_minmax(150px,19%)_minmax(120px,16%)]';
+}
 
 export function BaseTransactionHistoryCard({
     rows,
@@ -40,89 +51,59 @@ export function BaseTransactionHistoryCard({
     onLoadMore,
     headerActions,
     headerSubRow,
+    renderRow,
 }: BaseTransactionHistoryCardProps) {
     const hasTimestamps = rows.some(row => row.blockTime);
+    const isEmpty = rows.length === 0;
 
-    return (
-        <Card ui="dashkit">
-            <HistoryCardHeader
-                title="Transaction History"
-                analyticsSection="transaction_history_header"
-                refresh={onRefresh}
-                fetching={fetching}
-                actions={headerActions}
-                subHeader={headerSubRow}
-            />
-            <BaseTable ui="dashkit" variant="card" nowrap>
-                <BaseTable.Head>
-                    <BaseTable.Row>
-                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">
-                            Transaction Signature
-                        </BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="w-px text-dk-gray-700">Block</BaseTable.HeaderCell>
-                        {hasTimestamps && (
-                            <>
-                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Age</BaseTable.HeaderCell>
-                                <BaseTable.HeaderCell className="w-px text-dk-gray-700">Timestamp</BaseTable.HeaderCell>
-                            </>
-                        )}
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Result</BaseTable.HeaderCell>
-                        <BaseTable.HeaderCell className="text-dk-gray-700">Raw Data</BaseTable.HeaderCell>
-                    </BaseTable.Row>
-                </BaseTable.Head>
-                <BaseTable.Body>
-                    {rows.map(row => (
-                        <TransactionRow key={row.signature} row={row} hasTimestamps={hasTimestamps} />
-                    ))}
-                </BaseTable.Body>
-            </BaseTable>
-            <HistoryCardFooter fetching={fetching} foundOldest={foundOldest} loadMore={onLoadMore} />
-        </Card>
-    );
-}
-
-// Domain status → how the Result column renders it. The card owns this mapping so Badge's variant
-// names ('warning' for a failed tx) never leak into the row's data model.
-const STATUS_BADGE = {
-    failed: { label: 'Failed', variant: 'warning' },
-    success: { label: 'Success', variant: 'success' },
-} as const;
-
-function TransactionRow({
-    row: { signature, slot, blockTime, status, instructionsCell, rawDataCell },
-    hasTimestamps,
-}: {
-    row: TransactionHistoryRowView;
-    hasTimestamps: boolean;
-}) {
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell>
-                <Signature signature={signature} link />
-                {instructionsCell}
-            </BaseTable.Cell>
-
-            <BaseTable.Cell className="w-px">
-                <Slot slot={slot} link />
-            </BaseTable.Cell>
-
-            {hasTimestamps && (
-                <>
-                    <BaseTable.Cell className="text-dk-gray-700">
-                        {blockTime ? <RelativeTime date={unixTimestampToMs(blockTime)} /> : '---'}
-                    </BaseTable.Cell>
-                    <BaseTable.Cell className="text-dk-gray-700">
-                        {blockTime ? displayTimestampUtc(unixTimestampToMs(blockTime), true) : '---'}
-                    </BaseTable.Cell>
-                </>
+    const header = !isEmpty ? (
+        <div
+            className={cn(
+                'hidden items-baseline gap-4 border-0 border-b border-solid border-white/10 text-xs uppercase text-outer-space-300 lg:grid',
+                ROW_PADDING,
+                historyGridCols(hasTimestamps),
             )}
+        >
+            <div>Transaction Signature</div>
+            {hasTimestamps && <div>Time</div>}
+            <div>Block</div>
+            <div>Size (bytes)</div>
+        </div>
+    ) : undefined;
 
-            <BaseTable.Cell>
-                <Badge ui="dashkit" variant={STATUS_BADGE[status].variant}>
-                    {STATUS_BADGE[status].label}
-                </Badge>
-            </BaseTable.Cell>
-            <BaseTable.Cell>{rawDataCell}</BaseTable.Cell>
-        </BaseTable.Row>
+    const footer = (
+        <div
+            className={cn(
+                // Mobile: no outer card frame, so no top divider and no horizontal padding.
+                // Desktop: the footer sits inside the card, so add the top divider + padding.
+                'border-0 border-solid border-dark-border px-0 py-3 lg:px-3',
+                !isEmpty && 'lg:border-t',
+                isEmpty && 'py-12',
+            )}
+        >
+            <HistoryCardFooterContent fetching={fetching} foundOldest={foundOldest} loadMore={onLoadMore} />
+        </div>
+    );
+
+    return (
+        <DataListCard
+            title="Transaction History"
+            collapsible={false}
+            actions={
+                <>
+                    {headerActions}
+                    <RefreshButton
+                        analyticsSection="transaction_history_header"
+                        onClick={onRefresh}
+                        fetching={fetching}
+                    />
+                </>
+            }
+            belowTitle={headerSubRow ? <div className="flex flex-wrap gap-2">{headerSubRow}</div> : undefined}
+            header={header}
+            footer={footer}
+        >
+            {rows.map(row => renderRow(row, hasTimestamps))}
+        </DataListCard>
     );
 }
