@@ -194,7 +194,7 @@ function ValueRow({ label, testId, value }: { label: string; testId: string; val
     return (
         <BaseTable.Row data-testid={testId}>
             <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell colSpan={2} className="text-right font-mono text-xs">
+            <BaseTable.Cell colSpan={2} className="font-mono text-xs md:text-right">
                 {value}
             </BaseTable.Cell>
         </BaseTable.Row>

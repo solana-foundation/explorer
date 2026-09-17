@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
-import { HashValue } from '../HashValue';
+import { TruncatedValue } from '../TruncatedValue';
 
 const EXAMPLE_HASH = '7039867918bfbbe1aade33c02140c617247df2bb1528f38c66b642a2253c965b';
 
 const meta = {
-    component: HashValue,
+    component: TruncatedValue,
     tags: ['autodocs', 'test'],
-    title: 'Components/Common/HashValue',
-} satisfies Meta<typeof HashValue>;
+    title: 'Components/Shared/TruncatedValue',
+} satisfies Meta<typeof TruncatedValue>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -38,7 +38,25 @@ export const Truncated: Story = {
     },
     decorators: [
         Story => (
-            // narrow container should trigger hash string truncation.
+            // narrow container should trigger value truncation.
+            <div style={{ width: 200 }}>
+                <Story />
+            </div>
+        ),
+    ],
+    async play({ canvasElement }) {
+        const canvas = within(canvasElement);
+        expect(canvas.getByText('70398…c965b')).toBeInTheDocument();
+    },
+};
+
+export const TruncatedWithCustomChars: Story = {
+    args: {
+        truncation: { enabled: true, midTruncateChars: 8 },
+        value: EXAMPLE_HASH,
+    },
+    decorators: [
+        Story => (
             <div style={{ width: 200 }}>
                 <Story />
             </div>
@@ -47,5 +65,23 @@ export const Truncated: Story = {
     async play({ canvasElement }) {
         const canvas = within(canvasElement);
         expect(canvas.getByText('70398679…253c965b')).toBeInTheDocument();
+    },
+};
+
+export const Linked: Story = {
+    args: {
+        href: '/tx/example',
+        value: EXAMPLE_HASH,
+    },
+    decorators: [
+        Story => (
+            <div style={{ width: 200 }}>
+                <Story />
+            </div>
+        ),
+    ],
+    async play({ canvasElement }) {
+        const canvas = within(canvasElement);
+        expect(canvas.getByRole('link', { name: '70398…c965b' })).toHaveAttribute('href', '/tx/example');
     },
 };
