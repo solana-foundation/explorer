@@ -138,6 +138,7 @@ describe('BaseBufferAccountCard', () => {
         );
 
         expect(screen.getByTestId('pmp-account-buffer-incomplete-note')).toHaveTextContent('incomplete');
+        expect(screen.queryByTestId('pmp-payload-data-hash')).not.toBeInTheDocument();
     });
 
     it('should report a failed read of the buffer itself', () => {
@@ -167,6 +168,7 @@ describe('BaseBufferAccountCard', () => {
         expect(screen.getByTestId('pmp-account-buffer-unpack-error-note')).toHaveTextContent(
             'invalid distance too far back',
         );
+        expect(screen.queryByTestId('pmp-payload-data-hash')).not.toBeInTheDocument();
     });
 
     it('should say the payload expands past the unpack limit', () => {
@@ -185,7 +187,7 @@ describe('BaseBufferAccountCard', () => {
             <BaseBufferAccountCard
                 {...bufferArgs(pack(YAML_DOC, Compression.Gzip))}
                 configFromBytes={{
-                    result: { budget: 2, bytes: new Uint8Array([1, 2, 3]), kind: 'oversized' },
+                    result: { budget: 2, bytes: new Uint8Array([1, 2, 3]), dataHash: 'deadbeef', kind: 'oversized' },
                     status: 'ready',
                 }}
             />,
@@ -193,5 +195,16 @@ describe('BaseBufferAccountCard', () => {
 
         expect(screen.getByTestId('pmp-account-payload-too-large')).toHaveTextContent('3 bytes, limit 2');
         expect(screen.getByTestId('pmp-account-raw')).toBeInTheDocument();
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent('deadbeef');
+    });
+
+    it('should show the payload data hash for a compressed buffer', () => {
+        const body = pack(YAML_DOC, Compression.Gzip);
+        const resolved = resolveBufferConfigFromBytes(body);
+        if (resolved.kind !== 'text') throw new Error(`expected a text payload, got "${resolved.kind}"`);
+
+        render(<BaseBufferAccountCard {...bufferArgs(body)} />);
+
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(resolved.dataHash);
     });
 });
