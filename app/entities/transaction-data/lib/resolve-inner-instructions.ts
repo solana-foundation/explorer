@@ -9,14 +9,11 @@ import { compiledToTransactionInstruction } from './compiled-to-transaction-inst
 
 /**
  * Decompiles a transaction's inner instructions, keyed by the index of the top-level
- * instruction that invoked them. A `Map` because most instructions invoke nothing, and
- * a record would type the misses as hits.
+ * instruction that invoked them.
  *
- * Nothing forbids the source from reporting one parent index over several groups, so the
- * groups concatenate in arrival order rather than the later one replacing the earlier.
- *
- * A child that cannot be resolved stays in place as `undefined` rather than being
- * dropped, so it does not renumber the siblings after it.
+ * A `Map` because most instructions invoke nothing, and a record would type the misses as hits.
+ * A child that cannot be resolved holds its slot as `undefined`, so it does not renumber the
+ * siblings after it.
  */
 export function resolveInnerInstructions(
     compiledInnerInstructions: CompiledInnerInstruction[],

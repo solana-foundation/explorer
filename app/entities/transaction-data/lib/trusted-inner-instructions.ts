@@ -13,6 +13,9 @@ export function trustedInnerInstructions<T>(
     { cluster, slot }: { cluster: Cluster; slot: number },
 ): T[] | undefined {
     if (!innerInstructions) return undefined;
-    if (cluster === Cluster.MainnetBeta && slot < INNER_INSTRUCTIONS_START_SLOT) return undefined;
+    if (cluster !== Cluster.MainnetBeta) return innerInstructions;
+    // A slot the source did not supply reads as `NaN`, and every comparison against `NaN` is false,
+    // so it would pass the range check below. Reject a slot that is not a number first.
+    if (!Number.isFinite(slot) || slot < INNER_INSTRUCTIONS_START_SLOT) return undefined;
     return innerInstructions;
 }

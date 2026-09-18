@@ -70,8 +70,8 @@ describe('Inspector InstructionsSection with inner instructions', () => {
             </ScrollAnchorProvider>,
         );
 
-        // The header only renders when the parent card is handed children — the bug was
-        // that the inspector built none unless they were Squads token batches.
+        // The header renders only when the parent card is handed children, so it stands in for
+        // the section having built any.
         expect(await screen.findByText(/Inner Instructions/i)).toBeInTheDocument();
 
         // One card per CPI the RPC reported, numbered under its parent.
@@ -107,7 +107,12 @@ describe('Inspector InstructionsSection with inner instructions', () => {
             </ScrollAnchorProvider>,
         );
 
-        expect(await screen.findByText(/Token Program: Batch \(1 instruction\)/i)).toBeInTheDocument();
+        const title = await screen.findByText(/Token Program: Batch \(1 instruction\)/i);
+
+        // The badge sits beside the title in the card header, so reading the number off that element
+        // reads the batch card's own, not a sibling's.
+        // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
+        expect(title.parentElement).toHaveTextContent('#1.1');
     });
 
     test('should number a child it cannot decompile so the siblings keep their positions', async () => {
