@@ -22,9 +22,9 @@ export type AgGenesisCertAnswer =
 
 const METHOD = 'getAgGenesisCert';
 
-// Some providers decline an unsupported method with an HTTP status instead of a JSON-RPC error. kit
-// throws on the status, so the body never reaches the classifier.
-const NOT_SERVED = 404;
+// An RPC that does not support this call may return 404 instead of a JSON-RPC error. kit throws on
+// the status, so the body never reaches the classifier.
+const NOT_FOUND = 404;
 
 // Some endpoints rate-limit this method alone while still serving others.
 const RATE_LIMITED = 429;
@@ -69,7 +69,7 @@ function classifyDecline(error: unknown): AgGenesisCertAnswer | undefined {
     if (!isSolanaError(error, SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR)) return undefined;
 
     const { statusCode } = error.context;
-    if (statusCode === NOT_SERVED) return { kind: 'unsupported' };
+    if (statusCode === NOT_FOUND) return { kind: 'unsupported' };
     if (statusCode === RATE_LIMITED || UNAUTHORIZED.includes(statusCode)) {
         // A rate limit can be raised and a key can be corrected, unlike an unsupported method.
         Logger.warn(`[alpenglow] ${METHOD} was refused at this endpoint`, { status: statusCode });
