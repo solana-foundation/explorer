@@ -31,7 +31,6 @@
         "vitest": "catalog:vitest"
     },
     "peerDependencies": {
-        "@solana/kit": "^8.3.0",
-        "@solana/web3.js": "^1.99.0"
+        "@solana/kit": "^8.3.0"
     }
 }
