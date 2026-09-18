@@ -163,6 +163,10 @@ const TransactionAccountRow = React.memo(function TransactionAccountRow({
 
     const toggleExpanded = () => setExpandedState(state => (state === 'open' ? 'closed' : 'open'));
 
+    // The desktop layout hides the slideover, so the stored state must follow it. Otherwise a
+    // viewport that returns to mobile reopens the slideover with no user action.
+    if (isDesktop && slideover === 'open') setSlideover('closed');
+
     const handleRowClick = () => {
         if (isDesktop) {
             toggleExpanded();
@@ -260,7 +264,7 @@ const TransactionAccountRow = React.memo(function TransactionAccountRow({
                     index={index}
                     message={message}
                     onOpenChange={open => setSlideover(open ? 'open' : 'closed')}
-                    open={!isDesktop && slideover === 'open'}
+                    open={slideover === 'open'}
                 />
             )}
         </>
