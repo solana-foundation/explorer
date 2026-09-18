@@ -46,7 +46,7 @@ export function AccountDetailDrawer({ account, index, message, onOpenChange, ope
                 <div className="break-all font-mono text-xl leading-snug text-white">{nickname ?? address}</div>
                 {nickname && <span className="break-all text-sm text-outer-space-300">{address}</span>}
             </div>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 empty:hidden">
                 <AccountBadges index={index} account={account} message={message} pubkey={pubkey} />
             </div>
         </Drawer.Header>

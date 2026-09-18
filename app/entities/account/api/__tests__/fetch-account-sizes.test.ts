@@ -5,8 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchAccountSizes } from '../fetch-account-sizes';
 
 const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
-const MOCK_PUBKEY_1 = PublicKey.default;
-const MOCK_PUBKEY_2 = gen.publicKey(1);
+const ADDRESS_1 = PublicKey.default.toBase58();
+const ADDRESS_2 = gen.publicKey(1).toBase58();
 
 const mockGetMultipleAccounts = vi.fn();
 
@@ -30,10 +30,10 @@ describe('fetchAccountSizes', () => {
     it('should request a zero-length data slice so no account bytes are transferred', async () => {
         mockGetMultipleAccounts.mockResolvedValue([null]);
 
-        await fetchAccountSizes([MOCK_PUBKEY_1], MAINNET_URL);
+        await fetchAccountSizes([ADDRESS_1], MAINNET_URL);
 
         expect(mockGetMultipleAccounts).toHaveBeenCalledWith(
-            [MOCK_PUBKEY_1.toBase58()],
+            [ADDRESS_1],
             expect.objectContaining({ dataSlice: { length: 0, offset: 0 }, encoding: 'base64' }),
         );
     });
@@ -44,20 +44,20 @@ describe('fetchAccountSizes', () => {
             { data: ['', 'base64'], space: 0n },
         ]);
 
-        const sizes = await fetchAccountSizes([MOCK_PUBKEY_1, MOCK_PUBKEY_2], MAINNET_URL);
+        const sizes = await fetchAccountSizes([ADDRESS_1, ADDRESS_2], MAINNET_URL);
 
-        expect(sizes.get(MOCK_PUBKEY_1.toBase58())).toBe(3681);
-        expect(sizes.get(MOCK_PUBKEY_2.toBase58())).toBe(0);
+        expect(sizes.get(ADDRESS_1)).toBe(3681);
+        expect(sizes.get(ADDRESS_2)).toBe(0);
     });
 
     // The default commitment is behind, so an account created moments ago would read as missing.
     it('should request sizes at the confirmed commitment', async () => {
         mockGetMultipleAccounts.mockResolvedValue([null]);
 
-        await fetchAccountSizes([MOCK_PUBKEY_1], MAINNET_URL);
+        await fetchAccountSizes([ADDRESS_1], MAINNET_URL);
 
         expect(mockGetMultipleAccounts).toHaveBeenCalledWith(
-            [MOCK_PUBKEY_1.toBase58()],
+            [ADDRESS_1],
             expect.objectContaining({ commitment: 'confirmed' }),
         );
     });
@@ -65,18 +65,18 @@ describe('fetchAccountSizes', () => {
     it('should omit an account whose size the node does not report', async () => {
         mockGetMultipleAccounts.mockResolvedValue([{ data: ['', 'base64'] }, { data: ['', 'base64'], space: 82n }]);
 
-        const sizes = await fetchAccountSizes([MOCK_PUBKEY_1, MOCK_PUBKEY_2], MAINNET_URL);
+        const sizes = await fetchAccountSizes([ADDRESS_1, ADDRESS_2], MAINNET_URL);
 
-        expect(sizes.has(MOCK_PUBKEY_1.toBase58())).toBe(false);
-        expect(sizes.get(MOCK_PUBKEY_2.toBase58())).toBe(82);
+        expect(sizes.has(ADDRESS_1)).toBe(false);
+        expect(sizes.get(ADDRESS_2)).toBe(82);
     });
 
     it('should omit accounts that do not exist', async () => {
         mockGetMultipleAccounts.mockResolvedValue([null, { data: ['', 'base64'], space: 82n }]);
 
-        const sizes = await fetchAccountSizes([MOCK_PUBKEY_1, MOCK_PUBKEY_2], MAINNET_URL);
+        const sizes = await fetchAccountSizes([ADDRESS_1, ADDRESS_2], MAINNET_URL);
 
-        expect(sizes.has(MOCK_PUBKEY_1.toBase58())).toBe(false);
-        expect(sizes.get(MOCK_PUBKEY_2.toBase58())).toBe(82);
+        expect(sizes.has(ADDRESS_1)).toBe(false);
+        expect(sizes.get(ADDRESS_2)).toBe(82);
     });
 });

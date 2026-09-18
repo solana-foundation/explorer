@@ -1,6 +1,5 @@
 import { getRpc } from '@entities/cluster/@x/account';
 import { address } from '@solana/kit';
-import { PublicKey } from '@solana/web3.js';
 
 import { toByteCount } from '@/app/shared/lib/bytes';
 
@@ -13,12 +12,12 @@ const SIZE_ONLY = {
 } as const;
 
 export async function fetchAccountSizes(
-    pubkeys: PublicKey[],
+    addresses: readonly string[],
     clusterUrl: string,
 ): Promise<ReadonlyMap<string, number>> {
     const { value: infos } = await getRpc(clusterUrl)
         .getMultipleAccounts(
-            pubkeys.map(pubkey => address(pubkey.toBase58())),
+            addresses.map(candidate => address(candidate)),
             SIZE_ONLY,
         )
         .send();
@@ -27,7 +26,7 @@ export async function fetchAccountSizes(
     infos.forEach((info, i) => {
         const size = info ? toByteCount(info.space) : undefined;
         if (size !== undefined) {
-            sizes.set(pubkeys[i].toBase58(), size);
+            sizes.set(addresses[i], size);
         }
     });
     return sizes;
