@@ -12,6 +12,7 @@ import { SolBalance } from '@components/common/SolBalance';
 import { RawDataField } from '@components/shared/RawDataField';
 import { cn } from '@components/shared/utils';
 import { useLazyRawAccountData } from '@entities/account';
+import { isResolvedLookupTable, rowAddresses } from '@entities/transaction-data';
 import {
     useAccountInfo,
     useAccountInfos,
@@ -41,7 +42,6 @@ import { FetchStatus } from '@/app/providers/cache';
 import { AccountDetailSlideover } from './AccountDetailSlideover';
 import { AddressFromLookupTableWithContext } from './AddressWithContext';
 import { LG_ONLY_CARD } from './inspector-table';
-import { isResolvedLookupTable, rowAddresses } from './row-addresses';
 import { hasReliableChanges, simulationFailureMessage } from './simulation-changes';
 import { SimulationHint } from './SimulationHint';
 
