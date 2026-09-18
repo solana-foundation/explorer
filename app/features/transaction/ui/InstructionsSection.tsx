@@ -26,7 +26,7 @@ import { TxInstructionSurface } from '@entities/instruction-card';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { isZkElGamalProofInstruction } from '@entities/zk-elgamal-proof';
 import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
-import { isPythInstruction } from '@explorer/decoder-pyth/detection';
+import { isPythProgramId } from '@explorer/decoder-pyth/detection';
 import {
     getSerumInstructionLabel,
     isDeprecatedSerumProgram,
@@ -347,15 +347,19 @@ function InstructionCard({
     if (isWormholeInstruction(transactionIx)) {
         return <WormholeDetailsCard key={key} {...props} />;
     }
-    if (isPythInstruction(transactionIx)) {
+    if (isPythProgramId(transactionIx.programId.toBase58())) {
+        const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
+        if (!dispatched) {
+            return <UnknownDetailsCard key={key} {...props} />;
+        }
         return (
             <PythDetailsCard
                 key={key}
-                ix={transactionIx}
+                ix={dispatched}
+                raw={transactionIx}
                 index={index}
                 innerCards={innerCards}
                 childIndex={childIndex}
-                signature={signature}
             />
         );
     }
