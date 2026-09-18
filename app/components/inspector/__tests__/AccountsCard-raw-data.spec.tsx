@@ -59,7 +59,7 @@ describe('inspector::AccountsCard raw data', () => {
     test('should read the sizes from a request that carries no account bytes', async () => {
         renderCard();
 
-        await screen.findAllByRole('button', { name: '4 bytes' });
+        await findRenderedSizes();
 
         expect(mockGetMultipleAccounts).toHaveBeenCalledWith(
             expect.anything(),
@@ -70,7 +70,7 @@ describe('inspector::AccountsCard raw data', () => {
     test('should read every row from one batch request', async () => {
         renderCard();
 
-        await screen.findAllByRole('button', { name: '4 bytes' });
+        await findRenderedSizes();
 
         expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(1);
     });
@@ -78,7 +78,7 @@ describe('inspector::AccountsCard raw data', () => {
     test('should not request account data while the list renders', async () => {
         renderCard();
 
-        await screen.findAllByRole('button', { name: '4 bytes' });
+        await findRenderedSizes();
 
         expect(mockGetAccountInfo).not.toHaveBeenCalled();
     });
@@ -104,8 +104,8 @@ describe('inspector::AccountsCard raw data', () => {
             );
 
         renderCard(overOneBatchOfAccounts(150));
-        await vi.waitFor(() => expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(2));
-        await screen.findAllByRole('button', { name: '4 bytes' });
+        await waitForSecondBatch();
+        await findRenderedSizes();
 
         expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
 
@@ -123,8 +123,8 @@ describe('inspector::AccountsCard raw data', () => {
             .mockRejectedValueOnce(new Error('RPC unavailable'));
 
         renderCard(overOneBatchOfAccounts(150));
-        await vi.waitFor(() => expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(2));
-        await screen.findAllByRole('button', { name: '4 bytes' });
+        await waitForSecondBatch();
+        await findRenderedSizes();
 
         expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
     });
@@ -141,7 +141,7 @@ describe('inspector::AccountsCard raw data', () => {
         });
 
         renderCard(lookupMessage(), <FetchLookupTable />);
-        await screen.findAllByRole('button', { name: '4 bytes' });
+        await findRenderedSizes();
 
         expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
 
@@ -158,7 +158,7 @@ describe('inspector::AccountsCard raw data', () => {
         );
 
         renderCard(lookupMessage(), <FetchLookupTable />);
-        await screen.findAllByRole('button', { name: '4 bytes' });
+        await findRenderedSizes();
         await screen.findAllByText('Invalid Lookup Table');
 
         expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
@@ -189,6 +189,17 @@ function renderCard(
             </ClusterProvider>
         </SWRConfig>,
     );
+}
+
+// A name filter computes an accessible name for every button on the card, so one attempt over a
+// message this size costs more than the query's own timeout.
+function findRenderedSizes() {
+    return screen.findAllByText('4 bytes');
+}
+
+// A message this size leaves the second request little margin inside the default one-second wait.
+function waitForSecondBatch() {
+    return vi.waitFor(() => expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(2), { timeout: 5000 });
 }
 
 // The provider splits a read into batches, so a count this high answers in more than one request.
