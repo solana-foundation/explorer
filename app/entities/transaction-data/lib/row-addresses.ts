@@ -1,11 +1,11 @@
 import { type AddressLookupTableAccount, type VersionedMessage } from '@solana/web3.js';
 
-// The provider resolves a table to a string when it cannot parse one, and to undefined while it loads.
+// The caller resolves a table to a string when it cannot parse one, and to undefined while it loads.
 type ResolvedLookupTable = readonly [AddressLookupTableAccount | string | undefined, unknown] | undefined;
 
 /**
- * Addresses of every row the Account List renders, in row order and without repeats. A key that is both
- * static and looked up must not be counted twice in the size total.
+ * Every account a message references, in row order and without repeats. A key that is both static and
+ * looked up must not be counted twice in a caller's size total.
  */
 export function rowAddresses(message: VersionedMessage, lookupTables: readonly ResolvedLookupTable[]): string[] {
     const addresses = new Set(message.staticAccountKeys.map(pubkey => pubkey.toBase58()));
@@ -23,7 +23,7 @@ export function rowAddresses(message: VersionedMessage, lookupTables: readonly R
     return Array.from(addresses);
 }
 
-/** A table that contributes rows. Everything else the provider resolves to carries no addresses. */
+/** A table that contributes addresses. Everything else the caller resolves to carries none. */
 export function isResolvedLookupTable(
     table: ResolvedLookupTable,
 ): table is readonly [AddressLookupTableAccount, unknown] {

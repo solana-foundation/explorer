@@ -25,6 +25,7 @@ import { AccountExpandedContent } from './AccountExpandedContent';
 
 type TransactionAccountRowProps = {
     account: ParsedMessageAccount;
+    address: string;
     index: number;
     isDesktop: boolean;
     message: ParsedMessage;
@@ -32,8 +33,23 @@ type TransactionAccountRowProps = {
     pre: number;
 };
 
-function TransactionAccountRow({ account, index, isDesktop, message, post, pre }: TransactionAccountRowProps) {
-    const [expanded, setExpanded] = useState(false);
+// A row builds its expanded content when it first opens it, so a list of accounts carries no expanded
+// content for a row nobody touched.
+type DetailsState = 'closed' | 'open' | 'unmounted';
+
+// The card re-renders when the account sizes arrive and on every cluster or transaction cache
+// change, and a row's props hold across all three.
+const TransactionAccountRow = React.memo(function TransactionAccountRow({
+    account,
+    address,
+    index,
+    isDesktop,
+    message,
+    post,
+    pre,
+}: TransactionAccountRowProps) {
+    const [expandedState, setExpandedState] = useState<DetailsState>('unmounted');
+    const expanded = expandedState === 'open';
     const [drawerOpen, setDrawerOpen] = useState(false);
     // Mount the mobile drawer only once the row is first tapped — otherwise every account row mounts a
     // closed drawer up front.
@@ -46,19 +62,13 @@ function TransactionAccountRow({ account, index, isDesktop, message, post, pre }
     }, [isDesktop]);
 
     const pubkey = account.pubkey;
-    const key = pubkey.toBase58();
     const delta = new BigNumber(post).minus(new BigNumber(pre));
 
-    const hasBadges =
-        index === 0 ||
-        account.signer ||
-        account.writable ||
-        message.instructions.some(ix => ix.programId.equals(pubkey)) ||
-        account.source === 'lookupTable';
+    const toggleExpanded = () => setExpandedState(state => (state === 'open' ? 'closed' : 'open'));
 
     const handleRowClick = () => {
         if (isDesktop) {
-            setExpanded(v => !v);
+            toggleExpanded();
         } else {
             setDrawerMounted(true);
             setDrawerOpen(true);
@@ -84,11 +94,9 @@ function TransactionAccountRow({ account, index, isDesktop, message, post, pre }
                                 noCopy={!isDesktop}
                             />
                         </div>
-                        {hasBadges && (
-                            <span className="mb-0.5 mt-1 inline-flex flex-wrap gap-1">
-                                <AccountBadges index={index} message={message} pubkey={pubkey} account={account} />
-                            </span>
-                        )}
+                        <span className="mb-0.5 mt-1 inline-flex flex-wrap gap-1 empty:hidden">
+                            <AccountBadges index={index} message={message} pubkey={pubkey} account={account} />
+                        </span>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-0.5 whitespace-nowrap text-right">
                         <BalanceDelta delta={delta} isSol />
@@ -102,7 +110,7 @@ function TransactionAccountRow({ account, index, isDesktop, message, post, pre }
                             className="!h-5 !w-5 [&_svg]:size-4"
                             onClick={e => {
                                 e.stopPropagation();
-                                setExpanded(v => !v);
+                                toggleExpanded();
                             }}
                             size="icon"
                             variant="ghost"
@@ -127,7 +135,9 @@ function TransactionAccountRow({ account, index, isDesktop, message, post, pre }
                     )}
                 >
                     <div className="min-h-0 overflow-hidden">
-                        <AccountExpandedContent flat address={key} enabled={expanded} />
+                        {expandedState !== 'unmounted' && (
+                            <AccountExpandedContent flat address={address} enabled={expanded} />
+                        )}
                     </div>
                 </div>
             </DataListRow>
@@ -143,7 +153,7 @@ function TransactionAccountRow({ account, index, isDesktop, message, post, pre }
             )}
         </>
     );
-}
+});
 
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
@@ -157,11 +167,17 @@ export function AccountsCard({ signature }: SignatureProps) {
     const message = transactionWithMeta?.transaction.message;
     const meta = transactionWithMeta?.meta;
 
-    const pubkeys = useMemo(() => message?.accountKeys.map(a => a.pubkey) ?? [], [message?.accountKeys]);
+    // The row key, the row itself and the sizes request all need the base58 of each account, and
+    // `toBase58` re-encodes on every call, so the card mints each string once.
+    const accounts = useMemo(
+        () => message?.accountKeys.map(account => ({ account, address: account.pubkey.toBase58() })) ?? [],
+        [message?.accountKeys],
+    );
+    const addresses = useMemo(() => accounts.map(({ address }) => address), [accounts]);
 
     // Sizes feed the footer total only, so a failed fetch drops the footer and leaves the rows
     // untouched.
-    const { sizes, loading } = useAccountSizes(pubkeys, url);
+    const { sizes, loading } = useAccountSizes(addresses, url);
 
     const totalAccountSize = useMemo(
         () => Array.from(sizes.values()).reduce((total, size) => total + size, 0),
@@ -176,11 +192,12 @@ export function AccountsCard({ signature }: SignatureProps) {
         return <ErrorCard text="Transaction metadata is missing" />;
     }
 
-    const accountRows = message.accountKeys.map((account, index) => {
+    const accountRows = accounts.map(({ account, address }, index) => {
         return (
             <TransactionAccountRow
-                key={account.pubkey.toBase58()}
+                key={address}
                 account={account}
+                address={address}
                 index={index}
                 isDesktop={isDesktop}
                 message={message}
