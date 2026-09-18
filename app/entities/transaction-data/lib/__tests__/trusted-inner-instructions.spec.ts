@@ -28,6 +28,11 @@ describe('trustedInnerInstructions', () => {
         }
     });
 
+    it('should report nothing when the source supplied no slot to check against', () => {
+        // An absent slot reaches this as `NaN`, which passes a range check rather than failing one.
+        expect(trustedInnerInstructions(GROUPS, { cluster: Cluster.MainnetBeta, slot: NaN })).toBeUndefined();
+    });
+
     it('should keep an absent list absent rather than reporting an empty one', () => {
         // The RPC types spell an absent list `null`, the inspector's own path `undefined`.
         expect(trustedInnerInstructions(null, { cluster: Cluster.Devnet, slot: 1 })).toBeUndefined();

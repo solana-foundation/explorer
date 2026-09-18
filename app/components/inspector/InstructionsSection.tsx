@@ -84,6 +84,9 @@ export function InstructionsSection({
     // `useAddressLookupTables` rebuilds its array, and every account in it, on each render, so the decode
     // below keys on what the tables hold rather than on their identity. Without that the instructions get
     // fresh identities every render and the IDL tier rebuilds an Anchor coder for each one.
+    //
+    // A table only ever grows, and every extend raises both `lastExtendedSlot` and the address count, so
+    // those two pin the addresses a given table key resolves to.
     const lookupTablesKey = lookupTables
         .map(table => `${table.key.toBase58()}:${table.state.lastExtendedSlot}:${table.state.addresses.length}`)
         .join('|');
@@ -197,8 +200,8 @@ function InspectorInstructionCard({
     // hit it draws a raw card over every curated tier below, for any program that has an IDL at all.
     const decodedByIdl = idlDecode?.kind === 'unknown' ? undefined : idlDecode;
 
-    // Named rather than spread: a spread of a props object type-checks even against a card that has
-    // stopped accepting one of them, and a dropped `innerCards` is this section's whole bug.
+    // Named rather than spread, so a card that stops accepting `childIndex` or `innerCards` fails
+    // type-checking instead of silently dropping the prop.
     const unknownCard = <UnknownDetailsCard index={index} ix={ix} childIndex={childIndex} innerCards={innerCards} />;
 
     // PMP owns every instruction on its program id: `setData`/`initialize`/`write` render decoded content from

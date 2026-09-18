@@ -149,7 +149,7 @@ export function makeSetAuthorityData(authorityType: number, newAuthority?: Publi
     return new Uint8Array([6, authorityType, 0]);
 }
 
-export function encodeSubIx(numAccounts: number, data: Uint8Array): Uint8Array {
+function encodeSubIx(numAccounts: number, data: Uint8Array): Uint8Array {
     if (data.length > 255) throw new Error(`Sub-instruction data exceeds u8 max (${data.length} bytes)`);
     const out = new Uint8Array(2 + data.length);
     out[0] = numAccounts;

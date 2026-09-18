@@ -174,7 +174,6 @@ describe('fetchRawTransaction', () => {
 
         const raw = await fetchRawTransaction(URL, SIGNATURE);
 
-        // A missing slot would read as NaN and silently pass every guard downstream.
         expect(raw?.slot).toBe(372_654_321);
     });
 
