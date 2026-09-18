@@ -169,6 +169,14 @@ describe('fetchRawTransaction', () => {
         ]);
     });
 
+    it('should carry the slot, which decides whether mainnet recorded inner instructions', async () => {
+        respondWith(transactionResult(createWeb3TransactionBytes('legacy')));
+
+        const raw = await fetchRawTransaction(URL, SIGNATURE);
+
+        expect(raw?.slot).toBe(372_654_321);
+    });
+
     it('should reject when the RPC call fails, so the provider can report the failure', async () => {
         fetchMock.mockResolvedValueOnce({
             headers: new Headers(),
