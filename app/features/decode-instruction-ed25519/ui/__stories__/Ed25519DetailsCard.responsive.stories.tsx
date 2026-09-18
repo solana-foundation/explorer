@@ -1,5 +1,6 @@
+import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { getBase58Decoder } from '@solana/kit';
-import { ParsedTransaction, PublicKey } from '@solana/web3.js';
+import { ParsedTransaction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
     withCluster,
@@ -11,15 +12,19 @@ import {
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
+import { invariant } from '@/app/shared/lib/invariant';
+
+import { ed25519InstructionParser } from '../../lib/ed25519-client';
+import { siblingDataFromParsedTransaction } from '../../lib/sibling-data';
 import { Ed25519DetailsCard } from '../Ed25519DetailsCard';
 
 const BASE58_DECODER = getBase58Decoder();
 
-const ix = {
+const ix = new TransactionInstruction({
     data: Buffer.from('01000c0001004c0001006e008a000100', 'hex'),
     keys: [],
     programId: new PublicKey('Ed25519SigVerify111111111111111111111111111'),
-};
+});
 
 const surroundingIx = {
     accounts: [],
@@ -57,7 +62,17 @@ const meta: Meta<typeof Ed25519DetailsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { childIndex: undefined, index: 0, innerCards: undefined, ix, tx };
+const dispatched = createInstructionParserDispatcher([ed25519InstructionParser]).fromTransactionInstruction(ix);
+invariant(dispatched, 'the fixture program id is registered');
+
+const args = {
+    childIndex: undefined,
+    index: 0,
+    innerCards: undefined,
+    ix: dispatched,
+    raw: ix,
+    siblingData: siblingDataFromParsedTransaction(tx),
+};
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

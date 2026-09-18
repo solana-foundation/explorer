@@ -10,9 +10,11 @@ import {
     SYSTEM_PROGRAM_LABEL,
 } from '@explorer/parsers';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
+import { Ed25519DetailsCard } from '@features/decode-instruction-ed25519';
 import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
+import { ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
 import { PythDetailsCard } from '@features/instruction-program-pyth';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
@@ -237,6 +239,20 @@ function InspectorInstructionCard({
     }
 
     if ('unknown' in parsedIx) {
+        if (parsedIx.programLabel === 'ed25519') {
+            return (
+                <Ed25519DetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    raw={ix}
+                    siblingData={siblingIndex => message.compiledInstructions[siblingIndex]?.data}
+                    index={index}
+                />
+            );
+        }
+        if (parsedIx.programLabel === 'zk-elgamal-proof') {
+            return <ZkElGamalProofDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />;
+        }
         if (parsedIx.programLabel === 'pyth') {
             return (
                 <ErrorBoundary
@@ -377,6 +393,28 @@ function InspectorInstructionCard({
                     fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
                 >
                     <PythDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />
+                </ErrorBoundary>
+            );
+        case 'ed25519':
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <Ed25519DetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        raw={ix}
+                        siblingData={siblingIndex => message.compiledInstructions[siblingIndex]?.data}
+                        index={index}
+                    />
+                </ErrorBoundary>
+            );
+        case 'zk-elgamal-proof':
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <ZkElGamalProofDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />
                 </ErrorBoundary>
             );
     }

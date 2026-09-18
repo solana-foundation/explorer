@@ -1,4 +1,5 @@
 import { TxInstructionSurface } from '@entities/instruction-card';
+import { createInstructionParserDispatcher, toParsedInstruction } from '@entities/instruction-parser';
 import { getBase58Decoder } from '@solana/kit';
 import { ParsedTransaction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen, waitFor, within } from '@testing-library/react';
@@ -15,10 +16,17 @@ import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TransactionsProvider } from '@/app/providers/transactions';
+import { invariant } from '@/app/shared/lib/invariant';
+import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
+import { ed25519InstructionParser } from '../../lib/ed25519-client';
+import { ED25519_PROGRAM_LABEL, parseEd25519Instruction } from '../../lib/ed25519-parser';
+import { siblingDataFromParsedTransaction } from '../../lib/sibling-data';
 import { Ed25519DetailsCard } from '../Ed25519DetailsCard';
 
 const BASE58_DECODER = getBase58Decoder();
+
+const dispatcher = createInstructionParserDispatcher([ed25519InstructionParser]);
 
 const PROGRAM_ID = new PublicKey('Ed25519SigVerify111111111111111111111111111');
 
@@ -164,6 +172,15 @@ function transaction(...instructions: Array<{ data: unknown }>): ParsedTransacti
     } as unknown as ParsedTransaction;
 }
 
+/** Through the dispatcher when the program id is registered; parsed directly for the foreign-program case. */
+function dispatched(ix: TransactionInstruction) {
+    const viaDispatcher = dispatcher.fromTransactionInstruction(ix);
+    if (viaDispatcher) return viaDispatcher;
+    const parsed = parseEd25519Instruction(toKitInstruction(ix));
+    invariant(parsed, 'fixture data is at least the count and padding');
+    return toParsedInstruction(parsed, ED25519_PROGRAM_LABEL, ix.programId);
+}
+
 function renderCard(ix: TransactionInstruction, tx: ParsedTransaction) {
     return render(
         <ScrollAnchorProvider>
@@ -171,7 +188,12 @@ function renderCard(ix: TransactionInstruction, tx: ParsedTransaction) {
                 <TransactionsProvider>
                     <AccountsProvider>
                         <TxInstructionSurface result={{ err: null }}>
-                            <Ed25519DetailsCard tx={tx} ix={ix} index={0} />
+                            <Ed25519DetailsCard
+                                ix={dispatched(ix)}
+                                raw={ix}
+                                siblingData={siblingDataFromParsedTransaction(tx)}
+                                index={0}
+                            />
                         </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>
