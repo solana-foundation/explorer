@@ -54,7 +54,7 @@ describe('should generate transaction page metadata', () => {
 
         expect(metadata.openGraph).toMatchObject({
             description: `Details of the Solana transaction with signature ${SIGNATURE}`,
-            title: `Transaction | ${SIGNATURE} | Solana`,
+            title: `Transaction | ${SIGNATURE.slice(0, 16)}... | Solana`,
             type: 'website',
             url: `${BASE_URL}/tx/${SIGNATURE}`,
         });
