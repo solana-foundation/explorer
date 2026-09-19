@@ -14,6 +14,10 @@ const nextConfig = {
     // Use separate build directory for dev server to avoid conflicts with production builds
     distDir: process.env.NODE_ENV === 'production' ? '.next' : '.next-dev',
     outputFileTracingRoot: projectRoot,
+    // The tx OG route reads these off disk at runtime to hand satori.
+    outputFileTracingIncludes: {
+        '/og/tx/[signature]': ['./public/fonts/**', './public/img/og/**'],
+    },
     images: {
         remotePatterns: [
             {

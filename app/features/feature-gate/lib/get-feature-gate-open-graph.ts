@@ -1,7 +1,7 @@
 import { getFeatureInfo } from '@entities/feature-gate';
+import { IMAGE_SIZE } from '@shared/lib/og/image-size';
 import type { Metadata } from 'next/types';
 
-import { IMAGE_SIZE } from '../constants';
 import { FEATURE_GATE_BASE_URL, isFeatureGateOgEnabled } from '../env';
 
 export function getFeatureGateOpenGraph(address: string): Metadata['openGraph'] | undefined {

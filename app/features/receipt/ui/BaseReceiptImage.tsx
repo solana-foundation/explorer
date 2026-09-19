@@ -1,21 +1,15 @@
+import { IMAGE_SIZE, type ImageSize } from '@shared/lib/og/image-size';
+
 import { Logo } from '@/app/shared/components/SolanaLogo';
 
 import { splitAtFirstNonZeroDigit } from '../lib/split-at-first-non-zero-digit';
 import type { FormattedReceipt } from '../types';
 import { BottomLine } from './BottomLine';
 
-export const IMAGE_SIZE = {
-    height: 630,
-    width: 1200,
-};
-
 type BaseReceiptImageProps = {
     data: FormattedReceipt | undefined;
     options?: {
-        size?: {
-            height: number;
-            width: number;
-        };
+        size?: ImageSize;
     };
 };
 
