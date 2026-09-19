@@ -39,6 +39,10 @@ export const mockFirstAvailableBlock = (block?: bigint): bigint => block ?? gen.
 
 /** Creates a mock RPC object matching the shape returned by createSolanaRpc() */
 export const mockSolanaRpc = (overrides?: Partial<ClusterInfo> & { genesisHash?: string }) => ({
+    // Before the Alpenglow transition, no genesis certificate exists, so the RPC returns null.
+    getAgGenesisCert: () => ({
+        send: vi.fn().mockResolvedValue(null),
+    }),
     getEpochInfo: () => ({
         send: vi.fn().mockResolvedValue(mockEpochInfo(overrides?.epochInfo)),
     }),
