@@ -13,6 +13,7 @@ import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associa
 import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
+import { PythDetailsCard } from '@features/instruction-program-pyth';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { useCluster } from '@providers/cluster';
 import {
@@ -236,6 +237,15 @@ function InspectorInstructionCard({
     }
 
     if ('unknown' in parsedIx) {
+        if (parsedIx.programLabel === 'pyth') {
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <PythDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />
+                </ErrorBoundary>
+            );
+        }
         if (parsedIx.programLabel === 'mpl-token-metadata') {
             return (
                 <ErrorBoundary
@@ -265,7 +275,7 @@ function InspectorInstructionCard({
         );
     }
 
-    // mpl-token-metadata / lighthouse below stay literal: dispatcher-only labels with no registry specimen (see ParserProgramLabel)
+    // mpl-token-metadata / lighthouse / pyth below stay literal: dispatcher-only labels with no registry specimen (see ParserProgramLabel)
     switch (parsedIx.program) {
         case SYSTEM_PROGRAM_LABEL:
             return (
@@ -359,6 +369,14 @@ function InspectorInstructionCard({
                     fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
                 >
                     <LighthouseDetailsCard key={index} ix={parsedIx} raw={ix} index={index} result={INSPECTOR_RESULT} />
+                </ErrorBoundary>
+            );
+        case 'pyth':
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <PythDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />
                 </ErrorBoundary>
             );
     }
