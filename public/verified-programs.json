@@ -354,6 +354,12 @@
     "verifiedAt": "2026-09-14T13:25:28"
   },
   {
+    "address": "66FyiUTkw4JMYMi3yErfa7UBqrHm9GZha1meAxcgbjDg",
+    "name": "SpareCashFinance/jrock-lotto",
+    "repoUrl": "https://github.com/SpareCashFinance/jrock-lotto/tree/35de5008f9a5f7746b712386bf77d2cfd39d7db3",
+    "verifiedAt": "2026-09-18T23:01:57"
+  },
+  {
     "address": "67g5HhrzQ2eqqEDJTEogHGBjAfwRD8evD3wg6LTDV8GK",
     "name": "doorcash",
     "repoUrl": "https://github.com/schonfeld/doorcash-sol/tree/309cd41e5355b5147635997d71f909a262570271",
@@ -368,8 +374,8 @@
   {
     "address": "6aYP8MQt44Zn91McAT7BU4gfoFoGxZ8H1jdNJuFVnS9R",
     "name": "blocfone_market",
-    "repoUrl": "https://github.com/ParisMind/blocfone-market-program/tree/f0abae6f8fee92bf14742bdcc947db50ca50ce45",
-    "verifiedAt": "2026-09-11T09:43:51"
+    "repoUrl": "https://github.com/ParisMind/blocfone-market-program/tree/683c89866ce2aeec2bef43c2cdab467e79fe89a2",
+    "verifiedAt": "2026-09-18T16:25:15"
   },
   {
     "address": "6bdJpVRqvStcE7DJjdpRRHGUSKXE82ym9KMYbeKxC6td",
@@ -842,14 +848,8 @@
   {
     "address": "Bff6QTTezbcfzhNtP6Gao2VtRVzXR9jdaof7aSzzAWGT",
     "name": "blocfone_escrow",
-    "repoUrl": "https://github.com/ParisMind/blocfone-escrow-program/tree/608e89aaa1b46e39f30ba6351e1fe460b2b7e879",
-    "verifiedAt": "2026-09-11T10:13:37"
-  },
-  {
-    "address": "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY",
-    "name": "bubblegum",
-    "repoUrl": "https://github.com/metaplex-foundation/mpl-bubblegum/tree/575f7292e64cdc2e6402bf5c5a52d4e05775494b",
-    "verifiedAt": "2026-06-09T22:44:06"
+    "repoUrl": "https://github.com/ParisMind/blocfone-escrow-program/tree/65569b9caed2bab9f5fe2ba960caa1b5f40601bc",
+    "verifiedAt": "2026-09-18T16:10:52"
   },
   {
     "address": "BoXzSxwNc9ZhX5RXChRDgageCKRzSZTDb2ZZwHRucmY7",
@@ -1096,6 +1096,12 @@
     "name": "flipdash_router",
     "repoUrl": "https://github.com/HuntlerX/flipdash-router/tree/85da7ef",
     "verifiedAt": "2026-05-01T02:48:18"
+  },
+  {
+    "address": "DawnxS4Adzh591GmqiDNfrSZBS4ENdQ9VDRStRJJ8qt7",
+    "name": "dawn",
+    "repoUrl": "https://github.com/DAWN-Foundation/dawn/tree/752c885dc6ea41dce46eec1343380ff6806f2502",
+    "verifiedAt": "2026-09-18T20:15:46"
   },
   {
     "address": "DBc9SEQghiJUj52YPqTKk8R4CMRgagBxi2LU1yBbeMpk",
@@ -1612,12 +1618,6 @@
     "name": "ripstr_claim",
     "repoUrl": "https://github.com/ripstr-dev/ripstr-programs/tree/21ecd5c9b8b9787b38aa26ee059c176ed613412e",
     "verifiedAt": "2026-07-30T01:18:32"
-  },
-  {
-    "address": "GkZ9HQvNe1m1KDPA3D9HtFWNdkMe2baaed2fKH8w4FUv",
-    "name": "lumi-fans/solana-contracts",
-    "repoUrl": "https://github.com/lumi-fans/solana-contracts/tree/1c5209e932dc8cdd2bea98ccb2511c490288f982",
-    "verifiedAt": "2026-09-17T20:38:56"
   },
   {
     "address": "Gmso1uvJnLbawvw7yezdfCDcPydwW2s2iqG3w6MDucLo",
@@ -2684,13 +2684,13 @@
   {
     "address": "ZYNKctWoaYeAdN9szq1joeu6rRPf7LK72pUurkcBpBY",
     "name": "Zynklabs/zynk-protocol-solana-programs.public",
-    "repoUrl": "https://github.com/Zynklabs/zynk-protocol-solana-programs.public/tree/cc81cc7a61fd72b46ac3b4bcbb708a2d72d116f3",
-    "verifiedAt": "2026-06-03T09:28:14"
+    "repoUrl": "https://github.com/Zynklabs/zynk-protocol-solana-programs.public/tree/e966d5f24c96b3f7b3c6bdd52aff3fdedf09ad81",
+    "verifiedAt": "2026-09-19T06:46:38"
   },
   {
     "address": "ZYNKopsYjG6gaGqdwz8HLAgvCAEFwCET56kRQKkjxfc",
     "name": "Zynklabs/zynk-protocol-solana-programs.public",
-    "repoUrl": "https://github.com/Zynklabs/zynk-protocol-solana-programs.public/tree/ebdbf9872794efc7318351b9e531c180678af6e9",
-    "verifiedAt": "2026-06-30T13:06:46"
+    "repoUrl": "https://github.com/Zynklabs/zynk-protocol-solana-programs.public/tree/e966d5f24c96b3f7b3c6bdd52aff3fdedf09ad81",
+    "verifiedAt": "2026-09-19T07:24:15"
   }
 ]
