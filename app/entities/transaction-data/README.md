@@ -167,6 +167,8 @@ sibling, which returns `undefined`.
 
 ## Everything else
 
-`api/` fetches raw and parsed transactions. `lib/adapt-parsed-transaction.ts`, `lib/encoding.ts`, and
-`lib/merge-transaction-map.ts` are unrelated to naming and stand on their own. `model/types.ts` holds the
-transaction types the barrel re-exports.
+`api/` fetches raw and parsed transactions. `lib/adapt-parsed-transaction.ts`, `lib/encoding.ts`,
+`lib/merge-transaction-map.ts` and `lib/row-addresses.ts` are unrelated to naming and stand on their own.
+`lib/row-addresses.ts` lists the accounts a message references, in row order and without repeats. The
+caller resolves the address lookup tables and passes them in, so the function fetches nothing.
+`model/types.ts` holds the transaction types the barrel re-exports.

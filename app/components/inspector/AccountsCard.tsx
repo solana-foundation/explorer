@@ -11,8 +11,15 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { SolBalance } from '@components/common/SolBalance';
 import { RawDataField } from '@components/shared/RawDataField';
 import { cn } from '@components/shared/utils';
-import { type AccountInfo, useAccountsInfo } from '@entities/account';
-import { useAccountInfo, useAddressLookupTable, useFetchAccountInfo } from '@providers/accounts';
+import { useLazyRawAccountData } from '@entities/account';
+import { isResolvedLookupTable, rowAddresses } from '@entities/transaction-data';
+import {
+    useAccountInfo,
+    useAccountInfos,
+    useAddressLookupTable,
+    useAddressLookupTables,
+    useFetchAccountInfo,
+} from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { type PublicKey, type VersionedMessage } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
@@ -30,6 +37,7 @@ import { LastSimulatedAtLabel } from '@/app/features/instruction-simulation/ui/L
 import { SimulateButton } from '@/app/features/instruction-simulation/ui/SimulateButton';
 import { SimulatedBadge } from '@/app/features/instruction-simulation/ui/SimulatedBadge';
 import { Section } from '@/app/features/transaction/ui/Section';
+import { FetchStatus } from '@/app/providers/cache';
 
 import { AccountDetailSlideover } from './AccountDetailSlideover';
 import { AddressFromLookupTableWithContext } from './AddressWithContext';
@@ -74,10 +82,22 @@ export function AccountsCard({
     simulation?: SimulationState;
 }) {
     const simulation = simulationProp ?? IDLE_SIMULATION;
-    const { url } = useCluster();
 
-    const pubkeys = useMemo(() => message.staticAccountKeys, [message.staticAccountKeys]);
-    const { accounts, error: fetchError, loading } = useAccountsInfo(pubkeys, url);
+    // A legacy message builds a new array on every read of `addressTableLookups`, so the memo keys on
+    // the message.
+    const lookupTableAddresses = useMemo(
+        () => message.addressTableLookups.map(lookup => lookup.accountKey.toBase58()),
+        [message],
+    );
+    const lookupTables = useAddressLookupTables(lookupTableAddresses);
+
+    // The provider hands back a new entry array on every render, so a memo over the entries would
+    // never hold.
+    const addresses = rowAddresses(message, lookupTables);
+
+    // The rows already read these accounts through the provider, so summing its cache avoids a second
+    // batch request.
+    const accounts = useAccountInfos(addresses);
 
     // Tracked here (a persistently-mounted host) so the header popover can show the last run's time even
     // though its own content mounts only while open.
@@ -130,9 +150,7 @@ export function AccountsCard({
 
             const props = {
                 accountIndex,
-                accountInfo: accounts.get(publicKey.toBase58()),
                 changeByKey,
-                loading,
                 publicKey,
                 readOnly,
                 signer,
@@ -178,20 +196,14 @@ export function AccountsCard({
         return {
             accountRows: [...staticAccountRows, ...writableLookupTableRows, ...readonlyLookupTableRows],
         };
-    }, [accounts, loading, validMessage, simulation, changeByKey]);
+    }, [validMessage, simulation, changeByKey]);
 
-    const totalAccountSize = React.useMemo(
-        () => Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0),
-        [accounts],
-    );
+    const totalAccountSize = accounts.reduce((total, entry) => total + (entry?.data?.space ?? 0), 0);
 
-    if (fetchError) {
-        return (
-            <Section title="Account List" className="">
-                <ErrorCard text="Failed to fetch accounts info" />
-            </Section>
-        );
-    }
+    // A failed row counts as zero and a table that resolves to no addresses adds no rows at all, so a
+    // total shown before every read succeeds is short but reads as the whole transaction's size.
+    const tablesSettled = lookupTables.every(isResolvedLookupTable);
+    const sizesSettled = tablesSettled && accounts.every(entry => entry?.status === FetchStatus.Fetched);
 
     if (error) {
         return <ErrorCard text={`Unable to display accounts. ${error}`} />;
@@ -213,7 +225,7 @@ export function AccountsCard({
                 <div className="text-right">Size</div>
             </div>
             {accountRows}
-            {!loading && totalAccountSize > 0 && (
+            {sizesSettled && totalAccountSize > 0 && (
                 <div className="py-3 text-sm text-outer-space-300 lg:ml-10 lg:px-4">
                     <div className="flex flex-col">
                         <div className="flex items-baseline gap-2">
@@ -232,8 +244,6 @@ export function AccountsCard({
 
 function AccountRow({
     accountIndex,
-    accountInfo,
-    loading,
     publicKey,
     signer,
     readOnly,
@@ -241,8 +251,6 @@ function AccountRow({
     changeByKey,
 }: {
     accountIndex: number;
-    accountInfo: AccountInfo | undefined;
-    loading: boolean;
     publicKey: PublicKey;
     signer: boolean;
     readOnly: boolean;
@@ -270,7 +278,6 @@ function AccountRow({
                     )}
                 </>
             }
-            sizeSlot={<AccountDataSize accountInfo={accountInfo} loading={loading} address={publicKey.toBase58()} />}
         />
     );
 }
@@ -476,9 +483,7 @@ function ChangeCell({
     );
 }
 
-// Shared presentational row. Reads the on-chain account state (owner + balance) from the accounts
-// provider; renders the merged Change column from `simulation`/`changeByKey`; `sizeSlot` is the
-// interactive size element.
+// Reads the account state from the accounts provider rather than from props.
 function AccountRowLayout({
     index,
     pubkey,
@@ -486,7 +491,6 @@ function AccountRowLayout({
     badges,
     simulation,
     changeByKey,
-    sizeSlot,
 }: {
     index: number;
     pubkey?: PublicKey;
@@ -494,15 +498,15 @@ function AccountRowLayout({
     badges?: React.ReactNode;
     simulation: SimulationState;
     changeByKey: Map<string, SolBalanceChange>;
-    sizeSlot?: React.ReactNode;
 }) {
+    const address = pubkey?.toBase58();
     const { account } = useInspectorAccountInfo(pubkey);
     // Mobile-only: tapping the row opens a bottom drawer with the account's full details.
     const [drawerOpen, setDrawerOpen] = React.useState(false);
 
     let ownedNode: React.ReactNode = null;
     let balanceNode: React.ReactNode = null;
-    let sizeNode: React.ReactNode = sizeSlot;
+    let sizeNode: React.ReactNode = null;
 
     if (!account) {
         ownedNode = (
@@ -516,12 +520,8 @@ function AccountRowLayout({
     } else {
         ownedNode = <Address pubkey={account.owner} link />;
         balanceNode = <SolBalance lamports={account.lamports} />;
-        if (sizeNode == undefined && account.space !== undefined) {
-            sizeNode = (
-                <span className="text-outer-space-300">
-                    {new Intl.NumberFormat('en-US').format(account.space)} bytes
-                </span>
-            );
+        if (address !== undefined) {
+            sizeNode = <AccountDataSize space={account.space} address={address} />;
         }
     }
 
@@ -602,36 +602,28 @@ function AccountRowLayout({
     );
 }
 
-// The interactive size element: shows the account's data size and, on click, opens the raw-data viewer
-// (Hex / Base64 with copy and download) in a popover — the shared RawDataField used on the account and
-// transaction pages.
-function AccountDataSize({
-    accountInfo,
-    loading,
-    address,
-}: {
-    accountInfo: AccountInfo | undefined;
-    loading: boolean;
-    address: string;
-}) {
-    if (loading) return <span className="text-outer-space-300">Loading...</span>;
-    if (!accountInfo) return null;
+// The bytes are fetched when the popover opens, so rendering the list costs no account data.
+function AccountDataSize({ space, address }: { space: number | undefined; address: string }) {
+    const { data, error, load, loading } = useLazyRawAccountData(address);
+
+    if (space === undefined) return <span className="text-outer-space-300">Unknown</span>;
+    if (space === 0) return <span className="text-outer-space-300">0 bytes</span>;
 
     return (
-        <Popover>
+        <Popover onOpenChange={open => open && load()}>
             <PopoverTrigger asChild>
                 <button
                     type="button"
                     className="inline-flex cursor-pointer appearance-none items-center gap-1 whitespace-nowrap border-0 bg-transparent p-0 text-outer-space-300 transition-colors hover:text-white"
                 >
                     <Code size={11} />
-                    <span>{accountInfo.size.toLocaleString('en-US')} bytes</span>
+                    <span>{space.toLocaleString('en-US')} bytes</span>
                 </button>
             </PopoverTrigger>
             {/* RawDataField brings its own card chrome, so the popover wrapper is left transparent (its
                 drop shadow is kept for depth). */}
             <PopoverContent align="end" className="w-auto !border-0 !bg-transparent p-0">
-                <RawDataField data={accountInfo.data} filename={address} loading={loading} />
+                <RawDataField data={data} error={error} filename={address} loading={loading} />
             </PopoverContent>
         </Popover>
     );
