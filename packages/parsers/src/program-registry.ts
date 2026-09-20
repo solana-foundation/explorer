@@ -28,6 +28,7 @@ export const VOTE_PROGRAM_LABEL = 'vote';
  * guards they are compared against from drifting.
  */
 export type ParserProgramLabel =
+    | typeof ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL
     | typeof BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL
     | 'compute-budget'
     | 'ed25519'

@@ -3,6 +3,7 @@ import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { type InstructionSurface, InstructionSurfaceProvider } from '@entities/instruction-card';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
 import {
+    ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
     BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
     SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL,
     SPL_MEMO_PROGRAM_LABEL,
@@ -10,6 +11,7 @@ import {
     SPL_TOKEN_PROGRAM_LABEL,
     SYSTEM_PROGRAM_LABEL,
 } from '@explorer/parsers';
+import { AddressLookupTableDetailsCard } from '@features/decode-instruction-address-lookup-table';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
 import { ComputeBudgetDetailsCard } from '@features/decode-instruction-compute-budget';
 import { Ed25519DetailsCard } from '@features/decode-instruction-ed25519';
@@ -371,6 +373,8 @@ function InspectorInstructionCard({
             );
         case SPL_MEMO_PROGRAM_LABEL:
             return <MemoDetailsCard key={index} ix={parsedIx} index={index} />;
+        case ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL:
+            return <AddressLookupTableDetailsCard key={index} ix={parsedIx} index={index} />;
         case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL:
             return (
                 <ErrorBoundary fallback={unknownCard}>

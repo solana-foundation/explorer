@@ -2,6 +2,7 @@
 // consumers of this dispatcher (the /mcp route) must not pull in. The contract itself is React-free
 // in @explorer/parsers.
 import { createInstructionParserDispatcher } from '@explorer/parsers';
+import { addressLookupTableInstructionParser } from '@features/decode-instruction-address-lookup-table/lib/address-lookup-table-client';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token/lib/associated-token-client';
 import { bpfUpgradeableLoaderInstructionParser } from '@features/decode-instruction-bpf-upgradeable-loader/lib/bpf-upgradeable-loader-client';
 import { computeBudgetInstructionParser } from '@features/decode-instruction-compute-budget/lib/compute-budget-client';
@@ -20,6 +21,7 @@ export const instructionParserDispatcher = createInstructionParserDispatcher([
     tokenInstructionParser,
     token2022InstructionParser,
     associatedTokenInstructionParser,
+    addressLookupTableInstructionParser,
     metaplexTokenMetadataInstructionParser,
     bpfUpgradeableLoaderInstructionParser,
     lighthouseInstructionParser,
