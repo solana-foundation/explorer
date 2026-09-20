@@ -5,6 +5,7 @@ import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '
 import {
     BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
     SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL,
+    SPL_MEMO_PROGRAM_LABEL,
     SPL_TOKEN_2022_PROGRAM_LABEL,
     SPL_TOKEN_PROGRAM_LABEL,
     SYSTEM_PROGRAM_LABEL,
@@ -12,6 +13,7 @@ import {
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
 import { Ed25519DetailsCard } from '@features/decode-instruction-ed25519';
 import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
+import { MemoDetailsCard } from '@features/decode-instruction-memo';
 import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
@@ -373,6 +375,8 @@ function InspectorInstructionCard({
                     innerCards={innerCards}
                 />
             );
+        case SPL_MEMO_PROGRAM_LABEL:
+            return <MemoDetailsCard key={index} ix={parsedIx} index={index} />;
         case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL:
             return (
                 <ErrorBoundary fallback={unknownCard}>
