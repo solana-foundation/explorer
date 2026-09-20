@@ -20,11 +20,13 @@ import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TransactionsProvider } from '@/app/providers/transactions';
 
-import { CloseLookupTableDetailsCard } from '../address-lookup-table/CloseLookupTableDetails';
-import { CreateLookupTableDetailsCard } from '../address-lookup-table/CreateLookupTableDetails';
-import { DeactivateLookupTableDetailsCard } from '../address-lookup-table/DeactivateLookupTableDetails';
-import { ExtendLookupTableDetailsCard } from '../address-lookup-table/ExtendLookupTableDetails';
-import { FreezeLookupTableDetailsCard } from '../address-lookup-table/FreezeLookupTableDetails';
+import {
+    CloseLookupTableDetailsCard,
+    CreateLookupTableDetailsCard,
+    DeactivateLookupTableDetailsCard,
+    ExtendLookupTableDetailsCard,
+    FreezeLookupTableDetailsCard,
+} from '../AddressLookupTableDetailsCard';
 
 const A = {
     authority: '3EbFtRfKRMTrhPrRQjxbfWCB6NUyTQxwsWTKQFVKgNbb',
@@ -113,7 +115,7 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; title: string }> = [
     },
 ];
 
-describe('instruction::address-lookup-table cards', () => {
+describe('address-lookup-table cards', () => {
     /** Pins each card's rows: label, order, count, and the value every row resolves to. */
     it.each(CASES)('should render the rows of $title', async ({ card, rows, title }) => {
         renderCard(card);

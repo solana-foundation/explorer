@@ -1,6 +1,5 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { AddressLookupTableDetailsCard } from '@components/instruction/AddressLookupTableDetailsCard';
 import { BpfLoaderDetailsCard } from '@components/instruction/bpf-loader/BpfLoaderDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import {
@@ -39,6 +38,7 @@ import {
     SYSTEM_PROGRAM_LABEL,
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
+import { AddressLookupTableDetailsCard } from '@features/decode-instruction-address-lookup-table';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
 import { ComputeBudgetDetailsCard, isComputeBudgetInstruction } from '@features/decode-instruction-compute-budget';
 import {
@@ -280,7 +280,15 @@ function InstructionCard({
             case VOTE_PROGRAM_LABEL:
                 return <VoteDetailsCard {...props} key={key} />;
             case ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL:
-                return <AddressLookupTableDetailsCard {...props} key={key} />;
+                return (
+                    <AddressLookupTableDetailsCard
+                        key={key}
+                        ix={parsedIx}
+                        index={index}
+                        innerCards={innerCards}
+                        childIndex={childIndex}
+                    />
+                );
             default:
                 return <UnknownDetailsCard {...props} key={key} />;
         }
