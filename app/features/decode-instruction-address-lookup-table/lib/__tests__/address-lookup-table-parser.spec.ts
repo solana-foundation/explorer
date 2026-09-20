@@ -75,6 +75,19 @@ describe('parseAddressLookupTableKitInstruction', () => {
         });
     });
 
+    // The payer and system program only ride along when the table needs rent, so they are optional.
+    it('should decode an extend that carries no payer', () => {
+        const data = getExtendLookupTableInstructionDataEncoder().encode({ addresses: [ENTRY] });
+        const parsed = parse(new Uint8Array(data), [TABLE, AUTHORITY]);
+
+        expect(parsed?.type).toBe('extendLookupTable');
+        expect(base58(parsed?.info ?? {})).toEqual({
+            lookupTableAccount: TABLE,
+            lookupTableAuthority: AUTHORITY,
+            newAddresses: [ENTRY],
+        });
+    });
+
     it.each([
         ['freezeLookupTable', getFreezeLookupTableInstructionDataEncoder()],
         ['deactivateLookupTable', getDeactivateLookupTableInstructionDataEncoder()],
