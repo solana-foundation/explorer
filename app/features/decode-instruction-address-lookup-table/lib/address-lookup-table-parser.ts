@@ -9,6 +9,8 @@ import type { ParsedInstruction } from '@solana/web3.js';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
     AddressLookupTableInstruction,
+    getExtendLookupTableInstructionDataDecoder,
+    identifyAddressLookupTableInstruction,
     parseAddressLookupTableInstruction,
 } from '@solana-program/address-lookup-table';
 import { create } from 'superstruct';
@@ -42,6 +44,23 @@ export type AddressLookupTableParsed =
 
 export function parseAddressLookupTableKitInstruction(ix: KitInstruction): AddressLookupTableParsed | undefined {
     try {
+        // The client's extend parser insists on the payer and system program, but the program only
+        // needs them when the table must be topped up, so an extend without rent carries two accounts.
+        if (identifyAddressLookupTableInstruction(ix.data) === AddressLookupTableInstruction.ExtendLookupTable) {
+            const [table, authority] = ix.accounts;
+            return {
+                info: create(
+                    {
+                        lookupTableAccount: table.address,
+                        lookupTableAuthority: authority.address,
+                        newAddresses: getExtendLookupTableInstructionDataDecoder().decode(ix.data).addresses,
+                    },
+                    ExtendLookupTableInfo,
+                ),
+                type: 'extendLookupTable',
+            };
+        }
+
         const parsed = parseAddressLookupTableInstruction(ix);
         switch (parsed.instructionType) {
             case AddressLookupTableInstruction.CreateLookupTable:
@@ -58,18 +77,6 @@ export function parseAddressLookupTableKitInstruction(ix: KitInstruction): Addre
                         CreateLookupTableInfo,
                     ),
                     type: 'createLookupTable',
-                };
-            case AddressLookupTableInstruction.ExtendLookupTable:
-                return {
-                    info: create(
-                        {
-                            lookupTableAccount: parsed.accounts.address.address,
-                            lookupTableAuthority: parsed.accounts.authority.address,
-                            newAddresses: parsed.data.addresses,
-                        },
-                        ExtendLookupTableInfo,
-                    ),
-                    type: 'extendLookupTable',
                 };
             case AddressLookupTableInstruction.FreezeLookupTable:
                 return { info: create(tableInfo(parsed.accounts), FreezeLookupTableInfo), type: 'freezeLookupTable' };

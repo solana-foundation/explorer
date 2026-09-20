@@ -8,7 +8,7 @@ import {
     text,
     useInstructionSurface,
 } from '@entities/instruction-card';
-import type { ParsedInstruction, PublicKey } from '@solana/web3.js';
+import type { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 import { is } from 'superstruct';
 
@@ -63,6 +63,8 @@ export const CloseLookupTableDetailsCard = defineInstructionCard<CloseLookupTabl
 type AddressLookupTableDetailsCardProps = {
     /** Already normalised by the dispatcher — this card does not decode. */
     ix: ParsedInstruction;
+    /** Byte form, when the caller has one, so the shell's Raw view can show accounts and data. */
+    raw?: TransactionInstruction;
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
@@ -71,10 +73,11 @@ type AddressLookupTableDetailsCardProps = {
 export function AddressLookupTableDetailsCard({
     ix,
     index,
+    raw,
     innerCards,
     childIndex,
 }: AddressLookupTableDetailsCardProps) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix, programId: ix.programId };
+    const node: InstructionNode = { childIndex, index, innerCards, ix, programId: ix.programId, raw };
 
     if (!isAddressLookupTableParsed(ix.parsed)) {
         return <InstructionCardView node={node} title={`${TITLE_PREFIX} Program: Unknown Instruction`} defaultRaw />;

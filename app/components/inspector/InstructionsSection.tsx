@@ -372,9 +372,9 @@ function InspectorInstructionCard({
                 />
             );
         case SPL_MEMO_PROGRAM_LABEL:
-            return <MemoDetailsCard key={index} ix={parsedIx} index={index} />;
+            return <MemoDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />;
         case ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL:
-            return <AddressLookupTableDetailsCard key={index} ix={parsedIx} index={index} />;
+            return <AddressLookupTableDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />;
         case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL:
             return (
                 <ErrorBoundary fallback={unknownCard}>
