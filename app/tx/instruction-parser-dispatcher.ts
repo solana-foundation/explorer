@@ -4,6 +4,7 @@
 import { createInstructionParserDispatcher } from '@explorer/parsers';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token/lib/associated-token-client';
 import { bpfUpgradeableLoaderInstructionParser } from '@features/decode-instruction-bpf-upgradeable-loader/lib/bpf-upgradeable-loader-client';
+import { computeBudgetInstructionParser } from '@features/decode-instruction-compute-budget/lib/compute-budget-client';
 import { ed25519InstructionParser } from '@features/decode-instruction-ed25519/lib/ed25519-client';
 import { lighthouseInstructionParser } from '@features/decode-instruction-lighthouse/lib/lighthouse-client';
 import { memoInstructionParsers } from '@features/decode-instruction-memo/lib/memo-client';
@@ -23,6 +24,7 @@ export const instructionParserDispatcher = createInstructionParserDispatcher([
     bpfUpgradeableLoaderInstructionParser,
     lighthouseInstructionParser,
     ed25519InstructionParser,
+    computeBudgetInstructionParser,
     zkElGamalProofInstructionParser,
     ...pythInstructionParsers,
     ...memoInstructionParsers,

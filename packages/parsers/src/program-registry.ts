@@ -29,6 +29,7 @@ export const VOTE_PROGRAM_LABEL = 'vote';
  */
 export type ParserProgramLabel =
     | typeof BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL
+    | 'compute-budget'
     | 'ed25519'
     | 'lighthouse'
     | 'mpl-token-metadata'

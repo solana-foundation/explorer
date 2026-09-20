@@ -3,7 +3,6 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { AddressLookupTableDetailsCard } from '@components/instruction/AddressLookupTableDetailsCard';
 import { BpfLoaderDetailsCard } from '@components/instruction/bpf-loader/BpfLoaderDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
-import { ComputeBudgetDetailsCard } from '@components/instruction/ComputeBudgetDetailsCard';
 import {
     isSolanaAttestationInstruction,
     SolanaAttestationDetailsCard,
@@ -41,6 +40,7 @@ import {
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
+import { ComputeBudgetDetailsCard, isComputeBudgetInstruction } from '@features/decode-instruction-compute-budget';
 import {
     Ed25519DetailsCard,
     isEd25519Instruction,
@@ -66,7 +66,6 @@ import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import {
-    ComputeBudgetProgram,
     ParsedInnerInstruction,
     ParsedInstruction,
     ParsedTransaction,
@@ -368,8 +367,21 @@ function InstructionCard({
             />
         );
     }
-    if (ComputeBudgetProgram.programId.equals(transactionIx.programId)) {
-        return <ComputeBudgetDetailsCard key={key} {...props} />;
+    if (isComputeBudgetInstruction(transactionIx)) {
+        const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
+        if (dispatched) {
+            return (
+                <ComputeBudgetDetailsCard
+                    key={key}
+                    ix={dispatched}
+                    raw={transactionIx}
+                    index={index}
+                    innerCards={innerCards}
+                    childIndex={childIndex}
+                />
+            );
+        }
+        return <UnknownDetailsCard key={key} {...props} />;
     }
     if (isZkElGamalProofInstruction(transactionIx)) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);

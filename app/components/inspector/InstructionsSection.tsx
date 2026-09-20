@@ -11,6 +11,7 @@ import {
     SYSTEM_PROGRAM_LABEL,
 } from '@explorer/parsers';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
+import { ComputeBudgetDetailsCard } from '@features/decode-instruction-compute-budget';
 import { Ed25519DetailsCard } from '@features/decode-instruction-ed25519';
 import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { MemoDetailsCard } from '@features/decode-instruction-memo';
@@ -23,7 +24,6 @@ import { useScrollAnchor } from '@providers/scroll-anchor';
 import {
     AddressLookupTableAccount,
     type CompiledInnerInstruction,
-    ComputeBudgetProgram,
     type TransactionInstruction,
     TransactionMessage,
     type VersionedMessage,
@@ -42,7 +42,6 @@ import { ErrorCard } from '../common/ErrorCard';
 import { InspectorInstructionCard as InspectorInstructionCardComponent } from '../common/InspectorInstructionCard';
 import { LoadingCard } from '../common/LoadingCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
-import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AddressWithContextCell } from './AddressWithContextCell';
@@ -262,23 +261,6 @@ function InspectorInstructionCard({
         );
     }
 
-    // Compute Budget instructions are not RPC-pre-parsed and its DetailsCard
-    // decodes raw bytes directly, so no parser entry is needed today. Phase 3
-    // of the unification will fold this into the registry.
-    if (ComputeBudgetProgram.programId.equals(programId)) {
-        return (
-            <ComputeBudgetDetailsCard
-                ix={ix}
-                index={index}
-                result={INSPECTOR_RESULT}
-                signature={INSPECTOR_SIGNATURE}
-                InstructionCardComponent={BaseInstructionCard}
-                childIndex={childIndex}
-                innerCards={innerCards}
-            />
-        );
-    }
-
     if (!parsedIx) {
         return unknownCard;
     }
@@ -300,6 +282,18 @@ function InspectorInstructionCard({
         if (parsedIx.programLabel === 'zk-elgamal-proof') {
             return (
                 <ZkElGamalProofDetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    raw={ix}
+                    index={index}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            );
+        }
+        if (parsedIx.programLabel === 'compute-budget') {
+            return (
+                <ComputeBudgetDetailsCard
                     key={index}
                     ix={parsedIx}
                     raw={ix}
@@ -465,6 +459,21 @@ function InspectorInstructionCard({
             return (
                 <ErrorBoundary fallback={unknownCard}>
                     <ZkElGamalProofDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        raw={ix}
+                        index={index}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
+                    />
+                </ErrorBoundary>
+            );
+        case 'compute-budget':
+            return (
+                <ErrorBoundary
+                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                >
+                    <ComputeBudgetDetailsCard
                         key={index}
                         ix={parsedIx}
                         raw={ix}
