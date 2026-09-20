@@ -1,12 +1,8 @@
 import type { KitInstruction, ParsedInstructionInfo, ParserProgramLabel } from '@explorer/parsers';
-import type { Address } from '@solana/kit';
 import type { ParsedInstruction } from '@solana/web3.js';
-import { MEMO_PROGRAM_ADDRESS, parseAddMemoInstruction } from '@solana-program/memo';
+import { parseAddMemoInstruction, SUPPORTED_MEMO_PROGRAM_ADDRESSES } from '@solana-program/memo';
 
-export { MEMO_PROGRAM_ADDRESS };
-
-/** The original SPL Memo deployment. The client only names v2, and the RPC parses both as `spl-memo`. */
-export const MEMO_V1_PROGRAM_ADDRESS = 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo' as Address;
+export { SUPPORTED_MEMO_PROGRAM_ADDRESSES };
 
 /** RPC `parsed.program` discriminator for both Memo programs; also the slices' `programLabel`. */
 export const MEMO_PROGRAM_LABEL = 'spl-memo' satisfies ParserProgramLabel;

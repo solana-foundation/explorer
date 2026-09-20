@@ -221,14 +221,14 @@ importers:
         specifier: '=2.8.1'
         version: 2.8.1(patch_hash=3404536e2e71cf96a8aa5675d9b2c17a94f209253305827d7d8dca7686d0c388)(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
       '@solana-program/address-lookup-table':
-        specifier: 0.14.0
-        version: 0.14.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+        specifier: 0.14.1
+        version: 0.14.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana-program/compute-budget':
-        specifier: 0.18.0
-        version: 0.18.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+        specifier: 0.18.1
+        version: 0.18.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana-program/memo':
-        specifier: 0.13.0
-        version: 0.13.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+        specifier: 0.14.1
+        version: 0.14.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana-program/program-metadata':
         specifier: 0.9.1
         version: 0.9.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
@@ -675,8 +675,8 @@ importers:
         specifier: 1.5.0
         version: 1.5.0
       '@solana-program/address-lookup-table':
-        specifier: 0.14.0
-        version: 0.14.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+        specifier: 0.14.1
+        version: 0.14.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana-program/loader-v3':
         specifier: 0.6.0
         version: 0.6.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
@@ -4330,9 +4330,8 @@ packages:
   '@solana-developers/helpers@2.8.1':
     resolution: {integrity: sha512-xvoOj+ewL18+h6fMrXp1vTss0WBLnhQHnBb6mMPfEQE32w0THlxm8OPXNUY8g4tREX7ugU5cDEP7c2teye1Z7A==}
 
-  '@solana-program/address-lookup-table@0.14.0':
-    resolution: {integrity: sha512-/GQtSRRJC/8wj0VpPLqsxkT6dBA6Eg0JbYlMECx8bJZRdTwqHzQEIm6tfYA1sV7aXkGQxGgIUbLiIo+ULtz8MA==}
-    engines: {node: '>=24.0.0'}
+  '@solana-program/address-lookup-table@0.14.1':
+    resolution: {integrity: sha512-bYhSDq3lKB/kOIyx5jd91DwyDZH3GeBTpZaIO2YQC0ivFepPK4TWNwqFvdRfZ5wm5/70sp9Fs3lQeewUqVhXHA==}
     peerDependencies:
       '@solana/kit': ^8.0.0
 
@@ -4341,9 +4340,8 @@ packages:
     peerDependencies:
       '@solana/kit': ^6.3.0
 
-  '@solana-program/compute-budget@0.18.0':
-    resolution: {integrity: sha512-tmLtJ4mtxsmkj1QH5JQ9BphzMBgiCgRqb5chAiPlFEvyVaJ+UQfLRredVfaU2pTBR0sjnI31zIvz8VzgWu5IlQ==}
-    engines: {node: '>=24.0.0'}
+  '@solana-program/compute-budget@0.18.1':
+    resolution: {integrity: sha512-ZVWknu3XvF6NI3zAuT6TXV19lQ7iDPzToM9gwI6KnUlnzHHP3u7IAIzDM7hLueQ6T7vLGjIUjYFCVg4mLHRZcg==}
     peerDependencies:
       '@solana/kit': ^8.0.0
 
@@ -4353,8 +4351,8 @@ packages:
     peerDependencies:
       '@solana/kit': ^8.0.0
 
-  '@solana-program/memo@0.13.0':
-    resolution: {integrity: sha512-JVe6KV4UU/VZkPq6MD8O50pUfUvsAA4BBiP2g6Y2Nr2CgxTXdnyslD+3r8ZmahEb9XB8dWajw+qzl+BDWxJj2g==}
+  '@solana-program/memo@0.14.1':
+    resolution: {integrity: sha512-B56Yfxfjtio0sGNs+sfb9U11rTaUBustU7mMWcyN8cz4f3WHTVdByPuxtIsfnvrjcZG7hhCU2jnSyRCu4UMZig==}
     peerDependencies:
       '@solana/kit': ^8.0.0
 
@@ -14262,7 +14260,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@solana-program/address-lookup-table@0.14.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
+  '@solana-program/address-lookup-table@0.14.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/kit': 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
 
@@ -14270,7 +14268,7 @@ snapshots:
     dependencies:
       '@solana/kit': 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
 
-  '@solana-program/compute-budget@0.18.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
+  '@solana-program/compute-budget@0.18.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/kit': 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
 
@@ -14278,7 +14276,7 @@ snapshots:
     dependencies:
       '@solana/kit': 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
 
-  '@solana-program/memo@0.13.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
+  '@solana-program/memo@0.14.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/kit': 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
 

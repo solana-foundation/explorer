@@ -51,7 +51,7 @@ describe('MemoDetailsCard', () => {
         });
     });
 
-    // The v1 deployment is registered too, so it reaches the same card and names its own program.
+    // Every deployment is registered, so the v1 program reaches the same card and names its own program.
     it('should render the program row from the node', async () => {
         const legacyMemoProgram = new PublicKey('Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo');
 
