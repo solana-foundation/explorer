@@ -35,6 +35,11 @@ ignoreScripts: true
 
 minimumReleaseAge: 20160
 
+minimumReleaseAgeExclude:
+  # 0.14.1 (2026-09-16) adds the helpers covering every Memo deployment, which the memo
+  # instruction slice is built on. Clears the quarantine window on 2026-09-30; remove then.
+  - '@solana-program/memo'
+
 # Pin resolution to the public npm registry so it can't silently inherit a
 # global/org .npmrc mirror. Scoped keys (e.g. '@my-org') can be added here.
 registries:

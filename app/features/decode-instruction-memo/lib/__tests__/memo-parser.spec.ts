@@ -6,12 +6,13 @@ import { describe, expect, it } from 'vitest';
 import { memoInstructionParsers } from '../memo-client';
 import {
     isMemoParsed,
-    MEMO_PROGRAM_ADDRESS,
     MEMO_PROGRAM_LABEL,
-    MEMO_V1_PROGRAM_ADDRESS,
     parseMemoInstruction,
     parseMemoRpcInstruction,
+    SUPPORTED_MEMO_PROGRAM_ADDRESSES,
 } from '../memo-parser';
+
+const [MEMO_V1, MEMO_V3, MEMO_V4] = SUPPORTED_MEMO_PROGRAM_ADDRESSES;
 
 const dispatcher = createInstructionParserDispatcher(memoInstructionParsers);
 
@@ -19,7 +20,7 @@ describe('parseMemoInstruction', () => {
     it('should decode the instruction data as UTF-8', () => {
         const data = new Uint8Array(getUtf8Encoder().encode('gm ☀️'));
 
-        expect(parseMemoInstruction({ accounts: [], data, programAddress: MEMO_PROGRAM_ADDRESS })).toEqual({
+        expect(parseMemoInstruction({ accounts: [], data, programAddress: MEMO_V3 })).toEqual({
             info: 'gm ☀️',
             type: 'memo',
         });
@@ -41,7 +42,7 @@ describe('parseMemoRpcInstruction', () => {
 });
 
 describe('memoInstructionParsers', () => {
-    it.each([MEMO_PROGRAM_ADDRESS, MEMO_V1_PROGRAM_ADDRESS])('should decode bytes sent to %s', programId => {
+    it.each([MEMO_V1, MEMO_V3, MEMO_V4])('should decode bytes sent to %s', programId => {
         const dispatched = dispatcher.fromTransactionInstruction(
             new TransactionInstruction({
                 data: Buffer.from('hello'),
@@ -64,5 +65,5 @@ describe('memoInstructionParsers', () => {
 });
 
 function rpcMemo(memo: string): ParsedInstruction {
-    return { parsed: memo, program: MEMO_PROGRAM_LABEL, programId: new PublicKey(MEMO_PROGRAM_ADDRESS) };
+    return { parsed: memo, program: MEMO_PROGRAM_LABEL, programId: new PublicKey(MEMO_V3) };
 }
