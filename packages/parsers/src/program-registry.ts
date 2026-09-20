@@ -34,6 +34,7 @@ export type ParserProgramLabel =
     | 'mpl-token-metadata'
     | 'pyth'
     | typeof SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL
+    | typeof SPL_MEMO_PROGRAM_LABEL
     | typeof SPL_TOKEN_PROGRAM_LABEL
     | typeof SPL_TOKEN_2022_PROGRAM_LABEL
     | typeof SYSTEM_PROGRAM_LABEL
