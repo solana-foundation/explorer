@@ -1,6 +1,6 @@
 # OG image routes
 
-`app/og/` holds the OG image routes: `tx/[signature]`, `receipt/[signature]` and `feature-gate/[address]`.
+`app/og/` holds the OG image routes: `account/[address]`, `tx/[signature]`, `receipt/[signature]` and `feature-gate/[address]`.
 
 ## Firewall
 
@@ -24,6 +24,12 @@ Rule:
 `/` and the unanchored `/og` exempted every path containing it, `/address/ogAbC…` included.
 
 Unfurling a receipt link also needs the receipt view of the `/tx/` page, which is a separate rule in
+[`docs/firewall.md`](../../docs/firewall.md).
+
+Unfurling an account link likewise needs the bare `/address/<addr>` page bypassed — the crawler reads
+`og:image` off the page, not from the image route, and that page is otherwise challenged (the same reason
+the feature-gate `og:image` on `/address/<addr>` never unfurled). Because that opens the page and the
+`/og/account/` render (an RPC call each) to unmetered traffic, both carry rate limits. All in
 [`docs/firewall.md`](../../docs/firewall.md).
 
 ### To apply
