@@ -75,6 +75,7 @@ describe('BaseBufferAccountCard', () => {
         expect(screen.getByTestId('pmp-account-encoding')).toHaveTextContent('Base64');
         expect(screen.getByTestId('pmp-account-format')).toHaveTextContent('YAML');
         expect(screen.getByTestId('pmp-account-dataSource')).toHaveTextContent('Direct');
+        expect(screen.queryByTestId('pmp-payload-data-hash-unresolved-source')).not.toBeInTheDocument();
     });
 
     it('should show the compression resolved from bytes when nothing was resolved onchain', () => {
@@ -82,6 +83,13 @@ describe('BaseBufferAccountCard', () => {
 
         expect(screen.getByTestId('pmp-account-compression')).toHaveTextContent('Gzip');
         expect(screen.queryByTestId('pmp-account-encoding')).not.toBeInTheDocument();
+    });
+
+    it('should display a note when no onchain lookup resolved the data source', () => {
+        render(<BaseBufferAccountCard {...bufferArgs(pack(YAML_DOC, Compression.Gzip))} />);
+
+        expect(screen.getByTestId('pmp-payload-data-hash-unresolved-source')).toHaveTextContent('Data Hash');
+        expect(screen.queryByTestId('pmp-payload-data-hash-pointer')).not.toBeInTheDocument();
     });
 
     // A dead scan and a scan that found nothing leave the same rows blank, so the note is the only thing that can tell

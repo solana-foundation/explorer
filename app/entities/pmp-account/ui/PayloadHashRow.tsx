@@ -1,16 +1,17 @@
+import { InfoTooltip } from '@components/common/InfoTooltip';
 import { TruncatedValue } from '@components/shared/TruncatedValue';
 import { DataSource } from '@solana-program/program-metadata';
 
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { PMP_POINTER_HASH_NOTES } from '../lib/constants';
+import { PMP_POINTER_HASH_NOTES, PMP_UNRESOLVED_SOURCE_HASH_NOTE } from '../lib/constants';
 
 const HASH_MID_TRUNCATE_CHARS = 8;
 
 /**
  * The sha256 digest over the UNPACKED payload bytes.
  * A non-Direct payload stores a pointer, so it reports why there is no hash rather than digesting the reference.
- * An undefined `dataSource` is unresolved, not a pointer, so it still shows the digest.
+ * An undefined `dataSource` is unresolved, so the hash shows with a tooltip explaining what it covers.
  */
 export function PayloadHashRow({
     columns,
@@ -26,7 +27,15 @@ export function PayloadHashRow({
 
     return (
         <BaseTable.Row data-testid="pmp-payload-data-hash">
-            <BaseTable.Cell>Data Hash</BaseTable.Cell>
+            <BaseTable.Cell>
+                {dataSource === undefined ? (
+                    <InfoTooltip text={PMP_UNRESOLVED_SOURCE_HASH_NOTE}>
+                        <span data-testid="pmp-payload-data-hash-unresolved-source">Data Hash</span>
+                    </InfoTooltip>
+                ) : (
+                    'Data Hash'
+                )}
+            </BaseTable.Cell>
             <BaseTable.Cell className="md:text-right" colSpan={columns - 1}>
                 {pointerNote !== undefined ? (
                     <span data-testid="pmp-payload-data-hash-pointer" className="text-xs text-neutral-500">

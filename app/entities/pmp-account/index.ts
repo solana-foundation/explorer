@@ -22,6 +22,7 @@ export {
     PMP_MAX_UNPACKED_BYTES,
     PMP_POINTER_HASH_NOTES,
     PMP_UNCOMPRESSED_BYTES_LABEL,
+    PMP_UNRESOLVED_SOURCE_HASH_NOTE,
 } from './lib/constants';
 export { decodePmpAccount } from './lib/decode-pmp-account';
 export {
