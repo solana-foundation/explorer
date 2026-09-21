@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
-import { PMP_DECODED_RENDER_CAP_BYTES } from '@entities/pmp-account';
+import { PMP_DECODED_RENDER_CAP_BYTES, PMP_POINTER_HASH_NOTES } from '@entities/pmp-account';
 import type { Account } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import type { Address } from '@solana/kit';
@@ -246,11 +246,37 @@ describe('DataPayloadSection', () => {
             payload: new Uint8Array(40),
         });
 
-        // A non-Direct source gets no special-cased note in this section: the card's `Data Source` config row
-        // already names it, so the section stays a plain bytes view rather than repeating the same fact.
+        // A non-Direct source gets no special-cased note in the bytes view: the card's `Data Source` config row
+        // already names it, so the tabs stay a plain bytes view rather than repeating the same fact.
         expect(screen.getByTestId('pmp-raw-payload')).toBeInTheDocument();
         expect(screen.getByRole('tab', { name: 'Decoded' })).toBeInTheDocument();
         expect(screen.queryByTestId('pmp-decoded-text')).not.toBeInTheDocument();
+    });
+
+    it('should report why an External payload has no data hash instead of hashing its pointer bytes', () => {
+        renderSection({
+            config: JSON_CONFIG,
+            dataSource: DataSource.External,
+            kind: 'setData',
+            payload: new Uint8Array(40),
+        });
+
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(
+            PMP_POINTER_HASH_NOTES[DataSource.External],
+        );
+    });
+
+    it('should report why a Url payload has no data hash instead of hashing its pointer bytes', () => {
+        const url = 'https://example.com/idl.json';
+        renderSection({
+            config: JSON_CONFIG,
+            dataSource: DataSource.Url,
+            kind: 'setData',
+            payload: new TextEncoder().encode(url),
+        });
+
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(PMP_POINTER_HASH_NOTES[DataSource.Url]);
+        expect(screen.getByTestId('pmp-payload-data-hash')).not.toHaveTextContent(sha256Hex(fromUtf8(url)));
     });
 
     it('should render a Url payload pointer as decoded text without resolving it', async () => {

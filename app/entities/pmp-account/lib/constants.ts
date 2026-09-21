@@ -96,3 +96,9 @@ export const PMP_DATA_SOURCE_LABELS: Record<DataSource, string> = {
     [DataSource.External]: 'External',
     [DataSource.Url]: 'Url',
 };
+
+/** A non-Direct payload's bytes NAME the document rather than being it, so no digest over them is reproducible. */
+export const PMP_POINTER_HASH_NOTES: Record<Exclude<DataSource, DataSource.Direct>, string> = {
+    [DataSource.External]: 'Not hashed - the payload is an External pointer.',
+    [DataSource.Url]: 'Not hashed - the payload is a Url pointer.',
+};

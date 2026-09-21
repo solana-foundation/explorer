@@ -64,7 +64,7 @@ export function DataPayloadSection({ pmpIx }: { pmpIx: PmpPayloadInstruction }) 
     const hash = getPayloadDataHash(decoded);
     return (
         <>
-            {hash !== undefined && <PayloadHashRow columns={CARD_TABLE_COLUMNS} hash={hash} />}
+            {hash !== undefined && <PayloadHashRow columns={CARD_TABLE_COLUMNS} dataSource={dataSource} hash={hash} />}
             <SectionRow testId="pmp-payload-section">
                 <DecodedTabs
                     compression={config.compression}
@@ -128,7 +128,7 @@ function AccountRows({
 
     return (
         <>
-            {hash !== undefined && <PayloadHashRow columns={CARD_TABLE_COLUMNS} hash={hash} />}
+            {hash !== undefined && <PayloadHashRow columns={CARD_TABLE_COLUMNS} dataSource={dataSource} hash={hash} />}
             <SectionRow testId="pmp-payload-section">
                 <div className="flex flex-col gap-0">
                     <Alert variant="default" data-testid="pmp-deferred-source-note" className="!mb-0 pl-0">

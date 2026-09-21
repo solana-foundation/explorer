@@ -93,19 +93,23 @@ function BufferDataContentRows({
         return <PayloadUnpackOverflowRow limit={resultFromBytes.limit} />;
     }
 
+    const foundConfig = toFoundConfig(configFromOnchain);
+
     // The bytes here are the DECOMPRESSED payload, which is why they are worth offering rather than pointing at the
     // still-compressed account bytes on the card above.
     if (resultFromBytes.kind === 'oversized') {
         return (
             <>
-                <PayloadHashRow columns={CARD_TABLE_COLUMNS} hash={resultFromBytes.dataHash} />
+                <PayloadHashRow
+                    columns={CARD_TABLE_COLUMNS}
+                    dataSource={foundConfig?.dataSource}
+                    hash={resultFromBytes.dataHash}
+                />
                 <PayloadTooLargeRow budget={resultFromBytes.budget} size={resultFromBytes.bytes.length} />
                 <RawPayloadRow bytes={resultFromBytes.bytes} />
             </>
         );
     }
-
-    const foundConfig = toFoundConfig(configFromOnchain);
 
     return (
         <>
@@ -120,7 +124,11 @@ function BufferDataContentRows({
                         (resultFromBytes.kind === 'text' ? resultFromBytes.format : undefined),
                 }}
             />
-            <PayloadHashRow columns={CARD_TABLE_COLUMNS} hash={resultFromBytes.dataHash} />
+            <PayloadHashRow
+                columns={CARD_TABLE_COLUMNS}
+                dataSource={foundConfig?.dataSource}
+                hash={resultFromBytes.dataHash}
+            />
             <BufferPayloadRow foundConfig={foundConfig} fromBytesConfig={resultFromBytes} />
         </>
     );

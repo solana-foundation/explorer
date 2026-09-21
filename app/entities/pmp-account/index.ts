@@ -20,6 +20,7 @@ export {
     PMP_ENCODING_LABELS,
     PMP_FORMAT_LABELS,
     PMP_MAX_UNPACKED_BYTES,
+    PMP_POINTER_HASH_NOTES,
     PMP_UNCOMPRESSED_BYTES_LABEL,
 } from './lib/constants';
 export { decodePmpAccount } from './lib/decode-pmp-account';
