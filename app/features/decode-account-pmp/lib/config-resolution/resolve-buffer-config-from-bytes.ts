@@ -12,7 +12,7 @@ export type ConfigResolutionFromBytesResult =
     | {
           kind: 'text';
           compression: Compression;
-          /** sha256 over the UNPACKED bytes. User can reproduce it off-chain from the document. */
+          /** sha256 over the UNPACKED bytes (as stored). User can reproduce it off-chain from the document. */
           dataHash: string;
           /** The unpacked bytes, carried so a declared-config upgrade never inflates the body a second time. */
           payload: Uint8Array;
@@ -102,6 +102,8 @@ export function resolveBufferConfigFromBytes(body: Uint8Array): ConfigResolution
     // over-allocated account carries trailing zeros inside its body. The trim is kept ONLY when it turned a
     // failing parse into a passing one, which is what makes it evidence rather than a guess.
     //
+    // A PARSING device only: `payload` and `dataHash` stay as stored, so the digest matches the instruction card's.
+    //
     // Never applied before the inflate: pako stops at the end of a stream on its own, so slack after a compressed
     // payload is already harmless.
     if (compression === Compression.None && !isJsonFormat) {
@@ -111,10 +113,10 @@ export function resolveBufferConfigFromBytes(body: Uint8Array): ConfigResolution
         if (trimmedText !== undefined && isJson(trimmedText)) {
             return {
                 compression,
-                dataHash: sha256Hex(trimmed),
+                dataHash: sha256Hex(payload),
                 format: Format.Json,
                 kind: 'text',
-                payload: trimmed,
+                payload,
                 text: toDocumentText(trimmedText, Format.Json),
             };
         }
