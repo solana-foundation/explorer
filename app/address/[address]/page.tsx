@@ -1,4 +1,6 @@
+import { getAccountOgImageUrl, getAccountOpenGraph } from '@features/account-share/server';
 import { TransactionHistoryCard } from '@features/transaction-history';
+import { Cluster, clusterFromSlug } from '@utils/cluster';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
@@ -13,14 +15,36 @@ type Props = Readonly<{
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     const { address } = await props.params;
+    const { cluster: clusterParam } = await props.searchParams;
     const title = `Transaction History | ${await getReadableTitleFromAddress(props)} | Solana`;
+    const description = `History of all transactions involving the address ${address} on Solana`;
+
+    const featureGateOpenGraph = getFeatureGateOpenGraph(address);
+    if (featureGateOpenGraph) {
+        return { description, openGraph: featureGateOpenGraph, title };
+    }
+
+    const cluster = clusterParam === undefined ? undefined : clusterFromSlug(clusterParam);
+
+    if (cluster === Cluster.Custom) {
+        return {
+            description,
+            openGraph: { description, title, type: 'website' },
+            title,
+            twitter: { card: 'summary', description, title },
+        };
+    }
+
     return {
-        description: `History of all transactions involving the address ${address} on Solana`,
-        // Feature gate OG images are intentionally shown on the main address page too,
-        // so shared links to feature gate addresses always display the rich preview.
-        // e.g. /address/5xXZc66h4UdB6Yq7FzdBxBiRAFMMScMLwHxk2QZDaNZL?cluster=testnet
-        openGraph: getFeatureGateOpenGraph(address),
+        description,
+        openGraph: { ...getAccountOpenGraph(address, cluster), description, title },
         title,
+        twitter: {
+            card: 'summary_large_image',
+            description,
+            images: [getAccountOgImageUrl(address, cluster)],
+            title,
+        },
     };
 }
 
