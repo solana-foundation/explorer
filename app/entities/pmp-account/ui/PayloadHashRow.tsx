@@ -29,9 +29,12 @@ export function PayloadHashRow({
         <BaseTable.Row data-testid="pmp-payload-data-hash">
             <BaseTable.Cell>
                 {dataSource === undefined ? (
-                    <InfoTooltip text={PMP_UNRESOLVED_SOURCE_HASH_NOTE}>
-                        <span data-testid="pmp-payload-data-hash-unresolved-source">Data Hash</span>
-                    </InfoTooltip>
+                    <>
+                        <InfoTooltip text={PMP_UNRESOLVED_SOURCE_HASH_NOTE}>
+                            <span data-testid="pmp-payload-data-hash-unresolved-source">Data Hash</span>
+                        </InfoTooltip>
+                        <span className="sr-only">{PMP_UNRESOLVED_SOURCE_HASH_NOTE}</span>
+                    </>
                 ) : (
                     'Data Hash'
                 )}

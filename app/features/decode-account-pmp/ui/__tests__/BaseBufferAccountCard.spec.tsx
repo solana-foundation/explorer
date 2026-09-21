@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { PMP_UNRESOLVED_SOURCE_HASH_NOTE } from '@entities/pmp-account';
 import { Compression, DataSource, Encoding, Format } from '@solana-program/program-metadata';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
@@ -89,6 +90,7 @@ describe('BaseBufferAccountCard', () => {
         render(<BaseBufferAccountCard {...bufferArgs(pack(YAML_DOC, Compression.Gzip))} />);
 
         expect(screen.getByTestId('pmp-payload-data-hash-unresolved-source')).toHaveTextContent('Data Hash');
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(PMP_UNRESOLVED_SOURCE_HASH_NOTE);
         expect(screen.queryByTestId('pmp-payload-data-hash-pointer')).not.toBeInTheDocument();
     });
 
