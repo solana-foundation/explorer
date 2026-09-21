@@ -103,4 +103,4 @@ export const PMP_POINTER_HASH_NOTES: Record<Exclude<DataSource, DataSource.Direc
     [DataSource.Url]: 'Not hashed - the payload is a Url pointer.',
 };
 
-export const PMP_UNRESOLVED_SOURCE_HASH_NOTE = 'Unknown data source - hashed the stored bytes';
+export const PMP_UNRESOLVED_SOURCE_HASH_NOTE = 'Unknown data source - hashed the unpacked payload bytes';
