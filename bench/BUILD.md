@@ -59,6 +59,7 @@
 | Static | `/feature-gates` | 50 kB | 460 kB |
 | Dynamic | `/mcp` | — | — |
 | Static | `/mcp/start` | 30 kB | 440 kB |
+| Dynamic | `/og/account/[address]` | — | — |
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Dynamic | `/og/tx/[signature]` | — | — |
