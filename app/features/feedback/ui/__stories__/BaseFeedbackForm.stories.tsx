@@ -50,3 +50,27 @@ export const CloseWithoutSubmit: Story = {
         await expect(args.onSubmit).not.toHaveBeenCalled();
     },
 };
+
+export const RateWithKeyboard: Story = {
+    play: async ({ canvasElement, args }) => {
+        const body = within(canvasElement.ownerDocument.body);
+
+        const firstStar = await body.findByRole('radio', { name: '1 of 5 stars' });
+        firstStar.focus();
+        await userEvent.keyboard('{ArrowRight}{ArrowRight}');
+        await expect(body.getByRole('radio', { name: '3 of 5 stars' })).toBeChecked();
+
+        // The five stars are one tab stop, so Tab leaves the group rather than stepping through it
+        await userEvent.tab();
+        await expect(body.getByLabelText('Feedback')).toHaveFocus();
+
+        await userEvent.type(body.getByLabelText('Feedback'), 'Keyboard only');
+        await userEvent.click(body.getByRole('button', { name: 'Submit' }));
+
+        await expect(args.onSubmit).toHaveBeenCalledWith({
+            contact: undefined,
+            message: 'Keyboard only',
+            rating: 3,
+        });
+    },
+};
