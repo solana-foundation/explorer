@@ -1,5 +1,4 @@
-import { useCluster } from '@entities/cluster';
-import { clusterSlug } from '@utils/cluster';
+import { clusterSlug, useCluster } from '@entities/cluster';
 import { useState } from 'react';
 
 import { useToast } from '@/app/components/shared/ui/sonner/use-toast';
