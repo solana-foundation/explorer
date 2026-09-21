@@ -5,7 +5,7 @@ import {
     FEEDBACK_ISSUES_URL,
     isFeedbackEnabled,
     isFeedbackWidgetEnabled,
-} from '../lib/feedback-options';
+} from '../env';
 import { useFeedbackForm } from '../model/use-feedback-form';
 import { BaseFeedbackForm } from './BaseFeedbackForm';
 import { BaseFeedbackWidget } from './BaseFeedbackWidget';
