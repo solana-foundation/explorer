@@ -1,3 +1,4 @@
+import { FetchStatus } from '@providers/cache';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -13,6 +14,9 @@ import {
 } from '../__fixtures__/transaction';
 import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
 import { SummaryCard } from '../SummaryCard';
+
+/** A `getTransaction` the page has started and is still waiting on. */
+const IN_FLIGHT = { status: FetchStatus.Fetching };
 
 // `ClusterProvider` reads the router on mount, which jsdom has no app router for.
 vi.mock('next/navigation', () => ({
@@ -47,10 +51,20 @@ describe('SummaryCard timestamp', () => {
     });
 
     it('should fall back to the parsed transaction when the raw response has no block time', async () => {
-        // The two fetches use the same commitment, but only one has to land for the row to render.
+        // Both fetches answered; only one of them carried a time.
         renderSummary({ raw: MOCK_RAW_TX_NO_BLOCK_TIME });
 
         expect(await screen.findByText('Timestamp (Local)')).toBeInTheDocument();
+    });
+
+    it('should omit the row until the transaction fetches answer', async () => {
+        renderSummary({ parsed: IN_FLIGHT, raw: IN_FLIGHT });
+
+        // Positive control: the status alone renders the card, so a missing row is the row's own
+        // doing rather than an unrendered card.
+        expect(await screen.findByText('Signature')).toBeInTheDocument();
+        expect(screen.queryByText('Timestamp (Local)')).not.toBeInTheDocument();
+        expect(screen.queryByText('Unavailable')).not.toBeInTheDocument();
     });
 
     it('should say unavailable when neither transaction carries a block time', async () => {

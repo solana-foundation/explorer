@@ -1,5 +1,5 @@
 import { FetchStatus } from '@providers/cache';
-import { act, render } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { AUTO_REFRESH_INTERVAL, AutoRefresh } from '@/app/shared/lib/use-auto-refresh';
@@ -26,7 +26,7 @@ function rawEntry(status: FetchStatus, raw?: null) {
     return { data: raw === null ? { raw: null } : undefined, status };
 }
 
-function renderSummary(entry: ReturnType<typeof rawEntry>) {
+function renderSummary(entry: ReturnType<typeof rawEntry>, autoRefresh = AutoRefresh.Active) {
     const Wrapper = withTransactionProviders(
         { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
         { [DEFAULT_SIGNATURE]: MOCK_STATUS },
@@ -35,7 +35,7 @@ function renderSummary(entry: ReturnType<typeof rawEntry>) {
 
     return render(
         <Wrapper>
-            <SummaryCard signature={DEFAULT_SIGNATURE} autoRefresh={AutoRefresh.Active} />
+            <SummaryCard signature={DEFAULT_SIGNATURE} autoRefresh={autoRefresh} />
         </Wrapper>,
     );
 }
@@ -60,6 +60,16 @@ describe('SummaryCard raw retry', () => {
         renderSummary(rawEntry(FetchStatus.Fetched, null));
 
         await tick();
+
+        expect(fetchRaw).toHaveBeenCalledWith(DEFAULT_SIGNATURE);
+    });
+
+    it('should retry the raw fetch from the Refresh button', () => {
+        // The interval stops once the transaction finalizes, so the button is the only way back to a
+        // transaction the RPC answered null for.
+        renderSummary(rawEntry(FetchStatus.Fetched, null), AutoRefresh.Inactive);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
 
         expect(fetchRaw).toHaveBeenCalledWith(DEFAULT_SIGNATURE);
     });
