@@ -94,15 +94,16 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     // Read the version off the raw details rather than the parsed ones, so the size and the limit it
     // is compared against always come from the same fetch.
     const rawVersion = rawDetails?.data?.raw?.version;
-    // Both fetches carry the block time; the raw one lands first, and the parsed one covers the window
-    // where a commitment difference leaves the raw response null.
+    // Both fetches carry the block time, so either can supply the row.
     const blockTime = rawDetails?.data?.raw?.blockTime ?? details?.data?.transactionWithMeta?.blockTime ?? undefined;
+    // Both fetches land after the status that gates this card, so an absent block time means "not fetched
+    // yet" until they answer. The row must not call it unavailable before then.
+    const blockTimeAnswered = isFetched(rawDetails) && isFetched(details);
 
     // A finalized mainnet transaction always has a block time. Losing one means the cluster answered
     // without it, which is worth knowing about; every other cluster and commitment can legitimately lack it.
     const isFinalizedOnMainnet = cluster === Cluster.MainnetBeta && status?.data?.info?.confirmations === 'max';
-    const hasSettledWithoutBlockTime =
-        isFinalizedOnMainnet && blockTime === undefined && Boolean(rawDetails?.data) && Boolean(details?.data);
+    const hasSettledWithoutBlockTime = isFinalizedOnMainnet && blockTime === undefined && blockTimeAnswered;
     useEffect(() => {
         if (!hasSettledWithoutBlockTime) return;
         Logger.warn('[transaction] finalized transaction has no block time', {
@@ -124,8 +125,8 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     }, [signature, clusterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // `getTransaction` answers null until the block is confirmed, so a transaction that is merely processed
-    // has no wire bytes and no block time yet. Retry it alongside the status until one arrives; auto-refresh
-    // only runs while confirmations are short of max, so this stops on its own.
+    // has no wire bytes and no block time yet. The status refresh carries neither, so both the auto-refresh
+    // interval and the Refresh button retry the transaction alongside the status.
     //
     // Read the entry through a ref: the hook needs a stable callback, and the entry changes on every
     // fetch, so a dependency would rebuild the interval and push the next status refresh out.
@@ -245,7 +246,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     <RefreshButton
                         fetching={autoRefresh === AutoRefresh.Active}
                         analyticsSection="transaction_card"
-                        onClick={() => fetchStatus(signature)}
+                        onClick={refresh}
                     />
                     <DownloadDropdown
                         filename={signature}
@@ -395,7 +396,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     </KeyValue>
                 )}
 
-                {blockTime ? (
+                {blockTime !== undefined ? (
                     <>
                         <KeyValue label="Timestamp (Local)">
                             <span className="font-mono">{displayTimestamp(blockTime * 1000, true)}</span>
@@ -404,16 +405,21 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                             <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>
                         </KeyValue>
                     </>
-                ) : (
+                ) : blockTimeAnswered ? (
                     <KeyValue label="Timestamp" divider={false}>
                         <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
                             Unavailable
                         </InfoTooltip>
                     </KeyValue>
-                )}
+                ) : undefined}
             </Card>
         </section>
     );
+}
+
+/** A cache entry that answered, as opposed to one still in flight, failed, or never started. */
+function isFetched(entry?: { status: FetchStatus }): boolean {
+    return entry?.status === FetchStatus.Fetched;
 }
 
 /**
