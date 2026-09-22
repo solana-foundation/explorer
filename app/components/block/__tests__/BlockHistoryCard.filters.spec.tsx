@@ -1,6 +1,5 @@
-import type { BlockWithV1 } from '@entities/block-data';
-import type { TransactionVersion } from '@solana/kit';
-import { PublicKey } from '@solana/web3.js';
+import type { BlockData, BlockTransaction } from '@entities/block-data';
+import { type Address, address, blockhash, lamports, type Signature } from '@solana/kit';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -20,7 +19,7 @@ vi.mock('@providers/cluster', () => ({
 }));
 
 vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: PublicKey }) => <span>{pubkey.toBase58()}</span>,
+    Address: ({ address }: { address: Address }) => <span>{address}</span>,
 }));
 
 vi.mock('@components/common/Signature', () => ({
@@ -28,7 +27,7 @@ vi.mock('@components/common/Signature', () => ({
 }));
 
 vi.mock('@components/common/SolBalance', () => ({
-    SolBalance: ({ lamports }: { lamports: number }) => <span>{lamports}</span>,
+    SolBalance: ({ lamports }: { lamports: bigint }) => <span>{lamports.toString()}</span>,
 }));
 
 vi.mock('@entities/compute-unit', () => ({
@@ -66,37 +65,39 @@ describe('BlockHistoryCard filters', () => {
     });
 });
 
-function makeBlock(): BlockWithV1 {
+function makeBlock(): BlockData {
     return {
+        blockTime: null,
+        blockhash: blockhash('11111111111111111111111111111111'),
+        parentSlot: 122n,
+        previousBlockhash: blockhash('11111111111111111111111111111111'),
+        rewards: [],
         transactions: [
-            makeTransaction('legacy-program-a', 'legacy', PROGRAM_A),
-            makeTransaction('v0-program-a', 0, PROGRAM_A),
-            makeTransaction('v0-program-b', 0, PROGRAM_B),
+            makeTransaction(0, 'legacy-program-a', 'legacy', PROGRAM_A),
+            makeTransaction(1, 'v0-program-a', 0, PROGRAM_A),
+            makeTransaction(2, 'v0-program-b', 0, PROGRAM_B),
         ],
-    } as unknown as BlockWithV1;
+    };
 }
 
-function makeTransaction(signature: string, version: TransactionVersion, program: string) {
-    const keys = [new PublicKey(program), new PublicKey(ACCOUNT)];
+function makeTransaction(index: number, transactionSignature: string, version: 'legacy' | 0, program: string) {
     return {
+        index,
+        message: {
+            header: { numReadonlyNonSignerAccounts: 0, numReadonlySignerAccounts: 0, numSignerAccounts: 0 },
+            instructions: [{ accountIndices: [1], data: new Uint8Array(), programAddressIndex: 0 }],
+            lifetimeToken: blockhash('11111111111111111111111111111111'),
+            staticAccounts: [address(program), address(ACCOUNT)],
+            version,
+        },
         meta: {
-            costUnits: 1,
+            costUnits: 1n,
             err: null,
-            fee: 5_000,
+            fee: lamports(5_000n),
             innerInstructions: [],
             loadedAddresses: undefined,
             logMessages: [],
         },
-        transaction: {
-            message: {
-                compiledInstructions: [{ data: new Uint8Array(), programIdIndex: 0 }],
-                getAccountKeys: () => ({
-                    get: (index: number) => keys[index],
-                    keySegments: () => [keys],
-                }),
-            },
-            signatures: [signature],
-        },
-        version,
-    };
+        signatures: [transactionSignature as Signature],
+    } satisfies BlockTransaction;
 }
