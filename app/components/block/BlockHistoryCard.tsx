@@ -2,7 +2,6 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
-import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
 import { BLOCK_TRANSACTION_VERSIONS, type BlockWithV1 } from '@entities/block-data';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
@@ -24,13 +23,14 @@ import {
     type SortMode,
     sortTransactions,
 } from '@/app/components/block/block-history-sort';
-import { LoadMoreButton, type ResponsiveCell, ResponsiveGridRow, TIGHT_CARD } from '@/app/components/block/shared';
+import { LoadMoreButton, type ResponsiveCell, ResponsiveGridRow } from '@/app/components/block/shared';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { Input } from '@/app/components/shared/ui/input';
 import { invariant } from '@/app/shared/lib/invariant';
-import { Card } from '@/app/shared/ui/Card';
+import { DataListCard } from '@/app/shared/ui/DataListCard';
+import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
 const PAGE_SIZE = 25;
 
@@ -237,7 +237,8 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
             : 'No transactions found with this filter';
 
     return (
-        <CollapsibleSection
+        <DataListCard
+            breakpoint="md"
             // The record count rides in the title as a muted, smaller run.
             title={
                 <>
@@ -252,26 +253,37 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                     </span>
                 </>
             }
-            className=""
             titleClassName="items-end gap-4"
             belowTitle={
-                isProgramFilterSet || versionLabel !== undefined ? (
-                    <div className="-mt-1 mb-0.5 flex flex-wrap items-center gap-2">
-                        {isProgramFilterSet && (
-                            <FilterChip
-                                field="Program"
-                                label={filterModel.current.name}
-                                applyReset={params => params.set('filter', ALL_TRANSACTIONS)}
-                            />
+                isProgramFilterSet || versionLabel !== undefined || accountFilter !== null ? (
+                    <>
+                        {(isProgramFilterSet || versionLabel !== undefined) && (
+                            <div className="-mt-1 mb-0.5 flex flex-wrap items-center gap-2">
+                                {isProgramFilterSet && (
+                                    <FilterChip
+                                        field="Program"
+                                        label={filterModel.current.name}
+                                        applyReset={params => params.set('filter', ALL_TRANSACTIONS)}
+                                    />
+                                )}
+                                {versionLabel !== undefined && (
+                                    <FilterChip
+                                        field="Version"
+                                        label={versionLabel}
+                                        applyReset={params => params.delete(VERSION_PARAM)}
+                                    />
+                                )}
+                            </div>
                         )}
-                        {versionLabel !== undefined && (
-                            <FilterChip
-                                field="Version"
-                                label={versionLabel}
-                                applyReset={params => params.delete(VERSION_PARAM)}
-                            />
+                        {accountFilter !== null && (
+                            <div className="text-sm text-white">
+                                Showing transactions which load account:
+                                <span className="ml-1.5 inline-block align-middle">
+                                    <Address pubkey={accountFilter} link />
+                                </span>
+                            </div>
                         )}
-                    </div>
+                    </>
                 ) : undefined
             }
             actions={
@@ -293,31 +305,19 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                 </>
             }
         >
-            <div className="flex flex-col gap-3">
-                {accountFilter !== null && (
-                    <div className="text-sm text-white">
-                        Showing transactions which load account:
-                        <span className="ml-1.5 inline-block align-middle">
-                            <Address pubkey={accountFilter} link />
-                        </span>
-                    </div>
-                )}
-                <Card variant="tight" className={TIGHT_CARD}>
-                    {filteredTransactions.length === 0 ? (
-                        <div className="px-4 py-3 text-sm text-white">{emptyFilterMessage}</div>
-                    ) : (
-                        <BlockHistoryGrid
-                            rows={visible}
-                            showComputeUnits={showComputeUnits}
-                            onSort={pushSort}
-                            sortMode={sortMode}
-                            sortDirection={sortDirection}
-                        />
-                    )}
-                    {hasMore && <LoadMoreButton onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)} />}
-                </Card>
-            </div>
-        </CollapsibleSection>
+            {filteredTransactions.length === 0 ? (
+                <div className={cn(ROW_PADDING, 'text-sm text-white')}>{emptyFilterMessage}</div>
+            ) : (
+                <BlockHistoryGrid
+                    rows={visible}
+                    showComputeUnits={showComputeUnits}
+                    onSort={pushSort}
+                    sortMode={sortMode}
+                    sortDirection={sortDirection}
+                />
+            )}
+            {hasMore && <LoadMoreButton onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)} />}
+        </DataListCard>
     );
 }
 
@@ -395,7 +395,10 @@ function BlockHistoryGrid({
         <div className="text-sm text-white">
             <div
                 style={gridStyle}
-                className="hidden gap-4 border-b border-solid border-white/10 px-4 py-2.5 text-xs uppercase text-outer-space-300 md:grid"
+                className={cn(
+                    'hidden gap-4 border-b border-solid border-white/10 text-xs uppercase text-outer-space-300 md:grid',
+                    ROW_PADDING,
+                )}
             >
                 {headers.map(header => {
                     const sortKey = header.sortKey;
@@ -524,9 +527,9 @@ function BlockHistoryGridRow({
         <ResponsiveGridRow
             cells={cells}
             gridStyle={gridStyle}
-            mobileClassName="relative gap-1.5 px-4"
-            desktopClassName="gap-4 px-4 py-3"
-            pinnedTopRight={<span className="absolute right-4 top-3 text-outer-space-300">#{tx.index + 1}</span>}
+            mobileClassName="relative gap-1.5"
+            desktopClassName="gap-4"
+            pinnedTopRight={<span className="absolute right-3 top-2.5 text-outer-space-300">#{tx.index + 1}</span>}
         />
     );
 }

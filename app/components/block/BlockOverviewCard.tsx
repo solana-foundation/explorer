@@ -11,9 +11,9 @@ import { PublicKey } from '@solana/web3.js';
 import { IBRL_EXPLORER_URL } from '@utils/env';
 import { ExternalLink } from 'react-feather';
 
-import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { Card } from '@/app/shared/ui/Card';
+import { KeyValue, TextValue } from '@/app/shared/ui/key-value';
 
 type BlockOverviewCardProps = {
     block: BlockWithV1;
@@ -64,89 +64,55 @@ export function BlockOverviewCard({
                 )}
             </div>
             <Card ui="dashkit">
-                <Row divider>
-                    <Label>Blockhash</Label>
-                    <Value className="flex w-full min-w-0 items-baseline">
-                        <Copyable text={block.blockhash}>
-                            <span className="min-w-0 break-all">{block.blockhash}</span>
-                        </Copyable>
-                    </Value>
-                </Row>
-                <Row divider>
-                    <Label>Slot</Label>
-                    <Value className="flex w-full min-w-0 items-baseline">
-                        <Copyable text={String(slot)}>
-                            <Slot slot={slot} />
-                        </Copyable>
-                    </Value>
-                </Row>
+                <KeyValue label="Blockhash">
+                    <Copyable text={block.blockhash}>
+                        <TextValue>{block.blockhash}</TextValue>
+                    </Copyable>
+                </KeyValue>
+                <KeyValue label="Slot">
+                    <Copyable text={String(slot)}>
+                        <Slot slot={slot} />
+                    </Copyable>
+                </KeyValue>
                 {blockLeader !== undefined && (
-                    <Row divider>
-                        <Label>Slot Leader</Label>
-                        <Value>
-                            <Address pubkey={blockLeader} link noTruncate />
-                        </Value>
-                    </Row>
+                    <KeyValue label="Slot Leader">
+                        <Address pubkey={blockLeader} link noTruncate />
+                    </KeyValue>
                 )}
-                <Row divider>
-                    <Label>Timestamp</Label>
-                    <Value mono={false}>
-                        {block.blockTime ? <Timestamp unixTimestamp={block.blockTime} /> : 'Unavailable'}
-                    </Value>
-                </Row>
+                <KeyValue label="Timestamp">
+                    {block.blockTime ? <Timestamp unixTimestamp={block.blockTime} /> : 'Unavailable'}
+                </KeyValue>
                 {epoch !== undefined && (
-                    <Row divider>
-                        <Label>Epoch</Label>
-                        <Value>
-                            <Epoch epoch={epoch} link />
-                        </Value>
-                    </Row>
+                    <KeyValue label="Epoch">
+                        <Epoch epoch={epoch} link />
+                    </KeyValue>
                 )}
-                <Row divider>
-                    <Label>Parent Blockhash</Label>
-                    <Value className="flex w-full min-w-0 items-baseline">
-                        <Copyable text={block.previousBlockhash}>
-                            <span className="min-w-0 break-all">{block.previousBlockhash}</span>
-                        </Copyable>
-                    </Value>
-                </Row>
-                <Row divider>
-                    <Label>Parent Slot</Label>
-                    <Value>
-                        <Slot slot={block.parentSlot} link />
-                    </Value>
-                </Row>
+                <KeyValue label="Parent Blockhash">
+                    <Copyable text={block.previousBlockhash}>
+                        <TextValue>{block.previousBlockhash}</TextValue>
+                    </Copyable>
+                </KeyValue>
+                <KeyValue label="Parent Slot">
+                    <Slot slot={block.parentSlot} link />
+                </KeyValue>
                 {parentLeader !== undefined && (
-                    <Row divider>
-                        <Label>Parent Slot Leader</Label>
-                        <Value>
-                            <Address pubkey={parentLeader} link noTruncate />
-                        </Value>
-                    </Row>
+                    <KeyValue label="Parent Slot Leader">
+                        <Address pubkey={parentLeader} link noTruncate />
+                    </KeyValue>
                 )}
                 {childSlot !== undefined && (
-                    <Row divider>
-                        <Label>Child Slot</Label>
-                        <Value>
-                            <Slot slot={childSlot} link />
-                        </Value>
-                    </Row>
+                    <KeyValue label="Child Slot">
+                        <Slot slot={childSlot} link />
+                    </KeyValue>
                 )}
                 {childLeader !== undefined && (
-                    <Row divider>
-                        <Label>Child Slot Leader</Label>
-                        <Value>
-                            <Address pubkey={childLeader} link noTruncate />
-                        </Value>
-                    </Row>
+                    <KeyValue label="Child Slot Leader">
+                        <Address pubkey={childLeader} link noTruncate />
+                    </KeyValue>
                 )}
-                <Row divider>
-                    <Label>Processed Transactions</Label>
-                    <Value mono={false}>{block.transactions.length}</Value>
-                </Row>
-                <Row divider>
-                    <Label>Transaction Versions</Label>
-                    <Value mono={false} breakAll={false}>
+                <KeyValue label="Processed Transactions">{block.transactions.length}</KeyValue>
+                <KeyValue label="Transaction Versions">
+                    <span>
                         {versionEntries.map(({ count, label, share, version }, index) => (
                             <span key={String(version)}>
                                 {index > 0 && <span className="text-outer-space-300"> &middot; </span>}
@@ -154,36 +120,24 @@ export function BlockOverviewCard({
                                 <span className="text-outer-space-300">({Math.round(share * 100)}%)</span>
                             </span>
                         ))}
-                    </Value>
-                </Row>
-                {showSuccessfulCount && (
-                    <Row divider>
-                        <Label>Successful Transactions</Label>
-                        <Value mono={false}>{successfulTxs.length}</Value>
-                    </Row>
-                )}
-                <Row divider>
-                    <Label>Total CUs Consumed</Label>
-                    <Value mono={false}>{totalCUs.toLocaleString()}</Value>
-                </Row>
-                <Row divider>
-                    <Label>Transaction Cost Utilization</Label>
-                    <Value mono={false} breakAll={false}>
-                        {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()}{' '}
-                        <span className="text-outer-space-300">
-                            ({Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
-                        </span>
-                    </Value>
-                </Row>
-                <Row>
-                    <Label>Reserved Compute Units</Label>
-                    <Value mono={false} breakAll={false}>
-                        {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()}{' '}
-                        <span className="text-outer-space-300">
-                            ({Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)
-                        </span>
-                    </Value>
-                </Row>
+                    </span>
+                </KeyValue>
+                {showSuccessfulCount && <KeyValue label="Successful Transactions">{successfulTxs.length}</KeyValue>}
+                <KeyValue label="Total CUs Consumed">{totalCUs.toLocaleString()}</KeyValue>
+                <KeyValue label="Transaction Cost Utilization">
+                    {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()}
+                    {/* ml-1 (not {' '}) because the KeyValue value column is flex, which strips a whitespace-only node between children. */}
+                    <span className="ml-1 text-outer-space-300">
+                        ({Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
+                    </span>
+                </KeyValue>
+                <KeyValue label="Reserved Compute Units" divider={false}>
+                    {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()}
+                    {/* ml-1 (not {' '}) because the KeyValue value column is flex, which strips a whitespace-only node between children. */}
+                    <span className="ml-1 text-outer-space-300">
+                        ({Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)
+                    </span>
+                </KeyValue>
             </Card>
         </section>
     );

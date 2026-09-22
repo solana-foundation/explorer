@@ -1,11 +1,16 @@
 // TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Copyable } from '@components/common/Copyable';
 import { cva } from 'class-variance-authority';
-import React from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { ByteArray, toHex } from '@/app/shared/lib/bytes';
 
 import { cn } from './utils';
+
+// Measure the wrapped hex layout before the browser paints so the column-based checkerboard doesn't
+// flash from a flat single color on the first frame. Falls back to useEffect on the server, where
+// there is no layout to measure anyway (and useLayoutEffect would warn).
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type HexSpan = { text: string; variant: 'primary' | 'secondary' | 'secondary-old' };
 export type HexRow = HexSpan[];
@@ -78,28 +83,36 @@ const fullContentVariants = cva('items-center', {
     },
 });
 
-export function HexData({
-    raw,
-    className,
-    copyableRaw,
-    truncate = false,
-    inverted = false,
-    isCopyable = true,
-    align = 'end',
-    spanSize = SPAN_SIZE,
-    rowSize = ROW_SIZE,
-}: {
+type HexDataBase = {
     raw: ByteArray;
     copyableRaw?: ByteArray;
     className?: string;
-    truncate?: boolean;
     inverted?: boolean;
-    // 'end' is the legacy default (right-aligned in table cells).
-    align?: 'start' | 'end';
     isCopyable?: boolean;
     spanSize?: number;
-    rowSize?: number;
-}) {
+};
+
+// The layout is a discriminated union: `rowSize` / `align` shape the default `fixed` grid only.
+// The `fit` (responsive wrap) layout ignores them, so the types forbid passing them there rather
+// than silently dropping them.
+//   - `fixed` (default): grouped rows; `align` right/left-aligns, `rowSize` sets bytes/row.
+//   - `fit`           : reflows the hex to the container width (mobile drawer / full-width panes).
+type HexDataLayout = { layout?: 'fixed'; align?: 'start' | 'end'; rowSize?: number } | { layout: 'fit' };
+
+export type HexDataProps = HexDataBase & HexDataLayout;
+
+export function HexData(props: HexDataProps) {
+    const { raw, className, copyableRaw, inverted = false, isCopyable = true, spanSize = SPAN_SIZE } = props;
+
+    // `align` / `rowSize` are meaningful only for the fixed grid ('end' is the legacy default,
+    // right-aligned in table cells); the other layouts fall back to these harmless defaults.
+    let align: 'start' | 'end' = 'end';
+    let rowSize = ROW_SIZE;
+    if (props.layout === undefined || props.layout === 'fixed') {
+        align = props.align ?? 'end';
+        rowSize = props.rowSize ?? ROW_SIZE;
+    }
+
     if (!raw || raw.length === 0) {
         return (
             <div className={cn('p-1.5', fullContentVariants({ align }), className)}>
@@ -111,18 +124,6 @@ export function HexData({
     const hexString = toHex(raw);
     const copyText = copyableRaw ? toHex(copyableRaw) : hexString;
 
-    if (truncate) {
-        return (
-            <TruncatedContent
-                hexString={hexString}
-                copyText={copyText}
-                raw={raw}
-                inverted={inverted}
-                spanSize={spanSize}
-            />
-        );
-    }
-
     return (
         <FullContent
             hexString={hexString}
@@ -133,6 +134,7 @@ export function HexData({
             spanSize={spanSize}
             rowSize={rowSize}
             isCopyable={isCopyable}
+            wrap={props.layout === 'fit'}
         />
     );
 }
@@ -149,43 +151,71 @@ const hexSpanVariants = cva('', {
     },
 });
 
-function ColoredSpans({ spans }: { spans: HexSpan[] }) {
-    return (
-        <>
-            {spans.map((span, i) => (
-                <span key={i} className={hexSpanVariants({ tone: span.variant })}>
-                    {span.text}{' '}
-                </span>
-            ))}
-        </>
-    );
-}
-
-function TruncatedContent({
-    hexString,
+function WrapContent({
+    spans,
+    className,
     copyText,
-    raw,
     inverted,
-    spanSize,
+    isCopyable,
 }: {
-    hexString: string;
+    spans: HexSpan[];
+    className?: string;
     copyText: string | null;
-    raw: ByteArray;
     inverted: boolean;
-    spanSize: number;
+    isCopyable: boolean;
 }) {
-    const { pairs: truncatedPairs, truncated } = truncateHexPairs(splitHexPairs(hexString));
-    const spans = formatHexSpans(truncatedPairs, { inverted }, spanSize);
+    const preRef = useRef<HTMLPreElement>(null);
+    const [cols, setCols] = useState(1);
+
+    useIsomorphicLayoutEffect(() => {
+        const el = preRef.current;
+        if (!el) return;
+        const measure = () => {
+            const groups = el.querySelectorAll<HTMLElement>('[data-hex-group]');
+            if (groups.length === 0) return;
+            const firstTop = groups[0].offsetTop;
+            let count = 0;
+            for (const g of groups) {
+                if (g.offsetTop !== firstTop) break;
+                count++;
+            }
+            setCols(Math.max(1, count));
+        };
+        measure();
+        const ro = new ResizeObserver(measure);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [spans]);
+
+    const first: HexSpan['variant'] = inverted ? 'secondary-old' : 'primary';
+    const second: HexSpan['variant'] = inverted ? 'primary' : 'secondary-old';
+
+    const content = (
+        // px-0 overrides the global `pre { padding: .33rem }` so the hex sits flush left.
+        <pre
+            ref={preRef}
+            className="mb-0 block whitespace-normal bg-heavy-metal-900 px-0 py-1.5 text-left font-mono text-xs"
+        >
+            {spans.map((span, i) => (
+                <React.Fragment key={i}>
+                    <span
+                        data-hex-group
+                        className={cn(
+                            'mr-3 inline-block whitespace-nowrap',
+                            hexSpanVariants({ tone: (i % cols) % 2 === 0 ? first : second }),
+                        )}
+                    >
+                        {span.text}
+                    </span>{' '}
+                </React.Fragment>
+            ))}
+        </pre>
+    );
 
     return (
-        <span className="inline-flex items-center gap-2 text-sm">
-            <Copyable text={copyText}>
-                <span className="font-mono text-xs">
-                    <ColoredSpans spans={spans} />
-                </span>
-            </Copyable>
-            {truncated && <span className="text-xs text-neutral-500">({raw.length} bytes)</span>}
-        </span>
+        <div className={cn('w-full', className)}>
+            {isCopyable ? <Copyable text={copyText}>{content}</Copyable> : content}
+        </div>
     );
 }
 
@@ -198,6 +228,7 @@ function FullContent({
     spanSize,
     rowSize,
     isCopyable,
+    wrap,
 }: {
     hexString: string;
     copyText: string | null;
@@ -207,9 +238,22 @@ function FullContent({
     spanSize: number;
     rowSize: number;
     isCopyable: boolean;
+    wrap: boolean;
 }) {
     const spans = formatHexSpans(splitHexPairs(hexString), { inverted }, spanSize);
     const rows = groupHexRows(spans, rowSize, spanSize);
+
+    if (wrap) {
+        return (
+            <WrapContent
+                spans={spans}
+                className={className}
+                copyText={copyText}
+                inverted={inverted}
+                isCopyable={isCopyable}
+            />
+        );
+    }
 
     const divs = rows.map((row, rowIdx) => (
         <div key={rowIdx}>
@@ -221,26 +265,11 @@ function FullContent({
         </div>
     ));
 
+    const pre = <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>;
+
     return (
-        <>
-            <div className={cn('hidden lg:flex', fullContentVariants({ align }), className)}>
-                {isCopyable ? (
-                    <Copyable text={copyText}>
-                        <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
-                    </Copyable>
-                ) : (
-                    <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
-                )}
-            </div>
-            <div className={cn('flex lg:hidden', fullContentVariants({ align }), className)}>
-                {isCopyable ? (
-                    <Copyable text={copyText}>
-                        <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
-                    </Copyable>
-                ) : (
-                    <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
-                )}
-            </div>
-        </>
+        <div className={cn('flex', fullContentVariants({ align }), className)}>
+            {isCopyable ? <Copyable text={copyText}>{pre}</Copyable> : pre}
+        </div>
     );
 }

@@ -1,5 +1,4 @@
 import { Address } from '@components/common/Address';
-import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import type { BlockWithV1 } from '@entities/block-data';
 import { PublicKey } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
@@ -13,10 +12,9 @@ import {
     percentOf,
     type ResponsiveCell,
     ResponsiveGridRow,
-    TIGHT_CARD,
 } from '@/app/components/block/shared';
 import { invariant } from '@/app/shared/lib/invariant';
-import { Card } from '@/app/shared/ui/Card';
+import { DataListCard } from '@/app/shared/ui/DataListCard';
 
 type AccountStats = {
     reads: number;
@@ -93,26 +91,24 @@ export function BlockAccountsCard({ block, blockSlot }: { block: BlockWithV1; bl
     ];
 
     return (
-        <CollapsibleSection title="Block Account Usage" className="">
-            <Card variant="tight" className={TIGHT_CARD}>
-                <div className="text-sm text-white">
-                    <GridHeaderRow headers={headers} style={ACCOUNTS_GRID} rightAlignFrom={1} />
+        <DataListCard title="Block Account Usage" breakpoint="md">
+            <div className="text-sm text-white">
+                <GridHeaderRow headers={headers} style={ACCOUNTS_GRID} rightAlignFrom={1} />
 
-                    {visible.map(([address, stats]) => (
-                        <AccountsGridRow
-                            address={address}
-                            blockSlot={blockSlot}
-                            key={address}
-                            reads={stats.reads}
-                            totalTransactions={totalTransactions}
-                            writes={stats.writes}
-                        />
-                    ))}
+                {visible.map(([address, stats]) => (
+                    <AccountsGridRow
+                        address={address}
+                        blockSlot={blockSlot}
+                        key={address}
+                        reads={stats.reads}
+                        totalTransactions={totalTransactions}
+                        writes={stats.writes}
+                    />
+                ))}
 
-                    {hasMore && <LoadMoreButton onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)} />}
-                </div>
-            </Card>
-        </CollapsibleSection>
+                {hasMore && <LoadMoreButton onClick={() => setNumDisplayed(displayed => displayed + PAGE_SIZE)} />}
+            </div>
+        </DataListCard>
     );
 }
 
