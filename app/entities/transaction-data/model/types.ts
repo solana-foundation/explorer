@@ -42,6 +42,8 @@ type RawTransactionBase = {
     serializedSize: number;
     /** Base58-encoded in signer order; a signer slot that has not been signed is `undefined`. */
     signatures: (string | undefined)[];
+    /** The slot that confirmed the transaction. */
+    slot: number;
 };
 
 /**

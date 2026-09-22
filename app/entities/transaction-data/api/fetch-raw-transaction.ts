@@ -65,6 +65,7 @@ export async function fetchRawTransaction(
             : undefined,
         serializedSize: getTransactionSize(transaction),
         signatures,
+        slot: Number(response.slot),
     };
 
     if (compiledMessage.version === 1) {

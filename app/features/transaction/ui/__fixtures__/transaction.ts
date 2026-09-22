@@ -180,6 +180,7 @@ export const MOCK_RAW_TX = mockRawTransactionDetails({
         messageBytes: RAW_MESSAGE_BYTES,
         serializedSize: RAW_TX_BYTES.length,
         signatures: [DEFAULT_SIGNATURE],
+        slot: 372_654_321,
         transaction: TransactionMessage.decompile(RAW_MESSAGE),
         version: 'legacy',
     },

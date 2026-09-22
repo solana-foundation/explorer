@@ -24,6 +24,7 @@ import useSWR from 'swr';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
+import { trustedInnerInstructions } from '@/app/entities/transaction-data';
 import { useSimulation } from '@/app/features/instruction-simulation/model/use-simulation';
 import { generateTokenBalanceRows, TokenBalancesCardInner } from '@/app/features/transaction';
 import { useCluster } from '@/app/providers/cluster';
@@ -487,7 +488,7 @@ export function PermalinkView({
 }) {
     const details = useRawTransactionDetails(signature);
     const fetchTransaction = useFetchRawTransaction();
-    const { status } = useCluster();
+    const { cluster, status } = useCluster();
     const transaction = details?.data?.raw;
 
     // Fetch on load at 'confirmed' (matches providers/transactions/parsed.tsx) so freshly-confirmed txs resolve fast.
@@ -540,7 +541,10 @@ export function PermalinkView({
 
     const tx: TransactionData = {
         accountBalances: meta,
-        compiledInnerInstructions: meta?.innerInstructions,
+        compiledInnerInstructions: trustedInnerInstructions(meta?.innerInstructions, {
+            cluster,
+            slot: transaction.slot,
+        }),
         message: resolvedMessage,
         rawMessage: messageBytes,
         signatures,

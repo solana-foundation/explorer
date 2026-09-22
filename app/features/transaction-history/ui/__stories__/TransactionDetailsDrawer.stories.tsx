@@ -25,6 +25,7 @@ const FETCHED: CacheEntry<Details> = {
             messageBytes: MESSAGE_BYTES,
             serializedSize: MESSAGE_BYTES.length + 64,
             signatures: [SIGNATURE],
+            slot: SLOT,
             version: 1,
         },
     },

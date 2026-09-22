@@ -167,6 +167,8 @@ sibling, which returns `undefined`.
 
 ## Everything else
 
-`api/` fetches raw and parsed transactions. `lib/adapt-parsed-transaction.ts`, `lib/encoding.ts`, and
-`lib/merge-transaction-map.ts` are unrelated to naming and stand on their own. `model/types.ts` holds the
-transaction types the barrel re-exports.
+`api/` fetches raw and parsed transactions. `lib/adapt-parsed-transaction.ts`, `lib/encoding.ts`,
+`lib/merge-transaction-map.ts`, `lib/resolve-inner-instructions.ts` (with the
+`lib/compiled-to-transaction-instruction.ts` it decompiles through) and `lib/trusted-inner-instructions.ts`
+are unrelated to naming and stand on their own. `model/types.ts` holds the transaction types the barrel
+re-exports.
