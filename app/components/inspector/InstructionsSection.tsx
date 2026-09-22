@@ -420,9 +420,7 @@ function InspectorInstructionCard({
             );
         case 'ed25519':
             return (
-                <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-                >
+                <ErrorBoundary fallback={unknownCard}>
                     <Ed25519DetailsCard
                         key={index}
                         ix={parsedIx}
@@ -434,9 +432,7 @@ function InspectorInstructionCard({
             );
         case 'zk-elgamal-proof':
             return (
-                <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-                >
+                <ErrorBoundary fallback={unknownCard}>
                     <ZkElGamalProofDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />
                 </ErrorBoundary>
             );
