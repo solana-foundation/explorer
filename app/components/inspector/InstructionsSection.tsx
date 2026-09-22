@@ -282,9 +282,7 @@ function InspectorInstructionCard({
     if ('unknown' in parsedIx) {
         if (parsedIx.programLabel === 'pyth') {
             return (
-                <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-                >
+                <ErrorBoundary fallback={unknownCard}>
                     <PythDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />
                 </ErrorBoundary>
             );
@@ -400,9 +398,7 @@ function InspectorInstructionCard({
             );
         case 'pyth':
             return (
-                <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-                >
+                <ErrorBoundary fallback={unknownCard}>
                     <PythDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />
                 </ErrorBoundary>
             );
