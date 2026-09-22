@@ -25,8 +25,6 @@ vi.mock('swr', () => ({
     })),
 }));
 
-// The section reads its lookup tables through this hook, and a table's three states —
-// unresolved, failed, resolved — pick three different renders.
 vi.mock('@/app/providers/accounts', async importOriginal => ({
     ...(await importOriginal<typeof import('@/app/providers/accounts')>()),
     useAddressLookupTables: vi.fn(() => []),
@@ -75,8 +73,6 @@ describe('Inspector InstructionsSection with address lookup tables', () => {
         const { rerender } = renderSection();
         expect(screen.getByText(/Loading/)).toBeInTheDocument();
 
-        // The instruction names an account the message only holds through the table, so it decompiles
-        // at all only once the table is there.
         vi.mocked(useAddressLookupTables).mockReturnValue([[lookupTable(), FetchStatus.Fetched]]);
         rerender(section());
 
@@ -98,7 +94,7 @@ function lookupTable(): AddressLookupTableAccount {
     });
 }
 
-// A one-instruction message whose second account comes from the lookup table, not the static keys.
+// A one-instruction message whose second account comes from the lookup table.
 function buildMessage(): MessageV0 {
     return new MessageV0({
         addressTableLookups: [{ accountKey: TABLE_KEY, readonlyIndexes: [], writableIndexes: [0] }],

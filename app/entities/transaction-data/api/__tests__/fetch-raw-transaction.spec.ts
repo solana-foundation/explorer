@@ -169,7 +169,7 @@ describe('fetchRawTransaction', () => {
         ]);
     });
 
-    it('should carry the slot, which decides whether mainnet recorded inner instructions', async () => {
+    it('should return the slot from the RPC response', async () => {
         respondWith(transactionResult(createWeb3TransactionBytes('legacy')));
 
         const raw = await fetchRawTransaction(URL, SIGNATURE);

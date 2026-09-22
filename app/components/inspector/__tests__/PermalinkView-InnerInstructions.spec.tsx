@@ -34,8 +34,7 @@ vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
     useIdlInstructionDecode: vi.fn(() => undefined),
 }));
 
-// The view reads its transaction through these; the slot it carries is what the rule under test reads.
-// Partial, since `TransactionsProvider` still needs the real `RawDetailsProvider` around the tree.
+// The spread keeps the real `RawDetailsProvider`, which `TransactionsProvider` needs.
 vi.mock('@providers/transactions/raw', async importOriginal => ({
     ...(await importOriginal<typeof import('@providers/transactions/raw')>()),
     useFetchRawTransaction: vi.fn(() => vi.fn()),
@@ -53,7 +52,7 @@ vi.mock('next/link', () => ({
     default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
 }));
 
-// `ClusterProvider` defaults to mainnet, which is the only cluster the slot rule applies to.
+// `ClusterProvider` defaults to mainnet, and `trustedInnerInstructions` checks the slot only on mainnet.
 describe('PermalinkView inner instructions on mainnet', () => {
     beforeEach(() => {
         vi.mocked(useRawTransactionDetails).mockReset();

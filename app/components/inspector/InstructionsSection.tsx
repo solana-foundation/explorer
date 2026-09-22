@@ -81,12 +81,9 @@ export function InstructionsSection({
     );
     const allLookupsResolved = lookupTables.length === hydratedTables.length;
 
-    // `useAddressLookupTables` rebuilds its array, and every account in it, on each render, so the decode
-    // below keys on what the tables hold rather than on their identity. Without that the instructions get
-    // fresh identities every render and the IDL tier rebuilds an Anchor coder for each one.
-    //
-    // A table only ever grows, and every extend raises both `lastExtendedSlot` and the address count, so
-    // those two pin the addresses a given table key resolves to.
+    // `useAddressLookupTables` returns a new array on each render, so the memo below depends on
+    // `lookupTablesKey` instead of `lookupTables`.
+    // A table only gains addresses, so `lastExtendedSlot` and the address count identify its contents.
     const lookupTablesKey = lookupTables
         .map(table => `${table.key.toBase58()}:${table.state.lastExtendedSlot}:${table.state.addresses.length}`)
         .join('|');
@@ -104,7 +101,7 @@ export function InstructionsSection({
                 : undefined,
             instructions: TransactionMessage.decompile(message, { addressLookupTableAccounts }).instructions,
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- `lookupTables` is a new array every render; `lookupTablesKey` stands in for its content
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- `lookupTablesKey` replaces `lookupTables`, which is a new array every render
     }, [allLookupsResolved, compiledInnerInstructions, lookupTablesKey, message]);
 
     if (failedLookupIndex >= 0) {
@@ -129,8 +126,8 @@ export function InstructionsSection({
                         innerIx ? (
                             <ErrorBoundary
                                 key={childIndex}
-                                // The card carries the badge and the scroll anchor, so a throwing child
-                                // stays numbered and linkable.
+                                // `UnknownDetailsCard` renders the badge and the scroll anchor,
+                                // so an inner instruction that throws keeps its number and anchor.
                                 fallback={<UnknownDetailsCard index={index} childIndex={childIndex} ix={innerIx} />}
                             >
                                 <InspectorInstructionCard
@@ -160,8 +157,6 @@ export function InstructionsSection({
     );
 }
 
-// A child that cannot be decompiled holds its position, so the siblings after it keep the numbers their
-// positions give them — and it registers the anchor for that number, which a deep link resolves against.
 function UndisplayableInstructionCard({ index, childIndex }: { index: number; childIndex: number }) {
     const scrollAnchorRef = useScrollAnchor(getInstructionCardScrollAnchorId([index + 1, childIndex + 1]));
 
@@ -194,14 +189,11 @@ function InspectorInstructionCard({
         [ix, message, parsedIx],
     );
 
-    // The dynamic IDL decode, shared with the tx page; what the tiers below make of it is local.
     const idlDecode = useIdlInstructionDecode({ programId: programId.toString(), raw: ix });
-    // An `unknown` decode means the IDL resolved but declares nothing for this discriminator. Read as a
-    // hit it draws a raw card over every curated tier below, for any program that has an IDL at all.
+    // The IDL decoder returns `{ kind: 'unknown' }`, not `undefined`, when the IDL does not
+    // declare the discriminator. The cards below must still render.
     const decodedByIdl = idlDecode?.kind === 'unknown' ? undefined : idlDecode;
 
-    // Named rather than spread, so a card that stops accepting `childIndex` or `innerCards` fails
-    // type-checking instead of silently dropping the prop.
     const unknownCard = <UnknownDetailsCard index={index} ix={ix} childIndex={childIndex} innerCards={innerCards} />;
 
     // PMP owns every instruction on its program id: `setData`/`initialize`/`write` render decoded content from

@@ -121,7 +121,6 @@ describe('resolveInnerInstructions', () => {
             message,
         );
 
-        // The unresolvable child holds its slot, so the third one is still numbered third.
         expect(result.get(0)).toHaveLength(3);
         expect(result.get(0)?.[1]).toBeUndefined();
         expect(result.get(0)?.[2]?.data).toEqual(Buffer.from([3]));
@@ -161,7 +160,6 @@ describe('resolveInnerInstructions', () => {
             message,
         );
 
-        // The later group must not replace the earlier one, which would drop CPIs with no trace.
         expect(result.get(0)?.map(ix => ix?.data)).toEqual([Buffer.from([1]), Buffer.from([2])]);
     });
 
@@ -177,7 +175,6 @@ describe('resolveInnerInstructions', () => {
     });
 });
 
-// Builds a minimal MessageV0 with the given static keys and header.
 function makeMessage(
     keys: PublicKey[],
     header: { numRequiredSignatures: number; numReadonlySignedAccounts: number; numReadonlyUnsignedAccounts: number },

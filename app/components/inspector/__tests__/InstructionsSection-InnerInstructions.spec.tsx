@@ -16,8 +16,8 @@ import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatc
 
 import { InstructionsSection } from '../InstructionsSection';
 
-// `useAnchorProgram` (checked before the program switch) reads through SWR;
-// stub it to "no IDL" so the byte instructions fall through to the dispatcher.
+// `useAnchorProgram` reads its IDL through SWR. The mock returns no data, so the instructions
+// render through the dispatcher.
 vi.mock('swr', () => ({
     __esModule: true,
     default: vi.fn(() => ({
@@ -29,8 +29,6 @@ vi.mock('swr', () => ({
     })),
 }));
 
-// Defaults to "no IDL"; the batch test overrides it. Only the hook is stubbed — the cards it routes to
-// stay real, since which card wins is the thing under test.
 vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
     ...(await importOriginal<typeof import('@features/decode-instruction-with-idl')>()),
     useIdlInstructionDecode: vi.fn(() => undefined),
@@ -70,27 +68,24 @@ describe('Inspector InstructionsSection with inner instructions', () => {
             </ScrollAnchorProvider>,
         );
 
-        // The header renders only when the parent card is handed children, so it stands in for
-        // the section having built any.
+        // The header is only rendered when the parent has inner instruction cards.
         expect(await screen.findByText(/Inner Instructions/i)).toBeInTheDocument();
 
-        // One card per CPI the RPC reported, numbered under its parent.
         const rendered = container.textContent ?? '';
         expect(rendered).toContain('#1.1');
         expect(rendered).toContain('#1.2');
         expect(rendered).toContain('#1.3');
         expect(rendered).toContain('#1.4');
 
-        // A child went through the shared dispatcher, not just a raw dump. The three Token
-        // CPIs land on the raw card here because this test stubs the IDL tier away and the
-        // dispatcher has no byte decoder for those discriminators — unrelated to nesting.
+        // The three Token CPIs render as raw cards because the IDL decoder is mocked to return
+        // undefined and the dispatcher does not parse those discriminators.
         expect(await screen.findByText(/System Program: Create Account/i)).toBeInTheDocument();
     });
 
-    test('should render an inner token batch as a batch card, not through the IDL tier', async () => {
-        // The Token program resolves an IDL on mainnet, and the tier never answers undefined — it
-        // returns `{ kind: 'unknown' }` for a discriminator the IDL does not declare. Read as a hit,
-        // that draws a raw card over the curated batch card.
+    test('should render an inner token batch as a batch card, not through the IDL decoder', async () => {
+        // On mainnet the Token program has an IDL. The IDL decoder returns `{ kind: 'unknown' }`,
+        // not `undefined`, when the IDL does not declare the discriminator.
+        // The batch card must still render.
         vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'unknown' });
 
         render(
@@ -109,8 +104,7 @@ describe('Inspector InstructionsSection with inner instructions', () => {
 
         const title = await screen.findByText(/Token Program: Batch \(1 instruction\)/i);
 
-        // The badge sits beside the title in the card header, so reading the number off that element
-        // reads the batch card's own, not a sibling's.
+        // The badge is in the same element as the title, so this asserts the batch card's own number.
         // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
         expect(title.parentElement).toHaveTextContent('#1.1');
     });
@@ -135,15 +129,12 @@ describe('Inspector InstructionsSection with inner instructions', () => {
 
         expect(await screen.findByText(/Could not display instruction #1\.2, please report/i)).toBeInTheDocument();
 
-        // The child after the hole still reads as the third, not the second.
         const rendered = document.body.textContent ?? '';
         expect(rendered).toContain('#1.1');
         expect(rendered).toContain('#1.3');
     });
 
-    test('should fall through to the curated card when the IDL declares nothing for the instruction', async () => {
-        // Same `{ kind: 'unknown' }` the batch test uses, on a top-level instruction the dispatcher
-        // knows. Reading it as a hit replaces every curated card in the switch with a raw dump.
+    test('should render the curated card when the IDL declares nothing for the instruction', async () => {
         vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'unknown' });
 
         render(
@@ -183,8 +174,6 @@ describe('Inspector InstructionsSection with inner instructions', () => {
 
         await screen.findByText(/Could not display instruction #1\.2, please report/i);
 
-        // The hole registers its anchor like the siblings around it, so `#ix-1-2` is not a dead link.
-        // Read from the DOM directly: the anchor id is the thing under test and no query exposes it.
         /* eslint-disable testing-library/no-node-access -- the anchor id is what is under test */
         expect(document.getElementById('ix-1-1')).not.toBeNull();
         expect(document.getElementById('ix-1-2')).not.toBeNull();
@@ -192,7 +181,7 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         /* eslint-enable testing-library/no-node-access */
     });
 
-    test('should hand the IDL tier the same instructions across a re-render', async () => {
+    test('should pass the same instructions to the IDL decoder across a re-render', async () => {
         const message = buildMessage();
         const tree = () => (
             <ScrollAnchorProvider>
@@ -218,8 +207,6 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         rerender(tree());
         const second = vi.mocked(useIdlInstructionDecode).mock.calls.map(call => call[0].raw);
 
-        // One top-level instruction plus its four CPIs. `useIdlInstructionDecode` memoizes on this
-        // identity, so a fresh one per render rebuilds an Anchor Program for every one of them.
         expect(first).toHaveLength(5);
         expect(second.every((raw, position) => raw === first[position])).toBe(true);
     });
@@ -264,7 +251,7 @@ const ACCOUNT_KEYS = [
 
 // The four CPIs the RPC reports for the Create Idempotent instruction, verbatim
 // from `getTransaction`: GetAccountDataSize, CreateAccount, InitializeImmutableOwner,
-// InitializeAccount3. None is a token batch, which is why the inspector dropped them all.
+// InitializeAccount3.
 const INNER_INSTRUCTIONS: CompiledInnerInstruction[] = [
     {
         index: 0,
@@ -281,8 +268,8 @@ const INNER_INSTRUCTIONS: CompiledInnerInstruction[] = [
     },
 ];
 
-// One inner instruction on the Token program carrying the batch discriminator (255), wrapping a
-// single Transfer of 100 over its three accounts (source, destination, authority).
+// One Token program inner instruction with the batch discriminator (255). It contains a single
+// Transfer of 100 over three accounts: source, destination, authority.
 const INNER_BATCH: CompiledInnerInstruction[] = [
     {
         index: 0,
@@ -296,7 +283,7 @@ const INNER_BATCH: CompiledInnerInstruction[] = [
     },
 ];
 
-// Three CPIs whose middle one names an account index the message does not have.
+// Three CPIs. The middle one names an account index the message does not have.
 const INNER_WITH_BAD_ACCOUNT: CompiledInnerInstruction[] = [
     {
         index: 0,
@@ -312,9 +299,8 @@ const INNER_WITH_BAD_ACCOUNT: CompiledInnerInstruction[] = [
     },
 ];
 
-// A single Create Idempotent instruction over the account list above. Only the parent
-// matters here — the other two top-level instructions of the real transaction have no
-// CPIs of their own.
+// A single Create Idempotent instruction over the account list above. The real transaction has two
+// more top-level instructions, and neither has inner instructions.
 function buildMessage(): MessageV0 {
     return new MessageV0({
         addressTableLookups: [],
