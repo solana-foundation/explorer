@@ -1,4 +1,5 @@
 import { TxInstructionSurface } from '@entities/instruction-card';
+import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import {
     PYTH_INSTRUCTION_TYPES,
     PYTH_INSTRUCTIONS,
@@ -16,14 +17,12 @@ vi.mock('next/navigation', () => ({
     useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
 }));
 
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
-
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TransactionsProvider } from '@/app/providers/transactions';
-import { Logger } from '@/app/shared/lib/logger';
 
+import { pythInstructionParsers } from '../../lib/pyth-client';
 import { PythDetailsCard } from '../PythDetailsCard';
 
 const PROGRAM_ID = new PublicKey(PYTH_ORACLE_PROGRAM_IDS.mainnet);
@@ -63,18 +62,15 @@ const RAW_ONLY: PythInstructionType[] = ['InitTest', 'UpdateTest'];
 
 const WITH_CARD = PYTH_INSTRUCTION_TYPES.filter(type => !RAW_ONLY.includes(type));
 
-describe('PythDetailsCard dispatch', () => {
-    beforeEach(() => {
-        vi.mocked(Logger.error).mockClear();
-    });
+const dispatcher = createInstructionParserDispatcher(pythInstructionParsers);
 
+describe('PythDetailsCard dispatch', () => {
     it.each(WITH_CARD)('should render the %s card', async type => {
         renderCard(pythInstruction(type));
 
         await waitFor(() => {
             expect(screen.getByText(`Pyth: ${PYTH_INSTRUCTIONS[type].name}`)).toBeInTheDocument();
         });
-        expect(Logger.error).not.toHaveBeenCalled();
     });
 
     it.each(RAW_ONLY)('should render %s as a raw-only card under its own name', async type => {
@@ -84,35 +80,30 @@ describe('PythDetailsCard dispatch', () => {
             expect(screen.getByText(`Pyth: ${PYTH_INSTRUCTIONS[type].name}`)).toBeInTheDocument();
         });
         expect(screen.queryByText(UNKNOWN_TITLE)).not.toBeInTheDocument();
-        // Nothing failed — these two simply have no fields to tabulate.
-        expect(Logger.error).not.toHaveBeenCalled();
     });
 
-    it('should fall back and report an unsupported version', async () => {
+    it('should fall back on an unsupported version', async () => {
         renderCard(rawInstruction([...u32(1), ...u32(0)]));
 
         await waitFor(() => {
             expect(screen.getByText(UNKNOWN_TITLE)).toBeInTheDocument();
         });
-        expect(Logger.error).toHaveBeenCalled();
     });
 
-    it('should fall back and report an index no instruction uses', async () => {
+    it('should fall back on an index no instruction uses', async () => {
         renderCard(rawInstruction([...u32(2), ...u32(14)]));
 
         await waitFor(() => {
             expect(screen.getByText(UNKNOWN_TITLE)).toBeInTheDocument();
         });
-        expect(Logger.error).toHaveBeenCalled();
     });
 
-    it('should fall back and report a payload too short for its instruction', async () => {
+    it('should fall back on a payload too short for its instruction', async () => {
         renderCard(rawInstruction([...u32(2), ...u32(PYTH_INSTRUCTIONS.AddPrice.index)]));
 
         await waitFor(() => {
             expect(screen.getByText(UNKNOWN_TITLE)).toBeInTheDocument();
         });
-        expect(Logger.error).toHaveBeenCalled();
     });
 
     // The node is assembled here, so a dropped field silently loses the CPI children or misnumbers the card.
@@ -158,16 +149,19 @@ function rawInstruction(data: number[]): TransactionInstruction {
 }
 
 function renderCard(
-    ix: TransactionInstruction,
+    raw: TransactionInstruction,
     props: { childIndex?: number; index?: number; innerCards?: JSX.Element[] } = {},
 ) {
+    const dispatched = dispatcher.fromTransactionInstruction(raw);
+    if (!dispatched) throw new Error('no Pyth parser registered for the mainnet deployment');
+
     return render(
         <ScrollAnchorProvider>
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
                         <TxInstructionSurface result={{ err: null }}>
-                            <PythDetailsCard ix={ix} index={0} signature="sig" {...props} />
+                            <PythDetailsCard ix={dispatched} raw={raw} index={0} {...props} />
                         </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>

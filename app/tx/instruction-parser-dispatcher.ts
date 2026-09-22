@@ -8,6 +8,7 @@ import { lighthouseInstructionParser } from '@features/decode-instruction-lighth
 import { systemInstructionParser } from '@features/decode-instruction-system/lib/system-client';
 import { tokenInstructionParser } from '@features/decode-instruction-token/lib/token-client';
 import { token2022InstructionParser } from '@features/decode-instruction-token-2022/lib/token-2022-client';
+import { pythInstructionParsers } from '@features/instruction-program-pyth/lib/pyth-client';
 import { metaplexTokenMetadataInstructionParser } from '@features/mpl-token-metadata/lib/metaplex-token-metadata-client';
 
 export const instructionParserDispatcher = createInstructionParserDispatcher([
@@ -18,4 +19,5 @@ export const instructionParserDispatcher = createInstructionParserDispatcher([
     metaplexTokenMetadataInstructionParser,
     bpfUpgradeableLoaderInstructionParser,
     lighthouseInstructionParser,
+    ...pythInstructionParsers,
 ]);

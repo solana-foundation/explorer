@@ -1,4 +1,4 @@
-import { PublicKey } from '@solana/web3.js';
+import { getAddressEncoder } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -10,6 +10,7 @@ import {
     decodeDeletePublisher,
     decodeInitMapping,
     decodeInitPrice,
+    decodePythInstruction,
     decodeSetMinPublishers,
     decodeUpdatePrice,
     decodeUpdatePriceNoFailOnError,
@@ -60,19 +61,20 @@ const CASES = [
         name: 'AddPrice',
     },
     {
-        decoded: () => decodeAddPublisher(pythInstruction('AddPublisher', [...PUBLISHER.toBytes()])),
+        decoded: () => decodeAddPublisher(pythInstruction('AddPublisher', [...getAddressEncoder().encode(PUBLISHER)])),
         expected: {
             pricePubkey: ACCOUNTS.second,
-            publisherPubkey: PUBLISHER.toBase58(),
+            publisherPubkey: PUBLISHER,
             signerPubkey: ACCOUNTS.first,
         },
         name: 'AddPublisher',
     },
     {
-        decoded: () => decodeDeletePublisher(pythInstruction('DeletePublisher', [...PUBLISHER.toBytes()])),
+        decoded: () =>
+            decodeDeletePublisher(pythInstruction('DeletePublisher', [...getAddressEncoder().encode(PUBLISHER)])),
         expected: {
             pricePubkey: ACCOUNTS.second,
-            publisherPubkey: PUBLISHER.toBase58(),
+            publisherPubkey: PUBLISHER,
             signerPubkey: ACCOUNTS.first,
         },
         name: 'DeletePublisher',
@@ -125,7 +127,7 @@ const CASES = [
 
 describe('decoder', () => {
     it.each(CASES)('should decode $name', ({ decoded, expected }) => {
-        expect(asBase58(decoded())).toEqual(expected);
+        expect(decoded()).toEqual(expected);
     });
 
     it('should decode the trailing attribute list of an update product instruction', () => {
@@ -138,13 +140,43 @@ describe('decoder', () => {
         );
         const { attributes, fundingPubkey, productPubkey } = decodeUpdateProduct(ix);
 
-        expect(Object.fromEntries(attributes)).toEqual({ asset_type: 'Crypto', symbol: 'BTC/USD' });
-        expect(fundingPubkey.toBase58()).toBe(ACCOUNTS.first);
-        expect(productPubkey.toBase58()).toBe(ACCOUNTS.second);
+        expect(attributes).toEqual({ asset_type: 'Crypto', symbol: 'BTC/USD' });
+        expect(fundingPubkey).toBe(ACCOUNTS.first);
+        expect(productPubkey).toBe(ACCOUNTS.second);
     });
 
     it('should read an empty attribute list as no attributes', () => {
-        expect(decodeUpdateProduct(pythInstruction('UpdateProduct')).attributes.size).toBe(0);
+        expect(decodeUpdateProduct(pythInstruction('UpdateProduct')).attributes).toEqual({});
+    });
+});
+
+describe('decodePythInstruction', () => {
+    it('should decode the two payload-free test instructions', () => {
+        expect(decodePythInstruction(pythInstruction('InitTest'))).toEqual({ info: {}, type: 'InitTest' });
+        expect(decodePythInstruction(pythInstruction('UpdateTest'))).toEqual({ info: {}, type: 'UpdateTest' });
+    });
+
+    it('should decode a payload instruction to its typed params', () => {
+        expect(decodePythInstruction(pythInstruction('UpdatePrice', ...PRICE_UPDATE))).toEqual({
+            info: {
+                conf: 678,
+                price: -12345,
+                pricePubkey: ACCOUNTS.second,
+                publishSlot: 170_640_000,
+                publisherPubkey: ACCOUNTS.first,
+                status: 1,
+            },
+            type: 'UpdatePrice',
+        });
+    });
+
+    it('should reject a payload too short for its instruction', () => {
+        expect(() => decodePythInstruction(pythInstruction('AddPrice'))).toThrow('invalid instruction');
+    });
+
+    it('should reject an instruction missing a positional account', () => {
+        const ix = { ...pythInstruction('AddMapping'), accounts: [] };
+        expect(() => decodePythInstruction(ix)).toThrow('missing account at index 0');
     });
 });
 
@@ -170,10 +202,3 @@ describe('parsePythInstructionType', () => {
         expect(() => decodeInitMapping(pythInstruction('AddMapping'))).toThrow('instruction index mismatch 1 != 0');
     });
 });
-
-/** Addresses as base58, so a wrong account reads as a wrong string rather than an opaque object diff. */
-function asBase58(params: object): Record<string, unknown> {
-    return Object.fromEntries(
-        Object.entries(params).map(([key, value]) => [key, value instanceof PublicKey ? value.toBase58() : value]),
-    );
-}

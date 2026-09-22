@@ -5,6 +5,7 @@ import {
     TxInstructionSurface,
 } from '@entities/instruction-card';
 import { PriceType, PYTH_INSTRUCTIONS, PYTH_ORACLE_PROGRAM_IDS, TradingStatus } from '@explorer/decoder-pyth';
+import { address } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
@@ -42,10 +43,10 @@ const A = {
     signer: '3EbFtRfKRMTrhPrRQjxbfWCB6NUyTQxwsWTKQFVKgNbb',
 } as const;
 
-const key = (base58: string) => new PublicKey(base58);
+const key = (base58: string) => address(base58);
 
-const PROGRAM_ID = key(PYTH_ORACLE_PROGRAM_IDS.mainnet);
-const PROGRAM: string = PROGRAM_ID.toBase58();
+const PROGRAM_ID = new PublicKey(PYTH_ORACLE_PROGRAM_IDS.mainnet);
+const PROGRAM: string = PYTH_ORACLE_PROGRAM_IDS.mainnet;
 
 const node: InstructionNode = {
     index: 0,
@@ -74,7 +75,7 @@ type Row = [string, string];
 
 const PROGRAM_ROW: Row = ['Program', PROGRAM];
 
-const ATTRIBUTES_JSON = '{\n  "symbol": "BTC/USD",\n  "asset_type": "Crypto"\n}';
+const ATTRIBUTES_JSON = '{\n  "asset_type": "Crypto",\n  "symbol": "BTC/USD"\n}';
 
 /** Publisher and price-update rows repeat across the pairs of cards that share a payload. */
 const PUBLISHER_ROWS: Row[] = [PROGRAM_ROW, ['Price Account', A.price], ['Publisher', A.publisher]];
@@ -228,10 +229,7 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; title: string }> = [
             <UpdateProductDetailsCard
                 node={node}
                 info={{
-                    attributes: new Map([
-                        ['symbol', 'BTC/USD'],
-                        ['asset_type', 'Crypto'],
-                    ]),
+                    attributes: { asset_type: 'Crypto', symbol: 'BTC/USD' },
                     fundingPubkey: key(A.funding),
                     productPubkey: key(A.product),
                 }}
@@ -271,7 +269,7 @@ describe('instruction-program-pyth cards', () => {
     it('should render the program row from the node', async () => {
         renderCard(
             <AggregatePriceDetailsCard
-                node={{ ...node, programId: key(A.funding) }}
+                node={{ ...node, programId: new PublicKey(A.funding) }}
                 info={{ fundingPubkey: key(A.funding), pricePubkey: key(A.price) }}
             />,
         );

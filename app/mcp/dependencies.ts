@@ -17,7 +17,7 @@ import { createMcpTrack } from './telemetry';
 
 const resolveProgramName: EntityInspectorConfig['resolveProgramName'] = programNameByAddress;
 
-const decodeInstructionFallback: EntityInspectorConfig['decodeInstructionFallback'] = instruction => {
+export const decodeInstructionFallback: EntityInspectorConfig['decodeInstructionFallback'] = instruction => {
     const dispatched = instructionParserDispatcher.fromTransactionInstruction(
         new TransactionInstruction({
             data: Buffer.from(getBase58Encoder().encode(instruction.data)),

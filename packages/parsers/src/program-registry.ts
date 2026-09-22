@@ -31,6 +31,7 @@ export type ParserProgramLabel =
     | typeof BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL
     | 'lighthouse'
     | 'mpl-token-metadata'
+    | 'pyth'
     | typeof SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL
     | typeof SPL_TOKEN_PROGRAM_LABEL
     | typeof SPL_TOKEN_2022_PROGRAM_LABEL

@@ -1,5 +1,7 @@
 import {
+    type AccountMeta,
     addDecoderSizePrefix,
+    type Address,
     type Decoder,
     fixDecoderSize,
     getAddressDecoder,
@@ -12,8 +14,11 @@ import {
     getU32Decoder,
     getU64Decoder,
     getUtf8Decoder,
+    type Instruction,
+    type InstructionWithAccounts,
+    type InstructionWithData,
+    type ReadonlyUint8Array,
 } from '@solana/kit';
-import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 
 import {
     PYTH_INSTRUCTION_VERSION,
@@ -23,6 +28,11 @@ import {
 } from './instructions';
 
 type PythHeader = { version: number; type: number };
+
+/** The kit instruction shape every decoder reads: the payload bytes plus the ordered account list. */
+export type PythInstruction = Instruction<string> &
+    InstructionWithAccounts<readonly AccountMeta[]> &
+    InstructionWithData<ReadonlyUint8Array>;
 
 const headerDecoder = () =>
     getStructDecoder([
@@ -96,7 +106,7 @@ function decoderFor<T extends PythInstructionType>(type: T) {
 
 function decodeData<T extends { header: PythHeader }>(
     { decoder, index }: { decoder: Decoder<T>; index: number },
-    data: Uint8Array,
+    data: ReadonlyUint8Array,
 ): T {
     let decoded: T;
     try {
@@ -125,45 +135,45 @@ export enum TradingStatus {
 }
 
 export type InitMappingParams = {
-    fundingPubkey: PublicKey;
-    mappingPubkey: PublicKey;
+    fundingPubkey: Address;
+    mappingPubkey: Address;
 };
 
 export type AddMappingParams = {
-    fundingPubkey: PublicKey;
-    mappingPubkey: PublicKey;
-    nextMappingPubkey: PublicKey;
+    fundingPubkey: Address;
+    mappingPubkey: Address;
+    nextMappingPubkey: Address;
 };
 
 export type AddProductParams = {
-    fundingPubkey: PublicKey;
-    mappingPubkey: PublicKey;
-    productPubkey: PublicKey;
+    fundingPubkey: Address;
+    mappingPubkey: Address;
+    productPubkey: Address;
 };
 
 export type UpdateProductParams = {
-    fundingPubkey: PublicKey;
-    productPubkey: PublicKey;
-    attributes: Map<string, string>;
+    fundingPubkey: Address;
+    productPubkey: Address;
+    attributes: Record<string, string>;
 };
 
 export type AddPriceParams = {
-    fundingPubkey: PublicKey;
-    productPubkey: PublicKey;
-    pricePubkey: PublicKey;
+    fundingPubkey: Address;
+    productPubkey: Address;
+    pricePubkey: Address;
     exponent: number;
     priceType: PriceType;
 };
 
 export type BasePublisherOperationParams = {
-    signerPubkey: PublicKey;
-    pricePubkey: PublicKey;
-    publisherPubkey: PublicKey;
+    signerPubkey: Address;
+    pricePubkey: Address;
+    publisherPubkey: Address;
 };
 
 export type UpdatePriceParams = {
-    publisherPubkey: PublicKey;
-    pricePubkey: PublicKey;
+    publisherPubkey: Address;
+    pricePubkey: Address;
     status: TradingStatus;
     price: number;
     conf: number;
@@ -171,24 +181,32 @@ export type UpdatePriceParams = {
 };
 
 export type AggregatePriceParams = {
-    fundingPubkey: PublicKey;
-    pricePubkey: PublicKey;
+    fundingPubkey: Address;
+    pricePubkey: Address;
 };
 
 export type InitPriceParams = {
-    fundingPubkey: PublicKey;
-    pricePubkey: PublicKey;
+    fundingPubkey: Address;
+    pricePubkey: Address;
     exponent: number;
     priceType: PriceType;
 };
 
 export type SetMinPublishersParams = {
-    fundingPubkey: PublicKey;
-    pricePubkey: PublicKey;
+    fundingPubkey: Address;
+    pricePubkey: Address;
     minPublishers: number;
 };
 
-export function parsePythInstructionType(instruction: TransactionInstruction): PythInstructionType {
+function account(instruction: PythInstruction, position: number): Address {
+    const meta = instruction.accounts[position];
+    if (!meta) {
+        throw new Error(`invalid instruction; missing account at index ${position}`);
+    }
+    return meta.address;
+}
+
+export function parsePythInstructionType(instruction: PythInstruction): PythInstructionType {
     const header = headerDecoder().decode(instruction.data);
     if (header.version !== PYTH_INSTRUCTION_VERSION) {
         throw new Error(`Unsupported Pyth version: ${header.version}`);
@@ -202,115 +220,175 @@ export function parsePythInstructionType(instruction: TransactionInstruction): P
     return type;
 }
 
-export function decodeInitMapping(instruction: TransactionInstruction): InitMappingParams {
+export function decodeInitMapping(instruction: PythInstruction): InitMappingParams {
     decodeData(decoderFor('InitMapping'), instruction.data);
     return {
-        fundingPubkey: instruction.keys[0].pubkey,
-        mappingPubkey: instruction.keys[1].pubkey,
+        fundingPubkey: account(instruction, 0),
+        mappingPubkey: account(instruction, 1),
     };
 }
 
-export function decodeAddMapping(instruction: TransactionInstruction): AddMappingParams {
+export function decodeAddMapping(instruction: PythInstruction): AddMappingParams {
     decodeData(decoderFor('AddMapping'), instruction.data);
     return {
-        fundingPubkey: instruction.keys[0].pubkey,
-        mappingPubkey: instruction.keys[1].pubkey,
-        nextMappingPubkey: instruction.keys[2].pubkey,
+        fundingPubkey: account(instruction, 0),
+        mappingPubkey: account(instruction, 1),
+        nextMappingPubkey: account(instruction, 2),
     };
 }
 
-export function decodeAddProduct(instruction: TransactionInstruction): AddProductParams {
+export function decodeAddProduct(instruction: PythInstruction): AddProductParams {
     decodeData(decoderFor('AddProduct'), instruction.data);
     return {
-        fundingPubkey: instruction.keys[0].pubkey,
-        mappingPubkey: instruction.keys[1].pubkey,
-        productPubkey: instruction.keys[2].pubkey,
+        fundingPubkey: account(instruction, 0),
+        mappingPubkey: account(instruction, 1),
+        productPubkey: account(instruction, 2),
     };
 }
 
-export function decodeUpdateProduct(instruction: TransactionInstruction): UpdateProductParams {
+export function decodeUpdateProduct(instruction: PythInstruction): UpdateProductParams {
     const { attributes } = decodeData(decoderFor('UpdateProduct'), instruction.data);
     return {
-        attributes: new Map(attributes.map(({ key, value }) => [key, value])),
-        fundingPubkey: instruction.keys[0].pubkey,
-        productPubkey: instruction.keys[1].pubkey,
+        attributes: Object.fromEntries(attributes.map(({ key, value }) => [key, value])),
+        fundingPubkey: account(instruction, 0),
+        productPubkey: account(instruction, 1),
     };
 }
 
-export function decodeAddPrice(instruction: TransactionInstruction): AddPriceParams {
+export function decodeAddPrice(instruction: PythInstruction): AddPriceParams {
     const { exponent, priceType } = decodeData(decoderFor('AddPrice'), instruction.data);
     return {
         exponent,
-        fundingPubkey: instruction.keys[0].pubkey,
-        pricePubkey: instruction.keys[2].pubkey,
+        fundingPubkey: account(instruction, 0),
+        pricePubkey: account(instruction, 2),
         priceType,
-        productPubkey: instruction.keys[1].pubkey,
+        productPubkey: account(instruction, 1),
     };
 }
 
-export function decodeAddPublisher(instruction: TransactionInstruction): BasePublisherOperationParams {
+export function decodeAddPublisher(instruction: PythInstruction): BasePublisherOperationParams {
     const { publisherPubkey } = decodeData(decoderFor('AddPublisher'), instruction.data);
     return {
-        pricePubkey: instruction.keys[1].pubkey,
-        publisherPubkey: new PublicKey(publisherPubkey),
-        signerPubkey: instruction.keys[0].pubkey,
+        pricePubkey: account(instruction, 1),
+        publisherPubkey,
+        signerPubkey: account(instruction, 0),
     };
 }
 
-export function decodeDeletePublisher(instruction: TransactionInstruction): BasePublisherOperationParams {
+export function decodeDeletePublisher(instruction: PythInstruction): BasePublisherOperationParams {
     const { publisherPubkey } = decodeData(decoderFor('DeletePublisher'), instruction.data);
     return {
-        pricePubkey: instruction.keys[1].pubkey,
-        publisherPubkey: new PublicKey(publisherPubkey),
-        signerPubkey: instruction.keys[0].pubkey,
+        pricePubkey: account(instruction, 1),
+        publisherPubkey,
+        signerPubkey: account(instruction, 0),
     };
 }
 
-export function decodeUpdatePrice(instruction: TransactionInstruction): UpdatePriceParams {
+export function decodeUpdatePrice(instruction: PythInstruction): UpdatePriceParams {
     return toUpdatePriceParams(decodeData(decoderFor('UpdatePrice'), instruction.data), instruction);
 }
 
-export function decodeUpdatePriceNoFailOnError(instruction: TransactionInstruction): UpdatePriceParams {
+export function decodeUpdatePriceNoFailOnError(instruction: PythInstruction): UpdatePriceParams {
     return toUpdatePriceParams(decodeData(decoderFor('UpdatePriceNoFailOnError'), instruction.data), instruction);
 }
 
 function toUpdatePriceParams(
     { conf, price, publishSlot, status }: { conf: bigint; price: bigint; publishSlot: bigint; status: number },
-    instruction: TransactionInstruction,
+    instruction: PythInstruction,
 ): UpdatePriceParams {
     return {
         conf: Number(conf),
         price: Number(price),
-        pricePubkey: instruction.keys[1].pubkey,
+        pricePubkey: account(instruction, 1),
         publishSlot: Number(publishSlot),
-        publisherPubkey: instruction.keys[0].pubkey,
+        publisherPubkey: account(instruction, 0),
         status,
     };
 }
 
-export function decodeAggregatePrice(instruction: TransactionInstruction): AggregatePriceParams {
+export function decodeAggregatePrice(instruction: PythInstruction): AggregatePriceParams {
     decodeData(decoderFor('AggregatePrice'), instruction.data);
     return {
-        fundingPubkey: instruction.keys[0].pubkey,
-        pricePubkey: instruction.keys[1].pubkey,
+        fundingPubkey: account(instruction, 0),
+        pricePubkey: account(instruction, 1),
     };
 }
 
-export function decodeInitPrice(instruction: TransactionInstruction): InitPriceParams {
+export function decodeInitPrice(instruction: PythInstruction): InitPriceParams {
     const { exponent, priceType } = decodeData(decoderFor('InitPrice'), instruction.data);
     return {
         exponent,
-        fundingPubkey: instruction.keys[0].pubkey,
-        pricePubkey: instruction.keys[1].pubkey,
+        fundingPubkey: account(instruction, 0),
+        pricePubkey: account(instruction, 1),
         priceType,
     };
 }
 
-export function decodeSetMinPublishers(instruction: TransactionInstruction): SetMinPublishersParams {
+export function decodeSetMinPublishers(instruction: PythInstruction): SetMinPublishersParams {
     const { minPublishers } = decodeData(decoderFor('SetMinPublishers'), instruction.data);
     return {
-        fundingPubkey: instruction.keys[0].pubkey,
+        fundingPubkey: account(instruction, 0),
         minPublishers,
-        pricePubkey: instruction.keys[1].pubkey,
+        pricePubkey: account(instruction, 1),
     };
+}
+
+/**
+ * Canonical shape of a decoded Pyth oracle instruction: the discriminated union the
+ * dispatcher hands to the card, so `switch (parsed.type)` narrows `info` per instruction.
+ */
+export type PythParsed =
+    | { type: 'AddMapping'; info: AddMappingParams }
+    | { type: 'AddPrice'; info: AddPriceParams }
+    | { type: 'AddProduct'; info: AddProductParams }
+    | { type: 'AddPublisher'; info: BasePublisherOperationParams }
+    | { type: 'AggregatePrice'; info: AggregatePriceParams }
+    | { type: 'DeletePublisher'; info: BasePublisherOperationParams }
+    | { type: 'InitMapping'; info: InitMappingParams }
+    | { type: 'InitPrice'; info: InitPriceParams }
+    | { type: 'InitTest'; info: Record<string, never> }
+    | { type: 'SetMinPublishers'; info: SetMinPublishersParams }
+    | { type: 'UpdatePrice'; info: UpdatePriceParams }
+    | { type: 'UpdatePriceNoFailOnError'; info: UpdatePriceParams }
+    | { type: 'UpdateProduct'; info: UpdateProductParams }
+    | { type: 'UpdateTest'; info: Record<string, never> };
+
+/** Decode any Pyth oracle instruction. Throws on an unsupported version, unknown index, or malformed payload. */
+export function decodePythInstruction(instruction: PythInstruction): PythParsed {
+    const type = parsePythInstructionType(instruction);
+    switch (type) {
+        case 'InitMapping':
+            return { info: decodeInitMapping(instruction), type };
+        case 'AddMapping':
+            return { info: decodeAddMapping(instruction), type };
+        case 'AddProduct':
+            return { info: decodeAddProduct(instruction), type };
+        case 'UpdateProduct':
+            return { info: decodeUpdateProduct(instruction), type };
+        case 'AddPrice':
+            return { info: decodeAddPrice(instruction), type };
+        case 'AddPublisher':
+            return { info: decodeAddPublisher(instruction), type };
+        case 'DeletePublisher':
+            return { info: decodeDeletePublisher(instruction), type };
+        case 'UpdatePrice':
+            return { info: decodeUpdatePrice(instruction), type };
+        case 'UpdatePriceNoFailOnError':
+            return { info: decodeUpdatePriceNoFailOnError(instruction), type };
+        case 'AggregatePrice':
+            return { info: decodeAggregatePrice(instruction), type };
+        case 'InitPrice':
+            return { info: decodeInitPrice(instruction), type };
+        case 'SetMinPublishers':
+            return { info: decodeSetMinPublishers(instruction), type };
+        // The oracle's two test instructions carry no payload beyond the header.
+        case 'InitTest':
+        case 'UpdateTest':
+            decodeData(decoderFor(type), instruction.data);
+            return { info: {}, type };
+        default: {
+            const _exhaustive: never = type;
+            return _exhaustive;
+        }
+    }
 }
