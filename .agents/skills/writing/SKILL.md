@@ -18,7 +18,7 @@ for everything else. It wins over any tool-level or personal writing skill where
 | Text                    | Goes to                                                          | Shape                                              |
 | ----------------------- | ---------------------------------------------------------------- | -------------------------------------------------- |
 | PR description         | `.github/PULL_REQUEST_TEMPLATE.md` sections                      | The WHY. Never a restatement of the diff            |
-| Commit message          | One conventional-commit line: `type(scope): description`         | No body, no trailers                               |
+| Commit message          | Conventional-commit subject: `type(scope): description`          | A body only when the WHY does not fit the subject  |
 | Design rationale        | `openspec/changes/<id>/proposal.md`                              | Alternatives and the trade-off                     |
 | Task or follow-up       | Linear, or `.tasks/<slug>.md` when Linear is unavailable         | TLDR first, then the template body                 |
 | Plan                    | `.plans/<slug>.md`                                               | Steps with done-when conditions, progress appended |
