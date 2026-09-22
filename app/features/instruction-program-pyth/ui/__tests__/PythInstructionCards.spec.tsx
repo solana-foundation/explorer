@@ -75,7 +75,7 @@ type Row = [string, string];
 
 const PROGRAM_ROW: Row = ['Program', PROGRAM];
 
-const ATTRIBUTES_JSON = '{\n  "symbol": "BTC/USD",\n  "asset_type": "Crypto"\n}';
+const ATTRIBUTES_JSON = '{\n  "asset_type": "Crypto",\n  "symbol": "BTC/USD"\n}';
 
 /** Publisher and price-update rows repeat across the pairs of cards that share a payload. */
 const PUBLISHER_ROWS: Row[] = [PROGRAM_ROW, ['Price Account', A.price], ['Publisher', A.publisher]];
@@ -229,10 +229,7 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; title: string }> = [
             <UpdateProductDetailsCard
                 node={node}
                 info={{
-                    attributes: new Map([
-                        ['symbol', 'BTC/USD'],
-                        ['asset_type', 'Crypto'],
-                    ]),
+                    attributes: { asset_type: 'Crypto', symbol: 'BTC/USD' },
                     fundingPubkey: key(A.funding),
                     productPubkey: key(A.product),
                 }}

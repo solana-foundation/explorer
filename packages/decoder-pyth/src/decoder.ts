@@ -154,7 +154,7 @@ export type AddProductParams = {
 export type UpdateProductParams = {
     fundingPubkey: Address;
     productPubkey: Address;
-    attributes: Map<string, string>;
+    attributes: Record<string, string>;
 };
 
 export type AddPriceParams = {
@@ -249,7 +249,7 @@ export function decodeAddProduct(instruction: PythInstruction): AddProductParams
 export function decodeUpdateProduct(instruction: PythInstruction): UpdateProductParams {
     const { attributes } = decodeData(decoderFor('UpdateProduct'), instruction.data);
     return {
-        attributes: new Map(attributes.map(({ key, value }) => [key, value])),
+        attributes: Object.fromEntries(attributes.map(({ key, value }) => [key, value])),
         fundingPubkey: account(instruction, 0),
         productPubkey: account(instruction, 1),
     };

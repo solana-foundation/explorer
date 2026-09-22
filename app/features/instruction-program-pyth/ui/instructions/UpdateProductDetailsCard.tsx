@@ -12,8 +12,8 @@ export const UpdateProductDetailsCard = defineInstructionCard<UpdateProductParam
 });
 
 /** Two copies, one per breakpoint, because the alignment cannot be expressed on a single node. */
-function AttributesJson({ attributes }: { attributes: Map<string, string> }) {
-    const json = JSON.stringify(Object.fromEntries(attributes), undefined, 2);
+function AttributesJson({ attributes }: { attributes: Record<string, string> }) {
+    const json = JSON.stringify(attributes, undefined, 2);
     const content = (
         <Copyable text={json}>
             <pre className="mb-0 inline-block text-left">{json}</pre>

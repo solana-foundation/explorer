@@ -140,13 +140,13 @@ describe('decoder', () => {
         );
         const { attributes, fundingPubkey, productPubkey } = decodeUpdateProduct(ix);
 
-        expect(Object.fromEntries(attributes)).toEqual({ asset_type: 'Crypto', symbol: 'BTC/USD' });
+        expect(attributes).toEqual({ asset_type: 'Crypto', symbol: 'BTC/USD' });
         expect(fundingPubkey).toBe(ACCOUNTS.first);
         expect(productPubkey).toBe(ACCOUNTS.second);
     });
 
     it('should read an empty attribute list as no attributes', () => {
-        expect(decodeUpdateProduct(pythInstruction('UpdateProduct')).attributes.size).toBe(0);
+        expect(decodeUpdateProduct(pythInstruction('UpdateProduct')).attributes).toEqual({});
     });
 });
 
