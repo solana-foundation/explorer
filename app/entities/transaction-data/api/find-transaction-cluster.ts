@@ -41,12 +41,12 @@ async function getSignatureStatus(
 ): Promise<SignatureStatusResult> {
     try {
         const rpc = createSolanaRpc(serverClusterUrl(cluster));
-        const { value } = await rpc
+        const { value: statuses } = await rpc
             .getSignatureStatuses([createSignature(signature)], { searchTransactionHistory: true })
             .send({ abortSignal });
 
         // The RPC returns literal null for a signature it does not hold, per the JSON-RPC spec.
-        return { right: Boolean(value[0]) };
+        return { right: Boolean(statuses[0]) };
     } catch (error) {
         return { left: error instanceof Error ? error : new Error(String(error)) };
     }
