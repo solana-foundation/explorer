@@ -3,18 +3,14 @@ import type { ReactNode, SVGProps } from 'react';
 /**
  * The shared grid for normalized icons.
  *
- * "Normalized" means an icon brought onto our grid rather than left on whatever grid it shipped
- * with: every glyph is authored on a 24-unit box, inking about three quarters of it, and is drawn at
- * one display size. That is the grid react-feather already uses, so its icons pass through untouched
- * and only the odd ones out need placing — a brand mark that fills its whole box gets padded down, a
- * chevron that inks a quarter of its box gets scaled up.
+ * "Normalized" means every glyph sits on a 24-unit box, inks about three quarters of it, and draws at
+ * one display size — the grid react-feather already uses, so its icons pass through untouched and only
+ * the odd ones out need placing (a brand mark that fills its box gets padded down, a chevron that inks
+ * a quarter gets scaled up). This replaces sizing a glyph at the call site: the box is uniform and the
+ * optical work happens inside the viewBox.
  *
- * Sizing a glyph at the call site is what this replaces: the box is uniform, and the optical work
- * happens inside the viewBox.
- *
- * One rule holds across the whole family: at the base grid every stroke is `BASE_STROKE` units wide.
- * Thickness then scales with the display size and never with the individual glyph, so two icons drawn
- * at the same size always carry the same line — enlarging a glyph's ink must not thicken its stroke.
+ * One rule holds family-wide: at the base grid every stroke is `BASE_STROKE` wide. Thickness scales
+ * with display size, never with the glyph, so enlarging a glyph's ink must not thicken its stroke.
  */
 export const BASE_GRID = 24;
 export const BASE_STROKE = 2;

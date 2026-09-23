@@ -19,5 +19,5 @@ export function ShareOnXShareItem({ onShare }: ShareOnXShareItemProps) {
         onShare?.();
     }
 
-    return <PopoverMenuItem icon={<NormalizedXMark aria-hidden="true" />} label="Share on X" onClick={handleClick} />;
+    return <PopoverMenuItem icon={<NormalizedXMark />} label="Share on X" onClick={handleClick} />;
 }

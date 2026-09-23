@@ -287,6 +287,8 @@ export function NoReceipt({
 
 export function Zigzag() {
     return (
+        // A border can't follow the masked zigzag edge, so a 1.4px drop-shadow traces it as the card's
+        // bottom outline; border-x carries the straight sides up to meet the section above.
         <div className="[filter:drop-shadow(0_1.4px_0_theme(colors.outer-space.800))]">
             <div className="zigzag border-x border-solid border-outer-space-800 bg-outer-space-900 pb-6" />
         </div>

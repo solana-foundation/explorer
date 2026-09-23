@@ -3,14 +3,10 @@ import { BASE_GRID, NormalizedIcon } from './base';
 /**
  * X's brand mark on the normalized grid.
  *
- * The mark is authored as a filled path inking its whole 11-unit box, which at an equal box size
- * makes it both larger and heavier than the stroked glyphs it shares a menu with. Placing it on the
- * 24 grid at `INK_SPAN` units gives it the same three-quarter coverage as the rest of the family, so
- * no call site has to compensate with a smaller box.
- *
- * The artwork is the same path as `../XIcon`, which stays available in its original 11-unit form;
- * keep the two in sync if the mark is ever redrawn. Stroke rules do not apply here — a filled glyph
- * has no line, so ink coverage is the only lever it shares with the family.
+ * The mark is a filled path inking its whole 11-unit box, so at an equal box size it reads larger and
+ * heavier than the stroked glyphs beside it. Placing it on the 24 grid at `INK_SPAN` units matches
+ * the family's three-quarter coverage, so no call site has to compensate with a smaller box. Stroke
+ * rules do not apply — a filled glyph has no line, so ink coverage is its only shared lever.
  */
 const INK_SPAN = 18;
 const SOURCE_SPAN = 11;

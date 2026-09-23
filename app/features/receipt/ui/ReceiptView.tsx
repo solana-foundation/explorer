@@ -3,7 +3,7 @@
 import { Button } from '@components/shared/ui/button';
 import { TransactionSignature } from '@solana/web3.js';
 import Link from 'next/link';
-import { ChevronDown, Download, FileText, Share2, Table } from 'react-feather';
+import { Download, FileText, Share2, Table } from 'react-feather';
 
 import { useToast } from '@/app/components/shared/ui/sonner/use-toast';
 import { EReceiptDownloadFormat, receiptAnalytics } from '@/app/shared/lib/analytics';
@@ -78,7 +78,6 @@ export function ReceiptView({
                 <div className="flex flex-row items-center gap-4">
                     <PopoverButton
                         align="end"
-                        caret={<ChevronDown size={16} aria-hidden="true" className="-ml-1" />}
                         variant="quiet"
                         size="toolbar"
                         icon={<Download size={16} />}
@@ -110,7 +109,6 @@ export function ReceiptView({
                     ) : (
                         <PopoverButton
                             align="end"
-                            caret={<ChevronDown size={16} aria-hidden="true" className="-ml-1" />}
                             variant="quiet"
                             size="toolbar"
                             icon={<Share2 size={16} aria-hidden="true" />}

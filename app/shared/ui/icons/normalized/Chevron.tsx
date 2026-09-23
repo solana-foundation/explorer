@@ -3,13 +3,10 @@ import { BASE_STROKE, inkScale, NormalizedIcon } from './base';
 /**
  * Chevrons on the normalized grid.
  *
- * A chevron inks only a quarter of react-feather's 24 box, so beside a filled-out glyph such as
- * `Download` (which inks about three quarters) it reads much lighter. Instead of handing it a bigger
- * box at the call site, the glyph is drawn larger inside the shared box: `INK_SCALE` enlarges the
- * geometry, while the stroke is divided by the same factor so it renders at the family's
- * `BASE_STROKE` — bigger mark, identical line.
- *
- * Geometry is feather's own (MIT), kept verbatim so the shape stays the familiar one.
+ * A chevron inks only a quarter of the 24 box, so beside a filled-out glyph like `Download` it reads
+ * much lighter. `INK_SCALE` enlarges the geometry inside the shared box, and the stroke is divided by
+ * the same factor so it lands back on the family's `BASE_STROKE` — bigger mark, identical line.
+ * Geometry is feather's own (MIT), kept verbatim so the shape stays familiar.
  */
 const INK_SCALE = 1.25;
 const STROKE = BASE_STROKE / INK_SCALE;

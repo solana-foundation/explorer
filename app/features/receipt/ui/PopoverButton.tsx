@@ -1,13 +1,13 @@
 import { Button, type ButtonProps } from '@components/shared/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
+import { cn } from '@components/shared/utils';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
-import { ChevronDown } from 'react-feather';
+
+import { NormalizedChevronDown } from '@/app/shared/ui/icons/normalized';
 
 interface PopoverButtonProps {
     /** Menu edge pinned to the trigger; 'end' keeps right-aligned triggers from opening off-screen. */
     align?: ComponentPropsWithoutRef<typeof PopoverContent>['align'];
-    /** Trailing caret. Defaults to the feather chevron the compact triggers have always drawn. */
-    caret?: ReactNode;
     icon: ReactNode;
     label: string;
     children: ReactNode;
@@ -20,7 +20,6 @@ interface PopoverButtonProps {
 
 export function PopoverButton({
     align = 'start',
-    caret,
     icon,
     label,
     children,
@@ -33,10 +32,11 @@ export function PopoverButton({
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant={variant} size={size} className={className} disabled={disabled || loading}>
+                {/* `group` lets the caret read the trigger's Radix data-state and flip when the menu opens. */}
+                <Button variant={variant} size={size} className={cn('group', className)} disabled={disabled || loading}>
                     {loading ? <span className="spinner-grow spinner-grow-xs mx-0.5" aria-hidden="true" /> : icon}
                     {label}
-                    {caret ?? <ChevronDown size={12} aria-hidden="true" />}
+                    <NormalizedChevronDown className="transition-transform duration-200 group-data-[state=open]:rotate-180" />
                 </Button>
             </PopoverTrigger>
 
