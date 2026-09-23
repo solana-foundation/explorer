@@ -1,6 +1,7 @@
 'use client';
 
-import { XIcon } from './icons/XIcon';
+import { NormalizedXMark } from '@/app/shared/ui/icons/normalized';
+
 import { PopoverMenuItem } from './PopoverMenuItem';
 
 interface ShareOnXShareItemProps {
@@ -18,5 +19,5 @@ export function ShareOnXShareItem({ onShare }: ShareOnXShareItemProps) {
         onShare?.();
     }
 
-    return <PopoverMenuItem icon={<XIcon aria-hidden="true" />} label="Share on X" onClick={handleClick} />;
+    return <PopoverMenuItem icon={<NormalizedXMark aria-hidden="true" />} label="Share on X" onClick={handleClick} />;
 }

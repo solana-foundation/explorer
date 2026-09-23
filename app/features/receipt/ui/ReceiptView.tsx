@@ -3,11 +3,12 @@
 import { Button } from '@components/shared/ui/button';
 import { TransactionSignature } from '@solana/web3.js';
 import Link from 'next/link';
-import { Download, FileText, Share2, Table } from 'react-feather';
+import { ChevronDown, Download, FileText, Share2, Table } from 'react-feather';
 
 import { useToast } from '@/app/components/shared/ui/sonner/use-toast';
 import { EReceiptDownloadFormat, receiptAnalytics } from '@/app/shared/lib/analytics';
 import { useCanNativeShare } from '@/app/shared/lib/use-can-native-share';
+import { NormalizedChevronLeft } from '@/app/shared/ui/icons/normalized';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 import type { DownloadReceiptFn, FormattedExtendedReceipt } from '../types';
@@ -63,48 +64,29 @@ export function ReceiptView({
     }
 
     return (
-        <PageContainer className="flex min-h-[80vh] min-w-[theme(screens.xs)] flex-col items-center justify-center gap-6 px-5 py-10">
+        <PageContainer className="flex min-h-[80vh] min-w-[theme(screens.xs)] flex-col items-center justify-start gap-4 pb-10 pt-4 sm:justify-center sm:pt-10">
             <BlurredCircle />
-            <BaseReceipt data={data} />
-            <div className="flex flex-row items-center gap-1">
-                <div className="flex items-start gap-0.5">
-                    <Button variant="compact" size="compact" asChild>
-                        <Link
-                            href={transactionPath}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={handleViewTxClick}
-                        >
-                            View transaction in Explorer
-                        </Link>
-                    </Button>
-                </div>
-                <div className="flex items-start gap-0.5">
-                    {canNativeShare ? (
-                        <Button variant="compact" size="compact" onClick={handleNativeShare} className="max-h-[25px]">
-                            <Share2 size={12} aria-hidden="true" />
-                            Share
-                        </Button>
-                    ) : (
-                        <PopoverButton
-                            icon={<Share2 size={12} aria-hidden="true" />}
-                            label="Share"
-                            className="max-h-[25px]"
-                        >
-                            <ShareOnXShareItem onShare={() => receiptAnalytics.trackShareOnX(signature)} />
-                            <CopyLinkShareItem onCopy={() => receiptAnalytics.trackShareCopyLink(signature)} />
-                        </PopoverButton>
-                    )}
-                </div>
-                <div className="flex items-start gap-0.5">
+            {/* Actions sit above the receipt and share its width: back on the left, share/download on the right. */}
+            <div className="flex w-full max-w-lg flex-row items-center justify-between gap-2">
+                <Button variant="quiet" size="toolbar" asChild>
+                    {/* Same-tab navigation on purpose: this is the page's back affordance, not a side trip. */}
+                    <Link href={transactionPath} onClick={handleViewTxClick}>
+                        <NormalizedChevronLeft className="-mr-1" />
+                        Transaction
+                    </Link>
+                </Button>
+                <div className="flex flex-row items-center gap-4">
                     <PopoverButton
-                        icon={<Download size={12} />}
+                        align="end"
+                        caret={<ChevronDown size={16} aria-hidden="true" className="-ml-1" />}
+                        variant="quiet"
+                        size="toolbar"
+                        icon={<Download size={16} />}
                         label="Download"
                         loading={isPriceLoading}
-                        className="max-h-[25px]"
                     >
                         <DownloadReceiptItem
-                            icon={<Table size={12} />}
+                            icon={<Table size={16} />}
                             format={EReceiptDownloadFormat.Csv}
                             label="CSV"
                             download={downloadCsv}
@@ -112,7 +94,7 @@ export function ReceiptView({
                             onError={() => toast.custom({ title: 'Failed to download receipt CSV', type: 'error' })}
                         />
                         <DownloadReceiptItem
-                            icon={<FileText size={12} />}
+                            icon={<FileText size={16} />}
                             format={EReceiptDownloadFormat.Pdf}
                             label="PDF"
                             download={downloadPdf}
@@ -120,8 +102,27 @@ export function ReceiptView({
                             onError={() => toast.custom({ title: 'Failed to download receipt PDF', type: 'error' })}
                         />
                     </PopoverButton>
+                    {canNativeShare ? (
+                        <Button variant="quiet" size="toolbar" onClick={handleNativeShare}>
+                            <Share2 size={16} aria-hidden="true" />
+                            Share
+                        </Button>
+                    ) : (
+                        <PopoverButton
+                            align="end"
+                            caret={<ChevronDown size={16} aria-hidden="true" className="-ml-1" />}
+                            variant="quiet"
+                            size="toolbar"
+                            icon={<Share2 size={16} aria-hidden="true" />}
+                            label="Share"
+                        >
+                            <ShareOnXShareItem onShare={() => receiptAnalytics.trackShareOnX(signature)} />
+                            <CopyLinkShareItem onCopy={() => receiptAnalytics.trackShareCopyLink(signature)} />
+                        </PopoverButton>
+                    )}
                 </div>
             </div>
+            <BaseReceipt data={data} />
         </PageContainer>
     );
 }

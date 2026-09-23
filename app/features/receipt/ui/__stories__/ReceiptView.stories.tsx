@@ -35,7 +35,7 @@ export const Default: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         expect(canvas.getByText('Solana Receipt')).toBeInTheDocument();
-        expect(canvas.getByText('View transaction in Explorer')).toBeInTheDocument();
+        expect(canvas.getByRole('link', { name: 'Transaction' })).toBeInTheDocument();
         // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         expect(canvas.getByRole('button', { name: /share/i })).toBeInTheDocument();
     },
@@ -52,12 +52,10 @@ export const DownloadOptions: Story = {
         const downloadButton = canvas.getByRole('button', { name: /download/i });
         await userEvent.click(downloadButton);
 
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
-        const csvButton = await within(document.body).findByRole('button', { name: /^get csv$/i });
+        const csvButton = await within(document.body).findByRole('button', { name: 'CSV' });
         await expect(csvButton).toBeInTheDocument();
 
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
-        const pdfButton = await within(document.body).findByRole('button', { name: /^get pdf$/i });
+        const pdfButton = await within(document.body).findByRole('button', { name: 'PDF' });
         await expect(pdfButton).toBeInTheDocument();
     },
 };

@@ -47,7 +47,7 @@ export function BaseReceipt({
 
     return (
         <div className="w-full max-w-lg">
-            <div className="bg-outer-space-900">
+            <div className="border border-b-0 border-solid border-outer-space-800 bg-outer-space-900">
                 <Header date={date} />
                 <TransactionSection network={network} confirmationStatus={confirmationStatus} />
                 <TransfersTable transfers={transferRows} fee={fee} logoURI={logoURI} tokenHref={tokenHref} />
@@ -264,7 +264,7 @@ export function NoReceipt({
             <BlurredCircle />
 
             <div className="w-full max-w-lg">
-                <div className="min-h-96 bg-outer-space-900">
+                <div className="min-h-96 border border-b-0 border-solid border-outer-space-800 bg-outer-space-900">
                     <Header date={date} title="No Receipt" />
                     <div className="p-6 text-sm text-gray-400">
                         <p className="m-0">
@@ -286,7 +286,11 @@ export function NoReceipt({
 }
 
 export function Zigzag() {
-    return <div className="zigzag bg-outer-space-900 pb-6" />;
+    return (
+        <div className="[filter:drop-shadow(0_1.4px_0_theme(colors.outer-space.800))]">
+            <div className="zigzag border-x border-solid border-outer-space-800 bg-outer-space-900 pb-6" />
+        </div>
+    );
 }
 
 export function BlurredCircle() {

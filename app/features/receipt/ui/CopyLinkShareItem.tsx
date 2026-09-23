@@ -21,13 +21,13 @@ export function CopyLinkShareItem({ onCopy }: CopyLinkShareItemProps) {
     }
 
     function getIcon() {
-        if (state === 'copied') return <Check size={11} aria-hidden="true" />;
-        if (state === 'errored') return <XCircle size={11} aria-hidden="true" />;
-        return <Link size={11} aria-hidden="true" />;
+        if (state === 'copied') return <Check size={16} aria-hidden="true" />;
+        if (state === 'errored') return <XCircle size={16} aria-hidden="true" />;
+        return <Link size={16} aria-hidden="true" />;
     }
 
     function getLabel() {
-        if (state === 'copied') return 'Copied!';
+        if (state === 'copied') return 'Copied';
         if (state === 'errored') return 'Failed to copy';
         return 'Copy link';
     }
