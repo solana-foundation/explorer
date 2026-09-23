@@ -65,14 +65,9 @@ Non-trivial design and architectural choices are captured as **OpenSpec change p
 
 ## Writing
 
-Applies to every text an agent produces: docs, OpenSpec proposals, PR and issue bodies, commit messages, task descriptions, plan files, review notes, code comments, replies to reviewers.
+Every text an agent produces, from a code comment to a PR body, follows [`.agents/skills/writing/SKILL.md`](.agents/skills/writing/SKILL.md). Read it before writing prose.
 
-- Read [`.agents/skills/writing/SKILL.md`](.agents/skills/writing/SKILL.md) before writing prose and apply it. That file is the contract; this section is the summary.
-- Front-load the answer. Delete each sentence the reader does not need.
-- Say it literally. No idioms, metaphors, humour, or cultural references.
-- Write what stays true after the next change: the WHY, names not positions, links that do not move.
-- Match the spelling of the file you edit. Identifiers, quotes, and proper nouns keep their source spelling.
-- A reply to a person is a draft. Hand it to a human. Never post it on their behalf.
+One rule holds even without that file: a reply to a person is a draft. Hand it to a human. Never post it on their behalf.
 
 ## PR Authoring
 
