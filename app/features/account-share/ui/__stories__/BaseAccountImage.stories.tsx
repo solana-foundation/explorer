@@ -129,9 +129,11 @@ export const NotFoundNeverUsed: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        expect(canvas.getByTestId('account-image-pill')).toHaveTextContent('Never used');
-        expect(canvas.getByText('Nothing at this address')).toBeInTheDocument();
-        expect(canvas.getByTestId('account-image-reason')).toBeInTheDocument();
+        expect(canvas.getByTestId('account-image-pill')).toHaveTextContent('Not found');
+        expect(canvas.getByText('No account data found')).toBeInTheDocument();
+        expect(canvas.getByTestId('account-image-reason')).toHaveTextContent(
+            'No account data was found for this address on this cluster.',
+        );
         expect(canvas.getByTestId('account-image-glow').style.backgroundImage).toContain('amber_gradient');
     },
 };
@@ -148,6 +150,12 @@ export const NotFoundClosed: Story = {
 
 export const NotFoundOtherCluster: Story = {
     args: { data: { address: ADDRESS, kind: 'not-found', reason: 'other-cluster' } },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+
+        expect(canvas.getByTestId('account-image-pill')).toHaveTextContent('Not found');
+        expect(canvas.getByText('No account on this cluster')).toBeInTheDocument();
+    },
 };
 
 export const Fallback: Story = {
