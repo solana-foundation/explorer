@@ -42,9 +42,6 @@ vi.mock('@entities/transaction-data/server', () => ({ findTransactionCluster: mo
 vi.mock('../../api/get-tx', () => ({ getTx: mocks.getTx }));
 vi.mock('../../api/get-idl-names', () => ({ getIdlNames: mocks.getIdlNames }));
 
-const env = vi.hoisted(() => ({ isClusterProbeEnabled: true }));
-vi.mock('../../env', () => env);
-
 import { MAX_INSTRUCTION_ROWS } from '../../lib/constants';
 import { getTxShareData } from '../get-tx-share-data';
 
@@ -116,7 +113,6 @@ function txWith(instructions: (ParsedInstruction | PartiallyDecodedInstruction)[
 const TX = txWith([]);
 
 beforeEach(() => {
-    env.isClusterProbeEnabled = true;
     mocks.getTx.mockResolvedValue(TX);
     mocks.getIdlNames.mockResolvedValue(new Map());
 });
@@ -148,28 +144,7 @@ describe('should shape the transaction behind an OG image', () => {
         });
     });
 
-    it('should fetch from the cluster the probe found when the request carried none', async () => {
-        mocks.findTransactionCluster.mockResolvedValue({ cluster: Cluster.Testnet, kind: 'found' });
-
-        const result = await getTxShareData(SIGNATURE);
-
-        // Mainnet first: an absent `?cluster=` means mainnet by the app's own contract, so the common case hits
-        // on the first probe.
-        expect(mocks.findTransactionCluster).toHaveBeenCalledWith(
-            [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet],
-            SIGNATURE,
-            { abortSignal: expect.any(AbortSignal) },
-        );
-        expect(mocks.getTx).toHaveBeenCalledWith({
-            abortSignal: expect.any(AbortSignal),
-            cluster: Cluster.Testnet,
-            signature: SIGNATURE,
-        });
-        expect(result.kind).toBe('ok');
-    });
-
-    it('should probe mainnet only when cluster probing is disabled', async () => {
-        env.isClusterProbeEnabled = false;
+    it('should probe mainnet only when the request carried no cluster', async () => {
         mocks.findTransactionCluster.mockResolvedValue({ cluster: Cluster.MainnetBeta, kind: 'found' });
 
         const result = await getTxShareData(SIGNATURE);
@@ -177,15 +152,12 @@ describe('should shape the transaction behind an OG image', () => {
         expect(mocks.findTransactionCluster).toHaveBeenCalledWith([Cluster.MainnetBeta], SIGNATURE, {
             abortSignal: expect.any(AbortSignal),
         });
+        expect(mocks.getTx).toHaveBeenCalledWith({
+            abortSignal: expect.any(AbortSignal),
+            cluster: Cluster.MainnetBeta,
+            signature: SIGNATURE,
+        });
         expect(result.kind).toBe('ok');
-    });
-
-    it('should report not-found rather than reaching devnet when cluster probing is disabled', async () => {
-        env.isClusterProbeEnabled = false;
-        mocks.findTransactionCluster.mockResolvedValue({ kind: 'not-found' });
-
-        await expect(getTxShareData(SIGNATURE)).resolves.toEqual({ kind: 'not-found' });
-        expect(mocks.getTx).not.toHaveBeenCalled();
     });
 
     it('should print a placeholder when the transaction has no block time', async () => {

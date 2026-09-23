@@ -4,12 +4,9 @@ import { findTransactionCluster } from '@entities/transaction-data/server';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterSlug, type ServerCluster, serverClusterUrl } from '@/app/utils/cluster';
 
-import { isClusterProbeEnabled } from '../env';
 import { ReceiptError } from './errors';
 
-// Clusters that can be probed when tx not found on mainnet
-type ProbeCluster = Cluster.Devnet | Cluster.Testnet;
-const CLUSTERS_TO_PROBE: ProbeCluster[] = [Cluster.Devnet, Cluster.Testnet];
+const CLUSTERS: readonly ServerCluster[] = [Cluster.MainnetBeta];
 
 export type ApiData = {
     cluster: Cluster;
@@ -56,11 +53,7 @@ export async function getTx(
  * Receipt's mapping of the entity probe onto its own error type.
  */
 async function findClusterOrThrow(signature: string): Promise<ServerCluster | undefined> {
-    const clusters: ServerCluster[] = isClusterProbeEnabled
-        ? [Cluster.MainnetBeta, ...CLUSTERS_TO_PROBE]
-        : [Cluster.MainnetBeta];
-
-    const result = await findTransactionCluster(clusters, signature);
+    const result = await findTransactionCluster(CLUSTERS, signature);
 
     if (result.kind === 'error') {
         // Fail rather than treating a network fault as "not on this cluster" and probing on.
@@ -76,7 +69,7 @@ async function findClusterOrThrow(signature: string): Promise<ServerCluster | un
         return result.cluster;
     }
 
-    Logger.info('[receipt] Transaction not found on any probed cluster', { clusters, signature });
+    Logger.info('[receipt] Transaction not found on clusters', { clusters: CLUSTERS, signature });
     return undefined;
 }
 
