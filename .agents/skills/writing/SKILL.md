@@ -51,6 +51,8 @@ Text lives longer than the code around it. Write what stays true after an unrela
   State the condition instead: "until the RPC supports batch requests".
 - Point at names, not positions. "The function above", "see below", "the previous section", or a line number
   break on the next edit. Name the symbol, heading, or file.
+- In code, point at a symbol with `{@link}` so a rename follows it. In markdown, write a path as a relative link so
+  a checker can fail on it. A bare path in a comment is checked by nobody.
 - Do not describe another module's behaviour. State what this code requires of it, or enforce the requirement
   in a type, an assertion, or a test.
 - Do not repeat a value the code owns: a default, a limit, a list of variants. Name the constant.
@@ -77,7 +79,7 @@ After: `// Public RPC drops requests under load; MAX_RPC_RETRIES bounds the cost
 ## Keep
 
 - The non-obvious WHY, the failure mode, the consequence, the caveat.
-- Concrete nouns, numbers, file paths, exact quotes, commands.
+- The specific thing: a name, an exact quote, a command, a measured result. Not "the config", "an error", "some tests".
 - Uncertainty, stated plainly: "unverified", "I did not test this", "this is inference". Never build a section around
   an unverified claim. State the open question instead, and say what would settle it.
 - Examples and cross-references. Terseness trims prose, never evidence.
