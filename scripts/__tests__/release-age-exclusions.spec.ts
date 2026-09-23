@@ -3,9 +3,8 @@ import path from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
-// The kit 8.3.0 upgrade exempted its same-day releases from the release-age quarantine. They
-// clear the window on this date, and the exemption must not outlive the reason for it.
-const EXPIRES_ON = Date.parse('2026-09-23T00:00:00Z');
+// On this date, every exempted release is older than `minimumReleaseAge`.
+const EXPIRES_ON = Date.parse('2026-09-25T00:00:00Z');
 
 function expiredExemptions(workspace: string, now: number): string[] {
     if (now < EXPIRES_ON) return [];
@@ -14,7 +13,7 @@ function expiredExemptions(workspace: string, now: number): string[] {
         .map(line => line.trim())
         .filter(line => line.startsWith("- '") && line.endsWith("'"))
         .map(line => line.slice(3, -1))
-        .filter(name => name.startsWith('@solana/') || name === 'undici-types');
+        .filter(name => name.startsWith('@solana/'));
 }
 
 describe('release-age exemptions', () => {
