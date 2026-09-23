@@ -39,22 +39,21 @@ const TYPO = {
 
 const LOGO = { height: '28px', width: '229px' } as const;
 
-// What each not-found reason prints: a pill label, a headline, and one wrapped sentence.
 const NOT_FOUND_COPY: Record<NotFoundReason, { headline: string; pill: string; reason: string }> = {
     closed: {
         headline: 'Account closed',
         pill: 'Closed',
-        reason: 'This account was emptied and its rent refunded — its transaction history remains on-chain.',
+        reason: 'This address has on-chain transaction history, but holds no account data now.',
     },
     'never-used': {
-        headline: 'Nothing at this address',
-        pill: 'Never used',
-        reason: 'No transaction has ever touched this address — it is only a public key until something is sent to it.',
+        headline: 'No account data found',
+        pill: 'Not found',
+        reason: 'No account data was found for this address on this cluster.',
     },
     'other-cluster': {
-        headline: 'No account at this address',
+        headline: 'No account on this cluster',
         pill: 'Not found',
-        reason: 'Nothing is stored here on the cluster you are viewing — the same address may hold an account on another one.',
+        reason: 'No account data was found on the cluster you are viewing — it may exist on another one.',
     },
 };
 
