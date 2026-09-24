@@ -27,6 +27,8 @@ export type TransactionWithMeta = Omit<ParsedTransactionWithMeta, 'version'> & {
 };
 
 type RawTransactionBase = {
+    /** Unix timestamp in seconds. Absent when the RPC has no time for the block. */
+    blockTime?: number;
     messageBytes: Uint8Array;
     meta?: {
         innerInstructions?: CompiledInnerInstruction[];

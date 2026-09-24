@@ -150,28 +150,28 @@ export const FetchersContext = React.createContext<Fetchers | undefined>(undefin
 export const StateContext = React.createContext<State | undefined>(undefined);
 export const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
 
+type BatchOptions = {
+    dispatch: Dispatch;
+    url: string;
+    dataMode: FetchAccountDataMode;
+    fetchNftMetadata: boolean;
+    onError: (error: unknown) => void;
+};
+
 class MultipleAccountFetcher {
     pubkeys: Set<string> = new Set();
     fetchTimeout?: NodeJS.Timeout;
 
-    constructor(
-        private dispatch: Dispatch,
-        private url: string,
-        private dataMode: FetchAccountDataMode,
-        private onError: (error: unknown) => void,
-    ) {}
+    constructor(private options: BatchOptions) {}
     fetch = (pubkey: PublicKey) => {
-        if (this.pubkeys !== undefined) this.pubkeys.add(pubkey.toBase58());
+        this.pubkeys.add(pubkey.toBase58());
         if (this.fetchTimeout === undefined) {
             this.fetchTimeout = setTimeout(() => {
                 this.fetchTimeout = undefined;
-                if (this.pubkeys !== undefined) {
-                    const pubkeys = Array.from(this.pubkeys).map(p => new PublicKey(p));
-                    this.pubkeys.clear();
+                const pubkeys = Array.from(this.pubkeys).map(p => new PublicKey(p));
+                this.pubkeys.clear();
 
-                    const { dispatch, url, dataMode, onError } = this;
-                    fetchMultipleAccounts({ dataMode, dispatch, onError, pubkeys, url });
-                }
+                fetchMultipleAccounts({ ...this.options, pubkeys });
             }, 100);
         }
     };
@@ -183,8 +183,18 @@ class MultipleAccountFetcher {
 
 export type FetchAccountDataMode = 'parsed' | 'raw' | 'skip';
 
-type AccountsProviderProps = { children: React.ReactNode };
-export function AccountsProvider({ children }: AccountsProviderProps) {
+type AccountsProviderProps = {
+    children: React.ReactNode;
+    /**
+     * Adds Metaplex metadata to parsed mints. Only the address page renders it, and each mint costs
+     * sequential RPC calls and an off-chain JSON read.
+     *
+     * Each mount has its own cache, so the address page reads only mints fetched with metadata.
+     * This provider must not move to a shared layout.
+     */
+    fetchNftMetadata?: boolean;
+};
+export function AccountsProvider({ children, fetchNftMetadata = false }: AccountsProviderProps) {
     const { cluster, url } = useCluster();
     const [state, dispatch] = Cache.useReducer<Account>(url);
 
@@ -205,14 +215,14 @@ export function AccountsProvider({ children }: AccountsProviderProps) {
         [url],
     );
 
-    const fetchers = React.useMemo<Fetchers>(
-        () => ({
-            parsed: new MultipleAccountFetcher(dispatch, url, 'parsed', reportFetchError),
-            raw: new MultipleAccountFetcher(dispatch, url, 'raw', reportFetchError),
-            skip: new MultipleAccountFetcher(dispatch, url, 'skip', reportFetchError),
-        }),
-        [dispatch, url, reportFetchError],
-    );
+    const fetchers = React.useMemo<Fetchers>(() => {
+        const shared = { dispatch, fetchNftMetadata, onError: reportFetchError, url };
+        return {
+            parsed: new MultipleAccountFetcher({ ...shared, dataMode: 'parsed' }),
+            raw: new MultipleAccountFetcher({ ...shared, dataMode: 'raw' }),
+            skip: new MultipleAccountFetcher({ ...shared, dataMode: 'skip' }),
+        };
+    }, [dispatch, url, fetchNftMetadata, reportFetchError]);
 
     React.useEffect(() => {
         dispatch({ type: ActionType.Clear, url });
@@ -246,15 +256,10 @@ async function fetchMultipleAccounts({
     dispatch,
     pubkeys,
     dataMode,
+    fetchNftMetadata,
     onError,
     url,
-}: {
-    dispatch: Dispatch;
-    pubkeys: PublicKey[];
-    dataMode: FetchAccountDataMode;
-    onError: (error: unknown) => void;
-    url: string;
-}) {
+}: BatchOptions & { pubkeys: PublicKey[] }) {
     for (const pubkey of pubkeys) {
         dispatch({
             key: pubkey.toBase58(),
@@ -266,6 +271,7 @@ async function fetchMultipleAccounts({
 
     const BATCH_SIZE = 100;
     const rpc = getRpc(url);
+    const pendingMetadata: Promise<void>[] = [];
 
     let nextBatchStart = 0;
     while (nextBatchStart < pubkeys.length) {
@@ -309,7 +315,7 @@ async function fetchMultipleAccounts({
                     if (!Array.isArray(result.data)) {
                         space = Number(result.data.space);
                         try {
-                            parsedData = await handleParsedAccountData(rpc, pubkey, result.data, url, result.lamports);
+                            parsedData = await handleParsedAccountData(rpc, result.data, result.lamports);
                         } catch (error) {
                             Logger.error(error, {
                                 address: pubkey.toBase58(),
@@ -339,13 +345,28 @@ async function fetchMultipleAccounts({
                     };
                 }
 
-                dispatch({
-                    data: account,
-                    key: pubkey.toBase58(),
-                    status: FetchStatus.Fetched,
-                    type: ActionType.Update,
-                    url,
-                });
+                const settle = (data: Account) =>
+                    dispatch({
+                        data,
+                        key: pubkey.toBase58(),
+                        status: FetchStatus.Fetched,
+                        type: ActionType.Update,
+                        url,
+                    });
+
+                const mint = fetchNftMetadata ? asMint(account) : undefined;
+                if (mint === undefined) {
+                    settle(account);
+                } else {
+                    // The metadata read is not awaited because an `await` here delays every account after
+                    // this mint. The mint settles once, with its metadata, so its entry stays `Fetching`
+                    // until the read resolves.
+                    pendingMetadata.push(
+                        fetchNftData(pubkey, url, { onError: ex => Logger.error(ex) }).then(nftData =>
+                            settle({ ...account, data: { ...account.data, parsed: { ...mint, nftData } } }),
+                        ),
+                    );
+                }
             }
         } catch (error) {
             onError(error);
@@ -360,6 +381,15 @@ async function fetchMultipleAccounts({
             }
         }
     }
+
+    // A timer calls this function without `await`, so a rejection must be caught here.
+    await Promise.all(pendingMetadata).catch(onError);
+}
+
+function asMint(account: Account): TokenProgramData | undefined {
+    const parsed = account.data.parsed;
+    if (!parsed || !isTokenProgramData(parsed) || parsed.parsed.type !== 'mint') return undefined;
+    return parsed;
 }
 
 // The kit-typed shape of a jsonParsed account's `data` when the RPC could parse it — the
@@ -368,9 +398,7 @@ type ParsedAccountData = Exclude<AccountInfoWithJsonData['data'], readonly [stri
 
 async function handleParsedAccountData(
     rpc: SolanaRpc,
-    accountKey: PublicKey,
     accountData: ParsedAccountData,
-    url: string,
     lamports: bigint,
 ): Promise<ParsedData | undefined> {
     // kit upcasts every integral value in the jsonParsed payload to a bigint; the superstruct
@@ -470,16 +498,8 @@ async function handleParsedAccountData(
 
         case SPL_TOKEN_PROGRAM_LABEL:
         case SPL_TOKEN_2022_PROGRAM_LABEL: {
-            const parsed = create(info, TokenAccount);
-            let nftData;
-
-            if (parsed.type === 'mint') {
-                nftData = await fetchNftData(accountKey, url, { onError: ex => Logger.error(ex) });
-            }
-
             return {
-                nftData,
-                parsed,
+                parsed: create(info, TokenAccount),
                 program: accountData.program,
             };
         }

@@ -56,6 +56,30 @@ describe('fetchRawTransaction', () => {
         ]);
     });
 
+    it('should default to confirmed so a freshly landed transaction still answers', async () => {
+        respondWith(transactionResult(createV1TransactionBytes({})));
+
+        await fetchRawTransaction(URL, SIGNATURE);
+
+        expect(requestBody().params[1].commitment).toBe('confirmed');
+    });
+
+    it('should carry the block time, which spares the page a getBlockTime for the same slot', async () => {
+        respondWith(transactionResult(createV1TransactionBytes({})));
+
+        const raw = await fetchRawTransaction(URL, SIGNATURE);
+
+        expect(raw?.blockTime).toBe(1_778_761_079);
+    });
+
+    it('should leave a missing block time absent rather than defaulting it', async () => {
+        respondWith({ ...transactionResult(createV1TransactionBytes({})), blockTime: null });
+
+        const raw = await fetchRawTransaction(URL, SIGNATURE);
+
+        expect(raw?.blockTime).toBeUndefined();
+    });
+
     it('should return null when the RPC does not hold the transaction', async () => {
         respondWith(null);
 

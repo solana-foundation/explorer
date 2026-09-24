@@ -19,7 +19,7 @@ import {
 } from '@entities/transaction-fee';
 import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
-import { useCluster, useClusterInfo } from '@providers/cluster';
+import { useCluster, useEpochSchedule } from '@providers/cluster';
 import {
     TransactionStatusInfo,
     useFetchTransactionStatus,
@@ -28,19 +28,20 @@ import {
 } from '@providers/transactions';
 import type { TransactionVersion } from '@solana/kit';
 import { PACKET_DATA_SIZE, ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
-import { ClusterStatus } from '@utils/cluster';
+import { Cluster, ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useBuildClusterPath, useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { ZoomIn } from 'react-feather';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
-import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
+import { Logger } from '@/app/shared/lib/logger';
+import { AutoRefresh, useAutoRefreshInterval, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 import { V1_TRANSACTION_SIZE_LIMIT } from '@/app/shared/lib/v1-message-bridge';
 import { Card } from '@/app/shared/ui/Card';
 import { KeyValue, TextValue } from '@/app/shared/ui/key-value';
@@ -80,7 +81,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const details = useTransactionDetails(signature);
     const rawDetails = useRawTransactionDetails(signature);
     const { cluster, status: clusterStatus } = useCluster();
-    const clusterInfo = useClusterInfo();
+    const epochSchedule = useEpochSchedule();
     const inspectPath = useClusterPath({ pathname: `/tx/${signature}/inspect` });
     // The error link's target is only known inside the render below, so this needs the callback form.
     const buildClusterPath = useBuildClusterPath();
@@ -94,6 +95,21 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     // Read the version off the raw details rather than the parsed ones, so the size and the limit it
     // is compared against always come from the same fetch.
     const rawVersion = rawDetails?.data?.raw?.version;
+    const blockTime = rawDetails?.data?.raw?.blockTime ?? details?.data?.transactionWithMeta?.blockTime ?? undefined;
+    // This card needs only the status to render, so both transaction fetches can still be in flight.
+    // The row must show "Unavailable" only after both fetches return.
+    const blockTimeAnswered = isFetched(rawDetails) && isFetched(details);
+
+    // A finalized mainnet transaction always has a block time. Other clusters and commitments can lack one.
+    const isFinalizedOnMainnet = cluster === Cluster.MainnetBeta && status?.data?.info?.confirmations === 'max';
+    const hasSettledWithoutBlockTime = isFinalizedOnMainnet && blockTime === undefined && blockTimeAnswered;
+    useEffect(() => {
+        if (!hasSettledWithoutBlockTime) return;
+        Logger.warn('[transaction] finalized transaction has no block time', {
+            sentry: true,
+            sentryExtras: { signature },
+        });
+    }, [hasSettledWithoutBlockTime, signature]);
 
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
@@ -107,31 +123,27 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         }
     }, [signature, clusterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    useEffect(() => {
-        if (autoRefresh === AutoRefresh.Active) {
-            const intervalHandle: NodeJS.Timeout = setInterval(() => fetchStatus(signature), AUTO_REFRESH_INTERVAL);
-            return () => {
-                clearInterval(intervalHandle);
-            };
-        }
-    }, [autoRefresh, fetchStatus, signature]);
+    // `getTransaction` returns `null` until the transaction is confirmed, and the status has no wire bytes
+    // or block time. Auto-refresh stops at finalization, so the Refresh button must also retry the transaction.
+    //
+    // `rawDetails` changes on every fetch, so `refresh` reads it through a ref to stay stable.
+    const rawEntryRef = useRef(rawDetails);
+    rawEntryRef.current = rawDetails;
+    const refresh = useCallback(() => {
+        fetchStatus(signature);
+        const entry = rawEntryRef.current;
+        // The raw cache keeps the last response, so an overlapping request can replace a found transaction
+        // with `null`. If auto-refresh stops, that `null` stays until the Refresh button retries.
+        if (!entry?.data?.raw && entry?.status !== FetchStatus.Fetching) fetchRaw(signature);
+    }, [fetchStatus, fetchRaw, signature]);
+    useAutoRefreshInterval(autoRefresh, refresh);
 
     if (!status || (status.status === FetchStatus.Fetching && autoRefresh === AutoRefresh.Inactive)) {
         return <LoadingCard />;
     } else if (status.status === FetchStatus.FetchFailed) {
         return <ErrorCard retry={() => fetchStatus(signature)} text="Fetch Failed" />;
     } else if (!status.data?.info) {
-        return (
-            <TransactionNotFoundCard
-                signature={signature}
-                retry={() => fetchStatus(signature)}
-                firstAvailableBlock={
-                    clusterInfo?.firstAvailableBlock && clusterInfo.firstAvailableBlock > 0n
-                        ? clusterInfo.firstAvailableBlock
-                        : undefined
-                }
-            />
-        );
+        return <TransactionNotFoundCard signature={signature} retry={() => fetchStatus(signature)} />;
     }
 
     const { info } = status.data;
@@ -148,7 +160,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         (transactionWithMeta?.transaction && transactionWithMeta.version !== 1
             ? estimateRequestedComputeUnitsForParsedTransaction(
                   transactionWithMeta.transaction,
-                  clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(info.slot)) : undefined,
+                  epochSchedule ? getEpochForSlot(epochSchedule, BigInt(info.slot)) : undefined,
                   cluster,
               )
             : undefined);
@@ -230,7 +242,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     <RefreshButton
                         fetching={autoRefresh === AutoRefresh.Active}
                         analyticsSection="transaction_card"
-                        onClick={() => fetchStatus(signature)}
+                        onClick={refresh}
                     />
                     <DownloadDropdown
                         filename={signature}
@@ -380,25 +392,29 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     </KeyValue>
                 )}
 
-                {info.timestamp !== 'unavailable' ? (
+                {blockTime !== undefined ? (
                     <>
                         <KeyValue label="Timestamp (Local)">
-                            <span className="font-mono">{displayTimestamp(info.timestamp * 1000, true)}</span>
+                            <span className="font-mono">{displayTimestamp(blockTime * 1000, true)}</span>
                         </KeyValue>
                         <KeyValue label="Timestamp (UTC)" divider={false}>
-                            <span className="font-mono">{displayTimestampUtc(info.timestamp * 1000, true)}</span>
+                            <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>
                         </KeyValue>
                     </>
-                ) : (
+                ) : blockTimeAnswered ? (
                     <KeyValue label="Timestamp" divider={false}>
                         <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
                             Unavailable
                         </InfoTooltip>
                     </KeyValue>
-                )}
+                ) : undefined}
             </Card>
         </section>
     );
+}
+
+function isFetched(entry?: { status: FetchStatus }): boolean {
+    return entry?.status === FetchStatus.Fetched;
 }
 
 /**
