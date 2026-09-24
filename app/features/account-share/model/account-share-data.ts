@@ -39,16 +39,16 @@ export type UpgradeAuthority = {
     /** The authority key, drawn in green mono. Absent for an immutable program. */
     address?: string;
     /**
-     * The authority's structure, shown after the address as "· <note>" - e.g. "Single key" or
-     * "Squads multisig 3 of 5", or "Immutable" when there is no address. Absent when undetermined, in
-     * which case only the address prints.
+     * The authority's structure, shown after the address as "· <note>" - e.g. "Immutable" when there is
+     * no address. Absent when undetermined, in which case only the address prints.
      */
     note?: string;
-    /** A single upgrade key is the weakest posture, so its note is drawn in the amber alert colour. */
-    alert?: boolean;
 };
 
-/** The program card: an executable account behind the upgradeable BPF loader. */
+/** The loader that owns an executable account, deciding where its bytes live and whether it can be upgraded. */
+export type ProgramLoader = 'upgradeable' | 'v4' | 'immutable-elf' | 'native' | 'unknown';
+
+/** The program card: any executable account (upgradeable, v4, legacy, or native loader). */
 export type ProgramCardData = {
     kind: 'program';
     address: string;
@@ -62,8 +62,11 @@ export type ProgramCardData = {
     programSize?: string;
 };
 
-/** Why no account renders: distinguishes an address that never existed from one that was closed. */
-export type NotFoundReason = 'never-used' | 'closed' | 'other-cluster';
+/**
+ * Why no account renders: `closed` when the address still has on-chain history, `never-used` when it has
+ * none, and `unknown` when the history lookup itself failed so neither can be claimed.
+ */
+export type NotFoundReason = 'never-used' | 'closed' | 'unknown';
 
 /** The fallback card: a valid address the cluster holds no account for. */
 export type NotFoundCardData = {

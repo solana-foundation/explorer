@@ -12,11 +12,14 @@ vi.mock('@entities/idl/server', () => ({ resolveProgramIdls: mocks.resolveProgra
 vi.mock('@solana/security-txt', () => ({ fetchSecurityTxt: mocks.fetchSecurityTxt }));
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
-import { getProgramProvenance } from '../get-program-provenance';
+import { getProgramProvenance, isVerifiedBuild } from '../get-program-provenance';
 
 const PROGRAM_ID = address(gen.address(1));
 // A throwaway rpc: every consumer of it is mocked, so its shape never matters.
 const RPC = {} as Parameters<typeof getProgramProvenance>[0];
+const AUTHORITY = gen.address(2);
+const STRANGER = gen.address(9);
+const HASH = 'current-on-chain-hash';
 
 function noIdls() {
     return { anchorIdl: undefined, programMetadataIdl: undefined };
@@ -42,27 +45,29 @@ afterEach(() => {
 
 describe('IDL marker and name', () => {
     it('should mark idlUploaded and title-case the anchor IDL name', async () => {
-        mocks.resolveProgramIdls.mockResolvedValue({ anchorIdl: { name: 'jupiter_aggregator' } });
+        mocks.resolveProgramIdls.mockResolvedValue({ anchorIdl: { metadata: { name: 'jupiter_aggregator' } } });
 
         const result = await run();
 
-        expect(result.markers.idlUploaded).toBe(true);
+        expect(result.idlUploaded).toBe(true);
         expect(result.name).toBe('Jupiter Aggregator');
     });
 
-    it('should fall back to the program-metadata IDL metadata.name', async () => {
-        mocks.resolveProgramIdls.mockResolvedValue({ programMetadataIdl: { metadata: { name: 'my-program' } } });
+    it('should fall back to the program-metadata IDL program name', async () => {
+        mocks.resolveProgramIdls.mockResolvedValue({
+            programMetadataIdl: { program: { name: 'my-program' }, standard: 'codama' },
+        });
 
         const result = await run();
 
-        expect(result.markers.idlUploaded).toBe(true);
+        expect(result.idlUploaded).toBe(true);
         expect(result.name).toBe('My Program');
     });
 
     it('should leave idlUploaded false and the name absent when no IDL is published', async () => {
         const result = await run();
 
-        expect(result.markers.idlUploaded).toBe(false);
+        expect(result.idlUploaded).toBe(false);
         expect(result.name).toBeUndefined();
     });
 
@@ -71,37 +76,46 @@ describe('IDL marker and name', () => {
 
         const result = await run();
 
-        expect(result.markers.idlUploaded).toBe(false);
+        expect(result.idlUploaded).toBe(false);
         expect(result.name).toBeUndefined();
     });
 });
 
-describe('verified-build marker', () => {
-    it('should mark verified when the registry reports a verified entry', async () => {
+describe('verified-build registry entries', () => {
+    it('should surface the registry entries for a cluster that has one', async () => {
+        const entries = [{ is_verified: true, on_chain_hash: HASH, signer: AUTHORITY }];
         vi.stubGlobal(
             'fetch',
-            vi.fn(() => Promise.resolve({ json: () => Promise.resolve([{ is_verified: true }]), ok: true })),
+            vi.fn(() => Promise.resolve({ json: () => Promise.resolve(entries), ok: true })),
         );
 
         const result = await run();
 
-        expect(result.markers.verifiedBuild).toBe(true);
+        expect(result.verifiedEntries).toEqual(entries);
     });
 
-    it('should not mark verified when the registry has no verified entry', async () => {
+    it('should drop malformed entries so one bad element cannot hide a valid one', async () => {
+        const good = { is_verified: true, on_chain_hash: HASH, signer: AUTHORITY };
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(() =>
+                Promise.resolve({ json: () => Promise.resolve([null, 'nope', { signer: 1 }, good]), ok: true }),
+            ),
+        );
+
         const result = await run();
 
-        expect(result.markers.verifiedBuild).toBe(false);
+        expect(result.verifiedEntries).toEqual([good]);
     });
 
     it('should skip the registry entirely on a cluster that has none', async () => {
         const result = await run(Cluster.Testnet);
 
-        expect(result.markers.verifiedBuild).toBe(false);
+        expect(result.verifiedEntries).toEqual([]);
         expect(fetch).not.toHaveBeenCalled();
     });
 
-    it('should fail soft to unverified when the registry request throws', async () => {
+    it('should fail soft to no entries when the registry request throws', async () => {
         vi.stubGlobal(
             'fetch',
             vi.fn(() => Promise.reject(new Error('network'))),
@@ -109,10 +123,10 @@ describe('verified-build marker', () => {
 
         const result = await run();
 
-        expect(result.markers.verifiedBuild).toBe(false);
+        expect(result.verifiedEntries).toEqual([]);
     });
 
-    it('should fail soft to unverified on a non-ok response', async () => {
+    it('should fail soft to no entries on a non-ok response', async () => {
         vi.stubGlobal(
             'fetch',
             vi.fn(() => Promise.resolve({ json: () => Promise.resolve([]), ok: false })),
@@ -120,7 +134,39 @@ describe('verified-build marker', () => {
 
         const result = await run();
 
-        expect(result.markers.verifiedBuild).toBe(false);
+        expect(result.verifiedEntries).toEqual([]);
+    });
+});
+
+describe('isVerifiedBuild', () => {
+    it('should verify an authority-signed entry whose hash matches the current bytes', () => {
+        const entries = [{ is_verified: true, on_chain_hash: HASH, signer: AUTHORITY }];
+
+        expect(isVerifiedBuild(entries, AUTHORITY, HASH)).toBe(true);
+    });
+
+    it('should reject an entry signed by neither the authority nor a trusted signer', () => {
+        const entries = [{ is_verified: true, on_chain_hash: HASH, signer: STRANGER }];
+
+        expect(isVerifiedBuild(entries, AUTHORITY, HASH)).toBe(false);
+    });
+
+    it('should reject a stale entry whose hash no longer matches the deployed bytes', () => {
+        const entries = [{ is_verified: true, on_chain_hash: 'hash-from-before-the-upgrade', signer: AUTHORITY }];
+
+        expect(isVerifiedBuild(entries, AUTHORITY, HASH)).toBe(false);
+    });
+
+    it('should return false when the local hash could not be computed', () => {
+        const entries = [{ is_verified: true, on_chain_hash: HASH, signer: AUTHORITY }];
+
+        expect(isVerifiedBuild(entries, AUTHORITY, undefined)).toBe(false);
+    });
+
+    it('should accept a frozen entry for an immutable program with no authority', () => {
+        const entries = [{ is_frozen: true, is_verified: true, on_chain_hash: HASH, signer: STRANGER }];
+
+        expect(isVerifiedBuild(entries, undefined, HASH)).toBe(true);
     });
 });
 
@@ -130,13 +176,13 @@ describe('security.txt marker', () => {
 
         const result = await run();
 
-        expect(result.markers.securityTxt).toBe(true);
+        expect(result.securityTxt).toBe(true);
     });
 
     it('should leave securityTxt false when none is found', async () => {
         const result = await run();
 
-        expect(result.markers.securityTxt).toBe(false);
+        expect(result.securityTxt).toBe(false);
     });
 
     it('should fail soft to no security.txt when the lookup throws', async () => {
@@ -144,6 +190,6 @@ describe('security.txt marker', () => {
 
         const result = await run();
 
-        expect(result.markers.securityTxt).toBe(false);
+        expect(result.securityTxt).toBe(false);
     });
 });

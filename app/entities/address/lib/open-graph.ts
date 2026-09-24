@@ -3,9 +3,7 @@ import { Cluster, clusterSlug, type ServerCluster } from '@utils/cluster';
 import { EXPLORER_BASE_URL } from '@utils/env';
 import type { Metadata } from 'next/types';
 
-/**
- * Open Graph tags for an account (address) page.
- */
+/** Open Graph tags for an account (address) page. */
 export function getAccountOpenGraph(address: string, cluster?: ServerCluster): Metadata['openGraph'] {
     return {
         images: [{ ...IMAGE_SIZE, alt: 'Solana Account', url: getAccountOgImageUrl(address, cluster) }],

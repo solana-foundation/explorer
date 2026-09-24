@@ -34,7 +34,7 @@ const programData: ProgramCardData = {
     markers: { idlUploaded: true, securityTxt: true, verifiedBuild: true },
     name: 'Jupiter Aggregator v6',
     programSize: '1.24 MB',
-    upgradeAuthority: { address: AUTHORITY, note: 'Squads multisig 3 of 5' },
+    upgradeAuthority: { address: AUTHORITY },
 };
 
 const meta: Meta<typeof BaseAccountImage> = {
@@ -98,7 +98,6 @@ export const Program: Story = {
         expect(canvas.getByText('security.txt')).toBeInTheDocument();
 
         expect(canvas.getByText('Upgrade authority')).toBeInTheDocument();
-        expect(canvas.getByText('Squads multisig 3 of 5')).toBeInTheDocument();
         expect(canvas.getByText('Last deployed')).toBeInTheDocument();
         expect(canvas.getByText('Slot 208,871,522')).toBeInTheDocument();
         expect(canvas.getByText('Program size')).toBeInTheDocument();
@@ -106,12 +105,13 @@ export const Program: Story = {
     },
 };
 
-export const ProgramUnverified: Story = {
+export const ProgramUnverifiedImmutable: Story = {
     args: {
         data: {
             ...programData,
             markers: { idlUploaded: false, securityTxt: false, verifiedBuild: false },
-            upgradeAuthority: { address: AUTHORITY, alert: true, note: 'Single key' },
+            // An immutable program carries no authority address, only the "Immutable" note the model derives.
+            upgradeAuthority: { note: 'Immutable' },
         },
     },
     play: async ({ canvasElement }) => {
@@ -120,7 +120,7 @@ export const ProgramUnverified: Story = {
         expect(canvas.getByText('Not verified')).toBeInTheDocument();
         expect(canvas.getByText('No IDL')).toBeInTheDocument();
         expect(canvas.getByText('No security.txt')).toBeInTheDocument();
-        expect(canvas.getByText('Single key')).toBeInTheDocument();
+        expect(canvas.getByText('Immutable')).toBeInTheDocument();
     },
 };
 
@@ -148,13 +148,15 @@ export const NotFoundClosed: Story = {
     },
 };
 
-export const NotFoundOtherCluster: Story = {
-    args: { data: { address: ADDRESS, kind: 'not-found', reason: 'other-cluster' } },
+export const NotFoundUnknown: Story = {
+    args: { data: { address: ADDRESS, kind: 'not-found', reason: 'unknown' } },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
         expect(canvas.getByTestId('account-image-pill')).toHaveTextContent('Not found');
-        expect(canvas.getByText('No account on this cluster')).toBeInTheDocument();
+        expect(canvas.getByTestId('account-image-reason')).toHaveTextContent(
+            'No account data could be loaded for this address on this cluster.',
+        );
     },
 };
 
