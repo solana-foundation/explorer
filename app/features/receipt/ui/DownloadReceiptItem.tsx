@@ -25,14 +25,7 @@ export function DownloadReceiptItemBase({ disabled, icon, label, state, onTrigge
         return icon;
     }
 
-    return (
-        <PopoverMenuItem
-            disabled={disabled || isDownloading}
-            icon={getIcon()}
-            label={`Get ${label}`}
-            onClick={onTrigger}
-        />
-    );
+    return <PopoverMenuItem disabled={disabled || isDownloading} icon={getIcon()} label={label} onClick={onTrigger} />;
 }
 
 interface DownloadReceiptItemProps {

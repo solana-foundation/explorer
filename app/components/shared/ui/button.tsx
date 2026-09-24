@@ -31,6 +31,9 @@ const buttonVariants = cva([], {
         { class: 'h-7 w-7 gap-2 rounded [&_svg]:size-3', size: 'icon', ui: 'tw' },
         { class: 'h-10 gap-2 rounded px-8 [&_svg]:size-3', size: 'lg', ui: 'tw' },
         { class: 'h-7 gap-2 rounded px-2 text-xs [&_svg]:size-3', size: 'sm', ui: 'tw' },
+        // Toolbar action row (pairs with variant="quiet"): tighter box than `sm` so a bare
+        // label + icon sits close to its neighbours without a fill to separate them.
+        { class: 'h-7 gap-1.5 rounded px-0 text-sm font-normal [&_svg]:size-4', size: 'toolbar', ui: 'tw' },
         // Tall icon-over-label action tile (e.g. slideover footer actions).
         { class: 'h-16 flex-col gap-1 rounded-lg px-2 text-xs [&_svg]:size-4', size: 'tile', ui: 'tw' },
         { class: 'border-0 bg-accent text-gray-900 hover:bg-accent/90', ui: 'tw', variant: 'accent' },
@@ -60,6 +63,17 @@ const buttonVariants = cva([], {
             class: 'border border-neutral-600 bg-transparent text-white hover:bg-neutral-600/10 hover:text-white focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:ring-neutral-950',
             ui: 'tw',
             variant: 'outline',
+        },
+        {
+            // Toolbar action: reads as a bare label + icon, so the hover brightens the text (icons
+            // included, they inherit currentColor) instead of painting a fill or an outline. The rest
+            // state is deliberately dim: hovering an already near-white label to white is invisible at
+            // this size, so the contrast has to come from the resting colour (cf. `timestamp`'s pin).
+            // A trigger whose menu is open keeps the bright colour — with no fill or border left, that
+            // is the only thing marking the open state (Radix sets data-state on the trigger).
+            class: 'border-0 bg-transparent text-neutral-400 hover:text-white data-[state=open]:text-white',
+            ui: 'tw',
+            variant: 'quiet',
         },
         {
             class: 'border-0 bg-neutral-100 text-neutral-900 shadow-sm hover:bg-neutral-100/80',
@@ -155,7 +169,7 @@ const buttonVariants = cva([], {
     },
     variants: {
         active: { false: '', true: '' },
-        size: { compact: '', default: '', icon: '', lg: '', sm: '', tile: '' },
+        size: { compact: '', default: '', icon: '', lg: '', sm: '', tile: '', toolbar: '' },
         ui: { dashkit: '', tw: '' },
         variant: {
             accent: '',
@@ -172,6 +186,7 @@ const buttonVariants = cva([], {
             'outline-primary': '',
             'outline-warning': '',
             primary: '',
+            quiet: '',
             secondary: '',
             warning: '',
             white: '',

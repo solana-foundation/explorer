@@ -20,12 +20,21 @@ const twVariantOptions = [
     'ghost',
     'link',
     'outline',
+    'quiet',
     'secondary',
 ] as const satisfies readonly ButtonVariant[];
 
 type TwVariant = (typeof twVariantOptions)[number];
 
-const sizeOptions = ['default', 'sm', 'lg', 'icon', 'compact', 'tile'] as const satisfies readonly ButtonSize[];
+const sizeOptions = [
+    'default',
+    'sm',
+    'lg',
+    'icon',
+    'compact',
+    'tile',
+    'toolbar',
+] as const satisfies readonly ButtonSize[];
 
 // Dashkit migration shim — emits raw Bootstrap `.btn` + `.btn-<variant>` classes via `ui="dashkit"`.
 // Stays until consumers migrate to the OKLCH-flavored `ui="tw"` surface.
@@ -50,6 +59,7 @@ const twVariantIcons: Record<TwVariant, typeof Check | typeof X | typeof Downloa
     ghost: ArrowRight,
     link: ArrowRight,
     outline: Download,
+    quiet: Download,
     secondary: Check,
 };
 
@@ -134,6 +144,7 @@ export const WithIcons: Story = {
             ghost: { icon: ArrowRight, label: 'Continue', position: 'right' },
             link: { icon: ArrowRight, label: 'Continue', position: 'right' },
             outline: { icon: Download, label: 'Download', position: 'right' },
+            quiet: { icon: Download, label: 'Download' },
             secondary: { icon: Check, label: 'Success' },
         };
 
@@ -186,6 +197,7 @@ export const VariantsBySize: Story = {
             lg: 'Large',
             sm: 'Small',
             tile: 'Tile',
+            toolbar: 'Toolbar',
         };
 
         return (
