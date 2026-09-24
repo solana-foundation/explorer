@@ -2,20 +2,20 @@ import { useEffect, useState } from 'react';
 import { ExternalLink as ExternalLinkIcon, X } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/app/components/shared/ui/dialog';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/app/components/shared/ui/dialog';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { Input, inputVariants } from '@/app/components/shared/ui/input';
 import { Label } from '@/app/components/shared/ui/label';
-import {
-    Slideover,
-    SlideoverBody,
-    SlideoverClose,
-    SlideoverContent,
-    SlideoverHeader,
-    SlideoverTitle,
-} from '@/app/components/shared/ui/slideover';
 import { cn } from '@/app/components/shared/utils';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
+import { Drawer } from '@/app/shared/ui/drawer';
 
 import { BaseStarRating } from './BaseStarRating';
 
@@ -108,24 +108,26 @@ export function BaseFeedbackForm({
     );
 
     if (!isSm) {
+        const header = (
+            <Drawer.Header>
+                <div className="flex items-center justify-between">
+                    <DialogTitle>Give feedback</DialogTitle>
+                    <DialogClose className="flex items-center justify-center rounded-sm border-0 bg-transparent p-0 text-neutral-500 opacity-70 transition-opacity hover:opacity-100">
+                        <X size={16} />
+                        <span className="sr-only">Close</span>
+                    </DialogClose>
+                </div>
+            </Drawer.Header>
+        );
+
         return (
-            <Slideover open={open} onOpenChange={onOpenChange}>
-                <SlideoverContent aria-describedby={undefined}>
-                    <SlideoverHeader>
-                        {/* The global stylesheet sets a bottom margin on every h2. */}
-                        <SlideoverTitle className="m-0">Give feedback</SlideoverTitle>
-                        <SlideoverClose className="flex items-center justify-center rounded-sm border-0 bg-transparent p-0 text-neutral-500 opacity-70 transition-opacity hover:opacity-100">
-                            <X size={16} />
-                            <span className="sr-only">Close</span>
-                        </SlideoverClose>
-                    </SlideoverHeader>
-                    <SlideoverBody className="flex flex-col gap-4 p-4 pb-6">
-                        <p className="m-0 text-sm text-neutral-400">{DESCRIPTION}</p>
-                        {form}
-                        {githubLinks}
-                    </SlideoverBody>
-                </SlideoverContent>
-            </Slideover>
+            <Drawer open={open} onOpenChange={onOpenChange} header={header} aria-describedby={undefined}>
+                <div className="flex flex-col gap-4 p-4 pb-6">
+                    <p className="m-0 text-sm text-neutral-400">{DESCRIPTION}</p>
+                    {form}
+                    {githubLinks}
+                </div>
+            </Drawer>
         );
     }
 
