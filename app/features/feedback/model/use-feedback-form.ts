@@ -5,9 +5,14 @@ import { useToast } from '@/app/components/shared/ui/sonner/use-toast';
 import { withScope } from '@/app/shared/lib/sentry';
 import { sendFeedback } from '@/app/shared/lib/sentry/client';
 
-import type { FeedbackFormValues } from '../ui/BaseFeedbackForm';
-
 const FEEDBACK_SOURCE = 'widget';
+
+export interface FeedbackFormValues {
+    contact?: string;
+    message: string;
+    /** A value from 1 to 5, or `undefined` when the user selects no star. */
+    rating?: number;
+}
 
 export function useFeedbackForm() {
     const [isOpen, setIsOpen] = useState(false);

@@ -17,14 +17,8 @@ import { cn } from '@/app/components/shared/utils';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { Drawer } from '@/app/shared/ui/drawer';
 
+import type { FeedbackFormValues } from '../model/use-feedback-form';
 import { BaseStarRating } from './BaseStarRating';
-
-export interface FeedbackFormValues {
-    contact?: string;
-    message: string;
-    /** A value from 1 to 5, or `undefined` when the user selects no star. */
-    rating?: number;
-}
 
 export interface BaseFeedbackFormProps {
     bugReportUrl: string;
