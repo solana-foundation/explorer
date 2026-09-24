@@ -65,6 +65,7 @@ Rule:
 
 Bot Filter auto-allows Vercel's verified-bot directory, so Googlebot may already reach these — verification is by IP,
 not user-agent, so that cannot be tested from here. Unverified crawlers and SEO tooling are challenged today.
+Which crawlers robots.txt itself keeps or turns away is decided in [`crawlers.md`](./crawlers.md).
 
 A project that builds with `SEO_DISALLOW_BOTS=true` needs this rule too. Without it, Bot Filter challenges
 `/robots.txt`, so an unverified crawler never reads `Disallow: /`.
