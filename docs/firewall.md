@@ -66,7 +66,23 @@ Rule:
 Bot Filter auto-allows Vercel's verified-bot directory, so Googlebot may already reach these — verification is by IP,
 not user-agent, so that cannot be tested from here. Unverified crawlers and SEO tooling are challenged today.
 
-## Blocking Meta's external agent
+## Blocking crawlers
+
+### robots.txt versus WAF
+
+| Method                                      | What it does                            | Use when                                                             |
+| ------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------- |
+| [`public/robots.txt`](../public/robots.txt) | Asks a named crawler not to fetch paths | The crawler declares its user agent and honors robots.txt            |
+| WAF custom rule matching the user agent     | Rejects requests at the edge            | The crawler does not honor robots.txt or must be stopped immediately |
+
+Prefer robots.txt when the crawler's owner states that it honors the file. The policy then remains in the repository
+and goes through code review. A WAF rule lives in the Vercel dashboard and enforces the block regardless of crawler
+cooperation.
+
+A named robots.txt group replaces the `User-agent: *` group for that crawler rather than adding to it. Give a blocked
+crawler its own group with `Disallow: /`.
+
+### Meta's external agent
 
 Meta documents its user agents on its
 [web crawlers page](https://developers.facebook.com/docs/sharing/webmasters/web-crawlers). Only one is blocked:
@@ -79,22 +95,7 @@ Meta documents its user agents on its
 individual links for Meta AI in response to a person's request. Both lead back to a person and remain allowed.
 
 `meta-externalagent` is disallowed in [`public/robots.txt`](../public/robots.txt). Meta lists it among the crawlers
-that honor the file, so do not add a WAF rule unless request logs show that the crawl continues a few days after
-deployment.
-
-If requests continue, add this rule:
-
-```
-Name: Block meta-externalagent
-Description: Denies Meta's crawler for AI training and product improvement when robots.txt does not stop it.
-Rule:
-    If `User Agent` `Contains` `meta-externalagent`
-    Then `Deny`
-```
-
-Place a crawler deny above every `Bypass` rule. A matching bypass skips the rules below it and would otherwise admit
-the crawler to `/og/` and transaction receipt pages. Do not include `facebookexternalhit` or
-`meta-externalfetcher` in the deny.
+that honor the file, so this block does not use a WAF custom rule.
 
 A project that builds with `SEO_DISALLOW_BOTS=true` needs this rule too. Without it, Bot Filter challenges
 `/robots.txt`, so an unverified crawler never reads `Disallow: /`.
