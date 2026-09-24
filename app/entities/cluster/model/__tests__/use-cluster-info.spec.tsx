@@ -3,10 +3,9 @@ import { createElement, type ReactNode } from 'react';
 import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@solana/kit', () => ({ createSolanaRpc: vi.fn() }));
+vi.mock('../../api/get-rpc', () => ({ getRpc: vi.fn() }));
 
-import { createSolanaRpc } from '@solana/kit';
-
+import { getRpc, type SolanaRpc } from '../../api/get-rpc';
 import { Cluster, clusterSelection, ClusterStatus, clusterUrl } from '../../lib/cluster';
 import { toConnectableUrl } from '../../lib/connectable-url';
 import { type ClusterState, StateContext } from '../cluster-provider';
@@ -56,7 +55,7 @@ function makeWrapper(state: ClusterState) {
 beforeEach(() => {
     vi.clearAllMocks();
     rpc = mockRpc();
-    vi.mocked(createSolanaRpc).mockReturnValue(rpc as unknown as ReturnType<typeof createSolanaRpc>);
+    vi.mocked(getRpc).mockReturnValue(rpc as unknown as SolanaRpc);
 });
 
 describe('useEpochSchedule', () => {
@@ -77,7 +76,7 @@ describe('useEpochSchedule', () => {
         });
 
         expect(result.current).toBeUndefined();
-        expect(createSolanaRpc).not.toHaveBeenCalled();
+        expect(getRpc).not.toHaveBeenCalled();
     });
 
     it('should not fetch when disabled', () => {
@@ -86,7 +85,7 @@ describe('useEpochSchedule', () => {
         });
 
         expect(result.current).toBeUndefined();
-        expect(createSolanaRpc).not.toHaveBeenCalled();
+        expect(getRpc).not.toHaveBeenCalled();
     });
 });
 
@@ -106,7 +105,7 @@ describe('useEpochInfo', () => {
         });
 
         expect(result.current).toBeUndefined();
-        expect(createSolanaRpc).not.toHaveBeenCalled();
+        expect(getRpc).not.toHaveBeenCalled();
     });
 });
 
@@ -126,7 +125,7 @@ describe('useFirstAvailableBlock', () => {
         });
 
         expect(result.current).toBeUndefined();
-        expect(createSolanaRpc).not.toHaveBeenCalled();
+        expect(getRpc).not.toHaveBeenCalled();
     });
 });
 
@@ -155,6 +154,6 @@ describe('useClusterInfo', () => {
         });
 
         expect(result.current).toBeUndefined();
-        expect(createSolanaRpc).not.toHaveBeenCalled();
+        expect(getRpc).not.toHaveBeenCalled();
     });
 });
