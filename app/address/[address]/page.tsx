@@ -1,4 +1,4 @@
-import { getAccountOgImageUrl, getAccountOpenGraph } from '@features/account-share/server';
+import { getAccountOgImageUrl, getAccountOpenGraph } from '@entities/address';
 import { TransactionHistoryCard } from '@features/transaction-history';
 import { Cluster, clusterFromSlug } from '@utils/cluster';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';

@@ -1,25 +1,34 @@
 import { gen } from '@__fixtures__/gen';
 import { type Address, getAddressEncoder } from '@solana/kit';
-import { Cluster } from '@utils/cluster';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { BPF_UPGRADEABLE_LOADER_ADDRESS } from '../../lib/constants';
+import {
+    BPF_LOADER_2_ADDRESS,
+    BPF_UPGRADEABLE_LOADER_ADDRESS,
+    LOADER_V4_ADDRESS,
+    LOADER_V4_HEADER_SIZE,
+    NATIVE_LOADER_ADDRESS,
+    PROGRAM_DATA_HEADER_SIZE,
+} from '../../lib/constants';
 
 const mocks = vi.hoisted(() => ({
-    createSolanaRpc: vi.fn(),
     getProgramProvenance: vi.fn(),
+    getRpc: vi.fn(),
+    isVerifiedBuild: vi.fn(),
     programLabel: vi.fn(),
 }));
 
-vi.mock('@solana/kit', async importOriginal => {
-    const actual = await importOriginal<typeof import('@solana/kit')>();
-    return { ...actual, createSolanaRpc: mocks.createSolanaRpc };
-});
+vi.mock('@entities/cluster/server', () => ({ getRpc: mocks.getRpc }));
 vi.mock('@utils/tx', async importOriginal => {
     const actual = await importOriginal<typeof import('@utils/tx')>();
     return { ...actual, programLabel: mocks.programLabel };
 });
-vi.mock('../../api/get-program-provenance', () => ({ getProgramProvenance: mocks.getProgramProvenance }));
+vi.mock('../../api/get-program-provenance', () => ({
+    getProgramProvenance: mocks.getProgramProvenance,
+    isVerifiedBuild: mocks.isVerifiedBuild,
+}));
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
 import { getAccountShareData } from '../get-account-share-data';
@@ -30,9 +39,9 @@ const AUTHORITY = gen.address(3);
 const PROGRAM_DATA = gen.address(5);
 
 const NO_MARKERS = { idlUploaded: false, securityTxt: false, verifiedBuild: false };
+const NO_PROVENANCE = { idlUploaded: false, securityTxt: false, verifiedEntries: [] };
 // 2026-08-26T11:32:13Z -> "Aug 26, 2026" through the real formatter.
 const BLOCK_TIME = 1_787_743_933;
-const PROGRAM_DATA_HEADER_SIZE = 45;
 
 type AccountValue = { data: unknown; executable: boolean; lamports: bigint; owner: string; space: bigint };
 
@@ -49,12 +58,12 @@ function fakeRpc(accounts: Record<string, AccountValue | null>, signatures: { bl
 }
 
 function useRpc(accounts: Record<string, AccountValue | null>, signatures: { blockTime: number | null }[] = []) {
-    mocks.createSolanaRpc.mockReturnValue(fakeRpc(accounts, signatures));
+    mocks.getRpc.mockReturnValue(fakeRpc(accounts, signatures));
 }
 
 function walletValue(over: Partial<AccountValue> = {}): AccountValue {
     return {
-        data: { parsed: {}, program: 'spl-token' },
+        data: ['', 'base64'],
         executable: false,
         lamports: 2_039_281_440n,
         owner: OWNER,
@@ -63,9 +72,17 @@ function walletValue(over: Partial<AccountValue> = {}): AccountValue {
     };
 }
 
+/** A program account's 36-byte payload: a 4-byte enum tag then the 32-byte program-data address. */
+function programAccountData(programDataAddress: string): [string, 'base64'] {
+    const buffer = Buffer.alloc(36);
+    buffer.writeUInt32LE(2, 0); // UpgradeableLoaderState::Program
+    Buffer.from(getAddressEncoder().encode(programDataAddress as Address)).copy(buffer, 4);
+    return [buffer.toString('base64'), 'base64'];
+}
+
 function programValue(over: Partial<AccountValue> = {}): AccountValue {
     return {
-        data: { parsed: { info: { programData: PROGRAM_DATA }, type: 'program' }, program: 'bpf-upgradeable-loader' },
+        data: programAccountData(PROGRAM_DATA),
         executable: true,
         lamports: 1n,
         owner: BPF_UPGRADEABLE_LOADER_ADDRESS,
@@ -102,7 +119,8 @@ function programDataValue({
 
 beforeEach(() => {
     mocks.programLabel.mockReturnValue(undefined);
-    mocks.getProgramProvenance.mockResolvedValue({ markers: NO_MARKERS });
+    mocks.getProgramProvenance.mockResolvedValue(NO_PROVENANCE);
+    mocks.isVerifiedBuild.mockReturnValue(false);
 });
 
 afterEach(() => vi.clearAllMocks());
@@ -127,6 +145,15 @@ describe('account card', () => {
             },
             kind: 'ok',
         });
+    });
+
+    it('should omit the owner for a system-owned wallet', async () => {
+        useRpc({ [ADDRESS]: walletValue({ owner: SYSTEM_PROGRAM_ADDRESS }) }, []);
+
+        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+
+        expect(result).toMatchObject({ data: { kind: 'account' }, kind: 'ok' });
+        expect(result).toHaveProperty('data.owner', undefined);
     });
 
     it('should cap the transaction count at one page and flag it', async () => {
@@ -158,7 +185,7 @@ describe('program card', () => {
             [ADDRESS]: programValue(),
             [PROGRAM_DATA]: programDataValue({ authority: AUTHORITY, slot: 208_871_522, space: 45 + 1_300_234 }),
         });
-        mocks.getProgramProvenance.mockResolvedValue({ markers: NO_MARKERS, name: 'Jupiter' });
+        mocks.getProgramProvenance.mockResolvedValue({ ...NO_PROVENANCE, name: 'Jupiter' });
 
         const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
 
@@ -196,7 +223,7 @@ describe('program card', () => {
             [PROGRAM_DATA]: programDataValue({ authority: AUTHORITY, slot: 1, space: 45 }),
         });
         mocks.programLabel.mockReturnValue('Known Program');
-        mocks.getProgramProvenance.mockResolvedValue({ markers: NO_MARKERS, name: 'idl-name' });
+        mocks.getProgramProvenance.mockResolvedValue({ ...NO_PROVENANCE, name: 'idl-name' });
 
         const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
 
@@ -214,17 +241,80 @@ describe('program card', () => {
         expect((result as { data: { name: string } }).data.name).toContain('..');
     });
 
-    it('should pass the provenance markers straight through', async () => {
-        const markers = { idlUploaded: true, securityTxt: false, verifiedBuild: true };
+    it('should combine the provenance markers with the computed verified-build result', async () => {
         useRpc({
             [ADDRESS]: programValue(),
             [PROGRAM_DATA]: programDataValue({ authority: AUTHORITY, slot: 1, space: 45 }),
         });
-        mocks.getProgramProvenance.mockResolvedValue({ markers });
+        mocks.getProgramProvenance.mockResolvedValue({
+            idlUploaded: true,
+            securityTxt: false,
+            verifiedEntries: [{ is_verified: true, on_chain_hash: 'h', signer: AUTHORITY }],
+        });
+        mocks.isVerifiedBuild.mockReturnValue(true);
 
         const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
 
-        expect(result).toMatchObject({ data: { markers } });
+        expect(result).toMatchObject({
+            data: { markers: { idlUploaded: true, securityTxt: false, verifiedBuild: true } },
+        });
+    });
+
+    it('should leave size and authority absent when the program-data account cannot be read', async () => {
+        useRpc({ [ADDRESS]: programValue(), [PROGRAM_DATA]: null });
+
+        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+
+        expect(result).toMatchObject({ data: { kind: 'program' }, kind: 'ok' });
+        expect(result).not.toHaveProperty('data.programSize');
+        expect(result).not.toHaveProperty('data.upgradeAuthority');
+        expect(result).not.toHaveProperty('data.lastDeployedSlot');
+    });
+});
+
+describe('program loaders', () => {
+    it('should size a legacy BPF-loader program from its own account and mark it immutable', async () => {
+        useRpc({ [ADDRESS]: programValue({ owner: BPF_LOADER_2_ADDRESS, space: 8_320n }) });
+
+        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+
+        expect(result).toMatchObject({
+            data: { kind: 'program', programSize: '8,320 B', upgradeAuthority: { note: 'Immutable' } },
+            kind: 'ok',
+        });
+        expect(result).not.toHaveProperty('data.lastDeployedSlot');
+    });
+
+    it('should size a LoaderV4 program past its header and leave the authority undetermined', async () => {
+        useRpc({
+            [ADDRESS]: programValue({ owner: LOADER_V4_ADDRESS, space: BigInt(LOADER_V4_HEADER_SIZE + 1_048_576) }),
+        });
+
+        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+
+        expect(result).toMatchObject({ data: { kind: 'program', programSize: '1.00 MB' }, kind: 'ok' });
+        expect(result).not.toHaveProperty('data.upgradeAuthority');
+    });
+
+    it('should show no byte size for a native program and mark it immutable', async () => {
+        useRpc({ [ADDRESS]: programValue({ owner: NATIVE_LOADER_ADDRESS, space: 36n }) });
+
+        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+
+        expect(result).toMatchObject({
+            data: { kind: 'program', upgradeAuthority: { note: 'Immutable' } },
+            kind: 'ok',
+        });
+        expect(result).not.toHaveProperty('data.programSize');
+    });
+
+    it('should fall back to the account size for an unknown loader without asserting immutability', async () => {
+        useRpc({ [ADDRESS]: programValue({ owner: gen.address(7), space: 100n }) });
+
+        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+
+        expect(result).toMatchObject({ data: { kind: 'program', programSize: '100 B' }, kind: 'ok' });
+        expect(result).not.toHaveProperty('data.upgradeAuthority');
     });
 });
 
@@ -244,23 +334,35 @@ describe('not-found card', () => {
 
         expect(result).toMatchObject({ data: { kind: 'not-found', reason: 'closed' }, kind: 'ok' });
     });
+
+    it('should read a missing account whose history lookup failed as unknown', async () => {
+        const rpc = {
+            getAccountInfo: vi.fn(() => ({ send: () => Promise.resolve({ value: null }) })),
+            getSignaturesForAddress: vi.fn(() => ({ send: () => Promise.reject(new Error('rpc down')) })),
+        };
+        mocks.getRpc.mockReturnValue(rpc);
+
+        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+
+        expect(result).toMatchObject({ data: { kind: 'not-found', reason: 'unknown' }, kind: 'ok' });
+    });
 });
 
 describe('failures and defaults', () => {
     it('should map an unexpected throw to an error result rather than throwing', async () => {
-        mocks.createSolanaRpc.mockImplementation(() => {
+        mocks.getRpc.mockImplementation(() => {
             throw new Error('boom');
         });
 
         await expect(getAccountShareData(ADDRESS, Cluster.MainnetBeta)).resolves.toEqual({ kind: 'error' });
     });
 
-    it('should default to mainnet when the request carried no cluster', async () => {
+    it('should default to the mainnet endpoint when the request carried no cluster', async () => {
         useRpc({ [ADDRESS]: walletValue() }, []);
 
         const result = await getAccountShareData(ADDRESS);
 
-        expect(mocks.createSolanaRpc).toHaveBeenCalledTimes(1);
+        expect(mocks.getRpc).toHaveBeenCalledWith(serverClusterUrl(Cluster.MainnetBeta));
         expect(result.kind).toBe('ok');
     });
 });
