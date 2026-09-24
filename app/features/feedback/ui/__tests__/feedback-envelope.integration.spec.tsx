@@ -25,12 +25,6 @@ vi.mock('@entities/cluster', () => ({
 
 const SENTRY_DSN_FIXTURE = 'https://examplePublicKey@o0.ingest.sentry.io/0';
 
-type FeedbackEventShape = {
-    contexts?: { feedback?: Record<string, unknown> };
-    tags?: Record<string, unknown>;
-    type?: string;
-};
-
 describe('FeedbackWidget — real captureFeedback envelope', () => {
     const envelopes: Envelope[] = [];
 
@@ -86,3 +80,9 @@ describe('FeedbackWidget — real captureFeedback envelope', () => {
         expect(event.tags).toMatchObject({ cluster: 'mainnet-beta', rating: 4, source: 'widget', type: 'feedback' });
     });
 });
+
+type FeedbackEventShape = {
+    contexts?: { feedback?: Record<string, unknown> };
+    tags?: Record<string, unknown>;
+    type?: string;
+};

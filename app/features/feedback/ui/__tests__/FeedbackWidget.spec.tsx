@@ -13,16 +13,6 @@ vi.mock('@entities/cluster', () => ({
 
 const SENTRY_DSN_FIXTURE = 'https://examplePublicKey@o0.ingest.sentry.io/0';
 
-async function openMenu() {
-    await userEvent.click(await screen.findByRole('button', { name: 'Feedback' }));
-}
-
-async function openForm() {
-    await openMenu();
-    await userEvent.click(await screen.findByText('Share feedback'));
-    await screen.findByRole('heading', { name: 'Give feedback' });
-}
-
 describe('FeedbackWidget', () => {
     beforeEach(() => {
         vi.mocked(sendFeedback).mockClear();
@@ -122,3 +112,13 @@ describe('FeedbackWidget', () => {
         expect(screen.queryByRole('heading', { name: 'Give feedback' })).toBeNull();
     });
 });
+
+async function openMenu() {
+    await userEvent.click(await screen.findByRole('button', { name: 'Feedback' }));
+}
+
+async function openForm() {
+    await openMenu();
+    await userEvent.click(await screen.findByText('Share feedback'));
+    await screen.findByRole('heading', { name: 'Give feedback' });
+}

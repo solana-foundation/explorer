@@ -5,11 +5,6 @@ import type { ReactNode } from 'react';
 
 import { isFeedbackEnabled, isFeedbackWidgetEnabled } from '../env';
 
-// A static import bundles the feedback form and `sendFeedback` even when the flag is off.
-const FeedbackTriggerButton = dynamic(() => import('./FeedbackTriggerButton').then(m => m.FeedbackTriggerButton), {
-    ssr: false,
-});
-
 export interface FeedbackTriggerProps {
     children: ReactNode;
     className?: string;
@@ -21,3 +16,8 @@ export function FeedbackTrigger({ children, className }: FeedbackTriggerProps) {
 
     return <FeedbackTriggerButton className={className}>{children}</FeedbackTriggerButton>;
 }
+
+// A static import bundles the feedback form and `sendFeedback` even when the flag is off.
+const FeedbackTriggerButton = dynamic(() => import('./FeedbackTriggerButton').then(m => m.FeedbackTriggerButton), {
+    ssr: false,
+});

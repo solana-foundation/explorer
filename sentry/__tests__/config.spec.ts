@@ -4,14 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CLIENT_REPORT_ALLOWED, CLIENT_REPORT_TAG } from '../client-report.mjs';
 import { createSentryConfig } from '../config.mjs';
 
-function clientBeforeSend() {
-    const { beforeSend } = createSentryConfig('client');
-    if (!beforeSend) throw new Error('client config is expected to define beforeSend');
-    return beforeSend;
-}
-
-const taggedEvent = (): ErrorEvent => ({ tags: { [CLIENT_REPORT_TAG]: CLIENT_REPORT_ALLOWED }, type: undefined });
-
 describe('createSentryConfig beforeSend guard', () => {
     beforeEach(() => {
         vi.stubEnv('NEXT_PUBLIC_SENTRY_CLIENT_ERRORS', 'true');
@@ -63,3 +55,11 @@ describe('createSentryConfig beforeSend guard', () => {
         expect(beforeSend(taggedEvent(), {})).toBeNull();
     });
 });
+
+function clientBeforeSend() {
+    const { beforeSend } = createSentryConfig('client');
+    if (!beforeSend) throw new Error('client config is expected to define beforeSend');
+    return beforeSend;
+}
+
+const taggedEvent = (): ErrorEvent => ({ tags: { [CLIENT_REPORT_TAG]: CLIENT_REPORT_ALLOWED }, type: undefined });
