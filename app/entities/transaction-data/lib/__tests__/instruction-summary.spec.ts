@@ -8,6 +8,7 @@ import {
     SystemProgram,
 } from '@solana/web3.js';
 
+import type { TransactionWithMeta } from '../../model/types';
 import { getInstructionSummaries, resolveInstructionNames, resolveNamesFromData } from '../instruction-summary';
 
 const BASE58_DECODER = getBase58Decoder();
@@ -149,6 +150,20 @@ describe('getInstructionSummaries', () => {
             expect(getInstructionSummaries(makeTx([]))).toEqual([]);
         });
     });
+
+    describe('transaction versions', () => {
+        it('should accept a v1 transaction as the kit fetch returns it', () => {
+            const ix = {
+                parsed: { info: {}, type: 'transfer' },
+                program: 'system',
+                programId: SystemProgram.programId,
+            } as unknown as ParsedInstruction;
+            const version = 1;
+            const results = getInstructionSummaries(makeTxWithMeta([ix], version));
+
+            expect(results).toEqual([{ name: 'Transfer', programName: 'System Program' }]);
+        });
+    });
 });
 
 describe('resolveInstructionNames', () => {
@@ -266,4 +281,21 @@ function makeTx(instructions: (ParsedInstruction | PartiallyDecodedInstruction)[
             signatures: [],
         },
     } as unknown as ParsedTransactionWithMeta;
+}
+
+function makeTxWithMeta(
+    instructions: (ParsedInstruction | PartiallyDecodedInstruction)[],
+    version: TransactionWithMeta['version'],
+): TransactionWithMeta {
+    return {
+        meta: null,
+        transaction: {
+            message: {
+                accountKeys: [],
+                instructions,
+            },
+            signatures: [],
+        },
+        version,
+    } as unknown as TransactionWithMeta;
 }

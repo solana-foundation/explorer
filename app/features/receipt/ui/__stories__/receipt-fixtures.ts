@@ -1,6 +1,6 @@
 import { Cluster } from '@/app/utils/cluster';
 
-import { formatReceiptData } from '../../model/create-receipt';
+import { formatReceiptData } from '../../model/receipt-data';
 import type { Receipt } from '../../model/types';
 import type { FormattedExtendedReceipt, FormattedReceipt } from '../../types';
 

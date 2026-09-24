@@ -34,7 +34,8 @@ import {
     buildSolTransferWithSeedIx,
     buildTokenTransferCheckedIx,
 } from '../__fixtures__/builders';
-import { createReceipt, type ReceiptResult } from '../create-receipt';
+import { createReceipt } from '../create-receipt';
+import { type ReceiptResult } from '../receipt-data';
 
 vi.mock('../../api/get-tx');
 vi.mock('../../api/get-token-info');
