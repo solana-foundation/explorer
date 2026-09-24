@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 
 import { isFeedbackWidgetEnabled } from '../env';
 
-// The flag is read at runtime, so only a dynamic import keeps the form and the Sentry client out of a build that has it off
+// A static import bundles the feedback form and `sendFeedback` even when the flag is off.
 const FeedbackWidgetPanel = dynamic(() => import('./FeedbackWidgetPanel').then(m => m.FeedbackWidgetPanel), {
     ssr: false,
 });

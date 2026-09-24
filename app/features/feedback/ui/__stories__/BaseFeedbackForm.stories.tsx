@@ -13,7 +13,7 @@ const meta = {
     },
     component: BaseFeedbackForm,
     parameters: {
-        // The dialog portals to document.body; give the docs iframe room to show it fully.
+        // The dialog renders in a portal on document.body, so the docs story needs its own iframe.
         docs: { story: { height: '640px', inline: false } },
     },
     tags: ['autodocs', 'test'],
@@ -25,7 +25,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     play: async ({ canvasElement, args }) => {
-        // The dialog portals to document.body, outside the story canvas
+        // The dialog renders in a portal outside the story canvas.
         const body = within(canvasElement.ownerDocument.body);
 
         await expect(await body.findByRole('heading', { name: 'Give feedback' })).toBeInTheDocument();
@@ -60,7 +60,6 @@ export const RateWithKeyboard: Story = {
         await userEvent.keyboard('{ArrowRight}{ArrowRight}');
         await expect(body.getByRole('radio', { name: '3 of 5 stars' })).toBeChecked();
 
-        // The five stars are one tab stop, so Tab leaves the group rather than stepping through it
         await userEvent.tab();
         await expect(body.getByLabelText('Feedback')).toHaveFocus();
 

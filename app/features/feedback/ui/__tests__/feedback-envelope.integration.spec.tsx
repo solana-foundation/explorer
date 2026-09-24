@@ -5,14 +5,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FeedbackWidget } from '../FeedbackWidget';
 
-// Exercise the real feedback → envelope path: unmock the shared module and route
-// '@sentry/nextjs' to '@sentry/core' (the nextjs entry drags server-only pieces into jsdom).
-// The SDK's sendFeedback is browser-entry-only, so its envelope-producing core delegate stands in.
+// The @sentry/nextjs entry imports server code that fails in jsdom, so the test uses @sentry/core.
+// @sentry/core has no sendFeedback, so the mock calls captureFeedback, which sendFeedback calls.
 vi.unmock('@/app/shared/lib/sentry');
 vi.mock('@sentry/nextjs', async () => vi.importActual('@sentry/core'));
 vi.mock('@/app/shared/lib/sentry/client', async () => {
     const { captureFeedback } = await vi.importActual<typeof import('@sentry/core')>('@sentry/core');
-    // The url default is mirrored, not exercised: this pins our param spread, not the SDK's fill
+    // sendFeedback defaults `url` to the page URL, and the mock copies that default.
+    // The `url` assertion checks the mock, not the SDK.
     return {
         sendFeedback: async (params: Parameters<typeof captureFeedback>[0]) =>
             captureFeedback({ url: window.location.href, ...params }),

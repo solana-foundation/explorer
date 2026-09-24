@@ -227,7 +227,7 @@ const config: Config = {
         },
 
         screens: {
-            // Object form: a bare string would register a min-width screen, inverting the intent
+            // Tailwind reads a string screen as min-width, so a max-width screen needs the object form.
             'max-sm': { max: getScreenDim('sm', 0) },
             'max-md': { max: getScreenDim('md', 0) },
             xxs: getScreenDim('xxs'),

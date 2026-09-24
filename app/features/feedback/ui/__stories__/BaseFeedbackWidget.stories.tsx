@@ -11,8 +11,7 @@ const meta = {
     },
     component: BaseFeedbackWidget,
     parameters: {
-        // The widget is position:fixed, so inline it escapes the docs flow; render each
-        // story in its own sized iframe so the trigger and menu are contained and visible.
+        // The widget has `position: fixed`, so an inline docs story positions it against the docs page.
         docs: { story: { height: '260px', inline: false } },
     },
     tags: ['autodocs', 'test'],
@@ -24,11 +23,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     play: async ({ canvasElement, args }) => {
-        // The menu portals to document.body, outside the story canvas
+        // The menu renders in a portal outside the story canvas.
         const body = within(canvasElement.ownerDocument.body);
 
         await userEvent.click(body.getByRole('button', { name: 'Feedback' }));
-        // toBeInTheDocument, not toBeVisible: the enter animation keeps opacity at 0 in headless runs
+        // The enter animation keeps opacity at 0 in headless runs, so toBeVisible fails.
         await expect(await body.findByText('Share feedback')).toBeInTheDocument();
         await expect(body.getByRole('menuitem', { name: 'Suggest an idea' })).toHaveAttribute('href', args.ideasUrl);
         await expect(body.getByRole('menuitem', { name: 'Report a bug' })).toHaveAttribute('href', args.bugReportUrl);

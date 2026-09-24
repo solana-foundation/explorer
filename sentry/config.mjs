@@ -11,19 +11,17 @@ import { CLIENT_REPORT_ALLOWED, CLIENT_REPORT_TAG } from './client-report.mjs';
  */
 export function createSentryConfig(context) {
     return {
-        // Client bundles only see inlined NEXT_PUBLIC_* literals (the browser SDK has no env
-        // fallback); server/edge prefer SENTRY_DSN but accept the public DSN, so one var covers all.
+        // Next.js inlines only NEXT_PUBLIC_* variables into client bundles. Server and edge accept
+        // either DSN, so NEXT_PUBLIC_SENTRY_DSN alone configures every runtime.
         dsn:
             context === 'client'
                 ? process.env.NEXT_PUBLIC_SENTRY_DSN
                 : process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-        // A browser error event needs both the flag and the Logger's opt-in tag. The flag keeps error
-        // reporting off while a DSN is present, so the feedback widget can ship on its own and browser
-        // sources are adopted one at a time. The tag then drops anything that bypassed the Logger — a
-        // stray captureException, a `sentry: true` written with the server in mind, SDK auto-captures —
-        // so bot-heavy client traffic cannot page Sentry. Feedback events go through beforeSendFeedback
-        // and are unaffected by either. Matches isEnvEnabled, which this file cannot import.
+        // The flag allows the feedback form to run without browser error reporting.
+        // The tag drops SDK auto-captures and direct captureException calls, which bot traffic triggers.
+        // beforeSend receives error events only, so feedback events skip this check.
+        // The flag check matches isEnvEnabled, which this file cannot import.
         ...(context === 'client' && {
             beforeSend: (/** @type {import('@sentry/core').ErrorEvent} */ event) =>
                 process.env.NEXT_PUBLIC_SENTRY_CLIENT_ERRORS === 'true' &&

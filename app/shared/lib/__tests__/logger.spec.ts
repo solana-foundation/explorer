@@ -171,7 +171,7 @@ describe('Logger', () => {
         });
     });
 
-    // jsdom provides `window`, so plain `sentry: true` is the browser path; these describe the server.
+    // jsdom defines `window`, so the server tests set `window` to undefined.
     describe('error with sentry', () => {
         beforeEach(() => vi.stubGlobal('window', undefined));
 
@@ -323,7 +323,6 @@ describe('Logger', () => {
         });
     });
 
-    // jsdom keeps `window` defined, which is the browser runtime to the Logger.
     describe('browser gating', () => {
         beforeEach(() => {
             vi.stubEnv('NEXT_LOG_LEVEL', '2');
@@ -357,7 +356,6 @@ describe('Logger', () => {
             expect(captureMessage).toHaveBeenCalledWith('[idl] fetch failed');
         });
 
-        // The client config's beforeSend drops untagged events, so an untagged capture would vanish.
         it('should tag browser captures so the client beforeSend passes them through', () => {
             Logger.error(new Error('client-only failure'), { sentry: 'always' });
 

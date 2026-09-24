@@ -6,7 +6,6 @@ import { sendFeedback } from '@/app/shared/lib/sentry/client';
 
 import { FeedbackWidget } from '../FeedbackWidget';
 
-// test-setup.specs.ts globally mocks the Sentry modules; sendFeedback resolves by default
 vi.mock('@entities/cluster', () => ({
     clusterSlug: () => 'mainnet-beta',
     useCluster: () => ({ cluster: 0 }),

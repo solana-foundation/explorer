@@ -22,14 +22,13 @@ import { BaseStarRating } from './BaseStarRating';
 export interface FeedbackFormValues {
     contact?: string;
     message: string;
-    /** 1-5; absent when the user skipped the stars. */
+    /** A value from 1 to 5, or `undefined` when the user selects no star. */
     rating?: number;
 }
 
 export interface BaseFeedbackFormProps {
     bugReportUrl: string;
     ideasUrl: string;
-    /** Disables Submit while a send is in flight. */
     isSubmitting?: boolean;
     onOpenChange: (open: boolean) => void;
     onSubmit: (values: FeedbackFormValues) => void;
@@ -49,7 +48,7 @@ export function BaseFeedbackForm({
     const [rating, setRating] = useState(0);
     const { isSm } = useBreakpoint();
 
-    // Keyed off `open`, not onOpenChange: the programmatic close after a successful send never fires that callback
+    // The close after a successful send does not call onOpenChange, so the reset reads `open`.
     useEffect(() => {
         if (!open) setRating(0);
     }, [open]);
@@ -74,7 +73,7 @@ export function BaseFeedbackForm({
                 <textarea
                     className={cn(inputVariants({ variant: 'dark' }), 'h-auto resize-none')}
                     id="feedback-message"
-                    // Keeps the event (which also carries breadcrumbs) far from Sentry's 1MB rejection line
+                    // Sentry rejects oversized events, and breadcrumbs add to the event size.
                     maxLength={4096}
                     name="message"
                     required
@@ -85,7 +84,7 @@ export function BaseFeedbackForm({
                 <Label className="text-neutral-200" htmlFor="feedback-contact">
                     X handle <span className="font-normal text-neutral-400">(optional)</span>
                 </Label>
-                {/* X handles are at most 15 chars plus the optional @ */}
+                {/* X handles have at most 15 characters, plus an optional @. */}
                 <Input id="feedback-contact" maxLength={16} name="contact" variant="dark" />
                 <p className="m-0 text-xs text-neutral-400">So we can reach out if we have any questions</p>
             </div>
@@ -108,13 +107,12 @@ export function BaseFeedbackForm({
         </p>
     );
 
-    // Bottom drawer below `sm`, centered dialog above — the shared Slideover owns the slide-up animation
     if (!isSm) {
         return (
             <Slideover open={open} onOpenChange={onOpenChange}>
                 <SlideoverContent aria-describedby={undefined}>
                     <SlideoverHeader>
-                        {/* Preflight is skipped, so the UA h2 margins must be reset explicitly */}
+                        {/* The global stylesheet sets a bottom margin on every h2. */}
                         <SlideoverTitle className="m-0">Give feedback</SlideoverTitle>
                         <SlideoverClose className="flex items-center justify-center rounded-sm border-0 bg-transparent p-0 text-neutral-500 opacity-70 transition-opacity hover:opacity-100">
                             <X size={16} />

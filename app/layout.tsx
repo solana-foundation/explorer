@@ -73,7 +73,7 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                                         <Footer />
                                     </div>
                                     <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
-                                    {/* Inside ClusterProvider: submissions are tagged with the active cluster */}
+                                    {/* FeedbackWidget reads the cluster, so it must stay inside ClusterProvider. */}
                                     <FeedbackWidget />
                                 </TokenInfoBatchProvider>
                             </VisibilityProvider>

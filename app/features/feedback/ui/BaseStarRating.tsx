@@ -5,20 +5,19 @@ import { cn } from '@/app/components/shared/utils';
 
 export interface BaseStarRatingProps {
     onChange?: (rating: number) => void;
-    /** 0 means no rating selected. */
     value?: number;
 }
 
 const STARS = [1, 2, 3, 4, 5];
 
 export function BaseStarRating({ onChange, value = 0 }: BaseStarRatingProps) {
-    // Two forms can be mounted at once, so each group needs its own name to stay independent
+    // Two feedback forms can be mounted at once, and radios with the same name form one group.
     const name = useId();
 
     return (
         <div aria-label="Rating" className="flex items-center justify-center gap-1" role="radiogroup">
             {STARS.map(star => (
-                // A hidden native radio, not a button, so the browser gives the group arrow-key navigation and one tab stop
+                // The browser gives native radios arrow-key navigation and a single tab stop.
                 <label key={star} className="cursor-pointer p-1">
                     <input
                         aria-label={`${star} of ${STARS.length} stars`}

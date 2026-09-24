@@ -18,7 +18,6 @@ vi.mock('@/app/shared/lib/sentry', () => ({
     withTraceData: vi.fn(() => ({})),
 }));
 
-// Client-only Sentry surface gets its own module id, so the mock above does not cover it.
 vi.mock('@/app/shared/lib/sentry/client', () => ({
     sendFeedback: vi.fn(async () => 'test-event-id'),
 }));

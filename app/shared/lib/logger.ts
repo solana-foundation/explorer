@@ -18,7 +18,7 @@ type SentryExtras = Record<string, unknown>;
 type SentryReport = boolean | 'always';
 
 type SentryContext = LogContext & {
-    /** `true` sends to Sentry from the server only — never from the browser; `'always'` reports from both. */
+    /** `true` reports from the server only. `'always'` reports from the server and the browser. */
     sentry?: SentryReport;
     /** Extra data sent exclusively to Sentry (not included in console output). */
     sentryExtras?: SentryExtras;
@@ -41,14 +41,11 @@ type PanicContext = LogContext & {
  *
  * Sentry integration (each method always sets the correct severity level via `withScope`):
  * - `panic` (level: `fatal`) — always calls `captureException`, on every runtime.
- * - `error` (level: `error`) — `captureException` on the server only with `{ sentry: true }`; in the browser
- *   nothing is sent unless the call site writes `{ sentry: 'always' }`.
- * - `warn`  (level: `warning`) — `captureMessage` under the same rule.
+ * - `error` (level: `error`) — calls `captureException` with `{ sentry: true }` on the server, and with
+ *   `{ sentry: 'always' }` on the server and in the browser.
+ * - `warn`  (level: `warning`) — calls `captureMessage` under the same rule.
  *
- * `sentry: true` is a no-op in the browser, by design: bot-heavy client traffic must not page Sentry.
- * Browser captures are tagged so the client config's `beforeSend` can drop anything not routed through here.
- * That `beforeSend` drops every browser error event, tagged ones included, until
- * `NEXT_PUBLIC_SENTRY_CLIENT_ERRORS` is `true` — so a browser panic reaches Sentry only once the flag is on.
+ * The browser sends error events only when `NEXT_PUBLIC_SENTRY_CLIENT_ERRORS` is `true`.
  *
  * Use `sentryExtras` to attach data exclusively to the Sentry event.
  * Context fields outside `sentryExtras` are only sent to the console.
@@ -114,7 +111,7 @@ function isLoggable(expectedLevel: LOG_LEVEL) {
     return !isNullish(currentLevel) && Number.isFinite(currentLevel) && expectedLevel <= currentLevel;
 }
 
-/** `true` never reports from the browser: it was almost always written with the server in mind. */
+/** `true` does not report from the browser because most call sites that pass `true` expect the server. */
 function shouldReport(sentry: SentryReport | undefined): boolean {
     if (!sentry) return false;
     return sentry === 'always' || typeof window === 'undefined';
@@ -152,8 +149,6 @@ function withSentryLevel(
 ) {
     withScope(scope => {
         scope.setLevel(level);
-        // The client Sentry config's beforeSend drops browser events without this tag, so a capture
-        // that bypasses the Logger cannot report from the browser.
         if (typeof window !== 'undefined') scope.setTag(CLIENT_REPORT_TAG, CLIENT_REPORT_ALLOWED);
         if (context?.sentryExtras) scope.setExtras(context.sentryExtras);
         capture();

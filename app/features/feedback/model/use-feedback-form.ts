@@ -18,12 +18,12 @@ export function useFeedbackForm() {
     const submit = async (values: FeedbackFormValues) => {
         setIsSubmitting(true);
         try {
-            // withScope: sendFeedback writes its tags onto the active scope, which must not leak into later events
+            // sendFeedback sets its tags on the current scope. withScope keeps those tags off later events.
             await withScope(() =>
                 sendFeedback({
                     message: values.message,
                     name: values.contact,
-                    // Left unset, the SDK stamps the entry's source as 'api'
+                    // sendFeedback sets `source` to 'api' when it is unset.
                     source: FEEDBACK_SOURCE,
                     tags: {
                         cluster: clusterSlug(cluster),
@@ -36,7 +36,7 @@ export function useFeedbackForm() {
             setIsOpen(false);
             toast.custom({ description: 'Thank you fren, enjoy exploring', title: 'Feedback sent!', type: 'success' });
         } catch {
-            // Delivery failed (e.g. Sentry blocked by a content blocker) — keep the form open so nothing is lost
+            // The form must stay open to keep the message the user typed.
             toast.custom({
                 description: 'You can use the GitHub links in the form instead',
                 title: 'Could not send feedback',

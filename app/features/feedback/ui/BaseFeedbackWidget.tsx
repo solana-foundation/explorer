@@ -13,7 +13,6 @@ export interface BaseFeedbackWidgetProps {
     bugReportUrl: string;
     ideasUrl: string;
     onShareFeedback?: () => void;
-    /** The Sentry-backed feedback form needs a client DSN; the GitHub links work without one. */
     showSentryActions?: boolean;
 }
 
@@ -24,7 +23,7 @@ export function BaseFeedbackWidget({
     showSentryActions = true,
 }: BaseFeedbackWidgetProps) {
     return (
-        // z-40 keeps the trigger under the shared dialog's z-50, so an open modal dims it (same contract as CookieConsent)
+        // The trigger must stay below the dialog overlay, so an open dialog covers the trigger.
         <div className="fixed bottom-4 right-4 z-40 flex rounded-full shadow-lg before:absolute before:-inset-[1.5px] before:-z-10 before:rounded-full before:bg-gradient-to-br before:from-[#9945FF] before:to-[#14F195]">
             <div className="flex rounded-full bg-[#141816]">
                 <DropdownMenu>
@@ -43,7 +42,7 @@ export function BaseFeedbackWidget({
                             </DropdownMenuItem>
                         )}
                         <DropdownMenuItem asChild className="!cursor-pointer">
-                            {/* Preflight is skipped, so the UA anchor color/underline must be reset explicitly */}
+                            {/* The global stylesheet sets a color on every link. */}
                             <ExternalLink className="text-inherit no-underline" href={ideasUrl}>
                                 <GitHub /> Suggest an idea
                             </ExternalLink>

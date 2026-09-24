@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 
 import { isFeedbackEnabled, isFeedbackWidgetEnabled } from '../env';
 
-// The flag is read at runtime, so only a dynamic import keeps the form and the Sentry client out of a build that has it off
+// A static import bundles the feedback form and `sendFeedback` even when the flag is off.
 const FeedbackTriggerButton = dynamic(() => import('./FeedbackTriggerButton').then(m => m.FeedbackTriggerButton), {
     ssr: false,
 });
@@ -15,7 +15,7 @@ export interface FeedbackTriggerProps {
     className?: string;
 }
 
-/** Inline trigger (e.g. a footer link) that opens the feedback form; renders nothing without a client DSN. */
+/** Opens the feedback form from inline content, such as a footer link. */
 export function FeedbackTrigger({ children, className }: FeedbackTriggerProps) {
     if (!isFeedbackWidgetEnabled() || !isFeedbackEnabled()) return undefined;
 
