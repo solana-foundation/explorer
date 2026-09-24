@@ -42,13 +42,12 @@ export function BaseFeedbackWidget({
                             </DropdownMenuItem>
                         )}
                         <DropdownMenuItem asChild className="!cursor-pointer">
-                            {/* The global stylesheet sets a color on every link. */}
-                            <ExternalLink className="text-inherit no-underline" href={ideasUrl}>
+                            <ExternalLink className="text-inherit" href={ideasUrl}>
                                 <GitHub /> Suggest an idea
                             </ExternalLink>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild className="!cursor-pointer">
-                            <ExternalLink className="text-inherit no-underline" href={bugReportUrl}>
+                            <ExternalLink className="text-inherit" href={bugReportUrl}>
                                 <AlertCircle /> Report a bug
                             </ExternalLink>
                         </DropdownMenuItem>
