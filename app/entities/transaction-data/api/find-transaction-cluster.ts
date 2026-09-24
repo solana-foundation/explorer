@@ -1,3 +1,4 @@
+import { err, ok, type Result, toError } from '@shared/lib/result';
 import { createSolanaRpc, signature as createSignature } from '@solana/kit';
 import { type ServerCluster, serverClusterUrl } from '@utils/cluster';
 
@@ -23,22 +24,20 @@ export async function findTransactionCluster(
     options?: { abortSignal?: AbortSignal },
 ): Promise<FindTransactionClusterResult> {
     for (const cluster of clusters) {
-        const status = await getSignatureStatus(cluster, signature, options?.abortSignal);
+        const [error, isSignatureFound] = await getSignatureStatus(cluster, signature, options?.abortSignal);
 
-        if ('left' in status) return { cluster, error: status.left, kind: 'error' };
-        if (status.right) return { cluster, kind: 'found' };
+        if (error) return { cluster, error, kind: 'error' };
+        if (isSignatureFound) return { cluster, kind: 'found' };
     }
 
     return { kind: 'not-found' };
 }
 
-type SignatureStatusResult = { left: Error } | { right: boolean };
-
 async function getSignatureStatus(
     cluster: ServerCluster,
     signature: string,
     abortSignal?: AbortSignal,
-): Promise<SignatureStatusResult> {
+): Promise<Result<boolean>> {
     try {
         const rpc = createSolanaRpc(serverClusterUrl(cluster));
         const { value: statuses } = await rpc
@@ -46,8 +45,8 @@ async function getSignatureStatus(
             .send({ abortSignal });
 
         // The RPC returns literal null for a signature it does not hold, per the JSON-RPC spec.
-        return { right: Boolean(statuses[0]) };
+        return ok(Boolean(statuses[0]));
     } catch (error) {
-        return { left: error instanceof Error ? error : new Error(String(error)) };
+        return err(toError(error));
     }
 }
