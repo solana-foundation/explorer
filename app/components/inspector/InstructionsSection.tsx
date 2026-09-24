@@ -438,13 +438,22 @@ function InspectorInstructionCard({
                         raw={ix}
                         siblingData={siblingIndex => message.compiledInstructions[siblingIndex]?.data}
                         index={index}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
                     />
                 </ErrorBoundary>
             );
         case 'zk-elgamal-proof':
             return (
                 <ErrorBoundary fallback={unknownCard}>
-                    <ZkElGamalProofDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />
+                    <ZkElGamalProofDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        raw={ix}
+                        index={index}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
+                    />
                 </ErrorBoundary>
             );
     }
