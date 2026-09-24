@@ -65,7 +65,36 @@ Rule:
 
 Bot Filter auto-allows Vercel's verified-bot directory, so Googlebot may already reach these — verification is by IP,
 not user-agent, so that cannot be tested from here. Unverified crawlers and SEO tooling are challenged today.
-Which crawlers robots.txt itself keeps or turns away is decided in [`crawlers.md`](./crawlers.md).
+
+## Blocking Meta's external agent
+
+Meta documents its user agents on its
+[web crawlers page](https://developers.facebook.com/docs/sharing/webmasters/web-crawlers). Only one is blocked:
+
+| User agent           | Meta's stated purpose                                                                      | Why                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `meta-externalagent` | "Crawls the web for use cases such as training foundation AI models or improving products" | Returns no readers. It crawls dynamic pages at scale, and each page costs RPC calls. |
+
+`facebookexternalhit` renders link previews on Facebook, Instagram, and WhatsApp. `meta-externalfetcher` fetches
+individual links for Meta AI in response to a person's request. Both lead back to a person and remain allowed.
+
+`meta-externalagent` is disallowed in [`public/robots.txt`](../public/robots.txt). Meta lists it among the crawlers
+that honor the file, so do not add a WAF rule unless request logs show that the crawl continues a few days after
+deployment.
+
+If requests continue, add this rule:
+
+```
+Name: Block meta-externalagent
+Description: Denies Meta's crawler for AI training and product improvement when robots.txt does not stop it.
+Rule:
+    If `User Agent` `Contains` `meta-externalagent`
+    Then `Deny`
+```
+
+Place a crawler deny above every `Bypass` rule. A matching bypass skips the rules below it and would otherwise admit
+the crawler to `/og/` and transaction receipt pages. Do not include `facebookexternalhit` or
+`meta-externalfetcher` in the deny.
 
 A project that builds with `SEO_DISALLOW_BOTS=true` needs this rule too. Without it, Bot Filter challenges
 `/robots.txt`, so an unverified crawler never reads `Disallow: /`.

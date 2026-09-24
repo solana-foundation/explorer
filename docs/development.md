@@ -43,7 +43,7 @@ Production challenges every client it cannot identify as a browser, so any route
 unreachable until it has a `Bypass` rule. Rules live in the Vercel dashboard, not the repo — configure them when the
 route ships, not when something breaks.
 
-- [`firewall.md`](./firewall.md) — pipeline stages, rule semantics, incident runbook, permissions, and the icon rules
-- [`crawlers.md`](./crawlers.md) — which crawlers are kept or blocked, and robots.txt versus a WAF rule
+- [`firewall.md`](./firewall.md) — pipeline stages, rule semantics, crawler blocking, incident runbook, permissions,
+  and the icon rules
 - [`app/og/README.md`](../app/og/README.md) — OG images and receipt pages, plus receipt env keys
 - [`app/mcp/README.md`](../app/mcp/README.md) — `/mcp`
