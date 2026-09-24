@@ -94,14 +94,12 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     // Read the version off the raw details rather than the parsed ones, so the size and the limit it
     // is compared against always come from the same fetch.
     const rawVersion = rawDetails?.data?.raw?.version;
-    // Both fetches carry the block time, so either can supply the row.
     const blockTime = rawDetails?.data?.raw?.blockTime ?? details?.data?.transactionWithMeta?.blockTime ?? undefined;
-    // Both fetches land after the status that gates this card, so an absent block time means "not fetched
-    // yet" until they answer. The row must not call it unavailable before then.
+    // This card needs only the status to render, so both transaction fetches can still be in flight.
+    // The row must show "Unavailable" only after both fetches return.
     const blockTimeAnswered = isFetched(rawDetails) && isFetched(details);
 
-    // A finalized mainnet transaction always has a block time. Losing one means the cluster answered
-    // without it, which is worth knowing about; every other cluster and commitment can legitimately lack it.
+    // A finalized mainnet transaction always has a block time. Other clusters and commitments can lack one.
     const isFinalizedOnMainnet = cluster === Cluster.MainnetBeta && status?.data?.info?.confirmations === 'max';
     const hasSettledWithoutBlockTime = isFinalizedOnMainnet && blockTime === undefined && blockTimeAnswered;
     useEffect(() => {
@@ -124,20 +122,17 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         }
     }, [signature, clusterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // `getTransaction` answers null until the block is confirmed, so a transaction that is merely processed
-    // has no wire bytes and no block time yet. The status refresh carries neither, so both the auto-refresh
-    // interval and the Refresh button retry the transaction alongside the status.
+    // `getTransaction` returns `null` until the transaction is confirmed, and the status has no wire bytes
+    // or block time. Auto-refresh stops at finalization, so the Refresh button must also retry the transaction.
     //
-    // Read the entry through a ref: the hook needs a stable callback, and the entry changes on every
-    // fetch, so a dependency would rebuild the interval and push the next status refresh out.
+    // `rawDetails` changes on every fetch, so `refresh` reads it through a ref to stay stable.
     const rawEntryRef = useRef(rawDetails);
     rawEntryRef.current = rawDetails;
     const refresh = useCallback(() => {
         fetchStatus(signature);
         const entry = rawEntryRef.current;
-        // Never open a second request while one is still running. The cache keeps whichever response
-        // lands last, so a slow null would replace a transaction a later request had already found, and
-        // auto-refresh can stop on the very next status before anything retries.
+        // The raw cache keeps the last response, so an overlapping request can replace a found transaction
+        // with `null`. If auto-refresh stops, that `null` stays until the Refresh button retries.
         if (!entry?.data?.raw && entry?.status !== FetchStatus.Fetching) fetchRaw(signature);
     }, [fetchStatus, fetchRaw, signature]);
     useAutoRefreshInterval(autoRefresh, refresh);
@@ -417,7 +412,6 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     );
 }
 
-/** A cache entry that answered, as opposed to one still in flight, failed, or never started. */
 function isFetched(entry?: { status: FetchStatus }): boolean {
     return entry?.status === FetchStatus.Fetched;
 }

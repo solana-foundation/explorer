@@ -15,7 +15,6 @@ import {
 import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
 import { SummaryCard } from '../SummaryCard';
 
-/** A `getTransaction` the page has started and is still waiting on. */
 const IN_FLIGHT = { status: FetchStatus.Fetching };
 
 // `ClusterProvider` reads the router on mount, which jsdom has no app router for.
@@ -51,7 +50,6 @@ describe('SummaryCard timestamp', () => {
     });
 
     it('should fall back to the parsed transaction when the raw response has no block time', async () => {
-        // Both fetches answered; only one of them carried a time.
         renderSummary({ raw: MOCK_RAW_TX_NO_BLOCK_TIME });
 
         expect(await screen.findByText('Timestamp (Local)')).toBeInTheDocument();
@@ -60,8 +58,7 @@ describe('SummaryCard timestamp', () => {
     it('should omit the row until the transaction fetches answer', async () => {
         renderSummary({ parsed: IN_FLIGHT, raw: IN_FLIGHT });
 
-        // Positive control: the status alone renders the card, so a missing row is the row's own
-        // doing rather than an unrendered card.
+        // The card must render first, so the absent rows come from the row condition, not an empty card.
         expect(await screen.findByText('Signature')).toBeInTheDocument();
         expect(screen.queryByText('Timestamp (Local)')).not.toBeInTheDocument();
         expect(screen.queryByText('Unavailable')).not.toBeInTheDocument();

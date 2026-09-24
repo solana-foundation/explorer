@@ -21,7 +21,7 @@ vi.mock('@/app/providers/transactions/raw', async importOriginal => ({
     useFetchRawTransaction: () => fetchRaw,
 }));
 
-/** A raw-cache entry in the state the test needs, which the fixture builder always reports as fetched. */
+/** `mockRawTransactionDetails` always sets `FetchStatus.Fetched`, so this helper builds the other states. */
 function rawEntry(status: FetchStatus, raw?: null) {
     return { data: raw === null ? { raw: null } : undefined, status };
 }
@@ -65,8 +65,6 @@ describe('SummaryCard raw retry', () => {
     });
 
     it('should retry the raw fetch from the Refresh button', () => {
-        // The interval stops once the transaction finalizes, so the button is the only way back to a
-        // transaction the RPC answered null for.
         renderSummary(rawEntry(FetchStatus.Fetched, null), AutoRefresh.Inactive);
 
         fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
@@ -79,8 +77,6 @@ describe('SummaryCard raw retry', () => {
 
         await tick();
 
-        // The cache keeps whichever response lands last, so an overlapping request lets a slow null
-        // replace a transaction a later request already found — and auto-refresh can stop right after.
         expect(fetchRaw).not.toHaveBeenCalled();
     });
 });

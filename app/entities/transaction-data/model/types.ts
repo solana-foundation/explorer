@@ -27,7 +27,7 @@ export type TransactionWithMeta = Omit<ParsedTransactionWithMeta, 'version'> & {
 };
 
 type RawTransactionBase = {
-    /** Seconds since the epoch, as the cluster recorded the block. Absent until the block is confirmed. */
+    /** Unix timestamp in seconds. Absent when the RPC has no time for the block. */
     blockTime?: number;
     messageBytes: Uint8Array;
     meta?: {

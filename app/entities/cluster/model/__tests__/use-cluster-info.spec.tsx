@@ -65,8 +65,6 @@ describe('useEpochSchedule', () => {
 
         await waitFor(() => expect(result.current).toEqual(EPOCH_SCHEDULE));
         expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
-        // The schedule is all a slot-to-epoch mapping needs; the live epoch and the oldest served block
-        // used to ride along on the same fetch and were paid for on every page that mapped a slot.
         expect(rpc.getEpochInfo).not.toHaveBeenCalled();
         expect(rpc.getFirstAvailableBlock).not.toHaveBeenCalled();
         // getGenesisHash is the connection health check's job, not this hook's.
