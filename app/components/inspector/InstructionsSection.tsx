@@ -310,7 +310,14 @@ function InspectorInstructionCard({
         if (parsedIx.programLabel === 'pyth') {
             return (
                 <ErrorBoundary fallback={unknownCard}>
-                    <PythDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />
+                    <PythDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        raw={ix}
+                        index={index}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
+                    />
                 </ErrorBoundary>
             );
         }
@@ -426,7 +433,14 @@ function InspectorInstructionCard({
         case 'pyth':
             return (
                 <ErrorBoundary fallback={unknownCard}>
-                    <PythDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />
+                    <PythDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        raw={ix}
+                        index={index}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
+                    />
                 </ErrorBoundary>
             );
         case 'ed25519':

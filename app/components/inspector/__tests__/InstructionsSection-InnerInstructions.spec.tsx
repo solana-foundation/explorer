@@ -133,6 +133,30 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         expect(title.parentElement).toHaveTextContent('#1.2');
     });
 
+    test('should number an inner Pyth card under its parent', async () => {
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection
+                                    message={buildMessage()}
+                                    compiledInnerInstructions={INNER_PYTH_INIT_MAPPING}
+                                />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        const title = await screen.findByText(/Pyth: Init Mapping Account/i);
+
+        // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
+        expect(title.parentElement).toHaveTextContent('#1.2');
+    });
+
     test('should number a child it cannot decompile so the siblings keep their positions', async () => {
         render(
             <ScrollAnchorProvider>
@@ -260,6 +284,7 @@ const TOKEN_PROGRAM = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
 const ATA_PROGRAM = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 const COMPUTE_BUDGET_PROGRAM = new PublicKey('ComputeBudget111111111111111111111111111111');
 const ZK_ELGAMAL_PROOF_PROGRAM = new PublicKey('ZkE1Gama1Proof11111111111111111111111111111');
+const PYTH_PROGRAM = new PublicKey('FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH');
 
 // The account list of the transaction in HOO-611, in wire order.
 const ACCOUNT_KEYS = [
@@ -273,6 +298,7 @@ const ACCOUNT_KEYS = [
     new PublicKey('97PALEbpPj7muiQqi2HXS8QukLsrrr1yfgKfvXjWtsUG'), // 7 wallet
     ATA_PROGRAM, // 8
     ZK_ELGAMAL_PROOF_PROGRAM, // 9
+    PYTH_PROGRAM, // 10
 ];
 
 // The four CPIs the RPC reports for the Create Idempotent instruction, verbatim
@@ -325,6 +351,22 @@ const INNER_ZK_CLOSE_CONTEXT_STATE: CompiledInnerInstruction[] = [
     },
 ];
 
+// A System CreateAccount followed by a Pyth Init Mapping: header version 2, instruction index 0,
+// over funding and mapping accounts.
+const INNER_PYTH_INIT_MAPPING: CompiledInnerInstruction[] = [
+    {
+        index: 0,
+        instructions: [
+            {
+                accounts: [0, 2],
+                data: '11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL',
+                programIdIndex: 3,
+            },
+            { accounts: [0, 1], data: encodeBase58([2, 0, 0, 0, 0, 0, 0, 0]), programIdIndex: 10 },
+        ],
+    },
+];
+
 // Three CPIs. The middle one names an account index the message does not have.
 const INNER_WITH_BAD_ACCOUNT: CompiledInnerInstruction[] = [
     {
@@ -355,7 +397,7 @@ function buildMessage(): MessageV0 {
         ],
         header: {
             numReadonlySignedAccounts: 0,
-            numReadonlyUnsignedAccounts: 7,
+            numReadonlyUnsignedAccounts: 8,
             numRequiredSignatures: 1,
         },
         recentBlockhash: new PublicKey(new Uint8Array(32)).toBase58(),
