@@ -1,8 +1,8 @@
 import { getRpc, serverClusterUrlFromParam } from '@entities/cluster/server';
 import { errors } from '@entities/program-metadata/server';
+import { fetchProgramSecurityTxt } from '@entities/security-txt/server';
 import { isRetryableError } from '@shared/lib/errors';
 import { type Address, address } from '@solana/kit';
-import { fetchSecurityTxt, type SecurityTxtFields, type SecurityTxtSource } from '@solana/security-txt';
 import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -45,10 +45,7 @@ export async function GET(request: Request) {
 
     try {
         const rpc = getRpc(url);
-        let securityTxt: { type: SecurityTxtSource; fields: SecurityTxtFields } | undefined;
-        // eslint-disable-next-line unicorn/no-null -- library API: null = canonical-only PMP lookup (no fndn fallback)
-        const result = await fetchSecurityTxt(rpc, programId, { authority: null });
-        if (result) securityTxt = { fields: result.fields, type: result.type };
+        const securityTxt = await fetchProgramSecurityTxt(rpc, programId);
 
         // `securityTxt` omitted (undefined) when absent — the "no security.txt" case, cacheable.
         return NextResponse.json({ securityTxt }, { headers: CACHE_HEADERS, status: 200 });
