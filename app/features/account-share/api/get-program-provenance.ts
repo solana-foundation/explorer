@@ -1,51 +1,84 @@
+import type { SolanaRpc } from '@entities/cluster/server';
+import { buildProgramName, type SupportedIdl } from '@entities/idl';
 import { resolveProgramIdls } from '@entities/idl/server';
-import type { Address, Rpc, SolanaRpcApi } from '@solana/kit';
+import { fetchProgramSecurityTxt } from '@entities/security-txt/server';
+import { orderVerifiedEntries, TRUSTED_SIGNERS } from '@explorer/entity-inspector/verification';
+import type { Address } from '@solana/kit';
 import type { ServerCluster } from '@utils/cluster';
+import { getOsecRegistryUrl } from '@utils/verified-builds-url';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { getOsecRegistryUrl } from '../lib/constants';
-import type { ProgramMarkers } from '../model/account-share-data';
+// One OSEC `/status-all` entry, narrowed to the fields the verified check reads and shape-compatible with
+// the shared `orderVerifiedEntries` core.
+type OsecEntry = { signer: string; is_verified: boolean; on_chain_hash: string; is_frozen?: boolean };
 
-type ProvenanceRpc = Rpc<SolanaRpcApi>;
-
-/** One OSEC registry entry, narrowed to the fields the verified signal reads. */
-type OsecEntry = { is_verified?: boolean };
-
-/** The build-provenance markers, plus the program name the IDL fetch happened to surface. */
-export type ProgramProvenance = { markers: ProgramMarkers; name?: string };
+// Registry-independent signals plus the raw OSEC entries; the caller decides `verifiedBuild` from those
+// entries and the program's hash/authority via `isVerifiedBuild`.
+export type ProgramProvenance = {
+    idlUploaded: boolean;
+    securityTxt: boolean;
+    verifiedEntries: OsecEntry[];
+    name?: string;
+};
 
 /**
- * The three program markers - and, for free, the program's IDL name - each resolved independently so one
- * failing check never blanks the others.
- *
- * Best-effort by design: every probe is bounded by the caller's `abortSignal` and fails soft to its
- * negative state, since a share card must render even when a registry is slow. The signals come from the
- * same sources the program page uses - `@solana/idl`, `@solana/security-txt`, and the OSEC registry.
+ * The program's registry-independent signals, each probed independently and failing soft so a slow source
+ * never blanks the others. Only the registry fetch takes `abortSignal`; the IDL and security.txt lookups are
+ * single RPC round trips with no signal.
  */
 export async function getProgramProvenance(
-    rpc: ProvenanceRpc,
+    rpc: SolanaRpc,
     programId: Address,
     cluster: ServerCluster,
     abortSignal: AbortSignal,
 ): Promise<ProgramProvenance> {
-    const [idl, securityTxt, verifiedBuild] = await Promise.all([
+    const [idl, securityTxt, verifiedEntries] = await Promise.all([
         resolveIdl(rpc, programId),
         hasSecurityTxt(rpc, programId),
-        hasVerifiedBuild(programId, cluster, abortSignal),
+        fetchVerifiedEntries(programId, cluster, abortSignal),
     ]);
 
-    return { markers: { idlUploaded: idl.uploaded, securityTxt, verifiedBuild }, name: idl.name };
+    return { idlUploaded: idl.uploaded, name: idl.name, securityTxt, verifiedEntries };
+}
+
+/**
+ * Whether the OSEC registry proves a *current* verified build. Reuses the program page's core: only
+ * authority/trusted-signer entries count, and each is re-checked against the freshly computed on-chain hash
+ * so a stale (post-upgrade) or spoofed entry never reads as verified. An immutable program can't drift, so
+ * a frozen/trusted entry whose hash still matches is accepted directly.
+ */
+export function isVerifiedBuild(
+    entries: OsecEntry[],
+    programAuthority: string | undefined,
+    localHash: string | undefined,
+): boolean {
+    if (!localHash || entries.length === 0) return false;
+
+    if (programAuthority) {
+        return orderVerifiedEntries(entries, programAuthority, localHash).some(entry => entry.is_verified);
+    }
+
+    return entries.some(
+        entry =>
+            entry.is_verified &&
+            (entry.is_frozen === true || TRUSTED_SIGNERS[entry.signer] !== undefined) &&
+            entry.on_chain_hash === localHash,
+    );
 }
 
 type IdlResult = { name?: string; uploaded: boolean };
 
 /** Whether an Anchor or Program-Metadata IDL is published, and the name it carries when it is. */
-async function resolveIdl(rpc: ProvenanceRpc, programId: Address): Promise<IdlResult> {
+async function resolveIdl(rpc: SolanaRpc, programId: Address): Promise<IdlResult> {
     try {
         const { anchorIdl, programMetadataIdl } = await resolveProgramIdls(rpc, programId);
         return {
-            name: idlName(anchorIdl) ?? idlName(programMetadataIdl),
+            // Same preference order and title-casing the program header uses.
+            name: buildProgramName([
+                programMetadataIdl as SupportedIdl | undefined,
+                anchorIdl as SupportedIdl | undefined,
+            ]),
             uploaded: Boolean(anchorIdl || programMetadataIdl),
         };
     } catch (error) {
@@ -54,36 +87,10 @@ async function resolveIdl(rpc: ProvenanceRpc, programId: Address): Promise<IdlRe
     }
 }
 
-/** The program's display name from an IDL's `name` (or `metadata.name`), prettified from its raw slug. */
-function idlName(idl: unknown): string | undefined {
-    if (!idl || typeof idl !== 'object') return undefined;
-    const record = idl as { metadata?: { name?: unknown }; name?: unknown };
-    const raw = pickString(record.name) ?? pickString(record.metadata?.name);
-    return raw ? prettifyName(raw) : undefined;
-}
-
-function pickString(value: unknown): string | undefined {
-    return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
-}
-
-/** "jupiter_aggregator" -> "Jupiter Aggregator": the IDL slug read as a title. */
-function prettifyName(raw: string): string {
-    return raw
-        .replaceAll('_', ' ')
-        .replaceAll('-', ' ')
-        .split(' ')
-        .filter(Boolean)
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-}
-
-/** Whether the program exposes a security.txt (canonical PMP `security` seed, then legacy ELF section). */
-async function hasSecurityTxt(rpc: ProvenanceRpc, programId: Address): Promise<boolean> {
+/** Whether the program exposes a security.txt, via the shared resolver the program page keys on. */
+async function hasSecurityTxt(rpc: SolanaRpc, programId: Address): Promise<boolean> {
     try {
-        const { fetchSecurityTxt } = await import('@solana/security-txt');
-        // eslint-disable-next-line unicorn/no-null -- library API: null = canonical-only PMP lookup.
-        const result = await fetchSecurityTxt(rpc, programId, { authority: null });
-        return Boolean(result);
+        return Boolean(await fetchProgramSecurityTxt(rpc, programId));
     } catch (error) {
         Logger.warn('[account-share] security.txt lookup failed', {
             cause: error instanceof Error ? error.message : error,
@@ -92,31 +99,38 @@ async function hasSecurityTxt(rpc: ProvenanceRpc, programId: Address): Promise<b
     }
 }
 
-/**
- * Whether the OSEC registry reports a verified build for the program on this cluster.
- *
- * A single HTTP read of the registry's `status-all` list - the same endpoint the program page keys on.
- * It trusts the registry's own `is_verified` flag rather than re-hashing the program bytes, which an image
- * route cannot afford to download; clusters with no registry (testnet) resolve to false.
- */
-async function hasVerifiedBuild(
+// The OSEC `status-all` entries for the program, validated per element so a malformed one can't hide a
+// valid verified build. Clusters with no registry (testnet) resolve to none.
+async function fetchVerifiedEntries(
     programId: Address,
     cluster: ServerCluster,
     abortSignal: AbortSignal,
-): Promise<boolean> {
+): Promise<OsecEntry[]> {
     const registryUrl = getOsecRegistryUrl(cluster);
-    if (!registryUrl) return false;
+    if (!registryUrl) return [];
 
     try {
         const response = await fetch(`${registryUrl}/status-all/${programId}`, { signal: abortSignal });
-        if (!response.ok) return false;
+        if (!response.ok) return [];
 
-        const entries = (await response.json()) as OsecEntry[];
-        return Array.isArray(entries) && entries.some(entry => entry.is_verified === true);
+        return parseVerifiedEntries(await response.json());
     } catch (error) {
         Logger.warn('[account-share] verified-build lookup failed', {
             cause: error instanceof Error ? error.message : error,
         });
-        return false;
+        return [];
     }
+}
+
+/** Keep only well-formed registry entries, so a null or retyped element never breaks the verified check. */
+function parseVerifiedEntries(payload: unknown): OsecEntry[] {
+    if (!Array.isArray(payload)) return [];
+    return payload.filter(
+        (entry): entry is OsecEntry =>
+            entry !== null &&
+            typeof entry === 'object' &&
+            typeof (entry as OsecEntry).signer === 'string' &&
+            typeof (entry as OsecEntry).is_verified === 'boolean' &&
+            typeof (entry as OsecEntry).on_chain_hash === 'string',
+    );
 }

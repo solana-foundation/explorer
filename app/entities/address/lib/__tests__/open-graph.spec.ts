@@ -2,7 +2,7 @@ import { gen } from '@__fixtures__/gen';
 import { Cluster } from '@utils/cluster';
 import { describe, expect, it } from 'vitest';
 
-import { getAccountOgImageUrl, getAccountOpenGraph, getAccountPageUrl } from '../get-account-open-graph';
+import { getAccountOgImageUrl, getAccountOpenGraph, getAccountPageUrl } from '../open-graph';
 
 const ADDRESS = gen.address(1);
 const BASE_URL = 'https://explorer.solana.com';

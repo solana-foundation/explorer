@@ -1,30 +1,24 @@
-import { Cluster, type ServerCluster } from '@utils/cluster';
-
 /** The wall-clock budget for all RPC + provenance work behind one account card. */
 export const RPC_BUDGET_MS = 2_500;
 
 /**
- * The one page `getSignaturesForAddress` returns, and the cap the activity count reads as. A single
- * 1000-signature call is one round trip; counting past it would page, which an image route cannot afford,
- * so `1,000` prints as `1,000+`.
+ * The activity-count cap, and the RPC's own per-call ceiling for `getSignaturesForAddress`: one round trip,
+ * no paging, so the exact count tops out here and `1,000` prints as `1,000+`.
  */
 export const SIGNATURE_LOOKUP_LIMIT = 1_000;
 
-/** Programs deployed by this loader keep their bytes, authority, and deploy slot in a separate data account. */
-export const BPF_UPGRADEABLE_LOADER_ADDRESS = 'BPFLoaderUpgradeab1e11111111111111111111111';
+// Program loader account owners, reused from the shared entity-inspector constants so this route and the
+// program page classify loaders from one source. (`SYSTEM_PROGRAM_ADDRESS` comes from its own client.)
+export {
+    BPF_LOADER_2_PROGRAM_ID as BPF_LOADER_2_ADDRESS,
+    BPF_LOADER_PROGRAM_ID as BPF_LOADER_ADDRESS,
+    BPF_UPGRADEABLE_LOADER_PROGRAM_ID as BPF_UPGRADEABLE_LOADER_ADDRESS,
+    LOADER_V4_PROGRAM_ID as LOADER_V4_ADDRESS,
+    NATIVE_LOADER_PROGRAM_ID as NATIVE_LOADER_ADDRESS,
+} from '@explorer/entity-inspector/constants';
 
 /** The upgradeable program-data account prefixes its bytes with this many, so the program size subtracts it. */
 export const PROGRAM_DATA_HEADER_SIZE = 45;
 
-/**
- * OSEC hosts one verified-builds registry per cluster; testnet and custom have none.
- * Kept local to this feature so the server route never imports the client `verified-builds` module (SWR/React).
- */
-const OSEC_REGISTRY_URL_BY_CLUSTER: Partial<Record<ServerCluster, string>> = {
-    [Cluster.MainnetBeta]: 'https://verify.osec.io',
-    [Cluster.Devnet]: 'https://verify-devnet.osec.io',
-};
-
-export function getOsecRegistryUrl(cluster: ServerCluster): string | undefined {
-    return OSEC_REGISTRY_URL_BY_CLUSTER[cluster];
-}
+/** LoaderV4 accounts prefix their ELF with a slot (u64), authority (32), and status (u8) header. */
+export const LOADER_V4_HEADER_SIZE = 48;

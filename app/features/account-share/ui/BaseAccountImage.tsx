@@ -50,10 +50,10 @@ const NOT_FOUND_COPY: Record<NotFoundReason, { headline: string; pill: string; r
         pill: 'Not found',
         reason: 'No account data was found for this address on this cluster.',
     },
-    'other-cluster': {
-        headline: 'No account on this cluster',
+    unknown: {
+        headline: 'No account data found',
         pill: 'Not found',
-        reason: 'No account data was found on the cluster you are viewing — it may exist on another one.',
+        reason: 'No account data could be loaded for this address on this cluster.',
     },
 };
 
@@ -291,14 +291,7 @@ function ProgramFooter({ data }: { data: ProgramCardData }) {
                         <span style={{ color: COLORS.muted, ...TYPO.caption }}>·</span>
                     )}
                     {data.upgradeAuthority.note && (
-                        <span
-                            style={{
-                                color: data.upgradeAuthority.alert ? COLORS.alert : COLORS.secondary,
-                                ...TYPO.caption,
-                            }}
-                        >
-                            {data.upgradeAuthority.note}
-                        </span>
+                        <span style={{ color: COLORS.secondary, ...TYPO.caption }}>{data.upgradeAuthority.note}</span>
                     )}
                 </StackedCell>
             )}
