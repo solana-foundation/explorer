@@ -186,12 +186,11 @@ export type FetchAccountDataMode = 'parsed' | 'raw' | 'skip';
 type AccountsProviderProps = {
     children: React.ReactNode;
     /**
-     * Enrich parsed mints with Metaplex metadata. Off by default: it costs two serial RPC round trips
-     * per mint plus an off-chain JSON read, and only the address page renders the result.
+     * Adds Metaplex metadata to parsed mints. Only the address page renders it, and each mint costs
+     * sequential RPC calls and an off-chain JSON read.
      *
-     * Safe as a per-provider switch only because each mount owns its own cache — a page that opts out
-     * can never hand a stripped entry to a page that needs the metadata. Hoisting this provider to a
-     * shared layout would break that.
+     * Each mount has its own cache, so the address page reads only mints fetched with metadata.
+     * This provider must not move to a shared layout.
      */
     fetchNftMetadata?: boolean;
 };
@@ -359,9 +358,9 @@ async function fetchMultipleAccounts({
                 if (mint === undefined) {
                     settle(account);
                 } else {
-                    // Not awaited: metadata costs two more round trips, and awaiting it inside the loop
-                    // held back every account queued behind this one. Each mint settles once, with its
-                    // metadata, so a refresh landing meanwhile is never overwritten by a stale replay.
+                    // The metadata read is not awaited because an `await` here delays every account after
+                    // this mint. The mint settles once, with its metadata, so its entry stays `Fetching`
+                    // until the read resolves.
                     pendingMetadata.push(
                         fetchNftData(pubkey, url, { onError: ex => Logger.error(ex) }).then(nftData =>
                             settle({ ...account, data: { ...account.data, parsed: { ...mint, nftData } } }),
@@ -383,11 +382,10 @@ async function fetchMultipleAccounts({
         }
     }
 
-    // Reported, not thrown: this function is started from a timer, so a rejection would go unhandled.
+    // A timer calls this function without `await`, so a rejection must be caught here.
     await Promise.all(pendingMetadata).catch(onError);
 }
 
-/** The account's parsed data when it is a token mint, which is the only kind that carries NFT metadata. */
 function asMint(account: Account): TokenProgramData | undefined {
     const parsed = account.data.parsed;
     if (!parsed || !isTokenProgramData(parsed) || parsed.parsed.type !== 'mint') return undefined;

@@ -276,7 +276,7 @@ describe('AccountsProvider: NFT metadata', () => {
         };
     }
 
-    /** Reads `StateContext` rather than `useAccountInfo`, which also needs a real `ClusterProvider`. */
+    /** Reads `StateContext` because `useAccountInfo` also needs a real `ClusterProvider`. */
     function EntryStatus({ pubkey }: { pubkey: PublicKey }) {
         const state = React.useContext(StateContext);
         const key = pubkey.toBase58();
@@ -326,7 +326,6 @@ describe('AccountsProvider: NFT metadata', () => {
         );
         await flushDebounce();
 
-        // Two round trips per mint plus an off-chain read, for data only the address page renders.
         expect(fetchNftData).not.toHaveBeenCalled();
     });
 
@@ -355,7 +354,6 @@ describe('AccountsProvider: NFT metadata', () => {
         );
         await flushDebounce();
 
-        // Awaited inside the loop, the second mint's read only started once the first had resolved.
         expect(fetchNftData).toHaveBeenCalledTimes(2);
     });
 
@@ -392,8 +390,6 @@ describe('AccountsProvider: NFT metadata', () => {
         );
         await flushDebounce();
 
-        // One settle carrying the metadata, never a settle before it followed by a second one replaying
-        // the pre-metadata snapshot over whatever landed in between.
         expect(statusOf(MINT_A)).toBe(String(FetchStatus.Fetched));
         expect(capturedEntry(MINT_A)?.data?.data.parsed).toMatchObject({ nftData: metadata });
     });

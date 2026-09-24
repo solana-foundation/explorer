@@ -61,8 +61,6 @@ describe('fetchRawTransaction', () => {
 
         await fetchRawTransaction(URL, SIGNATURE);
 
-        // At the RPC default of `finalized` a confirmed-but-unrooted transaction comes back null, which
-        // leaves the size and the timestamp blank on a page that has already rendered everything else.
         expect(requestBody().params[1].commitment).toBe('confirmed');
     });
 

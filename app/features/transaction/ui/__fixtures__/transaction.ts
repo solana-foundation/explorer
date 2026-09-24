@@ -111,7 +111,6 @@ const BASE_TX = {
 
 export const MOCK_PARSED_TX = mockParsedTransactionDetails({ transactionWithMeta: BASE_TX });
 
-/** A transaction the cluster has not timestamped yet, so the summary renders its "Unavailable" row. */
 export const MOCK_PARSED_TX_NO_BLOCK_TIME = mockParsedTransactionDetails({
     transactionWithMeta: { ...BASE_TX, blockTime: null },
 });
@@ -192,7 +191,6 @@ const RAW_TX: RawTransaction = {
 
 export const MOCK_RAW_TX = mockRawTransactionDetails({ raw: { ...RAW_TX, blockTime: 1_716_000_000 } });
 
-/** The same wire bytes before the block is confirmed, when the RPC reports no time yet. */
 export const MOCK_RAW_TX_NO_BLOCK_TIME = mockRawTransactionDetails({ raw: RAW_TX });
 
 export const MOCK_NO_LOGS_TX = mockParsedTransactionDetails({

@@ -20,11 +20,8 @@ export type ClusterQueryResult<T> = {
 type Options = { enabled?: boolean };
 
 /**
- * The epoch schedule, fixed at genesis. Needed wherever a slot has to be mapped to an epoch.
- *
- * Returns the value alone, which collapses "not connected", "in flight" and "failed" into `undefined`.
- * Use the `*Result` form where those must be told apart — a consumer that hides itself when the value
- * is absent otherwise hides itself silently on a fetch error.
+ * Returns `undefined` for "not connected", "in flight" and "failed". Use `useEpochScheduleResult` where
+ * a consumer must report a fetch error.
  */
 export function useEpochSchedule(options: Options = {}): ClusterInfo['epochSchedule'] | undefined {
     return useEpochScheduleResult(options).data;
@@ -34,7 +31,7 @@ export function useEpochScheduleResult(options: Options = {}): ClusterQueryResul
     return useClusterQuery('epoch-schedule', fetchEpochSchedule, options);
 }
 
-/** The live epoch. Moves every slot, so nothing that only needs slot→epoch should reach for it. */
+/** Returns the epoch from the first fetch for the cluster URL. The hook never refetches it. */
 export function useEpochInfo(options: Options = {}): EpochInfo | undefined {
     return useEpochInfoResult(options).data;
 }
@@ -43,12 +40,11 @@ function useEpochInfoResult(options: Options = {}): ClusterQueryResult<EpochInfo
     return useClusterQuery('epoch-info', fetchEpochInfo, options);
 }
 
-/** The oldest block the endpoint still serves. Only the transaction-not-found card renders it. */
 export function useFirstAvailableBlock(options: Options = {}): bigint | undefined {
     return useClusterQuery('first-available-block', fetchFirstAvailableBlock, options).data;
 }
 
-/** Both epoch values, for pages that render both. Shares each half's SWR entry, so it adds no request. */
+/** Fetches both epoch values. Mapping a slot to an epoch needs only `useEpochSchedule`. */
 export function useClusterInfo(options: Options = {}): ClusterInfo | undefined {
     const epochSchedule = useEpochSchedule(options);
     const epochInfo = useEpochInfo(options);
@@ -59,11 +55,7 @@ export function useClusterInfo(options: Options = {}): ClusterInfo | undefined {
     );
 }
 
-/**
- * Fetches once the cluster is connected and a consumer actually mounts. SWR dedupes by key, so several
- * consumers of one value share a single request. Pass `enabled: false` to defer (e.g. the always-mounted
- * search bar only needs the epoch while a query is active).
- */
+/** SWR dedupes by key, so all consumers of one value share one request. */
 function useClusterQuery<T>(
     name: string,
     fetcher: (url: string) => Promise<T>,

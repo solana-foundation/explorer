@@ -139,7 +139,7 @@ describe('CUProfilingSection', () => {
     /**
      * The epoch schedule sets the CU reserve, so no schedule means no card. An empty card body is what
      * the user would otherwise get with no explanation, and only the error tells "failed" apart from
-     * "still loading" — `useEpochSchedule` returns undefined for both.
+     * "still loading". `useEpochSchedule` returns undefined for both.
      */
     describe('when the epoch schedule cannot be loaded', () => {
         beforeEach(() => {
