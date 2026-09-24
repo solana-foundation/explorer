@@ -37,6 +37,18 @@ Write for a reader who reads the words, not the culture behind them.
 Before: A paragraph surviving only because it "reads nicely" goes.
 After: Good style is not a reason to keep a sentence.
 
+## Use the established name
+
+Names are the vocabulary a reader searches for. An invented synonym is a search miss.
+
+- Reuse the name the codebase already has for a concept: the existing constant, type, function, or doc term.
+  `NOT_FOUND` exists, so `NOT_SERVED` is not a new concept, it is a second name for the same one.
+- Where the codebase has no name, take the one the domain or the platform uses: `fetch`, not `obtain`; `decode`,
+  not `unpack`; the Solana term, not a paraphrase of it.
+- One concept, one word, in code and prose alike. Do not rotate synonyms for variety.
+- Coin a name only for a concept that has none, and put a one-line comment next to it saying what sets the
+  concept apart from its nearest existing neighbour.
+
 ## Outlive the next change
 
 Text stays in the repository after the code around it changes. Write what is still true after an unrelated
@@ -46,9 +58,11 @@ refactor.
 - No words that date the text. Typical: "currently", "for now", "new", "legacy". State the condition instead:
   "until the RPC supports batch requests".
 - Point at names, not positions. "The function above", "see below", "the previous section", or a line number
-  break on the next edit. Name the symbol, heading, or file.
+  break on the next edit. Name the symbol, heading, or file. Never a line number.
+- Text that describes one moment (a review finding, task evidence) names the file and the commit it was read at:
+  `path at <sha>`, or a permalink with a commit hash. The symbol inside the file, not its line, says where.
 - In code, point at a symbol with `{@link}` so a rename follows it. In markdown, write a path as a relative link:
-  a rename breaks it loudly. A line-number link breaks silently. Never use one.
+  a rename breaks it loudly.
 - Do not describe another module's behaviour. State what this code requires of it, or enforce the requirement
   in a type, an assertion, or a test.
 - Do not repeat a value the code owns: a default, a limit, a list of variants. Name the constant.
@@ -91,5 +105,9 @@ The contract in 1 to 3 lines. Never restate the signature. Keep `@example` block
 
 ## Spelling
 
-Match the spelling convention of the file you are editing. In a new file, match its nearest neighbour. Identifiers,
-quoted text, and proper nouns keep their source spelling.
+Spelling variant only, en-GB or en-US. This section says nothing about the shape or quality of nearby text.
+
+- Editing a file: keep the variant the file already uses. Never respell existing prose.
+- New file: use the variant of the repository's root docs (`AGENTS.md`, then `README.md`). Where they disagree or
+  say nothing, en-US.
+- Identifiers, quoted text, and proper nouns keep their source spelling.
