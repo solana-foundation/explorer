@@ -29,5 +29,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
+    // `matcher` repeats `SITEMAP_PATHS` because Next.js parses the exported `config` statically.
     matcher: ['/api/:path*', '/sitemap.xml', '/default-sitemap.xml', '/accounts-sitemap.xml'],
 };

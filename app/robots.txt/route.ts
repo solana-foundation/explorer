@@ -5,13 +5,11 @@ import { NextResponse } from 'next/server';
 
 import { ifNoneMatchMatches, notModifiedResponse } from '@/app/shared/lib/http-utils';
 
-// s-maxage is explicit but redundant: max-age already governs the shared cache. A flag flip waits
-// out the freshness window either way, and the ETag only saves bytes once the entry goes stale.
 const ROBOTS_CACHE_HEADERS = {
     'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
 };
 
-// Google resolves a path by longest match, not by order, so `/mcp/start` stays reachable.
+// Crawlers use the longest matching rule (RFC 9309), so `Allow: /mcp/start` takes precedence over `Disallow: /mcp`.
 const ALLOW_BOTS_CONTENT = `User-agent: *
 Allow: /
 Allow: /mcp/start

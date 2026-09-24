@@ -23,7 +23,7 @@ describe('GET /robots.txt', () => {
         expect(body).toContain('Sitemap: https://explorer.solana.com/sitemap.xml');
     });
 
-    it('should keep the MCP endpoint closed and its landing page open', async () => {
+    it('should disallow /mcp and allow /mcp/start', async () => {
         const body = await GET(createRequest()).text();
 
         expect(body).toContain('Disallow: /mcp\n');

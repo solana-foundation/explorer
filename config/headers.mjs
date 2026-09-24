@@ -1,15 +1,11 @@
 const SEO_FILE_HEADERS = [{ key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' }];
 
-// robots.txt is absent here: its route handler owns its own Cache-Control.
 const SITEMAP_PATHS = ['/sitemap.xml', '/default-sitemap.xml', '/accounts-sitemap.xml'];
 
 /**
- * Build the header table consumed by `next.config.mjs`.
- * Extracted so it can be unit-tested without loading the Sentry/BotID wrappers.
- *
- * Node loads the config unbundled, so this cannot import the TypeScript flag helper and re-checks
- * the variable itself. That also pins `X-Robots-Tag` to build time, unlike the request-time reads
- * elsewhere — set the variable for the build, not only for the runtime.
+ * Next.js imports `next.config.mjs` without a bundler, so this file reads `SEO_DISALLOW_BOTS` instead of
+ * importing `@utils/env`.
+ * Next.js calls `headers()` at build time, so `X-Robots-Tag` needs `SEO_DISALLOW_BOTS` set for the build.
  *
  * @returns {Array<{ source: string; headers: Array<{ key: string; value: string }> }>}
  */

@@ -21,7 +21,7 @@ describe('next headers', () => {
         },
     );
 
-    it('should leave robots.txt to the route handler, which owns its own Cache-Control', () => {
+    it('should skip robots.txt because its route handler sets Cache-Control', () => {
         expect(buildHeaders().some(entry => entry.source === '/robots.txt')).toBe(false);
     });
 

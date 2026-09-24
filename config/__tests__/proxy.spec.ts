@@ -55,7 +55,7 @@ describe('Next.js proxy', () => {
             },
         );
 
-        it('should pass sitemap requests through when the flag is not set', async () => {
+        it('should return 200 for a sitemap when SEO_DISALLOW_BOTS is not set', async () => {
             const response = await proxy(createRequest('/sitemap.xml'));
 
             expect(response.status).toBe(200);
