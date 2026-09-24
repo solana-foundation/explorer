@@ -1,7 +1,6 @@
-import { createSolanaRpc } from '@solana/kit';
-
 import type { EpochInfo } from '../lib/types';
+import { getRpc } from './get-rpc';
 
 export async function fetchEpochInfo(url: string): Promise<EpochInfo> {
-    return createSolanaRpc(url).getEpochInfo().send();
+    return getRpc(url).getEpochInfo().send();
 }

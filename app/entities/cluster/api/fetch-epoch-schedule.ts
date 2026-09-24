@@ -1,6 +1,7 @@
-import { createSolanaRpc } from '@solana/kit';
 import type { EpochSchedule } from '@utils/epoch-schedule';
 
+import { getRpc } from './get-rpc';
+
 export async function fetchEpochSchedule(url: string): Promise<EpochSchedule> {
-    return createSolanaRpc(url).getEpochSchedule().send();
+    return getRpc(url).getEpochSchedule().send();
 }
