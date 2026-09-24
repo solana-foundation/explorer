@@ -1,4 +1,4 @@
-import { type Address, getAddressDecoder } from '@solana/kit';
+import { type Address, getAddressDecoder, type ReadonlyUint8Array } from '@solana/kit';
 
 import { readUint8, readUint16LE } from '@/app/shared/lib/bytes';
 
@@ -43,7 +43,7 @@ export type Ed25519SignatureDetails = {
  * Wire data of the transaction's instruction at `index`, or `undefined` when there is no such
  * instruction or its bytes are unavailable (an RPC-parsed neighbour carries no wire data).
  */
-export type SiblingInstructionData = (index: number) => Uint8Array | undefined;
+export type SiblingInstructionData = (index: number) => ReadonlyUint8Array | undefined;
 
 // See https://docs.anza.xyz/runtime/programs/#ed25519-program
 export function decodeEd25519Offsets(data: Uint8Array): Ed25519SignatureOffsets[] {

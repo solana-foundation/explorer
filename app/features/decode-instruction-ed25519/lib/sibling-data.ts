@@ -14,7 +14,7 @@ export function siblingDataFromParsedTransaction(tx: ParsedTransaction): Sibling
             return undefined;
         }
         try {
-            return BASE58_ENCODER.encode(target.data) as Uint8Array;
+            return BASE58_ENCODER.encode(target.data);
         } catch {
             return undefined;
         }

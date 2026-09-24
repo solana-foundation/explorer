@@ -290,11 +290,22 @@ function InspectorInstructionCard({
                     raw={ix}
                     siblingData={siblingIndex => message.compiledInstructions[siblingIndex]?.data}
                     index={index}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
                 />
             );
         }
         if (parsedIx.programLabel === 'zk-elgamal-proof') {
-            return <ZkElGamalProofDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />;
+            return (
+                <ZkElGamalProofDetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    raw={ix}
+                    index={index}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            );
         }
         if (parsedIx.programLabel === 'pyth') {
             return (
