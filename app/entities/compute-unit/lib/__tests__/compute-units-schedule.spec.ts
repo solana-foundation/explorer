@@ -157,6 +157,36 @@ describe('getReservedComputeUnits', () => {
         });
     });
 
+    describe('simd296 cluster', () => {
+        it('should use the most recent configuration, whose activation epoch is also 0', () => {
+            // Every config activates at epoch 0 on this cluster, so the tie has
+            // to resolve to the newest one rather than the initial one.
+            expect(
+                getReservedComputeUnits({
+                    cluster: Cluster.Simd296,
+                    epoch: 0n,
+                    programId: '11111111111111111111111111111111',
+                }),
+            ).toEqual(3_000);
+
+            expect(
+                getReservedComputeUnits({
+                    cluster: Cluster.Simd296,
+                    epoch: 1000n,
+                    programId: '11111111111111111111111111111111',
+                }),
+            ).toEqual(3_000);
+
+            expect(
+                getReservedComputeUnits({
+                    cluster: Cluster.Simd296,
+                    epoch: 1000n,
+                    programId: 'Feature111111111111111111111111111111111111',
+                }),
+            ).toEqual(200_000);
+        });
+    });
+
     describe('edge cases', () => {
         it('should handle undefined epoch', () => {
             expect(
