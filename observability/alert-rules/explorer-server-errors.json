@@ -1,0 +1,92 @@
+{
+    "uid": "explorer-server-errors",
+    "title": "explorer: server error log spike",
+    "ruleGroup": "explorer-availability",
+    "folderUID": "explorer",
+    "noDataState": "OK",
+    "execErrState": "OK",
+    "for": "5m",
+    "data": [
+        {
+            "refId": "A",
+            "datasourceUid": "grafanacloud-logs",
+            "queryType": "range",
+            "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+            },
+            "model": {
+                "expr": "sum(rate({service=\"explorer\", env=\"prd\", level=~\"error|fatal\"}[5m]))",
+                "queryType": "range",
+                "refId": "A"
+            }
+        },
+        {
+            "refId": "B",
+            "datasourceUid": "__expr__",
+            "queryType": "",
+            "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+            },
+            "model": {
+                "type": "reduce",
+                "refId": "B",
+                "expression": "A",
+                "reducer": "last",
+                "settings": {
+                    "mode": "replaceNN",
+                    "replaceWithValue": 0
+                }
+            }
+        },
+        {
+            "refId": "C",
+            "datasourceUid": "__expr__",
+            "queryType": "",
+            "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+            },
+            "model": {
+                "type": "threshold",
+                "refId": "C",
+                "expression": "B",
+                "conditions": [
+                    {
+                        "evaluator": {
+                            "type": "gt",
+                            "params": [0.1]
+                        },
+                        "operator": {
+                            "type": "and"
+                        },
+                        "query": {
+                            "params": ["B"]
+                        },
+                        "reducer": {
+                            "type": "last",
+                            "params": []
+                        },
+                        "type": "query"
+                    }
+                ]
+            }
+        }
+    ],
+    "condition": "C",
+    "labels": {
+        "service": "explorer",
+        "severity": "critical",
+        "slack": "true"
+    },
+    "annotations": {
+        "summary": "explorer error-log rate above threshold",
+        "description": "explorer is emitting more than 0.1 error/fatal log lines per second sustained over 5m (Loki stream label `level`, set by /api/log-drain from Vercel's level field). Open the Explorer dashboard's Recent errors panel, or Vercel logs with the level=error filter, to triage. Sentry has the stack traces.",
+        "runbook_url": "https://github.com/solana-foundation/explorer/blob/master/docs/observability.md"
+    },
+    "notification_settings": {
+        "receiver": "explorer-slack"
+    },
+    "isPaused": false
+}

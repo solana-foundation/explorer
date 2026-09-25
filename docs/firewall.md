@@ -7,7 +7,7 @@ Bypass for Automation secret here.
 ## Rules to configure
 
 Bot Filter is active at `challenge`, so anything Vercel cannot identify as a browser gets `429` +
-`x-vercel-mitigated: challenge`. Some rules below exempt a path that breaks under it, the rest cap how fast one client can hit a path an exemption opened. All eleven must exist in the dashboard, and live config matches this set.
+`x-vercel-mitigated: challenge`. Some rules below exempt a path that breaks under it, the rest cap how fast one client can hit a path an exemption opened. All twelve must exist in the dashboard, and live config matches this set.
 
 Rules named `[EMERGENCY]` are disabled by default. Switch them on during a spike, off afterwards.
 
@@ -19,6 +19,7 @@ Rules named `[EMERGENCY]` are disabled by default. Switch them on during a spike
 | `Bypass /tx/<sig> transaction page`        | `/tx/<sig>`               | Shared Transaction links do not unfurl — the crawler fetches the page, not just the image | [below](#rules-to-configure)      |
 | `Bypass feature gate pages`                | `/address/…/feature-gate` | Shared feature gate links do not unfurl, for the same reason                          | [below](#rules-to-configure)      |
 | `Bypass MCP endpoint`                      | `/mcp`                    | Unreachable to every MCP client                                                       | [`app/mcp`](../app/mcp/README.md) |
+| `Bypass log drain endpoint`                | `/api/log-drain`          | Vercel's log-drain deliveries are not browsers; challenged, no log reaches Grafana    | [`docs/observability.md`](observability.md) |
 | `[EMERGENCY] Rate limit MCP` (disabled)                | `/mcp`                    | No way to throttle a spike without closing the endpoint                               | [`app/mcp`](../app/mcp/README.md) |
 | `Rate limit og/tx image route (IP)`        | `/og/tx/`                 | One client renders OG images unmetered, each uncached one an RPC call                 | [below](#rate-limits)             |
 | `Rate limit /tx/<sig> transaction page (IP)` | `/tx/<sig>`             | One client scrapes tx pages unmetered, the bypass having already cleared Bot Filter    | [below](#rate-limits)             |
@@ -93,6 +94,17 @@ challenged, so no crawler reads the tag. Nothing cheap fixes it. A rule cannot t
 from the path alone, so it would either exempt every account page or enumerate the 100 keys in
 `feature-gates.json` — 4.5 kB of alternation, stale on the next SIMD. A redirect does not work either: routing runs
 after the firewall, so the request is challenged before anything can redirect it. Share the `/feature-gate` URL.
+
+```
+Name: Bypass log drain endpoint
+Description: Bypass Bot Protection for the Vercel log-drain receiver: `^/api/log-drain$`
+Rule:
+    If `Request Path` `Equals` `/api/log-drain`
+    Then `Bypass`
+```
+
+The route authenticates its caller with `x-vercel-drain-secret`, so the bypass exposes nothing an unauthenticated
+client can use.
 
 ## Rate limits
 

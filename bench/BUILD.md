@@ -34,6 +34,7 @@
 | Dynamic | `/api/domain-info/[domain]` | — | — |
 | Dynamic | `/api/geo-location` | — | — |
 | Dynamic | `/api/idl-latest` | — | — |
+| Dynamic | `/api/log-drain` | — | — |
 | Dynamic | `/api/metadata/proxy` | — | — |
 | Dynamic | `/api/ping/[network]` | — | — |
 | Dynamic | `/api/search` | — | — |
