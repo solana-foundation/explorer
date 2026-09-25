@@ -18,6 +18,10 @@ vi.mock('@/app/shared/lib/sentry', () => ({
     withTraceData: vi.fn(() => ({})),
 }));
 
+vi.mock('@/app/shared/lib/sentry/server', () => ({
+    wrapMcpServerWithSentry: vi.fn(server => server),
+}));
+
 vi.mock('@/app/shared/lib/sentry/client', () => ({
     sendFeedback: vi.fn(async () => 'test-event-id'),
 }));
