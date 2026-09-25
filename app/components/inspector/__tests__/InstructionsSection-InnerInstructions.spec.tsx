@@ -157,6 +157,75 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         expect(title.parentElement).toHaveTextContent('#1.2');
     });
 
+    test('should number an inner Compute Budget card under its parent', async () => {
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection
+                                    message={buildMessage()}
+                                    compiledInnerInstructions={INNER_COMPUTE_BUDGET_SET_LIMIT}
+                                />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        const title = await screen.findByText(/Compute Budget Program: Set Compute Unit Limit/i);
+
+        // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
+        expect(title.parentElement).toHaveTextContent('#1.2');
+    });
+
+    test('should number an inner Memo card under its parent', async () => {
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection message={buildMessage()} compiledInnerInstructions={INNER_MEMO} />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        const title = await screen.findByText(/Memo Program: Memo/i);
+
+        // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
+        expect(title.parentElement).toHaveTextContent('#1.2');
+    });
+
+    test('should number an inner Address Lookup Table card under its parent', async () => {
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection
+                                    message={buildMessage()}
+                                    compiledInnerInstructions={INNER_ALT_FREEZE}
+                                />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        const title = await screen.findByText(/Address Lookup Table: Freeze Lookup Table/i);
+
+        // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
+        expect(title.parentElement).toHaveTextContent('#1.2');
+    });
+
     test('should number a child it cannot decompile so the siblings keep their positions', async () => {
         render(
             <ScrollAnchorProvider>
@@ -285,6 +354,8 @@ const ATA_PROGRAM = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
 const COMPUTE_BUDGET_PROGRAM = new PublicKey('ComputeBudget111111111111111111111111111111');
 const ZK_ELGAMAL_PROOF_PROGRAM = new PublicKey('ZkE1Gama1Proof11111111111111111111111111111');
 const PYTH_PROGRAM = new PublicKey('FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH');
+const MEMO_PROGRAM = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
+const ADDRESS_LOOKUP_TABLE_PROGRAM = new PublicKey('AddressLookupTab1e1111111111111111111111111');
 
 // The account list of the transaction in HOO-611, in wire order.
 const ACCOUNT_KEYS = [
@@ -299,6 +370,8 @@ const ACCOUNT_KEYS = [
     ATA_PROGRAM, // 8
     ZK_ELGAMAL_PROOF_PROGRAM, // 9
     PYTH_PROGRAM, // 10
+    MEMO_PROGRAM, // 11
+    ADDRESS_LOOKUP_TABLE_PROGRAM, // 12
 ];
 
 // The four CPIs the RPC reports for the Create Idempotent instruction, verbatim
@@ -367,6 +440,52 @@ const INNER_PYTH_INIT_MAPPING: CompiledInnerInstruction[] = [
     },
 ];
 
+// A System CreateAccount followed by a Compute Budget SetComputeUnitLimit: discriminator 2, u32 limit 200_000.
+const INNER_COMPUTE_BUDGET_SET_LIMIT: CompiledInnerInstruction[] = [
+    {
+        index: 0,
+        instructions: [
+            {
+                accounts: [0, 2],
+                data: '11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL',
+                programIdIndex: 3,
+            },
+            { accounts: [], data: encodeBase58([2, 64, 13, 3, 0]), programIdIndex: 5 },
+        ],
+    },
+];
+
+// A System CreateAccount followed by a Memo whose data is the UTF-8 text "hi".
+const INNER_MEMO: CompiledInnerInstruction[] = [
+    {
+        index: 0,
+        instructions: [
+            {
+                accounts: [0, 2],
+                data: '11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL',
+                programIdIndex: 3,
+            },
+            { accounts: [0], data: encodeBase58([104, 105]), programIdIndex: 11 },
+        ],
+    },
+];
+
+// A System CreateAccount followed by an Address Lookup Table Freeze: u32 discriminator 1, over
+// the table and its authority.
+const INNER_ALT_FREEZE: CompiledInnerInstruction[] = [
+    {
+        index: 0,
+        instructions: [
+            {
+                accounts: [0, 2],
+                data: '11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL',
+                programIdIndex: 3,
+            },
+            { accounts: [1, 0], data: encodeBase58([1, 0, 0, 0]), programIdIndex: 12 },
+        ],
+    },
+];
+
 // Three CPIs. The middle one names an account index the message does not have.
 const INNER_WITH_BAD_ACCOUNT: CompiledInnerInstruction[] = [
     {
@@ -397,7 +516,7 @@ function buildMessage(): MessageV0 {
         ],
         header: {
             numReadonlySignedAccounts: 0,
-            numReadonlyUnsignedAccounts: 8,
+            numReadonlyUnsignedAccounts: 10,
             numRequiredSignatures: 1,
         },
         recentBlockhash: new PublicKey(new Uint8Array(32)).toBase58(),
