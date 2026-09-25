@@ -1,4 +1,6 @@
 // Modelled on @codama/errors; WARNING: don't remove, change, or renumber error codes.
+import { err as baseErr, type Result as BaseResult } from '@explorer/utils';
+
 import type { IdlStandard } from './types.js';
 
 export const IDL_ERROR__UNSUPPORTED_IDL_FORMAT = 1;
@@ -92,9 +94,7 @@ export function isIdlError<TCode extends IdlErrorCode = IdlErrorCode>(e: unknown
 }
 
 /** Error-first result tuple for single-attempt operations on untrusted input. */
-export type Result<T, TCode extends IdlErrorCode = IdlErrorCode> =
-    | readonly [IdlError<TCode>, undefined]
-    | readonly [undefined, T];
+export type Result<T, TCode extends IdlErrorCode = IdlErrorCode> = BaseResult<T, IdlError<TCode>>;
 
-export const ok = <T>(value: T): Result<T, never> => [undefined, value];
-export const err = <TCode extends IdlErrorCode>(error: IdlError<TCode>): Result<never, TCode> => [error, undefined];
+export { ok } from '@explorer/utils';
+export const err = <TCode extends IdlErrorCode>(error: IdlError<TCode>): Result<never, TCode> => baseErr(error);

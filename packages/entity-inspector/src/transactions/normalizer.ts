@@ -1,8 +1,9 @@
 // Ported from the solana-mcp-official fork (feat/account-resolver) — validates the probe's message
 // integrity before index resolution so a malformed RPC response fails loudly, not with wrong data.
+import { err, ok, type Result } from '@explorer/utils';
+
 import { type InspectorLogger, ns } from '../logger.js';
 import { asRecord, asSafeNumeric } from '../shared/parse-helpers.js';
-import { err, ok, type Result } from '../shared/result.js';
 import type {
     CompiledInnerInstruction,
     CompiledInstruction,
