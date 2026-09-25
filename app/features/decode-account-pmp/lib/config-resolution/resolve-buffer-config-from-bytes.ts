@@ -102,7 +102,8 @@ export function resolveBufferConfigFromBytes(body: Uint8Array): ConfigResolution
     // over-allocated account carries trailing zeros inside its body. The trim is kept ONLY when it turned a
     // failing parse into a passing one, which is what makes it evidence rather than a guess.
     //
-    // A PARSING device only: `payload` and `dataHash` stay as stored, so the digest matches the instruction card's.
+    // The trim affects only format detection:
+    // `payload` and `dataHash` use the stored bytes to match the instruction card.
     //
     // Never applied before the inflate: pako stops at the end of a stream on its own, so slack after a compressed
     // payload is already harmless.

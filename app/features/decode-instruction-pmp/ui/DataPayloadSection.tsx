@@ -105,11 +105,7 @@ function getPayloadAccountLabel(pmpIx: PmpPayloadInstruction): string {
     return pmpIx.kind === 'setData' ? 'Source buffer account' : 'Metadata account';
 }
 
-/**
- * Names the account the instruction points at, reads it, and once the read resolves to a payload, hashes it.
- * The caller guarantees `address` is a real address, so `usePmpAccountPayload` never reports `loading` for an
- * account nobody named.
- */
+/** Shows the account that holds the payload, loads its data, and the payload hash. */
 function AccountRows({
     address,
     dataSource,
