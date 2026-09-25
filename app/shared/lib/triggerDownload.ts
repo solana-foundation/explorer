@@ -1,5 +1,4 @@
 import { fromBase64, isValidBase64 } from './bytes';
-import { formatBytes } from './format-bytes';
 
 export interface DownloadOptions {
     /** MIME type for the file */
@@ -43,6 +42,14 @@ const triggerDownloadBlob = (blob: Blob, filename: string): void => {
             tempLink.parentNode.removeChild(tempLink);
         }
     }
+};
+
+const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
 };
 
 /**
