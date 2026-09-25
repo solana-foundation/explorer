@@ -174,14 +174,15 @@ For non-security bugs, please use GitHub Issues with the following information:
 
 You may use AI-assisted tools. Review the generated code, understand its behavior, and run the same checks expected of any other contribution.
 
-Point Claude Code, Cursor, Copilot, Codex, or similar tools at [`AGENTS.md`](./AGENTS.md) and the skills under [`.agents/skills/`](./.agents/skills/). They carry the project's conventions, code style, and writing contract, so the agent matches the codebase instead of rediscovering it.
+If you are building with AI on Solana, check out the [Solana Dev Skill](https://github.com/solana-foundation/solana-dev-skill) or the [Solana MCP](https://mcp.solana.com/) to aid in your work. The Explorer also serves its own MCP endpoint at [explorer.solana.com/mcp](https://explorer.solana.com/mcp) for inspecting on-chain entities. This repository ships [`AGENTS.md`](./AGENTS.md) and skills under [`.agents/skills/`](./.agents/skills/) that carry the repo's conventions, code style, and writing contract; point your tooling at them rather than rediscovering the codebase from scratch.
 
-Maintainers can close PRs that look like low-effort AI output. Audit your changes for these patterns before opening one:
+Ensure that the generated code adheres to the project's coding standards and best practices. Maintainers can close PRs if they appear to be low-effort AI slop. In particular, audit your changes for the following AI code smells that increase maintenance burden:
 
--   Comments that explain why the _previous_ behavior was wrong and the new one is correct. That context belongs in the PR description, not in the codebase.
--   Dense comment blocks. A comment states _why_ the code does something when that is not obvious, not _what_ it does.
--   Drive-by refactoring of code unrelated to the change.
--   Tests that would pass against a broken implementation. A test asserting a parser rejects malformed data is worthless unless it also asserts that well-formed data renders, and it must fail if the parser were replaced by one that rejects everything.
+-   Comments that explain why the _previous_ behavior was wrong and the new behavior is correct. This can be helpful context for reviewers as a GitHub comment in the review, but we do not need a history of every code change living in the codebase.
+-   Large blocks of comments with a high density of technical jargon. Comments should be distilled to clearly explain _why_ this code is doing something (if it is not obvious), not _what_ (the code should speak for itself).
+-   Drive-by refactoring of code that is not relevant to the actual change being made.
+
+Be especially careful with AI-generated tests here. A test that asserts a protocol card renders is worthless if it would pass with an empty card. Assert the specific field values the card shows, as described in [Testing Protocol Integrations](#testing-protocol-integrations), and make sure the test fails when the parser returns wrong data.
 
 You must be able to explain every line of your diff without an LLM. Reviewers may ask a pointed question about any part of the change; if the answer is pasted from a model or does not come, the PR is closed.
 
