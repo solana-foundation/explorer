@@ -11,6 +11,7 @@ Thank you for your interest in contributing to the Solana Explorer project! This
 -   [Testing Protocol Integrations](#testing-protocol-integrations)
 -   [CI/CD Requirements](#cicd-requirements)
 -   [Bug Reporting](#bug-reporting)
+-   [AI Use](#ai-use)
 -   [Pull Request Process](#pull-request-process)
 
 ## Getting Started
@@ -19,8 +20,6 @@ Thank you for your interest in contributing to the Solana Explorer project! This
 2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/explorer.git`
 3. Install dependencies: `pnpm i --frozen-lockfile`
 4. Create a new branch for your feature: `git checkout -b feature/your-feature-name`
-
-> **Using an AI coding agent?** Point Claude Code, Cursor, Copilot, or similar tools at [`AGENTS.md`](./AGENTS.md) — it captures the project's architectural conventions and code style so the agent matches the codebase.
 
 > **Important Note**: Wallet connection is intentionally scoped to the interactive IDL feature (executing program instructions defined by Anchor or Codama IDLs). PRs that broaden wallet adapter usage, add new wallet-connected flows, or introduce general transaction-signing UI elsewhere will not be accepted. Please check with maintainers before starting related work.
 
@@ -171,11 +170,35 @@ For non-security bugs, please use GitHub Issues with the following information:
 -   Screenshots if applicable
 -   Environment information (browser, OS, etc.)
 
+## AI Use
+
+You may use AI-assisted tools. Review the generated code, understand its behavior, and run the same checks expected of any other contribution.
+
+If you are building with AI on Solana, check out the [Solana Dev Skill](https://github.com/solana-foundation/solana-dev-skill) or the [Solana MCP](https://mcp.solana.com/) to aid in your work. The Explorer also serves its own MCP endpoint at [explorer.solana.com/mcp](https://explorer.solana.com/mcp) for inspecting on-chain entities. This repository ships [`AGENTS.md`](./AGENTS.md) and skills under [`.agents/skills/`](./.agents/skills/) that carry the repo's conventions, code style, and writing contract; point your tooling at them rather than rediscovering the codebase from scratch.
+
+Ensure that the generated code adheres to the project's coding standards and best practices. Maintainers can close PRs if they appear to be low-effort AI slop. In particular, audit your changes for the following AI code smells that increase maintenance burden:
+
+-   Comments that explain why the _previous_ behavior was wrong and the new behavior is correct. This can be helpful context for reviewers as a GitHub comment in the review, but we do not need a history of every code change living in the codebase.
+-   Large blocks of comments with a high density of technical jargon. Comments should be distilled to clearly explain _why_ this code is doing something (if it is not obvious), not _what_ (the code should speak for itself).
+-   Drive-by refactoring of code that is not relevant to the actual change being made.
+
+Be especially careful with AI-generated tests here. A test that asserts a protocol card renders is worthless if it would pass with an empty card. Assert the specific field values the card shows, as described in [Testing Protocol Integrations](#testing-protocol-integrations), and make sure the test fails when the parser returns wrong data.
+
+You must be able to explain every line of your diff without an LLM. Reviewers may ask a pointed question about any part of the change; if the answer is pasted from a model or does not come, the PR is closed.
+
+Tool attribution left in a PR (a `Generated with Claude Code` footer, a `Co-Authored-By: Claude` trailer, a `cursor/` or `codex/` branch, and the like) tells us the submission was opened without being read. Remove it before requesting review.
+
+### Communication
+
+When maintainers ask questions or suggest changes, do not relay the question to an LLM and paste its answer back. Distilling what the tool produced is what makes your contribution valuable.
+
 ## Pull Request Process
 
 1. Create a branch with a descriptive name using a conventional prefix — `feat/...`, `fix/...`, `chore/...`, or `hotfix/...` (e.g. `feat/your-feature`)
 2. Make your changes, following the code style guidelines
 3. Add tests for your changes
 4. Push your changes and create a pull request
-5. Include screenshots — required for protocol screens, recommended for other UI changes
-6. Request review ONLY after CI/CD has passed and screenshots have been uploaded
+5. Fill in every applicable section of the pull request template; mark inapplicable sections as N/A or leave them blank
+6. Include screenshots — required for protocol screens, recommended for other UI changes
+7. Resolve every Greptile comment with a code fix or an explanation of why no change is needed
+8. Request review ONLY after CI/CD has passed, screenshots have been uploaded, and Greptile comments are resolved
