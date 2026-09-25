@@ -4,10 +4,11 @@ import { Epoch } from '@components/common/Epoch';
 import { ExternalLinkWarning } from '@components/common/ExternalLinkWarning';
 import { Slot } from '@components/common/Slot';
 import { cn } from '@components/shared/utils';
-import { type BlockWithV1, summarizeBlockTransactionVersions } from '@entities/block-data';
+import { type BlockData, isBlockTransaction, summarizeBlockTransactionVersions } from '@entities/block-data';
 import { summarizeBlockComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
-import { PublicKey } from '@solana/web3.js';
+import { Alert } from '@shared/ui/Alert';
+import type { Address as KitAddress, Slot as KitSlot } from '@solana/kit';
 import { IBRL_EXPLORER_URL } from '@utils/env';
 import { ExternalLink } from 'react-feather';
 
@@ -16,13 +17,13 @@ import { Card } from '@/app/shared/ui/Card';
 import { KeyValue, TextValue } from '@/app/shared/ui/key-value';
 
 type BlockOverviewCardProps = {
-    block: BlockWithV1;
+    block: BlockData;
     slot: number;
     epoch: bigint | undefined;
-    blockLeader?: PublicKey;
-    childSlot?: number;
-    childLeader?: PublicKey;
-    parentLeader?: PublicKey;
+    blockLeader?: KitAddress;
+    childSlot?: KitSlot;
+    childLeader?: KitAddress;
+    parentLeader?: KitAddress;
     className?: string;
 };
 
@@ -42,13 +43,16 @@ export function BlockOverviewCard({
         consumed: totalCUs,
         requested: totalRequestedCUs,
         cost: totalCostUnits,
+        incomplete: computeTotalsIncomplete,
         max: maxComputeUnits,
     } = summarizeBlockComputeUnits({ block, cluster, epoch });
+    const maxCostUnits = BigInt(maxComputeUnits);
+    const totalCostPercent = ((totalCostUnits * 100n + maxCostUnits / 2n) / maxCostUnits).toString();
 
-    const { entries: versionEntries } = summarizeBlockTransactionVersions(block);
+    const { entries: versionEntries, incomplete: versionsIncomplete } = summarizeBlockTransactionVersions(block);
 
-    const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
-    const successfulTxs = block.transactions.filter(tx => tx.meta?.err === null);
+    const showSuccessfulCount = block.transactions.every(tx => isBlockTransaction(tx) && tx.meta !== null);
+    const successfulTxs = block.transactions.filter(tx => isBlockTransaction(tx) && tx.meta?.err === null);
 
     return (
         <section className={cn('flex flex-col gap-3', className)}>
@@ -63,6 +67,12 @@ export function BlockOverviewCard({
                     </ExternalLinkWarning>
                 )}
             </div>
+            {(computeTotalsIncomplete || versionsIncomplete) && (
+                <Alert variant="warning" className="mb-0">
+                    Some transactions could not be parsed. Version counts and compute totals include only readable
+                    transactions.
+                </Alert>
+            )}
             <Card ui="dashkit">
                 <KeyValue label="Blockhash">
                     <Copyable text={block.blockhash}>
@@ -76,11 +86,11 @@ export function BlockOverviewCard({
                 </KeyValue>
                 {blockLeader !== undefined && (
                     <KeyValue label="Slot Leader">
-                        <Address pubkey={blockLeader} link noTruncate />
+                        <Address address={blockLeader} link noTruncate />
                     </KeyValue>
                 )}
                 <KeyValue label="Timestamp">
-                    {block.blockTime ? <Timestamp unixTimestamp={block.blockTime} /> : 'Unavailable'}
+                    {block.blockTime ? <Timestamp unixTimestamp={Number(block.blockTime)} /> : 'Unavailable'}
                 </KeyValue>
                 {epoch !== undefined && (
                     <KeyValue label="Epoch">
@@ -97,7 +107,7 @@ export function BlockOverviewCard({
                 </KeyValue>
                 {parentLeader !== undefined && (
                     <KeyValue label="Parent Slot Leader">
-                        <Address pubkey={parentLeader} link noTruncate />
+                        <Address address={parentLeader} link noTruncate />
                     </KeyValue>
                 )}
                 {childSlot !== undefined && (
@@ -107,7 +117,7 @@ export function BlockOverviewCard({
                 )}
                 {childLeader !== undefined && (
                     <KeyValue label="Child Slot Leader">
-                        <Address pubkey={childLeader} link noTruncate />
+                        <Address address={childLeader} link noTruncate />
                     </KeyValue>
                 )}
                 <KeyValue label="Processed Transactions">{block.transactions.length}</KeyValue>
@@ -119,17 +129,20 @@ export function BlockOverviewCard({
                                 {label}: {count.toLocaleString()}{' '}
                                 <span className="text-outer-space-300">({Math.round(share * 100)}%)</span>
                             </span>
-                        ))}
+                        ))}{' '}
+                        {versionsIncomplete && <span className="text-outer-space-300">(incomplete)</span>}
                     </span>
                 </KeyValue>
                 {showSuccessfulCount && <KeyValue label="Successful Transactions">{successfulTxs.length}</KeyValue>}
-                <KeyValue label="Total CUs Consumed">{totalCUs.toLocaleString()}</KeyValue>
+                <KeyValue label="Total CUs Consumed">
+                    {totalCUs.toLocaleString()}
+                    {computeTotalsIncomplete && <span className="ml-1 text-outer-space-300">(incomplete)</span>}
+                </KeyValue>
                 <KeyValue label="Transaction Cost Utilization">
                     {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()}
                     {/* ml-1 (not {' '}) because the KeyValue value column is flex, which strips a whitespace-only node between children. */}
-                    <span className="ml-1 text-outer-space-300">
-                        ({Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
-                    </span>
+                    <span className="ml-1 text-outer-space-300">({totalCostPercent}%)</span>
+                    {computeTotalsIncomplete && <span className="ml-1 text-outer-space-300">(incomplete)</span>}
                 </KeyValue>
                 <KeyValue label="Reserved Compute Units" divider={false}>
                     {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()}
@@ -137,6 +150,7 @@ export function BlockOverviewCard({
                     <span className="ml-1 text-outer-space-300">
                         ({Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)
                     </span>
+                    {computeTotalsIncomplete && <span className="ml-1 text-outer-space-300">(incomplete)</span>}
                 </KeyValue>
             </Card>
         </section>
