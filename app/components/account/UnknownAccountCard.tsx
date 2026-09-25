@@ -32,10 +32,14 @@ export function UnknownAccountCard({ account }: { account: Account }) {
             <BaseTable.Row>
                 <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
                 <BaseTable.Cell className="md:text-right">
-                    {account.lamports === 0 ? (
-                        <AccountNofFound account={account} />
-                    ) : (
-                        <SolBalance lamports={account.lamports} />
+                    {/* A zero balance is still a balance: replacing it with the not-found
+                        notice hides the 0 SOL. The notice stays alongside so the
+                        cross-cluster search keeps working. */}
+                    <SolBalance lamports={account.lamports} />
+                    {account.lamports === 0 && (
+                        <span className="ml-2">
+                            <AccountNofFound account={account} />
+                        </span>
                     )}
                 </BaseTable.Cell>
             </BaseTable.Row>
