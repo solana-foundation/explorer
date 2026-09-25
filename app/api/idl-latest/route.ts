@@ -5,7 +5,6 @@ import { type Address, address, createSolanaRpc } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { isBlockedRequestError, withOnChainFetch } from '@/app/shared/lib/on-chain-fetch';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
 
@@ -72,13 +71,8 @@ export async function GET(request: Request) {
     const context = { cluster: clusterProp, programAddress };
 
     try {
-        // Scope `fetch` to the cluster RPC only: `resolveProgramIdls` can follow an off-chain URL stored in a
-        // program's on-chain PMP `idl` record, so an unguarded fetch here would let this unauthenticated
-        // route be aimed at internal addresses (SSRF). See `withOnChainFetch`.
-        const { anchorIdl, anchorIdlAddress, programMetadataIdl, programMetadataIdlAddress } = await withOnChainFetch(
-            [url],
-            () => resolveProgramIdlsWithRetry(url, programId),
-        );
+        const { anchorIdl, anchorIdlAddress, programMetadataIdl, programMetadataIdlAddress } =
+            await resolveProgramIdlsWithRetry(url, programId);
 
         const idls = {
             anchor: anchorIdl,
@@ -88,14 +82,6 @@ export async function GET(request: Request) {
         };
         return NextResponse.json({ idls }, { headers: CACHE_HEADERS, status: 200 });
     } catch (error) {
-        // An off-chain IDL URL we refuse to fetch server-side (SSRF guard): resolve the on-chain sources and
-        // treat the off-chain one as absent. It reaches here only if the resolver surfaced it as a hard
-        // failure; return uncached rather than paging or pinning a false-negative "no IDLs".
-        if (isBlockedRequestError(error)) {
-            Logger.warn('[api:idl-latest] Off-chain IDL URL blocked by SSRF guard', context);
-            return NextResponse.json({ error: 'Off-chain IDL not resolvable' }, { status: 502 });
-        }
-
         // `resolveProgramIdls` surfaces absent/undecodable as values and throws only on RPC failure.
         // Transient blips → retryable 502 (uncached) without paging; misconfiguration → Sentry page.
         if (isRetryableError(error)) {
