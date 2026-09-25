@@ -89,24 +89,34 @@ describe('BlockHistoryCard filters', () => {
         );
     });
 
+    it('should show the generic empty message when a status filter matches nothing', () => {
+        search = 'status=failed';
+        render(<BlockHistoryCard block={makeBlock(false)} epoch={500n} />);
+        expect(screen.getByText('No transactions found with this filter')).toBeInTheDocument();
+    });
+
     it('should hide the invoked program list when the instructions toggle is off', () => {
         search = 'filter=all';
         render(<BlockHistoryCard block={makeBlock()} epoch={500n} />);
 
         expect(screen.getAllByText(PROGRAM_A).length).toBeGreaterThan(0);
+        expect(screen.getByText('Signature / Programs')).toBeInTheDocument();
         fireEvent.click(screen.getByRole('button', { name: 'Hide instructions' }));
         expect(screen.queryAllByText(PROGRAM_A)).toHaveLength(0);
+        expect(screen.queryByText('Signature / Programs')).not.toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Show instructions' })).toHaveAttribute('aria-pressed', 'false');
     });
 });
 
-function makeBlock(): BlockWithV1 {
+function makeBlock(withFailed = true): BlockWithV1 {
     return {
         transactions: [
             makeTransaction('legacy-program-a', 'legacy', PROGRAM_A),
             makeTransaction('v0-program-a', 0, PROGRAM_A),
             makeTransaction('v0-program-b', 0, PROGRAM_B),
-            makeTransaction('failed-program-b', 0, PROGRAM_B, { InstructionError: [0, 'Custom'] }),
+            ...(withFailed
+                ? [makeTransaction('failed-program-b', 0, PROGRAM_B, { InstructionError: [0, 'Custom'] })]
+                : []),
         ],
     } as unknown as BlockWithV1;
 }

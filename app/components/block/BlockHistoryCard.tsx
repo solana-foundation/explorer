@@ -257,7 +257,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
     const visible = filteredTransactions.slice(0, numDisplayed);
     const hasMore = filteredTransactions.length > numDisplayed;
     const emptyFilterMessage =
-        accountFilter === null && programFilter === HIDE_VOTES
+        accountFilter === null && statusFilter === null && versionFilter === null && programFilter === HIDE_VOTES
             ? "This block doesn't contain any non-vote transactions"
             : 'No transactions found with this filter';
 
@@ -403,6 +403,7 @@ function BlockHistoryGrid({
     sortMode: SortMode;
     sortDirection: SortDirection;
 }) {
+    const [showInstructions] = useShowInstructions();
     // Signature takes the slack; the numeric columns are capped wide enough for their label + sort
     // chevrons. The Compute column only exists when compute data is available. Inline (not a
     // `grid-cols-[…]` class) so the Storybook JIT can't purge it.
@@ -416,7 +417,7 @@ function BlockHistoryGrid({
     // SortIndicator reflects the live `sortDirection`; inactive sortable columns show a dim chevron pair.
     const headers: { label: string; numeric?: boolean; sortKey?: SortMode }[] = [
         { label: '#', sortKey: 'index' },
-        { label: 'Signature / Programs' },
+        { label: showInstructions ? 'Signature / Programs' : 'Signature' },
         { label: 'Fee', numeric: true, sortKey: 'fee' },
     ];
     if (showComputeUnits) {
