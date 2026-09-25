@@ -63,6 +63,12 @@
 
 Non-trivial design and architectural choices are captured as **OpenSpec change proposals** under `openspec/changes/<change-id>/proposal.md`. `proposal.md` is the only required artifact; specs/tasks/design are optional per-change. See [`openspec/README.md`](openspec/README.md) for the convention and [`openspec/changes/pick-adr-methodology/proposal.md`](openspec/changes/pick-adr-methodology/proposal.md) for the rationale. Validate with `openspec validate <change-id> --type change --strict`.
 
+## Writing
+
+Every text an agent produces, from a code comment to a PR body, follows [`.agents/skills/writing/SKILL.md`](.agents/skills/writing/SKILL.md). Read it before writing prose.
+
+One rule holds even without that file: a reply to a person is a draft. Hand it to a human. Never post it on their behalf.
+
 ## PR Authoring
 
 - When opening a PR via `gh pr create --body`, fill the body from [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md) — the `--body` flag bypasses the template that GitHub's web UI auto-loads.
@@ -82,10 +88,10 @@ Recommended: when the diff includes files under `openspec/`, focus on **semantic
 ## Adoption
 
 Tools wired up to read these rules:
-- **Claude Code** — reads `AGENTS.md` at project root alongside `CLAUDE.md`
+- **Claude Code** — reads `AGENTS.md` when no `CLAUDE.md` is present; with a local `CLAUDE.md`, import it via `@AGENTS.md`. `.claude/skills/writing` symlinks to the shared writing skill
 - **Greptile** — auto-indexes `AGENTS.md` for PR reviews
-- **Codex (OpenAI)** — reads `AGENTS.md` at project root
+- **Codex (OpenAI)** — reads `AGENTS.md` at project root; discovers `.agents/skills/*/SKILL.md` as skills
 - **Cursor** — reads `AGENTS.md` at project root
 - **Zed** — reads `AGENTS.md` at project root
 - **opencode** — reads `AGENTS.md` at project root
-- **GitHub Copilot** — reads `.github/copilot-instructions.md`, symlinked to `AGENTS.md`
+- **GitHub Copilot** — reads `.github/copilot-instructions.md`, symlinked to `AGENTS.md`; discovers `.agents/skills/*/SKILL.md` as skills
