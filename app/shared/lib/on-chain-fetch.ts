@@ -35,11 +35,6 @@ export class BlockedRequestError extends Error {
     }
 }
 
-/** Whether an error is a {@link BlockedRequestError}, so callers can degrade softly instead of paging. */
-export function isBlockedRequestError(error: unknown): error is BlockedRequestError {
-    return error instanceof BlockedRequestError;
-}
-
 function patchGlobalFetch(): void {
     if (patched) return;
     patched = true;
