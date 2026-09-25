@@ -1,3 +1,4 @@
+import { err, ok, type Result } from '@explorer/utils';
 import {
     type Address,
     getAddressCodec,
@@ -6,8 +7,6 @@ import {
     getU64Codec,
     type ReadonlyUint8Array,
 } from '@solana/kit';
-
-import { err, ok, type Result } from '../shared/result.js';
 
 // Status discriminators are positional, so this order is the wire format (solana-loader-v4-interface).
 const STATUS_BY_VALUE = ['retracted', 'deployed', 'finalized'] as const;

@@ -2304,5 +2304,31 @@
     ],
     "testnet_activation_epoch": 1026,
     "title": "SIMD-0437-2: Set lamports per byte to 5080"
+  },
+  {
+    "comms_required": null,
+    "description": "This proposal changes the core consensus protocol from the current one, based on Proof-of-History and TowerBFT, to Alpenglow, specifically the Votor parts of Alpenglow. Compared to the old protocol, Alpenglow offers higher resilience and better performance.",
+    "devnet_activation_epoch": null,
+    "key": "A1pengvuM6JEcyNuTnMqepBKhwHE3N6PmUrdATGawhJS",
+    "mainnet_activation_epoch": null,
+    "min_agave_versions": [
+      "v4.3.0"
+    ],
+    "min_fd_versions": [
+      "NOT SUPPORTED"
+    ],
+    "min_jito_versions": [],
+    "owners": [
+      "AshwinSekar"
+    ],
+    "planned_testnet_order": null,
+    "simd_link": [
+      "https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0326-alpenglow.md"
+    ],
+    "simds": [
+      "0326"
+    ],
+    "testnet_activation_epoch": null,
+    "title": "SIMD-0326: Alpenglow: new consensus algorithm"
   }
 ]

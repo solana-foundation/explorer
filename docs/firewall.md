@@ -7,19 +7,23 @@ Bypass for Automation secret here.
 ## Rules to configure
 
 Bot Filter is active at `challenge`, so anything Vercel cannot identify as a browser gets `429` +
-`x-vercel-mitigated: challenge`. Each rule below exempts something that breaks under it, and all seven must exist in
-the dashboard. This is the **target** set, and live config matches it — `Rate limit MCP` sits disabled by design,
-switched on only during a spike.
+`x-vercel-mitigated: challenge`. Some rules below exempt a path that breaks under it, the rest cap how fast one client can hit a path an exemption opened. All eleven must exist in the dashboard, and live config matches this set.
+
+Rules named `[EMERGENCY]` are disabled by default. Switch them on during a spike, off afterwards.
 
 | Rule                                       | Covers                    | Without it                                                                            | Fields                            |
 | ------------------------------------------ | ------------------------- | ------------------------------------------------------------------------------------- | --------------------------------- |
 | `Allow static assets`                      | root icons, manifest      | Tab icons, PWA install, and the site preview all fail                                 | [below](#rules-to-configure)      |
 | `Bypass crawler files`                     | robots and sitemaps       | Unverified crawlers and SEO tooling cannot read either                                | [below](#rules-to-configure)      |
 | `Bypass OG image routes`                   | all of `/og/`             | Link previews render blank — crawlers cannot solve a challenge                        | [`app/og`](../app/og/README.md)   |
-| `Bypass receipt view of transaction pages` | `/tx/` + `view=receipt`   | Shared receipt links do not unfurl — the crawler fetches the page, not just the image | [below](#rules-to-configure)      |
+| `Bypass /tx/<sig> transaction page`        | `/tx/<sig>`               | Shared Transaction links do not unfurl — the crawler fetches the page, not just the image | [below](#rules-to-configure)      |
 | `Bypass feature gate pages`                | `/address/…/feature-gate` | Shared feature gate links do not unfurl, for the same reason                          | [below](#rules-to-configure)      |
 | `Bypass MCP endpoint`                      | `/mcp`                    | Unreachable to every MCP client                                                       | [`app/mcp`](../app/mcp/README.md) |
-| `Rate limit MCP` (disabled)                | `/mcp`                    | No way to throttle a spike without closing the endpoint                               | [`app/mcp`](../app/mcp/README.md) |
+| `[EMERGENCY] Rate limit MCP` (disabled)                | `/mcp`                    | No way to throttle a spike without closing the endpoint                               | [`app/mcp`](../app/mcp/README.md) |
+| `Rate limit og/tx image route (IP)`        | `/og/tx/`                 | One client renders OG images unmetered, each uncached one an RPC call                 | [below](#rate-limits)             |
+| `Rate limit /tx/<sig> transaction page (IP)` | `/tx/<sig>`             | One client scrapes tx pages unmetered, the bypass having already cleared Bot Filter    | [below](#rate-limits)             |
+| `[EMERGENCY] Rate limit og/tx image route (JA4)` (disabled) | `/og/tx/` | No lever when a botnet rotates IPs faster than a per-IP limit can see                  | [below](#rate-limits)             |
+| `[EMERGENCY] Rate limit /tx/<sig> transaction page (JA4)` (disabled) | `/tx/<sig>` | Same, for the page itself                                                    | [below](#rate-limits)             |
 
 Names lead with what the rule does, so the dashboard list shows which rules are holes — the ones to review or toggle
 during an incident — without opening each one. Verify any of them with
@@ -61,12 +65,14 @@ Rule:
 Bot Filter auto-allows Vercel's verified-bot directory, so Googlebot may already reach these — verification is by IP,
 not user-agent, so that cannot be tested from here. Unverified crawlers and SEO tooling are challenged today.
 
+A project that builds with `SEO_DISALLOW_BOTS=true` needs this rule too. Without it, Bot Filter challenges
+`/robots.txt`, so an unverified crawler never reads `Disallow: /`.
+
 ```
-Name: Bypass receipt view of transaction pages
-Description: Receipt is an alternative view of the /tx/ page, not its own route; social crawlers unfurl it: `^/tx/.*?view=receipt`
+Name: Bypass /tx/<sig> transaction page
+Description: Exempts tx pages from Bot Filter so crawlers can unfurl them. Also opens unchallenged scraping. Keep below the rate limits as a Bypass above disables them: ^/tx/[^/]{80,88}/?$.
 Rule:
-    If `Request Path` `Starts with` `/tx/`
-    AND `Query` `view` `Equals` `receipt`
+    If `Request Path` `Matches expression` `^/tx/[^/]{80,88}/?$`
     Then `Bypass`
 ```
 
@@ -78,7 +84,7 @@ Rule:
     Then `Bypass`
 ```
 
-Both are pages, not images. `Bypass OG image routes` already serves `/og/receipt/` and `/og/feature-gate/`, but a
+Both are pages, not images. `Bypass OG image routes` already serves `/og/receipt/`, `/og/feature-gate/` and `/og/tx/`, but a
 crawler reaches those only after reading `og:image` off the page — so without these two the preview never starts.
 Anchored at both ends because `Starts with /address/` would exempt every account page.
 
@@ -87,6 +93,74 @@ challenged, so no crawler reads the tag. Nothing cheap fixes it. A rule cannot t
 from the path alone, so it would either exempt every account page or enumerate the 100 keys in
 `feature-gates.json` — 4.5 kB of alternation, stale on the next SIMD. A redirect does not work either: routing runs
 after the firewall, so the request is challenged before anything can redirect it. Share the `/feature-gate` URL.
+
+## Rate limits
+
+Each rule must sit **above** the `Bypass` for its path.
+The IP rate limits are always on. JA4 rules are disabled by default: a TLS fingerprint is shared by everyone running the same browser, so it reaches a botnet rotating IPs only at the cost of hitting real users in the same bucket.
+
+| Rule                                             | Limit       | Key | Above it    |
+| ------------------------------------------------ | ----------- | --- | ----------- |
+| `Rate limit og/tx image route (IP)`              | 150 req/60s | IP  | `429`       |
+| `Rate limit /tx/<sig> transaction page (IP)`     | 300 req/60s | IP  | `429`       |
+| `[EMERGENCY] og/tx image route (JA4)`          | 200 req/60s | JA4 | `429`       |
+| `[EMERGENCY] /tx/<sig> transaction page (JA4)` | 600 req/60s | JA4 | `Challenge` |
+
+```
+Name: [EMERGENCY] Rate limit og/tx image route (JA4)
+Description: 200/60s per JA4, 429 above. Catches botnets per-IP limits can't see; crawler fleets share one fingerprint, so previews degrade. Enable only under attack. Keep above Bypass OG image routes or it never fires: /og/tx/*.
+Status: Disabled
+Rule:
+    If `Request Path` `Starts with` `/og/tx/`
+    AND `Rate Limit`
+        Strategy: Fixed Window
+        Window: 60 seconds
+        Limit: 200 requests
+        Keys: JA4 Digest
+    Then `Too Many Requests (429)`
+```
+
+```
+Name: [EMERGENCY] Rate limit /tx/<sig> transaction page (JA4)
+Description: 600/60s per JA4, Challenge above. Humans solve it and continue; crawlers cannot, so unfurls stop. Enable only under attack: ^/tx/[^/]{80,88}/?$.
+Status: Disabled
+Rule:
+    If `Request Path` `Matches expression` `^/tx/[^/]{80,88}/?$`
+    AND `Rate Limit`
+        Strategy: Fixed Window
+        Window: 60 seconds
+        Limit: 600 requests
+        Keys: JA4 Digest
+    Then `Challenge`
+```
+
+```
+Name: Rate limit og/tx image route (IP)
+Description: 150/60s per IP, 429 above. Each uncached request renders an image and hits RPC; loose so shared crawler IP pools keep unfurling. Keep above Bypass OG image routes or it never fires: /og/tx/*.
+Status: Enabled
+Rule:
+    If `Request Path` `Starts with` `/og/tx/`
+    AND `Rate Limit`
+        Strategy: Fixed Window
+        Window: 60 seconds
+        Limit: 150 requests
+        Keys: IP Address
+    Then `Too Many Requests (429)`
+```
+
+```
+Name: Rate limit /tx/<sig> transaction page (IP)
+Description: 300/60s per IP, 429 above. Loose because many users share one IP behind corporate NAT; sized from Log, not calculated. On real-user 429 reports, switch exceed action to Log and re-size later: ^/tx/[^/]{80,88}/?$.
+Status: Enabled
+Rule:
+    If `Request Path` `Matches expression` `^/tx/[^/]{80,88}/?$`
+    AND `Rate Limit`
+        Strategy: Fixed Window
+        Window: 60 seconds
+        Limit: 300 requests
+        Keys: IP Address
+    Then `Too Many Requests (429)`
+```
 
 ## Under attack
 
@@ -98,9 +172,10 @@ redeploy.
 2. **Enable `Rate limit MCP`.** It ships disabled, so `/mcp` is unmetered until you switch it on: 100 req/60s per IP,
    `429` above that, then 30 req/60s with `Deny` for 10 minutes. Never disable `Bypass MCP endpoint` as a throttle;
    that closes `/mcp` outright. Ladder in [`app/mcp`](../app/mcp/README.md).
-3. **Raise Bot Filter** `log` → `challenge`. Bypassed paths stay up: they match at Custom Rules, Bot Filter runs
+3. **Enable the `[EMERGENCY]` JA4 rules** if the spike is on `/tx/<sig>` or `/og/tx/`. Disabling `Bypass /tx/<sig> transaction page` is the heavier version of the emergency switches, trading every tx unfurl for a challenge on the whole route.
+4. **Raise Bot Filter** `log` → `challenge`. Bypassed paths stay up: they match at Custom Rules, Bot Filter runs
    after.
-4. **Attack Mode**, last. ACM runs _before_ custom rules, so no rule can exempt a path — `/mcp` and every link
+5. **Attack Mode**, last. ACM runs _before_ custom rules, so no rule can exempt a path — `/mcp` and every link
    preview ([`app/og`](../app/og/README.md)) go dark with it.
 
 If `/mcp` must survive step 4: a system bypass covers IPs or CIDRs only — a load generator or fixed-egress partner,

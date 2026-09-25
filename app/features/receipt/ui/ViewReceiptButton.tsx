@@ -10,7 +10,7 @@ import { Button } from '@/app/components/shared/ui/button';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 
 import { isReceiptEnabled } from '../env';
-import { extractReceiptData } from '../model/create-receipt';
+import { extractReceiptData } from '../model/receipt-data';
 
 interface ViewReceiptButtonProps {
     signature: string;

@@ -34,15 +34,13 @@ export const Default: Story = {
     play: async ({ canvasElement, args }) => {
         const canvas = within(canvasElement);
 
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
-        const button = canvas.getByRole('button', { name: /^get download png$/i });
+        const button = canvas.getByRole('button', { name: 'Download PNG' });
         await expect(button).toBeInTheDocument();
 
         await userEvent.click(button);
 
         await expect(args.download).toHaveBeenCalledOnce();
 
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
-        await expect(canvas.getByRole('button', { name: /^get download png$/i })).toBeInTheDocument();
+        await expect(canvas.getByRole('button', { name: 'Download PNG' })).toBeInTheDocument();
     },
 };

@@ -2,6 +2,34 @@
      Keep the gstatic preconnect to warm the connection for next/font's woff2 fetch. -->
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+<!-- Roboto Mono is not a next/font face: only the OG images ask for it.
+    A browser has no such registration, so `fontFamily:
+    'Roboto Mono'` in `BaseTxImage` would silently fall back to Rubik.
+    Declared off the same files the route reads, served by `staticDirs: ['../public']`.
+-->
+<style>
+    @font-face {
+        font-family: 'Roboto Mono';
+        font-style: normal;
+        font-weight: 400;
+        src: url('/fonts/RobotoMono-Regular.ttf') format('truetype');
+    }
+
+    @font-face {
+        font-family: 'Roboto Mono';
+        font-style: normal;
+        font-weight: 500;
+        src: url('/fonts/RobotoMono-Medium.ttf') format('truetype');
+    }
+
+    @font-face {
+        font-family: 'Roboto Mono';
+        font-style: normal;
+        font-weight: 600;
+        src: url('/fonts/RobotoMono-SemiBold.ttf') format('truetype');
+    }
+</style>
+
 <!-- The autodocs Primary block's panel isn't targeted by the backgrounds addon, so it shows the
      white docs frame. --sb-doc-bg mirrors the selected background (preview.tsx); the addon's own
      rule still wins on the Stories blocks where it applies. -->

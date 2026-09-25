@@ -1,15 +1,12 @@
 import { fetchTransactionDetails, type TransactionWithMeta } from '@entities/transaction-data';
-import { createSolanaRpc, signature as createSignature } from '@solana/kit';
+import { findTransactionCluster } from '@entities/transaction-data/server';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster, clusterSlug, type ServerCluster, serverClusterUrl } from '@/app/utils/cluster';
 
-import { isClusterProbeEnabled } from '../env';
 import { ReceiptError } from './errors';
 
-// Clusters that can be probed when tx not found on mainnet
-type ProbeCluster = Cluster.Devnet | Cluster.Testnet;
-const CLUSTERS_TO_PROBE: ProbeCluster[] = [Cluster.Devnet, Cluster.Testnet];
+const CLUSTERS: readonly ServerCluster[] = [Cluster.MainnetBeta];
 
 export type ApiData = {
     cluster: Cluster;
@@ -24,7 +21,7 @@ export async function getTx(
     },
     cluster?: ServerCluster,
 ): Promise<ApiData> {
-    const findClusterFn = dependencies?.findCluster ?? findTransactionCluster;
+    const findClusterFn = dependencies?.findCluster ?? findClusterOrThrow;
     const fetchDetailsFn = dependencies?.fetchDetails ?? fetchReceiptTransaction;
 
     // If cluster is provided, fetch directly without probing
@@ -52,64 +49,28 @@ export async function getTx(
     return { cluster: foundCluster, transaction };
 }
 
-async function findTransactionCluster(signature: string): Promise<ServerCluster | undefined> {
-    const mainnetResult = await getSignatureStatus(signature, Cluster.MainnetBeta);
+/**
+ * Receipt's mapping of the entity probe onto its own error type.
+ */
+async function findClusterOrThrow(signature: string): Promise<ServerCluster | undefined> {
+    const result = await findTransactionCluster(CLUSTERS, signature);
 
-    // Fail on mainnet network error - don't silently probe other clusters
-    if ('left' in mainnetResult) {
-        Logger.error(mainnetResult.left);
-        throw new ReceiptError(`Failed to check the ${clusterSlug(Cluster.MainnetBeta)}`, {
-            cause: mainnetResult.left,
+    if (result.kind === 'error') {
+        // Fail rather than treating a network fault as "not on this cluster" and probing on.
+        Logger.error(result.error, { cluster: result.cluster });
+        throw new ReceiptError(`Failed to check the ${clusterSlug(result.cluster)}`, {
+            cause: result.error,
             status: 502,
         });
     }
 
-    if (mainnetResult.right) {
-        Logger.info('[receipt] Transaction found on mainnet', { signature });
-        return Cluster.MainnetBeta;
+    if (result.kind === 'found') {
+        Logger.info('[receipt] Transaction found on cluster', { cluster: result.cluster, signature });
+        return result.cluster;
     }
 
-    // Skip probing other clusters if disabled
-    if (!isClusterProbeEnabled) {
-        Logger.info('[receipt] Cluster probing disabled, skipping other clusters', { signature });
-        return undefined;
-    } else {
-        // Transaction not found on mainnet - probe other clusters
-        Logger.warn('[receipt] Transaction not found on mainnet, probing other clusters', { signature });
-    }
-
-    for (const cluster of CLUSTERS_TO_PROBE) {
-        const result = await getSignatureStatus(signature, cluster);
-
-        if ('left' in result) {
-            Logger.error(result.left, { cluster });
-            throw new ReceiptError(`Failed to check the ${clusterSlug(cluster)}`, { cause: result.left, status: 502 });
-        }
-
-        if (result.right) {
-            Logger.info('[receipt] Transaction found on cluster', { cluster, signature });
-            return cluster;
-        }
-    }
-
+    Logger.info('[receipt] Transaction not found on clusters', { clusters: CLUSTERS, signature });
     return undefined;
-}
-
-type SignatureStatusResult = { left: Error } | { right: boolean };
-
-async function getSignatureStatus(signature: string, cluster: ServerCluster): Promise<SignatureStatusResult> {
-    const rpcUrl = serverClusterUrl(cluster);
-    const rpc = createSolanaRpc(rpcUrl);
-
-    try {
-        const { value } = await rpc
-            .getSignatureStatuses([createSignature(signature)], { searchTransactionHistory: true })
-            .send();
-        return { right: Boolean(value[0]) };
-    } catch (error) {
-        Logger.error(error, { cluster, signature });
-        return { left: error instanceof Error ? error : new Error(String(error)) };
-    }
 }
 
 async function fetchReceiptTransaction(signature: string, rpcUrl: string): Promise<TransactionWithMeta> {

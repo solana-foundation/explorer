@@ -10,6 +10,7 @@ import {
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
 import { hasAddressLookupTableLayout } from '@explorer/parsers/programs/address-lookup-table';
+import { err, ok, type Result } from '@explorer/utils';
 import { AccountDiscriminator, PROGRAM_METADATA_PROGRAM_ADDRESS } from '@solana-program/program-metadata';
 import { isAddress, isSignature } from '@solana/kit';
 
@@ -24,7 +25,6 @@ import {
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ID,
 } from '../shared/constants.js';
 import { asRecord, asString } from '../shared/parse-helpers.js';
-import { err, ok, type Result } from '../shared/result.js';
 import {
     ACCOUNT_IDENTIFIER_KIND,
     ADDRESS_LOOKUP_TABLE_KIND,

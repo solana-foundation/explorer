@@ -1,6 +1,7 @@
 // Ported from explorer-mcp's squads resolver — Squads Lambda lookup (mainnet only), then the
 // multisig account decoded with idl-decode over the bundled v3/v4 IDL stubs (no anchor).
 import { type IdlClient, tryCreateIdlClient } from '@explorer/idl-decode';
+import { err, ok, type Result, toError } from '@explorer/utils';
 
 import type { SupportedCluster } from '../config.js';
 import { type InspectorLogger, ns } from '../logger.js';
@@ -9,7 +10,6 @@ import { SQUADS_LAMBDA_URL } from '../shared/constants.js';
 import { squadsV3Idl } from './idls/squads-v3.js';
 import { squadsV4Idl } from './idls/squads-v4.js';
 import { asRecord, asSafeNumeric, asString } from '../shared/parse-helpers.js';
-import { err, ok, type Result, toError } from '../shared/result.js';
 import { toLoggedError } from '../shared/logged-error.js';
 import type { RpcClient } from '../rpc/rpc.js';
 import type { MultisigReferenceResult } from './types.js';

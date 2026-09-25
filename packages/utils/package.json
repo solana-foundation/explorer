@@ -1,0 +1,30 @@
+{
+    "name": "@explorer/utils",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "prebuild": "rm -rf dist",
+        "build": "tsc",
+        "pretest": "pnpm run build",
+        "test": "pnpm run typecheck && vitest run",
+        "test:changed": "git diff --cached --name-only --diff-filter=ACMR -z --relative -- . | xargs -0 -r vitest related --run",
+        "test:watch": "vitest",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "typescript": "catalog:tooling",
+        "vitest": "catalog:vitest"
+    }
+}
