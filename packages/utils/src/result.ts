@@ -15,7 +15,7 @@ export function unwrapOr<T, E extends Error, F>(result: Result<T, E>, fallback: 
     return isErr(result) ? fallback : result[1];
 }
 
-const isErr =<T, E extends Error>(result: Result<T, E>): result is readonly [E, undefined] => result[0] !== undefined;
+const isErr = <T, E extends Error>(result: Result<T, E>): result is readonly [E, undefined] => result[0] !== undefined;
 
 /** Coerces a caught unknown into an Error. */
 export const toError = (err: unknown): Error => (err instanceof Error ? err : new Error(String(err)));
