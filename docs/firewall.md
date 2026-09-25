@@ -30,8 +30,8 @@ Names lead with what the rule does, so the dashboard list shows which rules are 
 during an incident — without opening each one. Verify any of them with
 `curl -o /dev/null -w '%{http_code} %header{x-vercel-mitigated}\n' <url>`; an empty header means a bypass matched.
 
-These four have no endpoint README to live in. The first two cover `public/` files, fetched without page credentials,
-so Bot Filter challenges them.
+These four have no endpoint README to live in. The first two cover files fetched without page credentials, so Bot
+Filter challenges them.
 
 ```
 Name: Allow static assets
@@ -231,10 +231,10 @@ outside `/api/*` to stay out of that matcher.
 
 ### robots.txt versus WAF
 
-| Method                                      | What it does                            | Use when                                                             |
-| ------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------- |
-| [`public/robots.txt`](../public/robots.txt) | Asks a named crawler not to fetch paths | The crawler declares its user agent and honors robots.txt            |
-| WAF custom rule matching the user agent     | Rejects requests at the edge            | The crawler does not honor robots.txt or must be stopped immediately |
+| Method                                                  | What it does                            | Use when                                                             |
+| ------------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------- |
+| [`app/robots.txt/route.ts`](../app/robots.txt/route.ts) | Asks a named crawler not to fetch paths | The crawler declares its user agent and honors robots.txt            |
+| WAF custom rule matching the user agent                 | Rejects requests at the edge            | The crawler does not honor robots.txt or must be stopped immediately |
 
 Prefer robots.txt when the crawler's owner states that it honors the file. The policy then remains in the repository
 and goes through code review. A WAF rule lives in the Vercel dashboard and enforces the block regardless of crawler
@@ -255,5 +255,5 @@ Meta documents its user agents on its
 `facebookexternalhit` renders link previews on Facebook, Instagram, and WhatsApp. `meta-externalfetcher` fetches
 individual links for Meta AI in response to a person's request. Both lead back to a person and remain allowed.
 
-`meta-externalagent` is disallowed in [`public/robots.txt`](../public/robots.txt). Meta lists it among the crawlers
-that honor the file, so this block does not use a WAF custom rule.
+`meta-externalagent` is disallowed in [`app/robots.txt/route.ts`](../app/robots.txt/route.ts). Meta lists it among
+the crawlers that honor the file, so this block does not use a WAF custom rule.
