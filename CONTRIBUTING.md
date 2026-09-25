@@ -11,6 +11,7 @@ Thank you for your interest in contributing to the Solana Explorer project! This
 -   [Testing Protocol Integrations](#testing-protocol-integrations)
 -   [CI/CD Requirements](#cicd-requirements)
 -   [Bug Reporting](#bug-reporting)
+-   [AI Use](#ai-use)
 -   [Pull Request Process](#pull-request-process)
 
 ## Getting Started
@@ -19,8 +20,6 @@ Thank you for your interest in contributing to the Solana Explorer project! This
 2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/explorer.git`
 3. Install dependencies: `pnpm i --frozen-lockfile`
 4. Create a new branch for your feature: `git checkout -b feature/your-feature-name`
-
-> **Using an AI coding agent?** Point Claude Code, Cursor, Copilot, or similar tools at [`AGENTS.md`](./AGENTS.md) — it captures the project's architectural conventions and code style so the agent matches the codebase.
 
 > **Important Note**: Wallet connection is intentionally scoped to the interactive IDL feature (executing program instructions defined by Anchor or Codama IDLs). PRs that broaden wallet adapter usage, add new wallet-connected flows, or introduce general transaction-signing UI elsewhere will not be accepted. Please check with maintainers before starting related work.
 
@@ -171,11 +170,46 @@ For non-security bugs, please use GitHub Issues with the following information:
 -   Screenshots if applicable
 -   Environment information (browser, OS, etc.)
 
+## AI Use
+
+You may use AI-assisted tools. Review the generated code, understand its behavior, and run the same checks expected of any other contribution.
+
+Point Claude Code, Cursor, Copilot, Codex, or similar tools at [`AGENTS.md`](./AGENTS.md) and the skills under [`.agents/skills/`](./.agents/skills/). They carry the project's conventions, code style, and writing contract, so the agent matches the codebase instead of rediscovering it.
+
+Maintainers can close PRs that look like low-effort AI output. Audit your changes for these patterns before opening one:
+
+-   Comments that explain why the _previous_ behavior was wrong and the new one is correct. That context belongs in the PR description, not in the codebase.
+-   Dense comment blocks. A comment states _why_ the code does something when that is not obvious, not _what_ it does.
+-   Drive-by refactoring of code unrelated to the change.
+-   Tests that would pass against a broken implementation. A test asserting a parser rejects malformed data is worthless unless it also asserts that well-formed data renders, and it must fail if the parser were replaced by one that rejects everything.
+
+You must be able to explain every line of your diff without an LLM. Reviewers may ask a pointed question about any part of the change; if the answer is pasted from a model or does not come, the PR is closed.
+
+Tool attribution left in a PR (a `Generated with Claude Code` footer, a `Co-Authored-By: Claude` trailer, a `cursor/` or `codex/` branch, and the like) tells us the submission was opened without being read. Remove it before requesting review.
+
+### Disclosure
+
+Disclosure is required. The pull request template has two boxes; check exactly one. If AI tooling was used, name the tool and the extent, for example:
+
+> I wrote the parser and had Claude Code write the tests and update the documentation
+
+or
+
+> I designed the change and handed the implementation to Codex
+
+Editor autocomplete of single keywords or short phrases does not count as AI tooling.
+
+### Communication
+
+When maintainers ask questions or suggest changes, do not relay the question to an LLM and paste its answer back. Distilling what the tool produced is what makes your contribution valuable.
+
 ## Pull Request Process
 
 1. Create a branch with a descriptive name using a conventional prefix — `feat/...`, `fix/...`, `chore/...`, or `hotfix/...` (e.g. `feat/your-feature`)
 2. Make your changes, following the code style guidelines
 3. Add tests for your changes
 4. Push your changes and create a pull request
-5. Include screenshots — required for protocol screens, recommended for other UI changes
-6. Request review ONLY after CI/CD has passed and screenshots have been uploaded
+5. Fill in every section of the pull request template, including the [AI disclosure](#disclosure)
+6. Include screenshots — required for protocol screens, recommended for other UI changes
+7. Resolve every Greptile comment with a code fix or an explanation of why no change is needed
+8. Request review ONLY after CI/CD has passed, screenshots have been uploaded, and Greptile comments are resolved

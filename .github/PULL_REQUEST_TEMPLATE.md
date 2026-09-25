@@ -27,6 +27,13 @@
 <!-- Link to any related issues this PR addresses -->
 <!-- Example: Fixes #<issue-number>, Addresses #<issue-number> -->
 
+## AI disclosure
+
+<!-- Check exactly one. See CONTRIBUTING.md, section "AI Use" -->
+
+-   [ ] No AI tooling was used beyond editor autocomplete.
+-   [ ] AI tooling was used. Tool and extent: <!-- e.g. Claude Code wrote the tests, I wrote and reviewed everything else -->
+
 ## Checklist
 
 <!-- Verify that you have completed the following before requesting review -->
