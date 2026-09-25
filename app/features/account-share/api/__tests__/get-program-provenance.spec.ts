@@ -12,7 +12,7 @@ vi.mock('@entities/idl/server', () => ({ resolveProgramIdls: mocks.resolveProgra
 vi.mock('@solana/security-txt', () => ({ fetchSecurityTxt: mocks.fetchSecurityTxt }));
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
-import { getProgramProvenance, isVerifiedBuild } from '../get-program-provenance';
+import { getProgramProvenance, verifiedBuildState, type VerifiedLookup } from '../get-program-provenance';
 
 const PROGRAM_ID = address(gen.address(1));
 // A throwaway rpc: every consumer of it is mocked, so its shape never matters.
@@ -27,6 +27,12 @@ function noIdls() {
 
 function run(cluster: ServerCluster = Cluster.MainnetBeta) {
     return getProgramProvenance(RPC, PROGRAM_ID, cluster, AbortSignal.timeout(1_000));
+}
+
+type OsecEntry = Extract<VerifiedLookup, { kind: 'entries' }>['entries'][number];
+
+function entriesLookup(entries: OsecEntry[]): VerifiedLookup {
+    return { entries, kind: 'entries' };
 }
 
 beforeEach(() => {
@@ -49,7 +55,7 @@ describe('IDL marker and name', () => {
 
         const result = await run();
 
-        expect(result.idlUploaded).toBe(true);
+        expect(result.idlUploaded).toBe('yes');
         expect(result.name).toBe('Jupiter Aggregator');
     });
 
@@ -60,28 +66,28 @@ describe('IDL marker and name', () => {
 
         const result = await run();
 
-        expect(result.idlUploaded).toBe(true);
+        expect(result.idlUploaded).toBe('yes');
         expect(result.name).toBe('My Program');
     });
 
-    it('should leave idlUploaded false and the name absent when no IDL is published', async () => {
+    it('should leave idlUploaded no and the name absent when no IDL is published', async () => {
         const result = await run();
 
-        expect(result.idlUploaded).toBe(false);
+        expect(result.idlUploaded).toBe('no');
         expect(result.name).toBeUndefined();
     });
 
-    it('should fail soft to no IDL when the resolver throws', async () => {
+    it('should report idlUploaded unknown when the resolver throws (a transient RPC failure)', async () => {
         mocks.resolveProgramIdls.mockRejectedValue(new Error('rpc down'));
 
         const result = await run();
 
-        expect(result.idlUploaded).toBe(false);
+        expect(result.idlUploaded).toBe('unknown');
         expect(result.name).toBeUndefined();
     });
 });
 
-describe('verified-build registry entries', () => {
+describe('verified-build lookup', () => {
     it('should surface the registry entries for a cluster that has one', async () => {
         const entries = [{ is_verified: true, on_chain_hash: HASH, signer: AUTHORITY }];
         vi.stubGlobal(
@@ -91,7 +97,7 @@ describe('verified-build registry entries', () => {
 
         const result = await run();
 
-        expect(result.verifiedEntries).toEqual(entries);
+        expect(result.verified).toEqual({ entries, kind: 'entries' });
     });
 
     it('should drop malformed entries so one bad element cannot hide a valid one', async () => {
@@ -105,17 +111,17 @@ describe('verified-build registry entries', () => {
 
         const result = await run();
 
-        expect(result.verifiedEntries).toEqual([good]);
+        expect(result.verified).toEqual({ entries: [good], kind: 'entries' });
     });
 
-    it('should skip the registry entirely on a cluster that has none', async () => {
+    it('should report no registry on a cluster that has none, without a request', async () => {
         const result = await run(Cluster.Testnet);
 
-        expect(result.verifiedEntries).toEqual([]);
+        expect(result.verified).toEqual({ kind: 'none' });
         expect(fetch).not.toHaveBeenCalled();
     });
 
-    it('should fail soft to no entries when the registry request throws', async () => {
+    it('should report the lookup unavailable when the registry request throws', async () => {
         vi.stubGlobal(
             'fetch',
             vi.fn(() => Promise.reject(new Error('network'))),
@@ -123,10 +129,10 @@ describe('verified-build registry entries', () => {
 
         const result = await run();
 
-        expect(result.verifiedEntries).toEqual([]);
+        expect(result.verified).toEqual({ kind: 'unavailable' });
     });
 
-    it('should fail soft to no entries on a non-ok response', async () => {
+    it('should report the lookup unavailable on a non-ok response', async () => {
         vi.stubGlobal(
             'fetch',
             vi.fn(() => Promise.resolve({ json: () => Promise.resolve([]), ok: false })),
@@ -134,39 +140,53 @@ describe('verified-build registry entries', () => {
 
         const result = await run();
 
-        expect(result.verifiedEntries).toEqual([]);
+        expect(result.verified).toEqual({ kind: 'unavailable' });
     });
 });
 
-describe('isVerifiedBuild', () => {
+describe('verifiedBuildState', () => {
     it('should verify an authority-signed entry whose hash matches the current bytes', () => {
-        const entries = [{ is_verified: true, on_chain_hash: HASH, signer: AUTHORITY }];
+        const lookup = entriesLookup([{ is_verified: true, on_chain_hash: HASH, signer: AUTHORITY }]);
 
-        expect(isVerifiedBuild(entries, AUTHORITY, HASH)).toBe(true);
+        expect(verifiedBuildState(lookup, AUTHORITY, HASH)).toBe('yes');
     });
 
     it('should reject an entry signed by neither the authority nor a trusted signer', () => {
-        const entries = [{ is_verified: true, on_chain_hash: HASH, signer: STRANGER }];
+        const lookup = entriesLookup([{ is_verified: true, on_chain_hash: HASH, signer: STRANGER }]);
 
-        expect(isVerifiedBuild(entries, AUTHORITY, HASH)).toBe(false);
+        expect(verifiedBuildState(lookup, AUTHORITY, HASH)).toBe('no');
     });
 
     it('should reject a stale entry whose hash no longer matches the deployed bytes', () => {
-        const entries = [{ is_verified: true, on_chain_hash: 'hash-from-before-the-upgrade', signer: AUTHORITY }];
+        const lookup = entriesLookup([
+            { is_verified: true, on_chain_hash: 'hash-from-before-the-upgrade', signer: AUTHORITY },
+        ]);
 
-        expect(isVerifiedBuild(entries, AUTHORITY, HASH)).toBe(false);
+        expect(verifiedBuildState(lookup, AUTHORITY, HASH)).toBe('no');
     });
 
-    it('should return false when the local hash could not be computed', () => {
-        const entries = [{ is_verified: true, on_chain_hash: HASH, signer: AUTHORITY }];
+    it('should report unknown when the local hash could not be computed', () => {
+        const lookup = entriesLookup([{ is_verified: true, on_chain_hash: HASH, signer: AUTHORITY }]);
 
-        expect(isVerifiedBuild(entries, AUTHORITY, undefined)).toBe(false);
+        expect(verifiedBuildState(lookup, AUTHORITY, undefined)).toBe('unknown');
+    });
+
+    it('should report unknown when the registry lookup was unavailable', () => {
+        expect(verifiedBuildState({ kind: 'unavailable' }, AUTHORITY, HASH)).toBe('unknown');
+    });
+
+    it('should report unknown when the cluster has no registry to check against', () => {
+        expect(verifiedBuildState({ kind: 'none' }, AUTHORITY, HASH)).toBe('unknown');
+    });
+
+    it('should report no when the registry answered with no entries', () => {
+        expect(verifiedBuildState(entriesLookup([]), AUTHORITY, HASH)).toBe('no');
     });
 
     it('should accept a frozen entry for an immutable program with no authority', () => {
-        const entries = [{ is_frozen: true, is_verified: true, on_chain_hash: HASH, signer: STRANGER }];
+        const lookup = entriesLookup([{ is_frozen: true, is_verified: true, on_chain_hash: HASH, signer: STRANGER }]);
 
-        expect(isVerifiedBuild(entries, undefined, HASH)).toBe(true);
+        expect(verifiedBuildState(lookup, undefined, HASH)).toBe('yes');
     });
 });
 
@@ -176,20 +196,20 @@ describe('security.txt marker', () => {
 
         const result = await run();
 
-        expect(result.securityTxt).toBe(true);
+        expect(result.securityTxt).toBe('yes');
     });
 
-    it('should leave securityTxt false when none is found', async () => {
+    it('should leave securityTxt no when none is found', async () => {
         const result = await run();
 
-        expect(result.securityTxt).toBe(false);
+        expect(result.securityTxt).toBe('no');
     });
 
-    it('should fail soft to no security.txt when the lookup throws', async () => {
+    it('should report securityTxt unknown when the lookup throws', async () => {
         mocks.fetchSecurityTxt.mockRejectedValue(new Error('rpc down'));
 
         const result = await run();
 
-        expect(result.securityTxt).toBe(false);
+        expect(result.securityTxt).toBe('unknown');
     });
 });

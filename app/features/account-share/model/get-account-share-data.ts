@@ -7,10 +7,12 @@ import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { Cluster, type ServerCluster, serverClusterUrl } from '@utils/cluster';
 import { lamportsToSolString } from '@utils/index';
 import { programLabel } from '@utils/tx';
+import { getOsecRegistryUrl } from '@utils/verified-builds-url';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { getProgramProvenance, isVerifiedBuild } from '../api/get-program-provenance';
+import { getProgramProvenance, verifiedBuildState } from '../api/get-program-provenance';
+import { withOnChainFetch } from '../api/on-chain-fetch';
 import {
     BPF_LOADER_2_ADDRESS,
     BPF_LOADER_ADDRESS,
@@ -34,6 +36,9 @@ import type {
     UpgradeAuthority,
 } from './account-share-data';
 
+// The three build-provenance markers, in the order the card draws them; used to flag an incomplete card.
+const MARKER_KEYS = ['idlUploaded', 'securityTxt', 'verifiedBuild'] as const;
+
 /** The card, or a signal the route turns into a status code. A missing account is a card, not an error. */
 export type AccountShareResult = { kind: 'ok'; data: AccountShareData } | { kind: 'error' };
 
@@ -46,30 +51,37 @@ const NAME_PAD = 6;
  */
 export async function getAccountShareData(address: string, cluster?: ServerCluster): Promise<AccountShareResult> {
     const resolved = cluster ?? Cluster.MainnetBeta;
+    const rpcUrl = serverClusterUrl(resolved);
 
     try {
-        const abortSignal = AbortSignal.timeout(RPC_BUDGET_MS);
-        const rpc = getRpc(serverClusterUrl(resolved));
-        const accountAddress = toAddress(address);
+        // All RPC + provenance work runs with `fetch` scoped to our own backends (the cluster RPC and the
+        // OSEC registry). The shared IDL / security.txt resolvers can follow off-chain URLs planted in a
+        // program's on-chain metadata; scoping fetch here stops this unauthenticated route from being aimed
+        // at internal addresses (SSRF). See `withOnChainFetch`.
+        return await withOnChainFetch([rpcUrl, getOsecRegistryUrl(resolved)], async () => {
+            const abortSignal = AbortSignal.timeout(RPC_BUDGET_MS);
+            const rpc = getRpc(rpcUrl);
+            const accountAddress = toAddress(address);
 
-        // 36 bytes is all any card reads from the account: balance/owner/executable/size come from the meta,
-        // and a program's only on-account payload we need is the 32-byte program-data pointer past the tag.
-        const { value } = await rpc
-            .getAccountInfo(accountAddress, { dataSlice: { length: 36, offset: 0 }, encoding: 'base64' })
-            .send({ abortSignal });
+            // 36 bytes is all any card reads from the account: balance/owner/executable/size come from the
+            // meta, and a program's only on-account payload we need is the 32-byte program-data pointer.
+            const { value } = await rpc
+                .getAccountInfo(accountAddress, { dataSlice: { length: 36, offset: 0 }, encoding: 'base64' })
+                .send({ abortSignal });
 
-        if (!value) {
-            return { data: await buildNotFound(rpc, accountAddress, address, abortSignal), kind: 'ok' };
-        }
+            if (!value) {
+                return { data: await buildNotFound(rpc, accountAddress, address, abortSignal), kind: 'ok' };
+            }
 
-        const owner = String(value.owner);
-        const space = accountSpace(value);
+            const owner = String(value.owner);
+            const space = accountSpace(value);
 
-        const data = value.executable
-            ? await buildProgram({ abortSignal, address, cluster: resolved, owner, rpc, space, value })
-            : await buildAccount({ abortSignal, address, owner, rpc, space, value });
+            const data = value.executable
+                ? await buildProgram({ abortSignal, address, cluster: resolved, owner, rpc, space, value })
+                : await buildAccount({ abortSignal, address, owner, rpc, space, value });
 
-        return { data, kind: 'ok' };
+            return { data, kind: 'ok' };
+        });
     } catch (error) {
         Logger.error(new Error('[account-share] Failed to get account share data', { cause: error }), { address });
         return { kind: 'error' };
@@ -98,6 +110,8 @@ async function buildAccount(args: {
         balance: `${lamportsToSolString(value.lamports)} SOL`,
         dataSize: formatBytes(space),
         executable: false,
+        // A failed activity lookup leaves the count/last-activity absent; flag the card so it caches briefly.
+        incomplete: activity.kind === 'unknown',
         kind: 'account',
         lastActivity:
             activity.kind === 'some' && activity.lastActivity ? formatDateShort(activity.lastActivity) : undefined,
@@ -121,9 +135,8 @@ async function buildProgram(args: {
     const programId = toAddress(address);
     const loader = programLoader(owner);
 
-    // Only the upgradeable loader keeps bytes/authority/slot in a separate data account.
-    const [programData, provenance] = await Promise.all([
-        loader === 'upgradeable' ? getProgramData(rpc, value, abortSignal) : Promise.resolve(undefined),
+    const [verification, provenance] = await Promise.all([
+        resolveVerificationInputs(rpc, programId, loader, value, abortSignal),
         getProgramProvenance(rpc, programId, cluster, abortSignal),
     ]);
 
@@ -133,10 +146,68 @@ async function buildProgram(args: {
     const markers: ProgramMarkers = {
         idlUploaded: provenance.idlUploaded,
         securityTxt: provenance.securityTxt,
-        verifiedBuild: isVerifiedBuild(provenance.verifiedEntries, programData?.authority, programData?.localHash),
+        verifiedBuild: verifiedBuildState(provenance.verified, verification.authority, verification.localHash),
     };
 
-    return { address, kind: 'program', markers, name, ...describeProgram(loader, space, programData) };
+    return {
+        address,
+        // Any `unknown` marker means a signal could not be resolved, so the card caches briefly.
+        incomplete: MARKER_KEYS.some(key => markers[key] === 'unknown'),
+        kind: 'program',
+        markers,
+        name,
+        ...describeProgram(loader, space, verification.programData),
+    };
+}
+
+type VerificationInputs = { authority?: string; localHash?: string; programData?: ProgramData };
+
+/**
+ * The upgrade authority and on-chain program hash the verified-build check needs, resolved per loader:
+ * - `upgradeable` reads both from the separate program-data account.
+ * - `immutable-elf` (legacy BPF loaders) keeps the raw ELF in the program account itself, so it is hashed
+ *   directly; it can never be upgraded, so there is no authority.
+ * - `v4` (ELF behind a header the 36-byte slice does not include), `native`, and `unknown` cannot be hashed
+ *   here, so no hash is returned and the verified-build marker is left `unknown` rather than a false negative.
+ */
+async function resolveVerificationInputs(
+    rpc: SolanaRpc,
+    programId: Address,
+    loader: ProgramLoader,
+    value: AccountInfoValue,
+    abortSignal: AbortSignal,
+): Promise<VerificationInputs> {
+    if (loader === 'upgradeable') {
+        const programData = await getProgramData(rpc, value, abortSignal);
+        return { authority: programData?.authority, localHash: programData?.localHash, programData };
+    }
+    if (loader === 'immutable-elf') {
+        return { localHash: await hashLegacyProgram(rpc, programId, abortSignal) };
+    }
+    return {};
+}
+
+/** The on-chain hash of a legacy-loader program, whose account data is the raw ELF, or undefined on failure. */
+async function hashLegacyProgram(
+    rpc: SolanaRpc,
+    programId: Address,
+    abortSignal: AbortSignal,
+): Promise<string | undefined> {
+    try {
+        // Full account (no dataSlice): the whole account payload is the ELF the registry hashes over.
+        const { value } = await rpc.getAccountInfo(programId, { encoding: 'base64' }).send({ abortSignal });
+        if (!value) return undefined;
+
+        const base64 = base64Data(value.data);
+        if (!base64) return undefined;
+
+        return hashProgramBytes(Buffer.from(base64, 'base64'));
+    } catch (error) {
+        Logger.warn('[account-share] Legacy program hash failed', {
+            cause: error instanceof Error ? error.message : error,
+        });
+        return undefined;
+    }
 }
 
 /** The loader that owns an executable account - where its bytes live and whether it can be upgraded. */
@@ -190,10 +261,12 @@ async function buildNotFound(
     address: string,
     abortSignal: AbortSignal,
 ): Promise<NotFoundCardData> {
-    // History is the only signal that separates a closed account from one that never existed. When the
-    // lookup itself fails we know neither, so the card says so rather than guessing "never used".
+    // Signature history is the only signal we have, and it cannot prove the account ever existed: a failed
+    // creation transaction leaves history for an address that was never allocated. So `has-history` only
+    // records that history exists (the copy stops short of claiming "closed"), and a failed lookup is
+    // `unknown` rather than a guess.
     const history = await hasHistory(rpc, accountAddress, abortSignal);
-    const reason: NotFoundReason = history === undefined ? 'unknown' : history ? 'closed' : 'never-used';
+    const reason: NotFoundReason = history === undefined ? 'unknown' : history ? 'has-history' : 'never-used';
     return { address, kind: 'not-found', reason };
 }
 

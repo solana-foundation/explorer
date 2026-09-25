@@ -44,6 +44,18 @@ describe('GET /og/account/[address]', () => {
         expect(mocks.getAccountShareData).toHaveBeenCalledWith(ADDRESS, undefined);
     });
 
+    it('should cache an incomplete card only briefly so a transient failure is not pinned', async () => {
+        mocks.getAccountShareData.mockResolvedValue({
+            data: { address: ADDRESS, incomplete: true, kind: 'account' },
+            kind: 'ok',
+        });
+
+        const response = await get(`/og/account/${ADDRESS}`);
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get('Cache-Control')).toContain('max-age=60');
+    });
+
     it('should cache a not-found card only briefly', async () => {
         mocks.getAccountShareData.mockResolvedValue({
             data: { address: ADDRESS, kind: 'not-found', reason: 'never-used' },

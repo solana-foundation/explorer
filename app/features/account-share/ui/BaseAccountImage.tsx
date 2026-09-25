@@ -3,7 +3,14 @@ import { truncateAddress } from '@entities/address';
 import { Logo } from '@/app/shared/components/SolanaLogo';
 
 import type { OgGlows } from '../lib/og-glows';
-import type { AccountCardData, AccountShareData, NotFoundReason, ProgramCardData } from '../model/account-share-data';
+import type {
+    AccountCardData,
+    AccountShareData,
+    MarkerState,
+    NotFoundReason,
+    ProgramCardData,
+    ProgramMarkers,
+} from '../model/account-share-data';
 import { MarkerIcon, type MarkerIconName } from './marker-icons';
 
 // Every address on the card is written as six characters a side, the width the design uses for account keys.
@@ -40,10 +47,12 @@ const TYPO = {
 const LOGO = { height: '28px', width: '229px' } as const;
 
 const NOT_FOUND_COPY: Record<NotFoundReason, { headline: string; pill: string; reason: string }> = {
-    closed: {
-        headline: 'Account closed',
-        pill: 'Closed',
-        reason: 'This address has on-chain transaction history, but holds no account data now.',
+    'has-history': {
+        headline: 'No account data found',
+        pill: 'Not found',
+        // History exists but does not prove the account ever did (a failed creation leaves history too), so
+        // this stops short of claiming the account was closed.
+        reason: 'This address has on-chain transaction history but holds no account data on this cluster.',
     },
     'never-used': {
         headline: 'No account data found',
@@ -250,21 +259,10 @@ function ProgramBody({ data }: { data: ProgramCardData }) {
             </Headline>
             <Identity address={data.address} />
             <div style={{ alignItems: 'center', display: 'flex', gap: '26px', paddingTop: '12px' }}>
-                <Marker
-                    icon={data.markers.verifiedBuild ? 'badge-check' : 'badge-alert'}
-                    label={data.markers.verifiedBuild ? 'Verified build' : 'Not verified'}
-                    tone={data.markers.verifiedBuild ? 'positive' : 'alert'}
-                />
-                <Marker
-                    icon={data.markers.idlUploaded ? 'file-code' : 'file-x'}
-                    label={data.markers.idlUploaded ? 'IDL uploaded' : 'No IDL'}
-                    tone={data.markers.idlUploaded ? 'positive' : 'muted'}
-                />
-                <Marker
-                    icon={data.markers.securityTxt ? 'shield-check' : 'shield-off'}
-                    label={data.markers.securityTxt ? 'security.txt' : 'No security.txt'}
-                    tone={data.markers.securityTxt ? 'positive' : 'muted'}
-                />
+                {MARKER_KEYS.map(key => {
+                    const { icon, label, tone } = MARKER_DISPLAY[key][data.markers[key]];
+                    return <Marker icon={icon} key={key} label={label} tone={tone} />;
+                })}
             </div>
         </div>
     );
@@ -373,6 +371,33 @@ function StackedCell({ children, label }: { children: React.ReactNode; label: st
 }
 
 type MarkerTone = 'alert' | 'muted' | 'positive';
+
+type MarkerDisplay = { icon: MarkerIconName; label: string; tone: MarkerTone };
+
+// The markers, in draw order.
+const MARKER_KEYS = ['verifiedBuild', 'idlUploaded', 'securityTxt'] as const satisfies ReadonlyArray<
+    keyof ProgramMarkers
+>;
+
+// How each marker renders per state. `unknown` (lookup failed or check not supported) stays muted with
+// neutral copy so the card never asserts a negative ("Not verified" / "No IDL") it could not actually check.
+const MARKER_DISPLAY: Record<keyof ProgramMarkers, Record<MarkerState, MarkerDisplay>> = {
+    idlUploaded: {
+        no: { icon: 'file-x', label: 'No IDL', tone: 'muted' },
+        unknown: { icon: 'file-x', label: 'IDL unavailable', tone: 'muted' },
+        yes: { icon: 'file-code', label: 'IDL uploaded', tone: 'positive' },
+    },
+    securityTxt: {
+        no: { icon: 'shield-off', label: 'No security.txt', tone: 'muted' },
+        unknown: { icon: 'shield-off', label: 'security.txt unavailable', tone: 'muted' },
+        yes: { icon: 'shield-check', label: 'security.txt', tone: 'positive' },
+    },
+    verifiedBuild: {
+        no: { icon: 'badge-alert', label: 'Not verified', tone: 'alert' },
+        unknown: { icon: 'badge-alert', label: 'Verification unavailable', tone: 'muted' },
+        yes: { icon: 'badge-check', label: 'Verified build', tone: 'positive' },
+    },
+};
 
 // A positive marker keeps a white label beside a green icon; an alert one is amber, a muted one grey.
 function Marker({ icon, label, tone }: { icon: MarkerIconName; label: string; tone: MarkerTone }) {
