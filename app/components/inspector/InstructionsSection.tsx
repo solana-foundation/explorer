@@ -3,15 +3,20 @@ import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { type InstructionSurface, InstructionSurfaceProvider } from '@entities/instruction-card';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
 import {
+    ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
     BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
     SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL,
+    SPL_MEMO_PROGRAM_LABEL,
     SPL_TOKEN_2022_PROGRAM_LABEL,
     SPL_TOKEN_PROGRAM_LABEL,
     SYSTEM_PROGRAM_LABEL,
 } from '@explorer/parsers';
+import { AddressLookupTableDetailsCard } from '@features/decode-instruction-address-lookup-table';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
+import { ComputeBudgetDetailsCard } from '@features/decode-instruction-compute-budget';
 import { Ed25519DetailsCard } from '@features/decode-instruction-ed25519';
 import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
+import { MemoDetailsCard } from '@features/decode-instruction-memo';
 import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
@@ -21,7 +26,6 @@ import { useScrollAnchor } from '@providers/scroll-anchor';
 import {
     AddressLookupTableAccount,
     type CompiledInnerInstruction,
-    ComputeBudgetProgram,
     type TransactionInstruction,
     TransactionMessage,
     type VersionedMessage,
@@ -40,7 +44,6 @@ import { ErrorCard } from '../common/ErrorCard';
 import { InspectorInstructionCard as InspectorInstructionCardComponent } from '../common/InspectorInstructionCard';
 import { LoadingCard } from '../common/LoadingCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
-import { ComputeBudgetDetailsCard } from '../instruction/ComputeBudgetDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { AddressWithContextCell } from './AddressWithContextCell';
@@ -260,23 +263,6 @@ function InspectorInstructionCard({
         );
     }
 
-    // Compute Budget instructions are not RPC-pre-parsed and its DetailsCard
-    // decodes raw bytes directly, so no parser entry is needed today. Phase 3
-    // of the unification will fold this into the registry.
-    if (ComputeBudgetProgram.programId.equals(programId)) {
-        return (
-            <ComputeBudgetDetailsCard
-                ix={ix}
-                index={index}
-                result={INSPECTOR_RESULT}
-                signature={INSPECTOR_SIGNATURE}
-                InstructionCardComponent={BaseInstructionCard}
-                childIndex={childIndex}
-                innerCards={innerCards}
-            />
-        );
-    }
-
     if (!parsedIx) {
         return unknownCard;
     }
@@ -298,6 +284,18 @@ function InspectorInstructionCard({
         if (parsedIx.programLabel === 'zk-elgamal-proof') {
             return (
                 <ZkElGamalProofDetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    raw={ix}
+                    index={index}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            );
+        }
+        if (parsedIx.programLabel === 'compute-budget') {
+            return (
+                <ComputeBudgetDetailsCard
                     key={index}
                     ix={parsedIx}
                     raw={ix}
@@ -369,6 +367,28 @@ function InspectorInstructionCard({
                     InstructionCardComponent={InspectorInstructionCardComponent}
                     AddressComponent={AddressWithContextCell}
                     showProgramField={false}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            );
+        case SPL_MEMO_PROGRAM_LABEL:
+            return (
+                <MemoDetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    raw={ix}
+                    index={index}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            );
+        case ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL:
+            return (
+                <AddressLookupTableDetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    raw={ix}
+                    index={index}
                     childIndex={childIndex}
                     innerCards={innerCards}
                 />
@@ -461,6 +481,19 @@ function InspectorInstructionCard({
             return (
                 <ErrorBoundary fallback={unknownCard}>
                     <ZkElGamalProofDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        raw={ix}
+                        index={index}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
+                    />
+                </ErrorBoundary>
+            );
+        case 'compute-budget':
+            return (
+                <ErrorBoundary fallback={unknownCard}>
+                    <ComputeBudgetDetailsCard
                         key={index}
                         ix={parsedIx}
                         raw={ix}

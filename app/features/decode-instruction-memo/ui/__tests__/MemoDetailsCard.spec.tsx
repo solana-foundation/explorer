@@ -1,4 +1,5 @@
 import { TxInstructionSurface } from '@entities/instruction-card';
+import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
@@ -15,9 +16,12 @@ import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TransactionsProvider } from '@/app/providers/transactions';
 
+import { memoInstructionParsers } from '../../lib/memo-client';
 import { MemoDetailsCard } from '../MemoDetailsCard';
 
 const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
+
+const dispatcher = createInstructionParserDispatcher(memoInstructionParsers);
 
 describe('MemoDetailsCard', () => {
     it('should render the memo payload and the program row', async () => {
@@ -47,14 +51,26 @@ describe('MemoDetailsCard', () => {
         });
     });
 
-    // A foreign program id proves the row reads the node rather than a memo-program constant.
+    // Every deployment is registered, so the v1 program reaches the same card and names its own program.
     it('should render the program row from the node', async () => {
         const legacyMemoProgram = new PublicKey('Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo');
 
         renderCard({ ...memoInstruction('gm'), programId: legacyMemoProgram });
 
         await waitFor(() => {
-            expect(readRows()[0]).toEqual(['Program', legacyMemoProgram.toBase58()]);
+            expect(readRows()).toEqual([
+                ['Program', legacyMemoProgram.toBase58()],
+                ['Data (UTF-8)', 'gm'],
+            ]);
+        });
+    });
+
+    // A payload the slice did not normalise must not reach `wrap` as a non-string.
+    it('should fall back to the unknown card when the payload is not a memo', async () => {
+        renderCard({ parsed: { info: {}, type: 'other' }, program: 'spl-memo', programId: MEMO_PROGRAM_ID });
+
+        await waitFor(() => {
+            expect(screen.getByText('Memo Program: Unknown Instruction')).toBeInTheDocument();
         });
     });
 });
@@ -70,7 +86,7 @@ function renderCard(ix: ParsedInstruction) {
                 <TransactionsProvider>
                     <AccountsProvider>
                         <TxInstructionSurface result={{ err: null }}>
-                            <MemoDetailsCard ix={ix} index={0} />
+                            <MemoDetailsCard ix={dispatcher.fromParsedInstruction(ix)} index={0} />
                         </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>

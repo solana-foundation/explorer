@@ -1,15 +1,11 @@
-import { MEMO_PROGRAM_ADDRESS } from '@solana-program/memo';
+import { SUPPORTED_MEMO_PROGRAM_ADDRESSES } from '@solana-program/memo';
 
 import type { InstructionNameLookup } from './types';
 
-/** The SPL Memo programs. v2 has a canonical export; v1 predates one, so it stays a literal. */
-const MEMO_PROGRAM_IDS: ReadonlySet<string> = new Set([
-    MEMO_PROGRAM_ADDRESS,
-    'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo',
-]);
+const MEMO_PROGRAM_IDS: ReadonlySet<string> = new Set(SUPPORTED_MEMO_PROGRAM_ADDRESSES);
 
 /**
- * `'Memo'` for either SPL Memo program, or undefined for any other.
+ * `'Memo'` for any SPL Memo deployment, or undefined for any other program.
  *
  * The one name source that reads no bytes: a memo's whole instruction data *is* the UTF-8 text, so there
  * is no discriminator and the program id alone decides. Taking only `programId` is what lets both

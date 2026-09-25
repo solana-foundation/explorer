@@ -1,5 +1,6 @@
 import { TxInstructionSurface } from '@entities/instruction-card';
-import { AddressLookupTableProgram, type ParsedInstruction, type ParsedTransaction } from '@solana/web3.js';
+import { createInstructionParserDispatcher } from '@entities/instruction-parser';
+import { AddressLookupTableProgram, type ParsedInstruction } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
@@ -18,7 +19,10 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TransactionsProvider } from '@/app/providers/transactions';
 import { Logger } from '@/app/shared/lib/logger';
 
+import { addressLookupTableInstructionParser } from '../../lib/address-lookup-table-client';
 import { AddressLookupTableDetailsCard } from '../AddressLookupTableDetailsCard';
+
+const dispatcher = createInstructionParserDispatcher([addressLookupTableInstructionParser]);
 
 const A = {
     authority: '3EbFtRfKRMTrhPrRQjxbfWCB6NUyTQxwsWTKQFVKgNbb',
@@ -56,7 +60,7 @@ const DISPATCH: Array<{ info: unknown; title: string; type: string }> = [
     },
 ];
 
-describe('instruction::AddressLookupTableDetailsCard dispatch', () => {
+describe('AddressLookupTableDetailsCard dispatch', () => {
     beforeEach(() => {
         vi.mocked(Logger.error).mockClear();
     });
@@ -70,9 +74,7 @@ describe('instruction::AddressLookupTableDetailsCard dispatch', () => {
         expect(Logger.error).not.toHaveBeenCalled();
     });
 
-    // A single union used to validate every type, and `type()` let the loosest member win —
-    // so extend payloads were checked against the freeze schema and `newAddresses` reached
-    // the card as raw strings. Pin the coercion each type's own schema now performs.
+    // Each type is validated against its own schema, so `newAddresses` reaches the card as keys.
     it('should coerce the extend addresses through the extend schema', async () => {
         renderCard({ ...TABLE, newAddresses: [A.entry] }, 'extendLookupTable');
 
@@ -91,8 +93,7 @@ describe('instruction::AddressLookupTableDetailsCard dispatch', () => {
         });
     });
 
-    // Each type is now validated against its own schema, so a payload missing a
-    // field that type requires no longer slips through a looser sibling.
+    // A payload missing a field its type requires is rejected by the slice and reported.
     it('should fall back and report when a payload misses a required field', async () => {
         renderCard(TABLE, 'closeLookupTable');
 
@@ -104,24 +105,19 @@ describe('instruction::AddressLookupTableDetailsCard dispatch', () => {
 });
 
 function renderCard(info: unknown, type: string) {
+    const ix = {
+        parsed: { info, type },
+        program: 'address-lookup-table',
+        programId: AddressLookupTableProgram.programId,
+    } as unknown as ParsedInstruction;
+
     return render(
         <ScrollAnchorProvider>
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
                         <TxInstructionSurface result={{ err: null }}>
-                            <AddressLookupTableDetailsCard
-                                tx={{ signatures: ['sig'] } as ParsedTransaction}
-                                ix={
-                                    {
-                                        parsed: { info, type },
-                                        program: 'address-lookup-table',
-                                        programId: AddressLookupTableProgram.programId,
-                                    } as unknown as ParsedInstruction
-                                }
-                                result={{ err: null }}
-                                index={0}
-                            />
+                            <AddressLookupTableDetailsCard ix={dispatcher.fromParsedInstruction(ix)} index={0} />
                         </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>
