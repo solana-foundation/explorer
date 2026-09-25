@@ -5,6 +5,9 @@ on:
     branches: [master, development, 'development-*']
   pull_request:
 
+permissions:
+  contents: read
+
 env:
   PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
   SENTRY_TELEMETRY_DISABLE: true
