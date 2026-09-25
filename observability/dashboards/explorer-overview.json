@@ -1,0 +1,442 @@
+{
+    "uid": "explorer-overview",
+    "title": "Explorer \u2014 Overview",
+    "tags": ["explorer", "vercel", "loki"],
+    "timezone": "utc",
+    "schemaVersion": 39,
+    "refresh": "1m",
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "templating": {
+        "list": []
+    },
+    "panels": [
+        {
+            "id": 1,
+            "type": "timeseries",
+            "title": "Requests by status class",
+            "description": "Vercel request logs (lambda/edge/static sources) from the log drain, bucketed by the first digit of proxy.statusCode.",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 0
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps"
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "queryType": "range",
+                    "legendFormat": "{{class}}",
+                    "expr": "sum by (class) (label_replace(rate({service=\"explorer\", env=\"prd\", source=~\"lambda|edge|static\"} | json | proxy_statusCode != \"\" [$__rate_interval]), \"class\", \"${1}xx\", \"proxy_statusCode\", \"([0-9])[0-9][0-9]\"))"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "type": "timeseries",
+            "title": "Log lines by level",
+            "description": "Stream label `level` set by /api/log-drain from Vercel's level field. The error-rate alert fires on error|fatal > 0.1/s for 5m.",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 0
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "error"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "red"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "fatal"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "dark-red"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "warning"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "orange"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "queryType": "range",
+                    "legendFormat": "{{level}}",
+                    "expr": "sum by (level) (rate({service=\"explorer\", env=\"prd\"}[$__rate_interval]))"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "type": "stat",
+            "title": "5xx in range",
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 0,
+                "y": 8
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 1
+                            },
+                            {
+                                "color": "red",
+                                "value": 20
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "value",
+                "graphMode": "none"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "queryType": "instant",
+                    "expr": "sum(count_over_time({service=\"explorer\", env=\"prd\"} | json | proxy_statusCode=~\"5..\" [$__range]))"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "type": "stat",
+            "title": "Error / fatal lines in range",
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 6,
+                "y": 8
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 1
+                            },
+                            {
+                                "color": "red",
+                                "value": 50
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "value",
+                "graphMode": "none"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "queryType": "instant",
+                    "expr": "sum(count_over_time({service=\"explorer\", env=\"prd\", level=~\"error|fatal\"}[$__range]))"
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "type": "stat",
+            "title": "Log lines by source",
+            "description": "If lambda drops to zero while the site is up, the drain or the Loki push is broken (see the logs-absent alert).",
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 12,
+                "y": 8
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "none",
+                "graphMode": "area",
+                "textMode": "value_and_name"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "queryType": "instant",
+                    "legendFormat": "{{source}}",
+                    "expr": "sum by (source) (count_over_time({service=\"explorer\", env=\"prd\"}[$__range]))"
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "type": "table",
+            "title": "Top paths with 5xx",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 12
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "options": {
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "displayName": "Value",
+                        "desc": true
+                    }
+                ]
+            },
+            "transformations": [
+                {
+                    "id": "labelsToFields",
+                    "options": {}
+                },
+                {
+                    "id": "organize",
+                    "options": {
+                        "excludeByName": {
+                            "Time": true
+                        }
+                    }
+                }
+            ],
+            "targets": [
+                {
+                    "refId": "A",
+                    "queryType": "instant",
+                    "expr": "topk(10, sum by (path) (count_over_time({service=\"explorer\", env=\"prd\"} | json | proxy_statusCode=~\"5..\" [$__range])))"
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "type": "table",
+            "title": "Top paths with error logs",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 12
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "options": {
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "displayName": "Value",
+                        "desc": true
+                    }
+                ]
+            },
+            "transformations": [
+                {
+                    "id": "labelsToFields",
+                    "options": {}
+                },
+                {
+                    "id": "organize",
+                    "options": {
+                        "excludeByName": {
+                            "Time": true
+                        }
+                    }
+                }
+            ],
+            "targets": [
+                {
+                    "refId": "A",
+                    "queryType": "instant",
+                    "expr": "topk(10, sum by (path) (count_over_time({service=\"explorer\", env=\"prd\", level=~\"error|fatal\"} | json [$__range])))"
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "type": "logs",
+            "title": "Recent errors",
+            "gridPos": {
+                "h": 12,
+                "w": 24,
+                "x": 0,
+                "y": 20
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+            },
+            "options": {
+                "showTime": true,
+                "wrapLogMessage": true,
+                "sortOrder": "Descending",
+                "dedupStrategy": "none",
+                "enableLogDetails": true
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "queryType": "range",
+                    "expr": "{service=\"explorer\", env=\"prd\", level=~\"error|fatal\"} | json | line_format \"{{.source}} {{.path}} {{.message}}\""
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "type": "stat",
+            "title": "Firewall actions in range (waf)",
+            "description": "If lambda drops to zero while the site is up, the drain or the Loki push is broken (see the logs-absent alert).",
+            "gridPos": {
+                "x": 18,
+                "y": 8,
+                "w": 6,
+                "h": 4
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "none",
+                "graphMode": "area",
+                "textMode": "value_and_name"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "queryType": "instant",
+                    "legendFormat": "{{waf}}",
+                    "expr": "sum by (waf) (label_replace(count_over_time({service=\"explorer\", env=\"prd\"} | json | proxy_wafAction != \"\" [$__range]), \"waf\", \"$1\", \"proxy_wafAction\", \"(.*)\"))"
+                }
+            ]
+        }
+    ]
+}

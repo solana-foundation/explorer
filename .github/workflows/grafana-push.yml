@@ -1,0 +1,104 @@
+name: Grafana push (dashboards + alert rules)
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/grafana-push.yml'
+      - 'observability/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: grafana-push
+  cancel-in-progress: false
+
+# Provisions the Explorer folder on the Solana Foundation Grafana Cloud stack from the JSON under
+# observability/. GRAFANA_API_TOKEN is a stack service-account token; SLACK_ALERT_WEBHOOK_URL is the alerts channel's incoming webhook.
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GRAFANA_API_URL: https://solanafoundation.grafana.net
+      GRAFANA_FOLDER_UID: explorer
+      GRAFANA_API_TOKEN: ${{ secrets.GRAFANA_API_TOKEN }}
+      SLACK_ALERT_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK_URL }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate JSON
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for f in observability/dashboards/*.json observability/alert-rules/*.json observability/contact-points/*.json; do
+            jq empty "$f"
+          done
+          # The stack's notification-policy tree is shared with other teams and is never written from here:
+          # every rule routes itself through notification_settings.receiver.
+          for f in observability/alert-rules/*.json; do
+            jq -e '.notification_settings.receiver | strings' "$f" >/dev/null \
+              || { echo "::error file=$f::alert rule must set notification_settings.receiver"; exit 1; }
+            jq -e --arg folder "$GRAFANA_FOLDER_UID" '.folderUID == $folder' "$f" >/dev/null \
+              || { echo "::error file=$f::alert rule must live in folder $GRAFANA_FOLDER_UID"; exit 1; }
+          done
+
+      - name: Push dashboards
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for f in observability/dashboards/*.json; do
+            payload=$(jq --arg folder "$GRAFANA_FOLDER_UID" --arg msg "Pushed from $(git rev-parse --short HEAD)" \
+              '{dashboard: ., folderUid: $folder, overwrite: true, message: $msg}' "$f")
+            http_code=$(curl -sS -o /tmp/resp.json -w '%{http_code}' \
+              -X POST "$GRAFANA_API_URL/api/dashboards/db" \
+              -H "Authorization: Bearer $GRAFANA_API_TOKEN" -H 'Content-Type: application/json' --data "$payload")
+            if [ "$http_code" -ge 300 ]; then echo "::error file=$f::Push failed ($http_code)"; cat /tmp/resp.json; exit 1; fi
+            jq -r '"\(input_filename // ""): uid=\(.uid) url=\(.url)"' /tmp/resp.json
+          done
+
+      - name: Push contact points
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for f in observability/contact-points/*.json; do
+            uid=$(jq -r '.uid // empty' "$f")
+            [ -n "$uid" ] || { echo "::error file=$f::missing top-level .uid"; exit 1; }
+            payload=$(envsubst '$SLACK_ALERT_WEBHOOK_URL' < "$f")
+            http_code=$(curl -sS -o /tmp/resp.json -w '%{http_code}' \
+              -X PUT "$GRAFANA_API_URL/api/v1/provisioning/contact-points/$uid" \
+              -H "Authorization: Bearer $GRAFANA_API_TOKEN" -H 'Content-Type: application/json' \
+              -H 'X-Disable-Provenance: true' --data "$payload")
+            if [ "$http_code" = "404" ]; then
+              http_code=$(curl -sS -o /tmp/resp.json -w '%{http_code}' \
+                -X POST "$GRAFANA_API_URL/api/v1/provisioning/contact-points" \
+                -H "Authorization: Bearer $GRAFANA_API_TOKEN" -H 'Content-Type: application/json' \
+                -H 'X-Disable-Provenance: true' --data "$payload")
+            fi
+            if [ "$http_code" -ge 300 ]; then echo "::error file=$f::Push failed ($http_code)"; cat /tmp/resp.json; exit 1; fi
+            echo "$(basename "$f"): $http_code"
+          done
+
+      - name: Push alert rules
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for f in observability/alert-rules/*.json; do
+            uid=$(jq -r '.uid // empty' "$f")
+            [ -n "$uid" ] || { echo "::error file=$f::missing top-level .uid"; exit 1; }
+            http_code=$(curl -sS -o /tmp/resp.json -w '%{http_code}' \
+              -X PUT "$GRAFANA_API_URL/api/v1/provisioning/alert-rules/$uid" \
+              -H "Authorization: Bearer $GRAFANA_API_TOKEN" -H 'Content-Type: application/json' \
+              -H 'X-Disable-Provenance: true' --data @"$f")
+            if [ "$http_code" = "404" ]; then
+              http_code=$(curl -sS -o /tmp/resp.json -w '%{http_code}' \
+                -X POST "$GRAFANA_API_URL/api/v1/provisioning/alert-rules" \
+                -H "Authorization: Bearer $GRAFANA_API_TOKEN" -H 'Content-Type: application/json' \
+                -H 'X-Disable-Provenance: true' --data @"$f")
+            fi
+            if [ "$http_code" -ge 300 ]; then echo "::error file=$f::Push failed ($http_code)"; cat /tmp/resp.json; exit 1; fi
+            echo "$(basename "$f"): $http_code"
+          done
