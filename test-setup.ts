@@ -79,8 +79,8 @@ if (!Object.getOwnPropertyDescriptor(Uint8Array, Symbol.hasInstance)) {
     });
 }
 
-// jsdom does not implement pointer capture.
-if (!Element.prototype.hasPointerCapture) {
+// jsdom does not implement pointer capture. Specs in the node environment have no `Element`.
+if (typeof Element !== 'undefined' && !Element.prototype.hasPointerCapture) {
     Element.prototype.hasPointerCapture = () => false;
     Element.prototype.releasePointerCapture = () => {};
     Element.prototype.setPointerCapture = () => {};
