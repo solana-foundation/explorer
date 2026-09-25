@@ -39,7 +39,7 @@
                     "refId": "A",
                     "queryType": "range",
                     "legendFormat": "{{class}}",
-                    "expr": "sum by (class) (label_replace(rate({service=\"explorer\", env=\"prd\", source=~\"lambda|edge|static\"} | json | proxy_statusCode != \"\" [$__rate_interval]), \"class\", \"${1}xx\", \"proxy_statusCode\", \"([0-9])[0-9][0-9]\"))"
+                    "expr": "sum by (class) (label_replace(rate({service=\"explorer\", env=\"prd\", source=~\"lambda|edge|static\"} | json | proxy_statusCode != \"\" [$__auto]), \"class\", \"${1}xx\", \"proxy_statusCode\", \"([0-9])[0-9][0-9]\"))"
                 }
             ]
         },
@@ -115,7 +115,7 @@
                     "refId": "A",
                     "queryType": "range",
                     "legendFormat": "{{level}}",
-                    "expr": "sum by (level) (rate({service=\"explorer\", env=\"prd\"}[$__rate_interval]))"
+                    "expr": "sum by (level) (rate({service=\"explorer\", env=\"prd\"}[$__auto]))"
                 }
             ]
         },
@@ -244,7 +244,8 @@
             },
             "fieldConfig": {
                 "defaults": {
-                    "unit": "short"
+                    "unit": "short",
+                    "displayName": "${__field.labels.source}"
                 },
                 "overrides": []
             },
@@ -256,7 +257,8 @@
                 },
                 "colorMode": "none",
                 "graphMode": "area",
-                "textMode": "value_and_name"
+                "textMode": "value_and_name",
+                "orientation": "horizontal"
             },
             "targets": [
                 {
@@ -401,7 +403,7 @@
         {
             "id": 11,
             "type": "stat",
-            "title": "Firewall actions in range (waf)",
+            "title": "Firewall actions in range",
             "description": "If lambda drops to zero while the site is up, the drain or the Loki push is broken (see the logs-absent alert).",
             "gridPos": {
                 "x": 18,
@@ -415,7 +417,8 @@
             },
             "fieldConfig": {
                 "defaults": {
-                    "unit": "short"
+                    "unit": "short",
+                    "displayName": "${__field.labels.proxy_wafAction}"
                 },
                 "overrides": []
             },
@@ -427,14 +430,15 @@
                 },
                 "colorMode": "none",
                 "graphMode": "area",
-                "textMode": "value_and_name"
+                "textMode": "value_and_name",
+                "orientation": "horizontal"
             },
             "targets": [
                 {
                     "refId": "A",
                     "queryType": "instant",
-                    "legendFormat": "{{waf}}",
-                    "expr": "sum by (waf) (label_replace(count_over_time({service=\"explorer\", env=\"prd\"} | json | proxy_wafAction != \"\" [$__range]), \"waf\", \"$1\", \"proxy_wafAction\", \"(.*)\"))"
+                    "legendFormat": "{{proxy_wafAction}}",
+                    "expr": "sum by (proxy_wafAction) (count_over_time({service=\"explorer\", env=\"prd\"} | json | proxy_wafAction != \"\" [$__range]))"
                 }
             ]
         }
