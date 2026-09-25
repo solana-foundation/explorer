@@ -31,35 +31,59 @@ describe('Analytics', () => {
         expect(container).toBeEmptyDOMElement();
     });
 
-    it('should emit the tag id as a JSON string literal in the GTM bootstrap', () => {
+    it('should quote the tag id in the GTM bootstrap', () => {
+        vi.stubEnv('NEXT_PUBLIC_GOOGLE_TAG_ID', 'GTM-ABC123');
+        vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', '');
+
+        render(<Analytics />);
+
+        expect(screen.getByTestId('google-tag-initialization')).toHaveTextContent(
+            `(window,document,'script','dataLayer',"GTM-ABC123");`,
+        );
+    });
+
+    it('should escape a hostile tag id into a valid string literal', () => {
         vi.stubEnv('NEXT_PUBLIC_GOOGLE_TAG_ID', HOSTILE_ID);
         vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', '');
 
         render(<Analytics />);
 
         expect(screen.getByTestId('google-tag-initialization')).toHaveTextContent(
-            `'dataLayer',${JSON.stringify(HOSTILE_ID)});`,
+            String.raw`(window,document,'script','dataLayer',"G-1'2'\\3\"4");`,
         );
     });
 
-    it('should emit the analytics id as a JSON string literal and URL-encode it in the loader src', () => {
+    it('should quote the analytics id in the gtag config and pass it through the loader src', () => {
+        vi.stubEnv('NEXT_PUBLIC_GOOGLE_TAG_ID', '');
+        vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', 'G-ABC123');
+
+        render(<Analytics />);
+
+        expect(screen.getByTestId('google-analytics-initialization')).toHaveTextContent(`gtag('config', "G-ABC123");`);
+        expect(screen.getByTestId('gtag-loader')).toHaveAttribute(
+            'src',
+            'https://www.googletagmanager.com/gtag/js?id=G-ABC123',
+        );
+    });
+
+    it('should escape a hostile analytics id in the gtag config and percent-encode it in the loader src', () => {
         vi.stubEnv('NEXT_PUBLIC_GOOGLE_TAG_ID', '');
         vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', HOSTILE_ID);
 
         render(<Analytics />);
 
         expect(screen.getByTestId('google-analytics-initialization')).toHaveTextContent(
-            `gtag('config', ${JSON.stringify(HOSTILE_ID)});`,
+            String.raw`gtag('config', "G-1'2'\\3\"4");`,
         );
         expect(screen.getByTestId('gtag-loader')).toHaveAttribute(
             'src',
-            `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(HOSTILE_ID)}`,
+            "https://www.googletagmanager.com/gtag/js?id=G-1'2'%5C3%224",
         );
     });
 
     it('should prefer the tag id when both ids are configured', () => {
-        vi.stubEnv('NEXT_PUBLIC_GOOGLE_TAG_ID', 'GTM-TEST');
-        vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', 'G-TEST');
+        vi.stubEnv('NEXT_PUBLIC_GOOGLE_TAG_ID', 'GTM-ABC123');
+        vi.stubEnv('NEXT_PUBLIC_GOOGLE_ANALYTICS_ID', 'G-ABC123');
 
         render(<Analytics />);
 
