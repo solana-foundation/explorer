@@ -32,14 +32,15 @@ function GoogleTags() {
     // nothing, since PerformanceObserver replays what it already saw.
     const [isGtagReady, setIsGtagReady] = useState(false);
     const markGtagReady = () => setIsGtagReady(true);
-    const safeAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.replace("'", "\\'");
-    const safeTagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID?.replace("'", "\\'");
+    // '' keeps the fallback branch typed as string; the guard below treats '' and undefined alike.
+    const analyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID ?? '';
+    const tagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID;
 
-    if (!safeAnalyticsId && !safeTagId) {
-        return null;
+    if (!analyticsId && !tagId) {
+        return undefined;
     }
 
-    if (safeTagId) {
+    if (tagId) {
         return (
             <>
                 {isGtagReady && <WebVitalsReporter />}
@@ -55,12 +56,12 @@ function GoogleTags() {
                             j.async=true;
                             j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
                     })
-                    (window,document,'script','dataLayer','${safeTagId}');
+                    (window,document,'script','dataLayer',${JSON.stringify(tagId)});
                 `}
                 </Script>
                 <noscript>
                     <iframe
-                        src={`https://www.googletagmanager.com/ns.html?id=${safeTagId}`}
+                        src={`https://www.googletagmanager.com/ns.html?id=${encodeURIComponent(tagId)}`}
                         height="0"
                         width="0"
                         style={{ display: 'none', visibility: 'hidden' }}
@@ -77,7 +78,7 @@ function GoogleTags() {
             {/* Global site tag (gtag.js) - Google Analytics  */}
             <Script
                 async
-                src={`https://www.googletagmanager.com/gtag/js?id=${safeAnalyticsId}`}
+                src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(analyticsId)}`}
                 strategy="afterInteractive"
             />
             <Script id="google-analytics-initialization" strategy="afterInteractive" onReady={markGtagReady}>
@@ -85,7 +86,7 @@ function GoogleTags() {
                     window.dataLayer = window.dataLayer || [];
                     function gtag(){dataLayer.push(arguments);}
                     gtag('js', new Date());
-                    gtag('config', '${safeAnalyticsId}');
+                    gtag('config', ${JSON.stringify(analyticsId)});
                 `}
             </Script>
         </>

@@ -737,7 +737,6 @@ export default tseslint.config(
     {
         files: [
             // app root & route pages (pre-FSD)
-            'app/@analytics/default.js',
             'app/layout.tsx',
             'app/address/[[]address[]]/layout.tsx',
             'app/block/[[]slot[]]/accounts/page-client.tsx',
