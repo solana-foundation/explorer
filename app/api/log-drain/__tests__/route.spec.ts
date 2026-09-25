@@ -108,6 +108,15 @@ describe('log-drain route', () => {
         expect(response.headers.get('x-vercel-verify')).toBe(VERIFY);
     });
 
+    it('should answer 502 when Loki is unreachable', async () => {
+        fetchMock.mockRejectedValue(new TypeError('fetch failed'));
+
+        const response = await post(event({}));
+
+        expect(response.status).toBe(502);
+        expect(response.headers.get('x-vercel-verify')).toBe(VERIFY);
+    });
+
     it('should answer 502 when the Loki credentials are not configured', async () => {
         vi.stubEnv('GRAFANA_LOKI_TOKEN', '');
 

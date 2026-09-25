@@ -14,6 +14,8 @@ export const SERVICE = 'explorer';
 // Vercel's own severity values. Anything else collapses to `info` so the `level` label stays bounded.
 const LEVELS = new Set(['info', 'warning', 'error', 'fatal']);
 
+const PUSH_TIMEOUT_MS = 10_000;
+
 type LokiStream = {
     stream: Record<string, string>;
     values: [string, string][];
@@ -105,14 +107,22 @@ async function pushToLoki(streams: LokiStream[]) {
         return true;
     }
     const origin = base.endsWith('/') ? base.slice(0, -1) : base;
-    const response = await fetch(`${origin}/loki/api/v1/push`, {
-        body: JSON.stringify({ streams }),
-        headers: {
-            Authorization: `Basic ${Buffer.from(`${user}:${token}`).toString('base64')}`,
-            'Content-Type': 'application/json',
-        },
-        method: 'POST',
-    });
+    let response: Response;
+    try {
+        response = await fetch(`${origin}/loki/api/v1/push`, {
+            body: JSON.stringify({ streams }),
+            headers: {
+                Authorization: `Basic ${Buffer.from(`${user}:${token}`).toString('base64')}`,
+                'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            // A stalled Loki connection would otherwise hold the delivery until the function itself times out.
+            signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
+        });
+    } catch (error) {
+        Logger.error(new Error('[log-drain] Loki push failed: transport', { cause: error }), { sentry: true });
+        return false;
+    }
     if (!response.ok) {
         const detail = await response.text().catch(() => '');
         // Sentry is the only channel left when the drain itself is broken: every log-based alert is blind.

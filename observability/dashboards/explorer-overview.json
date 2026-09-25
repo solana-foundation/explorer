@@ -433,7 +433,7 @@
                 {
                     "refId": "A",
                     "queryType": "instant",
-                    "legendFormat": "{{source}}",
+                    "legendFormat": "{{waf}}",
                     "expr": "sum by (waf) (label_replace(count_over_time({service=\"explorer\", env=\"prd\"} | json | proxy_wafAction != \"\" [$__range]), \"waf\", \"$1\", \"proxy_wafAction\", \"(.*)\"))"
                 }
             ]

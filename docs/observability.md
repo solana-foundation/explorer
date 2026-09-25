@@ -32,13 +32,13 @@ Everything under [`observability/`](../observability/) is pushed by
 [`grafana-push.yml`](../.github/workflows/grafana-push.yml) on merge to `master`, dashboards first, then contact
 points, then alert rules.
 
-| Object                                    | What it is                                                                                                                        |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `dashboards/explorer-overview.json`       | Requests by status class, log lines by level and source, 5xx and error counts, firewall actions, top failing paths, recent errors |
-| `alert-rules/explorer-5xx-responses.json` | More than 20 requests with a 5xx proxy status in 5m, for 5m. Counts responses, not log lines                                      |
-| `alert-rules/explorer-server-errors.json` | error/fatal log lines above 0.1/s for 5m                                                                                          |
-| `alert-rules/explorer-logs-absent.json`   | No production log lines for 30m, or the Loki query errors. Ships paused; unpause once the drain is verified                       |
-| `contact-points/explorer-slack.json`      | The one receiver. Slack webhook from `SLACK_ALERT_WEBHOOK_URL`                                                                    |
+| Object                                    | What it is                                                                                                                            |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `dashboards/explorer-overview.json`       | Requests by status class, log lines by level and source, 5xx and error counts, firewall actions, top failing paths, recent errors     |
+| `alert-rules/explorer-5xx-responses.json` | More than 20 requests with a 5xx proxy status in 5m, for 5m. Counts responses, not log lines                                          |
+| `alert-rules/explorer-server-errors.json` | error/fatal log lines above 0.1/s for 5m                                                                                              |
+| `alert-rules/explorer-logs-absent.json`   | No production log lines for 30m, or the Loki query errors. Committed with `isPaused: true`; enable it by editing the file, not the UI |
+| `contact-points/explorer-slack.json`      | The one receiver. Slack webhook from `SLACK_ALERT_WEBHOOK_URL`                                                                        |
 
 The stack's notification-policy tree is shared with other Foundation projects and the provisioning API has no
 compare-and-swap, so this repository never writes it. Every rule routes itself through
@@ -85,6 +85,9 @@ Grafana → Explore → Logs, `{service="explorer"}`: lines appear within about 
 `{service="explorer", level="error"}` is what `explorer-server-errors` counts, and
 `{service="explorer"} | json | proxy_statusCode=~"5.."` is what `explorer-5xx-responses` counts. A push failure
 from the route is reported to Sentry as `[log-drain] Loki push failed`.
+
+Once lines are flowing, set `isPaused` to `false` in `observability/alert-rules/explorer-logs-absent.json` and merge.
+The push sends the whole file, so a rule unpaused in the Grafana UI is paused again on the next merge.
 
 ## Adding an alert
 
