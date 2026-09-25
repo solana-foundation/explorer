@@ -16,8 +16,8 @@ import {
 const mocks = vi.hoisted(() => ({
     getProgramProvenance: vi.fn(),
     getRpc: vi.fn(),
-    isVerifiedBuild: vi.fn(),
     programLabel: vi.fn(),
+    verifiedBuildState: vi.fn(),
 }));
 
 vi.mock('@entities/cluster/server', () => ({ getRpc: mocks.getRpc }));
@@ -27,7 +27,7 @@ vi.mock('@utils/tx', async importOriginal => {
 });
 vi.mock('../../api/get-program-provenance', () => ({
     getProgramProvenance: mocks.getProgramProvenance,
-    isVerifiedBuild: mocks.isVerifiedBuild,
+    verifiedBuildState: mocks.verifiedBuildState,
 }));
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 
@@ -38,8 +38,8 @@ const OWNER = gen.address(2);
 const AUTHORITY = gen.address(3);
 const PROGRAM_DATA = gen.address(5);
 
-const NO_MARKERS = { idlUploaded: false, securityTxt: false, verifiedBuild: false };
-const NO_PROVENANCE = { idlUploaded: false, securityTxt: false, verifiedEntries: [] };
+const NO_MARKERS = { idlUploaded: 'no', securityTxt: 'no', verifiedBuild: 'no' };
+const NO_PROVENANCE = { idlUploaded: 'no', securityTxt: 'no', verified: { entries: [], kind: 'entries' } };
 // 2026-08-26T11:32:13Z -> "Aug 26, 2026" through the real formatter.
 const BLOCK_TIME = 1_787_743_933;
 
@@ -120,7 +120,7 @@ function programDataValue({
 beforeEach(() => {
     mocks.programLabel.mockReturnValue(undefined);
     mocks.getProgramProvenance.mockResolvedValue(NO_PROVENANCE);
-    mocks.isVerifiedBuild.mockReturnValue(false);
+    mocks.verifiedBuildState.mockReturnValue('no');
 });
 
 afterEach(() => vi.clearAllMocks());
@@ -137,6 +137,7 @@ describe('account card', () => {
                 balance: '2.03928144 SOL',
                 dataSize: '165 B',
                 executable: false,
+                incomplete: false,
                 kind: 'account',
                 lastActivity: 'Aug 26, 2026',
                 owner: OWNER,
@@ -192,6 +193,7 @@ describe('program card', () => {
         expect(result).toEqual({
             data: {
                 address: ADDRESS,
+                incomplete: false,
                 kind: 'program',
                 lastDeployedSlot: 208_871_522,
                 markers: NO_MARKERS,
@@ -247,17 +249,29 @@ describe('program card', () => {
             [PROGRAM_DATA]: programDataValue({ authority: AUTHORITY, slot: 1, space: 45 }),
         });
         mocks.getProgramProvenance.mockResolvedValue({
-            idlUploaded: true,
-            securityTxt: false,
-            verifiedEntries: [{ is_verified: true, on_chain_hash: 'h', signer: AUTHORITY }],
+            idlUploaded: 'yes',
+            securityTxt: 'no',
+            verified: { entries: [{ is_verified: true, on_chain_hash: 'h', signer: AUTHORITY }], kind: 'entries' },
         });
-        mocks.isVerifiedBuild.mockReturnValue(true);
+        mocks.verifiedBuildState.mockReturnValue('yes');
 
         const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
 
         expect(result).toMatchObject({
-            data: { markers: { idlUploaded: true, securityTxt: false, verifiedBuild: true } },
+            data: { incomplete: false, markers: { idlUploaded: 'yes', securityTxt: 'no', verifiedBuild: 'yes' } },
         });
+    });
+
+    it('should flag the card incomplete when a marker could not be resolved', async () => {
+        useRpc({
+            [ADDRESS]: programValue(),
+            [PROGRAM_DATA]: programDataValue({ authority: AUTHORITY, slot: 1, space: 45 }),
+        });
+        mocks.getProgramProvenance.mockResolvedValue({ ...NO_PROVENANCE, idlUploaded: 'unknown' });
+
+        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+
+        expect(result).toMatchObject({ data: { incomplete: true, markers: { idlUploaded: 'unknown' } } });
     });
 
     it('should leave size and authority absent when the program-data account cannot be read', async () => {
@@ -283,6 +297,16 @@ describe('program loaders', () => {
             kind: 'ok',
         });
         expect(result).not.toHaveProperty('data.lastDeployedSlot');
+    });
+
+    it('should hash a legacy BPF-loader program directly so it can be verified against the registry', async () => {
+        useRpc({ [ADDRESS]: programValue({ owner: BPF_LOADER_2_ADDRESS, space: 8_320n }) });
+
+        await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+
+        // A legacy program keeps its ELF in the program account, so it is hashed directly (no authority) and
+        // handed to the verified-build check - rather than passing `undefined` and always reading "unverified".
+        expect(mocks.verifiedBuildState).toHaveBeenCalledWith(expect.anything(), undefined, expect.any(String));
     });
 
     it('should size a LoaderV4 program past its header and leave the authority undetermined', async () => {
@@ -327,12 +351,12 @@ describe('not-found card', () => {
         expect(result).toEqual({ data: { address: ADDRESS, kind: 'not-found', reason: 'never-used' }, kind: 'ok' });
     });
 
-    it('should read a missing account that still has history as closed', async () => {
+    it('should record that a missing account has history without claiming it was closed', async () => {
         useRpc({ [ADDRESS]: null }, [{ blockTime: BLOCK_TIME }]);
 
         const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
 
-        expect(result).toMatchObject({ data: { kind: 'not-found', reason: 'closed' }, kind: 'ok' });
+        expect(result).toMatchObject({ data: { kind: 'not-found', reason: 'has-history' }, kind: 'ok' });
     });
 
     it('should read a missing account whose history lookup failed as unknown', async () => {

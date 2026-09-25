@@ -46,8 +46,10 @@ export async function GET(request: NextRequest, props: Props) {
         });
         const imageBuffer = await imageResponse.arrayBuffer();
 
-        // A not-found card is a real render, but the address may gain an account later, so it caches briefly.
-        const isResolved = result.data.kind !== 'not-found';
+        // Only a fully resolved account gets the long cache. A not-found card may gain an account later, and
+        // an incomplete card (a lookup failed, leaving an `unknown` marker or a missing count) must not pin a
+        // false-negative for the full lifetime - both fall back to the short duration.
+        const isResolved = result.data.kind !== 'not-found' && !result.data.incomplete;
         return new NextResponse(imageBuffer, {
             headers: {
                 ...cacheHeaders(isResolved ? RESOLVED_CACHE_DURATION : FALLBACK_CACHE_DURATION),
