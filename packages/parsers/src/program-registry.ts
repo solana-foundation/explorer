@@ -29,13 +29,15 @@ export const VOTE_PROGRAM_LABEL = 'vote';
  */
 export type ParserProgramLabel =
     | typeof BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL
+    | 'ed25519'
     | 'lighthouse'
     | 'mpl-token-metadata'
     | 'pyth'
     | typeof SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL
     | typeof SPL_TOKEN_PROGRAM_LABEL
     | typeof SPL_TOKEN_2022_PROGRAM_LABEL
-    | typeof SYSTEM_PROGRAM_LABEL;
+    | typeof SYSTEM_PROGRAM_LABEL
+    | 'zk-elgamal-proof';
 
 export const TOKEN_PROGRAMS = [SPL_TOKEN_PROGRAM_LABEL, SPL_TOKEN_2022_PROGRAM_LABEL] as const;
 export type TokenProgram = (typeof TOKEN_PROGRAMS)[number];

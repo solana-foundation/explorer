@@ -3,17 +3,24 @@ import {
     custom,
     defineInstructionCard,
     heading,
+    InstructionCardView,
     type InstructionFieldList,
     type InstructionNode,
     text,
 } from '@entities/instruction-card';
-import { ParsedTransaction, TransactionInstruction } from '@solana/web3.js';
+import type { DispatchResult } from '@entities/instruction-parser';
+import type { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
+import { Copyable } from '@/app/components/common/Copyable';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { Copyable } from '../../common/Copyable';
-import { type Ed25519SignatureDetails, resolveEd25519Signatures } from './decode';
+import {
+    type Ed25519SignatureDetails,
+    resolveEd25519Signatures,
+    type SiblingInstructionData,
+} from '../lib/ed25519-decode';
+import type { Ed25519Parsed } from '../lib/ed25519-parser';
 
 const INVALID_REFERENCE = 'Invalid reference';
 
@@ -22,22 +29,29 @@ const Ed25519VerifyCard = defineInstructionCard<Ed25519SignatureDetails[]>({
     title: 'Ed25519: Verify Signature',
 });
 
-export function Ed25519DetailsCard({
-    tx,
-    ix,
-    index,
-    innerCards,
-    childIndex,
-}: {
-    tx: ParsedTransaction;
-    ix: TransactionInstruction;
+type Ed25519DetailsCardProps = {
+    /** The dispatcher's verdict for an ed25519 instruction: decoded, or registered-but-unparsed. */
+    ix: DispatchResult;
+    /** Raw form, for the shell's hex view and for offsets that point into this instruction. */
+    raw: TransactionInstruction;
+    /** Offsets may point into other instructions, which only the caller can see. */
+    siblingData: SiblingInstructionData;
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
-}) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix, programId: ix.programId };
+};
 
-    return <Ed25519VerifyCard node={node} info={resolveEd25519Signatures(tx, ix.data)} />;
+export function Ed25519DetailsCard({ ix, raw, siblingData, index, innerCards, childIndex }: Ed25519DetailsCardProps) {
+    const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
+
+    if ('unknown' in ix) {
+        return <InstructionCardView node={node} title="Ed25519: Unknown Instruction" defaultRaw />;
+    }
+
+    const parsed = ix.parsed as Ed25519Parsed;
+    const signatures = resolveEd25519Signatures(parsed.info.signatures, raw.data, siblingData);
+
+    return <Ed25519VerifyCard node={node} info={signatures} />;
 }
 
 /** One instruction verifies any number of signatures, so each gets its own group of rows. */
@@ -52,7 +66,7 @@ function signatureFields(
             ? custom('Signature', <Base64Value value={toBase64(signature.bytes)} />)
             : text('Signature', INVALID_REFERENCE),
         text('Public Key Reference', referenceText(publicKey)),
-        publicKey.pubkey ? address('Public Key', publicKey.pubkey) : text('Public Key', INVALID_REFERENCE),
+        publicKey.address ? address('Public Key', publicKey.address) : text('Public Key', INVALID_REFERENCE),
         text('Message Reference', `${referenceText(message)}, Size ${message.size}`),
         message.bytes
             ? custom('Message', <Base64Value value={toBase64(message.bytes)} wrapped />)

@@ -1,11 +1,6 @@
-import { getBase58Decoder } from '@solana/kit';
-import { ParsedTransaction, PublicKey } from '@solana/web3.js';
-
 import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { decodeEd25519Offsets, resolveEd25519Signatures } from '../decode';
-
-const BASE58_DECODER = getBase58Decoder();
+import { decodeEd25519Offsets, resolveEd25519Signatures, type SiblingInstructionData } from '../ed25519-decode';
 
 /** The index the program reserves for "the bytes are in this instruction". */
 const SELF = 0xffff;
@@ -68,57 +63,48 @@ describe('decodeEd25519Offsets', () => {
 
 describe('resolveEd25519Signatures', () => {
     it('should read the bytes out of this instruction when the offsets point at it', () => {
-        const [{ signature, publicKey, message }] = resolveEd25519Signatures(
-            transaction(SELF_CONTAINED),
-            SELF_CONTAINED,
-        );
+        const [{ signature, publicKey, message }] = resolve(SELF_CONTAINED);
 
         expect(signature.instructionIndex).toBeUndefined();
         expect(signature.offset).toBe(48);
         expect(base64(signature.bytes)).toBe(
             'TBBeGYnE0nY3LJel77edibzHjwlPFVvhs2nmLot+tC9CszQfa+O1xvE6F2/XyjIyO/dZxUcSYRc2Xcza5W4YDw==',
         );
-        expect(publicKey.pubkey).toEqual(new PublicKey('AdvjU3gzNNXxASXEKBHovk3xAjFxQVn1UX6fUdgSvnS8'));
+        expect(publicKey.address).toBe('AdvjU3gzNNXxASXEKBHovk3xAjFxQVn1UX6fUdgSvnS8');
         expect(message.size).toBe(32);
         expect(base64(message.bytes)).toBe('B5MrvqsIcDUTKXV4jJryosGmPjceCGbvzbWhlSodJCI=');
     });
 
     it('should read the bytes out of the instruction the offsets name', () => {
-        const [{ signature, publicKey, message }] = resolveEd25519Signatures(
-            transaction(CROSS_REFERENCE, REFERENCED_NEIGHBOUR),
-            CROSS_REFERENCE,
-        );
+        const [{ signature, publicKey, message }] = resolve(CROSS_REFERENCE, REFERENCED_NEIGHBOUR);
 
         expect(signature.instructionIndex).toBe(1);
         expect(base64(signature.bytes)).toBe(
             'N9as9LPJYos0hfOY7XuqIMN8Tf+Ovuk3RWreoQDSfJI+CXyw9Byf91Lvx+0G2zwovPhn88ogPN6SIuctHpPVAw==',
         );
-        expect(publicKey.pubkey).toEqual(new PublicKey('4rmhwytmKH1XsgGAUyUUH7U64HS5FtT6gM8HGKAfwcFE'));
+        expect(publicKey.address).toBe('4rmhwytmKH1XsgGAUyUUH7U64HS5FtT6gM8HGKAfwcFE');
         expect(message.instructionIndex).toBe(1);
         expect(message.offset).toBe(110);
         expect(message.size).toBe(138);
     });
 
     it('should resolve nothing for an instruction index the transaction does not have', () => {
-        const [{ signature, publicKey, message }] = resolveEd25519Signatures(
-            transaction(DANGLING_REFERENCE),
-            DANGLING_REFERENCE,
-        );
+        const [{ signature, publicKey, message }] = resolve(DANGLING_REFERENCE);
 
         expect(signature.bytes).toBeUndefined();
-        expect(publicKey.pubkey).toBeUndefined();
+        expect(publicKey.address).toBeUndefined();
         expect(message.bytes).toBeUndefined();
     });
 
-    // Building a PublicKey from a short slice throws, which would take the whole card down.
+    // Decoding an address from a short slice throws, which would take the whole card down.
     it('should resolve no public key when the reference lands on fewer than 32 bytes', () => {
         const keyOffsetPastTheEnd = new Uint8Array([
             1, 0, 48, 0, 0xff, 0xff, 0xf0, 0xff, 0xff, 0xff, 112, 0, 32, 0, 0xff, 0xff,
         ]);
 
-        const [{ publicKey }] = resolveEd25519Signatures(transaction(keyOffsetPastTheEnd), keyOffsetPastTheEnd);
+        const [{ publicKey }] = resolve(keyOffsetPastTheEnd);
 
-        expect(publicKey.pubkey).toBeUndefined();
+        expect(publicKey.address).toBeUndefined();
     });
 });
 
@@ -131,16 +117,7 @@ function base64(bytes: Uint8Array | undefined): string | undefined {
 }
 
 /** The ed25519 instruction sits at index 0; any neighbour it references follows it. */
-function transaction(ed25519Data: Uint8Array, ...neighbourData: Uint8Array[]): ParsedTransaction {
-    return {
-        message: {
-            accountKeys: [],
-            instructions: [
-                { data: ed25519Data },
-                ...neighbourData.map(data => ({ data: BASE58_DECODER.decode(data) })),
-            ],
-            recentBlockhash: '11111111111111111111111111111111',
-        },
-        signatures: [],
-    } as unknown as ParsedTransaction;
+function resolve(ed25519Data: Uint8Array, ...neighbourData: Uint8Array[]) {
+    const siblingData: SiblingInstructionData = index => [ed25519Data, ...neighbourData][index];
+    return resolveEd25519Signatures(decodeEd25519Offsets(ed25519Data), ed25519Data, siblingData);
 }

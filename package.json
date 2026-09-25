@@ -85,6 +85,7 @@
         "@solana-program/system": "0.14.0",
         "@solana-program/token": "0.16.0",
         "@solana-program/token-2022": "0.16.0",
+        "@solana-program/zk-elgamal-proof": "0.4.0",
         "@solana/idl": "0.2.0",
         "@solana/kit": "8.3.0",
         "@solana/kit-plugin-wallet": "0.20.0",

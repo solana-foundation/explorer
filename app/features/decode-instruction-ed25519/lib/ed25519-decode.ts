@@ -1,9 +1,8 @@
-import { getBase58Encoder } from '@solana/kit';
-import { ParsedTransaction, PublicKey } from '@solana/web3.js';
+import { type Address, getAddressDecoder, type ReadonlyUint8Array } from '@solana/kit';
 
 import { readUint8, readUint16LE } from '@/app/shared/lib/bytes';
 
-const BASE58_ENCODER = getBase58Encoder();
+const ADDRESS_DECODER = getAddressDecoder();
 
 /** The program's stand-in for "the bytes are in this instruction". */
 const SELF_REFERENCE_INSTRUCTION_INDEX = 65535;
@@ -36,9 +35,15 @@ export type Ed25519SignatureDetails = {
      * Resolved here rather than in the card: a reference may land on fewer than 32
      * bytes, which is not a key, and building one from those would throw mid-render.
      */
-    publicKey: Ed25519Reference & { pubkey?: PublicKey };
+    publicKey: Ed25519Reference & { address?: Address };
     message: Ed25519Reference & { size: number; bytes?: Uint8Array };
 };
+
+/**
+ * Wire data of the transaction's instruction at `index`, or `undefined` when there is no such
+ * instruction or its bytes are unavailable (an RPC-parsed neighbour carries no wire data).
+ */
+export type SiblingInstructionData = (index: number) => ReadonlyUint8Array | undefined;
 
 // See https://docs.anza.xyz/runtime/programs/#ed25519-program
 export function decodeEd25519Offsets(data: Uint8Array): Ed25519SignatureOffsets[] {
@@ -67,46 +72,33 @@ export function decodeEd25519Offsets(data: Uint8Array): Ed25519SignatureOffsets[
 
 /**
  * Follows every offset to the bytes it names. Each one points either into this
- * instruction's data or into another instruction's, which is why the whole
- * transaction is needed to read a single ed25519 instruction.
+ * instruction's data or into another instruction's, which is why a lookup over the
+ * whole transaction is needed to read a single ed25519 instruction.
  */
-export function resolveEd25519Signatures(tx: ParsedTransaction, data: Uint8Array): Ed25519SignatureDetails[] {
-    return decodeEd25519Offsets(data).map(offsets => ({
+export function resolveEd25519Signatures(
+    offsets: readonly Ed25519SignatureOffsets[],
+    data: Uint8Array,
+    siblingData: SiblingInstructionData,
+): Ed25519SignatureDetails[] {
+    const read = (instructionIndex: number, offset: number, length: number) =>
+        readReferencedBytes(data, siblingData, instructionIndex, offset, length);
+
+    return offsets.map(entry => ({
         message: {
-            bytes: readReferencedBytes(
-                tx,
-                data,
-                offsets.messageInstructionIndex,
-                offsets.messageDataOffset,
-                offsets.messageDataSize,
-            ),
-            instructionIndex: referencedInstruction(offsets.messageInstructionIndex),
-            offset: offsets.messageDataOffset,
-            size: offsets.messageDataSize,
+            bytes: read(entry.messageInstructionIndex, entry.messageDataOffset, entry.messageDataSize),
+            instructionIndex: referencedInstruction(entry.messageInstructionIndex),
+            offset: entry.messageDataOffset,
+            size: entry.messageDataSize,
         },
         publicKey: {
-            instructionIndex: referencedInstruction(offsets.publicKeyInstructionIndex),
-            offset: offsets.publicKeyOffset,
-            pubkey: toPublicKey(
-                readReferencedBytes(
-                    tx,
-                    data,
-                    offsets.publicKeyInstructionIndex,
-                    offsets.publicKeyOffset,
-                    PUBLIC_KEY_SIZE,
-                ),
-            ),
+            address: toAddress(read(entry.publicKeyInstructionIndex, entry.publicKeyOffset, PUBLIC_KEY_SIZE)),
+            instructionIndex: referencedInstruction(entry.publicKeyInstructionIndex),
+            offset: entry.publicKeyOffset,
         },
         signature: {
-            bytes: readReferencedBytes(
-                tx,
-                data,
-                offsets.signatureInstructionIndex,
-                offsets.signatureOffset,
-                SIGNATURE_SIZE,
-            ),
-            instructionIndex: referencedInstruction(offsets.signatureInstructionIndex),
-            offset: offsets.signatureOffset,
+            bytes: read(entry.signatureInstructionIndex, entry.signatureOffset, SIGNATURE_SIZE),
+            instructionIndex: referencedInstruction(entry.signatureInstructionIndex),
+            offset: entry.signatureOffset,
         },
     }));
 }
@@ -116,32 +108,19 @@ function referencedInstruction(instructionIndex: number): number | undefined {
 }
 
 function readReferencedBytes(
-    tx: ParsedTransaction,
     own: Uint8Array,
+    siblingData: SiblingInstructionData,
     instructionIndex: number,
     offset: number,
     length: number,
 ): Uint8Array | undefined {
-    if (instructionIndex === SELF_REFERENCE_INSTRUCTION_INDEX) {
-        return own.slice(offset, offset + length);
-    }
-
-    const target = tx.message.instructions[instructionIndex];
-    // An RPC-parsed neighbour carries no wire data, so its offsets cannot be followed.
-    if (!target || !('data' in target)) {
-        return undefined;
-    }
-
-    try {
-        return BASE58_ENCODER.encode(target.data).slice(offset, offset + length);
-    } catch {
-        return undefined;
-    }
+    const source = instructionIndex === SELF_REFERENCE_INSTRUCTION_INDEX ? own : siblingData(instructionIndex);
+    return source?.slice(offset, offset + length);
 }
 
-function toPublicKey(bytes: Uint8Array | undefined): PublicKey | undefined {
+function toAddress(bytes: Uint8Array | undefined): Address | undefined {
     if (bytes?.length !== PUBLIC_KEY_SIZE) {
         return undefined;
     }
-    return new PublicKey(bytes);
+    return ADDRESS_DECODER.decode(bytes);
 }

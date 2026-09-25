@@ -109,6 +109,30 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         expect(title.parentElement).toHaveTextContent('#1.1');
     });
 
+    test('should number an inner ZK ElGamal Proof card under its parent', async () => {
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection
+                                    message={buildMessage()}
+                                    compiledInnerInstructions={INNER_ZK_CLOSE_CONTEXT_STATE}
+                                />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        const title = await screen.findByText(/ZK ElGamal Proof Program: Close Context State/i);
+
+        // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
+        expect(title.parentElement).toHaveTextContent('#1.2');
+    });
+
     test('should number a child it cannot decompile so the siblings keep their positions', async () => {
         render(
             <ScrollAnchorProvider>
@@ -235,6 +259,7 @@ const SYSTEM_PROGRAM = new PublicKey('11111111111111111111111111111111');
 const TOKEN_PROGRAM = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 const ATA_PROGRAM = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 const COMPUTE_BUDGET_PROGRAM = new PublicKey('ComputeBudget111111111111111111111111111111');
+const ZK_ELGAMAL_PROOF_PROGRAM = new PublicKey('ZkE1Gama1Proof11111111111111111111111111111');
 
 // The account list of the transaction in HOO-611, in wire order.
 const ACCOUNT_KEYS = [
@@ -247,6 +272,7 @@ const ACCOUNT_KEYS = [
     TOKEN_PROGRAM, // 6
     new PublicKey('97PALEbpPj7muiQqi2HXS8QukLsrrr1yfgKfvXjWtsUG'), // 7 wallet
     ATA_PROGRAM, // 8
+    ZK_ELGAMAL_PROOF_PROGRAM, // 9
 ];
 
 // The four CPIs the RPC reports for the Create Idempotent instruction, verbatim
@@ -283,6 +309,22 @@ const INNER_BATCH: CompiledInnerInstruction[] = [
     },
 ];
 
+// A System CreateAccount followed by a ZK ElGamal Proof Close Context State (discriminator 0) over
+// context state, destination, authority.
+const INNER_ZK_CLOSE_CONTEXT_STATE: CompiledInnerInstruction[] = [
+    {
+        index: 0,
+        instructions: [
+            {
+                accounts: [0, 2],
+                data: '11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL',
+                programIdIndex: 3,
+            },
+            { accounts: [1, 2, 0], data: encodeBase58([0]), programIdIndex: 9 },
+        ],
+    },
+];
+
 // Three CPIs. The middle one names an account index the message does not have.
 const INNER_WITH_BAD_ACCOUNT: CompiledInnerInstruction[] = [
     {
@@ -313,7 +355,7 @@ function buildMessage(): MessageV0 {
         ],
         header: {
             numReadonlySignedAccounts: 0,
-            numReadonlyUnsignedAccounts: 6,
+            numReadonlyUnsignedAccounts: 7,
             numRequiredSignatures: 1,
         },
         recentBlockhash: new PublicKey(new Uint8Array(32)).toBase58(),
