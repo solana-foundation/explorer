@@ -1,10 +1,10 @@
 'use client';
 
-import { useDecodeBufferPayload } from '../model/use-decode-buffer-payload';
+import { useResolveBufferConfig } from '../model/use-resolve-buffer-config';
 import { BaseBufferAccountCard, type BufferAccountRead } from './BaseBufferAccountCard';
 
 export function BufferAccountDataCard({ address, buffer }: { address: string; buffer: BufferAccountRead }) {
-    const { configFromBytes, configFromOnchain } = useDecodeBufferPayload({ account: buffer.account, address });
+    const { configFromBytes, configFromOnchain } = useResolveBufferConfig({ account: buffer.account, address });
 
     return (
         <BaseBufferAccountCard

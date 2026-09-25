@@ -8,6 +8,7 @@ import {
     IDL_DOC,
     metadataAccountData,
     metadataBase64AccountData,
+    OVERSIZED_DOC,
     pack,
     readAs,
 } from '../__fixtures__/pmp-account-fixtures';
@@ -67,4 +68,9 @@ export const MetadataBinaryPayload: Story = {
  */
 export const MetadataUnbrokenText: Story = {
     args: argsFor(metadataAccountData(pack(`https://example.com/${'x'.repeat(600)}`, Compression.Zlib), 'security')),
+};
+
+/** Past the decode budget. */
+export const MetadataOversizedPayload: Story = {
+    args: argsFor(metadataAccountData(pack(OVERSIZED_DOC, Compression.Zlib))),
 };

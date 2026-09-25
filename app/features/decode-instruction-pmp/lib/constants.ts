@@ -18,7 +18,6 @@ export const PMP_CODAMA_PROGRAM_NAME = 'ProgramMetadata';
 export const PMP_RAW_DOWNLOAD_FILENAME = 'pmp-payload-raw';
 export const PMP_DECODED_DOWNLOAD_FILENAME = 'pmp-payload-decoded';
 export const PMP_WRITE_CHUNK_DOWNLOAD_FILENAME = 'pmp-write-chunk';
-export const PMP_ACCOUNT_RAW_DOWNLOAD_FILENAME = 'pmp-account-raw';
 
 /**
  * Re-exported for the decode modules alongside. The definitions live in the `pmp-instruction` entity, so the wire

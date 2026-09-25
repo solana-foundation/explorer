@@ -1,8 +1,13 @@
-import { PMP_DECODED_RENDER_CAP_BYTES } from '@entities/pmp-account';
+import { gen } from '@__fixtures__/gen';
+import { decodePmpAccount, getPayloadDataHash, PMP_ADDRESS, PMP_DECODED_RENDER_CAP_BYTES } from '@entities/pmp-account';
+import type { Address } from '@solana/kit';
 import { getBase16Encoder, getUtf8Encoder } from '@solana/kit';
-import { Compression, Format } from '@solana-program/program-metadata';
+import { Compression, Encoding, Format, getBufferEncoder } from '@solana-program/program-metadata';
 import { deflate, gzip } from 'pako';
 import { describe, expect, it } from 'vitest';
+
+import { concat } from '@/app/shared/lib/bytes';
+import { sha256Hex } from '@/app/shared/lib/hash';
 
 import {
     hasPmpPayload,
@@ -15,6 +20,7 @@ import {
 
 const utf8 = (text: string) => new TextEncoder().encode(text);
 const JSON_DOC = '{"name":"orbit","version":"1.0.0"}';
+const JSON_DOC_HASH = 'ba0a2df00866d7ef32684e6440b97da5aa84443bf915d7004586260a46044446';
 
 describe('resolveBufferConfigFromBytes', () => {
     it('should report gzip text with a resolved Json format', () => {
@@ -79,12 +85,12 @@ describe('resolveBufferConfigFromBytes', () => {
         expect(result).toMatchObject({ compression: Compression.Gzip, kind: 'text' });
     });
 
-    it('should trim trailing zero slack when that turns a failing Json parse into a passing one', () => {
+    it('should resolve Json by trimming trailing zero slack while keeping the payload as stored', () => {
         const body = new Uint8Array([...utf8(JSON_DOC), 0, 0, 0, 0]);
         const result = resolveBufferConfigFromBytes(body);
 
         expect(result).toMatchObject({ format: Format.Json, kind: 'text' });
-        expect(result.kind === 'text' && result.payload.length).toBe(JSON_DOC.length);
+        expect(result.kind === 'text' && result.payload.length).toBe(body.length);
     });
 
     it('should keep trailing zero slack on a text body that is not Json either way', () => {
@@ -164,6 +170,63 @@ describe('resolveBufferConfigFromBytes', () => {
             budget: PMP_DECODED_RENDER_CAP_BYTES,
             kind: 'oversized',
         });
+    });
+
+    it('should return dataHash from the unpacked bytes (zlib and plain)', () => {
+        expect(resolveBufferConfigFromBytes(deflate(utf8(JSON_DOC)))).toMatchObject({ dataHash: JSON_DOC_HASH });
+        expect(resolveBufferConfigFromBytes(utf8(JSON_DOC))).toMatchObject({ dataHash: JSON_DOC_HASH });
+    });
+
+    it('should return dataHash from the bytes as stored (trimming only for parsing)', () => {
+        const body = concat([utf8(JSON_DOC), new Uint8Array(64)]);
+
+        expect(resolveBufferConfigFromBytes(body)).toMatchObject({
+            dataHash: sha256Hex(body),
+            format: Format.Json,
+            kind: 'text',
+        });
+    });
+
+    it('should parse Json document from trimmed bytes', () => {
+        const body = concat([utf8(JSON_DOC), new Uint8Array(64)]);
+        const result = resolveBufferConfigFromBytes(body);
+
+        expect(result.kind === 'text' && result.text).toContain('\n  "name": "orbit"');
+        expect(result.kind === 'text' && result.payload).toHaveLength(body.length);
+    });
+});
+
+describe('dataHash sync across the account and from-bytes config', () => {
+    function bufferAccount(body: Uint8Array): Uint8Array {
+        return getBufferEncoder().encode({
+            authority: gen.address(2) as Address,
+            canonical: true,
+            data: body,
+            program: gen.address(1) as Address,
+            seed: 'idl',
+        }) as Uint8Array;
+    }
+
+    function hashFromAccountConfig(body: Uint8Array, compression: Compression): string | undefined {
+        const result = decodePmpAccount({
+            account: { data: bufferAccount(body), lamports: 1_000_000, owner: PMP_ADDRESS },
+            config: { compression, encoding: Encoding.Utf8, format: Format.Json },
+        });
+        return result.kind === 'payload' ? getPayloadDataHash(result.payload) : undefined;
+    }
+
+    function hashFromAccountFromBytesConfig(body: Uint8Array): string | undefined {
+        const result = resolveBufferConfigFromBytes(body);
+        return 'dataHash' in result ? result.dataHash : undefined;
+    }
+
+    it.each([
+        ['an exactly sized buffer', utf8(JSON_DOC), Compression.None],
+        ['an over-allocated buffer', concat([utf8(JSON_DOC), new Uint8Array(64)]), Compression.None],
+        ['a zlib buffer', deflate(utf8(JSON_DOC)), Compression.Zlib],
+        ['a gzip buffer', gzip(utf8(JSON_DOC)), Compression.Gzip],
+    ])('should agree on the data hash for %s', (_label, body, compression) => {
+        expect(hashFromAccountConfig(body, compression)).toBe(hashFromAccountFromBytesConfig(body));
     });
 });
 
@@ -256,7 +319,9 @@ describe('hasPmpPayload', () => {
     it('should reject the outcomes that carry no payload', () => {
         expect(hasPmpPayload({ kind: 'empty' })).toBe(false);
         expect(hasPmpPayload({ kind: 'incomplete' })).toBe(false);
-        expect(hasPmpPayload({ budget: 1, bytes: new Uint8Array(2), kind: 'oversized' })).toBe(false);
+        expect(hasPmpPayload({ budget: 1, bytes: new Uint8Array(2), dataHash: 'deadbeef', kind: 'oversized' })).toBe(
+            false,
+        );
         expect(hasPmpPayload({ kind: 'overflow', limit: 1 })).toBe(false);
     });
 });
