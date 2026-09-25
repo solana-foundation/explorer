@@ -187,18 +187,6 @@ You must be able to explain every line of your diff without an LLM. Reviewers ma
 
 Tool attribution left in a PR (a `Generated with Claude Code` footer, a `Co-Authored-By: Claude` trailer, a `cursor/` or `codex/` branch, and the like) tells us the submission was opened without being read. Remove it before requesting review.
 
-### Disclosure
-
-Disclosure is required. The pull request template has two boxes; check exactly one. If AI tooling was used, name the tool and the extent, for example:
-
-> I wrote the parser and had Claude Code write the tests and update the documentation
-
-or
-
-> I designed the change and handed the implementation to Codex
-
-Editor autocomplete of single keywords or short phrases does not count as AI tooling.
-
 ### Communication
 
 When maintainers ask questions or suggest changes, do not relay the question to an LLM and paste its answer back. Distilling what the tool produced is what makes your contribution valuable.
@@ -209,7 +197,7 @@ When maintainers ask questions or suggest changes, do not relay the question to 
 2. Make your changes, following the code style guidelines
 3. Add tests for your changes
 4. Push your changes and create a pull request
-5. Fill in every section of the pull request template, including the [AI disclosure](#disclosure)
+5. Fill in every section of the pull request template
 6. Include screenshots — required for protocol screens, recommended for other UI changes
 7. Resolve every Greptile comment with a code fix or an explanation of why no change is needed
 8. Request review ONLY after CI/CD has passed, screenshots have been uploaded, and Greptile comments are resolved
