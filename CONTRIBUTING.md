@@ -198,7 +198,7 @@ When maintainers ask questions or suggest changes, do not relay the question to 
 2. Make your changes, following the code style guidelines
 3. Add tests for your changes
 4. Push your changes and create a pull request
-5. Fill in every section of the pull request template
+5. Fill in every applicable section of the pull request template; mark inapplicable sections as N/A or leave them blank
 6. Include screenshots — required for protocol screens, recommended for other UI changes
 7. Resolve every Greptile comment with a code fix or an explanation of why no change is needed
 8. Request review ONLY after CI/CD has passed, screenshots have been uploaded, and Greptile comments are resolved
