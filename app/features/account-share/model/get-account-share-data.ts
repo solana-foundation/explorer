@@ -10,9 +10,9 @@ import { programLabel } from '@utils/tx';
 import { getOsecRegistryUrl } from '@utils/verified-builds-url';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { withOnChainFetch } from '@/app/shared/lib/on-chain-fetch';
 
 import { getProgramProvenance, verifiedBuildState } from '../api/get-program-provenance';
-import { withOnChainFetch } from '../api/on-chain-fetch';
 import {
     BPF_LOADER_2_ADDRESS,
     BPF_LOADER_ADDRESS,

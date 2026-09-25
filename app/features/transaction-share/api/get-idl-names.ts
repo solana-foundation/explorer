@@ -5,6 +5,7 @@ import { settleWithin } from '@utils/settle-within';
 import { type BackoffOptions } from '@utils/with-backoff';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { isBlockedRequestError, withOnChainFetch } from '@/app/shared/lib/on-chain-fetch';
 
 // One retry to keep an OG image render fast.
 const IDL_BACKOFF_OPTIONS: BackoffOptions = { initialDelay: 200, maxRetries: 1 };
@@ -39,10 +40,15 @@ export async function getIdlNames({
     const abortController = new AbortController();
 
     try {
-        const settled = await settleWithin(
-            IDL_FETCH_BUDGET_MS,
-            resolvable.map(programId =>
-                resolveProgramEntry({ abortSignal: abortController.signal, cluster, programId, url }),
+        // Scope `fetch` to the cluster RPC only: the IDL resolver can follow an off-chain URL planted in a
+        // program's on-chain metadata, so an unguarded fetch here would be an SSRF vector on this
+        // unauthenticated route. See `withOnChainFetch`.
+        const settled = await withOnChainFetch([url], () =>
+            settleWithin(
+                IDL_FETCH_BUDGET_MS,
+                resolvable.map(programId =>
+                    resolveProgramEntry({ abortSignal: abortController.signal, cluster, programId, url }),
+                ),
             ),
         );
 
@@ -74,6 +80,14 @@ async function resolveProgramEntry({
         // error level would file one alert per slow program on every render.
         if (matchAbortError(error)) {
             Logger.debug('[transaction-share] IDL names abandoned past the budget', { cluster, programId });
+            return undefined;
+        }
+        // An off-chain IDL URL we refuse to fetch server-side (SSRF guard): expected and stable, not a fault.
+        if (isBlockedRequestError(error)) {
+            Logger.debug('[transaction-share] IDL name skipped: off-chain URL blocked by SSRF guard', {
+                cluster,
+                programId,
+            });
             return undefined;
         }
         Logger.error(new Error('[transaction-share] IDL names unavailable for this program', { cause: error }), {
