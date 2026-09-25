@@ -21,6 +21,7 @@ const accountData: AccountCardData = {
     balance: '2.03928144 SOL',
     dataSize: '165 B',
     executable: false,
+    incomplete: false,
     kind: 'account',
     lastActivity: 'Aug 26, 2026',
     owner: OWNER,
@@ -29,9 +30,10 @@ const accountData: AccountCardData = {
 
 const programData: ProgramCardData = {
     address: ADDRESS,
+    incomplete: false,
     kind: 'program',
     lastDeployedSlot: 208871522,
-    markers: { idlUploaded: true, securityTxt: true, verifiedBuild: true },
+    markers: { idlUploaded: 'yes', securityTxt: 'yes', verifiedBuild: 'yes' },
     name: 'Jupiter Aggregator v6',
     programSize: '1.24 MB',
     upgradeAuthority: { address: AUTHORITY },
@@ -109,7 +111,7 @@ export const ProgramUnverifiedImmutable: Story = {
     args: {
         data: {
             ...programData,
-            markers: { idlUploaded: false, securityTxt: false, verifiedBuild: false },
+            markers: { idlUploaded: 'no', securityTxt: 'no', verifiedBuild: 'no' },
             // An immutable program carries no authority address, only the "Immutable" note the model derives.
             upgradeAuthority: { note: 'Immutable' },
         },
@@ -121,6 +123,24 @@ export const ProgramUnverifiedImmutable: Story = {
         expect(canvas.getByText('No IDL')).toBeInTheDocument();
         expect(canvas.getByText('No security.txt')).toBeInTheDocument();
         expect(canvas.getByText('Immutable')).toBeInTheDocument();
+    },
+};
+
+export const ProgramProvenanceUnknown: Story = {
+    args: {
+        data: {
+            ...programData,
+            incomplete: true,
+            markers: { idlUploaded: 'unknown', securityTxt: 'unknown', verifiedBuild: 'unknown' },
+        },
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+
+        // A failed lookup renders neutrally instead of asserting a negative it could not verify.
+        expect(canvas.getByText('Verification unavailable')).toBeInTheDocument();
+        expect(canvas.getByText('IDL unavailable')).toBeInTheDocument();
+        expect(canvas.getByText('security.txt unavailable')).toBeInTheDocument();
     },
 };
 
@@ -138,13 +158,16 @@ export const NotFoundNeverUsed: Story = {
     },
 };
 
-export const NotFoundClosed: Story = {
-    args: { data: { address: ADDRESS, kind: 'not-found', reason: 'closed' } },
+export const NotFoundHasHistory: Story = {
+    args: { data: { address: ADDRESS, kind: 'not-found', reason: 'has-history' } },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        expect(canvas.getByTestId('account-image-pill')).toHaveTextContent('Closed');
-        expect(canvas.getByText('Account closed')).toBeInTheDocument();
+        expect(canvas.getByTestId('account-image-pill')).toHaveTextContent('Not found');
+        expect(canvas.getByText('No account data found')).toBeInTheDocument();
+        expect(canvas.getByTestId('account-image-reason')).toHaveTextContent(
+            'This address has on-chain transaction history but holds no account data on this cluster.',
+        );
     },
 };
 
