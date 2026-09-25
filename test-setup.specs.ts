@@ -13,7 +13,17 @@ vi.mock('@/app/shared/lib/logger', () => ({
 // Global no-op mock for Sentry to avoid @sentry/nextjs import issues in tests.
 vi.mock('@/app/shared/lib/sentry', () => ({
     SentryErrorBoundary: ({ children }: { children: React.ReactNode }) => children,
+    captureFeedback: vi.fn(() => 'test-event-id'),
+    withScope: vi.fn(callback => callback({})),
     withTraceData: vi.fn(() => ({})),
+}));
+
+vi.mock('@/app/shared/lib/sentry/server', () => ({
+    wrapMcpServerWithSentry: vi.fn(server => server),
+}));
+
+vi.mock('@/app/shared/lib/sentry/client', () => ({
+    sendFeedback: vi.fn(async () => 'test-event-id'),
 }));
 
 // Global no-op mock for TokenInfoBatchProvider to prevent network requests in all tests.

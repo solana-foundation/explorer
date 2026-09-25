@@ -227,8 +227,9 @@ const config: Config = {
         },
 
         screens: {
-            'max-sm': getScreenDim('sm', -1),
-            'max-md': getScreenDim('md', -1),
+            // Tailwind reads a string screen as min-width, so a max-width screen needs the object form.
+            'max-sm': { max: getScreenDim('sm', 0) },
+            'max-md': { max: getScreenDim('md', 0) },
             xxs: getScreenDim('xxs'),
             xs: getScreenDim('xs'),
             sm: getScreenDim('sm'),

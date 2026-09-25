@@ -124,7 +124,8 @@ export default defineConfig({
                         provider: playwright(),
                         connectTimeout: 30000,
                     },
-                    setupFiles: ['./test-setup.ts', './.storybook/vitest.setup.ts'],
+                    // addon-vitest applies the preview annotations, so the project needs no Storybook setup file.
+                    setupFiles: ['./test-setup.ts'],
                     testTimeout: 15000,
                     hookTimeout: 30000,
                     retry: 1,
