@@ -2328,7 +2328,7 @@
     "simds": [
       "0326"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1042,
     "title": "SIMD-0326: Alpenglow: new consensus algorithm"
   }
 ]
