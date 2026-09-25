@@ -1,0 +1,7 @@
+{
+    "config": {
+        "MD013": { "line_length": 120, "code_blocks": false, "tables": false },
+        // Aligned tables re-pad every row when one cell widens; compact keeps a diff to the changed row.
+        "MD060": { "style": "compact" }
+    }
+}
