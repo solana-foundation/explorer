@@ -3,6 +3,7 @@ import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { BlockedRequestError } from '@/app/shared/lib/on-chain-fetch';
 
 const mocks = vi.hoisted(() => ({ resolveProgramIdlNames: vi.fn() }));
 
@@ -58,6 +59,20 @@ describe('getIdlNames', () => {
 
         expect(names.get(FIRST)).toBe(firstNames);
         expect(names.has(SECOND)).toBe(false);
+    });
+
+    it('should skip an off-chain IDL blocked by the SSRF guard, without paging', async () => {
+        mocks.resolveProgramIdlNames.mockRejectedValue(new BlockedRequestError('evil.internal'));
+
+        const names = await getIdlNames({ cluster: Cluster.MainnetBeta, programIds: [FIRST] });
+
+        expect(names.size).toBe(0);
+        // Refusing an off-chain URL is a deliberate, expected outcome - a debug note, never an error alert.
+        expect(Logger.error).not.toHaveBeenCalled();
+        expect(Logger.debug).toHaveBeenCalledWith(expect.stringContaining('blocked by SSRF guard'), {
+            cluster: Cluster.MainnetBeta,
+            programId: FIRST,
+        });
     });
 
     it('should log the failed program with its cluster, its cause, and no url', async () => {
