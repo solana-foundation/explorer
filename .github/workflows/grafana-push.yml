@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 # Provisions the Explorer folder on the Solana Foundation Grafana Cloud stack from the JSON under
-# observability/. Secrets are plain repository secrets; see docs/observability.md for their sources.
+# observability/. GRAFANA_API_TOKEN is a stack service-account token; SLACK_ALERT_WEBHOOK_URL is the alerts channel's incoming webhook.
 jobs:
   push:
     runs-on: ubuntu-latest

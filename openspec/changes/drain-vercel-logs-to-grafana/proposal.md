@@ -2,7 +2,7 @@
 
 ## Context
 
-Explorer had error tracking (Sentry) and no request-level monitoring. Nothing counted 5xx responses, nothing recorded which paths failed, nothing showed what the firewall was blocking, and no alert fired when the site returned errors. Vercel's dashboard shows these figures but keeps them inside Vercel, with no alert routing and no history beyond the plan's retention.
+Sentry covers exceptions the code throws. Request-level signals, 5xx rates, which paths fail, what the firewall blocks, live in Vercel's own dashboard, which has no alert routing and no history beyond the plan's retention. The Foundation's other projects read the same signals from one Grafana Cloud stack and alert from it; Explorer joins that stack.
 
 ## Why
 
@@ -24,11 +24,11 @@ Two choices inside the chosen option:
 - `app/api/log-drain/route.ts`: authenticates Vercel with `x-vercel-drain-secret`, answers every response with the team's `x-vercel-verify` key, groups events into one Loki stream per `(source, level)` and pushes them as JSON lines. A failed push is reported to Sentry, the one channel left when the drain is broken.
 - `observability/`: one dashboard, three alert rules, one Slack contact point, as Grafana provisioning JSON.
 - `.github/workflows/grafana-push.yml`: pushes `observability/` to the `explorer` folder on merge to `master`.
-- `docs/observability.md`: data flow, secrets, drain setup, verification. `docs/firewall.md`: a twelfth rule, because Bot Filter at `challenge` would otherwise answer Vercel's delivery requests with 429.
+- `docs/firewall.md`: a twelfth rule, because Bot Filter at `challenge` would otherwise answer Vercel's delivery requests with 429.
 
 ## Impact
 
 - One new API route with no client JS; `bench/BUILD.md` gains a row.
-- Five runtime environment variables and two GitHub secrets, listed in `docs/observability.md`. Until they exist the route answers 502 on delivery and the workflow fails on push; nothing else in the site depends on either.
+- Five runtime environment variables and two GitHub secrets, listed in the pull request. Until they exist the route answers 502 on delivery and the workflow fails on push; nothing else in the site depends on either.
 - The Vercel drain and the firewall rule are dashboard configuration, not code, and are created after this merges.
 - Accepted: alert thresholds are inherited from Frontier and will need tuning against Explorer's traffic; the `logs-absent` rule ships paused for that reason and is unpaused once the drain is verified.

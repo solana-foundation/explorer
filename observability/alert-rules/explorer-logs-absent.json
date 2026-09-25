@@ -82,8 +82,8 @@
     },
     "annotations": {
         "summary": "explorer log drain has gone quiet",
-        "description": "No log lines from Vercel production reached Loki in the last 30 minutes. explorer.solana.com serves traffic continuously, so the Vercel log drain, /api/log-drain, or the Loki push credentials are broken, and every log-based alert is blind until fixed. Check Vercel \u2192 Project \u2192 Log Drains, then the log-drain route's own errors in Sentry. This rule also fires on a Loki query error, since a broken datasource silences the other rules the same way. Enabled by setting isPaused to false in observability/alert-rules/explorer-logs-absent.json and merging; the push overwrites the live rule with the file, so the Grafana UI toggle does not stick.",
-        "runbook_url": "https://github.com/solana-foundation/explorer/blob/master/docs/observability.md"
+        "description": "No log lines from Vercel production reached Loki in the last 30 minutes. explorer.solana.com serves traffic continuously, so the Vercel log drain, /api/log-drain, or the Loki push credentials are broken, and every log-based alert is blind until fixed. Check Vercel \u2192 Project \u2192 Log Drains, then the log-drain route's own errors in Sentry. This rule also fires on a Loki query error, since a broken datasource silences the other rules the same way. Enabled by setting isPaused to false in its file under observability/alert-rules and merging; the push overwrites the live rule with the file, so the Grafana UI toggle does not stick.",
+        "runbook_url": "https://github.com/solana-foundation/explorer/tree/master/observability"
     },
     "notification_settings": {
         "receiver": "explorer-slack"

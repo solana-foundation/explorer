@@ -4,7 +4,7 @@ import { Logger } from '@/app/shared/lib/logger';
 
 // Receives Vercel's log-drain NDJSON and forwards every event to Grafana Cloud Loki as one JSON line, so
 // dashboards and alert rules can `| json` for proxy_statusCode, path, requestId and message. Streams are
-// labelled {service, env, source, level}; see docs/observability.md.
+// labelled {service, env, source, level}.
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

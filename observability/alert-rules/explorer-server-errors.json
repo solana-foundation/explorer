@@ -83,7 +83,7 @@
     "annotations": {
         "summary": "explorer error-log rate above threshold",
         "description": "explorer is emitting more than 0.1 error/fatal log lines per second sustained over 5m (Loki stream label `level`, set by /api/log-drain from Vercel's level field). Open the Explorer dashboard's Recent errors panel, or Vercel logs with the level=error filter, to triage. Sentry has the stack traces.",
-        "runbook_url": "https://github.com/solana-foundation/explorer/blob/master/docs/observability.md"
+        "runbook_url": "https://github.com/solana-foundation/explorer/tree/master/observability"
     },
     "notification_settings": {
         "receiver": "explorer-slack"

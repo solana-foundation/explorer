@@ -83,7 +83,7 @@
     "annotations": {
         "summary": "explorer.solana.com is returning 5xx responses",
         "description": "More than 20 requests in the trailing 5 minutes got a 5xx from explorer (Vercel proxy status code, all sources), sustained for 5m. Counts responses, not log lines, so a noisy stack trace cannot trip it. Check the Explorer dashboard: Top paths with 5xx, then Recent errors, then the Vercel deployment logs. A burst that starts within minutes of a deploy and stops on its own is usually one bad function instance during rollout; anything sustained is an outage.",
-        "runbook_url": "https://github.com/solana-foundation/explorer/blob/master/docs/observability.md"
+        "runbook_url": "https://github.com/solana-foundation/explorer/tree/master/observability"
     },
     "notification_settings": {
         "receiver": "explorer-slack"
