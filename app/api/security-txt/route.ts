@@ -6,6 +6,7 @@ import { type Address, address } from '@solana/kit';
 import { NextResponse } from 'next/server';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { isBlockedRequestError, withOnChainFetch } from '@/app/shared/lib/on-chain-fetch';
 
 const CACHE_DURATION = 30 * 60; // 30 minutes
 
@@ -45,11 +46,24 @@ export async function GET(request: Request) {
 
     try {
         const rpc = getRpc(url);
-        const securityTxt = await fetchProgramSecurityTxt(rpc, programId);
+        // Scope `fetch` to the cluster RPC only: `@solana/security-txt` resolves the PMP `security` record,
+        // which can point at an off-chain URL stored on-chain - an unguarded fetch here would let this
+        // unauthenticated route be aimed at internal addresses (SSRF). See `withOnChainFetch`.
+        const securityTxt = await withOnChainFetch([url], () => fetchProgramSecurityTxt(rpc, programId));
 
         // `securityTxt` omitted (undefined) when absent — the "no security.txt" case, cacheable.
         return NextResponse.json({ securityTxt }, { headers: CACHE_HEADERS, status: 200 });
     } catch (error) {
+        // An off-chain security.txt URL we refuse to fetch server-side (SSRF guard): treat it as absent, but
+        // do not cache - the content is real, we simply will not resolve it here, so this is not a durable
+        // "no security.txt".
+        if (isBlockedRequestError(error)) {
+            Logger.warn('[api:security-txt] Off-chain security.txt URL blocked by SSRF guard', context);
+            // The same absent-security.txt shape as the found-nothing path, but uncached: the record is real,
+            // we simply will not resolve it server-side, so this is not a durable "no security.txt".
+            return NextResponse.json({}, { status: 200 });
+        }
+
         // `@solana/security-txt` surfaces absent/unparseable as a value and throws only on RPC failure.
         // Transient blips → retryable, *uncached* 502 (no page); persistent misconfiguration → Sentry.
         if (isRetryableError(error)) {
