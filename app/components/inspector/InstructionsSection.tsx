@@ -372,7 +372,16 @@ function InspectorInstructionCard({
                 />
             );
         case SPL_MEMO_PROGRAM_LABEL:
-            return <MemoDetailsCard key={index} ix={parsedIx} raw={ix} index={index} />;
+            return (
+                <MemoDetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    raw={ix}
+                    index={index}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            );
         case ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL:
             return (
                 <AddressLookupTableDetailsCard
@@ -380,6 +389,7 @@ function InspectorInstructionCard({
                     ix={parsedIx}
                     raw={ix}
                     index={index}
+                    childIndex={childIndex}
                     innerCards={innerCards}
                 />
             );
@@ -482,9 +492,7 @@ function InspectorInstructionCard({
             );
         case 'compute-budget':
             return (
-                <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-                >
+                <ErrorBoundary fallback={unknownCard}>
                     <ComputeBudgetDetailsCard
                         key={index}
                         ix={parsedIx}
