@@ -2308,7 +2308,7 @@
   {
     "comms_required": null,
     "description": "This proposal changes the core consensus protocol from the current one, based on Proof-of-History and TowerBFT, to Alpenglow, specifically the Votor parts of Alpenglow. Compared to the old protocol, Alpenglow offers higher resilience and better performance.",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1167,
     "key": "A1pengvuM6JEcyNuTnMqepBKhwHE3N6PmUrdATGawhJS",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
