@@ -122,8 +122,8 @@
   {
     "address": "2KRqqGA47Pg2ML7Q8WJyaVAmEL8DaRx1sKxqzpVyNnkg",
     "name": "cfsumbach/dom-vault",
-    "repoUrl": "https://github.com/cfsumbach/dom-vault/tree/991a65a2a3ba4a799b98a2b9db115e95bf409e3c",
-    "verifiedAt": "2026-09-21T17:17:45"
+    "repoUrl": "https://github.com/cfsumbach/dom-vault/tree/21fe6ab95719fa2db179b4bb388036da27126d02",
+    "verifiedAt": "2026-09-25T13:58:11"
   },
   {
     "address": "2kZqCjGfKgVR8dUkv4PCogFsFgN3EoSSNX41HN1cBfBA",
@@ -372,12 +372,6 @@
     "verifiedAt": "2024-10-04T15:04:30"
   },
   {
-    "address": "65cX8gGch8x4vQvU4gnpPcepwKadDSAtJ4ZgZg3hp61t",
-    "name": "holder_locker",
-    "repoUrl": "https://github.com/mad-cook/caged/tree/12642dd9fa2079a1d35f6a1b5caf9ae78078a4ad",
-    "verifiedAt": "2026-09-14T13:25:28"
-  },
-  {
     "address": "66FyiUTkw4JMYMi3yErfa7UBqrHm9GZha1meAxcgbjDg",
     "name": "SpareCashFinance/jrock-lotto",
     "repoUrl": "https://github.com/SpareCashFinance/jrock-lotto/tree/35de5008f9a5f7746b712386bf77d2cfd39d7db3",
@@ -424,6 +418,12 @@
     "name": "x3_monsterball",
     "repoUrl": "https://github.com/pepememe-dev/contracts/tree/b0aa41a655ebb7cf9441377cd96165d286ad3ff6",
     "verifiedAt": "2026-01-23T14:02:17"
+  },
+  {
+    "address": "6hKr9jCZtjfsjtdKZ7cBvMrQsXaHjewjwsC6uW1JYXwq",
+    "name": "loot_king",
+    "repoUrl": "https://github.com/loot-king-game/smart-contract/tree/1f618ccd3bf91ea097179ea148ed72b41d43e83c",
+    "verifiedAt": "2026-09-24T09:03:53"
   },
   {
     "address": "6jmkKJJDo5DBLC8vgMpRFAYWdQjfZX8qqqtMnWbSzBWF",
@@ -646,12 +646,6 @@
     "name": "pepememe-dev/contracts",
     "repoUrl": "https://github.com/pepememe-dev/contracts/tree/f69e51654433c61266063f29eab707d04d2f5e48",
     "verifiedAt": "2026-02-04T16:15:38"
-  },
-  {
-    "address": "9NMVd4ifdeoqnomHh6idvp9C4mve7QiiLui658yfyRTz",
-    "name": "tornweb3/motokart-program-",
-    "repoUrl": "https://github.com/tornweb3/motokart-program-/tree/da782d89ab38660dd5563fe3add4d7c4aeb0935f",
-    "verifiedAt": "2026-09-23T08:54:17"
   },
   {
     "address": "9pJW6zuXvTweg5doiWn9wAsqKcnbMsJPWLq9zWyGApmA",
@@ -956,8 +950,8 @@
   {
     "address": "C7PXyLpLQBh3Ce7e9DNj3rDVUvwqa5orDwQG5hs1rfNi",
     "name": "cow_settlement",
-    "repoUrl": "https://github.com/cowprotocol/solana-programs/tree/c1350d95d9b3de21e3fa8b2f99e2963ca4fa9675",
-    "verifiedAt": "2026-09-16T16:18:56"
+    "repoUrl": "https://github.com/cowprotocol/solana-programs/tree/4145db103b48e7a432d5b48dc5d4c18d317e36fc",
+    "verifiedAt": "2026-09-24T16:53:23"
   },
   {
     "address": "CaWcaw5YfBYQZ1jraTPqiLx2CJc5CwBL8J4Z1DN5neVs",
@@ -1572,6 +1566,12 @@
     "verifiedAt": "2025-12-23T22:59:55"
   },
   {
+    "address": "FUTARELBfJfQ8RDGhg1wdhddq1odMAJUePHFuBYfUxKq",
+    "name": "futarchy",
+    "repoUrl": "https://github.com/metaDAOproject/programs/tree/e263bbf877e7772b200f1cece056d4f26abc64c3",
+    "verifiedAt": "2026-09-25T22:45:13"
+  },
+  {
     "address": "FUTrVnQuWRvAMcxDDkcvDig3mYnLUqzimZ6ZLBHB8BNw",
     "name": "Futurity-DeFi/smart-contract-solana",
     "repoUrl": "https://github.com/Futurity-DeFi/smart-contract-solana/tree/665da02f7103b6254006af605be7f72690c4c217",
@@ -2154,6 +2154,12 @@
     "verifiedAt": "2024-10-24T11:45:23"
   },
   {
+    "address": "MNFSTqtC93rEfYHB6hF82sKdZpUDFWkViLByLd1k1Ms",
+    "name": "Bonasa-Tech/manifest",
+    "repoUrl": "https://github.com/Bonasa-Tech/manifest/tree/f6eb1305338cba4a2e98d8571c9f3ad3a730aeaa",
+    "verifiedAt": "2026-09-25T23:19:20"
+  },
+  {
     "address": "moonDJUoHteKkGATejA5bdJVwJ6V6Dg74gyqyJTx73n",
     "name": "launchpad_v8",
     "repoUrl": "https://github.com/metaDAOproject/programs/tree/e709fb5b7fe9b8be2607bd08965111633aa97247",
@@ -2200,6 +2206,12 @@
     "name": "metaplex-foundation/mpl-hybrid",
     "repoUrl": "https://github.com/metaplex-foundation/mpl-hybrid/tree/aacf1a53c8a43bf395db7b562c02cf016ce604c5",
     "verifiedAt": "2026-05-27T18:37:07"
+  },
+  {
+    "address": "MPSoLoEnfNRFReRZSVH2V8AffSmWSR4dVoBLFm1YpAW",
+    "name": "mp_sol_restaking",
+    "repoUrl": "https://github.com/Meta-Pool/solana-restaking-aggregator/tree/71675487046ce830d56257650767107c7d7937dd",
+    "verifiedAt": "2026-09-25T19:58:49"
   },
   {
     "address": "mRXspNQ2wBD4ekkCE2wP5gxKAjuHovJzqTh42KY3Zbn",
@@ -2294,8 +2306,8 @@
   {
     "address": "oreV3EG1i9BEgiAJ8b177Z2S2rMarzak4NMv1kULvWv",
     "name": "regolith-labs/ore",
-    "repoUrl": "https://github.com/regolith-labs/ore/tree/13ac04f2ed33168680894bb2998948bf5a4317e3",
-    "verifiedAt": "2026-09-14T23:19:32"
+    "repoUrl": "https://github.com/regolith-labs/ore/tree/b92c5043581a4ad513401f7d5aabd1eb21148c12",
+    "verifiedAt": "2026-09-25T23:12:35"
   },
   {
     "address": "paxosVkYuJBKUQoZGAidRA47Qt4uidqG5fAt5kmr1nR",
@@ -2574,6 +2586,12 @@
     "verifiedAt": "2025-07-08T12:16:58"
   },
   {
+    "address": "TGLDv9L2xHKHRi2yQJSKt5QCKpH6fZrAz4kJ4wydPhR",
+    "name": "toggld",
+    "repoUrl": "https://github.com/plungarini/toggld-program/tree/cfd9212c28f7cf02f7a77267f95def9f3ce9770e",
+    "verifiedAt": "2026-09-25T21:23:14"
+  },
+  {
     "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
     "name": "solana-program/token",
     "repoUrl": "https://github.com/solana-program/token/tree/a94dd19750dc3b2409f73e15bb74754935b2a489",
@@ -2668,6 +2686,12 @@
     "name": "bid_wall",
     "repoUrl": "https://github.com/metaDAOproject/programs/tree/6f4841515b04d906018d5f71a0b6ce373335665b",
     "verifiedAt": "2026-03-22T22:33:23"
+  },
+  {
+    "address": "whCPiKnNSoKXaKtSf3potS9iZcEVnWP9PgLeTCAmFWN",
+    "name": "wormholelabs-xyz/executor-helpers",
+    "repoUrl": "https://github.com/wormholelabs-xyz/executor-helpers/tree/1279c789eea904399e249728c31b784cc7644599",
+    "verifiedAt": "2026-09-25T08:49:45"
   },
   {
     "address": "wocur7QRRMdzPZN52688gBa5iJD4mLkNWSxN5xGGRjY",
