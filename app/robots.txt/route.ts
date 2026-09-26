@@ -16,6 +16,9 @@ Allow: /mcp/start
 Disallow: /api/
 Disallow: /mcp
 
+User-agent: meta-externalagent
+Disallow: /
+
 Sitemap: ${EXPLORER_BASE_URL}/sitemap.xml
 `;
 
