@@ -83,7 +83,6 @@ export const FlatLayout: Story = {
     },
 };
 
-// The size is read from the account itself, so the story seeds one rather than passing a prop.
 export const WithAccountSize: Story = {
     args: {
         address: SIZED_ADDRESS,
@@ -119,7 +118,6 @@ export const WithAccountSize: Story = {
     },
 };
 
-// An account with no data has nothing to view, so the count renders as plain text.
 export const EmptyAccount: Story = {
     args: {
         address: SIZED_ADDRESS,

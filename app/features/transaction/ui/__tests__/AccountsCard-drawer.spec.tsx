@@ -8,7 +8,6 @@ import { DEFAULT_SIGNATURE, FEE_PAYER, MOCK_PARSED_TX, MOCK_STATUS } from '../__
 import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
 import { AccountsCard } from '../AccountsCard';
 
-// Breakpoint pixel values from tailwind.config.ts
 const LG_WIDTH = 992;
 const MOBILE_WIDTH = 375;
 
@@ -51,8 +50,6 @@ describe('transaction::AccountsCard drawer', () => {
         expect(await screen.findByRole('dialog')).toHaveTextContent('Account 1');
     });
 
-    // Radix reports only its own dismissals, so widening the viewport leaves the row's stored state
-    // open unless the row clears it.
     test('should stay closed after the viewport widens and narrows again', async () => {
         renderCard();
         await tapFeePayer();
@@ -79,7 +76,6 @@ function renderCard() {
     );
 }
 
-// The rows render their mobile variant at this width, so a tap opens the drawer.
 async function tapFeePayer() {
     await userEvent.click(screen.getAllByText(FEE_PAYER.toBase58())[0]);
 }
@@ -117,8 +113,6 @@ function resizeTo(width: number) {
     });
 }
 
-// The card only reads min-width and orientation, and jsdom reports no orientation, so a width alone
-// decides every query the card asks about.
 function matchesQuery(query: string) {
     // eslint-disable-next-line no-restricted-syntax -- need regex to parse CSS media query string from matchMedia
     const minWidth = query.match(/\(min-width:\s*(\d+)px\)/);

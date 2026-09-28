@@ -28,7 +28,6 @@ import { AccountExpandedContentInner } from '../AccountExpandedContent';
 
 const ADDRESS = PublicKey.default.toBase58();
 const ACCOUNT_BYTES = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
-// HexData joins the pairs of a span with spaces, and renders a desktop and a mobile copy of the row.
 const ACCOUNT_HEX = 'de ad be ef';
 
 const account: Account = {

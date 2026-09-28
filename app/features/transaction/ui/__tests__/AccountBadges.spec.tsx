@@ -17,8 +17,6 @@ const readonlyAccount: ParsedMessageAccount = {
 const message = { accountKeys: [], addressTableLookups: [], instructions: [] } as unknown as ParsedMessage;
 
 describe('AccountBadges', () => {
-    // Both callers wrap this component in a container that collapses with `empty:hidden`, which
-    // stops matching as soon as the component emits any node of its own.
     test('should emit no node when no condition matches', () => {
         const { container } = render(
             <AccountBadges index={1} message={message} pubkey={PUBKEY} account={readonlyAccount} />,

@@ -1050,11 +1050,11 @@ describe('startsWith', () => {
 });
 
 describe('toByteCount', () => {
-    it('should read the bigint kit reports', () => {
+    it('should read a bigint count', () => {
         expect(toByteCount(165n)).toBe(165);
     });
 
-    it('should read the number web3.js reports', () => {
+    it('should read a number count', () => {
         expect(toByteCount(165)).toBe(165);
     });
 
@@ -1068,7 +1068,6 @@ describe('toByteCount', () => {
         expect(toByteCount(null)).toBeUndefined();
     });
 
-    // Number() rounds past 2^53, so a count that large would render a wrong figure rather than none.
     it('should reject a count beyond the safe integer range', () => {
         expect(toByteCount(18_446_744_073_709_551_615n)).toBeUndefined();
         expect(toByteCount(Number.MAX_SAFE_INTEGER + 1)).toBeUndefined();

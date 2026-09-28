@@ -7,11 +7,6 @@ import { fetchRawAccountData } from '../api/fetch-raw-account-data';
 
 export const rawAccountDataKey = (url: string, address: string) => ['raw-account-data', url, address] as const;
 
-/**
- * Raw bytes that nothing fetches until `load` runs, so listing accounts costs no account data.
- * `load` fetches only while the bytes are missing. An absent account also reads as missing, so `load`
- * asks for it again every time.
- */
 export function useLazyRawAccountData(accountAddress: string) {
     const { data, error, isLoading, mutate } = useRawAccountData(accountAddress);
 
@@ -26,7 +21,6 @@ export function useLazyRawAccountData(accountAddress: string) {
 }
 
 const LAZY_SWR = {
-    // Without a cap SWR retries a failing RPC forever, so the viewer never settles on the error.
     errorRetryCount: 3,
     revalidateOnFocus: false,
     revalidateOnMount: false,
@@ -43,7 +37,6 @@ export function useRawAccountData(accountAddress: string) {
     );
 }
 
-/** Eager variant — fetches immediately on mount. */
 export function useRawAccountDataOnMount(pubkey: PublicKey): { data: Uint8Array | undefined; isLoading: boolean } {
     const { url } = useCluster();
 

@@ -32,12 +32,10 @@ type TransactionAccountRowProps = {
     pre: number;
 };
 
-// A row builds its expanded content when it first opens it, so a list of accounts carries no expanded
-// content for a row nobody touched.
+// Mounted expanded content re-renders on every accounts provider update, so a row mounts it on first
+// open.
 type DetailsState = 'closed' | 'open' | 'unmounted';
 
-// The card re-renders when the account sizes arrive and on every cluster or transaction cache
-// change, and a row's props hold across all three.
 const TransactionAccountRow = React.memo(function TransactionAccountRow({
     account,
     address,
@@ -165,16 +163,12 @@ export function AccountsCard({ signature }: SignatureProps) {
     const message = transactionWithMeta?.transaction.message;
     const meta = transactionWithMeta?.meta;
 
-    // The row key, the row itself and the sizes request all need the base58 of each account, and
-    // `toBase58` re-encodes on every call, so the card mints each string once.
     const accounts = useMemo(
         () => message?.accountKeys.map(account => ({ account, address: account.pubkey.toBase58() })) ?? [],
         [message?.accountKeys],
     );
     const addresses = useMemo(() => accounts.map(({ address }) => address), [accounts]);
 
-    // Sizes feed the footer total only, so a failed fetch drops the footer and leaves the rows
-    // untouched.
     const sizes = useAccountSizes(addresses);
 
     const totalAccountSize = useMemo(

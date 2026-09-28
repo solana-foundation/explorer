@@ -23,8 +23,6 @@ type Props = {
 
 export function NicknameEditor({ address, open, onClose }: Props) {
     const [nickname, setNicknameLocal] = useState('');
-    // The value in the store, which decides the Remove button. Reading the store while rendering
-    // parses the whole nickname map on every render.
     const [savedNickname, setSavedNickname] = useState<string>();
     const inputRef = useRef<HTMLInputElement>(null);
 

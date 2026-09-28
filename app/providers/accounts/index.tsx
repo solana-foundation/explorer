@@ -329,8 +329,6 @@ async function fetchMultipleAccounts({
                         space = rawData.length;
                     }
 
-                    // `skip` mode requests a zero-length slice, so the count the RPC reports is the
-                    // only size available.
                     space ??= toByteCount(result.space);
 
                     account = {

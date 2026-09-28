@@ -35,8 +35,6 @@ describe('NicknameEditor', () => {
         expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument();
     });
 
-    // The field holds a draft. Clearing it is how a nickname is saved away, so Remove has to stay
-    // reachable for the one still in the store.
     test('should keep Remove while the field is cleared', async () => {
         setNickname(ADDRESS, 'Treasury');
         renderEditor();

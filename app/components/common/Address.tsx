@@ -61,8 +61,6 @@ export function Address({
     const address = pubkey.toBase58();
     const { cluster, genesisHash } = useCluster();
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
-    // 'unmounted' until the button opens it, so a list of addresses builds no dialog nobody opened.
-    // Closing keeps it mounted, so the closing animation plays.
     const [editor, setEditor] = useState<'closed' | 'open' | 'unmounted'>('unmounted');
     const nickname = useNickname(address);
     const { ref: visibilityRef, isVisible } = useVisibility(fetchTokenLabelInfo);

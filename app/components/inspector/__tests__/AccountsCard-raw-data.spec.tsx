@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 vi.mock('next/navigation');
 
-// The accounts provider does not read an account until the cluster handshake resolves.
 vi.mock('@/app/entities/cluster/api/fetch-genesis-hash', () => ({
     fetchGenesisHash: vi.fn(async () => 'genesis'),
 }));
@@ -13,8 +12,6 @@ vi.mock('@/app/entities/cluster/api/fetch-genesis-hash', () => ({
 const mockGetMultipleAccounts = vi.fn();
 const mockGetAccountInfo = vi.fn();
 
-// The viewer imports getRpc from the account slice and the accounts provider imports it from the
-// entity root, so both paths need the mock.
 const mockRpc = () => ({
     getAccountInfo: (...args: unknown[]) => ({
         send: async () => ({ value: await mockGetAccountInfo(...args) }),
@@ -46,7 +43,6 @@ import { toBase64 } from '@/app/shared/lib/bytes';
 import { AccountsCard } from '../AccountsCard';
 
 const ACCOUNT_BYTES = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
-// HexData joins the pairs of a span with spaces, and renders a desktop and a mobile copy of the row.
 const ACCOUNT_HEX = 'de ad be ef';
 
 describe('inspector::AccountsCard raw data', () => {
@@ -91,7 +87,6 @@ describe('inspector::AccountsCard raw data', () => {
         expect(mockGetAccountInfo).toHaveBeenCalledTimes(1);
     });
 
-    // A total assembled from the rows that answered first reads as the whole transaction's size.
     test('should hold the total back while a later batch is still in flight', async () => {
         let answerLastBatch = () => undefined as void;
         mockGetMultipleAccounts
@@ -115,8 +110,6 @@ describe('inspector::AccountsCard raw data', () => {
         expect(screen.getByText('600 bytes')).toBeInTheDocument();
     });
 
-    // The rows that failed count as zero, so the rows that answered sum to a number that reads as the
-    // whole transaction's size.
     test('should drop the total when a batch fails', async () => {
         mockGetMultipleAccounts
             .mockImplementationOnce(async addresses => sizedAccounts(addresses))
@@ -170,7 +163,6 @@ describe('inspector::AccountsCard raw data', () => {
         answerTable();
 
         expect(await screen.findByText('Total Account Size:')).toBeInTheDocument();
-        // Three static accounts and the two the table resolves, at 4 bytes each.
         expect(screen.getByText('20 bytes')).toBeInTheDocument();
     });
 
@@ -225,18 +217,16 @@ function renderCard(
     );
 }
 
-// A name filter computes an accessible name for every button on the card, so one attempt over a
-// message this size costs more than the query's own timeout.
+// A `name` filter computes each button's accessible name, so one attempt over a long account list
+// exceeds the query timeout.
 function findRenderedSizes() {
     return screen.findAllByText('4 bytes');
 }
 
-// A message this size leaves the second request little margin inside the default one-second wait.
 function waitForSecondBatch() {
     return vi.waitFor(() => expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(2), { timeout: 5000 });
 }
 
-// The provider splits a read into batches, so a count this high answers in more than one request.
 function overOneBatchOfAccounts(count: number): VersionedMessage {
     return new Message({
         accountKeys: Array.from({ length: count }, (_, i) => new PublicKey(new Uint8Array(32).fill(i))),
@@ -246,7 +236,6 @@ function overOneBatchOfAccounts(count: number): VersionedMessage {
     });
 }
 
-// The card requests a zero-length data slice, so `space` is the only size the rows can read.
 function sizedAccounts(addresses: readonly unknown[]) {
     return (addresses as readonly string[]).map(() => ({
         data: ['', 'base64'],
@@ -270,7 +259,6 @@ function lookupMessage(): VersionedMessage {
     });
 }
 
-// The inspector page reads the tables a message names, not the card, so the test supplies that read.
 function FetchLookupTable() {
     const fetchAccount = useFetchAccountInfo();
     React.useEffect(() => {
@@ -302,8 +290,6 @@ function lookupTable() {
     };
 }
 
-// Fetched, but not as a lookup table, so the provider resolves it to a string and its rows have no
-// address to read a size from.
 function unparseableTable() {
     return {
         data: ['', 'base64'],
