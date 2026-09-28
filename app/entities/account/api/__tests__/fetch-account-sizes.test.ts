@@ -71,12 +71,12 @@ describe('fetchAccountSizes', () => {
         expect(sizes.get(ADDRESS_2)).toBe(82);
     });
 
-    it('should omit accounts that do not exist', async () => {
+    it('should count an account that does not exist as zero bytes', async () => {
         mockGetMultipleAccounts.mockResolvedValue([null, { data: ['', 'base64'], space: 82n }]);
 
         const sizes = await fetchAccountSizes([ADDRESS_1, ADDRESS_2], MAINNET_URL);
 
-        expect(sizes.has(ADDRESS_1)).toBe(false);
+        expect(sizes.get(ADDRESS_1)).toBe(0);
         expect(sizes.get(ADDRESS_2)).toBe(82);
     });
 });

@@ -105,13 +105,19 @@ describe('transaction::AccountExpandedContent raw data', () => {
         expect(await screen.findByText('Failed to load account data.')).toBeInTheDocument();
         expect(screen.queryByText('No data')).not.toBeInTheDocument();
     });
+
+    test('should show an unknown size for an account that reports none', async () => {
+        renderContent({ ...account, space: undefined });
+
+        expect(await screen.findByText('Unknown')).toBeInTheDocument();
+    });
 });
 
-function renderContent() {
+function renderContent(data: Account = account) {
     return render(
         <SWRConfig value={{ provider: () => new Map() }}>
             <ClusterProvider>
-                <AccountExpandedContentInner address={ADDRESS} data={account} />
+                <AccountExpandedContentInner address={ADDRESS} data={data} />
             </ClusterProvider>
         </SWRConfig>,
     );

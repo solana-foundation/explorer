@@ -24,7 +24,7 @@ export async function fetchAccountSizes(
 
     const sizes = new Map<string, number>();
     infos.forEach((info, i) => {
-        const size = info ? toByteCount(info.space) : undefined;
+        const size = info === null ? 0 : toByteCount(info.space);
         if (size !== undefined) {
             sizes.set(addresses[i], size);
         }

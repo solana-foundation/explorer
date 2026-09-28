@@ -200,12 +200,12 @@ export function AccountsCard({
         };
     }, [validMessage, simulation, changeByKey]);
 
-    const totalAccountSize = accounts.reduce((total, entry) => total + (entry?.data?.space ?? 0), 0);
-
-    // A failed row counts as zero and a table that resolves to no addresses adds no rows at all, so a
-    // total shown before every read succeeds is short but reads as the whole transaction's size.
     const tablesSettled = lookupTables.every(isResolvedLookupTable);
-    const sizesSettled = tablesSettled && accounts.every(entry => entry?.status === FetchStatus.Fetched);
+    const spaces = accounts.map(entry => entry?.data?.space);
+    const totalAccountSize =
+        tablesSettled && spaces.every(space => space !== undefined)
+            ? spaces.reduce((total, space) => total + space, 0)
+            : undefined;
 
     if (error) {
         return <ErrorCard text={`Unable to display accounts. ${error}`} />;
@@ -227,7 +227,7 @@ export function AccountsCard({
                 <div className="text-right">Size</div>
             </div>
             {accountRows}
-            {sizesSettled && totalAccountSize > 0 && (
+            {totalAccountSize !== undefined && totalAccountSize > 0 && (
                 <div className="py-2.5 text-sm text-outer-space-300 lg:ml-10 lg:px-3">
                     <div className="flex flex-col">
                         <div className="flex items-baseline gap-2">
@@ -502,7 +502,7 @@ function AccountRowLayout({
     changeByKey: Map<string, SolBalanceChange>;
 }) {
     const address = pubkey?.toBase58();
-    const { account } = useInspectorAccountInfo(pubkey);
+    const { account, status } = useInspectorAccountInfo(pubkey);
     // Mobile-only: tapping the row opens a bottom drawer with the account's full details.
     const [drawerOpen, setDrawerOpen] = React.useState(false);
 
@@ -510,7 +510,9 @@ function AccountRowLayout({
     let balanceNode: React.ReactNode = null;
     let sizeNode: React.ReactNode = null;
 
-    if (!account) {
+    if (!account && status === FetchStatus.FetchFailed) {
+        ownedNode = <span className="text-outer-space-300">Failed to fetch account</span>;
+    } else if (!account) {
         ownedNode = (
             <span className="text-outer-space-300">
                 <span className="spinner-grow spinner-grow-sm mr-1.5"></span>
@@ -636,5 +638,5 @@ function useInspectorAccountInfo(pubkey?: PublicKey) {
         }
     }, [address, status]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    return { account: info?.data };
+    return { account: info?.data, status: info?.status };
 }
