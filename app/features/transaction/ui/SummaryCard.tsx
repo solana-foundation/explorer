@@ -28,7 +28,7 @@ import {
 } from '@providers/transactions';
 import type { TransactionVersion } from '@solana/kit';
 import { PACKET_DATA_SIZE, ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
-import { Cluster, ClusterStatus } from '@utils/cluster';
+import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
@@ -40,7 +40,6 @@ import { ZoomIn } from 'react-feather';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
-import { Logger } from '@/app/shared/lib/logger';
 import { AutoRefresh, useAutoRefreshInterval, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 import { V1_TRANSACTION_SIZE_LIMIT } from '@/app/shared/lib/v1-message-bridge';
 import { Card } from '@/app/shared/ui/Card';
@@ -96,20 +95,9 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     // is compared against always come from the same fetch.
     const rawVersion = rawDetails?.data?.raw?.version;
     const blockTime = rawDetails?.data?.raw?.blockTime ?? details?.data?.transactionWithMeta?.blockTime ?? undefined;
-    // This card needs only the status to render, so both transaction fetches can still be in flight.
-    // The row must show "Unavailable" only after both fetches return.
+    // The card renders from the status alone, so the timestamp row shows "Unavailable" only after
+    // both transaction fetches succeed.
     const blockTimeAnswered = isFetched(rawDetails) && isFetched(details);
-
-    // A finalized mainnet transaction always has a block time. Other clusters and commitments can lack one.
-    const isFinalizedOnMainnet = cluster === Cluster.MainnetBeta && status?.data?.info?.confirmations === 'max';
-    const hasSettledWithoutBlockTime = isFinalizedOnMainnet && blockTime === undefined && blockTimeAnswered;
-    useEffect(() => {
-        if (!hasSettledWithoutBlockTime) return;
-        Logger.warn('[transaction] finalized transaction has no block time', {
-            sentry: true,
-            sentryExtras: { signature },
-        });
-    }, [hasSettledWithoutBlockTime, signature]);
 
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
@@ -123,17 +111,16 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         }
     }, [signature, clusterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // `getTransaction` returns `null` until the transaction is confirmed, and the status has no wire bytes
-    // or block time. Auto-refresh stops at finalization, so the Refresh button must also retry the transaction.
-    //
     // `rawDetails` changes on every fetch, so `refresh` reads it through a ref to stay stable.
     const rawEntryRef = useRef(rawDetails);
     rawEntryRef.current = rawDetails;
+    // `getTransaction` returns `null` before confirmation, and auto-refresh stops at finalization.
+    // Every retry must also retry the raw fetch, because the status has no wire bytes or block time.
     const refresh = useCallback(() => {
         fetchStatus(signature);
         const entry = rawEntryRef.current;
         // The raw cache keeps the last response, so an overlapping request can replace a found transaction
-        // with `null`. If auto-refresh stops, that `null` stays until the Refresh button retries.
+        // with `null`.
         if (!entry?.data?.raw && entry?.status !== FetchStatus.Fetching) fetchRaw(signature);
     }, [fetchStatus, fetchRaw, signature]);
     useAutoRefreshInterval(autoRefresh, refresh);
@@ -141,9 +128,9 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     if (!status || (status.status === FetchStatus.Fetching && autoRefresh === AutoRefresh.Inactive)) {
         return <LoadingCard />;
     } else if (status.status === FetchStatus.FetchFailed) {
-        return <ErrorCard retry={() => fetchStatus(signature)} text="Fetch Failed" />;
+        return <ErrorCard retry={refresh} text="Fetch Failed" />;
     } else if (!status.data?.info) {
-        return <TransactionNotFoundCard signature={signature} retry={() => fetchStatus(signature)} />;
+        return <TransactionNotFoundCard signature={signature} retry={refresh} />;
     }
 
     const { info } = status.data;

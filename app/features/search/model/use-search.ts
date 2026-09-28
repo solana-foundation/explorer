@@ -12,7 +12,7 @@ export function useSearch(query: string) {
     const trimmed = query.trim();
 
     // currentEpoch only bounds numeric epoch-number searches (see epoch-search-provider), so fetch it
-    // lazily and only for a numeric query: address/signature searches never pull cluster info, and the
+    // lazily and only for a numeric query: address/signature searches never fetch the epoch info, and the
     // search never re-runs when epoch info resolves. When disabled, currentEpoch stays undefined and
     // drops out of the SWR key below.
     const isNumericQuery = parseNaturalNumber(trimmed) !== undefined;

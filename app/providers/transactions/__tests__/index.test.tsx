@@ -16,10 +16,6 @@ vi.mock('@entities/cluster', async importOriginal => ({
     getRpc: (...args: [string]) => getRpc(...args),
 }));
 
-// The catch block reports every non-custom cluster to Sentry.
-const loggerError = vi.fn();
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: (...args: unknown[]) => loggerError(...args) } }));
-
 function status(overrides: Record<string, unknown> = {}) {
     return {
         confirmationStatus: 'confirmed',
@@ -66,7 +62,7 @@ describe('fetchTransactionStatus', () => {
         });
     });
 
-    it('should not ask for the block time, which getTransaction already carries', async () => {
+    it('should not fetch the block time', async () => {
         getSignatureStatuses.mockResolvedValue({ value: [status()] });
 
         await fetchTransactionStatus(dispatch, DEFAULT_SIGNATURE, Cluster.MainnetBeta, MOCK_URL);

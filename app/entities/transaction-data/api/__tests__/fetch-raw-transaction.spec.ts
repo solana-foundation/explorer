@@ -56,7 +56,7 @@ describe('fetchRawTransaction', () => {
         ]);
     });
 
-    it('should default to confirmed so a freshly landed transaction still answers', async () => {
+    it('should request the confirmed commitment by default', async () => {
         respondWith(transactionResult(createV1TransactionBytes({})));
 
         await fetchRawTransaction(URL, SIGNATURE);
@@ -64,7 +64,7 @@ describe('fetchRawTransaction', () => {
         expect(requestBody().params[1].commitment).toBe('confirmed');
     });
 
-    it('should carry the block time, which spares the page a getBlockTime for the same slot', async () => {
+    it('should return the block time from the response', async () => {
         respondWith(transactionResult(createV1TransactionBytes({})));
 
         const raw = await fetchRawTransaction(URL, SIGNATURE);

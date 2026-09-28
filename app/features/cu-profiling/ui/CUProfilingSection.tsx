@@ -58,8 +58,8 @@ export function CUProfilingSection({ signature }: SignatureProps) {
     useEffect(() => {
         if (!epochScheduleError) return;
         Logger.warn('[cu-profiling] epoch schedule unavailable; CU profiling cannot render', {
-            sentry: true,
-            sentryExtras: { reason: String(epochScheduleError), signature },
+            reason: String(epochScheduleError),
+            signature,
         });
     }, [epochScheduleError, signature]);
 

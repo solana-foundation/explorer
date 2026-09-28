@@ -90,7 +90,7 @@ describe('useEpochSchedule', () => {
 });
 
 describe('useEpochInfo', () => {
-    it('should fetch only the live epoch', async () => {
+    it('should fetch only the epoch info', async () => {
         const { result } = renderHook(() => useEpochInfo(), { wrapper: makeWrapper(connectedState) });
 
         await waitFor(() => expect(result.current).toEqual(EPOCH_INFO));
@@ -110,7 +110,7 @@ describe('useEpochInfo', () => {
 });
 
 describe('useFirstAvailableBlock', () => {
-    it('should fetch only the oldest served block', async () => {
+    it('should fetch only the first available block', async () => {
         const { result } = renderHook(() => useFirstAvailableBlock(), { wrapper: makeWrapper(connectedState) });
 
         await waitFor(() => expect(result.current).toEqual(FIRST_BLOCK));
@@ -130,7 +130,7 @@ describe('useFirstAvailableBlock', () => {
 });
 
 describe('useClusterInfo', () => {
-    it('should compose both epoch values without asking for the oldest served block', async () => {
+    it('should compose both epoch values without fetching the first available block', async () => {
         const { result } = renderHook(() => useClusterInfo(), { wrapper: makeWrapper(connectedState) });
 
         await waitFor(() => expect(result.current).toEqual(EXPECTED_INFO));

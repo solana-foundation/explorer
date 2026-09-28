@@ -7,7 +7,6 @@ import { Cluster } from '@/app/utils/cluster';
 
 import { TransactionNotFoundCard } from '../TransactionNotFoundCard';
 
-// Mock useCluster to return a controlled cluster value
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: vi.fn(() => ({ cluster: Cluster.MainnetBeta })),
     useFirstAvailableBlock: vi.fn(() => undefined),

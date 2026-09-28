@@ -173,18 +173,16 @@ describe('CUProfilingSection', () => {
             expect(screen.queryByText('Unavailable: the epoch schedule could not be loaded.')).not.toBeInTheDocument();
         });
 
-        it('should report the failure to Sentry with the reason attached', () => {
+        it('should log the failure with its reason and not send it to Sentry', () => {
             mockTransaction([transferChecked()], [invocation(TOKEN_PROGRAM, 105)]);
 
             renderSection();
 
             expect(warn).toHaveBeenCalledWith(
                 expect.stringContaining('epoch schedule unavailable'),
-                expect.objectContaining({
-                    sentry: true,
-                    sentryExtras: expect.objectContaining({ reason: expect.stringContaining('rpc unavailable') }),
-                }),
+                expect.objectContaining({ reason: expect.stringContaining('rpc unavailable') }),
             );
+            expect(warn.mock.calls[0][1]).not.toHaveProperty('sentry');
         });
 
         // Still nothing to show when the transaction logged nothing: the section is not this user's

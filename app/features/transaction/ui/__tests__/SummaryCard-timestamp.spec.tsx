@@ -16,6 +16,7 @@ import { withTransactionProviders } from '../__fixtures__/withTransactionProvide
 import { SummaryCard } from '../SummaryCard';
 
 const IN_FLIGHT = { status: FetchStatus.Fetching };
+const FIXTURE_BLOCK_TIME_UTC = 'May 18, 2024 at 02:40:00 UTC';
 
 // `ClusterProvider` reads the router on mount, which jsdom has no app router for.
 vi.mock('next/navigation', () => ({
@@ -42,17 +43,16 @@ function renderSummary({
 }
 
 describe('SummaryCard timestamp', () => {
-    it('should render the block time carried by the raw transaction', async () => {
-        renderSummary();
+    it('should render the block time from the raw transaction', async () => {
+        renderSummary({ parsed: MOCK_PARSED_TX_NO_BLOCK_TIME });
 
-        expect(await screen.findByText('Timestamp (Local)')).toBeInTheDocument();
-        expect(screen.getByText('Timestamp (UTC)')).toBeInTheDocument();
+        expect(await screen.findByText(FIXTURE_BLOCK_TIME_UTC)).toBeInTheDocument();
     });
 
     it('should fall back to the parsed transaction when the raw response has no block time', async () => {
         renderSummary({ raw: MOCK_RAW_TX_NO_BLOCK_TIME });
 
-        expect(await screen.findByText('Timestamp (Local)')).toBeInTheDocument();
+        expect(await screen.findByText(FIXTURE_BLOCK_TIME_UTC)).toBeInTheDocument();
     });
 
     it('should omit the row until the transaction fetches answer', async () => {

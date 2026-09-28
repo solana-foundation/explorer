@@ -31,7 +31,7 @@ export function useEpochScheduleResult(options: Options = {}): ClusterQueryResul
     return useClusterQuery('epoch-schedule', fetchEpochSchedule, options);
 }
 
-/** Returns the epoch from the first fetch for the cluster URL. The hook never refetches it. */
+/** Returns the epoch from the first successful fetch for the cluster URL. The hook never refetches it. */
 export function useEpochInfo(options: Options = {}): EpochInfo | undefined {
     return useEpochInfoResult(options).data;
 }
