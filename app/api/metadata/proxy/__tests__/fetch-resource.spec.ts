@@ -123,16 +123,15 @@ describe('fetchResource', () => {
         });
     });
 
-    it('should handle AbortSignal', async () => {
-        class TimeoutError extends Error {
-            constructor() {
-                super();
-                this.name = 'TimeoutError';
-            }
-        }
-        mockRejectOnce(new TimeoutError());
+    it.each([
+        ['TimeoutError', 'timeout'],
+        ['AbortError', 'aborted'],
+    ])('should map a %s rejection to a 504 with code %s', async (name, code) => {
+        const error = new Error('upstream fetch stopped');
+        error.name = name;
+        mockRejectOnce(error);
 
-        expect(await fetchError()).toMatchObject({ code: 'timeout', status: 504 });
+        expect(await fetchError()).toMatchObject({ code, status: 504 });
     });
 
     it('should treat an unexpected fetch rejection as an unreachable upstream (502)', async () => {
