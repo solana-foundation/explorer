@@ -1,16 +1,28 @@
+import type { TransactionVersion } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
-import type { BlockTransaction } from '../../model/types';
-import { summarizeBlockTransactionVersions, type VersionedBlockTransactions } from '../transaction-versions';
+import type { BlockData } from '../../model/types';
+import { summarizeBlockTransactionVersions } from '../transaction-versions';
 
-function blockWithVersions(versions: BlockTransaction['version'][]): VersionedBlockTransactions {
-    return { transactions: versions.map(version => ({ version })) };
+function blockWithVersions(versions: TransactionVersion[], unavailable = 0): BlockData {
+    return {
+        transactions: [
+            ...versions.map((version, index) => ({ index, message: { version } })),
+            ...Array.from({ length: unavailable }, (_, offset) => ({
+                index: versions.length + offset,
+                unavailable: true,
+            })),
+        ],
+    } as unknown as BlockData;
 }
 
 describe('summarizeBlockTransactionVersions', () => {
     it('should count each version and its share of the block', () => {
-        const { entries, total } = summarizeBlockTransactionVersions(blockWithVersions(['legacy', 0, 0, 1]));
+        const { entries, incomplete, total } = summarizeBlockTransactionVersions(
+            blockWithVersions(['legacy', 0, 0, 1]),
+        );
 
+        expect(incomplete).toBe(false);
         expect(total).toEqual(4);
         expect(entries).toEqual([
             { count: 1, label: 'Legacy', share: 0.25, version: 'legacy' },
@@ -20,13 +32,22 @@ describe('summarizeBlockTransactionVersions', () => {
     });
 
     it('should report every version for an empty block without dividing by zero', () => {
-        const { entries, total } = summarizeBlockTransactionVersions(blockWithVersions([]));
+        const { entries, incomplete, total } = summarizeBlockTransactionVersions(blockWithVersions([]));
 
+        expect(incomplete).toBe(false);
         expect(total).toEqual(0);
         expect(entries.map(entry => [entry.count, entry.share])).toEqual([
             [0, 0],
             [0, 0],
             [0, 0],
         ]);
+    });
+
+    it('should mark version counts as incomplete when a transaction is unavailable', () => {
+        const { entries, incomplete, total } = summarizeBlockTransactionVersions(blockWithVersions(['legacy', 0], 1));
+
+        expect(incomplete).toBe(true);
+        expect(total).toBe(2);
+        expect(entries.map(entry => entry.count)).toEqual([1, 1, 0]);
     });
 });
