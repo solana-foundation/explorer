@@ -1,6 +1,8 @@
 import { getProxiedUri } from '@features/metadata/utils';
 import { vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { STATUS_MESSAGES } from '../feature';
 import { GET } from '../route';
 
@@ -159,6 +161,20 @@ describe('Metadata Proxy Route', () => {
             // shared/edge-cached.
             expect(response.headers.get('cache-control')).toBe('private, max-age=30');
             expect(response.headers.get('vercel-cdn-cache-control')).toBeNull();
+        });
+
+        it('should log the returned error through the proxy log policy', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+            fetchMock.mockResolvedValueOnce(new Response(null, { status: 404 }));
+
+            await GET(new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`));
+
+            expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Upstream returned error', {
+                host: 'external.resource',
+                status: 404,
+                url: 'http://external.resource/file.json',
+            });
         });
     });
 

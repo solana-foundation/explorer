@@ -1,24 +1,49 @@
+// What failed, so the caller can pick a log policy without parsing messages.
+export type ProxyErrorCode =
+    | 'aborted'
+    | 'decode-failed'
+    | 'malformed-json'
+    | 'non-http-protocol'
+    | 'oversize-declared'
+    | 'oversize-streamed'
+    | 'redirect-loop'
+    | 'redirect-missing-location'
+    | 'ssrf-blocked'
+    | 'timeout'
+    | 'too-many-redirects'
+    | 'unlisted-upstream-status'
+    | 'unreachable'
+    | 'unsupported-content-type'
+    | 'upstream-status';
+
 // `status` is a separate field (not `cause`) so that `cause` retains its
 // standard Error-chaining semantics and error reporters can walk the chain.
 // `retryAfter` is the upstream `Retry-After` value, forwarded verbatim; the proxy never retries itself.
-type StatusErrorOptions = ErrorOptions & { retryAfter?: string };
+type StatusErrorOptions = ErrorOptions & {
+    code: ProxyErrorCode;
+    context?: Record<string, unknown>;
+    retryAfter?: string;
+};
 
 export class StatusError extends Error {
-    status: number;
+    status: StatusCode;
+    code: ProxyErrorCode;
+    context: Record<string, unknown>;
     retryAfter?: string;
-    constructor(message: string, options: StatusErrorOptions & { status: number }) {
+    constructor(message: string, options: StatusErrorOptions & { status: StatusCode }) {
         super(message, options);
         this.name = 'StatusError';
         this.status = options.status;
+        this.code = options.code;
+        this.context = options.context ?? {};
         this.retryAfter = options.retryAfter;
     }
 }
 
 // Canonical HTTP status text used for the proxy response body. Kept separate
-// from thrown errors on purpose — each throw site constructs a fresh
-// StatusError with a site-specific message (so Sentry/Logger can distinguish
-// "too many redirects" from "redirect loop" from "non-2xx upstream"), while
-// the client always sees the canonical text below.
+// from returned errors on purpose — each failure site constructs a fresh
+// StatusError with a site-specific message and `code`, while the client
+// always sees the canonical text below.
 export const STATUS_MESSAGES = {
     400: 'Invalid Request',
     403: 'Access Denied',
@@ -37,9 +62,9 @@ export const STATUS_MESSAGES = {
 export type StatusCode = keyof typeof STATUS_MESSAGES;
 
 // Factory — fresh stack trace per call, optional `cause` for chaining.
-// Use `message` to describe what went wrong at this throw site (logged +
-// preserved in the Error chain); the response body comes from STATUS_MESSAGES.
-export function statusError(status: StatusCode, message: string, options?: StatusErrorOptions): StatusError {
+// Use `message` to describe what went wrong at this site (preserved in the
+// Error chain); the response body comes from STATUS_MESSAGES.
+export function statusError(status: StatusCode, message: string, options: StatusErrorOptions): StatusError {
     return new StatusError(message, { ...options, status });
 }
 

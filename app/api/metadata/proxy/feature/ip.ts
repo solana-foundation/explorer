@@ -2,7 +2,6 @@ import _dns, { type LookupAddress } from 'dns';
 import Address, { parse } from 'ipaddr.js';
 import { type LookupFunction } from 'net';
 
-import { Logger } from '@/app/shared/lib/logger';
 import { SAFE_EXTERNAL_PROTOCOLS } from '@/app/shared/lib/url';
 
 const dns = _dns.promises;
@@ -48,7 +47,8 @@ function isLocalhostName(hostname: string): boolean {
 }
 
 export type LookupResult =
-    { kind: 'public'; lookup: LookupFunction; addresses: LookupAddress[] } | { kind: 'private'; reason: string };
+    | { kind: 'public'; lookup: LookupFunction; addresses: LookupAddress[] }
+    | { kind: 'private'; reason: string; cause?: unknown };
 
 /**
  * Resolve a hostname once, validate every returned address against the private
@@ -74,8 +74,7 @@ export async function lookupHostnameSafely(hostname: string): Promise<LookupResu
         }
         addresses = Array.isArray(result) ? result : [result];
     } catch (error) {
-        Logger.debug('[api:metadata-proxy] DNS resolution failed', { error, hostname });
-        return { kind: 'private', reason: 'DNS resolution failed' };
+        return { cause: error, kind: 'private', reason: 'DNS resolution failed' };
     }
 
     if (addresses.length === 0) {

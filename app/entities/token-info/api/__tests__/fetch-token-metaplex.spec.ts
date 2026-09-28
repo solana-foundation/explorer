@@ -3,6 +3,8 @@ import { none, some } from '@metaplex-foundation/umi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
+import { statusError } from '@/app/api/metadata/proxy/feature';
+import { err, ok } from '@/app/shared/lib/result';
 
 const MINT_A = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 const MINT_B = 'So11111111111111111111111111111111111111112';
@@ -64,7 +66,11 @@ function parsedMint(decimals: number) {
 
 /** Shape `fetchResource` resolves to for a JSON body. */
 function jsonResource(data: unknown) {
-    return { data, headers: new Headers({ 'content-type': 'application/json' }) };
+    return resource(data, 'application/json');
+}
+
+function resource(data: unknown, contentType: string) {
+    return ok({ byteLength: 0, data, headers: new Headers({ 'content-type': contentType }), host: 'example.com' });
 }
 
 async function importSubject() {
@@ -299,24 +305,24 @@ describe('getTokenInfosFromMetaplex', () => {
     it('should report a null logo when the proxy fetcher rejects the address', async () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
-        // What `fetchResource` does for a private host or a redirect loop.
-        mocks.fetchResource.mockRejectedValueOnce(new Error('Hostname resolves to a private IP'));
+        // What `fetchResource` returns for a private host.
+        const blocked = statusError(403, 'Hostname resolution blocked: private address 10.0.0.1', {
+            code: 'ssrf-blocked',
+        });
+        mocks.fetchResource.mockResolvedValueOnce(err(blocked));
         const onError = vi.fn();
 
         const { getTokenInfosFromMetaplex } = await importSubject();
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC, { onError });
 
         expect(result).toMatchObject({ address: MINT_A, logoURI: null });
-        expect(onError).toHaveBeenCalledWith(expect.any(Error));
+        expect(onError).toHaveBeenCalledWith(blocked);
     });
 
     it('should ignore a non-JSON body rather than treat it as metadata', async () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
-        mocks.fetchResource.mockResolvedValueOnce({
-            data: { image: 'https://example.com/logo.png' },
-            headers: new Headers({ 'content-type': 'text/html' }),
-        });
+        mocks.fetchResource.mockResolvedValueOnce(resource({ image: 'https://example.com/logo.png' }, 'text/html'));
 
         const { getTokenInfosFromMetaplex } = await importSubject();
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);

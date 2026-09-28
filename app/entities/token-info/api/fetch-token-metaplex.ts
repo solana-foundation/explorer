@@ -146,18 +146,24 @@ async function fetchLogoUri(
     if (timeout <= 0) return null;
 
     try {
-        const { data, headers } = await fetchResource(uri, {
+        const [error, resource] = await fetchResource(uri, {
             headers: new Headers({ 'User-Agent': USER_AGENT }),
             size: MAX_SIZE,
             timeout,
         });
+        if (error) {
+            // A dead link, a slow host, or a blocked address is routine for third-party metadata.
+            options.onError?.(error);
+            // eslint-disable-next-line unicorn/no-null -- same contract as above
+            return null;
+        }
+        const { data, headers } = resource;
         // eslint-disable-next-line unicorn/no-null -- same contract as above
         if (!matchJsonContent(headers.get('content-type'))) return null;
         const image = (data as { image?: unknown } | undefined)?.image;
         // eslint-disable-next-line unicorn/no-null -- same contract as above
         return typeof image === 'string' ? image : null;
     } catch (error) {
-        // A dead link, a slow host, or a blocked address is routine for third-party metadata.
         options.onError?.(error);
         // eslint-disable-next-line unicorn/no-null -- same contract as above
         return null;

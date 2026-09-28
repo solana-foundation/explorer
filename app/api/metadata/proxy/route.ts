@@ -4,14 +4,8 @@ import { Logger } from '@/app/shared/lib/logger';
 import { parseUrl as parseSharedUrl } from '@/app/shared/lib/url';
 
 import { CACHE_HEADERS, ERROR_CACHE_HEADERS, MAX_SIZE, SECURITY_HEADERS, TIMEOUT, USER_AGENT } from './config';
-import {
-    fetchResource,
-    isHTTPProtocol,
-    matchJsonContent,
-    STATUS_MESSAGES,
-    type StatusCode,
-    StatusError,
-} from './feature';
+import { fetchResource, isHTTPProtocol, matchJsonContent, STATUS_MESSAGES, type StatusCode } from './feature';
+import { logProxyError } from './log-proxy-error';
 
 export const dynamic = 'force-dynamic';
 // Platform backstop. The per-hop fetch timeout (NEXT_PUBLIC_METADATA_TIMEOUT,
@@ -44,18 +38,27 @@ export async function GET(request: Request) {
     // inside fetchResource via the pinned-lookup mechanism — once per hop.
     // The kernel never sees a hostname that wasn't pre-validated.
     try {
-        const { data, headers } = await fetchResource(parsedUri.href, {
+        const [error, resource] = await fetchResource(parsedUri.href, {
             headers: new Headers({ 'Content-Type': 'application/json; charset=utf-8', 'User-Agent': USER_AGENT }),
             size: MAX_SIZE,
             timeout: TIMEOUT,
         });
+        if (error) {
+            logProxyError(error);
+            return respondWithError(error.status, error.retryAfter);
+        }
+
+        const { byteLength, data, headers, host } = resource;
+        // Records the full fetched-size distribution, not just the over-cap tail, to tune `MAX_SIZE`.
+        Logger.info('[api:metadata-proxy] Resource fetched', {
+            byteLength,
+            contentType: headers.get('content-type'),
+            host,
+            maxSize: MAX_SIZE,
+        });
         return buildResponse(data, headers);
     } catch (e) {
-        if (e instanceof StatusError && isKnownStatus(e.status)) {
-            return respondWithError(e.status, e.retryAfter);
-        }
-        // Defensive: fetchResource is expected to only throw StatusError. Log
-        // anything else so we notice if that invariant breaks.
+        // fetchResource returns expected failures; a throw here is a bug.
         Logger.error(e);
         return respondWithError(500);
     }
@@ -102,10 +105,6 @@ function buildResponse(data: unknown, resourceHeaders: Headers): NextResponse {
     }
 
     return respondWithError(415);
-}
-
-function isKnownStatus(status: number): status is StatusCode {
-    return status in STATUS_MESSAGES;
 }
 
 function respondWithError(status: StatusCode, retryAfter?: string) {
