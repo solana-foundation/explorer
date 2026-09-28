@@ -129,6 +129,28 @@ describe('inspector::AccountsCard raw data', () => {
         expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
     });
 
+    test('should report a failed account read in place of the loading state', async () => {
+        mockGetMultipleAccounts.mockRejectedValue(new Error('RPC unavailable'));
+
+        renderCard();
+
+        expect(await screen.findAllByText('Failed to fetch account')).not.toHaveLength(0);
+        expect(screen.queryByText('Loading')).not.toBeInTheDocument();
+    });
+
+    test('should drop the total when the node does not report an account size', async () => {
+        mockGetMultipleAccounts.mockImplementation(async addresses => {
+            const [first, ...rest] = sizedAccounts(addresses);
+            return [{ ...first, space: undefined }, ...rest];
+        });
+
+        renderCard();
+        await screen.findAllByText('Unknown');
+        await findRenderedSizes();
+
+        expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
+    });
+
     test('should hold the total back until the lookup table adds its rows', async () => {
         let answerTable = () => undefined as void;
         mockGetMultipleAccounts.mockImplementation((addresses, options) => {
@@ -172,6 +194,18 @@ describe('inspector::AccountsCard raw data', () => {
 
         expect(await screen.findByText('Failed to load account data.')).toBeInTheDocument();
         expect(screen.queryByText('No data')).not.toBeInTheDocument();
+    });
+
+    test('should show a 0-byte account as plain text with no viewer', async () => {
+        mockGetMultipleAccounts.mockImplementation(async addresses => {
+            const [first, ...rest] = sizedAccounts(addresses);
+            return [{ ...first, space: 0n }, ...rest];
+        });
+
+        renderCard();
+
+        expect(await screen.findAllByText('0 bytes')).not.toHaveLength(0);
+        expect(screen.queryAllByRole('button', { name: '0 bytes' })).toHaveLength(0);
     });
 });
 

@@ -7,7 +7,6 @@ import { SolBalance } from '@components/common/SolBalance';
 import { Button } from '@components/shared/ui/button';
 import { cn } from '@components/shared/utils';
 import { useAccountSizes } from '@entities/account';
-import { useCluster } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
@@ -157,7 +156,6 @@ const TransactionAccountRow = React.memo(function TransactionAccountRow({
 
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
-    const { url } = useCluster();
     // One breakpoint subscription for the whole card — rows read `isDesktop` as a prop instead of each
     // registering its own matchMedia listeners.
     const { isLandscape, isLg } = useBreakpoint();
@@ -177,11 +175,14 @@ export function AccountsCard({ signature }: SignatureProps) {
 
     // Sizes feed the footer total only, so a failed fetch drops the footer and leaves the rows
     // untouched.
-    const { sizes, loading } = useAccountSizes(addresses, url);
+    const sizes = useAccountSizes(addresses);
 
     const totalAccountSize = useMemo(
-        () => Array.from(sizes.values()).reduce((total, size) => total + size, 0),
-        [sizes],
+        () =>
+            addresses.every(address => sizes.has(address))
+                ? Array.from(sizes.values()).reduce((total, size) => total + size, 0)
+                : undefined,
+        [addresses, sizes],
     );
 
     if (!transactionWithMeta) {
@@ -207,7 +208,7 @@ export function AccountsCard({ signature }: SignatureProps) {
         );
     });
 
-    const footer = !loading && totalAccountSize > 0 && (
+    const footer = totalAccountSize !== undefined && totalAccountSize > 0 && (
         <div className={cn('text-sm text-outer-space-300', ROW_PADDING)}>
             <div className="flex flex-col">
                 <div className="flex items-baseline gap-2">
