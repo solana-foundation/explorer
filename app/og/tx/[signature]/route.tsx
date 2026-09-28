@@ -21,7 +21,7 @@ type Props = Readonly<{
     params: Promise<{ signature: string }>;
 }>;
 
-type ClusterParam = { kind: 'ok'; cluster?: ServerCluster } | { kind: 'invalid' };
+type ClusterParam = { kind: 'ok'; cluster: ServerCluster } | { kind: 'invalid' };
 
 export async function GET(request: NextRequest, props: Props) {
     const { signature } = await props.params;
@@ -35,7 +35,10 @@ export async function GET(request: NextRequest, props: Props) {
 
     try {
         const result = await getTxShareData(signature, clusterParam.cluster);
-        if (result.kind === 'error') return new NextResponse('Failed to load transaction', { status: 502 });
+        if (result.kind === 'rpc-budget-timeout') {
+            return new NextResponse('Transaction request timed out due to budget limit', { status: 504 });
+        }
+        if (result.kind === 'error') return new NextResponse('Failed to fetch transaction data', { status: 502 });
 
         // A missing transaction still renders: BaseTxImage draws its own fallback, so a stale link unfurls as
         // a branded card instead of a broken image.
@@ -71,7 +74,7 @@ function resolveClusterParam(request: NextRequest): ClusterParam {
     const slug = searchParams.get('cluster') ?? undefined;
 
     // The CDN keys on the whole URL, so a second spelling of one request is a fresh miss - and each miss
-    // costs a probe, a transaction fetch, an IDL round and a Satori render that any caller can ask for.
+    // costs a transaction fetch, an IDL fetch (optional) and a Satori render.
     // Comparing the raw query against the param it parsed to leaves the two shapes `getTxOgImageUrl` emits.
     const canonical = slug === undefined ? '' : `?cluster=${slug}`;
     if (search !== canonical) {
@@ -81,8 +84,7 @@ function resolveClusterParam(request: NextRequest): ClusterParam {
         return { kind: 'invalid' };
     }
 
-    // An absent param is not an error: it means mainnet by the app's own contract, and getTxShareData probes.
-    if (slug === undefined) return { kind: 'ok' };
+    if (slug === undefined) return { cluster: Cluster.MainnetBeta, kind: 'ok' };
 
     const cluster = clusterFromSlug(slug);
     // Custom is rejected rather than resolved. Its URL is client-supplied, so honouring it on an

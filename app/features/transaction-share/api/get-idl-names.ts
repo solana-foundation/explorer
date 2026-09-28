@@ -73,7 +73,10 @@ async function resolveProgramEntry({
         // A program dropped by the budget is the documented outcome above, not a fault: reporting it at
         // error level would file one alert per slow program on every render.
         if (matchAbortError(error)) {
-            Logger.debug('[transaction-share] IDL names abandoned past the budget', { cluster, programId });
+            Logger.debug('[transaction-share] IDL name resolution request timed out due to budget limit', {
+                cluster,
+                programId,
+            });
             return undefined;
         }
         Logger.error(new Error('[transaction-share] IDL names unavailable for this program', { cause: error }), {
