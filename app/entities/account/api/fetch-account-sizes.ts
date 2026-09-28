@@ -3,8 +3,6 @@ import { address } from '@solana/kit';
 
 import { toByteCount } from '@/app/shared/lib/bytes';
 
-// `space` reports the full length even when the slice returns nothing, so the response stays flat
-// however large the accounts are. The commitment matches every other account read on these pages.
 const SIZE_ONLY = {
     commitment: 'confirmed',
     dataSlice: { length: 0, offset: 0 },

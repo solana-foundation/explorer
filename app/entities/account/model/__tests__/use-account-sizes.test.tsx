@@ -53,7 +53,7 @@ describe('useAccountSizes', () => {
         expect(result.current.get(ADDRESS_2)).toBe(101);
     });
 
-    it('should read a new list rather than serve it the first list sizes', async () => {
+    it('should read a new list rather than return the sizes of the first list', async () => {
         const { rerender, result } = renderHook(({ addresses }) => useAccountSizes(addresses), {
             initialProps: { addresses: [ADDRESS_1] },
             wrapper,
@@ -107,7 +107,6 @@ describe('useAccountSizes', () => {
         expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(ERROR_RETRY_COUNT + 1);
     });
 
-    // A new map on every render would restart any memo keyed on it while the request is in flight.
     it('should hold one empty map until the sizes arrive', () => {
         mockGetMultipleAccounts.mockReturnValue(new Promise(() => undefined));
 
@@ -120,12 +119,10 @@ describe('useAccountSizes', () => {
     });
 });
 
-// The hook requests a zero-length slice, so `space` is the only size the response carries.
 function sizedAccounts(addresses: readonly string[]) {
     return addresses.map((_, index) => ({ data: ['', 'base64'], space: BigInt(100 + index) }));
 }
 
-// A fresh cache per render keeps one test's sizes out of the next one.
 function wrapper({ children }: { children: React.ReactNode }) {
     return <SWRConfig value={{ errorRetryInterval: 1, provider: () => new Map() }}>{children}</SWRConfig>;
 }

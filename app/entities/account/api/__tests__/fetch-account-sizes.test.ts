@@ -50,7 +50,6 @@ describe('fetchAccountSizes', () => {
         expect(sizes.get(ADDRESS_2)).toBe(0);
     });
 
-    // The default commitment is behind, so an account created moments ago would read as missing.
     it('should request sizes at the confirmed commitment', async () => {
         mockGetMultipleAccounts.mockResolvedValue([null]);
 

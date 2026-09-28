@@ -70,7 +70,6 @@ export const Loading: Story = {
     },
 };
 
-/** The fetch failed — say so rather than showing an empty viewer. */
 export const LoadFailed: Story = {
     args: {
         data: undefined,
@@ -86,7 +85,6 @@ export const LoadFailed: Story = {
     },
 };
 
-/** A refetch failed while the previous bytes are still held — show the bytes, not the error. */
 export const RefetchFailedWithData: Story = {
     args: {
         data: mockSmallData,

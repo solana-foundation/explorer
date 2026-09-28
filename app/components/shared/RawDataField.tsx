@@ -20,8 +20,6 @@ const VISIBLE_ROWS = 3;
 
 const BASE64_VISIBLE_CHARS = 192;
 
-// Above this size the tab bodies show a notice instead of the payload. Copy and Download still convert
-// on demand.
 const MAX_INLINE_BYTES = 1024;
 
 // Bottom fade-out for the `embedded` variant: data dissolves into the host background over its
@@ -291,8 +289,6 @@ export function RawDataField({
                             <span className="hidden md:inline">{copyState === 'copied' ? 'Copied!' : 'Copy'}</span>
                         )}
                     </Button>
-                    {/* A single encoding downloads on the trigger's click, so no menu renders and no
-                        menu state is passed. */}
                     <DownloadDropdown
                         filename={filename}
                         data={bytes}
@@ -382,7 +378,6 @@ type ViewState =
     | { data: ByteArray; kind: 'tooLarge' }
     | { data: ByteArray; kind: 'ready' };
 
-// Bytes already loaded outrank a later failure, so a failed refetch still copies and downloads.
 function viewState({ data, error, loading }: Pick<RawDataFieldProps, 'data' | 'error' | 'loading'>): ViewState {
     if (loading) return { kind: 'loading' };
     if (data === undefined) return error !== undefined ? { error, kind: 'failed' } : { kind: 'idle' };

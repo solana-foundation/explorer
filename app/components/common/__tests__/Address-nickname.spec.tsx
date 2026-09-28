@@ -13,7 +13,7 @@ import { Address } from '../Address';
 const PUBKEY = new PublicKey('So11111111111111111111111111111111111111112');
 
 describe('Address nickname editor', () => {
-    test('should build no editor until the button opens it', () => {
+    test('should show no dialog until the button opens it', () => {
         renderAddress();
 
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

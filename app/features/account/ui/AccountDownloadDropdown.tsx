@@ -5,7 +5,7 @@ import { PublicKey } from '@solana/web3.js';
 
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 
-// FIXME: missing Storybook story — needs useLazyRawAccountData SWR mock + useConnection.
+// FIXME: missing Storybook story — needs useLazyRawAccountData SWR mock + useCluster.
 export function AccountDownloadDropdown({ pubkey, space }: { pubkey: PublicKey; space?: number }) {
     const address = pubkey.toBase58();
     const { data: rawData, error, load, loading } = useLazyRawAccountData(address);

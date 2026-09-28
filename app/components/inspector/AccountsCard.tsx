@@ -85,20 +85,14 @@ export function AccountsCard({
 }) {
     const simulation = simulationProp ?? IDLE_SIMULATION;
 
-    // A legacy message builds a new array on every read of `addressTableLookups`, so the memo keys on
-    // the message.
     const lookupTableAddresses = useMemo(
         () => message.addressTableLookups.map(lookup => lookup.accountKey.toBase58()),
         [message],
     );
     const lookupTables = useAddressLookupTables(lookupTableAddresses);
 
-    // The provider hands back a new entry array on every render, so a memo over the entries would
-    // never hold.
     const addresses = rowAddresses(message, lookupTables);
 
-    // The rows already read these accounts through the provider, so summing its cache avoids a second
-    // batch request.
     const accounts = useAccountInfos(addresses);
 
     // Tracked here (a persistently-mounted host) so the header popover can show the last run's time even
@@ -485,7 +479,6 @@ function ChangeCell({
     );
 }
 
-// Reads the account state from the accounts provider rather than from props.
 function AccountRowLayout({
     index,
     pubkey,
@@ -598,7 +591,6 @@ function AccountRowLayout({
     );
 }
 
-// The bytes are fetched when the popover opens, so rendering the list costs no account data.
 function AccountDataSize({ space, address }: { space: number | undefined; address: string }) {
     const { data, error, load, loading } = useLazyRawAccountData(address);
 

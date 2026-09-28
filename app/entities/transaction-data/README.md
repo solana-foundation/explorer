@@ -186,6 +186,5 @@ sibling, which returns `undefined`.
 `lib/merge-transaction-map.ts`, `lib/resolve-inner-instructions.ts` (with the
 `lib/compiled-to-transaction-instruction.ts` it decompiles through), `lib/trusted-inner-instructions.ts` and
 `lib/row-addresses.ts` are unrelated to naming and stand on their own. `lib/row-addresses.ts` lists the
-accounts a message references, in row order and without repeats. The caller resolves the address lookup
-tables and passes them in, so the function fetches nothing. `model/types.ts` holds the transaction types the
-barrel re-exports.
+accounts a message references, without repeats. The caller resolves the address lookup tables and passes
+them in, so the function fetches nothing. `model/types.ts` holds the transaction types the barrel re-exports.

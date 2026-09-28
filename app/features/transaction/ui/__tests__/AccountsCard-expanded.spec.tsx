@@ -8,8 +8,6 @@ import { DEFAULT_SIGNATURE, MOCK_PARSED_TX, MOCK_STATUS } from '../__fixtures__/
 import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
 import { AccountsCard } from '../AccountsCard';
 
-// The third account key is the Token program, which the mock accounts provider already holds, so the
-// expanded content has an account to read.
 const TOKEN_ACCOUNT_ROW = 2;
 
 describe('transaction::AccountsCard expanded content', () => {
