@@ -4,6 +4,8 @@
 
 When the upstream returns a non-2xx status that is not a handled redirect, the proxy SHALL respond with the same status if it is one of `400`, `403`, `404`, `410`, `429`, `451`, `500`, `503`, or `504`, and with `502` otherwise. The response body SHALL be the canonical `STATUS_MESSAGES` text. On a `429` the proxy SHALL forward the upstream `Retry-After` value unchanged when present; it SHALL NOT forward any other upstream response header on this path.
 
+This requirement intentionally replaces the `add-metadata-proxy` rule that every non-2xx upstream is a `502`; `502` remains only for statuses outside the list.
+
 #### Scenario: Listed upstream status
 
 - **WHEN** the upstream responds `404`
