@@ -12,6 +12,7 @@ import { fetchAll } from '@utils/fetch-all';
 
 import { MAX_SIZE, USER_AGENT } from '@/app/api/metadata/proxy/config';
 import { fetchResource, matchJsonContent } from '@/app/api/metadata/proxy/feature';
+import { logProxyError, logResourceFetched } from '@/app/api/metadata/proxy/log-proxy-error';
 import { chunk } from '@/app/shared/lib/array';
 import { IPFS_PROTOCOL, resolveIpfsUri } from '@/app/shared/lib/ipfs';
 import { parseUrl } from '@/app/shared/lib/url';
@@ -151,12 +152,15 @@ async function fetchLogoUri(
             size: MAX_SIZE,
             timeout,
         });
+        // TODO(<ticket>): a proxy failure is logged twice, by logProxyError and by the caller's onError; pick one owner
         if (error) {
             // A dead link, a slow host, or a blocked address is routine for third-party metadata.
+            logProxyError(error);
             options.onError?.(error);
             // eslint-disable-next-line unicorn/no-null -- same contract as above
             return null;
         }
+        logResourceFetched(resource, MAX_SIZE);
         const { data, headers } = resource;
         // eslint-disable-next-line unicorn/no-null -- same contract as above
         if (!matchJsonContent(headers.get('content-type'))) return null;

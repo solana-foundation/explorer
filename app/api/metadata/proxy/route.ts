@@ -5,7 +5,7 @@ import { parseUrl as parseSharedUrl } from '@/app/shared/lib/url';
 
 import { CACHE_HEADERS, ERROR_CACHE_HEADERS, MAX_SIZE, SECURITY_HEADERS, TIMEOUT, USER_AGENT } from './config';
 import { fetchResource, isHTTPProtocol, matchJsonContent, STATUS_MESSAGES, type StatusCode } from './feature';
-import { logProxyError } from './log-proxy-error';
+import { logProxyError, logResourceFetched } from './log-proxy-error';
 
 export const dynamic = 'force-dynamic';
 // Platform backstop. The per-hop fetch timeout (NEXT_PUBLIC_METADATA_TIMEOUT,
@@ -48,15 +48,8 @@ export async function GET(request: Request) {
             return respondWithError(error.status, error.retryAfter);
         }
 
-        const { byteLength, data, headers, host } = resource;
-        // Records the full fetched-size distribution, not just the over-cap tail, to tune `MAX_SIZE`.
-        Logger.info('[api:metadata-proxy] Resource fetched', {
-            byteLength,
-            contentType: headers.get('content-type'),
-            host,
-            maxSize: MAX_SIZE,
-        });
-        return buildResponse(data, headers);
+        logResourceFetched(resource, MAX_SIZE);
+        return buildResponse(resource.data, resource.headers);
     } catch (e) {
         // fetchResource returns expected failures; a throw here is a bug.
         Logger.error(e);

@@ -1,6 +1,6 @@
 import { Logger } from '@/app/shared/lib/logger';
 
-import type { ProxyErrorCode, StatusError } from './feature';
+import type { FetchedResource, ProxyErrorCode, StatusError } from './feature';
 
 type LogPolicy = {
     level: 'debug' | 'warn';
@@ -34,4 +34,14 @@ export function logProxyError(error: StatusError) {
     const { level, message = error.message, sentry } = LOG_POLICY[error.code];
     const context = sentry ? { ...error.context, sentry, sentryExtras: error.context } : error.context;
     Logger[level](`[api:metadata-proxy] ${message}`, context);
+}
+
+// Records the full fetched-size distribution, not just the over-cap tail, to tune `MAX_SIZE`.
+export function logResourceFetched({ byteLength, headers, host }: FetchedResource, maxSize: number) {
+    Logger.info('[api:metadata-proxy] Resource fetched', {
+        byteLength,
+        contentType: headers.get('content-type'),
+        host,
+        maxSize,
+    });
 }

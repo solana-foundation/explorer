@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
 import { statusError } from '@/app/api/metadata/proxy/feature';
+import { Logger } from '@/app/shared/lib/logger';
 import { err, ok } from '@/app/shared/lib/result';
 
 const MINT_A = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
@@ -306,8 +307,10 @@ describe('getTokenInfosFromMetaplex', () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
         // What `fetchResource` returns for a private host.
+        const context = { hostname: 'blocked.example', reason: 'private address 10.0.0.1' };
         const blocked = statusError(403, 'Hostname resolution blocked: private address 10.0.0.1', {
             code: 'ssrf-blocked',
+            context,
         });
         mocks.fetchResource.mockResolvedValueOnce(err(blocked));
         const onError = vi.fn();
@@ -317,6 +320,10 @@ describe('getTokenInfosFromMetaplex', () => {
 
         expect(result).toMatchObject({ address: MINT_A, logoURI: null });
         expect(onError).toHaveBeenCalledWith(blocked);
+        expect(Logger.warn).toHaveBeenCalledWith(
+            '[api:metadata-proxy] Hostname resolution blocked (SSRF protection)',
+            context,
+        );
     });
 
     it('should ignore a non-JSON body rather than treat it as metadata', async () => {
