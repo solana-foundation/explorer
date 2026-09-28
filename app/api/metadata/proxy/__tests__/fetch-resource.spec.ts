@@ -193,6 +193,20 @@ describe('fetchResource', () => {
         });
     });
 
+    it('should carry the DNS error in the log context of a blocked hostname', async () => {
+        const dnsError = new Error('getaddrinfo ENOTFOUND hello.world');
+        vi.mocked(lookupHostnameSafely).mockResolvedValueOnce({
+            cause: dnsError,
+            kind: 'private',
+            reason: 'DNS resolution failed',
+        });
+
+        expect(await fetchError()).toMatchObject({
+            code: 'ssrf-blocked',
+            context: { error: dnsError, hostname: 'hello.world', reason: 'DNS resolution failed' },
+        });
+    });
+
     it('should return 502 when redirect has no Location header', async () => {
         mockResponseOnce(null, { status: 302 });
 
