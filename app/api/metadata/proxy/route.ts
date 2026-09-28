@@ -52,7 +52,7 @@ export async function GET(request: Request) {
         return buildResponse(data, headers);
     } catch (e) {
         if (e instanceof StatusError && isKnownStatus(e.status)) {
-            return respondWithError(e.status);
+            return respondWithError(e.status, e.retryAfter);
         }
         // Defensive: fetchResource is expected to only throw StatusError. Log
         // anything else so we notice if that invariant breaks.
@@ -108,9 +108,10 @@ function isKnownStatus(status: number): status is StatusCode {
     return status in STATUS_MESSAGES;
 }
 
-function respondWithError(status: StatusCode) {
+function respondWithError(status: StatusCode, retryAfter?: string) {
     // ERROR_CACHE_HEADERS lets the failed `<img>` request prime the browser cache
     // so ProxiedImage's on-error reason probe re-reads the status from cache
     // rather than re-invoking the proxy. Browser-only and short-lived by design.
-    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { headers: ERROR_CACHE_HEADERS, status });
+    const headers = retryAfter ? { ...ERROR_CACHE_HEADERS, 'Retry-After': retryAfter } : ERROR_CACHE_HEADERS;
+    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { headers, status });
 }

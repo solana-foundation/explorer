@@ -4,6 +4,7 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { matchAbortError, matchMaxSizeError, matchTimeoutError, StatusError, statusError } from './errors';
 import { isHTTPProtocol, lookupHostnameSafely } from './ip';
+import { isPassthroughStatus, toProxyStatus } from './lib/upstream-status';
 import { processBinary, processJson, processTextAsJson } from './processors';
 import { readBodyWithLimit } from './read-body-with-limit';
 
@@ -83,8 +84,7 @@ async function executeHop(url: URL, request: FetchRequest): Promise<HopResult> {
         }
 
         if (!response.ok) {
-            Logger.warn('[api:metadata-proxy] Upstream returned error', { status: response.status, url: url.href });
-            throw statusError(502, `Upstream returned ${response.status}`);
+            throw upstreamStatusError(response, url);
         }
 
         return { kind: 'done', value: await processResponse(response, request, url) };
@@ -97,6 +97,17 @@ async function executeHop(url: URL, request: FetchRequest): Promise<HopResult> {
         // error.
         await dispatcher.close().catch(() => undefined);
     }
+}
+
+function upstreamStatusError(response: Response, url: URL): StatusError {
+    const { status } = response;
+    Logger.warn('[api:metadata-proxy] Upstream returned error', { status, url: url.href });
+    if (!isPassthroughStatus(status)) {
+        // TODO(<ticket>): report to Sentry (sentry: true) once unlisted statuses are tracked there
+        Logger.warn('[api:metadata-proxy] Unlisted upstream status', { host: url.host, status });
+    }
+    const retryAfter = status === 429 ? (response.headers.get('retry-after') ?? undefined) : undefined;
+    return statusError(toProxyStatus(status), `Upstream returned ${status}`, { retryAfter });
 }
 
 function resolveRedirectUrl(location: string, currentUrl: URL): URL {
@@ -223,8 +234,7 @@ function handleFetchError(e: unknown, url: URL, size: number): StatusError {
     // connection, TLS error). That's a bad *gateway*, not our internal fault, so
     // it's a 502, not a 500. The distinction is user-visible: 502 surfaces as
     // "Image source unavailable" while 500 collapses to the generic "Image could
-    // not be displayed" (500 stays reserved for genuine internal errors, caught
-    // at the route boundary). Reported to Sentry to gauge how often upstreams are
+    // not be displayed". Reported to Sentry to gauge how often upstreams are
     // unreachable.
     Logger.warn('[api:metadata-proxy] Fetch failed', { sentry: true, url: url.href });
     return statusError(502, 'Upstream unreachable', { cause: error });

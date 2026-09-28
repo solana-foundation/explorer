@@ -1,11 +1,16 @@
 // `status` is a separate field (not `cause`) so that `cause` retains its
 // standard Error-chaining semantics and error reporters can walk the chain.
+// `retryAfter` is the upstream `Retry-After` value, forwarded verbatim; the proxy never retries itself.
+type StatusErrorOptions = ErrorOptions & { retryAfter?: string };
+
 export class StatusError extends Error {
     status: number;
-    constructor(message: string, options: ErrorOptions & { status: number }) {
+    retryAfter?: string;
+    constructor(message: string, options: StatusErrorOptions & { status: number }) {
         super(message, options);
         this.name = 'StatusError';
         this.status = options.status;
+        this.retryAfter = options.retryAfter;
     }
 }
 
@@ -18,10 +23,14 @@ export const STATUS_MESSAGES = {
     400: 'Invalid Request',
     403: 'Access Denied',
     404: 'Resource Not Found',
+    410: 'Gone',
     413: 'Max Content Size Exceeded',
     415: 'Unsupported Media Type',
+    429: 'Too Many Requests',
+    451: 'Unavailable For Legal Reasons',
     500: 'General Error',
     502: 'Bad Gateway',
+    503: 'Service Unavailable',
     504: 'Gateway Timeout',
 } as const satisfies Record<number, string>;
 
@@ -30,7 +39,7 @@ export type StatusCode = keyof typeof STATUS_MESSAGES;
 // Factory — fresh stack trace per call, optional `cause` for chaining.
 // Use `message` to describe what went wrong at this throw site (logged +
 // preserved in the Error chain); the response body comes from STATUS_MESSAGES.
-export function statusError(status: StatusCode, message: string, options?: ErrorOptions): StatusError {
+export function statusError(status: StatusCode, message: string, options?: StatusErrorOptions): StatusError {
     return new StatusError(message, { ...options, status });
 }
 

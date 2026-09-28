@@ -175,15 +175,19 @@ describe('fetchResource', () => {
         });
     });
 
-    it('should throw 502 when upstream returns a non-2xx status', async () => {
-        mockResponseOnce(null, { headers: { 'Content-Type': 'text/html' }, status: 403 });
+    it('should preserve a listed upstream status', async () => {
+        mockResponseOnce(null, { headers: { 'Content-Type': 'text/html' }, status: 404 });
 
-        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 502 });
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 404 });
 
         expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Upstream returned error', {
-            status: 403,
+            status: 404,
             url: uri,
         });
+        expect(Logger.warn).not.toHaveBeenCalledWith(
+            '[api:metadata-proxy] Unlisted upstream status',
+            expect.anything(),
+        );
     });
 
     it('should follow redirect when target resolves to a public IP', async () => {
@@ -215,7 +219,7 @@ describe('fetchResource', () => {
 
     // 304/305 are 3xx but don't carry a Location header by spec; they must be
     // classified as upstream errors, not as redirects with a missing Location.
-    it.each([304, 305])('should classify %i as an upstream error, not a redirect', async status => {
+    it.each([304, 305])('should classify %i as an unlisted upstream error, not a redirect', async status => {
         mockResponseOnce(null, { status });
 
         await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toMatchObject({ status: 502 });
@@ -223,6 +227,10 @@ describe('fetchResource', () => {
         expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Upstream returned error', {
             status,
             url: uri,
+        });
+        expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Unlisted upstream status', {
+            host: 'hello.world',
+            status,
         });
     });
 

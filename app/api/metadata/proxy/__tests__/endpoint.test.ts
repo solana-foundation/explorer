@@ -1,6 +1,7 @@
 import { getProxiedUri } from '@features/metadata/utils';
 import { vi } from 'vitest';
 
+import { STATUS_MESSAGES } from '../feature';
 import { GET } from '../route';
 
 const { dnsLookupMock, fetchMock } = vi.hoisted(() => ({
@@ -159,6 +160,30 @@ describe('Metadata Proxy Route', () => {
             expect(response.headers.get('cache-control')).toBe('private, max-age=30');
             expect(response.headers.get('vercel-cdn-cache-control')).toBeNull();
         });
+    });
+
+    describe('upstream Retry-After', () => {
+        it.each([
+            { expected: '120', retryAfter: '120', status: 429 },
+            { expected: null, retryAfter: undefined, status: 429 },
+            { expected: null, retryAfter: '120', status: 503 },
+        ] as const)(
+            'should respond $status with Retry-After $expected when upstream sends $retryAfter',
+            async ({ expected, retryAfter, status }) => {
+                vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+                dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+                fetchMock.mockResolvedValueOnce(
+                    new Response(null, { headers: retryAfter ? { 'Retry-After': retryAfter } : {}, status }),
+                );
+
+                const request = new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`);
+                const response = await GET(request);
+
+                expect(response.status).toBe(status);
+                expect(response.headers.get('retry-after')).toBe(expected);
+                expect(await response.json()).toEqual({ error: STATUS_MESSAGES[status] });
+            },
+        );
     });
 
     describe('successful response', () => {
