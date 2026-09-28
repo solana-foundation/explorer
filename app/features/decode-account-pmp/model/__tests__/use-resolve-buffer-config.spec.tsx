@@ -6,7 +6,7 @@ import { SWRConfig } from 'swr';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { bufferAccountData, IDL_DOC, pack, readAs, YAML_DOC } from '../../ui/__fixtures__/pmp-account-fixtures';
-import { useDecodeBufferPayload } from '../use-decode-buffer-payload';
+import { useResolveBufferConfig } from '../use-resolve-buffer-config';
 
 const { mockFindConfigInTransactions } = vi.hoisted(() => ({ mockFindConfigInTransactions: vi.fn() }));
 
@@ -39,12 +39,12 @@ function wrapper({ children }: { children: ReactNode }) {
 
 afterEach(() => vi.clearAllMocks());
 
-describe('useDecodeBufferPayload', () => {
+describe('useResolveBufferConfig', () => {
     it('should reuse the cached lookup when a refetch returns the same bytes', async () => {
         const raw = bufferAccountData(pack(YAML_DOC, Compression.Zlib));
         mockFindConfigInTransactions.mockResolvedValue(declared(Encoding.Utf8));
 
-        const { result, rerender } = renderHook(props => useDecodeBufferPayload(props), {
+        const { result, rerender } = renderHook(props => useResolveBufferConfig(props), {
             initialProps: { account: readAs(raw, 'buffer').account, address: ADDRESS },
             wrapper,
         });
@@ -64,7 +64,7 @@ describe('useDecodeBufferPayload', () => {
             .mockResolvedValueOnce(declared(Encoding.Utf8))
             .mockResolvedValueOnce(declared(Encoding.Base64));
 
-        const { result, rerender } = renderHook(props => useDecodeBufferPayload(props), {
+        const { result, rerender } = renderHook(props => useResolveBufferConfig(props), {
             initialProps: {
                 account: readAs(bufferAccountData(pack(YAML_DOC, Compression.Zlib)), 'buffer').account,
                 address: ADDRESS,

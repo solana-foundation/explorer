@@ -1,10 +1,10 @@
-'use client';
+import 'client-only';
 
 import type { BufferAccount } from '@entities/pmp-account';
-import { sha256 } from '@noble/hashes/sha256';
 import React from 'react';
 
-import { bytes, toHex } from '@/app/shared/lib/bytes';
+import { bytes } from '@/app/shared/lib/bytes';
+import { sha256Hex } from '@/app/shared/lib/hash';
 
 import {
     type ConfigResolutionFromBytesResult,
@@ -16,21 +16,21 @@ import { useResolveBufferConfigFromBytes } from './use-resolve-buffer-config-fro
 import { useResolveBufferConfigOnchain } from './use-resolve-buffer-config-onchain';
 
 /**
- * Tries to decode Buffer account data.
- * A Metadata account carries its own decode config, a Buffer doesn't and its config has be resolved first.
+ * Tries to find config for decoding Buffer account data.
+ * A Metadata account carries its own decode config, a Buffer doesn't and its config has to be resolved first.
  *
- * Two strategies to resolve a Buffer's config are "Resolution from bytes" and "Resolution from intructions (Lookup)".
+ * Two strategies to resolve a Buffer's config are "Resolution from bytes" and "Resolution from instructions (Lookup)".
  * - Resolution from bytes tries to resolve config from bytes. It runs first.
  * - Lookup tries to resolve config from the on-chain instructions that holds the config (initialize, setData, etc).
  */
-export function useDecodeBufferPayload({ account, address }: { account: BufferAccount | undefined; address: string }) {
+export function useResolveBufferConfig({ account, address }: { account: BufferAccount | undefined; address: string }) {
     const configFromBytes = useResolveBufferConfigFromBytes(account);
 
     // The lookup is immutable per buffer VERSION, not per address: a later `setData` declares a new config, and the
     // cached one must not outlive the bytes it was resolved against. Fingerprinting the body rather than keying on
     // the account's identity is what keeps that cheap - the provider hands back a new object on every fetch, so an
     // identity key would re-run the scan even when the chain returned the very same bytes.
-    const fingerprint = React.useMemo(() => (account ? toHex(sha256(bytes(account.data))) : ''), [account]);
+    const fingerprint = React.useMemo(() => (account ? sha256Hex(bytes(account.data)) : ''), [account]);
 
     const enabled = shouldResolveOnchain(configFromBytes.status === 'ready' ? configFromBytes.result : undefined);
     const configFromOnchain = useResolveBufferConfigOnchain({ address, enabled, fingerprint });

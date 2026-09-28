@@ -20,10 +20,18 @@ export {
     PMP_ENCODING_LABELS,
     PMP_FORMAT_LABELS,
     PMP_MAX_UNPACKED_BYTES,
+    PMP_POINTER_HASH_NOTES,
     PMP_UNCOMPRESSED_BYTES_LABEL,
+    PMP_UNRESOLVED_SOURCE_HASH_NOTE,
 } from './lib/constants';
 export { decodePmpAccount } from './lib/decode-pmp-account';
-export { decodePmpPayload, decodeUnpackedPayload, toDocumentText, unpackBounded } from './lib/decode-pmp-payload';
+export {
+    decodePmpPayload,
+    decodeUnpackedPayload,
+    getPayloadDataHash,
+    toDocumentText,
+    unpackBounded,
+} from './lib/decode-pmp-payload';
 export type { BoundedUnpackResult } from './lib/decode-pmp-payload';
 export { toErrorReason } from './lib/errors';
 export { isPmpAccount } from './lib/program-address';
@@ -39,3 +47,4 @@ export type {
     PmpPayloadDecodeResult,
 } from './lib/types';
 export { PmpDecodeConfigStruct } from './lib/validators';
+export { PayloadHashRow } from './ui/PayloadHashRow';

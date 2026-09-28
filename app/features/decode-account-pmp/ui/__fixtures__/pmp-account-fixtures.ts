@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { type PmpAccountReadResult, readPmpAccount } from '@entities/pmp-account';
+import { PMP_DECODED_RENDER_CAP_BYTES, type PmpAccountReadResult, readPmpAccount } from '@entities/pmp-account';
 import type { Address } from '@solana/kit';
 import {
     Compression,
@@ -31,6 +31,9 @@ export const IDL_DOC = JSON.stringify({
     name: 'company_program',
     version: '1.0.0',
 });
+
+/** One byte past the render cap, so unpacking it always lands on the `oversized` arm. */
+export const OVERSIZED_DOC = 'x'.repeat(PMP_DECODED_RENDER_CAP_BYTES + 1);
 
 export function pack(content: string, compression: Compression): Uint8Array {
     return packDirectData({ compression, content, encoding: Encoding.Utf8 }).data as Uint8Array;
