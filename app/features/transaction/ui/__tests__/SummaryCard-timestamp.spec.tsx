@@ -46,13 +46,13 @@ describe('SummaryCard timestamp', () => {
     it('should render the block time from the raw transaction', async () => {
         renderSummary({ parsed: MOCK_PARSED_TX_NO_BLOCK_TIME });
 
-        expect(await screen.findByText(FIXTURE_BLOCK_TIME_UTC)).toBeInTheDocument();
+        expect(await findUtcTimestampRow()).toHaveTextContent(FIXTURE_BLOCK_TIME_UTC);
     });
 
     it('should fall back to the parsed transaction when the raw response has no block time', async () => {
         renderSummary({ raw: MOCK_RAW_TX_NO_BLOCK_TIME });
 
-        expect(await screen.findByText(FIXTURE_BLOCK_TIME_UTC)).toBeInTheDocument();
+        expect(await findUtcTimestampRow()).toHaveTextContent(FIXTURE_BLOCK_TIME_UTC);
     });
 
     it('should omit the row until the transaction fetches answer', async () => {
@@ -71,3 +71,7 @@ describe('SummaryCard timestamp', () => {
         expect(screen.queryByText('Timestamp (Local)')).not.toBeInTheDocument();
     });
 });
+
+async function findUtcTimestampRow() {
+    return (await screen.findByText('Timestamp (UTC)')).parentElement;
+}
