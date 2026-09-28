@@ -25,7 +25,6 @@ const sample = (context: 'client' | 'server' | 'edge', name: string, op?: string
     return tracesSampler(samplingContext(name, op));
 };
 
-const CLIENT_BASELINE = 1 / 100000000;
 const SERVER_BASELINE = 1 / 100000;
 
 afterEach(() => {
@@ -56,10 +55,8 @@ describe('vitalsSampleRateMultiplier', () => {
 
 describe('traceSampleRateMultiplier', () => {
     it('should read the per-runtime var', () => {
-        vi.stubEnv('NEXT_PUBLIC_TELEMETRY_TRACE_SAMPLE_RATE_CLIENT', '0.5');
         vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '0.25');
         vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_EDGE', '0');
-        expect(traceSampleRateMultiplier('client')).toBe(0.5);
         expect(traceSampleRateMultiplier('server')).toBe(0.25);
         expect(traceSampleRateMultiplier('edge')).toBe(0);
     });
@@ -82,14 +79,14 @@ describe('traceSampleRateMultiplier', () => {
     });
 
     it('should return undefined when unset or unparsable', () => {
+        expect(traceSampleRateMultiplier('server')).toBeUndefined();
         vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', 'garbage');
-        expect(traceSampleRateMultiplier('client')).toBeUndefined();
         expect(traceSampleRateMultiplier('server')).toBeUndefined();
     });
 
     it('should clamp values above 1', () => {
-        vi.stubEnv('NEXT_PUBLIC_TELEMETRY_TRACE_SAMPLE_RATE_CLIENT', '5');
-        expect(traceSampleRateMultiplier('client')).toBe(1);
+        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '5');
+        expect(traceSampleRateMultiplier('server')).toBe(1);
     });
 });
 
@@ -199,45 +196,32 @@ describe('tracesSampler vitals gate', () => {
         expect(sample('client', '/address/abc', 'pageload')).toBe(0.0005);
     });
 
-    it('should keep the baseline for other client ops', () => {
+    it('should not sample other client ops', () => {
         vi.stubEnv('NEXT_PUBLIC_TELEMETRY_VITALS_SAMPLE_RATE', '1');
-        expect(sample('client', 'GET /api/foo', 'http.client')).toBe(CLIENT_BASELINE);
+        expect(sample('client', 'GET /api/foo', 'http.client')).toBe(0);
     });
 
-    it('should keep the baseline for server and edge regardless of op', () => {
+    it('should sample server and edge at the shared baseline regardless of op', () => {
         vi.stubEnv('NEXT_PUBLIC_TELEMETRY_VITALS_SAMPLE_RATE', '1');
         expect(sample('server', '/address/abc', 'pageload')).toBe(SERVER_BASELINE);
-        expect(sample('edge', '/address/abc', 'pageload')).toBe(CLIENT_BASELINE);
+        expect(sample('edge', '/address/abc', 'pageload')).toBe(SERVER_BASELINE);
     });
 
-    it('should fall back to the baseline when the var is unset', () => {
+    it('should not sample client pageloads when vitals sampling is off', () => {
         vi.stubEnv('NEXT_PUBLIC_TELEMETRY_VITALS_SAMPLE_RATE', undefined);
-        expect(sample('client', '/address/abc', 'pageload')).toBe(CLIENT_BASELINE);
-    });
-
-    it.each(['0', 'garbage', '-0.5'])('should fall back to the baseline for %j', value => {
-        vi.stubEnv('NEXT_PUBLIC_TELEMETRY_VITALS_SAMPLE_RATE', value);
-        expect(sample('client', '/address/abc', 'pageload')).toBe(CLIENT_BASELINE);
+        expect(sample('client', '/address/abc', 'pageload')).toBe(0);
     });
 
     it('should dampen the baseline with the per-runtime multiplier', () => {
-        vi.stubEnv('NEXT_PUBLIC_TELEMETRY_TRACE_SAMPLE_RATE_CLIENT', '0.5');
         vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '0');
-        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_EDGE', '1');
-        expect(sample('client', '/address/abc', 'http.client')).toBe(CLIENT_BASELINE * 0.5);
+        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_EDGE', '0.5');
         expect(sample('server', 'GET /address/abc')).toBe(0);
-        expect(sample('edge', 'GET /address/abc')).toBe(CLIENT_BASELINE);
+        expect(sample('edge', 'GET /address/abc')).toBe(SERVER_BASELINE * 0.5);
     });
 
     it('should mute edge through the server fallback', () => {
         vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '0');
         expect(sample('edge', 'GET /address/abc')).toBe(0);
-    });
-
-    it('should keep the vitals gate ahead of the baseline multiplier', () => {
-        vi.stubEnv('NEXT_PUBLIC_TELEMETRY_VITALS_SAMPLE_RATE', '1');
-        vi.stubEnv('NEXT_PUBLIC_TELEMETRY_TRACE_SAMPLE_RATE_CLIENT', '0');
-        expect(sample('client', '/address/abc', 'pageload')).toBe(0.001);
     });
 
     it('should keep the zero branches ahead of the vitals gate', () => {

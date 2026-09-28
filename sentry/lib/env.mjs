@@ -70,14 +70,12 @@ export function vitalsSampleRateMultiplier() {
 }
 
 /**
- * Multiplier applied to the baseline trace rate of one runtime, clamped to [0, 1] — 0 mutes it.
- * @param {'client' | 'server' | 'edge'} context
+ * Multiplier applied to the baseline trace rate of one server runtime, clamped to [0, 1] — 0 mutes it.
+ * @param {'server' | 'edge'} context
  * @returns {number | undefined} undefined when unset or unparsable — baseline applies unchanged
  */
 export function traceSampleRateMultiplier(context) {
     switch (context) {
-        case 'client':
-            return parseMultiplier(process.env.NEXT_PUBLIC_TELEMETRY_TRACE_SAMPLE_RATE_CLIENT);
         case 'edge':
             // Edge is "just server" to developers; the EDGE var exists only for targeted overrides.
             // Parse each var separately so an unparsable EDGE value falls back to SERVER instead of masking it.
