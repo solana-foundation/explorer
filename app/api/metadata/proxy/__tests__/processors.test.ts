@@ -1,12 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { processTextAsJson } from '../feature/processors';
+import { unwrap } from '@/app/shared/lib/result';
 
-async function parse(response: Response) {
-    const [error, result] = await processTextAsJson(response);
-    if (error) throw error;
-    return result;
-}
+import { processTextAsJson } from '../feature/processors';
 
 function createMockResponse(text: string, headers: Headers = new Headers()): Response {
     // Cast: tests only stub the surface of Response that processTextAsJson touches.
@@ -21,7 +17,7 @@ describe('processTextAsJson', () => {
         const jsonText = '{"name": "Test", "value": 123}';
         const response = createMockResponse(jsonText);
 
-        const result = await parse(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.data).toEqual({ name: 'Test', value: 123 });
     });
@@ -30,7 +26,7 @@ describe('processTextAsJson', () => {
         const jsonText = '{"name": "Test"}\n';
         const response = createMockResponse(jsonText);
 
-        const result = await parse(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.data).toEqual({ name: 'Test' });
     });
@@ -39,7 +35,7 @@ describe('processTextAsJson', () => {
         const jsonText = '  \n{"name": "Test"}\n  ';
         const response = createMockResponse(jsonText);
 
-        const result = await parse(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.data).toEqual({ name: 'Test' });
     });
@@ -53,7 +49,7 @@ describe('processTextAsJson', () => {
 }`;
         const response = createMockResponse(jsonText);
 
-        const result = await parse(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.data).toEqual({
             description: 'The US Dollar upgraded for a new era of finance.',
@@ -67,7 +63,7 @@ describe('processTextAsJson', () => {
         const jsonText = '{\r\n"name": "Test"\r\n}\r\n';
         const response = createMockResponse(jsonText);
 
-        const result = await parse(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.data).toEqual({ name: 'Test' });
     });
@@ -79,7 +75,7 @@ describe('processTextAsJson', () => {
         });
         const response = createMockResponse('{"test": true}', headers);
 
-        const result = await parse(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.headers.get('Cache-Control')).toBe('max-age=3600');
         expect(result.headers.get('Content-Type')).toBe('text/plain');
