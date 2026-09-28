@@ -11,23 +11,24 @@ import { vitalsTraceSampleRate } from './vitals.mjs';
 
 /**
  * @typedef {'client' | 'server' | 'edge'} RuntimeContext
+ * @typedef {Exclude<RuntimeContext, 'client'>} ServerRuntime
  */
 
 // Server/edge errors are rare and load-bearing; the client starts near zero until quota headroom is proven.
 // TODO(rollout): client 1e-6 → 1e-4 → 1e-2 → 1; each ×100 step bounds the next volume at 100× the measured
 // one, advance when that still fits quota. The client beforeSend gate limits which events send, not how many.
+/** @type {Record<RuntimeContext, number>} */
 const ERROR_SAMPLE_RATES = {
     client: 1 / 1000000,
     edge: 1,
     server: 1,
 };
 
-// Server traces are ~5 spans each; browser pageloads emit hundreds, so client/edge stay near zero.
-// TODO(rollout): server 1e-5 → 1e-4 → 1e-3 while span quota holds (dampener env vars are the brake);
-// client/edge baselines stay near zero — client visibility ships via the vitals gate, not this map.
+// Server traces are ~5 spans each; edge follows server. The client has no baseline, see tracesSampler.
+// TODO(rollout): 1e-5 → 1e-4 → 1e-3 while span quota holds (dampener env vars are the brake).
+/** @type {Record<ServerRuntime, number>} */
 const TRACE_SAMPLE_RATES = {
-    client: 1 / 100000000,
-    edge: 1 / 100000000,
+    edge: 1 / 100000,
     server: 1 / 100000,
 };
 
@@ -65,12 +66,9 @@ export function createSentryConfig(context) {
                 return 0;
             }
 
-            // Vitals sampling off → the baseline map rate applies.
+            // Browser pageloads emit hundreds of spans, so the opt-in vitals gate is the only source of client traces.
             if (context === 'client') {
-                const vitalsRate = vitalsTraceSampleRate(samplingContext);
-                if (vitalsRate !== undefined) {
-                    return vitalsRate;
-                }
+                return vitalsTraceSampleRate(samplingContext) ?? 0;
             }
 
             // TODO: enable once a client DSN exists so a sampled client trace keeps its server half; callers
