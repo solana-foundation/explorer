@@ -88,5 +88,5 @@
     "notification_settings": {
         "receiver": "explorer-slack"
     },
-    "isPaused": true
+    "isPaused": false
 }
