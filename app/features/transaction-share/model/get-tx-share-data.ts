@@ -42,10 +42,9 @@ export type TxShareResult = { kind: 'ok'; data: TxShareData } | ErrorResult | No
 const RPC_BUDGET_MS = 1_200;
 
 /**
- * The data behind `/og/tx/<signature>`, read from the cluster passed or fallback to mainnet.
+ * The data behind `/og/tx/<signature>`, read from the cluster passed.
  *
- * The one place a cluster is decided, which is what lets `getTx` take a required one. Never throws:
- * every failure becomes a result the route turns into a status code.
+ * Never throws: every failure becomes a result the route turns into a status code.
  * @param signature - The transaction signature from the route
  * @param cluster - The cluster from `?cluster=`
  */

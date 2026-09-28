@@ -9,8 +9,8 @@ import { Logger } from '@/app/shared/lib/logger';
 // One retry to keep an OG image render fast.
 const IDL_BACKOFF_OPTIONS: BackoffOptions = { initialDelay: 200, maxRetries: 1 };
 
-// Slack gives an unfurl 3s end to end, and this stage shares that budget with the cluster probe, the
-// transaction fetch and the Satori render. Half of it is the most the IDL stage can take and still leave
+// Slack gives an unfurl 3s.
+// Half of it is the most the IDL stage can take and still leave
 // room for the rest, so a stalled RPC costs its program a name rather than costing the image.
 const IDL_FETCH_BUDGET_MS = 1_500;
 
@@ -20,7 +20,7 @@ const IDL_FETCH_BUDGET_MS = 1_500;
  * past the budget.
  *
  * Never throws: an unnamed row is the same row either way, so a failure here costs names, not an image.
- * @param cluster - The cluster to resolve against, already decided by `getTxShareData`
+ * @param cluster - The cluster to resolve against
  * @param programIds - The programs worth an IDL fetch. Duplicates are fine, they cost one resolution
  */
 export async function getIdlNames({

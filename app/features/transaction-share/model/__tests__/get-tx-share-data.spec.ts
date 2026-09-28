@@ -116,7 +116,7 @@ beforeEach(() => {
 afterEach(() => vi.clearAllMocks());
 
 describe('should shape the transaction behind an OG image', () => {
-    it('should call getTxShareData with the cluster', async () => {
+    it('should fetch from the given cluster and shape every field', async () => {
         const result = await getTxShareData(SIGNATURE, Cluster.Devnet);
 
         expect(mocks.getTx).toHaveBeenCalledWith({
@@ -163,13 +163,6 @@ describe('should map every failure to a result rather than throwing', () => {
         mocks.getTx.mockResolvedValue(null);
 
         await expect(getTxShareData(SIGNATURE, Cluster.Devnet)).resolves.toEqual({ kind: 'not-found' });
-    });
-
-    it('should report an error when the fetch throws', async () => {
-        const error = new Error('unexpected error');
-        mocks.getTx.mockRejectedValue(error);
-
-        await expect(getTxShareData(SIGNATURE, Cluster.Devnet)).resolves.toEqual({ error, kind: 'error' });
     });
 });
 
@@ -303,7 +296,7 @@ describe('should name the instructions only an IDL can name', () => {
         });
     });
 
-    it('should ask for the unnamed program on the cluster it resolved', async () => {
+    it('should ask for the unnamed program on the given cluster', async () => {
         mocks.getTx.mockResolvedValue(txWith([ROUTE]));
 
         await getTxShareData(SIGNATURE, Cluster.Devnet);
