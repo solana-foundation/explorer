@@ -3,7 +3,7 @@ import { none, some } from '@metaplex-foundation/umi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
-import { statusError } from '@/app/api/metadata/proxy/feature';
+import { statusError } from '@/app/api/metadata/proxy';
 import { Logger } from '@/app/shared/lib/logger';
 import { err, ok } from '@/app/shared/lib/result';
 

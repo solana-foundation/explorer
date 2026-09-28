@@ -10,9 +10,14 @@ import { publicKey, unwrapOption } from '@metaplex-foundation/umi';
 import { address } from '@solana/kit';
 import { fetchAll } from '@utils/fetch-all';
 
-import { MAX_SIZE, USER_AGENT } from '@/app/api/metadata/proxy/config';
-import { fetchResource, matchJsonContent } from '@/app/api/metadata/proxy/feature';
-import { logProxyError, logResourceFetched } from '@/app/api/metadata/proxy/log-proxy-error';
+import {
+    fetchResource,
+    logProxyError,
+    logResourceFetched,
+    matchJsonContent,
+    MAX_SIZE,
+    USER_AGENT,
+} from '@/app/api/metadata/proxy';
 import { chunk } from '@/app/shared/lib/array';
 import { IPFS_PROTOCOL, resolveIpfsUri } from '@/app/shared/lib/ipfs';
 import { parseUrl } from '@/app/shared/lib/url';
