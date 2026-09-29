@@ -1,30 +1,16 @@
-/**
- * Real conversations with a coding agent connected to this MCP server, shortened
- * to what fits a chat bubble. Answers are modelled as blocks rather than markup
- * so each docs variant can render them in its own visual language.
- *
- * Every fact here came back from a single `inspect_entity` call — keep it that
- * way when editing: no follow-up RPC, no numbers from memory.
- */
-
 export type AnswerBlock = { kind: 'text'; text: string } | { kind: 'table'; head: string[]; rows: string[][] };
 
 export type McpExample = {
     id: string;
-    /** Shortened wording for the suggestion bubble. */
     prompt: string;
-    /** What actually goes to the agent, with the identifier in full. */
     question: string;
     answer: AnswerBlock[];
     tool: string;
 };
 
-// A table isn't typed out character by character; it lands row by row, and these are the
-// "characters" each part is worth so prose and tables share one progress clock.
 const TABLE_HEAD_COST = 24;
 const TABLE_ROW_COST = 26;
 
-/** How much of one block is on screen: prose is sliced, a table is revealed row by row. */
 export type RevealedBlock = { block: AnswerBlock; rows: number; text: string; partial: boolean };
 
 export function blockCost(block: AnswerBlock): number {
@@ -35,11 +21,6 @@ export function answerCost(blocks: AnswerBlock[]): number {
     return blocks.reduce((sum, block) => sum + blockCost(block), 0);
 }
 
-/**
- * The blocks visible once `revealed` "characters" of the answer have been typed.
- * Blocks arrive in order: everything before the one being typed is complete, and
- * nothing after it exists yet.
- */
 export function revealAnswer(blocks: AnswerBlock[], revealed: number): RevealedBlock[] {
     const shown: RevealedBlock[] = [];
     let consumed = 0;
@@ -53,7 +34,6 @@ export function revealAnswer(blocks: AnswerBlock[], revealed: number): RevealedB
         shown.push({
             block,
             partial,
-            // A table shows its frame as soon as it starts, then fills in.
             rows:
                 block.kind === 'table'
                     ? partial
