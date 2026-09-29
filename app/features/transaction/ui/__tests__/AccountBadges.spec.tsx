@@ -1,11 +1,11 @@
 import { gen } from '@__fixtures__/gen';
-import { ParsedMessage, ParsedMessageAccount, PublicKey } from '@solana/web3.js';
+import { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { render } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 
 import { AccountBadges } from '../AccountBadges';
 
-const PUBKEY = new PublicKey(gen.blockhash(1));
+const PUBKEY = gen.publicKey(1);
 
 const readonlyAccount: ParsedMessageAccount = {
     pubkey: PUBKEY,

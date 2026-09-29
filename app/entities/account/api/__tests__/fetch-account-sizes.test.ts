@@ -1,12 +1,10 @@
-import { gen } from '@__fixtures__/gen';
-import { PublicKey } from '@solana/web3.js';
+import { DEFAULT_RPC_URL, gen } from '@__fixtures__/gen';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchAccountSizes } from '../fetch-account-sizes';
 
-const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
-const ADDRESS_1 = PublicKey.default.toBase58();
-const ADDRESS_2 = gen.publicKey(1).toBase58();
+const ADDRESS_1 = gen.address(1);
+const ADDRESS_2 = gen.address(2);
 
 const mockGetMultipleAccounts = vi.fn();
 
@@ -30,7 +28,7 @@ describe('fetchAccountSizes', () => {
     it('should request a zero-length data slice so no account bytes are transferred', async () => {
         mockGetMultipleAccounts.mockResolvedValue([null]);
 
-        await fetchAccountSizes([ADDRESS_1], MAINNET_URL);
+        await fetchAccountSizes([ADDRESS_1], DEFAULT_RPC_URL);
 
         expect(mockGetMultipleAccounts).toHaveBeenCalledWith(
             [ADDRESS_1],
@@ -44,7 +42,7 @@ describe('fetchAccountSizes', () => {
             { data: ['', 'base64'], space: 0n },
         ]);
 
-        const sizes = await fetchAccountSizes([ADDRESS_1, ADDRESS_2], MAINNET_URL);
+        const sizes = await fetchAccountSizes([ADDRESS_1, ADDRESS_2], DEFAULT_RPC_URL);
 
         expect(sizes.get(ADDRESS_1)).toBe(3681);
         expect(sizes.get(ADDRESS_2)).toBe(0);
@@ -53,7 +51,7 @@ describe('fetchAccountSizes', () => {
     it('should request sizes at the confirmed commitment', async () => {
         mockGetMultipleAccounts.mockResolvedValue([null]);
 
-        await fetchAccountSizes([ADDRESS_1], MAINNET_URL);
+        await fetchAccountSizes([ADDRESS_1], DEFAULT_RPC_URL);
 
         expect(mockGetMultipleAccounts).toHaveBeenCalledWith(
             [ADDRESS_1],
@@ -64,7 +62,7 @@ describe('fetchAccountSizes', () => {
     it('should omit an account whose size the node does not report', async () => {
         mockGetMultipleAccounts.mockResolvedValue([{ data: ['', 'base64'] }, { data: ['', 'base64'], space: 82n }]);
 
-        const sizes = await fetchAccountSizes([ADDRESS_1, ADDRESS_2], MAINNET_URL);
+        const sizes = await fetchAccountSizes([ADDRESS_1, ADDRESS_2], DEFAULT_RPC_URL);
 
         expect(sizes.has(ADDRESS_1)).toBe(false);
         expect(sizes.get(ADDRESS_2)).toBe(82);
@@ -73,7 +71,7 @@ describe('fetchAccountSizes', () => {
     it('should count an account that does not exist as zero bytes', async () => {
         mockGetMultipleAccounts.mockResolvedValue([null, { data: ['', 'base64'], space: 82n }]);
 
-        const sizes = await fetchAccountSizes([ADDRESS_1, ADDRESS_2], MAINNET_URL);
+        const sizes = await fetchAccountSizes([ADDRESS_1, ADDRESS_2], DEFAULT_RPC_URL);
 
         expect(sizes.get(ADDRESS_1)).toBe(0);
         expect(sizes.get(ADDRESS_2)).toBe(82);

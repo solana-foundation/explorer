@@ -1,5 +1,4 @@
-import { gen } from '@__fixtures__/gen';
-import { PublicKey } from '@solana/web3.js';
+import { DEFAULT_RPC_URL, gen } from '@__fixtures__/gen';
 import { renderHook, waitFor } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
@@ -10,11 +9,10 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { ERROR_RETRY_COUNT, useAccountSizes } from '../use-account-sizes';
 
-const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
 const DEVNET_URL = 'https://api.devnet.solana.com';
 const CUSTOM_URL = 'http://localhost:8899';
-const ADDRESS_1 = PublicKey.default.toBase58();
-const ADDRESS_2 = gen.publicKey(1).toBase58();
+const ADDRESS_1 = gen.address(1);
+const ADDRESS_2 = gen.address(2);
 
 const mockGetMultipleAccounts = vi.fn();
 const mockCluster = vi.hoisted(() => ({ current: {} as { cluster: Cluster; url: string } }));
@@ -36,7 +34,7 @@ vi.mock('@entities/cluster/@x/account', async () => {
 describe('useAccountSizes', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockCluster.current = { cluster: Cluster.MainnetBeta, url: MAINNET_URL };
+        mockCluster.current = { cluster: Cluster.MainnetBeta, url: DEFAULT_RPC_URL };
         mockGetMultipleAccounts.mockImplementation(async addresses => sizedAccounts(addresses));
     });
 
@@ -82,7 +80,7 @@ describe('useAccountSizes', () => {
         renderHook(() => useAccountSizes([ADDRESS_1]), { wrapper });
 
         await waitFor(() =>
-            expect(Logger.error).toHaveBeenCalledWith(new Error('rpc unavailable'), { url: MAINNET_URL }),
+            expect(Logger.error).toHaveBeenCalledWith(new Error('rpc unavailable'), { url: DEFAULT_RPC_URL }),
         );
     });
 

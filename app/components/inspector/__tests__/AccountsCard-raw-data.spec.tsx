@@ -31,6 +31,7 @@ vi.mock('@entities/cluster', async () => {
     return { ...actual, getRpc: vi.fn(() => mockRpc()) };
 });
 
+import { DEFAULT_BLOCKHASH, gen } from '@__fixtures__/gen';
 import { Message, MessageV0, PublicKey, type VersionedMessage } from '@solana/web3.js';
 import React from 'react';
 
@@ -229,10 +230,10 @@ function waitForSecondBatch() {
 
 function overOneBatchOfAccounts(count: number): VersionedMessage {
     return new Message({
-        accountKeys: Array.from({ length: count }, (_, i) => new PublicKey(new Uint8Array(32).fill(i))),
+        accountKeys: Array.from({ length: count }, (_, i) => gen.publicKey(i)),
         header: { numReadonlySignedAccounts: 0, numReadonlyUnsignedAccounts: 1, numRequiredSignatures: 1 },
         instructions: [],
-        recentBlockhash: '4BbJaBaqatXh5gbRry2yGerZoDm8MP3Tdaw9yVbHSGa3',
+        recentBlockhash: DEFAULT_BLOCKHASH,
     });
 }
 
@@ -246,16 +247,16 @@ function sizedAccounts(addresses: readonly unknown[]) {
     }));
 }
 
-const TABLE_KEY = new PublicKey(new Uint8Array(32).fill(50));
-const LOOKED_UP = [60, 61].map(fill => new PublicKey(new Uint8Array(32).fill(fill)));
+const TABLE_KEY = gen.publicKey(50);
+const LOOKED_UP = [60, 61].map(seed => gen.publicKey(seed));
 
 function lookupMessage(): VersionedMessage {
     return new MessageV0({
         addressTableLookups: [{ accountKey: TABLE_KEY, readonlyIndexes: [1], writableIndexes: [0] }],
         compiledInstructions: [],
         header: { numReadonlySignedAccounts: 0, numReadonlyUnsignedAccounts: 1, numRequiredSignatures: 1 },
-        recentBlockhash: '4BbJaBaqatXh5gbRry2yGerZoDm8MP3Tdaw9yVbHSGa3',
-        staticAccountKeys: [1, 2, 3].map(fill => new PublicKey(new Uint8Array(32).fill(fill))),
+        recentBlockhash: DEFAULT_BLOCKHASH,
+        staticAccountKeys: [1, 2, 3].map(seed => gen.publicKey(seed)),
     });
 }
 
@@ -273,7 +274,7 @@ function lookupTable() {
             parsed: {
                 info: {
                     addresses: LOOKED_UP.map(key => key.toBase58()),
-                    authority: PublicKey.default.toBase58(),
+                    authority: gen.address(70),
                     deactivationSlot: '18446744073709551615',
                     lastExtendedSlot: '0',
                     lastExtendedSlotStartIndex: 0,
