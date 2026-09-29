@@ -125,7 +125,7 @@ function parseBuildMd(content: string): BuildRoute[] {
         const [, type, routeCell, size, firstLoadJs] = cells;
         if (type !== 'Static' && type !== 'Dynamic') continue;
 
-        // eslint-disable-next-line no-restricted-syntax -- Stripping markdown backticks from route cell
+        // eslint-disable-next-line explorer/no-restricted-syntax -- Stripping markdown backticks from route cell
         const route = routeCell.replace(/`/g, '');
         routes.push({ type, route, size, firstLoadJs });
     }

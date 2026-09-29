@@ -59,9 +59,9 @@ export function createPreview({ mswEnabled }: { mswEnabled: boolean }): Preview 
             },
             controls: {
                 matchers: {
-                    // eslint-disable-next-line no-restricted-syntax -- Storybook controls matcher requires regex to match arg names
+                    // eslint-disable-next-line explorer/no-restricted-syntax -- Storybook controls matcher requires regex to match arg names
                     color: /(background|color)$/i,
-                    // eslint-disable-next-line no-restricted-syntax -- Storybook controls matcher requires regex to match arg names
+                    // eslint-disable-next-line explorer/no-restricted-syntax -- Storybook controls matcher requires regex to match arg names
                     date: /Date$/i,
                 },
             },

@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-restricted-syntax -- separates the leading-zero fraction from the first significant digit
+// eslint-disable-next-line explorer/no-restricted-syntax -- separates the leading-zero fraction from the first significant digit
 const LEADING_ZEROS_RE = /^(0\.0*)([1-9].*)/;
 
 /**

@@ -4,7 +4,7 @@ import { loadOgGlows } from '../og-glows';
 
 // `no-restricted-syntax` bans regex literals repo-wide, tests included.
 // A data URI is a format, and a prefix check would pass on a truncated one.
-// eslint-disable-next-line no-restricted-syntax -- asserting the base64 data URI format
+// eslint-disable-next-line explorer/no-restricted-syntax -- asserting the base64 data URI format
 const PNG_DATA_URI = /^data:image\/png;base64,[\w+/]+=*$/;
 
 describe('og-glows images', () => {

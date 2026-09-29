@@ -8,7 +8,7 @@ export type GetMetadataJsonDeps = {
     onError?: (error: unknown) => void;
 };
 
-// eslint-disable-next-line no-restricted-syntax -- match image data URI mime types
+// eslint-disable-next-line explorer/no-restricted-syntax -- match image data URI mime types
 const IMAGE_MIME_TYPE_REGEX = /data:image\/(svg\+xml|png|jpeg|gif)/;
 
 /**

@@ -317,7 +317,7 @@ describe('convertValue', () => {
             const root = rootWithDefinedType('other', stringType());
             const type = definedTypeLinkType('Missing');
             expect(() => convertValue('x', type, root)).toThrow(
-                // eslint-disable-next-line no-restricted-syntax -- case-insensitive regex matcher for error message
+                // eslint-disable-next-line explorer/no-restricted-syntax -- case-insensitive regex matcher for error message
                 /defined type "Missing" not found/i,
             );
         });

@@ -57,7 +57,7 @@ export function lamportsToSolString(lamports: number | bigint, maximumFractionDi
 }
 
 export function numberWithSeparator(s: string) {
-    // eslint-disable-next-line no-restricted-syntax -- insert thousands separator
+    // eslint-disable-next-line explorer/no-restricted-syntax -- insert thousands separator
     return s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
@@ -97,13 +97,13 @@ export function wrap(input: string, length: number): string {
 }
 
 export function camelToTitleCase(str: string): string {
-    // eslint-disable-next-line no-restricted-syntax -- insert space before uppercase letters
+    // eslint-disable-next-line explorer/no-restricted-syntax -- insert space before uppercase letters
     const result = str.replace(/([A-Z])/g, ' $1');
     return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
 export function snakeToTitleCase(str: string): string {
-    // eslint-disable-next-line no-restricted-syntax -- convert snake_case to Title Case
+    // eslint-disable-next-line explorer/no-restricted-syntax -- convert snake_case to Title Case
     const result = str.replace(/([-_]\w)/g, g => ` ${g[1].toUpperCase()}`);
     return result.charAt(0).toUpperCase() + result.slice(1);
 }

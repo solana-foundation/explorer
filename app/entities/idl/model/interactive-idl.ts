@@ -23,7 +23,7 @@ export function isInteractiveIdlSupported(idl: SupportedIdl): boolean {
     if (specVersion !== MODERN_ANCHOR_IDL_WILDCARD) return false;
 
     // Check if spec is >= 0.1.0
-    // eslint-disable-next-line no-restricted-syntax -- parse semantic version string
+    // eslint-disable-next-line explorer/no-restricted-syntax -- parse semantic version string
     const match = spec.match(/^(\d+)\.(\d+)\.(\d+)/);
     if (!match) return false;
 

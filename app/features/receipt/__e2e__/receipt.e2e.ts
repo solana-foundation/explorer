@@ -55,7 +55,7 @@ test.describe('when feature enabled', () => {
 
         if (hasReceipt) {
             const bodyText = await page.textContent('body');
-            // eslint-disable-next-line no-restricted-syntax -- Verify the receipt contains at least one of the expected fields
+            // eslint-disable-next-line explorer/no-restricted-syntax -- Verify the receipt contains at least one of the expected fields
             expect(bodyText).toMatch(/Sender|Receiver|Status|Network/i);
         }
     });
@@ -102,7 +102,7 @@ test.describe('when feature enabled', () => {
             page.locator('button:has-text("CSV")').click(),
         ]);
 
-        // eslint-disable-next-line no-restricted-syntax -- regex needed to validate filename pattern: solana-receipt-<signature>.csv
+        // eslint-disable-next-line explorer/no-restricted-syntax -- regex needed to validate filename pattern: solana-receipt-<signature>.csv
         expect(download.suggestedFilename()).toMatch(/^solana-receipt-.+\.csv$/);
     });
 

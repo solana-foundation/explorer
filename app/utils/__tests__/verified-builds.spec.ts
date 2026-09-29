@@ -69,7 +69,7 @@ describe('hashProgramData', () => {
         // Hash should be computed from the entire buffer (minus trailing zeros)
         const hash = hashProgramData(programData);
         expect(hash).toHaveLength(64); // SHA-256 hex
-        // eslint-disable-next-line no-restricted-syntax -- validating SHA-256 hex output format
+        // eslint-disable-next-line explorer/no-restricted-syntax -- validating SHA-256 hex output format
         expect(hash).toMatch(/^[0-9a-f]{64}$/);
     });
 
@@ -174,7 +174,7 @@ describe('hashProgramBuffer', () => {
         // A buffer whose program bytes are the ELF magic: verifies the exact wire format
         // (sha256 over the bytes, hex-encoded) used by `solana-verify get-buffer-hash`.
         const buffer = makeBuffer({ authority: PublicKey.default, rawBytes: programBytes });
-        // eslint-disable-next-line no-restricted-syntax -- validating SHA-256 hex output format
+        // eslint-disable-next-line explorer/no-restricted-syntax -- validating SHA-256 hex output format
         expect(hashProgramBuffer(buffer)).toMatch(/^[0-9a-f]{64}$/);
     });
 });

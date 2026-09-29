@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
 import type { Idl } from '@coral-xyz/anchor';
 import { Keypair, PublicKey } from '@solana/web3.js';

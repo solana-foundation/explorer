@@ -33,7 +33,7 @@ export function extractEventsFromLogs(
     let depth = 0;
 
     for (const log of logs) {
-        // eslint-disable-next-line no-restricted-syntax -- match program invoke pattern
+        // eslint-disable-next-line explorer/no-restricted-syntax -- match program invoke pattern
         const invoke = log.match(/^Program (\w+) invoke \[\d+\]/);
         if (invoke) {
             if (depth === 0) {
@@ -48,7 +48,7 @@ export function extractEventsFromLogs(
                 }
             }
             depth++;
-            // eslint-disable-next-line no-restricted-syntax -- match program status pattern
+            // eslint-disable-next-line explorer/no-restricted-syntax -- match program status pattern
         } else if (/^Program (?:\w+ (?:success|failed)|failed)/.test(log)) {
             // Anchor on the `Program <id> success/failed` format so user log text or a `Program data:`
             // base64 payload containing the substring "success"/"failed" can't decrement depth.

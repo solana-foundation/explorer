@@ -11,7 +11,7 @@ export function parseSimdQuery(query: string): number | undefined {
 /** Registry entries are zero-padded and may carry upstream whitespace, so both sides parse to a number. */
 export function parseSimdNumber(value: string): number | undefined {
     const digits = value.trim();
-    // eslint-disable-next-line no-restricted-syntax -- Number() alone accepts 1e3, 0x10, 1.0
+    // eslint-disable-next-line explorer/no-restricted-syntax -- Number() alone accepts 1e3, 0x10, 1.0
     if (!/^\d+$/.test(digits)) return undefined;
     return Number(digits);
 }

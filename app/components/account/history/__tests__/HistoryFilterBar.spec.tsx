@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax, no-restricted-globals -- markdown parsing needs regexes */
+/* eslint-disable explorer/no-restricted-syntax, no-restricted-globals -- markdown parsing needs regexes */
 import { fetchText } from './http';
 
 const SUMMARY_HEADERS = ['Summary', 'Abstract', 'Overview', 'Description'] as const;

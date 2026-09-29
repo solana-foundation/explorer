@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { ChevronDown, Download, Edit, LogOut, Settings, Trash, User } from 'react-feather';
 import { expect, userEvent, within } from 'storybook/test';

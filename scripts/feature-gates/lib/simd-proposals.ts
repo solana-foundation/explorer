@@ -33,7 +33,7 @@ export function parseProposals(items: GithubContent[]): Map<string, string> {
     for (const item of items) {
         if (!item.name.endsWith('.md')) continue;
         const prefix = item.name.slice(0, 4);
-        // eslint-disable-next-line no-restricted-syntax -- match the 4-digit SIMD prefix
+        // eslint-disable-next-line explorer/no-restricted-syntax -- match the 4-digit SIMD prefix
         if (!/^\d{4}$/.test(prefix)) continue;
         proposals.set(prefix, item.html_url);
     }
@@ -48,7 +48,7 @@ export function parseProposals(items: GithubContent[]): Map<string, string> {
 export function resolveSimdLinks(simdCsv: string, proposals: Map<string, string>): string[] {
     return simdCsv.split(',').map(raw => {
         const trimmed = raw.trim();
-        // eslint-disable-next-line no-restricted-syntax -- match a numeric SIMD reference
+        // eslint-disable-next-line explorer/no-restricted-syntax -- match a numeric SIMD reference
         if (!/^\d+$/.test(trimmed)) return '';
         return proposals.get(trimmed.padStart(4, '0')) ?? '';
     });

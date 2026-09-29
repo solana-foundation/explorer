@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { LIGHTHOUSE_ADDRESS } from '@features/decode-instruction-lighthouse';
 import { Keypair, type MessageV0, PublicKey, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';

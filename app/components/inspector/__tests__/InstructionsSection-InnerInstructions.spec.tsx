@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { getBase58Decoder } from '@solana/kit';
 import type { CompiledInnerInstruction } from '@solana/web3.js';

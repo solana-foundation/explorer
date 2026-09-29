@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { SystemProgram } from '@solana/web3.js';
 import { nextjsParameters, withCardTableField, withTokenInfoBatch } from '@storybook-config/decorators';

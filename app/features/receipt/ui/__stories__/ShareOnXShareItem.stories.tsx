@@ -19,7 +19,7 @@ export const Default: Story = {
     play: async ({ canvasElement, args }) => {
         const canvas = within(canvasElement);
 
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
+        // eslint-disable-next-line explorer/no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         const button = canvas.getByRole('button', { name: /share on x/i });
         await expect(button).toBeInTheDocument();
 

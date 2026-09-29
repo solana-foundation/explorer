@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
 import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';

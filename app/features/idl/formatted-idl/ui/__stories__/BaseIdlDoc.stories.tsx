@@ -40,7 +40,6 @@ export const LongDocumentation: Story = {
     },
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used only in typeof for StoryObj generics
 const tooltipMeta = {
     component: IdlDocTooltip,
     decorators: [

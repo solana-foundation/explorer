@@ -169,7 +169,7 @@ function integerToSeedBuffer(value: string, size: number): Uint8Array | null {
 
 function parseU8ArrayFromHex(value: string, length: number): number[] | null {
     const hex = value.startsWith('0x') ? value.slice(2) : value;
-    /* eslint-disable-next-line no-restricted-syntax -- validate hex string format */
+    /* eslint-disable-next-line explorer/no-restricted-syntax -- validate hex string format */
     if (!/^[0-9a-fA-F]+$/.test(hex) || hex.length !== length * 2) return null;
     const bytes: number[] = [];
     for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.slice(i, i + 2), 16));

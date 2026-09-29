@@ -35,7 +35,7 @@ export function statusError(status: StatusCode, message: string, options?: Error
 }
 
 export function matchMaxSizeError(error: unknown): error is Error {
-    // eslint-disable-next-line no-restricted-syntax -- pattern matching for error message detection
+    // eslint-disable-next-line explorer/no-restricted-syntax -- pattern matching for error message detection
     return Boolean(error instanceof Error && error.message.match(/over limit:/));
 }
 

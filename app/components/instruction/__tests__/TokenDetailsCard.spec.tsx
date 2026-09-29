@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { intoTransactionInstructionFromVersionedMessage } from '@components/inspector/utils';
 import {
     createInstructionParserDispatcher,

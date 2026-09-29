@@ -53,7 +53,7 @@ export async function processTextAsJson(data: Response) {
     try {
         const text = await data.text();
         // Remove trailing/leading whitespace and normalize line endings
-        // eslint-disable-next-line no-restricted-syntax -- normalize CRLF to LF line endings
+        // eslint-disable-next-line explorer/no-restricted-syntax -- normalize CRLF to LF line endings
         const cleanedText = text.trim().replace(/\r\n/g, '\n');
         const json = JSON.parse(cleanedText);
 

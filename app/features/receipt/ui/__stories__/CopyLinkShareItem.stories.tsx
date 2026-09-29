@@ -18,13 +18,13 @@ export const Default: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
+        // eslint-disable-next-line explorer/no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         const button = canvas.getByRole('button', { name: /copy link/i });
         await expect(button).toBeInTheDocument();
 
         await userEvent.click(button);
 
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
+        // eslint-disable-next-line explorer/no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         await expect(canvas.getByRole('button', { name: /copied/i })).toBeInTheDocument();
     },
 };

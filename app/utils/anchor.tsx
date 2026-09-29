@@ -359,7 +359,7 @@ export function mapAccountToRows(accountData: any, accountType: IdlTypeDef, idl:
 
 function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: any, nestingLevel = 0): ReactNode {
     let itemKey = key;
-    // eslint-disable-next-line no-restricted-syntax -- check if keySuffix is numeric index
+    // eslint-disable-next-line explorer/no-restricted-syntax -- check if keySuffix is numeric index
     if (/^-?\d+$/.test(keySuffix)) {
         itemKey = `#${keySuffix}`;
     }
@@ -603,7 +603,7 @@ function SimpleRow({
     children?: ReactNode;
 }) {
     let itemKey = rawKey;
-    // eslint-disable-next-line no-restricted-syntax -- check if keySuffix is numeric index
+    // eslint-disable-next-line explorer/no-restricted-syntax -- check if keySuffix is numeric index
     if (/^-?\d+$/.test(keySuffix)) {
         itemKey = `#${keySuffix}`;
     }

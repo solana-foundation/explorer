@@ -23,7 +23,7 @@ const CSV_HEADERS = [
 // fast-csv handles CSV formatting (quoting, delimiter escaping) but not application-level injection.
 // Sanitize any field sourced from user-controlled or on-chain data (memo, token symbol).
 function sanitizeCsvField(value: string): string {
-    // eslint-disable-next-line no-restricted-syntax -- regex is the clearest way to express CSV formula injection chars
+    // eslint-disable-next-line explorer/no-restricted-syntax -- regex is the clearest way to express CSV formula injection chars
     return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
 }
 

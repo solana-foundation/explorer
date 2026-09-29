@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { FetchStatus } from '@providers/cache';
 import { useRawTransactionDetails } from '@providers/transactions/raw';
 import type { CompiledInnerInstruction } from '@solana/web3.js';

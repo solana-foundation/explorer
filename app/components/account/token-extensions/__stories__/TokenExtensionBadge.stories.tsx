@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, fn, within } from 'storybook/test';
 

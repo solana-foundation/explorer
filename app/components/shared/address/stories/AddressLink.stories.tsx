@@ -54,12 +54,12 @@ export const CopyInteraction: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
+        // eslint-disable-next-line explorer/no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         const copyButton = canvas.getByRole('button', { name: /copy address/i });
         await userEvent.click(copyButton);
 
         await expect(navigator.clipboard.writeText).toHaveBeenCalledWith(SAMPLE_ADDRESS);
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
+        // eslint-disable-next-line explorer/no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         await expect(canvas.getByRole('button', { name: /copied/i })).toBeInTheDocument();
     },
 };
@@ -72,7 +72,7 @@ export const Errored: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
-        // eslint-disable-next-line no-restricted-syntax -- case-insensitive accessible name match for testing-library query
+        // eslint-disable-next-line explorer/no-restricted-syntax -- case-insensitive accessible name match for testing-library query
         const copyButton = canvas.getByRole('button', { name: /copy address/i });
         await userEvent.click(copyButton);
 

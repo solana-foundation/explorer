@@ -50,7 +50,7 @@ export function parseProgramLogs(
     logs.forEach(log => {
         if (log.startsWith('Program log:')) {
             // Use passive tense
-            // eslint-disable-next-line no-restricted-syntax -- extract program log message
+            // eslint-disable-next-line explorer/no-restricted-syntax -- extract program log message
             log = log.replace(/Program log: (.*)/g, (match, p1) => {
                 return `Program logged: "${p1}"`;
             });
@@ -69,7 +69,7 @@ export function parseProgramLogs(
         } else if (log.startsWith('Log truncated')) {
             prettyLogs[prettyLogs.length - 1].truncated = true;
         } else {
-            // eslint-disable-next-line no-restricted-syntax -- match program invoke pattern
+            // eslint-disable-next-line explorer/no-restricted-syntax -- match program invoke pattern
             const regex = /Program (\w*) invoke \[(\d)\]/g;
             const matches = Array.from(log.matchAll(regex));
 
@@ -131,7 +131,7 @@ export function parseProgramLogs(
                 }
 
                 // Remove redundant program address from logs
-                // eslint-disable-next-line no-restricted-syntax -- extract compute units consumed
+                // eslint-disable-next-line explorer/no-restricted-syntax -- extract compute units consumed
                 log = log.replace(/Program \w* consumed (\d*) (.*)/g, (match, p1, p2) => {
                     // Only aggregate compute units consumed from top-level tx instructions
                     // because they include inner ix compute units as well.

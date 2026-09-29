@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token';

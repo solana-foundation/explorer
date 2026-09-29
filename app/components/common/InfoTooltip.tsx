@@ -18,9 +18,9 @@ type Props = {
 // words still wrap normally; it is empty for a single word, making the whole label + icon one
 // unbreakable run.
 export function splitLastWord(label: string): { lead: string; lastWord: string } {
-    // eslint-disable-next-line no-restricted-syntax -- trim trailing whitespace before locating the label's last word
+    // eslint-disable-next-line explorer/no-restricted-syntax -- trim trailing whitespace before locating the label's last word
     const trimmed = label.replace(/\s+$/, '');
-    // eslint-disable-next-line no-restricted-syntax -- split off the last word on ANY whitespace (space/tab/NBSP) so the icon can be pinned to it
+    // eslint-disable-next-line explorer/no-restricted-syntax -- split off the last word on ANY whitespace (space/tab/NBSP) so the icon can be pinned to it
     const match = trimmed.match(/^([\s\S]*\S\s+)(\S+)$/);
     return match ? { lastWord: match[2], lead: match[1] } : { lastWord: trimmed, lead: '' };
 }

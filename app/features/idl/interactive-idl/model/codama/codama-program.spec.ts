@@ -118,7 +118,7 @@ describe('CodamaUnifiedProgram', () => {
         it('should include available instruction names in error message', async () => {
             const program = createProgram(systemIdl);
 
-            // eslint-disable-next-line no-restricted-syntax -- regex needed to match partial error message
+            // eslint-disable-next-line explorer/no-restricted-syntax -- regex needed to match partial error message
             await expect(program.buildInstruction('fakeInstruction', {}, [])).rejects.toThrow(/Available:/);
         });
 
@@ -158,7 +158,7 @@ describe('CodamaUnifiedProgram', () => {
                     },
                     ['Test', 'not-a-number'],
                 ),
-                // eslint-disable-next-line no-restricted-syntax -- regex needed to match partial error message
+                // eslint-disable-next-line explorer/no-restricted-syntax -- regex needed to match partial error message
             ).rejects.toThrow(/Could not convert "pollId" argument/);
         });
     });

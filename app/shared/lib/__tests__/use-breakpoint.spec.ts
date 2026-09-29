@@ -12,7 +12,7 @@ function mockMatchMedia(width: number, isLandscape = false) {
         if (query.includes('orientation: landscape')) {
             matches = isLandscape;
         } else {
-            // eslint-disable-next-line no-restricted-syntax -- need regex to parse CSS media query string from matchMedia
+            // eslint-disable-next-line explorer/no-restricted-syntax -- need regex to parse CSS media query string from matchMedia
             const m = query.match(/\(min-width:\s*(\d+)px\)/);
             const minWidth = m ? parseInt(m[1], 10) : 0;
             matches = width >= minWidth;

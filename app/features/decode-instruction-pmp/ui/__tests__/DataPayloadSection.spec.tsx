@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
 import { PMP_DECODED_RENDER_CAP_BYTES, PMP_POINTER_HASH_NOTES } from '@entities/pmp-account';
 import type { Account } from '@providers/accounts';

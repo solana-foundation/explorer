@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
 // From the literal's own library-free module: the feature no longer re-exports it, and this spec only needs the
 // program id to build a fixture instruction - not the decoders that `@entities/pmp-account` would pull in.

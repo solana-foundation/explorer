@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
 import { ParsedInstruction, ParsedTransaction, PublicKey, VOTE_PROGRAM_ID } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';

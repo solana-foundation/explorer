@@ -20,7 +20,7 @@ export const IPFS_PROTOCOL = 'ipfs:';
  * `url.href`, which `new URL` may have normalised.
  */
 export function resolveIpfsUri(url: URL): string {
-    // eslint-disable-next-line no-restricted-syntax -- Strips redundant "ipfs/" prefix from the path for a clean gateway URL.
+    // eslint-disable-next-line explorer/no-restricted-syntax -- Strips redundant "ipfs/" prefix from the path for a clean gateway URL.
     const fullPath = (url.host + url.pathname).replace(/^ipfs\//, '');
     // Split the CID from any subpath (e.g. "QmXXX/image.png" → cid="QmXXX", subpath="/image.png")
     const firstSlash = fullPath.indexOf('/');

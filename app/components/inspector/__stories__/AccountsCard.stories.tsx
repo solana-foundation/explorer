@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
+/* eslint-disable explorer/no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';

@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- test normalizes rendered hex whitespace via RegExp */
+/* eslint-disable explorer/no-restricted-syntax -- test normalizes rendered hex whitespace via RegExp */
 import type { Program } from '@coral-xyz/anchor';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
