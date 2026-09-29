@@ -32,7 +32,8 @@ Alternatives considered:
 ## Impact
 
 - Upstream `404`, `403`, and `429` stop counting as proxy `5xx`. Upstream `500`, `503`, and `504` still count.
-- Supersedes three passages of `add-metadata-proxy`, across two requirements:
+- Supersedes four passages of `add-metadata-proxy`, across three requirements:
     - "The proxy SHALL serve only JSON, text-as-JSON, and image content": its sentence "A non-2xx upstream (that is not a handled redirect) SHALL be `502`" and its "Non-2xx upstream" scenario.
     - "Off-chain images SHALL surface why they could not be displayed and degrade gracefully": its "Image fails to load for another readable reason" scenario, which says an upstream `404` is surfaced as a `502`.
-- Archive order: `add-metadata-proxy` is archived first, which creates the `metadata-proxy` base spec. This delta then moves from `## ADDED Requirements` to `## MODIFIED Requirements`, restating both requirements above in full with the superseded passages replaced, before it is archived. Until then both changes are open and the overlap is recorded here only.
+    - "The proxy SHALL report size-cap hits and network failures to Sentry as warnings": its "Upstream fetch fails for a network reason" scenario, which says "`500` is reserved for genuine internal errors caught at the route boundary", while an upstream `500` now passes through.
+- Archive order: `add-metadata-proxy` is archived first, which creates the `metadata-proxy` base spec. This delta then moves from `## ADDED Requirements` to `## MODIFIED Requirements`, restating all three requirements above in full with the superseded passages replaced, before it is archived. Until then both changes are open and the overlap is recorded here only.
