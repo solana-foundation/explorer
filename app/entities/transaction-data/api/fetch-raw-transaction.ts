@@ -24,7 +24,7 @@ import type { RawTransaction } from '../model/types';
 export async function fetchRawTransaction(
     url: string,
     signature: string,
-    commitment?: Finality,
+    commitment: Finality = 'confirmed',
 ): Promise<RawTransaction | null> {
     const response = await createSolanaRpc(url)
         .getTransaction(createSignature(signature), {
@@ -47,6 +47,7 @@ export async function fetchRawTransaction(
     const meta = response.meta;
 
     const base = {
+        blockTime: response.blockTime === null ? undefined : Number(response.blockTime),
         messageBytes,
         meta: meta
             ? {

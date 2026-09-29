@@ -1,42 +1,65 @@
 'use client';
 
+import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
-import { fetchClusterInfo } from '../api/fetch-cluster-info';
+import { fetchEpochInfo } from '../api/fetch-epoch-info';
+import { fetchEpochSchedule } from '../api/fetch-epoch-schedule';
+import { fetchFirstAvailableBlock } from '../api/fetch-first-available-block';
 import { ClusterStatus } from '../lib/cluster';
-import type { ClusterInfo } from '../lib/types';
+import type { ClusterInfo, EpochInfo } from '../lib/types';
 import { useCluster } from './use-cluster';
 
-/** The cluster-info fetch as SWR reports it, so a consumer can tell "failed" from "not fetched yet". */
-export type ClusterInfoResult = {
-    data: ClusterInfo | undefined;
+export type ClusterQueryResult<T> = {
+    data: T | undefined;
     error: unknown;
     isLoading: boolean;
 };
 
-/**
- * Lazily fetch live cluster info (epoch, schedule, first available block). Only fetches once the
- * cluster is connected and a consumer actually mounts this hook; SWR dedupes by URL so multiple
- * consumers share a single request. Pass `enabled: false` to defer the fetch (e.g. the always-mounted
- * search bar only needs it while a query is active).
- *
- * Returns the value alone, which collapses "not connected", "in flight" and "failed" into `undefined`.
- * Use `useClusterInfoResult` where those must be told apart — a consumer that hides itself when the
- * value is absent otherwise hides itself silently on a fetch error.
- */
-export function useClusterInfo(options: { enabled?: boolean } = {}): ClusterInfo | undefined {
-    return useClusterInfoResult(options).data;
+type Options = { enabled?: boolean };
+
+export function useEpochSchedule(options: Options = {}): ClusterInfo['epochSchedule'] | undefined {
+    return useEpochScheduleResult(options).data;
 }
 
-/** `useClusterInfo` with the fetch state alongside the value. Shares its SWR entry, so it adds no request. */
-export function useClusterInfoResult({ enabled = true }: { enabled?: boolean } = {}): ClusterInfoResult {
+export function useEpochScheduleResult(options: Options = {}): ClusterQueryResult<ClusterInfo['epochSchedule']> {
+    return useClusterQuery('epoch-schedule', fetchEpochSchedule, options);
+}
+
+/** Returns the epoch from the first successful fetch for the cluster URL. The hook never refetches it. */
+export function useEpochInfo(options: Options = {}): EpochInfo | undefined {
+    return useEpochInfoResult(options).data;
+}
+
+function useEpochInfoResult(options: Options = {}): ClusterQueryResult<EpochInfo> {
+    return useClusterQuery('epoch-info', fetchEpochInfo, options);
+}
+
+export function useFirstAvailableBlock(options: Options = {}): bigint | undefined {
+    return useClusterQuery('first-available-block', fetchFirstAvailableBlock, options).data;
+}
+
+export function useClusterInfo(options: Options = {}): ClusterInfo | undefined {
+    const epochSchedule = useEpochSchedule(options);
+    const epochInfo = useEpochInfo(options);
+
+    return useMemo(
+        () => (epochSchedule && epochInfo ? { epochInfo, epochSchedule } : undefined),
+        [epochSchedule, epochInfo],
+    );
+}
+
+function useClusterQuery<T>(
+    name: string,
+    fetcher: (url: string) => Promise<T>,
+    { enabled = true }: Options,
+): ClusterQueryResult<T> {
     const { url, status } = useCluster();
     const shouldFetch = enabled && status === ClusterStatus.Connected && Boolean(url);
     const { data, error, isLoading } = useSWRImmutable(
-        shouldFetch ? ['cluster-info', url] : undefined,
-        () => fetchClusterInfo(url),
-        // Capped so `error` settles. Each retry yields a fresh Error identity, which re-fires consumers
-        // keyed on it — unbounded, that is one report per attempt for as long as the page stays open.
+        shouldFetch ? [name, url] : undefined,
+        () => fetcher(url),
+        // SWR retries a failed fetch without limit by default. The cap limits the requests to an unreachable RPC.
         { errorRetryCount: 3 },
     );
 
