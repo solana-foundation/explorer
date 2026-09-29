@@ -6,7 +6,7 @@ import { matchAbortError, matchMaxSizeError, matchTimeoutError, type StatusError
 import { isHTTPProtocol, lookupHostnameSafely } from './ip';
 import { isPassthroughStatus, toProxyStatus } from './lib/upstream-status';
 import { processBinary, processJson, processTextAsJson } from './processors';
-import { readBodyWithLimit } from './read-body-with-limit';
+import { BodyShapeError, readBodyWithLimit } from './read-body-with-limit';
 
 // Content-type matchers
 export const matchJson = (header?: string | null) => header?.includes('application/json');
@@ -33,8 +33,8 @@ type HopResult = { kind: 'done'; value: FetchedResource } | { kind: 'redirect'; 
 export type FetchRequest = { headers: Headers; timeout: number; size: number };
 
 /**
- * Fetches `uri` through the SSRF-safe pipeline. Expected failures come back as a {@link StatusError}
- * carrying a `code` and log `context`; logging them is the caller's decision.
+ * Fetches `uri` through the SSRF-safe pipeline. Every upstream failure comes back as a {@link StatusError}
+ * carrying a `code` and log `context`; logging them is the caller's decision. A throw is an internal fault.
  */
 export async function fetchResource(uri: string, request: FetchRequest): Promise<Result<FetchedResource, StatusError>> {
     let currentUrl = new URL(uri);
@@ -45,7 +45,9 @@ export async function fetchResource(uri: string, request: FetchRequest): Promise
         if (error) return err(error);
         if (outcome.kind === 'done') return ok(outcome.value);
 
-        currentUrl = resolveRedirectUrl(outcome.location, currentUrl);
+        const [redirectError, nextUrl] = resolveRedirectUrl(outcome.location, currentUrl);
+        if (redirectError) return err(redirectError);
+        currentUrl = nextUrl;
 
         if (visited.has(currentUrl.href)) {
             return err(
@@ -127,8 +129,15 @@ function upstreamStatusError(response: Response, url: URL): StatusError {
     });
 }
 
-function resolveRedirectUrl(location: string, currentUrl: URL): URL {
-    return new URL(location, currentUrl);
+function resolveRedirectUrl(location: string, currentUrl: URL): Result<URL, StatusError> {
+    const next = URL.parse(location, currentUrl);
+    if (next) return ok(next);
+    return err(
+        statusError(502, 'Redirect Location is not a valid URL', {
+            code: 'redirect-invalid-location',
+            context: { location, url: currentUrl.href },
+        }),
+    );
 }
 
 // Only statuses that carry a `Location` header by spec. Excludes 304/305/306
@@ -208,7 +217,9 @@ async function processResponse(
                 }),
             );
         }
-        throw e;
+        if (e instanceof BodyShapeError) throw e;
+        // The upstream stalled or dropped the connection after sending headers: the same failure as a failed fetch().
+        return err(classifyFetchError(e, url, size));
     }
     const contentType = response.headers.get('content-type');
 

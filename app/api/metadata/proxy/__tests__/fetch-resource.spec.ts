@@ -212,6 +212,46 @@ describe('fetchResource', () => {
         expect(await fetchError()).toMatchObject({ code: 'redirect-missing-location', status: 502 });
     });
 
+    it('should return 502 when the redirect Location is not a valid URL', async () => {
+        mockRedirectOnce('http://[::1');
+
+        expect(await fetchError()).toMatchObject({
+            code: 'redirect-invalid-location',
+            context: { location: 'http://[::1', url: uri },
+            status: 502,
+        });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+        ['TimeoutError', 'timeout', 504],
+        ['Error', 'unreachable', 502],
+    ])('should classify a %s while reading the body as %s', async (name, code, status) => {
+        const failure = new Error('body read stopped');
+        failure.name = name;
+        const body = new ReadableStream({
+            start(controller) {
+                controller.error(failure);
+            },
+        });
+        mockResponseOnce(body, { headers: { 'Content-Type': 'application/json' } });
+
+        expect(await fetchError()).toMatchObject({ code, status });
+    });
+
+    it('should throw when the runtime hands over a body the reader cannot consume', async () => {
+        fetchMock.mockResolvedValueOnce({
+            body: 'not a stream',
+            headers: new Headers({ 'Content-Type': 'application/json' }),
+            ok: true,
+            status: 200,
+        });
+
+        await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toThrow(
+            'Unsupported response body shape',
+        );
+    });
+
     // 304/305 are 3xx but don't carry a Location header by spec; they must be
     // classified as upstream errors, not as redirects with a missing Location.
     it.each([304, 305])('should classify %i as an unlisted upstream error, not a redirect', async status => {

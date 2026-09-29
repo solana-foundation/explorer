@@ -175,27 +175,41 @@ describe('Metadata Proxy Route', () => {
             });
         });
 
-        it('should answer 500 and report a Sentry warning when fetchResource throws', async () => {
+        it('should answer 502 with a Sentry warning when the upstream drops the connection mid-body', async () => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
             dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
-            const failure = new Error('terminated');
             const body = new ReadableStream({
                 start(controller) {
-                    controller.error(failure);
+                    controller.error(new Error('terminated'));
                 },
             });
             fetchMock.mockResolvedValueOnce(new Response(body, { headers: { 'Content-Type': 'application/json' } }));
 
             const response = await GET(new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`));
 
-            expect(response.status).toBe(500);
-            const context = { error: failure, uri: 'http://external.resource/file.json' };
-            expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Resource fetch threw', {
-                ...context,
-                sentry: true,
-                sentryExtras: context,
-            });
+            expect(response.status).toBe(502);
+            expect(Logger.warn).toHaveBeenCalledWith(
+                '[api:metadata-proxy] Fetch failed',
+                expect.objectContaining({ sentry: true, url: 'http://external.resource/file.json' }),
+            );
             expect(Logger.error).not.toHaveBeenCalled();
+        });
+
+        it('should answer 500 and report a Sentry exception when the route itself throws', async () => {
+            const failure = new Error('route fault');
+            vi.mocked(Logger.info).mockImplementationOnce(() => {
+                throw failure;
+            });
+
+            const { response } = await setup('http://external.resource/file.json', {
+                upstream: { data: { name: 'NFT' }, headers: { 'Content-Type': 'application/json' } },
+            });
+
+            expect(response.status).toBe(500);
+            expect(Logger.error).toHaveBeenCalledWith(failure, {
+                sentry: true,
+                sentryExtras: { uri: 'http://external.resource/file.json' },
+            });
         });
     });
 

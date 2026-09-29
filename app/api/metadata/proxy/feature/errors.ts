@@ -6,6 +6,7 @@ export type ProxyErrorCode =
     | 'non-http-protocol'
     | 'oversize-declared'
     | 'oversize-streamed'
+    | 'redirect-invalid-location'
     | 'redirect-loop'
     | 'redirect-missing-location'
     | 'ssrf-blocked'

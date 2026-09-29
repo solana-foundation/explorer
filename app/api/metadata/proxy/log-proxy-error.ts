@@ -18,6 +18,7 @@ const LOG_POLICY: Record<ProxyErrorCode, LogPolicy> = {
     'non-http-protocol': { level: 'warn', message: 'Non-HTTP protocol blocked' },
     'oversize-declared': { level: 'warn', message: 'Resource exceeds max size (Content-Length)', sentry: true },
     'oversize-streamed': { level: 'warn', message: 'Resource exceeds max size (streamed)', sentry: true },
+    'redirect-invalid-location': { level: 'warn', message: 'Redirect with invalid Location header' },
     'redirect-loop': { level: 'warn', message: 'Redirect loop detected' },
     'redirect-missing-location': { level: 'warn', message: 'Redirect without Location header' },
     'ssrf-blocked': { level: 'warn', message: 'Hostname resolution blocked (SSRF protection)' },

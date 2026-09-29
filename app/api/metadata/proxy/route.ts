@@ -51,9 +51,8 @@ export async function GET(request: Request) {
         logResourceFetched(resource, MAX_SIZE);
         return buildResponse(resource.data, resource.headers);
     } catch (e) {
-        // Mostly an upstream body-read failure, which the spec reports as a warning; a bug lands here too.
-        const context = { error: e, uri: parsedUri.href };
-        Logger.warn('[api:metadata-proxy] Resource fetch threw', { ...context, sentry: true, sentryExtras: context });
+        // fetchResource returns every upstream failure, so a throw here is an internal fault.
+        Logger.error(e, { sentry: true, sentryExtras: { uri: parsedUri.href } });
         return respondWithError(500);
     }
 }
