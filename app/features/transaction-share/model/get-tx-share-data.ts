@@ -5,9 +5,7 @@ import {
     type InstructionSummary,
     type TransactionWithMeta,
 } from '@entities/transaction-data';
-import { getSignatureStatus } from '@entities/transaction-data/server';
 import { isTimeoutError } from '@shared/lib/http-utils';
-import { unwrap } from '@shared/lib/result';
 import { type ServerCluster } from '@utils/cluster';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { lamportsToSolString } from '@utils/index';
@@ -53,10 +51,6 @@ const RPC_BUDGET_MS = 1_200;
 export async function getTxShareData(signature: string, cluster: ServerCluster): Promise<TxShareResult> {
     try {
         const abortSignal = AbortSignal.timeout(RPC_BUDGET_MS);
-
-        // getSignatureStatus is a faster check for tx existence than getTransaction.
-        const isSignatureOnCluster = unwrap(await getSignatureStatus(cluster, signature, abortSignal));
-        if (!isSignatureOnCluster) return { kind: 'not-found' };
 
         const tx = await getTx({ abortSignal, cluster, signature });
         if (!tx) return { kind: 'not-found' };
