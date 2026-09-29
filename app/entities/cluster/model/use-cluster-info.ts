@@ -21,7 +21,7 @@ type Options = { enabled?: boolean };
 
 /**
  * Returns `undefined` for "not connected", "in flight" and "failed". Use `useEpochScheduleResult` where
- * a consumer must report a fetch error.
+ * a consumer must show a fetch error.
  */
 export function useEpochSchedule(options: Options = {}): ClusterInfo['epochSchedule'] | undefined {
     return useEpochScheduleResult(options).data;
@@ -66,8 +66,7 @@ function useClusterQuery<T>(
     const { data, error, isLoading } = useSWRImmutable(
         shouldFetch ? [name, url] : undefined,
         () => fetcher(url),
-        // Capped so `error` settles. Each retry yields a fresh Error identity, which re-fires consumers
-        // keyed on it — unbounded, that is one report per attempt for as long as the page stays open.
+        // SWR retries a failed fetch without limit by default. The cap limits the requests to an unreachable RPC.
         { errorRetryCount: 3 },
     );
 

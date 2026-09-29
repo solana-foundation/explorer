@@ -8,9 +8,8 @@ import type { Cluster } from '@utils/cluster';
 import { getEpochForSlot } from '@utils/epoch-schedule';
 import type { SignatureProps } from '@utils/index';
 import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
-import { Logger } from '@/app/shared/lib/logger';
 import { baseCardVariants, CardBody } from '@/app/shared/ui/Card';
 
 // FIXME: missing Storybook story — needs useTransactionDetails provider + TransactionWithMeta fixture.
@@ -51,17 +50,6 @@ export function CUProfilingSection({ signature }: SignatureProps) {
 
         return formatInstructionLogs({ cluster, epoch, instructionLogs, instructions });
     }, [instructions, instructionLogs, cluster, slot, epochSchedule]);
-
-    // Keyed on the error, so this reports the fetch actually failing rather than the ordinary first
-    // render, where the schedule has simply not arrived yet. An effect, not the render body: the render
-    // body repeats the report on every render and doubles it under StrictMode.
-    useEffect(() => {
-        if (!epochScheduleError) return;
-        Logger.warn('[cu-profiling] epoch schedule unavailable; CU profiling cannot render', {
-            reason: String(epochScheduleError),
-            signature,
-        });
-    }, [epochScheduleError, signature]);
 
     if (!logMessages || logMessages.length === 0) return undefined;
 

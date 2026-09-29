@@ -11,18 +11,16 @@ import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Chart.js needs a canvas that jsdom does not have; the legend is plain DOM, which is where names show.
-const { Bar, useTransactionDetails, useProgramIdlNames, useEpochScheduleResult, warn } = vi.hoisted(() => ({
+const { Bar, useTransactionDetails, useProgramIdlNames, useEpochScheduleResult } = vi.hoisted(() => ({
     Bar: vi.fn(() => null),
     useEpochScheduleResult: vi.fn(),
     useProgramIdlNames: vi.fn(),
     useTransactionDetails: vi.fn(),
-    warn: vi.fn(),
 }));
 vi.mock('react-chartjs-2', () => ({ Bar }));
 vi.mock('@providers/transactions', () => ({ useTransactionDetails }));
 // The `@x` path: `useResolvedInstructionNames` reaches the fetch through the cross-entity API.
 vi.mock('@entities/idl/@x/transaction-data', () => ({ useProgramIdlNames }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn } }));
 vi.mock('@providers/cluster', () => ({
     useCluster: () => ({ cluster: Cluster.MainnetBeta, url: MAINNET_URL }),
     useEpochScheduleResult,
@@ -173,18 +171,6 @@ describe('CUProfilingSection', () => {
             expect(screen.queryByText('Unavailable: the epoch schedule could not be loaded.')).not.toBeInTheDocument();
         });
 
-        it('should log the failure with its reason and not send it to Sentry', () => {
-            mockTransaction([transferChecked()], [invocation(TOKEN_PROGRAM, 105)]);
-
-            renderSection();
-
-            expect(warn).toHaveBeenCalledWith(
-                expect.stringContaining('epoch schedule unavailable'),
-                expect.objectContaining({ reason: expect.stringContaining('rpc unavailable') }),
-            );
-            expect(warn.mock.calls[0][1]).not.toHaveProperty('sentry');
-        });
-
         // Still nothing to show when the transaction logged nothing: the section is not this user's
         // concern at all, so the degraded card would be noise.
         it('should still render nothing when the transaction has no logs', () => {
@@ -196,15 +182,13 @@ describe('CUProfilingSection', () => {
         });
     });
 
-    // The ordinary first render, before the schedule arrives. No card and no report — nothing has failed.
-    it('should render nothing and report nothing while the schedule is still loading', () => {
+    it('should render nothing while the schedule is still loading', () => {
         useEpochScheduleResult.mockReturnValue({ data: undefined, error: undefined, isLoading: true });
         mockTransaction([transferChecked()], [invocation(TOKEN_PROGRAM, 105)]);
 
         const { container } = renderSection();
 
         expect(container).toBeEmptyDOMElement();
-        expect(warn).not.toHaveBeenCalled();
     });
 });
 
