@@ -24,7 +24,7 @@ Alternatives considered:
 ## What Changes
 
 - `isPrivateIP` returns `false` only for an address that `ipaddr.js` classifies as `unicast`; an IPv4-mapped IPv6 address is judged as its IPv4 address.
-- Three registry blocks that `ipaddr.js` 2.2.0 does not classify are refused explicitly: `64:ff9b:1::/48` (RFC 8215), `3fff::/20` (RFC 9637), and `5f00::/16` (RFC 9602).
+- Four registry blocks missing from the `ipaddr.js` range table are refused explicitly: `64:ff9b:1::/48` (RFC 8215), `100:0:0:1::/64` (RFC 9780), `3fff::/20` (RFC 9637), and `5f00::/16` (RFC 9602).
 - The two hand-written CIDR lists are removed.
 
 ## Impact

@@ -1,41 +1,25 @@
 import _dns, { type LookupAddress } from 'dns';
-import Address, { parse } from 'ipaddr.js';
+import Address from 'ipaddr.js';
 import { type LookupFunction } from 'net';
 
 import { SAFE_EXTERNAL_PROTOCOLS } from '@/app/shared/lib/url';
 
 const dns = _dns.promises;
 
-// List of private IP ranges (CIDR notation)
-const privateIPv4CIDRs = [
-    '10.0.0.0/8',
-    '172.16.0.0/12',
-    '192.168.0.0/16',
-    '127.0.0.0/8',
-    '169.254.0.0/16',
-    '100.64.0.0/10',
-    '0.0.0.0/8',
+// IANA special-purpose IPv6 blocks missing from the ipaddr.js range table, which would otherwise pass as `unicast`.
+const UNCLASSIFIED_SPECIAL_PURPOSE_IPV6 = [
+    Address.IPv6.parseCIDR('64:ff9b:1::/48'), // RFC 8215, local-use IPv4/IPv6 translation
+    Address.IPv6.parseCIDR('100:0:0:1::/64'), // RFC 9780, dummy IPv6 prefix
+    Address.IPv6.parseCIDR('3fff::/20'), // RFC 9637, documentation
+    Address.IPv6.parseCIDR('5f00::/16'), // RFC 9602, SRv6 SIDs
 ];
 
-const privateIPv6CIDRs = ['::1/128', 'fc00::/7', 'fe80::/10', '::ffff:0:0/96'];
-
-function ipInRange(ip: Address.IPv4 | Address.IPv6, cidr: string) {
-    const [network, prefix] = cidr.split('/');
-    const range = parse(network);
-    return ip.match(range, parseInt(prefix, 10));
-}
-
+// Only globally reachable unicast is public: every IANA special-purpose block (RFC 6890) and multicast is refused.
 export function isPrivateIP(ip: string) {
-    const isIPv4 = Address.IPv4.isIPv4(ip);
-    const normalizedIP = parse(ip);
-
-    let isMatchedRanges: boolean;
-    if (isIPv4) {
-        isMatchedRanges = privateIPv4CIDRs.some(cidr => ipInRange(normalizedIP, cidr));
-    } else {
-        isMatchedRanges = privateIPv6CIDRs.some(cidr => ipInRange(normalizedIP, cidr));
-    }
-    return isMatchedRanges;
+    // `process` turns an IPv4-mapped IPv6 address into its IPv4 address, so it is judged as IPv4.
+    const address = Address.process(ip);
+    if (address.range() !== 'unicast') return true;
+    return address instanceof Address.IPv6 && UNCLASSIFIED_SPECIAL_PURPOSE_IPV6.some(range => address.match(range));
 }
 
 export function isHTTPProtocol(url: URL) {
