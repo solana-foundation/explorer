@@ -64,7 +64,6 @@ const HOOKS_PENDING_CLIENT_ONLY = [
     'app/entities/idl/model/use-format-codama-idl.ts',
     'app/entities/idl/model/use-program-idl-names.ts',
     'app/entities/idl/model/use-program-idls.ts',
-    'app/entities/nft/model/use-token-metadata.ts',
     'app/entities/program-metadata/model/use-program-metadata-idl.tsx',
     'app/entities/slot-time/model/use-slot-time.ts',
     'app/entities/token-info/model/use-token-info.ts',
@@ -353,7 +352,6 @@ export default tseslint.config(
         files: [
             // app/components (pre-FSD legacy)
             'app/components/account/token-extensions/ScaledUiAmountMultiplierTooltip.tsx',
-            'app/components/instruction/AnchorDetailsCard.tsx',
 
             // app/providers (pre-FSD legacy)
             'app/providers/accounts/flagged-accounts.tsx',
@@ -787,11 +785,7 @@ export default tseslint.config(
             'app/components/inspector/AddressTableLookupsCard.tsx',
             'app/components/inspector/AddressWithContext.tsx',
             'app/components/inspector/InstructionsSection.tsx',
-            'app/components/instruction/AnchorDetailsCard.tsx',
             'app/components/instruction/ProgramEventsCard.tsx',
-            'app/components/instruction/codama/CodamaInstructionDetailsCard.tsx',
-            'app/components/instruction/codama/codamaUtils.tsx',
-            'app/components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
             'app/components/shared/StatusBadge.tsx',
             'app/components/shared/account/ProgramHeader.tsx',
@@ -953,11 +947,8 @@ export default tseslint.config(
             'app/components/common/BaseInstructionCard.tsx',
             'app/components/common/InspectorInstructionCard.tsx',
             'app/components/inspector/InstructionsSection.tsx',
-            'app/components/instruction/AnchorDetailsCard.tsx',
             'app/components/instruction/ProgramEventsCard.tsx',
             'app/components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard.tsx',
-            'app/components/instruction/codama/codamaUtils.tsx',
-            'app/components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
 
             // app/providers (pre-FSD legacy)

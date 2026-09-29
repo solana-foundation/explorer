@@ -29,6 +29,8 @@ type InstructionProps = {
     raw?: TransactionInstruction;
     // will be triggered on requesting raw data for instruction, if present
     onRequestRaw?: () => void;
+    /** For a body that has no Program row of its own. */
+    alwaysShowProgramRow?: boolean;
 };
 
 export function InspectorInstructionCard({
@@ -42,6 +44,7 @@ export function InspectorInstructionCard({
     childIndex,
     raw,
     onRequestRaw,
+    alwaysShowProgramRow = false,
 }: InstructionProps) {
     const [resultClass] = ixResult(result, index);
     const [showRaw, setShowRaw] = React.useState(defaultRaw || false);
@@ -85,7 +88,9 @@ export function InspectorInstructionCard({
         >
             <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
                 <BaseTable.Body>
-                    <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
+                    {(showRaw || alwaysShowProgramRow) && (
+                        <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
+                    )}
                     {showRaw ? (
                         'parsed' in ix ? (
                             <BaseRawParsedDetails ix={ix}>
@@ -99,9 +104,9 @@ export function InspectorInstructionCard({
                     )}
                     {innerCards && innerCards.length > 0 && (
                         <>
-                            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                            <BaseTable.SectionRow>
                                 <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
-                            </BaseTable.Row>
+                            </BaseTable.SectionRow>
                             <BaseTable.Row>
                                 <BaseTable.Cell colSpan={3}>
                                     <div className="m-6">{innerCards}</div>

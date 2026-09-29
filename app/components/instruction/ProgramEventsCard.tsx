@@ -122,11 +122,11 @@ function EventCard({
                         event &&
                         fields.length > 0 && (
                             <>
-                                <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                                <BaseTable.SectionRow>
                                     <BaseTable.Cell>Field Name</BaseTable.Cell>
                                     <BaseTable.Cell>Type</BaseTable.Cell>
                                     <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
-                                </BaseTable.Row>
+                                </BaseTable.SectionRow>
                                 {mapIxArgsToRows(event.data, { ...eventDef, args: fields } as any, program.idl)}
                             </>
                         )

@@ -1,9 +1,4 @@
-import {
-    type InstructionNode,
-    type InstructionSurface,
-    InstructionSurfaceProvider,
-    TxInstructionSurface,
-} from '@entities/instruction-card';
+import { type InstructionNode, TxInstructionSurface } from '@entities/instruction-card';
 import { PriceType, PYTH_INSTRUCTIONS, PYTH_ORACLE_PROGRAM_IDS, TradingStatus } from '@explorer/decoder-pyth';
 import { address } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
@@ -278,25 +273,7 @@ describe('instruction-program-pyth cards', () => {
             expect(readRows()[0]).toEqual(['Program', A.funding]);
         });
     });
-
-    it('should draw every address with the surface address renderer', () => {
-        render(
-            <InstructionSurfaceProvider surface={STUB_SURFACE}>
-                <UpdatePriceDetailsCard node={node} info={PRICE_UPDATE_INFO} />
-            </InstructionSurfaceProvider>,
-        );
-
-        expect(screen.getAllByTestId('surface-address').map(el => el.textContent)).toEqual([A.publisher, A.price]);
-    });
 });
-
-/** A surface that renders nothing of its own, so only what a card asks of it shows up. */
-const STUB_SURFACE: InstructionSurface = {
-    Address: ({ pubkey }) => <span data-testid="surface-address">{pubkey.toBase58()}</span>,
-    Shell: ({ children }) => <table>{children}</table>,
-    result: { err: null },
-    showProgramField: false,
-};
 
 function renderCard(card: React.ReactElement) {
     return render(

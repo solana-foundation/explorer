@@ -5,6 +5,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -26,7 +27,7 @@ const fallbackParsedIx = { path: [{ kind: 'unknownNode' }] } as any;
 
 const meta: Meta<typeof CodamaInstructionCard> = {
     component: CodamaInstructionCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
@@ -38,5 +39,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const UnknownFallback: Story = {
-    args: { index: 0, ix: sampleIx, parsedIx: fallbackParsedIx, result: { err: null } },
+    args: { index: 0, ix: sampleIx, parsedIx: fallbackParsedIx },
 };

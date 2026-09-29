@@ -1,6 +1,7 @@
-import { address, custom, defineInstructionCard, useInstructionSurface } from '@entities/instruction-card';
+import { address, custom, defineInstructionCard, InstructionAddress } from '@entities/instruction-card';
 import type { PublicKey } from '@solana/web3.js';
 
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { ExtendLookupTableInfo } from './types';
@@ -14,14 +15,7 @@ export const ExtendLookupTableDetailsCard = defineInstructionCard<ExtendLookupTa
     title: 'Address Lookup Table: Extend Lookup Table',
 });
 
-/**
- * A whole table in one cell, which no field kind describes — so it takes the
- * `custom` door and reads the address renderer off the surface itself, the way
- * `InstructionFields` would.
- */
 function NewAddresses({ addresses }: { addresses: PublicKey[] }) {
-    const { Address } = useInstructionSurface();
-
     return (
         // The card table's edge padding reaches these nested cells and insets every
         // entry from the rows above; only `tbody tr td` outweighs that selector.
@@ -32,7 +26,7 @@ function NewAddresses({ addresses }: { addresses: PublicKey[] }) {
                     <BaseTable.Row key={index}>
                         <BaseTable.Cell className="w-px font-mono">{index}</BaseTable.Cell>
                         <BaseTable.Cell className="text-right">
-                            <Address pubkey={pubkey} />
+                            <InstructionAddress address={toKitAddress(pubkey)} />
                         </BaseTable.Cell>
                     </BaseTable.Row>
                 ))}

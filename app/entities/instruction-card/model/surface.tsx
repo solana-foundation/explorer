@@ -1,6 +1,6 @@
 'use client';
 
-import type { ParsedInstruction, PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import type { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React, { createContext, useContext } from 'react';
 
 /** The subset of shell props every instruction shell accepts. */
@@ -23,26 +23,9 @@ export type InstructionShellProps = {
     eventCards?: React.ReactNode[];
 };
 
-export type InstructionAddressProps = { pubkey: PublicKey };
-
-/**
- * Where the cards are being rendered. There are two surfaces — the transaction
- * page and the inspector — and they differ only in chrome, not in meaning.
- *
- * This replaces the per-card injection props (`InstructionCardComponent`,
- * `AddressComponent`, `showProgramField`) and the `INSPECTOR_RESULT` placeholder
- * the inspector passed to satisfy card signatures.
- */
 export type InstructionSurface = {
     /** Card frame: index badge, Raw toggle, scroll anchor, nesting slot. */
     Shell: React.ComponentType<InstructionShellProps>;
-    /** How an account address renders on this surface. */
-    Address: React.ComponentType<InstructionAddressProps>;
-    /**
-     * Whether the field renderer emits the leading `Program` row.
-     * False in the inspector, whose shell already renders one itself.
-     */
-    showProgramField: boolean;
     /** Per-transaction, so it belongs here rather than on every card. */
     result: SignatureResult;
 };

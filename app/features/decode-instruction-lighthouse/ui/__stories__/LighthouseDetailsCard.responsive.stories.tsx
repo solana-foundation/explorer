@@ -6,6 +6,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -37,12 +38,18 @@ const args = {
     innerCards: undefined,
     ix: toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId),
     raw,
-    result: { err: null },
 };
 
 const meta: Meta<typeof LighthouseDetailsCard> = {
     component: LighthouseDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withViewportFromGlobal],
+    decorators: [
+        withCluster,
+        withScrollAnchor,
+        withTokenInfoBatch,
+        withMockTransactions,
+        withTxInstructionSurface,
+        withViewportFromGlobal,
+    ],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
