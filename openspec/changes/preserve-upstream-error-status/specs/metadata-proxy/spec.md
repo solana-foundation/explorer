@@ -27,3 +27,29 @@ This requirement intentionally replaces the `add-metadata-proxy` rule that every
 - **WHEN** the upstream responds with a status outside the list (e.g. `401`, `304`, `502`)
 - **THEN** the proxy SHALL respond `502`
 - **AND** it SHALL emit a `warning`-level log with the raw upstream status and `host`
+
+### Requirement: The proxy SHALL answer an upstream failure after the headers with an upstream status
+
+An upstream failure that happens after the response headers arrive SHALL produce the same status as the equivalent failure of the request itself: `504` when the body stalls past the timeout, `502` when the connection drops while the body streams, and `502` when a redirect `Location` is not a valid URL. The proxy SHALL answer `500` only for its own faults, and SHALL report those to Sentry as exceptions.
+
+#### Scenario: Body stalls past the timeout
+
+- **WHEN** the upstream sends headers and then sends the body slower than the timeout allows
+- **THEN** the proxy SHALL respond `504`
+
+#### Scenario: Connection dropped mid-body
+
+- **WHEN** the upstream closes the connection while the body streams
+- **THEN** the proxy SHALL respond `502`
+- **AND** it SHALL emit the `warning`-level network-failure event to Sentry, not an exception
+
+#### Scenario: Invalid redirect Location
+
+- **WHEN** the upstream redirects with a `Location` that is not a valid URL
+- **THEN** the proxy SHALL respond `502` without following it
+
+#### Scenario: Internal fault
+
+- **WHEN** the proxy's own code throws while handling a request
+- **THEN** the proxy SHALL respond `500`
+- **AND** it SHALL report the error to Sentry as an exception
