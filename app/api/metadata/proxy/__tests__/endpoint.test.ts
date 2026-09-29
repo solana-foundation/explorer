@@ -175,7 +175,7 @@ describe('Metadata Proxy Route', () => {
             });
         });
 
-        it('should answer 500 and report to Sentry when fetchResource throws', async () => {
+        it('should answer 500 and report a Sentry warning when fetchResource throws', async () => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
             dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
             const failure = new Error('terminated');
@@ -189,10 +189,13 @@ describe('Metadata Proxy Route', () => {
             const response = await GET(new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`));
 
             expect(response.status).toBe(500);
-            expect(Logger.error).toHaveBeenCalledWith(failure, {
+            const context = { error: failure, uri: 'http://external.resource/file.json' };
+            expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Resource fetch threw', {
+                ...context,
                 sentry: true,
-                sentryExtras: { uri: 'http://external.resource/file.json' },
+                sentryExtras: context,
             });
+            expect(Logger.error).not.toHaveBeenCalled();
         });
     });
 

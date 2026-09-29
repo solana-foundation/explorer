@@ -51,8 +51,9 @@ export async function GET(request: Request) {
         logResourceFetched(resource, MAX_SIZE);
         return buildResponse(resource.data, resource.headers);
     } catch (e) {
-        // A bug, or a body-read failure other than the size cap, which fetchResource still throws.
-        Logger.error(e, { sentry: true, sentryExtras: { uri: parsedUri.href } });
+        // Mostly an upstream body-read failure, which the spec reports as a warning; a bug lands here too.
+        const context = { error: e, uri: parsedUri.href };
+        Logger.warn('[api:metadata-proxy] Resource fetch threw', { ...context, sentry: true, sentryExtras: context });
         return respondWithError(500);
     }
 }
