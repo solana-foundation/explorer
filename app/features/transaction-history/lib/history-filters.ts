@@ -5,8 +5,19 @@ export type RangeFilter = { gte?: number; lte?: number };
 export type HistoryFilters = {
     slot?: RangeFilter; // filters.slot
     blockTime?: RangeFilter; // filters.blockTime (unix seconds)
-    status?: 'succeeded' | 'failed'; // filters.status (omit for "any")
+    status?: HistoryStatus; // filters.status (omit for "any")
 };
+
+// The status filter is shared with the block transactions list (which filters client-side), so both
+// pages read and write the same URL param and values.
+export const STATUS_PARAM = 'status';
+export const STATUS_VALUES = ['succeeded', 'failed'] as const;
+export type HistoryStatus = (typeof STATUS_VALUES)[number];
+export const STATUS_LABELS: Record<HistoryStatus, string> = { failed: 'Failed', succeeded: 'Succeeded' };
+
+export function isHistoryStatus(value: string): value is HistoryStatus {
+    return (STATUS_VALUES as readonly string[]).includes(value);
+}
 
 // `HistoryFilters` already mirrors the RPC `filters` shape, so this just drops empty
 // entries. Returns undefined when no filter is active so the key is omitted entirely.
