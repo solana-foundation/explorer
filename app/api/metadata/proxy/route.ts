@@ -51,8 +51,8 @@ export async function GET(request: Request) {
         logResourceFetched(resource, MAX_SIZE);
         return buildResponse(resource.data, resource.headers);
     } catch (e) {
-        // fetchResource returns expected failures; a throw here is a bug.
-        Logger.error(e);
+        // A bug, or a body-read failure other than the size cap, which fetchResource still throws.
+        Logger.error(e, { sentry: true, sentryExtras: { uri: parsedUri.href } });
         return respondWithError(500);
     }
 }

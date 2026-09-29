@@ -16,19 +16,18 @@ export type ProxyErrorCode =
     | 'unsupported-content-type'
     | 'upstream-status';
 
-// `status` is a separate field (not `cause`) so that `cause` retains its
-// standard Error-chaining semantics and error reporters can walk the chain.
-// `retryAfter` is the upstream `Retry-After` value, forwarded verbatim; the proxy never retries itself.
 type StatusErrorOptions = ErrorOptions & {
     code: ProxyErrorCode;
     context?: Record<string, unknown>;
     retryAfter?: string;
 };
 
+// `status` is its own field so `cause` keeps its Error-chaining meaning for error reporters.
 export class StatusError extends Error {
     status: StatusCode;
     code: ProxyErrorCode;
     context: Record<string, unknown>;
+    // Upstream `Retry-After`, for the caller's retry policy; the proxy never retries.
     retryAfter?: string;
     constructor(message: string, options: StatusErrorOptions & { status: StatusCode }) {
         super(message, options);
@@ -61,9 +60,7 @@ export const STATUS_MESSAGES = {
 
 export type StatusCode = keyof typeof STATUS_MESSAGES;
 
-// Factory — fresh stack trace per call, optional `cause` for chaining.
-// Use `message` to describe what went wrong at this site (preserved in the
-// Error chain); the response body comes from STATUS_MESSAGES.
+// `message` names the failing site; `logProxyError` logs it when `LOG_POLICY` has no message for the code.
 export function statusError(status: StatusCode, message: string, options: StatusErrorOptions): StatusError {
     return new StatusError(message, { ...options, status });
 }

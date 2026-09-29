@@ -109,10 +109,8 @@ describe('Metadata Proxy Route', () => {
         );
     });
 
-    // Locks in the original passthrough contract: when fetchResource throws a
-    // StatusError with one of these statuses, the route must surface it as-is
-    // rather than collapsing to 500.
-    describe('upstream status passthrough', () => {
+    // The route answers with the status of the StatusError that fetchResource returns, not 500.
+    describe('proxy error statuses', () => {
         const TEN_MB = 10 * 1024 * 1024;
 
         it.each([
@@ -176,6 +174,26 @@ describe('Metadata Proxy Route', () => {
                 url: 'http://external.resource/file.json',
             });
         });
+
+        it('should answer 500 and report to Sentry when fetchResource throws', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+            const failure = new Error('terminated');
+            const body = new ReadableStream({
+                start(controller) {
+                    controller.error(failure);
+                },
+            });
+            fetchMock.mockResolvedValueOnce(new Response(body, { headers: { 'Content-Type': 'application/json' } }));
+
+            const response = await GET(new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`));
+
+            expect(response.status).toBe(500);
+            expect(Logger.error).toHaveBeenCalledWith(failure, {
+                sentry: true,
+                sentryExtras: { uri: 'http://external.resource/file.json' },
+            });
+        });
     });
 
     describe('upstream Retry-After', () => {
@@ -225,6 +243,17 @@ describe('Metadata Proxy Route', () => {
             // and the upstream's own value is not forwarded.
             expect(response.headers.get('cache-control')).toBe('public, max-age=86400');
             expect(response.headers.get('vercel-cdn-cache-control')).toBeNull();
+        });
+
+        it('should log the fetched size of a successful response', async () => {
+            await setup('http://external.resource/file.json', {
+                upstream: { data: { name: 'NFT' }, headers: { 'Content-Type': 'application/json' } },
+            });
+
+            expect(Logger.info).toHaveBeenCalledWith(
+                '[api:metadata-proxy] Resource fetched',
+                expect.objectContaining({ contentType: 'application/json', host: 'external.resource' }),
+            );
         });
 
         it('should omit Content-Length to avoid browser CORS issues', async () => {

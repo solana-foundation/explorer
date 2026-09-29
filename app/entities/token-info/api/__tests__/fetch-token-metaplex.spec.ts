@@ -3,7 +3,7 @@ import { none, some } from '@metaplex-foundation/umi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
-import { statusError } from '@/app/api/metadata/proxy';
+import { MAX_SIZE, statusError } from '@/app/api/metadata/proxy';
 import { Logger } from '@/app/shared/lib/logger';
 import { err, ok } from '@/app/shared/lib/result';
 
@@ -153,6 +153,12 @@ describe('getTokenInfosFromMetaplex', () => {
                 verified: false,
             },
         ]);
+        expect(Logger.info).toHaveBeenCalledWith('[api:metadata-proxy] Resource fetched', {
+            byteLength: 0,
+            contentType: 'application/json',
+            host: 'example.com',
+            maxSize: MAX_SIZE,
+        });
     });
 
     it('should keep only mints whose token standard is Fungible', async () => {
@@ -303,7 +309,21 @@ describe('getTokenInfosFromMetaplex', () => {
         }
     });
 
-    it('should report a null logo when the proxy fetcher rejects the address', async () => {
+    it('should report a null logo when the proxy fetcher throws', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
+        mocks.getMultipleAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+        const failure = new Error('terminated');
+        mocks.fetchResource.mockRejectedValueOnce(failure);
+        const onError = vi.fn();
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC, { onError });
+
+        expect(result).toMatchObject({ address: MINT_A, logoURI: null });
+        expect(onError).toHaveBeenCalledWith(failure);
+    });
+
+    it('should report a null logo when the proxy fetcher blocks the address', async () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
         // What `fetchResource` returns for a private host.

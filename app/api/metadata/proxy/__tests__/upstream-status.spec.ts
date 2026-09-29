@@ -7,7 +7,8 @@ describe('toProxyStatus', () => {
         expect(toProxyStatus(status)).toBe(status);
     });
 
-    it.each([401, 304, 502])('should map unlisted upstream %i to 502', status => {
+    // 413 has a `STATUS_MESSAGES` entry but is not passed through, which a "known status" check would miss.
+    it.each([401, 413])('should map unlisted upstream %i to 502', status => {
         expect(toProxyStatus(status)).toBe(502);
     });
 });
