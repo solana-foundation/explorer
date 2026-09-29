@@ -72,8 +72,7 @@ import {
 import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { type NavigationTab, NavigationTabLink, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
-import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
-import { StickyHeader } from '@/app/shared/ui/sticky-header/StickyHeader';
+import { PageLayout, PageSections } from '@/app/shared/ui/page-layout';
 import { isAttestationAccount } from '@/app/utils/attestation-service';
 import {
     fetchFullTokenInfo,
@@ -156,14 +155,6 @@ type AddressParams = { address: string };
 type Props = PropsWithChildren<{ params: Promise<AddressParams> }>;
 type InnerProps = PropsWithChildren<{ params: AddressParams }>;
 
-// Single source of truth for the page's centered content-column width — every section on the address
-// page aligns to this, so the max-width lives in one place rather than being copy-pasted per section.
-const CONTENT_WIDTH = 'mx-auto w-full max-w-5xl';
-
-function ContentWidth({ children }: { children: React.ReactNode }) {
-    return <div className={CONTENT_WIDTH}>{children}</div>;
-}
-
 function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     const fetchAccount = useFetchAccountInfo();
     const { status, cluster, url, genesisHash } = useCluster();
@@ -199,19 +190,15 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     }, [address, status, info]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <PageContainer variant="pulled-up" className="pt-3 lg:pt-5">
-            <ContentWidth>
-                <Header
-                    address={address}
-                    account={info?.data}
-                    tokenInfo={fullTokenInfo}
-                    isTokenInfoLoading={isTokenInfoLoading}
-                />
-            </ContentWidth>
+        <PageLayout>
+            <Header
+                address={address}
+                account={info?.data}
+                tokenInfo={fullTokenInfo}
+                isTokenInfoLoading={isTokenInfoLoading}
+            />
             {!pubkey ? (
-                <ContentWidth>
-                    <ErrorCard text={`Address "${address}" is not valid`} />
-                </ContentWidth>
+                <ErrorCard text={`Address "${address}" is not valid`} />
             ) : (
                 <DetailsSections
                     info={info}
@@ -223,7 +210,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
                     {children}
                 </DetailsSections>
             )}
-        </PageContainer>
+        </PageLayout>
     );
 }
 
@@ -289,16 +276,14 @@ function DetailsSections({
     );
 
     return (
-        <>
+        <PageSections>
             {FLAGGED_ACCOUNTS_WARNING[address] ?? null}
-            <ContentWidth>
-                <InfoSection account={account} tokenInfo={tokenInfo} />
-            </ContentWidth>
-            <ContentWidth>{notification}</ContentWidth>
+            <InfoSection account={account} tokenInfo={tokenInfo} />
+            {notification}
             <MoreSection baseUrl={`/address/${address}`} tabs={navigationTabs} asyncChildren={asyncTabChildren}>
                 {children}
             </MoreSection>
-        </>
+        </PageSections>
     );
 }
 
@@ -401,16 +386,10 @@ function MoreSection({
 
     return (
         <>
-            <StickyHeader className={CONTENT_WIDTH}>
-                <PageContainer>
-                    <ContentWidth>
-                        <NavigationTabs buildHref={buildHref} tabs={tabs}>
-                            {asyncChildren}
-                        </NavigationTabs>
-                    </ContentWidth>
-                </PageContainer>
-            </StickyHeader>
-            <ContentWidth>{children}</ContentWidth>
+            <NavigationTabs buildHref={buildHref} sticky tabs={tabs}>
+                {asyncChildren}
+            </NavigationTabs>
+            {children}
         </>
     );
 }
