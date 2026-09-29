@@ -4,15 +4,6 @@ import { TokenVerificationResult } from '../../model/use-verification-sources';
 
 const MOCK_ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
-export const mockBlupryntSource = (overrides?: Partial<VerificationSource>): VerificationSource => ({
-    applyUrl: 'https://verified.bluprynt.com/assets/new',
-    isVerificationFound: true,
-    name: EVerificationSource.Bluprynt,
-    url: `https://verified.bluprynt.com/verified-assets/${MOCK_ADDRESS}/solana`,
-    verified: true,
-    ...overrides,
-});
-
 export const mockCoinGeckoSource = (overrides?: Partial<VerificationSource>): VerificationSource => ({
     applyUrl:
         'https://support.coingecko.com/hc/en-us/articles/23725417857817-Verification-Guide-for-Listing-Update-Requests-on-CoinGecko',
@@ -53,7 +44,6 @@ export const mockRugCheckSource = (overrides?: Partial<VerificationSource>): Ver
 });
 
 export const mockAllVerifiedSources = (): VerificationSource[] => [
-    mockBlupryntSource(),
     mockCoinGeckoSource(),
     mockJupiterSource(),
     mockSolflareSource(),
@@ -61,7 +51,6 @@ export const mockAllVerifiedSources = (): VerificationSource[] => [
 ];
 
 export const mockPartiallyVerifiedSources = (): VerificationSource[] => [
-    mockBlupryntSource({ isVerificationFound: false, verified: false }),
     mockCoinGeckoSource(),
     mockJupiterSource(),
     mockSolflareSource({ isVerificationFound: false, verified: false }),
@@ -69,7 +58,6 @@ export const mockPartiallyVerifiedSources = (): VerificationSource[] => [
 ];
 
 export const mockNotVerifiedSources = (): VerificationSource[] => [
-    mockBlupryntSource({ isVerificationFound: false, verified: false }),
     mockCoinGeckoSource({ isVerificationFound: false, verified: false }),
     mockJupiterSource({ isVerificationFound: false, verified: false }),
     mockSolflareSource({ isVerificationFound: false, verified: false }),
@@ -77,7 +65,6 @@ export const mockNotVerifiedSources = (): VerificationSource[] => [
 ];
 
 export const mockRateLimitedSources = (): VerificationSource[] => [
-    mockBlupryntSource(),
     mockCoinGeckoSource({ isRateLimited: true, isVerificationFound: false, verified: false }),
     mockJupiterSource({ isRateLimited: true, isVerificationFound: false, verified: false }),
     mockSolflareSource(),
@@ -91,7 +78,6 @@ export const mockRateLimitedSources = (): VerificationSource[] => [
 ];
 
 export const mockDangerousTokenSources = (): VerificationSource[] => [
-    mockBlupryntSource({ isVerificationFound: false, verified: false }),
     mockCoinGeckoSource({ isVerificationFound: false, verified: false }),
     mockJupiterSource({ isVerificationFound: false, verified: false }),
     mockSolflareSource({ isVerificationFound: false, verified: false }),

@@ -2,19 +2,10 @@ import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EVerificationSource, type VerificationTarget } from '../../lib/types';
-import { BlupryntStatus, useBlupryntVerification } from '../use-bluprynt';
 import { CoingeckoStatus, useCoinGeckoVerification } from '../use-coingecko';
 import { JupiterStatus, useJupiterVerification } from '../use-jupiter';
 import { ERiskLevel, RugCheckStatus, useRugCheckVerification } from '../use-rugcheck';
 import { useTokenVerification } from '../use-verification-sources';
-
-vi.mock('../use-bluprynt', async importOriginal => {
-    const original = await importOriginal<typeof import('../use-bluprynt')>();
-    return {
-        ...original,
-        useBlupryntVerification: vi.fn(),
-    };
-});
 
 vi.mock('../use-coingecko', async importOriginal => {
     const original = await importOriginal<typeof import('../use-coingecko')>();
@@ -52,51 +43,9 @@ const legacyTarget: VerificationTarget = {
 describe('useTokenVerification', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(useBlupryntVerification).mockReturnValue(undefined);
         vi.mocked(useCoinGeckoVerification).mockReturnValue(undefined);
         vi.mocked(useJupiterVerification).mockReturnValue(undefined);
         vi.mocked(useRugCheckVerification).mockReturnValue(undefined);
-    });
-
-    describe('Bluprynt verification', () => {
-        it('should mark as verified when status is Success and verified is true', () => {
-            vi.mocked(useBlupryntVerification).mockReturnValue({
-                status: BlupryntStatus.Success,
-                verified: true,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const bluprynt = result.current.sources.find(s => s.name === EVerificationSource.Bluprynt);
-
-            expect(bluprynt?.verified).toBe(true);
-            expect(bluprynt?.isVerificationFound).toBe(true);
-        });
-
-        it('should mark as not verified when status is Success but verified is false', () => {
-            vi.mocked(useBlupryntVerification).mockReturnValue({
-                status: BlupryntStatus.Success,
-                verified: false,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const bluprynt = result.current.sources.find(s => s.name === EVerificationSource.Bluprynt);
-
-            expect(bluprynt?.verified).toBe(false);
-            expect(bluprynt?.isVerificationFound).toBe(true);
-        });
-
-        it('should mark isVerificationFound as false when status is FetchFailed', () => {
-            vi.mocked(useBlupryntVerification).mockReturnValue({
-                status: BlupryntStatus.FetchFailed,
-                verified: false,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const bluprynt = result.current.sources.find(s => s.name === EVerificationSource.Bluprynt);
-
-            expect(bluprynt?.verified).toBe(false);
-            expect(bluprynt?.isVerificationFound).toBe(false);
-        });
     });
 
     describe('CoinGecko verification', () => {
@@ -330,10 +279,6 @@ describe('useTokenVerification', () => {
 
     describe('verificationFoundSources', () => {
         it('should include all sources with isVerificationFound true', () => {
-            vi.mocked(useBlupryntVerification).mockReturnValue({
-                status: BlupryntStatus.Success,
-                verified: true,
-            });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.Success,
                 verified: true,
@@ -350,9 +295,8 @@ describe('useTokenVerification', () => {
 
             const { result } = renderHook(() => useTokenVerification(baseTarget));
 
-            expect(result.current.verificationFoundSources).toHaveLength(5);
+            expect(result.current.verificationFoundSources).toHaveLength(4);
             expect(result.current.verificationFoundSources.map(s => s.name)).toEqual([
-                EVerificationSource.Bluprynt,
                 EVerificationSource.CoinGecko,
                 EVerificationSource.Jupiter,
                 EVerificationSource.Solflare,
@@ -361,10 +305,6 @@ describe('useTokenVerification', () => {
         });
 
         it('should exclude sources with isVerificationFound false', () => {
-            vi.mocked(useBlupryntVerification).mockReturnValue({
-                status: BlupryntStatus.FetchFailed,
-                verified: false,
-            });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.FetchFailed,
                 verified: false,
@@ -388,10 +328,6 @@ describe('useTokenVerification', () => {
 
     describe('sourcesToApply', () => {
         it('should include sources that are not verified, not found, and not rate limited', () => {
-            vi.mocked(useBlupryntVerification).mockReturnValue({
-                status: BlupryntStatus.FetchFailed,
-                verified: false,
-            });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.FetchFailed,
                 verified: false,
@@ -409,9 +345,8 @@ describe('useTokenVerification', () => {
             const unverifiedTarget: VerificationTarget = { ...baseTarget, solflareVerified: false };
             const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
 
-            expect(result.current.sourcesToApply).toHaveLength(4);
+            expect(result.current.sourcesToApply).toHaveLength(3);
             expect(result.current.sourcesToApply.map(s => s.name)).toEqual([
-                EVerificationSource.Bluprynt,
                 EVerificationSource.CoinGecko,
                 EVerificationSource.Jupiter,
                 EVerificationSource.RugCheck,
@@ -419,12 +354,8 @@ describe('useTokenVerification', () => {
         });
 
         it('should exclude rate limited sources from sourcesToApply', () => {
-            vi.mocked(useBlupryntVerification).mockReturnValue({
-                status: BlupryntStatus.FetchFailed,
-                verified: false,
-            });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
-                status: CoingeckoStatus.RateLimited,
+                status: CoingeckoStatus.FetchFailed,
                 verified: false,
             });
             vi.mocked(useJupiterVerification).mockReturnValue({
@@ -441,20 +372,16 @@ describe('useTokenVerification', () => {
             const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
 
             expect(result.current.sourcesToApply).toHaveLength(1);
-            expect(result.current.sourcesToApply[0].name).toBe(EVerificationSource.Bluprynt);
+            expect(result.current.sourcesToApply[0].name).toBe(EVerificationSource.CoinGecko);
         });
 
         it('should exclude sources with verification found from sourcesToApply', () => {
-            vi.mocked(useBlupryntVerification).mockReturnValue({
-                status: BlupryntStatus.Success,
-                verified: false,
-            });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.FetchFailed,
                 verified: false,
             });
             vi.mocked(useJupiterVerification).mockReturnValue({
-                status: JupiterStatus.FetchFailed,
+                status: JupiterStatus.Success,
                 verified: false,
             });
             vi.mocked(useRugCheckVerification).mockReturnValue({
@@ -466,14 +393,10 @@ describe('useTokenVerification', () => {
             const unverifiedTarget: VerificationTarget = { ...baseTarget, solflareVerified: false };
             const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
 
-            expect(result.current.sourcesToApply.map(s => s.name)).not.toContain(EVerificationSource.Bluprynt);
+            expect(result.current.sourcesToApply.map(s => s.name)).not.toContain(EVerificationSource.Jupiter);
         });
 
         it('should be empty when all sources are verified or found', () => {
-            vi.mocked(useBlupryntVerification).mockReturnValue({
-                status: BlupryntStatus.Success,
-                verified: true,
-            });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.Success,
                 verified: true,
@@ -498,15 +421,11 @@ describe('useTokenVerification', () => {
         it('should handle mint with only address', () => {
             const { result } = renderHook(() => useTokenVerification({ address: 'some-address' }));
 
-            expect(result.current.sources).toHaveLength(5);
+            expect(result.current.sources).toHaveLength(4);
             expect(result.current.verificationFoundSources).toHaveLength(0);
         });
 
         it('should handle mixed verification states', () => {
-            vi.mocked(useBlupryntVerification).mockReturnValue({
-                status: BlupryntStatus.Success,
-                verified: true,
-            });
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.RateLimited,
                 verified: false,
@@ -524,7 +443,6 @@ describe('useTokenVerification', () => {
             const { result } = renderHook(() => useTokenVerification(baseTarget));
 
             expect(result.current.verificationFoundSources.map(s => s.name)).toEqual([
-                EVerificationSource.Bluprynt,
                 EVerificationSource.Jupiter,
                 EVerificationSource.Solflare,
                 EVerificationSource.RugCheck,
