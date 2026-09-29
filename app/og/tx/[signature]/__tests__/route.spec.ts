@@ -68,7 +68,6 @@ describe('should handle GET /og/tx/[signature]', () => {
         expect(response.status).toBe(200);
         expect(response.headers.get('Content-Type')).toBe('image/png');
         expect(response.headers.get('Cache-Control')).toBe(RESOLVED_CACHE_CONTROL);
-        expect(getTxShareData).toHaveBeenCalledWith(SIGNATURE, undefined);
     });
 
     it('should return 400 for an invalid transaction signature', async () => {
@@ -117,6 +116,13 @@ describe('should handle GET /og/tx/[signature]', () => {
         expect(getTxShareData).not.toHaveBeenCalled();
     });
 
+    it('should fallback cluster to mainnet when the cluster param is absent', async () => {
+        const response = await GET(makeRequest(SIGNATURE), makeProps(SIGNATURE));
+
+        expect(response.status).toBe(200);
+        expect(getTxShareData).toHaveBeenCalledWith(SIGNATURE, Cluster.MainnetBeta);
+    });
+
     it('should resolve against devnet when the cluster param is devnet', async () => {
         const response = await GET(makeRequest(SIGNATURE, 'devnet'), makeProps(SIGNATURE));
 
@@ -150,12 +156,21 @@ describe('should handle GET /og/tx/[signature]', () => {
     });
 
     it('should return 502 when the data layer errors', async () => {
-        vi.mocked(getTxShareData).mockResolvedValue({ kind: 'error' });
+        vi.mocked(getTxShareData).mockResolvedValue({ error: new Error('rpc unreachable'), kind: 'error' });
 
         const response = await GET(makeRequest(SIGNATURE), makeProps(SIGNATURE));
 
         expect(response.status).toBe(502);
-        expect(await response.text()).toBe('Failed to load transaction');
+        expect(await response.text()).toBe('Failed to fetch transaction data');
+    });
+
+    it('should return 504 when the RPC budget runs out', async () => {
+        vi.mocked(getTxShareData).mockResolvedValue({ kind: 'rpc-budget-timeout' });
+
+        const response = await GET(makeRequest(SIGNATURE), makeProps(SIGNATURE));
+
+        expect(response.status).toBe(504);
+        expect(await response.text()).toBe('Transaction request timed out due to budget limit');
     });
 
     it('should return 500 when image generation fails', async () => {

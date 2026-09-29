@@ -65,5 +65,5 @@
 | Dynamic | `/robots.txt` | — | — |
 | Static | `/tos` | 10 kB | 430 kB |
 | Dynamic | `/tx/[signature]` | 550 kB | 960 kB |
-| Dynamic | `/tx/[signature]/inspect` | 470 kB | 880 kB |
-| Static | `/tx/inspector` | 470 kB | 880 kB |
+| Dynamic | `/tx/[signature]/inspect` | 470 kB | 890 kB |
+| Static | `/tx/inspector` | 470 kB | 890 kB |

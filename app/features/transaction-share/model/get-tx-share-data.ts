@@ -5,8 +5,8 @@ import {
     type InstructionSummary,
     type TransactionWithMeta,
 } from '@entities/transaction-data';
-import { findTransactionCluster } from '@entities/transaction-data/server';
-import { Cluster, type ServerCluster } from '@utils/cluster';
+import { isTimeoutError } from '@shared/lib/http-utils';
+import { type ServerCluster } from '@utils/cluster';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { lamportsToSolString } from '@utils/index';
 
@@ -34,73 +34,48 @@ export type TxShareData = {
     version?: string;
 };
 
-type ErrorResult = { kind: 'error' };
+type ErrorResult = { kind: 'error'; error: unknown };
 type NotFoundResult = { kind: 'not-found' };
-export type TxShareResult = { kind: 'ok'; data: TxShareData } | ErrorResult | NotFoundResult;
+type BudgetTimeoutErrorResult = { kind: 'rpc-budget-timeout' };
+export type TxShareResult = { kind: 'ok'; data: TxShareData } | ErrorResult | NotFoundResult | BudgetTimeoutErrorResult;
 
 const RPC_BUDGET_MS = 1_200;
 
 /**
- * The data behind `/og/tx/<signature>`, read from the cluster the link named or from the one the probe finds.
+ * The data behind `/og/tx/<signature>`, read from the cluster passed.
  *
- * The one place a cluster is decided, which is what lets `getTx` take a required one. Never throws:
- * every failure becomes a result the route turns into a status code.
+ * Never throws: every failure becomes a result the route turns into a status code.
  * @param signature - The transaction signature from the route
- * @param cluster - The cluster from `?cluster=`, absent when the link carried none
+ * @param cluster - The cluster from `?cluster=`
  */
-export async function getTxShareData(signature: string, cluster?: ServerCluster): Promise<TxShareResult> {
+export async function getTxShareData(signature: string, cluster: ServerCluster): Promise<TxShareResult> {
     try {
         const abortSignal = AbortSignal.timeout(RPC_BUDGET_MS);
 
-        const resolved = await resolveCluster(signature, cluster, abortSignal);
-        if (resolved.kind !== 'found') return resolved;
-
-        const tx = await getTx({ abortSignal, cluster: resolved.cluster, signature });
+        const tx = await getTx({ abortSignal, cluster, signature });
         if (!tx) return { kind: 'not-found' };
 
         // Summarize the instructions in the transaction.
         const summaries = getInstructionSummaries(tx);
         // Get names for the custom programs and their instructions.
-        const names = await getIdlNames({ cluster: resolved.cluster, programIds: idlProgramIds(summaries) });
+        const names = await getIdlNames({ cluster: cluster, programIds: idlProgramIds(summaries) });
         const instructions = applyNameSourcesToSummaries(summaries, names);
 
         return { data: toShareData(signature, tx, instructions), kind: 'ok' };
     } catch (error) {
+        // A slow RPC running out of budget is possible and not a fault, so we warn.
+        if (isTimeoutError(error)) {
+            Logger.warn('[transaction-share] Transaction request budget exceeded', {
+                cluster,
+                signature,
+            });
+            return { kind: 'rpc-budget-timeout' };
+        }
         Logger.error(new Error('[transaction-share] Failed to get transaction share data', { cause: error }), {
+            cluster,
             signature,
         });
-        return { kind: 'error' };
-    }
-}
-
-type ResolvedCluster = { kind: 'found'; cluster: ServerCluster } | NotFoundResult | ErrorResult;
-
-/**
- * Clusters to probe, in order, when the link carried no `?cluster=`.
- */
-const CLUSTERS: readonly ServerCluster[] = [Cluster.MainnetBeta];
-
-/**
- * The caller's cluster when the link carried one, otherwise the entity's probe.
- */
-async function resolveCluster(
-    signature: string,
-    cluster: ServerCluster | undefined,
-    abortSignal: AbortSignal,
-): Promise<ResolvedCluster> {
-    if (cluster !== undefined) return { cluster, kind: 'found' };
-
-    const result = await findTransactionCluster(CLUSTERS, signature, { abortSignal });
-
-    switch (result.kind) {
-        case 'found':
-            return { cluster: result.cluster, kind: 'found' };
-        case 'not-found':
-            Logger.info('[transaction-share] No cluster carries the signature', { signature });
-            return result;
-        case 'error':
-            Logger.error(result.error, { cluster: result.cluster, signature });
-            return { kind: 'error' };
+        return { error, kind: 'error' };
     }
 }
 

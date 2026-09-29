@@ -33,7 +33,7 @@ export async function findTransactionCluster(
     return { kind: 'not-found' };
 }
 
-async function getSignatureStatus(
+export async function getSignatureStatus(
     cluster: ServerCluster,
     signature: string,
     abortSignal?: AbortSignal,
