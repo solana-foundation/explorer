@@ -40,7 +40,7 @@ export function NumberedBand({
 export function BandIntro({ children, title }: { children: React.ReactNode; title: string }) {
     return (
         <div className="flex w-full flex-col gap-3">
-            <h2 className="text-5 sm:text-6 m-0 font-normal leading-6 tracking-tight text-dark-foreground sm:leading-7 sm:tracking-tight lg:text-3xl lg:leading-8 lg:tracking-tight xxl:text-4xl xxl:leading-9 xxl:tracking-tight">
+            <h2 className="m-0 text-xl font-normal leading-6 tracking-tight text-dark-foreground sm:text-2xl sm:leading-7 sm:tracking-tight lg:text-3xl lg:leading-8 lg:tracking-tight xxl:text-4xl xxl:leading-9 xxl:tracking-tight">
                 {title}
             </h2>
             <p className="m-0 max-w-3xl text-sm leading-5 text-heavy-metal-300 sm:text-base sm:leading-6">{children}</p>

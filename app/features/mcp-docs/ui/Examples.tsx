@@ -263,14 +263,14 @@ function AnswerBlockView({ caret, revealed }: { caret: boolean; revealed: Reveal
             <div className="rounded-lg border border-solid border-dark-border sm:hidden">
                 {rows.map((row, rowIndex) => (
                     <div
-                        key={row[0]}
+                        key={rowIndex}
                         className={cn(
                             'flex flex-col gap-2 p-3',
                             rowIndex > 0 && 'border-0 border-t border-solid border-dark-border',
                         )}
                     >
                         {row.map((cell, columnIndex) => (
-                            <div key={block.head[columnIndex]} className="flex flex-col gap-1">
+                            <div key={columnIndex} className="flex flex-col gap-1">
                                 <span className="font-mono text-xs uppercase leading-4 tracking-widest text-heavy-metal-500">
                                     {block.head[columnIndex]}
                                 </span>
@@ -289,7 +289,7 @@ function AnswerBlockView({ caret, revealed }: { caret: boolean; revealed: Reveal
                         <tr className="bg-heavy-metal-900">
                             {block.head.map((title, index) => (
                                 <th
-                                    key={title}
+                                    key={index}
                                     className={cn(
                                         'border-0 border-r border-solid border-dark-border last:border-r-0',
                                         rows.length > 0 && 'border-b',
@@ -303,14 +303,14 @@ function AnswerBlockView({ caret, revealed }: { caret: boolean; revealed: Reveal
                         </tr>
                     </thead>
                     <tbody>
-                        {rows.map(row => (
+                        {rows.map((row, rowIndex) => (
                             <tr
-                                key={row[0]}
+                                key={rowIndex}
                                 className="border-0 border-b border-solid border-dark-border last:border-b-0"
                             >
                                 {row.map((cell, index) => (
                                     <td
-                                        key={cell}
+                                        key={index}
                                         className={cn(
                                             'border-0 border-r border-solid border-dark-border last:border-r-0',
                                             'px-3 py-2.5 align-top text-sm leading-5 text-dark-foreground [overflow-wrap:anywhere]',

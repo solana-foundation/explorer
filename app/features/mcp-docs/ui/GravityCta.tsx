@@ -22,7 +22,6 @@ const CTA_MOBILE_PULL_DOT_DIVISOR = 2;
 const CTA_DRAIN_TAU = 0.4;
 const CTA_REDIST_OVERFILL = 1.5;
 const CTA_HOVER_SCALE = 1.02;
-const CTA_HOVER_SHIFT = 6;
 const CTA_DOT_SIZES = [
     { max: 1, min: 1, weight: 10 },
     { max: 2, min: 2, weight: 1.6 },
@@ -254,8 +253,6 @@ export function GravityCta({
 
         let swell = 0;
         let scale = 1;
-        let offsetX = 0;
-        let offsetY = 0;
         let spawnDebt = 0;
         let last = 0;
         let frame = 0;
@@ -396,18 +393,13 @@ export function GravityCta({
             }
             ctx.globalAlpha = 1;
 
-            const pointer = pointerRef.current;
-            const targetScale = pointer ? CTA_HOVER_SCALE : 1;
-            const targetX = pointer ? Math.max(-1, Math.min(1, pointer.x / halfW)) * CTA_HOVER_SHIFT : 0;
-            const targetY = pointer ? Math.max(-1, Math.min(1, pointer.y / halfH)) * CTA_HOVER_SHIFT : 0;
+            const targetScale = pointerRef.current ? CTA_HOVER_SCALE : 1;
 
             const ease = 1 - Math.exp(-dt * 14);
             scale += (targetScale - scale) * ease;
-            offsetX += (targetX - offsetX) * ease;
-            offsetY += (targetY - offsetY) * ease;
             swell *= Math.exp(-dt * 7);
 
-            link.style.transform = `translate3d(${offsetX.toFixed(2)}px, ${offsetY.toFixed(2)}px, 0) scale(${(scale + swell).toFixed(4)})`;
+            link.style.transform = `scale(${(scale + swell).toFixed(4)})`;
 
             if (!hovering) {
                 const cols = Math.max(1, Math.floor(width / CTA_CELL));

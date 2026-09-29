@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
+import { useTablistKeyboard } from '@/app/shared/lib/use-tablist-keyboard';
 import { useScrollSpy } from '@/app/shared/ui/navigation-tabs/model/useScrollSpy';
 
 import { GUTTER, MONO_LABEL, SECTIONS } from '../lib/mcp-docs-layout';
@@ -17,6 +18,12 @@ export function SectionTabs() {
         registerStickyHeight: false,
         wrapperRef: barRef,
     });
+
+    const { onKeyDown, tabRefs } = useTablistKeyboard<HTMLAnchorElement>(
+        SECTIONS.length,
+        SECTIONS.findIndex(section => section.id === active),
+        index => scrollToSection(SECTIONS[index].id),
+    );
 
     return (
         <div
@@ -34,16 +41,21 @@ export function SectionTabs() {
                 </span>
                 <div
                     role="tablist"
+                    onKeyDown={onKeyDown}
                     className="flex min-w-0 flex-1 gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 >
-                    {SECTIONS.map(section => {
+                    {SECTIONS.map((section, index) => {
                         const isActive = active === section.id;
                         return (
                             <a
                                 key={section.id}
+                                ref={node => {
+                                    tabRefs.current[index] = node;
+                                }}
                                 href={`#${section.id}`}
                                 role="tab"
                                 aria-selected={isActive}
+                                tabIndex={isActive ? 0 : -1}
                                 onClick={event => {
                                     event.preventDefault();
                                     scrollToSection(section.id);
