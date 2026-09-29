@@ -24,8 +24,6 @@ import type { RawTransaction } from '../model/types';
 export async function fetchRawTransaction(
     url: string,
     signature: string,
-    // The RPC defaults to `finalized`, which returns `null` for a transaction that is only confirmed.
-    // The parsed fetch also uses `confirmed`.
     commitment: Finality = 'confirmed',
 ): Promise<RawTransaction | null> {
     const response = await createSolanaRpc(url)

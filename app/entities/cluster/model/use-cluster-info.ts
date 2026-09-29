@@ -10,7 +10,6 @@ import { ClusterStatus } from '../lib/cluster';
 import type { ClusterInfo, EpochInfo } from '../lib/types';
 import { useCluster } from './use-cluster';
 
-/** A cluster fetch as SWR reports it, so a consumer can tell "failed" from "not fetched yet". */
 export type ClusterQueryResult<T> = {
     data: T | undefined;
     error: unknown;
@@ -19,10 +18,6 @@ export type ClusterQueryResult<T> = {
 
 type Options = { enabled?: boolean };
 
-/**
- * Returns `undefined` for "not connected", "in flight" and "failed". Use `useEpochScheduleResult` where
- * a consumer must show a fetch error.
- */
 export function useEpochSchedule(options: Options = {}): ClusterInfo['epochSchedule'] | undefined {
     return useEpochScheduleResult(options).data;
 }
@@ -44,7 +39,6 @@ export function useFirstAvailableBlock(options: Options = {}): bigint | undefine
     return useClusterQuery('first-available-block', fetchFirstAvailableBlock, options).data;
 }
 
-/** Fetches both epoch values. Mapping a slot to an epoch needs only `useEpochSchedule`. */
 export function useClusterInfo(options: Options = {}): ClusterInfo | undefined {
     const epochSchedule = useEpochSchedule(options);
     const epochInfo = useEpochInfo(options);
@@ -55,7 +49,6 @@ export function useClusterInfo(options: Options = {}): ClusterInfo | undefined {
     );
 }
 
-/** SWR dedupes by key, so all consumers of one value share one request. */
 function useClusterQuery<T>(
     name: string,
     fetcher: (url: string) => Promise<T>,

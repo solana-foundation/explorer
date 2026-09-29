@@ -75,7 +75,7 @@ describe('TransactionNotFoundCard', () => {
         expect(retry).toHaveBeenCalledTimes(1);
     });
 
-    it('should show the first available block note once the search comes back empty', async () => {
+    it('should show the first available block note after the cluster search finds nothing', async () => {
         mockSend.mockResolvedValue({ value: [null] });
         vi.mocked(useFirstAvailableBlock).mockReturnValue(100n);
         render(<TransactionNotFoundCard signature={TEST_SIGNATURE} />);

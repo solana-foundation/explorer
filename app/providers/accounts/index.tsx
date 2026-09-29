@@ -186,11 +186,8 @@ export type FetchAccountDataMode = 'parsed' | 'raw' | 'skip';
 type AccountsProviderProps = {
     children: React.ReactNode;
     /**
-     * Adds Metaplex metadata to parsed mints. Only the address page renders it, and each mint costs
-     * sequential RPC calls and an off-chain JSON read.
-     *
-     * Each mount has its own cache, so the address page reads only mints fetched with metadata.
-     * This provider must not move to a shared layout.
+     * Each mint costs sequential RPC calls and an off-chain JSON read. Only the address page's own
+     * `AccountsProvider` sets this flag.
      */
     fetchNftMetadata?: boolean;
 };
@@ -358,9 +355,6 @@ async function fetchMultipleAccounts({
                 if (mint === undefined) {
                     settle(account);
                 } else {
-                    // The metadata read is not awaited because an `await` here delays every account after
-                    // this mint. The mint settles once, with its metadata, so its entry stays `Fetching`
-                    // until the read resolves.
                     pendingMetadata.push(
                         fetchNftData(pubkey, url, { onError: ex => Logger.error(ex) }).then(nftData =>
                             settle({ ...account, data: { ...account.data, parsed: { ...mint, nftData } } }),
@@ -382,7 +376,6 @@ async function fetchMultipleAccounts({
         }
     }
 
-    // A timer calls this function without `await`, so a rejection must be caught here.
     await Promise.all(pendingMetadata).catch(onError);
 }
 

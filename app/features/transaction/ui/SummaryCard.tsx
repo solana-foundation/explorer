@@ -95,9 +95,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     // is compared against always come from the same fetch.
     const rawVersion = rawDetails?.data?.raw?.version;
     const blockTime = rawDetails?.data?.raw?.blockTime ?? details?.data?.transactionWithMeta?.blockTime ?? undefined;
-    // The card renders from the status alone, so the timestamp row shows "Unavailable" only after
-    // both transaction fetches succeed.
-    const blockTimeAnswered = isFetched(rawDetails) && isFetched(details);
+    const transactionFetchesSucceeded = isFetched(rawDetails) && isFetched(details);
 
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
@@ -111,16 +109,11 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         }
     }, [signature, clusterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // `rawDetails` changes on every fetch, so `refresh` reads it through a ref to stay stable.
     const rawEntryRef = useRef(rawDetails);
     rawEntryRef.current = rawDetails;
-    // `getTransaction` returns `null` before confirmation, and auto-refresh stops at finalization.
-    // Every retry must also retry the raw fetch, because the status has no wire bytes or block time.
     const refresh = useCallback(() => {
         fetchStatus(signature);
         const entry = rawEntryRef.current;
-        // The raw cache keeps the last response, so an overlapping request can replace a found transaction
-        // with `null`.
         if (!entry?.data?.raw && entry?.status !== FetchStatus.Fetching) fetchRaw(signature);
     }, [fetchStatus, fetchRaw, signature]);
     useAutoRefreshInterval(autoRefresh, refresh);
@@ -388,7 +381,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                             <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>
                         </KeyValue>
                     </>
-                ) : blockTimeAnswered ? (
+                ) : transactionFetchesSucceeded ? (
                     <KeyValue label="Timestamp" divider={false}>
                         <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
                             Unavailable

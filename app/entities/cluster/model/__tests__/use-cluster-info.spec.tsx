@@ -139,7 +139,7 @@ describe('useClusterInfo', () => {
         expect(rpc.getFirstAvailableBlock).not.toHaveBeenCalled();
     });
 
-    it('should stay undefined until both halves arrive', async () => {
+    it('should stay undefined until both epoch values load', async () => {
         rpc.getEpochInfo.mockReturnValue({ send: () => new Promise(() => {}) });
 
         const { result } = renderHook(() => useClusterInfo(), { wrapper: makeWrapper(connectedState) });

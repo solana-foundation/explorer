@@ -18,7 +18,6 @@ import { SummaryCard } from '../SummaryCard';
 const IN_FLIGHT = { status: FetchStatus.Fetching };
 const FIXTURE_BLOCK_TIME_UTC = 'May 18, 2024 at 02:40:00 UTC';
 
-// `ClusterProvider` reads the router on mount, which jsdom has no app router for.
 vi.mock('next/navigation', () => ({
     usePathname: () => `/tx/${DEFAULT_SIGNATURE}`,
     useRouter: () => ({ replace: vi.fn() }),
@@ -49,22 +48,21 @@ describe('SummaryCard timestamp', () => {
         expect(await findUtcTimestampRow()).toHaveTextContent(FIXTURE_BLOCK_TIME_UTC);
     });
 
-    it('should fall back to the parsed transaction when the raw response has no block time', async () => {
+    it('should use the parsed block time when the raw response has none', async () => {
         renderSummary({ raw: MOCK_RAW_TX_NO_BLOCK_TIME });
 
         expect(await findUtcTimestampRow()).toHaveTextContent(FIXTURE_BLOCK_TIME_UTC);
     });
 
-    it('should omit the row until the transaction fetches answer', async () => {
+    it('should omit the timestamp rows while both transaction fetches are in flight', async () => {
         renderSummary({ parsed: IN_FLIGHT, raw: IN_FLIGHT });
 
-        // The card must render first, so the absent rows come from the row condition, not an empty card.
         expect(await screen.findByText('Signature')).toBeInTheDocument();
         expect(screen.queryByText('Timestamp (Local)')).not.toBeInTheDocument();
         expect(screen.queryByText('Unavailable')).not.toBeInTheDocument();
     });
 
-    it('should say unavailable when neither transaction carries a block time', async () => {
+    it('should render Unavailable when neither transaction has a block time', async () => {
         renderSummary({ parsed: MOCK_PARSED_TX_NO_BLOCK_TIME, raw: MOCK_RAW_TX_NO_BLOCK_TIME });
 
         expect(await screen.findByText('Unavailable')).toBeInTheDocument();

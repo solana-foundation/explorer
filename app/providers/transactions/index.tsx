@@ -20,7 +20,6 @@ export { useTransactionDetails } from './parsed';
 
 export type Confirmations = number | 'max';
 
-// The status has no timestamp because `getTransaction` returns the block time with the transaction.
 export interface TransactionStatusInfo {
     slot: number;
     result: SignatureResult;

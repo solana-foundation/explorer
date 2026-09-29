@@ -17,7 +17,6 @@ const STATUS_NOT_FOUND: typeof MOCK_STATUS = {
 };
 const STATUS_FAILED: typeof MOCK_STATUS = { status: FetchStatus.FetchFailed };
 
-// `ClusterProvider` reads the router on mount, which jsdom has no app router for.
 vi.mock('next/navigation', () => ({
     usePathname: () => `/tx/${DEFAULT_SIGNATURE}`,
     useRouter: () => ({ replace: vi.fn() }),

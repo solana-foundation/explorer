@@ -276,7 +276,6 @@ describe('AccountsProvider: NFT metadata', () => {
         };
     }
 
-    /** Reads `StateContext` because `useAccountInfo` also needs a real `ClusterProvider`. */
     function EntryStatus({ pubkey }: { pubkey: PublicKey }) {
         const state = React.useContext(StateContext);
         const key = pubkey.toBase58();
@@ -329,7 +328,7 @@ describe('AccountsProvider: NFT metadata', () => {
         expect(fetchNftData).not.toHaveBeenCalled();
     });
 
-    it('should read NFT metadata once per mint when asked', async () => {
+    it('should read NFT metadata once per mint when fetchNftMetadata is set', async () => {
         const FetchMints = fetchOnMount([MINT_A, MINT_B]);
         render(
             <AccountsProvider fetchNftMetadata>
@@ -343,7 +342,7 @@ describe('AccountsProvider: NFT metadata', () => {
         expect(fetchNftData).toHaveBeenCalledWith(MINT_B, DEVNET_ENDPOINT, expect.anything());
     });
 
-    it('should start every mint in a batch without waiting for the one before it', async () => {
+    it('should start the metadata read for every mint in a batch at once', async () => {
         fetchNftData.mockReturnValue(new Promise(() => {}));
         const FetchMints = fetchOnMount([MINT_A, MINT_B]);
 
@@ -357,7 +356,7 @@ describe('AccountsProvider: NFT metadata', () => {
         expect(fetchNftData).toHaveBeenCalledTimes(2);
     });
 
-    it('should settle a non-mint account while a mint is still reading its metadata', async () => {
+    it('should settle a non-mint account while the metadata read for a mint is pending', async () => {
         fetchNftData.mockReturnValue(new Promise(() => {}));
         getMultipleAccounts.mockResolvedValue({ value: [mintAccount(), systemAccount()] });
         const FetchBoth = fetchOnMount([MINT_A, WALLET]);
