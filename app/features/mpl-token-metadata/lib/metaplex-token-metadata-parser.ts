@@ -94,7 +94,7 @@ function tokenStandardToString(standard: TokenStandard): string {
 
 const INSTRUCTIONS: Record<number, Entry> = {
     11: {
-        // prettier-ignore
+        // oxfmt-ignore
         accounts: ['', 'newEdition', 'masterEdition', 'newMint', '', 'newMintAuthority', '', 'tokenAccountOwner', '', 'newUpdateAuthority', 'originalMetadata'],
 
         extractData: raw => {
@@ -240,7 +240,7 @@ const INSTRUCTIONS: Record<number, Entry> = {
         name: 'updatePrimarySaleHappenedViaToken',
     },
     41: {
-        // prettier-ignore
+        // oxfmt-ignore
         accounts: ['metadata', 'authority', 'token', 'mint', '', '', '', '', '', 'masterEdition'],
 
         name: 'burnV1',

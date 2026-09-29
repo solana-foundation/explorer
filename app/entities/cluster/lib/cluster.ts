@@ -74,7 +74,8 @@ const modifyUrl = (url: string): string => {
 // `endpoint?: undefined` on the known-cluster arm lets consumers that want only `cluster` read it off a
 // selection without narrowing first.
 export type ClusterSelection =
-    { cluster: ServerCluster; endpoint?: undefined } | { cluster: Cluster.Custom; endpoint: RpcEndpoint };
+    | { cluster: ServerCluster; endpoint?: undefined }
+    | { cluster: Cluster.Custom; endpoint: RpcEndpoint };
 
 // `||`, not `??`: a var set to `""` is a blank setting rather than an endpoint, and an empty string
 // reaches every consumer as "no endpoint decided yet" and waits there for good.

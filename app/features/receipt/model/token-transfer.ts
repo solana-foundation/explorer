@@ -24,7 +24,9 @@ function isMultisigTransfer(info: Record<string, unknown>): info is MultisigTran
 }
 
 export type TokenReceiptOutcome =
-    { kind: 'ok'; receipt: ReceiptToken } | { kind: 'rejected'; reason: 'mixed-mint' } | { kind: 'not-applicable' };
+    | { kind: 'ok'; receipt: ReceiptToken }
+    | { kind: 'rejected'; reason: 'mixed-mint' }
+    | { kind: 'not-applicable' };
 
 export async function createTokenTransferReceipt(
     transaction: TransactionWithMeta,

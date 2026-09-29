@@ -23,7 +23,9 @@ export type Stake = Readonly<{
 
 /** `retry` sits on `failed` alone, so there is no button where there is nothing to re-ask. */
 export type VoteAccountsState =
-    { kind: 'loading' } | { kind: 'failed'; retry: () => void } | { kind: 'ready'; stake: Stake };
+    | { kind: 'loading' }
+    | { kind: 'failed'; retry: () => void }
+    | { kind: 'ready'; stake: Stake };
 
 /** Keyed by cluster and endpoint, so switching either drops figures that belonged to the old one. */
 export function useVoteAccounts(): VoteAccountsState {

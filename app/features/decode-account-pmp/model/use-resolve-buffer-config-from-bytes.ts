@@ -12,7 +12,9 @@ import {
 } from '../lib/config-resolution/resolve-buffer-config-from-bytes';
 
 export type ConfigResolutionFromBytesState =
-    { status: 'idle' } | { status: 'failed' } | { status: 'ready'; result: ConfigResolutionFromBytesResult };
+    | { status: 'idle' }
+    | { status: 'failed' }
+    | { status: 'ready'; result: ConfigResolutionFromBytesResult };
 
 /**
  * Tries to decode config for a Buffer account from its bytes.

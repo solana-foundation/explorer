@@ -14,7 +14,9 @@ export function clusterFromParam(value: string): Cluster | undefined {
 // caller's input, `unconfigured` is a cluster we own with no endpoint set for it. A route that cannot
 // tell them apart either reports abuse or stays silent about its own broken deployment.
 export type ServerClusterUrl =
-    { kind: 'ok'; cluster: Cluster; url: string } | { kind: 'refused' } | { kind: 'unconfigured'; cluster: Cluster };
+    | { kind: 'ok'; cluster: Cluster; url: string }
+    | { kind: 'refused' }
+    | { kind: 'unconfigured'; cluster: Cluster };
 
 // Resolve a numeric cluster query-param to its server RPC URL. Refuses anything the server must not
 // resolve: a malformed param, an unknown cluster, or Custom (whose URL is client-supplied). Shared by the

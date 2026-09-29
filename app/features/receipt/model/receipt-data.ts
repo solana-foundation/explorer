@@ -23,7 +23,8 @@ import { hasTransfers, isSolReceipt, isTokenReceipt, type Receipt } from './type
 export type ReceiptUnavailabilityReason = 'inner-transfers' | 'mixed-mint' | 'no-transfers';
 
 export type ReceiptResult =
-    { kind: 'ok'; receipt: FormattedReceipt } | { kind: 'unavailable'; reason: ReceiptUnavailabilityReason };
+    | { kind: 'ok'; receipt: FormattedReceipt }
+    | { kind: 'unavailable'; reason: ReceiptUnavailabilityReason };
 
 export async function extractReceiptData(tx: TransactionWithMeta, cluster: Cluster): Promise<ReceiptResult> {
     const tokenOutcome = await createTokenTransferReceipt(tx, (mint: string | undefined) =>

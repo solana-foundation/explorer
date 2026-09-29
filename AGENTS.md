@@ -54,7 +54,7 @@
 ## CI
 
 - The CI pipeline runs `pnpm format:ci` → `pnpm lint` → `pnpm openspec:validate` → `pnpm build` → `pnpm test:ci`. These checks are mandatory — fix violations, never bypass them (no `--no-verify`, no skipping, no disabling rules to silence output). The local hooks below are a developer convenience to surface failures before push; the checks themselves are not optional. Enable with `git config core.hooksPath .githooks`:
-  - `pre-commit` — runs `pretty:format`, `eslint:lint`, and `test:changed` scoped to staged files.
+  - `pre-commit` — runs `oxfmt:check`, `eslint:lint`, and `test:changed` scoped to staged files.
   - `pre-push` — runs the full pipeline (format, lint, openspec:validate, build, test).
 - Optionally, use [`act`](https://github.com/nektos/act) to run GitHub Actions workflows locally before pushing.
 - [`bench/BUILD.md`](bench/BUILD.md) is the committed route-size snapshot. Any PR that changes client bundle sizes must refresh it with `pnpm build:info` and commit the result — the `Build-Info` CI job fails unless the committed file is byte-identical to the fresh build (rounding hysteresis absorbs sub-step variance).

@@ -7,7 +7,7 @@ staged() {
 }
 
 if [ -n "$(staged)" ]; then
-  staged | xargs -0 corepack pnpm pretty:format || exit 1
+  staged | xargs -0 corepack pnpm oxfmt:check --no-error-on-unmatched-pattern || exit 1
   staged | xargs -0 corepack pnpm eslint:lint || exit 1
   # Packages are upstream of the app, so their failures surface before the app specs they'd explain.
   corepack pnpm test:packages:changed || exit 1
