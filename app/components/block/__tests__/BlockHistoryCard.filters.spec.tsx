@@ -44,7 +44,6 @@ import { BlockHistoryCard } from '../BlockHistoryCard';
 describe('BlockHistoryCard filters', () => {
     beforeEach(() => {
         search = `version=0&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`;
-        window.localStorage.clear();
     });
 
     it('should combine version, program, and account filters while preserving URL parameters', () => {
@@ -93,18 +92,6 @@ describe('BlockHistoryCard filters', () => {
         search = 'status=failed';
         render(<BlockHistoryCard block={makeBlock(false)} epoch={500n} />);
         expect(screen.getByText('No transactions found with this filter')).toBeInTheDocument();
-    });
-
-    it('should hide the invoked program list when the instructions toggle is off', () => {
-        search = 'filter=all';
-        render(<BlockHistoryCard block={makeBlock()} epoch={500n} />);
-
-        expect(screen.getAllByText(PROGRAM_A).length).toBeGreaterThan(0);
-        expect(screen.getByText('Signature / Programs')).toBeInTheDocument();
-        fireEvent.click(screen.getByRole('button', { name: 'Hide instructions' }));
-        expect(screen.queryAllByText(PROGRAM_A)).toHaveLength(0);
-        expect(screen.queryByText('Signature / Programs')).not.toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Show instructions' })).toHaveAttribute('aria-pressed', 'false');
     });
 });
 

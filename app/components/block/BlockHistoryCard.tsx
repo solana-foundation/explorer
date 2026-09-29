@@ -37,7 +37,6 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/comp
 import { Input } from '@/app/components/shared/ui/input';
 import { invariant } from '@/app/shared/lib/invariant';
 import { DataListCard } from '@/app/shared/ui/DataListCard';
-import { InstructionsToggle, useShowInstructions } from '@/app/shared/ui/HistoryCard';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
 const PAGE_SIZE = 25;
@@ -324,7 +323,6 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                         sortDirection={sortDirection}
                         onSort={pushSort}
                     />
-                    <InstructionsToggle ui="dashkit" variant="white" size="sm" className="mr-1.5" />
                     <FilterDropdown
                         options={filterModel.options}
                         currentFilter={programFilter}
@@ -403,7 +401,6 @@ function BlockHistoryGrid({
     sortMode: SortMode;
     sortDirection: SortDirection;
 }) {
-    const [showInstructions] = useShowInstructions();
     // Signature takes the slack; the numeric columns are capped wide enough for their label + sort
     // chevrons. The Compute column only exists when compute data is available. Inline (not a
     // `grid-cols-[…]` class) so the Storybook JIT can't purge it.
@@ -417,7 +414,7 @@ function BlockHistoryGrid({
     // SortIndicator reflects the live `sortDirection`; inactive sortable columns show a dim chevron pair.
     const headers: { label: string; numeric?: boolean; sortKey?: SortMode }[] = [
         { label: '#', sortKey: 'index' },
-        { label: showInstructions ? 'Signature / Programs' : 'Signature' },
+        { label: 'Signature / Programs' },
         { label: 'Fee', numeric: true, sortKey: 'fee' },
     ];
     if (showComputeUnits) {
@@ -483,7 +480,6 @@ function BlockHistoryGridRow({
     showComputeUnits: boolean;
     gridStyle: React.CSSProperties;
 }) {
-    const [showInstructions] = useShowInstructions();
     const status = isFailed(tx) ? HISTORY_STATUS.failed : HISTORY_STATUS.success;
     const badge = (
         <Badge ui="dashkit" variant={status.variant}>
@@ -543,7 +539,7 @@ function BlockHistoryGridRow({
             desktop: (
                 <>
                     {signatureHeader}
-                    {showInstructions && <div className="mt-1">{invokedNode}</div>}
+                    <div className="mt-1">{invokedNode}</div>
                 </>
             ),
             desktopClassName: 'min-w-0',
@@ -557,17 +553,7 @@ function BlockHistoryGridRow({
             : []),
         { children: reserved, desktopClassName: 'text-right', key: 'reserved', label: 'CUs Reserved' },
         { children: txnCost, desktopClassName: 'text-right', key: 'cost', label: 'Cost' },
-        ...(showInstructions
-            ? [
-                  {
-                      children: invokedNode,
-                      hideDesktop: true,
-                      key: 'programs',
-                      label: 'Programs',
-                      mobileAlign: 'start',
-                  } satisfies ResponsiveCell,
-              ]
-            : []),
+        { children: invokedNode, hideDesktop: true, key: 'programs', label: 'Programs', mobileAlign: 'start' },
     ];
 
     return (

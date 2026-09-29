@@ -23,7 +23,6 @@ import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { useVisibility } from '@/app/shared/lib/visibility';
 import { RelativeTime } from '@/app/shared/RelativeTime';
 import { DataListRow } from '@/app/shared/ui/DataListCard';
-import { InstructionsToggle, useShowInstructions } from '@/app/shared/ui/HistoryCard';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
 import { isGtfaDisabled } from '../lib/gtfa-disabled-addresses';
@@ -111,12 +110,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
             foundOldest={history.data.foundOldest}
             onRefresh={refresh}
             onLoadMore={loadMore}
-            headerActions={
-                <>
-                    <InstructionsToggle />
-                    <HistoryFilterTrigger address={address} {...filters} />
-                </>
-            }
+            headerActions={<HistoryFilterTrigger address={address} {...filters} />}
             headerSubRow={hasActiveFilters ? <HistoryFilterChips {...filters} /> : undefined}
             renderRow={(row, hasTimestamps) => (
                 <TransactionRow key={row.signature} row={row} hasTimestamps={hasTimestamps} isLg={isLg} />
@@ -136,17 +130,11 @@ function TransactionRow({
 }) {
     const { signature, slot, blockTime, status } = row;
     const { isVisible, ref } = useVisibility<HTMLDivElement>(true);
-    const [showInstructions] = useShowInstructions();
+    const instructionNames = useResolvedInstructionSummaries(signature, isVisible);
     const [drawerOpen, setDrawerOpen] = useState(false);
     // Mount the mobile drawer only once the row is first tapped — otherwise every row would mount a
     // closed drawer (with its own raw-tx subscription) up front.
     const [drawerMounted, setDrawerMounted] = useState(false);
-    // With instructions hidden, skip the per-row getTransaction entirely — unless the mobile drawer
-    // has been opened, since it lists the instructions regardless of the preference.
-    const instructionNames = useResolvedInstructionSummaries(
-        signature,
-        isVisible && (showInstructions || drawerMounted),
-    );
     const badge = STATUS_BADGE[status];
 
     // If the viewport crosses to desktop while the drawer is open, close it gracefully
@@ -202,7 +190,7 @@ function TransactionRow({
                         {/* Plain text on mobile — the drawer carries the block link. */}
                         <Slot slot={slot} />
                     </MobileField>
-                    {showInstructions && <MobileField label="Programs">{programsBlock}</MobileField>}
+                    <MobileField label="Programs">{programsBlock}</MobileField>
                 </div>
 
                 <div className={cn('hidden items-baseline gap-4 lg:grid', ROW_PADDING, historyGridCols(hasTimestamps))}>
@@ -211,7 +199,7 @@ function TransactionRow({
                             <span className="min-w-0 text-sm">{signatureLink}</span>
                             {statusBadge}
                         </div>
-                        {showInstructions && <div className="mt-1">{programsBlock}</div>}
+                        <div className="mt-1">{programsBlock}</div>
                     </div>
 
                     {hasTimestamps && (
