@@ -1,5 +1,6 @@
 import { FetchStatus } from '@providers/cache';
-import { mockRawTransactionDetails } from '@storybook-config/__fixtures__/transactions';
+import { mockRawTransactionDetails, mockTransactionStatus } from '@storybook-config/__fixtures__/transactions';
+import { MockTransactionsProvider } from '@storybook-config/__mocks__/MockTransactionsProvider';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -16,6 +17,7 @@ const STATUS_NOT_FOUND: typeof MOCK_STATUS = {
     status: FetchStatus.Fetched,
 };
 const STATUS_FAILED: typeof MOCK_STATUS = { status: FetchStatus.FetchFailed };
+const STATUS_CONFIRMED = mockTransactionStatus({ confirmationStatus: 'confirmed', confirmations: 20 });
 
 vi.mock('next/navigation', () => ({
     usePathname: () => `/tx/${DEFAULT_SIGNATURE}`,
@@ -47,12 +49,12 @@ describe('SummaryCard raw retry', () => {
         expect(fetchRaw).toHaveBeenCalledWith(DEFAULT_SIGNATURE);
     });
 
-    it('should retry the raw fetch from the Refresh button', () => {
+    it('should retry the raw fetch from the Refresh button after the finality retry', () => {
         renderSummary({ autoRefresh: AutoRefresh.Inactive, raw: RAW_NOT_FOUND });
 
         fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
 
-        expect(fetchRaw).toHaveBeenCalledWith(DEFAULT_SIGNATURE);
+        expect(fetchRaw).toHaveBeenCalledTimes(2);
     });
 
     it('should retry the raw fetch from the not-found card', () => {
@@ -86,27 +88,57 @@ describe('SummaryCard raw retry', () => {
 
         expect(fetchRaw).not.toHaveBeenCalled();
     });
+
+    it('should retry a raw fetch that returns nothing after finality stops auto-refresh', async () => {
+        const { rerender } = renderSummary({ raw: RAW_IN_FLIGHT, status: STATUS_CONFIRMED });
+        rerender({ autoRefresh: AutoRefresh.Inactive, raw: RAW_IN_FLIGHT });
+
+        rerender({ autoRefresh: AutoRefresh.Inactive, raw: RAW_NOT_FOUND });
+        await tick();
+
+        expect(fetchRaw).toHaveBeenCalledOnce();
+    });
+
+    it('should not retry the raw fetch for a signature the cluster does not have', async () => {
+        renderSummary({ autoRefresh: AutoRefresh.Inactive, raw: RAW_NOT_FOUND, status: STATUS_NOT_FOUND });
+
+        await tick();
+
+        expect(fetchRaw).not.toHaveBeenCalled();
+    });
+
+    it('should retry only once after finality when the raw fetch keeps returning nothing', async () => {
+        const { rerender } = renderSummary({ autoRefresh: AutoRefresh.Inactive, raw: RAW_NOT_FOUND });
+
+        rerender({ autoRefresh: AutoRefresh.Inactive, raw: RAW_IN_FLIGHT });
+        rerender({ autoRefresh: AutoRefresh.Inactive, raw: RAW_NOT_FOUND });
+        await tick();
+
+        expect(fetchRaw).toHaveBeenCalledOnce();
+    });
 });
 
-function renderSummary({
-    raw,
-    status = MOCK_STATUS,
-    autoRefresh = AutoRefresh.Active,
-}: {
+type SummaryProps = {
     raw: typeof MOCK_RAW_TX;
     status?: typeof MOCK_STATUS;
     autoRefresh?: AutoRefresh;
-}) {
-    const Wrapper = withTransactionProviders(
-        { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
-        { [DEFAULT_SIGNATURE]: status },
-        { [DEFAULT_SIGNATURE]: raw },
-    );
+};
 
-    return render(
-        <Wrapper>
+function renderSummary(props: SummaryProps) {
+    // The caches sit inside the wrapper, so a rerender changes them without a remount.
+    const { rerender } = render(<Summary {...props} />, { wrapper: withTransactionProviders({}, {}) });
+    return { rerender: (next: SummaryProps) => rerender(<Summary {...next} />) };
+}
+
+function Summary({ raw, status = MOCK_STATUS, autoRefresh = AutoRefresh.Active }: SummaryProps) {
+    return (
+        <MockTransactionsProvider
+            parsed={{ [DEFAULT_SIGNATURE]: MOCK_PARSED_TX }}
+            raw={{ [DEFAULT_SIGNATURE]: raw }}
+            status={{ [DEFAULT_SIGNATURE]: status }}
+        >
             <SummaryCard signature={DEFAULT_SIGNATURE} autoRefresh={autoRefresh} />
-        </Wrapper>,
+        </MockTransactionsProvider>
     );
 }
 
