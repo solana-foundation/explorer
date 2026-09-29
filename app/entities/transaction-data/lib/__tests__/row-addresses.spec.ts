@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { rowAddresses } from '../row-addresses';
 
-const STATIC_A = PublicKey.default;
+const STATIC_A = gen.publicKey(0);
 const STATIC_B = gen.publicKey(1);
 const LOOKED_UP_A = gen.publicKey(2);
 const LOOKED_UP_B = gen.publicKey(3);

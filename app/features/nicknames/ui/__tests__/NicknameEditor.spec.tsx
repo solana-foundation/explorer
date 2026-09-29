@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
@@ -5,7 +6,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { getNickname, setNickname } from '../../lib/nicknames';
 import { NicknameEditor } from '../NicknameEditor';
 
-const ADDRESS = 'So11111111111111111111111111111111111111112';
+const ADDRESS = gen.address(1);
 
 describe('NicknameEditor', () => {
     beforeEach(() => {

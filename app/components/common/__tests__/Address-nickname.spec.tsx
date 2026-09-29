@@ -4,13 +4,13 @@ import { describe, expect, test, vi } from 'vitest';
 
 vi.mock('next/navigation');
 
-import { PublicKey } from '@solana/web3.js';
+import { gen } from '@__fixtures__/gen';
 
 import { ClusterProvider } from '@/app/providers/cluster';
 
 import { Address } from '../Address';
 
-const PUBKEY = new PublicKey('So11111111111111111111111111111111111111112');
+const PUBKEY = gen.publicKey(1);
 
 describe('Address nickname editor', () => {
     test('should show no dialog until the button opens it', () => {

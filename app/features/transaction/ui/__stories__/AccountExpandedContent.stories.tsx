@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
+import { gen } from '@__fixtures__/gen';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
@@ -13,7 +14,7 @@ import { AccountExpandedContent } from '../AccountExpandedContent';
 
 const SYSTEM_PROGRAM_ADDRESS = SystemProgram.programId.toBase58();
 const UNKNOWN_ADDRESS = new PublicKey('So11111111111111111111111111111111111111112').toBase58();
-const SIZED_ADDRESS = new PublicKey('Sysvar1nstructions1111111111111111111111111').toBase58();
+const SIZED_ADDRESS = gen.address(1);
 
 const meta: Meta<typeof AccountExpandedContent> = {
     args: {
