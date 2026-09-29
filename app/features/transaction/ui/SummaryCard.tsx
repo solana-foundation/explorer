@@ -119,16 +119,17 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     useAutoRefreshInterval(autoRefresh, refresh);
 
     // Finality stops auto-refresh, so a raw fetch still open on the last tick gets no retry from the timer.
-    // The ref allows one retry per signature, so an RPC that keeps returning nothing is not polled.
+    // The ref allows one retry per cache entry, so an RPC that keeps returning nothing is not polled.
     const isFinalized = status?.data?.info?.confirmations === 'max';
-    const isRawSettledEmpty =
-        rawDetails !== undefined && rawDetails.status !== FetchStatus.Fetching && !rawDetails.data?.raw;
+    const hasRawEntry = rawDetails !== undefined;
+    const isRawSettledEmpty = hasRawEntry && rawDetails.status !== FetchStatus.Fetching && !rawDetails.data?.raw;
     const finalityRetrySignatureRef = useRef<string>(undefined);
     useEffect(() => {
+        if (!hasRawEntry) finalityRetrySignatureRef.current = undefined;
         if (!isFinalized || !isRawSettledEmpty || finalityRetrySignatureRef.current === signature) return;
         finalityRetrySignatureRef.current = signature;
         fetchRaw(signature);
-    }, [isFinalized, isRawSettledEmpty, signature, fetchRaw]);
+    }, [hasRawEntry, isFinalized, isRawSettledEmpty, signature, fetchRaw]);
 
     if (!status || (status.status === FetchStatus.Fetching && autoRefresh === AutoRefresh.Inactive)) {
         return <LoadingCard />;

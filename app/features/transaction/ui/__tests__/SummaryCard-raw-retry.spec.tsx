@@ -116,10 +116,21 @@ describe('SummaryCard raw retry', () => {
 
         expect(fetchRaw).toHaveBeenCalledOnce();
     });
+
+    it('should retry again after an endpoint switch clears the raw cache', async () => {
+        const { rerender } = renderSummary({ autoRefresh: AutoRefresh.Inactive, raw: RAW_NOT_FOUND });
+
+        rerender({ autoRefresh: AutoRefresh.Inactive, raw: undefined });
+        rerender({ autoRefresh: AutoRefresh.Inactive, raw: RAW_IN_FLIGHT });
+        rerender({ autoRefresh: AutoRefresh.Inactive, raw: RAW_NOT_FOUND });
+        await tick();
+
+        expect(fetchRaw).toHaveBeenCalledTimes(2);
+    });
 });
 
 type SummaryProps = {
-    raw: typeof MOCK_RAW_TX;
+    raw: typeof MOCK_RAW_TX | undefined;
     status?: typeof MOCK_STATUS;
     autoRefresh?: AutoRefresh;
 };
@@ -134,7 +145,7 @@ function Summary({ raw, status = MOCK_STATUS, autoRefresh = AutoRefresh.Active }
     return (
         <MockTransactionsProvider
             parsed={{ [DEFAULT_SIGNATURE]: MOCK_PARSED_TX }}
-            raw={{ [DEFAULT_SIGNATURE]: raw }}
+            raw={raw && { [DEFAULT_SIGNATURE]: raw }}
             status={{ [DEFAULT_SIGNATURE]: status }}
         >
             <SummaryCard signature={DEFAULT_SIGNATURE} autoRefresh={autoRefresh} />
