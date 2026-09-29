@@ -45,6 +45,16 @@ describe('logProxyError', () => {
         );
     });
 
+    it('should report the proxy own fault to Sentry as an exception', () => {
+        const context = { error: new TypeError('decoder crashed') };
+        const failure = statusError(500, 'Failed to process JSON data', { code: 'decode-failed', context });
+
+        logProxyError(failure);
+
+        expect(Logger.error).toHaveBeenCalledWith(failure, { ...context, sentry: true, sentryExtras: context });
+        expect(Logger.warn).not.toHaveBeenCalled();
+    });
+
     it('should fall back to the error message for a code without its own log message', () => {
         const context = { url: 'http://hello.world/' };
 

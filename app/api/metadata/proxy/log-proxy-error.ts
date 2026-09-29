@@ -3,17 +3,19 @@ import { Logger } from '@/app/shared/lib/logger';
 import type { FetchedResource, ProxyErrorCode, StatusError } from './feature';
 
 type LogPolicy = {
-    level: 'debug' | 'warn';
+    // `error` reports the StatusError itself as an exception, for the proxy's own faults.
+    level: 'debug' | 'warn' | 'error';
     // Falls back to the error's own message when a code has no stable log message of its own.
     message?: string;
     // Oversize and unreachable upstreams are reported so their rate can tune the size cap and spot dead hosts.
     sentry?: true;
 };
 
-// Expected third-party failures: warnings at most, never exceptions.
+// Third-party failures are warnings at most; only the proxy's own faults are exceptions.
 const LOG_POLICY: Record<ProxyErrorCode, LogPolicy> = {
     aborted: { level: 'debug' },
-    'decode-failed': { level: 'warn' },
+    // The body is already buffered, so a decode failure other than malformed JSON is the proxy's own fault.
+    'decode-failed': { level: 'error', sentry: true },
     'malformed-json': { level: 'debug' },
     'non-http-protocol': { level: 'warn', message: 'Non-HTTP protocol blocked' },
     'oversize-declared': { level: 'warn', message: 'Resource exceeds max size (Content-Length)', sentry: true },
@@ -34,6 +36,10 @@ const LOG_POLICY: Record<ProxyErrorCode, LogPolicy> = {
 export function logProxyError(error: StatusError) {
     const { level, message = error.message, sentry } = LOG_POLICY[error.code];
     const context = sentry ? { ...error.context, sentry, sentryExtras: error.context } : error.context;
+    if (level === 'error') {
+        Logger.error(error, context);
+        return;
+    }
     Logger[level](`[api:metadata-proxy] ${message}`, context);
 }
 
