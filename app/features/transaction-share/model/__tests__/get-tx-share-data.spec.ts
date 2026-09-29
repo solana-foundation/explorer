@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { err, ok } from '@shared/lib/result';
 import { getBase58Decoder } from '@solana/kit';
 import {
     ComputeBudgetProgram,
@@ -14,6 +15,7 @@ import { Logger } from '@/app/shared/lib/logger';
 
 const mocks = vi.hoisted(() => ({
     getIdlNames: vi.fn(),
+    getSignatureStatus: vi.fn(),
     getTx: vi.fn(),
 }));
 
@@ -34,6 +36,7 @@ vi.mock('@entities/transaction-data', async () => {
         getInstructionSummaries: summaries.getInstructionSummaries,
     };
 });
+vi.mock('@entities/transaction-data/server', () => ({ getSignatureStatus: mocks.getSignatureStatus }));
 vi.mock('../../api/get-tx', () => ({ getTx: mocks.getTx }));
 vi.mock('../../api/get-idl-names', () => ({ getIdlNames: mocks.getIdlNames }));
 
@@ -109,6 +112,7 @@ function txWith(instructions: (ParsedInstruction | PartiallyDecodedInstruction)[
 const TX = txWith([]);
 
 beforeEach(() => {
+    mocks.getSignatureStatus.mockResolvedValue(ok(true));
     mocks.getTx.mockResolvedValue(TX);
     mocks.getIdlNames.mockResolvedValue(new Map());
 });
@@ -164,6 +168,13 @@ describe('should map every failure to a result rather than throwing', () => {
 
         await expect(getTxShareData(SIGNATURE, Cluster.Devnet)).resolves.toEqual({ kind: 'not-found' });
     });
+
+    it('should return not-found without fetching the transaction when the status is null', async () => {
+        mocks.getSignatureStatus.mockResolvedValue(ok(false));
+
+        await expect(getTxShareData(SIGNATURE, Cluster.Testnet)).resolves.toEqual({ kind: 'not-found' });
+        expect(mocks.getTx).not.toHaveBeenCalled();
+    });
 });
 
 describe('getTxShareData errors', () => {
@@ -194,6 +205,32 @@ describe('getTxShareData errors', () => {
             }),
             { cluster: Cluster.Devnet, signature: SIGNATURE },
         );
+    });
+
+    it('should report a budget timeout when the status check times out', async () => {
+        mocks.getSignatureStatus.mockResolvedValue(err(TIMEOUT_ERROR));
+
+        await expect(getTxShareData(SIGNATURE, Cluster.Testnet)).resolves.toEqual({ kind: 'rpc-budget-timeout' });
+        expect(Logger.warn).toHaveBeenCalledWith('[transaction-share] Transaction request budget exceeded', {
+            cluster: Cluster.Testnet,
+            signature: SIGNATURE,
+        });
+        expect(mocks.getTx).not.toHaveBeenCalled();
+    });
+
+    it('should report an error when the status check fails', async () => {
+        const rpcError = new Error('rpc unreachable');
+        mocks.getSignatureStatus.mockResolvedValue(err(rpcError));
+
+        await expect(getTxShareData(SIGNATURE, Cluster.Testnet)).resolves.toEqual({ error: rpcError, kind: 'error' });
+        expect(Logger.error).toHaveBeenCalledWith(
+            expect.objectContaining({
+                cause: rpcError,
+                message: '[transaction-share] Failed to get transaction share data',
+            }),
+            { cluster: Cluster.Testnet, signature: SIGNATURE },
+        );
+        expect(mocks.getTx).not.toHaveBeenCalled();
     });
 });
 
