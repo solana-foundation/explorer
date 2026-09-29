@@ -14,6 +14,7 @@ export function SectionTabs() {
     const { active, scrollToSection, stuck } = useScrollSpy({
         enabled: true,
         paths: SECTION_PATHS,
+        registerStickyHeight: false,
         wrapperRef: barRef,
     });
 

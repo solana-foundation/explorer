@@ -10,11 +10,13 @@ export function useScrollSpy({
     enabled,
     fallbackRef,
     paths,
+    registerStickyHeight = true,
     wrapperRef,
 }: {
     enabled: boolean;
     fallbackRef?: RefObject<HTMLElement | null>;
     paths: string[];
+    registerStickyHeight?: boolean;
     wrapperRef: RefObject<HTMLElement | null>;
 }) {
     const [stuck, setStuck] = useState(false);
@@ -40,7 +42,7 @@ export function useScrollSpy({
         [wrapperRef, fallbackRef],
     );
 
-    useStickyHeaderHeight(wrapperRef, enabled);
+    useStickyHeaderHeight(wrapperRef, enabled && registerStickyHeight);
 
     useEffect(() => {
         if (!enabled) return;
