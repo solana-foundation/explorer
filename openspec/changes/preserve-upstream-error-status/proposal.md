@@ -4,7 +4,7 @@
 
 - `executeHop` in `app/api/metadata/proxy/feature/fetch-resource.ts` answers every non-2xx upstream response with `502`.
 - Production logs show the upstream statuses behind those `502`s are mostly `429`, `403`, and `404`.
-- `reasonForStatus` in `app/features/metadata/lib/imageFailure.ts` has per-status copy for `403` and `404` that the proxy never lets it reach.
+- `reasonForStatus` in `app/features/metadata/lib/imageFailure.ts` has copy for `404` that the proxy never lets it reach, and copy for `403` that only the proxy's own SSRF and protocol blocks reach.
 - This decision overlaps the one recorded in `add-metadata-proxy`, which made every non-2xx upstream a `502`: its requirement "The proxy SHALL serve only JSON, text-as-JSON, and image content" says so, and its scenario "Image fails to load for another readable reason" says an upstream `404` is surfaced as a `502`.
 
 ## Why
@@ -17,7 +17,7 @@ Alternatives considered:
 
 - **Keep `502` for every non-2xx.** Rejected: a dead link, a denied request, and a rate limit are indistinguishable in logs and in the UI.
 - **Forward every upstream status.** Rejected: `401` and `407` carry authentication semantics that do not apply to our caller, and the set of proxy statuses stops being bounded by `STATUS_MESSAGES`.
-- **Map upstream `500` to `502` to keep `500` for internal faults.** Rejected: the upstream status is more useful to the caller, and the throw-site message already separates the two in logs.
+- **Map upstream `500` to `502` to keep `500` for internal faults.** Rejected: the upstream status is more useful to the caller, and the `StatusError` `code` already separates the two in logs.
 - **Drop `Retry-After` on `429`.** Rejected: the caller's retry policy needs the upstream's hint, so the proxy forwards `Retry-After` verbatim (delay-seconds or HTTP-date, RFC 9110 §10.2.3). The proxy itself never retries.
 - **Forward `3xx`.** Rejected: redirects are followed inside the proxy with per-hop SSRF validation; a forwarded redirect would send the browser to the upstream directly, exposing the viewer's IP and bypassing the response sandbox.
 
@@ -32,5 +32,7 @@ Alternatives considered:
 ## Impact
 
 - Upstream `404`, `403`, and `429` stop counting as proxy `5xx`. Upstream `500`, `503`, and `504` still count.
-- Supersedes two passages of `add-metadata-proxy`: the "Non-2xx upstream" scenario, which requires `502` for every non-2xx upstream, and the "Image fails to load for another readable reason" scenario, which says an upstream `404` is surfaced as a `502`.
-- Archive order: `add-metadata-proxy` is archived first, which creates the `metadata-proxy` base spec; this delta then moves from `## ADDED Requirements` to `## MODIFIED Requirements` over the two overlapping passages before it is archived. Until then both changes are open and the overlap is recorded here only.
+- Supersedes three passages of `add-metadata-proxy`, across two requirements:
+    - "The proxy SHALL serve only JSON, text-as-JSON, and image content": its sentence "A non-2xx upstream (that is not a handled redirect) SHALL be `502`" and its "Non-2xx upstream" scenario.
+    - "Off-chain images SHALL surface why they could not be displayed and degrade gracefully": its "Image fails to load for another readable reason" scenario, which says an upstream `404` is surfaced as a `502`.
+- Archive order: `add-metadata-proxy` is archived first, which creates the `metadata-proxy` base spec. This delta then moves from `## ADDED Requirements` to `## MODIFIED Requirements`, restating both requirements above in full with the superseded passages replaced, before it is archived. Until then both changes are open and the overlap is recorded here only.
