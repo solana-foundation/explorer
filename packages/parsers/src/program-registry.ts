@@ -29,12 +29,14 @@ export const VOTE_PROGRAM_LABEL = 'vote';
  */
 export type ParserProgramLabel =
     | typeof ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL
+    | typeof BPF_LOADER_PROGRAM_LABEL
     | typeof BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL
     | 'compute-budget'
     | 'ed25519'
     | 'lighthouse'
     | 'mpl-token-metadata'
     | 'pyth'
+    | 'solana-attestation-service'
     | typeof SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL
     | typeof SPL_MEMO_PROGRAM_LABEL
     | typeof SPL_TOKEN_PROGRAM_LABEL
