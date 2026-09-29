@@ -166,6 +166,20 @@ const Row = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTable
 ));
 Row.displayName = 'BaseTable.Row';
 
+const SectionRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
+    ({ className, ...props }, ref) => (
+        <tr
+            ref={ref}
+            className={cn(
+                'bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground',
+                className,
+            )}
+            {...props}
+        />
+    ),
+);
+SectionRow.displayName = 'BaseTable.SectionRow';
+
 const HeaderCell = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<HTMLTableCellElement>>(
     (props, ref) => <th ref={ref} {...props} />,
 );
@@ -189,6 +203,7 @@ const BaseTable = Object.assign(BaseTableRoot, {
     Head,
     HeaderCell,
     Row,
+    SectionRow,
 });
 
 export { BaseTable, tableVariants as baseTableVariants };

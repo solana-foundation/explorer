@@ -1,6 +1,8 @@
+import { gen } from '@__fixtures__/gen';
+import { TxInstructionSurface } from '@entities/instruction-card';
 import { toParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 
 import { invariant } from '@/app/shared/lib/invariant';
@@ -9,10 +11,6 @@ import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 import { LIGHTHOUSE_ADDRESS, LIGHTHOUSE_PROGRAM_LABEL } from '../../lib/constants';
 import { parseLighthouseInstruction } from '../../lib/lighthouse-parser';
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
-
-vi.mock('react-feather', () => ({
-    CornerDownRight: () => <div data-testid="corner-down-right" />,
-}));
 
 vi.mock('@/app/components/instruction/InstructionCard', () => ({
     InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
@@ -30,7 +28,9 @@ vi.mock('@/app/components/instruction/InstructionCard', () => ({
 }));
 
 vi.mock('@/app/components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: PublicKey }) => <div data-testid="address">{pubkey.toBase58()}</div>,
+    Address: ({ pubkey, overrideText }: { pubkey: PublicKey; overrideText?: string }) => (
+        <div data-testid="address">{overrideText ?? pubkey.toBase58()}</div>
+    ),
 }));
 
 vi.mock('@/app/components/common/Copyable', () => ({
@@ -41,34 +41,9 @@ vi.mock('@/app/components/common/Copyable', () => ({
     ),
 }));
 
-vi.mock('@/app/utils/anchor', () => ({
-    ExpandableRow: ({
-        fieldName,
-        fieldType,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        nestingLevel,
-        children,
-        ...props
-    }: {
-        children: React.ReactNode;
-        fieldName: string;
-        fieldType: string;
-        nestingLevel: number;
-    } & React.HTMLAttributes<HTMLTableRowElement>) => (
-        <>
-            <tr {...props}>
-                <td>{fieldName}</td>
-                <td>{fieldType}</td>
-            </tr>
-            {children}
-        </>
-    ),
-}));
-
 describe('LighthouseDetailsCard', () => {
     describe('Assert Instructions', () => {
         it('should render Assert Sysvar Clock instruction', () => {
-            // 5dakXwp5QTySbvc6P1Wp9MLZubnnG4R1Dh6cWSgNv6w1xt2JMsTp7EZvWEUxk9YLbJZHG97TT3jMVJ4yMTXKjM2L
             const ix = {
                 data: Buffer.from([15, 0, 0, 166, 238, 134, 18, 0, 0, 0, 0, 3]),
                 keys: [],
@@ -79,21 +54,21 @@ describe('LighthouseDetailsCard', () => {
 
             expect(screen.getByText('Lighthouse: Assert Sysvar Clock')).toBeInTheDocument();
 
-            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            const ixArgs0a = screen.getByTestId('ix-args-0-0');
             expect(ixArgs0a).toHaveTextContent('logLevel');
             expect(ixArgs0a).toHaveTextContent('number');
             expect(ixArgs0a).toHaveTextContent('0');
 
-            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            const ixArgs0b = screen.getByTestId('ix-args-0-1');
             expect(ixArgs0b).toHaveTextContent('assertion');
             expect(ixArgs0b).toHaveTextContent('Slot');
 
-            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            const ixArgs1 = screen.getByTestId('ix-args-1-0');
             expect(ixArgs1).toHaveTextContent('value');
             expect(ixArgs1).toHaveTextContent('bignum');
             expect(ixArgs1).toHaveTextContent('310832806');
 
-            const ixArgs2 = screen.getByTestId('ix-args-1-2');
+            const ixArgs2 = screen.getByTestId('ix-args-1-1');
             expect(ixArgs2).toHaveTextContent('operator');
             expect(ixArgs2).toHaveTextContent('string');
             expect(ixArgs2).toHaveTextContent('<');
@@ -118,24 +93,24 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Assert Account Info')).toBeInTheDocument();
 
             const accountRow = screen.getByTestId('account-row-0');
-            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('TargetAccount');
             expect(accountRow).toHaveTextContent('AUuYypaXez7kXWWWYecmsb89prMCnba6g2tBWm3BxKQV');
 
-            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            const ixArgs0a = screen.getByTestId('ix-args-0-0');
             expect(ixArgs0a).toHaveTextContent('logLevel');
             expect(ixArgs0a).toHaveTextContent('number');
             expect(ixArgs0a).toHaveTextContent('4');
 
-            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            const ixArgs0b = screen.getByTestId('ix-args-0-1');
             expect(ixArgs0b).toHaveTextContent('assertion');
             expect(ixArgs0b).toHaveTextContent('Lamports');
 
-            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            const ixArgs1 = screen.getByTestId('ix-args-1-0');
             expect(ixArgs1).toHaveTextContent('value');
             expect(ixArgs1).toHaveTextContent('bignum');
             expect(ixArgs1).toHaveTextContent('0');
 
-            const ixArgs2 = screen.getByTestId('ix-args-1-2');
+            const ixArgs2 = screen.getByTestId('ix-args-1-1');
             expect(ixArgs2).toHaveTextContent('operator');
             expect(ixArgs2).toHaveTextContent('string');
             expect(ixArgs2).toHaveTextContent('=');
@@ -160,24 +135,24 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Assert Token Account')).toBeInTheDocument();
 
             const accountRow = screen.getByTestId('account-row-0');
-            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('TargetAccount');
             expect(accountRow).toHaveTextContent('5bjPLjnXeCfVPa3khXYzdiHaUYrW6zwveZywNJydaumJ');
 
-            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            const ixArgs0a = screen.getByTestId('ix-args-0-0');
             expect(ixArgs0a).toHaveTextContent('logLevel');
             expect(ixArgs0a).toHaveTextContent('number');
             expect(ixArgs0a).toHaveTextContent('0');
 
-            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            const ixArgs0b = screen.getByTestId('ix-args-0-1');
             expect(ixArgs0b).toHaveTextContent('assertion');
             expect(ixArgs0b).toHaveTextContent('Amount');
 
-            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            const ixArgs1 = screen.getByTestId('ix-args-1-0');
             expect(ixArgs1).toHaveTextContent('value');
             expect(ixArgs1).toHaveTextContent('bignum');
             expect(ixArgs1).toHaveTextContent('7607010918');
 
-            const ixArgs2 = screen.getByTestId('ix-args-1-2');
+            const ixArgs2 = screen.getByTestId('ix-args-1-1');
             expect(ixArgs2).toHaveTextContent('operator');
             expect(ixArgs2).toHaveTextContent('string');
             expect(ixArgs2).toHaveTextContent('>');
@@ -205,24 +180,24 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Assert Bubblegum Tree Config Account')).toBeInTheDocument();
 
             const accountRow = screen.getByTestId('account-row-0');
-            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('TargetAccount');
             expect(accountRow).toHaveTextContent('FMPNEcpSDsAskMHGtB6b6vh4CipN9NNdhWtHKTDqZ9oS');
 
-            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            const ixArgs0a = screen.getByTestId('ix-args-0-0');
             expect(ixArgs0a).toHaveTextContent('logLevel');
             expect(ixArgs0a).toHaveTextContent('number');
             expect(ixArgs0a).toHaveTextContent('4');
 
-            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            const ixArgs0b = screen.getByTestId('ix-args-0-1');
             expect(ixArgs0b).toHaveTextContent('assertion');
             expect(ixArgs0b).toHaveTextContent('TreeDelegate');
 
-            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            const ixArgs1 = screen.getByTestId('ix-args-1-0');
             expect(ixArgs1).toHaveTextContent('value');
             expect(ixArgs1).toHaveTextContent('pubkey');
             expect(ixArgs1).toHaveTextContent('ArMorTp7EVn3SVVo8SJ92BiJAKETEczng6fyN743W3e');
 
-            const ixArgs2 = screen.getByTestId('ix-args-1-2');
+            const ixArgs2 = screen.getByTestId('ix-args-1-1');
             expect(ixArgs2).toHaveTextContent('operator');
             expect(ixArgs2).toHaveTextContent('string');
             expect(ixArgs2).toHaveTextContent('=');
@@ -250,19 +225,19 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Assert Upgradeable Loader Account')).toBeInTheDocument();
 
             const accountRow = screen.getByTestId('account-row-0');
-            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('TargetAccount');
             expect(accountRow).toHaveTextContent('DatucYgNGQn1qtsAJ7LDzt3n2mZstbTuLqyXDGbEwZDP');
 
-            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            const ixArgs0a = screen.getByTestId('ix-args-0-0');
             expect(ixArgs0a).toHaveTextContent('logLevel');
             expect(ixArgs0a).toHaveTextContent('number');
             expect(ixArgs0a).toHaveTextContent('4');
 
-            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            const ixArgs0b = screen.getByTestId('ix-args-0-1');
             expect(ixArgs0b).toHaveTextContent('assertion');
             expect(ixArgs0b).toHaveTextContent('ProgramData');
 
-            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            const ixArgs1 = screen.getByTestId('ix-args-1-0');
             expect(ixArgs1).toHaveTextContent('fields');
             expect(ixArgs1).toHaveTextContent('Array[1]');
 
@@ -270,16 +245,16 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs2).toHaveTextContent('#0');
             expect(ixArgs2).toHaveTextContent('UpgradeAuthority');
 
-            const ixArgs3a = screen.getByTestId('ix-args-3-1');
+            const ixArgs3a = screen.getByTestId('ix-args-3-0');
             expect(ixArgs3a).toHaveTextContent('value');
             expect(ixArgs3a).toHaveTextContent('Option(Some)');
 
-            const ixArgs4b = screen.getByTestId('ix-args-4-1');
+            const ixArgs4b = screen.getByTestId('ix-args-4-0');
             expect(ixArgs4b).toHaveTextContent('value');
             expect(ixArgs4b).toHaveTextContent('pubkey');
             expect(ixArgs4b).toHaveTextContent('2W7rVWpiRMzex7sGBnww6sozQp94xFBzCGYUzUKZw2X4');
 
-            const ixArgs3b = screen.getByTestId('ix-args-3-2');
+            const ixArgs3b = screen.getByTestId('ix-args-3-1');
             expect(ixArgs3b).toHaveTextContent('operator');
             expect(ixArgs3b).toHaveTextContent('string');
             expect(ixArgs3b).toHaveTextContent('=');
@@ -311,36 +286,36 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Assert Account Delta')).toBeInTheDocument();
 
             const accountRowA = screen.getByTestId('account-row-0');
-            expect(accountRowA).toHaveTextContent('Account A');
+            expect(accountRowA).toHaveTextContent('AccountA');
             expect(accountRowA).toHaveTextContent('14gyJnETr2upBHRoCVFfvqcaGGEZuJT1vYXzWCJGJ45h');
 
             const accountRowB = screen.getByTestId('account-row-1');
-            expect(accountRowB).toHaveTextContent('Account B');
+            expect(accountRowB).toHaveTextContent('AccountB');
             expect(accountRowB).toHaveTextContent('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u');
 
-            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            const ixArgs0a = screen.getByTestId('ix-args-0-0');
             expect(ixArgs0a).toHaveTextContent('logLevel');
             expect(ixArgs0a).toHaveTextContent('number');
             expect(ixArgs0a).toHaveTextContent('1');
 
-            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            const ixArgs0b = screen.getByTestId('ix-args-0-1');
             expect(ixArgs0b).toHaveTextContent('assertion');
             expect(ixArgs0b).toHaveTextContent('AccountInfo');
 
-            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            const ixArgs1 = screen.getByTestId('ix-args-1-0');
             expect(ixArgs1).toHaveTextContent('aOffset');
             expect(ixArgs1).toHaveTextContent('0');
 
-            const ixArgs2 = screen.getByTestId('ix-args-1-2');
+            const ixArgs2 = screen.getByTestId('ix-args-1-1');
             expect(ixArgs2).toHaveTextContent('assertion');
             expect(ixArgs2).toHaveTextContent('Lamports');
 
-            const ixArgs3 = screen.getByTestId('ix-args-2-1');
+            const ixArgs3 = screen.getByTestId('ix-args-2-0');
             expect(ixArgs3).toHaveTextContent('value');
             expect(ixArgs3).toHaveTextContent('bignum');
             expect(ixArgs3).toHaveTextContent('-100000000');
 
-            const ixArgs4 = screen.getByTestId('ix-args-2-2');
+            const ixArgs4 = screen.getByTestId('ix-args-2-1');
             expect(ixArgs4).toHaveTextContent('operator');
             expect(ixArgs4).toHaveTextContent('string');
             expect(ixArgs4).toHaveTextContent('>=');
@@ -381,11 +356,11 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Memory Write')).toBeInTheDocument();
 
             const accountRow = screen.getByTestId('account-row-0');
-            expect(accountRow).toHaveTextContent('Program Id');
+            expect(accountRow).toHaveTextContent('ProgramId');
             expect(accountRow).toHaveTextContent(LIGHTHOUSE_ADDRESS);
 
             const accountRow1 = screen.getByTestId('account-row-1');
-            expect(accountRow1).toHaveTextContent('System Program');
+            expect(accountRow1).toHaveTextContent('SystemProgram');
             expect(accountRow1).toHaveTextContent('11111111111111111111111111111111');
 
             // payer and sourceAccount share this address; each row must still
@@ -399,29 +374,29 @@ describe('LighthouseDetailsCard', () => {
             expect(accountRow3).toHaveTextContent('14gyJnETr2upBHRoCVFfvqcaGGEZuJT1vYXzWCJGJ45h');
 
             const accountRow4 = screen.getByTestId('account-row-4');
-            expect(accountRow4).toHaveTextContent('Source Account');
+            expect(accountRow4).toHaveTextContent('SourceAccount');
             expect(accountRow4).toHaveTextContent('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u');
 
-            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            const ixArgs0a = screen.getByTestId('ix-args-0-0');
             expect(ixArgs0a).toHaveTextContent('memoryId');
             expect(ixArgs0a).toHaveTextContent('number');
             expect(ixArgs0a).toHaveTextContent('0');
 
-            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            const ixArgs0b = screen.getByTestId('ix-args-0-1');
             expect(ixArgs0b).toHaveTextContent('memoryBump');
             expect(ixArgs0b).toHaveTextContent('number');
             expect(ixArgs0b).toHaveTextContent('254');
 
-            const ixArgs0c = screen.getByTestId('ix-args-0-3');
+            const ixArgs0c = screen.getByTestId('ix-args-0-2');
             expect(ixArgs0c).toHaveTextContent('writeOffset');
             expect(ixArgs0c).toHaveTextContent('number');
             expect(ixArgs0c).toHaveTextContent('0');
 
-            const ixArgs0d = screen.getByTestId('ix-args-0-4');
+            const ixArgs0d = screen.getByTestId('ix-args-0-3');
             expect(ixArgs0d).toHaveTextContent('writeType');
             expect(ixArgs0d).toHaveTextContent('AccountInfoField');
 
-            const ixArgs1a = screen.getByTestId('ix-args-1-1');
+            const ixArgs1a = screen.getByTestId('ix-args-1-0');
             expect(ixArgs1a).toHaveTextContent('fields');
             expect(ixArgs1a).toHaveTextContent('Array[1]');
 
@@ -460,7 +435,7 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Memory Close')).toBeInTheDocument();
 
             const accountRow = screen.getByTestId('account-row-0');
-            expect(accountRow).toHaveTextContent('Program Id');
+            expect(accountRow).toHaveTextContent('ProgramId');
             expect(accountRow).toHaveTextContent(LIGHTHOUSE_ADDRESS);
 
             const accountRow1 = screen.getByTestId('account-row-1');
@@ -471,12 +446,12 @@ describe('LighthouseDetailsCard', () => {
             expect(accountRow2).toHaveTextContent('Memory');
             expect(accountRow2).toHaveTextContent('14gyJnETr2upBHRoCVFfvqcaGGEZuJT1vYXzWCJGJ45h');
 
-            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            const ixArgs0a = screen.getByTestId('ix-args-0-0');
             expect(ixArgs0a).toHaveTextContent('memoryId');
             expect(ixArgs0a).toHaveTextContent('number');
             expect(ixArgs0a).toHaveTextContent('0');
 
-            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            const ixArgs0b = screen.getByTestId('ix-args-0-1');
             expect(ixArgs0b).toHaveTextContent('memoryBump');
             expect(ixArgs0b).toHaveTextContent('number');
             expect(ixArgs0b).toHaveTextContent('254');
@@ -525,19 +500,18 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Assert Account Info Multi')).toBeInTheDocument();
 
             const accountRow = screen.getByTestId('account-row-0');
-            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('TargetAccount');
             expect(accountRow).toHaveTextContent('FZLY576gVwyD6rEosP72pRUC9TAe7LhgvoSepk3F63PY');
 
-            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            const ixArgs0a = screen.getByTestId('ix-args-0-0');
             expect(ixArgs0a).toHaveTextContent('logLevel');
             expect(ixArgs0a).toHaveTextContent('number');
             expect(ixArgs0a).toHaveTextContent('5');
 
-            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            const ixArgs0b = screen.getByTestId('ix-args-0-1');
             expect(ixArgs0b).toHaveTextContent('assertions');
             expect(ixArgs0b).toHaveTextContent('Array[3]');
 
-            // Two of the following rows have the same data-testid 'ix-args-1-0'
             // eslint-disable-next-line testing-library/no-node-access
             const ixArgs0bChildren = ixArgs0b.nextElementSibling;
 
@@ -608,19 +582,18 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Assert Stake Account Multi')).toBeInTheDocument();
 
             const accountRow = screen.getByTestId('account-row-0');
-            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('TargetAccount');
             expect(accountRow).toHaveTextContent('2mWhJDFtX2LGKggEPVhznvs8cPzy5HM8HhsVPj5YxqA8');
 
-            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            const ixArgs0a = screen.getByTestId('ix-args-0-0');
             expect(ixArgs0a).toHaveTextContent('logLevel');
             expect(ixArgs0a).toHaveTextContent('number');
             expect(ixArgs0a).toHaveTextContent('5');
 
-            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            const ixArgs0b = screen.getByTestId('ix-args-0-1');
             expect(ixArgs0b).toHaveTextContent('assertions');
             expect(ixArgs0b).toHaveTextContent('Array[3]');
 
-            // Two of the followingrows have the same data-testid 'ix-args-1-0'
             // eslint-disable-next-line testing-library/no-node-access
             const ixArgs0bChildren = ixArgs0b.nextElementSibling;
 
@@ -697,12 +670,7 @@ describe('LighthouseDetailsCard', () => {
         });
     });
 
-    // Guards the account-role badges in the shared CodamaInstructionBody. The
-    // writable-non-signer and readonly-signer cases regressed historically to no
-    // badge at all (an `||`/`&&` precedence bug that only rendered for
-    // writable-signers); these assert each role surfaces the right badge.
     describe('account role badges', () => {
-        // Assert Account Info, single target account — only the account role varies.
         const assertAccountInfo = (isSigner: boolean, isWritable: boolean) => ({
             data: Buffer.from([5, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
             keys: [{ isSigner, isWritable, pubkey: new PublicKey('AUuYypaXez7kXWWWYecmsb89prMCnba6g2tBWm3BxKQV') }],
@@ -741,6 +709,50 @@ describe('LighthouseDetailsCard', () => {
             expect(accountRow).not.toHaveTextContent('Signer');
         });
     });
+
+    describe('account table', () => {
+        it('should omit the account table when the instruction takes no accounts', () => {
+            renderLighthouse({
+                data: Buffer.from([15, 0, 0, 166, 238, 134, 18, 0, 0, 0, 0, 3]),
+                keys: [],
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
+            });
+
+            expect(screen.queryByText('Account Name')).not.toBeInTheDocument();
+            expect(screen.getByText('Argument Name')).toBeInTheDocument();
+        });
+
+        it('should label an account past the declared ones as a remaining account', () => {
+            const extra = gen.publicKey(0);
+            renderLighthouse({
+                data: Buffer.from([5, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+                keys: [
+                    {
+                        isSigner: false,
+                        isWritable: false,
+                        pubkey: new PublicKey('AUuYypaXez7kXWWWYecmsb89prMCnba6g2tBWm3BxKQV'),
+                    },
+                    { isSigner: false, isWritable: false, pubkey: extra },
+                ],
+                programId: new PublicKey(LIGHTHOUSE_ADDRESS),
+            });
+
+            expect(screen.getByTestId('account-row-0')).toHaveTextContent('TargetAccount');
+            const extraRow = screen.getByTestId('account-row-1');
+            expect(extraRow).toHaveTextContent('Remaining Account #1');
+            expect(extraRow).toHaveTextContent(extra.toBase58());
+        });
+    });
+
+    it('should name the program in the Program row', () => {
+        renderLighthouse({
+            data: Buffer.from([15, 0, 0, 166, 238, 134, 18, 0, 0, 0, 0, 3]),
+            keys: [],
+            programId: new PublicKey(LIGHTHOUSE_ADDRESS),
+        });
+
+        expect(screen.getByText('Lighthouse')).toBeInTheDocument();
+    });
 });
 
 // Decode the fixture through the real parser + dispatcher wrapper so the card is
@@ -749,15 +761,26 @@ function renderLighthouse(raw: { data: Buffer; keys: unknown[]; programId: Publi
     const parsed = parseLighthouseInstruction(toKitInstruction(raw as unknown as TransactionInstruction));
     invariant(parsed, 'expected fixture to parse as a Lighthouse instruction');
     const ix = toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId);
-    return render(
-        <LighthouseDetailsCard
-            ix={ix}
-            raw={raw as unknown as TransactionInstruction}
-            index={0}
-            result={{ err: null }}
-        />,
+    const view = render(
+        <TxInstructionSurface result={{ err: null }}>
+            <LighthouseDetailsCard ix={ix} raw={raw as unknown as TransactionInstruction} index={0} />
+        </TxInstructionSurface>,
     );
+    expandAllGroups();
+    return view;
 }
+
+// A test timeout cannot stop a synchronous loop, so the loop stops at a fixed depth.
+function expandAllGroups() {
+    for (let level = 0; level < MAX_GROUP_DEPTH; level++) {
+        const toggles = screen.queryAllByText('Expand');
+        if (toggles.length === 0) return;
+        toggles.forEach(toggle => fireEvent.click(toggle));
+    }
+    throw new Error('a group did not expand');
+}
+
+const MAX_GROUP_DEPTH = 10;
 
 function nextSibling(el: Element | null): Element {
     invariant(el, 'expected current element to be non-null');

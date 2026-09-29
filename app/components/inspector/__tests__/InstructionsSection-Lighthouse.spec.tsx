@@ -1,9 +1,10 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import { LIGHTHOUSE_ADDRESS } from '@features/decode-instruction-lighthouse';
+import { LIGHTHOUSE_ADDRESS, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { Keypair, type MessageV0, PublicKey, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { InstructionParserProvider } from '@/app/entities/instruction-parser';
 import { AccountsProvider } from '@/app/providers/accounts';
@@ -27,6 +28,11 @@ vi.mock('swr', () => ({
     })),
 }));
 
+vi.mock('@features/decode-instruction-lighthouse', async importOriginal => {
+    const actual = await importOriginal<typeof import('@features/decode-instruction-lighthouse')>();
+    return { ...actual, LighthouseDetailsCard: vi.fn(actual.LighthouseDetailsCard) };
+});
+
 vi.mock('next/navigation', () => ({
     usePathname: vi.fn(() => '/'),
     useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn() })),
@@ -39,22 +45,13 @@ vi.mock('next/link', () => ({
 }));
 
 describe('Inspector InstructionsSection with a Lighthouse instruction', () => {
-    test('should decode and render a Lighthouse instruction via the unified dispatcher', async () => {
-        const message = buildLighthouseMessage();
+    afterEach(() => {
+        vi.mocked(LighthouseDetailsCard).mockReset();
+        vi.restoreAllMocks();
+    });
 
-        const { container: c } = render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <TransactionsProvider>
-                        <AccountsProvider>
-                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
-                                <InstructionsSection message={message} />
-                            </InstructionParserProvider>
-                        </AccountsProvider>
-                    </TransactionsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+    test('should decode and render a Lighthouse instruction via the unified dispatcher', async () => {
+        const { container: c } = renderSection();
 
         // Title proves the whole path: the dispatcher decoded the raw bytes into
         // `{ program: 'lighthouse', type: 'Assert Sysvar Clock' }` and the
@@ -62,17 +59,60 @@ describe('Inspector InstructionsSection with a Lighthouse instruction', () => {
         // inspector fell through to UnknownDetailsCard for Lighthouse.)
         expect(await screen.findByText(/Lighthouse: Assert Sysvar Clock/i)).toBeInTheDocument();
 
-        // The decoded body rendered too — a Program row labelled "Lighthouse".
         await waitFor(() => {
             expect(
                 findTableRowWithMatches(c, [
-                    { columnIndex: 0, regex: /Program/ },
-                    { columnIndex: 1, regex: /Lighthouse/ },
+                    { columnIndex: 0, regex: /^Program$/ },
+                    { columnIndex: 1, regex: /^Lighthouse$/ },
                 ]),
             ).not.toBeNull();
         });
+        expect(screen.getAllByText('Program')).toHaveLength(1);
+    });
+
+    test('should span the Program value across the Type and Value columns of the card body', async () => {
+        const { container: c } = renderSection();
+
+        expect(await findProgramValueCell(c)).toHaveAttribute('colspan', '2');
+    });
+
+    test('should not widen the Program row in the two-column raw view', async () => {
+        const { container: c } = renderSection();
+
+        await userEvent.click(await screen.findByRole('button', { name: 'Raw' }));
+
+        expect(await findProgramValueCell(c)).not.toHaveAttribute('colspan');
+    });
+
+    test('should replace a Lighthouse card that throws with the Unknown card', async () => {
+        const failure = new Error('lighthouse card failed');
+        vi.mocked(LighthouseDetailsCard).mockImplementation(() => {
+            throw failure;
+        });
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        renderSection();
+
+        expect(await screen.findByText('Instruction')).toBeInTheDocument();
+        expect(screen.queryByText(/Lighthouse: Assert Sysvar Clock/)).not.toBeInTheDocument();
     });
 });
+
+function renderSection() {
+    return render(
+        <ScrollAnchorProvider>
+            <ClusterProvider>
+                <TransactionsProvider>
+                    <AccountsProvider>
+                        <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                            <InstructionsSection message={buildLighthouseMessage()} />
+                        </InstructionParserProvider>
+                    </AccountsProvider>
+                </TransactionsProvider>
+            </ClusterProvider>
+        </ScrollAnchorProvider>,
+    );
+}
 
 // A single-instruction v0 message carrying the "Assert Sysvar Clock" bytes
 // (same fixture as the parser/card tests). No address-table lookups, so the
@@ -88,6 +128,15 @@ function buildLighthouseMessage(): MessageV0 {
         payerKey: Keypair.generate().publicKey,
         recentBlockhash: PublicKey.default.toBase58(),
     }).compileToV0Message();
+}
+
+async function findProgramValueCell(container: HTMLElement) {
+    const row = await waitFor(() => {
+        const match = findTableRowWithMatches(container, [{ columnIndex: 0, regex: /^Program$/ }]);
+        expect(match).not.toBeNull();
+        return match;
+    });
+    return row?.querySelectorAll('td')[1];
 }
 
 function findTableRowWithMatches(

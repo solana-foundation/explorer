@@ -13,8 +13,10 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
+import { expect, within } from 'storybook/test';
 
 import { decodeInstructionWithIdl } from '../../lib/decode-instruction-with-idl';
 import { IdlInstructionCard } from '../IdlInstructionCard';
@@ -38,7 +40,7 @@ function makeIx(data: Buffer, accountCount: number): TransactionInstruction {
 
 const meta = {
     component: IdlInstructionCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     // TODO(decode-instruction-with-idl): rename to a feature-scoped title once the Storybook tree migration off
@@ -59,6 +61,10 @@ export const Allocate: Story = {
         ix: allocateIx,
         result: { err: null },
         signature: '',
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(await canvas.findByText('ProgramMetadata: Allocate')).toBeInTheDocument();
     },
 };
 

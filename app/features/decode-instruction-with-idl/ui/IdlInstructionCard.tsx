@@ -29,11 +29,12 @@ export function IdlInstructionCard({
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const props = { childIndex, index, innerCards, ix, result };
+    const nodeProps = { childIndex, index, innerCards, ix };
+    const props = { ...nodeProps, result };
     return (
         <ErrorBoundary fallback={<UnknownDetailsCard {...props} />}>
             {decoded.kind === 'codama' ? (
-                <CodamaInstructionCard {...props} parsedIx={decoded.parsedIx} />
+                <CodamaInstructionCard {...nodeProps} parsedIx={decoded.parsedIx} />
             ) : decoded.kind === 'anchor' ? (
                 <AnchorDetailsCard
                     {...props}

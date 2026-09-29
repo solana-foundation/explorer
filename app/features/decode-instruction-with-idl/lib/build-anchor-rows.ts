@@ -1,3 +1,4 @@
+import { remainingAccountLabel } from '@entities/instruction-card';
 import { AccountMeta, PublicKey } from '@solana/web3.js';
 import { FlattenedIdlAccount } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
@@ -57,7 +58,7 @@ export function buildAnchorRows(keys: readonly AccountMeta[], ixAccounts: readon
             isWritable,
             keyIndex,
             kind: 'account',
-            name: info ? camelToTitleCase(info.name) : `Remaining Account #${keyIndex + 1 - namedCount}`,
+            name: info ? camelToTitleCase(info.name) : remainingAccountLabel(keyIndex, namedCount),
             nestingLevel: info?.nestingLevel,
             pubkey,
         });
