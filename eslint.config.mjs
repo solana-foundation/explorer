@@ -911,7 +911,6 @@ export default tseslint.config(
             'app/features/security-txt/ui/utils.ts',
             'app/features/stake/lib/stake-activation-math.ts',
             'app/features/stake/ui/StakeAccountSection.tsx',
-            'app/features/token-verification-badge/model/use-bluprynt.ts',
             'app/features/token-verification-badge/model/use-jupiter.ts',
             'app/features/token-verification-badge/model/use-rugcheck.ts',
             'app/features/token-verification-badge/ui/VerificationIcon.tsx',

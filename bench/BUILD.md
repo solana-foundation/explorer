@@ -47,7 +47,6 @@
 | Dynamic | `/api/token-info` | — | — |
 | Dynamic | `/api/token-market-data/[address]` | — | — |
 | Dynamic | `/api/token-price/[mintAddress]` | — | — |
-| Dynamic | `/api/verification/bluprynt/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
