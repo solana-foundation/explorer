@@ -36,11 +36,12 @@ Alternatives considered:
 - `processResponse` sends a body-read rejection other than the size cap through `classifyFetchError`, the classifier `fetch()` rejections already use; `readBodyWithLimit` throws `BodyShapeError` for the two faults caused by the runtime's stream type, which keep throwing.
 - `resolveRedirectUrl` returns a `redirect-invalid-location` `502` for a `Location` that `URL.parse` rejects.
 - The route's catch reports through `Logger.error` with `sentry: true`.
+- `decode-failed` is reported as a Sentry exception: the body is already buffered, so a decode failure other than malformed JSON is the proxy's own fault.
 
 ## Impact
 
 - Upstream `404`, `403`, and `429` stop counting as proxy `5xx`. Upstream `500`, `503`, and `504` still count.
-- A stalled body answers `504` and a dropped connection `502` instead of `500`; the route's `500` then counts only the proxy's own faults.
+- A stalled body answers `504` and a dropped connection `502` instead of `500`. Apart from a listed upstream `500`, a proxy `500` then means the proxy's own fault, and each one is a Sentry exception.
 - Supersedes four passages of `add-metadata-proxy`, across three requirements:
     - "The proxy SHALL serve only JSON, text-as-JSON, and image content": its sentence "A non-2xx upstream (that is not a handled redirect) SHALL be `502`" and its "Non-2xx upstream" scenario.
     - "Off-chain images SHALL surface why they could not be displayed and degrade gracefully": its "Image fails to load for another readable reason" scenario, which says an upstream `404` is surfaced as a `502`.

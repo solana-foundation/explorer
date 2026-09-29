@@ -30,7 +30,7 @@ This requirement intentionally replaces the `add-metadata-proxy` rule that every
 
 ### Requirement: The proxy SHALL answer an upstream failure after the headers with an upstream status
 
-An upstream failure that happens after the response headers arrive SHALL produce the same status as the equivalent failure of the request itself: `504` when the body stalls past the timeout, `502` when the connection drops while the body streams, and `502` when a redirect `Location` is not a valid URL. The proxy SHALL answer `500` only for its own faults, and SHALL report those to Sentry as exceptions.
+An upstream failure that happens after the response headers arrive SHALL produce the same status as the equivalent failure of the request itself: `504` when the body stalls past the timeout, `502` when the connection drops while the body streams, and `502` when a redirect `Location` is not a valid URL. A fault in the proxy's own code, whether thrown or returned as `decode-failed`, SHALL be answered `500` and reported to Sentry as an exception. A listed upstream `500` passes through under the pass-through requirement and is not reported as an exception.
 
 #### Scenario: Body stalls past the timeout
 
@@ -51,5 +51,11 @@ An upstream failure that happens after the response headers arrive SHALL produce
 #### Scenario: Internal fault
 
 - **WHEN** the proxy's own code throws while handling a request
+- **THEN** the proxy SHALL respond `500`
+- **AND** it SHALL report the error to Sentry as an exception
+
+#### Scenario: Decode fault on a buffered body
+
+- **WHEN** decoding the buffered body fails for a reason other than malformed JSON
 - **THEN** the proxy SHALL respond `500`
 - **AND** it SHALL report the error to Sentry as an exception
