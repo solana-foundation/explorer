@@ -87,16 +87,6 @@ describe('fetchResource', () => {
         expect(await fetchError()).toMatchObject({ code: 'unsupported-content-type', status: 415 });
     });
 
-    it('should return an error upon exceeded size when fetch rejects', async () => {
-        mockRejectOnce(new Error('FetchError: content size at https://path/to/resour.ce over limit: 100'));
-
-        expect(await fetchError()).toMatchObject({
-            code: 'oversize-streamed',
-            context: { host: 'hello.world', maxSize: 100 },
-            status: 413,
-        });
-    });
-
     it('should return an error when content-length exceeds limit', async () => {
         // Pre-check via Content-Length header — fast-fails before reading the body.
         const big = new Uint8Array(50_000);

@@ -181,7 +181,7 @@ async function doFetch(url: URL, request: FetchRequest, dispatcher: Agent): Prom
             }),
         );
     } catch (e) {
-        return err(classifyFetchError(e, url, request.size));
+        return err(classifyFetchError(e, url));
     }
 }
 
@@ -221,7 +221,7 @@ async function processResponse(
         }
         if (e instanceof BodyShapeError) throw e;
         // The upstream stalled or dropped the connection after sending headers: the same failure as a failed fetch().
-        return err(classifyFetchError(e, url, size));
+        return err(classifyFetchError(e, url));
     }
     const contentType = response.headers.get('content-type');
 
@@ -248,7 +248,7 @@ function pickProcessor(contentType: string | null) {
     return undefined;
 }
 
-function classifyFetchError(e: unknown, url: URL, size: number): StatusError {
+function classifyFetchError(e: unknown, url: URL): StatusError {
     const error = e instanceof Error ? e : new Error('Cannot fetch resource', { cause: e });
 
     if (matchTimeoutError(error)) {
@@ -256,14 +256,6 @@ function classifyFetchError(e: unknown, url: URL, size: number): StatusError {
             cause: error,
             code: 'timeout',
             context: { url: url.href },
-        });
-    }
-    if (matchMaxSizeError(error)) {
-        // fetch() itself rejected with a size error (limit hit before a Response was returned).
-        return statusError(413, 'Streamed body exceeds max size', {
-            cause: error,
-            code: 'oversize-streamed',
-            context: { host: url.host, maxSize: size },
         });
     }
     if (matchAbortError(error)) {
