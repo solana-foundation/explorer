@@ -30,6 +30,14 @@ describe('GET /robots.txt', () => {
         expect(body).toContain('Allow: /mcp/start\n');
     });
 
+    it('should keep AhrefsBot off the OG image routes', async () => {
+        const body = await GET(createRequest()).text();
+
+        expect(body).toContain(
+            'User-agent: AhrefsBot\nAllow: /\nAllow: /mcp/start\nDisallow: /api/\nDisallow: /mcp\nDisallow: /og/\n',
+        );
+    });
+
     it('should disallow meta-externalagent from every path', async () => {
         const body = await GET(createRequest()).text();
 
