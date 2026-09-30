@@ -6,7 +6,7 @@ import { matchAbortError, matchMaxSizeError, matchTimeoutError, type StatusError
 import { isHTTPProtocol, lookupHostnameSafely } from './ip';
 import { isPassthroughStatus, toProxyStatus } from './lib/upstream-status';
 import { processBinary, processJson, processTextAsJson } from './processors';
-import { BodyShapeError, readBodyWithLimit } from './read-body-with-limit';
+import { BodyShapeError, discardBody, readBodyWithLimit } from './read-body-with-limit';
 
 // Content-type matchers
 export const matchJson = (header?: string | null) => header?.includes('application/json');
@@ -112,17 +112,13 @@ async function executeHop(url: URL, request: FetchRequest): Promise<Result<HopRe
         return processError ? err(processError) : ok({ kind: 'done', value });
     } finally {
         // By this point the body has either been fully consumed (success
-        // path), cancelled (size pre-check), or abandoned (errors in
-        // processResponse). `close()` waits for any remaining in-flight
-        // stream to settle and is preferred over `destroy()`; swallowing
-        // the rejection avoids masking an upstream error with a cleanup
-        // error.
+        // path), cancelled (redirect, error status, size pre-check), or
+        // abandoned (errors in processResponse). `close()` waits for any
+        // remaining in-flight stream to settle and is preferred over
+        // `destroy()`; swallowing the rejection avoids masking an upstream
+        // error with a cleanup error.
         await dispatcher.close().catch(() => undefined);
     }
-}
-
-async function discardBody(response: Response): Promise<void> {
-    await response.body?.cancel().catch(() => undefined);
 }
 
 function upstreamStatusError(response: Response, url: URL): StatusError {
@@ -200,7 +196,7 @@ async function processResponse(
     // to readBodyWithLimit, which enforces the limit on the actual byte count.
     const contentLength = Number(response.headers.get('content-length'));
     if (Number.isFinite(contentLength) && contentLength > size) {
-        await response.body?.cancel();
+        await discardBody(response);
         return err(
             statusError(413, `Content-Length ${contentLength} exceeds max size ${size}`, {
                 code: 'oversize-declared',

@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream';
+
 import type { LookupAddress } from 'dns';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -42,6 +44,13 @@ function mockRedirectOnce(location: string, status = 302) {
 
 function mockRejectOnce<T extends Error>(error: T) {
     fetchMock.mockRejectedValueOnce(error);
+}
+
+// A plain object, because `new Response` would turn the `Readable` into a Web stream.
+function mockNodeStreamOnce(status: number, headers: Record<string, string>): Readable {
+    const body = Readable.from([new Uint8Array(10)]);
+    fetchMock.mockResolvedValueOnce({ body, headers: new Headers(headers), ok: status < 300, status });
+    return body;
 }
 
 describe('fetchResource', () => {
@@ -250,6 +259,33 @@ describe('fetchResource', () => {
         await expect(fetchResource(uri, { headers, size: 100, timeout: 100 })).rejects.toThrow(
             'Unsupported response body shape',
         );
+    });
+
+    // Next.js dev hands over a gzip body as a Node `Readable`, which has no `cancel()`.
+    describe('Node Readable body', () => {
+        it('should return the upstream status of an error response and destroy its body', async () => {
+            const body = mockNodeStreamOnce(404, { 'Content-Type': 'text/html' });
+
+            expect(await fetchError()).toMatchObject({ code: 'upstream-status', status: 404 });
+            expect(body.destroyed).toBe(true);
+        });
+
+        it('should return 413 for an oversize Content-Length and destroy the body', async () => {
+            const body = mockNodeStreamOnce(200, { 'Content-Length': '500', 'Content-Type': 'application/json' });
+
+            expect(await fetchError()).toMatchObject({ code: 'oversize-declared', status: 413 });
+            expect(body.destroyed).toBe(true);
+        });
+
+        it('should follow a redirect and destroy its body', async () => {
+            const body = mockNodeStreamOnce(302, { Location: 'http://cdn.hello.world/data.json' });
+            mockJsonResponseOnce({ redirected: true });
+
+            const resource = unwrap(await fetchResource(uri, { headers, size: 100, timeout: 100 }));
+
+            expect(resource).toMatchObject({ data: { redirected: true }, host: 'cdn.hello.world' });
+            expect(body.destroyed).toBe(true);
+        });
     });
 
     // 304/305 are 3xx but don't carry a Location header by spec; they must be

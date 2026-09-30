@@ -27,6 +27,16 @@ export async function readBodyWithLimit(response: Response, maxSize: number): Pr
     throw new BodyShapeError('Unsupported response body shape');
 }
 
+// An unread body holds the connection open until the timeout.
+export async function discardBody(response: Response): Promise<void> {
+    const body: unknown = response.body;
+    if (body instanceof ReadableStream) {
+        await body.cancel().catch(() => undefined);
+    } else if (body instanceof Readable) {
+        body.destroy();
+    }
+}
+
 async function collectFromReader(body: ReadableStream<Uint8Array>, maxSize: number): Promise<ArrayBuffer> {
     const reader = body.getReader();
     const chunks: Uint8Array[] = [];
