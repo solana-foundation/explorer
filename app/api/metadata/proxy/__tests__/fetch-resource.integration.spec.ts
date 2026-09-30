@@ -57,6 +57,16 @@ beforeAll(async () => {
             res.end(JSON.stringify({ small: true }));
             return;
         }
+        if (req.url === '/stalled-404') {
+            res.writeHead(404);
+            res.write('partial');
+            return;
+        }
+        if (req.url === '/stalled-redirect') {
+            res.writeHead(302, { Location: '/small.json' });
+            res.write('partial');
+            return;
+        }
         res.writeHead(404).end();
     });
     await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -110,5 +120,18 @@ describe('fetchResource — real undici path', () => {
         );
 
         expect(result.data).toEqual({ small: true });
+    });
+
+    it.each(['/stalled-404', '/stalled-redirect'])('should not wait for the body of %s to end', async path => {
+        const timeout = 3_000;
+        const startedAt = Date.now();
+
+        await fetchResource(`http://localhost.test:${port}${path}`, {
+            headers: new Headers({ 'User-Agent': 'test' }),
+            size: 1_000_000,
+            timeout,
+        });
+
+        expect(Date.now() - startedAt).toBeLessThan(timeout / 2);
     });
 });

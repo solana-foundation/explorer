@@ -99,10 +99,12 @@ async function executeHop(url: URL, request: FetchRequest): Promise<Result<HopRe
         if (fetchError) return err(fetchError);
 
         if (isRedirect(response)) {
+            await discardBody(response);
             return extractRedirect(response, url);
         }
 
         if (!response.ok) {
+            await discardBody(response);
             return err(upstreamStatusError(response, url));
         }
 
@@ -117,6 +119,10 @@ async function executeHop(url: URL, request: FetchRequest): Promise<Result<HopRe
         // error.
         await dispatcher.close().catch(() => undefined);
     }
+}
+
+async function discardBody(response: Response): Promise<void> {
+    await response.body?.cancel().catch(() => undefined);
 }
 
 function upstreamStatusError(response: Response, url: URL): StatusError {
