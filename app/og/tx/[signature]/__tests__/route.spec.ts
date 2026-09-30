@@ -84,6 +84,15 @@ describe('should handle GET /og/tx/[signature]', () => {
         expect(getTxShareData).not.toHaveBeenCalled();
     });
 
+    it('should return 400 for a signature with a character outside the base58 alphabet', async () => {
+        const signature = '5xJkP9v71VQpwSxvySDX5hzjZ8vSbnsNJs3EaUSSm9hiaA2c98KlmNQxRtsFgh7Lp';
+        const response = await GET(makeRequest(signature), makeProps(signature));
+
+        expect(response.status).toBe(400);
+        expect(await response.text()).toBe('Invalid transaction signature');
+        expect(getTxShareData).not.toHaveBeenCalled();
+    });
+
     it('should return 400 when the cluster param is custom', async () => {
         const response = await GET(makeRequest(SIGNATURE, 'custom'), makeProps(SIGNATURE));
 

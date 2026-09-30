@@ -15,7 +15,7 @@ const BASE58_ENCODER = getBase58Encoder();
 const BASE58_DECODER = getBase58Decoder();
 
 /**
- * Non-throwing signature check. Returns false for non-base58 input.
+ * Non-throwing signature check.
  * Added because @solana/kit {@link isSignature} throws on a string with
  * a character outside the base58 alphabet.
  */
