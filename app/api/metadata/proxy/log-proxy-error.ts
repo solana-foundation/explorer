@@ -26,7 +26,6 @@ const LOG_POLICY: Record<ProxyErrorCode, LogPolicy> = {
     'ssrf-blocked': { level: 'warn', message: 'Hostname resolution blocked (SSRF protection)' },
     timeout: { level: 'debug' },
     'too-many-redirects': { level: 'warn', message: 'Too many redirects' },
-    // TODO(<ticket>): report to Sentry (sentry: true) once unlisted statuses are tracked there
     'unlisted-upstream-status': { level: 'warn', message: 'Unlisted upstream status' },
     unreachable: { level: 'warn', message: 'Fetch failed', sentry: true },
     'unsupported-content-type': { level: 'debug' },

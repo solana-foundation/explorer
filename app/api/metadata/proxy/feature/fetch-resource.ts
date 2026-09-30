@@ -84,7 +84,6 @@ async function executeHop(url: URL, request: FetchRequest): Promise<Result<HopRe
             statusError(403, `Hostname resolution blocked: ${validation.reason}`, {
                 cause: validation.cause,
                 code: 'ssrf-blocked',
-                // TODO(<ticket>): a DNS failure is not an SSRF block; give it its own code and log level
                 context: { error: validation.cause, hostname: url.hostname, reason: validation.reason },
             }),
         );
