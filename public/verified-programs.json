@@ -354,6 +354,12 @@
     "verifiedAt": "2026-06-05T09:49:47"
   },
   {
+    "address": "5X7RTCFFLgCpsRiskzm1gBEQmbzBEL39H6WpN9YzSizB",
+    "name": "0xmigi/livestock",
+    "repoUrl": "https://github.com/0xmigi/livestock/tree/be8caf16fcad4429fbb5fd39d150291a3e1998c7",
+    "verifiedAt": "2026-09-28T19:58:17"
+  },
+  {
     "address": "5XDrnPsfpZ29v7DRrUtUBJ3yr5n1mhSUDyEzPuAvakHv",
     "name": "LayerZero-Labs/monorepo-external",
     "repoUrl": "https://github.com/LayerZero-Labs/monorepo-external/tree/60b4a946c52fbfe72b2cf76c2a4698778eadacfc",
@@ -615,7 +621,7 @@
     "address": "8zPmKwY3Wv9yVoP6xZnzkAUJX5BeqM7aVMDZio4PBDyb",
     "name": "LayerZero-Labs/devtools",
     "repoUrl": "https://github.com/LayerZero-Labs/devtools/tree/62efaf03fc3916312d7f7279f78ed6fdf2aa6c44",
-    "verifiedAt": "2025-06-10T13:21:27"
+    "verifiedAt": "2026-09-28T08:44:55"
   },
   {
     "address": "91ahrFntCbnRAcJhsSQGd4j2QNdiUZTbESA6cJYKeovn",
@@ -640,6 +646,12 @@
     "name": "credential_signer",
     "repoUrl": "https://github.com/alien-id/solana-attestation-signer/tree/cf90359175ab92e4d9f7efcaf658f976082c7a3e",
     "verifiedAt": "2026-01-28T14:49:00"
+  },
+  {
+    "address": "9fhQBbumKEFuXtMBDw8AaQyAjCorLGJQiS3skWZdQyQD",
+    "name": "Privacy-Cash/privacy-cash",
+    "repoUrl": "https://github.com/Privacy-Cash/privacy-cash/tree/06ce337de4c62b8f559c3beb544d9ba383376fca",
+    "verifiedAt": "2026-09-30T03:53:40"
   },
   {
     "address": "9Mq2JHE2c38LTioLQYjqbLDd4jJkgftLj83VYiTYrfnJ",
@@ -1218,6 +1230,12 @@
     "verifiedAt": "2026-04-29T12:55:50"
   },
   {
+    "address": "dvp34bdbcEm4f4FCUjGV4mDAkDshaQR4LkK8fdcsyZq",
+    "name": "solana-foundation/dvp",
+    "repoUrl": "https://github.com/solana-foundation/dvp/tree/dfd47bf9e558a0115af1a3ff06108c709bb7248b",
+    "verifiedAt": "2026-09-29T17:29:04"
+  },
+  {
     "address": "DXxCKeaee3YD1HeA1UcBxTiHGZYFDZQ34Q2bjY87Nyoc",
     "name": "setto-labs/gasless-solana",
     "repoUrl": "https://github.com/setto-labs/gasless-solana/tree/38d2b7114fb2d0416026fc3cf43ff0f0b4353239",
@@ -1266,10 +1284,22 @@
     "verifiedAt": "2026-09-22T22:41:12"
   },
   {
+    "address": "EcoACmxgWf3v4o3UBqro2qBaYxgidaXnqdAT55ue1UFe",
+    "name": "eco/eco-routes-svm",
+    "repoUrl": "https://github.com/eco/eco-routes-svm/tree/aa8059ee67ac116d47693ec83926078276c083f7",
+    "verifiedAt": "2026-09-29T05:48:51"
+  },
+  {
     "address": "EcoFiZiPRTZzcQhHHUZqL9VGMjzYWvfQbDgJwaNsSXbQ",
     "name": "flash_fulfiller",
     "repoUrl": "https://github.com/eco/eco-routes-svm/tree/3bace91f32a3e1c0dfb715992ac0ce8165bed67b",
     "verifiedAt": "2026-08-19T20:49:39"
+  },
+  {
+    "address": "EcoFPd5rxoSdvW3sdkrx3DLAmATfVaibfNvLq3ZUh9ge",
+    "name": "eco/eco-routes-svm",
+    "repoUrl": "https://github.com/eco/eco-routes-svm/tree/aa8059ee67ac116d47693ec83926078276c083f7",
+    "verifiedAt": "2026-09-29T05:42:26"
   },
   {
     "address": "EcoFvY9tDz6kaxAQxNHga68sQm535DskDBCgKm3tziaT",
@@ -1296,6 +1326,12 @@
     "verifiedAt": "2026-08-19T20:44:30"
   },
   {
+    "address": "EcoHjwFYKtiHp5ZuFQBc87GDikm9Lc5EYapKywjNAQQF",
+    "name": "eco/eco-routes-svm",
+    "repoUrl": "https://github.com/eco/eco-routes-svm/tree/aa8059ee67ac116d47693ec83926078276c083f7",
+    "verifiedAt": "2026-09-29T05:38:40"
+  },
+  {
     "address": "EcoLAP7GStetXHQa3R1UcKb2iBbodpwcSajQkiJKgF2U",
     "name": "local_prover",
     "repoUrl": "https://github.com/eco/eco-routes-svm/tree/5aa308c6386edc1e92413c30b35958023a003215",
@@ -1308,10 +1344,10 @@
     "verifiedAt": "2026-08-19T20:47:04"
   },
   {
-    "address": "EconCw1jAAqADgdvChWuySx11yDBZtLz6Wz4vgbJAuFq",
+    "address": "EcoLGDxv2hnDijPfHX9fAbFeMmUmGQ1XzLNUfCHyEw91",
     "name": "eco/eco-routes-svm",
-    "repoUrl": "https://github.com/eco/eco-routes-svm/tree/1bceec80cb9f2bcca8aa847338c942924604ae5c",
-    "verifiedAt": "2026-09-26T21:21:16"
+    "repoUrl": "https://github.com/eco/eco-routes-svm/tree/aa8059ee67ac116d47693ec83926078276c083f7",
+    "verifiedAt": "2026-09-29T05:35:17"
   },
   {
     "address": "Ecoog459avhoPbVoNnh8616uSHixCQdPPtedqNXohLLK",
@@ -1356,16 +1392,16 @@
     "verifiedAt": "2026-06-04T18:54:19"
   },
   {
-    "address": "EcoPZL6PoZ5zHUUpmJLfux1jw126W7jhBB8zrVaFaK1y",
-    "name": "local_prover",
-    "repoUrl": "https://github.com/eco/eco-routes-svm/tree/a3fba4638f945c07dfa9bd13020fe25a97b1d21c",
-    "verifiedAt": "2026-05-14T06:58:49"
+    "address": "EcoowmRRrMyYtQCuh5fCvMDWcD6B9ZDZkpgedf2bWKXi",
+    "name": "eco/eco-routes-svm",
+    "repoUrl": "https://github.com/eco/eco-routes-svm/tree/aa8059ee67ac116d47693ec83926078276c083f7",
+    "verifiedAt": "2026-09-29T05:31:59"
   },
   {
-    "address": "EcoqJaiaCnZrG7gQuvD1V6gbqz59VRNqSEjQAKYujEoV",
+    "address": "EcoPSkJe6BYMwkuYmpsEbhHX3ikDbnG2BdwavGquSwRV",
     "name": "eco/eco-routes-svm",
-    "repoUrl": "https://github.com/eco/eco-routes-svm/tree/178755547049e6668896527b5099e2de91d1c65f",
-    "verifiedAt": "2026-09-26T17:20:22"
+    "repoUrl": "https://github.com/eco/eco-routes-svm/tree/aa8059ee67ac116d47693ec83926078276c083f7",
+    "verifiedAt": "2026-09-29T05:45:46"
   },
   {
     "address": "EcoS9WNe7onaxkS9STYMHhUKsvjQGte1eitKhXCpvSPi",
@@ -1384,6 +1420,12 @@
     "name": "eco/eco-swap-gateway",
     "repoUrl": "https://github.com/eco/eco-swap-gateway/tree/4d16f036af1abddf2956a77a902043b53dd3b6f7",
     "verifiedAt": "2026-06-05T15:59:37"
+  },
+  {
+    "address": "EcoSZwpd4VnXXqfBHc4xBDzvidSRsNTPW744hs62hvWS",
+    "name": "eco/eco-swap-gateway",
+    "repoUrl": "https://github.com/eco/eco-swap-gateway/tree/0f599cbe498b86a3539d11c09a9020dd5bb89b9a",
+    "verifiedAt": "2026-09-29T05:43:47"
   },
   {
     "address": "EDSh6vJ7KDsB6UStKYt4mDBcAJqVtS7JWoPbDXw81LSr",
@@ -2708,8 +2750,8 @@
   {
     "address": "vsr2nfGVNHmSY8uxoBGqq8AQbwz3JwaEaHqGbsTPXqQ",
     "name": "Mythic-Project/voter-stake-registry",
-    "repoUrl": "https://github.com/Mythic-Project/voter-stake-registry/tree/1d69f9bd48f959db8ca815256a7dfb45b72160fd",
-    "verifiedAt": "2026-09-27T17:31:03"
+    "repoUrl": "https://github.com/Mythic-Project/voter-stake-registry/tree/c5f91c549d657030c35d0415b88ce2ddd0311115",
+    "verifiedAt": "2026-09-29T12:29:19"
   },
   {
     "address": "WALL8ucBuUyL46QYxwYJjidaFYhdvxUFrgvBxPshERx",
