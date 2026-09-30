@@ -5,7 +5,7 @@ import { Setup } from '../Setup';
 import { withMcpBand } from './mcp-band-decorator';
 
 const meta: Meta<typeof Setup> = {
-    args: { origin: 'https://explorer.solana.com' },
+    args: { isRestricted: false, origin: 'https://explorer.solana.com' },
     component: Setup,
     decorators: [withMcpBand],
     parameters: { layout: 'padded' },
@@ -25,4 +25,8 @@ export const SwitchClient: Story = {
         await userEvent.click(canvas.getByRole('tab', { name: 'Cursor' }));
         await expect(await canvas.findByText('mcpServers', { exact: false })).toBeVisible();
     },
+};
+
+export const Restricted: Story = {
+    args: { isRestricted: true },
 };

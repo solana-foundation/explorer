@@ -6,7 +6,7 @@ import { Check, Copy, ExternalLink, XCircle } from 'react-feather';
 import { cn } from '@/app/components/shared/utils';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
-import { BAND_RULE, type EndpointStatus, GUTTER, MONO_LABEL } from '../lib/mcp-docs-layout';
+import { BAND_RULE, EndpointState, type EndpointStatus, GUTTER, MONO_LABEL } from '../lib/mcp-docs-layout';
 import { GravityCta } from './GravityCta';
 
 const MCP_README = 'https://github.com/solana-foundation/explorer/blob/master/app/mcp/README.md';
@@ -17,7 +17,10 @@ export function Hero({ origin, status }: { origin: string; status: EndpointStatu
     const host = origin.replace('https://', '').replace('http://', '');
     const facts = [
         { key: 'Transport', value: 'Streamable HTTP, stateless' },
-        { key: 'Auth', value: 'Open — no key required' },
+        {
+            key: 'Auth',
+            value: status.state === EndpointState.Restricted ? 'Access key required' : 'Open — no key required',
+        },
         { key: 'Clusters', value: 'mainnet-beta · devnet · testnet' },
         { key: 'Tools', value: 'inspect_entity · ping' },
     ];
@@ -57,7 +60,13 @@ export function Hero({ origin, status }: { origin: string; status: EndpointStatu
                                 aria-hidden
                                 className={cn(
                                     'my-0.5 w-0.5 shrink-0 self-stretch rounded-full',
-                                    status.state === 'ready' ? 'bg-dark-accent' : 'bg-heavy-metal-300',
+                                    status.state === EndpointState.Ready && 'bg-dark-accent',
+                                    (status.state === EndpointState.Restricted ||
+                                        status.state === EndpointState.Blocked) &&
+                                        'bg-amber-400',
+                                    (status.state === EndpointState.Checking ||
+                                        status.state === EndpointState.Disabled) &&
+                                        'bg-heavy-metal-300',
                                 )}
                             />
                             <div className="flex min-w-0 flex-col gap-0.5">
@@ -95,13 +104,34 @@ export function Hero({ origin, status }: { origin: string; status: EndpointStatu
 }
 
 function StatusNote({ status }: { status: EndpointStatus }) {
-    if (status.state === 'checking') {
+    if (status.state === EndpointState.Checking) {
         return <span className="text-sm text-heavy-metal-300">Checking…</span>;
     }
-    if (status.state === 'disabled') {
+    if (status.state === EndpointState.Disabled) {
         return (
             <span className="flex w-fit items-center text-sm text-heavy-metal-300">
                 Disabled
+                <span className="mx-1.5 text-heavy-metal-500" aria-hidden>
+                    —
+                </span>
+                <a
+                    href={MCP_README}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-dark-accent no-underline"
+                >
+                    How to run
+                    <ExternalLink size={11} aria-hidden />
+                </a>
+            </span>
+        );
+    }
+    if (status.state === EndpointState.Restricted || status.state === EndpointState.Blocked) {
+        return (
+            <span className="flex w-fit items-center text-sm text-amber-300">
+                {status.state === EndpointState.Restricted
+                    ? 'Restricted — access key required'
+                    : 'Blocked — your IP isn’t allowed'}
                 <span className="mx-1.5 text-heavy-metal-500" aria-hidden>
                     —
                 </span>

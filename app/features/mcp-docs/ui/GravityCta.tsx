@@ -245,11 +245,13 @@ export function GravityCta({
                 ? Math.round((resting * swarm * mobilePullScale) / CTA_MOBILE_PULL_DOT_DIVISOR)
                 : Math.round(resting * swarm);
 
+        let seeded = false;
         const seed = () => {
+            if (seeded) return;
+            seeded = true;
             const cap = restingCap(resolveCtaField(phone ? 'base' : desktopScope).density);
             while (dots.length < cap) spawn(true);
         };
-        seed();
 
         let swell = 0;
         let scale = 1;
@@ -451,13 +453,12 @@ export function GravityCta({
             frame = requestAnimationFrame(step);
         };
 
-        running = true;
-        frame = requestAnimationFrame(step);
-
         const visibility = new IntersectionObserver(([entry]) => {
             if (entry.isIntersecting === running) return;
             running = entry.isIntersecting;
             if (running) {
+                // Seed lazily on first view so an off-screen CTA (e.g. the closing one) costs nothing until reached.
+                seed();
                 last = 0;
                 frame = requestAnimationFrame(step);
             } else {

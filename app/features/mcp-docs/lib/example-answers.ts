@@ -69,6 +69,10 @@ export const MCP_EXAMPLES: McpExample[] = [
                 kind: 'text',
                 text: 'Mint and freeze authorities are null too, and the extensions that carry real issuer power — permanentDelegate, transferHook, transferFeeConfig, confidential transfers — are simply absent.',
             },
+            {
+                kind: 'text',
+                text: 'One caveat: the on-chain authority is renounced, but the tokenMetadata uri points off-chain — whoever controls that domain can still change the name, image, and description a wallet displays.',
+            },
         ],
         id: 'token-2022',
         prompt: 'Which Token-2022 extensions are enabled on 49nkLrXi…3kTa8pTL, and who can still change them?',

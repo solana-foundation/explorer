@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { type EndpointStatus, SECTIONS } from '../lib/mcp-docs-layout';
+import { EndpointState, type EndpointStatus, SECTIONS } from '../lib/mcp-docs-layout';
 import { useDeploymentOrigin } from '../lib/useDeploymentOrigin';
 import { ClosingCta } from './ClosingCta';
 import { Examples } from './Examples';
@@ -13,9 +13,16 @@ import { SectionTabs } from './SectionTabs';
 import { Setup } from './Setup';
 import { Tools } from './Tools';
 
+function probeState(status: number): EndpointState {
+    if (status >= 500) return EndpointState.Disabled;
+    if (status === 403) return EndpointState.Blocked;
+    if (status === 401) return EndpointState.Restricted;
+    return EndpointState.Ready;
+}
+
 export function McpDocsOverviewView() {
     const origin = useDeploymentOrigin();
-    const [status, setStatus] = useState<EndpointStatus>({ state: 'checking' });
+    const [status, setStatus] = useState<EndpointStatus>({ state: EndpointState.Checking });
 
     useEffect(() => {
         const started = performance.now();
@@ -23,11 +30,13 @@ export function McpDocsOverviewView() {
             .then(response =>
                 setStatus({
                     ms: Math.round(performance.now() - started),
-                    state: response.status === 503 ? 'disabled' : 'ready',
+                    state: probeState(response.status),
                 }),
             )
-            .catch(() => setStatus({ state: 'disabled' }));
+            .catch(() => setStatus({ state: EndpointState.Disabled }));
     }, []);
+
+    const isRestricted = status.state === EndpointState.Restricted;
 
     return (
         <div
@@ -40,7 +49,7 @@ export function McpDocsOverviewView() {
             <Hero status={status} origin={origin} />
             <SectionTabs />
             <NumberedBand section={SECTIONS[0]} flushTop>
-                <Setup origin={origin} />
+                <Setup origin={origin} isRestricted={isRestricted} />
             </NumberedBand>
             <NumberedBand section={SECTIONS[1]}>
                 <Instructions />

@@ -1,24 +1,46 @@
-/**
- * Per-client setup instructions for the overview page. Snippets are functions
- * of the deployment origin so the visitor copies a config that already points
- * at the Explorer instance they are on. The deployed endpoint is open (no auth
- * header anywhere); a deployment that gates it with a key documents that in its
- * own README.
- */
 export type SetupClient = {
     id: string;
     label: string;
-    /** Where the snippet goes (command line, config file path, UI path). */
     where: string;
-    snippet: (origin: string) => string;
+    restrictedWhere?: string;
+    snippet: (origin: string, isRestricted: boolean) => string;
     verify: string;
 };
 
-function mcpJsonConfig(origin: string): string {
+const ACCESS_KEY_PLACEHOLDER = '<access-key>';
+
+const authHeaderFlag = ` \\\n  --header "Authorization: Bearer ${ACCESS_KEY_PLACEHOLDER}"`;
+
+function mcpJsonConfig(origin: string, isRestricted: boolean): string {
     return JSON.stringify(
         {
             mcpServers: {
                 'solana-explorer': {
+                    type: 'http',
+                    url: `${origin}/mcp`,
+                    ...(isRestricted && { headers: { Authorization: `Bearer ${ACCESS_KEY_PLACEHOLDER}` } }),
+                },
+            },
+        },
+        undefined,
+        4,
+    );
+}
+
+function codexTomlConfig(origin: string): string {
+    return [
+        '[mcp_servers.solana-explorer]',
+        `url = "${origin}/mcp"`,
+        `http_headers = { "Authorization" = "Bearer ${ACCESS_KEY_PLACEHOLDER}" }`,
+    ].join('\n');
+}
+
+function vsCodeJsonConfig(origin: string): string {
+    return JSON.stringify(
+        {
+            servers: {
+                'solana-explorer': {
+                    headers: { Authorization: `Bearer ${ACCESS_KEY_PLACEHOLDER}` },
                     type: 'http',
                     url: `${origin}/mcp`,
                 },
@@ -33,7 +55,8 @@ export const SETUP_CLIENTS: SetupClient[] = [
     {
         id: 'claude-code',
         label: 'Claude Code',
-        snippet: origin => `claude mcp add --transport http solana-explorer ${origin}/mcp`,
+        snippet: (origin, isRestricted) =>
+            `claude mcp add --transport http solana-explorer ${origin}/mcp${isRestricted ? authHeaderFlag : ''}`,
         verify: 'Run /mcp inside Claude Code and check that solana-explorer is connected.',
         where: 'Run in a terminal:',
     },
@@ -54,14 +77,17 @@ export const SETUP_CLIENTS: SetupClient[] = [
     {
         id: 'codex',
         label: 'Codex',
-        snippet: origin => `codex mcp add solana-explorer --url ${origin}/mcp`,
+        restrictedWhere: 'Add to ~/.codex/config.toml (project-scoped .codex/config.toml also works):',
+        snippet: (origin, isRestricted) =>
+            isRestricted ? codexTomlConfig(origin) : `codex mcp add solana-explorer --url ${origin}/mcp`,
         verify: 'codex mcp list shows solana-explorer.',
         where: 'Run in a terminal:',
     },
     {
         id: 'vs-code',
         label: 'VS Code',
-        snippet: origin => `${origin}/mcp`,
+        restrictedWhere: 'Add to .vscode/mcp.json (the Add Server UI cannot set an auth header):',
+        snippet: (origin, isRestricted) => (isRestricted ? vsCodeJsonConfig(origin) : `${origin}/mcp`),
         verify: 'The server appears under MCP: List Servers with two tools.',
         where: 'Command Palette → MCP: Add Server → HTTP, then enter the URL:',
     },

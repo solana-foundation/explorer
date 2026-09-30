@@ -105,7 +105,7 @@ export function CodeCard({
                     onClick={() => setExpanded(value => !value)}
                     className={cn(
                         'flex w-full cursor-pointer items-center justify-center border-0 border-t border-solid border-dark-border',
-                        'bg-transparent py-3 font-mono text-xs uppercase tracking-widest text-heavy-metal-300 hover:text-dark-foreground sm:hidden',
+                        'bg-transparent py-3 font-mono text-xs uppercase tracking-widest text-heavy-metal-300 hover:text-dark-foreground md:hidden',
                     )}
                 >
                     {expanded ? 'Show less' : 'Show more'}

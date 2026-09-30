@@ -13,4 +13,12 @@ export const SECTIONS = [
     { Icon: MessageSquare, id: 'examples', kicker: 'Examples' },
 ] as const;
 
-export type EndpointStatus = { state: 'checking' | 'ready' | 'disabled'; ms?: number };
+export enum EndpointState {
+    Checking = 'checking',
+    Ready = 'ready',
+    Restricted = 'restricted',
+    Blocked = 'blocked',
+    Disabled = 'disabled',
+}
+
+export type EndpointStatus = { state: EndpointState; ms?: number };

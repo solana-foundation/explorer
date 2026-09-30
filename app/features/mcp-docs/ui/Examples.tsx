@@ -16,6 +16,7 @@ export function Examples() {
 
     const { isMd } = useBreakpoint();
     const boxRef = useRef<HTMLDivElement>(null);
+    const firstChoiceRef = useRef<HTMLButtonElement>(null);
 
     const pendingBottom = useRef<number | undefined>(undefined);
 
@@ -30,6 +31,7 @@ export function Examples() {
         pendingBottom.current = undefined;
         const box = boxRef.current;
         if (target === undefined || !box) return;
+        firstChoiceRef.current?.focus({ preventScroll: true });
         if (!isMd) {
             const delta = box.getBoundingClientRect().top - CHAT_TOP_GAP;
             if (delta !== 0) window.scrollBy({ behavior: 'smooth', top: delta });
@@ -53,7 +55,7 @@ export function Examples() {
                     </span>
                 </div>
                 {picked === undefined ? (
-                    <ExamplePicker onPick={setPicked} />
+                    <ExamplePicker firstChoiceRef={firstChoiceRef} onPick={setPicked} />
                 ) : (
                     <ExampleAnswer key={picked.id} boxRef={boxRef} example={picked} onReset={handleReset} />
                 )}
@@ -62,7 +64,13 @@ export function Examples() {
     );
 }
 
-function ExamplePicker({ onPick }: { onPick: (example: McpExample) => void }) {
+function ExamplePicker({
+    firstChoiceRef,
+    onPick,
+}: {
+    firstChoiceRef: React.RefObject<HTMLButtonElement | null>;
+    onPick: (example: McpExample) => void;
+}) {
     return (
         <div className="flex min-h-[440px] w-full flex-col items-center p-4 sm:px-7 sm:py-6">
             <div className="flex w-full flex-1 items-center justify-center">
@@ -74,9 +82,10 @@ function ExamplePicker({ onPick }: { onPick: (example: McpExample) => void }) {
             <div className="flex w-full max-w-xl flex-col gap-6">
                 <span className={cn(MONO_LABEL, 'text-center text-heavy-metal-300')}>Try it</span>
                 <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
-                    {MCP_EXAMPLES.map(example => (
+                    {MCP_EXAMPLES.map((example, index) => (
                         <button
                             key={example.id}
+                            ref={index === 0 ? firstChoiceRef : undefined}
                             type="button"
                             onClick={() => onPick(example)}
                             className={cn(

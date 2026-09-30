@@ -16,7 +16,8 @@ export function useTablistKeyboard<T extends HTMLElement>(
     const tabRefs = useRef<(T | null)[]>([]);
 
     const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-        const current = Math.max(0, currentIndex);
+        const focused = tabRefs.current.findIndex(node => node === document.activeElement);
+        const current = focused >= 0 ? focused : Math.max(0, currentIndex);
         let next = current;
         if (event.key === 'ArrowRight') next = (current + 1) % count;
         else if (event.key === 'ArrowLeft') next = (current - 1 + count) % count;
