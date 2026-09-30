@@ -15,15 +15,17 @@ describe('isSignatureValid', () => {
         expect(isSignatureValid(withLowercaseL)).toBe(false);
     });
 
-    it('should return false for a base58 string that does not decode to 64 bytes', () => {
+    it('should return false for a string that is not 64 bytes', () => {
         const decodesTo65Bytes =
             '6b3wJC9EDTGQTmdPWvZxPrrsKvSiadsLzGU4EtV3Gp7aohQtWiETdRzAaAK8CfCUAWV2XNHquWvzN3PUAUVE8qtR';
 
         expect(isSignatureValid(decodesTo65Bytes)).toBe(false);
     });
 
-    it('should return false for a string outside the signature length range', () => {
-        expect(isSignatureValid('')).toBe(false);
-        expect(isSignatureValid("',")).toBe(false);
-    });
+    it.each([{ length: 63 }, { length: 89 }])(
+        'should return false for a string that is too short or too long: $length characters',
+        ({ length }) => {
+            expect(isSignatureValid('1'.repeat(length))).toBe(false);
+        },
+    );
 });

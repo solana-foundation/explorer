@@ -1,6 +1,6 @@
 import { BaseTxImage, getTxShareData, loadOgGlows } from '@features/transaction-share/server';
-import { isSignature } from '@solana/kit';
 import { Cluster, clusterFromSlug, type ServerCluster } from '@utils/cluster';
+import { isSignatureValid } from '@utils/tx';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -26,7 +26,7 @@ type ClusterParam = { kind: 'ok'; cluster: ServerCluster } | { kind: 'invalid' }
 export async function GET(request: NextRequest, props: Props) {
     const { signature } = await props.params;
 
-    if (!signature || !isSignature(signature)) {
+    if (!isSignatureValid(signature)) {
         return new NextResponse('Invalid transaction signature', { status: 400 });
     }
 
