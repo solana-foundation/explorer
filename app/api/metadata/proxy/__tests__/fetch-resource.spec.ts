@@ -238,6 +238,18 @@ describe('fetchResource', () => {
         expect(await fetchError()).toMatchObject({ code, status });
     });
 
+    it('should carry the body-read error in the log context of an unreachable upstream', async () => {
+        const failure = new TypeError('terminated', { cause: new Error('other side closed') });
+        const body = new ReadableStream({
+            start(controller) {
+                controller.error(failure);
+            },
+        });
+        mockResponseOnce(body, { headers: { 'Content-Type': 'application/json' } });
+
+        expect(await fetchError()).toMatchObject({ code: 'unreachable', context: { error: failure, url: uri } });
+    });
+
     it('should throw when the runtime hands over a body the reader cannot consume', async () => {
         fetchMock.mockResolvedValueOnce({
             body: 'not a stream',

@@ -268,5 +268,9 @@ function classifyFetchError(e: unknown, url: URL): StatusError {
 
     // A remaining error is a connection or body failure, such as a reset, a TLS error or a corrupt gzip body.
     // The upstream caused it, so it is a 502; a 500 means a proxy fault.
-    return statusError(502, 'Upstream unreachable', { cause: error, code: 'unreachable', context: { url: url.href } });
+    return statusError(502, 'Upstream unreachable', {
+        cause: error,
+        code: 'unreachable',
+        context: { error, url: url.href },
+    });
 }
