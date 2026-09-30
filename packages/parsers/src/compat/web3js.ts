@@ -9,12 +9,10 @@ import type { KitInstruction } from '../kit-instruction.js';
 
 export function toKitInstruction(ix: TransactionInstruction): KitInstruction {
     return {
-        accounts: ix.keys.map(
-            (key): AccountMeta => ({
-                address: address(key.pubkey.toBase58()),
-                role: toAccountRole(key.isSigner, key.isWritable),
-            }),
-        ),
+        accounts: ix.keys.map((key): AccountMeta => ({
+            address: address(key.pubkey.toBase58()),
+            role: toAccountRole(key.isSigner, key.isWritable),
+        })),
         data: ix.data,
         programAddress: address(ix.programId.toBase58()),
     };

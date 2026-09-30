@@ -1,6 +1,6 @@
 import { Cluster } from '@utils/cluster';
 
-/* eslint-disable sort-keys-fix/sort-keys-fix */
+/* eslint-disable sort-keys */
 const MARKET_REGISTRY: { [key: string]: string } = {
     '7kgkDyW7dmyMeP8KFXzbcUZz1R2WHsovDZ7n3ihZuNDS': 'Serum: MSRM / USDC',
     '6WpkeqE5oU1MUNPWvMDHhru1G5gjxMgAtib5wXuBSvgm': 'Serum: MSRM / USDC - Request Queue',
@@ -166,7 +166,7 @@ const MARKET_REGISTRY: { [key: string]: string } = {
     FEyMWn3KnWVEMeJr8q7nQxfQu3jq15MchkhLq94kEoVh: 'Serum: SRM / USDT - Quote Currency Vault',
     '9sBxruSjQ97z8k42RXAr2grx9S7Fsk2yisbvZE9cNfjG': 'Serum: SRM / USDT - Vault Owner',
 };
-/* eslint-enable sort-keys-fix/sort-keys-fix */
+/* eslint-enable sort-keys */
 
 function get(address: string, cluster: Cluster): string | undefined {
     if (cluster === Cluster.MainnetBeta) return MARKET_REGISTRY[address];

@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 
 import { ArgumentType } from '../types';
 
-/* eslint-disable sort-keys-fix/sort-keys-fix */
+/* eslint-disable sort-keys */
 const DEFAULT_VALUES_PER_TYPE: Record<ArgumentType, string> = {
     bool: 'false',
     u8: '1',
@@ -24,7 +24,7 @@ const DEFAULT_VALUES_PER_TYPE: Record<ArgumentType, string> = {
     bytes: 'data',
     pubkey: PublicKey.default.toString(),
 } as const;
-/* eslint-enable sort-keys-fix/sort-keys-fix */
+/* eslint-enable sort-keys */
 
 export function findDefaultValueForArgumentType(argType: IdlType | string): string {
     if (typeof argType === 'string') {

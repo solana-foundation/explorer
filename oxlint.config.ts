@@ -97,14 +97,12 @@ module.exports = {
     jsPlugins: [
         'eslint-plugin-boundaries',
         'eslint-plugin-simple-import-sort',
-        'eslint-plugin-sort-keys-fix',
         'eslint-plugin-storybook',
         'eslint-plugin-testing-library',
         { name: 'explorer', specifier: './config/oxlint-plugin.mjs' },
-        // oxlint reserves the upstream names for its native ports. These aliases carry only the rules
-        // those ports lack: the React Compiler checks, and Next's `no-location-assign-relative-destination`.
+        // oxlint reserves `nextjs` for its native port. This alias carries only the one rule that port
+        // lacks: `no-location-assign-relative-destination`.
         { name: 'next-js', specifier: '@next/eslint-plugin-next' },
-        { name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' },
     ],
     // Only rules listed below run; oxlint's default-on `correctness` category is not part of the ruleset.
     categories: { correctness: 'off' },
@@ -190,6 +188,8 @@ module.exports = {
         'jsx-a11y/role-supports-aria-props': 'warn',
         'react/display-name': 'error',
         'react/exhaustive-deps': 'warn',
+        'react/globals': 'error',
+        'react/incompatible-library': 'warn',
         'react/jsx-key': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-duplicate-props': 'error',
@@ -204,28 +204,24 @@ module.exports = {
         'react/no-unescaped-entities': 'error',
         'react/require-render-return': 'error',
         'react/rules-of-hooks': 'error',
-        'react-hooks-js/config': 'error',
-        'react-hooks-js/gating': 'error',
-        'react-hooks-js/globals': 'error',
-        'react-hooks-js/incompatible-library': 'warn',
-        'react-hooks-js/set-state-in-render': 'error',
-        'react-hooks-js/unsupported-syntax': 'warn',
-        'react-hooks-js/use-memo': 'error',
+        'react/set-state-in-render': 'error',
+        'react/unsupported-syntax': 'warn',
+        'react/use-memo': 'error',
 
         // TODO: react-hooks rollout (introduced by the Next.js 16 upgrade). `eslint-config-next` v16
         // bundles `eslint-plugin-react-hooks` with the React Compiler-era rules below, which flag 225
         // pre-existing findings across the codebase. They stay off so the version bump stays green and
         // self-contained; re-enable and fix them incrementally (counts at time of upgrade):
-        //   react-hooks/error-boundaries (143), react-hooks/refs (47), react-hooks/set-state-in-effect (26),
-        //   react-hooks/purity (3), react-hooks/static-components (3),
-        //   react-hooks/preserve-manual-memoization (2), react-hooks/immutability (1).
-        'react-hooks-js/error-boundaries': 'off',
-        'react-hooks-js/immutability': 'off',
-        'react-hooks-js/preserve-manual-memoization': 'off',
-        'react-hooks-js/purity': 'off',
-        'react-hooks-js/refs': 'off',
-        'react-hooks-js/set-state-in-effect': 'off',
-        'react-hooks-js/static-components': 'off',
+        //   react/error-boundaries (143), react/refs (47), react/set-state-in-effect (26),
+        //   react/purity (3), react/static-components (3),
+        //   react/preserve-manual-memoization (2), react/immutability (1).
+        'react/error-boundaries': 'off',
+        'react/immutability': 'off',
+        'react/preserve-manual-memoization': 'off',
+        'react/purity': 'off',
+        'react/refs': 'off',
+        'react/set-state-in-effect': 'off',
+        'react/static-components': 'off',
 
         // typescript-eslint recommended
         'no-array-constructor': 'error',
@@ -264,7 +260,7 @@ module.exports = {
         ],
         'prefer-template': 'error',
         'simple-import-sort/imports': 'error',
-        'sort-keys-fix/sort-keys-fix': 'error',
+        'sort-keys': 'error',
         'typescript/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
         'typescript/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports', prefer: 'type-imports' }],
         'typescript/no-explicit-any': 'error',
@@ -424,7 +420,7 @@ module.exports = {
                 'scripts/**',
             ],
             rules: {
-                'sort-keys-fix/sort-keys-fix': 'off',
+                'sort-keys': 'off',
             },
         },
 

@@ -1,4 +1,4 @@
-/* eslint-disable sort-keys-fix/sort-keys-fix -- `accounts` literal order drives UI row order (Object.entries); data schemas are kept in wire order only to mirror the layout */
+/* eslint-disable sort-keys -- `accounts` literal order drives UI row order (Object.entries); data schemas are kept in wire order only to mirror the layout */
 import { decodeInstruction } from '@project-serum/serum';
 import { type AccountMeta, type PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import { enums, type Infer, mask, number, object } from 'superstruct';

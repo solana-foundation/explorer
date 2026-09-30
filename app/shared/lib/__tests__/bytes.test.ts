@@ -34,14 +34,14 @@ import {
 // The production code uses only Uint8Array for browser compatibility.
 
 // Shared test data for base64 encoding/decoding
-/* eslint-disable sort-keys-fix/sort-keys-fix */
+/* eslint-disable sort-keys */
 const base64TestCases: Record<string, number[]> = {
     'SGVsbG8=': [72, 101, 108, 108, 111], // "Hello"
     'SGVsbG8gV29ybGQ=': [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100], // "Hello World"
     'dGVzdA==': [116, 101, 115, 116], // "test"
     '': [], // empty
 };
-/* eslint-enable sort-keys-fix/sort-keys-fix */
+/* eslint-enable sort-keys */
 
 // Invalid base64 strings for isValidBase64 tests
 const invalidBase64Strings = ['Hello World!', 'Invalid@#$', 'not-valid-base64!!!'];

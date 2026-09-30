@@ -46,16 +46,14 @@ export function toParsedTransaction(
 }
 
 function convertAccountKeysToParsedMessageAccounts(keys: LegacyAccountMeta[]): ParsedMessageAccount[] {
-    return keys.map(
-        (key): ParsedMessageAccount => ({
-            pubkey: key.pubkey,
-            signer: key.isSigner,
-            // A bare `TransactionInstruction.keys` entry carries no provenance, so
-            // we can't tell static from lookup-table-loaded accounts here. Default
-            // to 'transaction' (the honest default) rather than mislabelling static
-            // keys as 'lookupTable'.
-            source: 'transaction',
-            writable: key.isWritable,
-        }),
-    );
+    return keys.map((key): ParsedMessageAccount => ({
+        pubkey: key.pubkey,
+        signer: key.isSigner,
+        // A bare `TransactionInstruction.keys` entry carries no provenance, so
+        // we can't tell static from lookup-table-loaded accounts here. Default
+        // to 'transaction' (the honest default) rather than mislabelling static
+        // keys as 'lookupTable'.
+        source: 'transaction',
+        writable: key.isWritable,
+    }));
 }
