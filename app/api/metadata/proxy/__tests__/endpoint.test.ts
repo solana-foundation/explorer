@@ -175,6 +175,21 @@ describe('Metadata Proxy Route', () => {
             });
         });
 
+        it('should answer 502 and log a warning with the raw status for an unlisted upstream status', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+            fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
+
+            const response = await GET(new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`));
+
+            expect(response.status).toBe(502);
+            expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Unlisted upstream status', {
+                host: 'external.resource',
+                status: 401,
+                url: 'http://external.resource/file.json',
+            });
+        });
+
         it('should answer 502 with a Sentry warning when the upstream drops the connection mid-body', async () => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
             dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);

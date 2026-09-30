@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { unwrap } from '@/app/shared/lib/result';
 
-import { processTextAsJson } from '../feature/processors';
+import { processBinary, processJson, processTextAsJson } from '../feature/processors';
 
 function createMockResponse(text: string, headers: Headers = new Headers()): Response {
     // Cast: tests only stub the surface of Response that processTextAsJson touches.
@@ -88,5 +88,20 @@ describe('processTextAsJson', () => {
         const [error] = await processTextAsJson(response);
 
         expect(error).toMatchObject({ code: 'malformed-json', status: 415 });
+    });
+});
+
+describe('decode faults', () => {
+    it.each([
+        ['processBinary', processBinary],
+        ['processJson', processJson],
+        ['processTextAsJson', processTextAsJson],
+    ])('should return a 500 decode-failed error when %s gets a body it cannot read', async (_, process) => {
+        const response = new Response('{}');
+        await response.text();
+
+        const [error] = await process(response);
+
+        expect(error).toMatchObject({ code: 'decode-failed', status: 500 });
     });
 });

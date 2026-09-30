@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { statusError } from '../feature';
+import { type ProxyErrorCode, statusError } from '../feature';
 import { logProxyError, logResourceFetched } from '../log-proxy-error';
 
 describe('logProxyError', () => {
@@ -53,6 +53,32 @@ describe('logProxyError', () => {
 
         expect(Logger.error).toHaveBeenCalledWith(failure, { ...context, sentry: true, sentryExtras: context });
         expect(Logger.warn).not.toHaveBeenCalled();
+    });
+
+    type ThirdPartyCode = Exclude<ProxyErrorCode, 'decode-failed'>;
+    // A new code fails to compile until it is listed here, so it cannot become an exception unnoticed.
+    const THIRD_PARTY_CODES = {
+        aborted: true,
+        'malformed-json': true,
+        'non-http-protocol': true,
+        'oversize-declared': true,
+        'oversize-streamed': true,
+        'redirect-invalid-location': true,
+        'redirect-loop': true,
+        'redirect-missing-location': true,
+        'ssrf-blocked': true,
+        timeout: true,
+        'too-many-redirects': true,
+        'unlisted-upstream-status': true,
+        unreachable: true,
+        'unsupported-content-type': true,
+        'upstream-status': true,
+    } satisfies Record<ThirdPartyCode, true>;
+
+    it.each(Object.keys(THIRD_PARTY_CODES) as ThirdPartyCode[])('should not report %s as an exception', code => {
+        logProxyError(statusError(502, 'third-party failure', { code }));
+
+        expect(Logger.error).not.toHaveBeenCalled();
     });
 
     it('should fall back to the error message for a code without its own log message', () => {
