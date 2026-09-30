@@ -1,4 +1,4 @@
-# Proposal: Connect only to globally reachable unicast addresses in the metadata proxy
+# Proposal: Connect only to public unicast addresses in the metadata proxy
 
 ## Context
 
@@ -10,9 +10,9 @@
 
 ## Why
 
-The proxy connects only to addresses that the IANA special-purpose registries treat as globally reachable unicast, and refuses the rest. The registries are the published source for which blocks are not reachable from the public internet, so the rule follows them instead of a list the code maintains by hand:
+The proxy connects only to unicast addresses outside every block of the IANA special-purpose registries, and refuses the rest. The registries are the published source for which blocks are not ordinary public hosts, so the rule follows them instead of a list the code maintains by hand:
 
-- IANA IPv4 Special-Purpose Address Registry and IANA IPv6 Special-Purpose Address Registry, defined by RFC 6890: every entry marked "Globally Reachable: False" or "N/A" is refused.
+- IANA IPv4 Special-Purpose Address Registry and IANA IPv6 Special-Purpose Address Registry, defined by RFC 6890: every entry is refused, including the entries marked "Globally Reachable: True".
 - Multicast, which those registries do not list: RFC 5771 (`224.0.0.0/4`) and RFC 4291 §2.7 (`ff00::/8`).
 
 Alternatives considered:
@@ -29,6 +29,7 @@ Alternatives considered:
 
 ## Impact
 
-- No change for image and metadata hosts: every public host resolves to globally reachable unicast.
+- No change for image and metadata hosts: every public host resolves to a public unicast address.
+- An IPv4-mapped IPv6 address, such as `::ffff:8.8.8.8`, was refused as a whole and is now judged as its IPv4 address.
 - Hosts that resolve only to a refused block now get `403`, as private addresses already do.
 - CodeQL alert #8 remains open; it is dismissed as "won't fix" with this change as the reference.

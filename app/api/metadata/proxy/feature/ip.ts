@@ -14,7 +14,7 @@ const UNCLASSIFIED_SPECIAL_PURPOSE_IPV6 = [
     Address.IPv6.parseCIDR('5f00::/16'), // RFC 9602, SRv6 SIDs
 ];
 
-// Only globally reachable unicast is public: every IANA special-purpose block (RFC 6890) and multicast is refused.
+// Only unicast outside the IANA special-purpose blocks (RFC 6890) is public. Multicast is refused.
 export function isPrivateIP(ip: string) {
     // `process` turns an IPv4-mapped IPv6 address into its IPv4 address, so it is judged as IPv4.
     const address = Address.process(ip);
@@ -35,13 +35,8 @@ export type LookupResult =
     | { kind: 'private'; reason: string; cause?: unknown };
 
 /**
- * Resolve a hostname once, validate every returned address against the private
- * IP ranges, and return a `lookup` function that always replays those same
- * pre-validated addresses. Passing this `lookup` into an undici `Agent` closes
- * the DNS-rebinding TOCTOU window: a malicious authoritative DNS server cannot
- * flip the answer between our validation and the kernel's `connect()`, because
- * the kernel never resolves the hostname again — it sees only the IP we
- * already approved.
+ * Resolves a hostname once and refuses it when any address is not public.
+ * The returned `lookup` replays the checked addresses to prevent DNS rebinding.
  */
 export async function lookupHostnameSafely(hostname: string): Promise<LookupResult> {
     if (isLocalhostName(hostname)) {

@@ -15,7 +15,7 @@ export const matchImage = (header?: string | null) => header?.includes('image/')
 export const matchJsonContent = (header?: string | null) => matchJson(header) || matchTextPlain(header);
 
 // Redirects are followed manually so each hop's hostname can be re-validated
-// against private IP ranges. This closes an SSRF bypass where the initial
+// against non-public addresses. This closes an SSRF bypass where the initial
 // hostname resolves to a public IP but the upstream returns a 3xx pointing at
 // an internal address (e.g. 169.254.169.254 AWS metadata endpoint). Many
 // legitimate metadata hosts (Arweave, CDNs) use 302s, so blocking all

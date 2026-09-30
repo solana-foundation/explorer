@@ -39,6 +39,8 @@ describe('isPrivateIP', () => {
         ['198.18.0.1', 'benchmarking'],
         ['255.255.255.255', 'limited broadcast'],
         ['::ffff:127.0.0.1', 'IPv4-mapped loopback'],
+        ['192.175.48.1', 'AS112 anycast, marked globally reachable'],
+        ['2001:3::1', 'AMT anycast, marked globally reachable'],
         ['64:ff9b:1::1', 'local-use translation, unknown to ipaddr.js'],
         ['100:0:0:1::1', 'dummy prefix, unknown to ipaddr.js'],
         ['3fff::1', 'documentation, unknown to ipaddr.js'],
