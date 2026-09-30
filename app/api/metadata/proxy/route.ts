@@ -4,14 +4,8 @@ import { Logger } from '@/app/shared/lib/logger';
 import { parseUrl as parseSharedUrl } from '@/app/shared/lib/url';
 
 import { CACHE_HEADERS, ERROR_CACHE_HEADERS, MAX_SIZE, SECURITY_HEADERS, TIMEOUT, USER_AGENT } from './config';
-import {
-    fetchResource,
-    isHTTPProtocol,
-    matchJsonContent,
-    STATUS_MESSAGES,
-    type StatusCode,
-    StatusError,
-} from './feature';
+import { fetchResource, isHTTPProtocol, matchJsonContent, STATUS_MESSAGES, type StatusCode } from './feature';
+import { logProxyError, logResourceFetched } from './log-proxy-error';
 
 export const dynamic = 'force-dynamic';
 // Platform backstop. The per-hop fetch timeout (NEXT_PUBLIC_METADATA_TIMEOUT,
@@ -44,19 +38,21 @@ export async function GET(request: Request) {
     // inside fetchResource via the pinned-lookup mechanism — once per hop.
     // The kernel never sees a hostname that wasn't pre-validated.
     try {
-        const { data, headers } = await fetchResource(parsedUri.href, {
+        const [error, resource] = await fetchResource(parsedUri.href, {
             headers: new Headers({ 'Content-Type': 'application/json; charset=utf-8', 'User-Agent': USER_AGENT }),
             size: MAX_SIZE,
             timeout: TIMEOUT,
         });
-        return buildResponse(data, headers);
-    } catch (e) {
-        if (e instanceof StatusError && isKnownStatus(e.status)) {
-            return respondWithError(e.status);
+        if (error) {
+            logProxyError(error);
+            return respondWithError(error.status, error.retryAfter);
         }
-        // Defensive: fetchResource is expected to only throw StatusError. Log
-        // anything else so we notice if that invariant breaks.
-        Logger.error(e);
+
+        logResourceFetched(resource, MAX_SIZE);
+        return buildResponse(resource.data, resource.headers);
+    } catch (e) {
+        // fetchResource returns every upstream failure, so a throw here is an internal fault.
+        Logger.error(e, { sentry: true, sentryExtras: { uri: parsedUri.href } });
         return respondWithError(500);
     }
 }
@@ -104,13 +100,10 @@ function buildResponse(data: unknown, resourceHeaders: Headers): NextResponse {
     return respondWithError(415);
 }
 
-function isKnownStatus(status: number): status is StatusCode {
-    return status in STATUS_MESSAGES;
-}
-
-function respondWithError(status: StatusCode) {
+function respondWithError(status: StatusCode, retryAfter?: string) {
     // ERROR_CACHE_HEADERS lets the failed `<img>` request prime the browser cache
     // so ProxiedImage's on-error reason probe re-reads the status from cache
     // rather than re-invoking the proxy. Browser-only and short-lived by design.
-    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { headers: ERROR_CACHE_HEADERS, status });
+    const headers = retryAfter ? { ...ERROR_CACHE_HEADERS, 'Retry-After': retryAfter } : ERROR_CACHE_HEADERS;
+    return NextResponse.json({ error: STATUS_MESSAGES[status] }, { headers, status });
 }

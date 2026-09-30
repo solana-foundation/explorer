@@ -1,7 +1,7 @@
 import _dns, { type LookupAddress } from 'dns';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { lookupHostnameSafely } from '../feature/ip';
+import { isPrivateIP, lookupHostnameSafely } from '../feature/ip';
 
 const dns = _dns.promises;
 
@@ -25,6 +25,38 @@ function mockLookupOnce(addresses: LookupAddress | LookupAddress[] | undefined) 
     // @ts-expect-error lookup does not have mockImplementation
     dns.lookup.mockResolvedValueOnce(addresses);
 }
+
+describe('isPrivateIP', () => {
+    test.each([
+        ['::', 'unspecified'],
+        ['0.0.0.0', 'unspecified'],
+        ['64:ff9b::a9fe:a9fe', 'NAT64 form of 169.254.169.254'],
+        ['2002:a9fe:a9fe::1', '6to4'],
+        ['2001::1', 'Teredo'],
+        ['224.0.0.1', 'IPv4 multicast'],
+        ['ff02::1', 'IPv6 multicast'],
+        ['240.0.0.1', 'reserved'],
+        ['198.18.0.1', 'benchmarking'],
+        ['255.255.255.255', 'limited broadcast'],
+        ['::ffff:127.0.0.1', 'IPv4-mapped loopback'],
+        ['192.175.48.1', 'AS112 anycast, marked globally reachable'],
+        ['2001:3::1', 'AMT anycast, marked globally reachable'],
+        ['64:ff9b:1::1', 'local-use translation, unknown to ipaddr.js'],
+        ['100:0:0:1::1', 'dummy prefix, unknown to ipaddr.js'],
+        ['3fff::1', 'documentation, unknown to ipaddr.js'],
+        ['5f00::1', 'SRv6 SIDs, unknown to ipaddr.js'],
+    ])('should refuse %s (%s)', address => {
+        expect(isPrivateIP(address)).toBe(true);
+    });
+
+    test.each([
+        ['8.8.8.8', 'public IPv4'],
+        ['2606:4700:4700::1111', 'public IPv6'],
+        ['::ffff:8.8.8.8', 'IPv4-mapped public, judged as its IPv4 address'],
+    ])('should allow %s (%s)', address => {
+        expect(isPrivateIP(address)).toBe(false);
+    });
+});
 
 describe('lookupHostnameSafely', () => {
     beforeEach(() => {
