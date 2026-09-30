@@ -157,11 +157,10 @@ async function fetchLogoUri(
             size: MAX_SIZE,
             timeout,
         });
-        // TODO(<ticket>): a proxy failure is logged twice, by logProxyError and by the caller's onError; pick one owner
         if (error) {
             // A dead link, a slow host, or a blocked address is routine for third-party metadata.
+            // `logProxyError` owns the log, so `onError` would log the failure a second time.
             logProxyError(error);
-            options.onError?.(error);
             // eslint-disable-next-line unicorn/no-null -- same contract as above
             return null;
         }

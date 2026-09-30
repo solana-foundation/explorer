@@ -323,7 +323,7 @@ describe('getTokenInfosFromMetaplex', () => {
         expect(onError).toHaveBeenCalledWith(failure);
     });
 
-    it('should report a null logo when the proxy fetcher blocks the address', async () => {
+    it('should report a null logo and log a blocked address only through the proxy log policy', async () => {
         mocks.safeFetchAllMetadata.mockResolvedValueOnce([metadata(MINT_A)]);
         mocks.getMultipleAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
         // What `fetchResource` returns for a private host.
@@ -339,7 +339,7 @@ describe('getTokenInfosFromMetaplex', () => {
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC, { onError });
 
         expect(result).toMatchObject({ address: MINT_A, logoURI: null });
-        expect(onError).toHaveBeenCalledWith(blocked);
+        expect(onError).not.toHaveBeenCalled();
         expect(Logger.warn).toHaveBeenCalledWith(
             '[api:metadata-proxy] Hostname resolution blocked (SSRF protection)',
             context,
