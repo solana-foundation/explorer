@@ -3,7 +3,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import type { FetchedResource, ProxyErrorCode, StatusError } from './feature';
 
 type LogPolicy = {
-    // `error` reports the StatusError itself as an exception, for the proxy's own faults.
+    // `error` logs the StatusError itself, for the proxy's own faults. Sentry receives it only with `sentry`.
     level: 'debug' | 'warn' | 'error';
     // Falls back to the error's own message when a code has no stable log message of its own.
     message?: string;

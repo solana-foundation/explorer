@@ -220,7 +220,7 @@ async function processResponse(
             );
         }
         if (e instanceof BodyShapeError) throw e;
-        // The upstream stalled or dropped the connection after sending headers: the same failure as a failed fetch().
+        // A body read that fails after the headers is an upstream failure, so it gets the status of a failed fetch().
         return err(classifyFetchError(e, url));
     }
     const contentType = response.headers.get('content-type');
@@ -266,11 +266,7 @@ function classifyFetchError(e: unknown, url: URL): StatusError {
         });
     }
 
-    // Anything left is a `fetch()` rejection that isn't a timeout/abort/size
-    // error — i.e. an upstream connectivity failure (DNS miss, refused/reset
-    // connection, TLS error). That's a bad *gateway*, not our internal fault, so
-    // it's a 502, not a 500. The distinction is user-visible: 502 surfaces as
-    // "Image source unavailable" while 500 collapses to the generic "Image could
-    // not be displayed".
+    // A remaining error is a connection or body failure, such as a reset, a TLS error or a corrupt gzip body.
+    // The upstream caused it, so it is a 502; a 500 means a proxy fault.
     return statusError(502, 'Upstream unreachable', { cause: error, code: 'unreachable', context: { url: url.href } });
 }
