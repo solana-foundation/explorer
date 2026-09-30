@@ -2,8 +2,8 @@
 
 import { Address } from '@components/common/Address';
 import { Badge } from '@components/shared/ui/badge';
-import { PublicKey } from '@solana/web3.js';
 import { type ParsedTokenInstruction, TokenInstruction } from '@solana-program/token';
+import { PublicKey } from '@solana/web3.js';
 
 import { formatParsedInstruction } from '../lib/format-sub-instruction';
 import type { DecodedField, DecodedParams, LabeledAccount } from '../lib/types';

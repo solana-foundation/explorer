@@ -1,3 +1,4 @@
+import { getTokenMetadataFieldDecoder } from '@solana-program/token-2022';
 import {
     type AccountMeta,
     addDecoderSizePrefix,
@@ -9,7 +10,6 @@ import {
     getU64Decoder,
     getUtf8Decoder,
 } from '@solana/kit';
-import { getTokenMetadataFieldDecoder } from '@solana-program/token-2022';
 
 import { getDiscriminatorBytesDecoder } from '@/app/shared/lib/get-discriminator-bytes-decoder';
 import type { KitInstruction } from '@/app/shared/lib/web3js-compat';

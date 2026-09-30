@@ -1,5 +1,4 @@
 import '@/app/styles/styles.css';
-
 import { Metadata } from 'next/types';
 
 import { ExternalLink } from '@/app/components/shared/ui/external-link';

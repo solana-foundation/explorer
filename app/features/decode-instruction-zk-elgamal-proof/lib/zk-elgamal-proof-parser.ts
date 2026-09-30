@@ -1,12 +1,12 @@
 import { getZkElGamalProofInstructionName } from '@entities/zk-elgamal-proof';
 import type { KitInstruction, ParsedInstructionInfo, ParserProgramLabel } from '@explorer/parsers';
-import type { Address } from '@solana/kit';
 import {
     getVerifyProofInstructionDataDecoder,
     parseCloseContextStateInstruction,
     ZK_ELGAMAL_PROOF_PROGRAM_ADDRESS,
     ZkElGamalProofInstruction,
 } from '@solana-program/zk-elgamal-proof';
+import type { Address } from '@solana/kit';
 
 export { ZK_ELGAMAL_PROOF_PROGRAM_ADDRESS };
 

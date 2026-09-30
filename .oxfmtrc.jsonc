@@ -9,9 +9,10 @@
     "quoteProps": "as-needed",
     "semi": true,
     "singleQuote": true,
+    "sortImports": true,
     "sortPackageJson": false,
     "sortTailwindcss": {
-        "config": "./tailwind.config.ts"
+        "config": "./tailwind.config.ts",
     },
     "tabWidth": 4,
     "useTabs": false,
@@ -19,29 +20,29 @@
         {
             "files": ["*.yaml", "*.yml"],
             "options": {
-                "tabWidth": 2
-            }
+                "tabWidth": 2,
+            },
         },
         {
             "files": ["*.json", "*.md"],
             "options": {
-                "singleQuote": false
-            }
+                "singleQuote": false,
+            },
         },
         {
             "files": ["openspec/**/*.md"],
             "options": {
-                "proseWrap": "never"
-            }
+                "proseWrap": "never",
+            },
         },
         // Reflow prose at printWidth so these docs stay readable in a diff and in an editor without soft wrap.
         // Scoped rather than repo-wide: turning it on everywhere would reflow every existing markdown file.
         {
             "files": ["app/mcp/**/*.md"],
             "options": {
-                "proseWrap": "always"
-            }
-        }
+                "proseWrap": "always",
+            },
+        },
     ],
     "ignorePatterns": [
         ".next/",
@@ -62,6 +63,6 @@
         "packages/idl-decode/",
         "packages/parsers/",
         // markdownlint owns this file; the formatter re-aligns compact tables
-        "docs/firewall.md"
-    ]
+        "docs/firewall.md",
+    ],
 }

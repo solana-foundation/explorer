@@ -1,8 +1,6 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
 import { useCluster } from '@providers/cluster';
-import { address } from '@solana/kit';
-import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
     ComputeBudgetInstruction,
     identifyComputeBudgetInstruction,
@@ -12,6 +10,8 @@ import {
     parseSetComputeUnitPriceInstruction,
     parseSetLoadedAccountsDataSizeLimitInstruction,
 } from '@solana-program/compute-budget';
+import { address } from '@solana/kit';
+import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { microLamportsToLamportsString } from '@utils/index';
 import React from 'react';
 

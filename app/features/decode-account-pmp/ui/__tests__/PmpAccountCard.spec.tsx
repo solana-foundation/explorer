@@ -1,8 +1,8 @@
 import { gen } from '@__fixtures__/gen';
 import { PMP_ADDRESS, PMP_EMPTY_DISCRIMINATOR, type PmpPayloadDecodeResult } from '@entities/pmp-account';
 import type { Account } from '@providers/accounts';
-import { PublicKey } from '@solana/web3.js';
 import { Compression } from '@solana-program/program-metadata';
+import { PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

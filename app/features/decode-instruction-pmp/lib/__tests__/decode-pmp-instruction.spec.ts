@@ -1,5 +1,4 @@
 import { gen } from '@__fixtures__/gen';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     Compression,
     DataSource,
@@ -10,6 +9,7 @@ import {
     getSetDataInstructionDataEncoder,
     getWriteInstructionDataEncoder,
 } from '@solana-program/program-metadata';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { PMP_ADDRESS } from '../constants';

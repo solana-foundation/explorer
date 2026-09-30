@@ -1,6 +1,6 @@
 import { PYTH_INSTRUCTIONS, PYTH_ORACLE_PROGRAM_IDS } from '@explorer/decoder-pyth';
-import { getBase58Decoder } from '@solana/kit';
 import { ZK_ELGAMAL_PROOF_PROGRAM_ADDRESS } from '@solana-program/zk-elgamal-proof';
+import { getBase58Decoder } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
 import { decodeInstructionFallback } from '../dependencies';

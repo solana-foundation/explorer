@@ -1,6 +1,6 @@
 import { isTokenProgramId } from '@providers/accounts/tokens';
-import type { AccountInfo, ParsedAccountData, PublicKey, SimulatedTransactionAccountInfo } from '@solana/web3.js';
 import { getMintDecoder, getMintSize, getTokenSize } from '@solana-program/token';
+import type { AccountInfo, ParsedAccountData, PublicKey, SimulatedTransactionAccountInfo } from '@solana/web3.js';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { isTokenProgramAddress } from '@/app/shared/model/token-program';

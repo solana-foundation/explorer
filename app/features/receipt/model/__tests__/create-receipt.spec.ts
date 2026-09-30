@@ -1,6 +1,6 @@
 import { truncateAddress } from '@entities/address';
-import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';

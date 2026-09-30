@@ -1,5 +1,4 @@
 import { isParsedInstructionProgram, type ParserProgramLabel } from '@explorer/parsers';
-import { type ParsedInstruction } from '@solana/web3.js';
 import {
     AssociatedTokenInstruction,
     CREATE_ASSOCIATED_TOKEN_DISCRIMINATOR,
@@ -8,6 +7,7 @@ import {
     parseCreateAssociatedTokenInstruction,
     parseRecoverNestedAssociatedTokenInstruction,
 } from '@solana-program/token';
+import { type ParsedInstruction } from '@solana/web3.js';
 import { create } from 'superstruct';
 
 import { bytes } from '@/app/shared/lib/bytes';

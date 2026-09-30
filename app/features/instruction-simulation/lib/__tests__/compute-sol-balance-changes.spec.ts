@@ -1,6 +1,6 @@
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import type { AccountInfo, ParsedAccountData, SimulatedTransactionAccountInfo } from '@solana/web3.js';
 import { Keypair, PublicKey } from '@solana/web3.js';
-import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import BN from 'bn.js';
 import { describe, expect, it } from 'vitest';
 

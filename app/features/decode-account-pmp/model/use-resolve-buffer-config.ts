@@ -1,5 +1,4 @@
 import 'client-only';
-
 import type { BufferAccount } from '@entities/pmp-account';
 import React from 'react';
 

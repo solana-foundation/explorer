@@ -1,6 +1,7 @@
+import { fileURLToPath } from 'url';
+
 import { withSentryConfig } from '@sentry/nextjs';
 import { withBotId } from 'botid/next/config';
-import { fileURLToPath } from 'url';
 
 import { buildHeaders } from './config/headers.mjs';
 import { buildRedirects } from './config/redirects.mjs';

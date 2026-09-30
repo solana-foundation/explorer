@@ -1,12 +1,12 @@
 // Repo's stored PMP Codama IDL mock (not kept in sync with the published IDL) — drives the real decode path.
 import pmpIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
-import { address } from '@solana/kit';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     getAllocateInstructionDataEncoder,
     getSetAuthorityInstructionDataEncoder,
     PROGRAM_METADATA_PROGRAM_ADDRESS,
 } from '@solana-program/program-metadata';
+import { address } from '@solana/kit';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
     withCluster,

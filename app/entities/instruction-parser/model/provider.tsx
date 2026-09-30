@@ -1,5 +1,4 @@
 import 'client-only';
-
 import type { InstructionParserDispatcher } from '@explorer/parsers';
 import { createContext, type ReactNode, useContext } from 'react';
 

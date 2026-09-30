@@ -15,10 +15,11 @@
  *   - public/accounts-sitemap.xml (known program addresses)
  */
 
-import { XMLValidator } from 'fast-xml-parser';
 import { readFile, writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+
+import { XMLValidator } from 'fast-xml-parser';
 
 import { Cluster } from '../app/utils/cluster';
 import { LOADER_IDS, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS, TOKEN_IDS } from '../app/utils/programs';

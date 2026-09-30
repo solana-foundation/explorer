@@ -1,7 +1,7 @@
 import type { SolanaRpc } from '@entities/cluster';
+import { fetchAllMaybeAddressLookupTable } from '@solana-program/address-lookup-table';
 import { isSome } from '@solana/kit';
 import { AddressLookupTableAccount, type VersionedMessage } from '@solana/web3.js';
-import { fetchAllMaybeAddressLookupTable } from '@solana-program/address-lookup-table';
 
 import { toKitAddress, toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 

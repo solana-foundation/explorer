@@ -6,10 +6,10 @@ import { LIGHTHOUSE_ADDRESS, lighthouseInstructionParser } from '@features/decod
 import { systemInstructionParser } from '@features/decode-instruction-system';
 import { tokenInstructionParser } from '@features/decode-instruction-token';
 import { token2022InstructionParser } from '@features/decode-instruction-token-2022';
-import { address } from '@solana/kit';
-import { Keypair, type ParsedInstruction, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { getInitializeMetadataPointerInstruction, TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
+import { address } from '@solana/kit';
+import { Keypair, type ParsedInstruction, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { create } from 'superstruct';
 import { describe, expect, test } from 'vitest';
 

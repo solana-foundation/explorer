@@ -1,5 +1,4 @@
 import { gen } from '@__fixtures__/gen';
-import type { Address } from '@solana/kit';
 import {
     Compression,
     DataSource,
@@ -9,6 +8,7 @@ import {
     getMetadataEncoder,
     packDirectData,
 } from '@solana-program/program-metadata';
+import type { Address } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { concat } from '@/app/shared/lib/bytes';

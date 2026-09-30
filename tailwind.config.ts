@@ -1,6 +1,6 @@
 import type { Config } from 'tailwindcss';
-import plugin from 'tailwindcss/plugin';
 import tailwindcssAnimate from 'tailwindcss-animate';
+import plugin from 'tailwindcss/plugin';
 
 export const breakpoints = new Map([
     ['xxs', 320],

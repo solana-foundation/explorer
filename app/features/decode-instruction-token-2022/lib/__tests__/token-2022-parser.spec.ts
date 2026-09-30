@@ -1,5 +1,3 @@
-import { address, type ReadonlyUint8Array } from '@solana/kit';
-import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import {
     getEmitTokenMetadataInstructionDataEncoder,
     getInitializeTokenGroupInstructionDataEncoder,
@@ -12,6 +10,8 @@ import {
     getUpdateTokenMetadataUpdateAuthorityInstructionDataEncoder,
     TOKEN_2022_PROGRAM_ADDRESS,
 } from '@solana-program/token-2022';
+import { address, type ReadonlyUint8Array } from '@solana/kit';
+import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, test } from 'vitest';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';

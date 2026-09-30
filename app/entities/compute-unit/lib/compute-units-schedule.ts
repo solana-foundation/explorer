@@ -1,3 +1,9 @@
+import {
+    ComputeBudgetInstruction,
+    identifyComputeBudgetInstruction,
+    parseRequestUnitsInstruction,
+    parseSetComputeUnitLimitInstruction,
+} from '@solana-program/compute-budget';
 import { address, getBase58Encoder } from '@solana/kit';
 import {
     ComputeBudgetProgram,
@@ -5,12 +11,6 @@ import {
     type PartiallyDecodedInstruction,
     type PublicKey,
 } from '@solana/web3.js';
-import {
-    ComputeBudgetInstruction,
-    identifyComputeBudgetInstruction,
-    parseRequestUnitsInstruction,
-    parseSetComputeUnitLimitInstruction,
-} from '@solana-program/compute-budget';
 import { Cluster } from '@utils/cluster';
 
 const BASE58_ENCODER = getBase58Encoder();

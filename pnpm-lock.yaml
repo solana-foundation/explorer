@@ -38,6 +38,9 @@ catalogs:
     markdownlint-cli2:
       specifier: 0.23.2
       version: 0.23.2
+    prettier:
+      specifier: 3.9.6
+      version: 3.9.6
     typescript:
       specifier: 5.7.3
       version: 5.7.3
@@ -232,7 +235,7 @@ importers:
         version: 0.16.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana-program/token-2022':
         specifier: 0.16.0
-        version: 0.16.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+        version: 0.16.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))(@solana/sysvars@8.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3))
       '@solana-program/zk-elgamal-proof':
         specifier: 0.4.0
         version: 0.4.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
@@ -405,9 +408,6 @@ importers:
       '@mdx-js/react':
         specifier: 3.1.0
         version: 3.1.0(@types/react@19.2.14)(react@19.2.8)
-      '@next/eslint-plugin-next':
-        specifier: 16.3.3
-        version: 16.3.3(eslint@9.39.4(jiti@2.4.2))
       '@playwright/test':
         specifier: 1.57.0
         version: 1.57.0
@@ -483,9 +483,6 @@ importers:
       eslint-plugin-boundaries:
         specifier: 6.0.2
         version: 6.0.2(eslint-import-resolver-typescript@4.4.5)(eslint@9.39.4(jiti@2.4.2))
-      eslint-plugin-simple-import-sort:
-        specifier: 12.1.1
-        version: 12.1.1(eslint@9.39.4(jiti@2.4.2))
       eslint-plugin-storybook:
         specifier: catalog:storybook
         version: 10.5.7(eslint@9.39.4(jiti@2.4.2))(storybook@10.5.7(@types/react@19.2.14)(bufferutil@4.0.7)(prettier@3.9.6)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(utf-8-validate@5.0.10))(typescript@5.7.3)
@@ -2363,9 +2360,6 @@ packages:
 
   '@next/env@16.3.3':
     resolution: {integrity: sha512-U2eYQRwXj+dsqxV79zFqExDdatnNY/ZWc2nsJU1p/OgT7fd3dXwlF6OjYaFQCfMoeTA19PWq+wVmYgimVA+V+g==}
-
-  '@next/eslint-plugin-next@16.3.3':
-    resolution: {integrity: sha512-pbEh30vvjKpDoTAmo1v3q2uM4JUi8QaEBpbmjWvGfoec2jLghy/WNtvzAT0bk+Ik9oz6etjt4YjXEk4BQnicCw==}
 
   '@next/swc-darwin-arm64@16.3.3':
     resolution: {integrity: sha512-8Hiv32QJPwdV6KYJ8meR9SBA061tQqnIKTJDocvOXlEQqib0xMFpzArosuffFUUc0sslbh7QQ8a3Yey1QV8EIw==}
@@ -7201,11 +7195,6 @@ packages:
       '@typescript-eslint/parser':
         optional: true
 
-  eslint-plugin-simple-import-sort@12.1.1:
-    resolution: {integrity: sha512-6nuzu4xwQtE3332Uz0to+TxDQYRLTKRESSc2hefVT48Zc8JthmN23Gx9lnYhu0FtkRSL1oxny3kJ2aveVhmOVA==}
-    peerDependencies:
-      eslint: '>=5.0.0'
-
   eslint-plugin-storybook@10.5.7:
     resolution: {integrity: sha512-mLpamG1Rsica2jYbUzIZOEuy7Fm1IMtVLMvvxGTpjTVKUMxTXJsANx3MBpH2VSbGQB8Yzlt5399WL/O07K97Ig==}
     peerDependencies:
@@ -7339,10 +7328,6 @@ packages:
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
-
-  fast-glob@3.3.1:
-    resolution: {integrity: sha512-kNFPyjhh5cKjrUltxs+wFx+ZkbRaxxmZ+X0ZU31SOsxCEtP9VPgtq2teZw1DebupL5GmDaNQ6yKMMVcM41iqDg==}
-    engines: {node: '>=8.6.0'}
 
   fast-glob@3.3.2:
     resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
@@ -9086,11 +9071,6 @@ packages:
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
-
-  prettier@3.8.4:
-    resolution: {integrity: sha512-N2MylSdi48+5N/6S5j+maeHbUSIzzZ5uOcX5Hm4QpV8Dkb1HFjfAKTKX6yNPJQD9AhcT3ifHNB66tWTTJDi11Q==}
-    engines: {node: '>=14'}
-    hasBin: true
 
   prettier@3.9.6:
     resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
@@ -11162,7 +11142,7 @@ snapshots:
       '@codama/renderers-core': 1.3.9
       '@codama/visitors-core': 1.8.0
       '@solana/codecs-strings': 6.5.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
-      prettier: 3.8.4
+      prettier: 3.9.6
       semver: 7.8.5
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
@@ -12221,13 +12201,6 @@ snapshots:
   '@next/env@16.0.0': {}
 
   '@next/env@16.3.3': {}
-
-  '@next/eslint-plugin-next@16.3.3(eslint@9.39.4(jiti@2.4.2))':
-    dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.4(jiti@2.4.2))
-      fast-glob: 3.3.1
-    transitivePeerDependencies:
-      - eslint
 
   '@next/swc-darwin-arm64@16.3.3':
     optional: true
@@ -13908,14 +13881,6 @@ snapshots:
       '@noble/curves': 1.9.7
       '@solana-program/record': 0.3.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana-program/zk-elgamal-proof': 0.3.2(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
-      '@solana/kit': 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
-
-  '@solana-program/token-2022@0.16.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
-    dependencies:
-      '@noble/curves': 1.9.7
-      '@solana-program/record': 0.4.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
-      '@solana-program/system': 0.14.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
-      '@solana-program/zk-elgamal-proof': 0.4.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana/kit': 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
 
   '@solana-program/token-2022@0.16.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))(@solana/sysvars@8.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3))':
@@ -17305,10 +17270,6 @@ snapshots:
       - supports-color
     optional: true
 
-  eslint-plugin-simple-import-sort@12.1.1(eslint@9.39.4(jiti@2.4.2)):
-    dependencies:
-      eslint: 9.39.4(jiti@2.4.2)
-
   eslint-plugin-storybook@10.5.7(eslint@9.39.4(jiti@2.4.2))(storybook@10.5.7(@types/react@19.2.14)(bufferutil@4.0.7)(prettier@3.9.6)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(utf-8-validate@5.0.10))(typescript@5.7.3):
     dependencies:
       '@typescript-eslint/types': 8.67.0
@@ -17487,14 +17448,6 @@ snapshots:
   eyes@0.1.8: {}
 
   fast-deep-equal@3.1.3: {}
-
-  fast-glob@3.3.1:
-    dependencies:
-      '@nodelib/fs.stat': 2.0.5
-      '@nodelib/fs.walk': 1.2.8
-      glob-parent: 5.1.2
-      merge2: 1.4.1
-      micromatch: 4.0.8
 
   fast-glob@3.3.2:
     dependencies:
@@ -19665,8 +19618,6 @@ snapshots:
   prelude-ls@1.1.2: {}
 
   prelude-ls@1.2.1: {}
-
-  prettier@3.8.4: {}
 
   prettier@3.9.6: {}
 

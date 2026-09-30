@@ -1,7 +1,7 @@
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import type { Address } from '@solana/kit';
 import type { ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { SystemProgram } from '@solana/web3.js';
-import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 
 import { isTokenProgramAddress } from '@/app/shared/model/token-program';
 

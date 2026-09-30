@@ -1,5 +1,4 @@
 import { gen } from '@__fixtures__/gen';
-import { type Address, some, unwrapOption } from '@solana/kit';
 import {
     AccountDiscriminator,
     Compression,
@@ -9,6 +8,7 @@ import {
     getBufferEncoder,
     getMetadataEncoder,
 } from '@solana-program/program-metadata';
+import { type Address, some, unwrapOption } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';

@@ -1,5 +1,4 @@
 import 'client-only';
-
 import { type ChainId, getChainId } from '@entities/chain-id/@x/token-info';
 import { Cluster } from '@utils/cluster';
 import { useMemo } from 'react';

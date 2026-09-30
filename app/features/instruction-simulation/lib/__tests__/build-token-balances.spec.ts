@@ -1,6 +1,6 @@
+import { AccountState, getTokenEncoder, getTokenSize } from '@solana-program/token';
 import { address, none } from '@solana/kit';
 import { Keypair, PublicKey } from '@solana/web3.js';
-import { AccountState, getTokenEncoder, getTokenSize } from '@solana-program/token';
 import { describe, expect, it } from 'vitest';
 
 import { alloc, toBase64 } from '@/app/shared/lib/bytes';

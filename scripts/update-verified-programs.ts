@@ -11,12 +11,13 @@
  *   - public/verified-programs.json
  */
 
-import { fetchIdl } from '@solana/idl';
-import { address, createSolanaRpc } from '@solana/kit';
 import { writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
-import { array, create, type Infer, optional, refine, string, type } from 'superstruct';
 import { fileURLToPath } from 'url';
+
+import { fetchIdl } from '@solana/idl';
+import { address, createSolanaRpc } from '@solana/kit';
+import { array, create, type Infer, optional, refine, string, type } from 'superstruct';
 
 import { normalizeRepoUrl, safeRepoUrl } from '../app/utils/verified-builds-url';
 

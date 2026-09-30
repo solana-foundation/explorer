@@ -1,5 +1,4 @@
 import 'server-only';
-
 import { getTx } from '../api/get-tx';
 import { type QueryCluster } from './cluster';
 import { extractReceiptData, type ReceiptResult } from './receipt-data';

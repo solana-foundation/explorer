@@ -1,5 +1,4 @@
 import 'client-only';
-
 import React from 'react';
 
 import { type SimulationState } from './use-simulation';

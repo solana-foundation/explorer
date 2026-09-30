@@ -1,6 +1,6 @@
 import { DEFAULT_RPC_URL, gen } from '@__fixtures__/gen';
-import { createSolanaRpc } from '@solana/kit';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { createSolanaRpc } from '@solana/kit';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import codamaPmp from '../../mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';

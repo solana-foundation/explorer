@@ -1,6 +1,5 @@
 // Fails the build if this module (which reads key-bearing RPC env) is ever imported into a client bundle.
 import 'server-only';
-
 import type { EntityInspectorConfig, McpRequestHandler } from '@explorer/entity-inspector';
 import { isParsedInstruction } from '@explorer/parsers';
 import { getBase58Encoder } from '@solana/kit';

@@ -1,5 +1,5 @@
-import { type Address, createSolanaRpc } from '@solana/kit';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
+import { type Address, createSolanaRpc } from '@solana/kit';
 
 /**
  * Whether `address` is owned by the stake program.

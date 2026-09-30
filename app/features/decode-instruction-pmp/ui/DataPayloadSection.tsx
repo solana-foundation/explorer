@@ -8,8 +8,8 @@ import {
     type PmpAccountDecodeResult,
     type PmpPayloadDecodeResult,
 } from '@entities/pmp-account';
-import { PublicKey } from '@solana/web3.js';
 import { Compression, DataSource } from '@solana-program/program-metadata';
+import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
 import { Address } from '@/app/components/common/Address';

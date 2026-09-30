@@ -1,4 +1,5 @@
 import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import {
     type ParsedInnerInstruction,
     type ParsedInstruction,
@@ -7,7 +8,6 @@ import {
     PublicKey,
     SystemProgram,
 } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 
 const SYSTEM_PROGRAM = SystemProgram.programId;
 const TOKEN_PROGRAM = new PublicKey(TOKEN_PROGRAM_ADDRESS);

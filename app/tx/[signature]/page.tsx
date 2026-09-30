@@ -1,5 +1,4 @@
 import '../../styles/styles.css';
-
 import { isReceiptEnabled, RECEIPT_BASE_URL, RECEIPT_OG_IMAGE_VERSION } from '@features/receipt/server';
 import { buildCompositeSignature, getClusterParam } from '@features/receipt/server';
 import { getTxOgImageUrl, getTxOpenGraph, getTxPageUrl } from '@features/transaction-share/server';

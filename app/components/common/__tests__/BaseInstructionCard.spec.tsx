@@ -1,6 +1,6 @@
+import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 /* eslint-disable explorer/no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { SystemProgram, TransactionMessage } from '@solana/web3.js';
-import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { render, screen, waitFor } from '@testing-library/react';
 
 import { resolveAddressLookupTables } from '@/app/__tests__/mock-resolvers';

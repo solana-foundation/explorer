@@ -1,4 +1,5 @@
 import type { LookupAddress } from 'dns';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';

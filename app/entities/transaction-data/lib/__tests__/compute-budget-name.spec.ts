@@ -1,5 +1,5 @@
-import { ComputeBudgetProgram, SystemProgram } from '@solana/web3.js';
 import { ComputeBudgetInstruction } from '@solana-program/compute-budget';
+import { ComputeBudgetProgram, SystemProgram } from '@solana/web3.js';
 
 import { COMPUTE_BUDGET_INSTRUCTION_NAMES, resolveComputeBudgetInstructionName } from '../compute-budget-name';
 

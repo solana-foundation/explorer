@@ -1,8 +1,8 @@
 import { gen } from '@__fixtures__/gen';
 import { decodePmpAccount, getPayloadDataHash, PMP_ADDRESS, PMP_DECODED_RENDER_CAP_BYTES } from '@entities/pmp-account';
+import { Compression, Encoding, Format, getBufferEncoder } from '@solana-program/program-metadata';
 import type { Address } from '@solana/kit';
 import { getBase16Encoder, getUtf8Encoder } from '@solana/kit';
-import { Compression, Encoding, Format, getBufferEncoder } from '@solana-program/program-metadata';
 import { deflate, gzip } from 'pako';
 import { describe, expect, it } from 'vitest';
 

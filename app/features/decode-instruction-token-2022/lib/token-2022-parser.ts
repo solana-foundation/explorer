@@ -1,7 +1,5 @@
 import { getTokenIxValidator } from '@components/instruction/token/types';
 import { isParsedInstructionProgram, type ParserProgramLabel } from '@explorer/parsers';
-import { unwrapOption } from '@solana/kit';
-import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import {
     identifyToken2022Instruction,
     parseCloseAccountInstruction,
@@ -18,6 +16,8 @@ import {
     parseUpdateMetadataPointerInstruction,
     Token2022Instruction,
 } from '@solana-program/token-2022';
+import { unwrapOption } from '@solana/kit';
+import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { normalizeTokenAmount } from '@utils/index';
 import { create } from 'superstruct';
 

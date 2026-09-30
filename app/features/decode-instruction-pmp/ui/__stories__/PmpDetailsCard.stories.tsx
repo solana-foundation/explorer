@@ -2,7 +2,6 @@ import { gen } from '@__fixtures__/gen';
 import { PmpDetailsCard } from '@features/decode-instruction-pmp';
 import type { Account, State } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     Compression,
     DataSource,
@@ -15,6 +14,7 @@ import {
     packDirectData,
     PROGRAM_METADATA_PROGRAM_ADDRESS,
 } from '@solana-program/program-metadata';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
     withCluster,

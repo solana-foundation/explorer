@@ -1,5 +1,6 @@
 import { formatTokenAmount, tokenAmountToNumber } from '@entities/token-amount';
 import { isTokenProgramId } from '@providers/accounts/tokens';
+import { getTokenDecoder, getTokenSize } from '@solana-program/token';
 import type {
     AccountInfo,
     ParsedAccountData,
@@ -8,7 +9,6 @@ import type {
     SimulatedTransactionAccountInfo,
     TokenBalance,
 } from '@solana/web3.js';
-import { getTokenDecoder, getTokenSize } from '@solana-program/token';
 
 import { fromBase64 } from '@/app/shared/lib/bytes';
 import { isTokenProgramAddress } from '@/app/shared/model/token-program';

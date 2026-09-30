@@ -1,4 +1,5 @@
 import _dns, { type LookupAddress } from 'dns';
+
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { lookupHostnameSafely } from '../feature/ip';

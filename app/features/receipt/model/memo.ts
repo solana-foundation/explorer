@@ -1,6 +1,6 @@
 import type { TransactionWithMeta } from '@entities/transaction-data';
-import { ParsedInstruction, type PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { MEMO_PROGRAM_ADDRESS } from '@solana-program/memo';
+import { ParsedInstruction, type PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 
 import { isParsedInstruction } from './types';
 

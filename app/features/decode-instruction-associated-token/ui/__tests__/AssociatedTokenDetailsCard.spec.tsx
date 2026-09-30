@@ -2,8 +2,8 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token';
-import { ParsedInstruction, PublicKey, TransactionMessage } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { ParsedInstruction, PublicKey, TransactionMessage } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';

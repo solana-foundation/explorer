@@ -1,6 +1,7 @@
 import _dns, { type LookupAddress } from 'dns';
-import Address, { parse } from 'ipaddr.js';
 import { type LookupFunction } from 'net';
+
+import Address, { parse } from 'ipaddr.js';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { SAFE_EXTERNAL_PROTOCOLS } from '@/app/shared/lib/url';

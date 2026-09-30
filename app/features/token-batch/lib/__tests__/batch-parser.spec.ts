@@ -1,6 +1,6 @@
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
-import { Keypair, TransactionInstruction } from '@solana/web3.js';
 import { TokenInstruction } from '@solana-program/token';
+import { Keypair, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { toBuffer } from '@/app/shared/lib/bytes';

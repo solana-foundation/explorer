@@ -1,6 +1,6 @@
 import { PublicKey, SystemProgram } from '@solana/web3.js';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, within } from 'storybook/test';
 
 import { AccountExpandedContent } from '../AccountExpandedContent';

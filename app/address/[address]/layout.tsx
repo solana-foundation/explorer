@@ -1,6 +1,5 @@
 'use client';
 import './styles.css';
-
 import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
 import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
 import { ConfigAccountSection } from '@components/account/ConfigAccountSection';
@@ -45,10 +44,10 @@ import {
 import FLAGGED_ACCOUNTS_WARNING from '@providers/accounts/flagged-accounts';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { Address } from '@solana/kit';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
-import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { redirect, RedirectType } from 'next/navigation';

@@ -1,6 +1,6 @@
-import { Keypair, PublicKey } from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import BN from 'bn.js';
 import React from 'react';

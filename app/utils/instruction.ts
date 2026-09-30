@@ -1,9 +1,9 @@
-import { IX_TITLES, TokenInstructionType } from '@components/instruction/token/types';
 import {
     isTokenLendingInstruction,
     parseTokenLendingInstructionTitle,
 } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
+import { IX_TITLES, TokenInstructionType } from '@components/instruction/token/types';
 import { type TransactionWithMeta } from '@entities/transaction-data';
 import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
 import { isTokenProgram } from '@explorer/parsers';

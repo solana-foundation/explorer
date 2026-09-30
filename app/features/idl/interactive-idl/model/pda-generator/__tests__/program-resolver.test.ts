@@ -1,5 +1,5 @@
-import { PublicKey } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { resolveProgramId } from '../program-resolver';

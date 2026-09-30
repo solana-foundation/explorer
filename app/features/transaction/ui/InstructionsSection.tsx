@@ -10,9 +10,9 @@ import {
     SolanaAttestationDetailsCard,
 } from '@components/instruction/sas/SolanaAttestationDetailsCard';
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
-import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { isTokenLendingInstruction } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction } from '@components/instruction/token-swap/types';
+import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { TokenLendingDetailsCard } from '@components/instruction/TokenLendingDetailsCard';
 import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCard';
 import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';

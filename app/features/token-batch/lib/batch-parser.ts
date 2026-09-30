@@ -6,9 +6,9 @@ import {
     isTokenBatchInstruction as isTokenBatchKitInstruction,
     parseTokenBatchInstruction,
 } from '@explorer/parsers/token-batch';
+import { type ParsedTokenInstruction } from '@solana-program/token';
 import { type AccountMeta, isSignerRole, isWritableRole } from '@solana/kit';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
-import { type ParsedTokenInstruction } from '@solana-program/token';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 

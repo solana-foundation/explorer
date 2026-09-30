@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
-import { address } from '@solana/kit';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { address } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { isStakeAccount } from '../is-stake-account';

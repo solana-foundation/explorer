@@ -1,5 +1,4 @@
 import './styles/styles.css';
-
 import { Footer } from '@components/Footer';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';

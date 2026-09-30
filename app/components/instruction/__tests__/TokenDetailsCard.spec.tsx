@@ -6,8 +6,8 @@ import {
     toParsedTransaction,
 } from '@entities/instruction-parser';
 import { tokenInstructionParser } from '@features/decode-instruction-token';
-import { PublicKey, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { PublicKey, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
 

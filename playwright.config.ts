@@ -1,6 +1,7 @@
+import path from 'path';
+
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
-import path from 'path';
 
 // https://playwright.dev/docs/test-parameterize#env-files
 dotenv.config({ path: path.resolve(__dirname, '.env.local') });

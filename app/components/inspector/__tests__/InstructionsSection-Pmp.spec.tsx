@@ -3,7 +3,6 @@ import { gen } from '@__fixtures__/gen';
 // From the literal's own library-free module: the feature no longer re-exports it, and this spec only needs the
 // program id to build a fixture instruction - not the decoders that `@entities/pmp-account` would pull in.
 import { PMP_ADDRESS } from '@entities/pmp-account/lib/program-address';
-import { type MessageV0, PublicKey, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
 import {
     Compression,
     DataSource,
@@ -12,6 +11,7 @@ import {
     getAllocateInstructionDataEncoder,
     getSetDataInstructionDataEncoder,
 } from '@solana-program/program-metadata';
+import { type MessageV0, PublicKey, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';

@@ -1,5 +1,4 @@
 import '@/app/styles/styles.css';
-
 import { createPreview } from './create-preview';
 
 // MSW is opt-in: STORYBOOK_MSW=true registers the service worker so stories with

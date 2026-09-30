@@ -1,7 +1,5 @@
 import { gen } from '@__fixtures__/gen';
 import { PMP_ADDRESS } from '@entities/pmp-account';
-import { getBase58Decoder } from '@solana/kit';
-import type { Connection } from '@solana/web3.js';
 import {
     Compression,
     DataSource,
@@ -10,6 +8,8 @@ import {
     getInitializeInstructionDataEncoder,
     getSetDataInstructionDataEncoder,
 } from '@solana-program/program-metadata';
+import { getBase58Decoder } from '@solana/kit';
+import type { Connection } from '@solana/web3.js';
 import { describe, expect, it, vi } from 'vitest';
 
 import { findConfigInTransactions, PMP_LOOKUP_MAX_SIGNATURES } from '../find-config-in-transactions';

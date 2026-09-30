@@ -3,8 +3,6 @@ import { gen } from '@__fixtures__/gen';
 import { PMP_DECODED_RENDER_CAP_BYTES, PMP_POINTER_HASH_NOTES } from '@entities/pmp-account';
 import type { Account } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import type { Address } from '@solana/kit';
-import { PublicKey } from '@solana/web3.js';
 import {
     Compression,
     DataSource,
@@ -13,6 +11,8 @@ import {
     getBufferEncoder,
     packDirectData,
 } from '@solana-program/program-metadata';
+import type { Address } from '@solana/kit';
+import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { gzip } from 'pako';

@@ -1,12 +1,12 @@
 import { isParsedInstruction } from '@entities/instruction-parser';
-import { address, createNoopSigner, type ReadonlyUint8Array } from '@solana/kit';
-import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     getInitializeTokenGroupInstruction,
     getUpdateTokenMetadataFieldInstruction,
     TOKEN_2022_PROGRAM_ADDRESS,
     tokenMetadataField,
 } from '@solana-program/token-2022';
+import { address, createNoopSigner, type ReadonlyUint8Array } from '@solana/kit';
+import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, test } from 'vitest';
 
 import { instructionParserDispatcher } from '../instruction-parser-dispatcher';

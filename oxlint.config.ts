@@ -96,13 +96,9 @@ module.exports = {
     plugins: ['typescript', 'unicorn', 'import', 'nextjs', 'react', 'jsx-a11y', 'vitest'],
     jsPlugins: [
         'eslint-plugin-boundaries',
-        'eslint-plugin-simple-import-sort',
         'eslint-plugin-storybook',
         'eslint-plugin-testing-library',
         { name: 'explorer', specifier: './config/oxlint-plugin.mjs' },
-        // oxlint reserves `nextjs` for its native port. This alias carries only the one rule that port
-        // lacks: `no-location-assign-relative-destination`.
-        { name: 'next-js', specifier: '@next/eslint-plugin-next' },
     ],
     // Only rules listed below run; oxlint's default-on `correctness` category is not part of the ruleset.
     categories: { correctness: 'off' },
@@ -176,7 +172,6 @@ module.exports = {
         'nextjs/no-title-in-document-head': 'warn',
         'nextjs/no-typos': 'warn',
         'nextjs/no-unwanted-polyfillio': 'warn',
-        'next-js/no-location-assign-relative-destination': 'warn',
 
         // React, React Hooks and JSX a11y (as bundled by eslint-config-next)
         'import/no-anonymous-default-export': 'warn',
@@ -259,7 +254,6 @@ module.exports = {
             },
         ],
         'prefer-template': 'error',
-        'simple-import-sort/imports': 'error',
         'sort-keys': 'error',
         'typescript/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
         'typescript/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports', prefer: 'type-imports' }],

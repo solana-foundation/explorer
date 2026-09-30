@@ -1,7 +1,7 @@
 import { type InstructionNode, TxInstructionSurface } from '@entities/instruction-card';
+import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { address as toAddress } from '@solana/kit';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
-import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';

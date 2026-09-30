@@ -12,6 +12,7 @@
 // `RequestInit: Expected signal ("AbortSignal {}") to be an instance of AbortSignal`.
 import { createServer, type Server } from 'http';
 import type { AddressInfo } from 'net';
+
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchResource } from '../feature';

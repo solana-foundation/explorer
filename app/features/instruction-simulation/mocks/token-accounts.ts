@@ -1,8 +1,8 @@
-import type { AccountInfo, ParsedAccountData, SimulatedTransactionAccountInfo } from '@solana/web3.js';
-import { Keypair, PublicKey } from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { getMintSize, getTokenSize, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
+import type { AccountInfo, ParsedAccountData, SimulatedTransactionAccountInfo } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 
 import { USDC_MINT } from '@/app/shared/model/known-mints';
 import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';

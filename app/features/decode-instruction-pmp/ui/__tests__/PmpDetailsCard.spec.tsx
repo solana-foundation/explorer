@@ -1,5 +1,4 @@
 import { gen } from '@__fixtures__/gen';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     Compression,
     DataSource,
@@ -11,6 +10,7 @@ import {
     getWriteInstructionDataEncoder,
     packDirectData,
 } from '@solana-program/program-metadata';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';

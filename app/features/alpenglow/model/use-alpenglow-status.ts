@@ -1,5 +1,4 @@
 import 'client-only';
-
 import { type ConnectableUrl, useCluster } from '@entities/cluster';
 import { type Cluster } from '@utils/cluster';
 import useSWR from 'swr';

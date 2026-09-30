@@ -1,6 +1,6 @@
 import { gen } from '@__fixtures__/gen';
-import { address } from '@solana/kit';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { address } from '@solana/kit';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 

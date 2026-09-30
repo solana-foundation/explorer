@@ -1,5 +1,5 @@
-import { PublicKey } from '@solana/web3.js';
 import { PROGRAM_METADATA_PROGRAM_ADDRESS } from '@solana-program/program-metadata';
+import { PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { isPmpAccount, PMP_ADDRESS } from '../program-address';

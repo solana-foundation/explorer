@@ -1,5 +1,4 @@
 import 'client-only';
-
 import { getDefaultStore, useAtomValue } from 'jotai';
 import { atomWithStorage, createJSONStorage } from 'jotai/utils';
 

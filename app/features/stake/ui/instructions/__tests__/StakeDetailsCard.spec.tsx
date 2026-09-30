@@ -1,7 +1,7 @@
+import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { address as toAddress } from '@solana/kit';
 import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
-import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';

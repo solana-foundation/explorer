@@ -1,6 +1,5 @@
 import { gen } from '@__fixtures__/gen';
 import { PMP_DECODED_RENDER_CAP_BYTES, type PmpAccountReadResult, readPmpAccount } from '@entities/pmp-account';
-import type { Address } from '@solana/kit';
 import {
     Compression,
     DataSource,
@@ -11,6 +10,7 @@ import {
     packDirectData,
     PROGRAM_METADATA_PROGRAM_ADDRESS,
 } from '@solana-program/program-metadata';
+import type { Address } from '@solana/kit';
 
 /**
  * Account-byte builders shared by the PMP card specs and story files.

@@ -5,8 +5,8 @@ import {
     PMP_FORMAT_LABELS,
     type PmpAccountReadResult,
 } from '@entities/pmp-account';
-import { unwrapOption } from '@solana/kit';
 import type { Compression, DataSource, Encoding, Format } from '@solana-program/program-metadata';
+import { unwrapOption } from '@solana/kit';
 
 type MetadataHeader = Extract<PmpAccountReadResult, { kind: 'metadata' }>;
 type BufferHeader = Extract<PmpAccountReadResult, { kind: 'buffer' }>;

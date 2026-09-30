@@ -5,9 +5,9 @@ import {
     PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX,
     type PmpInstructionData,
 } from '@entities/pmp-instruction';
+import type { DataSource } from '@solana-program/program-metadata';
 import { getBase58Encoder } from '@solana/kit';
 import type { VersionedTransactionResponse } from '@solana/web3.js';
-import type { DataSource } from '@solana-program/program-metadata';
 
 const BASE58_ENCODER = getBase58Encoder();
 

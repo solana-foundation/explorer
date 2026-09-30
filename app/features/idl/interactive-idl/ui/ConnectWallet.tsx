@@ -3,9 +3,9 @@
 import { WalletReadyGate } from '@solana/kit-plugin-wallet/react';
 import { useState } from 'react';
 
+import { useWalletClient } from '@/app/providers/wallet-provider';
 import { useWallet } from '@/app/providers/wallet/use-wallet';
 import { WalletPickerDialog } from '@/app/providers/wallet/WalletPickerDialog';
-import { useWalletClient } from '@/app/providers/wallet-provider';
 
 import { BaseConnectWallet } from './BaseConnectWallet';
 

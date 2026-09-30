@@ -1,5 +1,4 @@
 import './breakpoint-toolbar';
-
 import { PREVIEW_KEYDOWN, STORIES_COLLAPSE_ALL } from 'storybook/internal/core-events';
 import { addons } from 'storybook/manager-api';
 import { themes } from 'storybook/theming';

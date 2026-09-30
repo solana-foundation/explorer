@@ -1,7 +1,7 @@
 import type { SolanaRpc } from '@entities/cluster';
-import { type AddressLookupTableAccount, Keypair, PublicKey, type VersionedMessage } from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { type AddressLookupTableAccount, Keypair, PublicKey, type VersionedMessage } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import type { InstructionLogs } from '@utils/program-logs';
 import BN from 'bn.js';

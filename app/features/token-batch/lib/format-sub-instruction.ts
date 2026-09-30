@@ -2,9 +2,9 @@
 // for display in the UI.
 
 import { formatTokenAmount } from '@entities/token-amount';
+import { AuthorityType, type ParsedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { type AccountMeta, isSignerRole, isSome, isWritableRole } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
-import { AuthorityType, type ParsedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { capitalCase } from 'change-case';
 
 import { Logger } from '@/app/shared/lib/logger';

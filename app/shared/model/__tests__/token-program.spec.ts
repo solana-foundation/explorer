@@ -1,6 +1,6 @@
-import { type Address, address, type ReadonlyUint8Array } from '@solana/kit';
 import { TOKEN_PROGRAM_ADDRESS, TokenAccount } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS, Token2022Account } from '@solana-program/token-2022';
+import { type Address, address, type ReadonlyUint8Array } from '@solana/kit';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import { identifyTokenAccountType, isTokenMintByOwner, isTokenProgramAddress } from '../token-program';

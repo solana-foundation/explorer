@@ -1,6 +1,6 @@
 import { DEFAULT_SLOT } from '@__fixtures__/gen';
-import { PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { PublicKey } from '@solana/web3.js';
 import { nextjsParameters, withClusterAndAccounts } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';

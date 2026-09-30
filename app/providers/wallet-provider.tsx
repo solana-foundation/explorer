@@ -1,7 +1,6 @@
 'use client';
 
 import './wallet/disposable-stack-polyfill';
-
 import { type Client, createClient } from '@solana/kit';
 import { type ClientWithWallet, walletSigner } from '@solana/kit-plugin-wallet';
 import { ClientProvider, useClient } from '@solana/react';
