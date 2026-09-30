@@ -236,9 +236,7 @@ async function processResponse(
     }
 
     // Re-wrap so processors keep using `.arrayBuffer()` / `.json()` / `.text()`.
-    const [processError, processed] = await process(
-        new Response(buffered, { headers: response.headers, status: response.status }),
-    );
+    const [processError, processed] = await process(new Response(buffered, { headers: response.headers }));
     if (processError) return err(processError);
     return ok({ ...processed, byteLength: buffered.byteLength, host: url.host });
 }

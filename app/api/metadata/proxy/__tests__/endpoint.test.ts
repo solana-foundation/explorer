@@ -195,6 +195,19 @@ describe('Metadata Proxy Route', () => {
             expect(Logger.error).not.toHaveBeenCalled();
         });
 
+        it.each([204, 205])('should answer 415 without a Sentry exception when the upstream sends %i', async status => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+            fetchMock.mockResolvedValueOnce(
+                new Response(null, { headers: { 'Content-Type': 'application/json' }, status }),
+            );
+
+            const response = await GET(new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`));
+
+            expect(response.status).toBe(415);
+            expect(Logger.error).not.toHaveBeenCalled();
+        });
+
         it('should answer 500 and report a Sentry exception when the route itself throws', async () => {
             const failure = new Error('route fault');
             vi.mocked(Logger.info).mockImplementationOnce(() => {
