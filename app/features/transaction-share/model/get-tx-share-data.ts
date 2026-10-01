@@ -39,7 +39,14 @@ type NotFoundResult = { kind: 'not-found' };
 type BudgetTimeoutErrorResult = { kind: 'rpc-budget-timeout' };
 export type TxShareResult = { kind: 'ok'; data: TxShareData } | ErrorResult | NotFoundResult | BudgetTimeoutErrorResult;
 
-const RPC_BUDGET_MS = 1_200;
+/**
+ * The budget we allocate for fetching transaction data from RPC.
+ *
+ * OG data response is recommended to be fast by social media.
+ * Slack's recommendation for og image is to keep it within 3 seconds.
+ * But here we intentionally allow more time only for fetching tx due to timeouts.
+ */
+const TX_DATA_RPC_BUDGET_MS = 3_000;
 
 /**
  * The data behind `/og/tx/<signature>`, read from the cluster passed.
@@ -50,7 +57,7 @@ const RPC_BUDGET_MS = 1_200;
  */
 export async function getTxShareData(signature: string, cluster: ServerCluster): Promise<TxShareResult> {
     try {
-        const abortSignal = AbortSignal.timeout(RPC_BUDGET_MS);
+        const abortSignal = AbortSignal.timeout(TX_DATA_RPC_BUDGET_MS);
 
         const tx = await getTx({ abortSignal, cluster, signature });
         if (!tx) return { kind: 'not-found' };
