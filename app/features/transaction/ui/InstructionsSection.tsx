@@ -1,10 +1,7 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { AddressLookupTableDetailsCard } from '@components/instruction/AddressLookupTableDetailsCard';
 import { BpfLoaderDetailsCard } from '@components/instruction/bpf-loader/BpfLoaderDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
-import { ComputeBudgetDetailsCard } from '@components/instruction/ComputeBudgetDetailsCard';
-import { MemoDetailsCard } from '@components/instruction/MemoDetailsCard';
 import {
     isSolanaAttestationInstruction,
     SolanaAttestationDetailsCard,
@@ -41,13 +38,16 @@ import {
     SYSTEM_PROGRAM_LABEL,
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
+import { AddressLookupTableDetailsCard } from '@features/decode-instruction-address-lookup-table';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
+import { ComputeBudgetDetailsCard, isComputeBudgetInstruction } from '@features/decode-instruction-compute-budget';
 import {
     Ed25519DetailsCard,
     isEd25519Instruction,
     siblingDataFromParsedTransaction,
 } from '@features/decode-instruction-ed25519';
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
+import { MemoDetailsCard } from '@features/decode-instruction-memo';
 import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { isZkElGamalProofInstruction, ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
@@ -66,7 +66,6 @@ import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import {
-    ComputeBudgetProgram,
     ParsedInnerInstruction,
     ParsedInstruction,
     ParsedTransaction,
@@ -281,7 +280,15 @@ function InstructionCard({
             case VOTE_PROGRAM_LABEL:
                 return <VoteDetailsCard {...props} key={key} />;
             case ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL:
-                return <AddressLookupTableDetailsCard {...props} key={key} />;
+                return (
+                    <AddressLookupTableDetailsCard
+                        key={key}
+                        ix={parsedIx}
+                        index={index}
+                        innerCards={innerCards}
+                        childIndex={childIndex}
+                    />
+                );
             default:
                 return <UnknownDetailsCard {...props} key={key} />;
         }
@@ -368,8 +375,21 @@ function InstructionCard({
             />
         );
     }
-    if (ComputeBudgetProgram.programId.equals(transactionIx.programId)) {
-        return <ComputeBudgetDetailsCard key={key} {...props} />;
+    if (isComputeBudgetInstruction(transactionIx)) {
+        const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
+        if (dispatched) {
+            return (
+                <ComputeBudgetDetailsCard
+                    key={key}
+                    ix={dispatched}
+                    raw={transactionIx}
+                    index={index}
+                    innerCards={innerCards}
+                    childIndex={childIndex}
+                />
+            );
+        }
+        return <UnknownDetailsCard key={key} {...props} />;
     }
     if (isZkElGamalProofInstruction(transactionIx)) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
