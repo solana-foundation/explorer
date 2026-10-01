@@ -113,13 +113,14 @@ jobs:
       - name: Test specs (shard ${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }})
         run: pnpm test:ci:specs --shard=${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }}
 
-  # Rebuilds the route-size table for the PR, enforces that bench/BUILD.md was refreshed, and
-  # publishes a bundle-change report. Gated behind Build-And-Test so it only runs on green builds.
+  # Rebuilds the route-size table for a PR or a merge-queue commit, enforces that bench/BUILD.md
+  # was refreshed, and publishes a bundle-change report. Gated behind Build-And-Test so it only
+  # runs on green builds.
   # Fork PRs get a read-only token here, so the PR comment is posted by build-info-comment.yaml
   # (workflow_run) from the artifact this job uploads.
   Build-Info:
     needs: [read-nvmrc, Build-And-Test]
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
