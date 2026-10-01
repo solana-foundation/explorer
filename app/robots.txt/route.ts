@@ -11,7 +11,10 @@ const ROBOTS_CACHE_HEADERS = {
 
 // Crawlers use the longest matching rule (RFC 9309), so `Allow: /mcp/start` takes precedence over `Disallow: /mcp`.
 // A crawler with its own group ignores `*` so it should repeat "*" shared rules, if necessary.
-// AhrefsBot doc {@link https://ahrefs.com/robot#our-bots}
+// Docs:
+// AhrefsBot {@link https://ahrefs.com/robot#our-bots}
+// Amazonbot {@link https://developer.amazon.com/amazonbot}
+// Google crawlers {@link https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers}
 const ALLOW_BOTS_CONTENT = `User-agent: *
 Allow: /
 Allow: /mcp/start
@@ -19,6 +22,8 @@ Disallow: /api/
 Disallow: /mcp
 
 User-agent: AhrefsBot
+User-agent: Amazonbot
+User-agent: GoogleOther
 Allow: /
 Allow: /mcp/start
 Disallow: /api/
