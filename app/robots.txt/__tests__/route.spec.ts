@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { OG_DISALLOWED_BOTS } from '../og-disallowed-bots';
 import { GET } from '../route';
 
 const ROBOTS_CACHE = 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400';
@@ -30,11 +31,12 @@ describe('GET /robots.txt', () => {
         expect(body).toContain('Allow: /mcp/start\n');
     });
 
-    it('should keep AhrefsBot off the OG image routes', async () => {
+    it('should keep defined bots off the OG image routes', async () => {
         const body = await GET(createRequest()).text();
+        const userAgents = OG_DISALLOWED_BOTS.map(bot => `User-agent: ${bot}\n`).join('');
 
         expect(body).toContain(
-            'User-agent: AhrefsBot\nAllow: /\nAllow: /mcp/start\nDisallow: /api/\nDisallow: /mcp\nDisallow: /og/\n',
+            `${userAgents}Allow: /\nAllow: /mcp/start\nDisallow: /api/\nDisallow: /mcp\nDisallow: /og/\n`,
         );
     });
 
