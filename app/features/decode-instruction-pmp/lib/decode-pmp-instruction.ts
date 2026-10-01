@@ -1,8 +1,11 @@
 import { decodePmpInstructionData } from '@entities/pmp-instruction';
+import type { Address } from '@solana/kit';
 import type { TransactionInstruction } from '@solana/web3.js';
 
+import { toKitAddress } from '@/app/shared/lib/web3js-compat';
+
 import { PMP_ADDRESS, PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX } from './constants';
-import type { PmpContentInstruction } from './types';
+import type { PmpBytesSource, PmpContentInstruction } from './types';
 
 /**
  * Decodes a content-carrying PMP instruction into the card's view model.
@@ -19,39 +22,44 @@ export function decodePmpContentInstruction(ix: TransactionInstruction): PmpCont
     if (!decoded) return undefined;
 
     if (decoded.kind === 'setData') {
+        if (decoded.dataSource === undefined) {
+            return { config: decoded.config, kind: 'setData' };
+        }
         return {
             config: decoded.config,
-            dataSource: decoded.dataSource,
             kind: 'setData',
-            payload: decoded.payload,
-            // A 5-byte setData with `buffer == programId` is InvalidInstructionData on chain, so "no payload plus a
-            // foreign buffer at index 2" is the only reachable buffer-sourced shape.
-            sourceBuffer: decoded.payload ? undefined : sourceBufferAt(ix),
+            payload: {
+                dataSource: decoded.dataSource,
+                source: bytesSource(decoded.payload, sourceBufferAt(ix)),
+            },
         };
     }
 
     if (decoded.kind === 'initialize') {
+        const metadataAccount = ix.keys[0];
         return {
             config: decoded.config,
-            dataSource: decoded.dataSource,
             kind: 'initialize',
-            // The in-place path finalises bytes already written to the metadata PDA at account index 0.
-            metadataAccount: ix.keys[0]?.pubkey.toBase58(),
-            payload: decoded.payload,
+            payload: {
+                dataSource: decoded.dataSource,
+                source: bytesSource(decoded.payload, metadataAccount && toKitAddress(metadataAccount.pubkey)),
+            },
             seed: decoded.seed,
         };
     }
 
-    return {
-        chunk: decoded.chunk,
-        kind: 'write',
-        offset: decoded.offset,
-        sourceBuffer: decoded.chunk ? undefined : sourceBufferAt(ix),
-    };
+    return { chunk: bytesSource(decoded.chunk, sourceBufferAt(ix)), kind: 'write', offset: decoded.offset };
+}
+
+function bytesSource(bytes: Uint8Array | undefined, account: Address | undefined): PmpBytesSource {
+    if (bytes) return { bytes, kind: 'inline' };
+    if (account) return { account, kind: 'account' };
+    return { kind: 'absent' };
 }
 
 /** The optional buffer/sourceBuffer slot. Codama's "programId" strategy fills an omitted optional with the id. */
-function sourceBufferAt(ix: TransactionInstruction): string | undefined {
-    const account = ix.keys[PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX]?.pubkey.toBase58();
+function sourceBufferAt(ix: TransactionInstruction): Address | undefined {
+    const pubkey = ix.keys[PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX]?.pubkey;
+    const account = pubkey && toKitAddress(pubkey);
     return account && account !== PMP_ADDRESS ? account : undefined;
 }

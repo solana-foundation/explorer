@@ -149,15 +149,27 @@ export function InstructionsSection({ signature }: SignatureProps) {
                         if (index in innerInstructions) {
                             innerInstructions[index].forEach((ix, childIndex) => {
                                 const res = (
-                                    <InstructionCard
+                                    <ErrorBoundary
                                         key={`${index}-${childIndex}`}
-                                        index={index}
-                                        ix={ix}
-                                        result={result}
-                                        signature={signature}
-                                        tx={transaction}
-                                        childIndex={childIndex}
-                                    />
+                                        fallback={
+                                            <InnerCardFallback
+                                                ix={ix}
+                                                tx={transaction}
+                                                result={result}
+                                                index={index}
+                                                childIndex={childIndex}
+                                            />
+                                        }
+                                    >
+                                        <InstructionCard
+                                            index={index}
+                                            ix={ix}
+                                            result={result}
+                                            signature={signature}
+                                            tx={transaction}
+                                            childIndex={childIndex}
+                                        />
+                                    </ErrorBoundary>
                                 );
                                 innerCards.push(res);
                             });
@@ -179,6 +191,26 @@ export function InstructionsSection({ signature }: SignatureProps) {
             </TxInstructionSurface>
         </CollapsibleSection>
     );
+}
+
+function InnerCardFallback({
+    ix,
+    tx,
+    result,
+    index,
+    childIndex,
+}: {
+    ix: ParsedInstruction | PartiallyDecodedInstruction;
+    tx: ParsedTransaction;
+    result: SignatureResult;
+    index: number;
+    childIndex: number;
+}) {
+    const fallbackIx = 'parsed' in ix ? ix : intoTransactionInstruction(tx, ix);
+    if (!fallbackIx) {
+        return <ErrorCard text="Could not display this instruction, please report" />;
+    }
+    return <UnknownDetailsCard ix={fallbackIx} result={result} index={index} childIndex={childIndex} />;
 }
 
 function InstructionCard({
@@ -391,15 +423,15 @@ function InstructionCard({
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
         if (isParsedInstruction(dispatched)) {
             return (
-                <LighthouseDetailsCard
-                    key={key}
-                    ix={dispatched}
-                    raw={transactionIx}
-                    index={index}
-                    result={result}
-                    innerCards={innerCards}
-                    childIndex={childIndex}
-                />
+                <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                    <LighthouseDetailsCard
+                        ix={dispatched}
+                        raw={transactionIx}
+                        index={index}
+                        innerCards={innerCards}
+                        childIndex={childIndex}
+                    />
+                </ErrorBoundary>
             );
         }
         return <UnknownDetailsCard key={key} {...props} />;

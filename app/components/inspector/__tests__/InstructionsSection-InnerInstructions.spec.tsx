@@ -1,9 +1,10 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { getBase58Decoder } from '@solana/kit';
 import type { CompiledInnerInstruction } from '@solana/web3.js';
 import { MessageV0, PublicKey } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
@@ -34,6 +35,11 @@ vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
     useIdlInstructionDecode: vi.fn(() => undefined),
 }));
 
+vi.mock('@components/instruction/system/SystemDetailsCard', async importOriginal => {
+    const actual = await importOriginal<typeof import('@components/instruction/system/SystemDetailsCard')>();
+    return { ...actual, SystemDetailsCard: vi.fn(actual.SystemDetailsCard) };
+});
+
 vi.mock('next/navigation', () => ({
     usePathname: vi.fn(() => '/'),
     useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn() })),
@@ -48,6 +54,8 @@ vi.mock('next/link', () => ({
 describe('Inspector InstructionsSection with inner instructions', () => {
     afterEach(() => {
         vi.mocked(useIdlInstructionDecode).mockReturnValue(undefined);
+        vi.mocked(SystemDetailsCard).mockReset();
+        vi.restoreAllMocks();
     });
 
     test('should render a card per inner instruction under its parent', async () => {
@@ -80,6 +88,35 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         // The three Token CPIs render as raw cards because the IDL decoder is mocked to return
         // undefined and the dispatcher does not parse those discriminators.
         expect(await screen.findByText(/System Program: Create Account/i)).toBeInTheDocument();
+    });
+
+    test('should replace an inner card that throws with the Unknown card', async () => {
+        vi.mocked(SystemDetailsCard).mockImplementation(() => {
+            throw new Error('system card failed');
+        });
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        const { container } = render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection
+                                    message={buildMessage()}
+                                    compiledInnerInstructions={INNER_INSTRUCTIONS}
+                                />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        await waitFor(() => expect(SystemDetailsCard).toHaveBeenCalled());
+        expect(screen.getByText(/Create Idempotent/i)).toBeInTheDocument();
+        expect(container.textContent).toContain('#1.2');
+        expect(screen.queryByText(/System Program: Create Account/i)).not.toBeInTheDocument();
     });
 
     test('should render an inner token batch as a batch card, not through the IDL decoder', async () => {

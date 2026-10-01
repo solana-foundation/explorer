@@ -1,13 +1,5 @@
 import type { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
-/**
- * Everything a card needs to know about *which* instruction it renders.
- *
- * Cards take a single `node` instead of the previous prop spread
- * (`ix` + `index` + `childIndex` + `raw` + `innerCards`). Surface-level
- * concerns — `result`, `signature`, the shell, the address renderer — live in
- * `InstructionSurface` and never travel as props.
- */
 export type InstructionNode = {
     /**
      * The one fact about the instruction a card may read. Named separately from

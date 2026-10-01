@@ -21,6 +21,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { gzip } from 'pako';
@@ -73,7 +74,7 @@ function setDataIx({
 
 const meta = {
     component: PmpDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/DecodeInstructionPmp/PmpDetailsCard',
@@ -87,7 +88,6 @@ type Story = StoryObj<typeof meta>;
 const baseArgs = {
     fallback: null,
     index: 0,
-    result: { err: null },
 };
 
 export const SetDataInlineJson: Story = {

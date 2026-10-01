@@ -62,9 +62,8 @@ describe('decodePmpContentInstruction', () => {
 
         expect(result).toEqual({
             config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: DOC_BYTES,
+            payload: { dataSource: DataSource.Direct, source: { bytes: DOC_BYTES, kind: 'inline' } },
         });
     });
 
@@ -120,9 +119,11 @@ describe('decodePmpContentInstruction', () => {
 
         expect(result).toEqual({
             config: { compression: Compression.None, encoding: Encoding.Utf8, format: Format.Json },
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            sourceBuffer: FOREIGN_BUFFER.toBase58(),
+            payload: {
+                dataSource: DataSource.Direct,
+                source: { account: FOREIGN_BUFFER.toBase58(), kind: 'account' },
+            },
         });
     });
 
@@ -138,8 +139,8 @@ describe('decodePmpContentInstruction', () => {
 
         expect(result).toEqual({
             config: { compression: Compression.None, encoding: Encoding.Utf8, format: Format.Json },
-            dataSource: DataSource.Direct,
             kind: 'setData',
+            payload: { dataSource: DataSource.Direct, source: { kind: 'absent' } },
         });
     });
 
@@ -157,10 +158,8 @@ describe('decodePmpContentInstruction', () => {
 
         expect(result).toEqual({
             config: { compression: Compression.None, encoding: Encoding.Utf8, format: Format.Json },
-            dataSource: DataSource.Direct,
             kind: 'initialize',
-            metadataAccount: METADATA_PDA.toBase58(),
-            payload: DOC_BYTES,
+            payload: { dataSource: DataSource.Direct, source: { bytes: DOC_BYTES, kind: 'inline' } },
             seed: 'idl',
         });
     });
@@ -178,9 +177,11 @@ describe('decodePmpContentInstruction', () => {
 
         expect(result).toEqual({
             config: { compression: Compression.None, encoding: Encoding.Utf8, format: Format.Json },
-            dataSource: DataSource.Direct,
             kind: 'initialize',
-            metadataAccount: METADATA_PDA.toBase58(),
+            payload: {
+                dataSource: DataSource.Direct,
+                source: { account: METADATA_PDA.toBase58(), kind: 'account' },
+            },
             seed: 'idl',
         });
     });
@@ -193,7 +194,11 @@ describe('decodePmpContentInstruction', () => {
 
         const result = decodePmpContentInstruction(makeIx(data, [METADATA_PDA, PMP, PMP]));
 
-        expect(result).toEqual({ chunk: new Uint8Array([1, 2, 3]), kind: 'write', offset: 7 });
+        expect(result).toEqual({
+            chunk: { bytes: new Uint8Array([1, 2, 3]), kind: 'inline' },
+            kind: 'write',
+            offset: 7,
+        });
     });
 
     it('should report the source buffer for a write whose chunk is not in the transaction', () => {
@@ -201,7 +206,11 @@ describe('decodePmpContentInstruction', () => {
 
         const result = decodePmpContentInstruction(makeIx(data, [METADATA_PDA, PMP, FOREIGN_BUFFER]));
 
-        expect(result).toEqual({ kind: 'write', offset: 7, sourceBuffer: FOREIGN_BUFFER.toBase58() });
+        expect(result).toEqual({
+            chunk: { account: FOREIGN_BUFFER.toBase58(), kind: 'account' },
+            kind: 'write',
+            offset: 7,
+        });
     });
 
     it('should return undefined for a housekeeping instruction so the caller falls through to the IDL tier', () => {

@@ -5,12 +5,6 @@ import React from 'react';
 import type { InstructionNode } from '../model/node';
 import { useInstructionSurface } from '../model/surface';
 
-/**
- * Draws one instruction card on whatever surface it finds itself on.
- *
- * Cards below this point never see the shell, the signature result, or the
- * nested cards — they only describe their own content.
- */
 export function InstructionCardView({
     node,
     title,
