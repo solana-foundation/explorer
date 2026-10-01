@@ -48,7 +48,7 @@ export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
                                 size={16}
                                 className={cn(
                                     'transition-transform duration-200 ease-in-out',
-                                    // keep this writing. this is working in case parent has trasform translate
+                                    // keep this writing. this is working in case parent has transform translate
                                     expanded && '[transform:rotate(180deg)]',
                                 )}
                             />
