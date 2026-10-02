@@ -34,7 +34,7 @@ function accountInfoValue(data: Uint8Array) {
 }
 
 function wrapper({ children }: { children: React.ReactNode }) {
-    return <SWRConfig value={{ provider: () => new Map() }}>{children}</SWRConfig>;
+    return <SWRConfig value={{ errorRetryInterval: 1, provider: () => new Map() }}>{children}</SWRConfig>;
 }
 
 describe('useRawAccountData', () => {
@@ -96,5 +96,19 @@ describe('useRawAccountData', () => {
         await waitFor(() => {
             expect(result.current.data).toEqual(mockData2);
         });
+    });
+
+    it('should stop retrying a failing read after three retries', async () => {
+        mockGetAccountInfo.mockRejectedValue(new Error('RPC unavailable'));
+
+        const { result } = renderHook(() => useRawAccountData(MOCK_ADDRESS), { wrapper });
+
+        act(() => {
+            result.current.mutate();
+        });
+        await waitFor(() => expect(mockGetAccountInfo).toHaveBeenCalledTimes(4));
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        expect(mockGetAccountInfo).toHaveBeenCalledTimes(4);
     });
 });
