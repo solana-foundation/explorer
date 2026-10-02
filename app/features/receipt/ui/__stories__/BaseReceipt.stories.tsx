@@ -59,8 +59,8 @@ export const WithDomainNames: Story = {
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        expect(canvas.getByText('alex.sol')).toBeInTheDocument();
-        expect(canvas.getByText('bob.sol')).toBeInTheDocument();
+        expect(canvas.getByText('alex.sns')).toBeInTheDocument();
+        expect(canvas.getByText('bob.sns')).toBeInTheDocument();
     },
 };
 

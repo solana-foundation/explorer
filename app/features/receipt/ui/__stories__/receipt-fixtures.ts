@@ -63,8 +63,8 @@ export const receiptWithDomains: FormattedReceipt = (() => {
     const formatted = formatReceiptData({ ...baseSolReceipt, total: 2500000000 }, CLUSTER);
     return {
         ...formatted,
-        receiver: { ...formatted.receiver, domain: 'bob.sol' },
-        sender: { ...formatted.sender, domain: 'alex.sol' },
+        receiver: { ...formatted.receiver, domain: 'bob.sns' },
+        sender: { ...formatted.sender, domain: 'alex.sns' },
     };
 })();
 

@@ -13,8 +13,8 @@ const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
 const USER_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 
 const mockDomains = [
-    { address: 'addr1', name: 'alex.sol' },
-    { address: 'addr2', name: 'bob.sol' },
+    { address: 'addr1', name: 'alex.sns' },
+    { address: 'addr2', name: 'bob.sns' },
 ];
 
 const swrResponse = (overrides: { data?: unknown; isLoading?: boolean; error?: unknown } = {}) => ({
