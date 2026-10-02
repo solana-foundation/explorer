@@ -1,107 +1,87 @@
 'use client';
 
 import { cn } from '@components/shared/utils';
-import { ClusterStatusButton } from '@features/cluster-switcher';
-import Logo from '@img/logos-solana/dark-explorer-logo.svg';
-import { useDisclosure } from '@mantine/hooks';
-import { useClusterPath } from '@utils/url';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useSelectedLayoutSegment, useSelectedLayoutSegments } from 'next/navigation';
-import React, { ReactNode } from 'react';
-import { Menu } from 'react-feather';
+import { ClusterDropdown } from '@features/cluster-switcher';
+import React, { type ReactNode, useRef, useState } from 'react';
 
-import { ExternalLink } from '@/app/components/shared/ui/external-link';
-import { NavbarItem, NavbarLink, NavbarList } from '@/app/shared/ui/Navbar';
+import { NavLinks, NavMenu } from './navbar/NavGroup';
+import { NavSearch } from './navbar/NavSearch';
+import { BAR_CLASSES, BrandLockup, GUTTER_CLASSES, useNavRoutes } from './navbar/shared';
 
 export interface INavbarProps {
     children?: ReactNode;
 }
 
 export function Navbar({ children }: INavbarProps) {
-    const [navOpened, navHandlers] = useDisclosure(false);
-    const homePath = useClusterPath({ pathname: '/' });
-    const featureGatesPath = useClusterPath({ pathname: '/feature-gates' });
-    const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
-    const selectedLayoutSegment = useSelectedLayoutSegment();
-    const selectedLayoutSegments = useSelectedLayoutSegments();
+    const [searchOpened, setSearchOpened] = useState(false);
+    const [clusterOpened, setClusterOpened] = useState(false);
+    const [menuOpened, setMenuOpened] = useState(false);
+    const routes = useNavRoutes();
+    const slotRef = useRef<HTMLSpanElement>(null);
+
+    const onSearchOpenChange = (open: boolean) => {
+        if (open) {
+            setMenuOpened(false);
+            setClusterOpened(false);
+        }
+        setSearchOpened(open);
+    };
+    const onClusterOpenChange = (open: boolean) => {
+        if (open) {
+            setMenuOpened(false);
+            setSearchOpened(false);
+        }
+        setClusterOpened(open);
+    };
+    const onMenuOpenChange = (open: boolean) => {
+        if (open) {
+            setClusterOpened(false);
+            setSearchOpened(false);
+        }
+        setMenuOpened(open);
+    };
 
     return (
-        <nav className="flex flex-wrap items-center bg-dk-gray-800-dark py-3 text-dk-white">
+        <nav className={cn('py-3', BAR_CLASSES)}>
             <div
-                // Per-breakpoint max-widths mirror Bootstrap `.container` (sm 540 / md 720 / lg 960 / xl 1140 / xxl 1320) so logo + links land in the same gutter as before the shell migration.
-                className="mx-auto flex w-full flex-wrap items-center justify-between px-6 sm:max-w-[540px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1140px] xxl:max-w-[1320px]"
+                className={cn(
+                    'relative flex items-center gap-1.5 xs:gap-2',
+                    'lg:grid lg:grid-cols-[minmax(112px,1fr)_minmax(0,720px)_1fr] lg:gap-4',
+                    GUTTER_CLASSES,
+                )}
             >
-                <Link href={homePath}>
-                    <Image alt="Solana Explorer" height={22} src={Logo} width={214} priority />
-                </Link>
+                <BrandLockup />
 
-                <button
-                    type="button"
-                    aria-label="Toggle navigation"
-                    onClick={navHandlers.toggle}
-                    className="rounded-dk border border-solid border-transparent bg-transparent px-0 py-1 text-dk-gray-700 lg:hidden"
-                >
-                    <Menu size={24} aria-hidden />
-                </button>
+                <div className="contents lg:flex lg:min-w-0 lg:items-center lg:gap-2">
+                    <NavSearch
+                        open={searchOpened}
+                        onOpenChange={onSearchOpenChange}
+                        dockClassName="sm:ml-auto sm:max-w-[720px] lg:ml-0 lg:max-w-none"
+                        restClassName="left-[calc(100%-184px)] right-[146px] xs:left-[calc(100%-239px)] xs:right-[201px]"
+                        slotRef={slotRef}
+                    >
+                        {children}
+                    </NavSearch>
 
-                <div className="flex hidden h-full grow items-center pl-6 pr-2 xl:block" style={{ minWidth: 0 }}>
-                    {children}
+                    <div className="ml-auto flex shrink-0 items-center gap-1.5 xs:gap-2 sm:ml-0">
+                        <span ref={slotRef} aria-hidden className="block h-[38px] w-[38px] sm:hidden" />
+                        <ClusterDropdown
+                            align="end"
+                            open={clusterOpened}
+                            onOpenChange={onClusterOpenChange}
+                            className="w-[80px] xs:w-[131px] sm:w-[142px] md:w-[170px]"
+                        />
+                    </div>
                 </div>
 
-                <div
-                    className={cn(
-                        // The lg: row layout is unconditional: `navOpened` only drives the below-lg drawer, and it
-                        // survives a resize past the breakpoint where the toggle that set it is no longer rendered.
-                        'ml-auto shrink-0 lg:flex lg:w-auto lg:flex-row lg:items-center',
-                        navOpened ? 'flex w-full flex-col' : 'hidden',
-                    )}
-                >
-                    <NavbarList className="mr-auto flex-col lg:flex-row">
-                        <NavbarItem>
-                            <NavbarLink asChild active={selectedLayoutSegment === 'feature-gates'}>
-                                <Link href={featureGatesPath}>Feature Gates</Link>
-                            </NavbarLink>
-                        </NavbarItem>
-                        <NavbarItem>
-                            <NavbarLink asChild active={selectedLayoutSegment === 'mcp'}>
-                                <Link href="/mcp/start">MCP</Link>
-                            </NavbarLink>
-                        </NavbarItem>
-                        <NavbarItem>
-                            <NavbarLink
-                                asChild
-                                active={
-                                    selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(inspector)'
-                                }
-                            >
-                                <Link href={inspectorPath}>Inspector</Link>
-                            </NavbarLink>
-                        </NavbarItem>
-                        {/* Centred only in the lg row; the drawer stacks vertically, where centring breaks the left edge the text links share. */}
-                        <NavbarItem className="flex items-center lg:justify-center">
-                            <ExternalLink
-                                aria-label="GitHub Repository"
-                                href="https://github.com/solana-foundation/explorer"
-                                // mx-2 matches the text links' px-2 so the drawer shares one left edge; lg restores the row spacing.
-                                className="mx-2 lg:mx-3"
-                            >
-                                <svg width="30" height="30" viewBox="0 0 98 98" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        fillRule="evenodd"
-                                        clipRule="evenodd"
-                                        d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"
-                                        fill="#fff"
-                                    />
-                                </svg>
-                            </ExternalLink>
-                        </NavbarItem>
-                    </NavbarList>
-                </div>
-
-                <div className="ml-[3px] hidden max-w-[210px] shrink-0 lg:block">
-                    <ClusterStatusButton />
-                </div>
+                <NavLinks routes={routes} className="hidden lg:flex lg:justify-self-end" />
+                <NavMenu
+                    routes={routes}
+                    filled
+                    open={menuOpened}
+                    onOpenChange={onMenuOpenChange}
+                    className="lg:hidden"
+                />
             </div>
         </nav>
     );

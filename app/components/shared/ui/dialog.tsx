@@ -62,8 +62,8 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
                 <DialogPrimitive.Close
                     className={cn(
                         'border-0 bg-transparent p-0 text-neutral-500',
-                        'flex items-center justify-center',
-                        'absolute right-4 top-2 rounded-sm opacity-70',
+                        'flex h-6 w-6 items-center justify-center',
+                        'absolute right-3.5 top-3.5 rounded-sm opacity-70',
                         'transition-opacity',
                         'hover:opacity-100',
                         'focus:outline-none',
@@ -71,7 +71,7 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
                         'disabled:pointer-events-none',
                     )}
                 >
-                    <X size={16} />
+                    <X size={18} />
                     <span className="sr-only">Close</span>
                 </DialogPrimitive.Close>
             </DialogPrimitive.Content>

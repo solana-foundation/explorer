@@ -97,14 +97,15 @@ export function BaseSearch({
                 <Command shouldFilter={false} label="Search">
                     <PopoverPrimitive.Anchor asChild>
                         <div
+                            data-search-frame
                             className={cn(
-                                'flex items-center gap-3',
-                                'rounded-md border border-heavy-metal-950 bg-heavy-metal-800 [border-style:solid]',
-                                'h-[38px] px-4 shadow-md',
+                                'flex items-center gap-2.5',
+                                'rounded-md border border-outer-space-700 bg-heavy-metal-800 [border-style:solid]',
+                                'h-[38px] pl-2.5 pr-1.5 shadow-md',
                                 'transition-shadow focus-within:shadow-[0_0_0.4rem_#00d18c]',
                             )}
                         >
-                            <Search className="shrink-0 text-heavy-metal-100" size={15} />
+                            <Search className="shrink-0 translate-x-px text-heavy-metal-100" size={15} />
                             <Command.Input
                                 ref={inputRef}
                                 autoFocus
@@ -112,7 +113,9 @@ export function BaseSearch({
                                     'w-full min-w-0 flex-1',
                                     'border-none bg-transparent outline-none',
                                     'text-sm text-white placeholder:text-heavy-metal-100',
-                                    'overflow-hidden text-ellipsis',
+                                    'overflow-hidden',
+                                    '[-webkit-mask-image:linear-gradient(to_right,#000_calc(100%-24px),transparent)]',
+                                    '[mask-image:linear-gradient(to_right,#000_calc(100%-24px),transparent)]',
                                 )}
                                 placeholder="Search for tokens, validators, programs, and accounts"
                                 value={value}
@@ -128,8 +131,8 @@ export function BaseSearch({
                                     aria-label="Clear search"
                                     className={cn(
                                         'flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center',
-                                        'appearance-none rounded border border-solid border-heavy-metal-950 bg-heavy-metal-700 p-0',
-                                        'text-heavy-metal-100 transition-colors hover:text-heavy-metal-400',
+                                        'appearance-none border-0 bg-transparent p-0',
+                                        'text-heavy-metal-100 transition-colors hover:text-white',
                                     )}
                                     type="button"
                                     onMouseDown={e => {
@@ -142,8 +145,8 @@ export function BaseSearch({
                             ) : (
                                 <kbd
                                     className={cn(
-                                        'flex h-6 w-6 shrink-0 items-center justify-center',
-                                        'rounded border border-solid border-heavy-metal-950 bg-heavy-metal-700',
+                                        'hidden h-6 w-6 shrink-0 items-center justify-center [@media(pointer:fine)]:flex',
+                                        'rounded border border-solid border-outer-space-600 bg-transparent',
                                         'text-sm text-heavy-metal-100',
                                     )}
                                 >
@@ -159,17 +162,18 @@ export function BaseSearch({
                         asChild
                         align="start"
                         sideOffset={4}
+                        data-search-panel
                         className={cn(
                             'z-50 rounded-md shadow-2xl [border-style:solid]',
                             'w-[var(--radix-popover-trigger-width)]',
-                            'border border-heavy-metal-950 bg-heavy-metal-800',
+                            'border border-outer-space-800 bg-outer-space-900',
                         )}
                         onInteractOutside={e => {
                             if (e.target instanceof Element && e.target === inputRef.current) e.preventDefault();
                         }}
                         onOpenAutoFocus={e => e.preventDefault()}
                     >
-                        <div>
+                        <div onMouseDown={event => event.preventDefault()}>
                             {/* Allow a single pill: hide-all rule can leave visibleTabs at length 1. */}
                             {hasResults && visibleTabs.length >= 1 && (
                                 <SearchFilters
@@ -182,20 +186,14 @@ export function BaseSearch({
 
                             <CommandList
                                 className={cn(
-                                    'max-h-[420px] overflow-y-auto overflow-x-hidden pb-2',
+                                    'max-h-[420px] overflow-y-auto overflow-x-hidden p-1.5 pt-0',
                                     '[&::-webkit-scrollbar]:w-2',
-                                    '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-heavy-metal-600 [&::-webkit-scrollbar-thumb]:hover:bg-heavy-metal-500',
-                                    '[&::-webkit-scrollbar-track]:rounded-md [&::-webkit-scrollbar-track]:bg-heavy-metal-800',
+                                    '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-outer-space-600 [&::-webkit-scrollbar-thumb]:hover:bg-outer-space-500',
+                                    '[&::-webkit-scrollbar-track]:rounded-md [&::-webkit-scrollbar-track]:bg-outer-space-900',
                                 )}
-                                onMouseDown={e => {
-                                    if (e.target === e.currentTarget) {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                    }
-                                }}
                             >
                                 {isLoading && (
-                                    <Command.Loading className="px-4 py-3 pb-1 text-sm text-heavy-metal-400">
+                                    <Command.Loading className="px-4 py-3 pb-1 text-sm text-outer-space-300">
                                         Searching...
                                     </Command.Loading>
                                 )}
@@ -209,9 +207,11 @@ export function BaseSearch({
                                                       <CommandItem
                                                           key={`${group.label}-${option.pathname}`}
                                                           className={cn(
-                                                              'cursor-pointer px-3 py-2',
+                                                              'cursor-pointer rounded-md px-3 py-2',
+                                                              'border border-solid border-transparent',
                                                               'transition-colors',
-                                                              'hover:bg-heavy-metal-700 aria-[selected=true]:bg-heavy-metal-600',
+                                                              'hover:bg-outer-space-800 aria-[selected=true]:bg-outer-space-800',
+                                                              'aria-[selected=true]:border-white/10',
                                                           )}
                                                           keywords={option.value}
                                                           value={option.pathname}
@@ -227,7 +227,7 @@ export function BaseSearch({
                                     : null}
 
                                 {!isLoading && (
-                                    <CommandEmpty className="w-full px-4 py-3 pb-1 text-sm text-heavy-metal-400">
+                                    <CommandEmpty className="w-full px-4 py-3 pb-1 text-sm text-outer-space-300">
                                         No results found
                                     </CommandEmpty>
                                 )}

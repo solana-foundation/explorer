@@ -7,15 +7,15 @@ import { type ConsentRequest, CustomUrlConsentDialog } from '../CustomUrlConsent
 const ENDPOINT_REQUEST: ConsentRequest = { endpoint: rpcEndpoint('https://my-node.example/rpc'), kind: 'endpoint' };
 const BYPASS_REQUEST: ConsentRequest = { kind: 'developer-bypass' };
 
-const ENDPOINT_QUESTION = 'Connect to this RPC server?';
-const BYPASS_QUESTION = 'Stop asking about custom RPC servers?';
+const ENDPOINT_QUESTION = 'Connect to an unknown RPC server?';
+const BYPASS_QUESTION = 'Trust any RPC server?';
 
 describe('CustomUrlConsentDialog', () => {
     afterEach(() => vi.restoreAllMocks());
 
     it('should keep the endpoint question on screen while it animates closed', () => {
         // Answering used to swap the copy on the way out: the last thing a visitor saw after refusing one
-        // server was a red button offering to stop asking about all of them.
+        // server was a red button offering to trust every link's choice of server.
         stubExitAnimation();
         const { close } = renderDialog(ENDPOINT_REQUEST);
 

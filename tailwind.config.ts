@@ -134,6 +134,7 @@ const config: Config = {
                     600: 'oklch(46.048% 0.0207 163.91)',
                     700: 'oklch(38.258% 0.0166 166.31)',
                     800: 'oklch(30.098% 0.01205 160.58)',
+                    850: 'oklch(25.7% 0.0096 162)', // navbar background — midpoint between 800 and 900
                     900: 'oklch(21.275% 0.00721 164.22)',
                     950: 'oklch(14.676% 0.004 164.84)',
                 },
@@ -231,7 +232,9 @@ const config: Config = {
             'max-sm': { max: getScreenDim('sm', 0) },
             'max-md': { max: getScreenDim('md', 0) },
             xxs: getScreenDim('xxs'),
-            xs: getScreenDim('xs'),
+            // Flat (no +1): the navbar's rest insets below sm are arithmetic for a 375px row, and a pixel
+            // up would drop an iPhone at 375 to the 320 numbers. Also keeps CSS in step with useBreakpoint.
+            xs: getScreenDim('xs', 0),
             sm: getScreenDim('sm'),
             md: getScreenDim('md'),
             lg: getScreenDim('lg'),

@@ -320,6 +320,7 @@ describe('ClusterModal cluster hrefs', () => {
             expect(nav.push).not.toHaveBeenCalled();
             expect(nav.replace).toHaveBeenCalledWith(
                 `/?cluster=custom&customUrl=${encodeURIComponent('http://typed-node:8899')}&sort=fee`,
+                { scroll: false },
             );
         } finally {
             vi.useRealTimers();
@@ -329,7 +330,7 @@ describe('ClusterModal cluster hrefs', () => {
     it('should drop the endpoint when deleting the saved cluster the page is pointed at', () => {
         renderWithStore([{ name: 'My Local', url: CUSTOM_URL }]);
         fireEvent.click(screen.getByTestId('delete-cluster-My Local'));
-        expect(nav.push).toHaveBeenCalledWith('/?sort=fee');
+        expect(nav.push).toHaveBeenCalledWith('/?sort=fee', { scroll: false });
     });
 });
 
@@ -359,6 +360,7 @@ describe('ClusterModal endpoint consent', () => {
             expect(store.get(approvedOriginsAtom)).toEqual(['https://my-node.example']);
             expect(nav.replace).toHaveBeenCalledWith(
                 `/?cluster=custom&customUrl=${encodeURIComponent('https://my-node.example/rpc?api-key=secret')}&sort=fee`,
+                { scroll: false },
             );
         } finally {
             vi.useRealTimers();
@@ -385,7 +387,7 @@ describe('ClusterModal endpoint consent', () => {
             renderWithStore();
             typeUrl('');
 
-            expect(nav.replace).toHaveBeenCalledWith('/?cluster=custom&sort=fee');
+            expect(nav.replace).toHaveBeenCalledWith('/?cluster=custom&sort=fee', { scroll: false });
         } finally {
             vi.useRealTimers();
         }

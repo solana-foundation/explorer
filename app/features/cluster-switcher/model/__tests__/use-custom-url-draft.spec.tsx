@@ -39,11 +39,11 @@ vi.mock('@entities/cluster', async importOriginal => {
 
 import { approvedOriginsAtom } from '@entities/cluster';
 
-import { useCustomUrlDraft } from '../use-custom-url-draft';
+import { type CustomUrlDraftOptions, useCustomUrlDraft } from '../use-custom-url-draft';
 
-function setupDraft() {
+function setupDraft(options?: CustomUrlDraftOptions) {
     const store = createStore();
-    const view = renderHook(() => useCustomUrlDraft(), {
+    const view = renderHook(() => useCustomUrlDraft(options), {
         wrapper: ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -53,10 +53,17 @@ function setupDraft() {
             clusterMock.customUrl = url;
             view.rerender();
         },
+
+        /** Choosing an endpoint outright — Enter, Go, an entry picked from the list. */
+        select(next: string) {
+            act(() => view.result.current.select(next));
+        },
+
         /** Let the commit debounce fire. */
         settle() {
             act(() => vi.advanceTimersByTime(500));
         },
+
         store,
         /** One edit of the field. */
         type(next: string) {
@@ -102,8 +109,11 @@ describe('useCustomUrlDraft', () => {
         draft.settle();
 
         // Unrelated params belong to the page underneath and survive the switch.
+        // `scroll: false` throughout: this fires mid-typing, and the App Router would otherwise throw
+        // the page back to the top on every pause.
         expect(nav.replace).toHaveBeenCalledWith(
             `/?cluster=custom&customUrl=${encodeURIComponent('http://my-node:8899')}&sort=fee`,
+            { scroll: false },
         );
     });
 
@@ -136,7 +146,36 @@ describe('useCustomUrlDraft', () => {
         draft.type('');
         draft.settle();
 
-        expect(nav.replace).toHaveBeenCalledWith('/?cluster=custom&sort=fee');
+        expect(nav.replace).toHaveBeenCalledWith('/?cluster=custom&sort=fee', { scroll: false });
+    });
+
+    // Typing must not move the page; choosing an endpoint outright is the reader starting on the content
+    // again, and starting means the top of it — the same thing the menu's cluster rows do.
+    it('should go back to the top when an endpoint is chosen outright', () => {
+        const scrolled = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+        const draft = setupDraft();
+
+        draft.select('http://picked-node:8899');
+
+        expect(scrolled).toHaveBeenCalledWith({ top: 0 });
+        // The router is told not to: it scrolls the changed segment into view rather than the document,
+        // which comes to rest with the navbar just off the screen.
+        expect(nav.replace).toHaveBeenCalledWith(
+            `/?cluster=custom&customUrl=${encodeURIComponent('http://picked-node:8899')}&sort=fee`,
+            { scroll: false },
+        );
+        scrolled.mockRestore();
+    });
+
+    it('should leave the page where it stands while the endpoint is being typed', () => {
+        const scrolled = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+        const draft = setupDraft();
+
+        draft.type('http://typed-node:8899');
+        draft.settle();
+
+        expect(scrolled).not.toHaveBeenCalled();
+        scrolled.mockRestore();
     });
 
     // A saved cluster, an in-app link or a declined prompt changes the endpoint without anyone touching
@@ -163,6 +202,32 @@ describe('useCustomUrlDraft', () => {
 
     // The echo guard covers one arrival and no more. Saving a cluster starts by typing its URL, so a
     // guard left standing would match that entry's click and leave the field showing the endpoint before.
+    // The navbar's menu has Go, so there typing is deciding and nothing applies itself: the page behind
+    // the menu must not change until the reader says so.
+    describe('with commitOnType off', () => {
+        it('should show the keystrokes and commit none of them', () => {
+            const draft = setupDraft({ commitOnType: false });
+            draft.type('http://my-node:8899');
+            draft.settle();
+
+            expect(draft.value()).toBe('http://my-node:8899');
+            expect(nav.replace).not.toHaveBeenCalled();
+            expect(draft.store.get(approvedOriginsAtom)).toEqual([]);
+        });
+
+        // Go and a picked entry go through `select`, which is a decision rather than a pause.
+        it('should still commit a selected endpoint at once', () => {
+            const draft = setupDraft({ commitOnType: false });
+            draft.select('http://my-node:8899');
+
+            expect(nav.replace).toHaveBeenCalledWith(
+                `/?cluster=custom&customUrl=${encodeURIComponent('http://my-node:8899')}&sort=fee`,
+                { scroll: false },
+            );
+            expect(draft.store.get(approvedOriginsAtom)).toEqual(['http://my-node:8899']);
+        });
+    });
+
     it('should follow a re-selected endpoint it committed earlier', () => {
         const draft = setupDraft();
 
