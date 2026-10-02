@@ -6,7 +6,6 @@ import { McpDocsOverviewView } from '../McpDocsOverviewView';
 const meta: Meta<typeof McpDocsOverviewView> = {
     component: McpDocsOverviewView,
     decorators: [withViewportFromGlobal],
-    globals: { backgrounds: { value: 'dark' } },
     parameters: {
         layout: 'fullscreen',
         viewport: { options: INITIAL_VIEWPORTS },
