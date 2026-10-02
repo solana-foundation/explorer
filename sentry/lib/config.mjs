@@ -1,0 +1,131 @@
+import { CLIENT_REPORT_ALLOWED, CLIENT_REPORT_TAG } from '../client-report.mjs';
+import {
+    clientErrorsEnabled,
+    clientSentryDsn,
+    sentryEnvironment,
+    serverSentryDsn,
+    sourcemapUploadsDisabled,
+    traceSampleRateMultiplier,
+} from './env.mjs';
+import { vitalsTraceSampleRate } from './vitals.mjs';
+
+/**
+ * @typedef {'client' | 'server' | 'edge'} RuntimeContext
+ * @typedef {Exclude<RuntimeContext, 'client'>} ServerRuntime
+ */
+
+// Server/edge errors are rare and load-bearing; the client starts near zero until quota headroom is proven.
+// TODO(rollout): client 1e-6 → 1e-4 → 1e-2 → 1; each ×100 step bounds the next volume at 100× the measured
+// one, advance when that still fits quota. The client beforeSend gate limits which events send, not how many.
+/** @type {Record<RuntimeContext, number>} */
+const ERROR_SAMPLE_RATES = {
+    client: 1 / 1000000,
+    edge: 1,
+    server: 1,
+};
+
+// Server traces are ~5 spans each; edge follows server. The client has no baseline, see tracesSampler.
+// TODO(rollout): 1e-5 → 1e-4 → 1e-3 while span quota holds (dampener env vars are the brake).
+/** @type {Record<ServerRuntime, number>} */
+const TRACE_SAMPLE_RATES = {
+    edge: 1 / 100000,
+    server: 1 / 100000,
+};
+
+// Never-sample name substrings: categories that are noise at any rate, excluded before every other rule.
+const TRACE_EXCLUDES = [
+    '/.well-known', // bot and devtools probes
+    'suspense-cache.vercel-infra.com', // Vercel infra, e.g. GET https://iad1.suspense-cache.vercel-infra.com/v1/*
+];
+
+/**
+ * Creates the common Sentry configuration for all runtimes
+ * @param {RuntimeContext} context - The runtime context (client, server, or edge)
+ * @returns {import('@sentry/core').Options} Sentry configuration options
+ */
+export function createSentryConfig(context) {
+    return {
+        dsn: context === 'client' ? clientSentryDsn() : serverSentryDsn(),
+
+        // The flag allows the feedback form to run without browser error reporting.
+        // The tag drops SDK auto-captures and direct captureException calls, which bot traffic triggers.
+        // beforeSend receives error events only, so feedback events skip this check.
+        ...(context === 'client' && {
+            beforeSend: (/** @type {import('@sentry/core').ErrorEvent} */ event) =>
+                clientErrorsEnabled() && event.tags?.[CLIENT_REPORT_TAG] === CLIENT_REPORT_ALLOWED
+                    ? event
+                    : // eslint-disable-next-line unicorn/no-null -- Sentry's drop signal is null
+                      null,
+        }),
+
+        sampleRate: ERROR_SAMPLE_RATES[context],
+
+        // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+        tracesSampler: (/** @type {import('@sentry/core').TracesSamplerSamplingContext} */ samplingContext) => {
+            if (TRACE_EXCLUDES.some(exclude => samplingContext.name.includes(exclude))) {
+                return 0;
+            }
+
+            // Browser pageloads emit hundreds of spans, so the opt-in vitals gate is the only source of client traces.
+            if (context === 'client') {
+                return vitalsTraceSampleRate(samplingContext) ?? 0;
+            }
+
+            // TODO: enable once a client DSN exists so a sampled client trace keeps its server half; callers
+            // can force sampling via sentry-trace headers, so weigh that first:
+            // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/sampling/#inheritance
+            // if (samplingContext.parentSampled !== undefined) {
+            //     return samplingContext.parentSampled;
+            // }
+
+            // Env multiplier dampens a runtime's baseline in an emergency (0 mutes); unset = unchanged.
+            return TRACE_SAMPLE_RATES[context] * (traceSampleRateMultiplier(context) ?? 1);
+        },
+
+        // Enable logs to be sent to Sentry
+        enableLogs: false,
+
+        // Setting this option to true will print useful information to the console while you're setting up Sentry.
+        debug: false,
+
+        environment: sentryEnvironment(context),
+    };
+}
+
+/**
+ * Creates the Sentry build configuration for webpack plugin
+ * @returns {import('@sentry/nextjs').SentryBuildOptions} Sentry build configuration options
+ */
+export function createSentryBuildConfig() {
+    return {
+        // For all available options, see:
+        // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PRJ,
+
+        // Only print logs for uploading source maps in CI
+        silent: !process.env.CI,
+
+        // Don't send telemetry about the build to Sentry.
+        telemetry: false,
+
+        // Webpack plugin options
+        webpack: {
+            // Enables automatic instrumentation of Vercel Cron Monitors
+            automaticVercelMonitors: true,
+            // Automatically tree-shake Sentry logger statements to reduce bundle size
+            treeshake: {
+                removeDebugLogging: true,
+            },
+        },
+
+        // Previews don't need symbolicated traces — uploading 800+ maps × 3 runtimes added ~90s/build.
+        sourcemaps: {
+            disable: sourcemapUploadsDisabled(),
+        },
+
+        // Off: widening pulls node_modules chunks into the upload.
+        widenClientFileUpload: false,
+    };
+}
