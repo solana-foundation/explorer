@@ -131,6 +131,25 @@ const clientBoundaryPlugin = {
                 type: 'suggestion',
             },
         },
+        // The selector matches the module prologue and a function-body prologue, and both declare an action.
+        'no-server-actions': {
+            create(context) {
+                return {
+                    "ExpressionStatement[directive='use server']"(node) {
+                        context.report({ messageId: 'noServerActions', node });
+                    },
+                };
+            },
+            meta: {
+                docs: { description: "Disallow 'use server' Server Actions." },
+                messages: {
+                    noServerActions:
+                        'Do not add a Server Action. Its arguments are serialized over HTTP, so a callback among them reaches the server as a proxy that throws when called. Send the data to a route handler as JSON and parse it with superstruct.',
+                },
+                schema: [],
+                type: 'problem',
+            },
+        },
     },
 };
 
@@ -549,6 +568,15 @@ export default tseslint.config(
         plugins: { boundary: clientBoundaryPlugin },
         rules: {
             'boundary/prefer-client-only-in-hooks': 'error',
+        },
+    },
+
+    // The app has no Server Actions. Browser-to-server data goes through route handlers instead.
+    {
+        files: ['app/**/*.[jt]s?(x)', 'packages/**/*.[jt]s?(x)'],
+        plugins: { boundary: clientBoundaryPlugin },
+        rules: {
+            'boundary/no-server-actions': 'error',
         },
     },
 

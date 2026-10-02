@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { getChainId } from '@entities/chain-id/@x/token-info';
 import { Cluster } from '@utils/cluster';
