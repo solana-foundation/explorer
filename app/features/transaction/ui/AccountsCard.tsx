@@ -19,6 +19,7 @@ import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { DataListCard, DataListRow } from '@/app/shared/ui/DataListCard';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
+import { getStaticAccountKeysSize } from './account-keys-size';
 import { AccountBadges } from './AccountBadges';
 import { AccountDetailDrawer } from './AccountDetailDrawer';
 import { AccountExpandedContent } from './AccountExpandedContent';
@@ -180,9 +181,12 @@ export function AccountsCard({ signature }: SignatureProps) {
 
     const { accounts, error, loading } = useAccountsInfo(pubkeys, url);
 
-    const totalAccountSize = useMemo(
-        () => Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0),
-        [accounts],
+    // The summed on-chain data sizes have no bearing on the transaction itself, so the
+    // footer reports the static account-keys footprint instead (32 bytes per key,
+    // lookup-table addresses excluded) for sizing against the transaction size limit.
+    const { accountCount, sizeBytes: totalAccountsSize } = useMemo(
+        () => getStaticAccountKeysSize(message?.accountKeys ?? []),
+        [message?.accountKeys],
     );
 
     if (!transactionWithMeta) {
@@ -214,15 +218,16 @@ export function AccountsCard({ signature }: SignatureProps) {
         );
     });
 
-    const footer = !loading && totalAccountSize > 0 && (
+    const footer = !loading && totalAccountsSize > 0 && (
         <div className={cn('text-sm text-outer-space-300', ROW_PADDING)}>
             <div className="flex flex-col">
                 <div className="flex items-baseline gap-2">
-                    <span>Total Account Size:</span>
-                    <span className="text-white">{totalAccountSize.toLocaleString('en-US')} bytes</span>
+                    <span>Total Accounts Size:</span>
+                    <span className="text-white">{totalAccountsSize.toLocaleString('en-US')} bytes</span>
                 </div>
                 <span className="text-xs">
-                    Current data. This data may have been different at the time of the transaction.
+                    {accountCount.toLocaleString('en-US')} static account keys × 32 bytes, excluding address lookup
+                    table addresses. Compare against the 1232-byte transaction size limit.
                 </span>
             </div>
         </div>
