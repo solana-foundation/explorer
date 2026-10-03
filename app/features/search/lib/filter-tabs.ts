@@ -88,7 +88,7 @@ export function computeFilterArgs(results: SearchOptions[], activeFilter: Filter
     const tokensIdx = reordered.findIndex(g => g.label === SearchGroup.Tokens);
     if (tokensIdx > 0) reordered.unshift(reordered.splice(tokensIdx, 1)[0]);
 
-    // Domain Owners above Tokens (provider only fires for .sol queries)
+    // Domain Owners go first because the group is present only when the query resolves to an owner.
     const domainsIdx = reordered.findIndex(g => g.label === SearchGroup.DomainOwners);
     if (domainsIdx > 0) reordered.unshift(reordered.splice(domainsIdx, 1)[0]);
 
