@@ -72,7 +72,7 @@ export const WithSavedClusters: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         expect(canvas.getByTestId('saved-clusters-section')).toBeVisible();
-        expect(canvas.getByTestId('saved-cluster-host-Staging')).toHaveTextContent('staging.example.com');
+        expect(canvas.getByTestId(`saved-cluster-host-${SAVED[1].url}`)).toHaveTextContent('staging.example.com');
     },
     render: () => <ClusterModalWithReopen />,
 };

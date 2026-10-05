@@ -5,6 +5,7 @@ export type { ClusterInfo } from './lib/types';
 export { type CustomUrlDecision, decideCustomUrl, isCustomUrlCarryable } from './lib/resolve-cluster';
 export { DEFAULT_RPC_ENDPOINT, parseRpcEndpoint, rpcEndpoint, type RpcEndpoint } from './lib/rpc-endpoint';
 export { isLocalRpcUrl, shouldUseDirectRpc } from './lib/should-use-direct-rpc';
+export { getWhitelistedRpcHostnames } from './lib/whitelisted-rpcs';
 export { approvedOriginsAtom, approveRpcOriginAtom } from './model/approved-origins';
 export { ClusterProvider, type ClusterState, StateContext } from './model/cluster-provider';
 export { customUrlEnabledAtom } from './model/custom-url-enabled';

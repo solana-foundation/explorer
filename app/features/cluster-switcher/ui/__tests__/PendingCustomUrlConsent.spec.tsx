@@ -56,8 +56,8 @@ describe('PendingCustomUrlConsent', () => {
         clusterState.pendingCustomUrl = rpcEndpoint(REMOTE_URL);
         renderConsent();
 
-        expect(screen.getByTestId('consent-host')).toHaveTextContent('my-node.example');
-        expect(screen.getByTestId('consent-full-url')).toHaveTextContent(REMOTE_URL);
+        // The whole address, once: the host is in it, and so is whatever follows the host.
+        expect(screen.getByTestId('consent-host')).toHaveTextContent(REMOTE_URL);
     });
 
     it('should sit above the cluster sidebar rather than under its overlay', () => {
