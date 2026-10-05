@@ -102,6 +102,14 @@ describe('fetchBlock', () => {
         expect(getTransaction(await fetchBlock(URL, SLOT)).meta?.costUnits).toBe(2_500n);
     });
 
+    it('should leave cost units undefined when the RPC omits them', async () => {
+        const [transaction] = LEGACY_BLOCK_RESPONSE.transactions;
+        const meta = { ...transaction.meta, costUnits: undefined };
+        respondWith({ ...LEGACY_BLOCK_RESPONSE, transactions: [{ ...transaction, meta }] });
+
+        expect(getTransaction(await fetchBlock(URL, SLOT)).meta?.costUnits).toBeUndefined();
+    });
+
     it('should ignore token balances that the block pages do not consume', async () => {
         const [transaction] = LEGACY_BLOCK_RESPONSE.transactions;
         const tokenBalance = {
