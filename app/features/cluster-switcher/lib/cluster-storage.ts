@@ -69,13 +69,6 @@ export const updateSavedClusterAtom = atom(
     },
 );
 
-export const restoreSavedClusterAtom = atom(undefined, (get, set, entry: { at: number } & SavedCluster) => {
-    const clusters = get(savedClustersAtom);
-    if (clusters.some(c => c.url === entry.url)) return;
-    const at = Math.min(Math.max(entry.at, 0), clusters.length);
-    set(savedClustersAtom, [...clusters.slice(0, at), { name: entry.name, url: entry.url }, ...clusters.slice(at)]);
-});
-
 function excludeByUrl(clusters: SavedCluster[], url: string): SavedCluster[] {
     return clusters.filter(c => c.url !== url);
 }

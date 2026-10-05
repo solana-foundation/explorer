@@ -56,6 +56,7 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
     const onCustom = cluster === Cluster.Custom;
     const customIsLive = onCustom && !listed.some(saved => saved.url === endpoint?.href);
     const draftEndpoint = parseRpcEndpoint(draft.value);
+    const alreadySaved = savedClusters.find(saved => saved.url === draft.value);
 
     const savedRef = useRef<HTMLUListElement>(null);
     const [showSavedFade, setShowSavedFade] = useState(false);
@@ -213,12 +214,17 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
                             variant="outline"
                             size="sm"
                             className={cn('self-start', MENU_SECONDARY_BUTTON)}
-                            disabled={!draftEndpoint}
+                            disabled={!draftEndpoint || alreadySaved !== undefined}
+                            title={
+                                alreadySaved
+                                    ? `Already saved as ${alreadySaved.name || draftEndpoint?.host}`
+                                    : undefined
+                            }
                             onClick={() => setSaving(true)}
                             data-testid="open-save-cluster-btn"
                         >
                             <Plus size={14} aria-hidden />
-                            Save…
+                            {alreadySaved ? 'Saved' : 'Save…'}
                         </Button>
                     </>
                 )}

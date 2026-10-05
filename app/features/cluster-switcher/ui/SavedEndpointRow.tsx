@@ -5,13 +5,13 @@ import { IconButton } from '@components/shared/ui/icon-button';
 import { cn } from '@components/shared/utils';
 import { parseRpcEndpoint } from '@entities/cluster';
 import { type SavedCluster, useSavedClusters } from '@features/cluster-switcher/client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Edit2, Trash2 } from 'react-feather';
 
 import { endpointProvenance } from '../lib/endpoint-provenance';
 import { MENU_SECONDARY_BUTTON, rowClasses } from './cluster-row-classes';
 import { EndpointForm } from './EndpointForm';
-import { KnownMark, UnknownMark } from './provenance-mark';
+import { ProvenanceMark } from './provenance-mark';
 
 const HOVER_FROM_GROUP =
     '[@media(hover:hover)]:group-hover/row:border-white/10 [@media(hover:hover)]:group-hover/row:bg-outer-space-800';
@@ -33,15 +33,27 @@ export function SavedEndpointRow({
     onPick: () => void;
     pinned?: boolean;
 }) {
-    const { removeSavedCluster, restoreSavedCluster, savedClusters, updateSavedCluster } = useSavedClusters();
+    const { removeSavedCluster, updateSavedCluster } = useSavedClusters();
     const [editing, setEditing] = useState(false);
-    const [removed, setRemoved] = useState<number | undefined>(undefined);
+    const [pendingRemoval, setPendingRemoval] = useState(false);
+    const pendingRef = useRef(false);
 
     useEffect(() => {
-        if (removed === undefined) return;
-        const timer = setTimeout(() => setRemoved(undefined), UNDO_WINDOW_MS);
+        if (!pendingRemoval) return;
+        const timer = setTimeout(() => {
+            pendingRef.current = false;
+            removeSavedCluster(entry.url);
+            setPendingRemoval(false);
+        }, UNDO_WINDOW_MS);
         return () => clearTimeout(timer);
-    }, [removed]);
+    }, [pendingRemoval, entry.url, removeSavedCluster]);
+
+    useEffect(
+        () => () => {
+            if (pendingRef.current) removeSavedCluster(entry.url);
+        },
+        [entry.url, removeSavedCluster],
+    );
 
     const savedEndpoint = parseRpcEndpoint(entry.url);
     const heading = entry.name || savedEndpoint?.host || entry.url;
@@ -65,12 +77,7 @@ export function SavedEndpointRow({
 
     const rowClass = cn(rowClasses({ active, stacked: true }), 'pr-14', HOVER_FROM_GROUP);
 
-    const mark =
-        provenance === 'known' ? (
-            <KnownMark withLabel={active} />
-        ) : provenance === 'unknown' ? (
-            <UnknownMark withLabel={active} />
-        ) : undefined;
+    const mark = <ProvenanceMark provenance={provenance} withLabel={active} />;
 
     const contents = (
         <span className="flex min-w-0 flex-1 flex-col leading-tight">
@@ -79,12 +86,12 @@ export function SavedEndpointRow({
                     className={cn(
                         'truncate text-sm font-medium text-white',
                         entry.name === '' && 'font-mono',
-                        removed !== undefined && 'line-through opacity-60',
+                        pendingRemoval && 'line-through opacity-60',
                     )}
                 >
                     {heading}
                 </span>
-                {mark !== undefined && <span className="flex shrink-0 items-center">{mark}</span>}
+                {mark}
             </span>
             {savedEndpoint && entry.name !== '' && savedEndpoint.host !== entry.name && (
                 <span className="block truncate font-mono text-xs text-outer-space-300">{savedEndpoint.host}</span>
@@ -95,7 +102,7 @@ export function SavedEndpointRow({
         </span>
     );
 
-    if (removed !== undefined)
+    if (pendingRemoval)
         return (
             <li className="group/row relative" data-testid={`saved-cluster-${entry.url}`}>
                 <div className={cn(rowClass, 'cursor-default')} aria-disabled>
@@ -107,8 +114,8 @@ export function SavedEndpointRow({
                         size="sm"
                         className={MENU_SECONDARY_BUTTON}
                         onClick={() => {
-                            restoreSavedCluster({ ...entry, at: removed });
-                            setRemoved(undefined);
+                            pendingRef.current = false;
+                            setPendingRemoval(false);
                         }}
                         data-testid={`restore-cluster-${entry.url}`}
                     >
@@ -145,10 +152,9 @@ export function SavedEndpointRow({
                         title="Delete this endpoint"
                         danger
                         onClick={() => {
-                            const at = savedClusters.findIndex(c => c.url === entry.url);
-                            removeSavedCluster(entry.url);
+                            pendingRef.current = true;
+                            setPendingRemoval(true);
                             onDelete?.();
-                            setRemoved(at < 0 ? 0 : at);
                         }}
                         testId={`delete-cluster-${entry.url}`}
                     >

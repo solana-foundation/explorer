@@ -1,12 +1,11 @@
 'use client';
 
+import { CONTROL_GROUND, FOCUS_RULE_GRADIENT } from '@components/shared/focus-rule';
 import { cn } from '@components/shared/utils';
 import { useHotkeys } from '@mantine/hooks';
 import React, { type ReactNode, type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Search, X } from 'react-feather';
-
-const GROUND = 'oklch(30.098% 0.01205 160.58)';
 
 const BELOW_DOCK =
     '[@media(max-width:575px)]:[&_kbd]:hidden [@media(max-width:575px)]:[&_[data-search-frame]]:!pr-[38px] [@media(max-width:575px)]:[&_[data-search-frame]>button]:!hidden';
@@ -63,10 +62,9 @@ export function NavSearch({ children, dockClassName, onOpenChange, open, restCla
         open || ringVisible
             ? {
                   backgroundClip: 'padding-box, border-box',
-                  backgroundImage: [
-                      `linear-gradient(${GROUND}, ${GROUND})`,
-                      'radial-gradient(118% 130% at 0% 100%, rgba(29,215,155,0.53) 0%, rgba(29,215,155,0.46) 35%, rgba(29,215,155,0.4) 65%, rgba(29,215,155,0.34) 90%, rgba(29,215,155,0.31) 100%)',
-                  ].join(', '),
+                  backgroundImage: [`linear-gradient(${CONTROL_GROUND}, ${CONTROL_GROUND})`, FOCUS_RULE_GRADIENT].join(
+                      ', ',
+                  ),
                   backgroundOrigin: 'border-box',
                   backgroundPosition: '0 0, left bottom',
                   backgroundRepeat: 'no-repeat',

@@ -198,23 +198,27 @@ describe('ClusterModal', () => {
             { name: 'My Local', url: 'http://localhost:8899' },
             { name: 'Staging', url: 'https://staging.example.com/rpc?api-key=secret' },
         ]);
-        expect(screen.getByTestId('saved-cluster-host-My Local')).toHaveTextContent('localhost:8899');
-        expect(screen.getByTestId('saved-cluster-host-Staging')).toHaveTextContent('staging.example.com');
+        expect(screen.getByTestId('saved-cluster-host-http://localhost:8899')).toHaveTextContent('localhost:8899');
+        expect(
+            screen.getByTestId('saved-cluster-host-https://staging.example.com/rpc?api-key=secret'),
+        ).toHaveTextContent('staging.example.com');
     });
 
     // The default name is the host, so the common entry is one line, not the same string twice.
     it('should drop the host line when the name is already the host', () => {
         renderWithStore([{ name: 'localhost:8899', url: 'http://localhost:8899' }]);
-        expect(screen.queryByTestId('saved-cluster-host-localhost:8899')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('saved-cluster-host-http://localhost:8899')).not.toBeInTheDocument();
         expect(screen.getByText('localhost:8899')).toBeInTheDocument();
     });
 
     // Providers put the API key in the path or the query, and this panel gets opened on a shared screen.
     it('should keep the path and query out of the visible host line', () => {
         renderWithStore([{ name: 'Staging', url: 'https://staging.example.com/rpc?api-key=secret' }]);
-        expect(screen.getByTestId('saved-cluster-host-Staging')).not.toHaveTextContent('api-key=secret');
+        expect(
+            screen.getByTestId('saved-cluster-host-https://staging.example.com/rpc?api-key=secret'),
+        ).not.toHaveTextContent('api-key=secret');
         // Still reachable on a deliberate hover.
-        expect(screen.getByTestId('saved-cluster-link-Staging')).toHaveAttribute(
+        expect(screen.getByTestId('saved-cluster-link-https://staging.example.com/rpc?api-key=secret')).toHaveAttribute(
             'title',
             'Staging — https://staging.example.com/rpc?api-key=secret',
         );
@@ -226,8 +230,8 @@ describe('ClusterModal', () => {
         const longName = 'dsfdfsdfsdfsdfdfsfsdfsdfsdfsdfsdfsdfsdfsdf';
         renderWithStore([{ name: longName, url: 'http://localhost:8899' }]);
         expect(screen.getByText(longName)).toHaveClass('truncate');
-        expect(screen.getByTestId(`saved-cluster-host-${longName}`)).toHaveClass('truncate');
-        expect(screen.getByTestId(`saved-cluster-link-${longName}`)).toHaveAttribute(
+        expect(screen.getByTestId('saved-cluster-host-http://localhost:8899')).toHaveClass('truncate');
+        expect(screen.getByTestId('saved-cluster-link-http://localhost:8899')).toHaveAttribute(
             'title',
             `${longName} — http://localhost:8899`,
         );
@@ -243,7 +247,7 @@ describe('ClusterModal', () => {
             { name: 'My Local', url: 'http://localhost:8899' },
             { name: 'Staging', url: 'http://staging.example.com' },
         ]);
-        fireEvent.click(screen.getByTestId('delete-cluster-My Local'));
+        fireEvent.click(screen.getByTestId('delete-cluster-http://localhost:8899'));
         expect(store.get(savedClustersAtom)).toEqual([{ name: 'Staging', url: 'http://staging.example.com' }]);
     });
 
@@ -262,7 +266,7 @@ describe('ClusterModal', () => {
     it('should show save button again after deleting the cluster with matching URL', () => {
         renderWithStore([{ name: 'My Node', url: CUSTOM_URL }]);
         expect(screen.queryByTestId('save-custom-cluster-btn')).not.toBeInTheDocument();
-        fireEvent.click(screen.getByTestId('delete-cluster-My Node'));
+        fireEvent.click(screen.getByTestId(`delete-cluster-${CUSTOM_URL}`));
         expect(screen.getByTestId('save-custom-cluster-btn')).toBeInTheDocument();
     });
 });
@@ -291,7 +295,7 @@ describe('ClusterModal cluster hrefs', () => {
 
     it('should point a saved cluster at its own endpoint', () => {
         renderWithStore([{ name: 'Staging', url: 'http://staging.example.com' }]);
-        expect(screen.getByTestId('saved-cluster-link-Staging')).toHaveAttribute(
+        expect(screen.getByTestId('saved-cluster-link-http://staging.example.com')).toHaveAttribute(
             'href',
             `/?cluster=custom&customUrl=${encodeURIComponent('http://staging.example.com')}&sort=fee`,
         );
@@ -329,7 +333,7 @@ describe('ClusterModal cluster hrefs', () => {
 
     it('should drop the endpoint when deleting the saved cluster the page is pointed at', () => {
         renderWithStore([{ name: 'My Local', url: CUSTOM_URL }]);
-        fireEvent.click(screen.getByTestId('delete-cluster-My Local'));
+        fireEvent.click(screen.getByTestId(`delete-cluster-${CUSTOM_URL}`));
         expect(nav.push).toHaveBeenCalledWith('/?sort=fee', { scroll: false });
     });
 });
@@ -398,7 +402,7 @@ describe('ClusterModal endpoint consent', () => {
 
         // A real anchor, so stop jsdom navigating. React's handler is delegated at the root and still
         // runs: `preventDefault` does not stop propagation.
-        const link = screen.getByTestId('saved-cluster-link-Staging');
+        const link = screen.getByTestId('saved-cluster-link-https://staging.example.com/rpc');
         link.addEventListener('click', event => event.preventDefault());
         fireEvent.click(link);
 

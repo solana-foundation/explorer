@@ -3,13 +3,13 @@
 import { Button } from '@components/shared/ui/button';
 import { cn } from '@components/shared/utils';
 import { approveRpcOriginAtom, parseRpcEndpoint, useCluster } from '@entities/cluster';
+import { type SavedCluster, useSavedClusters } from '@features/cluster-switcher/client';
 import { Cluster, ClusterStatus, DEFAULT_CLUSTER } from '@utils/cluster';
 import { useSetAtom } from 'jotai';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Trash2 } from 'react-feather';
 
-import { removeSavedClusterAtom, type SavedCluster } from '../lib/cluster-storage';
 import { useClusterHref } from '../model/use-cluster-href';
 import { clusterButtonVariants } from './cluster-button-variants';
 
@@ -17,7 +17,7 @@ type SavedClusterListProps = { savedClusters: SavedCluster[]; status: ClusterSta
 
 export function SavedClusterList({ savedClusters, status }: SavedClusterListProps) {
     const { endpoint, cluster } = useCluster();
-    const removeSavedCluster = useSetAtom(removeSavedClusterAtom);
+    const { removeSavedCluster } = useSavedClusters();
     const buildHref = useClusterHref();
     const router = useRouter();
 
@@ -38,7 +38,7 @@ export function SavedClusterList({ savedClusters, status }: SavedClusterListProp
             <h3 className="mb-3 text-center">Saved Clusters</h3>
             {savedClusters.map(saved => (
                 <SavedClusterItem
-                    key={saved.name}
+                    key={saved.url}
                     saved={saved}
                     status={status}
                     isActive={cluster === Cluster.Custom && endpoint?.href === saved.url}
@@ -61,25 +61,26 @@ function SavedClusterItem({ saved, status, isActive, onDelete }: SavedClusterIte
     const approveOrigin = useSetAtom(approveRpcOriginAtom);
 
     const savedEndpoint = parseRpcEndpoint(saved.url);
+    const heading = saved.name || savedEndpoint?.host || saved.url;
 
     const onSelect = () => {
         if (savedEndpoint !== undefined) approveOrigin(savedEndpoint);
     };
 
     return (
-        <div className="relative mb-3 w-full" data-testid={`saved-cluster-${saved.name}`}>
+        <div className="relative mb-3 w-full" data-testid={`saved-cluster-${saved.url}`}>
             <Link
                 className={cn(clusterButtonVariants({ active: isActive, status }), 'pl-10 pr-10 text-center')}
                 href={buildHref({ cluster: Cluster.Custom, customUrl: saved.url })}
                 onClick={onSelect}
-                title={`${saved.name} — ${saved.url}`}
-                data-testid={`saved-cluster-link-${saved.name}`}
+                title={saved.name ? `${saved.name} — ${saved.url}` : saved.url}
+                data-testid={`saved-cluster-link-${saved.url}`}
             >
-                <span className="block truncate">{saved.name}</span>
-                {savedEndpoint && savedEndpoint.host !== saved.name && (
+                <span className="block truncate">{heading}</span>
+                {savedEndpoint && savedEndpoint.host !== heading && (
                     <span
                         className="block truncate text-xs text-dk-gray-700"
-                        data-testid={`saved-cluster-host-${saved.name}`}
+                        data-testid={`saved-cluster-host-${saved.url}`}
                     >
                         {savedEndpoint.host}
                     </span>
@@ -94,8 +95,8 @@ function SavedClusterItem({ saved, status, isActive, onDelete }: SavedClusterIte
                     e.stopPropagation();
                     onDelete(saved.url);
                 }}
-                data-testid={`delete-cluster-${saved.name}`}
-                aria-label={`Delete ${saved.name}`}
+                data-testid={`delete-cluster-${saved.url}`}
+                aria-label={`Delete ${heading}`}
             >
                 <Trash2 size={14} />
             </Button>

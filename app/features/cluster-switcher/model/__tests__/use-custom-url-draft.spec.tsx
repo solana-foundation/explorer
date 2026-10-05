@@ -77,6 +77,9 @@ describe('useCustomUrlDraft', () => {
     beforeEach(() => {
         vi.useFakeTimers();
         vi.clearAllMocks();
+        // jsdom has no scroll; stub it so `select` (which scrolls to top) is safe for every test, not just
+        // the two that assert on it.
+        vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
         clusterMock.customUrl = CUSTOM_URL;
         nav.searchParams = new URLSearchParams(`cluster=custom&customUrl=${CUSTOM_URL}&sort=fee`);
     });
