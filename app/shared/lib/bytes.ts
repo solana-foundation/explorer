@@ -440,9 +440,3 @@ export function bytes(input: string | ArrayLike<number> | ArrayBufferLike, encod
     // Handle array-like (number[])
     return new Uint8Array(input as ArrayLike<number>);
 }
-
-export function toByteCount(value: number | bigint | null | undefined): number | undefined {
-    if (typeof value !== 'number' && typeof value !== 'bigint') return undefined;
-    const count = Number(value);
-    return Number.isSafeInteger(count) && count >= 0 ? count : undefined;
-}
