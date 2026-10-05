@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { useRawAccountData } from '../use-raw-account-data';
+import { useLazyRawAccountData, useRawAccountData } from '../use-raw-account-data';
 
 const MOCK_URL = 'https://api.mainnet-beta.solana.com';
 const MOCK_ADDRESS = PublicKey.default.toBase58();
@@ -110,5 +110,53 @@ describe('useRawAccountData', () => {
         await new Promise(resolve => setTimeout(resolve, 100));
 
         expect(mockGetAccountInfo).toHaveBeenCalledTimes(4);
+    });
+});
+
+describe('useLazyRawAccountData', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should send one read when load is called again during the read', async () => {
+        const mockData = new Uint8Array([4, 5, 6]);
+        let resolveRead!: (value: ReturnType<typeof accountInfoValue>) => void;
+        mockGetAccountInfo.mockReturnValue(new Promise(resolve => (resolveRead = resolve)));
+
+        const { result } = renderHook(() => useLazyRawAccountData(MOCK_ADDRESS), { wrapper });
+
+        act(() => result.current.load());
+        await waitFor(() => expect(result.current.loading).toBe(true));
+        act(() => result.current.load());
+        act(() => resolveRead(accountInfoValue(mockData)));
+
+        await waitFor(() => expect(result.current.data).toEqual(mockData));
+        expect(mockGetAccountInfo).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not send a read when load is called after the data loaded', async () => {
+        const mockData = new Uint8Array([4, 5, 6]);
+        mockGetAccountInfo.mockResolvedValue(accountInfoValue(mockData));
+
+        const { result } = renderHook(() => useLazyRawAccountData(MOCK_ADDRESS), { wrapper });
+
+        act(() => result.current.load());
+        await waitFor(() => expect(result.current.data).toEqual(mockData));
+        await act(async () => result.current.load());
+
+        expect(mockGetAccountInfo).toHaveBeenCalledTimes(1);
+    });
+
+    it('should send a new read when load is called after a failed read', async () => {
+        mockGetAccountInfo.mockRejectedValue(new Error('RPC unavailable'));
+
+        const { result } = renderHook(() => useLazyRawAccountData(MOCK_ADDRESS), { wrapper });
+
+        act(() => result.current.load());
+        await waitFor(() => expect(mockGetAccountInfo).toHaveBeenCalledTimes(4));
+        await waitFor(() => expect(result.current.loading).toBe(false));
+        act(() => result.current.load());
+
+        await waitFor(() => expect(mockGetAccountInfo).toHaveBeenCalledTimes(5));
     });
 });

@@ -14,7 +14,7 @@ export function useLazyRawAccountData(accountAddress: string) {
         data,
         error,
         load: () => {
-            if (data === undefined) void mutate();
+            if (data === undefined && !isLoading) void mutate();
         },
         loading: isLoading,
     };
