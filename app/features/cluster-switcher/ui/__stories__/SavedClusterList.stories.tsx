@@ -42,9 +42,12 @@ export const Several: Story = {
         const canvas = within(canvasElement);
         // The name alone cannot tell two entries, or a stale entry from a good one, apart. The key stays
         // out of it; the whole URL is on the title.
-        expect(canvas.getByTestId('saved-cluster-host-Staging')).toHaveTextContent('staging.example.com');
-        expect(canvas.getByTestId('saved-cluster-host-Staging')).not.toHaveTextContent('api-key');
-        expect(canvas.getByTestId('saved-cluster-link-Staging')).toHaveAttribute('title', `Staging — ${STAGING_URL}`);
+        expect(canvas.getByTestId(`saved-cluster-host-${STAGING_URL}`)).toHaveTextContent('staging.example.com');
+        expect(canvas.getByTestId(`saved-cluster-host-${STAGING_URL}`)).not.toHaveTextContent('api-key');
+        expect(canvas.getByTestId(`saved-cluster-link-${STAGING_URL}`)).toHaveAttribute(
+            'title',
+            `Staging — ${STAGING_URL}`,
+        );
     },
 };
 
@@ -57,8 +60,8 @@ export const Selected: Story = {
     ],
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        const selected = canvas.getByTestId('saved-cluster-link-Staging');
-        const other = canvas.getByTestId('saved-cluster-link-My Local');
+        const selected = canvas.getByTestId(`saved-cluster-link-${STAGING_URL}`);
+        const other = canvas.getByTestId(`saved-cluster-link-${SAVED[0].url}`);
 
         // Against a sibling rather than a literal color, so this asserts "it stands out" and not which
         // green the status happens to use.
