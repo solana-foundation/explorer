@@ -99,16 +99,21 @@ describe('BlockHistoryCard filters', () => {
         ['filter=all&status=succeeded', 0],
     ])('should show an unavailable transaction only without a status filter: %s', (query, expectedCount) => {
         search = query;
-        const block = makeBlock();
-        render(
-            <BlockHistoryCard
-                block={{ ...block, transactions: [...block.transactions, { index: 4, unavailable: true }] }}
-                epoch={500n}
-            />,
-        );
+        render(<BlockHistoryCard block={makeBlockWithUnavailable()} epoch={500n} />);
         expect(screen.queryAllByText('Unavailable')).toHaveLength(expectedCount);
     });
+
+    it('should keep the CUs Consumed column when an unavailable transaction is listed', () => {
+        search = 'filter=all';
+        render(<BlockHistoryCard block={makeBlockWithUnavailable()} epoch={500n} />);
+        expect(screen.getAllByText('CUs Consumed').length).toBeGreaterThan(0);
+    });
 });
+
+function makeBlockWithUnavailable(): BlockData {
+    const block = makeBlock();
+    return { ...block, transactions: [...block.transactions, { index: block.transactions.length, unavailable: true }] };
+}
 
 function makeBlock(withFailed = true): BlockData {
     return {
