@@ -4,32 +4,32 @@
 |------|-------|------|---------------|
 | Static | `/` | 140 kB | 550 kB |
 | Static | `/_not-found` | 0 B | 420 kB |
-| Dynamic | `/address/[address]` | 530 kB | 950 kB |
-| Dynamic | `/address/[address]/account-data` | 540 kB | 960 kB |
-| Dynamic | `/address/[address]/anchor-account` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/attestation` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/attributes` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/blockhashes` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/compression` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/concurrent-merkle-tree` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/domains` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/entries` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/feature-gate` | 500 kB | 910 kB |
-| Dynamic | `/address/[address]/idl` | 610 kB | 1.00 MB |
-| Dynamic | `/address/[address]/instructions` | 510 kB | 920 kB |
-| Dynamic | `/address/[address]/metadata` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/nftoken-collection-nfts` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/program-multisig` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/rewards` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/security` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/slot-hashes` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/stake-history` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/subscriptions` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/token-extensions` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/tokens` | 510 kB | 930 kB |
-| Dynamic | `/address/[address]/transfers` | 510 kB | 930 kB |
-| Dynamic | `/address/[address]/verified-build` | 500 kB | 920 kB |
-| Dynamic | `/address/[address]/vote-history` | 500 kB | 920 kB |
+| Dynamic | `/address/[address]` | 470 kB | 890 kB |
+| Dynamic | `/address/[address]/account-data` | 480 kB | 900 kB |
+| Dynamic | `/address/[address]/anchor-account` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/attestation` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/attributes` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/blockhashes` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/compression` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/concurrent-merkle-tree` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/domains` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/entries` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/feature-gate` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/idl` | 550 kB | 970 kB |
+| Dynamic | `/address/[address]/instructions` | 450 kB | 860 kB |
+| Dynamic | `/address/[address]/metadata` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/nftoken-collection-nfts` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/program-multisig` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/rewards` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/security` | 440 kB | 860 kB |
+| Dynamic | `/address/[address]/slot-hashes` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/stake-history` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/subscriptions` | 440 kB | 850 kB |
+| Dynamic | `/address/[address]/token-extensions` | 440 kB | 860 kB |
+| Dynamic | `/address/[address]/tokens` | 450 kB | 870 kB |
+| Dynamic | `/address/[address]/transfers` | 450 kB | 860 kB |
+| Dynamic | `/address/[address]/verified-build` | 440 kB | 860 kB |
+| Dynamic | `/address/[address]/vote-history` | 440 kB | 850 kB |
 | Dynamic | `/api/ans-domains/[address]` | — | — |
 | Dynamic | `/api/domain-info/[domain]` | — | — |
 | Dynamic | `/api/geo-location` | — | — |
@@ -64,6 +64,6 @@
 | Static | `/opengraph-image.png` | — | — |
 | Dynamic | `/robots.txt` | — | — |
 | Static | `/tos` | 10 kB | 430 kB |
-| Dynamic | `/tx/[signature]` | 550 kB | 960 kB |
+| Dynamic | `/tx/[signature]` | 490 kB | 900 kB |
 | Dynamic | `/tx/[signature]/inspect` | 470 kB | 890 kB |
 | Static | `/tx/inspector` | 470 kB | 890 kB |
