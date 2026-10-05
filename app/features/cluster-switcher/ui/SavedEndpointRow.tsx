@@ -22,37 +22,43 @@ export function SavedEndpointRow({
     active,
     facts,
     entry,
-    onDelete,
+    onRemove,
     onPick,
     pinned,
 }: {
     active: boolean;
     facts?: React.ReactNode;
     entry: SavedCluster;
-    onDelete?: () => void;
+    onRemove?: () => void;
     onPick: () => void;
     pinned?: boolean;
 }) {
     const { removeSavedCluster, updateSavedCluster } = useSavedClusters();
     const [editing, setEditing] = useState(false);
+    const [renameError, setRenameError] = useState<string>();
     const [pendingRemoval, setPendingRemoval] = useState(false);
     const pendingRef = useRef(false);
+
+    // Called when the delete actually lands (window elapses or the row unmounts), so the latest handler
+    // runs rather than the one captured when delete was clicked. Defaults to a plain storage removal.
+    const commitRef = useRef<() => void>(() => undefined);
+    commitRef.current = onRemove ?? (() => removeSavedCluster(entry.url));
 
     useEffect(() => {
         if (!pendingRemoval) return;
         const timer = setTimeout(() => {
             pendingRef.current = false;
-            removeSavedCluster(entry.url);
+            commitRef.current();
             setPendingRemoval(false);
         }, UNDO_WINDOW_MS);
         return () => clearTimeout(timer);
-    }, [pendingRemoval, entry.url, removeSavedCluster]);
+    }, [pendingRemoval]);
 
     useEffect(
         () => () => {
-            if (pendingRef.current) removeSavedCluster(entry.url);
+            if (pendingRef.current) commitRef.current();
         },
-        [entry.url, removeSavedCluster],
+        [],
     );
 
     const savedEndpoint = parseRpcEndpoint(entry.url);
@@ -66,11 +72,20 @@ export function SavedEndpointRow({
                 <EndpointForm
                     url={entry.url}
                     initialName={entry.name}
+                    error={renameError}
                     onSave={name => {
-                        updateSavedCluster({ name, url: entry.url });
+                        try {
+                            updateSavedCluster({ name, url: entry.url });
+                            setRenameError(undefined);
+                            setEditing(false);
+                        } catch {
+                            setRenameError('Could not save this endpoint. Your browser storage may be full.');
+                        }
+                    }}
+                    onCancel={() => {
+                        setRenameError(undefined);
                         setEditing(false);
                     }}
-                    onCancel={() => setEditing(false)}
                 />
             </li>
         );
@@ -154,7 +169,6 @@ export function SavedEndpointRow({
                         onClick={() => {
                             pendingRef.current = true;
                             setPendingRemoval(true);
-                            onDelete?.();
                         }}
                         testId={`delete-cluster-${entry.url}`}
                     >

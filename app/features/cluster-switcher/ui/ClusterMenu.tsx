@@ -13,9 +13,10 @@ import {
     useSavedClusters,
 } from '@features/cluster-switcher/client';
 import { scrollToTop } from '@shared/lib/scrollToTop';
-import { Cluster, clusterName, CLUSTERS, clusterSlug, ClusterStatus } from '@utils/cluster';
+import { Cluster, clusterName, CLUSTERS, clusterSlug, ClusterStatus, DEFAULT_CLUSTER } from '@utils/cluster';
 import { useAtom } from 'jotai';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { Plus } from 'react-feather';
 
@@ -44,10 +45,18 @@ const SAVED_LIST_FADE_MASK = 'linear-gradient(to bottom, #000 calc(100% - 28px),
 
 export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
     const { cluster, endpoint, status } = useCluster();
-    const { addSavedCluster, savedClusters } = useSavedClusters();
+    const { addSavedCluster, removeSavedCluster, savedClusters } = useSavedClusters();
     const buildHref = useClusterHref();
+    const router = useRouter();
     const draft = useCustomUrlDraft({ commitOnType: false });
     const [saving, setSaving] = useState(false);
+    const [saveError, setSaveError] = useState<string>();
+
+    const handleRemove = (url: string) => {
+        const wasActive = cluster === Cluster.Custom && endpoint?.href === url;
+        removeSavedCluster(url);
+        if (wasActive) router.push(buildHref({ cluster: DEFAULT_CLUSTER, customUrl: '' }), { scroll: false });
+    };
 
     const pinned: SavedCluster = { name: 'Default', url: DEFAULT_RPC_ENDPOINT.href };
     const showPinned = !savedClusters.some(saved => saved.url === pinned.url);
@@ -140,6 +149,7 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
                                 pinned={saved.url === pinned.url && showPinned}
                                 active={!customIsLive && endpoint?.href === saved.url}
                                 facts={facts}
+                                onRemove={() => handleRemove(saved.url)}
                                 onPick={() => {
                                     draft.select(saved.url);
                                     onDismiss();
@@ -166,11 +176,20 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
                             draft.value,
                             savedClusters.map(c => c.name),
                         )}
+                        error={saveError}
                         onSave={name => {
-                            addSavedCluster({ name, url: draft.value });
+                            try {
+                                addSavedCluster({ name, url: draft.value });
+                                setSaveError(undefined);
+                                setSaving(false);
+                            } catch {
+                                setSaveError('Could not save this endpoint. Your browser storage may be full.');
+                            }
+                        }}
+                        onCancel={() => {
+                            setSaveError(undefined);
                             setSaving(false);
                         }}
-                        onCancel={() => setSaving(false)}
                     />
                 ) : (
                     <>
