@@ -131,7 +131,7 @@ describe('getIdlNames', () => {
         await vi.advanceTimersByTimeAsync(0);
 
         expect(Logger.error).not.toHaveBeenCalled();
-        expect(Logger.debug).toHaveBeenCalledWith(expect.stringContaining('abandoned past the budget'), {
+        expect(Logger.debug).toHaveBeenCalledWith(expect.stringContaining('IDL name resolution request timed out'), {
             cluster: Cluster.MainnetBeta,
             programId: FIRST,
         });

@@ -30,6 +30,21 @@ describe('GET /robots.txt', () => {
         expect(body).toContain('Allow: /mcp/start\n');
     });
 
+    it('should keep defined bots off the OG image routes', async () => {
+        const body = await GET(createRequest()).text();
+        const userAgents = ['AhrefsBot', 'Amazonbot', 'GoogleOther'].map(bot => `User-agent: ${bot}\n`).join('');
+
+        expect(body).toContain(
+            `${userAgents}Allow: /\nAllow: /mcp/start\nDisallow: /api/\nDisallow: /mcp\nDisallow: /og/\n`,
+        );
+    });
+
+    it('should disallow meta-externalagent from every path', async () => {
+        const body = await GET(createRequest()).text();
+
+        expect(body).toContain('User-agent: meta-externalagent\nDisallow: /\n');
+    });
+
     it('should serve the allow policy when the flag is explicitly false', async () => {
         vi.stubEnv('SEO_DISALLOW_BOTS', 'false');
 

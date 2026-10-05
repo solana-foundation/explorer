@@ -27,6 +27,8 @@ export type TransactionWithMeta = Omit<ParsedTransactionWithMeta, 'version'> & {
 };
 
 type RawTransactionBase = {
+    /** Unix timestamp in seconds. */
+    blockTime?: number;
     messageBytes: Uint8Array;
     meta?: {
         innerInstructions?: CompiledInnerInstruction[];

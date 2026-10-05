@@ -1,12 +1,12 @@
-import type { BlockData, BlockTransaction } from '@entities/block-data';
+import type { BlockData, BlockTransaction, BlockTransactionMeta } from '@entities/block-data';
 import { type Address, address, blockhash, lamports, type Signature } from '@solana/kit';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const PROGRAM_A = '11111111111111111111111111111111';
 const PROGRAM_B = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const ACCOUNT = 'Stake11111111111111111111111111111111111111';
-const search = `version=0&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`;
+let search = `version=0&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`;
 
 vi.mock('next/navigation', () => ({
     usePathname: () => '/block/123',
@@ -41,6 +41,10 @@ vi.mock('@utils/program-logs', () => ({
 import { BlockHistoryCard } from '../BlockHistoryCard';
 
 describe('BlockHistoryCard filters', () => {
+    beforeEach(() => {
+        search = `version=0&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`;
+    });
+
     it('should combine version, program, and account filters while preserving URL parameters', () => {
         render(<BlockHistoryCard block={makeBlock()} epoch={500n} />);
 
@@ -63,9 +67,34 @@ describe('BlockHistoryCard filters', () => {
             `/block/123?version=1&filter=${PROGRAM_A}&accountFilter=${ACCOUNT}&sort=index&dir=desc&cluster=devnet`,
         );
     });
+
+    it('should hide failed transactions when status=succeeded and offer a chip to clear it', () => {
+        search = `filter=all&status=succeeded&cluster=devnet`;
+        render(<BlockHistoryCard block={makeBlock()} epoch={500n} />);
+
+        expect(screen.getAllByText('v0-program-a')).toHaveLength(2);
+        expect(screen.queryAllByText('failed-program-b')).toHaveLength(0);
+        expect(screen.getByText('3 filtered records')).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'Clear status filter' })).toHaveAttribute(
+            'href',
+            '/block/123?filter=all&cluster=devnet',
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+        expect(screen.getByRole('link', { name: 'Failed' })).toHaveAttribute(
+            'href',
+            '/block/123?filter=all&status=failed&cluster=devnet',
+        );
+    });
+
+    it('should show the generic empty message when a status filter matches nothing', () => {
+        search = 'status=failed';
+        render(<BlockHistoryCard block={makeBlock(false)} epoch={500n} />);
+        expect(screen.getByText('No transactions found with this filter')).toBeInTheDocument();
+    });
 });
 
-function makeBlock(): BlockData {
+function makeBlock(withFailed = true): BlockData {
     return {
         blockTime: null,
         blockhash: blockhash('11111111111111111111111111111111'),
@@ -76,11 +105,20 @@ function makeBlock(): BlockData {
             makeTransaction(0, 'legacy-program-a', 'legacy', PROGRAM_A),
             makeTransaction(1, 'v0-program-a', 0, PROGRAM_A),
             makeTransaction(2, 'v0-program-b', 0, PROGRAM_B),
+            ...(withFailed
+                ? [makeTransaction(3, 'failed-program-b', 0, PROGRAM_B, { InstructionError: [0, { Custom: 1 }] })]
+                : []),
         ],
     };
 }
 
-function makeTransaction(index: number, transactionSignature: string, version: 'legacy' | 0, program: string) {
+function makeTransaction(
+    index: number,
+    transactionSignature: string,
+    version: 'legacy' | 0,
+    program: string,
+    err: BlockTransactionMeta['err'] = null,
+) {
     return {
         index,
         message: {
@@ -92,7 +130,7 @@ function makeTransaction(index: number, transactionSignature: string, version: '
         },
         meta: {
             costUnits: 1n,
-            err: null,
+            err,
             fee: lamports(5_000n),
             innerInstructions: [],
             loadedAddresses: undefined,

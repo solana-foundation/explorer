@@ -1,10 +1,10 @@
 import { type GA4EventName, trackEvent } from '@/app/shared/lib/analytics';
 
 /** Which panel of the Decoded Content section the reader switched to. */
-type PmpTab = 'decoded' | 'raw';
+export type PmpTab = 'decoded' | 'raw';
 
 /** Where the bytes in the section came from: the instruction itself, or the account it points at. */
-type PmpPayloadSource = 'account' | 'instruction';
+export type PmpPayloadSource = 'account' | 'instruction';
 
 const PMP_TAB_OPENED = 'pmp_data_tab_opened';
 

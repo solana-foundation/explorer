@@ -15,3 +15,5 @@ storybook-static-*/
 public/mockServiceWorker.js
 packages/idl-decode/
 packages/parsers/
+# markdownlint owns this file; prettier re-aligns compact tables
+docs/firewall.md

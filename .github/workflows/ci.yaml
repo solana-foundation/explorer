@@ -4,6 +4,10 @@ on:
   push:
     branches: [master, development, 'development-*']
   pull_request:
+  merge_group:
+
+permissions:
+  contents: read
 
 env:
   PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
@@ -109,13 +113,14 @@ jobs:
       - name: Test specs (shard ${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }})
         run: pnpm test:ci:specs --shard=${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }}
 
-  # Rebuilds the route-size table for the PR, enforces that bench/BUILD.md was refreshed, and
-  # publishes a bundle-change report. Gated behind Build-And-Test so it only runs on green builds.
+  # Rebuilds the route-size table for a PR or a merge-queue commit, enforces that bench/BUILD.md
+  # was refreshed, and publishes a bundle-change report. Gated behind Build-And-Test so it only
+  # runs on green builds.
   # Fork PRs get a read-only token here, so the PR comment is posted by build-info-comment.yaml
   # (workflow_run) from the artifact this job uploads.
   Build-Info:
     needs: [read-nvmrc, Build-And-Test]
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -253,3 +258,18 @@ jobs:
         env:
           STORYBOOK_DISABLE_TELEMETRY: ${{ env.STORYBOOK_DISABLE_TELEMETRY }}
         run: pnpm test:sb
+
+  # The `master` branch ruleset requires this job to pass before a merge.
+  # A job blocks a merge only if it is listed in `needs`.
+  CI-Result:
+    # Without `always()`, GitHub skips this job when any job in `needs` fails.
+    # A skipped required check does not block a merge, so the broken PR would merge.
+    if: always()
+    needs: [read-nvmrc, Build-And-Test, Specs-Shards, Build-Info, Security-Audit, Sitemap-Check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Fail if a needed job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

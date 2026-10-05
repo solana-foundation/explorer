@@ -508,6 +508,6 @@ export function formatIdl(idl: any, programAddress?: string): Idl {
 export { convertLegacyIdl };
 export type { LegacyIdlType, TupleType };
 
-/// export part of the internal implementation to preserve existing functonality to display the IDL
+/// export part of the internal implementation to preserve existing functionality to display the IDL
 export const internalConvertDefinedTypeArg = convertDefinedTypeArg;
 export const privateConvertType = convertType;

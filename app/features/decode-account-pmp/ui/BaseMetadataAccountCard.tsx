@@ -1,8 +1,16 @@
-import type { PmpAccountReadResult } from '@entities/pmp-account';
+import { getPayloadDataHash, PayloadHashRow, type PmpAccountReadResult } from '@entities/pmp-account';
+import type { DataSource } from '@solana-program/program-metadata';
 
 import { METADATA_CONFIG_FIELDS, METADATA_HEADER_FIELDS } from '../lib/pmp-field-descriptors';
 import type { MetadataPayloadDecodeResult } from '../model/use-decode-metadata-payload';
-import { BasePmpAccountDataCard, FieldRows, NoteRow, PendingRow, PMP_CARD_TITLE } from './BasePmpAccountDataCard';
+import {
+    BasePmpAccountDataCard,
+    CARD_TABLE_COLUMNS,
+    FieldRows,
+    NoteRow,
+    PendingRow,
+    PMP_CARD_TITLE,
+} from './BasePmpAccountDataCard';
 import { PayloadRows } from './payload-rows';
 
 export type MetadataAccountRead = Extract<PmpAccountReadResult, { kind: 'metadata' }>;
@@ -27,12 +35,18 @@ export function BaseMetadataAccountCard({ payload, metadata }: BaseMetadataAccou
                 </NoteRow>
             )}
 
-            <MetadataPayloadRow payloadResult={payload} />
+            <MetadataPayloadRow dataSource={metadata.account.dataSource} payloadResult={payload} />
         </BasePmpAccountDataCard>
     );
 }
 
-function MetadataPayloadRow({ payloadResult }: { payloadResult: MetadataPayloadDecodeResult }) {
+function MetadataPayloadRow({
+    dataSource,
+    payloadResult,
+}: {
+    dataSource: DataSource;
+    payloadResult: MetadataPayloadDecodeResult;
+}) {
     if (payloadResult.status === 'idle') {
         return <PendingRow testId="pmp-account-decoded-pending">Decoding...</PendingRow>;
     }
@@ -45,5 +59,12 @@ function MetadataPayloadRow({ payloadResult }: { payloadResult: MetadataPayloadD
         );
     }
 
-    return <PayloadRows payload={payloadResult.payload} />;
+    const hash = getPayloadDataHash(payloadResult.payload);
+
+    return (
+        <>
+            {hash !== undefined && <PayloadHashRow columns={CARD_TABLE_COLUMNS} dataSource={dataSource} hash={hash} />}
+            <PayloadRows payload={payloadResult.payload} />
+        </>
+    );
 }

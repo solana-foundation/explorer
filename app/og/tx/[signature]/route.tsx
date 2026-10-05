@@ -1,8 +1,9 @@
-import { BaseTxImage, getTxShareData, loadOgGlows } from '@features/transaction-share/server';
+import { BaseTxImage, getTxShareData, loadOgGlows, TxImageNotAvailable } from '@features/transaction-share/server';
 import { isSignature } from '@solana/kit';
 import { Cluster, clusterFromSlug, type ServerCluster } from '@utils/cluster';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
+import type { ReactElement } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { loadOgFonts, type OgFontOption } from '@/app/shared/lib/og/fonts';
@@ -21,7 +22,7 @@ type Props = Readonly<{
     params: Promise<{ signature: string }>;
 }>;
 
-type ClusterParam = { kind: 'ok'; cluster?: ServerCluster } | { kind: 'invalid' };
+type ClusterParam = { kind: 'ok'; cluster: ServerCluster } | { kind: 'invalid' };
 
 export async function GET(request: NextRequest, props: Props) {
     const { signature } = await props.params;
@@ -35,31 +36,49 @@ export async function GET(request: NextRequest, props: Props) {
 
     try {
         const result = await getTxShareData(signature, clusterParam.cluster);
-        if (result.kind === 'error') return new NextResponse('Failed to load transaction', { status: 502 });
+
+        // OG data is recommended to be fast, hence rpc budget timeout.
+        // Testnet timeouts are handled separately - we render a "not available" card.
+        if (result.kind === 'rpc-budget-timeout' && clusterParam.cluster !== Cluster.Testnet) {
+            return new NextResponse('Transaction request timed out due to budget limit', { status: 504 });
+        }
+        if (result.kind === 'error') return new NextResponse('Failed to fetch transaction data', { status: 502 });
+
+        const [fonts, glows] = await Promise.all([loadOgFonts(FONTS_TO_LOAD), loadOgGlows()]);
+        // Return cached "not available" card for testnet timeouts.
+        if (result.kind === 'rpc-budget-timeout') {
+            return await pngImageResponse(
+                <TxImageNotAvailable glows={glows} signature={signature} />,
+                fonts,
+                FALLBACK_CACHE_DURATION,
+            );
+        }
 
         // A missing transaction still renders: BaseTxImage draws its own fallback, so a stale link unfurls as
         // a branded card instead of a broken image.
         const data = result.kind === 'ok' ? result.data : undefined;
 
-        // Both loaders cache after the first call, so this is one read per instance, not per request.
-        const [fonts, glows] = await Promise.all([loadOgFonts(FONTS_TO_LOAD), loadOgGlows()]);
-
-        const imageResponse = new ImageResponse(<BaseTxImage data={data} glows={glows} />, {
-            ...IMAGE_SIZE,
+        return await pngImageResponse(
+            <BaseTxImage data={data} glows={glows} signature={signature} />,
             fonts,
-        });
-        const imageBuffer = await imageResponse.arrayBuffer();
-
-        return new NextResponse(imageBuffer, {
-            headers: {
-                ...cacheHeaders(data ? RESOLVED_CACHE_DURATION : FALLBACK_CACHE_DURATION),
-                'Content-Type': 'image/png',
-            },
-        });
+            data ? RESOLVED_CACHE_DURATION : FALLBACK_CACHE_DURATION,
+        );
     } catch (e) {
         Logger.error(new Error('[og:tx] Failed to generate image', { cause: e }), { sentry: true, signature });
         return new NextResponse('Failed to process request', { status: 500 });
     }
+}
+
+async function pngImageResponse(
+    card: ReactElement,
+    fonts: Awaited<ReturnType<typeof loadOgFonts>>,
+    cacheDuration: number,
+): Promise<NextResponse> {
+    const imageBuffer = await new ImageResponse(card, { ...IMAGE_SIZE, fonts }).arrayBuffer();
+
+    return new NextResponse(imageBuffer, {
+        headers: { ...cacheHeaders(cacheDuration), 'Content-Type': 'image/png' },
+    });
 }
 
 function cacheHeaders(duration: number) {
@@ -71,7 +90,7 @@ function resolveClusterParam(request: NextRequest): ClusterParam {
     const slug = searchParams.get('cluster') ?? undefined;
 
     // The CDN keys on the whole URL, so a second spelling of one request is a fresh miss - and each miss
-    // costs a probe, a transaction fetch, an IDL round and a Satori render that any caller can ask for.
+    // costs a transaction fetch, an IDL fetch (optional) and a Satori render.
     // Comparing the raw query against the param it parsed to leaves the two shapes `getTxOgImageUrl` emits.
     const canonical = slug === undefined ? '' : `?cluster=${slug}`;
     if (search !== canonical) {
@@ -81,8 +100,7 @@ function resolveClusterParam(request: NextRequest): ClusterParam {
         return { kind: 'invalid' };
     }
 
-    // An absent param is not an error: it means mainnet by the app's own contract, and getTxShareData probes.
-    if (slug === undefined) return { kind: 'ok' };
+    if (slug === undefined) return { cluster: Cluster.MainnetBeta, kind: 'ok' };
 
     const cluster = clusterFromSlug(slug);
     // Custom is rejected rather than resolved. Its URL is client-supplied, so honouring it on an

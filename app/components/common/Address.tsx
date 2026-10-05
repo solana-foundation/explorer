@@ -91,7 +91,9 @@ export function Address({
     const { rowRef, hiddenTextRef, isMidTruncated, midTruncatedText } = useMidTruncation(
         isMidTruncateCandidate,
         address,
-        editBtnRef,
+        {
+            trailingRef: editBtnRef,
+        },
     );
 
     const handleMouseEnter = (text: string) => {

@@ -37,7 +37,7 @@ export function TokenExtensionsCard({
 
     const extensions = populateTokenExtensions(mintExtensions);
 
-    // check for nullish decimals to satisty constraint for required decimals.
+    // check for nullish decimals to satisfy constraint for required decimals.
     if (isLoading) {
         return <LoadingCard />;
     } else if (tokenInfo && tokenInfo.decimals !== null && decimals !== tokenInfo.decimals) {

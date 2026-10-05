@@ -1,14 +1,36 @@
+import { CLIENT_REPORT_ALLOWED, CLIENT_REPORT_TAG } from './client-report.mjs';
+
 /**
  * @typedef {'client' | 'server' | 'edge'} RuntimeContext
  */
 
 /**
  * Creates the common Sentry configuration for all runtimes
- * @param {RuntimeContext} _context - The runtime context (client, server, or edge)
+ * @param {RuntimeContext} context - The runtime context (client, server, or edge)
  * @returns {import('@sentry/core').Options} Sentry configuration options
  */
-export function createSentryConfig(_context) {
+export function createSentryConfig(context) {
     return {
+        // Next.js inlines only NEXT_PUBLIC_* variables into client bundles. Server and edge accept
+        // either DSN, so NEXT_PUBLIC_SENTRY_DSN alone configures every runtime.
+        dsn:
+            context === 'client'
+                ? process.env.NEXT_PUBLIC_SENTRY_DSN
+                : process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
+
+        // The flag allows the feedback form to run without browser error reporting.
+        // The tag drops SDK auto-captures and direct captureException calls, which bot traffic triggers.
+        // beforeSend receives error events only, so feedback events skip this check.
+        // The flag check matches isEnvEnabled, which this file cannot import.
+        ...(context === 'client' && {
+            beforeSend: (/** @type {import('@sentry/core').ErrorEvent} */ event) =>
+                process.env.NEXT_PUBLIC_SENTRY_CLIENT_ERRORS === 'true' &&
+                event.tags?.[CLIENT_REPORT_TAG] === CLIENT_REPORT_ALLOWED
+                    ? event
+                    : // eslint-disable-next-line unicorn/no-null -- Sentry's drop signal is null
+                      null,
+        }),
+
         sampleRate: 1,
 
         // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.

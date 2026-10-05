@@ -1,4 +1,4 @@
-import { DomainsCard } from '@entities/domain';
+import { DomainsCard } from '@entities/domain/server';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 

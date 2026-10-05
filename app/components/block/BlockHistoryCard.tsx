@@ -12,6 +12,13 @@ import {
     isBlockTransaction,
 } from '@entities/block-data';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
+import {
+    type HistoryStatus,
+    isHistoryStatus,
+    STATUS_LABELS,
+    STATUS_PARAM,
+    STATUS_VALUES,
+} from '@features/transaction-history/lib/history-filters';
 import { useCluster } from '@providers/cluster';
 import {
     type Address as KitAddress,
@@ -70,6 +77,11 @@ const useQueryVersionFilter = (query: ReadonlyURLSearchParams): TransactionVersi
     return match ? match.version : null;
 };
 
+const useQueryStatusFilter = (query: ReadonlyURLSearchParams): HistoryStatus | null => {
+    const filter = query.get(STATUS_PARAM);
+    return filter !== null && isHistoryStatus(filter) ? filter : null;
+};
+
 const useQuerySort = (query: ReadonlyURLSearchParams): { mode: SortMode; direction: SortDirection } => {
     const sort = query.get('sort');
     const mode: SortMode = isSortMode(sort) ? sort : 'index';
@@ -98,6 +110,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
     const programFilter = useQueryProgramFilter(currentSearchParams);
     const accountFilter = useQueryAccountFilter(currentSearchParams);
     const versionFilter = useQueryVersionFilter(currentSearchParams);
+    const statusFilter = useQueryStatusFilter(currentSearchParams);
     const { direction: sortDirection, mode: sortMode } = useQuerySort(currentSearchParams);
     const router = useRouter();
     const { cluster } = useCluster();
@@ -217,12 +230,22 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                 if (!tx || !isBlockTransaction(tx)) return false;
                 return getBlockTransactionAccounts(tx).includes(accountFilter);
             })
-            .filter(({ version }) => versionFilter === null || version === versionFilter);
+            .filter(({ version }) => versionFilter === null || version === versionFilter)
+            .filter(tx => statusFilter === null || (isFailed(tx) ? 'failed' : 'succeeded') === statusFilter);
 
         const showComputeUnits = filteredTxs.every(tx => tx.unavailable || tx.computeUnits !== undefined);
 
         return [sortTransactions(filteredTxs, sortMode, sortDirection, showComputeUnits), showComputeUnits];
-    }, [block.transactions, transactions, programFilter, accountFilter, versionFilter, sortMode, sortDirection]);
+    }, [
+        block.transactions,
+        transactions,
+        programFilter,
+        accountFilter,
+        versionFilter,
+        statusFilter,
+        sortMode,
+        sortDirection,
+    ]);
 
     // Shared by the filter dropdown (menu options + active row) and the removable chip below the title.
     // "Set" means anything other than "All Transactions": the empty-param default ("All Except Votes")
@@ -234,6 +257,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
     const isProgramFilterSet = programFilter !== ALL_TRANSACTIONS;
     const versionOptions = React.useMemo(() => buildVersionOptions(transactions), [transactions]);
     const versionLabel = BLOCK_TRANSACTION_VERSIONS.find(({ version }) => version === versionFilter)?.label;
+    const isFilterSet = isProgramFilterSet || accountFilter !== null || versionFilter !== null || statusFilter !== null;
 
     if (transactions.length === 0) {
         return <ErrorCard text="This block has no transactions" />;
@@ -242,7 +266,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
     const visible = filteredTransactions.slice(0, numDisplayed);
     const hasMore = filteredTransactions.length > numDisplayed;
     const emptyFilterMessage =
-        accountFilter === null && programFilter === HIDE_VOTES
+        accountFilter === null && statusFilter === null && versionFilter === null && programFilter === HIDE_VOTES
             ? "This block doesn't contain any non-vote transactions"
             : 'No transactions found with this filter';
 
@@ -256,18 +280,15 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                     {/* `inline-block` keeps the count atomic: it wraps to the next line whole rather than
                         breaking mid-phrase when it can't sit beside the title. */}
                     <span className="inline-block text-sm font-normal text-outer-space-300">
-                        {filteredTransactions.length}{' '}
-                        {isProgramFilterSet || accountFilter !== null || versionFilter !== null
-                            ? 'filtered records'
-                            : 'records'}
+                        {filteredTransactions.length} {isFilterSet ? 'filtered records' : 'records'}
                     </span>
                 </>
             }
             titleClassName="items-end gap-4"
             belowTitle={
-                isProgramFilterSet || versionLabel !== undefined || accountFilter !== null ? (
+                isFilterSet ? (
                     <>
-                        {(isProgramFilterSet || versionLabel !== undefined) && (
+                        {(isProgramFilterSet || versionLabel !== undefined || statusFilter !== null) && (
                             <div className="-mt-1 mb-0.5 flex flex-wrap items-center gap-2">
                                 {isProgramFilterSet && (
                                     <FilterChip
@@ -281,6 +302,13 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                                         field="Version"
                                         label={versionLabel}
                                         applyReset={params => params.delete(VERSION_PARAM)}
+                                    />
+                                )}
+                                {statusFilter !== null && (
+                                    <FilterChip
+                                        field="Status"
+                                        label={STATUS_LABELS[statusFilter]}
+                                        applyReset={params => params.delete(STATUS_PARAM)}
                                     />
                                 )}
                             </div>
@@ -308,9 +336,10 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                     <FilterDropdown
                         options={filterModel.options}
                         currentFilter={programFilter}
-                        isFilterSet={isProgramFilterSet || versionFilter !== null}
+                        isFilterSet={isProgramFilterSet || versionFilter !== null || statusFilter !== null}
                         versionOptions={versionOptions}
                         currentVersion={versionFilter}
+                        currentStatus={statusFilter}
                     />
                 </>
             }
@@ -337,6 +366,11 @@ const HISTORY_STATUS = {
     success: { label: 'Success', variant: 'success' },
     unavailable: { label: 'Unavailable', variant: 'warning' },
 } as const;
+
+// A transaction without a signature can't be looked up, so it's shown (and filtered) as failed.
+function isFailed(tx: Pick<TransactionWithInvocations, 'meta' | 'signature'>): boolean {
+    return Boolean(tx.meta?.err) || !tx.signature;
+}
 
 // One shared formatter instance — constructing `Intl.NumberFormat` per call is needlessly expensive.
 const NUMBER_FORMAT = new Intl.NumberFormat('en-US');
@@ -457,10 +491,9 @@ function BlockHistoryGridRow({
     showComputeUnits: boolean;
     gridStyle: React.CSSProperties;
 }) {
-    const failed = Boolean(tx.meta?.err) || !tx.signature;
     const status = tx.unavailable
         ? HISTORY_STATUS.unavailable
-        : failed
+        : isFailed(tx)
           ? HISTORY_STATUS.failed
           : HISTORY_STATUS.success;
     const badge = (
@@ -625,12 +658,14 @@ const FilterDropdown = ({
     isFilterSet,
     versionOptions,
     currentVersion,
+    currentStatus,
 }: {
     options: FilterOption[];
     currentFilter: string;
     isFilterSet: boolean;
     versionOptions: VersionOption[];
     currentVersion: TransactionVersion | null;
+    currentStatus: HistoryStatus | null;
 }) => {
     const [query, setQuery] = React.useState('');
     const trimmed = query.trim().toLowerCase();
@@ -677,14 +712,28 @@ const FilterDropdown = ({
                     </div>
                 </div>
                 <div className="border-b border-solid border-white/10 pb-1.5">
+                    <div className="px-6 pb-1 text-xs uppercase text-outer-space-300">Status</div>
+                    <ParamFilterLink active={currentStatus === null} label="Any status" param={STATUS_PARAM} />
+                    {STATUS_VALUES.map(status => (
+                        <ParamFilterLink
+                            active={currentStatus === status}
+                            key={status}
+                            label={STATUS_LABELS[status]}
+                            param={STATUS_PARAM}
+                            value={status}
+                        />
+                    ))}
+                </div>
+                <div className="border-b border-solid border-white/10 pb-1.5 pt-2">
                     <div className="px-6 pb-1 text-xs uppercase text-outer-space-300">Transaction Version</div>
-                    <VersionFilterLink currentVersion={currentVersion} label="Any version" version={null} />
+                    <ParamFilterLink active={currentVersion === null} label="Any version" param={VERSION_PARAM} />
                     {versionOptions.map(({ label, transactionCount, version }) => (
-                        <VersionFilterLink
-                            currentVersion={currentVersion}
+                        <ParamFilterLink
+                            active={currentVersion === version}
                             key={versionParam(version)}
                             label={`${label} (${transactionCount})`}
-                            version={version}
+                            param={VERSION_PARAM}
+                            value={versionParam(version)}
                         />
                     ))}
                 </div>
@@ -838,29 +887,31 @@ function FilterChip({
     );
 }
 
-function VersionFilterLink({
-    currentVersion,
+// A dropdown row that sets (or, with no `value`, deletes) one URL param while preserving the rest.
+function ParamFilterLink({
+    active,
     label,
-    version,
+    param,
+    value,
 }: {
-    currentVersion: TransactionVersion | null;
+    active: boolean;
     label: string;
-    version: TransactionVersion | null;
+    param: string;
+    value?: string;
 }) {
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
     const href = useMemo(() => {
         const params = new URLSearchParams(currentSearchParams?.toString());
-        if (version === null) {
-            params.delete(VERSION_PARAM);
+        if (value === undefined) {
+            params.delete(param);
         } else {
-            params.set(VERSION_PARAM, versionParam(version));
+            params.set(param, value);
         }
         const nextQueryString = params.toString();
         return `${currentPathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
-    }, [currentPathname, currentSearchParams, version]);
+    }, [currentPathname, currentSearchParams, param, value]);
 
-    const active = version === currentVersion;
     return (
         <DropdownItem asChild className={cn(active && 'active')}>
             <Link href={href} className="relative">

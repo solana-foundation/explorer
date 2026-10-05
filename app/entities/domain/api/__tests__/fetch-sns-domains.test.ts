@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchSnsDomains } from '../fetch-sns-domains';
 
 const USER_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const TOLY_NAME_ACCOUNT = 'FX1APjKbFu6M8GKb3dGXcZLXjxX4fGaYwvHqb5Vaee8q';
+const BONFIDA_NAME_ACCOUNT = 'Crf8hzfthWGbGbLTVCiqRqV5MVnbpHB1L9KQMd6gsinb';
 
 const mockFetchFn = vi.fn();
 vi.stubGlobal('fetch', mockFetchFn);
@@ -13,17 +15,23 @@ describe('fetchSnsDomains', () => {
     });
 
     it.each([
-        ['valid response', { [USER_ADDRESS]: ['alice', 'bob'] }, ['alice.sol', 'bob.sol']],
-        ['non-conforming values for other keys', { [USER_ADDRESS]: ['alice'], stats: 'not-an-array' }, ['alice.sol']],
+        [
+            'valid response',
+            { [USER_ADDRESS]: ['toly', 'bonfida'] },
+            [
+                { address: TOLY_NAME_ACCOUNT, name: 'toly.sns' },
+                { address: BONFIDA_NAME_ACCOUNT, name: 'bonfida.sns' },
+            ],
+        ],
+        [
+            'non-conforming values for other keys',
+            { [USER_ADDRESS]: ['toly'], stats: 'not-an-array' },
+            [{ address: TOLY_NAME_ACCOUNT, name: 'toly.sns' }],
+        ],
     ])('should return domains from %s', async (_label, body, expected) => {
         mockFetch(body);
 
-        const result = await fetchSnsDomains(USER_ADDRESS);
-
-        expect(result).toHaveLength(expected.length);
-        expected.forEach((name, i) => {
-            expect(result?.[i]?.name).toBe(name);
-        });
+        expect(await fetchSnsDomains(USER_ADDRESS)).toEqual(expected);
     });
 
     it('should throw when Bonfida API returns non-200', async () => {

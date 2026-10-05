@@ -5,16 +5,29 @@ import { NextResponse } from 'next/server';
 
 import { ifNoneMatchMatches, notModifiedResponse } from '@/app/shared/lib/http-utils';
 
+import { OG_DISALLOWED_BOTS } from './og-disallowed-bots';
+
 const ROBOTS_CACHE_HEADERS = {
     'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
 };
 
 // Crawlers use the longest matching rule (RFC 9309), so `Allow: /mcp/start` takes precedence over `Disallow: /mcp`.
+// A crawler with its own group ignores `*` so it should repeat "*" shared rules, if necessary.
 const ALLOW_BOTS_CONTENT = `User-agent: *
 Allow: /
 Allow: /mcp/start
 Disallow: /api/
 Disallow: /mcp
+
+${OG_DISALLOWED_BOTS.map(bot => `User-agent: ${bot}`).join('\n')}
+Allow: /
+Allow: /mcp/start
+Disallow: /api/
+Disallow: /mcp
+Disallow: /og/
+
+User-agent: meta-externalagent
+Disallow: /
 
 Sitemap: ${EXPLORER_BASE_URL}/sitemap.xml
 `;

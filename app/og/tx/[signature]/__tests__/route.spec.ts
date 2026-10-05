@@ -1,5 +1,10 @@
 import { gen } from '@__fixtures__/gen';
-import { getTxShareData, type OgGlows, type TxShareData } from '@features/transaction-share/server';
+import {
+    getTxShareData,
+    type OgGlows,
+    TxImageNotAvailable,
+    type TxShareData,
+} from '@features/transaction-share/server';
 import { Cluster } from '@utils/cluster';
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
@@ -18,6 +23,7 @@ vi.mock('next/og', () => ({
 
 vi.mock('@features/transaction-share/server', () => ({
     BaseTxImage: vi.fn(() => null),
+    TxImageNotAvailable: vi.fn(() => null),
     getTxShareData: vi.fn(),
     loadOgGlows: vi.fn(async () => ({ failed: 'data:image/png;base64,failed', success: 'data:image/png;base64,ok' })),
 }));
@@ -68,7 +74,6 @@ describe('should handle GET /og/tx/[signature]', () => {
         expect(response.status).toBe(200);
         expect(response.headers.get('Content-Type')).toBe('image/png');
         expect(response.headers.get('Cache-Control')).toBe(RESOLVED_CACHE_CONTROL);
-        expect(getTxShareData).toHaveBeenCalledWith(SIGNATURE, undefined);
     });
 
     it('should return 400 for an invalid transaction signature', async () => {
@@ -117,6 +122,13 @@ describe('should handle GET /og/tx/[signature]', () => {
         expect(getTxShareData).not.toHaveBeenCalled();
     });
 
+    it('should fallback cluster to mainnet when the cluster param is absent', async () => {
+        const response = await GET(makeRequest(SIGNATURE), makeProps(SIGNATURE));
+
+        expect(response.status).toBe(200);
+        expect(getTxShareData).toHaveBeenCalledWith(SIGNATURE, Cluster.MainnetBeta);
+    });
+
     it('should resolve against devnet when the cluster param is devnet', async () => {
         const response = await GET(makeRequest(SIGNATURE, 'devnet'), makeProps(SIGNATURE));
 
@@ -150,12 +162,38 @@ describe('should handle GET /og/tx/[signature]', () => {
     });
 
     it('should return 502 when the data layer errors', async () => {
-        vi.mocked(getTxShareData).mockResolvedValue({ kind: 'error' });
+        vi.mocked(getTxShareData).mockResolvedValue({ error: new Error('rpc unreachable'), kind: 'error' });
 
         const response = await GET(makeRequest(SIGNATURE), makeProps(SIGNATURE));
 
         expect(response.status).toBe(502);
-        expect(await response.text()).toBe('Failed to load transaction');
+        expect(await response.text()).toBe('Failed to fetch transaction data');
+    });
+
+    it.each([
+        { cluster: undefined, name: 'mainnet' },
+        { cluster: 'devnet', name: 'devnet' },
+    ])('should return 504 when the RPC budget runs out on $name', async ({ cluster }) => {
+        vi.mocked(getTxShareData).mockResolvedValue({ kind: 'rpc-budget-timeout' });
+
+        const response = await GET(makeRequest(SIGNATURE, cluster), makeProps(SIGNATURE));
+
+        expect(response.status).toBe(504);
+        expect(await response.text()).toBe('Transaction request timed out due to budget limit');
+        expect(ImageResponse).not.toHaveBeenCalled();
+    });
+
+    it('should return the not-available card with the fallback cache when the RPC budget runs out on testnet', async () => {
+        vi.mocked(getTxShareData).mockResolvedValue({ kind: 'rpc-budget-timeout' });
+
+        const response = await GET(makeRequest(SIGNATURE, 'testnet'), makeProps(SIGNATURE));
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get('Content-Type')).toBe('image/png');
+        expect(response.headers.get('Cache-Control')).toBe(FALLBACK_CACHE_CONTROL);
+        const [element] = vi.mocked(ImageResponse).mock.calls[0];
+        expect(element.type).toBe(TxImageNotAvailable);
+        expect((element.props as { signature?: string }).signature).toBe(SIGNATURE);
     });
 
     it('should return 500 when image generation fails', async () => {

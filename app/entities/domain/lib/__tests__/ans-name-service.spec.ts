@@ -12,9 +12,7 @@ import {
     getTldHouseKey,
 } from '../ans-name-service';
 
-// Ground-truth vectors produced by @onsol/tldparser 0.6.5, the reference implementation of ANS
-// derivation. A change to the derivation that breaks these breaks every non-.sol domain lookup.
-const DOMAIN_ADDRESS_VECTORS: [domainTld: string, nameAccountKey: string][] = [
+const TLDPARSER_VECTORS: [domainTld: string, nameAccountKey: string][] = [
     ['miester.poor', '6iE5btnTaan1eqfnwChLdVAyFERdn5uCVnp5GiXVg1aB'],
     ['test.bonk', '9Ba2kDeUEzfQXsf3GkPUo9ygwGoU51KrTJ47kZwEhhQc'],
     ['toly.abc', '2PM7gmoFrxA2UH8yqMEnLzAvTybdjgbCxVWTtATSAuzM'],
@@ -41,7 +39,7 @@ describe('getAnsHashedName', () => {
 });
 
 describe('getAnsDomainAddress', () => {
-    it.each(DOMAIN_ADDRESS_VECTORS)('should derive the name account for %s', async (domainTld, expected) => {
+    it.each(TLDPARSER_VECTORS)('should derive the name account for %s', async (domainTld, expected) => {
         expect(await getAnsDomainAddress(domainTld)).toBe(expected);
     });
 

@@ -29,8 +29,8 @@ describe('GET /api/sns-domains/[address]', () => {
 
     describe('successful requests', () => {
         const mockDomains = [
-            { address: 'addr1', name: 'alice.sol' },
-            { address: 'addr2', name: 'bob.sol' },
+            { address: 'addr1', name: 'alice.sns' },
+            { address: 'addr2', name: 'bob.sns' },
         ];
 
         it('should return domains from fetchSnsDomains', async () => {

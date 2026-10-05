@@ -14,6 +14,8 @@ import { createServer, type Server } from 'http';
 import type { AddressInfo } from 'net';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { unwrap } from '@/app/shared/lib/result';
+
 import { fetchResource } from '../feature';
 import { lookupHostnameSafely } from '../feature/ip';
 vi.mock('../feature/ip', async () => {
@@ -55,6 +57,16 @@ beforeAll(async () => {
             res.end(JSON.stringify({ small: true }));
             return;
         }
+        if (req.url === '/stalled-404') {
+            res.writeHead(404);
+            res.write('partial');
+            return;
+        }
+        if (req.url === '/stalled-redirect') {
+            res.writeHead(302, { Location: '/small.json' });
+            res.write('partial');
+            return;
+        }
         res.writeHead(404).end();
     });
     await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -85,11 +97,13 @@ beforeEach(() => {
 
 describe('fetchResource — real undici path', () => {
     it('should deliver a large streamed body in full (dispatcher closes after body drains)', async () => {
-        const result = await fetchResource(`http://localhost.test:${port}/large.json`, {
-            headers: new Headers({ 'User-Agent': 'test' }),
-            size: LARGE_BODY_SIZE * 2,
-            timeout: 5_000,
-        });
+        const result = unwrap(
+            await fetchResource(`http://localhost.test:${port}/large.json`, {
+                headers: new Headers({ 'User-Agent': 'test' }),
+                size: LARGE_BODY_SIZE * 2,
+                timeout: 5_000,
+            }),
+        );
 
         // If `dispatcher.close()` ran before processResponse drained the
         // body, the parsed object would be truncated or invalid JSON.
@@ -97,12 +111,27 @@ describe('fetchResource — real undici path', () => {
     });
 
     it('should deliver a small body without issue', async () => {
-        const result = await fetchResource(`http://localhost.test:${port}/small.json`, {
-            headers: new Headers({ 'User-Agent': 'test' }),
-            size: 1_000_000,
-            timeout: 5_000,
-        });
+        const result = unwrap(
+            await fetchResource(`http://localhost.test:${port}/small.json`, {
+                headers: new Headers({ 'User-Agent': 'test' }),
+                size: 1_000_000,
+                timeout: 5_000,
+            }),
+        );
 
         expect(result.data).toEqual({ small: true });
+    });
+
+    it.each(['/stalled-404', '/stalled-redirect'])('should not wait for the body of %s to end', async path => {
+        const timeout = 3_000;
+        const startedAt = Date.now();
+
+        await fetchResource(`http://localhost.test:${port}${path}`, {
+            headers: new Headers({ 'User-Agent': 'test' }),
+            size: 1_000_000,
+            timeout,
+        });
+
+        expect(Date.now() - startedAt).toBeLessThan(timeout / 2);
     });
 });

@@ -10,15 +10,13 @@ import {
 import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 const mocks = vi.hoisted(() => ({
-    findTransactionCluster: vi.fn(),
     getIdlNames: vi.fn(),
     getTx: vi.fn(),
 }));
 
-// Only the probe is faked. The naming path runs for real, because these tests exist to prove the image
-// lists the same names transaction-history does. Deep paths rather than `importActual` of the barrel:
-// the barrel also exports hook modules this spec has no reason to load.
 vi.mock('@entities/transaction-data', async () => {
     const summaries = await vi.importActual<typeof import('@entities/transaction-data/lib/instruction-summary')>(
         '@entities/transaction-data/lib/instruction-summary',
@@ -36,9 +34,6 @@ vi.mock('@entities/transaction-data', async () => {
         getInstructionSummaries: summaries.getInstructionSummaries,
     };
 });
-// The probe moved to the entity's server barrel, so it needs its own mock: the barrel factory above no
-// longer intercepts it.
-vi.mock('@entities/transaction-data/server', () => ({ findTransactionCluster: mocks.findTransactionCluster }));
 vi.mock('../../api/get-tx', () => ({ getTx: mocks.getTx }));
 vi.mock('../../api/get-idl-names', () => ({ getIdlNames: mocks.getIdlNames }));
 
@@ -46,6 +41,7 @@ import { MAX_INSTRUCTION_ROWS } from '../../lib/constants';
 import { getTxShareData } from '../get-tx-share-data';
 
 const SIGNATURE = gen.signature(1);
+const TIMEOUT_ERROR = new DOMException('The operation was aborted due to timeout', 'TimeoutError');
 
 // Seeded, so this is the fixed instant 2023-11-15T22:13:20Z. `dateUtc` is asserted against a literal
 // rather than a string this test recomputes with the same formatter it is checking.
@@ -120,10 +116,9 @@ beforeEach(() => {
 afterEach(() => vi.clearAllMocks());
 
 describe('should shape the transaction behind an OG image', () => {
-    it('should fetch from the cluster the request carried, without probing', async () => {
+    it('should fetch from the given cluster and shape every field', async () => {
         const result = await getTxShareData(SIGNATURE, Cluster.Devnet);
 
-        expect(mocks.findTransactionCluster).not.toHaveBeenCalled();
         expect(mocks.getTx).toHaveBeenCalledWith({
             abortSignal: expect.any(AbortSignal),
             cluster: Cluster.Devnet,
@@ -142,22 +137,6 @@ describe('should shape the transaction behind an OG image', () => {
             },
             kind: 'ok',
         });
-    });
-
-    it('should probe mainnet only when the request carried no cluster', async () => {
-        mocks.findTransactionCluster.mockResolvedValue({ cluster: Cluster.MainnetBeta, kind: 'found' });
-
-        const result = await getTxShareData(SIGNATURE);
-
-        expect(mocks.findTransactionCluster).toHaveBeenCalledWith([Cluster.MainnetBeta], SIGNATURE, {
-            abortSignal: expect.any(AbortSignal),
-        });
-        expect(mocks.getTx).toHaveBeenCalledWith({
-            abortSignal: expect.any(AbortSignal),
-            cluster: Cluster.MainnetBeta,
-            signature: SIGNATURE,
-        });
-        expect(result.kind).toBe('ok');
     });
 
     it('should print a placeholder when the transaction has no block time', async () => {
@@ -180,34 +159,41 @@ describe('should shape the transaction behind an OG image', () => {
 });
 
 describe('should map every failure to a result rather than throwing', () => {
-    it('should report not-found when no cluster carries the signature', async () => {
-        mocks.findTransactionCluster.mockResolvedValue({ kind: 'not-found' });
-
-        await expect(getTxShareData(SIGNATURE)).resolves.toEqual({ kind: 'not-found' });
-        expect(mocks.getTx).not.toHaveBeenCalled();
-    });
-
-    it('should report an error when the probe could not reach a cluster', async () => {
-        mocks.findTransactionCluster.mockResolvedValue({
-            cluster: Cluster.MainnetBeta,
-            error: new Error('rpc unreachable'),
-            kind: 'error',
-        });
-
-        await expect(getTxShareData(SIGNATURE)).resolves.toEqual({ kind: 'error' });
-        expect(mocks.getTx).not.toHaveBeenCalled();
-    });
-
     it('should report not-found when the cluster has no such transaction', async () => {
         mocks.getTx.mockResolvedValue(null);
 
         await expect(getTxShareData(SIGNATURE, Cluster.Devnet)).resolves.toEqual({ kind: 'not-found' });
     });
+});
 
-    it('should report an error when the fetch throws', async () => {
-        mocks.getTx.mockRejectedValue(new Error('unexpected error'));
+describe('getTxShareData errors', () => {
+    beforeEach(() => {
+        vi.spyOn(Logger, 'error').mockImplementation(() => {});
+        vi.spyOn(Logger, 'warn').mockImplementation(() => {});
+    });
 
-        await expect(getTxShareData(SIGNATURE, Cluster.Devnet)).resolves.toEqual({ kind: 'error' });
+    it('should report a timeout warning when the fetch runs past the budget', async () => {
+        mocks.getTx.mockRejectedValue(TIMEOUT_ERROR);
+
+        await expect(getTxShareData(SIGNATURE, Cluster.MainnetBeta)).resolves.toEqual({ kind: 'rpc-budget-timeout' });
+        expect(Logger.warn).toHaveBeenCalledWith('[transaction-share] Transaction request budget exceeded', {
+            cluster: Cluster.MainnetBeta,
+            signature: SIGNATURE,
+        });
+    });
+
+    it('should report a fetch error', async () => {
+        const rpcError = new Error('rpc unreachable');
+        mocks.getTx.mockRejectedValue(rpcError);
+
+        await expect(getTxShareData(SIGNATURE, Cluster.Devnet)).resolves.toEqual({ error: rpcError, kind: 'error' });
+        expect(Logger.error).toHaveBeenCalledWith(
+            expect.objectContaining({
+                cause: rpcError,
+                message: '[transaction-share] Failed to get transaction share data',
+            }),
+            { cluster: Cluster.Devnet, signature: SIGNATURE },
+        );
     });
 });
 
@@ -310,7 +296,7 @@ describe('should name the instructions only an IDL can name', () => {
         });
     });
 
-    it('should ask for the unnamed program on the cluster it resolved', async () => {
+    it('should ask for the unnamed program on the given cluster', async () => {
         mocks.getTx.mockResolvedValue(txWith([ROUTE]));
 
         await getTxShareData(SIGNATURE, Cluster.Devnet);
