@@ -1,6 +1,5 @@
-import type { BlockWithV1 } from '@entities/block-data';
-import type { TransactionVersion } from '@solana/kit';
-import { PublicKey } from '@solana/web3.js';
+import type { BlockData, BlockTransaction, BlockTransactionMeta } from '@entities/block-data';
+import { type Address, address, blockhash, lamports, type Signature } from '@solana/kit';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -20,7 +19,7 @@ vi.mock('@providers/cluster', () => ({
 }));
 
 vi.mock('@components/common/Address', () => ({
-    Address: ({ pubkey }: { pubkey: PublicKey }) => <span>{pubkey.toBase58()}</span>,
+    Address: ({ address }: { address: Address }) => <span>{address}</span>,
 }));
 
 vi.mock('@components/common/Signature', () => ({
@@ -28,7 +27,7 @@ vi.mock('@components/common/Signature', () => ({
 }));
 
 vi.mock('@components/common/SolBalance', () => ({
-    SolBalance: ({ lamports }: { lamports: number }) => <span>{lamports}</span>,
+    SolBalance: ({ lamports }: { lamports: bigint }) => <span>{lamports.toString()}</span>,
 }));
 
 vi.mock('@entities/compute-unit', () => ({
@@ -93,42 +92,71 @@ describe('BlockHistoryCard filters', () => {
         render(<BlockHistoryCard block={makeBlock(false)} epoch={500n} />);
         expect(screen.getByText('No transactions found with this filter')).toBeInTheDocument();
     });
+
+    it.each([
+        ['filter=all', 2],
+        ['filter=all&status=failed', 0],
+        ['filter=all&status=succeeded', 0],
+    ])('should show an unavailable transaction only without a status filter: %s', (query, expectedCount) => {
+        search = query;
+        render(<BlockHistoryCard block={makeBlockWithUnavailable()} epoch={500n} />);
+        expect(screen.queryAllByText('Unavailable')).toHaveLength(expectedCount);
+    });
+
+    it('should keep the CUs Consumed column when an unavailable transaction is listed', () => {
+        search = 'filter=all';
+        render(<BlockHistoryCard block={makeBlockWithUnavailable()} epoch={500n} />);
+        expect(screen.getAllByText('CUs Consumed').length).toBeGreaterThan(0);
+    });
 });
 
-function makeBlock(withFailed = true): BlockWithV1 {
-    return {
-        transactions: [
-            makeTransaction('legacy-program-a', 'legacy', PROGRAM_A),
-            makeTransaction('v0-program-a', 0, PROGRAM_A),
-            makeTransaction('v0-program-b', 0, PROGRAM_B),
-            ...(withFailed
-                ? [makeTransaction('failed-program-b', 0, PROGRAM_B, { InstructionError: [0, 'Custom'] })]
-                : []),
-        ],
-    } as unknown as BlockWithV1;
+function makeBlockWithUnavailable(): BlockData {
+    const block = makeBlock();
+    return { ...block, transactions: [...block.transactions, { index: block.transactions.length, unavailable: true }] };
 }
 
-function makeTransaction(signature: string, version: TransactionVersion, program: string, err: object | null = null) {
-    const keys = [new PublicKey(program), new PublicKey(ACCOUNT)];
+function makeBlock(withFailed = true): BlockData {
     return {
+        blockTime: null,
+        blockhash: blockhash('11111111111111111111111111111111'),
+        parentSlot: 122n,
+        previousBlockhash: blockhash('11111111111111111111111111111111'),
+        rewards: [],
+        transactions: [
+            makeTransaction(0, 'legacy-program-a', 'legacy', PROGRAM_A),
+            makeTransaction(1, 'v0-program-a', 0, PROGRAM_A),
+            makeTransaction(2, 'v0-program-b', 0, PROGRAM_B),
+            ...(withFailed
+                ? [makeTransaction(3, 'failed-program-b', 0, PROGRAM_B, { InstructionError: [0, { Custom: 1 }] })]
+                : []),
+        ],
+    };
+}
+
+function makeTransaction(
+    index: number,
+    transactionSignature: string,
+    version: 'legacy' | 0,
+    program: string,
+    err: BlockTransactionMeta['err'] = null,
+) {
+    return {
+        index,
+        message: {
+            header: { numReadonlyNonSignerAccounts: 0, numReadonlySignerAccounts: 0, numSignerAccounts: 0 },
+            instructions: [{ accountIndices: [1], data: new Uint8Array(), programAddressIndex: 0 }],
+            lifetimeToken: blockhash('11111111111111111111111111111111'),
+            staticAccounts: [address(program), address(ACCOUNT)],
+            version,
+        },
         meta: {
-            costUnits: 1,
+            costUnits: 1n,
             err,
-            fee: 5_000,
+            fee: lamports(5_000n),
             innerInstructions: [],
             loadedAddresses: undefined,
             logMessages: [],
         },
-        transaction: {
-            message: {
-                compiledInstructions: [{ data: new Uint8Array(), programIdIndex: 0 }],
-                getAccountKeys: () => ({
-                    get: (index: number) => keys[index],
-                    keySegments: () => [keys],
-                }),
-            },
-            signatures: [signature],
-        },
-        version,
-    };
+        signatures: [transactionSignature as Signature],
+    } satisfies BlockTransaction;
 }
