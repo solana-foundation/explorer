@@ -45,6 +45,7 @@ import {
 import FLAGGED_ACCOUNTS_WARNING from '@providers/accounts/flagged-accounts';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
+import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from '@solana/attestation';
 import { Address } from '@solana/kit';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
@@ -54,7 +55,6 @@ import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { redirect, RedirectType } from 'next/navigation';
 import React, { PropsWithChildren, Suspense, use } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from 'sas-lib';
 import useSWRImmutable from 'swr/immutable';
 
 import { CompressedNftCard } from '@/app/components/account/CompressedNftCard';

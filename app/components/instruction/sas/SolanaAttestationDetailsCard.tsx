@@ -4,9 +4,6 @@ import {
     ProgramField,
     useInstructionSurface,
 } from '@entities/instruction-card';
-import { AccountMeta } from '@solana/kit';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { capitalizeFirstLetter } from '@utils/index';
 import {
     identifySolanaAttestationServiceInstruction,
     parseChangeAuthorizedSignersInstruction,
@@ -23,7 +20,10 @@ import {
     parseTokenizeSchemaInstruction,
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID,
     SolanaAttestationServiceInstruction,
-} from 'sas-lib';
+} from '@solana/attestation';
+import { AccountMeta } from '@solana/kit';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { capitalizeFirstLetter } from '@utils/index';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 import { BaseTable } from '@/app/shared/ui/Table';

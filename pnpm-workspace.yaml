@@ -40,6 +40,9 @@ minimumReleaseAgeExclude:
   # 0.14.1 (2026-09-16) adds the helpers covering every Memo deployment, which the memo
   # instruction slice is built on. Clears the quarantine window on 2026-09-30; remove then.
   - '@solana-program/memo'
+  # 2.1.0 (2026-10-05) is the first release of the package that replaces sas-lib.
+  # Clears the quarantine window on 2026-10-19; remove then.
+  - '@solana/attestation'
 
 # Pin resolution to the public npm registry so it can't silently inherit a
 # global/org .npmrc mirror. Scoped keys (e.g. '@my-org') can be added here.
