@@ -92,6 +92,22 @@ describe('BlockHistoryCard filters', () => {
         render(<BlockHistoryCard block={makeBlock(false)} epoch={500n} />);
         expect(screen.getByText('No transactions found with this filter')).toBeInTheDocument();
     });
+
+    it.each([
+        ['filter=all', 2],
+        ['filter=all&status=failed', 0],
+        ['filter=all&status=succeeded', 0],
+    ])('should show an unavailable transaction only without a status filter: %s', (query, expectedCount) => {
+        search = query;
+        const block = makeBlock();
+        render(
+            <BlockHistoryCard
+                block={{ ...block, transactions: [...block.transactions, { index: 4, unavailable: true }] }}
+                epoch={500n}
+            />,
+        );
+        expect(screen.queryAllByText('Unavailable')).toHaveLength(expectedCount);
+    });
 });
 
 function makeBlock(withFailed = true): BlockData {

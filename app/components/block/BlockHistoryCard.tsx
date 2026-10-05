@@ -231,7 +231,12 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                 return getBlockTransactionAccounts(tx).includes(accountFilter);
             })
             .filter(({ version }) => versionFilter === null || version === versionFilter)
-            .filter(tx => statusFilter === null || (isFailed(tx) ? 'failed' : 'succeeded') === statusFilter);
+            // An unavailable transaction has no known status, so no status filter matches it.
+            .filter(
+                tx =>
+                    statusFilter === null ||
+                    (!tx.unavailable && (isFailed(tx) ? 'failed' : 'succeeded') === statusFilter),
+            );
 
         const showComputeUnits = filteredTxs.every(tx => tx.unavailable || tx.computeUnits !== undefined);
 
