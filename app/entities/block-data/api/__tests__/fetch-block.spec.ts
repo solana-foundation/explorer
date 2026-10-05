@@ -110,6 +110,14 @@ describe('fetchBlock', () => {
         expect(getTransaction(await fetchBlock(URL, SLOT)).meta?.costUnits).toBeUndefined();
     });
 
+    it('should load a block whose RPC response omits rewards', async () => {
+        respondWith({ ...V1_BLOCK_RESPONSE, rewards: undefined });
+        const block = await fetchBlock(URL, SLOT);
+
+        expect(block?.rewards).toBeUndefined();
+        expect(getTransaction(block).signatures).toHaveLength(1);
+    });
+
     it('should ignore token balances that the block pages do not consume', async () => {
         const [transaction] = LEGACY_BLOCK_RESPONSE.transactions;
         const tokenBalance = {

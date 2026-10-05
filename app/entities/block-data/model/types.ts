@@ -38,7 +38,7 @@ export type BlockData = Readonly<{
     blockhash: Blockhash;
     parentSlot: Slot;
     previousBlockhash: Blockhash;
-    rewards: readonly Reward[];
+    rewards?: readonly Reward[] | null;
     transactions: readonly BlockTransactionEntry[];
 }>;
 
