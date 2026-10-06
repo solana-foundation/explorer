@@ -1,13 +1,12 @@
 import { Format } from '@solana-program/program-metadata';
 import { describe, expect, it } from 'vitest';
 
+import { DOC, DOC_PRETTY } from '../../__fixtures__/pmp-account';
 import { toDocumentText } from '../decode-pmp-payload';
 
 describe('toDocumentText', () => {
     it('should pretty-print a minified JSON document', () => {
-        expect(toDocumentText('{"name":"company","version":"1.0.0"}', Format.Json)).toBe(
-            '{\n  "name": "company",\n  "version": "1.0.0"\n}',
-        );
+        expect(toDocumentText(DOC, Format.Json)).toBe(DOC_PRETTY);
     });
 
     it('should pretty-print a JSON array document', () => {

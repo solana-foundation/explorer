@@ -12,19 +12,8 @@ const specWorkspace = (name = 'specs') => ({
     environment: 'jsdom',
     globals: true,
     name,
-    server: {
-        deps: {
-            inline: [
-                '@noble',
-                'change-case',
-                '@solana/kit',
-                '@solana/rpc',
-                '@solana/rpc-spec',
-                '@solana/event-target-impl',
-                '@solana/addresses',
-            ],
-        },
-    },
+    // Every spec file gets a fresh worker, and a worker thread starts faster than a child process.
+    pool: 'threads' as const,
     setupFiles: ['./test-setup.ts'],
     testTimeout: 10000,
 });
@@ -72,7 +61,19 @@ export default defineConfig({
                 // No `typecheck`: the only *.spec-d.ts files live in packages/, which self-typecheck, so
                 // enabling it here collected nothing and still reported "Type Errors no errors". `pnpm check` owns tsc.
                 test: {
-                    name: 'specs',
+                    name: 'specs-dom',
+                    include: ['**/*.{test,spec}.tsx'],
+                    setupFiles: ['./test-setup.specs.ts'],
+                },
+            },
+            {
+                extends: true,
+                // A jsdom window is the largest fixed cost of a spec file, so a `.ts` spec runs in node
+                // unless it declares `// @vitest-environment jsdom`.
+                test: {
+                    name: 'specs-node',
+                    environment: 'node',
+                    include: ['**/*.{test,spec}.?(c|m)[jt]s'],
                     setupFiles: ['./test-setup.specs.ts'],
                 },
             },

@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { bytesToHex } from '@noble/hashes/utils';
 import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
@@ -9,7 +11,7 @@ import type {
     TypeFieldType,
     UnknownFieldType,
 } from '../../formatters/formatted-idl';
-import { useFormatAnchorIdl } from '../use-format-anchor-idl';
+import { formatAnchorIdl, useFormatAnchorIdl } from '../use-format-anchor-idl';
 
 // Mock byte to hex utility since we don't need actual conversion in tests
 vi.mock('@noble/hashes/utils', async importOriginal => {
@@ -21,11 +23,20 @@ vi.mock('@noble/hashes/utils', async importOriginal => {
 });
 
 describe('useFormatAnchorIdl', () => {
-    it('should return null when idl is undefined', () => {
-        const { result } = renderHook(() => useFormatAnchorIdl(undefined));
-        expect(result.current).toBeNull();
-    });
+    it('should return null without an IDL and the formatted IDL with one', () => {
+        const idl = { instructions: [{ accounts: [], args: [], name: 'initialize' }] } as any;
 
+        const { rerender, result } = renderHook(props => useFormatAnchorIdl(props.idl), {
+            initialProps: { idl: undefined },
+        });
+        expect(result.current).toBeNull();
+
+        rerender({ idl });
+        expect(result.current).toEqual(formatAnchorIdl(idl));
+    });
+});
+
+describe('formatAnchorIdl', () => {
     it('should format a minimal valid IDL correctly', () => {
         const minimalIdl = {
             instructions: [
@@ -37,11 +48,10 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(minimalIdl as any));
+        const formatted = formatAnchorIdl(minimalIdl as any);
 
-        expect(result.current).not.toBeNull();
-        expect(result.current?.instructions).toHaveLength(1);
-        expect(result.current?.instructions?.[0].name).toBe('initialize');
+        expect(formatted.instructions).toHaveLength(1);
+        expect(formatted.instructions?.[0].name).toBe('initialize');
     });
 
     it('should format instruction names using camelCase', () => {
@@ -60,10 +70,10 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        expect(result.current?.instructions?.[0].name).toBe('initializeAccount');
-        expect(result.current?.instructions?.[1].name).toBe('updateState');
+        expect(formatted.instructions?.[0].name).toBe('initializeAccount');
+        expect(formatted.instructions?.[1].name).toBe('updateState');
     });
 
     it('should correctly format instruction accounts', () => {
@@ -80,9 +90,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const accounts = result.current?.instructions?.[0].accounts;
+        const accounts = formatted.instructions?.[0].accounts;
         expect(accounts).toHaveLength(2);
         expect(accounts?.[0]).toMatchObject({
             docs: [],
@@ -113,9 +123,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const accounts = result.current?.instructions?.[0].accounts;
+        const accounts = formatted.instructions?.[0].accounts;
         expect(accounts).toHaveLength(1);
         expect(accounts?.[0]).toHaveProperty('accounts');
         expect((accounts?.[0] as NestedInstructionAccountsData).accounts).toHaveLength(2);
@@ -152,9 +162,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const args = result.current?.instructions?.[0].args;
+        const args = formatted.instructions?.[0].args;
         expect(args).toHaveLength(2);
         expect(args?.[0]).toMatchObject({
             name: 'amount',
@@ -186,9 +196,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const accounts = result.current?.accounts;
+        const accounts = formatted.accounts;
         expect(accounts).toHaveLength(1);
         expect(accounts?.[0].name).toBe('UserAccount');
         expect(accounts?.[0].fieldType?.kind).toBe('struct');
@@ -226,9 +236,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const types = result.current?.types;
+        const types = formatted.types;
         expect(types).toHaveLength(2);
         expect(types?.[0].fieldType?.kind).toBe('struct');
         const fields = (types?.[0].fieldType as StructFieldType).fields;
@@ -257,9 +267,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const types = result.current?.types;
+        const types = formatted.types;
         expect(types?.[0].fieldType?.kind).toBe('enum');
         const variants = (types?.[0].fieldType as EnumFieldType).variants;
         expect(variants).toEqual(['Active', 'Pending', 'Closed']);
@@ -288,9 +298,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const types = result.current?.types;
+        const types = formatted.types;
         const variants = (types?.[0].fieldType as EnumFieldType).variants;
         expect(variants[0]).toContain('Transfer');
         expect(variants[0]).toContain('{"amount":"u64","destination":"publicKey"}');
@@ -317,9 +327,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const types = result.current?.types;
+        const types = formatted.types;
         const variants = (types?.[0].fieldType as any).variants;
         expect(variants[0]).toBe('Data [u64, bool]');
         expect(variants[1]).toBe('Empty');
@@ -369,9 +379,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const fields = (result.current?.types?.[0].fieldType as any).fields;
+        const fields = (formatted.types?.[0].fieldType as any).fields;
         expect(fields[0].name).toBe('optionalValue');
         expect(fields[0].type).toBe('option(u64)');
 
@@ -416,9 +426,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const pdas = result.current?.pdas;
+        const pdas = formatted.pdas;
         expect(pdas).toHaveLength(1);
         expect(pdas?.[0].name).toBe('userAccount');
         expect(pdas?.[0].seeds).toHaveLength(2);
@@ -459,9 +469,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const pdas = result.current?.pdas;
+        const pdas = formatted.pdas;
         expect(pdas).toHaveLength(1);
         expect(pdas?.[0].name).toBe('userAccount');
     });
@@ -475,9 +485,9 @@ describe('useFormatAnchorIdl', () => {
             instructions: [],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const errors = result.current?.errors;
+        const errors = formatted.errors;
         expect(errors).toHaveLength(2);
         idl.errors.forEach((err, i) => {
             expect(errors?.[i]).toMatchObject({
@@ -497,9 +507,9 @@ describe('useFormatAnchorIdl', () => {
             instructions: [],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const constants = result.current?.constants;
+        const constants = formatted.constants;
         expect(constants).toHaveLength(2);
         expect(constants?.[0]).toMatchObject({
             name: 'MAX_USERS',
@@ -535,9 +545,9 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const events = result.current?.events;
+        const events = formatted.events;
         expect(events).toHaveLength(1);
         expect(events?.[0].name).toBe('UserCreated');
         expect(events?.[0].fieldType?.kind).toBe('struct');
@@ -559,12 +569,12 @@ describe('useFormatAnchorIdl', () => {
             ],
         };
 
-        const { result } = renderHook(() => useFormatAnchorIdl(idl as any));
+        const formatted = formatAnchorIdl(idl as any);
 
-        const types = result.current?.types;
+        const types = formatted.types;
         expect(types).toHaveLength(1);
         expect(types?.[0].name).toBe('UniqueTy');
-        expect(result.current?.accounts).toHaveLength(1);
-        expect(result.current?.events).toHaveLength(1);
+        expect(formatted.accounts).toHaveLength(1);
+        expect(formatted.events).toHaveLength(1);
     });
 });

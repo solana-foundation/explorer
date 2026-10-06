@@ -1,7 +1,6 @@
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-
+import { createProgramClient } from '@codama/dynamic-client';
 import type { SupportedIdl } from '@entities/idl';
+import pmpCodamaIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { PublicKey } from '@solana/web3.js';
 import type { RootNode } from 'codama';
 import {
@@ -26,10 +25,11 @@ import {
     stringValueNode,
     variablePdaSeedNode,
 } from 'codama';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
+import codamaVotingIdl from '../__mocks__/codama/codama-voting.json';
 import { createCodamaPdaProvider } from './codama-provider';
 
 vi.mock('@codama/dynamic-client', async () => {
@@ -40,22 +40,12 @@ vi.mock('@codama/dynamic-client', async () => {
     };
 });
 
-function loadCodamaIdl(filename: string): RootNode {
-    const idlPath = path.resolve(__dirname, '../__mocks__/codama', filename);
-    return JSON.parse(readFileSync(idlPath, 'utf8')) as RootNode;
-}
-
-function loadPmpCodamaIdl(): RootNode {
-    const idlPath = path.resolve(
-        __dirname,
-        '../../../../../entities/idl/mocks/codama',
-        'codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json',
-    );
-    return JSON.parse(readFileSync(idlPath, 'utf8')) as RootNode;
-}
-
 describe('createCodamaPdaProvider', () => {
-    const votingIdl = loadCodamaIdl('codama-voting.json');
+    const votingIdl = codamaVotingIdl as unknown as RootNode;
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
 
     describe('canHandle', () => {
         it('should return true for Codama IDL', () => {
@@ -132,7 +122,7 @@ describe('createCodamaPdaProvider', () => {
         });
 
         it('should return generated=null and log when a seed fails conversion (raw form value preserved in seed info)', async () => {
-            const errorSpy = vi.spyOn(Logger, 'error').mockImplementation(() => undefined);
+            const errorSpy = vi.mocked(Logger.error);
             const provider = createCodamaPdaProvider();
             // pollId is u64 — "not-a-number" will fail BigInt conversion.
             // candidateName (string) converts fine.
@@ -155,7 +145,6 @@ describe('createCodamaPdaProvider', () => {
             const [firstArg] = errorSpy.mock.calls[0];
             expect(firstArg).toBeInstanceOf(Error);
             expect((firstArg as Error).message).toContain('conversion failed for seed pollId');
-            errorSpy.mockRestore();
         });
 
         it('should return null for generated when argument seed value is empty', async () => {
@@ -296,7 +285,6 @@ describe('createCodamaPdaProvider', () => {
         });
 
         it('should cache client per program key and version, and rebuild on version change', async () => {
-            const { createProgramClient } = await import('@codama/dynamic-client');
             const createSpy = vi.mocked(createProgramClient);
             createSpy.mockClear();
 
@@ -338,7 +326,6 @@ describe('createCodamaPdaProvider', () => {
         });
 
         it('should key cache by object identity, not by publicKey+version string', async () => {
-            const { createProgramClient } = await import('@codama/dynamic-client');
             const createSpy = vi.mocked(createProgramClient);
             createSpy.mockClear();
 
@@ -808,7 +795,7 @@ describe('createCodamaPdaProvider', () => {
         });
 
         it('should fallback to ifTrue and warn when expected value-node kind is unsupported', async () => {
-            const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
+            const warnSpy = vi.mocked(Logger.warn);
             const { idl, expectedTrueAddr } = buildEqualityIdl(argumentValueNode('pollId'), noneValueNode());
             const provider = createCodamaPdaProvider();
             const result = await provider.computePdas(
@@ -821,7 +808,6 @@ describe('createCodamaPdaProvider', () => {
             expect(warnSpy).toHaveBeenCalled();
             const [msg] = warnSpy.mock.calls[0];
             expect(msg).toContain('Could not evaluate conditional PDA');
-            warnSpy.mockRestore();
         });
 
         it('should fallback to the only available branch when condition is unknown', async () => {
@@ -849,7 +835,7 @@ describe('createCodamaPdaProvider', () => {
         });
 
         describe('PMP conditional branch', () => {
-            const pmpIdl = loadPmpCodamaIdl();
+            const pmpIdl = pmpCodamaIdl as unknown as RootNode;
             const programKey = '5v4CbtQTxb4iYAW1MCJMpVu5Dud9ybmRqzXs4bTCJm3o';
             const authorityKey = '6hb98KJuyK4xfYEqMw8uLndqDMsx23ZcfzDxVRYHtdW9';
             const programDataKey = '8X6pQzHbYUDpmA5FyZ9hExgJ1b5fPexUoQWfu6cFvQhP';

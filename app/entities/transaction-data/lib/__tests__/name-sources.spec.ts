@@ -18,76 +18,32 @@ describe('resolveNamesFromLookup', () => {
         });
 
         // The programs below ship no fetchable IDL, so a built-in source must name them with an empty map.
-        it('should resolve a Compute Budget name without any IDL', () => {
+        it.each([
             // discriminator 2 = Set Compute Unit Limit
-            const names = resolveNamesFromLookup(
-                lookup(COMPUTE_BUDGET_PROGRAM, 2, 0x40, 0x0d, 0x03, 0x00),
-                idlNames({}),
-            );
-
-            expect(names.name).toBe('Set Compute Unit Limit');
-        });
-
-        // The raw-bytes counterpart of the memo branch in `resolveInstructionNames`. Without it a
-        // simulated memo stays unnamed while an RPC-parsed one reads "Memo".
-        it('should resolve a Memo name without any IDL', () => {
-            const names = resolveNamesFromLookup(lookup(MEMO_PROGRAM, 0x67, 0x6d), idlNames({}));
-
-            expect(names.name).toBe('Memo');
-        });
-
-        it('should resolve a ZK ElGamal name without any IDL', () => {
+            ['Compute Budget', [COMPUTE_BUDGET_PROGRAM, 2, 0x40, 0x0d, 0x03, 0x00], 'Set Compute Unit Limit'],
+            // The raw-bytes counterpart of the memo branch in `resolveInstructionNames`. Without it a
+            // simulated memo stays unnamed while an RPC-parsed one reads "Memo".
+            ['Memo', [MEMO_PROGRAM, 0x67, 0x6d], 'Memo'],
             // discriminator 3 = Verify Ciphertext-Commitment Equality
-            const names = resolveNamesFromLookup(lookup(ZK_PROGRAM, 3), idlNames({}));
-
-            expect(names.name).toBe('Verify Ciphertext-Commitment Equality');
-        });
-
-        it('should resolve a Lighthouse name without any IDL', () => {
+            ['ZK ElGamal', [ZK_PROGRAM, 3], 'Verify Ciphertext-Commitment Equality'],
             // discriminator 15 = Assert Sysvar Clock
-            const names = resolveNamesFromLookup(lookup(LIGHTHOUSE_PROGRAM_ADDRESS, 15), idlNames({}));
-
-            expect(names.name).toBe('Assert Sysvar Clock');
-        });
-
-        it('should resolve a Serum name without any IDL', () => {
+            ['Lighthouse', [LIGHTHOUSE_PROGRAM_ADDRESS, 15], 'Assert Sysvar Clock'],
             // Serum reads a u32 instruction code after a 1-byte version prefix; code 1 = New Order.
-            const names = resolveNamesFromLookup(lookup(SERUM_PROGRAM, 0, 1, 0, 0, 0), idlNames({}));
-
-            expect(names.name).toBe('New Order');
-        });
-
-        it('should resolve a Pyth name without any IDL', () => {
+            ['Serum', [SERUM_PROGRAM, 0, 1, 0, 0, 0], 'New Order'],
             // Pyth reads a u32 index after a u32 version; version 2, index 7 = Update Price.
-            const names = resolveNamesFromLookup(lookup(PYTH_PROGRAM, 2, 0, 0, 0, 7, 0, 0, 0), idlNames({}));
-
-            expect(names.name).toBe('Update Price');
-        });
-
-        // The generated `@solana-program/*` clients are the only thing that names a simulated System or
-        // Token instruction, which is half of what the CU chart needs. Covered here and not just in
-        // program-client-name.spec, so removing the source from the chain fails a test.
-        it('should resolve a Token name from the generated client without any IDL', () => {
+            ['Pyth', [PYTH_PROGRAM, 2, 0, 0, 0, 7, 0, 0, 0], 'Update Price'],
+            // The generated `@solana-program/*` clients are the only thing that names a simulated System or
+            // Token instruction, which is half of what the CU chart needs. Covered here and not just in
+            // program-client-name.spec, so removing the source from the chain fails a test.
             // discriminator 12 = transferChecked
-            const names = resolveNamesFromLookup(lookup(TOKEN_PROGRAM, 12), idlNames({}));
-
-            expect(names.name).toBe('Transfer Checked');
-        });
-
-        it('should resolve a System name from the generated client without any IDL', () => {
+            ['Token', [TOKEN_PROGRAM, 12], 'Transfer Checked'],
             // discriminator 2 (4-byte little-endian) = transfer
-            const names = resolveNamesFromLookup(lookup(SYSTEM_PROGRAM, 2, 0, 0, 0), idlNames({}));
-
-            expect(names.name).toBe('Transfer');
-        });
-
-        // Mango is the one chain member with no other case here, so without this, deleting it from
-        // NAME_SOURCES fails nothing.
-        it('should resolve a Mango name without any IDL', () => {
-            // Mango keys its instructions by a leading u32 LE discriminator; 2 = Deposit.
-            const names = resolveNamesFromLookup(lookup(MANGO_PROGRAM, 2, 0, 0, 0), idlNames({}));
-
-            expect(names.name).toBe('Deposit');
+            ['System', [SYSTEM_PROGRAM, 2, 0, 0, 0], 'Transfer'],
+            // Mango is the one chain member with no other case here, so without this, deleting it from
+            // NAME_SOURCES fails nothing. Mango keys its instructions by a leading u32 LE discriminator; 2 = Deposit.
+            ['Mango', [MANGO_PROGRAM, 2, 0, 0, 0], 'Deposit'],
+        ] as const)('should resolve a %s name without any IDL', (_program, [programId, ...data], expected) => {
+            expect(resolveNamesFromLookup(lookup(programId, ...data), idlNames({})).name).toBe(expected);
         });
 
         /**

@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { PublicKey } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -42,7 +44,6 @@ function mockWalletState({ address, hasSigner = true, status = 'connected' }: Wa
 describe('useWallet', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.spyOn(Logger, 'error').mockImplementation(() => {});
         mockUseDisconnect.mockReturnValue({ dispatch: vi.fn(), error: undefined });
     });
 
@@ -64,7 +65,7 @@ describe('useWallet', () => {
 
         expect(result.current.publicKey).toBeUndefined();
         expect(result.current.canSign).toBe(false);
-        expect(Logger.error).toHaveBeenCalled();
+        expect(vi.mocked(Logger.error)).toHaveBeenCalled();
     });
 
     it('should keep the same PublicKey instance while the address is unchanged', () => {
@@ -114,6 +115,6 @@ describe('useWallet', () => {
 
         renderHook(() => useWallet());
 
-        expect(Logger.error).toHaveBeenCalledWith(error, { sentry: true });
+        expect(vi.mocked(Logger.error)).toHaveBeenCalledWith(error, { sentry: true });
     });
 });

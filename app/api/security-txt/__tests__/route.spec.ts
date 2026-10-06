@@ -17,17 +17,9 @@ vi.mock('@solana/security-txt', () => ({
     fetchSecurityTxt: mocks.fetchSecurityTxt,
 }));
 
-vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    // The fetchers are mocked and ignore the rpc handle, so a stub is enough.
-    return { ...actual, createSolanaRpc: vi.fn(() => ({})) };
-});
-
 describe('GET /api/security-txt', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.spyOn(Logger, 'panic').mockImplementation(() => {});
-        vi.spyOn(Logger, 'warn').mockImplementation(() => {});
     });
 
     it('should return 400 when required params are missing', async () => {

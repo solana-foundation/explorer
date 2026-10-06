@@ -6,7 +6,6 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
-import { GENESIS_HASHES } from '@/app/entities/chain-id';
 import type { ProgramIdls, SupportedIdl } from '@/app/entities/idl';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { invariant } from '@/app/shared/lib/invariant';
@@ -24,37 +23,6 @@ vi.mock('next/navigation', () => ({
     usePathname: vi.fn(),
     useRouter: vi.fn(),
     useSearchParams: vi.fn(),
-}));
-
-vi.mock('@solana/kit', async importOriginal => ({
-    ...(await importOriginal<typeof import('@solana/kit')>()),
-    address: vi.fn((addr: string) => addr),
-    createSolanaRpc: vi.fn(() => ({
-        getEpochInfo: vi.fn(() => ({
-            send: vi.fn().mockResolvedValue({
-                absoluteSlot: 0n,
-                blockHeight: 0n,
-                epoch: 0n,
-                slotIndex: 0n,
-                slotsInEpoch: 432000n,
-            }),
-        })),
-        getEpochSchedule: vi.fn(() => ({
-            send: vi.fn().mockResolvedValue({
-                firstNormalEpoch: 0n,
-                firstNormalSlot: 0n,
-                leaderScheduleSlotOffset: 0n,
-                slotsPerEpoch: 432000n,
-                warmup: false,
-            }),
-        })),
-        getFirstAvailableBlock: vi.fn(() => ({
-            send: vi.fn().mockResolvedValue(0n),
-        })),
-        getGenesisHash: vi.fn(() => ({
-            send: vi.fn().mockResolvedValue(GENESIS_HASHES.MAINNET),
-        })),
-    })),
 }));
 
 const DEFAULT_ADDRESS = PublicKey.default.toBase58();
@@ -135,6 +103,13 @@ function expectNoSourceTabs(): void {
 describe('IdlCard', () => {
     const programId = DEFAULT_ADDRESS;
 
+    const renderCard = () =>
+        render(
+            <ClusterProvider>
+                <IdlCard programId={programId} />
+            </ClusterProvider>,
+        );
+
     beforeEach(() => {
         vi.clearAllMocks();
 
@@ -156,11 +131,7 @@ describe('IdlCard', () => {
     test('should render the PMP IDL (no source tabs) when a program-metadata IDL exists', async () => {
         mockProgramIdls({ programMetadataIdl: createMockProgramMetadataIdl() });
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
@@ -183,11 +154,7 @@ describe('IdlCard', () => {
             programMetadataIdlAddress: PMP_PDA,
         });
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
@@ -210,11 +177,7 @@ describe('IdlCard', () => {
         (idl as unknown as { program: { name: string } }).program.name = 'crypto_primitives';
         mockProgramIdls({ programMetadataIdl: idl, programMetadataIdlAddress: PMP_PDA });
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
@@ -227,11 +190,7 @@ describe('IdlCard', () => {
     test('should label the source as Anchor when falling back to the Anchor IDL', async () => {
         mockProgramIdls({ anchorIdl: createMockAnchorIdl(), anchorIdlAddress: DEFAULT_ADDRESS });
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
@@ -244,11 +203,7 @@ describe('IdlCard', () => {
     test('should fall back to the Anchor IDL with a warning badge + tooltip when no PMP IDL exists', async () => {
         mockProgramIdls({ anchorIdl: createMockAnchorIdl() });
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
@@ -268,11 +223,7 @@ describe('IdlCard', () => {
             programMetadataIdl: createMockProgramMetadataIdl(),
         });
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         await waitFor(() => {
             expect(screen.getByText('Codama (version 1.2.11)')).toBeInTheDocument();
@@ -291,11 +242,7 @@ describe('IdlCard', () => {
             anchorIdl: createMockAnchorIdl(Keypair.generate().publicKey.toBase58()),
         });
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         await waitFor(() => {
             expect(screen.getByText('IDL Program ID Mismatch')).toBeInTheDocument();
@@ -308,11 +255,7 @@ describe('IdlCard', () => {
     test('should render the empty upload state when no IDL exists', async () => {
         mockProgramIdls({});
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         await waitFor(() => {
             expect(screen.getByText('Upload IDL')).toBeInTheDocument();
@@ -327,11 +270,7 @@ describe('IdlCard', () => {
     test('should link to the idl.solana.com history view for the program', async () => {
         mockProgramIdls({ programMetadataIdl: createMockProgramMetadataIdl() });
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         const link = await screen.findByRole('link', { name: /IDL history/i });
         const url = new URL(link.getAttribute('href') as string);
@@ -344,11 +283,7 @@ describe('IdlCard', () => {
     test('should open the Orquestra project page behind the leaving-Explorer interstitial', async () => {
         mockProgramIdls({ programMetadataIdl: createMockProgramMetadataIdl() });
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
         fireEvent.click(await screen.findByRole('button', { name: /MCP & API/i }));
@@ -371,11 +306,7 @@ describe('IdlCard', () => {
     test('should not open Orquestra when the interstitial is cancelled', async () => {
         mockProgramIdls({ programMetadataIdl: createMockProgramMetadataIdl() });
 
-        render(
-            <ClusterProvider>
-                <IdlCard programId={programId} />
-            </ClusterProvider>,
-        );
+        renderCard();
 
         const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
         fireEvent.click(await screen.findByRole('button', { name: /MCP & API/i }));

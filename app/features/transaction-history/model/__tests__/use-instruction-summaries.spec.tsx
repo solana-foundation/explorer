@@ -1,7 +1,7 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
+import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 
 const mocks = vi.hoisted(() => ({
     fetchTransactionDetails: vi.fn(),
@@ -16,14 +16,8 @@ vi.mock('@providers/cluster', () => ({ useCluster: () => ({ url: 'https://api.de
 
 import { useInstructionSummaries } from '../use-instruction-summaries';
 
-// shouldRetryOnError:false keeps a thrown fetch from retrying mid-test; a fresh Map provider isolates the cache.
-function wrapper({ children }: { children: ReactNode }) {
-    return (
-        <SWRConfig value={{ dedupingInterval: 0, provider: () => new Map(), shouldRetryOnError: false }}>
-            {children}
-        </SWRConfig>
-    );
-}
+// shouldRetryOnError:false keeps a thrown fetch from retrying mid-test.
+const wrapper = swrWrapper({ dedupingInterval: 0, shouldRetryOnError: false });
 
 afterEach(() => vi.clearAllMocks());
 
@@ -35,7 +29,7 @@ describe('useInstructionSummaries', () => {
 
         const { result } = renderHook(() => useInstructionSummaries('sig'), { wrapper });
 
-        await waitFor(() => expect(result.current).toBe(summaries));
+        await waitForHook(() => expect(result.current).toBe(summaries));
     });
 
     // The regression guard: a null tx is a transient miss (a node that hasn't indexed the signature),
@@ -47,7 +41,7 @@ describe('useInstructionSummaries', () => {
 
         const { result } = renderHook(() => useInstructionSummaries('sig'), { wrapper });
 
-        await waitFor(() => expect(mocks.fetchTransactionDetails).toHaveBeenCalled());
+        await waitForHook(() => expect(mocks.fetchTransactionDetails).toHaveBeenCalled());
         expect(mocks.getInstructionSummaries).not.toHaveBeenCalled();
         expect(result.current).toBeUndefined();
     });
@@ -58,7 +52,7 @@ describe('useInstructionSummaries', () => {
 
         const { result } = renderHook(() => useInstructionSummaries('sig'), { wrapper });
 
-        await waitFor(() => expect(result.current).toEqual([]));
+        await waitForHook(() => expect(result.current).toEqual([]));
     });
 
     it('should not fetch while disabled', () => {

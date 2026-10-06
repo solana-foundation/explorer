@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { createStore } from 'jotai';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

@@ -1,23 +1,13 @@
-import { Compression, Encoding, Format, packDirectData } from '@solana-program/program-metadata';
+import { Compression, Encoding, Format } from '@solana-program/program-metadata';
 import { gzip } from 'pako';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fromUtf8 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
+import { DOC, DOC_PRETTY, pack } from '../../__fixtures__/pmp-account';
 import { PMP_DECODE_BUDGET_BYTES, PMP_DECODED_RENDER_CAP_BYTES, PMP_MAX_UNPACKED_BYTES } from '../constants';
 import { decodePmpPayload, decodeUnpackedPayload, getPayloadDataHash } from '../decode-pmp-payload';
-
-const DOC = '{"name":"company","version":"1.0.0"}';
-/** The same document as `DOC`, indented - a `Format.Json` payload is re-serialised before it reaches the card. */
-const DOC_PRETTY = '{\n  "name": "company",\n  "version": "1.0.0"\n}';
-
-// `packDirectData` is the library's own producer, so every fixture below is a byte-exact round trip of what the
-// canonical client puts on chain. Its `encoding` argument INTERPRETS the content string, so Utf8 is the only
-// realistic choice for a JSON document (with Base64 the content would have to be base64 text already).
-function pack(content: string, compression: Compression): Uint8Array {
-    return packDirectData({ compression, content, encoding: Encoding.Utf8 }).data as Uint8Array;
-}
 
 describe('decodePmpPayload', () => {
     // The Logger is a global no-op mock (test-setup.specs.ts), so these read the calls the decode makes.

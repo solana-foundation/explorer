@@ -1,18 +1,13 @@
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-
+import { gen } from '@__fixtures__/gen';
 import { createProgramClient } from '@codama/dynamic-client';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import type { RootNode } from 'codama';
 import { describe, expect, it } from 'vitest';
 
+import codamaVotingIdl from '../__mocks__/codama/codama-voting.json';
+import systemProgramIdl from '../__mocks__/codama/system-program-idl.json';
 import type { BaseIdl } from '../unified-program.d';
 import { CodamaUnifiedProgram } from './codama-program';
-
-function loadIdl(filename: string): RootNode {
-    const idlPath = path.resolve(__dirname, '../__mocks__/codama', filename);
-    return JSON.parse(readFileSync(idlPath, 'utf8')) as RootNode;
-}
 
 function createProgram(idl: RootNode, programId?: PublicKey) {
     const pubkey = programId ?? PublicKey.default;
@@ -21,12 +16,12 @@ function createProgram(idl: RootNode, programId?: PublicKey) {
 }
 
 describe('CodamaUnifiedProgram', () => {
-    const systemIdl = loadIdl('system-program-idl.json');
-    const votingIdl = loadIdl('codama-voting.json');
+    const systemIdl = systemProgramIdl as unknown as RootNode;
+    const votingIdl = codamaVotingIdl as unknown as RootNode;
 
     describe('properties', () => {
         it('should expose programId', () => {
-            const pubkey = new PublicKey('Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV');
+            const pubkey = gen.publicKey(1);
             const program = createProgram(systemIdl, pubkey);
             expect(program.programId).toEqual(pubkey);
         });
@@ -54,15 +49,9 @@ describe('CodamaUnifiedProgram', () => {
     describe('buildInstruction', () => {
         it('should build a valid TransactionInstruction', async () => {
             const program = createProgram(systemIdl);
-            const source = 'Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV';
-            const destination = '2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8';
-
             const ix = await program.buildInstruction(
                 'transferSol',
-                {
-                    destination: new PublicKey(destination),
-                    source: new PublicKey(source),
-                },
+                { destination: gen.publicKey(2), source: gen.publicKey(1) },
                 ['1000000'],
             );
 
@@ -74,8 +63,8 @@ describe('CodamaUnifiedProgram', () => {
 
         it('should set correct account roles (signer, writable)', async () => {
             const program = createProgram(systemIdl);
-            const source = new PublicKey('Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV');
-            const destination = new PublicKey('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8');
+            const source = gen.publicKey(1);
+            const destination = gen.publicKey(2);
 
             const ix = await program.buildInstruction('transferSol', { destination, source }, ['500']);
 
@@ -87,8 +76,8 @@ describe('CodamaUnifiedProgram', () => {
 
         it('should convert string amounts to BigInt for u64 args', async () => {
             const program = createProgram(systemIdl);
-            const source = new PublicKey('Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV');
-            const destination = new PublicKey('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8');
+            const source = gen.publicKey(1);
+            const destination = gen.publicKey(2);
 
             // Large value that exceeds Number.MAX_SAFE_INTEGER
             const ix = await program.buildInstruction('transferSol', { destination, source }, ['9999999999999999999']);
@@ -99,7 +88,7 @@ describe('CodamaUnifiedProgram', () => {
 
         it('should handle null accounts by passing null address', async () => {
             const program = createProgram(systemIdl);
-            const source = new PublicKey('Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV');
+            const source = gen.publicKey(1);
 
             // Passing null for destination
             await expect(
@@ -124,15 +113,15 @@ describe('CodamaUnifiedProgram', () => {
 
         it('should filter omitted arguments (discriminators)', async () => {
             const program = createProgram(votingIdl);
-            const signer = new PublicKey('Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV');
+            const signer = gen.publicKey(1);
 
             // initializeCandidate has 3 arguments: discriminator (omitted), candidateName, pollId
             // Only 2 user-facing args should be expected
             const ix = await program.buildInstruction(
                 'initializeCandidate',
                 {
-                    candidate: new PublicKey('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8'),
-                    poll: new PublicKey('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8'),
+                    candidate: gen.publicKey(2),
+                    poll: gen.publicKey(2),
                     signer,
                     systemProgram: new PublicKey('11111111111111111111111111111111'),
                 },
@@ -144,7 +133,7 @@ describe('CodamaUnifiedProgram', () => {
 
         it('should throw descriptive error when argument conversion fails', async () => {
             const program = createProgram(votingIdl);
-            const signer = new PublicKey('Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV');
+            const signer = gen.publicKey(1);
 
             // pollId (u64) gets an invalid value
             await expect(

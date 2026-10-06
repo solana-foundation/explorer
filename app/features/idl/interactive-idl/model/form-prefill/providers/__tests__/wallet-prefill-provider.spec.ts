@@ -1,86 +1,33 @@
-import type { InstructionAccountData, InstructionData, NestedInstructionAccountsData } from '@entities/idl';
+// @vitest-environment jsdom
+
 import { Keypair, PublicKey } from '@solana/web3.js';
-import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useInstructionForm } from '../../../use-instruction-form';
 import { createWalletPrefillDependency } from '../wallet-prefill-provider';
+import { createNestedTestAccount, createTestInstruction, renderInstructionForm } from './utils';
 
 const PREFILLED_ADDRESS = Keypair.generate().publicKey.toBase58();
 
-const SIGNER_ACCOUNT: InstructionAccountData = {
-    docs: [],
-    name: 'signer',
-    optional: false,
-    signer: true,
-};
+const SIGNER_ACCOUNT = { name: 'signer', signer: true };
 
-const NON_SIGNER_ACCOUNT: InstructionAccountData = {
-    docs: [],
-    name: 'nonSigner',
-    optional: false,
-    signer: false,
-};
+const INSTRUCTION_WITH_SIGNER = createTestInstruction([SIGNER_ACCOUNT]);
 
-const NESTED_SIGNER_GROUP: NestedInstructionAccountsData = {
-    accounts: [
-        {
-            docs: [],
-            name: 'nestedSigner',
-            optional: false,
-            signer: true,
-        },
-    ],
-    name: 'group',
-};
+const INSTRUCTION_WITH_SIGNER_AND_NON_SIGNER = createTestInstruction([SIGNER_ACCOUNT, 'nonSigner']);
 
-const INSTRUCTION_WITH_SIGNER: InstructionData = {
-    accounts: [SIGNER_ACCOUNT],
-    args: [],
-    docs: [],
-    name: 'testInstruction',
-};
+const INSTRUCTION_WITH_NESTED_SIGNER = createTestInstruction([
+    createNestedTestAccount('group', [{ name: 'nestedSigner', signer: true }]),
+]);
 
-const INSTRUCTION_WITH_SIGNER_AND_NON_SIGNER: InstructionData = {
-    accounts: [SIGNER_ACCOUNT, NON_SIGNER_ACCOUNT],
-    args: [],
-    docs: [],
-    name: 'testInstruction',
-};
+const INSTRUCTION_WITH_TWO_SIGNERS = createTestInstruction([
+    { ...SIGNER_ACCOUNT, name: 'signer1' },
+    { ...SIGNER_ACCOUNT, name: 'signer2' },
+]);
 
-const INSTRUCTION_WITH_NESTED_SIGNER: InstructionData = {
-    accounts: [NESTED_SIGNER_GROUP],
-    args: [],
-    docs: [],
-    name: 'testInstruction',
-};
-
-const INSTRUCTION_WITH_TWO_SIGNERS: InstructionData = {
-    accounts: [
-        { ...SIGNER_ACCOUNT, name: 'signer1' },
-        { ...SIGNER_ACCOUNT, name: 'signer2' },
-    ],
-    args: [],
-    docs: [],
-    name: 'testInstruction',
-};
-
-const EMPTY_INSTRUCTION: InstructionData = {
-    accounts: [],
-    args: [],
-    docs: [],
-    name: 'testInstruction',
-};
+const EMPTY_INSTRUCTION = createTestInstruction([]);
 
 describe('createWalletPrefillDependency', () => {
     it('should fill signer accounts with wallet address', () => {
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction: INSTRUCTION_WITH_SIGNER_AND_NON_SIGNER,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(INSTRUCTION_WITH_SIGNER_AND_NON_SIGNER);
 
         const walletPublicKey = PublicKey.default;
         const dependency = createWalletPrefillDependency(INSTRUCTION_WITH_SIGNER_AND_NON_SIGNER, undefined, {
@@ -94,33 +41,8 @@ describe('createWalletPrefillDependency', () => {
         expect(form.getValues('accounts.testInstruction.nonSigner')).toBe('');
     });
 
-    it('should not fill when wallet is null', () => {
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction: INSTRUCTION_WITH_SIGNER,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
-
-        const dependency = createWalletPrefillDependency(INSTRUCTION_WITH_SIGNER, undefined, {
-            account: fieldNames.account,
-        });
-
-        const setValueSpy = vi.spyOn(form, 'setValue');
-        dependency.onValueChange(null, form);
-
-        expect(setValueSpy).not.toHaveBeenCalled();
-    });
-
     it('should handle nested signer accounts', () => {
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction: INSTRUCTION_WITH_NESTED_SIGNER,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(INSTRUCTION_WITH_NESTED_SIGNER);
 
         const walletPublicKey = PublicKey.default;
         const dependency = createWalletPrefillDependency(INSTRUCTION_WITH_NESTED_SIGNER, undefined, {
@@ -144,13 +66,7 @@ describe('createWalletPrefillDependency', () => {
     });
 
     it('should update signer fields when wallet changes', () => {
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction: INSTRUCTION_WITH_SIGNER,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(INSTRUCTION_WITH_SIGNER);
 
         const walletA = Keypair.generate().publicKey;
         const walletB = Keypair.generate().publicKey;
@@ -173,13 +89,7 @@ describe('createWalletPrefillDependency', () => {
     });
 
     it('should ignore non-PublicKey values in onValueChange', () => {
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction: INSTRUCTION_WITH_SIGNER,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(INSTRUCTION_WITH_SIGNER);
 
         const dependency = createWalletPrefillDependency(INSTRUCTION_WITH_SIGNER, undefined, {
             account: fieldNames.account,
@@ -194,13 +104,7 @@ describe('createWalletPrefillDependency', () => {
     });
 
     it('should not overwrite user-typed values', () => {
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction: INSTRUCTION_WITH_SIGNER,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(INSTRUCTION_WITH_SIGNER);
 
         form.setValue('accounts.testInstruction.signer', PREFILLED_ADDRESS, { shouldDirty: true });
 
@@ -215,13 +119,7 @@ describe('createWalletPrefillDependency', () => {
     });
 
     it('should overwrite a signer field that still contains the previous wallet address', () => {
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction: INSTRUCTION_WITH_SIGNER,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(INSTRUCTION_WITH_SIGNER);
 
         const walletAAddress = Keypair.generate().publicKey.toBase58();
         const walletB = Keypair.generate().publicKey;
@@ -237,13 +135,7 @@ describe('createWalletPrefillDependency', () => {
     });
 
     it('should fill only non-dirty signer fields when some are already user-typed', () => {
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction: INSTRUCTION_WITH_TWO_SIGNERS,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(INSTRUCTION_WITH_TWO_SIGNERS);
 
         // Simulate user typing into signer1
         form.setValue('accounts.testInstruction.signer1', PREFILLED_ADDRESS, { shouldDirty: true });

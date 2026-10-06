@@ -1,8 +1,10 @@
+// @vitest-environment jsdom
+
 import type { InstructionData } from '@entities/idl';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useInstructionForm } from '../use-instruction-form';
+import { renderInstructionForm } from './providers/__tests__/utils';
 import type { ExternalDependency } from './types';
 import { useFormPrefill } from './use-form-prefill';
 
@@ -189,14 +191,7 @@ describe('useFormPrefill', () => {
 });
 
 function setup() {
-    const instruction = createMockInstruction();
-    const { result } = renderHook(() =>
-        useInstructionForm({
-            instruction,
-            onSubmit: vi.fn(),
-        }),
-    );
-    return { form: result.current.form };
+    return { form: renderInstructionForm(createMockInstruction()).form };
 }
 
 function createMockInstruction(): InstructionData {

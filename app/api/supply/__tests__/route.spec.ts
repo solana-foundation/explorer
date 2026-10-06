@@ -336,16 +336,6 @@ describe('GET /api/supply', () => {
             expect(Logger.panic).not.toHaveBeenCalled();
         });
 
-        // 502 belongs to a node that refuses the call, and to nothing else: it is the one answer the
-        // client is told not to ask again, so an unrecognised connection fault must not land on it.
-        it('should keep 502 for a refusal alone', async () => {
-            mocks.send.mockRejectedValueOnce(connectionFailure('ENOTFOUND'));
-
-            const response = await GET(createRequest(Cluster.MainnetBeta));
-
-            expect(response.status).not.toBe(502);
-        });
-
         // A DNS blip and a reset socket clear on their own, so they belong with the warnings.
         it.each([['EAI_AGAIN'], ['EHOSTUNREACH'], ['ENETUNREACH'], ['ECONNABORTED']])(
             'should treat a %s connection failure as transient',

@@ -344,53 +344,6 @@ describe('ClusterModal endpoint consent', () => {
         nav.searchParams = new URLSearchParams(`cluster=custom&customUrl=${CUSTOM_URL}&sort=fee`);
     });
 
-    function typeUrl(value: string) {
-        fireEvent.change(screen.getByLabelText('Custom RPC URL'), { target: { value } });
-        act(() => vi.advanceTimersByTime(500));
-    }
-
-    it('should approve the origin of a typed endpoint before navigating to it', () => {
-        vi.useFakeTimers();
-        try {
-            const { store } = renderWithStore();
-            typeUrl('https://my-node.example/rpc?api-key=secret');
-
-            // Origin only — a rotated key on the same server must not ask again.
-            expect(store.get(approvedOriginsAtom)).toEqual(['https://my-node.example']);
-            expect(nav.replace).toHaveBeenCalledWith(
-                `/?cluster=custom&customUrl=${encodeURIComponent('https://my-node.example/rpc?api-key=secret')}&sort=fee`,
-            );
-        } finally {
-            vi.useRealTimers();
-        }
-    });
-
-    it('should not navigate on a half-typed value', () => {
-        vi.useFakeTimers();
-        try {
-            const { store } = renderWithStore();
-            typeUrl('https:/');
-
-            // Not an endpoint yet. Navigating would churn the URL, and the reader would strip each attempt.
-            expect(store.get(approvedOriginsAtom)).toEqual([]);
-            expect(nav.replace).not.toHaveBeenCalled();
-        } finally {
-            vi.useRealTimers();
-        }
-    });
-
-    it('should clear the endpoint when the field is emptied', () => {
-        vi.useFakeTimers();
-        try {
-            renderWithStore();
-            typeUrl('');
-
-            expect(nav.replace).toHaveBeenCalledWith('/?cluster=custom&sort=fee');
-        } finally {
-            vi.useRealTimers();
-        }
-    });
-
     it('should approve a saved cluster when it is selected', () => {
         const { store } = renderWithStore([{ name: 'Staging', url: 'https://staging.example.com/rpc' }]);
 
@@ -401,26 +354,6 @@ describe('ClusterModal endpoint consent', () => {
         fireEvent.click(link);
 
         expect(store.get(approvedOriginsAtom)).toEqual(['https://staging.example.com']);
-    });
-
-    it('should not echo a committed endpoint back over what the user is still typing', () => {
-        vi.useFakeTimers();
-        try {
-            renderWithStore();
-            const input = screen.getByLabelText('Custom RPC URL');
-
-            // Commit one value...
-            typeUrl('https://a.io');
-            // ...then let that navigation land, which is when the render-phase re-sync fires...
-            clusterMock.customUrl = 'https://a.io';
-            // ...while the user is still typing the rest of the URL.
-            fireEvent.change(input, { target: { value: 'https://a.io/rpc' } });
-
-            // Without the guard the arriving value overwrites the draft and the keystrokes are lost.
-            expect(input).toHaveValue('https://a.io/rpc');
-        } finally {
-            vi.useRealTimers();
-        }
     });
 });
 

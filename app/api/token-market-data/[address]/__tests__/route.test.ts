@@ -8,10 +8,6 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../route';
 
-vi.mock('@/app/shared/lib/logger', () => ({
-    Logger: { error: vi.fn(), panic: vi.fn(), warn: vi.fn() },
-}));
-
 const VALID_ADDRESS = 'B61SyRxF2b8JwSLZHgEUF6rtn6NUikkrK1EMEgP6nhXW';
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);

@@ -1,15 +1,13 @@
-import {
-    differenceInDays,
-    differenceInHours,
-    differenceInMinutes,
-    differenceInSeconds,
-    type Duration,
-    formatDistance,
-    formatDuration as formatDurationParts,
-    intervalToDuration,
-    type Locale,
-} from 'date-fns';
-import { enUS } from 'date-fns/locale';
+// Subpath imports: the `date-fns` and `date-fns/locale` barrels load every function and every locale.
+import type { Duration, Locale } from 'date-fns';
+import { differenceInDays } from 'date-fns/differenceInDays';
+import { differenceInHours } from 'date-fns/differenceInHours';
+import { differenceInMinutes } from 'date-fns/differenceInMinutes';
+import { differenceInSeconds } from 'date-fns/differenceInSeconds';
+import { formatDistance } from 'date-fns/formatDistance';
+import { formatDuration as formatDurationParts } from 'date-fns/formatDuration';
+import { intervalToDuration } from 'date-fns/intervalToDuration';
+import { enUS } from 'date-fns/locale/en-US';
 
 export function unixTimestampToMs(seconds: number): number {
     return seconds * 1000;

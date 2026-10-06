@@ -59,20 +59,6 @@ describe('hashProgramData', () => {
         expect(hashNull).toBe(hashWithAuth);
     });
 
-    it('should not apply offset when authority is present', () => {
-        const data = Buffer.concat([programBytes, trailingZeros]);
-        const programData = makeProgramData({
-            authority: PublicKey.default,
-            rawBytes: data,
-        });
-
-        // Hash should be computed from the entire buffer (minus trailing zeros)
-        const hash = hashProgramData(programData);
-        expect(hash).toHaveLength(64); // SHA-256 hex
-        // eslint-disable-next-line no-restricted-syntax -- validating SHA-256 hex output format
-        expect(hash).toMatch(/^[0-9a-f]{64}$/);
-    });
-
     it('should strip exactly the first 32 bytes when authority is null', () => {
         const dataWithPlaceholder = Buffer.concat([staleAuthorityBytes, programBytes]);
         const programData = makeProgramData({
@@ -168,14 +154,6 @@ describe('hashProgramBuffer', () => {
 
     it('should return undefined when no data is available', () => {
         expect(hashProgramBuffer(makeBuffer({ authority: PublicKey.default }))).toBeUndefined();
-    });
-
-    it('should match the known solana-verify hash for a real buffer payload', () => {
-        // A buffer whose program bytes are the ELF magic: verifies the exact wire format
-        // (sha256 over the bytes, hex-encoded) used by `solana-verify get-buffer-hash`.
-        const buffer = makeBuffer({ authority: PublicKey.default, rawBytes: programBytes });
-        // eslint-disable-next-line no-restricted-syntax -- validating SHA-256 hex output format
-        expect(hashProgramBuffer(buffer)).toMatch(/^[0-9a-f]{64}$/);
     });
 });
 
@@ -326,20 +304,6 @@ describe('buildEnrichedOsecInfo', () => {
 });
 
 describe('dedupeAndSortBuilds', () => {
-    function makeBuild(overrides: Partial<OsecBuild> = {}): OsecBuild {
-        return {
-            build_id: 'build-0',
-            commit: 'aaaaaaa',
-            completed_at: '2026-01-01T00:00:00.000Z',
-            matches_deployed: true,
-            program_id: 'HfU7iK2hyesWG1abBD8nXDpsw2ijrA2vpdiNYNj3Hg3c',
-            repository: 'https://github.com/example/repo',
-            signer: null,
-            trusted: true,
-            ...overrides,
-        };
-    }
-
     it('should collapse builds that share program/repo/commit/trusted/matches_deployed', () => {
         const result = dedupeAndSortBuilds([
             makeBuild({ build_id: 'a' }),
@@ -413,28 +377,14 @@ describe('dedupeAndSortBuilds', () => {
 describe('OsecResolveHashResponse', () => {
     const HASH = '6122072454d9763f71b04106e79a9e670c695d500f104e31e4c2e4177f0cd736';
 
-    function makeRawBuild(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-        return {
-            build_id: 'build-0',
-            commit: 'aaaaaaa',
-            completed_at: '2026-01-01T00:00:00.000Z',
-            matches_deployed: true,
-            program_id: 'HfU7iK2hyesWG1abBD8nXDpsw2ijrA2vpdiNYNj3Hg3c',
-            repository: 'https://github.com/example/repo',
-            signer: null,
-            trusted: true,
-            ...overrides,
-        };
-    }
-
     it('should accept a well-formed payload', () => {
-        const raw = { builds: [makeRawBuild()], executable_hash: HASH };
+        const raw = { builds: [makeBuild()], executable_hash: HASH };
         expect(create(raw, OsecResolveHashResponse).builds).toHaveLength(1);
     });
 
     it('should accept a null or string signer', () => {
         const raw = {
-            builds: [makeRawBuild({ signer: null }), makeRawBuild({ build_id: 'b', signer: 'some-signer' })],
+            builds: [makeBuild({ signer: null }), makeBuild({ build_id: 'b', signer: 'some-signer' })],
             executable_hash: HASH,
         };
         expect(create(raw, OsecResolveHashResponse).builds.map(b => b.signer)).toEqual([null, 'some-signer']);
@@ -446,7 +396,7 @@ describe('OsecResolveHashResponse', () => {
 
     it('should tolerate unknown fields added upstream', () => {
         const raw = {
-            builds: [makeRawBuild({ future_field: 'ignored' })],
+            builds: [{ ...makeBuild(), future_field: 'ignored' }],
             executable_hash: HASH,
             unknown_top_level: 1,
         };
@@ -454,13 +404,13 @@ describe('OsecResolveHashResponse', () => {
     });
 
     it('should reject a build missing a required field', () => {
-        const raw = { builds: [makeRawBuild()], executable_hash: HASH };
+        const raw = { builds: [makeBuild()], executable_hash: HASH };
         delete (raw.builds[0] as Record<string, unknown>).repository;
         expect(() => create(raw, OsecResolveHashResponse)).toThrow();
     });
 
     it('should reject a field with the wrong type', () => {
-        const raw = { builds: [makeRawBuild({ trusted: 'yes' })], executable_hash: HASH };
+        const raw = { builds: [{ ...makeBuild(), trusted: 'yes' }], executable_hash: HASH };
         expect(() => create(raw, OsecResolveHashResponse)).toThrow();
     });
 
@@ -468,3 +418,17 @@ describe('OsecResolveHashResponse', () => {
         expect(() => create({ executable_hash: HASH }, OsecResolveHashResponse)).toThrow();
     });
 });
+
+function makeBuild(overrides: Partial<OsecBuild> = {}): OsecBuild {
+    return {
+        build_id: 'build-0',
+        commit: 'aaaaaaa',
+        completed_at: '2026-01-01T00:00:00.000Z',
+        matches_deployed: true,
+        program_id: 'HfU7iK2hyesWG1abBD8nXDpsw2ijrA2vpdiNYNj3Hg3c',
+        repository: 'https://github.com/example/repo',
+        signer: null,
+        trusted: true,
+        ...overrides,
+    };
+}

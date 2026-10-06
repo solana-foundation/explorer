@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { toConnectableUrl } from '@entities/cluster';
 import { useCluster, useEpochInfo } from '@providers/cluster';
 import { renderHook } from '@testing-library/react';
@@ -18,6 +20,10 @@ vi.mock('@providers/cluster', () => ({
 vi.mock('swr', () => ({ default: vi.fn() }));
 
 const ctx = createSearchContext();
+
+beforeEach(() => {
+    vi.clearAllMocks();
+});
 
 describe('resolveProviders', () => {
     it('should return results from all providers', async () => {
@@ -43,43 +49,29 @@ describe('resolveProviders', () => {
         expect(results).toEqual([makeResult('Async', 'x')]);
     });
 
-    it('should skip rejected providers and log an error', async () => {
-        const errorSpy = vi.spyOn(Logger, 'error').mockImplementation(() => {});
-
+    it.each([
+        [
+            'rejected',
+            () => {
+                throw new Error('boom');
+            },
+        ],
+        ['async rejected', () => Promise.reject(new Error('boom'))],
+    ])('should skip %s providers and log an error', async (_, failingSearch) => {
         const providers = [
             makeProvider('Good', 'local', () => [makeResult('Good', 'g')]),
-            makeProvider('Bad', 'local', () => {
-                throw new Error('boom');
-            }),
+            makeProvider('Bad', 'local', failingSearch),
             makeProvider('AlsoGood', 'local', () => [makeResult('Also', 'a')]),
         ];
 
         const results = await resolveProviders(providers, 'q', ctx);
 
         expect(results).toEqual([makeResult('Good', 'g'), makeResult('Also', 'a')]);
-        expect(errorSpy).toHaveBeenCalledOnce();
-        expect(errorSpy).toHaveBeenCalledWith(
+        expect(vi.mocked(Logger.error)).toHaveBeenCalledOnce();
+        expect(vi.mocked(Logger.error)).toHaveBeenCalledWith(
             expect.objectContaining({ cause: expect.any(Error), message: expect.stringContaining('Bad') }),
             { sentry: true },
         );
-
-        errorSpy.mockRestore();
-    });
-
-    it('should skip async rejected providers', async () => {
-        const errorSpy = vi.spyOn(Logger, 'error').mockImplementation(() => {});
-
-        const providers = [
-            makeProvider('Broken', 'remote', () => Promise.reject(new Error('network'))),
-            makeProvider('OK', 'remote', async () => [makeResult('OK', 'ok')]),
-        ];
-
-        const results = await resolveProviders(providers, 'q', ctx);
-
-        expect(results).toEqual([makeResult('OK', 'ok')]);
-        expect(errorSpy).toHaveBeenCalledOnce();
-
-        errorSpy.mockRestore();
     });
 
     it('should pass query and context to providers', async () => {
@@ -162,49 +154,31 @@ describe('search', () => {
     });
 
     it('should start remote concurrently with local', async () => {
-        const order: string[] = [];
-
+        let resolveLocal: (results: SearchOptions[]) => void = () => {};
+        const remoteSearch = vi.fn(() => [makeResult('Remote', 'r')]);
         const registry = makeRegistry({
             local: [
-                makeProvider('L', 'local', async () => {
-                    order.push('local-start');
-                    await new Promise(r => setTimeout(r, 50));
-                    order.push('local-end');
-                    return [makeResult('Local', 'l')];
-                }),
+                makeProvider(
+                    'L',
+                    'local',
+                    () =>
+                        new Promise<SearchOptions[]>(resolve => {
+                            resolveLocal = resolve;
+                        }),
+                ),
             ],
-            remote: [
-                makeProvider('R', 'remote', async () => {
-                    order.push('remote-start');
-                    await new Promise(r => setTimeout(r, 10));
-                    order.push('remote-end');
-                    return [makeResult('Remote', 'r')];
-                }),
-            ],
+            remote: [makeProvider('R', 'remote', remoteSearch)],
         });
 
-        await search(registry, 'q', ctx);
+        const pending = search(registry, 'q', ctx);
 
         // Remote should start before local finishes
-        expect(order.indexOf('remote-start')).toBeLessThan(order.indexOf('local-end'));
-    });
-
-    it('should preserve order: local, fallback, remote', async () => {
-        const registry = makeRegistry({
-            fallback: [makeProvider('F', 'fallback', () => [makeResult('Fallback', 'f')])],
-            local: [makeProvider('L', 'local', () => [])],
-            remote: [makeProvider('R', 'remote', () => [makeResult('Remote', 'r')])],
-        });
-
-        const results = await search(registry, 'q', ctx);
-        const labels = results.map(r => r.label);
-
-        expect(labels).toEqual(['Fallback', 'Remote']);
+        expect(remoteSearch).toHaveBeenCalledOnce();
+        resolveLocal([makeResult('Local', 'l')]);
+        await expect(pending).resolves.toEqual([makeResult('Local', 'l'), makeResult('Remote', 'r')]);
     });
 
     it('should handle all providers failing gracefully', async () => {
-        const errorSpy = vi.spyOn(Logger, 'error').mockImplementation(() => {});
-
         const registry = makeRegistry({
             fallback: [
                 makeProvider('F', 'fallback', () => {
@@ -222,9 +196,7 @@ describe('search', () => {
         const results = await search(registry, 'q', ctx);
 
         expect(results).toEqual([]);
-        expect(errorSpy).toHaveBeenCalledTimes(3);
-
-        errorSpy.mockRestore();
+        expect(vi.mocked(Logger.error)).toHaveBeenCalledTimes(3);
     });
 });
 
@@ -241,7 +213,6 @@ describe('useSearch', () => {
     };
 
     beforeEach(() => {
-        vi.clearAllMocks();
         vi.mocked(useCluster).mockReturnValue(clusterState);
         vi.mocked(useEpochInfo).mockReturnValue(undefined);
     });

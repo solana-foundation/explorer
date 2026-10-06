@@ -13,8 +13,11 @@ vi.mock('@entities/cluster', () => ({
 
 const SENTRY_DSN_FIXTURE = 'https://examplePublicKey@o0.ingest.sentry.io/0';
 
+let user: ReturnType<typeof userEvent.setup>;
+
 describe('FeedbackWidget', () => {
     beforeEach(() => {
+        user = userEvent.setup({ delay: null });
         vi.mocked(sendFeedback).mockClear();
         vi.mocked(sendFeedback).mockResolvedValue('test-event-id');
         vi.stubEnv('NEXT_PUBLIC_FEEDBACK_ENABLED', 'true');
@@ -53,10 +56,10 @@ describe('FeedbackWidget', () => {
         render(<FeedbackWidget />);
         await openForm();
 
-        await userEvent.click(screen.getByRole('radio', { name: '4 of 5 stars' }));
-        await userEvent.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Great explorer!');
-        await userEvent.type(screen.getByRole('textbox', { name: 'X handle (optional)' }), '@fren');
-        await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+        await user.click(screen.getByRole('radio', { name: '4 of 5 stars' }));
+        await user.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Great explorer!');
+        await user.type(screen.getByRole('textbox', { name: 'X handle (optional)' }), '@fren');
+        await user.click(screen.getByRole('button', { name: 'Submit' }));
 
         expect(sendFeedback).toHaveBeenCalledWith({
             message: 'Great explorer!',
@@ -72,14 +75,14 @@ describe('FeedbackWidget', () => {
         render(<FeedbackWidget />);
         await openForm();
 
-        await userEvent.click(screen.getByRole('radio', { name: '5 of 5 stars' }));
-        await userEvent.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Rated once');
-        await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+        await user.click(screen.getByRole('radio', { name: '5 of 5 stars' }));
+        await user.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Rated once');
+        await user.click(screen.getByRole('button', { name: 'Submit' }));
         await waitFor(() => expect(screen.queryByRole('heading', { name: 'Give feedback' })).toBeNull());
 
         await openForm();
-        await userEvent.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Second try');
-        await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+        await user.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Second try');
+        await user.click(screen.getByRole('button', { name: 'Submit' }));
 
         await waitFor(() => expect(sendFeedback).toHaveBeenCalledTimes(2));
         const resubmission = vi.mocked(sendFeedback).mock.calls[1][0];
@@ -93,8 +96,8 @@ describe('FeedbackWidget', () => {
         render(<FeedbackWidget />);
         await openForm();
 
-        await userEvent.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Lost feedback');
-        await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+        await user.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Lost feedback');
+        await user.click(screen.getByRole('button', { name: 'Submit' }));
 
         await waitFor(() => expect(sendFeedback).toHaveBeenCalledOnce());
         expect(screen.getByRole('heading', { name: 'Give feedback' })).toBeInTheDocument();
@@ -106,7 +109,7 @@ describe('FeedbackWidget', () => {
         render(<FeedbackWidget />);
         await openForm();
 
-        await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+        await user.click(screen.getByRole('button', { name: 'Close' }));
 
         expect(sendFeedback).not.toHaveBeenCalled();
         expect(screen.queryByRole('heading', { name: 'Give feedback' })).toBeNull();
@@ -114,11 +117,11 @@ describe('FeedbackWidget', () => {
 });
 
 async function openMenu() {
-    await userEvent.click(await screen.findByRole('button', { name: 'Feedback' }));
+    await user.click(await screen.findByRole('button', { name: 'Feedback' }));
 }
 
 async function openForm() {
     await openMenu();
-    await userEvent.click(await screen.findByText('Share feedback'));
+    await user.click(await screen.findByText('Share feedback'));
     await screen.findByRole('heading', { name: 'Give feedback' });
 }

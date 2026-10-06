@@ -65,10 +65,6 @@ export const triggerDownload = async (data: string, filename: string, options?: 
         throw new Error('Invalid data: must be a non-empty string');
     }
 
-    if (!isValidBase64(data)) {
-        throw new Error('Invalid data: not a valid base64 string');
-    }
-
     const type = options?.type;
     const maxSize = options?.maxSize ?? DEFAULT_MAX_SIZE;
 
@@ -81,6 +77,10 @@ export const triggerDownload = async (data: string, filename: string, options?: 
                 maxSize,
             )})`,
         );
+    }
+
+    if (!isValidBase64(data)) {
+        throw new Error('Invalid data: not a valid base64 string');
     }
 
     const decodedData = fromBase64(data);

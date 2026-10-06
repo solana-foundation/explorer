@@ -1,12 +1,19 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { Cluster, clusterName, clusterSelection, ClusterStatus } from '@utils/cluster';
-import { type ReactNode } from 'react';
-import { SWRConfig, type SWRConfiguration } from 'swr';
+import { act, renderHook } from '@testing-library/react';
+import { Cluster, ClusterStatus } from '@utils/cluster';
+import { type SWRConfiguration } from 'swr';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Imported from their own modules because this file mocks the entity barrel.
+import {
+    type ClusterContext,
+    clusterContext,
+    FAST_RETRY,
+    refocusTab,
+    swrWrapper,
+    UNTHROTTLED_FOCUS,
+    waitForHook,
+} from '@/app/__tests__/swr-hook';
+// Imported from its own module because this file mocks the entity barrel.
 import { toConnectableUrl } from '@/app/entities/cluster/lib/connectable-url';
-import type { useCluster } from '@/app/entities/cluster/model/use-cluster';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { type AgGenesisCertAnswer } from '../../api/fetch-ag-genesis-cert';
@@ -17,16 +24,10 @@ const TESTNET_URL = 'https://api.testnet.solana.com';
 
 const CERT = { blockId: 'HnvmbDUEbrmuj3mYAA1EKGGzpZRuFRgMRPwtsgGFadmn', slot: 460_012_345n };
 
-type SwrOverrides = SWRConfiguration & { provider?: () => Map<unknown, unknown> };
-
 const mocks = vi.hoisted(() => ({
     cluster: {} as ClusterContext,
     fetchAgGenesisCert: vi.fn(),
 }));
-
-// The real return type, not a hand-written stand-in. A weaker stand-in would let the hook read a
-// field the provider no longer publishes, and would type the endpoint as an unbranded string.
-type ClusterContext = ReturnType<typeof useCluster>;
 
 vi.mock('@entities/cluster', () => ({ useCluster: () => mocks.cluster }));
 vi.mock('../../api/fetch-ag-genesis-cert', () => ({ fetchAgGenesisCert: mocks.fetchAgGenesisCert }));
@@ -34,10 +35,10 @@ vi.mock('../../api/fetch-ag-genesis-cert', () => ({ fetchAgGenesisCert: mocks.fe
 describe('useAlpenglowStatus', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.cluster = clusterContext({ connectableUrl: MAINNET_URL });
+        mocks.cluster = connectedTo(Cluster.MainnetBeta, MAINNET_URL);
         // `shouldAdvanceTime` keeps `waitFor` and the fetcher's promises settling while this test
         // controls SWR's polling timer.
-        vi.useFakeTimers({ shouldAdvanceTime: true });
+        vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
     });
 
     afterEach(() => vi.useRealTimers());
@@ -49,7 +50,7 @@ describe('useAlpenglowStatus', () => {
     });
 
     it('should wait rather than ask while a custom URL is still unsettled', () => {
-        mocks.cluster = clusterContext({ connectableUrl: undefined });
+        mocks.cluster = { ...connectedTo(Cluster.MainnetBeta, MAINNET_URL), connectableUrl: undefined };
 
         expect(renderStatus().result.current).toEqual({ kind: 'loading' });
         expect(mocks.fetchAgGenesisCert).not.toHaveBeenCalled();
@@ -60,7 +61,7 @@ describe('useAlpenglowStatus', () => {
 
         renderStatus();
 
-        await waitFor(() => expect(mocks.fetchAgGenesisCert).toHaveBeenCalledWith(toConnectableUrl(MAINNET_URL)));
+        await waitForHook(() => expect(mocks.fetchAgGenesisCert).toHaveBeenCalledWith(toConnectableUrl(MAINNET_URL)));
     });
 
     it('should report a certificate as a completed migration', async () => {
@@ -68,7 +69,7 @@ describe('useAlpenglowStatus', () => {
 
         const { result } = renderStatus();
 
-        await waitFor(() => expect(result.current).toEqual({ cert: CERT, kind: 'migrated' }));
+        await waitForHook(() => expect(result.current).toEqual({ cert: CERT, kind: 'migrated' }));
     });
 
     it('should report an absent certificate as pending', async () => {
@@ -76,29 +77,25 @@ describe('useAlpenglowStatus', () => {
 
         const { result } = renderStatus();
 
-        await waitFor(() => expect(result.current).toEqual({ kind: 'pending' }));
+        await waitForHook(() => expect(result.current).toEqual({ kind: 'pending' }));
     });
 
-    it('should report a node without the method as unavailable', async () => {
-        answerWith({ kind: 'unsupported' });
+    it.each([
+        ['a node without the method', { kind: 'unsupported' } as const],
+        ['an endpoint that refuses the method', { kind: 'refused' } as const],
+        ['a result that is not a certificate', { kind: 'unreadable' } as const],
+    ])('should report %s as unavailable', async (_label, answer) => {
+        answerWith(answer);
 
         const { result } = renderStatus();
 
-        await waitFor(() => expect(result.current).toEqual({ kind: 'unavailable' }));
-    });
-
-    it('should report an endpoint that refuses the method as unavailable', async () => {
-        answerWith({ kind: 'refused' });
-
-        const { result } = renderStatus();
-
-        await waitFor(() => expect(result.current).toEqual({ kind: 'unavailable' }));
+        await waitForHook(() => expect(result.current).toEqual({ kind: 'unavailable' }));
     });
 
     it('should not ask a refusing endpoint again', async () => {
         answerWith({ kind: 'refused' });
 
-        await renderAndSettle({ dedupingInterval: 0, focusThrottleInterval: 0 });
+        await renderAndSettle(UNTHROTTLED_FOCUS);
         await advanceBy(POLL_INTERVAL_MS * 3);
         await refocusTab();
         await settle();
@@ -106,31 +103,15 @@ describe('useAlpenglowStatus', () => {
         expect(mocks.fetchAgGenesisCert).toHaveBeenCalledTimes(1);
     });
 
-    it('should report a result that is not a certificate as unavailable', async () => {
-        answerWith({ kind: 'unreadable' });
-
-        const { result } = renderStatus();
-
-        await waitFor(() => expect(result.current).toEqual({ kind: 'unavailable' }));
-    });
-
-    it('should report a failed lookup as unavailable', async () => {
-        mocks.fetchAgGenesisCert.mockRejectedValue(new Error('node is unhealthy'));
-
-        const { result } = renderStatus({ errorRetryCount: 0 });
-
-        await waitFor(() => expect(result.current).toEqual({ kind: 'unavailable' }));
-    });
-
     // An unkeyed fetch would leave the previous cluster's figures on screen through a switch. The
     // endpoint is in the key, so the new cluster starts from nothing.
     it('should not show one cluster answer while another is still loading', async () => {
         answerWith({ cert: CERT, kind: 'present' });
-        const { result, rerender } = renderHook(() => useAlpenglowStatus(), { wrapper: swrWrapper() });
-        await waitFor(() => expect(result.current.kind).toBe('migrated'));
+        const { result, rerender } = renderStatus();
+        await waitForHook(() => expect(result.current.kind).toBe('migrated'));
 
         mocks.fetchAgGenesisCert.mockReturnValue(new Promise(() => {}));
-        mocks.cluster = clusterContext({ cluster: Cluster.Testnet, connectableUrl: TESTNET_URL, url: TESTNET_URL });
+        mocks.cluster = connectedTo(Cluster.Testnet, TESTNET_URL);
         rerender();
 
         expect(result.current).toEqual({ kind: 'loading' });
@@ -142,7 +123,7 @@ describe('useAlpenglowStatus', () => {
         mocks.fetchAgGenesisCert.mockRejectedValue(new Error('node is unhealthy'));
 
         const { result } = renderStatus({ dedupingInterval: 0 });
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
+        await waitForHook(() => expect(result.current.kind).toBe('unavailable'));
         await advanceBy(60_000);
 
         expect(mocks.fetchAgGenesisCert).toHaveBeenCalledTimes(ERROR_RETRY_COUNT + 1);
@@ -152,7 +133,7 @@ describe('useAlpenglowStatus', () => {
     it('should keep showing pending when a poll fails', async () => {
         mocks.fetchAgGenesisCert.mockResolvedValueOnce({ kind: 'absent' });
         const { result } = renderStatus({ dedupingInterval: 0 });
-        await waitFor(() => expect(result.current.kind).toBe('pending'));
+        await waitForHook(() => expect(result.current.kind).toBe('pending'));
 
         mocks.fetchAgGenesisCert.mockRejectedValue(new Error('poll failed'));
         await advanceBy(POLL_INTERVAL_MS + 1000);
@@ -168,11 +149,11 @@ describe('useAlpenglowStatus', () => {
         const cache = new Map();
         const session = { dedupingInterval: 0, provider: () => cache };
         const view = renderStatus(session);
-        await waitFor(() => expect(view.result.current.kind).toBe('pending'));
+        await waitForHook(() => expect(view.result.current.kind).toBe('pending'));
         view.unmount();
 
         const { result } = renderStatus(session);
-        await waitFor(() => expect(result.current.kind).toBe('pending'));
+        await waitForHook(() => expect(result.current.kind).toBe('pending'));
         const before = mocks.fetchAgGenesisCert.mock.calls.length;
         await advanceBy(POLL_INTERVAL_MS + 1000);
 
@@ -180,12 +161,12 @@ describe('useAlpenglowStatus', () => {
     });
 
     // This fires once per visitor with no cache in front of it, so it logs to the console.
-    it('should log a failed lookup without reporting it to Sentry', async () => {
+    it('should report a failed lookup as unavailable, and log it without reporting it to Sentry', async () => {
         mocks.fetchAgGenesisCert.mockRejectedValue(new Error('node is unhealthy'));
 
         const { result } = renderStatus({ errorRetryCount: 0 });
 
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
+        await waitForHook(() => expect(result.current).toEqual({ kind: 'unavailable' }));
         expect(Logger.warn).toHaveBeenCalledWith(expect.stringContaining('[alpenglow]'), expect.anything());
         expect(Logger.error).not.toHaveBeenCalled();
     });
@@ -217,7 +198,7 @@ describe('useAlpenglowStatus', () => {
     ])('should not ask again on refocus once %s', async (_label, answer) => {
         answerWith(answer);
 
-        await renderAndSettle({ dedupingInterval: 0, focusThrottleInterval: 0 });
+        await renderAndSettle(UNTHROTTLED_FOCUS);
         await refocusTab();
         await settle();
 
@@ -235,22 +216,15 @@ describe('useAlpenglowStatus', () => {
     });
 });
 
-async function refocusTab() {
-    await act(async () => {
-        window.dispatchEvent(new Event('focus'));
-        document.dispatchEvent(new Event('visibilitychange'));
-    });
-}
-
 /** The wait is the assertion: checking straight after the event passes either way. */
 async function settle() {
     await act(() => vi.advanceTimersByTimeAsync(50));
 }
 
 /** Renders and waits for the first answer, with deduping off so a poll is free to reach the fetcher. */
-async function renderAndSettle(overrides: SwrOverrides = { dedupingInterval: 0 }) {
+async function renderAndSettle(overrides: SWRConfiguration = { dedupingInterval: 0 }) {
     const view = renderStatus(overrides);
-    await waitFor(() => expect(view.result.current.kind).not.toBe('loading'));
+    await waitForHook(() => expect(view.result.current.kind).not.toBe('loading'));
     return view;
 }
 
@@ -262,35 +236,10 @@ function answerWith(answer: AgGenesisCertAnswer) {
     mocks.fetchAgGenesisCert.mockResolvedValue(answer);
 }
 
-function renderStatus(overrides: SwrOverrides = {}) {
-    return renderHook(() => useAlpenglowStatus(), { wrapper: swrWrapper(overrides) });
+function renderStatus(overrides: SWRConfiguration = {}) {
+    return renderHook(() => useAlpenglowStatus(), { wrapper: swrWrapper({ ...FAST_RETRY, ...overrides }) });
 }
 
-/** A cache per test, so one test's pending promise cannot satisfy the next. Retries stay fast. */
-function swrWrapper(overrides: SwrOverrides = {}) {
-    return function Wrapper({ children }: { children: ReactNode }) {
-        return (
-            <SWRConfig value={{ errorRetryInterval: 1, provider: () => new Map(), ...overrides }}>{children}</SWRConfig>
-        );
-    };
-}
-
-function clusterContext({
-    cluster = Cluster.MainnetBeta,
-    url = MAINNET_URL,
-    connectableUrl,
-}: {
-    cluster?: Cluster;
-    url?: string;
-    connectableUrl: string | undefined;
-}): ClusterContext {
-    const selection = clusterSelection(cluster, url);
-    return {
-        ...selection,
-        connectableUrl: connectableUrl === undefined ? undefined : toConnectableUrl(connectableUrl),
-        name: clusterName(cluster),
-        selection,
-        status: ClusterStatus.Connected,
-        url,
-    };
+function connectedTo(cluster: Cluster, url: string) {
+    return clusterContext({ cluster, connectableUrl: url, status: ClusterStatus.Connected, url });
 }

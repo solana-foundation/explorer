@@ -1,26 +1,13 @@
-import {
-    type InstructionNode,
-    type InstructionSurface,
-    InstructionSurfaceProvider,
-    TxInstructionSurface,
-} from '@entities/instruction-card';
+import { gen } from '@__fixtures__/gen';
+import { type InstructionNode, type InstructionSurface, InstructionSurfaceProvider } from '@entities/instruction-card';
 import { PriceType, PYTH_INSTRUCTIONS, PYTH_ORACLE_PROGRAM_IDS, TradingStatus } from '@explorer/decoder-pyth';
 import { address } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(() => ({ push: vi.fn() })),
-    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
-}));
-
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
-import { TransactionsProvider } from '@/app/providers/transactions';
+import { type CardRow, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
 
 import { AddMappingDetailsCard } from '../instructions/AddMappingDetailsCard';
 import { AddPriceDetailsCard } from '../instructions/AddPriceDetailsCard';
@@ -33,14 +20,16 @@ import { SetMinPublishersDetailsCard } from '../instructions/SetMinPublishersDet
 import { UpdatePriceDetailsCard, UpdatePriceNoFailOnErrorDetailsCard } from '../instructions/UpdatePriceDetailsCards';
 import { UpdateProductDetailsCard } from '../instructions/UpdateProductDetailsCard';
 
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
+
 const A = {
-    funding: 'FagABcRBhZH27JDtu6A1Jo9woXyoznP28QujLkxkN9Hj',
-    mapping: '7txXZZD6Um59YoLMF7XUNimbMjsqsWhc7g2EniiTrmp1',
-    nextMapping: 'GgU1RSCbCTNfjPqBGnR7NBDZoLQwB7oEjnHqzGtcCLBH',
-    price: '5rATVSqZjaHzMqSJmnbEQNmSJhaKMwsA7Zx2KfBWZBS4',
-    product: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
-    publisher: '4vJ9JU1bJJE96FWSJKvHsmmFADCg4gpZQff4P3bkLKi',
-    signer: '3EbFtRfKRMTrhPrRQjxbfWCB6NUyTQxwsWTKQFVKgNbb',
+    funding: gen.address(1),
+    mapping: gen.address(2),
+    nextMapping: gen.address(3),
+    price: gen.address(4),
+    product: gen.address(5),
+    publisher: gen.address(6),
+    signer: gen.address(7),
 } as const;
 
 const key = (base58: string) => address(base58);
@@ -70,17 +59,14 @@ const PRICE_UPDATE_INFO = {
     status: TradingStatus.Trading,
 };
 
-/** Each row as `[label, value]`. An address row carries the untruncated address, not the shortened text. */
-type Row = [string, string];
-
-const PROGRAM_ROW: Row = ['Program', PROGRAM];
+const PROGRAM_ROW: CardRow = ['Program', PROGRAM];
 
 const ATTRIBUTES_JSON = '{\n  "asset_type": "Crypto",\n  "symbol": "BTC/USD"\n}';
 
 /** Publisher and price-update rows repeat across the pairs of cards that share a payload. */
-const PUBLISHER_ROWS: Row[] = [PROGRAM_ROW, ['Price Account', A.price], ['Publisher', A.publisher]];
+const PUBLISHER_ROWS: CardRow[] = [PROGRAM_ROW, ['Price Account', A.price], ['Publisher', A.publisher]];
 
-const PRICE_UPDATE_ROWS: Row[] = [
+const PRICE_UPDATE_ROWS: CardRow[] = [
     PROGRAM_ROW,
     ['Publisher', A.publisher],
     ['Price Account', A.price],
@@ -90,7 +76,7 @@ const PRICE_UPDATE_ROWS: Row[] = [
     ['Publish Slot', '170640000'],
 ];
 
-const CASES: Array<{ card: React.ReactElement; rows: Row[]; title: string }> = [
+const CASES: Array<{ card: React.ReactElement; rows: CardRow[]; title: string }> = [
     {
         card: (
             <InitMappingDetailsCard
@@ -249,11 +235,11 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; title: string }> = [
 describe('instruction-program-pyth cards', () => {
     /** Pins each card's rows: label, order, count, and the value every row resolves to. */
     it.each(CASES)('should render the rows of $title', async ({ card, rows, title }) => {
-        renderCard(card);
+        renderTxCard(card);
 
         // The cluster provider finishes an async fetch after mount, so assert inside waitFor.
         await waitFor(() => {
-            expect(readRows()).toEqual(rows);
+            expect(readCardRows()).toEqual(rows);
         });
 
         expect(screen.getByText(title)).toBeInTheDocument();
@@ -267,7 +253,7 @@ describe('instruction-program-pyth cards', () => {
 
     // A foreign program id proves the row reads the node rather than a Pyth constant.
     it('should render the program row from the node', async () => {
-        renderCard(
+        renderTxCard(
             <AggregatePriceDetailsCard
                 node={{ ...node, programId: new PublicKey(A.funding) }}
                 info={{ fundingPubkey: key(A.funding), pricePubkey: key(A.price) }}
@@ -275,7 +261,7 @@ describe('instruction-program-pyth cards', () => {
         );
 
         await waitFor(() => {
-            expect(readRows()[0]).toEqual(['Program', A.funding]);
+            expect(readCardRows()[0]).toEqual(['Program', A.funding]);
         });
     });
 
@@ -297,41 +283,3 @@ const STUB_SURFACE: InstructionSurface = {
     result: { err: null },
     showProgramField: false,
 };
-
-function renderCard(card: React.ReactElement) {
-    return render(
-        <ScrollAnchorProvider>
-            <ClusterProvider>
-                <TransactionsProvider>
-                    <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>{card}</TxInstructionSurface>
-                    </AccountsProvider>
-                </TransactionsProvider>
-            </ClusterProvider>
-        </ScrollAnchorProvider>,
-    );
-}
-
-/**
- * The card's own rows in render order, so the result pins row order as well as content.
- * Addresses are read from `data-address`, which carries the untruncated value the display
- * shortens; every other kind falls back to its rendered text, so a wrong value fails rather
- * than reading as an empty cell.
- */
-function readRows(): Row[] {
-    const card = screen.getAllByRole('table')[0];
-    return within(card)
-        .getAllByRole('row')
-        .filter(row => row.closest('table') === card)
-        .map(row => {
-            const cells = within(row).getAllByRole('cell');
-            return [cells[0].textContent ?? '', readAddresses(cells[1]) ?? cells[1]?.textContent ?? ''];
-        });
-}
-
-/** Comma-joined so a multi-address cell pins every entry and their order, not just the first. */
-function readAddresses(cell: HTMLElement | undefined): string | undefined {
-    // eslint-disable-next-line testing-library/no-node-access -- an address has no role to query by
-    const addresses = [...(cell?.querySelectorAll('[data-address]') ?? [])].map(el => el.getAttribute('data-address'));
-    return addresses.length > 0 ? addresses.join(',') : undefined;
-}

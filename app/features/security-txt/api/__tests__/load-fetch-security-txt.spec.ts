@@ -14,12 +14,6 @@ vi.mock('@solana/security-txt', () => ({
     fetchSecurityTxt: mocks.fetchSecurityTxt,
 }));
 
-// The fetchers ignore the rpc handle (it's mocked), so a stub is enough; keep the real `address`.
-vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    return { ...actual, createSolanaRpc: vi.fn(() => ({})) };
-});
-
 describe('fetchSecurityTxtClient', () => {
     beforeEach(() => vi.clearAllMocks());
     afterEach(() => vi.restoreAllMocks());

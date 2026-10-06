@@ -1,12 +1,19 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { Cluster, clusterName, clusterSelection, ClusterStatus } from '@utils/cluster';
-import { type ReactNode } from 'react';
-import { SWRConfig, type SWRConfiguration, useSWRConfig } from 'swr';
+import { act, renderHook } from '@testing-library/react';
+import { Cluster, ClusterStatus } from '@utils/cluster';
+import { type SWRConfiguration } from 'swr';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Both from their own modules rather than the entity barrel, which this file mocks.
-import { toConnectableUrl } from '@/app/entities/cluster/lib/connectable-url';
-import type { useCluster } from '@/app/entities/cluster/model/use-cluster';
+import {
+    type ClusterContext,
+    clusterContext,
+    FAST_RETRY,
+    refocusTab,
+    renderHookWithRevalidate,
+    settleRetries,
+    swrWrapper,
+    UNTHROTTLED_FOCUS,
+    waitForHook,
+} from '@/app/__tests__/swr-hook';
 import { Logger } from '@/app/shared/lib/logger';
 import { UPSTREAM_TIMEOUT_MS } from '@/app/shared/lib/timeouts';
 
@@ -15,43 +22,11 @@ import { totalStake, useVoteAccounts } from '../vote-accounts';
 const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
 const DEVNET_URL = 'https://api.devnet.solana.com';
 
-/** Long enough for a retry or a revalidation to land, so its absence is what the count proves. */
-const RETRY_SETTLE_MS = 50;
-
-type SwrOverrides = SWRConfiguration & { provider?: () => Map<unknown, unknown> };
-
 const mocks = vi.hoisted(() => ({
     cluster: {} as ClusterContext,
     getRpc: vi.fn(),
     getVoteAccounts: vi.fn(),
 }));
-
-// The real return type, not a hand-written stand-in: a stand-in weaker than the context lets the hook
-// read a field the provider no longer publishes, and types the endpoint as the plain string the brand
-// exists to refuse.
-type ClusterContext = ReturnType<typeof useCluster>;
-
-function clusterContext({
-    cluster,
-    connectableUrl,
-    status,
-    url,
-}: {
-    cluster: Cluster;
-    connectableUrl: string | undefined;
-    status: ClusterStatus;
-    url: string;
-}): ClusterContext {
-    const selection = clusterSelection(cluster, url);
-    return {
-        ...selection,
-        connectableUrl: connectableUrl === undefined ? undefined : toConnectableUrl(connectableUrl),
-        name: clusterName(cluster),
-        selection,
-        status,
-        url,
-    };
-}
 
 /** A connected endpoint the visitor has settled on. */
 function connectedTo(cluster: Cluster, url: string) {
@@ -91,16 +66,8 @@ describe('useVoteAccounts', () => {
     it('should report the activated stake of current and delinquent accounts', async () => {
         const { result } = renderVoteAccounts();
 
-        await waitFor(() => expect(result.current).toEqual({ kind: 'ready', stake: STAKE }));
+        await waitForHook(() => expect(result.current).toEqual({ kind: 'ready', stake: STAKE }));
         expect(mocks.getVoteAccounts).toHaveBeenCalledWith({ commitment: 'confirmed' });
-    });
-
-    it('should report a failure, so a consumer can tell "not coming" from "on its way"', async () => {
-        mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
-
-        const { result } = renderVoteAccounts();
-
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
     });
 
     // No server sees this one, so nobody hears about it unless we say so.
@@ -108,7 +75,8 @@ describe('useVoteAccounts', () => {
         mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
 
         const { result } = renderVoteAccounts();
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
+        // `failed`, so a consumer can tell "not coming" from "on its way".
+        await waitForHook(() => expect(result.current.kind).toBe('failed'));
 
         // Under `sentryExtras`, because this fires from the browser: console output is suppressed there,
         // and context outside `sentryExtras` never reaches Sentry, so a plain field goes nowhere at all.
@@ -119,16 +87,8 @@ describe('useVoteAccounts', () => {
                 sentryExtras: expect.objectContaining({ cluster: Cluster.MainnetBeta, rpcError: 'rpc down' }),
             }),
         );
-    });
-
-    // One slow cluster must not be able to set the *error* rate: this fires from the browser, once per
-    // visitor, with no CDN in front of it and no rate limit behind it.
-    it('should report at warning level, not error level', async () => {
-        mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
-
-        const { result } = renderVoteAccounts();
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
-
+        // One slow cluster must not be able to set the *error* rate: this fires from the browser, once per
+        // visitor, with no CDN in front of it and no rate limit behind it.
         expect(Logger.error).not.toHaveBeenCalled();
     });
 
@@ -141,7 +101,7 @@ describe('useVoteAccounts', () => {
 
         const { result } = renderVoteAccounts();
 
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
         expect(send).toHaveBeenCalledWith({ abortSignal: expect.any(AbortSignal) });
         expect(timeout).toHaveBeenCalledWith(UPSTREAM_TIMEOUT_MS);
     });
@@ -151,7 +111,7 @@ describe('useVoteAccounts', () => {
         mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
 
         const { result } = renderVoteAccounts();
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
+        await waitForHook(() => expect(result.current.kind).toBe('failed'));
 
         expect(Logger.warn).not.toHaveBeenCalled();
         expect(Logger.error).not.toHaveBeenCalled();
@@ -163,7 +123,7 @@ describe('useVoteAccounts', () => {
 
         const { result } = renderVoteAccounts();
 
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
+        await waitForHook(() => expect(result.current.kind).toBe('failed'));
         expect(mocks.getRpc).toHaveBeenCalledWith(MAINNET_URL);
     });
 
@@ -185,7 +145,7 @@ describe('useVoteAccounts', () => {
 
     it('should drop the previous cluster figures when the cluster changes', async () => {
         const { rerender, result } = renderVoteAccounts();
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
 
         // The next cluster never answers, so anything carried over would surface here.
         mocks.getVoteAccounts.mockReturnValue({ send: () => new Promise(() => {}) });
@@ -193,25 +153,25 @@ describe('useVoteAccounts', () => {
         rerender();
 
         expect(result.current).toEqual({ kind: 'loading' });
-        await waitFor(() => expect(mocks.getRpc).toHaveBeenCalledWith(DEVNET_URL));
+        await waitForHook(() => expect(mocks.getRpc).toHaveBeenCalledWith(DEVNET_URL));
     });
 
     // The same cluster repointed at a local validator: the cluster half of the key does not move, so only
     // the endpoint half can tell the two requests apart.
     it('should ask again when only the endpoint changes', async () => {
         const { rerender, result } = renderVoteAccounts();
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
 
         mocks.cluster = connectedTo(Cluster.MainnetBeta, 'http://localhost:8899');
         rerender();
 
-        await waitFor(() => expect(mocks.getRpc).toHaveBeenCalledWith('http://localhost:8899'));
+        await waitForHook(() => expect(mocks.getRpc).toHaveBeenCalledWith('http://localhost:8899'));
     });
 
     it('should keep figures already in hand when a revalidation fails', async () => {
         // A failed revalidation arrives alongside the data already held.
-        const { result } = renderVoteAccountsWithRevalidate();
-        await waitFor(() => expect(result.current.state.kind).toBe('ready'));
+        const { result } = renderHookWithRevalidate(() => useVoteAccounts(), FAST_RETRY);
+        await waitForHook(() => expect(result.current.state.kind).toBe('ready'));
 
         mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
         await act(async () => {
@@ -228,14 +188,14 @@ describe('useVoteAccounts', () => {
         mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
 
         const { result } = renderVoteAccounts();
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
+        await waitForHook(() => expect(result.current.kind).toBe('failed'));
 
         const state = result.current;
         if (state.kind !== 'failed') throw new Error(`expected a failed state, got ${state.kind}`);
         mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.resolve(RESPONSE) });
         await act(async () => state.retry());
 
-        await waitFor(() => expect(result.current).toEqual({ kind: 'ready', stake: STAKE }));
+        await waitForHook(() => expect(result.current).toEqual({ kind: 'ready', stake: STAKE }));
     });
 
     // The heaviest call here, always straight at the node with no CDN and no rate limit in front of it.
@@ -244,23 +204,20 @@ describe('useVoteAccounts', () => {
         mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
 
         const { result } = renderVoteAccounts();
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
+        await waitForHook(() => expect(result.current.kind).toBe('failed'));
         // The wait is the assertion: counting straight after the failure passes either way.
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        await settleRetries();
 
         expect(mocks.getVoteAccounts).toHaveBeenCalledTimes(1);
     });
 
     it('should not ask again when the tab regains focus', async () => {
         const { result } = renderVoteAccounts(UNTHROTTLED_FOCUS);
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
         expect(mocks.getVoteAccounts).toHaveBeenCalledTimes(1);
 
-        await act(async () => {
-            window.dispatchEvent(new Event('focus'));
-            document.dispatchEvent(new Event('visibilitychange'));
-        });
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        await refocusTab();
+        await settleRetries();
 
         expect(mocks.getVoteAccounts).toHaveBeenCalledTimes(1);
     });
@@ -268,15 +225,15 @@ describe('useVoteAccounts', () => {
     it('should not ask again when the page is revisited inside one session', async () => {
         // One Map across both mounts, and no deduping, so only staleness could hold the second request.
         const cache = new Map();
-        const sharedCache: SwrOverrides = { dedupingInterval: 0, provider: () => cache };
+        const sharedCache: SWRConfiguration = { dedupingInterval: 0, provider: () => cache };
 
         const { result: firstVisit, unmount } = renderVoteAccounts(sharedCache);
-        await waitFor(() => expect(firstVisit.current.kind).toBe('ready'));
+        await waitForHook(() => expect(firstVisit.current.kind).toBe('ready'));
         unmount();
 
         const { result } = renderVoteAccounts(sharedCache);
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
+        await settleRetries();
 
         expect(mocks.getVoteAccounts).toHaveBeenCalledTimes(1);
     });
@@ -300,29 +257,6 @@ describe('totalStake', () => {
     });
 });
 
-function renderVoteAccounts(overrides: SwrOverrides = {}) {
-    return renderHook(() => useVoteAccounts(), { wrapper: swrWrapper(overrides) });
+function renderVoteAccounts(overrides: SWRConfiguration = {}) {
+    return renderHook(() => useVoteAccounts(), { wrapper: swrWrapper({ ...FAST_RETRY, ...overrides }) });
 }
-
-/** A handle on `mutate`, to force a revalidation the hook does not expose. */
-function renderVoteAccountsWithRevalidate() {
-    return renderHook(() => ({ revalidate: useSWRConfig().mutate, state: useVoteAccounts() }), {
-        wrapper: swrWrapper(),
-    });
-}
-
-/**
- * A cache per test, so one test's pending promise cannot satisfy the next. `errorRetryInterval` is what
- * makes the counting tests above mean anything: on the default a retry lands long after they finish, so
- * they would pass whether or not retrying is off.
- */
-function swrWrapper(overrides: SwrOverrides = {}) {
-    return function Wrapper({ children }: { children: ReactNode }) {
-        return (
-            <SWRConfig value={{ errorRetryInterval: 1, provider: () => new Map(), ...overrides }}>{children}</SWRConfig>
-        );
-    };
-}
-
-/** Both throttles off, so a request following a focus is the config's doing and not a coincidence. */
-const UNTHROTTLED_FOCUS: SwrOverrides = { dedupingInterval: 0, focusThrottleInterval: 0 };

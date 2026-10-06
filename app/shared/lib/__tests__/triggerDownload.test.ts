@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { triggerDownload, triggerDownloadText } from '../triggerDownload';
@@ -76,13 +78,24 @@ describe('triggerDownload', () => {
         it('should reject files exceeding default max size (10MB)', async () => {
             // Create base64 string that decodes to ~11MB
             const largeBase64 = createBase64OfSize(11 * 1024 * 1024);
-            await expect(triggerDownload(largeBase64, 'file.txt')).rejects.toThrow('exceeds maximum allowed size');
+            await expect(triggerDownload(largeBase64, 'file.txt')).rejects.toThrow(
+                'exceeds maximum allowed size (10 MB)',
+            );
         });
 
-        it('should accept files within default max size', async () => {
-            // Create base64 string that decodes to ~5MB
-            const mediumBase64 = createBase64OfSize(5 * 1024 * 1024);
-            await expect(triggerDownload(mediumBase64, 'file.txt')).resolves.not.toThrow();
+        it('should reject an oversized payload before it decodes the payload', async () => {
+            await expect(triggerDownload('!!!!!!!!', 'file.txt', { maxSize: 1 })).rejects.toThrow(
+                'exceeds maximum allowed size',
+            );
+        });
+
+        it('should accept a file of exactly maxSize and reject one byte more', async () => {
+            // Six bytes encode without padding, so the size estimate is exact.
+            const base64 = toBase64('Hello!');
+            await expect(triggerDownload(base64, 'file.txt', { maxSize: 6 })).resolves.not.toThrow();
+            await expect(triggerDownload(base64, 'file.txt', { maxSize: 5 })).rejects.toThrow(
+                'exceeds maximum allowed size',
+            );
         });
     });
 

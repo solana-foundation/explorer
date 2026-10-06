@@ -55,15 +55,16 @@ describe('FeedbackWidget — real captureFeedback envelope', () => {
     });
 
     it('should deliver message, rating, contact, cluster, source, and url inside a feedback envelope', async () => {
+        const user = userEvent.setup({ delay: null });
         render(<FeedbackWidget />);
-        await userEvent.click(await screen.findByRole('button', { name: 'Feedback' }));
-        await userEvent.click(await screen.findByText('Share feedback'));
+        await user.click(await screen.findByRole('button', { name: 'Feedback' }));
+        await user.click(await screen.findByText('Share feedback'));
 
         await screen.findByRole('heading', { name: 'Give feedback' });
-        await userEvent.click(screen.getByRole('radio', { name: '4 of 5 stars' }));
-        await userEvent.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Great explorer!');
-        await userEvent.type(screen.getByRole('textbox', { name: 'X handle (optional)' }), '@fren');
-        await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+        await user.click(screen.getByRole('radio', { name: '4 of 5 stars' }));
+        await user.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Great explorer!');
+        await user.type(screen.getByRole('textbox', { name: 'X handle (optional)' }), '@fren');
+        await user.click(screen.getByRole('button', { name: 'Submit' }));
 
         await vi.waitFor(() => expect(envelopes).toHaveLength(1));
         const [, items] = envelopes[0];

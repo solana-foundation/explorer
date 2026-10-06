@@ -1,5 +1,4 @@
 import { gen } from '@__fixtures__/gen';
-import { TxInstructionSurface } from '@entities/instruction-card';
 import {
     type ParsedInstruction,
     type ParsedTransaction,
@@ -9,23 +8,15 @@ import {
     SYSVAR_SLOT_HASHES_PUBKEY,
     VOTE_PROGRAM_ID,
 } from '@solana/web3.js';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
-import React from 'react';
 import { vi } from 'vitest';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(() => ({ push: vi.fn() })),
-    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
-}));
-
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
-import { TransactionsProvider } from '@/app/providers/transactions';
+import { type CardRow, findCell, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
 
 import { VoteDetailsCard } from '../VoteDetailsCard';
+
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const A = {
     base: gen.address(1),
@@ -71,11 +62,20 @@ const ROOT = 414_213_969;
 
 const TOWER = { hash: HASH, lockouts: LOCKOUTS, root: ROOT, timestamp: TS };
 
-/** Each row as `[label, value]`. An address row carries the untruncated address, not the shortened text. */
-type Row = [string, string];
-
-/** `name` labels the it.each case when the title alone does not say which fixture ran. */
-const CASES: Array<{ info: object; name?: string; rows: Row[]; title: string; type: string }> = [
+/**
+ * `name` labels the it.each case when the title alone does not say which fixture ran.
+ * `mono` names the rows whose value cell sets a monospace font. `pre` names the rows drawn in a
+ * <pre>: line breaks survive only there, and `getByText` normalizes them away.
+ */
+const CASES: Array<{
+    info: object;
+    mono?: string[];
+    name?: string;
+    pre?: string[];
+    rows: CardRow[];
+    title: string;
+    type: string;
+}> = [
     {
         info: {
             authorizedVoter: A.base,
@@ -348,7 +348,9 @@ const CASES: Array<{ info: object; name?: string; rows: Row[]; title: string; ty
             voteAccount: A.voteAccount,
             voteAuthority: A.voteAuthority,
         },
+        mono: ['Timestamp'],
         name: 'Tower Sync, block id present',
+        pre: ['Vote Hash', 'Root Slot', 'Slots (Confirmation Count)'],
         rows: [
             ['Program', PROGRAM],
             ['Vote Account', A.voteAccount],
@@ -474,14 +476,16 @@ const CASES: Array<{ info: object; name?: string; rows: Row[]; title: string; ty
 ];
 
 describe('vote::instruction cards', () => {
-    it.each(CASES)('should render $title ($name)', async ({ info, rows, title, type }) => {
+    it.each(CASES)('should render $title ($name)', async ({ info, mono = [], pre = [], rows, title, type }) => {
         renderCard({ info, type });
 
         // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
         await waitFor(() => {
             expect(screen.getByText(title)).toBeInTheDocument();
         });
-        expect(readRows()).toEqual(rows);
+        expect(readCardRows()).toEqual(rows);
+        mono.forEach(label => expect(findCell(label)).toHaveClass('font-mono'));
+        pre.forEach(label => expect(findPre(label)?.textContent).toBe(Object.fromEntries(rows)[label]));
     });
 
     // A foreign program id proves the row reads the instruction rather than a vote-program constant.
@@ -495,7 +499,7 @@ describe('vote::instruction cards', () => {
         );
 
         await waitFor(() => {
-            expect(readRows()[0]).toEqual(['Program', A.node]);
+            expect(readCardRows()[0]).toEqual(['Program', A.node]);
         });
     });
 
@@ -518,26 +522,6 @@ describe('vote::instruction cards', () => {
         });
     });
 
-    // Line breaks survive only inside a <pre>, and `getByText` normalizes them away.
-    it('should draw the tower payload as preformatted rows and the timestamp in UTC', async () => {
-        renderCard({
-            info: {
-                towerSync: { ...TOWER, blockId: BLOCK_ID },
-                voteAccount: A.voteAccount,
-                voteAuthority: A.voteAuthority,
-            },
-            type: 'towersync',
-        });
-
-        await waitFor(() => {
-            expect(readCell('Timestamp')).toBe(TS_TEXT);
-        });
-        expect(findCell('Timestamp')).toHaveClass('font-mono');
-        expect(findPre('Slots (Confirmation Count)')?.textContent).toBe(LOCKOUTS_TEXT);
-        expect(findPre('Root Slot')?.textContent).toBe(String(ROOT));
-        expect(findPre('Vote Hash')?.textContent).toBe(HASH);
-    });
-
     it('should fall back to UnknownDetailsCard for an unrecognized type', async () => {
         renderCard({ info: {}, type: 'someFutureInstruction' });
 
@@ -550,48 +534,9 @@ describe('vote::instruction cards', () => {
 function renderCard(parsed: { info: object; type: string }, programId: PublicKey = VOTE_PROGRAM_ID) {
     const ix = { parsed, program: 'vote', programId } as unknown as ParsedInstruction;
 
-    return render(
-        <ScrollAnchorProvider>
-            <ClusterProvider>
-                <TransactionsProvider>
-                    <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>
-                            <VoteDetailsCard
-                                index={0}
-                                ix={ix}
-                                result={{ err: null }}
-                                tx={{ signatures: ['sig'] } as ParsedTransaction}
-                            />
-                        </TxInstructionSurface>
-                    </AccountsProvider>
-                </TransactionsProvider>
-            </ClusterProvider>
-        </ScrollAnchorProvider>,
+    return renderTxCard(
+        <VoteDetailsCard index={0} ix={ix} result={{ err: null }} tx={{ signatures: ['sig'] } as ParsedTransaction} />,
     );
-}
-
-/**
- * In render order, so the result pins row order as well as content. Addresses are read
- * from `data-address`, which carries the untruncated value the display shortens; every
- * other kind falls back to its rendered text, so a wrong value fails rather than reading
- * as an empty cell.
- */
-function readRows(): Row[] {
-    return screen.getAllByRole('row').map(row => {
-        const cells = within(row).getAllByRole('cell');
-        // eslint-disable-next-line testing-library/no-node-access -- an address has no role to query by
-        const address = cells[1]?.querySelector('[data-address]')?.getAttribute('data-address');
-        return [cells[0].textContent ?? '', address ?? cells[1]?.textContent ?? ''];
-    });
-}
-
-function findCell(label: string): HTMLElement | undefined {
-    const row = screen.getAllByRole('row').find(r => within(r).getAllByRole('cell')[0]?.textContent === label);
-    return row && within(row).getAllByRole('cell')[1];
-}
-
-function readCell(label: string): string {
-    return findCell(label)?.textContent ?? '';
 }
 
 function findPre(label: string): Element | undefined {

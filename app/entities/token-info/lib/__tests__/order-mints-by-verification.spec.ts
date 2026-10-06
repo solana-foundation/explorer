@@ -1,11 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { tokenInfo } from '../../__fixtures__/token-info';
 import { orderMintsByVerification } from '../order-mints-by-verification';
 import type { TokenInfo } from '../types';
-
-function tokenInfo(address: string, verified?: boolean): TokenInfo {
-    return { address, decimals: 6, logoURI: null, name: address, symbol: address, verified };
-}
 
 function infos(...tokens: TokenInfo[]): ReadonlyMap<string, TokenInfo> {
     return new Map(tokens.map(token => [token.address, token]));

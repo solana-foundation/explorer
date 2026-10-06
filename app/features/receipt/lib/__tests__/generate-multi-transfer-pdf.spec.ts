@@ -4,6 +4,7 @@ import type { FormattedReceipt } from '../../types';
 import { generateMultiTransferPdf } from '../generate-multi-transfer-pdf';
 import { loadPdfDeps } from '../generate-receipt-pdf';
 import {
+    buildMultiSolReceipt,
     collectTextFromMock as collectText,
     mockAddField,
     mockAddImage,
@@ -13,27 +14,16 @@ import {
     mockTextField,
     mockToDataURL,
     PDF_OPTS,
+    qrcodeModule,
     SIGNATURE,
     SOL_RECEIPT as RECEIPT,
     stubSvgRasterizationUnsupported,
+    SVG_RASTERIZATION_ERROR,
 } from './__fixtures__/pdf-mocks';
 
 vi.mock('jspdf', () => ({ jsPDF: mockJsPDF }));
-
-vi.mock('qrcode', () => ({
-    default: { toDataURL: (...args: unknown[]) => mockToDataURL(...args) },
-    toDataURL: (...args: unknown[]) => mockToDataURL(...args),
-}));
-
-vi.mock('../pdf-fonts', () => ({
-    loadPdfFonts: vi.fn().mockResolvedValue({
-        robotoMonoRegular: 'AAA=',
-        robotoMonoSemiBold: 'AAA=',
-        rubikRegular: 'AAA=',
-        rubikSemiBold: 'AAA=',
-    }),
-    registerPdfFonts: vi.fn(),
-}));
+vi.mock('qrcode', () => qrcodeModule);
+vi.mock('../pdf-fonts', async () => (await import('./__fixtures__/pdf-mocks')).pdfFontsModule);
 
 describe('generateMultiTransferPdf', () => {
     const mockOnError = vi.fn();
@@ -92,44 +82,23 @@ describe('generateMultiTransferPdf', () => {
     });
 
     it('should render every transfer when receipt has multiple transfers (<= 18)', async () => {
-        const transfers = Array.from({ length: 18 }, (_, i) => ({
-            amount: { formatted: '0.1', raw: 100000000, unit: 'SOL' },
-            receiver: {
-                address: `Recv${i.toString().padStart(2, '0')}xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`,
-                truncated: `R${i}`,
-            },
-            sender: {
-                address: `Send${i.toString().padStart(2, '0')}xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`,
-                truncated: `S${i}`,
-            },
-        }));
-        const multiReceipt: FormattedReceipt = { ...RECEIPT, total: { ...RECEIPT.total, raw: 1800000000 }, transfers };
+        const multiReceipt = buildMultiSolReceipt(18);
 
         const deps = await loadPdfDeps(mockOnError);
         await generateMultiTransferPdf(deps, multiReceipt, PDF_OPTS);
 
         const allText = collectText();
 
-        for (let i = 0; i < 18; i++) {
-            expect(allText).toContain(transfers[i].sender.address);
-            expect(allText).toContain(transfers[i].receiver.address);
+        for (const transfer of multiReceipt.transfers) {
+            expect(allText).toContain(transfer.sender.address);
+            expect(allText).toContain(transfer.receiver.address);
         }
         expect(allText).not.toContain('largest transfers are shown here');
     });
 
     it('should cap visible transfers at 16 and render warning bar when there are more than 18', async () => {
-        const transfers = Array.from({ length: 20 }, (_, i) => ({
-            amount: { formatted: '0.1', raw: 100000000, unit: 'SOL' },
-            receiver: {
-                address: `Recv${i.toString().padStart(2, '0')}xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`,
-                truncated: `R${i}`,
-            },
-            sender: {
-                address: `Send${i.toString().padStart(2, '0')}xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`,
-                truncated: `S${i}`,
-            },
-        }));
-        const multiReceipt: FormattedReceipt = { ...RECEIPT, total: { ...RECEIPT.total, raw: 2000000000 }, transfers };
+        const multiReceipt = buildMultiSolReceipt(20);
+        const { transfers } = multiReceipt;
 
         const deps = await loadPdfDeps(mockOnError);
         await generateMultiTransferPdf(deps, multiReceipt, PDF_OPTS);
@@ -188,6 +157,7 @@ describe('generateMultiTransferPdf', () => {
         expect(fieldNames).toContain('supplier_name');
         expect(fieldNames).toContain('supplier_address');
         expect(fieldNames).toContain('items_description');
+        expect(mockAddField).toHaveBeenCalled();
     });
 
     it('should not render a Total row on the multi-transfer receipt', async () => {
@@ -208,35 +178,17 @@ describe('generateMultiTransferPdf', () => {
         expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
     });
 
-    it('should render the Memo label with a dash when memo is absent', async () => {
-        const receiptWithoutMemo: FormattedReceipt = { ...RECEIPT, memo: undefined };
+    it.each([
+        { expected: '-', memo: undefined, title: 'with a dash when memo is absent' },
+        { expected: 'Payment for services', memo: 'Payment for services', title: 'with its value when present' },
+    ])('should render the Memo label $title', async ({ expected, memo }) => {
         const deps = await loadPdfDeps(mockOnError);
+        await generateMultiTransferPdf(deps, { ...RECEIPT, memo }, PDF_OPTS);
 
-        await generateMultiTransferPdf(deps, receiptWithoutMemo, PDF_OPTS);
-
-        const allText = collectText();
-
-        expect(allText).toContain('Memo');
-        expect(allText).not.toContain('Payment for services');
+        const textCalls = mockText.mock.calls.flatMap(([text]) => text);
+        expect(textCalls).toContain('Memo');
+        expect(textCalls).toContain(expected);
         expect(mockSave).toHaveBeenCalled();
-    });
-
-    it('should add editable fields via addField for each AcroForm field', async () => {
-        const deps = await loadPdfDeps(mockOnError);
-        await generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS);
-
-        expect(mockAddField).toHaveBeenCalled();
-        expect(mockAddField.mock.calls.length).toBeGreaterThan(0);
-    });
-
-    it('should render memo cell with label and value when present', async () => {
-        const deps = await loadPdfDeps(mockOnError);
-        await generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS);
-
-        const allText = collectText();
-
-        expect(allText).toContain('Memo');
-        expect(allText).toContain('Payment for services');
     });
 
     it('should embed QR code image in the PDF', async () => {
@@ -253,143 +205,54 @@ describe('generateMultiTransferPdf', () => {
         expect(allText).toContain('Verify on Solana Explorer');
     });
 
-    it('should not render any prorated USD per row even when usdValue is provided', async () => {
+    it.each([
+        ['provided', '~200.00 USD'],
+        ['not provided', undefined],
+    ])('should not render any USD value or Jupiter API attribution when usdValue is %s', async (_, usdValue) => {
         const deps = await loadPdfDeps(mockOnError);
-        await generateMultiTransferPdf(deps, RECEIPT, { ...PDF_OPTS, usdValue: '~200.00 USD' });
+        await generateMultiTransferPdf(deps, RECEIPT, { ...PDF_OPTS, usdValue });
 
         const allText = collectText();
 
         expect(allText).not.toContain('~200.00 USD');
-    });
-
-    it('should not render the Jupiter API attribution on the multi-transfer receipt', async () => {
-        const deps = await loadPdfDeps(mockOnError);
-        await generateMultiTransferPdf(deps, RECEIPT, { ...PDF_OPTS, usdValue: '~200.00 USD' });
-
-        const allText = collectText();
-        expect(allText).not.toContain('Jupiter API');
-    });
-
-    it('should not render the Jupiter API attribution when usdValue is not provided', async () => {
-        const deps = await loadPdfDeps(mockOnError);
-        await generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS);
-
-        const allText = collectText();
-        expect(allText).not.toContain('Jupiter API');
-    });
-
-    it('should not render any USD value when usdValue is not provided', async () => {
-        const deps = await loadPdfDeps(mockOnError);
-        await generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS);
-
-        const allText = collectText();
-
         expect(allText).not.toContain('$');
-    });
-
-    it('should still save the PDF and report a wrapped error when QR generation fails', async () => {
-        const qrError = new Error('QR generation failed');
-        mockToDataURL.mockRejectedValueOnce(qrError);
-        const deps = await loadPdfDeps(mockOnError);
-
-        await generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS);
-
-        expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
-        const reported = mockOnError.mock.calls.map(([e]) => e as Error);
-        const qrReport = reported.find(e => e.message === 'Failed to render QR code in receipt footer');
-        expect(qrReport).toBeDefined();
-        expect(qrReport?.cause).toBe(qrError);
+        expect(allText).not.toContain('Jupiter API');
     });
 
     describe('error paths', () => {
-        // svgToDataUrl always opens a Blob URL — making createObjectURL throw
-        // is the most surgical way to force the SVG→PNG conversion to fail.
-        function breakSvgConversion(): { error: Error; restore: () => void } {
-            const error = new Error('Forced SVG conversion failure');
-            const target = URL as { createObjectURL?: (b: Blob) => string };
-            const original = target.createObjectURL;
-            target.createObjectURL = () => {
-                throw error;
-            };
-            return {
-                error,
-                restore: () => {
-                    if (original) target.createObjectURL = original;
-                    else delete target.createObjectURL;
-                },
-            };
-        }
-
         it('should call onError and render the Solana Explorer text fallback when the logo SVG fails', async () => {
-            const { error, restore } = breakSvgConversion();
-            try {
-                const deps = await loadPdfDeps(mockOnError);
-                await generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS);
+            const deps = await loadPdfDeps(mockOnError);
+            await generateMultiTransferPdf(deps, RECEIPT, PDF_OPTS);
 
-                expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
-                expect(mockOnError).toHaveBeenCalledWith(error);
-                expect(collectText()).toContain('Solana Explorer');
-            } finally {
-                restore();
-            }
+            expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
+            expect(mockOnError).toHaveBeenCalledWith(SVG_RASTERIZATION_ERROR);
+            expect(collectText()).toContain('Solana Explorer');
         });
 
         it('should call onError when the warning-icon SVG fails on a multi-transfer receipt', async () => {
-            const transfers = Array.from({ length: 20 }, (_, i) => ({
-                amount: { formatted: '0.1', raw: 100000000, unit: 'SOL' },
-                receiver: { address: `Recv${i}`.padEnd(43, 'x'), truncated: `R${i}` },
-                sender: { address: `Send${i}`.padEnd(43, 'x'), truncated: `S${i}` },
-            }));
-            const multiReceipt: FormattedReceipt = {
-                ...RECEIPT,
-                total: { ...RECEIPT.total, raw: 2000000000 },
-                transfers,
-            };
+            const deps = await loadPdfDeps(mockOnError);
+            await generateMultiTransferPdf(deps, buildMultiSolReceipt(20), PDF_OPTS);
 
-            const { error, restore } = breakSvgConversion();
-            try {
-                const deps = await loadPdfDeps(mockOnError);
-                await generateMultiTransferPdf(deps, multiReceipt, PDF_OPTS);
-
-                expect(mockSave).toHaveBeenCalled();
-                // Warning-icon path + logo path both fail → onError invoked at least twice
-                expect(mockOnError.mock.calls.length).toBeGreaterThanOrEqual(2);
-                expect(mockOnError).toHaveBeenCalledWith(error);
-                // Warning bar text still renders even when its icon failed
-                expect(collectText()).toContain('Only the 16 largest transfers are shown here');
-            } finally {
-                restore();
-            }
+            expect(mockSave).toHaveBeenCalled();
+            // Warning-icon path + logo path both fail → onError invoked at least twice
+            expect(mockOnError.mock.calls.length).toBeGreaterThanOrEqual(2);
+            expect(mockOnError).toHaveBeenCalledWith(SVG_RASTERIZATION_ERROR);
+            // Warning bar text still renders even when its icon failed
+            expect(collectText()).toContain('Only the 16 largest transfers are shown here');
         });
 
         it('should save the PDF even when logo, warning icon, and QR code all fail', async () => {
-            const transfers = Array.from({ length: 20 }, (_, i) => ({
-                amount: { formatted: '0.1', raw: 100000000, unit: 'SOL' },
-                receiver: { address: `Recv${i}`.padEnd(43, 'x'), truncated: `R${i}` },
-                sender: { address: `Send${i}`.padEnd(43, 'x'), truncated: `S${i}` },
-            }));
-            const multiReceipt: FormattedReceipt = {
-                ...RECEIPT,
-                total: { ...RECEIPT.total, raw: 2000000000 },
-                transfers,
-            };
             const qrError = new Error('QR generation failed');
-            mockToDataURL.mockRejectedValue(qrError);
+            mockToDataURL.mockRejectedValueOnce(qrError);
 
-            const { error: svgError, restore } = breakSvgConversion();
-            try {
-                const deps = await loadPdfDeps(mockOnError);
-                await generateMultiTransferPdf(deps, multiReceipt, PDF_OPTS);
+            const deps = await loadPdfDeps(mockOnError);
+            await generateMultiTransferPdf(deps, buildMultiSolReceipt(20), PDF_OPTS);
 
-                expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
-                const reported = mockOnError.mock.calls.map(([e]) => e as Error);
-                expect(reported).toContain(svgError);
-                const qrReport = reported.find(e => e.message === 'Failed to render QR code in receipt footer');
-                expect(qrReport?.cause).toBe(qrError);
-            } finally {
-                restore();
-                mockToDataURL.mockResolvedValue('data:image/png;base64,qrcode');
-            }
+            expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
+            const reported = mockOnError.mock.calls.map(([e]) => e as Error);
+            expect(reported).toContain(SVG_RASTERIZATION_ERROR);
+            const qrReport = reported.find(e => e.message === 'Failed to render QR code in receipt footer');
+            expect(qrReport?.cause).toBe(qrError);
         });
     });
 });

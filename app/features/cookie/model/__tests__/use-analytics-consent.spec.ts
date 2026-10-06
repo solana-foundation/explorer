@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -16,21 +18,14 @@ describe('useAnalyticsConsent', () => {
         vi.mocked(getCookie).mockReturnValue(null);
     });
 
-    it('should return isConsentGiven=false when no consent', () => {
+    it.each([
+        ['false when no consent', null, false],
+        ['true when granted', EConsentStatus.Granted, true],
+        ['false when denied', EConsentStatus.Denied, false],
+    ])('should return isConsentGiven=%s', (_, consent, expected) => {
+        vi.mocked(getCookie).mockReturnValue(consent);
         const { result } = renderHook(() => useAnalyticsConsent());
-        expect(result.current.isConsentGiven).toBe(false);
-    });
-
-    it('should return isConsentGiven=true when granted', () => {
-        vi.mocked(getCookie).mockReturnValue(EConsentStatus.Granted);
-        const { result } = renderHook(() => useAnalyticsConsent());
-        expect(result.current.isConsentGiven).toBe(true);
-    });
-
-    it('should return isConsentGiven=false when denied', () => {
-        vi.mocked(getCookie).mockReturnValue(EConsentStatus.Denied);
-        const { result } = renderHook(() => useAnalyticsConsent());
-        expect(result.current.isConsentGiven).toBe(false);
+        expect(result.current.isConsentGiven).toBe(expected);
     });
 
     it('should update on consent change event', () => {

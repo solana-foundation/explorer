@@ -1,8 +1,9 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { createElement, type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
+// @vitest-environment jsdom
+
+import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 import { createPmpSecurityTxt } from '@/app/features/security-txt/ui/__tests__/helpers';
 import { Cluster } from '@/app/utils/cluster';
 
@@ -18,14 +19,8 @@ vi.mock('@/app/providers/cluster', () => ({
     useCluster: vi.fn(() => ({ cluster: Cluster.MainnetBeta, url: 'https://api.mainnet-beta.solana.com' })),
 }));
 
-// Fresh SWR cache per render; no retries so a throwing fetcher settles within the test.
-function wrapper({ children }: { children: ReactNode }) {
-    return createElement(
-        SWRConfig,
-        { value: { dedupingInterval: 0, provider: () => new Map(), shouldRetryOnError: false } },
-        children,
-    );
-}
+// No retries so a throwing fetcher settles within the test.
+const wrapper = swrWrapper({ dedupingInterval: 0, shouldRetryOnError: false });
 
 describe('useSecurityTxt', () => {
     beforeEach(() => mocks.fetch.mockReset());
@@ -37,7 +32,7 @@ describe('useSecurityTxt', () => {
 
         const { result } = renderHook(() => useSecurityTxt(PROGRAM), { wrapper });
 
-        await waitFor(() => expect(result.current.securityTxt).toEqual(securityTxt));
+        await waitForHook(() => expect(result.current.securityTxt).toEqual(securityTxt));
         expect(mocks.fetch.mock.calls[0]?.[0] as string).toContain('/api/security-txt');
     });
 
@@ -46,7 +41,7 @@ describe('useSecurityTxt', () => {
 
         const { result } = renderHook(() => useSecurityTxt(PROGRAM), { wrapper });
 
-        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        await waitForHook(() => expect(result.current.isLoading).toBe(false));
         expect(result.current.securityTxt).toBeUndefined();
     });
 });

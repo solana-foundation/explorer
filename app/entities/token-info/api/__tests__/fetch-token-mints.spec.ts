@@ -116,31 +116,20 @@ describe('getTokenInfos', () => {
         expect(result).toEqual([]);
     });
 
-    it('should call onError with TokenInfoInvalidResponseError when content is missing', async () => {
+    it.each([
+        ['missing', {}],
+        ['not an array', { content: { [mockToken.address]: mockToken } }],
+    ])('should call onError with TokenInfoInvalidResponseError when content is %s', async (_label, body) => {
         const onError = vi.fn();
 
         vi.mocked(global.fetch).mockResolvedValueOnce({
-            json: () => Promise.resolve({}),
+            json: () => Promise.resolve(body),
             ok: true,
         } as Response);
 
         const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
 
         expect(onError).toHaveBeenCalledTimes(1);
-        expect(onError.mock.calls[0][0]).toBeInstanceOf(TokenInfoInvalidResponseError);
-        expect(result).toEqual([]);
-    });
-
-    it('should call onError with TokenInfoInvalidResponseError when content is not an array', async () => {
-        const onError = vi.fn();
-
-        vi.mocked(global.fetch).mockResolvedValueOnce({
-            json: () => Promise.resolve({ content: { [mockToken.address]: mockToken } }),
-            ok: true,
-        } as Response);
-
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
-
         expect(onError.mock.calls[0][0]).toBeInstanceOf(TokenInfoInvalidResponseError);
         expect(result).toEqual([]);
     });

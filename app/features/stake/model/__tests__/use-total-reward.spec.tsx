@@ -1,17 +1,14 @@
 import { gen } from '@__fixtures__/gen';
 import { address } from '@solana/kit';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
-import { type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { FAST_RETRY, settleRetries, swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 
 import { TotalRewardStatus, useTotalReward } from '../use-total-reward';
 
 const STAKE_ACCOUNT_ADDRESS = address(gen.address(0));
-
-/** Long enough to cover every backoff step the 1 ms retry interval produces. */
-const RETRY_SETTLE_MS = 50;
 
 const mocks = vi.hoisted(() => ({ cluster: { cluster: 0 } }));
 
@@ -42,7 +39,9 @@ describe('useTotalReward', () => {
 
         const { result } = renderTotalReward();
 
-        await waitFor(() => expect(result.current).toEqual({ lamports: 4_200_824, status: TotalRewardStatus.Ready }));
+        await waitForHook(() =>
+            expect(result.current).toEqual({ lamports: 4_200_824, status: TotalRewardStatus.Ready }),
+        );
     });
 
     it('should request the route for the stake account address', async () => {
@@ -50,7 +49,7 @@ describe('useTotalReward', () => {
 
         renderTotalReward();
 
-        await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(`/api/stake-rewards/${STAKE_ACCOUNT_ADDRESS}`));
+        await waitForHook(() => expect(fetchMock).toHaveBeenCalledWith(`/api/stake-rewards/${STAKE_ACCOUNT_ADDRESS}`));
     });
 
     it('should report unavailable when the route fails', async () => {
@@ -58,7 +57,7 @@ describe('useTotalReward', () => {
 
         const { result } = renderTotalReward();
 
-        await waitFor(() => expect(result.current).toEqual({ status: TotalRewardStatus.Unavailable }));
+        await waitForHook(() => expect(result.current).toEqual({ status: TotalRewardStatus.Unavailable }));
     });
 
     it('should report a zero total as ready, not unavailable', async () => {
@@ -66,7 +65,7 @@ describe('useTotalReward', () => {
 
         const { result } = renderTotalReward();
 
-        await waitFor(() => expect(result.current).toEqual({ lamports: 0, status: TotalRewardStatus.Ready }));
+        await waitForHook(() => expect(result.current).toEqual({ lamports: 0, status: TotalRewardStatus.Ready }));
     });
 
     it('should report disabled without calling the route when the feature is off', () => {
@@ -83,20 +82,15 @@ describe('useTotalReward', () => {
         expect(fetchMock).not.toHaveBeenCalled();
     });
 
-    it('should retry a failure the route may answer differently', async () => {
-        fetchMock.mockResolvedValue(failedResponse(502));
+    it.each([
+        ['a failure the route may answer differently', 502],
+        ['a rate limit, which the route answers once its window resets', 429],
+    ])('should retry %s', async (_reason, status) => {
+        fetchMock.mockResolvedValue(failedResponse(status));
 
         renderTotalReward();
 
-        await waitFor(() => expect(fetchMock.mock.calls.length).toBeGreaterThan(1));
-    });
-
-    it('should retry a rate limit, which the route answers once its window resets', async () => {
-        fetchMock.mockResolvedValue(failedResponse(429));
-
-        renderTotalReward();
-
-        await waitFor(() => expect(fetchMock.mock.calls.length).toBeGreaterThan(1));
+        await waitForHook(() => expect(fetchMock.mock.calls.length).toBeGreaterThan(1));
     });
 
     it.each([
@@ -108,22 +102,14 @@ describe('useTotalReward', () => {
 
         const { result } = renderTotalReward();
 
-        await waitFor(() => expect(result.current).toEqual({ status: TotalRewardStatus.Unavailable }));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        await waitForHook(() => expect(result.current).toEqual({ status: TotalRewardStatus.Unavailable }));
+        await settleRetries();
         expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 });
 
-/**
- * A fresh SWR cache per test, so one test's result — including a pending promise — cannot satisfy
- * the next test's identical key. The retry interval is collapsed to 1 ms so a retry that does
- * happen lands inside the test rather than after it.
- */
 function renderTotalReward() {
-    const wrapper = ({ children }: { children: ReactNode }) => (
-        <SWRConfig value={{ errorRetryInterval: 1, provider: () => new Map() }}>{children}</SWRConfig>
-    );
-    return renderHook(() => useTotalReward(STAKE_ACCOUNT_ADDRESS), { wrapper });
+    return renderHook(() => useTotalReward(STAKE_ACCOUNT_ADDRESS), { wrapper: swrWrapper(FAST_RETRY) });
 }
 
 function totalResponse(totalReward: number): Response {

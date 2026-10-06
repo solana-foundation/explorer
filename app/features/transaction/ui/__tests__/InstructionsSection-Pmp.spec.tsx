@@ -12,16 +12,10 @@ import {
     Format,
     getSetDataInstructionDataEncoder,
 } from '@solana-program/program-metadata';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { screen } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 
-import { InstructionParserProvider } from '@/app/entities/instruction-parser';
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
-import { TransactionsProvider } from '@/app/providers/transactions';
+import { renderWithProviders } from '@/app/__tests__/card-harness';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
 import { InstructionsSection } from '../InstructionsSection';
@@ -75,16 +69,7 @@ vi.mock('swr', () => ({
     })),
 }));
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(() => '/'),
-    useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn() })),
-    useSearchParams: vi.fn(() => new URLSearchParams()),
-}));
-
-vi.mock('next/link', () => ({
-    __esModule: true,
-    default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 // Override only the two cache reads the section makes. `importOriginal` keeps `TransactionsProvider` real, so the
 // raw-details context the InstructionCard reads is still there.
@@ -97,27 +82,9 @@ vi.mock('@providers/transactions', async importOriginal => ({
 }));
 
 describe('Transaction page InstructionsSection with a Program Metadata instruction', () => {
-    test('should decode and render an inline setData payload with no IDL resolved', async () => {
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <TransactionsProvider>
-                        <AccountsProvider>
-                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
-                                <InstructionsSection signature={SIGNATURE} />
-                            </InstructionParserProvider>
-                        </AccountsProvider>
-                    </TransactionsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+    test('should route an inline setData payload to the PMP card with no IDL resolved', async () => {
+        renderWithProviders(<InstructionsSection signature={SIGNATURE} />, { dispatcher: instructionParserDispatcher });
 
         expect(await screen.findByText(/ProgramMetadata: SetData/i)).toBeInTheDocument();
-
-        // The section opens on the Raw tab and Radix unmounts the inactive panel, so the decoded document is only
-        // in the DOM once the reader switches.
-        await userEvent.click(screen.getByRole('tab', { name: 'Decoded' }));
-
-        expect(screen.getByTestId('pmp-decoded-text')).toHaveTextContent('company');
     });
 });

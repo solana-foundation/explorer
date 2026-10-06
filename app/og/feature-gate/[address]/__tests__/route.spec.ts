@@ -1,6 +1,10 @@
+import { getFeatureInfo } from '@entities/feature-gate/server';
 import { address } from '@solana/kit';
+import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { GET } from '../route';
 
 vi.mock('next/og', () => ({
     ImageResponse: vi.fn(function () {
@@ -11,21 +15,13 @@ vi.mock('next/og', () => ({
     }),
 }));
 
-vi.mock('@features/feature-gate/server', async importOriginal => {
-    const actual = await importOriginal<typeof import('@features/feature-gate/server')>();
-    return {
-        ...actual,
-        BaseFeatureGateImage: vi.fn(() => null),
-    };
+vi.mock('@features/feature-gate/server', async () => {
+    const { isFeatureGateOgEnabled } =
+        await vi.importActual<typeof import('@features/feature-gate/env')>('@features/feature-gate/env');
+    return { BaseFeatureGateImage: vi.fn(() => null), isFeatureGateOgEnabled };
 });
 
-vi.mock('@entities/feature-gate/server', async importOriginal => {
-    const actual = await importOriginal<typeof import('@entities/feature-gate/server')>();
-    return {
-        ...actual,
-        getFeatureInfo: vi.fn(),
-    };
-});
+vi.mock('@entities/feature-gate/server', () => ({ getFeatureInfo: vi.fn() }));
 
 // Known feature gate address from feature-gates.json (branded so it can be used
 // as a `FeatureInfoType['key']` in the getFeatureInfo mock returns below).
@@ -40,14 +36,12 @@ function makeRequest(address: string) {
 describe('GET /og/feature-gate/[address]', () => {
     beforeEach(() => {
         vi.stubEnv('FEATURE_GATE_OG_ENABLED', 'true');
-        vi.resetModules();
         vi.clearAllMocks();
         vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     it('should return 404 when feature gate OG is disabled', async () => {
         vi.stubEnv('FEATURE_GATE_OG_ENABLED', 'false');
-        const { GET } = await import('../route');
 
         const response = await GET(makeRequest(validAddress), { params: Promise.resolve({ address: validAddress }) });
 
@@ -56,8 +50,6 @@ describe('GET /og/feature-gate/[address]', () => {
     });
 
     it('should generate image successfully for a known feature gate', async () => {
-        const { GET } = await import('../route');
-        const { getFeatureInfo } = await import('@entities/feature-gate/server');
         vi.mocked(getFeatureInfo).mockReturnValue({
             comms_required: null,
             description: 'Two new instructions for moving value between stake accounts',
@@ -84,9 +76,6 @@ describe('GET /og/feature-gate/[address]', () => {
     });
 
     it('should return 400 for an invalid base58 address', async () => {
-        const { GET } = await import('../route');
-        const { getFeatureInfo } = await import('@entities/feature-gate/server');
-
         const response = await GET(makeRequest('not-valid!!!'), {
             params: Promise.resolve({ address: 'not-valid!!!' }),
         });
@@ -97,8 +86,6 @@ describe('GET /og/feature-gate/[address]', () => {
     });
 
     it('should return 404 for a valid address that is not a known feature gate', async () => {
-        const { GET } = await import('../route');
-        const { getFeatureInfo } = await import('@entities/feature-gate/server');
         vi.mocked(getFeatureInfo).mockReturnValue(undefined);
 
         const response = await GET(makeRequest(unknownAddress), {
@@ -110,9 +97,6 @@ describe('GET /og/feature-gate/[address]', () => {
     });
 
     it('should return 500 when image generation fails', async () => {
-        const { GET } = await import('../route');
-        const { getFeatureInfo } = await import('@entities/feature-gate/server');
-        const { ImageResponse } = await import('next/og');
         vi.mocked(getFeatureInfo).mockReturnValue({
             comms_required: null,
             description: null,
@@ -129,7 +113,7 @@ describe('GET /og/feature-gate/[address]', () => {
             testnet_activation_epoch: null,
             title: 'MoveStake and MoveLamports',
         });
-        vi.mocked(ImageResponse).mockImplementation(function () {
+        vi.mocked(ImageResponse).mockImplementationOnce(function () {
             throw new Error('Render failed');
         });
 

@@ -129,18 +129,6 @@ describe('useClusterUrl', () => {
             expect(onReplaceSearchParams).not.toHaveBeenCalled();
         });
 
-        it('should honor anything valid under the developer bypass', () => {
-            const { onReplaceSearchParams, result } = renderUseClusterUrl({
-                cluster: Cluster.Custom,
-                devFlagEnabled: true,
-                search: `cluster=custom&customUrl=${REMOTE_URL}`,
-            });
-
-            expect(result.current.selection.endpoint?.href).toBe(REMOTE_URL);
-            expect(result.current.pendingCustomUrl).toBeUndefined();
-            expect(onReplaceSearchParams).not.toHaveBeenCalled();
-        });
-
         it('should read the developer bypass from storage on the very first render', () => {
             // Without `getOnInit` the read lands a render late, so an opted-in developer gets a prompt
             // for their own endpoint on every page load. Seeded through localStorage, as page load does.

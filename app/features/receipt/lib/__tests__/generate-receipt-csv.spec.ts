@@ -1,18 +1,12 @@
+// @vitest-environment jsdom
+
+import { buildFormattedReceipt } from '@entities/token-receipt/__fixtures__/formatted-receipt';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FormattedReceipt } from '../../types';
 import { buildReceiptCsvRows, generateReceiptCsv } from '../generate-receipt-csv';
 
-const RECEIPT: FormattedReceipt = {
-    date: { timestamp: 1700000000, utc: '2023-11-14 22:13:20 UTC' },
-    fee: { formatted: '0.000005', raw: 5000 },
-    kind: 'sol',
-    memo: 'Payment for services',
-    network: 'mainnet-beta',
-    receiver: { address: 'ReceiverAddr2222222222222222222222222222222', truncated: 'Recv...2222' },
-    sender: { address: 'SenderAddr111111111111111111111111111111111', truncated: 'Send...1111' },
-    total: { formatted: '1.0', raw: 1000000000, unit: 'SOL' },
-};
+const RECEIPT = buildFormattedReceipt();
 
 const SIGNATURE = '5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef';
 
@@ -37,11 +31,6 @@ describe('buildReceiptCsvRows', () => {
     it('should include USD value when provided', () => {
         const [row] = buildReceiptCsvRows(RECEIPT, SIGNATURE, '~150.00 USD');
         expect(row[8]).toBe('~150.00 USD');
-    });
-
-    it('should leave mint field empty for SOL receipts', () => {
-        const [row] = buildReceiptCsvRows(RECEIPT, SIGNATURE);
-        expect(row[7]).toBe('');
     });
 
     it('should include mint address for token receipts', () => {
@@ -133,33 +122,15 @@ describe('generateReceiptCsv', () => {
         vi.restoreAllMocks();
     });
 
-    it('should set the correct download filename', async () => {
+    it('should download a CSV Blob through a temporary object URL', async () => {
         await generateReceiptCsv(RECEIPT, SIGNATURE);
+
         expect(linkElement.download).toBe(`solana-receipt-${SIGNATURE}.csv`);
-    });
-
-    it('should set the href to the object URL', async () => {
-        await generateReceiptCsv(RECEIPT, SIGNATURE);
         expect(linkElement.href).toBe('blob:test-url');
-    });
-
-    it('should revoke the object URL after triggering download', async () => {
-        await generateReceiptCsv(RECEIPT, SIGNATURE);
         expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test-url');
-    });
-
-    it('should pass a Blob with CSV mime type to createObjectURL', async () => {
-        await generateReceiptCsv(RECEIPT, SIGNATURE);
-
         const blobArg = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob;
         expect(blobArg).toBeInstanceOf(Blob);
         expect(blobArg.type).toBe('text/csv;charset=utf-8;');
-    });
-
-    it('should pass a non-empty Blob to createObjectURL', async () => {
-        await generateReceiptCsv(RECEIPT, SIGNATURE);
-
-        const blobArg = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob;
         expect(blobArg.size).toBeGreaterThan(0);
     });
 

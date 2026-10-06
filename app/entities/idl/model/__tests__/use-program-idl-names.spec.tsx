@@ -1,17 +1,14 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
+import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
 import { useProgramIdlNames } from '../use-program-idl-names';
 
-const mocks = vi.hoisted(() => ({ fetch: vi.fn(), warn: vi.fn() }));
+const mocks = vi.hoisted(() => ({ fetch: vi.fn() }));
 vi.stubGlobal('fetch', mocks.fetch);
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn: mocks.warn } }));
-
-const { warn } = mocks;
 
 const VOTING = 'AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye';
 const SECOND = 'ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S';
@@ -31,16 +28,10 @@ const IDL_BY_PROGRAM: Record<string, unknown> = {
     },
 };
 
-function wrapper({ children }: { children: ReactNode }) {
-    return (
-        <SWRConfig value={{ dedupingInterval: 0, provider: () => new Map(), shouldRetryOnError: false }}>
-            {children}
-        </SWRConfig>
-    );
-}
-
 function render(programIds: string[], cluster = Cluster.Devnet, url = 'https://api.devnet.solana.com') {
-    return renderHook(() => useProgramIdlNames(programIds, cluster, url), { wrapper });
+    return renderHook(() => useProgramIdlNames(programIds, cluster, url), {
+        wrapper: swrWrapper({ dedupingInterval: 0, shouldRetryOnError: false }),
+    });
 }
 
 describe('useProgramIdlNames', () => {
@@ -60,19 +51,19 @@ describe('useProgramIdlNames', () => {
     it('should build a resolver that names an instruction by discriminator', async () => {
         const { result } = render([VOTING]);
 
-        await waitFor(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
+        await waitForHook(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
     });
 
     it('should expose the program display name from the IDL metadata', async () => {
         const { result } = render([VOTING]);
 
-        await waitFor(() => expect(result.current.get(VOTING)?.programName).toBe('Voting'));
+        await waitForHook(() => expect(result.current.get(VOTING)?.programName).toBe('Voting'));
     });
 
     it('should resolve every program in the set from one render', async () => {
         const { result } = render([VOTING, SECOND]);
 
-        await waitFor(() => expect(result.current.size).toBe(2));
+        await waitForHook(() => expect(result.current.size).toBe(2));
         expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote');
         expect(result.current.get(VOTING)?.programName).toBe('Voting');
         expect(result.current.get(SECOND)?.resolveInstructionName?.(FOO)).toBe('Foo');
@@ -91,7 +82,7 @@ describe('useProgramIdlNames', () => {
 
         const { result } = render([VOTING, SECOND]);
 
-        await waitFor(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
+        await waitForHook(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
         expect(result.current.size).toBe(1);
         expect(result.current.get(SECOND)).toBeUndefined();
     });
@@ -113,8 +104,8 @@ describe('useProgramIdlNames', () => {
 
         const { result } = render([VOTING, SECOND]);
 
-        await waitFor(() => expect(result.current.size).toBe(1));
-        expect(warn).toHaveBeenCalledWith(
+        await waitForHook(() => expect(result.current.size).toBe(1));
+        expect(Logger.warn).toHaveBeenCalledWith(
             expect.stringContaining('IDL fetch failed'),
             expect.objectContaining({
                 sentry: true,
@@ -127,14 +118,14 @@ describe('useProgramIdlNames', () => {
     it('should exclude builtin programs and not fetch them', async () => {
         const { result } = render([SYSTEM, COMPUTE_BUDGET]);
 
-        await waitFor(() => expect(result.current.size).toBe(0));
+        await waitForHook(() => expect(result.current.size).toBe(0));
         expect(mocks.fetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/idl-latest'));
     });
 
     it('should not fetch on a custom/localhost cluster the server route cannot reach', async () => {
         const { result } = render([VOTING], Cluster.Custom, 'http://localhost:8899');
 
-        await waitFor(() => expect(result.current.size).toBe(0));
+        await waitForHook(() => expect(result.current.size).toBe(0));
         expect(mocks.fetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/idl-latest'));
     });
 });

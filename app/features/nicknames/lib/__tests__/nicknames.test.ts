@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 /**
  * Tests for nickname localStorage utility functions
  */
@@ -75,22 +77,6 @@ describe('nicknames', () => {
             expect(stored['Address2']).toBe('Wallet 2');
         });
 
-        it('should dispatch nicknameUpdated event', () => {
-            const listener = vi.fn();
-            window.addEventListener('nicknameUpdated', listener);
-
-            setNickname('TestAddress123', 'My Wallet');
-
-            // Verify event was dispatched with correct address
-            expect(listener).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    detail: { address: 'TestAddress123' },
-                }),
-            );
-
-            window.removeEventListener('nicknameUpdated', listener);
-        });
-
         it('should truncate nicknames longer than MAX_NICKNAME_LENGTH', () => {
             const longNickname = 'This is a very long nickname that exceeds the maximum allowed length';
             setNickname('TestAddress123', longNickname);
@@ -102,16 +88,6 @@ describe('nicknames', () => {
     });
 
     describe('removeNickname', () => {
-        it('should remove a nickname from localStorage', () => {
-            // Setup: save a nickname first
-            setNickname('TestAddress123', 'My Wallet');
-
-            removeNickname('TestAddress123');
-
-            const stored = JSON.parse(localStorage.getItem('solana-explorer-nicknames') || '{}');
-            expect(stored['TestAddress123']).toBeUndefined();
-        });
-
         it('should preserve other nicknames when removing one', () => {
             // Setup: save multiple nicknames
             setNickname('Address1', 'Wallet 1');
@@ -123,21 +99,24 @@ describe('nicknames', () => {
             expect(stored['Address1']).toBeUndefined();
             expect(stored['Address2']).toBe('Wallet 2');
         });
+    });
 
-        it('should dispatch nicknameUpdated event', () => {
-            const listener = vi.fn();
-            window.addEventListener('nicknameUpdated', listener);
+    it.each([
+        ['setNickname', () => setNickname('TestAddress123', 'My Wallet')],
+        ['removeNickname', () => removeNickname('TestAddress123')],
+    ])('should dispatch nicknameUpdated event from %s', (_, update) => {
+        const listener = vi.fn();
+        window.addEventListener('nicknameUpdated', listener);
 
-            removeNickname('TestAddress123');
+        update();
 
-            // Verify event was dispatched with correct address
-            expect(listener).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    detail: { address: 'TestAddress123' },
-                }),
-            );
+        // Verify event was dispatched with correct address
+        expect(listener).toHaveBeenCalledWith(
+            expect.objectContaining({
+                detail: { address: 'TestAddress123' },
+            }),
+        );
 
-            window.removeEventListener('nicknameUpdated', listener);
-        });
+        window.removeEventListener('nicknameUpdated', listener);
     });
 });

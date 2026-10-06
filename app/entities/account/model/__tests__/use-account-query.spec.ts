@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { Account, FetchersContext, StateContext } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
@@ -8,6 +10,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 
+import { useAccountExpandedInfo } from '../use-account-expanded-info';
 import { useAccountQuery } from '../use-account-query';
 
 const TEST_ADDRESS = NATIVE_MINT_ADDRESS;
@@ -119,5 +122,32 @@ describe('useAccountQuery', () => {
 
         expect(result.current.data).toBeUndefined();
         expect(result.current.isLoading).toBe(false);
+    });
+});
+
+describe('useAccountExpandedInfo', () => {
+    it('should not fetch and report nothing when disabled', () => {
+        const { wrapper, fetchSpy } = createWrapper();
+        const { result } = renderHook(() => useAccountExpandedInfo(TEST_ADDRESS, false), { wrapper });
+
+        expect(fetchSpy).not.toHaveBeenCalled();
+        expect(result.current).toEqual({ data: undefined, isError: false, isLoading: false });
+    });
+
+    it('should fetch the parsed account by address when enabled', () => {
+        const { wrapper, fetchSpy } = createWrapper();
+        const { result } = renderHook(() => useAccountExpandedInfo(TEST_ADDRESS, true), { wrapper });
+
+        expect(fetchSpy).toHaveBeenCalledOnce();
+        expect(fetchSpy.mock.calls[0][0].toBase58()).toBe(TEST_ADDRESS);
+        expect(result.current.isLoading).toBe(true);
+    });
+
+    it('should return the cached account itself', () => {
+        const account = makeAccount(TEST_ADDRESS);
+        const { wrapper } = createWrapper({ [TEST_ADDRESS]: { data: account, status: FetchStatus.Fetched } });
+        const { result } = renderHook(() => useAccountExpandedInfo(TEST_ADDRESS, true), { wrapper });
+
+        expect(result.current.data).toBe(account);
     });
 });

@@ -1,12 +1,19 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { Cluster, clusterName, clusterSelection, ClusterStatus } from '@utils/cluster';
-import { type ReactNode } from 'react';
-import { SWRConfig, type SWRConfiguration, useSWRConfig } from 'swr';
+import { act, renderHook } from '@testing-library/react';
+import { Cluster, ClusterStatus } from '@utils/cluster';
+import { type SWRConfiguration } from 'swr';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Both from their own modules rather than the entity barrel, which this file mocks.
-import { toConnectableUrl } from '@/app/entities/cluster/lib/connectable-url';
-import type { useCluster } from '@/app/entities/cluster/model/use-cluster';
+import {
+    type ClusterContext,
+    clusterContext,
+    FAST_RETRY,
+    refocusTab,
+    renderHookWithRevalidate,
+    settleRetries,
+    swrWrapper,
+    UNTHROTTLED_FOCUS,
+    waitForHook,
+} from '@/app/__tests__/swr-hook';
 import { Logger } from '@/app/shared/lib/logger';
 import { ROUTE_TIMEOUT_MS, UPSTREAM_TIMEOUT_MS } from '@/app/shared/lib/timeouts';
 
@@ -16,44 +23,11 @@ const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
 const DEVNET_URL = 'https://api.devnet.solana.com';
 const LOCAL_URL = 'http://localhost:8899';
 
-/** Long enough to cover every backoff step the configured retry interval produces. */
-const RETRY_SETTLE_MS = 50;
-
-/** `SWRConfig` takes the cache provider too, which `SWRConfiguration` alone does not name. */
-type SwrOverrides = SWRConfiguration & { provider?: () => Map<unknown, unknown> };
-
 const mocks = vi.hoisted(() => ({
     cluster: {} as ClusterContext,
     getRpc: vi.fn(),
     getSupply: vi.fn(),
 }));
-
-// The real return type, not a hand-written stand-in: a stand-in weaker than the context lets the hook
-// read a field the provider no longer publishes, and types the endpoint as the plain string the brand
-// exists to refuse.
-type ClusterContext = ReturnType<typeof useCluster>;
-
-function clusterContext({
-    cluster,
-    connectableUrl,
-    status,
-    url,
-}: {
-    cluster: Cluster;
-    connectableUrl: string | undefined;
-    status: ClusterStatus;
-    url: string;
-}): ClusterContext {
-    const selection = clusterSelection(cluster, url);
-    return {
-        ...selection,
-        connectableUrl: connectableUrl === undefined ? undefined : toConnectableUrl(connectableUrl),
-        name: clusterName(cluster),
-        selection,
-        status,
-        url,
-    };
-}
 
 // `shouldUseDirectRpc` stays real: which endpoint gets asked is the decision under test.
 vi.mock('@entities/cluster', async () => {
@@ -94,7 +68,7 @@ describe('useSupply', () => {
     it('should ask the route while the cluster health check is still connecting', async () => {
         renderSupply();
 
-        await waitFor(() =>
+        await waitForHook(() =>
             expect(fetchMock).toHaveBeenCalledWith(
                 `/api/supply?cluster=${Cluster.MainnetBeta}`,
                 expect.objectContaining({ signal: expect.any(AbortSignal) }),
@@ -114,7 +88,7 @@ describe('useSupply', () => {
 
         const { result } = renderSupply();
 
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
         expect(fetchMock).toHaveBeenCalledWith(`/api/supply?cluster=${Cluster.MainnetBeta}`, expect.anything());
     });
 
@@ -125,7 +99,7 @@ describe('useSupply', () => {
 
         renderSupply();
 
-        await waitFor(() => expect(timeout).toHaveBeenCalledWith(ROUTE_TIMEOUT_MS));
+        await waitForHook(() => expect(timeout).toHaveBeenCalledWith(ROUTE_TIMEOUT_MS));
     });
 
     // A connection that is accepted and never answered would otherwise leave the card spinning for good:
@@ -138,7 +112,7 @@ describe('useSupply', () => {
 
         const { result } = renderSupply();
 
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
         expect(send).toHaveBeenCalledWith({ abortSignal: expect.any(AbortSignal) });
         expect(timeout).toHaveBeenCalledWith(UPSTREAM_TIMEOUT_MS);
     });
@@ -146,7 +120,7 @@ describe('useSupply', () => {
     it('should report the supply once the route answers', async () => {
         const { result } = renderSupply();
 
-        await waitFor(() =>
+        await waitForHook(() =>
             expect(result.current).toEqual({
                 kind: 'ready',
                 supply: { circulating: 1n, total: 3n },
@@ -166,7 +140,9 @@ describe('useSupply', () => {
 
         // The whole figure, not just the state: this path skips `parseSupplyPayload`, so nothing else
         // would notice the two counts being read out of the wrong fields.
-        await waitFor(() => expect(result.current).toEqual({ kind: 'ready', supply: { circulating: 1n, total: 3n } }));
+        await waitForHook(() =>
+            expect(result.current).toEqual({ kind: 'ready', supply: { circulating: 1n, total: 3n } }),
+        );
         expect(mocks.getRpc).toHaveBeenCalledWith('https://my-node.test');
         expect(fetchMock).not.toHaveBeenCalled();
         // Dropping the flag here would put the whole account list on the wire, in the browser.
@@ -186,7 +162,7 @@ describe('useSupply', () => {
 
         const { result } = renderSupply();
 
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
         expect(mocks.getRpc).toHaveBeenCalledWith('http://localhost:8899');
         expect(fetchMock).not.toHaveBeenCalled();
     });
@@ -203,7 +179,7 @@ describe('useSupply', () => {
 
         const { result } = renderSupply();
 
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        await settleRetries();
         expect(result.current).toEqual({ kind: 'loading' });
         expect(fetchMock).not.toHaveBeenCalled();
         expect(mocks.getRpc).not.toHaveBeenCalled();
@@ -211,7 +187,7 @@ describe('useSupply', () => {
 
     it('should drop the previous cluster figure when the cluster changes', async () => {
         const { rerender, result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
 
         // The next cluster never answers, so a figure carried over would surface here — one cluster's
         // supply beside another's stake is the mismatch this key exists to prevent.
@@ -225,7 +201,7 @@ describe('useSupply', () => {
         rerender();
 
         expect(result.current).toEqual({ kind: 'loading' });
-        await waitFor(() =>
+        await waitForHook(() =>
             expect(fetchMock).toHaveBeenCalledWith(`/api/supply?cluster=${Cluster.Devnet}`, expect.anything()),
         );
     });
@@ -234,7 +210,7 @@ describe('useSupply', () => {
     // key can tell the two requests apart.
     it('should ask again when only the endpoint changes', async () => {
         const { rerender, result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
 
         mocks.cluster = clusterContext({
             cluster: Cluster.MainnetBeta,
@@ -244,94 +220,38 @@ describe('useSupply', () => {
         });
         rerender();
 
-        await waitFor(() => expect(mocks.getRpc).toHaveBeenCalledWith(LOCAL_URL));
+        await waitForHook(() => expect(mocks.getRpc).toHaveBeenCalledWith(LOCAL_URL));
     });
 
-    it('should report a failure when the route fails', async () => {
-        fetchMock.mockResolvedValue({ ok: false, status: 502 } as Response);
-
-        const { result } = renderSupply();
-
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
-    });
-
-    // The server already logged it; repeating it per visitor turns one outage into a flood. Both levels
-    // asserted, because the gate that holds this back is the status test and not the retryable one — drop
-    // the status half and every `5xx` starts warning from every browser instead.
+    // Each needs someone to change configuration first, so a retry re-asks for the same answer. The
+    // route logged both, so a client report would turn one outage into one report per visitor.
     it.each([
-        ['a node the route could not reach', 502],
-        ['a cluster the route has no endpoint for', 500],
-    ])('should not report %s, which the route already logged', async (_reason, status) => {
+        ['a call the node refuses to serve', 502],
+        ['a cluster with no endpoint configured', 500],
+    ])('should neither retry nor report %s, which the route already logged', async (_reason, status) => {
         fetchMock.mockResolvedValue({ ok: false, status } as Response);
 
         const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        // `unavailable`, not a `failed` without a retry: the card picks its message off `kind`.
+        await waitForHook(() => expect(result.current).toEqual({ kind: 'unavailable' }));
+        await settleRetries();
 
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(Logger.error).not.toHaveBeenCalled();
         expect(Logger.warn).not.toHaveBeenCalled();
     });
 
-    it('should retry an upstream failure on its own, since the next attempt can answer differently', async () => {
-        fetchMock.mockResolvedValueOnce({ ok: false, status: 503 } as Response);
+    it.each([
+        ['an upstream failure, since the next attempt can answer differently', 503],
+        ['a deadline the route reported, since a node slow once may answer the next call', 504],
+        ['a rate limit, which clears on its own', 429],
+    ])('should retry %s', async (_reason, status) => {
+        fetchMock.mockResolvedValueOnce({ ok: false, status } as Response);
 
         const { result } = renderSupply();
 
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
         expect(fetchMock).toHaveBeenCalledTimes(2);
-    });
-
-    // The other half of the route's transient tier. A node that was slow once may answer the next call.
-    it('should retry a deadline the route reported', async () => {
-        fetchMock.mockResolvedValueOnce({ ok: false, status: 504 } as Response);
-
-        const { result } = renderSupply();
-
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
-        expect(fetchMock).toHaveBeenCalledTimes(2);
-    });
-
-    // The route answers 502 for a call the node refuses to serve: someone has to change configuration
-    // first, so every retry after that is another request for the same refusal.
-    it('should not retry a call the node refuses to serve', async () => {
-        fetchMock.mockResolvedValue({ ok: false, status: 502 } as Response);
-
-        const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
-
-        expect(fetchMock).toHaveBeenCalledTimes(1);
-    });
-
-    // A separate state, not a `failed` missing its retry: the card picks its message off `kind`, so a
-    // failure that carries no retry cannot be mistaken for one whose retry went missing.
-    it('should report an answer no retry can change as unavailable', async () => {
-        fetchMock.mockResolvedValue({ ok: false, status: 502 } as Response);
-
-        const { result } = renderSupply();
-
-        await waitFor(() => expect(result.current).toEqual({ kind: 'unavailable' }));
-    });
-
-    // The route answers 500 for a cluster it serves with no endpoint set. That waits on someone setting
-    // one, so a retry here would only re-ask for the same answer and hand the visitor a dead button.
-    it('should not retry, nor offer a retry for, a cluster with no endpoint configured', async () => {
-        fetchMock.mockResolvedValue({ ok: false, status: 500 } as Response);
-
-        const { result } = renderSupply();
-        await waitFor(() => expect(result.current).toEqual({ kind: 'unavailable' }));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
-
-        expect(fetchMock).toHaveBeenCalledTimes(1);
-    });
-
-    it('should offer a retry where the next attempt could answer differently', async () => {
-        fetchMock.mockResolvedValue({ ok: false, status: 503 } as Response);
-
-        const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
-
-        expect(result.current).toEqual({ kind: 'failed', retry: expect.any(Function) });
     });
 
     // Unclassified, so most likely the connection rather than the answer.
@@ -340,30 +260,21 @@ describe('useSupply', () => {
 
         const { result } = renderSupply();
 
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
         expect(fetchMock).toHaveBeenCalledTimes(2);
-    });
-
-    // It will refuse the next attempt identically.
-    it('should not retry a cluster the route refuses', async () => {
-        fetchMock.mockResolvedValue({ ok: false, status: 400 } as Response);
-
-        const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
-
-        expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     // The route stays quiet about a refusal, because any caller can provoke one. This caller sends a
     // single fixed request, so a refusal reaching it means our own bug or a deploy that left it behind —
-    // and nothing else anywhere would say so.
-    it('should report a refusal the route deliberately did not', async () => {
+    // and nothing else anywhere would say so. It will refuse the next attempt identically.
+    it('should report a refusal the route deliberately did not, and not retry it', async () => {
         fetchMock.mockResolvedValue({ ok: false, status: 400 } as Response);
 
         const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
+        await waitForHook(() => expect(result.current.kind).toBe('unavailable'));
+        await settleRetries();
 
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(Logger.warn).toHaveBeenCalledWith(
             expect.any(String),
             expect.objectContaining({
@@ -379,20 +290,9 @@ describe('useSupply', () => {
         fetchMock.mockResolvedValue({ ok: false, status: 401 } as Response);
 
         const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
+        await waitForHook(() => expect(result.current.kind).toBe('unavailable'));
 
         expect(Logger.error).not.toHaveBeenCalled();
-    });
-
-    // Not the route's own answer: a rate limit comes from whatever stands in front of it, and it clears on
-    // its own. Read as permanent it would hand the visitor a dead card until they reloaded the page.
-    it('should retry a rate limit and offer a retry for it', async () => {
-        fetchMock.mockResolvedValueOnce({ ok: false, status: 429 } as Response);
-
-        const { result } = renderSupply();
-
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
-        expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
     // Nobody's bug, and one throttled region would otherwise report once per visitor.
@@ -400,8 +300,8 @@ describe('useSupply', () => {
         fetchMock.mockResolvedValue({ ok: false, status: 429 } as Response);
 
         const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        await waitForHook(() => expect(result.current.kind).toBe('failed'));
+        await settleRetries();
 
         expect(Logger.warn).not.toHaveBeenCalled();
         expect(Logger.error).not.toHaveBeenCalled();
@@ -417,25 +317,21 @@ describe('useSupply', () => {
 
         const { result } = renderSupply();
 
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
         expect(Logger.error).not.toHaveBeenCalled();
     });
 
-    it('should report a failure when the route answers with a body it cannot trust', async () => {
+    // The only failure the server cannot see, so the only one worth reporting from here. It answered once
+    // and will answer the same way, so retrying just repeats the report.
+    it('should report a body it cannot trust once, without retrying it', async () => {
         fetchMock.mockResolvedValue({ json: () => Promise.resolve({ circulating: 'lots' }), ok: true } as Response);
 
         const { result } = renderSupply();
+        await waitForHook(() => expect(result.current.kind).toBe('unavailable'));
+        await settleRetries();
 
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
-    });
-
-    // The only failure the server cannot see, so the only one worth reporting from here.
-    it('should report a body it cannot trust, which the route answered 200 for', async () => {
-        fetchMock.mockResolvedValue({ json: () => Promise.resolve({ circulating: 'lots' }), ok: true } as Response);
-
-        const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
-
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(Logger.error).toHaveBeenCalledTimes(1);
         expect(Logger.error).toHaveBeenCalledWith(
             expect.any(Error),
             expect.objectContaining({
@@ -445,25 +341,13 @@ describe('useSupply', () => {
         );
     });
 
-    // It answered once and will answer the same way, so retrying just repeats the report.
-    it('should not retry a body it cannot read, nor report it more than once', async () => {
-        fetchMock.mockResolvedValue({ json: () => Promise.resolve({ circulating: 'lots' }), ok: true } as Response);
-
-        const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('unavailable'));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
-
-        expect(fetchMock).toHaveBeenCalledTimes(1);
-        expect(Logger.error).toHaveBeenCalledTimes(1);
-    });
-
     it("should not retry at the visitor's own node, where each attempt is another scan", async () => {
         mocks.cluster = customCluster();
         mocks.getSupply.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
 
         const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        await waitForHook(() => expect(result.current.kind).toBe('failed'));
+        await settleRetries();
 
         expect(mocks.getSupply).toHaveBeenCalledTimes(1);
         // That endpoint is the visitor's own, and its URL can carry their key.
@@ -482,7 +366,7 @@ describe('useSupply', () => {
         mocks.getSupply.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
 
         const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
+        await waitForHook(() => expect(result.current.kind).toBe('failed'));
 
         expect(Logger.error).toHaveBeenCalledWith(
             expect.any(Error),
@@ -495,8 +379,8 @@ describe('useSupply', () => {
 
     it('should keep supply already in hand when a revalidation fails', async () => {
         // SWR reports a failed revalidation alongside the data it already holds.
-        const { result } = renderSupplyWithRevalidate();
-        await waitFor(() => expect(result.current.state.kind).toBe('ready'));
+        const { result } = renderHookWithRevalidate(() => useSupply(), FAST_RETRY);
+        await waitForHook(() => expect(result.current.state.kind).toBe('ready'));
 
         fetchMock.mockResolvedValue({ ok: false, status: 502 } as Response);
         await act(async () => {
@@ -509,33 +393,18 @@ describe('useSupply', () => {
         expect(result.current.state).toEqual({ kind: 'ready', supply: { circulating: 1n, total: 3n } });
     });
 
-    // Nothing caches a ledger scan at someone's own node, so the defaults would repeat it per tab switch.
-    it("should not re-scan the visitor's own node when the tab regains focus", async () => {
+    // Nothing caches a ledger scan at someone's own node, so the defaults would repeat it per tab switch,
+    // and per laptop waking, VPN flap or phone changing network.
+    it("should not re-scan the visitor's own node when the tab regains focus or the connection comes back", async () => {
         mocks.cluster = customCluster();
 
         const { result } = renderSupply(UNTHROTTLED_FOCUS);
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
         expect(mocks.getSupply).toHaveBeenCalledTimes(1);
 
         await refocusTab();
-        // The wait is the assertion: checking straight after the event passes either way.
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
-
-        expect(mocks.getSupply).toHaveBeenCalledTimes(1);
-    });
-
-    // A laptop waking, a VPN flap, a phone changing network: the same trade as focus, through the one
-    // door the other two tests leave open.
-    it("should not re-scan the visitor's own node when the connection comes back", async () => {
-        mocks.cluster = customCluster();
-
-        const { result } = renderSupply({ dedupingInterval: 0 });
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
-        expect(mocks.getSupply).toHaveBeenCalledTimes(1);
-
         await act(async () => window.dispatchEvent(new Event('online')));
-        // The wait is the assertion: checking straight after the event passes either way.
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        await settleRetries();
 
         expect(mocks.getSupply).toHaveBeenCalledTimes(1);
     });
@@ -545,15 +414,15 @@ describe('useSupply', () => {
         mocks.cluster = customCluster();
         // One Map for both mounts, and no deduping, so only staleness can hold the second request back.
         const cache = new Map();
-        const sharedCache: SwrOverrides = { dedupingInterval: 0, provider: () => cache };
+        const sharedCache: SWRConfiguration = { dedupingInterval: 0, provider: () => cache };
 
         const { result: firstVisit, unmount } = renderSupply(sharedCache);
-        await waitFor(() => expect(firstVisit.current.kind).toBe('ready'));
+        await waitForHook(() => expect(firstVisit.current.kind).toBe('ready'));
         unmount();
 
         const { result } = renderSupply(sharedCache);
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
+        await settleRetries();
 
         expect(mocks.getSupply).toHaveBeenCalledTimes(1);
     });
@@ -561,12 +430,12 @@ describe('useSupply', () => {
     // The other side of the trade: behind the cache a refresh is free.
     it('should refresh through the route when the tab regains focus', async () => {
         const { result } = renderSupply(UNTHROTTLED_FOCUS);
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
         expect(fetchMock).toHaveBeenCalledTimes(1);
 
         await refocusTab();
 
-        await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+        await waitForHook(() => expect(fetchMock).toHaveBeenCalledTimes(2));
     });
 
     // An endpoint failing this often will not answer the next attempt either, and a tab may sit open for
@@ -575,53 +444,27 @@ describe('useSupply', () => {
     // Deduping off, and the count pinned rather than sampled twice: deduping throttles the retries to one
     // per interval, which leaves any short window unable to tell a retry that stopped from one still
     // waiting its turn — so the sampled version passed whenever the cap was gone.
-    it('should stop retrying a failure that keeps repeating', async () => {
+    it('should stop retrying a failure that keeps repeating, and ask again when the visitor retries it', async () => {
         fetchMock.mockResolvedValue({ ok: false, status: 503 } as Response);
 
         const { result } = renderSupply({ dedupingInterval: 0 });
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
+        await waitForHook(() => expect(result.current.kind).toBe('failed'));
+        await settleRetries();
 
         expect(fetchMock).toHaveBeenCalledTimes(ERROR_RETRY_COUNT + 1);
-    });
-
-    it('should ask again when the visitor retries a failure', async () => {
-        fetchMock.mockResolvedValue({ ok: false, status: 503 } as Response);
-
-        const { result } = renderSupply();
-        await waitFor(() => expect(result.current.kind).toBe('failed'));
-        // Let the automatic retries run out, so the recovery below is the visitor's retry.
-        await new Promise(resolve => setTimeout(resolve, RETRY_SETTLE_MS));
-
         const state = result.current;
-        if (state.kind !== 'failed' || !state.retry) throw new Error(`expected a retryable failure, got ${state.kind}`);
+        expect(state).toEqual({ kind: 'failed', retry: expect.any(Function) });
+        if (state.kind !== 'failed') throw new Error(`expected a retryable failure, got ${state.kind}`);
         fetchMock.mockResolvedValue(supplyResponse());
-        await act(async () => state.retry?.());
+        await act(async () => state.retry());
 
-        await waitFor(() => expect(result.current.kind).toBe('ready'));
+        await waitForHook(() => expect(result.current.kind).toBe('ready'));
     });
 });
 
-function renderSupply(overrides: SwrOverrides = {}) {
-    return renderHook(() => useSupply(), { wrapper: swrWrapper(overrides) });
+function renderSupply(overrides: SWRConfiguration = {}) {
+    return renderHook(() => useSupply(), { wrapper: swrWrapper({ ...FAST_RETRY, ...overrides }) });
 }
-
-/** A handle on `mutate`, to force a revalidation the hook does not expose. */
-function renderSupplyWithRevalidate() {
-    return renderHook(() => ({ revalidate: useSWRConfig().mutate, state: useSupply() }), { wrapper: swrWrapper() });
-}
-
-/** A cache per test, so one test's pending promise cannot satisfy the next. Retries stay fast. */
-function swrWrapper(overrides: SwrOverrides = {}) {
-    return function Wrapper({ children }: { children: ReactNode }) {
-        return (
-            <SWRConfig value={{ errorRetryInterval: 1, provider: () => new Map(), ...overrides }}>{children}</SWRConfig>
-        );
-    };
-}
-
-/** Both throttles off, so a request following a focus is the config's doing and not a coincidence. */
-const UNTHROTTLED_FOCUS: SwrOverrides = { dedupingInterval: 0, focusThrottleInterval: 0 };
 
 /** A settled custom endpoint, which goes straight to the node. */
 function customCluster() {
@@ -630,13 +473,6 @@ function customCluster() {
         connectableUrl: 'https://my-node.test',
         status: ClusterStatus.Connected,
         url: 'https://my-node.test',
-    });
-}
-
-async function refocusTab() {
-    await act(async () => {
-        window.dispatchEvent(new Event('focus'));
-        document.dispatchEvent(new Event('visibilitychange'));
     });
 }
 

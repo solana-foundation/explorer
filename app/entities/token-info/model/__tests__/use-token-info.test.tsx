@@ -1,7 +1,9 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import useSWR from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { waitForHook } from '@/app/__tests__/swr-hook';
 
 import { useTokenInfo } from '../use-token-info';
 
@@ -37,13 +39,13 @@ describe('useTokenInfo', () => {
         ['true with empty pubkey', true, ''],
     ])('should not request token info when fetchTokenLabelInfo is %s', async (_label, fetch, pubkey) => {
         renderHook(() => useTokenInfo(fetch, pubkey, Cluster.MainnetBeta));
-        await waitFor(() => expect(mockRequestTokenInfo).not.toHaveBeenCalled());
+        await waitForHook(() => expect(mockRequestTokenInfo).not.toHaveBeenCalled());
     });
 
     it('should request token info with correct args including genesisHash', async () => {
         renderHook(() => useTokenInfo(true, ADDR, Cluster.MainnetBeta, 'abc123'));
 
-        await waitFor(() => {
+        await waitForHook(() => {
             expect(mockRequestTokenInfo).toHaveBeenCalledWith(ADDR, Cluster.MainnetBeta, 'abc123');
         });
     });
@@ -71,15 +73,15 @@ describe('useTokenInfo', () => {
             initialProps: { cluster: Cluster.MainnetBeta, pubkey: 'address1' },
         });
 
-        await waitFor(() => {
+        await waitForHook(() => {
             expect(mockRequestTokenInfo).toHaveBeenCalledWith('address1', Cluster.MainnetBeta, undefined);
         });
 
         rerender({ cluster: Cluster.MainnetBeta, pubkey: 'address2' });
-        await waitFor(() => expect(mockRequestTokenInfo).toHaveBeenCalledTimes(2));
+        await waitForHook(() => expect(mockRequestTokenInfo).toHaveBeenCalledTimes(2));
 
         rerender({ cluster: Cluster.Devnet, pubkey: 'address2' });
-        await waitFor(() => expect(mockRequestTokenInfo).toHaveBeenCalledTimes(3));
+        await waitForHook(() => expect(mockRequestTokenInfo).toHaveBeenCalledTimes(3));
         expect(mockRequestTokenInfo).toHaveBeenLastCalledWith('address2', Cluster.Devnet, undefined);
     });
 });

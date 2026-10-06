@@ -1,8 +1,9 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { createElement, type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
+// @vitest-environment jsdom
+
+import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
+import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
@@ -11,7 +12,6 @@ import { TokenMarketDataStatus } from '../types';
 import { fetchTokenMarketData, useTokenMarketData } from '../use-token-market-data';
 
 vi.mock('@/app/providers/cluster', () => ({ useCluster: vi.fn() }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), panic: vi.fn(), warn: vi.fn() } }));
 vi.mock('@/app/utils/use-tab-visibility', () => ({ default: vi.fn() }));
 
 import { useCluster } from '@/app/providers/cluster';
@@ -98,25 +98,19 @@ describe('useTokenMarketData', () => {
     });
     afterEach(() => vi.restoreAllMocks());
 
-    function wrapper({ children }: { children: ReactNode }) {
-        return createElement(
-            SWRConfig,
-            { value: { dedupingInterval: 0, errorRetryCount: 2, errorRetryInterval: 50, provider: () => new Map() } },
-            children,
-        );
-    }
+    const wrapper = swrWrapper({ dedupingInterval: 0, errorRetryCount: 2, errorRetryInterval: 50 });
 
     it('should be Success when fetch succeeds', async () => {
         mockResponse(200, createTokenMarketData());
         const { result } = renderHook(() => useTokenMarketData('addr', true), { wrapper });
-        await waitFor(() => expect(result.current?.status).toBe(TokenMarketDataStatus.Success));
+        await waitForHook(() => expect(result.current?.status).toBe(TokenMarketDataStatus.Success));
         expect(result.current?.stats?.price).toBe(1.23);
     });
 
     it('should be FetchFailed for 404 without retry', async () => {
         mockResponse(404);
         const { result } = renderHook(() => useTokenMarketData('addr', true), { wrapper });
-        await waitFor(() => expect(result.current?.status).toBe(TokenMarketDataStatus.FetchFailed));
+        await waitForHook(() => expect(result.current?.status).toBe(TokenMarketDataStatus.FetchFailed));
         expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
 

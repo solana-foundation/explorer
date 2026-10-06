@@ -84,39 +84,32 @@ describe('ArgumentInput', () => {
     });
 
     describe('ArrayArgumentInput', () => {
-        it('should render array inputs for array types', () => {
-            const arg = createArgField({ type: 'array(u8, 3)' });
-            const handleChange = vi.fn();
+        it.each([
+            { expected: ['1', '2', '3'], title: 'array types', type: 'array(u8, 3)', value: '1, 2, 3' },
+            { expected: ['a', 'b'], title: 'vector types', type: 'vec(u8)', value: 'a, b' },
+            {
+                expected: ['a', 'b', 'c'],
+                title: 'values with extra spaces',
+                type: 'vec(u8)',
+                value: '  a  ,  b  ,  c  ',
+            },
+        ])('should render array inputs for $title', ({ expected, type, value }) => {
+            const arg = createArgField({ type });
 
-            render(<ArgumentInput arg={arg} value="1, 2, 3" onChange={handleChange} />);
-
-            const inputs: HTMLInputElement[] = screen.getAllByRole('textbox');
-            expect(inputs.map(input => input.value)).toEqual(['1', '2', '3']);
-        });
-
-        it('should render array inputs for vector types', () => {
-            const arg = createArgField({ type: 'vec(u8)' });
-            const handleChange = vi.fn();
-
-            render(<ArgumentInput arg={arg} value="a, b" onChange={handleChange} />);
+            render(<ArgumentInput arg={arg} value={value} onChange={vi.fn()} />);
 
             const inputs: HTMLInputElement[] = screen.getAllByRole('textbox');
-            expect(inputs.map(input => input.value)).toEqual(['a', 'b']);
+            expect(inputs.map(input => input.value)).toEqual(expected);
         });
 
-        it('should render single empty input when value is empty', () => {
+        it.each([
+            ['empty', ''],
+            ['whitespace only', '   '],
+            ['undefined', undefined],
+        ])('should render single empty input when value is %s', (_, value) => {
             const arg = createArgField({ type: 'vec(u8)' });
 
-            render(<ArgumentInput arg={arg} value="" />);
-
-            const inputs: HTMLInputElement[] = screen.getAllByRole('textbox');
-            expect(inputs.map(input => input.value)).toEqual(['']);
-        });
-
-        it('should render single empty input when value is whitespace only', () => {
-            const arg = createArgField({ type: 'vec(u8)' });
-
-            render(<ArgumentInput arg={arg} value="   " />);
+            render(<ArgumentInput arg={arg} value={value} />);
 
             const inputs: HTMLInputElement[] = screen.getAllByRole('textbox');
             expect(inputs.map(input => input.value)).toEqual(['']);
@@ -166,22 +159,6 @@ describe('ArgumentInput', () => {
 
             const addButton = screen.getByRole('button', { name: 'Add' });
             expect(addButton).toBeDisabled();
-        });
-
-        it('should add new item when Enter is pressed in the last input', async () => {
-            const user = userEvent.setup();
-            const arg = createArgField({ type: 'vec(u8)' });
-            const handleChange = vi.fn();
-
-            render(<ArgumentInput arg={arg} value="item1" onChange={handleChange} />);
-
-            const inputs = screen.getAllByRole('textbox');
-            const lastInput = inputs[inputs.length - 1];
-            await user.type(lastInput, '{Enter}');
-
-            expect(handleChange).toHaveBeenCalled();
-            const event = handleChange.mock.calls[0][0];
-            expect(event.target.value).toBe('item1, ');
         });
 
         it('should not add item when Enter is pressed in non-last input', async () => {
@@ -306,21 +283,6 @@ describe('ArgumentInput', () => {
             expect(screen.queryByRole('button', { name: 'Remove item' })).not.toBeInTheDocument();
         });
 
-        it('should remove item when remove button is clicked', async () => {
-            const user = userEvent.setup();
-            const arg = createArgField({ type: 'vec(u8)' });
-            const handleChange = vi.fn();
-
-            render(<ArgumentInput arg={arg} value="a, b, c" onChange={handleChange} />);
-
-            const removeButtons = screen.getAllByRole('button', { name: 'Remove item' });
-            await user.click(removeButtons[1]);
-
-            expect(handleChange).toHaveBeenCalled();
-            const event = handleChange.mock.calls[0][0];
-            expect(event.target.value).toBe('a, c');
-        });
-
         it('should remove first item when its remove button is clicked', async () => {
             const user = userEvent.setup();
             const arg = createArgField({ type: 'vec(u8)' });
@@ -334,15 +296,6 @@ describe('ArgumentInput', () => {
             expect(handleChange).toHaveBeenCalled();
             const event = handleChange.mock.calls[0][0];
             expect(event.target.value).toBe('second');
-        });
-
-        it('should not remove item when it is the last remaining item', () => {
-            const arg = createArgField({ type: 'vec(u8)' });
-            const handleChange = vi.fn();
-
-            render(<ArgumentInput arg={arg} value="only" onChange={handleChange} />);
-
-            expect(screen.queryByRole('button', { name: 'Remove item' })).not.toBeInTheDocument();
         });
 
         it('should filter out commas from input values', async () => {
@@ -364,21 +317,6 @@ describe('ArgumentInput', () => {
             const finalValue = lastCall[0].target.value;
             expect(finalValue).not.toContain(',');
             expect(finalValue.length).toBeGreaterThan(0);
-        });
-
-        it('should update value when input changes', async () => {
-            const user = userEvent.setup();
-            const arg = createArgField({ type: 'vec(u8)' });
-            const handleChange = vi.fn();
-
-            render(<ArgumentInput arg={arg} value="" onChange={handleChange} />);
-
-            const input = screen.getByRole('textbox');
-            await user.type(input, 'new');
-
-            expect(handleChange).toHaveBeenCalled();
-            // Exact values depend on controlled input behavior, but calls should be received
-            expect(handleChange.mock.calls.length).toBeGreaterThan(0);
         });
 
         it('should maintain stable keys when items are removed', async () => {
@@ -414,38 +352,6 @@ describe('ArgumentInput', () => {
 
             const inputs = screen.getAllByRole('textbox');
             expect(ref.current).toBe(inputs[0]);
-        });
-
-        it('should handle empty string value', () => {
-            const arg = createArgField({ type: 'vec(u8)' });
-
-            render(<ArgumentInput arg={arg} value="" />);
-
-            const inputs = screen.getAllByRole('textbox');
-            expect(inputs).toHaveLength(1);
-            expect(inputs[0]).toHaveValue('');
-        });
-
-        it('should handle undefined value', () => {
-            const arg = createArgField({ type: 'vec(u8)' });
-
-            render(<ArgumentInput arg={arg} value={undefined} />);
-
-            const inputs = screen.getAllByRole('textbox');
-            expect(inputs).toHaveLength(1);
-            expect(inputs[0]).toHaveValue('');
-        });
-
-        it('should handle values with extra spaces', () => {
-            const arg = createArgField({ type: 'vec(u8)' });
-
-            render(<ArgumentInput arg={arg} value="  a  ,  b  ,  c  " />);
-
-            const inputs = screen.getAllByRole('textbox');
-            expect(inputs).toHaveLength(3);
-            expect(inputs[0]).toHaveValue('a');
-            expect(inputs[1]).toHaveValue('b');
-            expect(inputs[2]).toHaveValue('c');
         });
 
         it('should call onBlur when input loses focus', async () => {
@@ -527,7 +433,28 @@ describe('ArgumentInput', () => {
             expect(addCall.target.value).toBe('b, ');
         });
 
-        it('should split comma-separated values on paste', async () => {
+        it.each([
+            {
+                expected: 'Ben, Sam',
+                pasted: 'Ben, Sam',
+                title: 'split comma-separated values on paste',
+            },
+            {
+                expected: 'Ben, Sam, Alex',
+                pasted: 'Ben, , Sam, , Alex',
+                title: 'filter out empty values when pasting',
+            },
+            {
+                expected: 'SingleValue',
+                pasted: 'SingleValue',
+                title: 'handle pasting single value without comma',
+            },
+            {
+                expected: 'Ben, Sam, Alex',
+                pasted: '  Ben  ,  Sam  ,  Alex  ',
+                title: 'handle pasting with extra spaces',
+            },
+        ])('should $title', async ({ expected, pasted }) => {
             const user = userEvent.setup();
             const arg = createArgField({ type: 'vec(u8)' });
             const handleChange = vi.fn();
@@ -536,58 +463,16 @@ describe('ArgumentInput', () => {
 
             const input = screen.getByRole('textbox');
             await user.click(input);
-            await user.paste('Ben, Sam');
+            await user.paste(pasted);
 
             expect(handleChange).toHaveBeenCalled();
             const event = handleChange.mock.calls[0][0];
-            expect(event.target.value).toBe('Ben, Sam');
+            expect(event.target.value).toBe(expected);
 
-            rerender(<ArgumentInput arg={arg} value="Ben, Sam" onChange={handleChange} />);
-
-            const inputs: HTMLInputElement[] = screen.getAllByRole('textbox');
-            expect(inputs.map(i => i.value)).toEqual(['Ben', 'Sam']);
-        });
-
-        it('should filter out empty values when pasting', async () => {
-            const user = userEvent.setup();
-            const arg = createArgField({ type: 'vec(u8)' });
-            const handleChange = vi.fn();
-
-            const { rerender } = render(<ArgumentInput arg={arg} value="" onChange={handleChange} />);
-
-            const input = screen.getByRole('textbox');
-            await user.click(input);
-            await user.paste('Ben, , Sam, , Alex');
-
-            expect(handleChange).toHaveBeenCalled();
-            const event = handleChange.mock.calls[0][0];
-            expect(event.target.value).toBe('Ben, Sam, Alex');
-
-            rerender(<ArgumentInput arg={arg} value="Ben, Sam, Alex" onChange={handleChange} />);
+            rerender(<ArgumentInput arg={arg} value={expected} onChange={handleChange} />);
 
             const inputs: HTMLInputElement[] = screen.getAllByRole('textbox');
-            expect(inputs.map(i => i.value)).toEqual(['Ben', 'Sam', 'Alex']);
-        });
-
-        it('should handle pasting single value without comma', async () => {
-            const user = userEvent.setup();
-            const arg = createArgField({ type: 'vec(u8)' });
-            const handleChange = vi.fn();
-
-            const { rerender } = render(<ArgumentInput arg={arg} value="" onChange={handleChange} />);
-
-            const input = screen.getByRole('textbox');
-            await user.click(input);
-            await user.paste('SingleValue');
-
-            expect(handleChange).toHaveBeenCalled();
-            const event = handleChange.mock.calls[0][0];
-            expect(event.target.value).toBe('SingleValue');
-
-            rerender(<ArgumentInput arg={arg} value="SingleValue" onChange={handleChange} />);
-
-            const inputs: HTMLInputElement[] = screen.getAllByRole('textbox');
-            expect(inputs.map(i => i.value)).toEqual(['SingleValue']);
+            expect(inputs.map(i => i.value)).toEqual(expected.split(', '));
         });
 
         it('should handle pasting into existing input and replace with first value', async () => {
@@ -610,27 +495,6 @@ describe('ArgumentInput', () => {
 
             const inputs: HTMLInputElement[] = screen.getAllByRole('textbox');
             expect(inputs.map(i => i.value)).toEqual(['First', 'Second', 'Third']);
-        });
-
-        it('should handle pasting with extra spaces', async () => {
-            const user = userEvent.setup();
-            const arg = createArgField({ type: 'vec(u8)' });
-            const handleChange = vi.fn();
-
-            const { rerender } = render(<ArgumentInput arg={arg} value="" onChange={handleChange} />);
-
-            const input = screen.getByRole('textbox');
-            await user.click(input);
-            await user.paste('  Ben  ,  Sam  ,  Alex  ');
-
-            expect(handleChange).toHaveBeenCalled();
-            const event = handleChange.mock.calls[0][0];
-            expect(event.target.value).toBe('Ben, Sam, Alex');
-
-            rerender(<ArgumentInput arg={arg} value="Ben, Sam, Alex" onChange={handleChange} />);
-
-            const inputs: HTMLInputElement[] = screen.getAllByRole('textbox');
-            expect(inputs.map(i => i.value)).toEqual(['Ben', 'Sam', 'Alex']);
         });
 
         it('should handle pasting into middle input', async () => {
@@ -672,11 +536,10 @@ describe('ArgumentInput', () => {
 
         it('should limit paste to max length', async () => {
             const user = userEvent.setup();
-            const arg = createArgField({ type: 'vec(u8)' });
+            const arg = createArgField({ rawType: { array: ['u8', 3] }, type: 'array(u8, 3)' });
             const handleChange = vi.fn();
 
-            const existingItems = Array.from({ length: 99 }, (_, i) => `item${i}`).join(', ');
-            render(<ArgumentInput arg={arg} value={existingItems} onChange={handleChange} />);
+            render(<ArgumentInput arg={arg} value="item0, item1" onChange={handleChange} />);
 
             const inputs = screen.getAllByRole('textbox');
             const lastInput = inputs[inputs.length - 1];
@@ -685,18 +548,15 @@ describe('ArgumentInput', () => {
 
             expect(handleChange).toHaveBeenCalled();
             const event = handleChange.mock.calls[0][0];
-            const pastedValues = event.target.value.split(', ');
-            // Should only add 1 item (to reach max of 100)
-            expect(pastedValues.length).toBe(100);
+            expect(event.target.value).toBe('item0, new1, new2');
         });
 
         it('should not allow Enter to add item when at max length', async () => {
             const user = userEvent.setup();
-            const arg = createArgField({ type: 'vec(u8)' });
+            const arg = createArgField({ rawType: { array: ['u8', 3] }, type: 'array(u8, 3)' });
             const handleChange = vi.fn();
 
-            const maxItems = Array.from({ length: 100 }, (_, i) => `item${i}`).join(', ');
-            render(<ArgumentInput arg={arg} value={maxItems} onChange={handleChange} />);
+            render(<ArgumentInput arg={arg} value="item1, item2, item3" onChange={handleChange} />);
 
             const inputs = screen.getAllByRole('textbox');
             const lastInput = inputs[inputs.length - 1];

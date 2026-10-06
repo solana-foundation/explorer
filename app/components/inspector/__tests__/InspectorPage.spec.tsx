@@ -1,18 +1,20 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import type { AccountInfo } from '@solana/web3.js';
 import { generated, PROGRAM_ID } from '@sqds/multisig';
-import { render, screen } from '@testing-library/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { screen, waitFor } from '@testing-library/react';
+import { useSearchParams } from 'next/navigation';
 import React from 'react';
-import type { Key } from 'swr';
+import useSWR, { type Key } from 'swr';
 import { describe, expect, type Mock, test, vi } from 'vitest';
 
-import { InstructionParserProvider } from '@/app/entities/instruction-parser';
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
+import { readCell, renderWithProviders } from '@/app/__tests__/card-harness';
+import * as stubs from '@/app/__tests__/mock-stubs';
+import { createV1TransactionBytes } from '@/app/entities/transaction-data/__fixtures__/wire-transactions';
+import { toBase64 } from '@/app/shared/lib/bytes';
+import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
+import { ADDRESS_TABLE_LOOKUPS_CARD_TITLE } from '../AddressTableLookupsCard';
 import { TransactionInspectorPage, vaultMessageToVersionedMessage } from '../InspectorPage';
 
 vi.mock('swr', () => ({
@@ -20,42 +22,30 @@ vi.mock('swr', () => ({
     default: vi.fn(() => ({ data: undefined })),
 }));
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(),
-    useSearchParams: vi.fn(),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
+
+beforeEach(() => {
+    // The page fetches the /api/idl-latest route; an empty payload means no IDL.
+    vi.stubGlobal(
+        'fetch',
+        vi.fn(async () => new Response(JSON.stringify({}), { headers: { 'Content-Type': 'application/json' } })),
+    );
+});
+
+afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.clearAllMocks();
+});
 
 describe('TransactionInspectorPage with Squads Transaction', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
         vi.useFakeTimers({ shouldAdvanceTime: true });
-
-        const params = new URLSearchParams();
-        params.set('squadsTx', 'ASwDJP5mzxV1dfov2eQz5WAVEy833nwK17VLcjsrZsZf');
-
-        vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(
-            params as unknown as ReturnType<typeof useSearchParams>,
-        );
-        vi.spyOn(await import('next/navigation'), 'useRouter').mockReturnValue({
-            push: vi.fn(),
-            replace: vi.fn(),
-        } as unknown as ReturnType<typeof useRouter>);
-
-        // Mock fetch for the /api/idl-latest route (catch-all empty payload — no IDL needed here)
-        global.fetch = vi.fn().mockImplementation(() =>
-            Promise.resolve(
-                new Response(JSON.stringify({}), {
-                    headers: { 'Content-Type': 'application/json' },
-                    status: 200,
-                }),
-            ),
-        );
+        setParam('squadsTx', 'ASwDJP5mzxV1dfov2eQz5WAVEy833nwK17VLcjsrZsZf');
     });
 
     afterEach(() => {
         vi.clearAllTimers();
         vi.useRealTimers();
-        vi.clearAllMocks();
     });
 
     test('should render without crashing and load Squads account data', async () => {
@@ -140,20 +130,70 @@ describe('TransactionInspectorPage with Squads Transaction', () => {
     });
 });
 
-function setup() {
-    const renderWithContext = () => {
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <InstructionParserProvider dispatcher={instructionParserDispatcher}>
-                            <TransactionInspectorPage showTokenBalanceChanges={false} />
-                        </InstructionParserProvider>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
+describe('TransactionInspectorPage with a ?message= param', () => {
+    beforeEach(() => {
+        vi.mocked(useSWR).mockReturnValue({ data: undefined } as ReturnType<typeof useSWR>);
+    });
+
+    test('should render a v1 message in the overview', async () => {
+        const { messageBytes } = parseTransactionBytes(
+            createV1TransactionBytes({ computeUnitLimit: 300_000, priorityFeeLamports: 50n }),
         );
-    };
+        setParam('message', encodeURIComponent(toBase64(messageBytes)));
+
+        renderPage({ transactions: false });
+
+        expect(await screen.findByRole('heading', { name: 'Overview' })).toBeInTheDocument();
+        expect(screen.queryByText('Inspector Input')).toBeNull();
+        expect(screen.getByText('v1')).toBeInTheDocument();
+        expect(screen.getByText('Compute unit limit')).toBeInTheDocument();
+        expect(screen.getByText('300,000')).toBeInTheDocument();
+        expect(screen.getByText('Priority fee (total)')).toBeInTheDocument();
+        expect(screen.getByText('Account List')).toBeInTheDocument();
+        // v1 messages carry static accounts only, so neither the lookups card nor the
+        // lookup-derived account badges appear.
+        expect(screen.queryByText(ADDRESS_TABLE_LOOKUPS_CARD_TITLE)).toBeNull();
+        expect(screen.queryByText('Address Table Lookup')).toBeNull();
+    });
+
+    test('should render a SystemProgram::CreateAccount instruction', async () => {
+        setParam('message', decodeURIComponent(stubs.systemProgramCreateAccountQueryParam));
+
+        renderPage();
+
+        await waitFor(() => {
+            expect(screen.queryByText(/Inspector Input/i)).toBeNull();
+        });
+        await waitFor(() => {
+            expect(screen.queryByText(/Loading/i)).toBeNull();
+        });
+        expect(screen.getByText(/System Program: Create Account/i)).toBeInTheDocument();
+        await waitFor(() => {
+            expect(readCell('Program')).toMatch(/System Program/);
+        });
+        expect(readCell('From Address')).toMatch(/paykgcZ547qCd1sm3kBn83t9Fnr2hxM6anLBXhV7Fhn/);
+        expect(readCell('New Address')).toMatch(/recvKuUhe9nsQ4QzrW68rTnzFT2S2dGmBKFNRfQB4Lp/);
+        expect(readCell('Transfer Amount (SOL)')).toMatch(/0.001/);
+        expect(readCell('Allocated Data Size')).toMatch(/100 byte\(s\)/);
+        expect(readCell('Assigned Program Id')).toMatch(/Associated Token Program/);
+    });
+});
+
+function setParam(name: string, value: string) {
+    vi.mocked(useSearchParams).mockReturnValue(
+        new URLSearchParams({ [name]: value }) as unknown as ReturnType<typeof useSearchParams>,
+    );
+}
+
+function renderPage(options: { transactions?: boolean } = {}) {
+    return renderWithProviders(<TransactionInspectorPage showTokenBalanceChanges={false} />, {
+        dispatcher: instructionParserDispatcher,
+        ...options,
+    });
+}
+
+function setup() {
+    const renderWithContext = () => renderPage({ transactions: false });
     const specificAccountKey = [
         'squads-proposal',
         'ASwDJP5mzxV1dfov2eQz5WAVEy833nwK17VLcjsrZsZf',

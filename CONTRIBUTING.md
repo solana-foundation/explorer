@@ -55,7 +55,8 @@ Once you have these versions installed, you can continue with the following step
     You will also see any lint errors in the console.
 
 -   `pnpm test` \
-    Runs the Vitest suite once. Use `pnpm test:watch` for the interactive watch mode.
+    Runs the Vitest suite once. Use `pnpm test:watch` for the interactive watch mode. \
+    A `.tsx` spec runs in jsdom and a `.ts` spec runs in node. Put `// @vitest-environment jsdom` on the first line of a `.ts` spec that renders or reads the DOM.
 
 ### Troubleshooting
 

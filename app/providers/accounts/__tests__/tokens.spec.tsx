@@ -5,16 +5,12 @@ import { Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { useClusterMock, getTokenAccountsByOwner, getRpc } = vi.hoisted(() => {
-    const getTokenAccountsByOwner = vi.fn();
-    return {
-        getRpc: vi.fn((_url: string) => ({
-            getTokenAccountsByOwner: (...args: unknown[]) => ({ send: () => getTokenAccountsByOwner(...args) }),
-        })),
-        getTokenAccountsByOwner,
-        useClusterMock: vi.fn(),
-    };
-});
+import { rpcStub } from '@/app/__tests__/mock-rpc';
+
+const { useClusterMock, getTokenAccountsByOwner } = vi.hoisted(() => ({
+    getTokenAccountsByOwner: vi.fn(),
+    useClusterMock: vi.fn(),
+}));
 
 vi.mock('@providers/cluster', async importOriginal => {
     const actual = await importOriginal<typeof import('@providers/cluster')>();
@@ -23,12 +19,8 @@ vi.mock('@providers/cluster', async importOriginal => {
 
 vi.mock('@entities/cluster', async importOriginal => {
     const actual = await importOriginal<typeof import('@entities/cluster')>();
-    return { ...actual, getRpc };
+    return { ...actual, getRpc: () => rpcStub({ getTokenAccountsByOwner }) };
 });
-
-vi.mock('@/app/shared/lib/logger', () => ({
-    Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
-}));
 
 import {
     TOKEN_2022_PROGRAM_ID,
@@ -95,6 +87,15 @@ function TestComponent() {
     );
 }
 
+function renderTokens() {
+    render(
+        <TokensProvider>
+            <TestComponent />
+        </TokensProvider>,
+    );
+    return waitFor(() => expect(screen.getByTestId('fetch-status').textContent).toBe(String(FetchStatus.Fetched)));
+}
+
 describe('should fetch account token holdings without enrichment', () => {
     beforeEach(() => {
         const selection = clusterSelection(Cluster.Devnet);
@@ -106,35 +107,16 @@ describe('should fetch account token holdings without enrichment', () => {
         vi.clearAllMocks();
     });
 
-    it('should return every token account without enriching metadata', async () => {
+    it('should return every token account with extension state as numbers, not bigints', async () => {
         // Legacy SPL program -> one holding. Token-2022 -> none.
         getTokenAccountsByOwner
             .mockResolvedValueOnce({ context: { slot: 0n }, value: [makeParsedTokenAccount(TOKEN_ACCOUNT_PUBKEY)] })
             .mockResolvedValueOnce({ context: { slot: 0n }, value: [] });
 
-        render(
-            <TokensProvider>
-                <TestComponent />
-            </TokensProvider>,
-        );
+        await renderTokens();
 
-        await waitFor(() => expect(screen.getByTestId('fetch-status').textContent).toBe(String(FetchStatus.Fetched)));
         expect(screen.getByTestId('token-count').textContent).toBe('1');
         expect(screen.getByTestId('token-row').textContent).toBe(MINT);
-    });
-
-    it('should hand extension state to consumers as numbers, not bigints', async () => {
-        getTokenAccountsByOwner
-            .mockResolvedValueOnce({ context: { slot: 0n }, value: [makeParsedTokenAccount(TOKEN_ACCOUNT_PUBKEY)] })
-            .mockResolvedValueOnce({ context: { slot: 0n }, value: [] });
-
-        render(
-            <TokensProvider>
-                <TestComponent />
-            </TokensProvider>,
-        );
-
-        await waitFor(() => expect(screen.getByTestId('fetch-status').textContent).toBe(String(FetchStatus.Fetched)));
         // A bigint anywhere in the payload would have thrown inside JSON.stringify.
         expect(JSON.parse(screen.getByTestId('first-extensions').textContent ?? 'null')).toEqual([
             { extension: 'transferFeeAmount', state: { withheldAmount: 42 } },
@@ -149,13 +131,8 @@ describe('should fetch account token holdings without enrichment', () => {
                 value: [makeParsedTokenAccount(new PublicKey(new Uint8Array(32).fill(7)))],
             });
 
-        render(
-            <TokensProvider>
-                <TestComponent />
-            </TokensProvider>,
-        );
+        await renderTokens();
 
-        await waitFor(() => expect(screen.getByTestId('fetch-status').textContent).toBe(String(FetchStatus.Fetched)));
         expect(screen.getByTestId('token-count').textContent).toBe('2');
         expect(getTokenAccountsByOwner.mock.calls.map(call => call[1].programId)).toEqual([
             TOKEN_PROGRAM_ID.toBase58(),
@@ -171,13 +148,8 @@ describe('should fetch account token holdings without enrichment', () => {
             .mockResolvedValueOnce({ context: { slot: 0n }, value: many })
             .mockResolvedValueOnce({ context: { slot: 0n }, value: [] });
 
-        render(
-            <TokensProvider>
-                <TestComponent />
-            </TokensProvider>,
-        );
+        await renderTokens();
 
-        await waitFor(() => expect(screen.getByTestId('fetch-status').textContent).toBe(String(FetchStatus.Fetched)));
         expect(screen.getByTestId('token-count').textContent).toBe('150');
     });
 });

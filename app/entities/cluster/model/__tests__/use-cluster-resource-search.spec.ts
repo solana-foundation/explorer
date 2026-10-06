@@ -1,7 +1,10 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+// @vitest-environment jsdom
+
+import { act, renderHook } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { waitForHook } from '@/app/__tests__/swr-hook';
 import { Cluster } from '@/app/utils/cluster';
 
 import { useClusterResourceSearch } from '../use-cluster-resource-search';
@@ -31,7 +34,7 @@ describe('useClusterResourceSearch', () => {
             useClusterResourceSearch({ currentCluster: Cluster.MainnetBeta, probe, resourceId: RESOURCE_ID }),
         );
 
-        await waitFor(() => expect(result.current.status).toBe('searching'));
+        await waitForHook(() => expect(result.current.status).toBe('searching'));
         expect(result.current.searchingCluster).toBe(Cluster.Devnet);
     });
 
@@ -42,12 +45,12 @@ describe('useClusterResourceSearch', () => {
             useClusterResourceSearch({ currentCluster: Cluster.Devnet, probe, resourceId: RESOURCE_ID }),
         );
 
-        await waitFor(() => expect(result.current.status).toBe('found'));
+        await waitForHook(() => expect(result.current.status).toBe('found'));
         // Devnet is the current cluster and excluded, so MainnetBeta is probed first
         expect(result.current.foundCluster).toBe(Cluster.MainnetBeta);
     });
 
-    it('should report not-found after probing every public cluster', async () => {
+    it('should report not-found after probing every public cluster except the current one', async () => {
         const probe = vi.fn().mockResolvedValue(false);
 
         const { result } = renderHook(() =>
@@ -58,22 +61,9 @@ describe('useClusterResourceSearch', () => {
             await vi.advanceTimersByTimeAsync(3000);
         });
 
-        await waitFor(() => expect(result.current.status).toBe('not-found'));
+        await waitForHook(() => expect(result.current.status).toBe('not-found'));
         expect(result.current.foundCluster).toBeUndefined();
         expect(result.current.searchingCluster).toBeUndefined();
-    });
-
-    it('should exclude the current cluster from the probe list', async () => {
-        const probe = vi.fn().mockResolvedValue(false);
-
-        renderHook(() =>
-            useClusterResourceSearch({ currentCluster: Cluster.MainnetBeta, probe, resourceId: RESOURCE_ID }),
-        );
-
-        await act(async () => {
-            await vi.advanceTimersByTimeAsync(3000);
-        });
-
         // MainnetBeta is current, so only Devnet + Testnet are probed
         expect(probe).toHaveBeenCalledTimes(2);
     });
@@ -108,7 +98,7 @@ describe('useClusterResourceSearch', () => {
             useClusterResourceSearch({ currentCluster: Cluster.MainnetBeta, probe, resourceId: RESOURCE_ID }),
         );
 
-        await waitFor(() => expect(result.current.status).toBe('found'));
+        await waitForHook(() => expect(result.current.status).toBe('found'));
         // First probe (Devnet) rejects, second probe (Testnet) resolves as found
         expect(result.current.foundCluster).toBe(Cluster.Testnet);
     });
@@ -124,7 +114,7 @@ describe('useClusterResourceSearch', () => {
             await vi.advanceTimersByTimeAsync(3000);
         });
 
-        await waitFor(() => expect(result.current.status).toBe('not-found'));
+        await waitForHook(() => expect(result.current.status).toBe('not-found'));
         expect(result.current.foundCluster).toBeUndefined();
         expect(result.current.searchingCluster).toBeUndefined();
         // Every non-current public cluster was attempted before falling through to not-found

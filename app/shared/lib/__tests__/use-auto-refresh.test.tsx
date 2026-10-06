@@ -12,28 +12,22 @@ afterEach(() => {
 });
 
 describe('useAutoRefreshState', () => {
-    it('should return Active when enabled + visible', () => {
-        const isTabVisible = true;
-        const { result } = renderHook(() => useAutoRefreshState({ enabled: true, isTabVisible }));
-        expect(result.current).toBe(AutoRefresh.Active);
-    });
-
-    it('should return Inactive when disabled', () => {
-        const isTabVisible = true;
-        const { result } = renderHook(() => useAutoRefreshState({ enabled: false, isTabVisible }));
-        expect(result.current).toBe(AutoRefresh.Inactive);
-    });
-
-    it('should return Inactive when tab hidden — even if enabled and bailedOut', () => {
-        const isTabVisible = false;
-        const { result } = renderHook(() => useAutoRefreshState({ bailedOut: true, enabled: true, isTabVisible }));
-        expect(result.current).toBe(AutoRefresh.Inactive);
-    });
-
-    it('should return BailedOut when bailedOut + visible (bailout wins over enabled)', () => {
-        const isTabVisible = true;
-        const { result } = renderHook(() => useAutoRefreshState({ bailedOut: true, enabled: true, isTabVisible }));
-        expect(result.current).toBe(AutoRefresh.BailedOut);
+    it.each([
+        { args: { enabled: true, isTabVisible: true }, expected: 'Active', scenario: 'enabled + visible' },
+        { args: { enabled: false, isTabVisible: true }, expected: 'Inactive', scenario: 'disabled' },
+        {
+            args: { bailedOut: true, enabled: true, isTabVisible: false },
+            expected: 'Inactive',
+            scenario: 'tab hidden — even if enabled and bailedOut',
+        },
+        {
+            args: { bailedOut: true, enabled: true, isTabVisible: true },
+            expected: 'BailedOut',
+            scenario: 'bailedOut + visible (bailout wins over enabled)',
+        },
+    ] as const)('should return $expected when $scenario', ({ args, expected }) => {
+        const { result } = renderHook(() => useAutoRefreshState(args));
+        expect(result.current).toBe(AutoRefresh[expected]);
     });
 });
 
@@ -45,16 +39,9 @@ describe('useAutoRefreshInterval', () => {
         expect(onRefresh).toHaveBeenCalledTimes(2);
     });
 
-    it('should not poll when Inactive', () => {
+    it.each(['Inactive', 'BailedOut'] as const)('should not poll when %s', state => {
         const onRefresh = vi.fn();
-        renderHook(() => useAutoRefreshInterval(AutoRefresh.Inactive, onRefresh));
-        act(() => vi.advanceTimersByTime(AUTO_REFRESH_INTERVAL * 2));
-        expect(onRefresh).not.toHaveBeenCalled();
-    });
-
-    it('should not poll when BailedOut', () => {
-        const onRefresh = vi.fn();
-        renderHook(() => useAutoRefreshInterval(AutoRefresh.BailedOut, onRefresh));
+        renderHook(() => useAutoRefreshInterval(AutoRefresh[state], onRefresh));
         act(() => vi.advanceTimersByTime(AUTO_REFRESH_INTERVAL * 2));
         expect(onRefresh).not.toHaveBeenCalled();
     });

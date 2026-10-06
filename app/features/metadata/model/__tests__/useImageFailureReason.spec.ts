@@ -1,5 +1,9 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+// @vitest-environment jsdom
+
+import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { waitForHook } from '@/app/__tests__/swr-hook';
 
 import { useImageFailureReason } from '../useImageFailureReason';
 
@@ -21,7 +25,7 @@ describe('useImageFailureReason', () => {
 
         act(() => result.current.onImageError());
 
-        await waitFor(() =>
+        await waitForHook(() =>
             expect(result.current.failure).toEqual({ reason: 'Image exceeds maximum size', status: 413 }),
         );
         expect(result.current.status).toBe('resolved');
@@ -35,7 +39,7 @@ describe('useImageFailureReason', () => {
 
         act(() => result.current.onImageError());
 
-        await waitFor(() => expect(result.current.status).toBe('probing'));
+        await waitForHook(() => expect(result.current.status).toBe('probing'));
         expect(result.current.failure).toBeUndefined();
     });
 
@@ -57,7 +61,7 @@ describe('useImageFailureReason', () => {
         });
 
         act(() => result.current.onImageError());
-        await waitFor(() => expect(result.current.failure).toBeDefined());
+        await waitForHook(() => expect(result.current.failure).toBeDefined());
 
         rerender({ src: '/api/metadata/proxy?uri=hook-b' });
 
