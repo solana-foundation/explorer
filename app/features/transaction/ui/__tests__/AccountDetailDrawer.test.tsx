@@ -85,7 +85,6 @@ function renderDrawer({ onOpenChange = vi.fn() }: { onOpenChange?: (open: boolea
                 source: 'transaction',
                 writable: false,
             }}
-            accountInfoLoading={false}
             index={0}
             message={{} as ParsedMessage}
             onOpenChange={onOpenChange}

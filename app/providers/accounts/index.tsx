@@ -51,7 +51,7 @@ import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
-import { withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
+import { toSafeUint, withNumbersInsteadOfBigInts } from '@/app/shared/lib/bigint-to-number';
 import { alloc, fromBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { toKitAddress, toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
@@ -310,7 +310,7 @@ async function fetchMultipleAccounts({
                     // jsonParsed answers with base64 data for any account its parsers don't cover,
                     // so an array here means "no parsed representation", not "raw mode".
                     if (!Array.isArray(result.data)) {
-                        space = Number(result.data.space);
+                        space = toSafeUint(result.data.space);
                         try {
                             parsedData = await handleParsedAccountData(rpc, result.data, result.lamports);
                         } catch (error) {
@@ -328,6 +328,8 @@ async function fetchMultipleAccounts({
                         rawData = fromBase64(result.data[0]);
                         space = rawData.length;
                     }
+
+                    space ??= toSafeUint(result.space);
 
                     account = {
                         data: {

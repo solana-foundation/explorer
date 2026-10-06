@@ -20,8 +20,6 @@ const VISIBLE_ROWS = 3;
 
 const BASE64_VISIBLE_CHARS = 192;
 
-// Inline string conversion (hex/base64) is skipped above this threshold.
-// Copy is disabled, use the download button for large payloads.
 const MAX_INLINE_BYTES = 1024;
 
 // Bottom fade-out for the `embedded` variant: data dissolves into the host background over its
@@ -29,8 +27,11 @@ const MAX_INLINE_BYTES = 1024;
 const FADE_TO_BG =
     'linear-gradient(to bottom, oklch(21.275% 0.00721 164.22 / 0) 0%, oklch(21.275% 0.00721 164.22) 100%)';
 
+const LOAD_FAILED = 'Failed to load account data.';
+
 export type RawDataFieldProps = {
     data: ByteArray | undefined;
+    error?: Error;
     loading?: boolean;
     filename: string;
     extraButton?: React.ReactNode;
@@ -58,6 +59,7 @@ export type RawDataFieldProps = {
 
 export function RawDataField({
     data,
+    error,
     loading,
     filename,
     extraButton,
@@ -77,18 +79,20 @@ export function RawDataField({
         }
     }, [downloadState]);
 
+    const view = viewState({ data, error, loading });
+    const bytes = 'data' in view ? view.data : undefined;
+    const hasData = view.kind === 'ready' || view.kind === 'tooLarge';
+
     useEffect(() => {
         setExpanded(false);
-    }, [data]);
+    }, [bytes]);
 
-    const hasData = data !== undefined && data.length > 0;
-    const tooLarge = data !== undefined && data.length > MAX_INLINE_BYTES;
+    const inlineBytes = view.kind === 'ready' ? view.data : undefined;
+    const base64String = useMemo(() => (inlineBytes ? toBase64(new Uint8Array(inlineBytes)) : ''), [inlineBytes]);
 
-    const hexString = useMemo(() => (data && data.length > 0 ? toHex(data) : ''), [data]);
-    const base64String = useMemo(() => (data && data.length > 0 ? toBase64(new Uint8Array(data)) : ''), [data]);
-
-    const hasMoreHex = data !== undefined && data.length > VISIBLE_ROWS * HEX_ROW_BYTES;
-    const visibleData = !expanded && hasMoreHex ? data.subarray(0, VISIBLE_ROWS * HEX_ROW_BYTES) : data;
+    const hasMoreHex = bytes !== undefined && bytes.length > VISIBLE_ROWS * HEX_ROW_BYTES;
+    const visibleData =
+        bytes !== undefined && !expanded && hasMoreHex ? bytes.subarray(0, VISIBLE_ROWS * HEX_ROW_BYTES) : bytes;
 
     const hasMoreBase64 = base64String.length > BASE64_VISIBLE_CHARS;
     const visibleBase64 = expanded ? base64String : base64String.slice(0, BASE64_VISIBLE_CHARS);
@@ -109,6 +113,15 @@ export function RawDataField({
         window.addEventListener('resize', measure);
         return () => window.removeEventListener('resize', measure);
     }, [data, tab, loading, expanded]);
+
+    const embeddedCopyValue = useMemo(
+        () => (variant === 'embedded' && bytes !== undefined ? encode(bytes, tab) : ''),
+        [variant, bytes, tab],
+    );
+
+    const handleCopy = () => {
+        if (bytes !== undefined) copy(encode(bytes, tab));
+    };
 
     const handleTabChange = (value: string) => {
         if (value === 'hex' || value === 'base64') {
@@ -136,28 +149,26 @@ export function RawDataField({
 
         const byteCount = (
             <span className="whitespace-nowrap text-sm text-white">
-                {data !== undefined && !loading && (
+                {bytes !== undefined && (
                     <>
                         {bytesPrefix && <span className="text-outer-space-300">{bytesPrefix}</span>}
-                        {`${data.length} bytes`}
+                        {`${bytes.length} bytes`}
                     </>
                 )}
             </span>
         );
 
-        const copyButton = (
-            <CopyButton value={tab === 'base64' ? base64String : hexString} disabled={!hasData || loading} />
-        );
+        const copyButton = <CopyButton value={embeddedCopyValue} disabled={!hasData} />;
 
         // Icon-only trigger (no "Download" label): this layout is the mobile drawer.
         const downloadButton = (
-            <DownloadDropdown filename={filename} data={data} loading={loading} disabled={!hasData} encodings={[tab]}>
+            <DownloadDropdown filename={filename} data={bytes} encodings={[tab]}>
                 <Button
                     variant="outline"
                     size="sm"
                     className="border-outer-space-800"
                     aria-label="Download"
-                    disabled={!hasData || loading}
+                    disabled={!hasData}
                 >
                     <Download size={12} />
                 </Button>
@@ -169,7 +180,9 @@ export function RawDataField({
         // indent the text past the byte-count label.
         const panes: { value: 'hex' | 'base64'; content: React.ReactNode }[] = [
             {
-                content: <HexData className="w-full" raw={data ?? new Uint8Array(0)} isCopyable={false} layout="fit" />,
+                content: (
+                    <HexData className="w-full" raw={bytes ?? new Uint8Array(0)} isCopyable={false} layout="fit" />
+                ),
                 value: 'hex',
             },
             {
@@ -179,9 +192,10 @@ export function RawDataField({
         ];
 
         const renderPaneBody = (content: React.ReactNode) => {
-            if (loading) return <span className="spinner-grow spinner-grow-sm" />;
+            if (view.kind === 'loading') return <span className="spinner-grow spinner-grow-sm" />;
+            if (view.kind === 'failed') return <span className="text-sm text-outer-space-200">{LOAD_FAILED}</span>;
             if (!hasData) return <span className="text-sm text-outer-space-200">No data</span>;
-            if (tooLarge)
+            if (view.kind === 'tooLarge')
                 return <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>;
             return content;
         };
@@ -214,7 +228,7 @@ export function RawDataField({
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5">
-                    {hasData && !loading && !tooLarge && (clamped || expanded) ? (
+                    {view.kind === 'ready' && (clamped || expanded) ? (
                         <Button
                             variant="outline"
                             size="sm"
@@ -265,17 +279,11 @@ export function RawDataField({
                     </TabsTrigger>
                 </TabsList>
                 <div className="flex min-w-0 items-center gap-2">
-                    {data !== undefined && !loading && (
-                        <span className="whitespace-nowrap text-xs text-outer-space-300">{data.length} bytes</span>
+                    {bytes !== undefined && (
+                        <span className="whitespace-nowrap text-xs text-outer-space-300">{bytes.length} bytes</span>
                     )}
                     {extraButton}
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        aria-label="Copy"
-                        disabled={!hasData || loading}
-                        onClick={() => copy(tab === 'base64' ? base64String : hexString)}
-                    >
+                    <Button variant="outline" size="sm" aria-label="Copy" disabled={!hasData} onClick={handleCopy}>
                         {copyState === 'copied' ? <Check size={12} /> : <Copy size={12} />}
                         {!iconOnlyActions && (
                             <span className="hidden md:inline">{copyState === 'copied' ? 'Copied!' : 'Copy'}</span>
@@ -283,13 +291,11 @@ export function RawDataField({
                     </Button>
                     <DownloadDropdown
                         filename={filename}
-                        data={data}
-                        loading={loading}
-                        disabled={!hasData}
+                        data={bytes}
                         encodings={[tab]}
                         onDownload={() => setDownloadState(DownloadState.Downloaded)}
                     >
-                        <Button variant="outline" size="sm" aria-label="Download" disabled={!hasData || loading}>
+                        <Button variant="outline" size="sm" aria-label="Download" disabled={!hasData}>
                             {downloadState === DownloadState.Downloaded ? <Check size={12} /> : <Download size={12} />}
                             {!iconOnlyActions && (
                                 <span className="hidden md:inline">
@@ -303,11 +309,17 @@ export function RawDataField({
 
             <TabsContent
                 value="hex"
-                className={cn('max-h-80 overflow-y-auto p-1.5 text-start', loading && 'p-3', tooLarge && 'px-3 py-2')}
+                className={cn(
+                    'max-h-80 overflow-y-auto p-1.5 text-start',
+                    view.kind === 'loading' && 'p-3',
+                    view.kind === 'tooLarge' && 'px-3 py-2',
+                )}
             >
-                {loading ? (
+                {view.kind === 'loading' ? (
                     <span className="spinner-grow spinner-grow-sm" />
-                ) : tooLarge ? (
+                ) : view.kind === 'failed' ? (
+                    <span className="text-sm text-outer-space-200">{LOAD_FAILED}</span>
+                ) : view.kind === 'tooLarge' ? (
                     <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>
                 ) : (
                     <HexData
@@ -321,15 +333,14 @@ export function RawDataField({
                 )}
             </TabsContent>
 
-            <TabsContent
-                value="base64"
-                className={cn('max-h-80 overflow-y-auto p-3 text-start', !loading && data?.length && 'py-2')}
-            >
-                {loading ? (
+            <TabsContent value="base64" className={cn('max-h-80 overflow-y-auto p-3 text-start', hasData && 'py-2')}>
+                {view.kind === 'loading' ? (
                     <span className="spinner-grow spinner-grow-sm" />
+                ) : view.kind === 'failed' ? (
+                    <span className="text-sm text-outer-space-200">{LOAD_FAILED}</span>
                 ) : !hasData ? (
                     <span className="text-sm text-outer-space-200">No data</span>
-                ) : tooLarge ? (
+                ) : view.kind === 'tooLarge' ? (
                     <span className="text-sm text-outer-space-200">Too large to display - use download/copy.</span>
                 ) : (
                     <span className="text-wrap break-all font-mono text-xs text-white">
@@ -339,7 +350,7 @@ export function RawDataField({
                 )}
             </TabsContent>
 
-            {hasMore && !tooLarge && !loading && hasData && (
+            {hasMore && view.kind === 'ready' && (
                 <div className="mt-1 flex justify-center border-t border-outer-space-800 [border-top-style:solid]">
                     <Button
                         variant="ghost"
@@ -357,4 +368,23 @@ export function RawDataField({
             )}
         </Tabs>
     );
+}
+
+type ViewState =
+    | { kind: 'loading' }
+    | { error: Error; kind: 'failed' }
+    | { kind: 'idle' }
+    | { data: ByteArray; kind: 'empty' }
+    | { data: ByteArray; kind: 'tooLarge' }
+    | { data: ByteArray; kind: 'ready' };
+
+function viewState({ data, error, loading }: Pick<RawDataFieldProps, 'data' | 'error' | 'loading'>): ViewState {
+    if (loading) return { kind: 'loading' };
+    if (data === undefined) return error !== undefined ? { error, kind: 'failed' } : { kind: 'idle' };
+    if (data.length === 0) return { data, kind: 'empty' };
+    return data.length > MAX_INLINE_BYTES ? { data, kind: 'tooLarge' } : { data, kind: 'ready' };
+}
+
+function encode(bytes: ByteArray, tab: 'hex' | 'base64') {
+    return tab === 'base64' ? toBase64(new Uint8Array(bytes)) : toHex(bytes);
 }

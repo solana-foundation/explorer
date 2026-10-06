@@ -63,7 +63,7 @@ export function Address({
     if (address === undefined) throw new Error('Address requires an address or pubkey');
     const { cluster, genesisHash } = useCluster();
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
-    const [showNicknameEditor, setShowNicknameEditor] = useState(false);
+    const [editor, setEditor] = useState<'closed' | 'open' | 'unmounted'>('unmounted');
     const nickname = useNickname(address);
     const { ref: visibilityRef, isVisible } = useVisibility(fetchTokenLabelInfo);
 
@@ -181,7 +181,7 @@ export function Address({
                         className="ms-1.5 flex-none shrink-0 cursor-pointer border-0 bg-transparent p-0 text-muted"
                         onClick={e => {
                             e.stopPropagation();
-                            setShowNicknameEditor(true);
+                            setEditor('open');
                         }}
                         title="Edit nickname"
                         style={{ fontSize: '0.875rem', lineHeight: 1 }}
@@ -189,12 +189,8 @@ export function Address({
                         <EditIcon className="-mt-0.5" />
                     </button>
                 )}
-                {!noNicknameEditing && (
-                    <NicknameEditor
-                        address={address}
-                        open={showNicknameEditor}
-                        onClose={() => setShowNicknameEditor(false)}
-                    />
+                {!noNicknameEditing && editor !== 'unmounted' && (
+                    <NicknameEditor address={address} open={editor === 'open'} onClose={() => setEditor('closed')} />
                 )}
             </div>
         </span>

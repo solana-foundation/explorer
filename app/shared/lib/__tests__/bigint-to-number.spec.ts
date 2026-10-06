@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { withNumbersInsteadOfBigInts } from '../bigint-to-number';
+import { toSafeUint, withNumbersInsteadOfBigInts } from '../bigint-to-number';
 
 describe('withNumbersInsteadOfBigInts', () => {
     it('should convert a bare bigint', () => {
@@ -37,5 +37,39 @@ describe('withNumbersInsteadOfBigInts', () => {
     it('should not be pointed at binary data: byte arrays are flattened into plain objects', () => {
         // Documents the plain-JSON-only restriction in the helper's docblock rather than endorsing it.
         expect(withNumbersInsteadOfBigInts(Uint8Array.from([1, 2]))).toStrictEqual({ 0: 1, 1: 2 });
+    });
+});
+
+describe('toSafeUint', () => {
+    it('should convert a bigint', () => {
+        expect(toSafeUint(165n)).toBe(165);
+    });
+
+    it('should keep a number', () => {
+        expect(toSafeUint(165)).toBe(165);
+    });
+
+    it('should keep zero instead of reporting absence', () => {
+        expect(toSafeUint(0n)).toBe(0);
+        expect(toSafeUint(0)).toBe(0);
+    });
+
+    it('should report absence for a missing or null value', () => {
+        expect(toSafeUint(undefined)).toBeUndefined();
+        expect(toSafeUint(null)).toBeUndefined();
+    });
+
+    it('should reject a value beyond the safe integer range', () => {
+        expect(toSafeUint(18_446_744_073_709_551_615n)).toBeUndefined();
+        expect(toSafeUint(Number.MAX_SAFE_INTEGER + 1)).toBeUndefined();
+    });
+
+    it('should reject a negative value', () => {
+        expect(toSafeUint(-1n)).toBeUndefined();
+        expect(toSafeUint(-1)).toBeUndefined();
+    });
+
+    it('should reject a fractional value', () => {
+        expect(toSafeUint(1.5)).toBeUndefined();
     });
 });

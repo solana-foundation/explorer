@@ -5,7 +5,7 @@ import { Button } from '@components/shared/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/popover';
 import { Skeleton } from '@components/shared/ui/skeleton';
 import { cn } from '@components/shared/utils';
-import { AccountInfo, useAccountExpandedInfo } from '@entities/account';
+import { useAccountExpandedInfo, useLazyRawAccountData } from '@entities/account';
 import { Account } from '@providers/accounts';
 import { cva } from 'class-variance-authority';
 import React from 'react';
@@ -64,29 +64,37 @@ const skeletonNote = cva('mt-4 flex items-center gap-1.5 py-0.5', {
 });
 
 type InnerProps = {
-    accountInfo?: AccountInfo;
-    accountInfoLoading?: boolean;
     address: string;
     data: Account;
     flat?: boolean;
 };
 
-export function AccountExpandedContentInner({ accountInfo, accountInfoLoading, address, data, flat }: InnerProps) {
+export function AccountExpandedContentInner({ address, data, flat }: InnerProps) {
+    const {
+        data: rawData,
+        error: rawDataError,
+        load: loadRawData,
+        loading: rawDataLoading,
+    } = useLazyRawAccountData(address);
+
+    const space = data.space;
     const dataSizeCell =
-        accountInfo && accountInfo.size > 0 ? (
-            <Popover>
+        space === undefined ? (
+            <span className="text-outer-space-300">Unknown</span>
+        ) : space > 0 ? (
+            <Popover onOpenChange={open => open && loadRawData()}>
                 <PopoverTrigger asChild>
                     <Button variant="ghost" className="h-auto !items-baseline !p-0 !text-sm">
                         <Code size={11} />
-                        <span>{accountInfo.size.toLocaleString('en-US')} byte(s)</span>
+                        <span>{space.toLocaleString('en-US')} byte(s)</span>
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="mx-4 w-auto !rounded-lg border-none p-0" align="end">
-                    <RawDataField data={accountInfo.data} filename={address} loading={accountInfoLoading} />
+                    <RawDataField data={rawData} error={rawDataError} filename={address} loading={rawDataLoading} />
                 </PopoverContent>
             </Popover>
         ) : (
-            <span>{(data.space ?? 0).toLocaleString('en-US')} byte(s)</span>
+            <span>0 byte(s)</span>
         );
 
     return (
@@ -115,14 +123,12 @@ export function AccountExpandedContentInner({ accountInfo, accountInfoLoading, a
 }
 
 type Props = {
-    accountInfo?: AccountInfo;
-    accountInfoLoading?: boolean;
     address: string;
     enabled: boolean;
     flat?: boolean;
 };
 
-export function AccountExpandedContent({ accountInfo, accountInfoLoading, address, enabled, flat }: Props) {
+export function AccountExpandedContent({ address, enabled, flat }: Props) {
     const { data, isError, isLoading } = useAccountExpandedInfo(address, enabled);
 
     if (enabled && isLoading) {
@@ -164,13 +170,7 @@ export function AccountExpandedContent({ accountInfo, accountInfoLoading, addres
 
     return (
         <FlatContext.Provider value={flat ?? false}>
-            <AccountExpandedContentInner
-                accountInfo={accountInfo}
-                accountInfoLoading={accountInfoLoading}
-                address={address}
-                data={data}
-                flat={flat}
-            />
+            <AccountExpandedContentInner address={address} data={data} flat={flat} />
         </FlatContext.Provider>
     );
 }
