@@ -248,6 +248,9 @@ importers:
       '@solana-program/zk-elgamal-proof':
         specifier: 0.4.0
         version: 0.4.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+      '@solana/attestation':
+        specifier: 2.1.0
+        version: 2.1.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana/idl':
         specifier: 0.2.0
         version: 0.2.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
@@ -389,9 +392,6 @@ importers:
       remark-gfm:
         specifier: 4.0.1
         version: 4.0.1
-      sas-lib:
-        specifier: 2.0.0-beta.1
-        version: 2.0.0-beta.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       server-only:
         specifier: 0.0.1
         version: 0.0.1
@@ -693,12 +693,12 @@ importers:
       '@solana-program/token-2022':
         specifier: 0.16.0
         version: 0.16.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))(@solana/sysvars@8.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3))
+      '@solana/attestation':
+        specifier: 2.1.0
+        version: 2.1.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana/kit':
         specifier: 8.3.0
         version: 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
-      sas-lib:
-        specifier: 2.0.0-beta.1
-        version: 2.0.0-beta.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -4526,6 +4526,11 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  '@solana/attestation@2.1.0':
+    resolution: {integrity: sha512-4Ryt9k4mSbCl61cniXtwRSd3uRBcImXhDWgAlzEOGo+1ZpHgJr7Cmhfacd0WzsHb7Wu13Qnyz6CGG/PLC7VhHQ==}
+    peerDependencies:
+      '@solana/kit': ^8.0.0
 
   '@solana/buffer-layout-utils@0.2.0':
     resolution: {integrity: sha512-szG4sxgJGktbuZYDg2FfNmkMi0DYQoVjN2h7ta1W1hPrwzarcFLBq9UpX1UjNXsNpT9dn+chgprtWGioUAr4/g==}
@@ -9837,11 +9842,6 @@ packages:
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
-  sas-lib@2.0.0-beta.1:
-    resolution: {integrity: sha512-EUtUaXuKnhkOeYcwpWdiXO+mIKTVfkmvNBvOFSqlzwKe6v/Fx8UDD1yfcuLDD9CDVSAZjDVeoWGT1HjsJyG7Wg==}
-    peerDependencies:
-      '@solana/kit': ^7.0.0
-
   sass@1.53.0:
     resolution: {integrity: sha512-zb/oMirbKhUgRQ0/GFz8TSAwRq2IlR29vOUJZOx0l8sV+CkHUfHa4u5nqrG+1VceZp7Jfj59SVW9ogdhTvJDcQ==}
     engines: {node: '>=12.0.0'}
@@ -14455,6 +14455,10 @@ snapshots:
       '@solana/errors': 8.3.0(typescript@5.7.3)
     optionalDependencies:
       typescript: 5.7.3
+
+  '@solana/attestation@2.1.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))':
+    dependencies:
+      '@solana/kit': 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
 
   '@solana/buffer-layout-utils@0.2.0(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)':
     dependencies:
@@ -21138,10 +21142,6 @@ snapshots:
       is-regex: 1.2.1
 
   safer-buffer@2.1.2: {}
-
-  sas-lib@2.0.0-beta.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)):
-    dependencies:
-      '@solana/kit': 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
 
   sass@1.53.0:
     dependencies:

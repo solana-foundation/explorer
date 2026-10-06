@@ -1,8 +1,8 @@
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
+import { Attestation as SasAttestation, Credential as SasCredential, Schema as SasSchema } from '@solana/attestation';
 import { SystemProgram } from '@solana/web3.js';
 import React from 'react';
-import { Attestation as SasAttestation, Credential as SasCredential, Schema as SasSchema } from 'sas-lib';
 
 import { AccountAddressRow } from '@/app/components/common/Account';
 import { Address } from '@/app/components/common/Address';
