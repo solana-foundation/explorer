@@ -18,8 +18,16 @@ describe('isTransientError', () => {
     });
 
     it('should be true for a connection that nothing listens on', async () => {
-        const error = await rejection(fetch('http://127.0.0.1:1'));
+        const error = await rejection(fetch(`http://127.0.0.1:${await unusedPort()}`));
 
+        expect(errorCode(error)).toBe('ECONNREFUSED');
+        expect(isTransientError(error)).toBe(true);
+    });
+
+    it('should be true for a response that drops after the headers', async () => {
+        const error = await rejection(readBodyOfDroppedResponse());
+
+        expect(errorCode(error)).toBe('UND_ERR_SOCKET');
         expect(isTransientError(error)).toBe(true);
     });
 
@@ -42,6 +50,43 @@ describe('isTransientError', () => {
         expect(isTransientError(value)).toBe(false);
     });
 });
+
+async function unusedPort(): Promise<number> {
+    const { createServer } = await import('node:http');
+    const server = createServer();
+    await new Promise<void>(resolve => server.listen(0, resolve));
+    const address = server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+    await new Promise(resolve => server.close(resolve));
+    return port;
+}
+
+// The server promises a body, sends the headers, then closes the socket.
+async function readBodyOfDroppedResponse() {
+    const { createServer } = await import('node:http');
+    const server = createServer((_request, response) => {
+        response.writeHead(200, { 'content-length': '100' });
+        response.flushHeaders();
+        setTimeout(() => response.destroy(), 10);
+    });
+    await new Promise<void>(resolve => server.listen(0, resolve));
+    const address = server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+    try {
+        const response = await fetch(`http://127.0.0.1:${port}`);
+        return await response.json();
+    } finally {
+        server.closeAllConnections();
+        server.close();
+    }
+}
+
+function errorCode(error: unknown): unknown {
+    for (let current = error; current instanceof Error; current = current.cause) {
+        const code = (current as { code?: unknown }).code;
+        if (code) return code;
+    }
+}
 
 // A request to a server that holds the connection open, so only the signal can end it.
 async function fetchWithSignal(signal: AbortSignal) {

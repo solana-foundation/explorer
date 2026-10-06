@@ -1,3 +1,5 @@
+import { isRetryableFetchError } from '@shared/lib/errors';
+
 type HttpErrorDetails = {
     status: number;
     statusText: string;
@@ -26,6 +28,5 @@ export function isTransientError(error: unknown): boolean {
     if (error instanceof TokenInfoHttpError) return error.status === 429 || error.status >= 500;
     if (!(error instanceof Error)) return false;
     if (error.name === 'TimeoutError' || error.name === 'AbortError') return true;
-    // Node fetch rejects every network failure with this TypeError message.
-    return error instanceof TypeError && error.message === 'fetch failed';
+    return isRetryableFetchError(error);
 }
