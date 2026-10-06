@@ -50,7 +50,7 @@
         "@explorer/idl-decode": "workspace:*",
         "@explorer/parsers": "workspace:*",
         "@explorer/utils": "workspace:*",
-        "@modelcontextprotocol/sdk": "1.27.1",
+        "@modelcontextprotocol/sdk": "1.31.0",
         "@noble/hashes": "1.5.0",
         "@solana-program/address-lookup-table": "0.14.1",
         "@solana-program/loader-v3": "0.6.0",
