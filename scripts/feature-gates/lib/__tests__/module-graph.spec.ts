@@ -33,7 +33,7 @@ describe('feature-gate pipeline module graph', () => {
 
         // The loader that the `tsx` CLI registers, without the cost of starting pnpm.
         expect(() =>
-            execFileSync(process.execPath, ['--import', 'tsx', '--eval', program], {
+            execFileSync(process.execPath, ['--import', 'tsx', '--input-type=module', '--eval', program], {
                 cwd: REPO_ROOT,
                 encoding: 'utf8',
                 stdio: 'pipe',
