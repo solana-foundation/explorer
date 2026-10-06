@@ -2,7 +2,7 @@ import { act, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToStaticMarkup, renderToString } from 'react-dom/server';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { displayTimestampAbsolute } from '@/app/utils/date';
 
@@ -28,22 +28,20 @@ const MS = UNIX * 1000;
 // differ, hydration breaks. These tests run under a fixed non-UTC zone so "local" and "UTC" are
 // distinguishable, then assert the server only ever emits the timezone-independent UTC value — the
 // exact guarantee that makes local/relative safe to hydrate (previously only UTC was).
-let originalTZ: string | undefined;
-
-beforeAll(() => {
-    originalTZ = process.env.TZ;
-});
-
-afterAll(() => {
-    process.env.TZ = originalTZ;
-});
+const RealDateTimeFormat = Intl.DateTimeFormat;
+let zone: string;
 
 beforeEach(() => {
-    process.env.TZ = 'America/New_York';
+    zone = 'America/New_York';
+    // A worker thread ignores a write to `process.env.TZ`, so the spec sets the zone in `Intl.DateTimeFormat`.
+    vi.spyOn(Intl, 'DateTimeFormat').mockImplementation(function (locales, options) {
+        return new RealDateTimeFormat(locales, { ...options, timeZone: options?.timeZone ?? zone });
+    });
     setPinnedTimestampDisplay(undefined);
 });
 
 afterEach(() => {
+    vi.mocked(Intl.DateTimeFormat).mockRestore();
     setPinnedTimestampDisplay(undefined);
 });
 
@@ -96,13 +94,13 @@ describe('Timestamp hydration across differing timezones', () => {
         document.body.appendChild(container);
 
         // Render the "server" markup in one zone...
-        process.env.TZ = 'America/New_York';
+        zone = 'America/New_York';
         container.innerHTML = ssrHtml(<Timestamp unixTimestamp={UNIX} display="local" />);
 
         // ...then hydrate on a "client" in a different zone. With the fix both sides emit the
         // timezone-independent UTC string, so hydration matches; before the fix the `local` label
         // differed between the two zones and React logged a text-content mismatch.
-        process.env.TZ = 'Asia/Tokyo';
+        zone = 'Asia/Tokyo';
         act(() => {
             hydrateRoot(container, <Timestamp unixTimestamp={UNIX} display="local" />);
         });

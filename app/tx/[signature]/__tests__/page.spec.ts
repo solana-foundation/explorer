@@ -1,5 +1,16 @@
 import { gen } from '@__fixtures__/gen';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+// The receipt env is read once, when the module loads, and a local `.env` may set any of it.
+const BASE_URL = vi.hoisted(() => {
+    const baseUrl = 'https://explorer.solana.com';
+    vi.stubEnv('NEXT_PUBLIC_RECEIPT_ENABLED', 'true');
+    vi.stubEnv('RECEIPT_BASE_URL', baseUrl);
+    vi.stubEnv('RECEIPT_OG_IMAGE_VERSION', '');
+    return baseUrl;
+});
+
+import { generateMetadata } from '../page';
 
 // The real client page pulls in providers, SWR and the PDF stack. generateMetadata never touches it.
 vi.mock('../page-client', () => ({
@@ -7,17 +18,9 @@ vi.mock('../page-client', () => ({
 }));
 
 const SIGNATURE = gen.signature(1);
-const BASE_URL = 'https://explorer.solana.com';
 
 describe('should generate transaction page metadata', () => {
-    beforeEach(() => {
-        vi.unstubAllEnvs();
-        vi.resetModules();
-    });
-
     it('should emit og:type, og:url and a 1200x630 og:image on the default view', async () => {
-        const { generateMetadata } = await import('../page');
-
         const metadata = await generateMetadata({
             params: Promise.resolve({ signature: SIGNATURE }),
             searchParams: Promise.resolve({}),
@@ -31,8 +34,6 @@ describe('should generate transaction page metadata', () => {
     });
 
     it('should carry the cluster into both urls on the default view', async () => {
-        const { generateMetadata } = await import('../page');
-
         const metadata = await generateMetadata({
             params: Promise.resolve({ signature: SIGNATURE }),
             searchParams: Promise.resolve({ cluster: 'devnet' }),
@@ -45,8 +46,6 @@ describe('should generate transaction page metadata', () => {
     });
 
     it('should keep the tags but drop the image on a custom cluster', async () => {
-        const { generateMetadata } = await import('../page');
-
         const metadata = await generateMetadata({
             params: Promise.resolve({ signature: SIGNATURE }),
             searchParams: Promise.resolve({ cluster: 'custom', customUrl: 'http://localhost:8899' }),
@@ -65,8 +64,6 @@ describe('should generate transaction page metadata', () => {
     });
 
     it('should show the mainnet image on an unknown cluster slug', async () => {
-        const { generateMetadata } = await import('../page');
-
         const metadata = await generateMetadata({
             params: Promise.resolve({ signature: SIGNATURE }),
             searchParams: Promise.resolve({ cluster: 'bogus' }),
@@ -78,9 +75,6 @@ describe('should generate transaction page metadata', () => {
     });
 
     it('should drop the receipt image on a custom cluster', async () => {
-        vi.stubEnv('NEXT_PUBLIC_RECEIPT_ENABLED', 'true');
-        const { generateMetadata } = await import('../page');
-
         const metadata = await generateMetadata({
             params: Promise.resolve({ signature: SIGNATURE }),
             searchParams: Promise.resolve({
@@ -101,8 +95,6 @@ describe('should generate transaction page metadata', () => {
     });
 
     it('should set a large summary twitter card pointing at the same image', async () => {
-        const { generateMetadata } = await import('../page');
-
         const metadata = await generateMetadata({
             params: Promise.resolve({ signature: SIGNATURE }),
             searchParams: Promise.resolve({}),
@@ -115,9 +107,6 @@ describe('should generate transaction page metadata', () => {
     });
 
     it('should leave the receipt view metadata unchanged', async () => {
-        vi.stubEnv('NEXT_PUBLIC_RECEIPT_ENABLED', 'true');
-        const { generateMetadata } = await import('../page');
-
         const metadata = await generateMetadata({
             params: Promise.resolve({ signature: SIGNATURE }),
             searchParams: Promise.resolve({ view: 'receipt' }),

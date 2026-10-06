@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { renderHook } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -28,16 +30,17 @@ describe('useSearchNavigation', () => {
         expect(pushMock).toHaveBeenCalledWith('/address/abc?cluster=devnet');
     });
 
-    it('should merge cluster into pathname query string when pathname contains ?', () => {
+    it('should merge cluster into pathname query string and preserve existing params when pathname contains ?', () => {
         const { result } = renderHook(() => useSearchNavigation());
 
-        result.current({ label: 'Inspector', pathname: '/tx/inspector?message=abc', value: ['abc'] });
+        result.current({ label: 'Inspector', pathname: '/tx/inspector?message=abc&foo=bar', value: ['abc'] });
 
         expect(pushMock).toHaveBeenCalledOnce();
         const pushed = pushMock.mock.calls[0][0] as string;
         const url = new URL(pushed, 'http://localhost');
         expect(url.pathname).toBe('/tx/inspector');
         expect(url.searchParams.get('message')).toBe('abc');
+        expect(url.searchParams.get('foo')).toBe('bar');
         expect(url.searchParams.get('cluster')).toBe('devnet');
     });
 
@@ -66,18 +69,6 @@ describe('useSearchNavigation', () => {
 
         // Current app cluster is devnet, but item overrides to mainnet — no param needed
         expect(pushMock).toHaveBeenCalledWith('/address/abc');
-    });
-
-    it('should preserve existing query params in pathname with ?', () => {
-        const { result } = renderHook(() => useSearchNavigation());
-
-        result.current({ label: 'Inspector', pathname: '/tx/inspector?message=abc&foo=bar', value: ['abc'] });
-
-        const pushed = pushMock.mock.calls[0][0] as string;
-        const url = new URL(pushed, 'http://localhost');
-        expect(url.searchParams.get('message')).toBe('abc');
-        expect(url.searchParams.get('foo')).toBe('bar');
-        expect(url.searchParams.get('cluster')).toBe('devnet');
     });
 
     it('should preserve query values that contain "?" by splitting at the first occurrence only', () => {

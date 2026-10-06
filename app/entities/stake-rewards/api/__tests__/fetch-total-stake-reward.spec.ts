@@ -112,14 +112,11 @@ describe('fetchTotalStakeReward', () => {
         );
     });
 
-    it('should reject a negative amount, which would break the monotonic sum', async () => {
-        mockPages([[{ amount: -1, decimals: 9, epoch: 900 }]]);
-
-        await expect(fetchTotalStakeReward({ address: ADDRESS, apiKey: API_KEY })).rejects.toThrow();
-    });
-
-    it('should reject a fractional amount', async () => {
-        mockPages([[{ amount: 1.5, decimals: 9, epoch: 900 }]]);
+    it.each([
+        ['a negative amount, which would break the monotonic sum', -1],
+        ['a fractional amount', 1.5],
+    ])('should reject %s', async (_label, amount) => {
+        mockPages([[{ amount, decimals: 9, epoch: 900 }]]);
 
         await expect(fetchTotalStakeReward({ address: ADDRESS, apiKey: API_KEY })).rejects.toThrow();
     });

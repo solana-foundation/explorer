@@ -5,8 +5,8 @@
 // closing the per-hop undici `Agent` must happen *after* `processResponse`
 // drains the body, otherwise large bodies could be truncated mid-stream.
 //
-// Must run in the `node` environment, not jsdom (the default for this
-// workspace). JSDOM ships its own `AbortSignal` class; undici's webidl
+// Must run in the `node` environment, not jsdom.
+// JSDOM ships its own `AbortSignal` class; undici's webidl
 // converter does an `instanceof` check against Node's `AbortSignal`, and
 // the mismatch makes the request fail with
 // `RequestInit: Expected signal ("AbortSignal {}") to be an instance of AbortSignal`.

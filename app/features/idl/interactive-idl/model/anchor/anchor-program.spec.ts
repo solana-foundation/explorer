@@ -96,99 +96,24 @@ describe('AnchorUnifiedProgram', () => {
             ],
         };
 
-        it('should return the IDL from the Anchor program instance', async () => {
-            const program = await interpreter.createProgram(connection, wallet, programId, pre030Idl);
+        it.each([
+            ['pre-0.30', pre030Idl],
+            ['0.30+', v030Idl],
+        ])('should expose program ID and camelCase instruction and argument names for %s IDL', async (_, idl) => {
+            const program = await interpreter.createProgram(connection, wallet, programId, idl);
             const returnedIdl = program.getIdl();
 
-            // Verify that getIdl() returns the program's IDL
+            expect(program.programId.toBase58()).toBe(programId.toBase58());
+            expect(returnedIdl.instructions.map((ix: any) => ix.name)).toEqual(['createAccount', 'updateAccount']);
+            expect(returnedIdl.instructions.map((ix: any) => ix.args[0].name)).toEqual(['accountData', 'newData']);
+        });
+
+        it('should preserve the original IDL and return the Anchor program IDL from getIdl', async () => {
+            const program = await interpreter.createProgram(connection, wallet, programId, pre030Idl);
+
+            expect(program.idl).toBe(pre030Idl);
             // @ts-expect-error expect to access private property
-            expect(returnedIdl).toBe(program.program.idl);
-        });
-
-        it('should preserve the original IDL in the program instance', async () => {
-            const program = await interpreter.createProgram(connection, wallet, programId, pre030Idl);
-
-            // Verify that the original IDL is preserved
-            expect(program.idl).toBe(pre030Idl);
-            expect(program.idl.instructions[0].name).toBe('createAccount');
-            expect(program.idl.instructions[1].name).toBe('updateAccount');
-        });
-
-        it('should have the program ID set correctly', async () => {
-            const program = await interpreter.createProgram(connection, wallet, programId, pre030Idl);
-
-            // Verify the program ID is set
-            expect(program.programId.toBase58()).toBe(programId.toBase58());
-        });
-
-        it('should handle pre-0.30 IDL format with interpreter', async () => {
-            const program = await interpreter.createProgram(connection, wallet, programId, pre030Idl);
-
-            // Verify the program was created successfully
-            expect(program).toBeDefined();
-            expect(program.programId.toBase58()).toBe(programId.toBase58());
-
-            // The returned IDL should have the expected structure
-            const idl = program.getIdl();
-            expect(idl).toBeDefined();
-            expect(idl.instructions).toBeDefined();
-            expect(idl.instructions.length).toBe(2);
-        });
-
-        it('should handle 0.30+ IDL format with interpreter', async () => {
-            const program = await interpreter.createProgram(connection, wallet, programId, v030Idl);
-
-            // Verify the program was created successfully
-            expect(program).toBeDefined();
-            expect(program.programId.toBase58()).toBe(programId.toBase58());
-
-            // The returned IDL should have the expected structure
-            const idl = program.getIdl();
-            expect(idl).toBeDefined();
-            expect(idl.instructions).toBeDefined();
-            expect(idl.instructions.length).toBe(2);
-        });
-
-        it('should maintain consistency between original and program IDL', async () => {
-            const program = await interpreter.createProgram(connection, wallet, programId, pre030Idl);
-
-            // Original IDL should be unchanged
-            expect(program.idl).toBe(pre030Idl);
-
-            // Program's IDL is what getIdl() returns
-            const returnedIdl = program.getIdl();
-
-            // Both should have instructions
-            expect(program.idl.instructions).toBeDefined();
-            expect(returnedIdl.instructions).toBeDefined();
-        });
-
-        it('should verify actual conversion behavior for pre-0.30 IDL', async () => {
-            // Create program and check what getIdl() returns
-            const program = await interpreter.createProgram(connection, wallet, programId, pre030Idl);
-            const returnedIdl = program.getIdl();
-
-            // The actual behavior: getIdl() returns the original camelCase names
-            const instructionNames = returnedIdl.instructions.map((ix: any) => ix.name);
-            expect(instructionNames).toEqual(['createAccount', 'updateAccount']);
-
-            // Arguments also keep their original camelCase names
-            expect(returnedIdl.instructions[0].args[0].name).toBe('accountData');
-            expect(returnedIdl.instructions[1].args[0].name).toBe('newData');
-        });
-
-        it('should verify actual conversion behavior for 0.30 IDL', async () => {
-            // Create program and check what getIdl() returns
-            const program = await interpreter.createProgram(connection, wallet, programId, v030Idl);
-            const returnedIdl = program.getIdl();
-
-            // The actual behavior: getIdl() also returns camelCase names for 0.30 IDL
-            const instructionNames = returnedIdl.instructions.map((ix: any) => ix.name);
-            expect(instructionNames).toEqual(['createAccount', 'updateAccount']);
-
-            // Arguments are also converted to camelCase
-            expect(returnedIdl.instructions[0].args[0].name).toBe('accountData');
-            expect(returnedIdl.instructions[1].args[0].name).toBe('newData');
+            expect(program.getIdl()).toBe(program.program.idl);
         });
     });
 });

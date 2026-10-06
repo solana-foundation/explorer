@@ -17,14 +17,16 @@ const defaultState: ClusterState = {
     status: ClusterStatus.Connected,
 };
 
+export const defaultEpochInfo: ClusterInfo['epochInfo'] = {
+    absoluteSlot: 312_456_789n,
+    blockHeight: 295_456_321n,
+    epoch: 520n,
+    slotIndex: 156_789n,
+    slotsInEpoch: 432_000n,
+};
+
 const defaultClusterInfo: ClusterInfo = {
-    epochInfo: {
-        absoluteSlot: 312_456_789n,
-        blockHeight: 295_456_321n,
-        epoch: 520n,
-        slotIndex: 156_789n,
-        slotsInEpoch: 432_000n,
-    },
+    epochInfo: defaultEpochInfo,
     epochSchedule: {
         firstNormalEpoch: 14n,
         firstNormalSlot: 524_256n,

@@ -1,5 +1,5 @@
+import { cuData } from '../../__fixtures__/cu-data';
 import { formatTooltipTitle, toInstructionCUDisplay } from '../instruction-display';
-import type { InstructionCUData } from '../types';
 
 describe('toInstructionCUDisplay', () => {
     describe('labels', () => {
@@ -89,7 +89,3 @@ describe('formatTooltipTitle', () => {
     // `toInstructionCUDisplay` always produces a label — it falls back to the position — so there is no
     // missing-label case to cover. `ExtendedBarDataset` requires the field for the same reason.
 });
-
-function cuData(overrides: Partial<InstructionCUData>): InstructionCUData {
-    return { computeUnits: 1000, defaultUnits: 0, programId: 'TestProgram', scheduledUnits: 200000, ...overrides };
-}

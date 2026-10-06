@@ -1,11 +1,8 @@
-import { address, none } from '@solana/kit';
-import { Keypair, PublicKey } from '@solana/web3.js';
-import { AccountState, getTokenEncoder, getTokenSize } from '@solana-program/token';
+import { Keypair } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { alloc, toBase64 } from '@/app/shared/lib/bytes';
-
 import {
+    encodeTokenAccountBase64,
     PARSED_USDC_TOKEN_ACCOUNT,
     POST_SYSTEM_ACCOUNT,
     postAccount,
@@ -15,14 +12,9 @@ import {
     USDC_MINT,
 } from '../../mocks/token-accounts';
 import { buildTokenBalances } from '../build-token-balances';
-import { ACCOUNT_TYPE_TOKEN } from '../token-layout';
 
 const UNKNOWN_MINT = Keypair.generate().publicKey;
-const TOKEN_ACCOUNT_SIZE = getTokenSize();
 const TOKEN_2022_MULTISIG_SIZE = 355;
-/** Offset of the account-state byte: mint (32) + owner (32) + amount (8) + delegate COption<Address> (4 + 32) */
-const STATE_OFFSET = 108;
-const tokenEncoder = getTokenEncoder();
 
 describe('buildTokenBalances', () => {
     it('should skip post-simulation token account when mint decimals are unknown', () => {
@@ -113,30 +105,3 @@ describe('buildTokenBalances', () => {
         expect(result.accountKeys[1].pubkey).toBe(keyB);
     });
 });
-
-function encodeTokenAccountBase64(
-    mint: PublicKey,
-    owner: PublicKey,
-    amount: bigint,
-    { state, totalSize = TOKEN_ACCOUNT_SIZE }: { state?: number; totalSize?: number } = {},
-): string {
-    const encoded = tokenEncoder.encode({
-        amount,
-        closeAuthority: none(),
-        delegate: none(),
-        delegatedAmount: 0n,
-        isNative: none(),
-        mint: address(mint.toBase58()),
-        owner: address(owner.toBase58()),
-        state: AccountState.Initialized,
-    });
-
-    const buf = alloc(totalSize);
-    buf.set(encoded);
-
-    // The encoder only accepts in-range AccountState values, so corrupt vectors patch the byte directly
-    if (state !== undefined) buf[STATE_OFFSET] = state;
-    if (totalSize > TOKEN_ACCOUNT_SIZE) buf[TOKEN_ACCOUNT_SIZE] = ACCOUNT_TYPE_TOKEN;
-
-    return toBase64(buf);
-}

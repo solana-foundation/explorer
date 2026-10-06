@@ -1,10 +1,11 @@
+import { gen } from '@__fixtures__/gen';
 import type { Account } from '@providers/accounts';
-import { Keypair, SystemProgram } from '@solana/web3.js';
+import { SystemProgram } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { selectMintDecimals, selectTokenAccountMint } from '../selectors';
 
-const MINT_PUBKEY = Keypair.generate().publicKey;
+const MINT_PUBKEY = gen.publicKey(1);
 
 function makeBaseAccount(): Account {
     return {
@@ -12,7 +13,7 @@ function makeBaseAccount(): Account {
         executable: false,
         lamports: 0,
         owner: SystemProgram.programId,
-        pubkey: Keypair.generate().publicKey,
+        pubkey: gen.publicKey(2),
     };
 }
 
@@ -26,7 +27,7 @@ function makeMintAccount(decimals: number): Account {
                         decimals,
                         freezeAuthority: null,
                         isInitialized: true,
-                        mintAuthority: Keypair.generate().publicKey.toBase58(),
+                        mintAuthority: gen.address(3),
                         supply: '1000000',
                     },
                     type: 'mint' as const,
@@ -46,7 +47,7 @@ function makeTokenAccount(mint: string): Account {
                     info: {
                         isNative: false,
                         mint,
-                        owner: Keypair.generate().publicKey.toBase58(),
+                        owner: gen.address(4),
                         state: 'initialized',
                         tokenAmount: { amount: '1000000', decimals: 6, uiAmountString: '1' },
                     },

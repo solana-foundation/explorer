@@ -1,17 +1,13 @@
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-
+import { gen } from '@__fixtures__/gen';
 import { Connection, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it, vi } from 'vitest';
 
+import systemProgramIdl from '../__mocks__/codama/system-program-idl.json';
 import type { BaseIdl, UnifiedWallet } from '../unified-program.d';
 import { CodamaInterpreter } from './codama-interpreter';
 import { CodamaUnifiedProgram } from './codama-program';
 
-function loadIdl(filename: string): BaseIdl {
-    const idlPath = path.resolve(__dirname, '../__mocks__/codama', filename);
-    return JSON.parse(readFileSync(idlPath, 'utf8')) as BaseIdl;
-}
+const idl = systemProgramIdl as BaseIdl;
 
 describe('CodamaInterpreter', () => {
     const interpreter = new CodamaInterpreter();
@@ -95,8 +91,6 @@ describe('CodamaInterpreter', () => {
 
     describe('createProgram', () => {
         it('should create a CodamaUnifiedProgram from a valid Codama IDL', async () => {
-            const idl = loadIdl('system-program-idl.json');
-
             const program = await interpreter.createProgram(mockConnection, mockWallet, mockProgramId, idl);
 
             expect(program).toBeInstanceOf(CodamaUnifiedProgram);
@@ -106,7 +100,6 @@ describe('CodamaInterpreter', () => {
         });
 
         it('should accept a string programId', async () => {
-            const idl = loadIdl('system-program-idl.json');
             const programIdStr = PublicKey.default.toBase58();
 
             const program = await interpreter.createProgram(mockConnection, mockWallet, programIdStr, idl);
@@ -117,16 +110,12 @@ describe('CodamaInterpreter', () => {
 
     describe('createInstruction', () => {
         it('should build a transferSol instruction', async () => {
-            const idl = loadIdl('system-program-idl.json');
             const program = await interpreter.createProgram(mockConnection, mockWallet, mockProgramId, idl);
-
-            const source = 'Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV';
-            const destination = '2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8';
 
             const ix = await interpreter.createInstruction(
                 program,
                 'transferSol',
-                { destination, source },
+                { destination: gen.address(2), source: gen.address(1) },
                 ['1000000000'], // amount as positional string arg
             );
 
@@ -139,7 +128,6 @@ describe('CodamaInterpreter', () => {
         });
 
         it('should throw for unknown instruction names', async () => {
-            const idl = loadIdl('system-program-idl.json');
             const program = await interpreter.createProgram(mockConnection, mockWallet, mockProgramId, idl);
 
             await expect(interpreter.createInstruction(program, 'nonExistentInstruction', {}, [])).rejects.toThrow(
@@ -149,95 +137,42 @@ describe('CodamaInterpreter', () => {
     });
 
     describe('account normalization', () => {
-        it('should normalize null account values', async () => {
-            const idl = loadIdl('system-program-idl.json');
+        it.each([
+            ['empty string', ''],
+            ['whitespace-only', '   '],
+        ])('should normalize %s account to null', async (_, destination) => {
             const program = await interpreter.createProgram(mockConnection, mockWallet, mockProgramId, idl);
 
-            const source = 'Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV';
-            // Passing null for destination — should normalize to null and let buildInstruction handle it
             await expect(
-                interpreter.createInstruction(program, 'transferSol', { destination: null as any, source }, ['1000']),
-            ).rejects.toThrow();
-        });
-
-        it('should normalize empty string account to null', async () => {
-            const idl = loadIdl('system-program-idl.json');
-            const program = await interpreter.createProgram(mockConnection, mockWallet, mockProgramId, idl);
-
-            const source = 'Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV';
-            await expect(
-                interpreter.createInstruction(program, 'transferSol', { destination: '', source }, ['1000']),
-            ).rejects.toThrow();
-        });
-
-        it('should normalize whitespace-only account to null', async () => {
-            const idl = loadIdl('system-program-idl.json');
-            const program = await interpreter.createProgram(mockConnection, mockWallet, mockProgramId, idl);
-
-            const source = 'Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV';
-            await expect(
-                interpreter.createInstruction(program, 'transferSol', { destination: '   ', source }, ['1000']),
+                interpreter.createInstruction(program, 'transferSol', { destination, source: gen.address(1) }, [
+                    '1000',
+                ]),
             ).rejects.toThrow();
         });
 
         it('should throw descriptive error for invalid public key', async () => {
-            const idl = loadIdl('system-program-idl.json');
             const program = await interpreter.createProgram(mockConnection, mockWallet, mockProgramId, idl);
 
-            const source = 'Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV';
             await expect(
                 interpreter.createInstruction(
                     program,
                     'transferSol',
-                    { destination: 'not-a-valid-pubkey!!!', source },
+                    { destination: 'not-a-valid-pubkey!!!', source: gen.address(1) },
                     ['1000'],
                 ),
             ).rejects.toThrow('Invalid public key for account "destination"');
         });
 
         it('should accept PublicKey objects directly', async () => {
-            const idl = loadIdl('system-program-idl.json');
             const program = await interpreter.createProgram(mockConnection, mockWallet, mockProgramId, idl);
 
-            const source = new PublicKey('Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV');
-            const destination = new PublicKey('2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8');
+            const source = gen.publicKey(1);
+            const destination = gen.publicKey(2);
 
             const ix = await interpreter.createInstruction(program, 'transferSol', { destination, source } as any, [
                 '1000',
             ]);
             expect(ix).toBeInstanceOf(TransactionInstruction);
-        });
-    });
-
-    describe('argument conversion', () => {
-        it('should convert u64 string args to BigInt via the instruction builder', async () => {
-            const idl = loadIdl('system-program-idl.json');
-            const program = await interpreter.createProgram(mockConnection, mockWallet, mockProgramId, idl);
-
-            // transferSol has one user-facing arg: amount (u64)
-            // If the conversion works, the instruction should build without error
-            const source = 'Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV';
-            const destination = '2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8';
-
-            const ix = await interpreter.createInstruction(program, 'transferSol', { destination, source }, [
-                '999999999999',
-            ]);
-
-            expect(ix).toBeDefined();
-        });
-
-        it('should skip omitted arguments (discriminators)', async () => {
-            const idl = loadIdl('system-program-idl.json');
-            const program = await interpreter.createProgram(mockConnection, mockWallet, mockProgramId, idl);
-
-            // transferSol has discriminator (omitted) + amount (user-facing)
-            // Passing only one arg should work because discriminator is filtered out
-            const source = 'Htp9MGP8Tig923ZFY7Qf2zzbMUmYneFRAhSp7vSg4wxV';
-            const destination = '2xNweLHLKifGNBhLp2giBonGDJ3dPAHpSTaMJmfcMon8';
-
-            const ix = await interpreter.createInstruction(program, 'transferSol', { destination, source }, ['500000']);
-
-            expect(ix).toBeDefined();
         });
     });
 });

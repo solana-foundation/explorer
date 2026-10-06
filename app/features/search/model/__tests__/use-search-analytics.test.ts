@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -63,20 +65,12 @@ describe('useSearchAnalytics', () => {
         expect(searchAnalytics.trackPerformed).toHaveBeenCalledWith(3, 3);
     });
 
-    it('should not fire when query is empty', () => {
+    it.each([
+        ['empty', ''],
+        ['whitespace only', '   '],
+    ])('should not fire when query is %s', (_, query) => {
         const { rerender } = renderHook(
-            ({ isLoading }: { isLoading: boolean }) => useSearchAnalytics('', isLoading, []),
-            { initialProps: { isLoading: true } },
-        );
-
-        rerender({ isLoading: false });
-
-        expect(searchAnalytics.trackPerformed).not.toHaveBeenCalled();
-    });
-
-    it('should not fire when query is whitespace only', () => {
-        const { rerender } = renderHook(
-            ({ isLoading }: { isLoading: boolean }) => useSearchAnalytics('   ', isLoading, []),
+            ({ isLoading }: { isLoading: boolean }) => useSearchAnalytics(query, isLoading, []),
             { initialProps: { isLoading: true } },
         );
 

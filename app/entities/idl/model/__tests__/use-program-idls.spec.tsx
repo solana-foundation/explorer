@@ -1,8 +1,7 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
+import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 import { Cluster } from '@/app/utils/cluster';
 
 import { useProgramIdls } from '../use-program-idls';
@@ -22,15 +21,7 @@ vi.mock('../../api/load-resolve-program-idls', () => ({
 
 const PROGRAM_ID = '11111111111111111111111111111111';
 
-// A fresh SWR cache per render so keys don't bleed across tests; disable error retries so a
-// throwing fetcher resolves deterministically within the test instead of scheduling backoff timers.
-function wrapper({ children }: { children: ReactNode }) {
-    return (
-        <SWRConfig value={{ dedupingInterval: 0, provider: () => new Map(), shouldRetryOnError: false }}>
-            {children}
-        </SWRConfig>
-    );
-}
+const wrapper = swrWrapper({ dedupingInterval: 0, shouldRetryOnError: false });
 
 describe('useProgramIdls', () => {
     beforeEach(() => {
@@ -61,7 +52,7 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitFor(() => expect(result.current.anchorIdl).toEqual({ name: 'anchor_idl' }));
+            await waitForHook(() => expect(result.current.anchorIdl).toEqual({ name: 'anchor_idl' }));
             expect(result.current.programMetadataIdl).toEqual({ name: 'pmp_idl' });
 
             const requestedUrl = mocks.fetch.mock.calls[0]?.[0] as string;
@@ -77,7 +68,7 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitFor(() => expect(result.current.isLoading).toBe(false));
+            await waitForHook(() => expect(result.current.isLoading).toBe(false));
             expect(result.current.anchorIdl).toBeUndefined();
             expect(result.current.programMetadataIdl).toBeUndefined();
         });
@@ -94,7 +85,7 @@ describe('useProgramIdls', () => {
                 wrapper,
             });
 
-            await waitFor(() => expect(result.current.anchorIdl).toEqual({ name: 'custom_anchor_idl' }));
+            await waitForHook(() => expect(result.current.anchorIdl).toEqual({ name: 'custom_anchor_idl' }));
             expect(result.current.programMetadataIdl).toEqual({ name: 'custom_pmp_idl' });
             // The resolver runs against the user-supplied RPC URL (so localhost works end-to-end).
             expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
@@ -111,7 +102,7 @@ describe('useProgramIdls', () => {
                 wrapper,
             });
 
-            await waitFor(() => expect(result.current.isLoading).toBe(false));
+            await waitForHook(() => expect(result.current.isLoading).toBe(false));
             expect(result.current.anchorIdl).toBeUndefined();
             expect(result.current.programMetadataIdl).toBeUndefined();
         });
@@ -132,7 +123,7 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitFor(() => expect(result.current.anchorIdl).toEqual({ name: 'local_anchor_idl' }));
+            await waitForHook(() => expect(result.current.anchorIdl).toEqual({ name: 'local_anchor_idl' }));
             // Resolved against the user's local RPC URL (the correct network)...
             expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
                 expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),

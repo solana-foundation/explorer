@@ -16,7 +16,7 @@ import {
     STATUS_VALUES,
 } from '@features/transaction-history/lib/history-filters';
 import { useHistoryFiltersSupported } from '@features/transaction-history/model/use-account-history';
-import { format } from 'date-fns';
+import { format } from 'date-fns/format';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { ChevronDown, Filter, X } from 'react-feather';

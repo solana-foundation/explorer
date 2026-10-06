@@ -1,7 +1,12 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+// @vitest-environment jsdom
+
+import { act, renderHook } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { DEFAULT_SIGNATURE } from '@/app/__fixtures__/gen';
+import { rpcStub } from '@/app/__tests__/mock-rpc';
+import { waitForHook } from '@/app/__tests__/swr-hook';
 import { Cluster } from '@/app/utils/cluster';
 
 const mockSend = vi.fn();
@@ -14,20 +19,16 @@ vi.mock('@solana/kit', async () => {
     const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
     return {
         ...actual,
-        createSolanaRpc: vi.fn(() => ({
-            getSignatureStatuses: vi.fn(() => ({ send: mockSend })),
-        })),
+        createSolanaRpc: vi.fn(() => rpcStub({ getSignatureStatuses: mockSend })),
     };
 });
-
-const TEST_SIGNATURE = '5UfDuX7hXbPjSUQPBfRBLRYoy4SZJvfP18VpoYz75Y4P6yCWNxbEq1RCfxGvod7U1PArBAkQbE4yLrdaAiZBmGEs';
 
 const NOT_FOUND = { value: [null] };
 const FOUND = { value: [{ confirmationStatus: 'finalized', confirmations: null, err: null, slot: 100 }] };
 
 describe('useClusterTransactionSearch', () => {
     beforeEach(() => {
-        vi.useFakeTimers({ shouldAdvanceTime: true });
+        vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
         vi.clearAllMocks();
         mockSend.mockResolvedValue(NOT_FOUND);
         vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams() as ReturnType<typeof useSearchParams>);
@@ -42,9 +43,9 @@ describe('useClusterTransactionSearch', () => {
         mockSend.mockReturnValue(new Promise(() => {}));
         const { useClusterTransactionSearch } = await import('../use-cluster-transaction-search');
 
-        const { result } = renderHook(() => useClusterTransactionSearch(TEST_SIGNATURE, Cluster.MainnetBeta));
+        const { result } = renderHook(() => useClusterTransactionSearch(DEFAULT_SIGNATURE, Cluster.MainnetBeta));
 
-        await waitFor(() => expect(result.current.status).toBe('searching'));
+        await waitForHook(() => expect(result.current.status).toBe('searching'));
         expect(result.current.searchingCluster).toBe(Cluster.Devnet);
     });
 
@@ -52,9 +53,9 @@ describe('useClusterTransactionSearch', () => {
         mockSend.mockResolvedValueOnce(FOUND);
         const { useClusterTransactionSearch } = await import('../use-cluster-transaction-search');
 
-        const { result } = renderHook(() => useClusterTransactionSearch(TEST_SIGNATURE, Cluster.Devnet));
+        const { result } = renderHook(() => useClusterTransactionSearch(DEFAULT_SIGNATURE, Cluster.Devnet));
 
-        await waitFor(() => expect(result.current.status).toBe('found'));
+        await waitForHook(() => expect(result.current.status).toBe('found'));
         // Devnet is the current cluster and excluded, so MainnetBeta is probed first
         expect(result.current.foundCluster).toBe(Cluster.MainnetBeta);
     });
@@ -62,13 +63,13 @@ describe('useClusterTransactionSearch', () => {
     it('should report not-found after probing every public cluster', async () => {
         const { useClusterTransactionSearch } = await import('../use-cluster-transaction-search');
 
-        const { result } = renderHook(() => useClusterTransactionSearch(TEST_SIGNATURE, Cluster.MainnetBeta));
+        const { result } = renderHook(() => useClusterTransactionSearch(DEFAULT_SIGNATURE, Cluster.MainnetBeta));
 
         await act(async () => {
             await vi.advanceTimersByTimeAsync(3000);
         });
 
-        await waitFor(() => expect(result.current.status).toBe('not-found'));
+        await waitForHook(() => expect(result.current.status).toBe('not-found'));
         expect(result.current.foundCluster).toBeUndefined();
         expect(result.current.searchingCluster).toBeUndefined();
     });
@@ -77,7 +78,7 @@ describe('useClusterTransactionSearch', () => {
         const { createSolanaRpc } = await import('@solana/kit');
         const { useClusterTransactionSearch } = await import('../use-cluster-transaction-search');
 
-        renderHook(() => useClusterTransactionSearch(TEST_SIGNATURE, Cluster.MainnetBeta));
+        renderHook(() => useClusterTransactionSearch(DEFAULT_SIGNATURE, Cluster.MainnetBeta));
 
         await act(async () => {
             await vi.advanceTimersByTimeAsync(3000);
@@ -99,7 +100,7 @@ describe('useClusterTransactionSearch', () => {
         const { createSolanaRpc } = await import('@solana/kit');
         const { useClusterTransactionSearch } = await import('../use-cluster-transaction-search');
 
-        renderHook(() => useClusterTransactionSearch(TEST_SIGNATURE, Cluster.Custom));
+        renderHook(() => useClusterTransactionSearch(DEFAULT_SIGNATURE, Cluster.Custom));
 
         await act(async () => {
             await vi.advanceTimersByTimeAsync(3000);
@@ -113,9 +114,9 @@ describe('useClusterTransactionSearch', () => {
         mockSend.mockRejectedValueOnce(new Error('RPC unreachable')).mockResolvedValueOnce(FOUND);
         const { useClusterTransactionSearch } = await import('../use-cluster-transaction-search');
 
-        const { result } = renderHook(() => useClusterTransactionSearch(TEST_SIGNATURE, Cluster.MainnetBeta));
+        const { result } = renderHook(() => useClusterTransactionSearch(DEFAULT_SIGNATURE, Cluster.MainnetBeta));
 
-        await waitFor(() => expect(result.current.status).toBe('found'));
+        await waitForHook(() => expect(result.current.status).toBe('found'));
         // First probe (Devnet) rejects, second probe (Testnet) resolves as found
         expect(result.current.foundCluster).toBe(Cluster.Testnet);
     });

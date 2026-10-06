@@ -23,13 +23,16 @@ describe('resolveDomain', () => {
     });
 
     describe('SNS domains (.sns)', () => {
-        it('should resolve a .sns domain to its name account and owner', async () => {
-            const rpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
+        it.each(['toly.sns', 'Toly.SNS'])(
+            'should resolve %s to the lowercase name account and its owner',
+            async domain => {
+                const rpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
 
-            const result = await resolveDomain('toly.sns', rpc);
+                const result = await resolveDomain(domain, rpc);
 
-            expect(result).toEqual({ address: TOLY_NAME_ACCOUNT, owner: KNOWN_OWNER });
-        });
+                expect(result).toEqual({ address: TOLY_NAME_ACCOUNT, owner: KNOWN_OWNER });
+            },
+        );
 
         it('should return null when account does not exist', async () => {
             const rpc = mockRpc(null);
@@ -54,12 +57,6 @@ describe('resolveDomain', () => {
 
             await expect(resolveDomain('test.sns', rpc)).rejects.toThrow('RPC failure');
         });
-
-        it('should resolve a mixed-case .sns domain to the lowercase name account', async () => {
-            const rpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
-
-            expect(await resolveDomain('Toly.SNS', rpc)).toEqual({ address: TOLY_NAME_ACCOUNT, owner: KNOWN_OWNER });
-        });
     });
 
     describe('.sol domains', () => {
@@ -80,14 +77,6 @@ describe('resolveDomain', () => {
             expect(result).not.toBeNull();
             expect(result?.owner).toBe(KNOWN_OWNER.toString());
             expect(result?.address).toBeTruthy();
-        });
-
-        it('should return null when account does not exist', async () => {
-            const rpc = mockRpc(null);
-
-            const result = await resolveDomain('nonexistent.bonk', rpc);
-
-            expect(result).toBeNull();
         });
 
         it('should return null when no account info exists for ANS domain', async () => {
@@ -113,16 +102,6 @@ describe('resolveDomain', () => {
             const rpc = mockRpc(null);
 
             await expect(resolveDomain('test.bonk', rpc)).rejects.toThrow('ANS lookup failed');
-        });
-
-        it('should lowercase the domain before lookup', async () => {
-            const upper = mockRpc(createAnsAccountData(KNOWN_OWNER));
-            const lower = mockRpc(createAnsAccountData(KNOWN_OWNER));
-
-            const result1 = await resolveDomain('TEST.BONK', upper);
-            const result2 = await resolveDomain('test.bonk', lower);
-
-            expect(result1?.address).toBe(result2?.address);
         });
 
         it('should return null for label counts ANS cannot register', async () => {

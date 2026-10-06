@@ -1,4 +1,3 @@
-import { TxInstructionSurface } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import {
     PYTH_INSTRUCTION_TYPES,
@@ -7,23 +6,15 @@ import {
     type PythInstructionType,
 } from '@explorer/decoder-pyth';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(() => ({ push: vi.fn() })),
-    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
-}));
-
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
-import { TransactionsProvider } from '@/app/providers/transactions';
+import { renderTxCard } from '@/app/__tests__/card-harness';
 
 import { pythInstructionParsers } from '../../lib/pyth-client';
 import { PythDetailsCard } from '../PythDetailsCard';
+
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const PROGRAM_ID = new PublicKey(PYTH_ORACLE_PROGRAM_IDS.mainnet);
 const PUBLISHER = new PublicKey('4vJ9JU1bJJE96FWSJKvHsmmFADCg4gpZQff4P3bkLKi');
@@ -155,17 +146,5 @@ function renderCard(
     const dispatched = dispatcher.fromTransactionInstruction(raw);
     if (!dispatched) throw new Error('no Pyth parser registered for the mainnet deployment');
 
-    return render(
-        <ScrollAnchorProvider>
-            <ClusterProvider>
-                <TransactionsProvider>
-                    <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>
-                            <PythDetailsCard ix={dispatched} raw={raw} index={0} {...props} />
-                        </TxInstructionSurface>
-                    </AccountsProvider>
-                </TransactionsProvider>
-            </ClusterProvider>
-        </ScrollAnchorProvider>,
-    );
+    return renderTxCard(<PythDetailsCard ix={dispatched} raw={raw} index={0} {...props} />);
 }

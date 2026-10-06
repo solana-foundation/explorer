@@ -1,7 +1,9 @@
 import { gen } from '@__fixtures__/gen';
 import type * as SolanaKit from '@solana/kit';
 import { SystemProgram } from '@solana/web3.js';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import { stubRpcFetch } from '@/app/__tests__/rpc-fetch';
 
 import { fetchTransactionDetails } from '../fetch-transaction-details';
 
@@ -14,13 +16,7 @@ const SIGNATURE = gen.signature(1);
 const FEE_PAYER = gen.address(1);
 const SYSTEM_PROGRAM = SystemProgram.programId.toBase58();
 
-const fetchMock = vi.fn();
-
-function respondWith(result: unknown) {
-    const body = JSON.stringify({ id: 1, jsonrpc: '2.0', result });
-    // kit reads the body as text so it can upcast integers to bigints as it parses.
-    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, text: async () => body });
-}
+const { fetchMock, respondWith, requestBody } = stubRpcFetch();
 
 function parsedTransactionResult(version: 'legacy' | 0 | 1) {
     return {
@@ -51,19 +47,6 @@ function parsedTransactionResult(version: 'legacy' | 0 | 1) {
         version,
     };
 }
-
-function requestBody() {
-    return JSON.parse(fetchMock.mock.calls[0][1].body);
-}
-
-beforeEach(() => {
-    vi.stubGlobal('fetch', fetchMock);
-});
-
-afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.clearAllMocks();
-});
 
 describe('fetchTransactionDetails', () => {
     it('should ask for parsed data at the newest version Explorer renders', async () => {

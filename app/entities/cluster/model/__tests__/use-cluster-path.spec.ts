@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { renderHook } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { describe, expect, it, vi } from 'vitest';
@@ -8,8 +10,11 @@ vi.mock('next/navigation');
 
 describe('pickClusterParams', () => {
     describe('with no search params', () => {
-        it('should return pathname only', () => {
-            const result = pickClusterParams('/address/abc123');
+        it.each([
+            ['no', undefined],
+            ['empty', new URLSearchParams('')],
+        ])('should return pathname only for %s current params', (_label, currentParams) => {
+            const result = pickClusterParams('/address/abc123', currentParams);
             expect(result).toBe('/address/abc123');
         });
 
@@ -62,12 +67,6 @@ describe('pickClusterParams', () => {
             const currentParams = new URLSearchParams('cluster=devnet&foo=bar&baz=qux');
             const result = pickClusterParams('/address/abc123', currentParams);
             expect(result).toBe('/address/abc123?cluster=devnet');
-        });
-
-        it('should handle empty current search params', () => {
-            const currentParams = new URLSearchParams('');
-            const result = pickClusterParams('/address/abc123', currentParams);
-            expect(result).toBe('/address/abc123');
         });
     });
 
@@ -171,25 +170,17 @@ describe('pickClusterParams', () => {
             const result = pickClusterParams('/address/abc123/', currentParams);
             expect(result).toBe('/address/abc123/?cluster=devnet');
         });
-
-        it('should handle complex pathname', () => {
-            const currentParams = new URLSearchParams('cluster=mainnet-beta');
-            const result = pickClusterParams('/address/abc123/tokens', currentParams);
-            expect(result).toBe('/address/abc123/tokens');
-        });
-
-        it('should handle undefined current params', () => {
-            const result = pickClusterParams('/address/abc123', undefined);
-            expect(result).toBe('/address/abc123');
-        });
     });
 
     describe('mainnet-beta filtering', () => {
-        it('should not include mainnet-beta cluster in URL', () => {
-            const currentParams = new URLSearchParams('cluster=mainnet-beta');
-            const result = pickClusterParams('/address/abc123', currentParams);
-            expect(result).toBe('/address/abc123');
-        });
+        it.each(['/address/abc123', '/address/abc123/tokens'])(
+            'should not include mainnet-beta cluster in %s',
+            pathname => {
+                const currentParams = new URLSearchParams('cluster=mainnet-beta');
+                const result = pickClusterParams(pathname, currentParams);
+                expect(result).toBe(pathname);
+            },
+        );
 
         it('should filter mainnet-beta from additional params', () => {
             const additionalParams = new URLSearchParams('cluster=mainnet-beta');
@@ -204,12 +195,6 @@ describe('pickClusterParams', () => {
             expect(result).toBe('/address/abc123');
         });
 
-        it('should not preserve customUrl when cluster is mainnet-beta', () => {
-            const currentParams = new URLSearchParams('cluster=mainnet-beta&customUrl=http://test.com');
-            const result = pickClusterParams('/address/abc123', currentParams);
-            expect(result).toBe('/address/abc123');
-        });
-
         it('should switch from mainnet-beta to other cluster correctly', () => {
             const currentParams = new URLSearchParams('cluster=mainnet-beta');
             const additionalParams = new URLSearchParams('cluster=devnet');
@@ -220,24 +205,9 @@ describe('pickClusterParams', () => {
 });
 
 describe('useClusterPath', () => {
-    const mockUseSearchParams = (params: Record<string, string | null> = {}) => {
-        const searchParams = new URLSearchParams();
-        Object.entries(params).forEach(([key, value]) => {
-            if (value !== null) {
-                searchParams.set(key, value);
-            }
-        });
-
-        return {
-            get: (key: string) => searchParams.get(key),
-            has: (key: string) => searchParams.has(key),
-            toString: () => searchParams.toString(),
-        };
-    };
-
     describe('integration with pickClusterParams', () => {
         it('should integrate with pickClusterParams for basic functionality', () => {
-            vi.mocked(useSearchParams).mockReturnValue(mockUseSearchParams({ cluster: 'devnet' }) as any);
+            vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams('cluster=devnet') as any);
 
             const { result } = renderHook(() => useClusterPath({ pathname: '/address/abc123' }));
 
@@ -245,7 +215,7 @@ describe('useClusterPath', () => {
         });
 
         it('should handle additional params override', () => {
-            vi.mocked(useSearchParams).mockReturnValue(mockUseSearchParams({ cluster: 'devnet' }) as any);
+            vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams('cluster=devnet') as any);
 
             const additionalParams = new URLSearchParams('cluster=testnet');
             const { result } = renderHook(() => useClusterPath({ additionalParams, pathname: '/address/abc123' }));
@@ -256,7 +226,7 @@ describe('useClusterPath', () => {
 
     describe('hash fragment handling', () => {
         it('should preserve hash fragment', () => {
-            vi.mocked(useSearchParams).mockReturnValue(mockUseSearchParams() as any);
+            vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams() as any);
 
             const { result } = renderHook(() => useClusterPath({ pathname: '/address/abc123#history' }));
 
@@ -264,7 +234,7 @@ describe('useClusterPath', () => {
         });
 
         it('should preserve hash with cluster param', () => {
-            vi.mocked(useSearchParams).mockReturnValue(mockUseSearchParams({ cluster: 'devnet' }) as any);
+            vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams('cluster=devnet') as any);
 
             const { result } = renderHook(() => useClusterPath({ pathname: '/address/abc123#history' }));
 
@@ -272,7 +242,7 @@ describe('useClusterPath', () => {
         });
 
         it('should handle multiple hash-like characters correctly', () => {
-            vi.mocked(useSearchParams).mockReturnValue(mockUseSearchParams({ cluster: 'testnet' }) as any);
+            vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams('cluster=testnet') as any);
 
             const { result } = renderHook(() => useClusterPath({ pathname: '/address/abc#def#ghi' }));
 
@@ -280,7 +250,7 @@ describe('useClusterPath', () => {
         });
 
         it('should handle additional params with hash, stripping customUrl when not on custom cluster', () => {
-            vi.mocked(useSearchParams).mockReturnValue(mockUseSearchParams({ cluster: 'devnet' }) as any);
+            vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams('cluster=devnet') as any);
 
             const additionalParams = new URLSearchParams('customUrl=http://test.com');
             const { result } = renderHook(() =>
@@ -292,16 +262,8 @@ describe('useClusterPath', () => {
     });
 
     describe('null or undefined search params', () => {
-        it('should handle null useSearchParams return', () => {
-            vi.mocked(useSearchParams).mockReturnValue(null as any);
-
-            const { result } = renderHook(() => useClusterPath({ pathname: '/address/abc123' }));
-
-            expect(result.current).toBe('/address/abc123');
-        });
-
-        it('should handle undefined useSearchParams return', () => {
-            vi.mocked(useSearchParams).mockReturnValue(undefined as any);
+        it.each([null, undefined])('should handle %s useSearchParams return', searchParams => {
+            vi.mocked(useSearchParams).mockReturnValue(searchParams as any);
 
             const { result } = renderHook(() => useClusterPath({ pathname: '/address/abc123' }));
 

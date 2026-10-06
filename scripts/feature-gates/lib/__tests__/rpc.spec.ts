@@ -14,6 +14,13 @@ const SCHEDULE: EpochSchedule = {
 
 const KEY = '7bTK6Jis8Xpfrs8ZoUfiMDPazTcdPcTWheZFJTA5Z6X4';
 
+// The probe waits before every attempt and backs off after a 429.
+async function runProbe(rpc: SolanaRpc) {
+    const result = probeFeatureActivation(rpc, SCHEDULE, KEY);
+    await vi.runAllTimersAsync();
+    return result;
+}
+
 function makeRpc(value: { data: [string, string] } | null): SolanaRpc {
     // Only the .getAccountInfo(...).send() shape is exercised by probeFeatureActivation.
     return {
@@ -23,14 +30,21 @@ function makeRpc(value: { data: [string, string] } | null): SolanaRpc {
     } as unknown as SolanaRpc;
 }
 
-function failingRpc(error: Error): SolanaRpc {
-    return {
+function failingRpc(error: Error) {
+    let calls = 0;
+    const rpc = {
         getAccountInfo: () => ({
             send: async () => {
+                calls += 1;
                 throw error;
             },
         }),
     } as unknown as SolanaRpc;
+    return { calls: () => calls, rpc };
+}
+
+function httpError(statusCode: number, message: string) {
+    return new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, { headers: new Headers(), message, statusCode });
 }
 
 function encode(bytes: number[]): { data: [string, string] } {
@@ -39,31 +53,33 @@ function encode(bytes: number[]): { data: [string, string] } {
 
 describe('probeFeatureActivation', () => {
     beforeEach(() => {
+        vi.useFakeTimers();
         vi.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
     });
 
     it('should return "missing" when the RPC responds with value=null', async () => {
-        const probe = await probeFeatureActivation(makeRpc(null), SCHEDULE, KEY);
+        const probe = await runProbe(makeRpc(null));
         expect(probe).toEqual({ kind: 'missing' });
     });
 
     it('should return "unactivated" when the activated flag is 0', async () => {
-        const probe = await probeFeatureActivation(makeRpc(encode([0, 0, 0, 0, 0, 0, 0, 0, 0])), SCHEDULE, KEY);
+        const probe = await runProbe(makeRpc(encode([0, 0, 0, 0, 0, 0, 0, 0, 0])));
         expect(probe).toEqual({ kind: 'unactivated' });
     });
 
     it('should return "unactivated" when the body is empty', async () => {
-        const probe = await probeFeatureActivation(makeRpc(encode([])), SCHEDULE, KEY);
+        const probe = await runProbe(makeRpc(encode([])));
         expect(probe).toEqual({ kind: 'unactivated' });
     });
 
     it('should return "unactivated" when the activated flag is set but the body is truncated', async () => {
         // < 9 bytes can't carry the activation_slot u64.
-        const probe = await probeFeatureActivation(makeRpc(encode([1, 0, 0])), SCHEDULE, KEY);
+        const probe = await runProbe(makeRpc(encode([1, 0, 0])));
         expect(probe).toEqual({ kind: 'unactivated' });
     });
 
@@ -74,55 +90,25 @@ describe('probeFeatureActivation', () => {
         const slotBytes = Buffer.alloc(8);
         slotBytes.writeBigUInt64LE(slot);
         bytes.push(...slotBytes);
-        const probe = await probeFeatureActivation(makeRpc(encode(bytes)), SCHEDULE, KEY);
+        const probe = await runProbe(makeRpc(encode(bytes)));
         expect(probe).toEqual({ epoch: 18, kind: 'activated' });
     });
 
     it('should return "unreachable" when the RPC throws a non-rate-limit error', async () => {
-        // The retry loop only retries 429s; other errors fall through immediately.
-        const probe = await probeFeatureActivation(failingRpc(new Error('network down')), SCHEDULE, KEY);
-        expect(probe).toEqual({ kind: 'unreachable' });
+        const { calls, rpc } = failingRpc(new Error('network down'));
+        expect(await runProbe(rpc)).toEqual({ kind: 'unreachable' });
+        expect(calls()).toBe(1);
     });
 
     it('should retry on a SolanaError TRANSPORT_HTTP_ERROR with statusCode 429 before giving up', async () => {
-        // Tracks how many times the retry loop calls into the RPC. We don't care about
-        // success — only that the kit-shaped 429 error is recognised as rate-limit and
-        // triggers the retry loop, not an immediate fall-through to `unreachable`.
-        let calls = 0;
-        const rpc = {
-            getAccountInfo: () => ({
-                send: async () => {
-                    calls += 1;
-                    throw new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
-                        headers: new Headers(),
-                        message: 'Too Many Requests',
-                        statusCode: 429,
-                    });
-                },
-            }),
-        } as unknown as SolanaRpc;
-
-        await probeFeatureActivation(rpc, SCHEDULE, KEY);
-        // MAX_RETRIES is 3 in the implementation; retries fire when the error is recognised.
-        expect(calls).toBeGreaterThan(1);
-    }, 60_000);
+        const { calls, rpc } = failingRpc(httpError(429, 'Too Many Requests'));
+        expect(await runProbe(rpc)).toEqual({ kind: 'unreachable' });
+        expect(calls()).toBe(3);
+    });
 
     it('should NOT retry a SolanaError TRANSPORT_HTTP_ERROR whose statusCode is not 429', async () => {
-        let calls = 0;
-        const rpc = {
-            getAccountInfo: () => ({
-                send: async () => {
-                    calls += 1;
-                    throw new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
-                        headers: new Headers(),
-                        message: 'Bad Gateway',
-                        statusCode: 502,
-                    });
-                },
-            }),
-        } as unknown as SolanaRpc;
-
-        await probeFeatureActivation(rpc, SCHEDULE, KEY);
-        expect(calls).toBe(1);
+        const { calls, rpc } = failingRpc(httpError(502, 'Bad Gateway'));
+        await runProbe(rpc);
+        expect(calls()).toBe(1);
     });
 });

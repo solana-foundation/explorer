@@ -1,8 +1,11 @@
 import { ActionType, type Dispatch, FetchStatus } from '@providers/cache';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { waitForHook } from '@/app/__tests__/swr-hook';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { type Details, DispatchContext, useFetchRawTransaction } from '../raw';
 
@@ -12,10 +15,6 @@ let mockCluster = Cluster.MainnetBeta;
 vi.mock('@providers/cluster', () => ({
     useCluster: () => ({ cluster: mockCluster, url: MOCK_URL }),
 }));
-
-// Silence Sentry; non-custom clusters call Logger.error in the catch block.
-const loggerError = vi.fn();
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: (...args: unknown[]) => loggerError(...args) } }));
 
 const fetchRawTransaction = vi.fn();
 vi.mock('@entities/transaction-data', () => ({
@@ -39,7 +38,7 @@ describe('useFetchRawTransaction', () => {
 
         result.current('sig', 'confirmed');
 
-        await waitFor(() =>
+        await waitForHook(() =>
             expect(dispatch).toHaveBeenCalledWith({
                 key: 'sig',
                 status: FetchStatus.FetchFailed,
@@ -53,25 +52,20 @@ describe('useFetchRawTransaction', () => {
             .find(action => action.status === FetchStatus.FetchFailed);
         expect(failedAction).toBeDefined();
         expect(failedAction).not.toHaveProperty('data');
+        expect(vi.mocked(Logger.error)).toHaveBeenCalledWith(expect.any(Error), { url: MOCK_URL });
     });
 
-    it('should thread the commitment through to the fetch', async () => {
-        fetchRawTransaction.mockResolvedValue(null);
-        const { result } = renderHook(() => useFetchRawTransaction(), { wrapper });
+    it.each(['confirmed', undefined] as const)(
+        'should pass the %s commitment through to the fetch',
+        async commitment => {
+            fetchRawTransaction.mockResolvedValue(null);
+            const { result } = renderHook(() => useFetchRawTransaction(), { wrapper });
 
-        result.current('sig', 'confirmed');
+            result.current('sig', commitment);
 
-        await waitFor(() => expect(fetchRawTransaction).toHaveBeenCalledWith(MOCK_URL, 'sig', 'confirmed'));
-    });
-
-    it('should pass undefined commitment by default (unchanged behavior for existing callers)', async () => {
-        fetchRawTransaction.mockResolvedValue(null);
-        const { result } = renderHook(() => useFetchRawTransaction(), { wrapper });
-
-        result.current('sig');
-
-        await waitFor(() => expect(fetchRawTransaction).toHaveBeenCalledWith(MOCK_URL, 'sig', undefined));
-    });
+            await waitForHook(() => expect(fetchRawTransaction).toHaveBeenCalledWith(MOCK_URL, 'sig', commitment));
+        },
+    );
 
     it('should dispatch the fetched transaction', async () => {
         const raw = { messageBytes: new Uint8Array([1, 2, 3]), signatures: ['sig'], version: 1 };
@@ -80,7 +74,7 @@ describe('useFetchRawTransaction', () => {
 
         result.current('sig');
 
-        await waitFor(() =>
+        await waitForHook(() =>
             expect(dispatch).toHaveBeenCalledWith({
                 data: { raw },
                 key: 'sig',
@@ -98,11 +92,11 @@ describe('useFetchRawTransaction', () => {
 
         result.current('sig', 'confirmed');
 
-        await waitFor(() =>
+        await waitForHook(() =>
             expect(dispatch).toHaveBeenCalledWith(
                 expect.objectContaining({ status: FetchStatus.FetchFailed, type: ActionType.Update }),
             ),
         );
-        expect(loggerError).not.toHaveBeenCalled();
+        expect(vi.mocked(Logger.error)).not.toHaveBeenCalled();
     });
 });

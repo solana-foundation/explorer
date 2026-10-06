@@ -28,7 +28,7 @@ async function signMessage(messageBytes: ReadonlyUint8Array): Promise<string> {
 }
 
 describe('TransactionSignatures', () => {
-    it('should render a Valid badge for a signature covering the message', async () => {
+    it('should render a Valid badge on the fee payer row for a signature covering the message', async () => {
         render(
             <TransactionSignatures
                 signatures={[await signMessage(rawMessage)]}
@@ -38,22 +38,14 @@ describe('TransactionSignatures', () => {
         );
 
         expect(await screen.findByText('Valid')).toBeInTheDocument();
+        expect(screen.getByText('Fee Payer')).toBeInTheDocument();
     });
 
-    it('should render an Invalid badge for a signature covering different bytes', async () => {
-        render(
-            <TransactionSignatures
-                signatures={[await signMessage(new Uint8Array(32))]}
-                message={message}
-                rawMessage={rawMessage}
-            />,
-        );
-
-        expect(await screen.findByText('Invalid')).toBeInTheDocument();
-    });
-
-    it('should render an Invalid badge for a malformed signature instead of blanking the column', async () => {
-        render(<TransactionSignatures signatures={['abc']} message={message} rawMessage={rawMessage} />);
+    it.each([
+        { name: 'a signature covering different bytes', signature: () => signMessage(new Uint8Array(32)) },
+        { name: 'a malformed signature', signature: async () => 'abc' },
+    ])('should render an Invalid badge for $name', async ({ signature }) => {
+        render(<TransactionSignatures signatures={[await signature()]} message={message} rawMessage={rawMessage} />);
 
         expect(await screen.findByText('Invalid')).toBeInTheDocument();
     });
@@ -63,17 +55,5 @@ describe('TransactionSignatures', () => {
 
         expect(await screen.findByText('Missing Signature')).toBeInTheDocument();
         expect(await screen.findByText('N/A')).toBeInTheDocument();
-    });
-
-    it('should mark the first row as fee payer', async () => {
-        render(
-            <TransactionSignatures
-                signatures={[await signMessage(rawMessage)]}
-                message={message}
-                rawMessage={rawMessage}
-            />,
-        );
-
-        expect(await screen.findByText('Fee Payer')).toBeInTheDocument();
     });
 });

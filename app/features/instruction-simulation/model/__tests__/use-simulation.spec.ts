@@ -1,11 +1,13 @@
+// @vitest-environment jsdom
+
 import type { VersionedMessage } from '@solana/web3.js';
 import { act, renderHook } from '@testing-library/react';
-import React from 'react';
-import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { swrWrapper } from '@/app/__tests__/swr-hook';
+
 import type { SimulationResult } from '../../lib/simulate-transaction';
-import type { SimulationState } from '../use-simulation';
+import { type SimulationState, useSimulation } from '../use-simulation';
 
 const MOCK_URL = 'https://devnet.rpc.address';
 
@@ -24,9 +26,8 @@ describe('useSimulation', () => {
         mockSimulateTransaction.mockResolvedValue(createSuccessResult());
     });
 
-    it('should return idle status before simulation', async () => {
-        const { useSimulation } = await import('../use-simulation');
-        const { result } = renderHook(() => useSimulation(createMockMessage()), { wrapper: swrWrapper });
+    it('should return idle status before simulation', () => {
+        const { result } = renderHook(() => useSimulation(createMockMessage()), { wrapper: swrWrapper() });
 
         expect(result.current.status).toBe('idle');
         expect(typeof getSimulate(result.current)).toBe('function');
@@ -36,8 +37,7 @@ describe('useSimulation', () => {
         const successResult = createSuccessResult({ epoch: 42n, unitsConsumed: 200 });
         mockSimulateTransaction.mockResolvedValue(successResult);
 
-        const { useSimulation } = await import('../use-simulation');
-        const { result } = renderHook(() => useSimulation(createMockMessage()), { wrapper: swrWrapper });
+        const { result } = renderHook(() => useSimulation(createMockMessage()), { wrapper: swrWrapper() });
 
         await act(async () => {
             getSimulate(result.current)();
@@ -52,8 +52,7 @@ describe('useSimulation', () => {
     it('should transition to error when simulateTransaction rejects', async () => {
         mockSimulateTransaction.mockRejectedValue(new Error('Network timeout'));
 
-        const { useSimulation } = await import('../use-simulation');
-        const { result } = renderHook(() => useSimulation(createMockMessage()), { wrapper: swrWrapper });
+        const { result } = renderHook(() => useSimulation(createMockMessage()), { wrapper: swrWrapper() });
 
         await act(async () => {
             getSimulate(result.current)();
@@ -71,8 +70,7 @@ describe('useSimulation', () => {
                 }),
         );
 
-        const { useSimulation } = await import('../use-simulation');
-        const { result } = renderHook(() => useSimulation(createMockMessage()), { wrapper: swrWrapper });
+        const { result } = renderHook(() => useSimulation(createMockMessage()), { wrapper: swrWrapper() });
 
         await act(async () => {
             getSimulate(result.current)();
@@ -112,8 +110,4 @@ function createSuccessResult(overrides?: Partial<SimulationResult>): SimulationR
         unitsConsumed: 150,
         ...overrides,
     };
-}
-
-function swrWrapper({ children }: { children: React.ReactNode }) {
-    return React.createElement(SWRConfig, { value: { provider: () => new Map() } }, children);
 }

@@ -18,11 +18,7 @@ import { SummaryCard } from '../SummaryCard';
 const IN_FLIGHT = { status: FetchStatus.Fetching };
 const FIXTURE_BLOCK_TIME_UTC = 'May 18, 2024 at 02:40:00 UTC';
 
-vi.mock('next/navigation', () => ({
-    usePathname: () => `/tx/${DEFAULT_SIGNATURE}`,
-    useRouter: () => ({ replace: vi.fn() }),
-    useSearchParams: () => new URLSearchParams(),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 function renderSummary({
     parsed = MOCK_PARSED_TX,

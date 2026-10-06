@@ -4,13 +4,12 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { CACHE_HEADERS, JUPITER_PRICE_ENDPOINT, NO_STORE_HEADERS } from '../config';
 
-vi.mock('@/app/shared/lib/logger', () => ({
-    Logger: {
-        error: vi.fn(),
-        panic: vi.fn(),
-        warn: vi.fn(),
-    },
-}));
+// The route reads JUPITER_API_KEY once, when the module loads.
+vi.hoisted(() => {
+    process.env.JUPITER_API_KEY = 'test-api-key';
+});
+
+import { GET } from '../route';
 
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
@@ -26,7 +25,6 @@ function mockResponseOnce(value: Partial<Response>) {
 describe('GET /api/token-price/[mintAddress]', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.stubEnv('JUPITER_API_KEY', 'test-api-key');
     });
 
     afterEach(() => {
@@ -35,7 +33,6 @@ describe('GET /api/token-price/[mintAddress]', () => {
 
     describe('validation', () => {
         it('should return 400 for an invalid mint address', async () => {
-            const { GET } = await import('../route');
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: 'not-a-valid-pubkey' }) });
 
             expect(response.status).toBe(400);
@@ -46,7 +43,6 @@ describe('GET /api/token-price/[mintAddress]', () => {
 
     describe('missing API key', () => {
         it('should return 500 when JUPITER_API_KEY is not set', async () => {
-            vi.unstubAllEnvs();
             vi.stubEnv('JUPITER_API_KEY', '');
             vi.resetModules();
             const { GET } = await import('../route');
@@ -62,8 +58,6 @@ describe('GET /api/token-price/[mintAddress]', () => {
 
     describe('Jupiter API errors', () => {
         it('should return 429 and calls Logger.warn on rate limit', async () => {
-            vi.resetModules();
-            const { GET } = await import('../route');
             mockResponseOnce({ ok: false, status: 429 });
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
@@ -74,8 +68,6 @@ describe('GET /api/token-price/[mintAddress]', () => {
         });
 
         it('should return 502 and calls Logger.error on non-rate-limit HTTP error', async () => {
-            vi.resetModules();
-            const { GET } = await import('../route');
             mockResponseOnce({ ok: false, status: 503 });
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
@@ -87,49 +79,17 @@ describe('GET /api/token-price/[mintAddress]', () => {
     });
 
     describe('schema mismatch', () => {
-        it('should return { price: null } with no-store headers when response schema is unexpected', async () => {
-            vi.resetModules();
-            const { GET } = await import('../route');
-            mockResponseOnce({
-                json: async () => ({ [VALID_MINT]: { usdPrice: -1 } }),
-                ok: true,
-            });
+        it.each([
+            ['a negative usdPrice', { [VALID_MINT]: { usdPrice: -1 } }],
+            ['a zero usdPrice', { [VALID_MINT]: { usdPrice: 0 } }],
+            ['a response without the mint address', {}],
+        ])('should log the error and return { price: null } with no-store headers for %s', async (_reason, body) => {
+            mockResponseOnce({ json: async () => body, ok: true });
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
             expect(response.status).toBe(200);
-            const data = await response.json();
-            expect(data).toEqual({ price: null });
-            expect(response.headers.get('Cache-Control')).toBe(NO_STORE_HEADERS['Cache-Control']);
-        });
-
-        it('should log and captures the error on schema mismatch', async () => {
-            vi.resetModules();
-            const { GET } = await import('../route');
-            mockResponseOnce({
-                json: async () => ({ [VALID_MINT]: { usdPrice: 0 } }),
-                ok: true,
-            });
-
-            await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
-
-            const expectedErr = new Error(`Jupiter price API returned unexpected schema for ${VALID_MINT}`);
-            expect(Logger.error).toHaveBeenCalledWith(expectedErr, { sentry: true });
-        });
-
-        it('should log an error when mint address is missing from response', async () => {
-            vi.resetModules();
-            const { GET } = await import('../route');
-            mockResponseOnce({
-                json: async () => ({}),
-                ok: true,
-            });
-
-            const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
-
-            expect(response.status).toBe(200);
-            const data = await response.json();
-            expect(data).toEqual({ price: null });
+            expect(await response.json()).toEqual({ price: null });
             expect(Logger.error).toHaveBeenCalledWith(
                 new Error(`Jupiter price API returned unexpected schema for ${VALID_MINT}`),
                 { sentry: true },
@@ -138,8 +98,6 @@ describe('GET /api/token-price/[mintAddress]', () => {
         });
 
         it('should not log an error when token has no usdPrice field', async () => {
-            vi.resetModules();
-            const { GET } = await import('../route');
             mockResponseOnce({
                 json: async () => ({ [VALID_MINT]: { blockId: 408752772, decimals: 8, liquidity: 856.71 } }),
                 ok: true,
@@ -156,9 +114,7 @@ describe('GET /api/token-price/[mintAddress]', () => {
     });
 
     describe('successful response', () => {
-        it('should return the price with cache headers', async () => {
-            vi.resetModules();
-            const { GET } = await import('../route');
+        it('should return the price from the Jupiter price endpoint with cache headers', async () => {
             mockResponseOnce({
                 json: async () => ({ [VALID_MINT]: { usdPrice: 180.5 } }),
                 ok: true,
@@ -166,30 +122,16 @@ describe('GET /api/token-price/[mintAddress]', () => {
 
             const response = await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
 
+            expect(fetchMock).toHaveBeenCalledWith(`${JUPITER_PRICE_ENDPOINT}?ids=${VALID_MINT}`, expect.any(Object));
             expect(response.status).toBe(200);
             const data = await response.json();
             expect(data).toEqual({ price: 180.5 });
             expect(response.headers.get('Cache-Control')).toBe(CACHE_HEADERS['Cache-Control']);
         });
-
-        it('should call the Jupiter price endpoint with the correct URL', async () => {
-            vi.resetModules();
-            const { GET } = await import('../route');
-            mockResponseOnce({
-                json: async () => ({ [VALID_MINT]: { usdPrice: 180.5 } }),
-                ok: true,
-            });
-
-            await GET(mockRequest, { params: Promise.resolve({ mintAddress: VALID_MINT }) });
-
-            expect(fetchMock).toHaveBeenCalledWith(`${JUPITER_PRICE_ENDPOINT}?ids=${VALID_MINT}`, expect.any(Object));
-        });
     });
 
     describe('fetch exception', () => {
         it('should return 500 and calls Logger.panic on unexpected error', async () => {
-            vi.resetModules();
-            const { GET } = await import('../route');
             const error = new Error('Network failure');
             fetchMock.mockRejectedValueOnce(error);
 

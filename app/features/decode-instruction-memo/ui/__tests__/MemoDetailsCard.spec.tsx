@@ -1,23 +1,15 @@
-import { TxInstructionSurface } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(() => ({ push: vi.fn() })),
-    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
-}));
-
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
-import { TransactionsProvider } from '@/app/providers/transactions';
+import { readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
 
 import { memoInstructionParsers } from '../../lib/memo-client';
 import { MemoDetailsCard } from '../MemoDetailsCard';
+
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
 
@@ -28,7 +20,7 @@ describe('MemoDetailsCard', () => {
         renderCard(memoInstruction('gm'));
 
         await waitFor(() => {
-            expect(readRows()).toEqual([
+            expect(readCardRows()).toEqual([
                 ['Program', MEMO_PROGRAM_ID.toBase58()],
                 ['Data (UTF-8)', 'gm'],
             ]);
@@ -44,7 +36,7 @@ describe('MemoDetailsCard', () => {
         renderCard(memoInstruction(memo));
 
         await waitFor(() => {
-            expect(readRows()[1]).toEqual([
+            expect(readCardRows()[1]).toEqual([
                 'Data (UTF-8)',
                 ['a'.repeat(50), 'a'.repeat(50), 'a'.repeat(20)].join('\n'),
             ]);
@@ -58,7 +50,7 @@ describe('MemoDetailsCard', () => {
         renderCard({ ...memoInstruction('gm'), programId: legacyMemoProgram });
 
         await waitFor(() => {
-            expect(readRows()).toEqual([
+            expect(readCardRows()).toEqual([
                 ['Program', legacyMemoProgram.toBase58()],
                 ['Data (UTF-8)', 'gm'],
             ]);
@@ -80,32 +72,5 @@ function memoInstruction(memo: string): ParsedInstruction {
 }
 
 function renderCard(ix: ParsedInstruction) {
-    return render(
-        <ScrollAnchorProvider>
-            <ClusterProvider>
-                <TransactionsProvider>
-                    <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>
-                            <MemoDetailsCard ix={dispatcher.fromParsedInstruction(ix)} index={0} />
-                        </TxInstructionSurface>
-                    </AccountsProvider>
-                </TransactionsProvider>
-            </ClusterProvider>
-        </ScrollAnchorProvider>,
-    );
-}
-
-/** Each row as `[label, value]`, in render order, so the result pins order as well as content. */
-function readRows(): Array<[string, string]> {
-    const card = screen.getAllByRole('table')[0];
-    return within(card)
-        .getAllByRole('row')
-        .map(row => {
-            const cells = within(row).getAllByRole('cell');
-            return [cells[0].textContent ?? '', readAddress(cells[1]) ?? cells[1]?.textContent ?? ''];
-        });
-}
-
-function readAddress(cell: HTMLElement | undefined): string | undefined {
-    return cell?.querySelector('[data-address]')?.getAttribute('data-address') ?? undefined;
+    return renderTxCard(<MemoDetailsCard ix={dispatcher.fromParsedInstruction(ix)} index={0} />);
 }

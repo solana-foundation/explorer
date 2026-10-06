@@ -4,7 +4,6 @@ import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@solana/kit', () => ({ createSolanaRpc: vi.fn() }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
 
 import { createSolanaRpc } from '@solana/kit';
 

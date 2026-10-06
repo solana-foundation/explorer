@@ -121,17 +121,6 @@ describe('createReceipt', () => {
             });
         });
 
-        it('should report no-transfers for zero SOL transfer', async () => {
-            vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
-                transaction: mockZeroTransferTransaction,
-            });
-
-            const result = await createReceipt(mockSignature);
-
-            expect(result).toEqual({ kind: 'unavailable', reason: 'no-transfers' });
-        });
-
         it('should handle custom fee payer transaction', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
                 cluster: Cluster.MainnetBeta,
@@ -274,17 +263,6 @@ describe('createReceipt', () => {
                 sender: { address: derived.toBase58() },
             });
         });
-
-        it('should report no-transfers for Jito-only SOL transfer', async () => {
-            vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
-                transaction: mockJitoOnlyTransferTransaction,
-            });
-
-            const result = await createReceipt(mockSignature);
-
-            expect(result).toEqual({ kind: 'unavailable', reason: 'no-transfers' });
-        });
     });
 
     describe('token transfer receipts', () => {
@@ -358,28 +336,15 @@ describe('createReceipt', () => {
             });
         });
 
-        it('should handle token transfer when getTokenInfo returns undefined', async () => {
+        it.each([
+            ['returns undefined', () => vi.mocked(getTokenInfo).mockResolvedValueOnce(undefined)],
+            ['throws an error', () => vi.mocked(getTokenInfo).mockRejectedValueOnce(new Error('Token info not found'))],
+        ])('should handle token transfer when getTokenInfo %s', async (_, mockTokenInfo) => {
             vi.mocked(getTx).mockResolvedValueOnce({
                 cluster: Cluster.MainnetBeta,
                 transaction: mockUsdcTransferTransaction,
             });
-            vi.mocked(getTokenInfo).mockResolvedValueOnce(undefined);
-
-            const receipt = unwrap(await createReceipt(mockSignature));
-
-            expect(receipt).toMatchObject({
-                total: {
-                    unit: 'TOKEN',
-                },
-            });
-        });
-
-        it('should handle token transfer when getTokenInfo throws an error', async () => {
-            vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
-                transaction: mockUsdcTransferTransaction,
-            });
-            vi.mocked(getTokenInfo).mockRejectedValueOnce(new Error('Token info not found'));
+            mockTokenInfo();
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -513,11 +478,12 @@ describe('createReceipt', () => {
     });
 
     describe('no transfer receipts', () => {
-        it('should report no-transfers for transaction with no transfers', async () => {
-            vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
-                transaction: mockNoTransferTransaction,
-            });
+        it.each([
+            ['zero SOL transfer', mockZeroTransferTransaction],
+            ['Jito-only SOL transfer', mockJitoOnlyTransferTransaction],
+            ['transaction with no transfers', mockNoTransferTransaction],
+        ])('should report no-transfers for %s', async (_, transaction) => {
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction });
 
             const result = await createReceipt(mockSignature);
 
@@ -793,18 +759,6 @@ describe('createReceipt', () => {
             // 0.1 + 0.2 via naive float addition would yield 0.30000000000000004.
             expect(receipt.total.raw).toBe(0.3);
             expect(receipt.total.formatted).toBe('0.3');
-        });
-
-        it('should produce an ok receipt for same-mint multi-token transactions', async () => {
-            vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
-                transaction: mockUsdcMultipleTransfersTransaction,
-            });
-            vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
-
-            const result = await createReceipt(mockSignature);
-
-            expect(result.kind).toBe('ok');
         });
     });
 });

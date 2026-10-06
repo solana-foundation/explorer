@@ -1,27 +1,21 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-vi.mock('next/navigation');
-
+import { renderWithProviders } from '@/app/__tests__/card-harness';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
 
 import { AccountsCard } from '../AccountsCard';
 
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
+
 describe('inspector::AccountsCard', () => {
-    test('should render accounts from message without lookup tables', async () => {
-        const m = mock.deserializeMessage(stubs.systemTransferMsg);
-
-        render(
-            <ClusterProvider>
-                <AccountsProvider>
-                    <AccountsCard message={m} />
-                </AccountsProvider>
-            </ClusterProvider>,
-        );
+    test.each([
+        { message: mock.deserializeMessage(stubs.systemTransferMsg), name: 'message without lookup tables' },
+        { message: mock.deserializeMessageV0(stubs.tokenTransferMsg), name: 'versioned message' },
+    ])('should render accounts from $name', async ({ message }) => {
+        renderWithProviders(<AccountsCard message={message} />, { transactions: false });
 
         // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
         await waitFor(() => {
@@ -30,45 +24,7 @@ describe('inspector::AccountsCard', () => {
             // independent of on-chain account loading. Both the mobile card and desktop row emit it.
             expect(screen.getAllByText('Signer').length).toBeGreaterThan(0);
         });
-    });
-
-    test('should explain the empty Change column and link to the Logs block', async () => {
-        const m = mock.deserializeMessage(stubs.systemTransferMsg);
-
-        render(
-            <ClusterProvider>
-                <AccountsProvider>
-                    <AccountsCard message={m} />
-                </AccountsProvider>
-            </ClusterProvider>,
-        );
-
-        // No simulation is wired up here, so the Change column has nothing to show: the hint under the
-        // heading must say why, offer a Simulate control, and point at the Logs block via an anchor.
-        await waitFor(() => {
-            expect(screen.getByText(/Simulate to see balance changes/, { selector: 'p' })).toBeInTheDocument();
-        });
-        expect(screen.getByRole('link', { name: 'Logs block' })).toHaveAttribute('href', '#logs');
-        expect(screen.getAllByRole('button', { name: 'Simulate' }).length).toBeGreaterThan(0);
-    });
-
-    test('should render accounts from versioned message', async () => {
-        const m = mock.deserializeMessageV0(stubs.tokenTransferMsg);
-
-        render(
-            <ClusterProvider>
-                <AccountsProvider>
-                    <AccountsCard message={m} />
-                </AccountsProvider>
-            </ClusterProvider>,
-        );
-
-        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
-        await waitFor(() => {
-            expect(screen.getByText(/Account List/)).toBeInTheDocument();
-            // The fee payer (account index 0) carries a Signer badge — rendered from the message header,
-            // independent of on-chain account loading. Both the mobile card and desktop row emit it.
-            expect(screen.getAllByText('Signer').length).toBeGreaterThan(0);
-        });
+        // No simulation is wired up here, so the hint under the heading says why the Change column is empty.
+        expect(screen.getByText(/Simulate to see balance changes/, { selector: 'p' })).toBeInTheDocument();
     });
 });

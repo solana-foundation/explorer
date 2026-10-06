@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { trackEvent } from '@/app/shared/lib/analytics';
 
 import { resolveBufferConfigFromBytes } from '../../lib/config-resolution/resolve-buffer-config-from-bytes';
-import { bufferAccountData, metadataAccountData, pack } from '../__fixtures__/pmp-account-fixtures';
+import { bufferAccountData, DOC, DOC_PRETTY, metadataAccountData, pack } from '../__fixtures__/pmp-account-fixtures';
 import { PmpAccountCard } from '../PmpAccountCard';
 
 const { mockDecodePmpPayload, mockFindConfigInTransactions } = vi.hoisted(() => ({
@@ -42,8 +42,6 @@ vi.mock('../../api/find-config-in-transactions', async importOriginal => ({
     findConfigInTransactions: mockFindConfigInTransactions,
 }));
 
-const DOC = '{"name":"company","version":"1.0.0"}';
-const DOC_PRETTY = '{\n  "name": "company",\n  "version": "1.0.0"\n}';
 const OTHER_DOC = '{"name":"other","version":"2.0.0"}';
 
 function toAccount(raw: Uint8Array): Account {

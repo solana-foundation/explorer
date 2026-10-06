@@ -1,29 +1,20 @@
-import { TxInstructionSurface } from '@entities/instruction-card';
+import { gen } from '@__fixtures__/gen';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { BPF_LOADER_PROGRAM_ID, type ParsedInstruction, PublicKey } from '@solana/web3.js';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(() => ({ push: vi.fn() })),
-    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
-}));
-
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
-
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
-import { TransactionsProvider } from '@/app/providers/transactions';
+import { readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { bpfLoaderInstructionParser } from '../../lib/bpf-loader-client';
 import { BpfLoaderDetailsCard } from '../BpfLoaderDetailsCard';
 
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
+
 const dispatcher = createInstructionParserDispatcher([bpfLoaderInstructionParser]);
 
-const ACCOUNT = '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM';
+const ACCOUNT = gen.address(1);
 const PROGRAM = BPF_LOADER_PROGRAM_ID.toBase58();
 
 const BYTES = 'AgAAAA==';
@@ -37,7 +28,7 @@ describe('BpfLoaderDetailsCard', () => {
         renderCard(dispatch('write', { account: ACCOUNT, bytes: BYTES, offset: 1024 }));
 
         await waitFor(() => {
-            expect(readRows()).toEqual([
+            expect(readCardRows()).toEqual([
                 ['Program', PROGRAM],
                 ['Account', ACCOUNT],
                 ['Bytes (Base 64)', BYTES],
@@ -56,7 +47,7 @@ describe('BpfLoaderDetailsCard', () => {
         renderCard(dispatch('write', { account: ACCOUNT, bytes, offset: 0 }));
 
         await waitFor(() => {
-            expect(readRows()[2]).toEqual(['Bytes (Base 64)', ['A'.repeat(50), 'A'.repeat(10)].join('\n')]);
+            expect(readCardRows()[2]).toEqual(['Bytes (Base 64)', ['A'.repeat(50), 'A'.repeat(10)].join('\n')]);
         });
     });
 
@@ -64,7 +55,7 @@ describe('BpfLoaderDetailsCard', () => {
         renderCard(dispatch('finalize', { account: ACCOUNT }));
 
         await waitFor(() => {
-            expect(readRows()).toEqual([
+            expect(readCardRows()).toEqual([
                 ['Program', PROGRAM],
                 ['Account', ACCOUNT],
             ]);
@@ -99,7 +90,7 @@ describe('BpfLoaderDetailsCard', () => {
         renderCard({ ...ix, programId: loaderV1 });
 
         await waitFor(() => {
-            expect(readRows()[0]).toEqual(['Program', loaderV1.toBase58()]);
+            expect(readCardRows()[0]).toEqual(['Program', loaderV1.toBase58()]);
         });
     });
 });
@@ -114,32 +105,5 @@ function dispatch(type: string, info: Record<string, unknown>): ParsedInstructio
 }
 
 function renderCard(ix: ParsedInstruction) {
-    return render(
-        <ScrollAnchorProvider>
-            <ClusterProvider>
-                <TransactionsProvider>
-                    <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>
-                            <BpfLoaderDetailsCard ix={ix} index={0} />
-                        </TxInstructionSurface>
-                    </AccountsProvider>
-                </TransactionsProvider>
-            </ClusterProvider>
-        </ScrollAnchorProvider>,
-    );
-}
-
-/** Each row as `[label, value]`, in render order, so the result pins order as well as content. */
-function readRows(): Array<[string, string]> {
-    const card = screen.getAllByRole('table')[0];
-    return within(card)
-        .getAllByRole('row')
-        .map(row => {
-            const cells = within(row).getAllByRole('cell');
-            return [cells[0].textContent ?? '', readAddress(cells[1]) ?? cells[1]?.textContent ?? ''];
-        });
-}
-
-function readAddress(cell: HTMLElement | undefined): string | undefined {
-    return cell?.querySelector('[data-address]')?.getAttribute('data-address') ?? undefined;
+    return renderTxCard(<BpfLoaderDetailsCard ix={ix} index={0} />);
 }

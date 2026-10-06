@@ -27,38 +27,26 @@ describe('Jupiter API Route', () => {
         expect(await response.json()).toEqual({ error: 'Invalid mint address' });
     });
 
-    it('should call the Jupiter search endpoint with the API key header', async () => {
+    it('should call the Jupiter search endpoint with the API key header and return verified: true', async () => {
         mockFetchResponse(200, [{ id: VALID_MINT, isVerified: true }]);
-        await callRoute(VALID_MINT);
+        const response = await callRoute(VALID_MINT);
 
         const [url, options] = fetchMock.mock.calls[0];
         expect(url).toBe(`https://api.jup.ag/tokens/v2/search?query=${VALID_MINT}`);
         expect((options?.headers as Record<string, string>)?.['x-api-key']).toBe('test-key');
-    });
-
-    it('should return verified: true when the token is verified by Jupiter', async () => {
-        mockFetchResponse(200, [{ id: VALID_MINT, isVerified: true }]);
-        const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ verified: true });
     });
 
-    it('should return verified: false when the token has isVerified: false', async () => {
-        mockFetchResponse(200, [{ id: VALID_MINT, isVerified: false }]);
-        const response = await callRoute(VALID_MINT);
-        expect(response.status).toBe(200);
-        expect(await response.json()).toEqual({ verified: false });
-    });
-
-    it('should return verified: false when isVerified is missing', async () => {
-        mockFetchResponse(200, [{ id: VALID_MINT }]);
-        const response = await callRoute(VALID_MINT);
-        expect(response.status).toBe(200);
-        expect(await response.json()).toEqual({ verified: false });
-    });
-
-    it('should return verified: false when the mint is not in the response array', async () => {
-        mockFetchResponse(200, [{ id: 'OtherMint11111111111111111111111111111111111', isVerified: true }]);
+    it.each([
+        ['the token has isVerified: false', [{ id: VALID_MINT, isVerified: false }]],
+        ['isVerified is missing', [{ id: VALID_MINT }]],
+        [
+            'the mint is not in the response array',
+            [{ id: 'OtherMint11111111111111111111111111111111111', isVerified: true }],
+        ],
+    ])('should return verified: false when %s', async (_reason, body) => {
+        mockFetchResponse(200, body);
         const response = await callRoute(VALID_MINT);
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ verified: false });

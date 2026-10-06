@@ -65,13 +65,11 @@ describe('convert idl comparison', () => {
                 [
                     {
                         convertType: convertReferenceType,
-                        expect: null,
-                        expectToThrow: new Error('Unsupported type: {"tuple":["u64","u64"]}'),
+                        expectedToThrow: new Error('Unsupported type: {"tuple":["u64","u64"]}'),
                         name: 'convertReference',
                     },
                     {
                         convertType: convertDisplayType,
-                        expectToThrow: null,
                         expected: {
                             option: {
                                 defined: {
@@ -83,18 +81,18 @@ describe('convert idl comparison', () => {
                                 },
                             },
                         },
+                        expectedToThrow: null,
                         name: 'convertDisplay',
                     },
                     {
                         convertType: convertLegacyType,
-                        expectToThrow: null,
                         expected: { option: { array: ['u64', 2] } },
+                        expectedToThrow: null,
                         name: 'convertLegacy',
                     },
                 ].map(a => ({ ...a, input: u64TupleOption })),
             )(
                 `should parse tuple type "${u64TupleOption.option.tuple}" with $name`,
-                //@ts-expect-error expected | expectedToThrow
                 ({ input, convertType, expected, expectedToThrow }) => {
                     if (expected) {
                         expect(convertType(input as any)).toEqual(expected);
@@ -108,13 +106,11 @@ describe('convert idl comparison', () => {
                 [
                     {
                         convertType: convertReferenceType,
-                        expect: null,
-                        expectToThrow: new Error('Unsupported type: {"tuple":["string","string"]}'),
+                        expectedToThrow: new Error('Unsupported type: {"tuple":["string","string"]}'),
                         name: 'convertReference',
                     },
                     {
                         convertType: convertDisplayType,
-                        expectToThrow: null,
                         expected: {
                             vec: {
                                 defined: {
@@ -126,18 +122,18 @@ describe('convert idl comparison', () => {
                                 },
                             },
                         },
+                        expectedToThrow: null,
                         name: 'convertDisplay',
                     },
                     {
                         convertType: convertLegacyType,
-                        expectToThrow: null,
                         expected: { vec: { array: ['string', 2] } },
+                        expectedToThrow: null,
                         name: 'convertLegacy',
                     },
                 ].map(a => ({ ...a, input: stringTupleVec })),
             )(
                 `should parse tuple type "${stringTupleVec.vec.tuple}" with $name`,
-                //@ts-expect-error expected | expectedToThrow
                 ({ input, convertType, expected, expectedToThrow }) => {
                     if (expected) {
                         expect(convertType(input as any)).toEqual(expected);

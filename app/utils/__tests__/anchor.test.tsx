@@ -3,6 +3,7 @@ import { IdlInstruction, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { render, screen } from '@testing-library/react';
 import { instructionIsSelfCPI, mapAccountToRows, mapIxArgsToRows } from '@utils/anchor';
 import BN from 'bn.js';
+import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -28,113 +29,32 @@ describe('anchor utilities - number overflow handling', () => {
     };
 
     describe('mapIxArgsToRows with large numbers', () => {
-        it('should handle u64 numbers larger than 53 bits without overflow', () => {
-            // Number larger than Number.MAX_SAFE_INTEGER (2^53 - 1 = 9007199254740991)
-            const largeNumber = new BN('18446744073709551615'); // Max u64: 2^64 - 1
-
+        it.each<{ type: 'u32' | 'u64' | 'u128' | 'u256'; value: BN | number; formatted: string }>([
+            // Max u64 is larger than Number.MAX_SAFE_INTEGER
+            { formatted: '18,446,744,073,709,551,615', type: 'u64', value: new BN('18446744073709551615') },
+            {
+                formatted: '340,282,366,920,938,463,463,374,607,431,768,211,455',
+                type: 'u128',
+                value: new BN('340282366920938463463374607431768211455'),
+            },
+            {
+                formatted:
+                    '115,792,089,237,316,195,423,570,985,008,687,907,853,269,984,665,640,564,039,457,584,007,913,129,639,935',
+                type: 'u256',
+                value: new BN('115792089237316195423570985008687907853269984665640564039457584007913129639935'),
+            },
+            { formatted: '1,000,000', type: 'u32', value: 1000000 },
+        ])('should display $type value $formatted without precision loss', ({ type, value, formatted }) => {
             const ixType: IdlInstruction = {
                 accounts: [],
-                args: [{ name: 'amount', type: 'u64' }],
+                args: [{ name: 'amount', type }],
                 discriminator: [1, 2, 3, 4, 5, 6, 7, 8],
                 name: 'testInstruction',
             };
 
-            const ixArgs = {
-                amount: largeNumber,
-            };
+            const { container } = renderRows(mapIxArgsToRows({ amount: value }, ixType, mockIdl));
 
-            const rows = mapIxArgsToRows(ixArgs, ixType, mockIdl);
-
-            // Render the rows to check output
-            const { container } = render(
-                <table>
-                    <tbody>{rows}</tbody>
-                </table>,
-            );
-
-            // Should display the full number without precision loss
-            expect(container.textContent).toContain('18,446,744,073,709,551,615');
-        });
-
-        it('should handle u128 numbers without overflow', () => {
-            const largeU128 = new BN('340282366920938463463374607431768211455'); // Max u128: 2^128 - 1
-
-            const ixType: IdlInstruction = {
-                accounts: [],
-                args: [{ name: 'largeValue', type: 'u128' }],
-                discriminator: [1, 2, 3, 4, 5, 6, 7, 8],
-                name: 'testInstruction',
-            };
-
-            const ixArgs = {
-                largeValue: largeU128,
-            };
-
-            const rows = mapIxArgsToRows(ixArgs, ixType, mockIdl);
-
-            const { container } = render(
-                <table>
-                    <tbody>{rows}</tbody>
-                </table>,
-            );
-
-            // Should display the full number
-            expect(container.textContent).toContain('340,282,366,920,938,463,463,374,607,431,768,211,455');
-        });
-
-        it('should handle u256 numbers without overflow', () => {
-            // Very large u256 number
-            const largeU256 = new BN('115792089237316195423570985008687907853269984665640564039457584007913129639935');
-
-            const ixType: IdlInstruction = {
-                accounts: [],
-                args: [{ name: 'veryLargeValue', type: 'u256' }],
-                discriminator: [1, 2, 3, 4, 5, 6, 7, 8],
-                name: 'testInstruction',
-            };
-
-            const ixArgs = {
-                veryLargeValue: largeU256,
-            };
-
-            const rows = mapIxArgsToRows(ixArgs, ixType, mockIdl);
-
-            const { container } = render(
-                <table>
-                    <tbody>{rows}</tbody>
-                </table>,
-            );
-
-            // Should display the full number without scientific notation
-            // The number is formatted with commas, so check for the raw number in chunks
-            const formattedNumber =
-                '115,792,089,237,316,195,423,570,985,008,687,907,853,269,984,665,640,564,039,457,584,007,913,129,639,935';
-            expect(container.textContent).toContain(formattedNumber);
-        });
-
-        it('should handle regular numbers (u32) correctly', () => {
-            const regularNumber = 1000000;
-
-            const ixType: IdlInstruction = {
-                accounts: [],
-                args: [{ name: 'count', type: 'u32' }],
-                discriminator: [1, 2, 3, 4, 5, 6, 7, 8],
-                name: 'testInstruction',
-            };
-
-            const ixArgs = {
-                count: regularNumber,
-            };
-
-            const rows = mapIxArgsToRows(ixArgs, ixType, mockIdl);
-
-            const { container } = render(
-                <table>
-                    <tbody>{rows}</tbody>
-                </table>,
-            );
-
-            expect(container.textContent).toContain('1,000,000');
+            expect(container.textContent).toContain(formatted);
         });
     });
 
@@ -150,33 +70,15 @@ describe('anchor utilities - number overflow handling', () => {
                 },
             };
 
-            const accountData = {
-                balance: largeBalance,
-            };
+            const { container } = renderRows(mapAccountToRows({ balance: largeBalance }, accountType, mockIdl));
 
-            const rows = mapAccountToRows(accountData, accountType, mockIdl);
-
-            const { container } = render(
-                <table>
-                    <tbody>{rows}</tbody>
-                </table>,
-            );
-
-            // Should display without precision loss
             expect(container.textContent).toContain('9,999,999,999,999,999,999');
         });
     });
 
     describe('error handling with proper table structure', () => {
         beforeEach(() => {
-            vi.spyOn(Logger, 'debug').mockImplementation(() => {});
-        });
-
-        afterEach(() => {
-            // Vitest 4: restoreAllMocks no longer clears call history, so clear it
-            // explicitly; restore then detaches the Logger.debug spy after the block.
             vi.clearAllMocks();
-            vi.restoreAllMocks();
         });
 
         it('should render proper table structure on error in mapIxArgsToRows', () => {
@@ -187,148 +89,52 @@ describe('anchor utilities - number overflow handling', () => {
                 name: 'testInstruction',
             };
 
-            const ixArgs = {
-                unknownField: 'value',
-            };
+            renderRows(mapIxArgsToRows({ unknownField: 'value' }, ixType, mockIdl));
 
-            const rows = mapIxArgsToRows(ixArgs, ixType, mockIdl);
-
-            render(
-                <table>
-                    <tbody>{rows}</tbody>
-                </table>,
-            );
-
-            // Should have logged the error
             expect(Logger.debug).toHaveBeenCalledTimes(1);
             expect(Logger.debug).toHaveBeenCalledWith('[utils:anchor] Error while displaying IDL-based account data', {
                 error: expect.any(Error),
             });
 
-            // Should have proper 3-column structure
             const cells = screen.getAllByRole('cell');
             expect(cells.length).toBe(3);
-
-            // First column: field name
             expect(cells[0]).toHaveTextContent('unknownField');
-
-            // Second column: type (instruction name)
             expect(cells[1]).toHaveTextContent('testInstruction');
-
-            // Third column: should contain JSON viewer
             expect(screen.getByTestId('json-viewer')).toBeInTheDocument();
         });
 
-        it('should render proper table structure on error in mapAccountToRows', () => {
-            const accountType: IdlTypeDef = {
-                name: 'TestAccount',
-                type: {
-                    fields: [],
-                    kind: 'struct',
+        it.each<{ description: string; accountType: IdlTypeDef }>([
+            {
+                accountType: { name: 'TestAccount', type: { fields: [], kind: 'struct' } },
+                description: 'a struct without the field',
+            },
+            {
+                accountType: {
+                    name: 'TestEnum',
+                    type: { kind: 'enum', variants: [{ name: 'VariantA' }, { name: 'VariantB' }] },
                 },
-            };
+                description: 'an enum',
+            },
+            {
+                accountType: {
+                    name: 'TestTypeAlias',
+                    type: { alias: { defined: { name: 'SomeOtherType' } }, kind: 'type' },
+                },
+                description: 'a type alias',
+            },
+        ])('should render JSON viewer in mapAccountToRows when account type is $description', ({ accountType }) => {
+            renderRows(mapAccountToRows({ unknownField: 'value' }, accountType, mockIdl));
 
-            const accountData = {
-                unknownField: 'value',
-            };
-
-            const rows = mapAccountToRows(accountData, accountType, mockIdl);
-
-            render(
-                <table>
-                    <tbody>{rows}</tbody>
-                </table>,
-            );
-
-            // Should have logged the error
             expect(Logger.debug).toHaveBeenCalledTimes(1);
             expect(Logger.debug).toHaveBeenCalledWith('[utils:anchor] Error while displaying IDL-based account data', {
                 error: expect.any(Error),
             });
 
-            // Should have proper 3-column structure
             const cells = screen.getAllByRole('cell');
             expect(cells.length).toBe(3);
-
-            // First column: field name
             expect(cells[0]).toHaveTextContent('unknownField');
-
-            // Second column: type (account type name)
-            expect(cells[1]).toHaveTextContent('TestAccount');
-
-            // Third column: should contain JSON viewer
+            expect(cells[1]).toHaveTextContent(accountType.name);
             expect(screen.getByTestId('json-viewer')).toBeInTheDocument();
-        });
-
-        it('should render JSON viewer when account type is not a struct (enum)', () => {
-            const accountType: IdlTypeDef = {
-                name: 'TestEnum',
-                type: {
-                    kind: 'enum',
-                    variants: [{ name: 'VariantA' }, { name: 'VariantB' }],
-                },
-            };
-
-            const accountData = {
-                someField: 'value',
-            };
-
-            const rows = mapAccountToRows(accountData, accountType, mockIdl);
-
-            render(
-                <table>
-                    <tbody>{rows}</tbody>
-                </table>,
-            );
-
-            // Should have logged the error
-            expect(Logger.debug).toHaveBeenCalledTimes(1);
-            expect(Logger.debug).toHaveBeenCalledWith('[utils:anchor] Error while displaying IDL-based account data', {
-                error: expect.any(Error),
-            });
-
-            // Should render JSON viewer for non-struct types
-            expect(screen.getByTestId('json-viewer')).toBeInTheDocument();
-
-            const cells = screen.getAllByRole('cell');
-            expect(cells.length).toBe(3);
-            expect(cells[0]).toHaveTextContent('someField');
-        });
-
-        it('should render JSON viewer when account type is type alias', () => {
-            const accountType: IdlTypeDef = {
-                name: 'TestTypeAlias',
-                type: {
-                    alias: { defined: { name: 'SomeOtherType' } },
-                    kind: 'type',
-                },
-            };
-
-            const accountData = {
-                someField: 'value',
-            };
-
-            const rows = mapAccountToRows(accountData, accountType, mockIdl);
-
-            render(
-                <table>
-                    <tbody>{rows}</tbody>
-                </table>,
-            );
-
-            // Should have logged the error
-            expect(Logger.debug).toHaveBeenCalledTimes(1);
-            expect(Logger.debug).toHaveBeenCalledWith('[utils:anchor] Error while displaying IDL-based account data', {
-                error: expect.any(Error),
-            });
-
-            // Should render JSON viewer for type alias
-            expect(screen.getByTestId('json-viewer')).toBeInTheDocument();
-
-            // Verify table structure
-            const cells = screen.getAllByRole('cell');
-            expect(cells.length).toBe(3);
-            expect(cells[1]).toHaveTextContent('TestTypeAlias');
         });
     });
 });
@@ -337,29 +143,12 @@ describe('instructionIsSelfCPI - Buffer operations', () => {
     // The Anchor self-CPI tag is '1d9acb512ea545e4' hex reversed
     const ANCHOR_SELF_CPI_TAG = Buffer.from('1d9acb512ea545e4', 'hex').reverse();
 
-    it('should detect Anchor self-CPI tag with Buffer input', () => {
-        // Create instruction data starting with the self-CPI tag
-        const ixData = Buffer.concat([ANCHOR_SELF_CPI_TAG, Buffer.from([0x01, 0x02, 0x03])]);
-
-        expect(instructionIsSelfCPI(ixData)).toBe(true);
-    });
-
-    it('should detect Anchor self-CPI tag with Uint8Array input', () => {
-        // Create instruction data as Uint8Array
-        const tagArray = new Uint8Array(ANCHOR_SELF_CPI_TAG);
-        const ixData = new Uint8Array([...tagArray, 0x01, 0x02, 0x03]);
-
-        expect(instructionIsSelfCPI(ixData)).toBe(true);
-    });
-
-    it('should return false for non-self-CPI instruction with Buffer', () => {
-        const ixData = Buffer.from([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07]);
-        expect(instructionIsSelfCPI(ixData)).toBe(false);
-    });
-
-    it('should return false for non-self-CPI instruction with Uint8Array', () => {
-        const ixData = new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07]);
-        expect(instructionIsSelfCPI(ixData)).toBe(false);
+    it.each([
+        { input: 'Buffer', toBytes: (bytes: number[]) => Buffer.from(bytes) },
+        { input: 'Uint8Array', toBytes: (bytes: number[]) => new Uint8Array(bytes) },
+    ])('should detect the Anchor self-CPI tag only at the start of $input input', ({ toBytes }) => {
+        expect(instructionIsSelfCPI(toBytes([...ANCHOR_SELF_CPI_TAG, 0x01, 0x02, 0x03]))).toBe(true);
+        expect(instructionIsSelfCPI(toBytes([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07]))).toBe(false);
     });
 
     it('should return false for data shorter than 8 bytes', () => {
@@ -414,3 +203,11 @@ describe('number overflow demonstration', () => {
         expect(bnMaxPlus2.toString()).toBe('9007199254740993'); // Correct!
     });
 });
+
+function renderRows(rows: ReactNode) {
+    return render(
+        <table>
+            <tbody>{rows}</tbody>
+        </table>,
+    );
+}

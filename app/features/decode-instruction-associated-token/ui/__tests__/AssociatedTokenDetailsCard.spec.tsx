@@ -3,140 +3,97 @@ import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { type InstructionSurface, InstructionSurfaceProvider } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token';
-import { ParsedInstruction, PublicKey, TransactionMessage } from '@solana/web3.js';
+import { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { render, screen, waitFor } from '@testing-library/react';
-import { useSearchParams } from 'next/navigation';
+import { screen, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { vi } from 'vitest';
 
-import { resolveAddressLookupTables } from '@/app/__tests__/mock-resolvers';
+import { renderWithProviders } from '@/app/__tests__/card-harness';
 import * as stubs from '@/app/__tests__/mock-stubs';
-import * as mock from '@/app/__tests__/mocks';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
+import { decompileStubInstruction } from '@/app/__tests__/mocks';
+import { InspectorInstructionCard } from '@/app/components/common/InspectorInstructionCard';
 
 import { AssociatedTokenDetailsCard } from '../AssociatedTokenDetailsCard';
 
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
+
 const dispatcher = createInstructionParserDispatcher([associatedTokenInstructionParser]);
-const SURFACE: InstructionSurface = { Shell: BaseInstructionCard, result: { err: null } };
+const BASE_SURFACE: InstructionSurface = { Shell: BaseInstructionCard, result: { err: null } };
+const INSPECTOR_SURFACE: InstructionSurface = { Shell: InspectorInstructionCard, result: { err: null } };
 
-vi.mock('next/navigation');
-// @ts-expect-error does not contain `mockReturnValue`
-useSearchParams.mockReturnValue({
-    get: () => 'mainnet-beta',
-    has: (_query?: string) => false,
-    toString: () => '',
-});
+const CASES = [
+    {
+        index: 1,
+        labels: [/Source/, /Account/, /Mint/, /Wallet/],
+        name: 'Create Idempotent',
+        programs: { system: 2, token: 2 },
+        stub: stubs.aTokenCreateIdempotentMsg,
+        title: /Associated Token Program: Create Idempotent/,
+    },
+    {
+        index: 2,
+        labels: [/Source/, /Account/, /Mint/, /Wallet/],
+        name: 'Create',
+        programs: { system: 2, token: 2 },
+        stub: stubs.aTokenCreateMsgWithInnerCards,
+        title: /Associated Token Program: Create$/,
+    },
+    {
+        index: 0,
+        labels: [/Destination/, /Nested Mint/, /Nested Owner/, /Nested Source/, /Owner Mint/, /^Owner$/],
+        name: 'Recover Nested',
+        programs: { system: 0, token: 2 },
+        stub: stubs.aTokenRecoverNestedMsg,
+        title: /Associated Token Program: Recover Nested/,
+    },
+];
 
-describe('instruction::AssociatedTokenDetailsCard', () => {
-    test('should render "CreateIdempotentDetailsCard"', async () => {
+const SHELLS = [
+    { render: renderBaseCard, shell: 'BaseInstructionCard' },
+    { render: renderInspectorCard, shell: 'InspectorInstructionCard' },
+];
+
+describe('AssociatedTokenDetailsCard', () => {
+    it.each(CASES.flatMap(c => SHELLS.map(s => ({ ...c, ...s }))))(
+        'should render the $name card in $shell',
+        async ({ index, labels, programs, render, stub, title }) => {
+            render(
+                decompileStubInstruction(stub, index, { programId: ASSOCIATED_TOKEN_PROGRAM_ADDRESS }).instruction,
+                index,
+            );
+
+            await waitFor(() => {
+                expect(screen.getByText(title)).toBeInTheDocument();
+            });
+            labels.forEach(label => {
+                expect(screen.getByText(label)).toBeInTheDocument();
+            });
+            expect(screen.queryAllByText(/^System Program$/)).toHaveLength(programs.system);
+            expect(screen.queryAllByText(/^Token Program$/)).toHaveLength(programs.token);
+        },
+    );
+
+    it('should render no inner instructions in the inspector', async () => {
         const index = 1;
-        const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const lookups = resolveAddressLookupTables(m.addressTableLookups);
-        const ti = TransactionMessage.decompile(m, {
-            addressLookupTableAccounts: lookups,
-        }).instructions[index];
-        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
+        const { instruction } = decompileStubInstruction(stubs.aTokenCreateIdempotentMsgWithInnerCards, index, {
+            programId: ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
+        });
 
-        const parsed = {
-            account: new PublicKey('Fv8YYjF2DUqj9RZhyXNzXa4yR9nHHwjg5bFjA82UidF1'),
-            mint: new PublicKey('74SBV4zDXxTRgv1pEMoECskKBkZHc2yGPnc7GYVepump'),
-            source: new PublicKey('EzdQH5zUfTMGb3vwU4oumxjVcxKMDpJ6dB78pbjfHmmb'),
-            systemProgram: new PublicKey('11111111111111111111111111111111'),
-            tokenProgram: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-            wallet: new PublicKey('EzdQH5zUfTMGb3vwU4oumxjVcxKMDpJ6dB78pbjfHmmb'),
-        };
+        renderInspectorCard(instruction, index);
 
-        const ix = withInfo(dispatcher.fromTransactionInstruction(ti), parsed);
-
-        // check that component is rendered properly
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <InstructionSurfaceProvider surface={SURFACE}>
-                        <AssociatedTokenDetailsCard ix={ix} index={index} />
-                    </InstructionSurfaceProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+        // Positive assertion forces waitFor to poll until the async render settles; the negative one alone would pass immediately.
         await waitFor(() => {
             expect(screen.getByText(/Associated Token Program: Create Idempotent/)).toBeInTheDocument();
+            expect(screen.queryByText(/Inner Instructions/)).not.toBeInTheDocument();
         });
     });
 
-    test('should render "CreateDetailsCard"', async () => {
-        const index = 2;
-        const m = mock.deserializeMessage(stubs.aTokenCreateMsgWithInnerCards);
-        const lookups = resolveAddressLookupTables(m.addressTableLookups);
-        const ti = TransactionMessage.decompile(m, {
-            addressLookupTableAccounts: lookups,
-        }).instructions[index];
-        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
-
-        const parsed = {
-            account: new PublicKey(ti.keys[1].pubkey),
-            mint: new PublicKey(ti.keys[3].pubkey),
-            source: new PublicKey(ti.keys[0].pubkey),
-            systemProgram: new PublicKey(ti.keys[4].pubkey),
-            tokenProgram: new PublicKey(ti.keys[5].pubkey),
-            wallet: new PublicKey(ti.keys[2].pubkey),
-        };
-
-        const ix = withInfo(dispatcher.fromTransactionInstruction(ti), parsed);
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <InstructionSurfaceProvider surface={SURFACE}>
-                        <AssociatedTokenDetailsCard ix={ix} index={index} />
-                    </InstructionSurfaceProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
-        await waitFor(() => {
-            expect(screen.getByText(/Associated Token Program: Create$/)).toBeInTheDocument();
-        });
-    });
-
-    test('should render "RecoverNestedDetailsCard"', async () => {
-        const index = 0;
-        const m = mock.deserializeMessage(stubs.aTokenRecoverNestedMsg);
-        const lookups = resolveAddressLookupTables(m.addressTableLookups);
-        const ti = TransactionMessage.decompile(m, {
-            addressLookupTableAccounts: lookups,
-        }).instructions[index];
-        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
-
-        const parsed = {
-            destination: new PublicKey(ti.keys[2].pubkey),
-            nestedMint: new PublicKey(ti.keys[1].pubkey),
-            nestedOwner: new PublicKey(ti.keys[3].pubkey),
-            nestedSource: new PublicKey(ti.keys[0].pubkey),
-            ownerMint: new PublicKey(ti.keys[4].pubkey),
-            tokenProgram: new PublicKey(ti.keys[6].pubkey),
-            wallet: new PublicKey(ti.keys[5].pubkey),
-        };
-
-        const ix = withInfo(dispatcher.fromTransactionInstruction(ti), parsed);
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <InstructionSurfaceProvider surface={SURFACE}>
-                        <AssociatedTokenDetailsCard ix={ix} index={index} />
-                    </InstructionSurfaceProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
-        await waitFor(() => {
-            expect(screen.getByText(/Associated Token Program: Recover Nested/)).toBeInTheDocument();
-        });
-    });
-
-    test.each(['create', 'createIdempotent', 'recoverNested'])(
+    // When this slice's parser rejects an RPC payload, the dispatcher falls back to
+    // RPC's raw view: `type` still looks familiar but `info` holds base58 strings
+    // rather than coerced PublicKeys. The card must degrade instead of throwing on
+    // `pubkey.toBase58`.
+    it.each(['create', 'createIdempotent', 'recoverNested'])(
         'should fall back to the unknown card when RPC info is not coerced (%s)',
         async type => {
             const rawInfoIx = {
@@ -152,15 +109,7 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
                 programId: new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ADDRESS),
             } as unknown as ParsedInstruction;
 
-            render(
-                <ScrollAnchorProvider>
-                    <ClusterProvider>
-                        <InstructionSurfaceProvider surface={SURFACE}>
-                            <AssociatedTokenDetailsCard ix={rawInfoIx} index={0} />
-                        </InstructionSurfaceProvider>
-                    </ClusterProvider>
-                </ScrollAnchorProvider>,
-            );
+            renderOnSurface(BASE_SURFACE, <AssociatedTokenDetailsCard ix={rawInfoIx} index={0} />);
 
             await waitFor(() => {
                 expect(screen.getByText(/Unknown Instruction/)).toBeInTheDocument();
@@ -169,10 +118,25 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
     );
 });
 
-function withInfo(
-    dispatched: ReturnType<typeof dispatcher.fromTransactionInstruction>,
-    info: Record<string, PublicKey>,
-): ParsedInstruction {
-    if (!isParsedInstruction(dispatched)) throw new Error('AT slice did not recognise instruction in fixture');
-    return { ...dispatched, parsed: { ...dispatched.parsed, info } };
+function renderBaseCard(instruction: TransactionInstruction, index: number) {
+    return renderOnSurface(BASE_SURFACE, <AssociatedTokenDetailsCard ix={dispatch(instruction)} index={index} />);
+}
+
+function renderInspectorCard(instruction: TransactionInstruction, index: number) {
+    return renderOnSurface(
+        INSPECTOR_SURFACE,
+        <AssociatedTokenDetailsCard ix={dispatch(instruction)} raw={instruction} index={index} />,
+    );
+}
+
+function renderOnSurface(surface: InstructionSurface, card: ReactElement) {
+    return renderWithProviders(<InstructionSurfaceProvider surface={surface}>{card}</InstructionSurfaceProvider>, {
+        transactions: false,
+    });
+}
+
+function dispatch(instruction: TransactionInstruction): ParsedInstruction {
+    const ix = dispatcher.fromTransactionInstruction(instruction);
+    if (!isParsedInstruction(ix)) throw new Error('AT slice did not recognise fixture');
+    return ix;
 }

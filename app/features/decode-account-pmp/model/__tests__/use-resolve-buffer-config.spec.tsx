@@ -1,9 +1,9 @@
 import { gen } from '@__fixtures__/gen';
 import { Compression, Encoding, Format } from '@solana-program/program-metadata';
-import { renderHook, waitFor } from '@testing-library/react';
-import type { ReactNode } from 'react';
-import { SWRConfig } from 'swr';
+import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 
 import { bufferAccountData, IDL_DOC, pack, readAs, YAML_DOC } from '../../ui/__fixtures__/pmp-account-fixtures';
 import { useResolveBufferConfig } from '../use-resolve-buffer-config';
@@ -28,14 +28,7 @@ function declared(encoding: Encoding) {
     };
 }
 
-// A fresh Map provider isolates the cache per test, otherwise a fingerprint key would carry across cases.
-function wrapper({ children }: { children: ReactNode }) {
-    return (
-        <SWRConfig value={{ dedupingInterval: 0, provider: () => new Map(), shouldRetryOnError: false }}>
-            {children}
-        </SWRConfig>
-    );
-}
+const wrapper = swrWrapper({ dedupingInterval: 0, shouldRetryOnError: false });
 
 afterEach(() => vi.clearAllMocks());
 
@@ -49,13 +42,13 @@ describe('useResolveBufferConfig', () => {
             wrapper,
         });
 
-        await waitFor(() => expect(result.current.configFromOnchain.status).toBe('ready'));
+        await waitForHook(() => expect(result.current.configFromOnchain.status).toBe('ready'));
         expect(mockFindConfigInTransactions).toHaveBeenCalledTimes(1);
 
         // The provider hands back a new object on every fetch. Identical bytes must not cost a second scan.
         rerender({ account: readAs(raw, 'buffer').account, address: ADDRESS });
 
-        await waitFor(() => expect(result.current.configFromOnchain.status).toBe('ready'));
+        await waitForHook(() => expect(result.current.configFromOnchain.status).toBe('ready'));
         expect(mockFindConfigInTransactions).toHaveBeenCalledTimes(1);
     });
 
@@ -72,7 +65,7 @@ describe('useResolveBufferConfig', () => {
             wrapper,
         });
 
-        await waitFor(() =>
+        await waitForHook(() =>
             expect(result.current.configFromOnchain).toStrictEqual({
                 result: declared(Encoding.Utf8),
                 status: 'ready',
@@ -85,7 +78,7 @@ describe('useResolveBufferConfig', () => {
         });
 
         // The config the card labels the new payload with has to be the one declared for THOSE bytes.
-        await waitFor(() =>
+        await waitForHook(() =>
             expect(result.current.configFromOnchain).toStrictEqual({
                 result: declared(Encoding.Base64),
                 status: 'ready',

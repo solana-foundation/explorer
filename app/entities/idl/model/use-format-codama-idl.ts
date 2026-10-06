@@ -248,75 +248,69 @@ function getSeedsFromPda(pda: PdaNode): PdaData['seeds'] {
 }
 
 export function useFormatCodamaIdl(idl?: RootNode): FormattedIdl | null {
-    const formattedIdl = useMemo(() => {
-        if (!idl) return null;
+    return useMemo(() => (idl ? formatCodamaIdl(idl) : null), [idl]);
+}
 
-        const linkedPdas = new Map<string, PdaNode>(arrayOrEmpty(idl.program.pdas).map(item => [item.name, item]));
-        const uniqPdaNodes = getUniqPdaNodesFromIxs(arrayOrEmpty(idl.program.instructions));
+export function formatCodamaIdl(idl: RootNode): FormattedIdl {
+    const linkedPdas = new Map<string, PdaNode>(arrayOrEmpty(idl.program.pdas).map(item => [item.name, item]));
+    const uniqPdaNodes = getUniqPdaNodesFromIxs(arrayOrEmpty(idl.program.instructions));
 
-        const formattedIdl: FormattedIdl = {
-            accounts: idl.program.accounts?.map(acc => ({
-                docs: acc.docs || [],
-                fieldType: parseTypeNode(acc.data),
-                name: acc.name,
-            })),
-            constants: undefined, // codama does not have constants
-            errors: idl.program.errors?.map(err => ({
-                code: err.code.toString(),
-                message: err.message || '',
-                name: err.name,
-            })),
-            events: undefined, // anchor "events" are in types
-            instructions: idl.program.instructions?.map(ix => ({
-                accounts: arrayOrEmpty(ix.accounts).map(acc => {
-                    return {
-                        docs: acc.docs || [],
-                        name: acc.name,
-                        optional: acc.isOptional,
-                        pda: isIxAccountNodePda(acc),
-                        signer: !!acc.isSigner,
-                        writable: acc.isWritable,
-                    };
-                }),
-                // Filter out auto-filled arguments (e.g. discriminators) that Codama marks as omitted
-                args:
-                    ix.arguments
-                        ?.filter(arg => arg.defaultValueStrategy !== 'omitted')
-                        .map(arg => {
-                            const rawType = typeNodeToIdlType(arg.type);
-                            return {
-                                docs: arg.docs || [],
-                                name: arg.name,
-                                type: parseTypeNodeFieldType(arg.type),
-                                ...(rawType !== undefined && { rawType }),
-                            };
-                        }) || [],
-                docs: ix.docs || [],
-                name: ix.name,
-            })),
-            pdas: uniqPdaNodes?.map(pdaValueNode => {
-                const { pda } = pdaValueNode;
-                const linkedPda = linkedPdas.get(pda.name);
+    const formattedIdl: FormattedIdl = {
+        accounts: idl.program.accounts?.map(acc => ({
+            docs: acc.docs || [],
+            fieldType: parseTypeNode(acc.data),
+            name: acc.name,
+        })),
+        constants: undefined, // codama does not have constants
+        errors: idl.program.errors?.map(err => ({
+            code: err.code.toString(),
+            message: err.message || '',
+            name: err.name,
+        })),
+        events: undefined, // anchor "events" are in types
+        instructions: idl.program.instructions?.map(ix => ({
+            accounts: arrayOrEmpty(ix.accounts).map(acc => {
                 return {
-                    docs: linkedPda?.docs || [],
-                    name: pda.name,
-                    seeds:
-                        pda.kind === 'pdaLinkNode'
-                            ? linkedPda
-                                ? getSeedsFromPda(linkedPda)
-                                : []
-                            : getSeedsFromPda(pda),
+                    docs: acc.docs || [],
+                    name: acc.name,
+                    optional: acc.isOptional,
+                    pda: isIxAccountNodePda(acc),
+                    signer: !!acc.isSigner,
+                    writable: acc.isWritable,
                 };
             }),
-            types: idl.program.definedTypes?.map(item => ({
-                docs: item.docs || [],
-                fieldType: parseTypeNode(item.type),
-                name: item.name,
-            })),
-        };
-        return formattedIdl;
-    }, [idl]);
-
+            // Filter out auto-filled arguments (e.g. discriminators) that Codama marks as omitted
+            args:
+                ix.arguments
+                    ?.filter(arg => arg.defaultValueStrategy !== 'omitted')
+                    .map(arg => {
+                        const rawType = typeNodeToIdlType(arg.type);
+                        return {
+                            docs: arg.docs || [],
+                            name: arg.name,
+                            type: parseTypeNodeFieldType(arg.type),
+                            ...(rawType !== undefined && { rawType }),
+                        };
+                    }) || [],
+            docs: ix.docs || [],
+            name: ix.name,
+        })),
+        pdas: uniqPdaNodes?.map(pdaValueNode => {
+            const { pda } = pdaValueNode;
+            const linkedPda = linkedPdas.get(pda.name);
+            return {
+                docs: linkedPda?.docs || [],
+                name: pda.name,
+                seeds:
+                    pda.kind === 'pdaLinkNode' ? (linkedPda ? getSeedsFromPda(linkedPda) : []) : getSeedsFromPda(pda),
+            };
+        }),
+        types: idl.program.definedTypes?.map(item => ({
+            docs: item.docs || [],
+            fieldType: parseTypeNode(item.type),
+            name: item.name,
+        })),
+    };
     return formattedIdl;
 }
 

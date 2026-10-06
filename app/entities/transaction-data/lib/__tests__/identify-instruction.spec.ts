@@ -1,22 +1,21 @@
 import { identifyStakeInstruction } from '@solana-program/stake';
 import { identifySystemInstruction } from '@solana-program/system';
 import { identifyToken2022Instruction } from '@solana-program/token-2022';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { warn } = vi.hoisted(() => ({ warn: vi.fn() }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn } }));
+import { Logger } from '@/app/shared/lib/logger';
 
 import { identifyInstruction } from '../identify-instruction';
 
 const PROGRAM_ID = 'Stake11111111111111111111111111111111111111';
 const UNRECOGNIZED = new Uint8Array([250]);
 
-afterEach(() => vi.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe('identifyInstruction', () => {
     it('should return the index the client read from the discriminator', () => {
         expect(identifyInstruction(() => 7, { data: UNRECOGNIZED, programId: PROGRAM_ID })).toBe(7);
-        expect(warn).not.toHaveBeenCalled();
+        expect(Logger.warn).not.toHaveBeenCalled();
     });
 
     /**
@@ -41,7 +40,7 @@ describe('identifyInstruction', () => {
         it.each(clients)('should report nothing at all for %s', (_label, identify) => {
             identifyInstruction(identify, { data: UNRECOGNIZED, programId: PROGRAM_ID });
 
-            expect(warn).not.toHaveBeenCalled();
+            expect(Logger.warn).not.toHaveBeenCalled();
         });
     });
 
@@ -58,7 +57,7 @@ describe('identifyInstruction', () => {
         it('should report it with the program and the offending bytes', () => {
             identifyInstruction(identify, { data: UNRECOGNIZED, programId: PROGRAM_ID });
 
-            expect(warn).toHaveBeenCalledWith(
+            expect(Logger.warn).toHaveBeenCalledWith(
                 expect.stringContaining('non-standard identify error'),
                 expect.objectContaining({
                     data: 'fa',
@@ -73,7 +72,7 @@ describe('identifyInstruction', () => {
         it('should not send the report to Sentry', () => {
             identifyInstruction(identify, { data: UNRECOGNIZED, programId: PROGRAM_ID });
 
-            expect(warn).toHaveBeenCalledWith(
+            expect(Logger.warn).toHaveBeenCalledWith(
                 expect.any(String),
                 expect.not.objectContaining({ sentry: expect.anything() }),
             );

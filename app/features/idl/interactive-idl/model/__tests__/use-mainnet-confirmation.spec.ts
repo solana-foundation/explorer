@@ -1,6 +1,8 @@
+// @vitest-environment jsdom
+
 import { toConnectableUrl } from '@entities/cluster';
 import { getCookie, setCookie } from '@features/cookie';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { Cluster, clusterName, clusterSelection, ClusterStatus, clusterUrl } from '@utils/cluster';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -21,9 +23,7 @@ describe('useMainnetConfirmation', () => {
         it('should require confirmation before executing action', async () => {
             setup();
 
-            const mockAction = vi.fn(async () => {
-                await new Promise(resolve => setTimeout(resolve, 10));
-            });
+            const mockAction = vi.fn(async () => {});
 
             const { result } = renderHook(() => useMainnetConfirmation());
 
@@ -42,10 +42,7 @@ describe('useMainnetConfirmation', () => {
                 await result.current.confirm();
             });
 
-            await waitFor(() => {
-                expect(mockAction).toHaveBeenCalledTimes(1);
-            });
-
+            expect(mockAction).toHaveBeenCalledTimes(1);
             expect(result.current.hasPendingAction).toBe(false);
             expect(result.current.isOpen).toBe(false);
         });
@@ -71,61 +68,20 @@ describe('useMainnetConfirmation', () => {
             });
 
             expect(mockAction).not.toHaveBeenCalled();
+            expect(setCookie).not.toHaveBeenCalled();
             expect(result.current.hasPendingAction).toBe(false);
             expect(result.current.isOpen).toBe(false);
-        });
-
-        it('should store context with pending action', async () => {
-            setup();
-
-            const testContext = { instructionName: 'test', params: { foo: 'bar' } };
-            const mockAction = vi.fn(async () => {
-                // Action executed
-            });
-
-            const { result } = renderHook(() => useMainnetConfirmation<typeof testContext>());
-
-            await act(async () => {
-                await result.current.requireConfirmation(mockAction, testContext);
-            });
-
-            expect(result.current.hasPendingAction).toBe(true);
-            await act(async () => {
-                await result.current.confirm();
-            });
-
-            expect(mockAction).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('when cluster is not MainnetBeta', () => {
-        it('should execute action immediately without confirmation for Devnet', async () => {
-            setup(Cluster.Devnet);
-
-            const mockAction = vi.fn(async () => {
-                await new Promise(resolve => setTimeout(resolve, 10));
-            });
-
-            const { result } = renderHook(() => useMainnetConfirmation());
-
-            await act(async () => {
-                await result.current.requireConfirmation(mockAction);
-            });
-
-            await waitFor(() => {
-                expect(mockAction).toHaveBeenCalledTimes(1);
-            });
-
-            expect(result.current.hasPendingAction).toBe(false);
-            expect(result.current.isOpen).toBe(false);
-        });
-
-        it('should execute action immediately without confirmation for Testnet', async () => {
-            setup(Cluster.Testnet);
-
-            const mockAction = vi.fn(async () => {
-                // Action executed immediately
-            });
+        it.each([
+            { action: async () => {}, cluster: Cluster.Devnet, kind: 'async', name: 'Devnet' },
+            { action: async () => {}, cluster: Cluster.Testnet, kind: 'async', name: 'Testnet' },
+            { action: () => {}, cluster: Cluster.Devnet, kind: 'sync', name: 'Devnet' },
+        ])('should execute $kind action immediately without confirmation for $name', async ({ action, cluster }) => {
+            setup(cluster);
+            const mockAction = vi.fn(action);
 
             const { result } = renderHook(() => useMainnetConfirmation());
 
@@ -136,23 +92,6 @@ describe('useMainnetConfirmation', () => {
             expect(mockAction).toHaveBeenCalledTimes(1);
             expect(result.current.hasPendingAction).toBe(false);
             expect(result.current.isOpen).toBe(false);
-        });
-
-        it('should handle synchronous actions immediately', async () => {
-            setup(Cluster.Devnet);
-
-            const mockAction = vi.fn(() => {
-                // Synchronous action executed
-            });
-
-            const { result } = renderHook(() => useMainnetConfirmation());
-
-            await act(async () => {
-                await result.current.requireConfirmation(mockAction);
-            });
-
-            expect(mockAction).toHaveBeenCalledTimes(1);
-            expect(result.current.hasPendingAction).toBe(false);
         });
     });
 
@@ -261,23 +200,6 @@ describe('useMainnetConfirmation', () => {
             expect(mockAction).toHaveBeenCalledTimes(1);
             expect(result.current.hasPendingAction).toBe(false);
             expect(result.current.isOpen).toBe(false);
-        });
-
-        it('should not set cookie when user cancels', async () => {
-            setup();
-
-            const mockAction = vi.fn();
-            const { result } = renderHook(() => useMainnetConfirmation());
-
-            await act(async () => {
-                await result.current.requireConfirmation(mockAction);
-            });
-
-            act(() => {
-                result.current.cancel();
-            });
-
-            expect(setCookie).not.toHaveBeenCalled();
         });
     });
 });

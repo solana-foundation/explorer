@@ -1,6 +1,8 @@
 import type { Metadata } from '@metaplex-foundation/mpl-token-metadata';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { getMetadataJson } from '../get-metadata-json';
+
 const mocks = vi.hoisted(() => ({ getProxiedUri: vi.fn() }));
 
 vi.mock('@/app/features/metadata/utils', () => ({ getProxiedUri: mocks.getProxiedUri }));
@@ -31,7 +33,6 @@ describe('getMetadataJson', () => {
     it('should fetch the proxy path as given', async () => {
         mocks.getProxiedUri.mockReturnValue(PROXY_PATH);
 
-        const { getMetadataJson } = await import('../get-metadata-json');
         await getMetadataJson(metadata('https://example.com/meta.json'));
 
         expect(global.fetch).toHaveBeenCalledWith(PROXY_PATH);
@@ -40,31 +41,19 @@ describe('getMetadataJson', () => {
     it('should fetch an unproxied URI as given, since the browser uses its own network', async () => {
         mocks.getProxiedUri.mockReturnValue('https://ipfs.io/ipfs/abc');
 
-        const { getMetadataJson } = await import('../get-metadata-json');
         await getMetadataJson(metadata('ipfs://abc'));
 
         expect(global.fetch).toHaveBeenCalledWith('https://ipfs.io/ipfs/abc');
     });
 
-    it('should resolve undefined when the request fails', async () => {
-        mocks.getProxiedUri.mockReturnValue('https://example.com/meta.json');
-        vi.mocked(global.fetch).mockRejectedValueOnce(new Error('aborted'));
-
-        const { getMetadataJson } = await import('../get-metadata-json');
-
-        await expect(getMetadataJson(metadata('https://example.com/meta.json'))).resolves.toBeUndefined();
-    });
-
     // The NFT page maps `onError` to `Logger.error`. Dead and slow third-party metadata links are
     // routine, so only bad input may be reported — otherwise the ordinary case escalates.
-    it('should not report a failed request, which is routine for third-party metadata', async () => {
+    it('should resolve undefined without reporting a failed request, which is routine for third-party metadata', async () => {
         mocks.getProxiedUri.mockReturnValue('https://example.com/meta.json');
         vi.mocked(global.fetch).mockRejectedValueOnce(new Error('socket hang up'));
         const onError = vi.fn();
 
-        const { getMetadataJson } = await import('../get-metadata-json');
-        await getMetadataJson(metadata('https://example.com/meta.json'), { onError });
-
+        await expect(getMetadataJson(metadata('https://example.com/meta.json'), { onError })).resolves.toBeUndefined();
         expect(onError).not.toHaveBeenCalled();
     });
 
@@ -73,8 +62,6 @@ describe('getMetadataJson', () => {
     it('should resolve undefined for an error response rather than read its body as metadata', async () => {
         mocks.getProxiedUri.mockReturnValue(PROXY_PATH);
         vi.mocked(global.fetch).mockResolvedValueOnce(jsonResponse({ error: 'Forbidden' }, false));
-
-        const { getMetadataJson } = await import('../get-metadata-json');
 
         await expect(getMetadataJson(metadata('https://example.com/meta.json'))).resolves.toBeUndefined();
     });
@@ -87,15 +74,11 @@ describe('getMetadataJson', () => {
         } as unknown as Response);
         const onError = vi.fn();
 
-        const { getMetadataJson } = await import('../get-metadata-json');
-
         await expect(getMetadataJson(metadata('https://example.com/meta.json'), { onError })).resolves.toBeUndefined();
         expect(onError).not.toHaveBeenCalled();
     });
 
     it('should resolve undefined when the metadata carries no URI', async () => {
-        const { getMetadataJson } = await import('../get-metadata-json');
-
         await expect(getMetadataJson(metadata(''))).resolves.toBeUndefined();
         expect(global.fetch).not.toHaveBeenCalled();
     });

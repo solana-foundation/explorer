@@ -2,19 +2,19 @@ import { createHash } from 'node:crypto';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
+
 import { createMcpTrack } from '../telemetry';
 
-const { afterMock, headersMock, loggerMock } = vi.hoisted(() => ({
+const { afterMock, headersMock } = vi.hoisted(() => ({
     afterMock: vi.fn((callback: () => Promise<void>) => {
         void callback();
     }),
     headersMock: vi.fn(),
-    loggerMock: { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() },
 }));
 
 vi.mock('next/headers', () => ({ headers: headersMock }));
 vi.mock('next/server', () => ({ after: afterMock }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: loggerMock }));
 
 const EVENT = { name: 'mcp_tool_call', params: { duration_ms: 1, status: 'success', tool: 'ping' } } as const;
 
@@ -131,7 +131,7 @@ describe('createMcpTrack', () => {
         await flushMicrotasks();
 
         expect(fetchMock).not.toHaveBeenCalled();
-        expect(loggerMock.warn).toHaveBeenCalledWith(
+        expect(vi.mocked(Logger.warn)).toHaveBeenCalledWith(
             '[mcp] MCP_GA_MEASUREMENT_ID (or NEXT_PUBLIC_GOOGLE_ANALYTICS_ID) or MCP_GA_API_SECRET unset — usage analytics disabled',
         );
     });
@@ -147,7 +147,7 @@ describe('createMcpTrack', () => {
         await flushMicrotasks();
 
         expect(fetchMock).not.toHaveBeenCalled();
-        expect(loggerMock.warn).toHaveBeenCalled();
+        expect(vi.mocked(Logger.warn)).toHaveBeenCalled();
     });
 
     it('should not warn when both GA credentials are configured', async () => {
@@ -157,7 +157,7 @@ describe('createMcpTrack', () => {
         createMcpTrack()(EVENT);
         await flushMicrotasks();
 
-        expect(loggerMock.warn).not.toHaveBeenCalled();
+        expect(vi.mocked(Logger.warn)).not.toHaveBeenCalled();
     });
 
     // Reported, not debug-logged: a rotated secret would otherwise leave the dashboards merely quiet.
@@ -168,6 +168,6 @@ describe('createMcpTrack', () => {
         createMcpTrack()(EVENT);
         await flushMicrotasks();
 
-        expect(loggerMock.error).toHaveBeenCalledWith(expect.any(Error), { sentry: true });
+        expect(vi.mocked(Logger.error)).toHaveBeenCalledWith(expect.any(Error), { sentry: true });
     });
 });

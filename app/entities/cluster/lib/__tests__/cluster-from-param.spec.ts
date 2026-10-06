@@ -43,6 +43,8 @@ describe('resolveServerClusterUrl', () => {
         ['the custom cluster', '3'],
         ['an unknown cluster', '999'],
         ['a malformed param', '01'],
+        ['a padded param', ' 0 '],
+        ['an empty param', ''],
     ])('should refuse %s as the caller’s input', (_reason, value) => {
         expect(resolveServerClusterUrl(value)).toEqual({ kind: 'refused' });
     });
@@ -55,28 +57,11 @@ describe('resolveServerClusterUrl', () => {
 });
 
 describe('serverClusterUrlFromParam', () => {
-    it('should resolve a known cluster to a non-empty server URL', () => {
-        expect(serverClusterUrlFromParam('0')).toEqual(expect.any(String));
-        expect(serverClusterUrlFromParam('0')).toBeTruthy();
-    });
-
-    it('should return undefined for a custom cluster (no server endpoint)', () => {
-        // Custom short-circuits before `serverClusterUrl`, which cannot resolve it. Custom is client-only.
+    it('should map an ok resolution to its URL and anything else to undefined', () => {
+        expect(resolveServerClusterUrl('0')).toMatchObject({ kind: 'ok', url: serverClusterUrlFromParam('0') });
         expect(serverClusterUrlFromParam('3')).toBeUndefined();
-    });
 
-    it('should return undefined when the cluster env var is set to an empty string', () => {
-        // `??` in `serverClusterUrl` does not fall back on `''`, so guard it here: callers test for
-        // `undefined`, and an empty URL would otherwise read as a valid endpoint.
         vi.stubEnv('MAINNET_RPC_URL', '');
         expect(serverClusterUrlFromParam('0')).toBeUndefined();
-        vi.unstubAllEnvs();
-    });
-
-    it('should reject the same malformed params as clusterFromParam (no bare Number() coercion)', () => {
-        expect(serverClusterUrlFromParam('999')).toBeUndefined();
-        expect(serverClusterUrlFromParam('01')).toBeUndefined();
-        expect(serverClusterUrlFromParam(' 0 ')).toBeUndefined();
-        expect(serverClusterUrlFromParam('')).toBeUndefined();
     });
 });

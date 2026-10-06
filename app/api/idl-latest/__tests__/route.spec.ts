@@ -18,12 +18,6 @@ vi.mock('@/app/entities/idl/server', async () => {
     return { ...actual, resolveProgramIdls: mocks.resolveProgramIdls };
 });
 
-vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    // The resolver is mocked and ignores the rpc handle, so a stub is enough.
-    return { ...actual, createSolanaRpc: vi.fn(() => ({})) };
-});
-
 function resolved(
     overrides: Partial<
         Record<'anchorIdl' | 'anchorIdlAddress' | 'programMetadataIdl' | 'programMetadataIdlAddress', unknown>
@@ -41,8 +35,6 @@ function resolved(
 describe('GET /api/idl-latest', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.spyOn(Logger, 'warn').mockImplementation(() => {});
-        vi.spyOn(Logger, 'panic').mockImplementation(() => {});
     });
 
     it('should return 400 when required params are missing', async () => {

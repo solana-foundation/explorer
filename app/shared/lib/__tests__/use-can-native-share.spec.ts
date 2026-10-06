@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -17,40 +19,18 @@ describe('useCanNativeShare', () => {
         Object.defineProperty(navigator, 'canShare', { configurable: true, value: undefined, writable: true });
     });
 
-    it('should return false when navigator.share is not available', () => {
-        mockMatchMedia(true, true);
+    it.each([
+        { apis: [], coarse: true, expected: false, hoverNone: true, scenario: 'navigator.share is missing' },
+        { apis: ['share'], coarse: true, expected: false, hoverNone: true, scenario: 'navigator.canShare is missing' },
+        { apis: ['share', 'canShare'], coarse: false, expected: false, hoverNone: true, scenario: 'no coarse pointer' },
+        { apis: ['share', 'canShare'], coarse: true, expected: false, hoverNone: false, scenario: 'hover is present' },
+        { apis: ['share', 'canShare'], coarse: true, expected: true, hoverNone: true, scenario: 'a mobile device' },
+    ])('should return $expected when $scenario', ({ apis, coarse, expected, hoverNone }) => {
+        mockMatchMedia(coarse, hoverNone);
+        for (const api of apis) {
+            Object.defineProperty(navigator, api, { configurable: true, value: vi.fn() });
+        }
         const { result } = renderHook(() => useCanNativeShare());
-        expect(result.current).toBe(false);
-    });
-
-    it('should return false when navigator.canShare is not available', () => {
-        mockMatchMedia(true, true);
-        Object.defineProperty(navigator, 'share', { configurable: true, value: vi.fn() });
-        const { result } = renderHook(() => useCanNativeShare());
-        expect(result.current).toBe(false);
-    });
-
-    it('should return false when device is not mobile (no coarse pointer)', () => {
-        mockMatchMedia(false, true);
-        Object.defineProperty(navigator, 'share', { configurable: true, value: vi.fn() });
-        Object.defineProperty(navigator, 'canShare', { configurable: true, value: vi.fn() });
-        const { result } = renderHook(() => useCanNativeShare());
-        expect(result.current).toBe(false);
-    });
-
-    it('should return false when device is not mobile (has hover support)', () => {
-        mockMatchMedia(true, false);
-        Object.defineProperty(navigator, 'share', { configurable: true, value: vi.fn() });
-        Object.defineProperty(navigator, 'canShare', { configurable: true, value: vi.fn() });
-        const { result } = renderHook(() => useCanNativeShare());
-        expect(result.current).toBe(false);
-    });
-
-    it('should return true when share APIs are available and device is mobile', () => {
-        mockMatchMedia(true, true);
-        Object.defineProperty(navigator, 'share', { configurable: true, value: vi.fn() });
-        Object.defineProperty(navigator, 'canShare', { configurable: true, value: vi.fn() });
-        const { result } = renderHook(() => useCanNativeShare());
-        expect(result.current).toBe(true);
+        expect(result.current).toBe(expected);
     });
 });

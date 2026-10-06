@@ -2,21 +2,14 @@
 import { gen } from '@__fixtures__/gen';
 import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(() => ({ push: vi.fn() })),
-    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
-}));
-
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
-import { TransactionsProvider } from '@/app/providers/transactions';
+import { renderWithProviders } from '@/app/__tests__/card-harness';
 
 import { SerumDetailsCard } from '../SerumDetailsCard';
+
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 // Authentic instruction data from mainnet OpenBook txs (2fHxffhsx9pJ… / 2DJ9K7gZfmtU…).
 const NEW_ORDER_V3_DATA =
@@ -36,16 +29,8 @@ function makeInstruction(dataHex: string, keyCount: number): TransactionInstruct
 }
 
 function renderCard(ix: TransactionInstruction) {
-    return render(
-        <ScrollAnchorProvider>
-            <ClusterProvider>
-                <TransactionsProvider>
-                    <AccountsProvider>
-                        <SerumDetailsCard index={0} ix={ix} result={{ err: null }} signature={gen.signature(0)} />
-                    </AccountsProvider>
-                </TransactionsProvider>
-            </ClusterProvider>
-        </ScrollAnchorProvider>,
+    return renderWithProviders(
+        <SerumDetailsCard index={0} ix={ix} result={{ err: null }} signature={gen.signature(0)} />,
     );
 }
 

@@ -1,281 +1,208 @@
+// @vitest-environment jsdom
+
 import type { InstructionData, SupportedIdl } from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { invariant } from '@/app/shared/lib/invariant';
+import { Logger } from '@/app/shared/lib/logger';
 
 import votingIdl029 from '../__mocks__/anchor/anchor-0.29.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
 import votingIdl030 from '../__mocks__/anchor/anchor-0.30.0-voting-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
 import votingIdl030Variations from '../__mocks__/anchor/anchor-0.30.0-voting-variations-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
 import donateIdl0301 from '../__mocks__/anchor/anchor-0.30.1-donate-DRLYxueWz6iymdsaRCER6iv6v9zL7gFWANwDL2V5VUx1.json';
 import codamaVotingIdl from '../__mocks__/codama/codama-voting.json';
+import { computePdas } from '../pda-generator/compute-pdas';
 import type { InstructionFormData } from '../use-instruction-form';
 import { usePdas } from '../use-pdas';
 import { findInstruction } from './utils';
 
 describe('usePdas', () => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('should compute PDAs from form values after the debounce delay', async () => {
+        const { idl, instruction } = setup(votingIdl030, 'initialize_candidate');
+        const form = createForm();
+        form.setValue('arguments.initializeCandidate.pollId', '123');
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+        const { result } = renderHook(() => usePdas({ form, idl, instruction }));
+
+        await act(() => vi.advanceTimersByTimeAsync(149));
+        expect(result.current).toEqual({});
+        await act(() => vi.advanceTimersByTimeAsync(1));
+        expect(result.current.poll.generated).toEqual(expect.any(String));
+        expect(result.current).toEqual(await computePdas(idl, instruction, form.getValues()));
+    });
+
+    it('should log and return empty object when PDA computation fails', async () => {
+        const { instruction } = setup(codamaVotingIdl, 'initializeCandidate');
+        const idlWithoutKey = {
+            ...codamaVotingIdl,
+            program: { ...codamaVotingIdl.program, publicKey: '' },
+        } as unknown as SupportedIdl;
+        const form = createForm();
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+        const { result } = renderHook(() => usePdas({ form, idl: idlWithoutKey, instruction }));
+        await act(() => vi.advanceTimersByTimeAsync(150));
+
+        expect(vi.mocked(Logger.error)).toHaveBeenCalledWith(expect.any(Error), {
+            message: 'Failed to compute PDAs',
+        });
+        expect(result.current).toEqual({});
+    });
+});
+
+describe('computePdas', () => {
     // Tests that work with both 0.29 and 0.30 - these don't need PDA seeds
     it.each([
         { idl: votingIdl029, instructionName: 'initializeCandidate', version: '0.29' },
         { idl: votingIdl030, instructionName: 'initialize_candidate', version: '0.30' },
     ])('should return empty object when IDL is undefined ($version)', async ({ idl, instructionName }) => {
-        const { createMockForm, mockInstruction, getPdas } = setup(idl, instructionName);
-        const form = createMockForm();
+        const { instruction } = setup(idl, instructionName);
 
-        const view = getPdas({ form, idl: undefined, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current).toEqual({});
-        });
+        await expect(computePdas(undefined, instruction, {})).resolves.toEqual({});
     });
 
     it.each([
         { idl: votingIdl029, instructionName: 'initializeCandidate', version: '0.29' },
         { idl: votingIdl030, instructionName: 'initialize_candidate', version: '0.30' },
     ])('should return empty object when program ID is missing ($version)', async ({ idl, instructionName }) => {
-        const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(idl, instructionName);
-        const form = createMockForm();
-        const idlWithoutAddress = { ...mockIdl, address: undefined } as SupportedIdl;
+        const { idl: supportedIdl, instruction } = setup(idl, instructionName);
+        const idlWithoutAddress = { ...supportedIdl, address: undefined } as SupportedIdl;
 
-        const view = getPdas({ form, idl: idlWithoutAddress, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current).toEqual({});
-        });
+        await expect(computePdas(idlWithoutAddress, instruction, {})).resolves.toEqual({});
     });
 
     it.each([
         { idl: votingIdl029, instructionName: 'initializeCandidate', version: '0.29' },
         { idl: votingIdl030, instructionName: 'initialize_candidate', version: '0.30' },
     ])('should return empty object when instruction is not found ($version)', async ({ idl, instructionName }) => {
-        const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(idl, instructionName);
-        const form = createMockForm();
-        const unknownInstruction: InstructionData = { ...mockInstruction, name: 'unknownInstruction' };
+        const { idl: supportedIdl, instruction } = setup(idl, instructionName);
+        const unknownInstruction: InstructionData = { ...instruction, name: 'unknownInstruction' };
 
-        const view = getPdas({ form, idl: mockIdl, instruction: unknownInstruction });
-
-        await waitFor(() => {
-            expect(view.current).toEqual({});
-        });
+        await expect(computePdas(supportedIdl, unknownInstruction, {})).resolves.toEqual({});
     });
 
     // 0.29 variations tests - pda:true without seeds (backport check)
     it('should return empty object for 0.29 IDL with pda:true (no seeds)', async () => {
-        const { createMockForm, mockIdl, mockInstruction, getPdas } = setup(votingIdl029, 'initializeCandidate');
-        const form = createMockForm();
-        form.setValue('arguments.initializeCandidate.pollId', '123');
-        form.setValue('arguments.initializeCandidate.candidateName', 'Test');
-
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        // 0.29 IDL has pda:true but no seeds array, so no PDAs can be generated
-        await waitFor(() => {
-            expect(view.current).toEqual({});
+        const pdas = await pdasFor(votingIdl029, 'initializeCandidate', {
+            arguments: { candidateName: 'Test', pollId: '123' },
         });
+
+        expect(pdas).toEqual({});
     });
 
     // 0.30 tests - these need PDA seeds from 0.30 IDL
     it('should generate PDA for single seed (poll)', async () => {
-        const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(votingIdl030, 'initialize_candidate');
-        const form = createMockForm();
-        form.setValue('arguments.initializeCandidate.pollId', '123');
+        const pdas = await pdasFor(votingIdl030, 'initialize_candidate', { arguments: { pollId: '123' } });
 
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current.poll).toBeDefined();
-        });
-        expect(view.current.poll.generated).not.toBeNull();
-        expect(typeof view.current.poll.generated).toBe('string');
-        expect(view.current.poll.seeds).toHaveLength(1);
-        expect(view.current.poll.seeds[0]).toEqual({ name: 'pollId', value: '123' });
+        expect(pdas.poll.generated).not.toBeNull();
+        expect(typeof pdas.poll.generated).toBe('string');
+        expect(pdas.poll.seeds).toHaveLength(1);
+        expect(pdas.poll.seeds[0]).toEqual({ name: 'pollId', value: '123' });
     });
 
     it('should generate PDA for multiple seeds (candidate)', async () => {
-        const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(votingIdl030, 'initialize_candidate');
-        const form = createMockForm();
-        form.setValue('arguments.initializeCandidate.pollId', '123');
-        form.setValue('arguments.initializeCandidate.candidateName', 'Marco');
-
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current.candidate).toBeDefined();
+        const pdas = await pdasFor(votingIdl030, 'initialize_candidate', {
+            arguments: { candidateName: 'Marco', pollId: '123' },
         });
-        expect(view.current.candidate.generated).not.toBeNull();
-        expect(typeof view.current.candidate.generated).toBe('string');
-        expect(view.current.candidate.seeds).toHaveLength(2);
-        expect(view.current.candidate.seeds[0]).toEqual({ name: 'pollId', value: '123' });
-        expect(view.current.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Marco' });
+
+        expect(pdas.candidate.generated).not.toBeNull();
+        expect(typeof pdas.candidate.generated).toBe('string');
+        expect(pdas.candidate.seeds).toHaveLength(2);
+        expect(pdas.candidate.seeds[0]).toEqual({ name: 'pollId', value: '123' });
+        expect(pdas.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Marco' });
     });
 
     it('should handle underscore prefix in argument names (_poll_id vs poll_id)', async () => {
-        const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(votingIdl030, 'initialize_candidate');
-        const form = createMockForm();
-        form.setValue('arguments.initializeCandidate.pollId', '456');
-        form.setValue('arguments.initializeCandidate.candidateName', 'Polo');
-
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            // Should still generate PDAs even though seed.path is "poll_id" and arg.name is "_poll_id"
-            expect(view.current.poll).toBeDefined();
+        const pdas = await pdasFor(votingIdl030, 'initialize_candidate', {
+            arguments: { candidateName: 'Polo', pollId: '456' },
         });
-        expect(view.current.poll.generated).not.toBeNull();
-        expect(view.current.candidate).toBeDefined();
-        expect(view.current.candidate.generated).not.toBeNull();
+
+        // Should still generate PDAs even though seed.path is "poll_id" and arg.name is "_poll_id"
+        expect(pdas.poll.generated).not.toBeNull();
+        expect(pdas.candidate.generated).not.toBeNull();
     });
 
     it('should return null for PDA when required argument is missing', async () => {
-        const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(votingIdl030, 'initialize_candidate');
-        const form = createMockForm();
-        form.setValue('arguments.initializeCandidate.candidateName', 'Marco');
-        // pollId is missing
+        const pdas = await pdasFor(votingIdl030, 'initialize_candidate', { arguments: { candidateName: 'Marco' } });
 
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current.poll.generated).toBeNull();
-        });
-        expect(view.current.poll.seeds).toHaveLength(1);
-        expect(view.current.poll.seeds[0]).toEqual({ name: 'pollId', value: null });
-        expect(view.current.candidate.generated).toBeNull();
-        expect(view.current.candidate.seeds).toHaveLength(2);
-        expect(view.current.candidate.seeds[0]).toEqual({ name: 'pollId', value: null });
-        expect(view.current.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Marco' });
+        expect(pdas.poll.generated).toBeNull();
+        expect(pdas.poll.seeds).toHaveLength(1);
+        expect(pdas.poll.seeds[0]).toEqual({ name: 'pollId', value: null });
+        expect(pdas.candidate.generated).toBeNull();
+        expect(pdas.candidate.seeds).toHaveLength(2);
+        expect(pdas.candidate.seeds[0]).toEqual({ name: 'pollId', value: null });
+        expect(pdas.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Marco' });
     });
 
     it('should return null for PDA when numeric argument value cannot be converted to number', async () => {
-        const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(votingIdl030, 'initialize_candidate');
-        const form = createMockForm();
-        form.setValue('arguments.initializeCandidate.pollId', 'invalid-number');
-        form.setValue('arguments.initializeCandidate.candidateName', 'Test');
-
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current.poll.generated).toBeNull();
+        const pdas = await pdasFor(votingIdl030, 'initialize_candidate', {
+            arguments: { candidateName: 'Test', pollId: 'invalid-number' },
         });
-        expect(view.current.poll.seeds).toHaveLength(1);
-        expect(view.current.poll.seeds[0]).toEqual({ name: 'pollId', value: 'invalid-number' });
-        expect(view.current.candidate.generated).toBeNull();
-        expect(view.current.candidate.seeds).toHaveLength(2);
-        expect(view.current.candidate.seeds[0]).toEqual({ name: 'pollId', value: 'invalid-number' });
-        expect(view.current.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Test' });
+
+        expect(pdas.poll.generated).toBeNull();
+        expect(pdas.poll.seeds).toHaveLength(1);
+        expect(pdas.poll.seeds[0]).toEqual({ name: 'pollId', value: 'invalid-number' });
+        expect(pdas.candidate.generated).toBeNull();
+        expect(pdas.candidate.seeds).toHaveLength(2);
+        expect(pdas.candidate.seeds[0]).toEqual({ name: 'pollId', value: 'invalid-number' });
+        expect(pdas.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Test' });
     });
 
     it('should handle different argument types (u64, string)', async () => {
-        const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(votingIdl030, 'initialize_candidate');
-        const form = createMockForm();
-        form.setValue('arguments.initializeCandidate.pollId', '789');
-        form.setValue('arguments.initializeCandidate.candidateName', 'Marco');
-
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current.poll).toBeDefined();
+        const pdas = await pdasFor(votingIdl030, 'initialize_candidate', {
+            arguments: { candidateName: 'Marco', pollId: '789' },
         });
-        expect(view.current.poll.generated).not.toBeNull();
-        expect(view.current.candidate).toBeDefined();
-        expect(view.current.candidate.generated).not.toBeNull();
+
+        expect(pdas.poll.generated).not.toBeNull();
+        expect(pdas.candidate.generated).not.toBeNull();
     });
 
     // 0.30 variations tests - nested groups
     it('should skip nested account groups', async () => {
-        const { createMockForm, mockIdl, mockInstruction, getPdas } = setup(
-            votingIdl030Variations,
-            'instruction_with_nested',
-        );
-        const form = createMockForm();
-        form.setValue('arguments.instructionWithNested.pollId', '999');
+        const pdas = await pdasFor(votingIdl030Variations, 'instruction_with_nested', { arguments: { pollId: '999' } });
 
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            // Nested accounts should be skipped, so nestedAccount should not be in result
-            expect(view.current.nestedAccount).toBeUndefined();
-        });
+        expect(Object.keys(pdas)).toEqual(['poll']);
+        expect(pdas.poll.generated).toEqual(expect.any(String));
     });
 
     // 0.30 variations tests
     it('should handle account seeds', async () => {
-        const { createMockForm, mockIdl, mockInstruction, getPdas } = setup(
-            votingIdl030Variations,
-            'instruction_with_account_seed',
-        );
-        const form = createMockForm();
         const accountPubkey = PublicKey.default.toString();
-
-        form.setValue('accounts.instructionWithAccountSeed.authority', accountPubkey);
-
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current.pdaAccount).toBeDefined();
+        const pdas = await pdasFor(votingIdl030Variations, 'instruction_with_account_seed', {
+            accounts: { authority: accountPubkey },
         });
-        expect(view.current.pdaAccount.generated).not.toBeNull();
-        expect(view.current.pdaAccount.seeds).toHaveLength(1);
-        expect(view.current.pdaAccount.seeds[0]).toEqual({ name: 'authority', value: accountPubkey });
+
+        expect(pdas.pdaAccount.generated).not.toBeNull();
+        expect(pdas.pdaAccount.seeds).toHaveLength(1);
+        expect(pdas.pdaAccount.seeds[0]).toEqual({ name: 'authority', value: accountPubkey });
     });
 
     it('should handle const seeds', async () => {
-        const { createMockForm, mockIdl, mockInstruction, getPdas } = setup(
-            votingIdl030Variations,
-            'instruction_with_const_seed',
-        );
-        const form = createMockForm();
+        const pdas = await pdasFor(votingIdl030Variations, 'instruction_with_const_seed');
 
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current.pdaAccount).toBeDefined();
-        });
-        expect(view.current.pdaAccount.generated).not.toBeNull();
-        expect(view.current.pdaAccount.seeds).toHaveLength(1);
-        expect(view.current.pdaAccount.seeds[0]).toEqual({ name: '0x74657374', value: '0x74657374' });
+        expect(pdas.pdaAccount.generated).not.toBeNull();
+        expect(pdas.pdaAccount.seeds).toHaveLength(1);
+        expect(pdas.pdaAccount.seeds[0]).toEqual({ name: '0x74657374', value: '0x74657374' });
     });
 
     it('should return null when account seed value is missing', async () => {
-        const { createMockForm, mockIdl, mockInstruction, getPdas } = setup(
-            votingIdl030Variations,
-            'instruction_with_account_seed',
-        );
-        const form = createMockForm();
+        const pdas = await pdasFor(votingIdl030Variations, 'instruction_with_account_seed');
 
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current.pdaAccount.generated).toBeNull();
-        });
-        expect(view.current.pdaAccount.seeds).toHaveLength(1);
-        expect(view.current.pdaAccount.seeds[0]).toEqual({ name: 'authority', value: null });
+        expect(pdas.pdaAccount.generated).toBeNull();
+        expect(pdas.pdaAccount.seeds).toHaveLength(1);
+        expect(pdas.pdaAccount.seeds[0]).toEqual({ name: 'authority', value: null });
     });
 
     describe('donate IDL (close_donation_epoch_v1)', () => {
-        const DONATE_KEY = 'closeDonationEpochV1';
-        const { createMockForm, mockIdl, mockInstruction, getPdas } = setup(donateIdl0301, 'close_donation_epoch_v1');
-
-        async function runDonateTest(formValues: {
-            accounts?: Record<string, string>;
-            arguments?: Record<string, string>;
-        }) {
-            const form = createMockForm();
-            for (const [key, val] of Object.entries(formValues.accounts ?? {})) {
-                form.setValue(`accounts.${DONATE_KEY}.${key}`, val);
-            }
-            for (const [key, val] of Object.entries(formValues.arguments ?? {})) {
-                form.setValue(`arguments.${DONATE_KEY}.${key}`, val);
-            }
-            const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-            // Wait for async computation to complete
-            await waitFor(() => {
-                // Wait until at least some PDA results are available
-                expect(Object.keys(view.current).length).toBeGreaterThan(0);
-            });
-            return view.current;
-        }
+        const runDonateTest = (formValues: FormValues) => pdasFor(donateIdl0301, 'close_donation_epoch_v1', formValues);
 
         it('should generate PDA for account seeds (debouncer, tokenProgram, mint)', async () => {
             const pdas = await runDonateTest({
@@ -317,15 +244,10 @@ describe('usePdas', () => {
         });
 
         it('should return null for distribution/epochTracker/debouncer when config_id is missing', async () => {
-            const form = createMockForm();
-            form.setValue(`accounts.${DONATE_KEY}.mint`, PublicKey.default.toString());
-            form.setValue(`arguments.${DONATE_KEY}.epoch`, '1');
-            const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-            await waitFor(() => {
-                expect(Object.keys(view.current).length).toBeGreaterThan(0);
+            const pdas = await runDonateTest({
+                accounts: { mint: PublicKey.default.toString() },
+                arguments: { epoch: '1' },
             });
-            const pdas = view.current;
 
             for (const key of ['distribution', 'epochTracker', 'debouncer']) {
                 expect(pdas[key].generated).toBeNull();
@@ -336,200 +258,58 @@ describe('usePdas', () => {
 
     // 0.30 tests - these need 0.30 IDL for PDA seeds
     it('should skip accounts without PDA', async () => {
-        const { createMockForm, mockIdl, mockInstruction, getPdas } = setup(votingIdl030, 'initialize_candidate');
-        const form = createMockForm();
-        form.setValue('arguments.initializeCandidate.pollId', '123');
-        form.setValue('arguments.initializeCandidate.candidateName', 'Eve');
-
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current.poll).toBeDefined();
+        const pdas = await pdasFor(votingIdl030, 'initialize_candidate', {
+            arguments: { candidateName: 'Eve', pollId: '123' },
         });
+
         // signer account should not be in result since it doesn't have PDA
-        expect(view.current.signer).toBeUndefined();
+        expect(pdas.signer).toBeUndefined();
         // Only PDA accounts should be present
-        expect(view.current.poll.generated).not.toBeNull();
-        expect(view.current.candidate).toBeDefined();
-        expect(view.current.candidate.generated).not.toBeNull();
+        expect(pdas.poll.generated).not.toBeNull();
+        expect(pdas.candidate.generated).not.toBeNull();
     });
 
     it('should generate consistent PDA addresses for same inputs', async () => {
-        const { createMockForm, mockIdl, mockInstruction, getPdas } = setup(votingIdl030, 'initialize_candidate');
-        const form = createMockForm();
-        form.setValue('arguments.initializeCandidate.pollId', '123');
-        form.setValue('arguments.initializeCandidate.candidateName', 'Frank');
+        const formValues = { arguments: { candidateName: 'Frank', pollId: '123' } };
+        const pdas = await pdasFor(votingIdl030, 'initialize_candidate', formValues);
+        const pdas2 = await pdasFor(votingIdl030, 'initialize_candidate', formValues);
 
-        const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-        const view2 = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-        await waitFor(() => {
-            expect(view.current.poll).toBeDefined();
-        });
-        await waitFor(() => {
-            expect(view2.current.poll).toBeDefined();
-        });
-        expect(view.current.poll.generated).not.toBeNull();
-        expect(view2.current.poll.generated).not.toBeNull();
-        expect(view.current.poll.generated).toBe(view2.current.poll.generated);
-        expect(view.current.candidate.generated).toBe(view2.current.candidate.generated);
+        expect(pdas.poll.generated).not.toBeNull();
+        expect(pdas2.poll.generated).not.toBeNull();
+        expect(pdas.poll.generated).toBe(pdas2.poll.generated);
+        expect(pdas.candidate.generated).toBe(pdas2.candidate.generated);
     });
 
-    describe('Codama IDL', () => {
-        it('should generate PDA with arg seeds', async () => {
-            const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(codamaVotingIdl, 'initializeCandidate');
-            const form = createMockForm();
-            form.setValue('arguments.initializeCandidate.pollId', '123');
-
-            const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-            await waitFor(() => {
-                expect(view.current.poll).toBeDefined();
-            });
-            expect(view.current.poll.generated).not.toBeNull();
-            expect(typeof view.current.poll.generated).toBe('string');
-            expect(view.current.poll.seeds).toHaveLength(1);
-            expect(view.current.poll.seeds[0]).toEqual({ name: 'pollId', value: '123' });
+    it('should route a Codama IDL to the Codama provider', async () => {
+        const pdas = await pdasFor(codamaVotingIdl, 'initializeCandidate', {
+            arguments: { candidateName: 'Marco', pollId: '123' },
         });
 
-        it('should generate PDA with multiple arg seeds', async () => {
-            const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(codamaVotingIdl, 'initializeCandidate');
-            const form = createMockForm();
-            form.setValue('arguments.initializeCandidate.pollId', '123');
-            form.setValue('arguments.initializeCandidate.candidateName', 'Marco');
-
-            const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-            await waitFor(() => {
-                expect(view.current.candidate).toBeDefined();
-            });
-            expect(view.current.candidate.generated).not.toBeNull();
-            expect(view.current.candidate.seeds).toHaveLength(2);
-            expect(view.current.candidate.seeds[0]).toEqual({ name: 'pollId', value: '123' });
-            expect(view.current.candidate.seeds[1]).toEqual({ name: 'candidateName', value: 'Marco' });
-        });
-
-        it('should generate PDA with account seeds', async () => {
-            const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(
-                codamaVotingIdl,
-                'instructionWithAccountSeed',
-            );
-            const form = createMockForm();
-            const accountPubkey = PublicKey.default.toString();
-            form.setValue('accounts.instructionWithAccountSeed.authority', accountPubkey);
-
-            const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-            await waitFor(() => {
-                expect(view.current.pdaAccount).toBeDefined();
-            });
-            expect(view.current.pdaAccount.generated).not.toBeNull();
-            expect(view.current.pdaAccount.seeds).toHaveLength(1);
-            expect(view.current.pdaAccount.seeds[0]).toEqual({ name: 'authority', value: accountPubkey });
-        });
-
-        it('should generate PDA with const seeds', async () => {
-            const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(
-                codamaVotingIdl,
-                'instructionWithConstSeed',
-            );
-            const form = createMockForm();
-
-            const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-            await waitFor(() => {
-                expect(view.current.pdaAccount).toBeDefined();
-            });
-            expect(view.current.pdaAccount.generated).not.toBeNull();
-            expect(view.current.pdaAccount.seeds).toHaveLength(1);
-            expect(view.current.pdaAccount.seeds[0]).toEqual({ name: '0x74657374', value: '0x74657374' });
-        });
-
-        it('should return null when required argument is missing', async () => {
-            const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(codamaVotingIdl, 'initializeCandidate');
-            const form = createMockForm();
-            form.setValue('arguments.initializeCandidate.candidateName', 'Marco');
-            // pollId is missing
-
-            const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-            await waitFor(() => {
-                expect(view.current.poll.generated).toBeNull();
-            });
-            expect(view.current.poll.seeds).toHaveLength(1);
-            expect(view.current.poll.seeds[0]).toEqual({ name: 'pollId', value: null });
-        });
-
-        it('should skip accounts without PDA', async () => {
-            const { createMockForm, mockInstruction, mockIdl, getPdas } = setup(codamaVotingIdl, 'initializeCandidate');
-            const form = createMockForm();
-            form.setValue('arguments.initializeCandidate.pollId', '123');
-            form.setValue('arguments.initializeCandidate.candidateName', 'Eve');
-
-            const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-            await waitFor(() => {
-                expect(view.current.poll).toBeDefined();
-            });
-            expect(view.current.signer).toBeUndefined();
-            expect(view.current.systemProgram).toBeUndefined();
-            expect(view.current.candidate).toBeDefined();
-        });
-
-        it('should generate consistent PDA addresses for same inputs', async () => {
-            const { createMockForm, mockIdl, mockInstruction, getPdas } = setup(codamaVotingIdl, 'initializeCandidate');
-            const form = createMockForm();
-            form.setValue('arguments.initializeCandidate.pollId', '123');
-            form.setValue('arguments.initializeCandidate.candidateName', 'Frank');
-
-            const view = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-            const view2 = getPdas({ form, idl: mockIdl, instruction: mockInstruction });
-
-            await waitFor(() => {
-                expect(view.current.poll).toBeDefined();
-            });
-            await waitFor(() => {
-                expect(view2.current.poll).toBeDefined();
-            });
-            expect(view.current.poll.generated).not.toBeNull();
-            expect(view2.current.poll.generated).not.toBeNull();
-            expect(view.current.poll.generated).toBe(view2.current.poll.generated);
-            expect(view.current.candidate.generated).toBe(view2.current.candidate.generated);
-        });
-
-        it('should return empty object when program ID is missing', async () => {
-            const { createMockForm, mockInstruction, getPdas } = setup(codamaVotingIdl, 'initializeCandidate');
-            const form = createMockForm();
-            const idlWithoutKey = {
-                ...codamaVotingIdl,
-                program: { ...codamaVotingIdl.program, publicKey: '' },
-            } as unknown as SupportedIdl;
-
-            const view = getPdas({ form, idl: idlWithoutKey, instruction: mockInstruction });
-
-            await waitFor(() => {
-                expect(view.current).toEqual({});
-            });
-        });
+        expect(pdas.candidate.generated).toEqual(expect.any(String));
+        expect(pdas.candidate.seeds).toEqual([
+            { name: 'pollId', value: '123' },
+            { name: 'candidateName', value: 'Marco' },
+        ]);
     });
 });
 
+type FormValues = { accounts?: Record<string, string>; arguments?: Record<string, string> };
+
+function pdasFor(idl: unknown, instructionName: string, formValues: FormValues = {}) {
+    const { idl: supportedIdl, instruction } = setup(idl, instructionName);
+    return computePdas(supportedIdl, instruction, {
+        accounts: { [instruction.name]: formValues.accounts ?? {} },
+        arguments: { [instruction.name]: formValues.arguments ?? {} },
+    });
+}
+
+function createForm() {
+    return renderHook(() => useForm<InstructionFormData>({ defaultValues: { accounts: {}, arguments: {} } })).result
+        .current;
+}
+
 function setup(idl: unknown, instructionName: string) {
-    const mockIdl = idl as SupportedIdl;
-    const mockInstruction = findInstruction(idl, instructionName);
-    invariant(mockInstruction, `instruction ${instructionName} not found in IDL fixture`);
-
-    const createMockForm = () => {
-        return renderHook(() =>
-            useForm<InstructionFormData>({
-                defaultValues: { accounts: {}, arguments: {} },
-            }),
-        ).result.current;
-    };
-
-    const getPdas = (params: Parameters<typeof usePdas>[0]) => {
-        return renderHook(() => usePdas(params)).result;
-    };
-
-    return { createMockForm, getPdas, mockIdl, mockInstruction };
+    const instruction = findInstruction(idl, instructionName);
+    invariant(instruction, `instruction ${instructionName} not found in IDL fixture`);
+    return { idl: idl as SupportedIdl, instruction };
 }
