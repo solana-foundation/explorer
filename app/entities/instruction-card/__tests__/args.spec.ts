@@ -1,4 +1,4 @@
-import { address, getBase58Decoder } from '@solana/kit';
+import { address, getBase58Decoder, none, some } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
 import { parseCodamaArgs } from '../model/args';
@@ -57,7 +57,7 @@ describe('parseCodamaArgs', () => {
 
     it('should label an enum by its variant, an option by its state and a plain struct as object', () => {
         const [option, struct, variant] = parseCodamaArgs({
-            option: { __option: 'Some', value: 1 },
+            option: some(1),
             struct: { x: 1 },
             variant: { __kind: 'Lamports', value: 2 },
         });
@@ -101,7 +101,7 @@ describe('parseCodamaArgs', () => {
             parseCodamaArgs({
                 empty: [],
                 map: new Map(),
-                none: { __option: 'None' },
+                none: none(),
                 unit: { __kind: 'A' },
             }),
         ).toEqual([

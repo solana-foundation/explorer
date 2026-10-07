@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { createProgramClient, type ProgramMethodBuilder } from '@codama/dynamic-client';
 import { parseInstruction } from '@codama/dynamic-parsers';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { AccountRole, isSignerRole, isWritableRole } from '@solana/kit';
@@ -6,13 +7,18 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import {
     fieldDiscriminatorNode,
+    type InstructionAccountNode,
     instructionAccountNode,
+    type InstructionArgumentNode,
     instructionArgumentNode,
     instructionNode,
     numberTypeNode,
     numberValueNode,
     programNode,
+    publicKeyTypeNode,
     rootNode,
+    structFieldTypeNode,
+    structTypeNode,
 } from 'codama';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -48,18 +54,29 @@ const VAULT = gen.address(2);
 const COUNTER_IDL = rootNode(
     programNode({
         instructions: [
-            instructionNode({
-                accounts: [instructionAccountNode({ isSigner: true, isWritable: true, name: 'authority' })],
+            counterInstruction({
+                accounts: [
+                    instructionAccountNode({ isSigner: true, isWritable: true, name: 'authority' }),
+                    instructionAccountNode({ isSigner: false, isWritable: false, name: 'vaultAccount' }),
+                ],
+                arguments: [instructionArgumentNode({ name: 'amount', type: numberTypeNode('u64') })],
+                discriminator: 1,
+                name: 'increment',
+            }),
+            counterInstruction({
+                accounts: [instructionAccountNode({ isSigner: true, isWritable: false, name: 'authority' })],
+                discriminator: 2,
+                name: 'reset',
+            }),
+            counterInstruction({
                 arguments: [
                     instructionArgumentNode({
-                        defaultValue: numberValueNode(1),
-                        defaultValueStrategy: 'omitted',
-                        name: 'discriminator',
-                        type: numberTypeNode('u8'),
+                        name: 'settings',
+                        type: structTypeNode([structFieldTypeNode({ name: 'owner', type: publicKeyTypeNode() })]),
                     }),
                 ],
-                discriminators: [fieldDiscriminatorNode('discriminator')],
-                name: 'increment',
+                discriminator: 3,
+                name: 'configure',
             }),
         ],
         name: 'counter',
@@ -67,16 +84,12 @@ const COUNTER_IDL = rootNode(
     }),
 );
 
+const client = createProgramClient(COUNTER_IDL);
+
 describe('CodamaInstructionCard', () => {
-    it('should render a titled card with the IDL account names, role badges and argument rows', () => {
-        renderCard(
-            makeParsedIx({
-                accounts: [
-                    { address: AUTHORITY, name: 'authority', role: AccountRole.WRITABLE_SIGNER },
-                    { address: VAULT, name: 'vaultAccount', role: AccountRole.READONLY },
-                ],
-                data: { amount: 42, discriminator: 1 },
-            }),
+    it('should render a titled card with the IDL account names, role badges and argument rows', async () => {
+        await renderBuilt(
+            client.methods.increment({ amount: 42 }).accounts({ authority: AUTHORITY, vaultAccount: VAULT }),
         );
 
         expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('Counter: Increment');
@@ -112,21 +125,13 @@ describe('CodamaInstructionCard', () => {
         expect(screen.getByTestId('account-row-1')).toHaveTextContent('Account #2');
     });
 
-    it('should list an account the IDL does not declare as a remaining account', () => {
-        const ix = makeIx([
-            { address: AUTHORITY, role: AccountRole.WRITABLE_SIGNER },
-            { address: VAULT, role: AccountRole.READONLY },
-        ]);
-
-        render(
-            <TxInstructionSurface result={{ err: null }}>
-                <CodamaInstructionCard
-                    ix={ix}
-                    index={0}
-                    parsedIx={parseInstruction(COUNTER_IDL, toKitInstruction(ix))}
-                />
-            </TxInstructionSurface>,
+    it('should list an account the IDL does not declare as a remaining account', async () => {
+        const ix = toTransactionInstruction(
+            await client.methods.reset().accounts({ authority: AUTHORITY }).instruction(),
         );
+        ix.keys.push({ isSigner: false, isWritable: false, pubkey: new PublicKey(VAULT) });
+
+        renderInstruction(ix);
 
         expect(screen.getByTestId('account-row-0')).toHaveTextContent('Authority');
         const remainingRow = screen.getByTestId('account-row-1');
@@ -134,36 +139,31 @@ describe('CodamaInstructionCard', () => {
         expect(remainingRow).toHaveTextContent(VAULT);
     });
 
-    it('should omit the argument table when the instruction carries a discriminator only', () => {
-        renderCard(
-            makeParsedIx({
-                accounts: [{ address: AUTHORITY, name: 'authority', role: AccountRole.READONLY }],
-                data: { discriminator: 7 },
-            }),
-        );
+    it('should omit the argument table when the instruction carries a discriminator only', async () => {
+        await renderBuilt(client.methods.reset().accounts({ authority: AUTHORITY }));
 
         expect(screen.getByTestId('account-row-0')).toBeInTheDocument();
         expect(screen.queryByText('Argument Name')).not.toBeInTheDocument();
     });
 
-    it('should omit the account table when the instruction takes no accounts', () => {
-        renderCard(makeParsedIx({ accounts: [], data: { amount: 42 } }));
+    it('should omit the account table when the instruction takes no accounts', async () => {
+        await renderBuilt(client.methods.configure({ settings: { owner: gen.address(3) } }));
 
         expect(screen.queryByText('Account Name')).not.toBeInTheDocument();
         expect(screen.getByText('Argument Name')).toBeInTheDocument();
     });
 
-    it('should render a nested address argument as an address', () => {
+    it('should render a nested address argument as an address', async () => {
         const OWNER = gen.address(3);
-        renderCard(makeParsedIx({ data: { discriminator: 1, settings: { owner: OWNER } } }));
+        await renderBuilt(client.methods.configure({ settings: { owner: OWNER } }));
 
         fireEvent.click(screen.getByText('Expand'));
 
         expect(within(screen.getByTestId('ix-args-1-0')).getByTestId('address')).toHaveTextContent(OWNER);
     });
 
-    it('should unmount the nested argument rows when the group collapses', () => {
-        renderCard(makeParsedIx({ data: { discriminator: 1, settings: { owner: gen.address(3) } } }));
+    it('should unmount the nested argument rows when the group collapses', async () => {
+        await renderBuilt(client.methods.configure({ settings: { owner: gen.address(3) } }));
 
         fireEvent.click(screen.getByText('Expand'));
         expect(screen.getByTestId('ix-args-1-0')).toHaveTextContent('owner');
@@ -196,6 +196,34 @@ describe('CodamaInstructionCard', () => {
         expect(screen.getByTestId('unknown-card')).toBeInTheDocument();
     });
 });
+
+async function renderBuilt(builder: ProgramMethodBuilder) {
+    return renderInstruction(toTransactionInstruction(await builder.instruction()));
+}
+
+function renderInstruction(ix: TransactionInstruction) {
+    return render(
+        <TxInstructionSurface result={{ err: null }}>
+            <CodamaInstructionCard ix={ix} index={0} parsedIx={parseInstruction(COUNTER_IDL, toKitInstruction(ix))} />
+        </TxInstructionSurface>,
+    );
+}
+
+function toTransactionInstruction({
+    accounts = [],
+    data = new Uint8Array(),
+    programAddress,
+}: Awaited<ReturnType<ProgramMethodBuilder['instruction']>>) {
+    return new TransactionInstruction({
+        data: Buffer.from(data),
+        keys: accounts.map(({ address, role }) => ({
+            isSigner: isSignerRole(role),
+            isWritable: isWritableRole(role),
+            pubkey: new PublicKey(address),
+        })),
+        programId: new PublicKey(programAddress),
+    });
+}
 
 function renderCard(parsedIx: ReturnType<typeof makeParsedIx>) {
     return render(
@@ -235,5 +263,32 @@ function makeIx(accounts: readonly Omit<ParsedAccount, 'name'>[]) {
             pubkey: new PublicKey(address),
         })),
         programId: PROGRAM,
+    });
+}
+
+function counterInstruction({
+    accounts = [],
+    arguments: args = [],
+    discriminator,
+    name,
+}: {
+    accounts?: InstructionAccountNode[];
+    arguments?: InstructionArgumentNode[];
+    discriminator: number;
+    name: string;
+}) {
+    return instructionNode({
+        accounts,
+        arguments: [
+            instructionArgumentNode({
+                defaultValue: numberValueNode(discriminator),
+                defaultValueStrategy: 'omitted',
+                name: 'discriminator',
+                type: numberTypeNode('u8'),
+            }),
+            ...args,
+        ],
+        discriminators: [fieldDiscriminatorNode('discriminator')],
+        name,
     });
 }

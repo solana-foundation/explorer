@@ -4,7 +4,7 @@ import type { TransactionInstruction } from '@solana/web3.js';
 
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 
-import { PMP_ADDRESS, PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX } from './constants';
+import { PMP_ADDRESS, PMP_METADATA_ACCOUNT_INDEX, PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX } from './constants';
 import type { PmpBytesSource, PmpContentInstruction } from './types';
 
 /**
@@ -36,7 +36,7 @@ export function decodePmpContentInstruction(ix: TransactionInstruction): PmpCont
     }
 
     if (decoded.kind === 'initialize') {
-        const metadataAccount = ix.keys[0];
+        const metadataAccount = ix.keys[PMP_METADATA_ACCOUNT_INDEX];
         return {
             config: decoded.config,
             kind: 'initialize',

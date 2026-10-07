@@ -8,7 +8,7 @@ export const PMP_RAW_DOWNLOAD_FILENAME = 'pmp-payload-raw';
 export const PMP_DECODED_DOWNLOAD_FILENAME = 'pmp-payload-decoded';
 export const PMP_WRITE_CHUNK_DOWNLOAD_FILENAME = 'pmp-write-chunk';
 
-export { PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX } from '@entities/pmp-instruction';
+export { PMP_METADATA_ACCOUNT_INDEX, PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX } from '@entities/pmp-instruction';
 
 export const PMP_ACCOUNT_NAMES = {
     initialize: ['metadata', 'authority', 'program', 'programData', 'system'],
