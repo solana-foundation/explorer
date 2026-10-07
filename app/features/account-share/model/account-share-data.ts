@@ -68,7 +68,6 @@ export type ProgramCardData = {
     programSize?: string;
 };
 
-
 export type NotFoundReason = 'never-used' | 'has-history' | 'unknown';
 export type NotFoundCardData = {
     kind: 'not-found';
