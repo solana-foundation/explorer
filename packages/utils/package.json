@@ -9,6 +9,11 @@
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js",
             "default": "./dist/index.js"
+        },
+        "./testing": {
+            "types": "./dist/testing/index.d.ts",
+            "import": "./dist/testing/index.js",
+            "default": "./dist/testing/index.js"
         }
     },
     "files": [
@@ -22,6 +27,9 @@
         "test:changed": "git diff --cached --name-only --diff-filter=ACMR -z --relative -- . | xargs -0 -r vitest related --run",
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@solana/kit": "8.3.0"
     },
     "devDependencies": {
         "typescript": "catalog:tooling",

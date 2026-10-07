@@ -29,10 +29,20 @@
             "import": "./dist/programs/address-lookup-table/index.js",
             "default": "./dist/programs/address-lookup-table/index.js"
         },
+        "./programs/compute-budget": {
+            "types": "./dist/programs/compute-budget/index.d.ts",
+            "import": "./dist/programs/compute-budget/index.js",
+            "default": "./dist/programs/compute-budget/index.js"
+        },
         "./token-batch": {
             "types": "./dist/token-batch/index.d.ts",
             "import": "./dist/token-batch/index.js",
             "default": "./dist/token-batch/index.js"
+        },
+        "./transaction": {
+            "types": "./dist/transaction/index.d.ts",
+            "import": "./dist/transaction/index.js",
+            "default": "./dist/transaction/index.js"
         },
         "./security-txt": {
             "types": "./dist/security-txt/index.d.ts",
@@ -57,6 +67,7 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
+        "@solana-program/compute-budget": "0.18.1",
         "@solana-program/system": "0.14.0",
         "@solana-program/token": "0.16.0",
         "@solana-program/token-2022": "0.16.0",
@@ -65,6 +76,7 @@
         "superstruct": "0.15.3"
     },
     "devDependencies": {
+        "@explorer/utils": "workspace:*",
         "@vitest/coverage-v8": "catalog:vitest",
         "agadoo": "^3.0.0",
         "oxfmt": "catalog:oxc",
