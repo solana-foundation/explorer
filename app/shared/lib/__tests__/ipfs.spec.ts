@@ -21,15 +21,19 @@ describe('resolveIpfsUri', () => {
         expect(resolve(uri)).toEqual({ kind: 'gateway', uri: expected });
     });
 
-    it.each(['ipfs.io', 'dweb.link', 'gateway.pinata.cloud', 'example.mypinata.cloud', 'example.com'])(
-        'should map an /ipfs/ URL on %s to the gateway',
-        host => {
-            expect(resolve(`https://${host}/ipfs/${CID_V0}/image.png?filename=a.png`)).toEqual({
-                kind: 'gateway',
-                uri: `${GATEWAY}/${CID_V0}/image.png?filename=a.png`,
-            });
-        },
-    );
+    it.each([
+        'ipfs.io',
+        'gateway.ipfs.io',
+        'dweb.link',
+        'gateway.pinata.cloud',
+        'example.mypinata.cloud',
+        'example.com',
+    ])('should map an /ipfs/ URL on %s to the gateway', host => {
+        expect(resolve(`https://${host}/ipfs/${CID_V0}/image.png?filename=a.png`)).toEqual({
+            kind: 'gateway',
+            uri: `${GATEWAY}/${CID_V0}/image.png?filename=a.png`,
+        });
+    });
 
     it.each([
         [`http://ipfs.io/ipfs/${CID_V1}`, `${GATEWAY}/${CID_V1}`],
