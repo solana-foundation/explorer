@@ -1,18 +1,5 @@
-/**
- * The data behind an account OG image, already formatted for the card.
- *
- * A discriminated union: the route classifies the address once and hands the card exactly the shape it
- * draws, so `BaseAccountImage` never re-derives anything. The first release renders three kinds - a
- * universal `account`, a richer `program`, and a `not-found` fallback - matching the "First release" cards
- * in the share-image design gallery.
- */
 export type AccountShareData = AccountCardData | ProgramCardData | NotFoundCardData;
 
-/**
- * A three-state signal for a provenance marker: `yes` and `no` are established facts, `unknown` is used
- * when the lookup itself failed or the check isn't supported for this program, so the card never claims a
- * negative it could not actually verify.
- */
 export type MarkerState = 'yes' | 'no' | 'unknown';
 
 /** The universal account card: every non-program account that exists. */
@@ -30,7 +17,7 @@ export type AccountCardData = {
     balance: string;
     /** "1,204". Absent when the signature lookup returned nothing or was skipped. */
     transactionCount?: string;
-    /** Whether {@link transactionCount} is an exact figure or a floor ("1,000+"). */
+    /** Whether {@link transactionCount} is an exact figure or a floor ("100+"). */
     transactionCountIsCapped?: boolean;
     /** "Aug 26, 2026". Absent when no signature carried a block time. */
     lastActivity?: string;
@@ -61,10 +48,8 @@ export type UpgradeAuthority = {
     note?: string;
 };
 
-/** The loader that owns an executable account, deciding where its bytes live and whether it can be upgraded. */
 export type ProgramLoader = 'upgradeable' | 'v4' | 'immutable-elf' | 'native' | 'unknown';
 
-/** The program card: any executable account (upgradeable, v4, legacy, or native loader). */
 export type ProgramCardData = {
     kind: 'program';
     address: string;
@@ -83,14 +68,8 @@ export type ProgramCardData = {
     programSize?: string;
 };
 
-/**
- * Why no account renders: `has-history` when the address has on-chain signatures (which does *not* prove the
- * account ever existed - a failed creation transaction leaves history too - so the copy stops short of
- * claiming "closed"), `never-used` when it has none, and `unknown` when the history lookup itself failed.
- */
-export type NotFoundReason = 'never-used' | 'has-history' | 'unknown';
 
-/** The fallback card: a valid address the cluster holds no account for. */
+export type NotFoundReason = 'never-used' | 'has-history' | 'unknown';
 export type NotFoundCardData = {
     kind: 'not-found';
     address: string;

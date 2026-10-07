@@ -2,13 +2,11 @@
 export const RPC_BUDGET_MS = 2_500;
 
 /**
- * The activity-count cap, and the RPC's own per-call ceiling for `getSignaturesForAddress`: one round trip,
- * no paging, so the exact count tops out here and `1,000` prints as `1,000+`.
+ * The activity-count cap for `getSignaturesForAddress`: one round trip, no paging, kept small so this
+ * route stays light. The exact count tops out here and `100` prints as `100+`.
  */
-export const SIGNATURE_LOOKUP_LIMIT = 1_000;
+export const SIGNATURE_LOOKUP_LIMIT = 100;
 
-// Program loader account owners, reused from the shared entity-inspector constants so this route and the
-// program page classify loaders from one source. (`SYSTEM_PROGRAM_ADDRESS` comes from its own client.)
 export {
     BPF_LOADER_2_PROGRAM_ID as BPF_LOADER_2_ADDRESS,
     BPF_LOADER_PROGRAM_ID as BPF_LOADER_ADDRESS,

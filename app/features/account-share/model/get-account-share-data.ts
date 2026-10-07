@@ -5,6 +5,7 @@ import { formatBytes } from '@shared/lib/format-bytes';
 import { type Address, address as toAddress, getAddressDecoder } from '@solana/kit';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { Cluster, type ServerCluster, serverClusterUrl } from '@utils/cluster';
+import { displayDateUtc } from '@utils/date';
 import { lamportsToSolString } from '@utils/index';
 import { programLabel } from '@utils/tx';
 import { getOsecRegistryUrl } from '@utils/verified-builds-url';
@@ -24,7 +25,6 @@ import {
     RPC_BUDGET_MS,
     SIGNATURE_LOOKUP_LIMIT,
 } from '../lib/constants';
-import { formatDateShort } from '../lib/format';
 import type {
     AccountCardData,
     AccountShareData,
@@ -44,20 +44,11 @@ export type AccountShareResult = { kind: 'ok'; data: AccountShareData } | { kind
 
 const NAME_PAD = 6;
 
-/**
- * The data behind `/og/account/<address>`, read from the named cluster or mainnet by default. Never throws:
- * every failure becomes a result, a missing account renders as a not-found card, and all RPC work shares one
- * wall-clock budget.
- */
 export async function getAccountShareData(address: string, cluster?: ServerCluster): Promise<AccountShareResult> {
     const resolved = cluster ?? Cluster.MainnetBeta;
     const rpcUrl = serverClusterUrl(resolved);
 
     try {
-        // All RPC + provenance work runs with `fetch` scoped to our own backends (the cluster RPC and the
-        // OSEC registry). The shared IDL / security.txt resolvers can follow off-chain URLs planted in a
-        // program's on-chain metadata; scoping fetch here stops this unauthenticated route from being aimed
-        // at internal addresses (SSRF). See `withOnChainFetch`.
         return await withOnChainFetch([rpcUrl, getOsecRegistryUrl(resolved)], async () => {
             const abortSignal = AbortSignal.timeout(RPC_BUDGET_MS);
             const rpc = getRpc(rpcUrl);
@@ -114,7 +105,9 @@ async function buildAccount(args: {
         incomplete: activity.kind === 'unknown',
         kind: 'account',
         lastActivity:
-            activity.kind === 'some' && activity.lastActivity ? formatDateShort(activity.lastActivity) : undefined,
+            activity.kind === 'some' && activity.lastActivity
+                ? displayDateUtc(activity.lastActivity * 1000)
+                : undefined,
         // A system-owned account is an ordinary wallet; omit the misleading "Owned by 1111…".
         owner: owner === SYSTEM_PROGRAM_ADDRESS ? undefined : owner,
         transactionCount: activity.kind === 'some' ? activity.count.toLocaleString('en-US') : undefined,
@@ -162,14 +155,6 @@ async function buildProgram(args: {
 
 type VerificationInputs = { authority?: string; localHash?: string; programData?: ProgramData };
 
-/**
- * The upgrade authority and on-chain program hash the verified-build check needs, resolved per loader:
- * - `upgradeable` reads both from the separate program-data account.
- * - `immutable-elf` (legacy BPF loaders) keeps the raw ELF in the program account itself, so it is hashed
- *   directly; it can never be upgraded, so there is no authority.
- * - `v4` (ELF behind a header the 36-byte slice does not include), `native`, and `unknown` cannot be hashed
- *   here, so no hash is returned and the verified-build marker is left `unknown` rather than a false negative.
- */
 async function resolveVerificationInputs(
     rpc: SolanaRpc,
     programId: Address,
@@ -261,26 +246,14 @@ async function buildNotFound(
     address: string,
     abortSignal: AbortSignal,
 ): Promise<NotFoundCardData> {
-    // Signature history is the only signal we have, and it cannot prove the account ever existed: a failed
-    // creation transaction leaves history for an address that was never allocated. So `has-history` only
-    // records that history exists (the copy stops short of claiming "closed"), and a failed lookup is
-    // `unknown` rather than a guess.
     const history = await hasHistory(rpc, accountAddress, abortSignal);
     const reason: NotFoundReason = history === undefined ? 'unknown' : history ? 'has-history' : 'never-used';
     return { address, kind: 'not-found', reason };
 }
 
-/**
- * The program's on-chain activity, kept as a typed union so a failed lookup ("unknown") is never confused
- * with a genuinely empty history ("none"); `lastActivity` is unix seconds.
- */
 type Activity =
     { kind: 'unknown' } | { kind: 'none' } | { capped: boolean; count: number; kind: 'some'; lastActivity?: number };
 
-/**
- * The signature count (capped at one page) and the most recent activity time.
- * One RPC call; a failure resolves to `unknown` and an empty history to `none`, so neither renders a count.
- */
 async function getActivity(rpc: SolanaRpc, accountAddress: Address, abortSignal: AbortSignal): Promise<Activity> {
     try {
         const signatures = await rpc
