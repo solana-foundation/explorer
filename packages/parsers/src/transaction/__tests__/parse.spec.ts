@@ -288,6 +288,24 @@ describe('fromRpcTransaction', () => {
         expect(() => fromRpcTransaction({ ...wireResponse(1), version: 0 })).toThrow('version mismatch');
     });
 
+    it.each([
+        ['json', jsonResponse],
+        ['jsonParsed', jsonParsedResponse],
+        ['wire', wireResponse],
+    ] as const)('should accept a bigint version in a %s response', (_label, makeResponse) => {
+        expect(fromRpcTransaction({ ...makeResponse(1), version: 1n }).version).toBe(1);
+    });
+
+    it('should reject a wire response whose bigint version disagrees with its bytes', () => {
+        expect(() => fromRpcTransaction({ ...wireResponse(1), version: 0n })).toThrow('version mismatch');
+    });
+
+    it('should reject an unsupported bigint version', () => {
+        expect(() => fromRpcTransaction({ ...jsonResponse(1), version: 2n })).toThrow(
+            'Unsupported transaction version: 2',
+        );
+    });
+
     it.each(['legacy', 0, 1] as const)('should reject %s wire bytes with trailing data', version => {
         const bytes = new Uint8Array([...wireBytes(version), 0]);
 
