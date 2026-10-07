@@ -12,7 +12,7 @@ import {
     transactionWireSize,
     V1_TRANSACTION_SIZE_LIMIT,
 } from '../size.js';
-import { legacyTransaction, twoSignerLegacyTransaction, v0Transaction, v1Transaction } from './fixtures.js';
+import { legacyTransaction, transactionWithSigners, v0Transaction, v1Transaction } from './fixtures.js';
 
 type MessageParts = { compiled: CompiledTransactionMessage; messageBytes: Uint8Array };
 
@@ -60,7 +60,9 @@ describe('transactionWireSize', () => {
         ['legacy', partsOf(legacyTransaction)],
         ['v0', partsOf(v0Transaction)],
         ['v1', partsOf(v1Transaction)],
-        ['two-signer legacy', twoSignerLegacyTransaction()],
+        ['two-signer legacy', transactionWithSigners('legacy', 2)],
+        ['127-signer v0', transactionWithSigners(0, 127)],
+        ['128-signer v0', transactionWithSigners(0, 128)],
     ] as const)('should match the encoded wire length of a %s transaction', (_label, parts) => {
         expect(transactionWireSize(parts.messageBytes)).toBe(encodedWireLength(parts));
     });

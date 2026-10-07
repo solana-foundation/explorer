@@ -30,7 +30,7 @@ import {
     legacyTransaction,
     legacyTransactionWithHeader,
     transactionWithInstructions,
-    twoSignerLegacyTransaction,
+    transactionWithSigners,
     unsignedWireResponse,
     v0CompiledWithFeePayerInLUT,
     v0CompiledWithLookupTable,
@@ -90,7 +90,7 @@ describe('fromCompiledMessage', () => {
     });
 
     it('should count every required signer of a compiled message', () => {
-        expect(fromCompiledMessage(twoSignerLegacyTransaction().compiled).numSignerAccounts).toBe(2);
+        expect(fromCompiledMessage(transactionWithSigners('legacy', 2).compiled).numSignerAccounts).toBe(2);
     });
 
     it('should keep a static key apart from its lookup table copy', () => {
