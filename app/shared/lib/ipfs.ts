@@ -31,7 +31,8 @@ const SUBDOMAIN_NAMESPACE = 'ipfs';
 
 function gatewayCidPath(url: URL): string | undefined {
     const [label, namespace] = url.hostname.split('.');
-    if (namespace === SUBDOMAIN_NAMESPACE) return url.pathname === '/' ? label : label + url.pathname;
+    if (namespace === SUBDOMAIN_NAMESPACE && verifyCID(label))
+        return url.pathname === '/' ? label : label + url.pathname;
     if (url.pathname.startsWith(GATEWAY_PATH_PREFIX)) return url.pathname.slice(GATEWAY_PATH_PREFIX.length);
     return undefined;
 }
