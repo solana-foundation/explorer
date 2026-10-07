@@ -5,8 +5,9 @@ export type TransactionVersion = 'legacy' | 0 | 1;
 /**
  * The version an RPC response reports, before the message is decoded.
  * `null` means the response has no `version` field, because the request omitted `maxSupportedTransactionVersion`.
+ * A bigint is accepted defensively, since older kit versions can return it.
  */
-export type ReportedTransactionVersion = TransactionVersion | null;
+export type ReportedTransactionVersion = TransactionVersion | bigint | null;
 
 export type AddressTableLookup = {
     accountKey: Address;
