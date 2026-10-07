@@ -6,6 +6,7 @@ import { useRefreshAccount } from '@entities/account';
 import { formatUsdValue, PriceStatus, useTokenPrice } from '@entities/token-price';
 import { AccountCard } from '@features/account';
 import type { Account } from '@providers/accounts';
+import { useEpochInfo } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { capitalizeFirstLetter, lamportsToSol } from '@utils/index';
@@ -82,13 +83,21 @@ export function StakeAccountSection({
 }
 
 function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
-    const lockupExpiryMs = unixTimestampToMs(stakeAccount.meta.lockup.unixTimestamp);
-    if (Date.now() >= lockupExpiryMs) {
+    const epochInfo = useEpochInfo();
+    const { epoch, unixTimestamp } = stakeAccount.meta.lockup;
+    const lockupExpiryMs = unixTimestampToMs(unixTimestamp);
+    // The stake program holds a lockup while either its timestamp or its epoch is still ahead.
+    const isTimestampLocked = Date.now() < lockupExpiryMs;
+    const isEpochLocked = epochInfo !== undefined && BigInt(epoch) > epochInfo.epoch;
+    if (!isTimestampLocked && !isEpochLocked) {
         return null;
     }
     return (
         <Alert variant="warning" className="text-center">
-            <strong>Account is locked!</strong> Lockup expires on {displayTimestampUtc(lockupExpiryMs)}
+            <strong>Account is locked!</strong> Lockup expires
+            {isTimestampLocked && ` on ${displayTimestampUtc(lockupExpiryMs)}`}
+            {isTimestampLocked && isEpochLocked && ' and'}
+            {isEpochLocked && ` at epoch ${epoch}`}
         </Alert>
     );
 }
