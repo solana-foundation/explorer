@@ -5,7 +5,9 @@ import {
     getBlockTransactionInstructions,
     isBlockTransaction,
 } from '@entities/block-data';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import { stubRpcFetch } from '@/app/__tests__/rpc-fetch';
 
 import { LEGACY_BLOCK_RESPONSE, V1_BLOCK_RESPONSE } from '../../__fixtures__/block-responses';
 import { fetchBlock } from '../fetch-block';
@@ -14,31 +16,13 @@ vi.mock('@solana/kit', async importOriginal => await importOriginal());
 
 const URL = 'https://mock.rpc';
 const SLOT = 440_572_822;
-const fetchMock = vi.fn();
-
-function respondWith(result: unknown) {
-    const body = JSON.stringify({ id: 1, jsonrpc: '2.0', result });
-    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, text: async () => body });
-}
-
-function requestBody() {
-    return JSON.parse(fetchMock.mock.calls[0][1].body);
-}
+const { respondWith, requestBody } = stubRpcFetch();
 
 function getTransaction(block: BlockData | null | undefined, index = 0): BlockTransaction {
     const transaction = block?.transactions[index];
     if (!transaction || !isBlockTransaction(transaction)) throw new Error(`Transaction ${index} is unavailable`);
     return transaction;
 }
-
-beforeEach(() => {
-    vi.stubGlobal('fetch', fetchMock);
-});
-
-afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.clearAllMocks();
-});
 
 describe('fetchBlock', () => {
     it('should ask for base64 transactions at the newest version Explorer renders', async () => {

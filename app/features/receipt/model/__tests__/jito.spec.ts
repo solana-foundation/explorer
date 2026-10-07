@@ -51,8 +51,14 @@ describe('isJitoTransfer', () => {
     });
 
     describe('NEXT_PUBLIC_RECEIPT_JITO_ACCOUNTS env', () => {
-        it('should use custom list when NEXT_PUBLIC_RECEIPT_JITO_ACCOUNTS is set', () => {
-            vi.stubEnv('NEXT_PUBLIC_RECEIPT_JITO_ACCOUNTS', `OtherAccount111,${JITO_TIP_ACCOUNT_IN_MOCK}`);
+        it.each([
+            [
+                'use custom list when NEXT_PUBLIC_RECEIPT_JITO_ACCOUNTS is set',
+                `OtherAccount111,${JITO_TIP_ACCOUNT_IN_MOCK}`,
+            ],
+            ['trim whitespace from comma-separated values', `  ${JITO_TIP_ACCOUNT_IN_MOCK}  , other`],
+        ])('should %s', (_, accounts) => {
+            vi.stubEnv('NEXT_PUBLIC_RECEIPT_JITO_ACCOUNTS', accounts);
             const instructions = mockUsdcJitoTransferTransaction.transaction.message.instructions;
             const jitoTipInstruction = instructions[1];
             expect(isJitoTransfer(jitoTipInstruction)).toBe(true);
@@ -82,13 +88,6 @@ describe('isJitoTransfer', () => {
                 },
             };
             expect(isJitoTransfer(customInstruction)).toBe(true);
-        });
-
-        it('should trim whitespace from comma-separated values', () => {
-            vi.stubEnv('NEXT_PUBLIC_RECEIPT_JITO_ACCOUNTS', `  ${JITO_TIP_ACCOUNT_IN_MOCK}  , other`);
-            const instructions = mockUsdcJitoTransferTransaction.transaction.message.instructions;
-            const jitoTipInstruction = instructions[1];
-            expect(isJitoTransfer(jitoTipInstruction)).toBe(true);
         });
     });
 });

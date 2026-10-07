@@ -25,14 +25,12 @@ export const gen = {
         return BASE58_DECODER.decode(bytes);
     },
     bigint: (max = 1_000_000n) => BigInt(Math.floor(Math.random() * Number(max))),
-    blockHeight: () => gen.bigint(250_000_000n),
     /** Deterministic blockhash (same seed → same value) so story fixtures stay pixel-stable. */
     blockhash: (seed = 0) => {
         const bytes = new Uint8Array(32);
         for (let i = 0; i < bytes.length; i++) bytes[i] = (seed * 7 + i * 13) & 0xff;
         return BASE58_DECODER.decode(bytes);
     },
-    epoch: () => gen.bigint(1_000n),
     /** Same as `address` but returns a `PublicKey` so callers needn't wrap it. */
     publicKey: (seed?: number) => new PublicKey(gen.address(seed)),
     /** Bare resolved security.txt for hook mocks; pass `fields` (e.g. name, version) for the case at hand. */
@@ -85,9 +83,6 @@ export const DEFAULT_SLOT = Number(gen.slot(0));
 
 /** Stable single-placeholder signature (base58, 64 bytes). */
 export const DEFAULT_SIGNATURE = gen.signature(0);
-
-/** Stable single-placeholder unix timestamp (seconds since epoch). */
-export const DEFAULT_TIMESTAMP = gen.timestamp(0);
 
 /** Stable rpc url placeholder. */
 export const DEFAULT_RPC_URL = 'https://rpc.example.com';

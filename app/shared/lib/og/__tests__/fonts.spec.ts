@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { loadOgFonts } from '../fonts';
 
 describe('og-fonts', () => {
-    it('should return both families at 400, 500 and 600', async () => {
+    it('should return both families at 400, 500 and 600, led by Rubik as the default family', async () => {
         const fonts = await loadOgFonts();
 
         expect(fonts.map(({ name, weight }) => `${name} ${weight}`)).toEqual([
@@ -14,12 +14,6 @@ describe('og-fonts', () => {
             'Roboto Mono 500',
             'Roboto Mono 600',
         ]);
-    });
-
-    it('should lead with Rubik, which is what makes it default family', async () => {
-        const [first] = await loadOgFonts();
-
-        expect(first.name).toBe('Rubik');
     });
 
     it('should return only the weights a request names', async () => {

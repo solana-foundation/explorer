@@ -48,22 +48,12 @@ describe('VisibilityProvider + useVisibility', () => {
     });
 
     it('should observe the ref element when enabled', () => {
-        function TestComponent() {
-            const { ref } = useVisibility<HTMLDivElement>(true);
-            return <div ref={ref} data-testid="target" />;
-        }
-
-        render(<TestComponent />, { wrapper });
+        render(<ObservedTarget />, { wrapper });
         expect(mockObserve).toHaveBeenCalledTimes(1);
     });
 
     it('should set isVisible=true when element intersects', () => {
-        function TestComponent() {
-            const { ref, isVisible } = useVisibility<HTMLDivElement>(true);
-            return <div ref={ref} data-testid={isVisible ? 'visible' : 'hidden'} />;
-        }
-
-        render(<TestComponent />, { wrapper });
+        render(<VisibilityTarget />, { wrapper });
         const el = screen.getByTestId('hidden');
 
         act(() => simulateIntersection(el, true));
@@ -72,12 +62,7 @@ describe('VisibilityProvider + useVisibility', () => {
     });
 
     it('should unobserve the element after it becomes visible', () => {
-        function TestComponent() {
-            const { ref } = useVisibility<HTMLDivElement>(true);
-            return <div ref={ref} data-testid="target" />;
-        }
-
-        render(<TestComponent />, { wrapper });
+        render(<ObservedTarget />, { wrapper });
         const el = screen.getByTestId('target');
 
         act(() => simulateIntersection(el, true));
@@ -86,12 +71,7 @@ describe('VisibilityProvider + useVisibility', () => {
     });
 
     it('should not set isVisible for non-intersecting entries', () => {
-        function TestComponent() {
-            const { ref, isVisible } = useVisibility<HTMLDivElement>(true);
-            return <div ref={ref} data-testid={isVisible ? 'visible' : 'hidden'} />;
-        }
-
-        render(<TestComponent />, { wrapper });
+        render(<VisibilityTarget />, { wrapper });
         const el = screen.getByTestId('hidden');
 
         act(() => simulateIntersection(el, false));
@@ -116,12 +96,7 @@ describe('VisibilityProvider + useVisibility', () => {
     });
 
     it('should unobserve on cleanup when component unmounts', () => {
-        function TestComponent() {
-            const { ref } = useVisibility<HTMLDivElement>(true);
-            return <div ref={ref} data-testid="target" />;
-        }
-
-        const { unmount } = render(<TestComponent />, { wrapper });
+        const { unmount } = render(<ObservedTarget />, { wrapper });
         const el = screen.getByTestId('target');
 
         unmount();
@@ -135,15 +110,20 @@ describe('VisibilityProvider + useVisibility', () => {
     });
 
     it('should create observer with rootMargin 50px', () => {
-        function TestComponent() {
-            const { ref } = useVisibility<HTMLDivElement>(true);
-            return <div ref={ref} />;
-        }
-
-        render(<TestComponent />, { wrapper });
+        render(<ObservedTarget />, { wrapper });
         expect(IntersectionObserver).toHaveBeenCalledWith(expect.any(Function), { rootMargin: '50px' });
     });
 });
+
+function ObservedTarget() {
+    const { ref } = useVisibility<HTMLDivElement>(true);
+    return <div ref={ref} data-testid="target" />;
+}
+
+function VisibilityTarget() {
+    const { ref, isVisible } = useVisibility<HTMLDivElement>(true);
+    return <div ref={ref} data-testid={isVisible ? 'visible' : 'hidden'} />;
+}
 
 function simulateIntersection(el: Element, isIntersecting: boolean) {
     const callback = observeCallbacks.get(el);

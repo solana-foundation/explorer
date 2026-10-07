@@ -14,12 +14,7 @@ import {
 import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
 import { SummaryCard } from '../SummaryCard';
 
-// `ClusterProvider` reads the router on mount, which jsdom has no app router for.
-vi.mock('next/navigation', () => ({
-    usePathname: () => `/tx/${DEFAULT_SIGNATURE}`,
-    useRouter: () => ({ replace: vi.fn() }),
-    useSearchParams: () => new URLSearchParams(),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 // `InfoTooltip` pins the label's last word to its help icon inside a nested `nowrap` span, so a
 // label like "Fee under SIMD-0553" is split across elements. Match on the innermost element whose

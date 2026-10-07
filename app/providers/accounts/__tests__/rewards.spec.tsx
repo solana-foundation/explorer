@@ -5,19 +5,13 @@ import { Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { useClusterMock, getEpochInfo, getInflationReward, getRpc } = vi.hoisted(() => {
-    const getEpochInfo = vi.fn();
-    const getInflationReward = vi.fn();
-    return {
-        getEpochInfo,
-        getInflationReward,
-        getRpc: vi.fn((_url: string) => ({
-            getEpochInfo: (...args: unknown[]) => ({ send: () => getEpochInfo(...args) }),
-            getInflationReward: (...args: unknown[]) => ({ send: () => getInflationReward(...args) }),
-        })),
-        useClusterMock: vi.fn(),
-    };
-});
+import { rpcStub } from '@/app/__tests__/mock-rpc';
+
+const { useClusterMock, getEpochInfo, getInflationReward } = vi.hoisted(() => ({
+    getEpochInfo: vi.fn(),
+    getInflationReward: vi.fn(),
+    useClusterMock: vi.fn(),
+}));
 
 vi.mock('@providers/cluster', async importOriginal => {
     const actual = await importOriginal<typeof import('@providers/cluster')>();
@@ -26,12 +20,8 @@ vi.mock('@providers/cluster', async importOriginal => {
 
 vi.mock('@entities/cluster', async importOriginal => {
     const actual = await importOriginal<typeof import('@entities/cluster')>();
-    return { ...actual, getRpc };
+    return { ...actual, getRpc: () => rpcStub({ getEpochInfo, getInflationReward }) };
 });
-
-vi.mock('@/app/shared/lib/logger', () => ({
-    Logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
-}));
 
 import { RewardsProvider, useFetchRewards, useRewards } from '../rewards';
 
@@ -93,7 +83,7 @@ describe('RewardsProvider', () => {
         vi.clearAllMocks();
     });
 
-    it('should expose rewards as numbers so they survive JSON serialization', async () => {
+    it('should expose rewards as numbers, one entry per epoch back to genesis', async () => {
         getInflationReward.mockImplementation((_addresses, config) => [makeInflationReward(config.epoch)]);
 
         await renderRewards();
@@ -107,13 +97,6 @@ describe('RewardsProvider', () => {
             postBalance: 999999,
         });
         expect(screen.getByTestId('highest-epoch').textContent).toBe('9');
-    });
-
-    it('should key rewards by epoch, one entry per epoch back to genesis', async () => {
-        getInflationReward.mockImplementation((_addresses, config) => [makeInflationReward(config.epoch)]);
-
-        await renderRewards();
-
         // Epoch 9 down to 0 — the page size is 15, but there are no negative epochs to request.
         expect(screen.getByTestId('reward-count').textContent).toBe('10');
     });

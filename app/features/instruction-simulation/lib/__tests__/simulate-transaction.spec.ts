@@ -8,10 +8,12 @@ import BN from 'bn.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createV1TransactionBytes, RECIPIENT } from '@/app/entities/transaction-data/__fixtures__/wire-transactions';
-import { alloc, toBase64, writeU64LE, writeUint32LE } from '@/app/shared/lib/bytes';
+import { alloc, toBase64, writeUint32LE } from '@/app/shared/lib/bytes';
 import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { bridgeV1MessageBytes } from '@/app/shared/lib/v1-message-bridge';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
+
+import { encodeMintAccountBase64, encodeTokenAccountBase64 } from '../../mocks/token-accounts';
 
 // Mock VersionedTransaction so we don't need a real message header
 vi.mock('@solana/web3.js', async () => {
@@ -43,7 +45,7 @@ describe('simulateTransaction', () => {
         mockParseProgramLogs.mockReturnValue([]);
     });
 
-    it('should return parsed logs after successful simulation', async () => {
+    it('should return parsed logs, units consumed, and SOL balance changes after successful simulation', async () => {
         const mockLogs: InstructionLogs[] = [
             {
                 computeUnits: 150,
@@ -57,18 +59,7 @@ describe('simulateTransaction', () => {
 
         const result = await simulate(createMockRpc());
 
-        expect(result).toMatchObject({ error: undefined, logs: mockLogs });
-    });
-
-    it('should return units consumed from simulation response', async () => {
-        const result = await simulate(createMockRpc());
-
-        expect(result).toMatchObject({ unitsConsumed: 150 });
-    });
-
-    it('should compute SOL balance changes from simulation data', async () => {
-        const result = await simulate(createMockRpc());
-
+        expect(result).toMatchObject({ error: undefined, logs: mockLogs, unitsConsumed: 150 });
         expect(result.solBalanceChanges).toHaveLength(2);
 
         const change1 = result.solBalanceChanges?.find(c => c.pubkey.equals(ACCOUNT_KEY_1));
@@ -377,24 +368,17 @@ describe('simulateTransaction', () => {
             });
         });
 
-        it('should handle token accounts with zero amount', async () => {
-            const rpc = setupTokenAccountRpc(0n, 0n);
-
-            const result = await simulate(rpc, createTokenMessage());
-
-            expect(result).toMatchObject({ error: undefined });
-            expect(result.tokenBalanceData?.postTokenBalances[0]).toMatchObject({ uiTokenAmount: { amount: '0' } });
-        });
-
-        it('should handle large token amounts without overflow', async () => {
-            const largeAmount = 9_000_000_000_000_000n;
-            const rpc = setupTokenAccountRpc(0n, largeAmount);
+        it.each([
+            ['token accounts with zero amount', 0n],
+            ['large token amounts without overflow', 9_000_000_000_000_000n],
+        ])('should handle %s', async (_, postAmount) => {
+            const rpc = setupTokenAccountRpc(0n, postAmount);
 
             const result = await simulate(rpc, createTokenMessage());
 
             expect(result).toMatchObject({ error: undefined });
             expect(result.tokenBalanceData?.postTokenBalances[0]).toMatchObject({
-                uiTokenAmount: { amount: largeAmount.toString() },
+                uiTokenAmount: { amount: postAmount.toString() },
             });
         });
     });
@@ -742,36 +726,4 @@ function simulate(
         message: message ?? createMockMessage(),
         rpc,
     });
-}
-
-/**
- * Build a 165-byte token account buffer matching AccountLayout, so that
- * AccountLayout.decode in the production code exercises the real decode path.
- */
-function encodeTokenAccountBase64(mint: PublicKey, owner: PublicKey, amount: bigint): string {
-    const buf = alloc(165);
-    let offset = 0;
-
-    buf.set(mint.toBytes(), offset);
-    offset += 32;
-    buf.set(owner.toBytes(), offset);
-    offset += 32;
-    buf.set(writeU64LE(amount), offset);
-    offset += 8;
-    writeUint32LE(buf, 0, offset);
-    offset += 4;
-    offset += 32;
-    buf[offset] = 1;
-
-    return toBase64(buf);
-}
-
-/**
- * Build a mint account buffer (82 bytes) for getMintDecimals to parse.
- */
-function encodeMintAccountBase64(decimals: number): string {
-    const buf = alloc(82);
-    buf[44] = decimals;
-    buf[45] = 1;
-    return toBase64(buf);
 }

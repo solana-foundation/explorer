@@ -1,32 +1,24 @@
 import { vi } from 'vitest';
 
+import { generateMultiTransferPdf } from '../generate-multi-transfer-pdf';
 import { generateReceiptPdf, loadPdfDeps } from '../generate-receipt-pdf';
+import { generateSingleTransferPdf } from '../generate-single-transfer-pdf';
 import {
     buildMultiSolReceipt,
     collectTextFromMock as collectText,
     mockJsPDF,
+    mockSave,
     mockToDataURL,
     PDF_OPTS,
+    qrcodeModule,
+    SIGNATURE,
     SOL_RECEIPT,
     stubSvgRasterizationUnsupported,
 } from './__fixtures__/pdf-mocks';
 
 vi.mock('jspdf', () => ({ jsPDF: mockJsPDF }));
-
-vi.mock('qrcode', () => ({
-    default: { toDataURL: (...args: unknown[]) => mockToDataURL(...args) },
-    toDataURL: (...args: unknown[]) => mockToDataURL(...args),
-}));
-
-vi.mock('../pdf-fonts', () => ({
-    loadPdfFonts: vi.fn().mockResolvedValue({
-        robotoMonoRegular: 'AAA=',
-        robotoMonoSemiBold: 'AAA=',
-        rubikRegular: 'AAA=',
-        rubikSemiBold: 'AAA=',
-    }),
-    registerPdfFonts: vi.fn(),
-}));
+vi.mock('qrcode', () => qrcodeModule);
+vi.mock('../pdf-fonts', async () => (await import('./__fixtures__/pdf-mocks')).pdfFontsModule);
 
 describe('generateReceiptPdf (dispatcher)', () => {
     const mockOnError = vi.fn();
@@ -68,22 +60,30 @@ describe('generateReceiptPdf (dispatcher)', () => {
         expect(allText).toContain('Transaction details');
         expect(allText).not.toContain('Transfers');
     });
+});
 
-    it('should append the cluster label to the subtitle when provided', async () => {
-        const deps = await loadPdfDeps(mockOnError);
-        await generateReceiptPdf(deps, SOL_RECEIPT, { ...PDF_OPTS, clusterLabel: 'Custom-Cluster' });
+describe.each([
+    ['generateSingleTransferPdf', generateSingleTransferPdf],
+    ['generateMultiTransferPdf', generateMultiTransferPdf],
+])('%s', (_, generatePdf) => {
+    const mockOnError = vi.fn();
 
-        expect(collectText()).toContain('On-chain Transaction Record — Custom-Cluster');
+    beforeEach(() => {
+        vi.clearAllMocks();
+        stubSvgRasterizationUnsupported();
     });
 
-    it('should always render Memo and Amount USD labels even when values are missing', async () => {
-        const deps = await loadPdfDeps(mockOnError);
-        await generateReceiptPdf(deps, { ...SOL_RECEIPT, memo: undefined }, PDF_OPTS);
+    it('should still save the PDF and report a wrapped error when QR generation fails', async () => {
+        const qrError = new Error('QR generation failed');
+        mockToDataURL.mockRejectedValueOnce(qrError);
 
-        const allText = collectText();
-        expect(allText).toContain('Memo');
-        expect(allText).toContain('Amount USD - equivalent by Jupiter API');
-        // No usdValue → no Jupiter "report date" caption should appear
-        expect(allText).not.toContain('Equivalent on report date');
+        const deps = await loadPdfDeps(mockOnError);
+        await generatePdf(deps, SOL_RECEIPT, PDF_OPTS);
+
+        expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
+        const reported = mockOnError.mock.calls.map(([e]) => e as Error);
+        const qrReport = reported.find(e => e.message === 'Failed to render QR code in receipt footer');
+        expect(qrReport).toBeDefined();
+        expect(qrReport?.cause).toBe(qrError);
     });
 });

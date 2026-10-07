@@ -3,12 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { searchProviders } from '../registry';
 
 describe('searchProviders registry', () => {
-    it('should contain all three tiers', () => {
-        expect(searchProviders).toHaveProperty('local');
-        expect(searchProviders).toHaveProperty('fallback');
-        expect(searchProviders).toHaveProperty('remote');
-    });
-
     it('should have at least one provider per tier', () => {
         expect(searchProviders.local.length).toBeGreaterThan(0);
         expect(searchProviders.fallback.length).toBeGreaterThan(0);

@@ -1,66 +1,38 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import { SystemProgram, TransactionMessage } from '@solana/web3.js';
+import { SystemProgram } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
-import { resolveAddressLookupTables } from '@/app/__tests__/mock-resolvers';
+import { renderWithProviders } from '@/app/__tests__/card-harness';
 import * as stubs from '@/app/__tests__/mock-stubs';
-import * as mock from '@/app/__tests__/mocks';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
+import { decompileStubInstruction } from '@/app/__tests__/mocks';
 
 import { BaseInstructionCard } from '../BaseInstructionCard';
 
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
+
 describe('BaseInstructionCard', () => {
-    test('should render "BaseInstructionCard"', async () => {
-        const index = 1;
-        const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const lookups = resolveAddressLookupTables(m.addressTableLookups);
-        const ti = TransactionMessage.decompile(m, {
-            addressLookupTableAccounts: lookups,
-        }).instructions[index];
-
-        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
-
-        // check that component is rendered properly
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <BaseInstructionCard ix={ti} index={index} title="Program: Instruction" result={{ err: null }} />
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-        // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
-        await waitFor(() => {
-            expect(screen.getByText(/Program: Instruction/)).toBeInTheDocument();
-        });
-    });
-
     test('should render "BaseInstructionCard" with raw data', async () => {
         const index = 1;
-        const m = mock.deserializeMessageV0(stubs.aTokenCreateIdempotentMsg);
-        const lookups = resolveAddressLookupTables(m.addressTableLookups);
-        const ti = TransactionMessage.decompile(m, {
-            addressLookupTableAccounts: lookups,
-        }).instructions[index];
-        expect(ti.programId.toBase58()).toBe(ASSOCIATED_TOKEN_PROGRAM_ADDRESS);
+        const { instruction } = decompileStubInstruction(stubs.aTokenCreateIdempotentMsg, index, {
+            programId: ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
+        });
 
-        // check that component is rendered properly
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <BaseInstructionCard
-                        ix={ti}
-                        index={index}
-                        title="Program: Instruction"
-                        result={{ err: null }}
-                        defaultRaw
-                    />
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
+        renderWithProviders(
+            <BaseInstructionCard
+                ix={instruction}
+                index={index}
+                title="Program: Instruction"
+                result={{ err: null }}
+                defaultRaw
+            />,
+            { transactions: false },
         );
+
+        expect(await screen.findByText(/Program: Instruction/)).toBeInTheDocument();
         // instruction should relate to specific program
-        expect(await screen.findAllByText(/Associated Token Program/)).toHaveLength(1);
+        expect(screen.getAllByText(/Associated Token Program/)).toHaveLength(1);
         // we expect specific internal component to be rendered with "defaultRaw"
         expect(screen.getByText('Instruction Data')).toBeInTheDocument();
     });
@@ -72,19 +44,16 @@ describe('BaseInstructionCard', () => {
             programId: SystemProgram.programId,
         };
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <BaseInstructionCard
-                        ix={parsedIx}
-                        index={0}
-                        title="System: Transfer"
-                        result={{ err: null }}
-                        defaultRaw
-                        rawUnavailable
-                    />
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
+        renderWithProviders(
+            <BaseInstructionCard
+                ix={parsedIx}
+                index={0}
+                title="System: Transfer"
+                result={{ err: null }}
+                defaultRaw
+                rawUnavailable
+            />,
+            { transactions: false },
         );
 
         expect(

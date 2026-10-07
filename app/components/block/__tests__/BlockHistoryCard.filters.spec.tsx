@@ -1,5 +1,6 @@
-import type { BlockData, BlockTransaction, BlockTransactionMeta } from '@entities/block-data';
-import { type Address, address, blockhash, lamports, type Signature } from '@solana/kit';
+import type { BlockData, BlockTransactionMeta } from '@entities/block-data';
+import { makeBlock, makeBlockTransaction } from '@entities/block-data/__fixtures__/block-builders';
+import { type Address, address, lamports, type Signature } from '@solana/kit';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -46,7 +47,7 @@ describe('BlockHistoryCard filters', () => {
     });
 
     it('should combine version, program, and account filters while preserving URL parameters', () => {
-        render(<BlockHistoryCard block={makeBlock()} epoch={500n} />);
+        render(<BlockHistoryCard block={makeMixedBlock()} epoch={500n} />);
 
         expect(screen.getAllByText('v0-program-a')).toHaveLength(2);
         expect(screen.queryAllByText('legacy-program-a')).toHaveLength(0);
@@ -70,7 +71,7 @@ describe('BlockHistoryCard filters', () => {
 
     it('should hide failed transactions when status=succeeded and offer a chip to clear it', () => {
         search = `filter=all&status=succeeded&cluster=devnet`;
-        render(<BlockHistoryCard block={makeBlock()} epoch={500n} />);
+        render(<BlockHistoryCard block={makeMixedBlock()} epoch={500n} />);
 
         expect(screen.getAllByText('v0-program-a')).toHaveLength(2);
         expect(screen.queryAllByText('failed-program-b')).toHaveLength(0);
@@ -89,7 +90,7 @@ describe('BlockHistoryCard filters', () => {
 
     it('should show the generic empty message when a status filter matches nothing', () => {
         search = 'status=failed';
-        render(<BlockHistoryCard block={makeBlock(false)} epoch={500n} />);
+        render(<BlockHistoryCard block={makeMixedBlock(false)} epoch={500n} />);
         expect(screen.getByText('No transactions found with this filter')).toBeInTheDocument();
     });
 
@@ -111,26 +112,19 @@ describe('BlockHistoryCard filters', () => {
 });
 
 function makeBlockWithUnavailable(): BlockData {
-    const block = makeBlock();
+    const block = makeMixedBlock();
     return { ...block, transactions: [...block.transactions, { index: block.transactions.length, unavailable: true }] };
 }
 
-function makeBlock(withFailed = true): BlockData {
-    return {
-        blockTime: null,
-        blockhash: blockhash('11111111111111111111111111111111'),
-        parentSlot: 122n,
-        previousBlockhash: blockhash('11111111111111111111111111111111'),
-        rewards: [],
-        transactions: [
-            makeTransaction(0, 'legacy-program-a', 'legacy', PROGRAM_A),
-            makeTransaction(1, 'v0-program-a', 0, PROGRAM_A),
-            makeTransaction(2, 'v0-program-b', 0, PROGRAM_B),
-            ...(withFailed
-                ? [makeTransaction(3, 'failed-program-b', 0, PROGRAM_B, { InstructionError: [0, { Custom: 1 }] })]
-                : []),
-        ],
-    };
+function makeMixedBlock(withFailed = true): BlockData {
+    return makeBlock([
+        makeTransaction(0, 'legacy-program-a', 'legacy', PROGRAM_A),
+        makeTransaction(1, 'v0-program-a', 0, PROGRAM_A),
+        makeTransaction(2, 'v0-program-b', 0, PROGRAM_B),
+        ...(withFailed
+            ? [makeTransaction(3, 'failed-program-b', 0, PROGRAM_B, { InstructionError: [0, { Custom: 1 }] })]
+            : []),
+    ]);
 }
 
 function makeTransaction(
@@ -140,23 +134,14 @@ function makeTransaction(
     program: string,
     err: BlockTransactionMeta['err'] = null,
 ) {
-    return {
+    return makeBlockTransaction({
         index,
         message: {
-            header: { numReadonlyNonSignerAccounts: 0, numReadonlySignerAccounts: 0, numSignerAccounts: 0 },
             instructions: [{ accountIndices: [1], data: new Uint8Array(), programAddressIndex: 0 }],
-            lifetimeToken: blockhash('11111111111111111111111111111111'),
             staticAccounts: [address(program), address(ACCOUNT)],
             version,
         },
-        meta: {
-            costUnits: 1n,
-            err,
-            fee: lamports(5_000n),
-            innerInstructions: [],
-            loadedAddresses: undefined,
-            logMessages: [],
-        },
+        meta: { costUnits: 1n, err, fee: lamports(5_000n), innerInstructions: [], loadedAddresses: undefined },
         signatures: [transactionSignature as Signature],
-    } satisfies BlockTransaction;
+    });
 }

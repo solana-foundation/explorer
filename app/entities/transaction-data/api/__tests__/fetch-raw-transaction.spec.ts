@@ -1,7 +1,8 @@
 import { gen } from '@__fixtures__/gen';
 import type * as SolanaKit from '@solana/kit';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
+import { stubRpcFetch } from '@/app/__tests__/rpc-fetch';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
 import {
@@ -19,30 +20,11 @@ vi.mock('@solana/kit', async () => await vi.importActual<typeof SolanaKit>('@sol
 const URL = 'https://mock.rpc';
 const SIGNATURE = gen.signature(1);
 
-const fetchMock = vi.fn();
-
-function respondWith(result: unknown) {
-    const body = JSON.stringify({ id: 1, jsonrpc: '2.0', result });
-    // kit reads the body as text so it can upcast integers to bigints as it parses.
-    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, text: async () => body });
-}
+const { fetchMock, respondWith, requestBody } = stubRpcFetch();
 
 function transactionResult(bytes: Uint8Array, meta: unknown = null, version: unknown = 1) {
     return { blockTime: 1_778_761_079, meta, slot: 372_654_321, transaction: [toBase64(bytes), 'base64'], version };
 }
-
-function requestBody() {
-    return JSON.parse(fetchMock.mock.calls[0][1].body);
-}
-
-beforeEach(() => {
-    vi.stubGlobal('fetch', fetchMock);
-});
-
-afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.clearAllMocks();
-});
 
 describe('fetchRawTransaction', () => {
     it('should ask for base64 bytes at the newest version Explorer renders', async () => {

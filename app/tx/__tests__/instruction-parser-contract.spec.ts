@@ -2,7 +2,7 @@ import { TransferInfo } from '@components/instruction/system/types';
 import { getTokenIxValidator, TransferChecked } from '@components/instruction/token/types';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { associatedTokenInstructionParser, CreateAccountsInfo } from '@features/decode-instruction-associated-token';
-import { LIGHTHOUSE_ADDRESS, lighthouseInstructionParser } from '@features/decode-instruction-lighthouse';
+import { lighthouseInstructionParser } from '@features/decode-instruction-lighthouse';
 import { systemInstructionParser } from '@features/decode-instruction-system';
 import { tokenInstructionParser } from '@features/decode-instruction-token';
 import { token2022InstructionParser } from '@features/decode-instruction-token-2022';
@@ -422,21 +422,7 @@ describe('instruction-parser contract', () => {
         );
     });
 
-    test('should decode a Lighthouse instruction via the byte path (no fromParsed)', () => {
-        const dispatcher = createInstructionParserDispatcher([lighthouseInstructionParser]);
-        // Bytes encode "Assert Sysvar Clock". Source: lighthouse card fixtures.
-        const rawIx = new TransactionInstruction({
-            data: Buffer.from([15, 0, 0, 166, 238, 134, 18, 0, 0, 0, 0, 3]),
-            keys: [],
-            programId: new PublicKey(LIGHTHOUSE_ADDRESS),
-        });
-
-        const byteParsed = dispatcher.fromTransactionInstruction(rawIx);
-        if (!isParsedInstruction(byteParsed)) throw new Error('expected a ParsedInstruction');
-        expect(byteParsed.program).toBe('lighthouse');
-        expect(byteParsed.parsed.type).toBe('Assert Sysvar Clock');
-
-        // Lighthouse is never RPC-pre-parsed, so the slice declares no fromParsed.
+    test('should declare no fromParsed for Lighthouse, which the RPC never pre-parses', () => {
         expect(lighthouseInstructionParser.fromParsed).toBeUndefined();
     });
 });

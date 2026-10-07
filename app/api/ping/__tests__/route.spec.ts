@@ -7,10 +7,6 @@ import { GET, ValidatorsAppPingStats } from '../[network]/route';
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
 
-vi.mock('@/app/shared/lib/logger', () => ({
-    Logger: { error: vi.fn(), panic: vi.fn(), warn: vi.fn() },
-}));
-
 const PING_INTERVALS = [1, 3, 12];
 
 describe('Ping API Route', () => {

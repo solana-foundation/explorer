@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax, no-restricted-globals -- test assertions use RegExp for pattern matching */
+import { gen } from '@__fixtures__/gen';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import { describe, vi } from 'vitest';
@@ -14,19 +14,6 @@ import { TokenExtension } from '@/app/validators/accounts/token-extension';
 import { TokenExtensionRow } from '../TokenAccountSection';
 
 vi.mock('next/navigation');
-vi.mock('@solana/kit', async () => {
-    const actual = await vi.importActual<typeof import('@solana/kit')>('@solana/kit');
-    const rpcMethod = () => ({ send: () => new Promise(() => {}) });
-    return {
-        ...actual,
-        createSolanaRpc: vi.fn(() => ({
-            getEpochInfo: rpcMethod,
-            getEpochSchedule: rpcMethod,
-            getFirstAvailableBlock: rpcMethod,
-            getGenesisHash: rpcMethod,
-        })),
-    };
-});
 // @ts-expect-error does not contain `mockReturnValue`
 useSearchParams.mockReturnValue({
     get: () => 'mainnet-beta',
@@ -39,20 +26,11 @@ describe('TokenExtensionRow', () => {
         const data = {
             extension: 'mintCloseAuthority',
             state: {
-                closeAuthority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                closeAuthority: gen.publicKey(1),
             },
         } as TokenExtension;
 
-        // check that component is rendered properly
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data);
 
         expect(await screen.findByText(/Close Authority/)).toBeInTheDocument();
         expect(screen.queryAllByText(new RegExp(`${data.state.closeAuthority.toString()}`))).toHaveLength(1);
@@ -66,32 +44,14 @@ describe('TokenExtensionRow', () => {
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, 'TEST')}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data, { symbol: 'TEST' });
 
         expect(await screen.findByText(/Withheld Amount \(TEST\)/)).toBeInTheDocument();
         expect(screen.getByText('1')).toBeInTheDocument();
     });
 
     test('should render transferFeeConfig extension', async () => {
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>
-                            {TokenExtensionRow(mockExtensions.transferFeeConfig0, 150n, 6, 'TEST')}
-                        </TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(mockExtensions.transferFeeConfig0, { epoch: 150n, symbol: 'TEST' });
 
         expect(await screen.findByText('Transfer Fee Config')).toBeInTheDocument();
         expect(screen.getByText(/Transfer Fee Authority/)).toBeInTheDocument();
@@ -111,20 +71,12 @@ describe('TokenExtensionRow', () => {
             extension: 'confidentialTransferMint',
             state: {
                 auditorElgamalPubkey: 'test-pubkey',
-                authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                authority: gen.publicKey(1),
                 autoApproveNewAccounts: true,
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data);
 
         expect(await screen.findByText('Confidential Transfer Mint')).toBeInTheDocument();
         expect(screen.getByText(/Authority/)).toBeInTheDocument();
@@ -137,22 +89,14 @@ describe('TokenExtensionRow', () => {
         const data = {
             extension: 'confidentialTransferFeeConfig',
             state: {
-                authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                authority: gen.publicKey(1),
                 harvestToMintEnabled: true,
                 withdrawWithheldAuthorityElgamalPubkey: 'test-pubkey',
                 withheldAmount: '1000',
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, 'TEST')}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data, { symbol: 'TEST' });
 
         expect(await screen.findByText('Confidential Transfer Fee')).toBeInTheDocument();
         expect(screen.getByText(/Authority/)).toBeInTheDocument();
@@ -162,46 +106,47 @@ describe('TokenExtensionRow', () => {
         expect(screen.getByText('1000')).toBeInTheDocument();
     });
 
-    test('should render defaultAccountState extension', async () => {
-        const data = {
-            extension: 'defaultAccountState',
-            state: {
-                accountState: 'frozen',
-            },
-        } as TokenExtension;
+    test.each<[TokenExtension['extension'], TokenExtension['state'], string, string]>([
+        ['defaultAccountState', { accountState: 'frozen' }, 'DefaultAccountState', 'frozen'],
+        ['nonTransferable', {}, 'Non-Transferable', 'enabled'],
+        ['pausableAccount', {}, 'Pausable Account', 'enabled'],
+        ['pausableConfig', { authority: gen.publicKey(1), paused: true }, 'Pausable Config', 'paused'],
+        [
+            'transferHook',
+            { authority: gen.publicKey(2), programId: gen.publicKey(1) },
+            'Transfer Hook Program Id',
+            'Transfer Hook Authority',
+        ],
+        [
+            'metadataPointer',
+            { authority: gen.publicKey(2), metadataAddress: gen.publicKey(1) },
+            'Metadata',
+            'Metadata Pointer Authority',
+        ],
+        [
+            'groupPointer',
+            { authority: gen.publicKey(2), groupAddress: gen.publicKey(1) },
+            'Token Group',
+            'Group Pointer Authority',
+        ],
+        [
+            'groupMemberPointer',
+            { authority: gen.publicKey(2), memberAddress: gen.publicKey(1) },
+            'Token Group Member',
+            'Member Pointer Authority',
+        ],
+        ['cpiGuard', { lockCpi: true }, 'CPI Guard', 'enabled'],
+        ['immutableOwner', {}, 'Immutable Owner', 'enabled'],
+        ['memoTransfer', { requireIncomingTransferMemos: true }, 'Require Memo on Incoming Transfers', 'enabled'],
+        ['transferHookAccount', { transferring: true }, 'Transfer Hook Status', 'transferring'],
+        ['nonTransferableAccount', {}, 'Non-Transferable', 'enabled'],
+        ['tokenGroupMember', { group: gen.publicKey(2), memberNumber: 1, mint: gen.publicKey(1) }, 'Group Member', '1'],
+        ['unparseableExtension', {}, 'Unknown Extension', 'unparseable'],
+    ])('should render %s extension', async (extension, state, title, value) => {
+        renderRow({ extension, state });
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('DefaultAccountState')).toBeInTheDocument();
-        expect(screen.getByText('frozen')).toBeInTheDocument();
-    });
-
-    test('should render nonTransferable extension', async () => {
-        const data = {
-            extension: 'nonTransferable',
-            state: {},
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Non-Transferable')).toBeInTheDocument();
-        expect(screen.getByText('enabled')).toBeInTheDocument();
+        expect(await screen.findByText(title)).toBeInTheDocument();
+        expect(screen.getByText(value)).toBeInTheDocument();
     });
 
     test('should render interestBearingConfig extension', async () => {
@@ -212,19 +157,11 @@ describe('TokenExtensionRow', () => {
                 initializationTimestamp: 900000,
                 lastUpdateTimestamp: 1000000,
                 preUpdateAverageRate: 400,
-                rateAuthority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                rateAuthority: gen.publicKey(1),
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data);
 
         expect(await screen.findByText('Interest-Bearing')).toBeInTheDocument();
         expect(screen.getByText(/Authority/)).toBeInTheDocument();
@@ -236,88 +173,29 @@ describe('TokenExtensionRow', () => {
         const data = {
             extension: 'scaledUiAmountConfig',
             state: {
-                authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                authority: gen.publicKey(1),
                 multiplier: '2',
                 newMultiplier: '4.22',
                 newMultiplierEffectiveTimestamp: 1743000000, // 2025-03-26 10:40:00
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data);
 
         expect(await screen.findByText('Scaled UI Amount Config')).toBeInTheDocument();
         expect(screen.getByText('2')).toBeInTheDocument();
         expect(screen.getByText('4.22')).toBeInTheDocument();
     });
 
-    test('should render pausableAccount extension', async () => {
-        const data = {
-            extension: 'pausableAccount',
-            state: {},
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Pausable Account')).toBeInTheDocument();
-        expect(screen.getByText('enabled')).toBeInTheDocument();
-    });
-
-    test('should render pausableConfig extension', async () => {
-        const data = {
-            extension: 'pausableConfig',
-            state: {
-                authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-                paused: true,
-            },
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Pausable Config')).toBeInTheDocument();
-        expect(screen.getByText('paused')).toBeInTheDocument();
-    });
-
     test('should render permissionedBurnConfig extension', async () => {
         const data = {
             extension: 'permissionedBurnConfig',
             state: {
-                authority: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                authority: gen.publicKey(1),
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data);
 
         expect(await screen.findByText('Permissioned Burn Authority')).toBeInTheDocument();
         expect(screen.queryAllByText(new RegExp(`${data.state.authority.toString()}`))).toHaveLength(1);
@@ -331,15 +209,7 @@ describe('TokenExtensionRow', () => {
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data);
 
         expect(screen.queryByText('Permissioned Burn Authority')).not.toBeInTheDocument();
     });
@@ -348,114 +218,14 @@ describe('TokenExtensionRow', () => {
         const data = {
             extension: 'permanentDelegate',
             state: {
-                delegate: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                delegate: gen.publicKey(1),
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data);
 
         expect(await screen.findByText('Permanent Delegate')).toBeInTheDocument();
         expect(screen.queryAllByText(new RegExp(`${data.state.delegate.toString()}`))).toHaveLength(1);
-    });
-
-    test('should render transferHook extension', async () => {
-        const data = {
-            extension: 'transferHook',
-            state: {
-                authority: new PublicKey('3apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-                programId: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-            },
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Transfer Hook Program Id')).toBeInTheDocument();
-        expect(screen.getByText('Transfer Hook Authority')).toBeInTheDocument();
-    });
-
-    test('should render metadataPointer extension', async () => {
-        const data = {
-            extension: 'metadataPointer',
-            state: {
-                authority: new PublicKey('3apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-                metadataAddress: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-            },
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Metadata')).toBeInTheDocument();
-        expect(screen.getByText('Metadata Pointer Authority')).toBeInTheDocument();
-    });
-
-    test('should render groupPointer extension', async () => {
-        const data = {
-            extension: 'groupPointer',
-            state: {
-                authority: new PublicKey('3apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-                groupAddress: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-            },
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Token Group')).toBeInTheDocument();
-        expect(screen.getByText('Group Pointer Authority')).toBeInTheDocument();
-    });
-
-    test('should render groupMemberPointer extension', async () => {
-        const data = {
-            extension: 'groupMemberPointer',
-            state: {
-                authority: new PublicKey('3apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-                memberAddress: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-            },
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Token Group Member')).toBeInTheDocument();
-        expect(screen.getByText('Member Pointer Authority')).toBeInTheDocument();
     });
 
     test('should render tokenMetadata extension', async () => {
@@ -463,23 +233,15 @@ describe('TokenExtensionRow', () => {
             extension: 'tokenMetadata',
             state: {
                 additionalMetadata: [['key', 'value']],
-                mint: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                mint: gen.publicKey(1),
                 name: 'Test Token',
                 symbol: 'TEST',
-                updateAuthority: new PublicKey('3apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                updateAuthority: gen.publicKey(2),
                 uri: 'https://test.com',
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data);
 
         expect(await screen.findByText('Metadata')).toBeInTheDocument();
         expect(screen.getByText('Test Token')).toBeInTheDocument();
@@ -488,28 +250,6 @@ describe('TokenExtensionRow', () => {
         expect(screen.getByText('Additional Metadata')).toBeInTheDocument();
         expect(screen.getByText('key')).toBeInTheDocument();
         expect(screen.getByText('value')).toBeInTheDocument();
-    });
-
-    test('should render cpiGuard extension', async () => {
-        const data = {
-            extension: 'cpiGuard',
-            state: {
-                lockCpi: true,
-            },
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('CPI Guard')).toBeInTheDocument();
-        expect(screen.getByText('enabled')).toBeInTheDocument();
     });
 
     test('should render confidentialTransferAccount extension', async () => {
@@ -531,15 +271,7 @@ describe('TokenExtensionRow', () => {
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data);
 
         expect(await screen.findByText('Confidential Transfer Account')).toBeInTheDocument();
         expect(screen.getByText('approved')).toBeInTheDocument();
@@ -561,90 +293,6 @@ describe('TokenExtensionRow', () => {
         expect(maxCounterElement.closest('tr')).toHaveTextContent('10');
     });
 
-    test('should render immutableOwner extension', async () => {
-        const data = {
-            extension: 'immutableOwner',
-            state: {},
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Immutable Owner')).toBeInTheDocument();
-        expect(screen.getByText('enabled')).toBeInTheDocument();
-    });
-
-    test('should render memoTransfer extension', async () => {
-        const data = {
-            extension: 'memoTransfer',
-            state: {
-                requireIncomingTransferMemos: true,
-            },
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Require Memo on Incoming Transfers')).toBeInTheDocument();
-        expect(screen.getByText('enabled')).toBeInTheDocument();
-    });
-
-    test('should render transferHookAccount extension', async () => {
-        const data = {
-            extension: 'transferHookAccount',
-            state: {
-                transferring: true,
-            },
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Transfer Hook Status')).toBeInTheDocument();
-        expect(screen.getByText('transferring')).toBeInTheDocument();
-    });
-
-    test('should render nonTransferableAccount extension', async () => {
-        const data = {
-            extension: 'nonTransferableAccount',
-            state: {},
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Non-Transferable')).toBeInTheDocument();
-        expect(screen.getByText('enabled')).toBeInTheDocument();
-    });
-
     test('should render confidentialTransferFeeAmount extension', async () => {
         const data = {
             extension: 'confidentialTransferFeeAmount',
@@ -653,15 +301,7 @@ describe('TokenExtensionRow', () => {
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, 'TEST')}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data, { symbol: 'TEST' });
 
         expect(await screen.findByText(/Encrypted Withheld Amount \(TEST\)/)).toBeInTheDocument();
         expect(screen.getByText('1000')).toBeInTheDocument();
@@ -672,68 +312,28 @@ describe('TokenExtensionRow', () => {
             extension: 'tokenGroup',
             state: {
                 maxSize: 100,
-                mint: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                mint: gen.publicKey(1),
                 size: 10,
-                updateAuthority: new PublicKey('3apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
+                updateAuthority: gen.publicKey(2),
             },
         } as TokenExtension;
 
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
+        renderRow(data);
 
         expect(await screen.findByText('Group')).toBeInTheDocument();
         expect(screen.getByText('10')).toBeInTheDocument();
         expect(screen.getByText('100')).toBeInTheDocument();
     });
-
-    test('should render tokenGroupMember extension', async () => {
-        const data = {
-            extension: 'tokenGroupMember',
-            state: {
-                group: new PublicKey('3apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-                memberNumber: 1,
-                mint: new PublicKey('2apBGMsS6ti9RyF5TwQTDswXBWskiJP2LD4cUEDqYJjk'),
-            },
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Group Member')).toBeInTheDocument();
-        expect(screen.getByText('1')).toBeInTheDocument();
-    });
-
-    test('should render unparseableExtension extension', async () => {
-        const data = {
-            extension: 'unparseableExtension',
-            state: {},
-        } as TokenExtension;
-
-        render(
-            <ScrollAnchorProvider>
-                <ClusterProvider>
-                    <AccountsProvider>
-                        <TableCardBody>{TokenExtensionRow(data, undefined, 6, undefined)}</TableCardBody>
-                    </AccountsProvider>
-                </ClusterProvider>
-            </ScrollAnchorProvider>,
-        );
-
-        expect(await screen.findByText('Unknown Extension')).toBeInTheDocument();
-        expect(screen.getByText('unparseable')).toBeInTheDocument();
-    });
 });
+
+function renderRow(data: TokenExtension, { epoch, symbol }: { epoch?: bigint; symbol?: string } = {}) {
+    render(
+        <ScrollAnchorProvider>
+            <ClusterProvider>
+                <AccountsProvider>
+                    <TableCardBody>{TokenExtensionRow(data, epoch, 6, symbol)}</TableCardBody>
+                </AccountsProvider>
+            </ClusterProvider>
+        </ScrollAnchorProvider>,
+    );
+}

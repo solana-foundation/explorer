@@ -8,16 +8,12 @@ import type { DashboardInfo } from '@providers/stats/solanaDashboardInfo';
 import type { PerformanceInfo } from '@providers/stats/solanaPerformanceInfo';
 import type { ReactNode } from 'react';
 
+import { defaultEpochInfo } from './MockClusterProvider';
+
 const defaultDashboard: DashboardInfo = {
     msPerSlot_1h: 420,
     msPerSlot_1min: 400,
-    epochInfo: {
-        absoluteSlot: 312_456_789n,
-        blockHeight: 295_456_321n,
-        epoch: 520n,
-        slotIndex: 156_789n,
-        slotsInEpoch: 432_000n,
-    },
+    epochInfo: defaultEpochInfo,
     status: ClusterStatsStatus.Ready,
 };
 

@@ -1,12 +1,16 @@
+// @vitest-environment jsdom
+
 import type { Connection } from '@solana/web3.js';
-import { Keypair, PublicKey, SendTransactionError, Transaction, TransactionInstruction } from '@solana/web3.js';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { Keypair, PublicKey, SendTransactionError } from '@solana/web3.js';
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { waitForHook } from '@/app/__tests__/swr-hook';
 import { useWallet } from '@/app/providers/wallet/use-wallet';
 
 import type { BroadcastFailedResult, ExecutionOkResult, PreBroadcastFailedResult } from '../types';
 import { useExecuteTransaction } from '../use-execute-transaction';
+import { makeTx } from './utils';
 
 vi.mock('@/app/providers/wallet/use-wallet');
 vi.mock('@/app/providers/cluster', () => ({
@@ -26,19 +30,6 @@ function mockConnection(overrides: Partial<Connection> = {}) {
         simulateTransaction: vi.fn().mockResolvedValue({ context: { slot: 1 }, value: { err: null, logs: ['s'] } }),
         ...overrides,
     } as unknown as Connection;
-}
-
-function makeTx(): Transaction {
-    const tx = new Transaction();
-    tx.feePayer = PK;
-    tx.add(
-        new TransactionInstruction({
-            data: Buffer.from([]),
-            keys: [],
-            programId: PublicKey.default,
-        }),
-    );
-    return tx;
 }
 
 function mockWallet(connected = true) {
@@ -69,7 +60,7 @@ describe('useExecuteTransaction', () => {
         await act(async () => {
             await result.current.executeTx(async () => makeTx());
         });
-        await waitFor(() => expect(result.current.lastResult?.status).toBe('success'));
+        await waitForHook(() => expect(result.current.lastResult?.status).toBe('success'));
         expect((result.current.lastResult as ExecutionOkResult).signature).toBe('sig123');
         expect(result.current.lastResult?.logs.raw).toEqual(['final-log']);
         expect(onSuccess).toHaveBeenCalledWith('sig123');
@@ -92,7 +83,7 @@ describe('useExecuteTransaction', () => {
         await act(async () => {
             await result.current.executeTx(async () => makeTx());
         });
-        await waitFor(() => expect(result.current.lastResult?.status).toBe('error'));
+        await waitForHook(() => expect(result.current.lastResult?.status).toBe('error'));
         expect(result.current.lastResult?.logs.raw).toEqual(['failed-log']);
         expect((result.current.lastResult as BroadcastFailedResult).message).toContain(
             'Instruction #1 got "AlreadyInitialized"',
@@ -113,7 +104,7 @@ describe('useExecuteTransaction', () => {
         await act(async () => {
             await result.current.executeTx(async () => makeTx());
         });
-        await waitFor(() => expect(result.current.lastResult?.status).toBe('error'));
+        await waitForHook(() => expect(result.current.lastResult?.status).toBe('error'));
         const r = result.current.lastResult as PreBroadcastFailedResult;
         expect(r.phase).toBe('pre_broadcast_failed');
         expect(r.message).toBe('Wallet not connected');
@@ -135,7 +126,7 @@ describe('useExecuteTransaction', () => {
         await act(async () => {
             await result.current.executeTx(async () => makeTx());
         });
-        await waitFor(() => expect(result.current.lastResult?.status).toBe('error'));
+        await waitForHook(() => expect(result.current.lastResult?.status).toBe('error'));
         const r = result.current.lastResult as BroadcastFailedResult;
         expect(r.phase).toBe('broadcast_failed');
         expect(r.signature).toBe('sig123');
@@ -156,7 +147,7 @@ describe('useExecuteTransaction', () => {
                 throw new Error('UnexpectedError');
             });
         });
-        await waitFor(() => expect(result.current.lastResult?.status).toBe('error'));
+        await waitForHook(() => expect(result.current.lastResult?.status).toBe('error'));
         expect((result.current.lastResult as PreBroadcastFailedResult).message).toBe('UnexpectedError');
         expect(result.current.isExecuting).toBe(false);
         expect(onError).toHaveBeenCalledWith('UnexpectedError', undefined);
@@ -193,7 +184,7 @@ describe('useExecuteTransaction', () => {
             await result.current.executeTx(async () => makeTx());
         });
 
-        await waitFor(() => expect(result.current.lastResult?.status).toBe('error'));
+        await waitForHook(() => expect(result.current.lastResult?.status).toBe('error'));
         const r = result.current.lastResult as PreBroadcastFailedResult;
         expect(r.phase).toBe('pre_broadcast_failed');
         expect(r.logs.raw).toEqual(preflightLogs);
@@ -217,7 +208,7 @@ describe('useExecuteTransaction', () => {
         await act(async () => {
             await result.current.executeTx(async () => makeTx());
         });
-        await waitFor(() => expect(result.current.lastResult?.status).toBe('error'));
+        await waitForHook(() => expect(result.current.lastResult?.status).toBe('error'));
         const r = result.current.lastResult as BroadcastFailedResult;
         expect(r.phase).toBe('broadcast_failed');
         expect(r.signature).toBe('sig123');
@@ -225,27 +216,16 @@ describe('useExecuteTransaction', () => {
         expect(r.serializedTxMessage.length).toBeGreaterThan(0);
     });
 
-    it('should send with skipPreflight true by default (simulation disabled)', async () => {
+    it.each([
+        ['true by default (simulation disabled)', undefined, true],
+        ['false when the simulate option is true', { simulate: true }, false],
+    ])('should send with skipPreflight %s', async (_, options, skipPreflight) => {
         const connection = mockConnection();
         const { result } = renderHook(() => useExecuteTransaction({ commitment: 'confirmed', connection }));
         await act(async () => {
-            await result.current.executeTx(async () => makeTx());
+            await result.current.executeTx(async () => makeTx(), options);
         });
-        await waitFor(() => expect(result.current.lastResult?.status).toBe('success'));
-        expect(connection.sendRawTransaction).toHaveBeenCalledWith(expect.anything(), {
-            skipPreflight: true,
-        });
-    });
-
-    it('should send with skipPreflight false when the simulate option is true', async () => {
-        const connection = mockConnection();
-        const { result } = renderHook(() => useExecuteTransaction({ commitment: 'confirmed', connection }));
-        await act(async () => {
-            await result.current.executeTx(async () => makeTx(), { simulate: true });
-        });
-        await waitFor(() => expect(result.current.lastResult?.status).toBe('success'));
-        expect(connection.sendRawTransaction).toHaveBeenCalledWith(expect.anything(), {
-            skipPreflight: false,
-        });
+        await waitForHook(() => expect(result.current.lastResult?.status).toBe('success'));
+        expect(connection.sendRawTransaction).toHaveBeenCalledWith(expect.anything(), { skipPreflight });
     });
 });

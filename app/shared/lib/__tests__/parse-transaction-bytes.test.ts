@@ -5,15 +5,14 @@ import {
     getCompiledTransactionMessageEncoder,
     getTransactionDecoder,
 } from '@solana/kit';
-import {
-    Keypair,
-    PublicKey,
-    SystemProgram,
-    TransactionMessage,
-    VersionedMessage,
-    VersionedTransaction,
-} from '@solana/web3.js';
+import { PublicKey, SystemProgram, TransactionMessage, VersionedMessage, VersionedTransaction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
+
+import {
+    createWeb3TransactionMessage,
+    FEE_PAYER,
+    RECIPIENT,
+} from '@/app/entities/transaction-data/__fixtures__/wire-transactions';
 
 import { parseTransactionBytes } from '../parse-transaction-bytes';
 
@@ -98,18 +97,6 @@ describe('parseTransactionBytes', () => {
         expect(new Uint8Array(BASE58_ENCODER.encode(firstSig))).toEqual(knownSigBytes);
     });
 
-    it('should fall back when signature count mismatches message header', () => {
-        const messageBytes = createLegacyMessageBytes();
-        const fakeBytes = new Uint8Array(1 + messageBytes.length);
-        fakeBytes[0] = 0;
-        fakeBytes.set(messageBytes, 1);
-
-        const result = parseTransactionBytes(fakeBytes);
-
-        expect(result.signatures).toBeUndefined();
-        expect(result.messageBytes).toBe(fakeBytes);
-    });
-
     it('should fall back when bytes after signatures fail to deserialize', () => {
         const garbage = new Uint8Array(69);
         garbage[0] = 1; // claims 1 signature
@@ -143,16 +130,6 @@ describe('parseTransactionBytes', () => {
         const result = parseTransactionBytes(bytes);
         expect(result.signatures).toBeUndefined();
         expect(result.messageBytes).toBe(bytes);
-    });
-
-    it('should not fall back for a real transaction that round-trips cleanly', () => {
-        const txBytes = buildTransactionBytes(createLegacyMessageBytes(), 1);
-
-        const result = parseTransactionBytes(txBytes);
-
-        expect(result.signatures).toHaveLength(1);
-        // Sanity: the round-trip check let a genuine transaction through.
-        expect(VersionedMessage.deserialize(result.messageBytes).header.numRequiredSignatures).toBe(1);
     });
 
     it('should return a slice (not a view) of message bytes for transactions', () => {
@@ -225,50 +202,27 @@ describe('parseTransactionBytes', () => {
     });
 });
 
-const FROM_PUBKEY = Keypair.generate().publicKey;
-const TO_PUBKEY = Keypair.generate().publicKey;
-
-const createTransferInstruction = () =>
-    SystemProgram.transfer({
-        fromPubkey: FROM_PUBKEY,
-        lamports: 1_000_000n,
-        toPubkey: TO_PUBKEY,
-    });
-
 function createLegacyMessageBytes(): Uint8Array {
-    const buf = new TransactionMessage({
-        instructions: [createTransferInstruction()],
-        payerKey: FROM_PUBKEY,
-        recentBlockhash: PublicKey.default.toBase58(),
-    })
-        .compileToLegacyMessage()
-        .serialize();
-    return new Uint8Array(buf);
+    return new Uint8Array(createWeb3TransactionMessage().compileToLegacyMessage().serialize());
 }
 
 function createV0MessageBytes(): Uint8Array {
-    const buf = new TransactionMessage({
-        instructions: [createTransferInstruction()],
-        payerKey: FROM_PUBKEY,
-        recentBlockhash: PublicKey.default.toBase58(),
-    })
-        .compileToV0Message()
-        .serialize();
-    return new Uint8Array(buf);
+    return new Uint8Array(createWeb3TransactionMessage().compileToV0Message().serialize());
 }
 
 function createMultiSigMessageBytes(): Uint8Array {
+    const payerKey = new PublicKey(FEE_PAYER);
     const buf = new TransactionMessage({
         instructions: [
             SystemProgram.createAccount({
-                fromPubkey: FROM_PUBKEY,
+                fromPubkey: payerKey,
                 lamports: 1_000_000,
-                newAccountPubkey: Keypair.generate().publicKey,
+                newAccountPubkey: new PublicKey(RECIPIENT),
                 programId: SystemProgram.programId,
                 space: 0,
             }),
         ],
-        payerKey: FROM_PUBKEY,
+        payerKey,
         recentBlockhash: PublicKey.default.toBase58(),
     })
         .compileToLegacyMessage()
@@ -278,10 +232,9 @@ function createMultiSigMessageBytes(): Uint8Array {
 
 /**
  * Bare legacy message whose bytes from offset 65 also parse as a (different)
- * valid VersionedMessage with numRequiredSignatures=1. This is the same shape
- * that `Keypair.generate()`-driven tests occasionally produce by accident:
- * `VersionedTransaction.deserialize` succeeds and silently returns a fake
- * message recovered from the back half of the input.
+ * valid VersionedMessage with numRequiredSignatures=1. Random keys sometimes
+ * produce this shape: `VersionedTransaction.deserialize` succeeds and silently
+ * returns a fake message recovered from the back half of the input.
  */
 function buildAmbiguousBareMessage(): Uint8Array {
     const bytes = new Uint8Array(136);

@@ -3,94 +3,47 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TokenExtension } from '../../validators/accounts/token-extension';
 import { getCurrentTokenScaledUiAmountMultiplier } from '../token-info';
 
-describe('getCurrentTokenScaledUiAmountMultiplier', () => {
-    let originalDateNow: () => number;
+const NOW_SECONDS = 1711486400; // March 27, 2024 00:00:00 UTC
 
+describe('getCurrentTokenScaledUiAmountMultiplier', () => {
     beforeEach(() => {
-        // Store the original Date.now
-        originalDateNow = Date.now;
+        vi.setSystemTime(NOW_SECONDS * 1000);
     });
 
     afterEach(() => {
-        // Restore the original Date.now after each test
-        Date.now = originalDateNow;
+        vi.useRealTimers();
     });
 
-    it('should return 1 when no extensions are provided', () => {
-        const result = getCurrentTokenScaledUiAmountMultiplier(undefined);
-        expect(result).toBe('1');
+    it.each<{ description: string; extensions: TokenExtension[] | undefined }>([
+        { description: 'no extensions are provided', extensions: undefined },
+        { description: 'extensions array is empty', extensions: [] },
+        {
+            description: 'extensions do not include scaledUiAmountConfig',
+            extensions: [{ extension: 'transferFeeConfig', state: {} }],
+        },
+    ])('should return 1 when $description', ({ extensions }) => {
+        expect(getCurrentTokenScaledUiAmountMultiplier(extensions)).toBe('1');
     });
 
-    it('should return 1 when extensions array is empty', () => {
-        const result = getCurrentTokenScaledUiAmountMultiplier([]);
-        expect(result).toBe('1');
-    });
-
-    it('should return 1 when extensions do not include scaledUiAmountConfig', () => {
-        const extensions: TokenExtension[] = [
-            {
-                extension: 'transferFeeConfig',
-                state: {},
-            },
-        ];
-        const result = getCurrentTokenScaledUiAmountMultiplier(extensions);
-        expect(result).toBe('1');
-    });
-
-    it('should return current multiplier when current time is before effective timestamp', () => {
-        const now = 1711486400000; // March 27, 2024 00:00:00 UTC
-        Date.now = vi.fn(() => now);
-
-        const extensions: TokenExtension[] = [
-            {
-                extension: 'scaledUiAmountConfig',
-                state: {
-                    multiplier: '1',
-                    newMultiplier: '2',
-                    newMultiplierEffectiveTimestamp: Math.floor(now / 1000) + 3600, // 1 hour in the future
+    it.each([
+        { expected: '1', moment: 'before', offsetSeconds: 3600 },
+        { expected: '2', moment: 'after', offsetSeconds: -3600 },
+        { expected: '2', moment: 'at', offsetSeconds: 0 },
+    ])(
+        'should return multiplier $expected when current time is $moment effective timestamp',
+        ({ expected, offsetSeconds }) => {
+            const extensions: TokenExtension[] = [
+                {
+                    extension: 'scaledUiAmountConfig',
+                    state: {
+                        multiplier: '1',
+                        newMultiplier: '2',
+                        newMultiplierEffectiveTimestamp: NOW_SECONDS + offsetSeconds,
+                    },
                 },
-            },
-        ];
+            ];
 
-        const result = getCurrentTokenScaledUiAmountMultiplier(extensions);
-        expect(result).toBe('1');
-    });
-
-    it('should return new multiplier when current time is after effective timestamp', () => {
-        const now = 1711486400000; // March 27, 2024 00:00:00 UTC
-        Date.now = vi.fn(() => now);
-
-        const extensions: TokenExtension[] = [
-            {
-                extension: 'scaledUiAmountConfig',
-                state: {
-                    multiplier: '1',
-                    newMultiplier: '2',
-                    newMultiplierEffectiveTimestamp: Math.floor(now / 1000) - 3600, // 1 hour in the past
-                },
-            },
-        ];
-
-        const result = getCurrentTokenScaledUiAmountMultiplier(extensions);
-        expect(result).toBe('2');
-    });
-
-    it('should return new multiplier when current time equals effective timestamp', () => {
-        const now = 1711486400000; // March 27, 2024 00:00:00 UTC
-        Date.now = vi.fn(() => now);
-
-        const extensions: TokenExtension[] = [
-            {
-                extension: 'scaledUiAmountConfig',
-                state: {
-                    multiplier: '1',
-                    newMultiplier: '2',
-                    newMultiplierEffectiveTimestamp: Math.floor(now / 1000), // exactly now
-                },
-            },
-        ];
-
-        const result = getCurrentTokenScaledUiAmountMultiplier(extensions);
-        expect(result).toBe('2');
-    });
+            expect(getCurrentTokenScaledUiAmountMultiplier(extensions)).toBe(expected);
+        },
+    );
 });

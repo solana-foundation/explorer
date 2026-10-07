@@ -1,5 +1,5 @@
-import type { BlockData, BlockTransaction } from '@entities/block-data/@x/compute-unit';
-import { address, blockhash, lamports } from '@solana/kit';
+import { makeBlock, makeBlockTransaction } from '@entities/block-data/__fixtures__/block-builders';
+import { address } from '@solana/kit';
 import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '@solana-program/compute-budget';
 import { Cluster } from '@utils/cluster';
 
@@ -24,37 +24,14 @@ function mockTransaction({
     const data = alloc(5);
     data[0] = 2; // SetComputeUnitLimit instruction type
     writeUint32LE(data, requestedUnits, 1);
-    return {
-        index: 0,
+    return makeBlockTransaction({
         message: {
-            header: { numReadonlyNonSignerAccounts: 0, numReadonlySignerAccounts: 0, numSignerAccounts: 0 },
             instructions: [{ data, programAddressIndex: 0 }],
-            lifetimeToken: blockhash('11111111111111111111111111111111'),
             staticAccounts: [address(COMPUTE_BUDGET_PROGRAM_ADDRESS)],
             version: 'legacy',
         },
-        meta: hasMeta
-            ? {
-                  computeUnitsConsumed: BigInt(consumed),
-                  costUnits: BigInt(cost),
-                  err: null,
-                  fee: lamports(0n),
-                  logMessages: [],
-              }
-            : null,
-        signatures: [],
-    } satisfies BlockTransaction;
-}
-
-function mockBlock(transactions: BlockData['transactions']): BlockData {
-    return {
-        blockTime: null,
-        blockhash: blockhash('11111111111111111111111111111111'),
-        parentSlot: 0n,
-        previousBlockhash: blockhash('11111111111111111111111111111111'),
-        rewards: [],
-        transactions,
-    };
+        meta: hasMeta ? { computeUnitsConsumed: BigInt(consumed), costUnits: BigInt(cost) } : null,
+    });
 }
 
 const EPOCH = 1000n;
@@ -62,7 +39,7 @@ const CLUSTER = Cluster.MainnetBeta;
 
 describe('summarizeBlockComputeUnits', () => {
     it('should sum consumed, requested and cost units across the block', () => {
-        const block = mockBlock([
+        const block = makeBlock([
             mockTransaction({ consumed: 90_000, cost: 80_000, requestedUnits: 100_000 }),
             mockTransaction({ consumed: 40_000, cost: 30_000, requestedUnits: 50_000 }),
         ]);
@@ -77,7 +54,7 @@ describe('summarizeBlockComputeUnits', () => {
     });
 
     it('should treat a transaction with null meta as zero consumed/cost while still counting requested units', () => {
-        const block = mockBlock([
+        const block = makeBlock([
             mockTransaction({ consumed: 0, cost: 0, hasMeta: false, requestedUnits: 100_000 }),
             mockTransaction({ consumed: 25_000, cost: 20_000, requestedUnits: 30_000 }),
         ]);
@@ -92,7 +69,7 @@ describe('summarizeBlockComputeUnits', () => {
     });
 
     it('should return zeroed totals (plus the block ceiling) for an empty block', () => {
-        expect(summarizeBlockComputeUnits({ block: mockBlock([]), cluster: CLUSTER, epoch: EPOCH })).toEqual({
+        expect(summarizeBlockComputeUnits({ block: makeBlock([]), cluster: CLUSTER, epoch: EPOCH })).toEqual({
             consumed: 0n,
             cost: 0n,
             incomplete: false,
@@ -102,7 +79,7 @@ describe('summarizeBlockComputeUnits', () => {
     });
 
     it('should mark readable-transaction totals as incomplete when any transaction is unavailable', () => {
-        const block = mockBlock([
+        const block = makeBlock([
             mockTransaction({ consumed: 90_000, cost: 80_000, requestedUnits: 100_000 }),
             { index: 1, unavailable: true },
         ]);

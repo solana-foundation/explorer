@@ -11,15 +11,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { InstructionStatus } from '../../model/use-instruction';
 import { InteractInstruction } from '../InteractInstruction';
 
-// jsdom doesn't implement ResizeObserver, which Radix Tooltip relies on once focused.
-if (typeof globalThis.ResizeObserver === 'undefined') {
-    globalThis.ResizeObserver = class {
-        observe() {}
-        unobserve() {}
-        disconnect() {}
-    } as unknown as typeof ResizeObserver;
-}
-
 const walletMock = vi.hoisted(() => ({ canSign: false, publicKey: null as PublicKey | null }));
 
 // Mock wallet state
@@ -69,157 +60,27 @@ describe('InteractInstruction', () => {
     };
 
     describe('Arguments prefilling', () => {
-        it('should prefill ArgumentInput with default value for bool type', () => {
-            const instruction = createInstruction({
-                args: [createArgField({ name: 'isActive', rawType: 'bool', type: 'bool' })],
-            });
-
-            renderInteractInstruction(instruction);
-
-            const input = screen.getByRole('textbox', { name: /isActive/i });
-            expect(input).toHaveValue('false');
-        });
-
-        it('should prefill ArgumentInput with default value for string type', () => {
-            const instruction = createInstruction({
-                args: [createArgField({ name: 'message', rawType: 'string', type: 'string' })],
-            });
-
-            renderInteractInstruction(instruction);
-
-            const input = screen.getByRole('textbox', { name: /message/i });
-            expect(input).toHaveValue('default');
-        });
-
-        it('should prefill ArgumentInput with default value for pubkey type', () => {
-            const instruction = createInstruction({
-                args: [createArgField({ name: 'owner', type: 'pubkey' })],
-            });
-
-            renderInteractInstruction(instruction);
-
-            const expectedValue = PublicKey.default.toString();
-            const input = screen.getByRole('textbox', { name: /owner/i });
-            expect(input).toHaveValue(expectedValue);
-        });
-
-        it('should prefill ArgumentInput with default value for f32 type', () => {
-            const instruction = createInstruction({
-                args: [createArgField({ name: 'price', type: 'f32' })],
-            });
-
-            renderInteractInstruction(instruction);
-
-            const input = screen.getByRole('textbox', { name: /price/i });
-            expect(input).toHaveValue('1.0');
-        });
-
-        it('should prefill ArgumentInput with default value for bytes type', () => {
-            const instruction = createInstruction({
-                args: [createArgField({ name: 'data', type: 'bytes' })],
-            });
-
-            renderInteractInstruction(instruction);
-
-            const input = screen.getByRole('textbox', { name: /data/i });
-            expect(input).toHaveValue('data');
-        });
-
         it('should prefill multiple ArgumentInputs with correct default values', () => {
             const instruction = createInstruction({
                 args: [
                     createArgField({ name: 'amount', type: 'u64' }),
                     createArgField({ name: 'isActive', type: 'bool' }),
                     createArgField({ name: 'owner', type: 'pubkey' }),
+                    createArgField({ name: 'optionalAmount', rawType: { option: 'u64' }, type: 'option(u64)' }),
                 ],
             });
 
             renderInteractInstruction(instruction);
 
-            const amountInput = screen.getByRole('textbox', { name: /amount/i });
+            const amountInput = screen.getByRole('textbox', { name: /^amount/i });
             const isActiveInput = screen.getByRole('textbox', { name: /isActive/i });
             const ownerInput = screen.getByRole('textbox', { name: /owner/i });
+            const optionalAmountInput = screen.getByRole('textbox', { name: /optionalAmount/i });
 
             expect(amountInput).toHaveValue('1');
             expect(isActiveInput).toHaveValue('false');
             expect(ownerInput).toHaveValue(PublicKey.default.toString());
-        });
-
-        it('should prefill ArgumentInput for wrapped types (option)', () => {
-            const instruction = createInstruction({
-                args: [createArgField({ name: 'optionalAmount', rawType: { option: 'u64' }, type: 'option(u64)' })],
-            });
-
-            renderInteractInstruction(instruction);
-
-            const input = screen.getByRole('textbox', { name: /optionalAmount/i });
-            // Should extract inner type u64 and use its default
-            expect(input).toHaveValue('1');
-        });
-
-        it('should prefill ArgumentInput for wrapped types (vec)', () => {
-            const instruction = createInstruction({
-                args: [createArgField({ name: 'amounts', rawType: { vec: 'u8' }, type: 'vec(u8)' })],
-            });
-
-            renderInteractInstruction(instruction);
-
-            const input = screen.getByRole('textbox', { name: /amounts/i });
-            // Should extract inner type u8 and use its default
-            expect(input).toHaveValue('1');
-        });
-
-        it('should prefill ArgumentInput for all numeric types', () => {
-            const numericTypes = ['u8', 'u16', 'u32', 'u64', 'u128', 'u256', 'i8', 'i16', 'i32', 'i64', 'i128', 'i256'];
-
-            numericTypes.forEach(type => {
-                const instruction = createInstruction({
-                    args: [createArgField({ name: `value_${type}`, type })],
-                });
-
-                const { unmount } = renderInteractInstruction(instruction);
-
-                const input = screen.getByRole('textbox', { name: new RegExp(`value_${type}`, 'i') });
-                expect(input).toHaveValue('1');
-
-                unmount();
-            });
-        });
-
-        it('should prefill ArgumentInput with empty string for unknown types', () => {
-            const instruction = createInstruction({
-                args: [createArgField({ name: 'customType', type: 'UnknownType' })],
-            });
-
-            renderInteractInstruction(instruction);
-
-            const input = screen.getByRole('textbox', { name: /customType/i });
-            expect(input).toHaveValue('');
-        });
-
-        it('should prefill ArgumentInput with default value for coption wrapped type', () => {
-            const instruction = createInstruction({
-                args: [createArgField({ name: 'coptionalValue', rawType: { coption: 'string' }, type: 'string' })],
-            });
-
-            renderInteractInstruction(instruction);
-
-            const input = screen.getByRole('textbox', { name: /coptionalValue/i });
-            // Should extract inner type string and use its default
-            expect(input).toHaveValue('default');
-        });
-
-        it('should prefill ArgumentInput with default value for array wrapped type', () => {
-            const instruction = createInstruction({
-                args: [createArgField({ name: 'fixedArray', rawType: { array: ['u16', 5] }, type: 'array(u16, 5)' })],
-            });
-
-            renderInteractInstruction(instruction);
-
-            // Array inputs may render multiple textboxes or a single one
-            const inputs = screen.getAllByRole('textbox');
-            // At least the first input should have the default value
-            expect(inputs[0]).toHaveValue('1');
+            expect(optionalAmountInput).toHaveValue('1');
         });
     });
 
@@ -230,43 +91,25 @@ describe('InteractInstruction', () => {
             expect(screen.getByRole('button', { name: /simulate/i })).toBeInTheDocument();
         });
 
-        it('should call onSimulateInstruction when Simulate is clicked', async () => {
+        it.each([
+            ['onSimulateInstruction', 'Simulate'],
+            ['onExecuteInstruction', 'Execute'],
+        ] as const)('should call %s when %s is clicked', async (handlerName, buttonLabel) => {
             walletMock.canSign = true;
             walletMock.publicKey = PublicKey.default;
-            const onSimulate = vi.fn();
+            const handler = vi.fn();
             const user = userEvent.setup();
-            renderInteractInstruction(createInstruction(), { onSimulateInstruction: onSimulate });
+            renderInteractInstruction(createInstruction(), { [handlerName]: handler });
 
-            await user.click(screen.getByRole('button', { name: /simulate/i }));
+            await user.click(screen.getByRole('button', { name: new RegExp(buttonLabel, 'i') }));
 
-            expect(onSimulate).toHaveBeenCalledTimes(1);
+            expect(handler).toHaveBeenCalledTimes(1);
         });
 
-        it('should call onExecuteInstruction when Execute is clicked', async () => {
+        it.each(['executing', 'simulating'] as const)('should disable both buttons while %s', status => {
             walletMock.canSign = true;
             walletMock.publicKey = PublicKey.default;
-            const onExecute = vi.fn();
-            const user = userEvent.setup();
-            renderInteractInstruction(createInstruction(), { onExecuteInstruction: onExecute });
-
-            await user.click(screen.getByRole('button', { name: /execute/i }));
-
-            expect(onExecute).toHaveBeenCalledTimes(1);
-        });
-
-        it('should disable both buttons while executing', () => {
-            walletMock.canSign = true;
-            walletMock.publicKey = PublicKey.default;
-            renderInteractInstruction(createInstruction(), { status: 'executing' });
-
-            expect(screen.getByRole('button', { name: /execute/i })).toBeDisabled();
-            expect(screen.getByRole('button', { name: /simulate/i })).toBeDisabled();
-        });
-
-        it('should disable both buttons while simulating', () => {
-            walletMock.canSign = true;
-            walletMock.publicKey = PublicKey.default;
-            renderInteractInstruction(createInstruction(), { status: 'simulating' });
+            renderInteractInstruction(createInstruction(), { status });
 
             expect(screen.getByRole('button', { name: /execute/i })).toBeDisabled();
             expect(screen.getByRole('button', { name: /simulate/i })).toBeDisabled();

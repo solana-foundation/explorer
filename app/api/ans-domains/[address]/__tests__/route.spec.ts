@@ -1,11 +1,11 @@
-import { fetchAnsDomains } from '@entities/domain/api/fetch-ans-domains';
+import { fetchAnsDomains } from '@entities/domain/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 import { GET } from '../route';
 
-vi.mock('@entities/domain/api/fetch-ans-domains', () => ({
+vi.mock('@entities/domain/server', () => ({
     fetchAnsDomains: vi.fn(),
 }));
 
@@ -43,25 +43,18 @@ describe('GET /api/ans-domains/[address]', () => {
             expect(data.domains).toEqual(mockDomains);
         });
 
-        it('should call fetchAnsDomains with the address', async () => {
-            vi.mocked(fetchAnsDomains).mockResolvedValueOnce([]);
-
-            await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
-
-            expect(fetchAnsDomains).toHaveBeenCalledWith(VALID_ADDRESS);
-        });
-
-        it('should return cache headers with 86400s max-age', async () => {
+        it('should call fetchAnsDomains with the address and cache the response for 86400s', async () => {
             vi.mocked(fetchAnsDomains).mockResolvedValueOnce([]);
 
             const response = await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
 
+            expect(fetchAnsDomains).toHaveBeenCalledWith(VALID_ADDRESS);
             expect(response.headers.get('Cache-Control')).toBe('public, s-maxage=86400, stale-while-revalidate=3600');
         });
     });
 
     describe('error handling', () => {
-        it('should return empty domains array on fetch error', async () => {
+        it('should escalate and return uncached empty domains on fetch error', async () => {
             const error = new Error('Connection failed');
             vi.mocked(fetchAnsDomains).mockRejectedValueOnce(error);
 
@@ -70,14 +63,7 @@ describe('GET /api/ans-domains/[address]', () => {
             expect(response.status).toBe(500);
             const data = await response.json();
             expect(data.domains).toEqual([]);
-        });
-
-        it('should escalate on fetch failure', async () => {
-            const error = new Error('Connection failed');
-            vi.mocked(fetchAnsDomains).mockRejectedValueOnce(error);
-
-            await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
-
+            expect(response.headers.get('Cache-Control')).toBe('no-store');
             expect(Logger.panic).toHaveBeenCalledWith(
                 expect.objectContaining({
                     cause: error,
@@ -85,14 +71,6 @@ describe('GET /api/ans-domains/[address]', () => {
                 }),
                 { sentryExtras: { address: VALID_ADDRESS } },
             );
-        });
-
-        it('should not cache error responses', async () => {
-            vi.mocked(fetchAnsDomains).mockRejectedValueOnce(new Error('fail'));
-
-            const response = await GET(mockRequest, { params: Promise.resolve({ address: VALID_ADDRESS }) });
-
-            expect(response.headers.get('Cache-Control')).toBe('no-store');
         });
     });
 });

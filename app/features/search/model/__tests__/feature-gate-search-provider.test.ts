@@ -47,11 +47,6 @@ describe('featureGateSearchProvider', () => {
         expect(titlesFor(gate.title)).toContain(gate.title);
     });
 
-    it('should reach a gate whose title omits its SIMD number', () => {
-        const [simd, gates] = simdReachableOnlyByNumber(1);
-        expect(titlesFor(String(simd))).toEqual(gates.map(gate => gate.title));
-    });
-
     it('should return the Feature Gates group with an address option per gate', () => {
         const [simd, gates] = simdReachableOnlyByNumber(1);
         expect(featureGateSearchProvider.search(String(simd), ctx)).toEqual([

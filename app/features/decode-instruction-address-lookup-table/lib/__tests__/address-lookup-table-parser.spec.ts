@@ -1,3 +1,4 @@
+import { gen } from '@__fixtures__/gen';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { AccountRole, type Address, address } from '@solana/kit';
 import { type ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
@@ -8,9 +9,7 @@ import {
     getExtendLookupTableInstructionDataEncoder,
     getFreezeLookupTableInstructionDataEncoder,
 } from '@solana-program/address-lookup-table';
-import { describe, expect, it, vi } from 'vitest';
-
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn() } }));
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
@@ -22,11 +21,11 @@ import {
     parseAddressLookupTableRpcInstruction,
 } from '../address-lookup-table-parser';
 
-const TABLE = address('7Np41oeYqPefeNQEHSv1UDhYrehxin3NStELsSKCT4K2');
-const AUTHORITY = address('3EbFtRfKRMTrhPrRQjxbfWCB6NUyTQxwsWTKQFVKgNbb');
-const PAYER = address('9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM');
-const RECIPIENT = address('4QUZQ4c7bZuJ4o4L8tYAEGnePFV27SUFEVmC7BYfsXRp');
-const ENTRY = address('5rATVSqZjaHzMqSJmnbEQNmSJhaKMwsA7Zx2KfBWZBS4');
+const TABLE = address(gen.address(1));
+const AUTHORITY = address(gen.address(2));
+const PAYER = address(gen.address(3));
+const RECIPIENT = address(gen.address(4));
+const ENTRY = address(gen.address(5));
 const SYSTEM = address('11111111111111111111111111111111');
 
 const dispatcher = createInstructionParserDispatcher([addressLookupTableInstructionParser]);
@@ -121,6 +120,10 @@ describe('parseAddressLookupTableKitInstruction', () => {
 });
 
 describe('parseAddressLookupTableRpcInstruction', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     it('should validate each type against its own schema', () => {
         const parsed = parseAddressLookupTableRpcInstruction(
             rpc('extendLookupTable', {

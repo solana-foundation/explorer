@@ -73,24 +73,16 @@ describe('AnchorInterpreter', () => {
 
     describe('createInstruction', () => {
         it('should convert string arguments to proper types based on IDL', async () => {
-            const mockBuildInstruction = vi.fn().mockResolvedValue({});
-            const mockProgram = {
-                buildInstruction: mockBuildInstruction,
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            accounts: [{ name: 'payer' }, { name: 'tokenAccount' }],
-                            args: [
-                                { name: 'amount', type: 'u64' },
-                                { name: 'flag', type: 'bool' },
-                                { name: 'message', type: 'string' },
-                                { name: 'authority', type: 'pubkey' },
-                            ],
-                            name: 'testInstruction',
-                        },
-                    ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
+            const { buildInstruction, program } = mockProgram(
+                'testInstruction',
+                [
+                    { name: 'amount', type: 'u64' },
+                    { name: 'flag', type: 'bool' },
+                    { name: 'message', type: 'string' },
+                    { name: 'authority', type: 'pubkey' },
+                ],
+                [{ name: 'payer' }, { name: 'tokenAccount' }],
+            );
 
             const accounts = {
                 payer: '11111111111111111111111111111111',
@@ -99,9 +91,9 @@ describe('AnchorInterpreter', () => {
 
             const args = ['1000', 'true', 'Hello World', 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'];
 
-            await interpreter.createInstruction(mockProgram, 'testInstruction', accounts, args);
+            await interpreter.createInstruction(program, 'testInstruction', accounts, args);
 
-            expect(mockBuildInstruction).toHaveBeenCalledWith(
+            expect(buildInstruction).toHaveBeenCalledWith(
                 'testInstruction',
                 {
                     payer: new PublicKey('11111111111111111111111111111111'),
@@ -112,23 +104,15 @@ describe('AnchorInterpreter', () => {
         });
 
         it('should handle empty string accounts as null', async () => {
-            const mockBuildInstruction = vi.fn().mockResolvedValue({});
-            const mockProgram = {
-                buildInstruction: mockBuildInstruction,
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            accounts: [
-                                { name: 'payer' },
-                                { name: 'optionalAccount', optional: true },
-                                { name: 'anotherOptional', optional: true },
-                            ],
-                            args: [],
-                            name: 'testInstruction',
-                        },
-                    ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
+            const { buildInstruction, program } = mockProgram(
+                'testInstruction',
+                [],
+                [
+                    { name: 'payer' },
+                    { name: 'optionalAccount', optional: true },
+                    { name: 'anotherOptional', optional: true },
+                ],
+            );
 
             const accounts = {
                 anotherOptional: '   ',
@@ -136,11 +120,9 @@ describe('AnchorInterpreter', () => {
                 payer: '11111111111111111111111111111111',
             };
 
-            const args: any[] = [];
+            await interpreter.createInstruction(program, 'testInstruction', accounts, []);
 
-            await interpreter.createInstruction(mockProgram, 'testInstruction', accounts, args);
-
-            expect(mockBuildInstruction).toHaveBeenCalledWith(
+            expect(buildInstruction).toHaveBeenCalledWith(
                 'testInstruction',
                 {
                     anotherOptional: null,
@@ -151,283 +133,137 @@ describe('AnchorInterpreter', () => {
             );
         });
 
-        it('should handle vector and option types', async () => {
-            const mockBuildInstruction = vi.fn().mockResolvedValue({});
-            const mockProgram = {
-                buildInstruction: mockBuildInstruction,
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            args: [
-                                { name: 'amounts', type: { vec: 'u64' } },
-                                { name: 'optionalValue', type: { option: 'u32' } },
-                                { name: 'emptyOption', type: { option: 'string' } },
-                            ],
-                            name: 'complexInstruction',
-                        },
-                    ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
+        const numericValues = [
+            '255',
+            '65535',
+            '4294967295',
+            '18446744073709551615',
+            '340282366920938463463374607431768211455',
+            '-128',
+            '-32768',
+            '-2147483648',
+            '-9223372036854775808',
+            '-170141183460469231731687303715884105728',
+        ];
 
-            const accounts = {};
-            const args = ['[100, 200, 300]', '42', ''];
-
-            await interpreter.createInstruction(mockProgram, 'complexInstruction', accounts, args);
-
-            expect(mockBuildInstruction).toHaveBeenCalledWith('complexInstruction', {}, [
-                [new BN('100'), new BN('200'), new BN('300')],
-                new BN('42'),
-                null,
-            ]);
-        });
-
-        it('should handle array types', async () => {
-            const mockBuildInstruction = vi.fn().mockResolvedValue({});
-            const mockProgram = {
-                buildInstruction: mockBuildInstruction,
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            args: [
-                                { name: 'fixedArray', type: { array: ['bool', 3] } },
-                                { name: 'pubkeyArray', type: { array: ['pubkey', 2] } },
-                            ],
-                            name: 'arrayInstruction',
-                        },
-                    ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
-
-            const accounts = {};
-            const args = [
-                '["true", "false", "true"]',
-                '["11111111111111111111111111111111", "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"]',
-            ];
-
-            await interpreter.createInstruction(mockProgram, 'arrayInstruction', accounts, args);
-
-            expect(mockBuildInstruction).toHaveBeenCalledWith('arrayInstruction', {}, [
-                [true, false, true],
-                [
-                    new PublicKey('11111111111111111111111111111111'),
-                    new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+        it.each([
+            {
+                args: ['[100, 200, 300]', '42', ''],
+                expected: [[new BN('100'), new BN('200'), new BN('300')], new BN('42'), null],
+                idlArgs: [
+                    { name: 'amounts', type: { vec: 'u64' } },
+                    { name: 'optionalValue', type: { option: 'u32' } },
+                    { name: 'emptyOption', type: { option: 'string' } },
                 ],
-            ]);
-        });
-
-        it('should handle all numeric types', async () => {
-            const mockBuildInstruction = vi.fn().mockResolvedValue({});
-            const mockProgram = {
-                buildInstruction: mockBuildInstruction,
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            args: [
-                                { name: 'u8Val', type: 'u8' },
-                                { name: 'u16Val', type: 'u16' },
-                                { name: 'u32Val', type: 'u32' },
-                                { name: 'u64Val', type: 'u64' },
-                                { name: 'u128Val', type: 'u128' },
-                                { name: 'i8Val', type: 'i8' },
-                                { name: 'i16Val', type: 'i16' },
-                                { name: 'i32Val', type: 'i32' },
-                                { name: 'i64Val', type: 'i64' },
-                                { name: 'i128Val', type: 'i128' },
-                            ],
-                            name: 'numericInstruction',
-                        },
+                title: 'vector and option types',
+            },
+            {
+                args: [
+                    '["true", "false", "true"]',
+                    '["11111111111111111111111111111111", "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"]',
+                ],
+                expected: [
+                    [true, false, true],
+                    [
+                        new PublicKey('11111111111111111111111111111111'),
+                        new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
                     ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
-
-            const accounts = {};
-            const args = [
-                '255',
-                '65535',
-                '4294967295',
-                '18446744073709551615',
-                '340282366920938463463374607431768211455',
-                '-128',
-                '-32768',
-                '-2147483648',
-                '-9223372036854775808',
-                '-170141183460469231731687303715884105728',
-            ];
-
-            await interpreter.createInstruction(mockProgram, 'numericInstruction', accounts, args);
-
-            const expectedArgs = args.map(arg => new BN(arg));
-            expect(mockBuildInstruction).toHaveBeenCalledWith('numericInstruction', {}, expectedArgs);
-        });
-
-        it('should handle bytes primitive type', async () => {
-            const mockBuildInstruction = vi.fn().mockResolvedValue({});
-            const mockProgram = {
-                buildInstruction: mockBuildInstruction,
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            args: [
-                                { name: 'data', type: 'bytes' },
-                                { name: 'message', type: 'string' },
-                            ],
-                            name: 'bytesInstruction',
-                        },
+                ],
+                idlArgs: [
+                    { name: 'fixedArray', type: { array: ['bool', 3] } },
+                    { name: 'pubkeyArray', type: { array: ['pubkey', 2] } },
+                ],
+                title: 'array types',
+            },
+            {
+                args: numericValues,
+                expected: numericValues.map(value => new BN(value)),
+                idlArgs: ['u8', 'u16', 'u32', 'u64', 'u128', 'i8', 'i16', 'i32', 'i64', 'i128'].map(type => ({
+                    name: `${type}Val`,
+                    type,
+                })),
+                title: 'all numeric types',
+            },
+            {
+                args: ['Hello, World!', 'test message'],
+                expected: [fromUtf8('Hello, World!'), 'test message'],
+                idlArgs: [
+                    { name: 'data', type: 'bytes' },
+                    { name: 'message', type: 'string' },
+                ],
+                title: 'bytes primitive type',
+            },
+            {
+                args: [null, '', 'required'],
+                expected: [null, null, 'required'],
+                idlArgs: [
+                    { name: 'optionalString', type: { option: 'string' } },
+                    { name: 'optionalNumber', type: { option: 'u64' } },
+                    { name: 'requiredString', type: 'string' },
+                ],
+                title: 'null and empty arguments',
+            },
+            {
+                args: ['encoded transaction data'],
+                expected: [fromUtf8('encoded transaction data')],
+                idlArgs: [{ name: 'customType', type: { defined: 'CustomStruct' } }],
+                title: 'defined types as-is',
+            },
+            {
+                args: ['[[1, 2, 3], [4, 5, 6]]'],
+                expected: [
+                    [
+                        [new BN('1'), new BN('2'), new BN('3')],
+                        [new BN('4'), new BN('5'), new BN('6')],
                     ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
+                ],
+                idlArgs: [{ name: 'matrix', type: { vec: { vec: 'u32' } } }],
+                title: 'nested vector types',
+            },
+            {
+                args: ['true', true, 'false'],
+                expected: [true, true, false],
+                idlArgs: [
+                    { name: 'bool1', type: 'bool' },
+                    { name: 'bool2', type: 'bool' },
+                    { name: 'bool3', type: 'bool' },
+                ],
+                title: 'boolean strings case-insensitively',
+            },
+        ])('should handle $title', async ({ args, expected, idlArgs }) => {
+            const { buildInstruction, program } = mockProgram('testInstruction', idlArgs);
 
-            const accounts = {};
-            const testData = 'Hello, World!';
-            const args = [testData, 'test message'];
+            await interpreter.createInstruction(program, 'testInstruction', {}, args);
 
-            await interpreter.createInstruction(mockProgram, 'bytesInstruction', accounts, args);
-
-            expect(mockBuildInstruction).toHaveBeenCalledWith('bytesInstruction', {}, [
-                fromUtf8(testData),
-                'test message',
-            ]);
-        });
-
-        it('should handle null and empty arguments', async () => {
-            const mockBuildInstruction = vi.fn().mockResolvedValue({});
-            const mockProgram = {
-                buildInstruction: mockBuildInstruction,
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            args: [
-                                { name: 'optionalString', type: { option: 'string' } },
-                                { name: 'optionalNumber', type: { option: 'u64' } },
-                                { name: 'requiredString', type: 'string' },
-                            ],
-                            name: 'nullableInstruction',
-                        },
-                    ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
-
-            const accounts = {};
-            const args = [null, '', 'required'];
-
-            await interpreter.createInstruction(mockProgram, 'nullableInstruction', accounts, args);
-
-            expect(mockBuildInstruction).toHaveBeenCalledWith('nullableInstruction', {}, [null, null, 'required']);
+            expect(buildInstruction).toHaveBeenCalledWith('testInstruction', {}, expected);
         });
 
         it('should throw error if instruction not found in IDL', async () => {
-            const mockProgram = {
-                buildInstruction: vi.fn(),
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            args: [],
-                            name: 'existingInstruction',
-                        },
-                    ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
+            const { program } = mockProgram('existingInstruction', []);
 
-            await expect(interpreter.createInstruction(mockProgram, 'nonExistentInstruction', {}, [])).rejects.toThrow(
+            await expect(interpreter.createInstruction(program, 'nonExistentInstruction', {}, [])).rejects.toThrow(
                 'Instruction definition not found for "nonExistentInstruction"',
             );
         });
 
         it('should throw error if argument count does not match IDL definition', async () => {
-            const mockProgram = {
-                buildInstruction: vi.fn(),
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            args: [
-                                { name: 'arg1', type: 'u64' },
-                                { name: 'arg2', type: 'string' },
-                            ],
-                            name: 'testInstruction',
-                        },
-                    ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
+            const { program } = mockProgram('testInstruction', [
+                { name: 'arg1', type: 'u64' },
+                { name: 'arg2', type: 'string' },
+            ]);
 
             await expect(
-                interpreter.createInstruction(mockProgram, 'testInstruction', {}, ['100', '200', 'extra']),
+                interpreter.createInstruction(program, 'testInstruction', {}, ['100', '200', 'extra']),
             ).rejects.toThrow('Argument at index 2 not found in instruction definition');
-        });
-
-        it('should handle defined types as-is', async () => {
-            const mockBuildInstruction = vi.fn().mockResolvedValue({});
-            const mockProgram = {
-                buildInstruction: mockBuildInstruction,
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            args: [{ name: 'customType', type: { defined: 'CustomStruct' } }],
-                            name: 'definedTypeInstruction',
-                        },
-                    ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
-
-            const accounts = {};
-            const customData = 'encoded transaction data';
-            const args = [customData];
-
-            await interpreter.createInstruction(mockProgram, 'definedTypeInstruction', accounts, args);
-
-            expect(mockBuildInstruction).toHaveBeenCalledWith('definedTypeInstruction', {}, [fromUtf8(customData)]);
-        });
-
-        it('should handle nested vector types', async () => {
-            const mockBuildInstruction = vi.fn().mockResolvedValue({});
-            const mockProgram = {
-                buildInstruction: mockBuildInstruction,
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            args: [{ name: 'matrix', type: { vec: { vec: 'u32' } } }],
-                            name: 'nestedVectorInstruction',
-                        },
-                    ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
-
-            const accounts = {};
-            const args = ['[[1, 2, 3], [4, 5, 6]]'];
-
-            await interpreter.createInstruction(mockProgram, 'nestedVectorInstruction', accounts, args);
-
-            expect(mockBuildInstruction).toHaveBeenCalledWith('nestedVectorInstruction', {}, [
-                [
-                    [new BN('1'), new BN('2'), new BN('3')],
-                    [new BN('4'), new BN('5'), new BN('6')],
-                ],
-            ]);
-        });
-
-        it('should handle boolean strings case-insensitively', async () => {
-            const mockBuildInstruction = vi.fn().mockResolvedValue({});
-            const mockProgram = {
-                buildInstruction: mockBuildInstruction,
-                getIdl: () => ({
-                    instructions: [
-                        {
-                            args: [
-                                { name: 'bool1', type: 'bool' },
-                                { name: 'bool2', type: 'bool' },
-                                { name: 'bool3', type: 'bool' },
-                            ],
-                            name: 'boolInstruction',
-                        },
-                    ],
-                }),
-            } as unknown as AnchorUnifiedProgram;
-
-            const accounts = {};
-            const args = ['true', true, 'false'];
-
-            await interpreter.createInstruction(mockProgram, 'boolInstruction', accounts, args);
-
-            expect(mockBuildInstruction).toHaveBeenCalledWith('boolInstruction', {}, [true, true, false]);
         });
     });
 });
+
+function mockProgram(name: string, args: unknown[], accounts: unknown[] = []) {
+    const buildInstruction = vi.fn().mockResolvedValue({});
+    const program = {
+        buildInstruction,
+        getIdl: () => ({ instructions: [{ accounts, args, name }] }),
+    } as unknown as AnchorUnifiedProgram;
+    return { buildInstruction, program };
+}

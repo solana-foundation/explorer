@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { useUserANSDomains, useUserSnsDomains } from '@entities/domain';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

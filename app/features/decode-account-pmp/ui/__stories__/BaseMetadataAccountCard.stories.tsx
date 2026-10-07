@@ -67,7 +67,9 @@ export const MetadataBinaryPayload: Story = {
  * Regression guard for horizontal overflow, on the path that still renders a document.
  */
 export const MetadataUnbrokenText: Story = {
-    args: argsFor(metadataAccountData(pack(`https://example.com/${'x'.repeat(600)}`, Compression.Zlib), 'security')),
+    args: argsFor(
+        metadataAccountData(pack(`https://example.com/${'x'.repeat(600)}`, Compression.Zlib), { seed: 'security' }),
+    ),
 };
 
 /** Past the decode budget. */

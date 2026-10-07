@@ -40,12 +40,12 @@
         "test:sb:changed": "vitest --project storybook --changed --run",
         "test:sb:coverage": "vitest --project storybook run --coverage",
         "test:sb:watch": "vitest --project storybook --watch",
-        "test:watch": "vitest --project specs --watch",
+        "test:watch": "vitest --project 'specs-*' --watch",
         "pretypecheck": "pnpm typegen",
         "typecheck": "pnpm typecheck:packages && tsc --noEmit",
         "typegen": "next typegen",
         "typecheck:packages": "pnpm -r --filter './packages/**' run typecheck",
-        "vitest:test": "vitest --project specs"
+        "vitest:test": "vitest --project 'specs-*'"
     },
     "dependencies": {
         "@codama/dynamic-client": "0.1.4",

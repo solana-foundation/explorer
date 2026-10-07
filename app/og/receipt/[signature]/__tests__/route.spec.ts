@@ -1,5 +1,8 @@
+import { createReceipt, ReceiptError } from '@features/receipt/server';
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { GET } from '../route';
 
 vi.mock('next/og', () => ({
     ImageResponse: vi.fn(function () {
@@ -12,13 +15,19 @@ vi.mock('next/og', () => ({
     }),
 }));
 
-vi.mock('@features/receipt/server', async importOriginal => {
-    const actual = await importOriginal<typeof import('@features/receipt/server')>();
+vi.mock('@features/receipt/server', async () => {
+    const [{ parseCompositeSignature }, { ReceiptError }] = await Promise.all([
+        vi.importActual<typeof import('@features/receipt/model/composite-signature')>(
+            '@features/receipt/model/composite-signature',
+        ),
+        vi.importActual<typeof import('@features/receipt/api/errors')>('@features/receipt/api/errors'),
+    ]);
     return {
-        ...actual,
         BaseReceiptImage: vi.fn(() => null),
+        ReceiptError,
         createReceipt: vi.fn(),
         isReceiptEnabled: true,
+        parseCompositeSignature,
     };
 });
 
@@ -26,15 +35,11 @@ const validSignature = '5yKzCuw1e9d58HcnzSL31cczfXUux2H4Ga5TAR2RcQLE5W8BiTAC9x9M
 
 describe('GET /og/receipt/[signature]', () => {
     beforeEach(() => {
-        vi.stubEnv('RECEIPT_OG_IMAGE_VERSION', '');
-        vi.resetModules();
         vi.clearAllMocks();
         vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     it('should generate image successfully with signature', async () => {
-        const { GET } = await import('../route');
-        const { createReceipt } = await import('@features/receipt/server');
         vi.mocked(createReceipt).mockResolvedValue({ kind: 'unavailable', reason: 'no-transfers' });
         const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
         const request = new NextRequest(url.toString());
@@ -47,8 +52,6 @@ describe('GET /og/receipt/[signature]', () => {
     });
 
     it('should return 400 when signature is invalid and not call createReceipt', async () => {
-        const { GET } = await import('../route');
-        const { createReceipt } = await import('@features/receipt/server');
         const request = new NextRequest('http://localhost:3000/og/receipt/not-base58!!!');
 
         const response = await GET(request, { params: Promise.resolve({ signature: 'not-base58!!!' }) });
@@ -59,8 +62,6 @@ describe('GET /og/receipt/[signature]', () => {
     });
 
     it('should return 404 when transaction or cluster not found', async () => {
-        const { GET } = await import('../route');
-        const { createReceipt, ReceiptError } = await import('@features/receipt/server');
         vi.mocked(createReceipt).mockRejectedValue(new ReceiptError('Transaction not found', { status: 404 }));
 
         const url = new URL(`http://localhost:3000/og/receipt/${validSignature}`);
@@ -74,8 +75,6 @@ describe('GET /og/receipt/[signature]', () => {
     });
 
     it('should return 502 when fetch transaction fails', async () => {
-        const { GET } = await import('../route');
-        const { createReceipt, ReceiptError } = await import('@features/receipt/server');
         vi.mocked(createReceipt).mockRejectedValue(new ReceiptError('Failed to fetch transaction', { status: 502 }));
 
         const request = new NextRequest(`http://localhost:3000/og/receipt/${validSignature}`);
@@ -88,8 +87,6 @@ describe('GET /og/receipt/[signature]', () => {
     });
 
     it('should return 500 for unknown errors', async () => {
-        const { GET } = await import('../route');
-        const { createReceipt } = await import('@features/receipt/server');
         vi.mocked(createReceipt).mockRejectedValue(new Error('Something broke'));
 
         const request = new NextRequest(`http://localhost:3000/og/receipt/${validSignature}`);

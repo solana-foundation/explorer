@@ -1,4 +1,9 @@
-import '@testing-library/jest-dom';
+export {};
+
+// The matchers need a DOM, and loading them is a large share of a node-environment spec's setup.
+if (typeof document !== 'undefined') {
+    await import('@testing-library/jest-dom');
+}
 
 // ResizeObserver is not available in jsdom
 if (!globalThis.ResizeObserver) {
@@ -74,7 +79,10 @@ if (!Object.getOwnPropertyDescriptor(Uint8Array, Symbol.hasInstance)) {
     Object.defineProperty(Uint8Array, Symbol.hasInstance, {
         configurable: true,
         value(potentialInstance: unknown) {
-            return originalHasInstance.call(this, potentialInstance) || Buffer.isBuffer(potentialInstance);
+            return (
+                originalHasInstance.call(this, potentialInstance) ||
+                (this === Uint8Array && Buffer.isBuffer(potentialInstance))
+            );
         },
     });
 }

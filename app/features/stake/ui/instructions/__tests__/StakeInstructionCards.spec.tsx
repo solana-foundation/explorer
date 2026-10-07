@@ -1,50 +1,29 @@
-import { type InstructionNode, TxInstructionSurface } from '@entities/instruction-card';
-import { address as toAddress } from '@solana/kit';
-import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
+import { gen } from '@__fixtures__/gen';
+import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
-import React from 'react';
 import { vi } from 'vitest';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(() => ({ push: vi.fn() })),
-    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
-}));
+import { type CardRow, findCell, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
 
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
-import { TransactionsProvider } from '@/app/providers/transactions';
+import { StakeDetailsCard } from '../StakeDetailsCard';
 
-import { AuthorizeCheckedDetailsCard } from '../AuthorizeCheckedDetailsCard';
-import { AuthorizeDetailsCard } from '../AuthorizeDetailsCard';
-import { AuthorizeCheckedWithSeedDetailsCard, AuthorizeWithSeedDetailsCard } from '../AuthorizeWithSeedDetailsCard';
-import { DeactivateDelinquentDetailsCard } from '../DeactivateDelinquentDetailsCard';
-import { DeactivateDetailsCard } from '../DeactivateDetailsCard';
-import { DelegateDetailsCard } from '../DelegateDetailsCard';
-import { GetMinimumDelegationDetailsCard } from '../GetMinimumDelegationDetailsCard';
-import { InitializeCheckedDetailsCard } from '../InitializeCheckedDetailsCard';
-import { InitializeDetailsCard } from '../InitializeDetailsCard';
-import { MergeDetailsCard } from '../MergeDetailsCard';
-import { MoveLamportsDetailsCard, MoveStakeDetailsCard } from '../MoveDetailsCard';
-import { SetLockupCheckedDetailsCard, SetLockupDetailsCard } from '../SetLockupDetailsCard';
-import { SplitDetailsCard } from '../SplitDetailsCard';
-import { WithdrawDetailsCard } from '../WithdrawDetailsCard';
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const A = {
-    base: toAddress('BQWWFhzBdw2vKKBUX17NHeFbCoFQHfRARpdztPE2tZHB'),
-    clock: toAddress('SysvarC1ock11111111111111111111111111111111'),
-    custodian: toAddress('9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM'),
-    dest: toAddress('3EbFtRfKRMTrhPrRQjxbfWCB6NUyTQxwsWTKQFVKgNbb'),
-    owner: toAddress('6dNUCJLdccKGSSQvQDNvQMKfWiV5j3XSTTGqNsCJ8mSA'),
-    rent: toAddress('SysvarRent111111111111111111111111111111111'),
-    source: toAddress('5rATVSqZjaHzMqSJmnbEQNmSJhaKMwsA7Zx2KfBWZBS4'),
-    stake: toAddress('7Np41oeYqPefeNQEHSv1UDhYrehxin3NStELsSKCT4K2'),
-    stakeHistory: toAddress('SysvarStakeHistory1111111111111111111111111'),
-    system: toAddress('11111111111111111111111111111111'),
-    vote: toAddress('4QUZQ4c7bZuJ4o4L8tYAEGnePFV27SUFEVmC7BYfsXRp'),
+    base: gen.address(1),
+    clock: 'SysvarC1ock11111111111111111111111111111111',
+    custodian: gen.address(2),
+    dest: gen.address(3),
+    owner: gen.address(4),
+    rent: 'SysvarRent111111111111111111111111111111111',
+    source: gen.address(5),
+    stake: gen.address(6),
+    stakeHistory: 'SysvarStakeHistory1111111111111111111111111',
+    system: '11111111111111111111111111111111',
+    vote: gen.address(7),
 } as const;
 
 const PROGRAM_ID = new PublicKey(STAKE_PROGRAM_ADDRESS);
@@ -55,13 +34,6 @@ const LOCKUP_TS = 1_700_000_000;
 const LOCKUP_TS_TEXT = displayTimestampUtc(unixTimestampToMs(LOCKUP_TS));
 const ZERO_TS_TEXT = displayTimestampUtc(unixTimestampToMs(0));
 
-const node: InstructionNode = {
-    index: 0,
-    // The shell only reads `ix` for the Raw view, which these cards never open.
-    ix: { parsed: {}, program: 'stake', programId: PROGRAM_ID } as unknown as ParsedInstruction,
-    programId: PROGRAM_ID,
-};
-
 const AUTHORIZE_WITH_SEED = {
     authorityBase: A.base,
     authorityOwner: A.owner,
@@ -71,27 +43,23 @@ const AUTHORIZE_WITH_SEED = {
     stakeAccount: A.stake,
 } as const;
 
-/** Each row as `[label, value]`. An address row carries the untruncated address, not the shortened text. */
-type Row = [string, string];
-
-/** `name` labels the it.each case when the card title alone does not say which fixture ran. */
-const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title: string }> = [
+/**
+ * `name` labels the it.each case when the card title alone does not say which fixture ran.
+ * `mono` names the rows whose value cell sets a monospace font.
+ */
+const CASES: Array<{ info: object; mono?: string[]; name?: string; rows: CardRow[]; title: string; type: string }> = [
     {
-        card: <DeactivateDetailsCard node={node} info={{ stakeAccount: A.stake, stakeAuthority: A.base }} />,
+        info: { stakeAccount: A.stake, stakeAuthority: A.base },
         rows: [
             ['Program', PROGRAM],
             ['Stake Address', A.stake],
             ['Authority Address', A.base],
         ],
         title: 'Stake Program: Deactivate Stake',
+        type: 'deactivate',
     },
     {
-        card: (
-            <DelegateDetailsCard
-                node={node}
-                info={{ stakeAccount: A.stake, stakeAuthority: A.base, voteAccount: A.vote }}
-            />
-        ),
+        info: { stakeAccount: A.stake, stakeAuthority: A.base, voteAccount: A.vote },
         rows: [
             ['Program', PROGRAM],
             ['Stake Address', A.stake],
@@ -99,14 +67,10 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Authority Address', A.base],
         ],
         title: 'Stake Program: Delegate Stake',
+        type: 'delegate',
     },
     {
-        card: (
-            <DeactivateDelinquentDetailsCard
-                node={node}
-                info={{ referenceVoteAccount: A.dest, stakeAccount: A.stake, voteAccount: A.vote }}
-            />
-        ),
+        info: { referenceVoteAccount: A.dest, stakeAccount: A.stake, voteAccount: A.vote },
         rows: [
             ['Program', PROGRAM],
             ['Stake Address', A.stake],
@@ -114,9 +78,10 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Reference Vote Account', A.dest],
         ],
         title: 'Stake Program: Deactivate Delinquent',
+        type: 'deactivateDelinquent',
     },
     {
-        card: <MergeDetailsCard node={node} info={{ destination: A.dest, source: A.source, stakeAuthority: A.base }} />,
+        info: { destination: A.dest, source: A.source, stakeAuthority: A.base },
         name: 'Merge Stake, sysvars omitted',
         rows: [
             ['Program', PROGRAM],
@@ -125,19 +90,15 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Authority Address', A.base],
         ],
         title: 'Stake Program: Merge Stake',
+        type: 'merge',
     },
     {
-        card: (
-            <MergeDetailsCard
-                node={node}
-                info={{
-                    clockSysvar: A.clock,
-                    destination: A.dest,
-                    source: A.source,
-                    stakeAuthority: A.base,
-                }}
-            />
-        ),
+        info: {
+            clockSysvar: A.clock,
+            destination: A.dest,
+            source: A.source,
+            stakeAuthority: A.base,
+        },
         name: 'Merge Stake, clock sysvar only',
         rows: [
             ['Program', PROGRAM],
@@ -147,20 +108,16 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Clock Sysvar', A.clock],
         ],
         title: 'Stake Program: Merge Stake',
+        type: 'merge',
     },
     {
-        card: (
-            <MergeDetailsCard
-                node={node}
-                info={{
-                    clockSysvar: A.clock,
-                    destination: A.dest,
-                    source: A.source,
-                    stakeAuthority: A.base,
-                    stakeHistorySysvar: A.stakeHistory,
-                }}
-            />
-        ),
+        info: {
+            clockSysvar: A.clock,
+            destination: A.dest,
+            source: A.source,
+            stakeAuthority: A.base,
+            stakeHistorySysvar: A.stakeHistory,
+        },
         name: 'Merge Stake, sysvars present',
         rows: [
             ['Program', PROGRAM],
@@ -171,19 +128,15 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Stake History Sysvar', A.stakeHistory],
         ],
         title: 'Stake Program: Merge Stake',
+        type: 'merge',
     },
     {
-        card: (
-            <AuthorizeDetailsCard
-                node={node}
-                info={{
-                    authority: A.base,
-                    authorityType: 'Staker',
-                    newAuthority: A.dest,
-                    stakeAccount: A.stake,
-                }}
-            />
-        ),
+        info: {
+            authority: A.base,
+            authorityType: 'Staker',
+            newAuthority: A.dest,
+            stakeAccount: A.stake,
+        },
         name: 'Authorize, no custodian',
         rows: [
             ['Program', PROGRAM],
@@ -193,20 +146,16 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Authority Type', 'Staker'],
         ],
         title: 'Stake Program: Authorize',
+        type: 'authorize',
     },
     {
-        card: (
-            <AuthorizeDetailsCard
-                node={node}
-                info={{
-                    authority: A.base,
-                    authorityType: 'Staker',
-                    custodian: A.custodian,
-                    newAuthority: A.dest,
-                    stakeAccount: A.stake,
-                }}
-            />
-        ),
+        info: {
+            authority: A.base,
+            authorityType: 'Staker',
+            custodian: A.custodian,
+            newAuthority: A.dest,
+            stakeAccount: A.stake,
+        },
         name: 'Authorize, with custodian',
         rows: [
             ['Program', PROGRAM],
@@ -217,20 +166,16 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Lockup Custodian', A.custodian],
         ],
         title: 'Stake Program: Authorize',
+        type: 'authorize',
     },
     {
-        card: (
-            <AuthorizeCheckedDetailsCard
-                node={node}
-                info={{
-                    authority: A.base,
-                    authorityType: 'Withdrawer',
-                    clockSysvar: A.clock,
-                    newAuthority: A.dest,
-                    stakeAccount: A.stake,
-                }}
-            />
-        ),
+        info: {
+            authority: A.base,
+            authorityType: 'Withdrawer',
+            clockSysvar: A.clock,
+            newAuthority: A.dest,
+            stakeAccount: A.stake,
+        },
         name: 'Authorize Checked, no custodian',
         rows: [
             ['Program', PROGRAM],
@@ -241,21 +186,17 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Clock Sysvar', A.clock],
         ],
         title: 'Stake Program: Authorize Checked',
+        type: 'authorizeChecked',
     },
     {
-        card: (
-            <AuthorizeCheckedDetailsCard
-                node={node}
-                info={{
-                    authority: A.base,
-                    authorityType: 'Withdrawer',
-                    clockSysvar: A.clock,
-                    custodian: A.custodian,
-                    newAuthority: A.dest,
-                    stakeAccount: A.stake,
-                }}
-            />
-        ),
+        info: {
+            authority: A.base,
+            authorityType: 'Withdrawer',
+            clockSysvar: A.clock,
+            custodian: A.custodian,
+            newAuthority: A.dest,
+            stakeAccount: A.stake,
+        },
         name: 'Authorize Checked, with custodian',
         rows: [
             ['Program', PROGRAM],
@@ -267,14 +208,10 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Lockup Custodian', A.custodian],
         ],
         title: 'Stake Program: Authorize Checked',
+        type: 'authorizeChecked',
     },
     {
-        card: (
-            <InitializeCheckedDetailsCard
-                node={node}
-                info={{ rentSysvar: A.rent, stakeAccount: A.stake, staker: A.base, withdrawer: A.dest }}
-            />
-        ),
+        info: { rentSysvar: A.rent, stakeAccount: A.stake, staker: A.base, withdrawer: A.dest },
         rows: [
             ['Program', PROGRAM],
             ['Stake Address', A.stake],
@@ -283,40 +220,32 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Rent Sysvar', A.rent],
         ],
         title: 'Stake Program: Initialize Checked',
+        type: 'initializeChecked',
     },
     {
-        card: (
-            <SplitDetailsCard
-                node={node}
-                info={{
-                    lamports: 2_000_000_000,
-                    newSplitAccount: A.dest,
-                    stakeAccount: A.stake,
-                    stakeAuthority: A.base,
-                }}
-            />
-        ),
+        info: {
+            lamports: 2_500_000_000,
+            newSplitAccount: A.dest,
+            stakeAccount: A.stake,
+            stakeAuthority: A.base,
+        },
         rows: [
             ['Program', PROGRAM],
             ['Stake Address', A.stake],
             ['Authority Address', A.base],
             ['New Stake Address', A.dest],
-            ['Split Amount (SOL)', '◎2'],
+            ['Split Amount (SOL)', '◎2.5'],
         ],
         title: 'Stake Program: Split Stake',
+        type: 'split',
     },
     {
-        card: (
-            <WithdrawDetailsCard
-                node={node}
-                info={{
-                    destination: A.dest,
-                    lamports: 1_000_000_000,
-                    stakeAccount: A.stake,
-                    withdrawAuthority: A.base,
-                }}
-            />
-        ),
+        info: {
+            destination: A.dest,
+            lamports: 1_000_000_000,
+            stakeAccount: A.stake,
+            withdrawAuthority: A.base,
+        },
         name: 'Withdraw Stake, no custodian',
         rows: [
             ['Program', PROGRAM],
@@ -326,20 +255,16 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Withdraw Amount (SOL)', '◎1'],
         ],
         title: 'Stake Program: Withdraw Stake',
+        type: 'withdraw',
     },
     {
-        card: (
-            <WithdrawDetailsCard
-                node={node}
-                info={{
-                    custodian: A.custodian,
-                    destination: A.dest,
-                    lamports: 1_000_000_000,
-                    stakeAccount: A.stake,
-                    withdrawAuthority: A.base,
-                }}
-            />
-        ),
+        info: {
+            custodian: A.custodian,
+            destination: A.dest,
+            lamports: 1_000_000_000,
+            stakeAccount: A.stake,
+            withdrawAuthority: A.base,
+        },
         name: 'Withdraw Stake, with custodian',
         rows: [
             ['Program', PROGRAM],
@@ -350,9 +275,10 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Lockup Custodian', A.custodian],
         ],
         title: 'Stake Program: Withdraw Stake',
+        type: 'withdraw',
     },
     {
-        card: <AuthorizeWithSeedDetailsCard node={node} info={AUTHORIZE_WITH_SEED} />,
+        info: AUTHORIZE_WITH_SEED,
         rows: [
             ['Program', PROGRAM],
             ['Stake Address', A.stake],
@@ -363,14 +289,10 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Authority Type', 'Staker'],
         ],
         title: 'Stake Program: Authorize With Seed',
+        type: 'authorizeWithSeed',
     },
     {
-        card: (
-            <AuthorizeCheckedWithSeedDetailsCard
-                node={node}
-                info={{ ...AUTHORIZE_WITH_SEED, clockSysvar: A.clock, custodian: A.custodian }}
-            />
-        ),
+        info: { ...AUTHORIZE_WITH_SEED, clockSysvar: A.clock, custodian: A.custodian },
         rows: [
             ['Program', PROGRAM],
             ['Stake Address', A.stake],
@@ -383,19 +305,15 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Lockup Custodian', A.custodian],
         ],
         title: 'Stake Program: Authorize Checked With Seed',
+        type: 'authorizeCheckedWithSeed',
     },
     {
-        card: (
-            <MoveStakeDetailsCard
-                node={node}
-                info={{
-                    destination: A.dest,
-                    lamports: 5_000_000_000,
-                    source: A.source,
-                    stakeAuthority: A.base,
-                }}
-            />
-        ),
+        info: {
+            destination: A.dest,
+            lamports: 5_000_000_000,
+            source: A.source,
+            stakeAuthority: A.base,
+        },
         rows: [
             ['Program', PROGRAM],
             ['Stake Source', A.source],
@@ -404,19 +322,15 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Move Amount (SOL)', '◎5'],
         ],
         title: 'Stake Program: Move Stake',
+        type: 'moveStake',
     },
     {
-        card: (
-            <MoveLamportsDetailsCard
-                node={node}
-                info={{
-                    destination: A.dest,
-                    lamports: 5_000_000_000,
-                    source: A.source,
-                    stakeAuthority: A.base,
-                }}
-            />
-        ),
+        info: {
+            destination: A.dest,
+            lamports: 5_000_000_000,
+            source: A.source,
+            stakeAuthority: A.base,
+        },
         rows: [
             ['Program', PROGRAM],
             ['Source', A.source],
@@ -425,9 +339,10 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Move Amount (SOL)', '◎5'],
         ],
         title: 'Stake Program: Move Lamports',
+        type: 'moveLamports',
     },
     {
-        card: <SetLockupDetailsCard node={node} info={{ custodian: A.custodian, lockup: {}, stakeAccount: A.stake }} />,
+        info: { custodian: A.custodian, lockup: {}, stakeAccount: A.stake },
         name: 'Set Lockup, no lockup args',
         rows: [
             ['Program', PROGRAM],
@@ -435,15 +350,11 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Lockup Authority', A.custodian],
         ],
         title: 'Stake Program: Set Lockup',
+        type: 'setLockup',
     },
     {
         // `SetLockup` guards on `!== undefined`, so an explicit zero still earns its row.
-        card: (
-            <SetLockupDetailsCard
-                node={node}
-                info={{ custodian: A.custodian, lockup: { epoch: 0, unixTimestamp: 0 }, stakeAccount: A.stake }}
-            />
-        ),
+        info: { custodian: A.custodian, lockup: { epoch: 0, unixTimestamp: 0 }, stakeAccount: A.stake },
         name: 'Set Lockup, zero epoch and timestamp',
         rows: [
             ['Program', PROGRAM],
@@ -453,18 +364,15 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['New Lockup Expiry Timestamp', ZERO_TS_TEXT],
         ],
         title: 'Stake Program: Set Lockup',
+        type: 'setLockup',
     },
     {
-        card: (
-            <SetLockupCheckedDetailsCard
-                node={node}
-                info={{
-                    custodian: A.custodian,
-                    lockup: { custodian: A.dest, epoch: 500, unixTimestamp: LOCKUP_TS },
-                    stakeAccount: A.stake,
-                }}
-            />
-        ),
+        info: {
+            custodian: A.custodian,
+            lockup: { custodian: A.dest, epoch: 500, unixTimestamp: LOCKUP_TS },
+            stakeAccount: A.stake,
+        },
+        mono: ['New Lockup Expiry Timestamp'],
         name: 'Set Lockup Checked, all lockup args',
         rows: [
             ['Program', PROGRAM],
@@ -475,19 +383,15 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['New Lockup Custodian', A.dest],
         ],
         title: 'Stake Program: Set Lockup Checked',
+        type: 'setLockupChecked',
     },
     {
-        card: (
-            <InitializeDetailsCard
-                node={node}
-                info={{
-                    authorized: { staker: A.base, withdrawer: A.dest },
-                    lockup: { custodian: A.custodian, epoch: 300, unixTimestamp: LOCKUP_TS },
-                    rentSysvar: A.rent,
-                    stakeAccount: A.stake,
-                }}
-            />
-        ),
+        info: {
+            authorized: { staker: A.base, withdrawer: A.dest },
+            lockup: { custodian: A.custodian, epoch: 300, unixTimestamp: LOCKUP_TS },
+            rentSysvar: A.rent,
+            stakeAccount: A.stake,
+        },
         name: 'Initialize Stake, with lockup',
         rows: [
             ['Program', PROGRAM],
@@ -500,20 +404,16 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Rent Sysvar', A.rent],
         ],
         title: 'Stake Program: Initialize Stake',
+        type: 'initialize',
     },
     {
         // `Initialize` guards on `> 0`, so an unset expiry drops both rows but keeps the custodian.
-        card: (
-            <InitializeDetailsCard
-                node={node}
-                info={{
-                    authorized: { staker: A.base, withdrawer: A.dest },
-                    lockup: { custodian: A.custodian, epoch: 0, unixTimestamp: 0 },
-                    rentSysvar: A.rent,
-                    stakeAccount: A.stake,
-                }}
-            />
-        ),
+        info: {
+            authorized: { staker: A.base, withdrawer: A.dest },
+            lockup: { custodian: A.custodian, epoch: 0, unixTimestamp: 0 },
+            rentSysvar: A.rent,
+            stakeAccount: A.stake,
+        },
         name: 'Initialize Stake, zero lockup expiry',
         rows: [
             ['Program', PROGRAM],
@@ -524,19 +424,15 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Rent Sysvar', A.rent],
         ],
         title: 'Stake Program: Initialize Stake',
+        type: 'initialize',
     },
     {
-        card: (
-            <InitializeDetailsCard
-                node={node}
-                info={{
-                    authorized: { staker: A.base, withdrawer: A.dest },
-                    lockup: { custodian: A.system, epoch: 300, unixTimestamp: LOCKUP_TS },
-                    rentSysvar: A.rent,
-                    stakeAccount: A.stake,
-                }}
-            />
-        ),
+        info: {
+            authorized: { staker: A.base, withdrawer: A.dest },
+            lockup: { custodian: A.system, epoch: 300, unixTimestamp: LOCKUP_TS },
+            rentSysvar: A.rent,
+            stakeAccount: A.stake,
+        },
         name: 'Initialize Stake, system-program custodian',
         rows: [
             ['Program', PROGRAM],
@@ -548,11 +444,13 @@ const CASES: Array<{ card: React.ReactElement; rows: Row[]; name?: string; title
             ['Rent Sysvar', A.rent],
         ],
         title: 'Stake Program: Initialize Stake',
+        type: 'initialize',
     },
     {
-        card: <GetMinimumDelegationDetailsCard node={node} />,
+        info: {},
         rows: [['Program', PROGRAM]],
         title: 'Stake Program: Get Minimum Delegation',
+        type: 'getMinimumDelegation',
     },
 ];
 
@@ -560,89 +458,33 @@ describe('stake::instruction cards', () => {
     /** Pins each card's rows: label, order, count, and the value every row resolves to. */
     it.each(CASES.map(c => ({ ...c, name: c.name ?? c.title })))(
         'should render the rows of $name',
-        async ({ card, rows, title }) => {
-            renderCard(card);
+        async ({ info, mono = [], rows, title, type }) => {
+            renderCard({ info, type });
 
             // The cluster provider finishes an async fetch after mount, so assert inside waitFor.
             await waitFor(() => {
-                expect(readRows()).toEqual(rows);
+                expect(readCardRows()).toEqual(rows);
             });
 
             expect(screen.getByText(title)).toBeInTheDocument();
+            mono.forEach(label => expect(findCell(label)).toHaveClass('font-mono'));
         },
     );
 
-    it('should render lamport amounts as SOL', async () => {
+    // A foreign program id proves the row reads the instruction rather than a stake-program constant.
+    it('should render the program row from the instruction', async () => {
         renderCard(
-            <SplitDetailsCard
-                node={node}
-                info={{
-                    lamports: 2_500_000_000,
-                    newSplitAccount: A.dest,
-                    stakeAccount: A.stake,
-                    stakeAuthority: A.base,
-                }}
-            />,
+            { info: { stakeAccount: A.stake, stakeAuthority: A.base }, type: 'deactivate' },
+            new PublicKey(A.vote),
         );
 
         await waitFor(() => {
-            expect(readCell('Split Amount (SOL)')).toContain('2.5');
-        });
-    });
-
-    it('should render the authority type verbatim', async () => {
-        renderCard(
-            <AuthorizeDetailsCard
-                node={node}
-                info={{
-                    authority: A.base,
-                    authorityType: 'Withdrawer',
-                    newAuthority: A.dest,
-                    stakeAccount: A.stake,
-                }}
-            />,
-        );
-
-        await waitFor(() => {
-            expect(readCell('Authority Type')).toBe('Withdrawer');
-        });
-    });
-
-    it('should render the lockup epoch and the timestamp converted to UTC', async () => {
-        renderCard(
-            <SetLockupCheckedDetailsCard
-                node={node}
-                info={{
-                    custodian: A.custodian,
-                    lockup: { epoch: 500, unixTimestamp: LOCKUP_TS },
-                    stakeAccount: A.stake,
-                }}
-            />,
-        );
-
-        await waitFor(() => {
-            expect(readCell('New Lockup Expiry Epoch')).toContain('500');
-        });
-        expect(readCell('New Lockup Expiry Timestamp')).toBe(LOCKUP_TS_TEXT);
-        expect(findCell('New Lockup Expiry Timestamp')).toHaveClass('font-mono');
-    });
-
-    // A foreign program id proves the row reads the node rather than a stake-program constant.
-    it('should render the program row from the node', async () => {
-        renderCard(
-            <DeactivateDetailsCard
-                node={{ ...node, programId: new PublicKey(A.vote) }}
-                info={{ stakeAccount: A.stake, stakeAuthority: A.base }}
-            />,
-        );
-
-        await waitFor(() => {
-            expect(readRows()[0]).toEqual(['Program', A.vote]);
+            expect(readCardRows()[0]).toEqual(['Program', A.vote]);
         });
     });
 
     it('should render the authority seed as copyable code', async () => {
-        renderCard(<AuthorizeWithSeedDetailsCard node={node} info={AUTHORIZE_WITH_SEED} />);
+        renderCard({ info: AUTHORIZE_WITH_SEED, type: 'authorizeWithSeed' });
 
         await waitFor(() => {
             expect(screen.getByText('stake:0').tagName).toBe('CODE');
@@ -650,40 +492,10 @@ describe('stake::instruction cards', () => {
     });
 });
 
-function renderCard(card: React.ReactElement) {
-    return render(
-        <ScrollAnchorProvider>
-            <ClusterProvider>
-                <TransactionsProvider>
-                    <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>{card}</TxInstructionSurface>
-                    </AccountsProvider>
-                </TransactionsProvider>
-            </ClusterProvider>
-        </ScrollAnchorProvider>,
+function renderCard(parsed: { info: object; type: string }, programId = PROGRAM_ID) {
+    const ix = { parsed, program: 'stake', programId } as unknown as ParsedInstruction;
+
+    return renderTxCard(
+        <StakeDetailsCard tx={{ signatures: ['sig'] } as ParsedTransaction} ix={ix} result={{ err: null }} index={0} />,
     );
-}
-
-/**
- * In render order, so the result pins row order as well as content. Addresses are read
- * from `data-address`, which carries the untruncated value the display shortens; every
- * other kind falls back to its rendered text, so a wrong value fails rather than reading
- * as an empty cell.
- */
-function readRows(): Row[] {
-    return screen.getAllByRole('row').map(row => {
-        const cells = within(row).getAllByRole('cell');
-        // eslint-disable-next-line testing-library/no-node-access -- an address has no role to query by
-        const address = cells[1]?.querySelector('[data-address]')?.getAttribute('data-address');
-        return [cells[0].textContent ?? '', address ?? cells[1]?.textContent ?? ''];
-    });
-}
-
-function findCell(label: string): HTMLElement | undefined {
-    const row = screen.getAllByRole('row').find(r => within(r).getAllByRole('cell')[0]?.textContent === label);
-    return row && within(row).getAllByRole('cell')[1];
-}
-
-function readCell(label: string): string {
-    return findCell(label)?.textContent ?? '';
 }

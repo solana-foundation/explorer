@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EVerificationSource, type VerificationTarget } from '../../lib/types';
+import { EVerificationSource, type VerificationSource, type VerificationTarget } from '../../lib/types';
 import { CoingeckoStatus, useCoinGeckoVerification } from '../use-coingecko';
 import { JupiterStatus, useJupiterVerification } from '../use-jupiter';
 import { ERiskLevel, RugCheckStatus, useRugCheckVerification } from '../use-rugcheck';
@@ -48,262 +48,156 @@ describe('useTokenVerification', () => {
         vi.mocked(useRugCheckVerification).mockReturnValue(undefined);
     });
 
-    describe('CoinGecko verification', () => {
-        it('should mark as verified when status is Success and gt_verified is true', () => {
-            vi.mocked(useCoinGeckoVerification).mockReturnValue({
-                status: CoingeckoStatus.Success,
+    it.each<
+        [
+            string,
+            EVerificationSource,
+            {
+                coingecko?: ReturnType<typeof useCoinGeckoVerification>;
+                jupiter?: ReturnType<typeof useJupiterVerification>;
+                rugcheck?: ReturnType<typeof useRugCheckVerification>;
+                target?: VerificationTarget;
+            },
+            Partial<VerificationSource>,
+        ]
+    >([
+        [
+            'CoinGecko as verified, linked to GeckoTerminal, when status is Success and gt_verified is true',
+            EVerificationSource.CoinGecko,
+            { coingecko: { status: CoingeckoStatus.Success, verified: true } },
+            {
+                isVerificationFound: true,
+                url: `https://www.geckoterminal.com/solana/tokens/${baseTarget.address}`,
                 verified: true,
-            });
+            },
+        ],
+        [
+            'CoinGecko as linked to the coin page when a coinGeckoId is present',
+            EVerificationSource.CoinGecko,
+            { coingecko: { coinGeckoId: 'usd-coin', status: CoingeckoStatus.Success, verified: true } },
+            { url: 'https://www.coingecko.com/en/coins/usd-coin' },
+        ],
+        [
+            'CoinGecko as found but not verified when status is Success but gt_verified is false',
+            EVerificationSource.CoinGecko,
+            { coingecko: { status: CoingeckoStatus.Success, verified: false } },
+            { isVerificationFound: true, verified: false },
+        ],
+        [
+            'CoinGecko as not verified when status is FetchFailed',
+            EVerificationSource.CoinGecko,
+            { coingecko: { status: CoingeckoStatus.FetchFailed, verified: false } },
+            { isVerificationFound: false, verified: false },
+        ],
+        [
+            'CoinGecko as rate limited when status is RateLimited',
+            EVerificationSource.CoinGecko,
+            { coingecko: { status: CoingeckoStatus.RateLimited, verified: false } },
+            { isRateLimited: true, isVerificationFound: false, verified: false },
+        ],
+        [
+            'Jupiter as verified when status is Success and verified is true',
+            EVerificationSource.Jupiter,
+            { jupiter: { status: JupiterStatus.Success, verified: true } },
+            { isVerificationFound: true, verified: true },
+        ],
+        [
+            'Jupiter as not verified when status is Success but verified is false',
+            EVerificationSource.Jupiter,
+            { jupiter: { status: JupiterStatus.Success, verified: false } },
+            { isVerificationFound: true, verified: false },
+        ],
+        [
+            'Jupiter as rate limited when status is RateLimited',
+            EVerificationSource.Jupiter,
+            { jupiter: { status: JupiterStatus.RateLimited, verified: false } },
+            { isRateLimited: true, verified: false },
+        ],
+        [
+            'Solflare as verified when solflareVerified is true',
+            EVerificationSource.Solflare,
+            {},
+            { isVerificationFound: true, verified: true },
+        ],
+        [
+            'Solflare as not verified when solflareVerified is false',
+            EVerificationSource.Solflare,
+            { target: { ...baseTarget, solflareVerified: false } },
+            { isVerificationFound: true, verified: false },
+        ],
+        [
+            'Solflare as not found when solflareVerified is undefined',
+            EVerificationSource.Solflare,
+            { target: legacyTarget },
+            { isVerificationFound: false, verified: false },
+        ],
+        [
+            'RugCheck as verified with level Good when score <= 25',
+            EVerificationSource.RugCheck,
+            { rugcheck: { score: 15, status: RugCheckStatus.Success, verified: true } },
+            { isVerificationFound: true, level: ERiskLevel.Good, score: 15, verified: true },
+        ],
+        [
+            'RugCheck as not verified with level Warning when score > 25 and <= 65',
+            EVerificationSource.RugCheck,
+            { rugcheck: { score: 45, status: RugCheckStatus.Success, verified: false } },
+            { isVerificationFound: true, level: ERiskLevel.Warning, score: 45, verified: false },
+        ],
+        [
+            'RugCheck as not verified with level Danger when score > 65',
+            EVerificationSource.RugCheck,
+            { rugcheck: { score: 85, status: RugCheckStatus.Success, verified: false } },
+            { isVerificationFound: true, level: ERiskLevel.Danger, score: 85, verified: false },
+        ],
+        [
+            'RugCheck as rate limited, with no level, when status is RateLimited',
+            EVerificationSource.RugCheck,
+            { rugcheck: { score: undefined, status: RugCheckStatus.RateLimited, verified: false } },
+            { isRateLimited: true, level: undefined, verified: false },
+        ],
+        [
+            'RugCheck with no level when status is FetchFailed',
+            EVerificationSource.RugCheck,
+            { rugcheck: { score: undefined, status: RugCheckStatus.FetchFailed, verified: false } },
+            { isVerificationFound: false, level: undefined, verified: false },
+        ],
+    ])('should map %s', (_label, name, { coingecko, jupiter, rugcheck, target = baseTarget }, expected) => {
+        vi.mocked(useCoinGeckoVerification).mockReturnValue(coingecko);
+        vi.mocked(useJupiterVerification).mockReturnValue(jupiter);
+        vi.mocked(useRugCheckVerification).mockReturnValue(rugcheck);
 
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
+        const { result } = renderHook(() => useTokenVerification(target));
 
-            expect(coingecko?.verified).toBe(true);
-            expect(coingecko?.isVerificationFound).toBe(true);
-        });
-
-        it('should link to the CoinGecko coin page when a coinGeckoId is present', () => {
-            vi.mocked(useCoinGeckoVerification).mockReturnValue({
-                coinGeckoId: 'usd-coin',
-                status: CoingeckoStatus.Success,
-                verified: true,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
-
-            expect(coingecko?.url).toBe('https://www.coingecko.com/en/coins/usd-coin');
-        });
-
-        it('should fall back to the GeckoTerminal token page when no coinGeckoId exists', () => {
-            vi.mocked(useCoinGeckoVerification).mockReturnValue({
-                status: CoingeckoStatus.Success,
-                verified: true,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
-
-            expect(coingecko?.url).toBe(`https://www.geckoterminal.com/solana/tokens/${baseTarget.address}`);
-        });
-
-        it('should mark as found but not verified when status is Success but gt_verified is false', () => {
-            vi.mocked(useCoinGeckoVerification).mockReturnValue({
-                status: CoingeckoStatus.Success,
-                verified: false,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
-
-            expect(coingecko?.verified).toBe(false);
-            expect(coingecko?.isVerificationFound).toBe(true);
-        });
-
-        it('should mark as not verified when status is FetchFailed', () => {
-            vi.mocked(useCoinGeckoVerification).mockReturnValue({
-                status: CoingeckoStatus.FetchFailed,
-                verified: false,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
-
-            expect(coingecko?.verified).toBe(false);
-            expect(coingecko?.isVerificationFound).toBe(false);
-        });
-
-        it('should mark as rate limited when status is RateLimited', () => {
-            vi.mocked(useCoinGeckoVerification).mockReturnValue({
-                status: CoingeckoStatus.RateLimited,
-                verified: false,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const coingecko = result.current.sources.find(s => s.name === EVerificationSource.CoinGecko);
-
-            expect(coingecko?.isRateLimited).toBe(true);
-            expect(coingecko?.verified).toBe(false);
-            expect(coingecko?.isVerificationFound).toBe(false);
-        });
+        expect(result.current.sources.find(s => s.name === name)).toMatchObject(expected);
     });
 
-    describe('Jupiter verification', () => {
-        it('should mark as verified when status is Success and verified is true', () => {
-            vi.mocked(useJupiterVerification).mockReturnValue({
-                status: JupiterStatus.Success,
-                verified: true,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const jupiter = result.current.sources.find(s => s.name === EVerificationSource.Jupiter);
-
-            expect(jupiter?.verified).toBe(true);
-            expect(jupiter?.isVerificationFound).toBe(true);
+    it('should list every source as found, and none to apply, when all are verified', () => {
+        vi.mocked(useCoinGeckoVerification).mockReturnValue({
+            status: CoingeckoStatus.Success,
+            verified: true,
+        });
+        vi.mocked(useJupiterVerification).mockReturnValue({
+            status: JupiterStatus.Success,
+            verified: true,
+        });
+        vi.mocked(useRugCheckVerification).mockReturnValue({
+            score: 20,
+            status: RugCheckStatus.Success,
+            verified: true,
         });
 
-        it('should mark as not verified when status is Success but verified is false', () => {
-            vi.mocked(useJupiterVerification).mockReturnValue({
-                status: JupiterStatus.Success,
-                verified: false,
-            });
+        const { result } = renderHook(() => useTokenVerification(baseTarget));
 
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const jupiter = result.current.sources.find(s => s.name === EVerificationSource.Jupiter);
-
-            expect(jupiter?.verified).toBe(false);
-            expect(jupiter?.isVerificationFound).toBe(true);
-        });
-
-        it('should mark as rate limited when status is RateLimited', () => {
-            vi.mocked(useJupiterVerification).mockReturnValue({
-                status: JupiterStatus.RateLimited,
-                verified: false,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const jupiter = result.current.sources.find(s => s.name === EVerificationSource.Jupiter);
-
-            expect(jupiter?.isRateLimited).toBe(true);
-            expect(jupiter?.verified).toBe(false);
-        });
-    });
-
-    describe('Solflare verification', () => {
-        it('should mark as verified when tokenInfo has verified property set to true', () => {
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const solflare = result.current.sources.find(s => s.name === EVerificationSource.Solflare);
-
-            expect(solflare?.verified).toBe(true);
-            expect(solflare?.isVerificationFound).toBe(true);
-        });
-
-        it('should mark as not verified when solflareVerified is false', () => {
-            const unverifiedTarget: VerificationTarget = { ...baseTarget, solflareVerified: false };
-
-            const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
-            const solflare = result.current.sources.find(s => s.name === EVerificationSource.Solflare);
-
-            expect(solflare?.verified).toBe(false);
-            expect(solflare?.isVerificationFound).toBe(true);
-        });
-
-        it('should mark isVerificationFound as false when solflareVerified is undefined', () => {
-            const { result } = renderHook(() => useTokenVerification(legacyTarget));
-            const solflare = result.current.sources.find(s => s.name === EVerificationSource.Solflare);
-
-            expect(solflare?.verified).toBe(false);
-            expect(solflare?.isVerificationFound).toBe(false);
-        });
-    });
-
-    describe('RugCheck verification', () => {
-        it('should mark as verified with level Good when score <= 25', () => {
-            vi.mocked(useRugCheckVerification).mockReturnValue({
-                score: 15,
-                status: RugCheckStatus.Success,
-                verified: true,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const rugcheck = result.current.sources.find(s => s.name === EVerificationSource.RugCheck);
-
-            expect(rugcheck?.verified).toBe(true);
-            expect(rugcheck?.level).toBe(ERiskLevel.Good);
-            expect(rugcheck?.score).toBe(15);
-            expect(rugcheck?.isVerificationFound).toBe(true);
-        });
-
-        it('should mark as not verified with level Warning when score > 25 and <= 65', () => {
-            vi.mocked(useRugCheckVerification).mockReturnValue({
-                score: 45,
-                status: RugCheckStatus.Success,
-                verified: false,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const rugcheck = result.current.sources.find(s => s.name === EVerificationSource.RugCheck);
-
-            expect(rugcheck?.verified).toBe(false);
-            expect(rugcheck?.level).toBe(ERiskLevel.Warning);
-            expect(rugcheck?.score).toBe(45);
-            expect(rugcheck?.isVerificationFound).toBe(true);
-        });
-
-        it('should mark as not verified with level Danger when score > 65', () => {
-            vi.mocked(useRugCheckVerification).mockReturnValue({
-                score: 85,
-                status: RugCheckStatus.Success,
-                verified: false,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const rugcheck = result.current.sources.find(s => s.name === EVerificationSource.RugCheck);
-
-            expect(rugcheck?.verified).toBe(false);
-            expect(rugcheck?.level).toBe(ERiskLevel.Danger);
-            expect(rugcheck?.score).toBe(85);
-            expect(rugcheck?.isVerificationFound).toBe(true);
-        });
-
-        it('should mark as rate limited when status is RateLimited', () => {
-            vi.mocked(useRugCheckVerification).mockReturnValue({
-                score: undefined,
-                status: RugCheckStatus.RateLimited,
-                verified: false,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const rugcheck = result.current.sources.find(s => s.name === EVerificationSource.RugCheck);
-
-            expect(rugcheck?.isRateLimited).toBe(true);
-            expect(rugcheck?.verified).toBe(false);
-            expect(rugcheck?.level).toBeUndefined();
-        });
-
-        it('should have undefined level when status is FetchFailed', () => {
-            vi.mocked(useRugCheckVerification).mockReturnValue({
-                score: undefined,
-                status: RugCheckStatus.FetchFailed,
-                verified: false,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-            const rugcheck = result.current.sources.find(s => s.name === EVerificationSource.RugCheck);
-
-            expect(rugcheck?.verified).toBe(false);
-            expect(rugcheck?.level).toBeUndefined();
-            expect(rugcheck?.isVerificationFound).toBe(false);
-        });
+        expect(result.current.verificationFoundSources.map(s => s.name)).toEqual([
+            EVerificationSource.CoinGecko,
+            EVerificationSource.Jupiter,
+            EVerificationSource.Solflare,
+            EVerificationSource.RugCheck,
+        ]);
+        expect(result.current.sourcesToApply).toHaveLength(0);
     });
 
     describe('verificationFoundSources', () => {
-        it('should include all sources with isVerificationFound true', () => {
-            vi.mocked(useCoinGeckoVerification).mockReturnValue({
-                status: CoingeckoStatus.Success,
-                verified: true,
-            });
-            vi.mocked(useJupiterVerification).mockReturnValue({
-                status: JupiterStatus.Success,
-                verified: true,
-            });
-            vi.mocked(useRugCheckVerification).mockReturnValue({
-                score: 20,
-                status: RugCheckStatus.Success,
-                verified: true,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-
-            expect(result.current.verificationFoundSources).toHaveLength(4);
-            expect(result.current.verificationFoundSources.map(s => s.name)).toEqual([
-                EVerificationSource.CoinGecko,
-                EVerificationSource.Jupiter,
-                EVerificationSource.Solflare,
-                EVerificationSource.RugCheck,
-            ]);
-        });
-
         it('should exclude sources with isVerificationFound false', () => {
             vi.mocked(useCoinGeckoVerification).mockReturnValue({
                 status: CoingeckoStatus.FetchFailed,
@@ -394,26 +288,6 @@ describe('useTokenVerification', () => {
             const { result } = renderHook(() => useTokenVerification(unverifiedTarget));
 
             expect(result.current.sourcesToApply.map(s => s.name)).not.toContain(EVerificationSource.Jupiter);
-        });
-
-        it('should be empty when all sources are verified or found', () => {
-            vi.mocked(useCoinGeckoVerification).mockReturnValue({
-                status: CoingeckoStatus.Success,
-                verified: true,
-            });
-            vi.mocked(useJupiterVerification).mockReturnValue({
-                status: JupiterStatus.Success,
-                verified: true,
-            });
-            vi.mocked(useRugCheckVerification).mockReturnValue({
-                score: 20,
-                status: RugCheckStatus.Success,
-                verified: true,
-            });
-
-            const { result } = renderHook(() => useTokenVerification(baseTarget));
-
-            expect(result.current.sourcesToApply).toHaveLength(0);
         });
     });
 

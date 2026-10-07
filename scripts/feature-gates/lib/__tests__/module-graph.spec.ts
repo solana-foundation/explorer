@@ -28,13 +28,12 @@ const PIPELINE_MODULES = [
  */
 describe('feature-gate pipeline module graph', () => {
     it('should load under plain Node, where the server-only marker throws', () => {
-        // `tsx --eval` compiles to CJS, so no top-level await. A rejection has to exit non-zero
-        // explicitly for `execFileSync` to see the failure.
         const imports = PIPELINE_MODULES.map(modulePath => `import('${modulePath}')`).join(', ');
-        const program = `Promise.all([${imports}]).then(() => process.exit(0), error => { console.error(error); process.exit(1); })`;
+        const program = `await Promise.all([${imports}])`;
 
+        // The loader that the `tsx` CLI registers, without the cost of starting pnpm.
         expect(() =>
-            execFileSync('pnpm', ['exec', 'tsx', '--eval', program], {
+            execFileSync(process.execPath, ['--import', 'tsx', '--input-type=module', '--eval', program], {
                 cwd: REPO_ROOT,
                 encoding: 'utf8',
                 stdio: 'pipe',

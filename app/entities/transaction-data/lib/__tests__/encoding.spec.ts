@@ -1,5 +1,6 @@
+import { gen } from '@__fixtures__/gen';
 import { getBase58Encoder } from '@solana/kit';
-import { Keypair, PublicKey, SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
+import { PublicKey, SystemProgram, TransactionMessage, VersionedMessage } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { encodeTransactionData } from '../encoding';
@@ -10,8 +11,8 @@ const BASE58_ENCODER = getBase58Encoder();
 // The production code uses only Uint8Array for browser compatibility.
 
 describe('transaction-data encoding', () => {
-    const FROM_PUBKEY = Keypair.generate().publicKey;
-    const TO_PUBKEY = Keypair.generate().publicKey;
+    const FROM_PUBKEY = gen.publicKey(1);
+    const TO_PUBKEY = gen.publicKey(2);
     const TRANSFER_AMOUNT = 1_000_000n;
 
     const createTransferInstruction = () =>

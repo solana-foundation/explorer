@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { PublicKey } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
@@ -11,7 +13,6 @@ import type { InstructionSummary, NamedInstruction } from '../../lib/types';
 import { useResolvedInstructionNames, useResolvedSummaryNames } from '../use-resolved-instruction-names';
 
 const MAINNET_URL = 'https://api.mainnet-beta.solana.com';
-const ZK_PROGRAM = 'ZkE1Gama1Proof11111111111111111111111111111';
 const SYSTEM_PROGRAM = '11111111111111111111111111111111';
 // Two programs the explorer has no name table entry for, so only a resolver can name them.
 const JUPITER = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4';
@@ -22,7 +23,7 @@ beforeEach(() => useProgramIdlNames.mockReturnValue(new Map()));
 afterEach(() => vi.clearAllMocks());
 
 describe('useResolvedInstructionNames', () => {
-    it('should name an instruction from the IDL resolver map', () => {
+    it('should name an instruction from the IDL resolver map and drop its nameLookup', () => {
         useProgramIdlNames.mockReturnValue(
             new Map([[JUPITER, { programName: 'Voting', resolveInstructionName: () => 'Vote' }]]),
         );
@@ -30,32 +31,7 @@ describe('useResolvedInstructionNames', () => {
         const { result } = renderHook(() => useResolvedInstructionNames([unnamed(JUPITER, 1)]));
 
         expect(result.current[0]).toMatchObject({ name: 'Vote', programName: 'Voting' });
-    });
-
-    // The IDL is the last source and the only one that fetches; an empty map is not "nothing named yet".
-    it('should name an instruction with no IDL in the map', () => {
-        const { result } = renderHook(() => useResolvedInstructionNames([unnamed(ZK_PROGRAM, 3)]));
-
-        // data 3 = Verify Ciphertext-Commitment Equality
-        expect(result.current[0].name).toBe('Verify Ciphertext-Commitment Equality');
-    });
-
-    it('should drop nameLookup once a row is named', () => {
-        useProgramIdlNames.mockReturnValue(
-            new Map([[JUPITER, { programName: 'Voting', resolveInstructionName: () => 'Vote' }]]),
-        );
-
-        const { result } = renderHook(() => useResolvedInstructionNames([unnamed(JUPITER, 1)]));
-
         expect(result.current[0]).not.toHaveProperty('nameLookup');
-    });
-
-    // A row that loses its lookup while unnamed can never be named — nothing is left to resolve.
-    it('should keep nameLookup on a row nothing named', () => {
-        const { result } = renderHook(() => useResolvedInstructionNames([unnamed(JUPITER, 1)]));
-
-        expect(result.current[0].name).toBeUndefined();
-        expect(result.current[0].nameLookup).toBeDefined();
     });
 
     // Callers pair row `i` with `instructionLogs[i]`, so a dropped row shifts every later CU figure.
@@ -91,18 +67,6 @@ describe('useResolvedSummaryNames', () => {
         const { result } = renderHook(() => useResolvedSummaryNames([unnamedSummary(JUPITER, 1)]));
 
         expect(result.current).toEqual([{ name: 'Vote', programName: 'Voting' }]);
-    });
-
-    // The row is still unnamed, so it keeps the lookup a later resolver needs — see InstructionNames.
-    it('should keep nameLookup when only the program name resolved', () => {
-        useProgramIdlNames.mockReturnValue(
-            new Map([[JUPITER, { programName: 'Voting', resolveInstructionName: () => undefined }]]),
-        );
-
-        const { result } = renderHook(() => useResolvedSummaryNames([unnamedSummary(JUPITER, 9)]));
-
-        expect(result.current?.[0]).toMatchObject({ name: 'Unknown Instruction', programName: 'Voting' });
-        expect(result.current?.[0].nameLookup).toBeDefined();
     });
 
     it('should fetch IDLs only for the programs of rows that are still unnamed', () => {

@@ -1,22 +1,14 @@
-import { TxInstructionSurface } from '@entities/instruction-card';
+import { gen } from '@__fixtures__/gen';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
-import { render, screen, waitFor, within } from '@testing-library/react';
-import React from 'react';
+import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-vi.mock('next/navigation', () => ({
-    usePathname: vi.fn(),
-    useRouter: vi.fn(() => ({ push: vi.fn() })),
-    useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
-}));
-
-import { AccountsProvider } from '@/app/providers/accounts';
-import { ClusterProvider } from '@/app/providers/cluster';
-import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
-import { TransactionsProvider } from '@/app/providers/transactions';
+import { readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
 
 import { RawStakeDetailsCard } from '../RawStakeDetailsCard';
+
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const STAKE_PROGRAM_ID = new PublicKey(STAKE_PROGRAM_ADDRESS);
 
@@ -40,16 +32,11 @@ describe('stake::RawStakeDetailsCard', () => {
         });
     });
 
-    it('should fall back to Unknown for an instruction the parsed path owns', async () => {
-        renderCard(instruction(INITIALIZE));
-
-        await waitFor(() => {
-            expect(screen.getByText('Stake Program: Unknown Instruction')).toBeInTheDocument();
-        });
-    });
-
-    it('should fall back to Unknown for an unrecognized discriminator', async () => {
-        renderCard(instruction(UNRECOGNIZED));
+    it.each([
+        { discriminator: INITIALIZE, name: 'an instruction the parsed path owns' },
+        { discriminator: UNRECOGNIZED, name: 'an unrecognized discriminator' },
+    ])('should fall back to Unknown for $name', async ({ discriminator }) => {
+        renderCard(instruction(discriminator));
 
         await waitFor(() => {
             expect(screen.getByText('Stake Program: Unknown Instruction')).toBeInTheDocument();
@@ -59,32 +46,15 @@ describe('stake::RawStakeDetailsCard', () => {
     // The node this card hand-builds carries the address, so a foreign program id proves the
     // Program row reads the instruction rather than a stake-program constant.
     it('should build the Program row from the instruction', async () => {
-        const foreign = new PublicKey('4QUZQ4c7bZuJ4o4L8tYAEGnePFV27SUFEVmC7BYfsXRp');
+        const foreign = gen.publicKey(1);
         renderCard(instruction(GET_MINIMUM_DELEGATION, foreign));
 
         await waitFor(() => {
-            expect(readProgramRow()).toBe(foreign.toBase58());
+            expect(readCardRows()[0]).toEqual(['Program', foreign.toBase58()]);
         });
     });
 });
 
 function renderCard(ix: TransactionInstruction) {
-    return render(
-        <ScrollAnchorProvider>
-            <ClusterProvider>
-                <TransactionsProvider>
-                    <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>
-                            <RawStakeDetailsCard ix={ix} index={0} result={{ err: null }} />
-                        </TxInstructionSurface>
-                    </AccountsProvider>
-                </TransactionsProvider>
-            </ClusterProvider>
-        </ScrollAnchorProvider>,
-    );
-}
-
-function readProgramRow(): string {
-    const row = screen.getAllByRole('row').find(r => within(r).getAllByRole('cell')[0]?.textContent === 'Program');
-    return row?.querySelector('[data-address]')?.getAttribute('data-address') ?? '';
+    return renderTxCard(<RawStakeDetailsCard ix={ix} index={0} result={{ err: null }} />);
 }

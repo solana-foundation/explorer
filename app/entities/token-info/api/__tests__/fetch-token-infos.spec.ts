@@ -2,17 +2,13 @@ import { Cluster } from '@utils/cluster';
 import { fetchTokenInfosFromApi } from '@utils/token-info';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { tokenInfo } from '../../__fixtures__/token-info';
 import { TOKEN_INFO_REQUEST_LIMIT } from '../../lib/request-limit';
-import type { TokenInfo } from '../../lib/types';
 import { fetchTokenInfos } from '../fetch-token-infos';
 
 vi.mock('@utils/token-info', () => ({ fetchTokenInfosFromApi: vi.fn() }));
 
 const mockedFetch = vi.mocked(fetchTokenInfosFromApi);
-
-function tokenInfo(address: string, verified = true): TokenInfo {
-    return { address, decimals: 6, logoURI: null, name: address, symbol: address, verified };
-}
 
 /** `n` distinct addresses, `addr-0` … `addr-(n-1)`. */
 function addresses(n: number): string[] {
@@ -83,19 +79,6 @@ describe('fetchTokenInfos', () => {
         expect(result.size).toBe(all.length);
     });
 
-    it('should keep the resolved chunks when another chunk fails', async () => {
-        const all = addresses(TOKEN_INFO_REQUEST_LIMIT + 1);
-        // A failed request resolves to `undefined` rather than throwing.
-        mockedFetch
-            .mockResolvedValueOnce(undefined)
-            .mockResolvedValueOnce([tokenInfo(`addr-${TOKEN_INFO_REQUEST_LIMIT}`)]);
-
-        const result = await fetchTokenInfos(all, Cluster.MainnetBeta);
-
-        expect(result.size).toBe(1);
-        expect(result.has(`addr-${TOKEN_INFO_REQUEST_LIMIT}`)).toBe(true);
-    });
-
     it('should de-duplicate mints before chunking', async () => {
         await fetchTokenInfos(['a', 'b', 'a', 'b', 'a'], Cluster.MainnetBeta);
 
@@ -117,20 +100,17 @@ describe('fetchTokenInfos', () => {
         expect(result.size).toBe(0);
     });
 
-    it('should return an empty map when every chunk fails', async () => {
-        mockedFetch.mockResolvedValue(undefined);
+    // A failed request resolves to `undefined`. `fetchAll` is a `Promise.all`, so a rejection would
+    // otherwise discard the chunks that already resolved and reject the whole lookup.
+    const failedChunks = [
+        { failChunk: () => Promise.resolve(undefined), outcome: 'fails' },
+        { failChunk: () => Promise.reject(new Error('boom')), outcome: 'rejects' },
+    ];
 
-        const result = await fetchTokenInfos(addresses(5), Cluster.MainnetBeta);
-
-        expect(result.size).toBe(0);
-    });
-
-    // `fetchAll` is a `Promise.all`, so a rejection would otherwise discard the chunks that
-    // already resolved and reject the whole lookup, which no caller is prepared for.
-    it('should keep the resolved chunks when another chunk rejects', async () => {
+    it.each(failedChunks)('should keep the resolved chunks when another chunk $outcome', async ({ failChunk }) => {
         const all = addresses(TOKEN_INFO_REQUEST_LIMIT + 1);
         mockedFetch
-            .mockRejectedValueOnce(new Error('boom'))
+            .mockImplementationOnce(failChunk)
             .mockResolvedValueOnce([tokenInfo(`addr-${TOKEN_INFO_REQUEST_LIMIT}`)]);
 
         const result = await fetchTokenInfos(all, Cluster.MainnetBeta);
@@ -139,8 +119,8 @@ describe('fetchTokenInfos', () => {
         expect(result.has(`addr-${TOKEN_INFO_REQUEST_LIMIT}`)).toBe(true);
     });
 
-    it('should not reject when every chunk rejects', async () => {
-        mockedFetch.mockRejectedValue(new Error('boom'));
+    it.each(failedChunks)('should resolve an empty map when every chunk $outcome', async ({ failChunk }) => {
+        mockedFetch.mockImplementation(failChunk);
 
         await expect(fetchTokenInfos(addresses(5), Cluster.MainnetBeta)).resolves.toEqual(new Map());
     });

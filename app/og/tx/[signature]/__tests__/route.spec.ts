@@ -84,41 +84,28 @@ describe('should handle GET /og/tx/[signature]', () => {
         expect(getTxShareData).not.toHaveBeenCalled();
     });
 
-    it('should return 400 when the cluster param is custom', async () => {
-        const response = await GET(makeRequest(SIGNATURE, 'custom'), makeProps(SIGNATURE));
+    it.each([
+        ['is custom', 'custom'],
+        ['is not a known slug', 'sandbox'],
+    ])('should return 400 when the cluster param %s', async (_reason, cluster) => {
+        const response = await GET(makeRequest(SIGNATURE, cluster), makeProps(SIGNATURE));
 
         expect(response.status).toBe(400);
         expect(await response.text()).toBe('Invalid cluster');
         expect(getTxShareData).not.toHaveBeenCalled();
     });
 
-    it('should return 400 when the cluster param is not a known slug', async () => {
-        const response = await GET(makeRequest(SIGNATURE, 'sandbox'), makeProps(SIGNATURE));
-
-        expect(response.status).toBe(400);
-        expect(getTxShareData).not.toHaveBeenCalled();
-    });
-
     // Every rejection below keeps one URL per card reaching the node. The CDN keys on the whole query, so a
     // shape that still parses to a valid cluster is a fresh miss that repeats the whole render.
-    it('should return 400 when a param rides along with a valid cluster', async () => {
-        const response = await GET(makeRawRequest(SIGNATURE, '?cluster=devnet&bust=1'), makeProps(SIGNATURE));
+    it.each([
+        ['a param rides along with a valid cluster', '?cluster=devnet&bust=1'],
+        ['an unrecognized param arrives without a cluster', '?bust=1'],
+        ['the cluster param is repeated', '?cluster=devnet&cluster=devnet'],
+    ])('should return 400 when %s', async (_reason, query) => {
+        const response = await GET(makeRawRequest(SIGNATURE, query), makeProps(SIGNATURE));
 
         expect(response.status).toBe(400);
-        expect(getTxShareData).not.toHaveBeenCalled();
-    });
-
-    it('should return 400 when an unrecognized param arrives without a cluster', async () => {
-        const response = await GET(makeRawRequest(SIGNATURE, '?bust=1'), makeProps(SIGNATURE));
-
-        expect(response.status).toBe(400);
-        expect(getTxShareData).not.toHaveBeenCalled();
-    });
-
-    it('should return 400 when the cluster param is repeated', async () => {
-        const response = await GET(makeRawRequest(SIGNATURE, '?cluster=devnet&cluster=devnet'), makeProps(SIGNATURE));
-
-        expect(response.status).toBe(400);
+        expect(await response.text()).toBe('Invalid cluster');
         expect(getTxShareData).not.toHaveBeenCalled();
     });
 

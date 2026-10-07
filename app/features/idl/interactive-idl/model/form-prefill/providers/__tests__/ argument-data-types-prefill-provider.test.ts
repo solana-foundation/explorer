@@ -8,11 +8,17 @@ describe('findDefaultValueForArgumentType', () => {
         expect(findDefaultValueForArgumentType('bool')).toBe('false');
         expect(findDefaultValueForArgumentType('f32')).toBe('1.0');
         expect(findDefaultValueForArgumentType('f64')).toBe('1.0');
-        expect(findDefaultValueForArgumentType('i32')).toBe('1');
-        expect(findDefaultValueForArgumentType('i128')).toBe('1');
-        expect(findDefaultValueForArgumentType('u8')).toBe('1');
-        expect(findDefaultValueForArgumentType('u64')).toBe('1');
         expect(findDefaultValueForArgumentType('string')).toBe('default');
+        expect(findDefaultValueForArgumentType('bytes')).toBe('data');
+    });
+    it.each(['u8', 'u16', 'u32', 'u64', 'u128', 'u256', 'i8', 'i16', 'i32', 'i64', 'i128', 'i256'])(
+        'should create default value for %s type',
+        type => {
+            expect(findDefaultValueForArgumentType(type)).toBe('1');
+        },
+    );
+    it('should create empty default value for unknown types', () => {
+        expect(findDefaultValueForArgumentType('UnknownType')).toBe('');
     });
     it('should create default value for pubkey type', () => {
         expect(findDefaultValueForArgumentType('pubkey')).toBe(PublicKey.default.toString());

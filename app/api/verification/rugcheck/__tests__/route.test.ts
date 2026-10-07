@@ -34,24 +34,14 @@ describe('Rugcheck API Route', () => {
         expect(await response.json()).toEqual({ error: 'Rugcheck API is misconfigured' });
     });
 
-    it('should return 404 when rugcheck responds with 400 (not found)', async () => {
-        mockFetchResponse(400, { error: 'not found' });
+    it.each([
+        [404, 'not found'],
+        [422, 'unable to generate report'],
+        [404, 'invalid token mint'],
+    ])('should return %i when rugcheck responds with 400 (%s)', async (expectedStatus, error) => {
+        mockFetchResponse(400, { error });
         const response = await callRoute(VALID_MINT);
-        expect(response.status).toBe(404);
-        expect(await response.json()).toEqual({ error: 'No rugcheck data available' });
-    });
-
-    it('should return 422 when rugcheck responds with 400 (unable to generate report)', async () => {
-        mockFetchResponse(400, { error: 'unable to generate report' });
-        const response = await callRoute(VALID_MINT);
-        expect(response.status).toBe(422);
-        expect(await response.json()).toEqual({ error: 'No rugcheck data available' });
-    });
-
-    it('should return 404 when rugcheck responds with 400 (invalid token mint)', async () => {
-        mockFetchResponse(400, { error: 'invalid token mint' });
-        const response = await callRoute(VALID_MINT);
-        expect(response.status).toBe(404);
+        expect(response.status).toBe(expectedStatus);
         expect(await response.json()).toEqual({ error: 'No rugcheck data available' });
         expect(Logger.panic).not.toHaveBeenCalled();
     });
