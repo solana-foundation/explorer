@@ -1,7 +1,6 @@
 import {
     AccountRole,
     type Address,
-    appendTransactionMessageInstruction,
     appendTransactionMessageInstructions,
     blockhash,
     type CompiledTransactionMessage,
@@ -34,87 +33,52 @@ const PROGRAM_ADDRESS = gen.address(2);
 const LOOKUP_TABLE_ADDRESS = gen.address(9);
 const LOOKUP_TABLE_LOADED_ADDRESS = gen.address(10);
 export const INSTRUCTION_DATA = new Uint8Array([1, 2, 3]);
-export const INSTRUCTION_DATA_BASE58 = 'Ldp';
+const INSTRUCTION_DATA_BASE58 = 'Ldp';
 
 type CompiledMessageFixture = CompiledTransactionMessage & CompiledTransactionMessageWithLifetime;
+type MessageFixture = { compiled: CompiledMessageFixture; messageBytes: Uint8Array };
 
 function compiledMessageFor(version: TransactionVersion): CompiledMessageFixture {
-    if (version === 'legacy') {
-        return compileTransactionMessage(
-            pipe(
-                createTransactionMessage({ version: 'legacy' }),
-                m => setTransactionMessageFeePayer(FEE_PAYER, m),
-                m => setTransactionMessageLifetimeUsingBlockhash(BLOCKHASH, m),
-                m =>
-                    appendTransactionMessageInstruction({ data: INSTRUCTION_DATA, programAddress: PROGRAM_ADDRESS }, m),
-            ),
-        );
-    }
-    if (version === 0) {
-        return compileTransactionMessage(
-            pipe(
-                createTransactionMessage({ version: 0 }),
-                m => setTransactionMessageFeePayer(FEE_PAYER, m),
-                m => setTransactionMessageLifetimeUsingBlockhash(BLOCKHASH, m),
-                m =>
-                    appendTransactionMessageInstruction({ data: INSTRUCTION_DATA, programAddress: PROGRAM_ADDRESS }, m),
-            ),
-        );
-    }
+    const instruction: Instruction = { data: INSTRUCTION_DATA, programAddress: PROGRAM_ADDRESS };
+    if (version !== 1) return compile(version, [instruction]);
+
+    return compile(version, [
+        { ...instruction, accounts: [{ address: FEE_PAYER, role: AccountRole.WRITABLE_SIGNER }] },
+    ]);
+}
+
+function compile(version: TransactionVersion, instructions: readonly Instruction[]): CompiledMessageFixture {
     return compileTransactionMessage(
         pipe(
-            createTransactionMessage({ version: 1 }),
+            createTransactionMessage({ version }),
             m => setTransactionMessageFeePayer(FEE_PAYER, m),
             m => setTransactionMessageLifetimeUsingBlockhash(BLOCKHASH, m),
-            m =>
-                appendTransactionMessageInstruction(
-                    {
-                        accounts: [{ address: FEE_PAYER, role: AccountRole.WRITABLE_SIGNER }],
-                        data: INSTRUCTION_DATA,
-                        programAddress: PROGRAM_ADDRESS,
-                    },
-                    m,
-                ),
+            m => appendTransactionMessageInstructions(instructions, m),
         ),
     );
 }
 
 /** A v0 message with one address loaded from a lookup table, for a test that needs a real ALT entry. */
-export function v0CompiledWithLookupTable(): {
-    compiled: CompiledMessageFixture;
-    loadedAddress: Address;
-    lookupTableAddress: Address;
-    messageBytes: Uint8Array;
-} {
-    const compiled = compileTransactionMessage(
-        pipe(
-            createTransactionMessage({ version: 0 }),
-            m => setTransactionMessageFeePayer(FEE_PAYER, m),
-            m => setTransactionMessageLifetimeUsingBlockhash(BLOCKHASH, m),
-            m =>
-                appendTransactionMessageInstruction(
-                    {
-                        accounts: [
-                            {
-                                address: LOOKUP_TABLE_LOADED_ADDRESS,
-                                addressIndex: 0,
-                                lookupTableAddress: LOOKUP_TABLE_ADDRESS,
-                                role: AccountRole.WRITABLE,
-                            },
-                        ],
-                        data: INSTRUCTION_DATA,
-                        programAddress: PROGRAM_ADDRESS,
-                    },
-                    m,
-                ),
-        ),
-    );
+export function v0CompiledWithLookupTable(): MessageFixture & { loadedAddress: Address; lookupTableAddress: Address } {
+    const compiled = compile(0, [
+        {
+            accounts: [
+                {
+                    address: LOOKUP_TABLE_LOADED_ADDRESS,
+                    addressIndex: 0,
+                    lookupTableAddress: LOOKUP_TABLE_ADDRESS,
+                    role: AccountRole.WRITABLE,
+                },
+            ],
+            data: INSTRUCTION_DATA,
+            programAddress: PROGRAM_ADDRESS,
+        },
+    ]);
 
     return {
-        compiled,
+        ...withMessageBytes(compiled),
         loadedAddress: LOOKUP_TABLE_LOADED_ADDRESS,
         lookupTableAddress: LOOKUP_TABLE_ADDRESS,
-        messageBytes: encode(compiled),
     };
 }
 
@@ -162,32 +126,23 @@ export function v0CompiledWithFeePayerInLUT(): {
     };
 }
 
-/** A legacy message with two required signers, for a wire-size test that exercises the per-signer multiplication. */
-export function twoSignerLegacyTransaction(): { compiled: CompiledMessageFixture; messageBytes: Uint8Array } {
-    const compiled = compileTransactionMessage(
-        pipe(
-            createTransactionMessage({ version: 'legacy' }),
-            m => setTransactionMessageFeePayer(FEE_PAYER, m),
-            m => setTransactionMessageLifetimeUsingBlockhash(BLOCKHASH, m),
-            m =>
-                appendTransactionMessageInstruction(
-                    {
-                        accounts: [{ address: gen.address(20), role: AccountRole.READONLY_SIGNER }],
-                        data: INSTRUCTION_DATA,
-                        programAddress: PROGRAM_ADDRESS,
-                    },
-                    m,
-                ),
-        ),
-    );
+/**
+ * A message with `numSigners` required signers, built by hand since kit's compiler caps a message at 64 accounts.
+ * The 128-signer boundary needs v0: in legacy, a first header byte of 128 or more reads as a version prefix.
+ */
+export function transactionWithSigners(version: 'legacy' | 0, numSigners: number): MessageFixture {
+    const signers = Array.from({ length: numSigners }, (_, i) => gen.address(100 + i));
+    const base = {
+        header: { numReadonlyNonSignerAccounts: 1, numReadonlySignerAccounts: 0, numSignerAccounts: numSigners },
+        instructions: [{ programAddressIndex: numSigners }],
+        lifetimeToken: BLOCKHASH.blockhash,
+        staticAccounts: [...signers, PROGRAM_ADDRESS],
+    };
 
-    return { compiled, messageBytes: encode(compiled) };
+    return withMessageBytes(version === 0 ? { ...base, addressTableLookups: [], version } : { ...base, version });
 }
 
-export function legacyTransactionWithHeader(header: Partial<CompiledMessageFixture['header']>): {
-    compiled: CompiledMessageFixture;
-    messageBytes: Uint8Array;
-} {
+export function legacyTransactionWithHeader(header: Partial<CompiledMessageFixture['header']>): MessageFixture {
     const base = compiledMessageFor('legacy');
     const compiled = { ...base, header: { ...base.header, ...header } };
 
@@ -203,27 +158,36 @@ function encode(compiled: CompiledTransactionMessage): Uint8Array {
     return new Uint8Array(getCompiledTransactionMessageEncoder().encode(compiled));
 }
 
-export const legacyTransaction = Object.assign(() => fromCompiledMessage(compiledMessageFor('legacy')), {
-    compiled: () => compiledMessageFor('legacy'),
-    messageBytes: () => encode(compiledMessageFor('legacy')),
-});
+function withMessageBytes(compiled: CompiledMessageFixture): MessageFixture {
+    return { compiled, messageBytes: encode(compiled) };
+}
 
-export const v0Transaction = Object.assign(() => fromCompiledMessage(compiledMessageFor(0)), {
-    compiled: () => compiledMessageFor(0),
-    messageBytes: () => encode(compiledMessageFor(0)),
-});
+function transactionFixture(version: TransactionVersion) {
+    return Object.assign(() => fromCompiledMessage(compiledMessageFor(version)), {
+        compiled: () => compiledMessageFor(version),
+        messageBytes: () => encode(compiledMessageFor(version)),
+    });
+}
 
-export const v1Transaction = Object.assign(() => fromCompiledMessage(compiledMessageFor(1)), {
-    compiled: () => compiledMessageFor(1),
-    messageBytes: () => encode(compiledMessageFor(1)),
-});
+export const legacyTransaction = transactionFixture('legacy');
+export const v0Transaction = transactionFixture(0);
+export const v1Transaction = transactionFixture(1);
 
-/** Overrides a compiled v1 message's config, so a spec can express any mask. */
-export function v1CompiledWithConfig(overrides: {
+type V1Config = {
     configMask: number;
     configValues: Extract<CompiledTransactionMessage, { version: 1 }>['configValues'];
-}): CompiledMessageFixture {
+};
+
+/** Overrides a compiled v1 message's config, so a spec can express any mask. */
+export function v1CompiledWithConfig(overrides: V1Config): CompiledMessageFixture {
     return { ...compiledMessageFor(1), ...overrides };
+}
+
+function computeUnitLimitConfig(computeUnitLimit: number): V1Config {
+    return {
+        configMask: TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
+        configValues: [{ kind: 'u32', value: computeUnitLimit }],
+    };
 }
 
 export function v1MessageBytesWithHalfSetPriorityFeeMask(): Uint8Array {
@@ -234,12 +198,7 @@ export function v1MessageBytesWithHalfSetPriorityFeeMask(): Uint8Array {
 export function v1TransactionWithConfig(overrides: { computeUnitLimit: number } | undefined): ParsedTransaction {
     if (!overrides) return fromCompiledMessage(v1CompiledWithConfig({ configMask: 0, configValues: [] }));
 
-    return fromCompiledMessage(
-        v1CompiledWithConfig({
-            configMask: TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
-            configValues: [{ kind: 'u32', value: overrides.computeUnitLimit }],
-        }),
-    );
+    return fromCompiledMessage(v1CompiledWithConfig(computeUnitLimitConfig(overrides.computeUnitLimit)));
 }
 
 /** A transaction built from bare instructions. */
@@ -247,34 +206,14 @@ export function transactionWithInstructions(
     version: TransactionVersion,
     instructions: readonly Instruction[],
 ): ParsedTransaction {
-    const message = pipe(
-        createTransactionMessage({ version }),
-        m => setTransactionMessageFeePayer(FEE_PAYER, m),
-        m => setTransactionMessageLifetimeUsingBlockhash(BLOCKHASH, m),
-        m => appendTransactionMessageInstructions(instructions, m),
-    );
-
-    return fromCompiledMessage(compileTransactionMessage(message));
+    return fromCompiledMessage(compile(version, instructions));
 }
 
 export function v1TransactionWithLimitAndInstructions(
     computeUnitLimit: number,
     instructions: readonly Instruction[],
 ): ParsedTransaction {
-    const compiled = compileTransactionMessage(
-        pipe(
-            createTransactionMessage({ version: 1 }),
-            m => setTransactionMessageFeePayer(FEE_PAYER, m),
-            m => setTransactionMessageLifetimeUsingBlockhash(BLOCKHASH, m),
-            m => appendTransactionMessageInstructions(instructions, m),
-        ),
-    );
-
-    return fromCompiledMessage({
-        ...compiled,
-        configMask: TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
-        configValues: [{ kind: 'u32', value: computeUnitLimit }],
-    });
+    return fromCompiledMessage({ ...compile(1, instructions), ...computeUnitLimitConfig(computeUnitLimit) });
 }
 
 export function setComputeUnitLimit(units: number): Instruction {

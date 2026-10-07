@@ -1,4 +1,4 @@
-import { type CompiledTransactionMessage, getCompiledTransactionMessageDecoder } from '@solana/kit';
+import { type CompiledTransactionMessage, getCompiledTransactionMessageDecoder, getShortU16Encoder } from '@solana/kit';
 
 import type { ParsedTransaction } from './types.js';
 import { isV1MessageBytes } from './version.js';
@@ -16,12 +16,13 @@ export function transactionSizeLimit(source: ParsedTransaction | CompiledTransac
     return isV1(source) ? V1_TRANSACTION_SIZE_LIMIT : LEGACY_TRANSACTION_SIZE_LIMIT;
 }
 
-/** The v1 envelope carries no signature-count byte: the count is read from the message header instead. */
+/** The v1 envelope carries no signature-count prefix: the count is read from the message header instead. */
 export function transactionWireSize(messageBytes: Uint8Array): number {
     const compiled = getCompiledTransactionMessageDecoder().decode(messageBytes);
-    const signatureCountPrefix = compiled.version === 1 ? 0 : 1;
+    const numSignatures = compiled.header.numSignerAccounts;
+    const signatureCountPrefix = compiled.version === 1 ? 0 : getShortU16Encoder().getSizeFromValue(numSignatures);
 
-    return signatureCountPrefix + SIGNATURE_BYTES * compiled.header.numSignerAccounts + messageBytes.length;
+    return signatureCountPrefix + SIGNATURE_BYTES * numSignatures + messageBytes.length;
 }
 
 function isV1(source: ParsedTransaction | CompiledTransactionMessage | Uint8Array): boolean {
