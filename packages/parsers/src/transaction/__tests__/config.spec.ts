@@ -101,6 +101,40 @@ describe('readTransactionConfig', () => {
             'Config value for computeUnitLimit is missing, expected u32.',
         );
     });
+
+    it('should throw when an empty mask has values', () => {
+        const message = v1CompiledWithConfig({ configMask: 0, configValues: [{ kind: 'u32', value: 19 }] });
+
+        expect(() => readTransactionConfig(message)).toThrow(InvalidTransactionConfigError);
+        expect(() => readTransactionConfig(message)).toThrow(
+            'Config value count 1 does not match the mask, which declares 0.',
+        );
+    });
+
+    it('should throw when values exceed the mask', () => {
+        const message = v1CompiledWithConfig({
+            configMask: TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
+            configValues: [
+                { kind: 'u32', value: 19 },
+                { kind: 'u32', value: 7 },
+            ],
+        });
+
+        expect(() => readTransactionConfig(message)).toThrow(InvalidTransactionConfigError);
+        expect(() => readTransactionConfig(message)).toThrow(
+            'Config value count 2 does not match the mask, which declares 1.',
+        );
+    });
+
+    it.each([
+        ['bit 5', 2 ** 5],
+        ['bit 31', 2 ** 31],
+    ])('should throw on unknown mask %s', (_label, configMask) => {
+        const message = v1CompiledWithConfig({ configMask, configValues: [] });
+
+        expect(() => readTransactionConfig(message)).toThrow(InvalidTransactionConfigError);
+        expect(() => readTransactionConfig(message)).toThrow(`Invalid transaction config mask: ${configMask}.`);
+    });
 });
 
 // eslint-disable-next-line unicorn/no-null -- the RPC marks an absent limit null

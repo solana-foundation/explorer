@@ -1,5 +1,9 @@
 import {
     type CompiledTransactionMessage,
+    TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK,
+    TRANSACTION_CONFIG_HEAP_SIZE_BIT_MASK,
+    TRANSACTION_CONFIG_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BIT_MASK,
+    TRANSACTION_CONFIG_PRIORITY_FEE_LAMPORTS_BIT_MASK,
     transactionConfigMaskHasComputeUnitLimit,
     transactionConfigMaskHasHeapSize,
     transactionConfigMaskHasLoadedAccountsDataSizeLimit,
@@ -17,15 +21,24 @@ const CONFIG_FIELDS = [
     ['heapSize', 'u32', transactionConfigMaskHasHeapSize],
 ] as const;
 
+const KNOWN_CONFIG_MASK_BITS =
+    TRANSACTION_CONFIG_PRIORITY_FEE_LAMPORTS_BIT_MASK |
+    TRANSACTION_CONFIG_COMPUTE_UNIT_LIMIT_BIT_MASK |
+    TRANSACTION_CONFIG_LOADED_ACCOUNTS_DATA_SIZE_LIMIT_BIT_MASK |
+    TRANSACTION_CONFIG_HEAP_SIZE_BIT_MASK;
+
 /**
  * Returns `undefined` for a legacy or v0 message, and for a v1 message that sets no limits.
- * Throws `InvalidTransactionConfigError` when the config values do not match the mask.
+ * Throws `InvalidTransactionConfigError` when the mask sets an unknown bit or the config values do not match it.
  *
  * Deliberately not kit's `decompileTransactionMessage`, which throws on an out-of-range account index
  * and costs a full message decompile per call.
  */
 export function readTransactionConfig(message: CompiledTransactionMessage): TransactionConfig | undefined {
     if (message.version !== 1) return undefined;
+    if (hasUnknownBits(message.configMask)) {
+        throw new InvalidTransactionConfigError(`Invalid transaction config mask: ${message.configMask}.`);
+    }
 
     const config: TransactionConfig = {};
     let valueIndex = 0;
@@ -51,7 +64,17 @@ export function readTransactionConfig(message: CompiledTransactionMessage): Tran
         Object.assign(config, { [field]: value.value });
     }
 
+    if (valueIndex !== message.configValues.length) {
+        throw new InvalidTransactionConfigError(
+            `Config value count ${message.configValues.length} does not match the mask, which declares ${valueIndex}.`,
+        );
+    }
+
     return valueIndex > 0 ? config : undefined;
+}
+
+function hasUnknownBits(configMask: number): boolean {
+    return (configMask & ~KNOWN_CONFIG_MASK_BITS) !== 0;
 }
 
 const RPC_CONFIG_FIELDS = [
