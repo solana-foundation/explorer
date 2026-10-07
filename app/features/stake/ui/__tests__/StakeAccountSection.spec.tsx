@@ -11,9 +11,9 @@ import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 import type { StakeAccountInfo } from '../../lib/validators';
 import { StakeAccountSection } from '../StakeAccountSection';
 
-const mocks = vi.hoisted(() => ({ epochInfo: undefined as { epoch: bigint } | undefined }));
+const mocks = vi.hoisted(() => ({ currentEpoch: undefined as bigint | undefined }));
 
-vi.mock('@providers/cluster', () => ({ useEpochInfo: () => mocks.epochInfo }));
+vi.mock('../../model/use-current-epoch', () => ({ useCurrentEpoch: () => mocks.currentEpoch }));
 vi.mock('@entities/token-price', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/token-price')>()),
     useTokenPrice: () => undefined,
@@ -40,7 +40,7 @@ const LOCKUP_UNIX_TIMESTAMP = 1_749_976_861;
 
 describe('StakeAccountSection', () => {
     beforeEach(() => {
-        mocks.epochInfo = { epoch: 1051n };
+        mocks.currentEpoch = 1051n;
     });
 
     it('should report a lockup whose epoch has not been reached', () => {
@@ -60,17 +60,36 @@ describe('StakeAccountSection', () => {
     });
 
     it('should not report a lockup whose epoch and timestamp have both passed', () => {
-        mocks.epochInfo = { epoch: 3600n };
+        mocks.currentEpoch = 3600n;
         renderSection({ epoch: LOCKUP_EPOCH, unixTimestamp: LOCKUP_UNIX_TIMESTAMP });
 
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
     it('should check only the timestamp until the current epoch is known', () => {
-        mocks.epochInfo = undefined;
+        mocks.currentEpoch = undefined;
         renderSection({ epoch: LOCKUP_EPOCH, unixTimestamp: LOCKUP_UNIX_TIMESTAMP });
 
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+    it('should report only the timestamp once the epoch has been reached', () => {
+        mocks.currentEpoch = 3600n;
+        const unixTimestamp = Math.floor(Date.now() / 1000) + 86_400;
+        renderSection({ epoch: LOCKUP_EPOCH, unixTimestamp });
+
+        const expiry = displayTimestampUtc(unixTimestampToMs(unixTimestamp));
+        expect(screen.getByRole('alert')).toHaveTextContent(`Account is locked! Lockup expires on ${expiry}`);
+        expect(screen.getByRole('alert')).not.toHaveTextContent('epoch');
+    });
+
+    it('should report a future timestamp while the current epoch is unknown', () => {
+        mocks.currentEpoch = undefined;
+        const unixTimestamp = Math.floor(Date.now() / 1000) + 86_400;
+        renderSection({ epoch: LOCKUP_EPOCH, unixTimestamp });
+
+        const expiry = displayTimestampUtc(unixTimestampToMs(unixTimestamp));
+        expect(screen.getByRole('alert')).toHaveTextContent(`Account is locked! Lockup expires on ${expiry}`);
+        expect(screen.getByRole('alert')).not.toHaveTextContent('epoch');
     });
 });
 

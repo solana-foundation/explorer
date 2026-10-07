@@ -6,7 +6,6 @@ import { useRefreshAccount } from '@entities/account';
 import { formatUsdValue, PriceStatus, useTokenPrice } from '@entities/token-price';
 import { AccountCard } from '@features/account';
 import type { Account } from '@providers/accounts';
-import { useEpochInfo } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { capitalizeFirstLetter, lamportsToSol } from '@utils/index';
@@ -22,6 +21,7 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import type { StakeActivationStatus } from '../api/stake-activation';
 import { EPOCH_NEVER_SET } from '../lib/constants';
 import type { StakeAccountInfo, StakeAccountType, StakeMeta } from '../lib/validators';
+import { useCurrentEpoch } from '../model/use-current-epoch';
 import {
     type DisabledTotalRewardState,
     type TotalRewardState,
@@ -83,12 +83,12 @@ export function StakeAccountSection({
 }
 
 function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
-    const epochInfo = useEpochInfo();
+    const currentEpoch = useCurrentEpoch();
     const { epoch, unixTimestamp } = stakeAccount.meta.lockup;
     const lockupExpiryMs = unixTimestampToMs(unixTimestamp);
     // The stake program holds a lockup while either its timestamp or its epoch is still ahead.
     const isTimestampLocked = Date.now() < lockupExpiryMs;
-    const isEpochLocked = epochInfo !== undefined && BigInt(epoch) > epochInfo.epoch;
+    const isEpochLocked = currentEpoch !== undefined && BigInt(epoch) > currentEpoch;
     if (!isTimestampLocked && !isEpochLocked) {
         return null;
     }
