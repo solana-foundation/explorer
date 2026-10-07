@@ -185,7 +185,8 @@ export function isRpcParsedInstruction(instruction: TransactionInstruction): ins
 
 /** The RPC reports the version outside the message, so it is checked before the message is read. */
 function normalizeVersion(version: ReportedTransactionVersion | undefined): TransactionVersion {
-    if (version === 'legacy' || version === 0 || version === 1) return version;
+    const reported = typeof version === 'bigint' ? Number(version) : version;
+    if (reported === 'legacy' || reported === 0 || reported === 1) return reported;
     throw new UnsupportedTransactionVersionError(version);
 }
 
