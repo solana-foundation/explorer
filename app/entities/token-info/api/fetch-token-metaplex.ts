@@ -19,7 +19,7 @@ import {
     USER_AGENT,
 } from '@/app/api/metadata/proxy';
 import { chunk } from '@/app/shared/lib/array';
-import { IPFS_PROTOCOL, resolveIpfsUri } from '@/app/shared/lib/ipfs';
+import { resolveIpfsUri } from '@/app/shared/lib/ipfs';
 import { parseUrl } from '@/app/shared/lib/url';
 
 import type { TokenInfo } from '../lib/types';
@@ -115,12 +115,14 @@ async function fetchDecimals(
  * unlisted mint hosted on IPFS reports a blocked protocol instead of a logo.
  *
  * Returns '' when the URI names nothing readable — unparseable, or an ipfs address with a
- * malformed CID. Other schemes pass through unchanged, for `fetchResource` to reject.
+ * malformed CID. Any other URI passes through unchanged.
  */
 function resolveMetadataUri(uri: string): string {
     const url = parseUrl(uri);
     if (!url) return '';
-    return url.protocol === IPFS_PROTOCOL ? resolveIpfsUri(url) : uri;
+    const ipfs = resolveIpfsUri(url);
+    if (!ipfs) return uri;
+    return ipfs.kind === 'gateway' ? ipfs.uri : '';
 }
 
 /**
