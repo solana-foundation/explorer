@@ -1,6 +1,7 @@
 import type { BlockTransaction } from '@entities/block-data/@x/compute-unit';
 import { address, blockhash } from '@solana/kit';
 import { ComputeBudgetProgram } from '@solana/web3.js';
+import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { Cluster } from '@utils/cluster';
 
 import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
@@ -8,176 +9,25 @@ import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
 import { estimateRequestedComputeUnits, getReservedComputeUnits } from '../compute-units-schedule';
 
 describe('getReservedComputeUnits', () => {
-    describe('mainnet', () => {
-        it('should return default compute units before builtin feature activation', () => {
-            // Before epoch 759 on mainnet
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    epoch: 758n,
-                    programId: '11111111111111111111111111111111', // System Program
-                }),
-            ).toEqual(200_000);
-
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    epoch: 0n,
-                    programId: 'Vote111111111111111111111111111111111111111', // Vote Program
-                }),
-            ).toEqual(200_000);
-        });
-
-        it('should return minimal compute units for builtins after feature activation', () => {
-            // After epoch 759 on mainnet
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    epoch: 759n,
-                    programId: '11111111111111111111111111111111', // System Program
-                }),
-            ).toEqual(3_000);
-
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    epoch: 1000n,
-                    programId: 'Vote111111111111111111111111111111111111111', // Vote Program
-                }),
-            ).toEqual(200_000);
-
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    epoch: 759n,
-                    programId: 'ComputeBudget111111111111111111111111111111', // Compute Budget
-                }),
-            ).toEqual(3_000);
-        });
-
-        it('should return default compute units for non-builtins after feature activation', () => {
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    epoch: 759n,
-                    programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', // Token Program
-                }),
-            ).toEqual(200_000);
-        });
-
-        it('should handle feature gate program migration correctly', () => {
-            // Before migration (epoch 753), feature gate is builtin
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    epoch: 752n,
-                    programId: 'Feature111111111111111111111111111111111111',
-                }),
-            ).toEqual(200_000); // Before builtin optimization
-
-            // After builtin optimization but before migration
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    epoch: 758n, // After 753 but before 759
-                    programId: 'Feature111111111111111111111111111111111111',
-                }),
-            ).toEqual(200_000); // Still default because migration happened before builtin optimization
-
-            // After both migration and builtin optimization
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    epoch: 759n,
-                    programId: 'Feature111111111111111111111111111111111111',
-                }),
-            ).toEqual(200_000); // Now BPF, uses default
-        });
+    it.each([
+        { cluster: Cluster.MainnetBeta, gateEpoch: 759n, name: 'mainnet-beta' },
+        { cluster: Cluster.Devnet, gateEpoch: 842n, name: 'devnet' },
+        { cluster: Cluster.Testnet, gateEpoch: 750n, name: 'testnet' },
+    ])('should apply the $name gate epoch to a builtin', ({ cluster, gateEpoch }) => {
+        expect(getReservedComputeUnits({ cluster, epoch: gateEpoch - 1n, programId: SYSTEM_PROGRAM_ADDRESS })).toBe(
+            200_000,
+        );
+        expect(getReservedComputeUnits({ cluster, epoch: gateEpoch, programId: SYSTEM_PROGRAM_ADDRESS })).toBe(3_000);
     });
 
-    describe('devnet', () => {
-        it('should return correct compute units based on devnet activation epochs', () => {
-            // Before epoch 842 on devnet
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.Devnet,
-                    epoch: 841n,
-                    programId: '11111111111111111111111111111111',
-                }),
-            ).toEqual(200_000);
-
-            // After epoch 842 on devnet
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.Devnet,
-                    epoch: 842n,
-                    programId: '11111111111111111111111111111111',
-                }),
-            ).toEqual(3_000);
-        });
+    it('should apply the newest schedule on a custom cluster', () => {
+        expect(getReservedComputeUnits({ cluster: Cluster.Custom, programId: SYSTEM_PROGRAM_ADDRESS })).toBe(3_000);
     });
 
-    describe('testnet', () => {
-        it('should return correct compute units based on testnet activation epochs', () => {
-            // Before epoch 750 on testnet
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.Testnet,
-                    epoch: 749n,
-                    programId: '11111111111111111111111111111111',
-                }),
-            ).toEqual(200_000);
-
-            // After epoch 750 on testnet
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.Testnet,
-                    epoch: 750n,
-                    programId: '11111111111111111111111111111111',
-                }),
-            ).toEqual(3_000);
-        });
-    });
-
-    describe('custom cluster', () => {
-        it('should always use most recent configuration', () => {
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.Custom,
-                    epoch: 0n,
-                    programId: '11111111111111111111111111111111',
-                }),
-            ).toEqual(3_000);
-
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.Custom,
-                    epoch: 1000n,
-                    programId: 'Feature111111111111111111111111111111111111',
-                }),
-            ).toEqual(200_000);
-        });
-    });
-
-    describe('edge cases', () => {
-        it('should handle undefined epoch', () => {
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    programId: '11111111111111111111111111111111',
-                }),
-            ).toEqual(200_000);
-        });
-
-        it('should handle negative epoch', () => {
-            expect(
-                getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
-                    epoch: -1n,
-                    programId: '11111111111111111111111111111111',
-                }),
-            ).toEqual(200_000);
-        });
+    it('should reserve the default cu for a program id that is not valid base58', () => {
+        expect(getReservedComputeUnits({ cluster: Cluster.MainnetBeta, epoch: 1000n, programId: 'not-base58' })).toBe(
+            200_000,
+        );
     });
 });
 

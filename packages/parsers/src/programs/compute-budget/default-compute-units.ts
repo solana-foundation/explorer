@@ -1,3 +1,5 @@
+import type { Address } from '@solana/kit';
+
 // https://github.com/anza-xyz/agave/blob/v2.1.13/programs/system/src/system_processor.rs#L299
 const SYSTEM_PROGRAM_INSTRUCTION_COMPUTE_UNITS = 150;
 
@@ -37,6 +39,6 @@ export const PROGRAM_DEFAULT_COMPUTE_UNITS: Record<string, number> = {
     Vote111111111111111111111111111111111111111: VOTE_PROGRAM_COMPUTE_UNITS,
 };
 
-export function getDefaultComputeUnits(programId: string): number {
-    return PROGRAM_DEFAULT_COMPUTE_UNITS[programId] ?? 0;
+export function getDefaultComputeUnits(programAddress: Address): number {
+    return PROGRAM_DEFAULT_COMPUTE_UNITS[programAddress] ?? 0;
 }
