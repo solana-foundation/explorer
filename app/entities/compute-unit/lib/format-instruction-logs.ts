@@ -1,10 +1,11 @@
+import { getDefaultComputeUnits } from '@explorer/parsers/programs/compute-budget';
+import type { Address } from '@solana/kit';
 import type { Cluster } from '@utils/cluster';
 import type { InstructionLogs } from '@utils/program-logs';
 
 import { Logger } from '@/app/shared/lib/logger';
 
 import { getReservedComputeUnits } from './compute-units-schedule';
-import { getDefaultComputeUnits } from './default-compute-units';
 import type { InstructionCUData, InstructionCUInput } from './types';
 
 /**
@@ -49,7 +50,8 @@ export function formatInstructionLogs({
 
         return {
             computeUnits: invocations[index]?.computeUnits ?? 0,
-            defaultUnits: getDefaultComputeUnits(programId),
+            // A cast, not address(): doesn't need validating, and a throw would break render for no gain.
+            defaultUnits: getDefaultComputeUnits(programId as Address),
             name: instruction.name,
             programId,
             programName: instruction.programName,
