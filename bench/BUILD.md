@@ -50,12 +50,12 @@
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
-| Dynamic | `/block/[slot]` | 170 kB | 580 kB |
+| Dynamic | `/block/[slot]` | 170 kB | 590 kB |
 | Dynamic | `/block/[slot]/accounts` | 150 kB | 570 kB |
-| Dynamic | `/block/[slot]/programs` | 150 kB | 570 kB |
-| Dynamic | `/block/[slot]/rewards` | 160 kB | 570 kB |
+| Dynamic | `/block/[slot]/programs` | 160 kB | 570 kB |
+| Dynamic | `/block/[slot]/rewards` | 160 kB | 580 kB |
 | Dynamic | `/epoch/[epoch]` | 20 kB | 430 kB |
-| Static | `/feature-gates` | 50 kB | 460 kB |
+| Static | `/feature-gates` | 50 kB | 470 kB |
 | Dynamic | `/mcp` | — | — |
 | Static | `/mcp/start` | 30 kB | 440 kB |
 | Dynamic | `/og/feature-gate/[address]` | — | — |
