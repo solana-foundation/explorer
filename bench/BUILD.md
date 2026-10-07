@@ -4,7 +4,7 @@
 |------|-------|------|---------------|
 | Static | `/` | 130 kB | 570 kB |
 | Static | `/_not-found` | 0 B | 450 kB |
-| Dynamic | `/address/[address]` | 450 kB | 900 kB |
+| Dynamic | `/address/[address]` | 460 kB | 900 kB |
 | Dynamic | `/address/[address]/account-data` | 460 kB | 910 kB |
 | Dynamic | `/address/[address]/anchor-account` | 420 kB | 870 kB |
 | Dynamic | `/address/[address]/attestation` | 420 kB | 870 kB |
@@ -57,7 +57,7 @@
 | Dynamic | `/epoch/[epoch]` | 20 kB | 470 kB |
 | Static | `/feature-gates` | 50 kB | 500 kB |
 | Dynamic | `/mcp` | — | — |
-| Static | `/mcp/start` | 20 kB | 470 kB |
+| Static | `/mcp/start` | 30 kB | 480 kB |
 | Dynamic | `/og/feature-gate/[address]` | — | — |
 | Dynamic | `/og/receipt/[signature]` | — | — |
 | Dynamic | `/og/tx/[signature]` | — | — |
