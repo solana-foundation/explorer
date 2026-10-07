@@ -8,7 +8,7 @@ import type { VerificationResult } from './types.js';
 import { hashProgramData } from './hash-program-data.js';
 import { type BuildParams, fetchOtterVerifyBuildParams, type OtterVerifyDependencies } from './otter-verify.js';
 import { TRUSTED_SIGNERS } from './config.js';
-import { orderVerifiedEntries } from './verification-core.js';
+import { fetchOsecStatusAll, orderVerifiedEntries } from './verification-core.js';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFICATION_FETCH_TIMEOUT_MS = 5000;
@@ -56,14 +56,6 @@ function toOsecEntry(value: unknown): OsecInfo | null {
         };
     }
     return null;
-}
-
-async function fetchOsecStatusAll(programAddress: string): Promise<unknown> {
-    const response = await fetch(`${OSEC_REGISTRY_URL}/status-all/${encodeURIComponent(programAddress)}`, {
-        signal: AbortSignal.timeout(VERIFICATION_FETCH_TIMEOUT_MS),
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
 }
 
 // The registry entry is only trusted after re-hashing the live program data against its claim.
@@ -123,7 +115,11 @@ export function createVerificationResolver(dependencies: OtterVerifyDependencies
     return async (programAddress, programAuthority, programDataBase64, cluster) => {
         let raw: unknown;
         try {
-            raw = await fetchOsecStatusAll(programAddress);
+            raw = await fetchOsecStatusAll(
+                OSEC_REGISTRY_URL,
+                programAddress,
+                AbortSignal.timeout(VERIFICATION_FETCH_TIMEOUT_MS),
+            );
         } catch (error) {
             logger.warn(ns('verification osec fetch failed'), { error: toLoggedError(error), programAddress });
             return { reason: 'source_unavailable', status: 'unknown' };

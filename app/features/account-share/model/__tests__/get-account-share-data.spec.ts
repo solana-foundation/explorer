@@ -11,6 +11,7 @@ import {
     LOADER_V4_HEADER_SIZE,
     NATIVE_LOADER_ADDRESS,
     PROGRAM_DATA_HEADER_SIZE,
+    SIGNATURE_LOOKUP_LIMIT,
 } from '../../lib/constants';
 
 const mocks = vi.hoisted(() => ({
@@ -158,13 +159,16 @@ describe('account card', () => {
     });
 
     it('should cap the transaction count at one page and flag it', async () => {
-        const signatures = Array.from({ length: 1_000 }, () => ({ blockTime: BLOCK_TIME }));
+        const signatures = Array.from({ length: SIGNATURE_LOOKUP_LIMIT + 50 }, () => ({ blockTime: BLOCK_TIME }));
         useRpc({ [ADDRESS]: walletValue() }, signatures);
 
         const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
 
         expect(result).toMatchObject({
-            data: { transactionCount: '1,000', transactionCountIsCapped: true },
+            data: {
+                transactionCount: SIGNATURE_LOOKUP_LIMIT.toLocaleString('en-US'),
+                transactionCountIsCapped: true,
+            },
             kind: 'ok',
         });
     });
