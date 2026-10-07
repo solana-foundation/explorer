@@ -1,4 +1,4 @@
-import { isRetryableFetchError } from '@shared/lib/errors';
+import { isRetryableFetchError, matchAbortError } from '@shared/lib/errors';
 
 type HttpErrorDetails = {
     status: number;
@@ -27,6 +27,6 @@ export class TokenInfoInvalidResponseError extends Error {
 export function isTransientError(error: unknown): boolean {
     if (error instanceof TokenInfoHttpError) return error.status === 429 || error.status >= 500;
     if (!(error instanceof Error)) return false;
-    if (error.name === 'TimeoutError' || error.name === 'AbortError') return true;
+    if (error.name === 'TimeoutError' || matchAbortError(error)) return true;
     return isRetryableFetchError(error);
 }

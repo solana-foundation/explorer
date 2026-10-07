@@ -17,6 +17,13 @@ describe('isTransientError', () => {
         expect(isTransientError(error)).toBe(true);
     });
 
+    it('should be true for an aborted request', async () => {
+        const error = await rejection(fetchWithSignal(AbortSignal.abort()));
+
+        expect(error).toHaveProperty('name', 'AbortError');
+        expect(isTransientError(error)).toBe(true);
+    });
+
     it('should be true for a connection that nothing listens on', async () => {
         const error = await rejection(fetch(`http://127.0.0.1:${await unusedPort()}`));
 
