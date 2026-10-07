@@ -160,7 +160,7 @@
         "@testing-library/user-event": "14.4.3",
         "@types/bootstrap": "5.2.6",
         "@types/chart.js": "2.9.34",
-        "@types/node": "22.15.3",
+        "@types/node": "24.13.6",
         "@types/pako": "2.0.3",
         "@types/qrcode": "1.5.6",
         "@types/react": "19.2.14",
@@ -208,7 +208,7 @@
     },
     "packageManager": "pnpm@10.17.1",
     "engines": {
-        "node": "^22.1"
+        "node": "^24"
     },
     "devEngines": {
         "packageManager": {
