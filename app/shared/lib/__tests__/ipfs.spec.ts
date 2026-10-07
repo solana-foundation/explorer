@@ -15,6 +15,7 @@ describe('resolveIpfsUri', () => {
         [`ipfs://${CID_V0}`, `${GATEWAY}/${CID_V0}`],
         [`ipfs://ipfs/${CID_V0}`, `${GATEWAY}/${CID_V0}`],
         [`ipfs://${CID_V1}/metadata/0.json?v=2`, `${GATEWAY}/${CID_V1}/metadata/0.json?v=2`],
+        [`ipfs://${CID_V1}/sprite.svg#token`, `${GATEWAY}/${CID_V1}/sprite.svg#token`],
         [`ipfs://${CID_V1_BASE32_UPPER}`, `${GATEWAY}/${CID_V1_BASE32_UPPER}`],
     ])('should map %s to the gateway', (uri, expected) => {
         expect(resolve(uri)).toEqual({ kind: 'gateway', uri: expected });
@@ -34,6 +35,7 @@ describe('resolveIpfsUri', () => {
         [`http://ipfs.io/ipfs/${CID_V1}`, `${GATEWAY}/${CID_V1}`],
         [`https://IPFS.IO/ipfs/${CID_V1}`, `${GATEWAY}/${CID_V1}`],
         [`https://ipfs.io/ipfs/${CID_V1_BASE16}`, `${GATEWAY}/${CID_V1_BASE16}`],
+        [`https://ipfs.io/ipfs/${CID_V0}/sprite.svg#token`, `${GATEWAY}/${CID_V0}/sprite.svg#token`],
         [`${GATEWAY}/${CID_V1}`, `${GATEWAY}/${CID_V1}`],
     ])('should map the /ipfs/ URL %s to the gateway', (uri, expected) => {
         expect(resolve(uri)).toEqual({ kind: 'gateway', uri: expected });
@@ -43,6 +45,8 @@ describe('resolveIpfsUri', () => {
         [`https://${CID_V1}.ipfs.dweb.link/`, `${GATEWAY}/${CID_V1}`],
         [`https://${CID_V1}.ipfs.nftstorage.link/image.png?x=1`, `${GATEWAY}/${CID_V1}/image.png?x=1`],
         [`https://${CID_V1_BASE32_UPPER}.IPFS.W3S.LINK`, `${GATEWAY}/${CID_V1}`],
+        [`https://${CID_V1}.ipfs.dweb.link/ipfs/image.png`, `${GATEWAY}/${CID_V1}/ipfs/image.png`],
+        [`https://${CID_V1}.ipfs.dweb.link/ipfs/${CID_V0}`, `${GATEWAY}/${CID_V1}/ipfs/${CID_V0}`],
     ])('should map the subdomain URL %s to the gateway', (uri, expected) => {
         expect(resolve(uri)).toEqual({ kind: 'gateway', uri: expected });
     });

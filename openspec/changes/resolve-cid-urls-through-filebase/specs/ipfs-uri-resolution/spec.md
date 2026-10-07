@@ -7,7 +7,7 @@
 
 ### Requirement: getProxiedUri SHALL rewrite a URI that contains a CID to IPFS_GATEWAY before proxying or passthrough
 
-`getProxiedUri` SHALL rewrite a URI that contains a CID to `<IPFS_GATEWAY>/<cid><subpath><query>`.
+`getProxiedUri` SHALL rewrite a URI that contains a CID to `<IPFS_GATEWAY>/<cid><subpath><query><fragment>`.
 
 A URI contains a CID in one of four forms: `ipfs://<cid>`, `ipfs://ipfs/<cid>`, `https://<host>/ipfs/<cid>`, or `https://<cid>.ipfs.<host>`. `<host>` can be any host. `getTokenInfosFromMetaplex` SHALL apply the same rewrite before it calls `fetchResource`.
 
@@ -30,6 +30,11 @@ A URI contains a CID in one of four forms: `ipfs://<cid>`, `ipfs://ipfs/<cid>`, 
 
 - **WHEN** `getProxiedUri` receives `https://<valid-CIDv1>.ipfs.<any-host>/`
 - **THEN** it SHALL return `<IPFS_GATEWAY>/<valid-CIDv1>`
+
+#### Scenario: CID in the host and an /ipfs/ path
+
+- **WHEN** `getProxiedUri` receives `https://<valid-CIDv1>.ipfs.<any-host>/ipfs/image.png`
+- **THEN** it SHALL return `<IPFS_GATEWAY>/<valid-CIDv1>/ipfs/image.png`
 
 #### Scenario: Server-side metadata read
 

@@ -16,13 +16,13 @@ export function resolveIpfsUri(url: URL): IpfsResolution | undefined {
     if (url.protocol === IPFS_PROTOCOL) {
         const path = url.host + url.pathname;
         const cidPath = path.startsWith('ipfs/') ? path.slice('ipfs/'.length) : path;
-        const resolution = toGateway(cidPath, url.search);
+        const resolution = toGateway(cidPath, url);
         if (resolution) return resolution;
         Logger.warn(`[ipfs] Cannot fetch a malformed CID: ${cidPath}`);
         return { kind: 'malformed-cid' };
     }
     const cidPath = gatewayCidPath(url);
-    return cidPath === undefined ? undefined : toGateway(cidPath, url.search);
+    return cidPath === undefined ? undefined : toGateway(cidPath, url);
 }
 
 const IPFS_PROTOCOL = 'ipfs:';
@@ -30,19 +30,19 @@ const GATEWAY_PATH_PREFIX = '/ipfs/';
 const SUBDOMAIN_NAMESPACE = 'ipfs';
 
 function gatewayCidPath(url: URL): string | undefined {
-    if (url.pathname.startsWith(GATEWAY_PATH_PREFIX)) return url.pathname.slice(GATEWAY_PATH_PREFIX.length);
     const [label, namespace] = url.hostname.split('.');
-    if (namespace !== SUBDOMAIN_NAMESPACE) return undefined;
-    return url.pathname === '/' ? label : label + url.pathname;
+    if (namespace === SUBDOMAIN_NAMESPACE) return url.pathname === '/' ? label : label + url.pathname;
+    if (url.pathname.startsWith(GATEWAY_PATH_PREFIX)) return url.pathname.slice(GATEWAY_PATH_PREFIX.length);
+    return undefined;
 }
 
-function toGateway(cidPath: string, search: string): GatewayResolution | undefined {
+function toGateway(cidPath: string, { search, hash }: URL): GatewayResolution | undefined {
     // Split the CID from any subpath (e.g. "QmXXX/image.png" → cid="QmXXX", subpath="/image.png")
     const firstSlash = cidPath.indexOf('/');
     const cid = firstSlash === -1 ? cidPath : cidPath.slice(0, firstSlash);
     const subpath = firstSlash === -1 ? '' : cidPath.slice(firstSlash);
     if (!verifyCID(cid)) return undefined;
-    return { kind: 'gateway', uri: `${IPFS_GATEWAY}/${cid}${subpath}${search}` };
+    return { kind: 'gateway', uri: `${IPFS_GATEWAY}/${cid}${subpath}${search}${hash}` };
 }
 
 function verifyCID(cid: string): boolean {
