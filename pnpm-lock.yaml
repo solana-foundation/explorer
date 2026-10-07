@@ -852,6 +852,9 @@ importers:
 
   packages/parsers:
     dependencies:
+      '@solana-program/compute-budget':
+        specifier: 0.18.1
+        version: 0.18.1(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
       '@solana-program/system':
         specifier: 0.14.0
         version: 0.14.0(@solana/kit@8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
@@ -871,6 +874,9 @@ importers:
         specifier: 0.15.3
         version: 0.15.3
     devDependencies:
+      '@explorer/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@vitest/coverage-v8':
         specifier: catalog:vitest
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
@@ -891,6 +897,10 @@ importers:
         version: 4.1.10(@opentelemetry/api@1.9.0)(@types/node@22.15.3)(@vitest/browser-playwright@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@26.0.0(bufferutil@4.0.7)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.15.3)(typescript@5.7.3))(vite@6.4.3(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
 
   packages/utils:
+    dependencies:
+      '@solana/kit':
+        specifier: 8.3.0
+        version: 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
     devDependencies:
       typescript:
         specifier: catalog:tooling
