@@ -3,9 +3,9 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { Account, isTokenProgramData } from '@providers/accounts';
 import React from 'react';
 
-import { getProxiedUri } from '@/app/features/metadata/utils';
 import { useCluster } from '@/app/providers/cluster';
 import { useCompressedNft } from '@/app/providers/compressed-nft';
+import { getProxiedUri } from '@/app/shared/lib/proxied-uri';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 

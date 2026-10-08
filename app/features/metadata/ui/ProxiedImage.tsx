@@ -3,10 +3,10 @@ import type { ReactNode } from 'react';
 
 import { ExternalResourceLink, type ImageProps, ImageWithFallback } from '@/app/components/shared/ui/image';
 import { Skeleton } from '@/app/components/shared/ui/skeleton';
+import { getProxiedUri as defaultGetProxiedUri } from '@/app/shared/lib/proxied-uri';
 
 import { type ImageFailure } from '../lib/imageFailure';
 import { useImageFailureReason } from '../model/useImageFailureReason';
-import { getProxiedUri as defaultGetProxiedUri } from '../utils';
 
 export type ProxiedImageProps = Omit<ImageProps, 'src' | 'fallback'> & {
     /** Original on-chain URI; routed through the metadata proxy when enabled. */

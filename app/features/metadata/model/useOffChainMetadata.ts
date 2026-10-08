@@ -3,8 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import { useCluster } from '@/app/providers/cluster';
 import { useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { useCompressedNft as useAsset } from '@/app/providers/compressed-nft';
-
-import { getProxiedUri } from '../utils';
+import { getProxiedUri } from '@/app/shared/lib/proxied-uri';
 
 export function useOffChainMetadata(pubkey: PublicKey): { metadata: Record<string, unknown> | null } {
     const { url } = useCluster();

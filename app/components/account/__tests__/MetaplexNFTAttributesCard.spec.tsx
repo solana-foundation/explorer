@@ -16,10 +16,6 @@ vi.mock('@/app/providers/compressed-nft', () => ({
     useCompressedNft: vi.fn(() => null),
 }));
 
-vi.mock('@/app/features/metadata/utils', () => ({
-    getProxiedUri: vi.fn((uri: string) => uri),
-}));
-
 function makeAccount(metadataUri: string): Account {
     const parsedData: TokenProgramData = {
         nftData: {

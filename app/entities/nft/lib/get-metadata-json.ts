@@ -1,6 +1,6 @@
 import type { Metadata } from '@metaplex-foundation/mpl-token-metadata';
 
-import { getProxiedUri } from '@/app/features/metadata/utils';
+import { getProxiedUri } from '@/app/shared/lib/proxied-uri';
 
 import type { NftJson } from './types';
 

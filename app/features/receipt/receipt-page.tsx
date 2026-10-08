@@ -17,9 +17,9 @@ import useSWR from 'swr';
 
 import { formatUsdValue, PriceStatus, USD_FALLBACK, useTokenPrice } from '@/app/entities/token-price';
 import { getReceiptAmount, getReceiptMint } from '@/app/entities/token-receipt';
-import { getProxiedUri } from '@/app/features/metadata';
 import { receiptAnalytics } from '@/app/shared/lib/analytics';
 import { Logger } from '@/app/shared/lib/logger';
+import { getProxiedUri } from '@/app/shared/lib/proxied-uri';
 import { AutoRefresh, useAutoRefreshInterval, type WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 

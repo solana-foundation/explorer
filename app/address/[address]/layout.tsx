@@ -5,9 +5,6 @@ import { AddressLookupTableAccountSection } from '@components/account/address-lo
 import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
 import { ConfigAccountSection } from '@components/account/ConfigAccountSection';
 import { FeatureAccountSection } from '@components/account/FeatureAccountSection';
-import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
-import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
-import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
 import { NonceAccountSection } from '@components/account/NonceAccountSection';
 import { detectSquadsAccountType, SquadsAccountSection } from '@components/account/squads/SquadsAccountSection';
 import { SysvarAccountSection } from '@components/account/SysvarAccountSection';
@@ -30,6 +27,7 @@ import {
     SYSVAR_PROGRAM_LABEL,
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
+import { isNftokenCollection, NFTOKEN_ADDRESS, NftokenAccountSection } from '@features/nftoken';
 import { SecurityNotification } from '@features/security-txt';
 import { StakeAccountSection } from '@features/stake';
 import { VoteAccountSection } from '@features/vote';
@@ -337,7 +335,7 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
             />
         );
     } else if (account.owner.toBase58() === NFTOKEN_ADDRESS) {
-        return <NFTokenAccountSection account={account} />;
+        return <NftokenAccountSection account={account} />;
     } else if (parsedData && isTokenProgramData(parsedData)) {
         return <TokenAccountSection account={account} tokenAccount={parsedData.parsed} tokenInfo={tokenInfo} />;
     } else if (isParsedAccountProgram(parsedData, NONCE_PROGRAM_LABEL)) {
@@ -460,12 +458,9 @@ function getNavigationTabs(pubkey: PublicKey, account: Account): AddressTab[] {
         tabs.push({ path: 'metadata', title: 'Metadata' });
     }
 
-    const isNFToken = account && isNFTokenAccount(account);
-    if (isNFToken) {
-        const collection = parseNFTokenCollectionAccount(account);
-        if (collection) {
-            tabs.push({ path: 'nftoken-collection-nfts', title: 'NFTs' });
-        }
+    const isNFToken = account.owner.toBase58() === NFTOKEN_ADDRESS;
+    if (isNftokenCollection(account)) {
+        tabs.push({ path: 'nftoken-collection-nfts', title: 'NFTs' });
     }
 
     if (

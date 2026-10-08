@@ -8,9 +8,9 @@ import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
 import { Dropdown, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
-import { getProxiedUri } from '@/app/features/metadata';
 import { useCluster } from '@/app/providers/cluster';
 import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
+import { getProxiedUri } from '@/app/shared/lib/proxied-uri';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { Address } from '../common/Address';
