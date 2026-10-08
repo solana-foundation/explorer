@@ -2,7 +2,7 @@ import { type ConnectableUrl } from '@entities/cluster';
 import { createSolanaRpc, isSolanaError, SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR } from '@solana/kit';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { isMethodNotFound } from '@/app/shared/lib/rpc-errors';
+import { asJsonRpcError, isMethodNotFound } from '@/app/shared/lib/rpc-errors';
 import { UPSTREAM_TIMEOUT_MS } from '@/app/shared/lib/timeouts';
 
 import { type AlpenglowGenesisCert, parseGenesisCert } from '../lib/genesis-cert';
@@ -76,15 +76,4 @@ function classifyDecline(error: unknown): AgGenesisCertAnswer | undefined {
         return { kind: 'refused' };
     }
     return undefined;
-}
-
-// kit reshapes a JSON-RPC error into a `SolanaError`, moving the code onto the context and the
-// node's own message under `__serverMessage`. Put back into the shape the classifier reads.
-function asJsonRpcError(error: unknown): { code?: number; message?: string } | undefined {
-    if (!isSolanaError(error)) return undefined;
-    const { __code: code, __serverMessage: message } = error.context as {
-        __code?: number;
-        __serverMessage?: string;
-    };
-    return { code, message };
 }

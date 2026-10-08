@@ -1,6 +1,12 @@
+import {
+    SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR,
+    SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND,
+    SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR,
+    SolanaError,
+} from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
-import { isMethodNotFound } from '../rpc-errors';
+import { asJsonRpcError, isMethodNotFound } from '../rpc-errors';
 
 describe('isMethodNotFound', () => {
     it('should recognise the standard JSON-RPC method-not-found code', () => {
@@ -35,5 +41,39 @@ describe('isMethodNotFound', () => {
         expect(isMethodNotFound(new Error('request timed out'))).toBe(false);
         expect(isMethodNotFound(undefined)).toBe(false);
         expect(isMethodNotFound('boom')).toBe(false);
+    });
+});
+
+describe('asJsonRpcError', () => {
+    it('should read the code and node message from a JSON-RPC SolanaError', () => {
+        const error = new SolanaError(SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND, {
+            __serverMessage: 'Method not found',
+        });
+
+        expect(asJsonRpcError(error)).toEqual({ code: -32601, message: 'Method not found' });
+    });
+
+    it('should keep the node message of an internal error so isMethodNotFound can read it', () => {
+        const error = new SolanaError(SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR, {
+            __serverMessage: 'Unsupported method: getProgramAccounts',
+        });
+
+        expect(isMethodNotFound(asJsonRpcError(error))).toBe(true);
+    });
+
+    it('should return the kit error code and no message for a SolanaError that is not a JSON-RPC error', () => {
+        const error = new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
+            headers: new Headers(),
+            message: 'Not Found',
+            statusCode: 404,
+        });
+
+        expect(asJsonRpcError(error)).toEqual({ code: SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, message: undefined });
+    });
+
+    it('should return undefined for an error that is not a SolanaError', () => {
+        expect(asJsonRpcError(new Error('Method not found'))).toBeUndefined();
+        expect(asJsonRpcError({ code: -32601, message: 'Method not found' })).toBeUndefined();
+        expect(asJsonRpcError(undefined)).toBeUndefined();
     });
 });
