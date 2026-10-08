@@ -1,9 +1,4 @@
-import {
-    InstructionCardView,
-    type InstructionNode,
-    ProgramField,
-    useInstructionSurface,
-} from '@entities/instruction-card';
+import { DecodedInstructionCard, parseCodamaArgs, useInstructionSurface } from '@entities/instruction-card';
 import {
     identifySolanaAttestationServiceInstruction,
     parseChangeAuthorizedSignersInstruction,
@@ -21,14 +16,12 @@ import {
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID,
     SolanaAttestationServiceInstruction,
 } from '@solana/attestation';
-import { AccountMeta } from '@solana/kit';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { capitalizeFirstLetter } from '@utils/index';
+import { AccountMeta, isSolanaError } from '@solana/kit';
+import { TransactionInstruction } from '@solana/web3.js';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
-import { BaseTable } from '@/app/shared/ui/Table';
 
-import { mapCodamaIxArgsToRows } from '../codama/codamaUtils';
+import { UnknownDetailsCard } from '../UnknownDetailsCard';
 
 export function isSolanaAttestationInstruction(transactionIx: TransactionInstruction) {
     return transactionIx.programId.toBase58() === SAS_PROGRAM_ID;
@@ -40,17 +33,6 @@ type ParsedSasInstruction = {
     data: Record<string, unknown>;
 };
 
-const SECTION_ROW_CLASS =
-    'bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground';
-
-/** Counts the discriminator the struct always carries, so a single argument still reads as none. */
-const ARGUMENT_KEY_THRESHOLD = 2;
-
-/**
- * Draws its own rows rather than declaring `InstructionField` descriptors: the argument
- * table is three columns wide (name, type, value) and generated from a Codama struct, so
- * the account rows have to span the extra column to stay flush right.
- */
 export function SolanaAttestationDetailsCard({
     ix,
     index,
@@ -62,48 +44,40 @@ export function SolanaAttestationDetailsCard({
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix, programId: ix.programId };
-    const { Address, showProgramField } = useInstructionSurface();
-    const { name, parsed } = parseSolanaAttestationInstruction(ix);
-    const hasArguments = Object.keys(parsed.data).length > ARGUMENT_KEY_THRESHOLD;
+    const { result } = useInstructionSurface();
+    const decoded = tryParseSolanaAttestationInstruction(ix);
+
+    if (!decoded) {
+        return (
+            <UnknownDetailsCard ix={ix} index={index} result={result} innerCards={innerCards} childIndex={childIndex} />
+        );
+    }
 
     return (
-        <InstructionCardView node={node} title={`Solana Attestation: ${name}`}>
-            {showProgramField && <ProgramField programId={node.programId} colSpan={2} />}
-            <BaseTable.Row className={SECTION_ROW_CLASS}>
-                <BaseTable.Cell>Account Name</BaseTable.Cell>
-                <BaseTable.Cell className="text-right" colSpan={2}>
-                    Address
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            {Object.entries(parsed.accounts).map(([accountName, account]) => (
-                <BaseTable.Row key={accountName}>
-                    <BaseTable.Cell>{capitalizeFirstLetter(accountName)}</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right" colSpan={2}>
-                        <Address pubkey={new PublicKey(account.address)} />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            ))}
-
-            {hasArguments && (
-                <>
-                    <BaseTable.Row className={SECTION_ROW_CLASS}>
-                        <BaseTable.Cell>Argument Name</BaseTable.Cell>
-                        <BaseTable.Cell>Type</BaseTable.Cell>
-                        <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
-                    </BaseTable.Row>
-                    {mapCodamaIxArgsToRows(parsed.data)}
-                </>
-            )}
-        </InstructionCardView>
+        <DecodedInstructionCard
+            node={{ childIndex, index, innerCards, ix, programId: ix.programId }}
+            ix={ix}
+            title={`Solana Attestation: ${decoded.name}`}
+            accountNames={Object.keys(decoded.parsed.accounts)}
+            args={parseCodamaArgs(decoded.parsed.data)}
+        />
     );
 }
 
-/** Throws for an instruction the program does not define; the caller's error boundary owns the fallback. */
-function parseSolanaAttestationInstruction(ix: TransactionInstruction): {
-    name: string;
-    parsed: ParsedSasInstruction;
-} {
+type DecodedSasInstruction = { name: string; parsed: ParsedSasInstruction };
+
+function tryParseSolanaAttestationInstruction(ix: TransactionInstruction): DecodedSasInstruction | undefined {
+    try {
+        return parseSolanaAttestationInstruction(ix);
+    } catch (error) {
+        if (isSolanaError(error)) {
+            return undefined;
+        }
+        throw error;
+    }
+}
+
+function parseSolanaAttestationInstruction(ix: TransactionInstruction): DecodedSasInstruction {
     const kitIx = toKitInstruction(ix);
 
     switch (identifySolanaAttestationServiceInstruction(ix)) {

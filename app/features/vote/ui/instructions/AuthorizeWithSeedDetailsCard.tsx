@@ -1,4 +1,4 @@
-import { address, defineInstructionCard, type InstructionFieldList, seed } from '@entities/instruction-card';
+import { address, defineInstructionCard, type InstructionFieldList, string } from '@entities/instruction-card';
 
 import type { AuthorizeWithSeedInfo } from '../../lib/instruction-types';
 import { authorityTypeFields } from './authority-type-fields';
@@ -20,7 +20,7 @@ function fields(info: AuthorizeWithSeedInfo): InstructionFieldList {
         address('Clock Sysvar', info.clockSysvar),
         address('Authority Base Key', info.authorityBaseKey),
         address('Authority Owner', info.authorityOwner),
-        seed('Authority Seed', info.authoritySeed),
+        string('Authority Seed', info.authoritySeed),
         address('New Authority', info.newAuthority),
         ...authorityTypeFields(info.authorityType),
     ];

@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { TxInstructionSurface } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     Compression,
@@ -13,12 +14,18 @@ import {
 } from '@solana-program/program-metadata';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PMP_ADDRESS } from '../../lib/constants';
+import { decodePmpContentInstruction } from '../../lib/decode-pmp-instruction';
 import { PmpDetailsCard } from '../PmpDetailsCard';
 
 vi.mock('@/app/shared/lib/analytics', () => ({ trackEvent: vi.fn() }));
+
+vi.mock('../../lib/decode-pmp-instruction', async importOriginal => {
+    const actual = await importOriginal<typeof import('../../lib/decode-pmp-instruction')>();
+    return { decodePmpContentInstruction: vi.fn(actual.decodePmpContentInstruction) };
+});
 
 vi.mock('@/app/components/instruction/InstructionCard', () => ({
     InstructionCard: ({ children, title }: { children: React.ReactNode; title: string }) => (
@@ -57,7 +64,9 @@ function makeIx(data: Uint8Array, accounts: PublicKey[]): TransactionInstruction
 
 function renderCard(ix: TransactionInstruction) {
     return render(
-        <PmpDetailsCard ix={ix} index={0} result={{ err: null }} fallback={<div data-testid="injected-fallback" />} />,
+        <TxInstructionSurface result={{ err: null }}>
+            <PmpDetailsCard ix={ix} index={0} fallback={<div data-testid="injected-fallback" />} />
+        </TxInstructionSurface>,
     );
 }
 
@@ -67,7 +76,12 @@ async function openDecodedTab() {
 }
 
 describe('PmpDetailsCard', () => {
-    it('should render a titled Set Data card with named accounts, config rows and the decoded document', async () => {
+    afterEach(() => {
+        vi.mocked(decodePmpContentInstruction).mockReset();
+        vi.restoreAllMocks();
+    });
+
+    it('should render a SetData card with named accounts, hint arguments and the decoded document', async () => {
         const packed = packDirectData({ compression: Compression.Zlib, content: DOC, encoding: Encoding.Utf8 });
         const ix = makeIx(
             getSetDataInstructionDataEncoder().encode({
@@ -83,27 +97,43 @@ describe('PmpDetailsCard', () => {
         renderCard(ix);
         await openDecodedTab();
 
-        // Labels mirror CodamaInstructionCard's style on purpose, so an `allocate` card in the same transaction
-        // reads identically. 'ProgramData' is not a typo for 'Program Data'.
         expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('ProgramMetadata: SetData');
         expect(screen.getByTestId('account-row-0')).toHaveTextContent('Metadata');
         expect(screen.getByTestId('account-row-1')).toHaveTextContent('Authority');
         expect(screen.getByTestId('account-row-4')).toHaveTextContent('ProgramData');
-        expect(screen.getByTestId('pmp-config-encoding')).toHaveTextContent('UTF-8');
-        expect(screen.getByTestId('pmp-config-compression')).toHaveTextContent('Zlib');
-        expect(screen.getByTestId('pmp-config-format')).toHaveTextContent('JSON');
-        expect(screen.getByTestId('pmp-config-data-source')).toHaveTextContent('Direct');
+        expect(readArgs()).toEqual([
+            ['encoding', 'enum', 'UTF-8'],
+            ['compression', 'enum', 'Zlib'],
+            ['format', 'enum', 'JSON'],
+            ['dataSource', 'enum', 'Direct'],
+        ]);
         expect(screen.getByTestId('pmp-decoded-text')).toHaveTextContent('company');
         expect(screen.getByTestId('pmp-payload-data-hash')).toBeInTheDocument();
+    });
+
+    it('should name the program in the Program row', () => {
+        renderCard(makeIx(new Uint8Array([3, 1, 0, 1]), [METADATA_PDA, AUTHORITY, PMP]));
+
+        expect(screen.getByText('ProgramMetadata')).toBeInTheDocument();
+    });
+
+    it('should label an account past the named ones as a remaining account', () => {
+        renderCard(makeIx(new Uint8Array([3, 1, 0, 1]), [METADATA_PDA, AUTHORITY, PMP, PMP, PMP, AUTHORITY]));
+
+        expect(screen.getByTestId('account-row-4')).toHaveTextContent('ProgramData');
+        expect(screen.getByTestId('account-row-5')).toHaveTextContent('Remaining Account #1');
     });
 
     it('should render the updated hints and the header-only note for a 4-byte setData', () => {
         renderCard(makeIx(new Uint8Array([3, 1, 0, 1]), [METADATA_PDA, AUTHORITY, PMP]));
 
         expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('ProgramMetadata: SetData');
-        expect(screen.getByTestId('pmp-config-format')).toHaveTextContent('JSON');
+        expect(readArgs()).toEqual([
+            ['encoding', 'enum', 'UTF-8'],
+            ['compression', 'enum', 'None'],
+            ['format', 'enum', 'JSON'],
+        ]);
         expect(screen.getByTestId('pmp-no-payload')).toBeInTheDocument();
-        expect(screen.queryByTestId('pmp-config-data-source')).not.toBeInTheDocument();
     });
 
     it('should render an Initialize card with its seed and decoded document', async () => {
@@ -123,7 +153,13 @@ describe('PmpDetailsCard', () => {
         await openDecodedTab();
 
         expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('ProgramMetadata: Initialize');
-        expect(screen.getByTestId('pmp-config-seed')).toHaveTextContent('idl');
+        expect(readArgs()).toEqual([
+            ['seed', 'string', 'idl'],
+            ['encoding', 'enum', 'UTF-8'],
+            ['compression', 'enum', 'None'],
+            ['format', 'enum', 'JSON'],
+            ['dataSource', 'enum', 'Direct'],
+        ]);
         expect(screen.getByTestId('account-row-4')).toHaveTextContent('System');
         expect(screen.getByTestId('pmp-decoded-text')).toHaveTextContent('1.0.0');
     });
@@ -140,7 +176,9 @@ describe('PmpDetailsCard', () => {
         renderCard(ix);
 
         expect(screen.getByTestId('instruction-card-title')).toHaveTextContent('ProgramMetadata: Write');
-        expect(screen.getByTestId('pmp-write-offset')).toHaveTextContent('96');
+        expect(screen.getByTestId('account-row-0')).toHaveTextContent('Buffer');
+        expect(screen.getByTestId('account-row-2')).toHaveTextContent('SourceBuffer');
+        expect(readArgs()).toEqual([['offset', 'number', '96']]);
         // RawDataField owns the hex grid and the byte count inside the Chunk row.
         expect(screen.getByTestId('pmp-write-chunk')).toHaveTextContent('de ad');
         expect(screen.getByTestId('pmp-write-chunk')).toHaveTextContent('2 bytes');
@@ -157,8 +195,29 @@ describe('PmpDetailsCard', () => {
 
         renderCard(ix);
 
-        expect(screen.getByTestId('pmp-write-source-buffer')).toHaveTextContent(FOREIGN_BUFFER.toBase58());
+        expect(screen.getByTestId('pmp-write-source-buffer')).toHaveTextContent(
+            'The chunk was copied from the SourceBuffer account',
+        );
+        const sourceBufferRow = screen.getByTestId('account-row-2');
+        expect(sourceBufferRow).toHaveTextContent('SourceBuffer');
+        expect(sourceBufferRow).toHaveTextContent(FOREIGN_BUFFER.toBase58());
         expect(screen.queryByTestId('pmp-write-chunk')).not.toBeInTheDocument();
+    });
+
+    it('should state that a Write with no chunk bytes and no source buffer carries no payload', () => {
+        const ix = makeIx(getWriteInstructionDataEncoder().encode({ offset: 0 }) as Uint8Array, [
+            METADATA_PDA,
+            AUTHORITY,
+            PMP,
+        ]);
+
+        renderCard(ix);
+
+        expect(screen.getByTestId('pmp-write-absent-chunk')).toHaveTextContent(
+            'This instruction carries no payload bytes.',
+        );
+        expect(screen.queryByTestId('pmp-write-chunk')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('pmp-write-source-buffer')).not.toBeInTheDocument();
     });
 
     it('should render the injected fallback for a housekeeping instruction', () => {
@@ -173,7 +232,19 @@ describe('PmpDetailsCard', () => {
         expect(screen.queryByTestId('instruction-card')).not.toBeInTheDocument();
     });
 
-    it('should keep the account and config tables when the payload fails to decode', async () => {
+    it('should render the injected fallback when the card throws', () => {
+        const failure = new Error('decode failed');
+        vi.mocked(decodePmpContentInstruction).mockImplementation(() => {
+            throw failure;
+        });
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        renderCard(makeIx(new Uint8Array([3, 1, 0, 1]), [METADATA_PDA, AUTHORITY]));
+
+        expect(screen.getByTestId('injected-fallback')).toBeInTheDocument();
+    });
+
+    it('should keep the account and argument rows when the payload fails to decode', async () => {
         const ix = makeIx(
             getSetDataInstructionDataEncoder().encode({
                 compression: Compression.Zlib, // a Zlib stream that is not one
@@ -190,8 +261,17 @@ describe('PmpDetailsCard', () => {
 
         expect(screen.getByTestId('pmp-decode-error')).toBeInTheDocument();
         expect(screen.getByTestId('account-row-0')).toHaveTextContent('Metadata');
-        expect(screen.getByTestId('pmp-config-encoding')).toHaveTextContent('UTF-8');
-        expect(screen.getByTestId('pmp-config-compression')).toHaveTextContent('Zlib');
+        expect(readArgs().slice(0, 2)).toEqual([
+            ['encoding', 'enum', 'UTF-8'],
+            ['compression', 'enum', 'Zlib'],
+        ]);
         expect(screen.queryByTestId('injected-fallback')).not.toBeInTheDocument();
     });
 });
+
+function readArgs(): string[][] {
+    return screen
+        .queryAllByRole('row')
+        .filter(row => row.dataset.testid?.startsWith('ix-args-0-'))
+        .map(row => Array.from(row.querySelectorAll('td'), cell => cell.textContent ?? ''));
+}

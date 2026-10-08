@@ -4,7 +4,7 @@ import { InstructionCardView, InstructionFields, type InstructionNode } from '@e
 export function GetMinimumDelegationDetailsCard({ node }: { node: InstructionNode }) {
     return (
         <InstructionCardView node={node} title="Stake Program: Get Minimum Delegation">
-            {/* Empty list — the Program row comes from the surface, not from a field. */}
+            {/* The list is empty, so `InstructionFields` draws only the Program row. */}
             <InstructionFields fields={[]} programId={node.programId} />
         </InstructionCardView>
     );

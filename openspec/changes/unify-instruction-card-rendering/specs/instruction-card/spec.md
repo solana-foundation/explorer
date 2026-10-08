@@ -4,15 +4,19 @@
 
 One rendering layer for instruction cards, shared by `/tx/[signature]` and `/tx/(inspector)/inspector`. A card declares what an instruction means; the surface it renders on owns the chrome. Adding a field is one descriptor; adding a surface is one Context value.
 
-**Scope.** These requirements bind every card that has migrated to the surface, and every card that migrates from here on. They are not a description of the current tree: System (13 cards) is the only migrated program, and the remaining 58 frame-drawing cards still resolve their own chrome — 49 hardcode `InstructionCard`, 7 take it as a prop, 2 hardcode it while being inspector-reachable. Each requirement below therefore reads as the rule a migration must satisfy, not as an invariant that already holds repo-wide.
+**Scope.** These requirements bind every card that has migrated to the surface, and every card that migrates from here on. These requirements do not describe the current tree. Programs migrate one at a time. An unmigrated card renders its own frame. Each requirement below therefore reads as the rule a migration must satisfy, not as an invariant that already holds repo-wide.
 
 ## ADDED Requirements
 
 ### Requirement: Surface-owned chrome
 
-Instruction cards MUST NOT receive surface chrome as props. The card frame, the address renderer, whether the leading `Program` row is emitted, and the transaction's `SignatureResult` SHALL be supplied by an `InstructionSurface` value through React Context.
+Instruction cards MUST NOT receive surface chrome as props. An `InstructionSurface` value in React Context SHALL contain the card frame and the transaction's `SignatureResult`.
 
-This supersedes the `InstructionCardComponent`, `AddressComponent`, and `showProgramField` injection props, and the inspector's `INSPECTOR_RESULT` / `INSPECTOR_SIGNATURE` placeholder constants — for migrated cards. All five still exist for the unmigrated ones; the props go program by program, and the constants go last, once the shared `UnknownDetailsCard` fallback stops requiring `result` as well. `useInstructionSurface` fails loudly rather than falling back to a default, matching `useInstructionParser`.
+The card body MUST draw the `Program` row in the decoded view, on both surfaces. The frame MUST draw its own `Program` row only in the raw view, where the body does not render. The frame therefore needs neither the width of the body nor the program name.
+
+An address MUST render the same way on both surfaces, so `InstructionSurface` MUST NOT contain an address renderer.
+
+For migrated cards, `InstructionSurface` replaces the `InstructionCardComponent` prop and the inspector's `INSPECTOR_RESULT` and `INSPECTOR_SIGNATURE` constants. Unmigrated cards keep all three. Each program migration removes that program's props. The last migration removes the constants, after the shared `UnknownDetailsCard` fallback stops requiring `result`. `useInstructionSurface` fails loudly rather than falling back to a default, matching `useInstructionParser`.
 
 #### Scenario: Same card on both surfaces
 
@@ -20,11 +24,21 @@ This supersedes the `InstructionCardComponent`, `AddressComponent`, and `showPro
 - **THEN** the card component MUST be the same component in both cases
 - **AND** only the surface value MUST differ
 
-#### Scenario: Program row is claimed exactly once
+#### Scenario: Program row is drawn exactly once
 
-- **WHEN** a surface's frame already renders a `Program` row of its own
-- **THEN** that surface MUST set `showProgramField: false`
-- **AND** exactly one `Program` row MUST appear in the rendered card
+- **WHEN** a card renders on either surface, in the decoded view or in the raw view
+- **THEN** exactly one `Program` row MUST appear in the rendered card
+- **AND** the body MUST draw it in the decoded view, and the frame MUST draw it in the raw view
+
+#### Scenario: Program row shows the card's program name
+
+- **WHEN** a card has a program name of its own
+- **THEN** the body MUST render that name in the `Program` row of the decoded view, on both surfaces
+
+#### Scenario: Card body wider than two columns
+
+- **WHEN** a card body has more than two columns
+- **THEN** the body MUST span its `Program` row to the right edge of the card body
 
 #### Scenario: Missing provider
 
@@ -33,17 +47,16 @@ This supersedes the `InstructionCardComponent`, `AddressComponent`, and `showPro
 
 ### Requirement: Fields declared as data
 
-A card's rows SHALL be declared as `InstructionField` descriptors rather than as table markup. Among migrated cards, `InstructionFields` MUST be the only component that knows row markup, cell alignment, and which address renderer the current surface uses. `ProgramField` is the single sanctioned exception: it owns the markup of the leading `Program` row, because the inspector renders that row through its own validator.
+A card SHALL declare its rows as data, not as table markup. Label and value rows are `InstructionField` descriptors. The argument rows of a decoded instruction are `InstructionArg` values. Among migrated cards, `ValueCell` MUST be the only component that formats a value. Field rows and argument rows both render `ValueCell`, to give each kind one format. `InstructionFields` renders the field rows. `DecodedInstructionCard` renders the account and argument rows. `ProgramField` is the single sanctioned exception: it owns the markup of the leading `Program` row, because the inspector renders that row through its own validator.
 
-The union is closed: `address`, `sol`, `bytes`, `seed`, `text`, `timestamp`, `preformatted`, `custom`, `heading`. Every kind but `heading` pairs a label with a value; `heading` MUST name the rows that follow it and MUST span the row, so a card whose rows fall into repeated groups does not draw that divider itself. `text` MUST accept only `string | number`, and `custom` MUST be the sole markup door. `timestamp` MUST take unix seconds and own the UTC conversion; `preformatted` MUST draw its value in a `<pre>` and MUST take a list unjoined, so that no card spells out the layout itself. `address` MUST accept both a web3.js `PublicKey` and a kit `Address`, coerced by the row rather than by the card, so kit-native slices stay kit-native. `custom` MUST take a `ReactElement` rather than a `ReactNode`, so that a labelled row with nothing in it is not representable; a field with no value to show MUST be omitted from the list instead.
+The union is closed: `address`, `sol`, `bytes`, `string`, `text`, `timestamp`, `preformatted`, `custom`, `heading`. Every kind but `heading` pairs a label with a value; `heading` MUST name the rows that follow it and MUST span the row, so a card whose rows fall into repeated groups does not draw that divider itself. `text` MUST accept only `string | number`, and `custom` MUST be the sole markup door. A `string` value is text that the reader copies exactly, such as a seed or a string argument. `string` MUST render its value inside `Copyable`. `timestamp` MUST take unix seconds and own the UTC conversion; `preformatted` MUST draw its value in a `<pre>` and MUST take a list unjoined, so that no card spells out the layout itself. The `address` constructor MUST accept a web3.js `PublicKey` or a kit `Address`. The constructor MUST store a kit `Address`, to give every row one address type. A kit-native slice passes its `Address` without a conversion. `custom` MUST take a `ReactElement` rather than a `ReactNode`, so that a labelled row with nothing in it is not representable; a field with no value to show MUST be omitted from the list instead.
 
 `InstructionFieldList` MUST admit `false` and `undefined` so optional rows read as `cond && address(...)`, and MUST NOT admit `null`, which `unicorn/no-null` forbids in card sources under `app/**` (the rule is off for tests and stories, and for a per-file legacy list that a migrated card MUST NOT join).
 
 #### Scenario: Field kind with no renderer
 
-- **WHEN** an `InstructionField` kind has no branch in the field renderer
+- **WHEN** a value kind has no `case` or no `CELL_CLASS` entry in `ValueCell`
 - **THEN** the build MUST fail on an exhaustiveness check
-- **AND** if such a descriptor still arrives at runtime the row MUST render empty and the kind MUST be reported, rather than the card failing
 
 #### Scenario: Repeated shape earns its own kind
 
@@ -69,6 +82,23 @@ The union is closed: `address`, `sol`, `bytes`, `seed`, `text`, `timestamp`, `pr
 - **THEN** it MUST NOT use `defineInstructionCard`, whose `title` and `fields` are plain functions
 - **AND** it MUST write its own component and render `InstructionCardView`
 - **AND** it SHOULD still use `InstructionFields` for the rows it can express, with `custom()` for the rest
+
+### Requirement: Decoded instruction card
+
+A card that decodes its instruction with a Codama client SHALL render `DecodedInstructionCard`. Every decoded card has the same account rows, role badges and argument table. The body has a Type column, so its `Program` row MUST span all `DECODED_TABLE_COLUMNS` columns.
+
+A Codama decoder returns only the accounts that its IDL declares, so `DecodedInstructionCard` MUST read its accounts from the instruction. `DecodedInstructionCard` MUST label each account with the IDL account name at the same position.
+
+#### Scenario: Instruction with more accounts than its IDL declares
+
+- **WHEN** an instruction has more accounts than its IDL names
+- **THEN** every account MUST have a row
+- **AND** each account past the last IDL name MUST have the label `Remaining Account #n`, with `n` counting from 1
+
+#### Scenario: Two accounts with one address
+
+- **WHEN** two accounts of an instruction have the same address
+- **THEN** each account MUST have its own row, with its own name and role badges
 
 ### Requirement: Single node prop
 

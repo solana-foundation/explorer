@@ -46,7 +46,6 @@ import { LoadingCard } from '../common/LoadingCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
-import { AddressWithContextCell } from './AddressWithContextCell';
 import { UnknownDetailsCard } from './UnknownDetailsCard';
 
 const INSPECTOR_RESULT = { err: null };
@@ -61,13 +60,8 @@ const PmpDetailsCard = dynamic(() => import('@features/decode-instruction-pmp').
 });
 
 const INSPECTOR_SURFACE: InstructionSurface = {
-    // The inspector resolves an address against the transaction under inspection
-    // rather than linking out to its account page.
-    Address: AddressWithContextCell,
     Shell: InspectorInstructionCardComponent,
     result: INSPECTOR_RESULT,
-    // `InspectorInstructionCard` renders its own Program row, so the fields must not.
-    showProgramField: false,
 };
 
 export function InstructionsSection({
@@ -210,8 +204,6 @@ function InspectorInstructionCard({
             <PmpDetailsCard
                 ix={ix}
                 index={index}
-                result={INSPECTOR_RESULT}
-                InstructionCardComponent={BaseInstructionCard}
                 childIndex={childIndex}
                 innerCards={innerCards}
                 // The card cannot import the IDL feature (boundaries/dependencies), so this surface decides what
@@ -365,8 +357,6 @@ function InspectorInstructionCard({
                     index={index}
                     result={INSPECTOR_RESULT}
                     InstructionCardComponent={InspectorInstructionCardComponent}
-                    AddressComponent={AddressWithContextCell}
-                    showProgramField={false}
                     childIndex={childIndex}
                     innerCards={innerCards}
                 />
@@ -417,6 +407,7 @@ function InspectorInstructionCard({
                         index={index}
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={InspectorInstructionCardComponent}
+                        alwaysShowProgramRow
                         raw={ix}
                         childIndex={childIndex}
                         innerCards={innerCards}
@@ -444,7 +435,6 @@ function InspectorInstructionCard({
                         ix={parsedIx}
                         raw={ix}
                         index={index}
-                        result={INSPECTOR_RESULT}
                         childIndex={childIndex}
                         innerCards={innerCards}
                     />

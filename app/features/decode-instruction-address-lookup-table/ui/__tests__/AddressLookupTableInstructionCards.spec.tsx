@@ -1,9 +1,4 @@
-import {
-    type InstructionNode,
-    type InstructionSurface,
-    InstructionSurfaceProvider,
-    TxInstructionSurface,
-} from '@entities/instruction-card';
+import { type InstructionNode, TxInstructionSurface } from '@entities/instruction-card';
 import { AddressLookupTableProgram, type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
@@ -166,26 +161,6 @@ describe('address-lookup-table cards', () => {
         });
     });
 
-    // Extend draws its own nested markup, so nothing but this stops it from
-    // hardcoding the transaction page's address renderer for the entries.
-    it('should draw every address with the surface address renderer', () => {
-        render(
-            <InstructionSurfaceProvider surface={STUB_SURFACE}>
-                <ExtendLookupTableDetailsCard
-                    node={node}
-                    info={{ ...TABLE, newAddresses: [key(A.entryOne), key(A.entryTwo)] }}
-                />
-            </InstructionSurfaceProvider>,
-        );
-
-        expect(screen.getAllByTestId('surface-address').map(el => el.textContent)).toEqual([
-            A.table,
-            A.authority,
-            A.entryOne,
-            A.entryTwo,
-        ]);
-    });
-
     // A foreign program id proves the row reads the node rather than an ALT-program constant.
     it('should render the program row from the node', async () => {
         renderCard(<FreezeLookupTableDetailsCard node={{ ...node, programId: key(A.authority) }} info={TABLE} />);
@@ -195,14 +170,6 @@ describe('address-lookup-table cards', () => {
         });
     });
 });
-
-/** A surface that renders nothing of its own, so only what a card asks of it shows up. */
-const STUB_SURFACE: InstructionSurface = {
-    Address: ({ pubkey }) => <span data-testid="surface-address">{pubkey.toBase58()}</span>,
-    Shell: ({ children }) => <table>{children}</table>,
-    result: { err: null },
-    showProgramField: false,
-};
 
 function renderCard(card: React.ReactElement) {
     return render(

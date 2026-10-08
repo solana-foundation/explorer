@@ -7,15 +7,20 @@ export {
     custom,
     heading,
     preformatted,
-    seed,
     sol,
+    string,
     text,
     timestamp,
 } from './model/fields';
 export type { InstructionField, InstructionFieldList } from './model/fields';
+export { remainingAccountLabel } from './model/accounts';
+export { parseCodamaArgs } from './model/args';
+export type { InstructionArg } from './model/args';
 export type { InstructionNode } from './model/node';
 export { InstructionSurfaceProvider, useInstructionSurface } from './model/surface';
-export type { InstructionAddressProps, InstructionShellProps, InstructionSurface } from './model/surface';
+export type { InstructionShellProps, InstructionSurface } from './model/surface';
+export { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from './ui/DecodedInstructionCard';
+export { InstructionAddress } from './ui/InstructionAddress';
 export { InstructionCardView } from './ui/InstructionCardView';
 export { InstructionFields } from './ui/InstructionFields';
 export { ProgramField } from './ui/ProgramField';

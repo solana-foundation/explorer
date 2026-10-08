@@ -9,9 +9,10 @@ type ProgramFieldProps = {
     showExtendedInfo?: boolean;
     /** For a card whose table is wider than two columns, so the row still reaches the right edge. */
     colSpan?: number;
+    name?: string;
 };
 
-export function ProgramField({ programId, showExtendedInfo = false, colSpan }: ProgramFieldProps) {
+export function ProgramField({ programId, showExtendedInfo = false, colSpan, name }: ProgramFieldProps) {
     return (
         <BaseTable.Row>
             <BaseTable.Cell>Program</BaseTable.Cell>
@@ -19,7 +20,7 @@ export function ProgramField({ programId, showExtendedInfo = false, colSpan }: P
                 {showExtendedInfo ? (
                     <AddressWithContext pubkey={programId} validator={programValidator} />
                 ) : (
-                    <Address pubkey={programId} alignRight link />
+                    <Address pubkey={programId} alignRight link overrideText={name} />
                 )}
             </BaseTable.Cell>
         </BaseTable.Row>

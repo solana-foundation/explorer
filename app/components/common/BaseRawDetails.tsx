@@ -2,7 +2,7 @@ import { Address } from '@components/common/Address';
 import { TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
-import { Badge } from '@/app/components/shared/ui/badge';
+import { AccountRoleBadges } from '@/app/shared/ui/AccountRoleBadges';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { HexData } from './HexData';
@@ -52,16 +52,7 @@ function BaseTransactionInstructionRawDetails({ ix }: { ix: TransactionInstructi
                 <BaseTable.Row key={keyIndex}>
                     <BaseTable.Cell>
                         <div className="mr-1.5 md:inline">Account #{keyIndex + 1}</div>
-                        {isWritable && (
-                            <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
-                                Writable
-                            </Badge>
-                        )}
-                        {isSigner && (
-                            <Badge ui="dashkit" variant="info" className="mr-[3px]">
-                                Signer
-                            </Badge>
-                        )}
+                        <AccountRoleBadges isWritable={isWritable} isSigner={isSigner} />
                     </BaseTable.Cell>
                     <BaseTable.Cell className="text-right">
                         <Address pubkey={pubkey} alignRight link />
