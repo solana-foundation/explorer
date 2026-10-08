@@ -86,14 +86,7 @@ describe('fetchNftokenMetadata', () => {
         await expect(fetchNftokenMetadata(URI)).resolves.toEqual({ kind: 'unavailable' });
     });
 
-    it('should settle a 502 from the metadata proxy as unavailable', async () => {
-        vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
-        respondWith({ error: 'Bad Gateway' }, { status: 502 });
-
-        await expect(fetchNftokenMetadata(URI)).resolves.toEqual({ kind: 'unavailable' });
-    });
-
-    it.each([408, 429, 500, 503, 504])('should throw on status %i so the caller retries', async status => {
+    it.each([408, 429, 500, 502, 503, 504])('should throw on status %i so the caller retries', async status => {
         respondWith({ error: 'error' }, { status });
 
         await expect(fetchNftokenMetadata(URI)).rejects.toThrow(String(status));

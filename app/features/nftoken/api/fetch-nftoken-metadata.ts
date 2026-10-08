@@ -35,8 +35,7 @@ function isFetchable(uri: string): boolean {
 
 const REQUEST_TIMEOUT = 408;
 const RATE_LIMITED = 429;
-const BAD_GATEWAY = 502;
 
 function isTransient(status: number): boolean {
-    return status === REQUEST_TIMEOUT || status === RATE_LIMITED || (status >= 500 && status !== BAD_GATEWAY);
+    return status === REQUEST_TIMEOUT || status === RATE_LIMITED || status >= 500;
 }
