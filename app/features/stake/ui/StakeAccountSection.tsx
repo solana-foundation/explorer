@@ -21,6 +21,7 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import type { StakeActivationStatus } from '../api/stake-activation';
 import { EPOCH_NEVER_SET } from '../lib/constants';
 import type { StakeAccountInfo, StakeAccountType, StakeMeta } from '../lib/validators';
+import { useCurrentEpoch } from '../model/use-current-epoch';
 import {
     type DisabledTotalRewardState,
     type TotalRewardState,
@@ -82,13 +83,21 @@ export function StakeAccountSection({
 }
 
 function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
-    const lockupExpiryMs = unixTimestampToMs(stakeAccount.meta.lockup.unixTimestamp);
-    if (Date.now() >= lockupExpiryMs) {
+    const currentEpoch = useCurrentEpoch();
+    const { epoch, unixTimestamp } = stakeAccount.meta.lockup;
+    const lockupExpiryMs = unixTimestampToMs(unixTimestamp);
+    // The stake program holds a lockup while either its timestamp or its epoch is still ahead.
+    const isTimestampLocked = Date.now() < lockupExpiryMs;
+    const isEpochLocked = currentEpoch !== undefined && BigInt(epoch) > currentEpoch;
+    if (!isTimestampLocked && !isEpochLocked) {
         return null;
     }
     return (
         <Alert variant="warning" className="text-center">
-            <strong>Account is locked!</strong> Lockup expires on {displayTimestampUtc(lockupExpiryMs)}
+            <strong>Account is locked!</strong> Lockup expires
+            {isTimestampLocked && ` on ${displayTimestampUtc(lockupExpiryMs)}`}
+            {isTimestampLocked && isEpochLocked && ' and'}
+            {isEpochLocked && ` at epoch ${epoch}`}
         </Alert>
     );
 }
