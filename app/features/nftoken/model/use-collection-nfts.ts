@@ -9,7 +9,8 @@ import { Logger } from '@/app/shared/lib/logger';
 import { type CollectionNftsAnswer, fetchCollectionNfts } from '../api/fetch-collection-nfts';
 import { ERROR_RETRY_COUNT } from './swr-options';
 
-type CollectionNftsState = { kind: 'loading' } | (CollectionNftsAnswer & { refreshing: boolean }) | { kind: 'failed' };
+export type CollectionNftsState =
+    { kind: 'loading' } | (CollectionNftsAnswer & { refreshing: boolean }) | { kind: 'failed' };
 
 export function useCollectionNfts(collection: Address): CollectionNftsState & { refresh: () => void } {
     const { connectableUrl } = useCluster();

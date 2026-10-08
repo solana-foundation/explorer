@@ -1,6 +1,6 @@
 import type { Account } from '@providers/accounts';
 import type { PublicKey } from '@solana/web3.js';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { type ReactNode } from 'react';
 import { SWRConfig } from 'swr';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -17,15 +17,18 @@ import {
 } from '../../__tests__/fixtures';
 import { NftokenAccountSection } from '../NftokenAccountSection';
 
-const mocks = vi.hoisted(() => ({ fetchCollectionNfts: vi.fn() }));
+const mocks = vi.hoisted(() => ({ fetchCollectionNfts: vi.fn(), refreshAccount: vi.fn() }));
 
 vi.mock('@entities/cluster', () => ({ useCluster: () => ({ connectableUrl: 'https://mock.rpc' }) }));
-vi.mock('@entities/account', () => ({ useRefreshAccount: () => vi.fn() }));
+vi.mock('@entities/account', () => ({ useRefreshAccount: () => mocks.refreshAccount }));
 vi.mock('@features/account', () => ({
-    AccountCard: ({ children }: { children: ReactNode }) => (
-        <table>
-            <tbody>{children}</tbody>
-        </table>
+    AccountCard: ({ children, refresh }: { children: ReactNode; refresh: () => void }) => (
+        <>
+            <button onClick={refresh}>Refresh</button>
+            <table>
+                <tbody>{children}</tbody>
+            </table>
+        </>
     ),
 }));
 vi.mock('@components/account/UnknownAccountCard', () => ({ UnknownAccountCard: () => <p>UnknownAccountCard</p> }));
@@ -86,6 +89,22 @@ describe('NftokenAccountSection', () => {
         expect(
             await screen.findByRole('row', { name: `Number of NFTs ${MAINNET_NFT_ACCOUNTS.length + 2}` }),
         ).toBeInTheDocument();
+    });
+
+    it('should count the NFTs again when the user refreshes the overview', async () => {
+        mocks.fetchCollectionNfts
+            .mockResolvedValueOnce({ kind: 'loaded', nfts: MAINNET_NFT_ACCOUNTS, undecodableCount: 0 })
+            .mockResolvedValueOnce({ kind: 'loaded', nfts: MAINNET_NFT_ACCOUNTS.slice(1), undecodableCount: 0 });
+        const account = collectionAccount();
+        renderSection(account);
+        await screen.findByRole('row', { name: `Number of NFTs ${MAINNET_NFT_ACCOUNTS.length}` });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+        expect(
+            await screen.findByRole('row', { name: `Number of NFTs ${MAINNET_NFT_ACCOUNTS.length - 1}` }),
+        ).toBeInTheDocument();
+        expect(mocks.refreshAccount).toHaveBeenCalledWith(account.pubkey, 'parsed');
     });
 
     it('should show Loading... as the count while the request is pending', () => {
