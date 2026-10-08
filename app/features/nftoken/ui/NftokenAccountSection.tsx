@@ -11,7 +11,7 @@ import type { Address } from '@solana/kit';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { type NftokenCollectionAccount, type NftokenNftAccount, parseNftokenAccount } from '../lib/nftoken-accounts';
-import { useCollectionNfts } from '../model/use-collection-nfts';
+import { type CollectionNftsState, useCollectionNfts } from '../model/use-collection-nfts';
 
 export function NftokenAccountSection({ account }: { account: Account }) {
     const nftoken = parseNftokenAccount(account);
@@ -47,20 +47,20 @@ function NftCard({ account, nft }: { account: Account; nft: NftokenNftAccount })
 
 function CollectionCard({ account, collection }: { account: Account; collection: NftokenCollectionAccount }) {
     const refreshAccount = useRefreshAccount();
+    const nfts = useCollectionNfts(collection.address);
+    const refresh = () => {
+        refreshAccount(account.pubkey, 'parsed');
+        nfts.refresh();
+    };
 
     return (
-        <AccountCard
-            title="Overview"
-            account={account}
-            refresh={() => refreshAccount(account.pubkey, 'parsed')}
-            analyticsSection="nft_token_collection_card"
-        >
+        <AccountCard title="Overview" account={account} refresh={refresh} analyticsSection="nft_token_collection_card">
             <AccountAddressRow account={account} />
             <AddressRow address={collection.authority} label="Authority" />
             <BaseTable.Row>
                 <BaseTable.Cell>Number of NFTs</BaseTable.Cell>
                 <BaseTable.Cell className="text-right">
-                    <NftCount collection={collection.address} />
+                    <NftCount nfts={nfts} />
                 </BaseTable.Cell>
             </BaseTable.Row>
         </AccountCard>
@@ -78,9 +78,7 @@ function AddressRow({ address, label, missing }: { address: Address | undefined;
     );
 }
 
-function NftCount({ collection }: { collection: Address }): string | number {
-    const nfts = useCollectionNfts(collection);
-
+function NftCount({ nfts }: { nfts: CollectionNftsState }): string | number {
     switch (nfts.kind) {
         case 'loading':
             return 'Loading...';
