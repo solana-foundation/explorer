@@ -1,10 +1,8 @@
 import { vi } from 'vitest';
 
-import { getProxiedUri } from '../utils';
+import { getProxiedUri } from '../proxied-uri';
 
-// A well-known valid CIDv0 (contains Hello World)
 const VALID_CID_V0 = 'QmWATWQ7fVPP2EFGu71UkfnqhYXDYH566qy47CnJDgvs8u';
-// A well-known valid CIDv1 (contains Hello World)
 const VALID_CID_V1 = 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3ek5bfx73d7h4x7bgd35y2nuq';
 
 describe('getProxiedUri', () => {
@@ -113,8 +111,6 @@ describe('getProxiedUri', () => {
 
     it('should return malformed URL strings unchanged rather than throw', () => {
         process.env.NEXT_PUBLIC_METADATA_ENABLED = 'true';
-        // Unparseable on-chain URIs must not crash callers that render the
-        // result inline (e.g. ProxiedImage outside an error boundary).
         expect(getProxiedUri('not-a-valid-url')).toBe('not-a-valid-url');
         expect(getProxiedUri('://missing-protocol')).toBe('://missing-protocol');
         expect(getProxiedUri('http://')).toBe('http://');

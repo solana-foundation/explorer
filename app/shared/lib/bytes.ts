@@ -269,7 +269,7 @@ export function equals(a: Uint8Array, b: Uint8Array): boolean {
  * Check whether `data` begins with `prefix`.
  * An empty prefix matches any input; a prefix longer than `data` never matches.
  */
-export function startsWith(data: Uint8Array, prefix: Uint8Array): boolean {
+export function startsWith(data: ArrayLike<number>, prefix: ArrayLike<number>): boolean {
     if (prefix.length > data.length) {
         return false;
     }

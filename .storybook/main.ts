@@ -55,12 +55,6 @@ const config: StorybookConfig = {
                         find: '@bundlr-network/client',
                         replacement: path.resolve(__dirname, './__mocks__/@bundlr-network/client.ts'),
                     },
-                    // Stub useCollectionNfts so suspense-mode SWR never fires getProgramAccounts.
-                    {
-                        // eslint-disable-next-line no-restricted-syntax -- module path matcher for Vite alias
-                        find: /^\.\/nftoken-hooks(?:\.tsx?)?$/,
-                        replacement: path.resolve(__dirname, './__mocks__/nftoken-hooks.tsx'),
-                    },
                 ],
             },
         };

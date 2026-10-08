@@ -1,7 +1,7 @@
-import { getProxiedUri } from '@features/metadata/utils';
 import { vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { getProxiedUri } from '@/app/shared/lib/proxied-uri';
 
 import { STATUS_MESSAGES } from '../feature';
 import { GET } from '../route';

@@ -1,32 +1,28 @@
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { NFTokenNFTHeader } from '../NFTokenAccountHeader';
+import solanaHero from '@/app/components/shared/ui/image/__stories__/solana_hero_generated.jpg';
 
-const nft = {
-    address: 'NFT1Tokenaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    authority: 'Authoraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    authority_can_update: true,
-    collection: null,
-    delegate: null,
-    holder: 'Holderaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    metadata_url: 'https://example.com/nft.json',
-};
+import { BaseNftokenHeader } from '../BaseNftokenHeader';
 
-const meta: Meta<typeof NFTokenNFTHeader> = {
-    component: NFTokenNFTHeader,
+const meta = {
+    component: BaseNftokenHeader,
     decorators: [withViewportFromGlobal],
     parameters: {
         viewport: { options: INITIAL_VIEWPORTS },
     },
     tags: ['autodocs', 'test'],
-    title: 'Components/Account/NFToken/NFTokenAccountHeader@Media',
-};
+    title: 'Features/NFToken/NftokenHeader@Media',
+} satisfies Meta<typeof BaseNftokenHeader>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { nft };
+const args = {
+    kind: 'nft',
+    metadata: { kind: 'loaded', metadata: { image: solanaHero.src, name: 'Genesis: friends.glow' } },
+    mutable: true,
+} as const;
 
 export const Mobile: Story = {
     args,

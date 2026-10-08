@@ -1,10 +1,9 @@
 import { CompressedNftAccountHeader } from '@components/account/CompressedNftCard';
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
-import { isNFTokenAccount } from '@components/account/nftoken/isNFTokenAccount';
-import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
 import { useDasImage } from '@entities/digital-asset';
 import { isMetaplexNFT } from '@entities/nft';
 import { STAKE_PROGRAM_LABEL } from '@explorer/parsers';
+import { NftokenAccountHeader, parseNftokenAccount } from '@features/nftoken';
 import {
     Account,
     isTokenProgramData,
@@ -22,7 +21,7 @@ import { create } from 'superstruct';
 import { dasImageAddress } from '@/app/components/account/das-image-address';
 import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { ProxiedImage } from '@/app/features/metadata';
-import { getProxiedUri } from '@/app/features/metadata/utils';
+import { getProxiedUri } from '@/app/shared/lib/proxied-uri';
 import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
 export function AccountHeader({
@@ -57,9 +56,9 @@ export function AccountHeader({
         return <MetaplexNFTHeader nftData={parsedData.nftData} />;
     }
 
-    const nftokenNFT = account && isNFTokenAccount(account);
-    if (nftokenNFT && account) {
-        return <NFTokenAccountHeader account={account} />;
+    const nftoken = account && parseNftokenAccount(account);
+    if (nftoken) {
+        return <NftokenAccountHeader nftoken={nftoken} />;
     }
 
     if (isProgram) {

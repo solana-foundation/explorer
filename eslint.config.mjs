@@ -606,13 +606,11 @@ export default tseslint.config(
     // logic to `shared/`).
     {
         files: [
-            // app/entities cross-entity / wrong-direction imports
-            'app/entities/nft/lib/get-metadata-json.ts',
-
             // app/features cross-feature imports
             'app/features/idl/interactive-idl/model/use-mainnet-confirmation.ts',
             'app/features/instruction-simulation/ui/SimulationCard.tsx',
-            'app/features/receipt/receipt-page.tsx',
+            'app/features/nftoken/ui/BaseNftokenTile.tsx',
+            'app/features/nftoken/ui/NftokenAccountSection.tsx',
             'app/features/stake/ui/StakeAccountSection.tsx',
             'app/features/transaction/ui/AccountDetailDrawer.tsx',
             'app/features/transaction/ui/AccountExpandedSections.tsx',
@@ -795,8 +793,6 @@ export default tseslint.config(
             'app/components/account/VerifiedBuildCard.tsx',
             'app/components/account/history/TokenInstructionsCard.tsx',
             'app/components/account/history/TokenTransfersCard.tsx',
-            'app/components/account/nftoken/isNFTokenAccount.ts',
-            'app/components/account/nftoken/nftoken.ts',
             'app/components/account/sas/AttestationDataCard.tsx',
             'app/components/account/sas/SolanaAttestationCard.tsx',
             'app/components/account/token-extensions/ScaledUiAmountMultiplierTooltip.tsx',
@@ -972,8 +968,6 @@ export default tseslint.config(
             'app/components/account/AccountHeader.tsx',
             'app/components/account/AnchorAccountCard.tsx',
             'app/components/account/MetaplexNFTAttributesCard.tsx',
-            'app/components/account/nftoken/nftoken-hooks.tsx',
-            'app/components/account/nftoken/nftoken-types.ts',
             'app/components/account/sas/AttestationDataCard.tsx',
             'app/components/common/BaseInstructionCard.tsx',
             'app/components/common/InspectorInstructionCard.tsx',

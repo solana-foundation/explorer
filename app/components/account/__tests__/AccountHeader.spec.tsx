@@ -4,6 +4,7 @@ import React from 'react';
 import { vi } from 'vitest';
 
 import { AccountHeader } from '@/app/components/account/AccountHeader';
+import { accountBytes, MAINNET_NFTS, nftokenAccount } from '@/app/features/nftoken/__tests__/fixtures';
 import { useSecurityTxt } from '@/app/features/security-txt';
 import { createNeodymeSecurityTxt, createPmpSecurityTxt } from '@/app/features/security-txt/ui/__tests__/helpers';
 import type { Account, UpgradeableLoaderAccountData } from '@/app/providers/accounts';
@@ -26,8 +27,9 @@ vi.mock('@components/account/MetaplexNFTHeader', () => ({
     MetaplexNFTHeader: () => <div data-testid="metaplex-nft-header">Metaplex NFT Header</div>,
 }));
 
-vi.mock('@components/account/nftoken/NFTokenAccountHeader', () => ({
-    NFTokenAccountHeader: () => <div data-testid="nftoken-header">NFToken Header</div>,
+vi.mock('@features/nftoken', async () => ({
+    ...(await vi.importActual('@features/nftoken')),
+    NftokenAccountHeader: () => <div data-testid="nftoken-header">NFToken Header</div>,
 }));
 
 vi.mock('@components/account/CompressedNftCard', () => ({
@@ -47,10 +49,6 @@ vi.mock('@providers/compressed-nft', () => ({
 vi.mock('@entities/nft', async () => ({
     ...(await vi.importActual('@entities/nft')),
     isMetaplexNFT: vi.fn(() => false),
-}));
-
-vi.mock('@components/account/nftoken/isNFTokenAccount', () => ({
-    isNFTokenAccount: vi.fn(() => false),
 }));
 
 vi.mock('@utils/token-info', () => ({
@@ -319,6 +317,27 @@ describe('AccountHeader', () => {
 
             expect(screen.getByRole('heading', { name: 'Stake Account' })).toBeInTheDocument();
             expect(screen.queryByRole('heading', { name: 'Account' })).not.toBeInTheDocument();
+        });
+    });
+
+    describe('NFToken account', () => {
+        const [nft] = MAINNET_NFTS;
+
+        it('should render the NFToken header for an account that decodes', () => {
+            const account = nftokenAccount(accountBytes(nft.base64), nft.pubkey);
+
+            render(<AccountHeader address={nft.pubkey} account={account} isTokenInfoLoading={false} />);
+
+            expect(screen.getByTestId('nftoken-header')).toBeInTheDocument();
+        });
+
+        it('should skip the NFToken header for an NFToken account that does not decode', () => {
+            const account = nftokenAccount(new Uint8Array(188), nft.pubkey);
+
+            render(<AccountHeader address={nft.pubkey} account={account} isTokenInfoLoading={false} />);
+
+            expect(screen.queryByTestId('nftoken-header')).not.toBeInTheDocument();
+            expect(screen.getByTestId('compressed-nft-header')).toBeInTheDocument();
         });
     });
 });

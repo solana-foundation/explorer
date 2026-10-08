@@ -1,5 +1,7 @@
-import { NFTokenCollectionNFTGrid } from '@components/account/nftoken/NFTokenCollectionNFTGrid';
+import { NftokenCollectionGrid } from '@features/nftoken';
+import { isAddress } from '@solana/kit';
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
+import { notFound } from 'next/navigation';
 import { Metadata } from 'next/types';
 
 type Props = Readonly<{
@@ -19,5 +21,7 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
 export default async function NFTokenCollectionPage(props: Props) {
     const { address } = await props.params;
 
-    return <NFTokenCollectionNFTGrid collection={address} />;
+    if (!isAddress(address)) notFound();
+
+    return <NftokenCollectionGrid collection={address} />;
 }
