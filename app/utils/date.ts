@@ -51,6 +51,15 @@ export function displayTimestampUtc(unixTimestamp: number, shortTimeZoneName = f
     return `${dateString} at ${timeString}`;
 }
 
+export function displayDateUtc(unixTimestampMs: number): string {
+    return new Intl.DateTimeFormat('en-US', {
+        day: 'numeric',
+        month: 'short',
+        timeZone: 'UTC',
+        year: 'numeric',
+    }).format(new Date(unixTimestampMs));
+}
+
 export function displayTimestampWithoutDate(unixTimestamp: number, shortTimeZoneName = true) {
     const expireDate = new Date(unixTimestamp);
     const timeString = new Intl.DateTimeFormat('en-US', {

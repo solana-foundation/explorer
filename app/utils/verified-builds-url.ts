@@ -1,5 +1,28 @@
+import { Cluster } from './cluster';
+
 // Canonical docs link for verified builds, shared by every card that explains the feature.
 export const VERIFIED_BUILDS_GUIDE_URL = 'https://solana.com/developers/guides/advanced/verified-builds';
+
+const OSEC_REGISTRY_URL = 'https://verify.osec.io';
+const OSEC_DEVNET_REGISTRY_URL = 'https://verify-devnet.osec.io';
+
+// OSEC hosts a separate verified-builds registry per cluster; Testnet/Custom have none. Kept in this
+// React-free module so server routes (e.g. the account OG image) can read it without pulling the SWR/
+// web3.js graph in `verified-builds.tsx`.
+export function getOsecRegistryUrl(cluster: Cluster): string | undefined {
+    switch (cluster) {
+        case Cluster.MainnetBeta:
+            return OSEC_REGISTRY_URL;
+        case Cluster.Devnet:
+            return OSEC_DEVNET_REGISTRY_URL;
+        default:
+            return undefined;
+    }
+}
+
+export function supportsVerifiedBuilds(cluster: Cluster): boolean {
+    return getOsecRegistryUrl(cluster) !== undefined;
+}
 
 // Strip `.git` from clone URLs so `<repo>/tree/<sha>` deep-links resolve on GitHub.
 export function normalizeRepoUrl(repoUrl: string | undefined): string | undefined {
