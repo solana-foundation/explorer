@@ -44,13 +44,7 @@ describe('instruction::SystemDetailsCard', () => {
                     <TransactionsProvider>
                         <AccountsProvider>
                             <TxInstructionSurface result={{ err: null }}>
-                                <SystemDetailsCard
-                                    index={index}
-                                    ix={parsedIx}
-                                    raw={ti}
-                                    result={{ err: null }}
-                                    tx={tx}
-                                />
+                                <SystemDetailsCard index={index} ix={parsedIx} raw={ti} tx={tx} />
                             </TxInstructionSurface>
                         </AccountsProvider>
                     </TransactionsProvider>
@@ -79,13 +73,7 @@ describe('instruction::SystemDetailsCard', () => {
                     <TransactionsProvider>
                         <AccountsProvider>
                             <TxInstructionSurface result={{ err: null }}>
-                                <SystemDetailsCard
-                                    index={index}
-                                    ix={parsedIx}
-                                    raw={ti}
-                                    result={{ err: null }}
-                                    tx={tx}
-                                />
+                                <SystemDetailsCard index={index} ix={parsedIx} raw={ti} tx={tx} />
                             </TxInstructionSurface>
                         </AccountsProvider>
                     </TransactionsProvider>

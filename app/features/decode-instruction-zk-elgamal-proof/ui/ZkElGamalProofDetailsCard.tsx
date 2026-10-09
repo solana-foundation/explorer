@@ -2,12 +2,11 @@ import {
     address,
     defineInstructionCard,
     InstructionCardView,
-    type InstructionNode,
     text,
+    toInstructionNode,
 } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
 import type { TransactionInstruction } from '@solana/web3.js';
-import React from 'react';
 
 import type { CloseContextStateInfo, VerifyProofInfo, ZkElGamalProofParsed } from '../lib/zk-elgamal-proof-parser';
 
@@ -44,7 +43,7 @@ type ZkElGamalProofDetailsCardProps = {
 };
 
 export function ZkElGamalProofDetailsCard({ ix, raw, index, innerCards, childIndex }: ZkElGamalProofDetailsCardProps) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
+    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
 
     if ('unknown' in ix) {
         return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;

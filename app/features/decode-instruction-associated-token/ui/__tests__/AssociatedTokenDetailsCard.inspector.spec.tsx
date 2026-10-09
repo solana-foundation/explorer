@@ -8,6 +8,7 @@ import { resolveAddressLookupTables } from '@/app/__tests__/mock-resolvers';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import * as mock from '@/app/__tests__/mocks';
 import { InspectorInstructionCard } from '@/app/components/common/InspectorInstructionCard';
+import { type InstructionSurface, InstructionSurfaceProvider } from '@/app/entities/instruction-card';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@/app/entities/instruction-parser';
 import { associatedTokenInstructionParser } from '@/app/features/decode-instruction-associated-token';
 import { AccountsProvider } from '@/app/providers/accounts';
@@ -17,6 +18,7 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { AssociatedTokenDetailsCard } from '../AssociatedTokenDetailsCard';
 
 const dispatcher = createInstructionParserDispatcher([associatedTokenInstructionParser]);
+const SURFACE: InstructionSurface = { Shell: InspectorInstructionCard, result: { err: null } };
 
 describe('inspector::AssociatedTokenDetailsCard', () => {
     test('should render "CreateIdempotent" card', async () => {
@@ -36,13 +38,9 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard
-                            ix={ix}
-                            raw={ti}
-                            index={index}
-                            result={{ err: null }}
-                            InstructionCardComponent={InspectorInstructionCard}
-                        />
+                        <InstructionSurfaceProvider surface={SURFACE}>
+                            <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} />
+                        </InstructionSurfaceProvider>
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,
@@ -78,13 +76,9 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard
-                            ix={ix}
-                            raw={ti}
-                            index={index}
-                            result={{ err: null }}
-                            InstructionCardComponent={InspectorInstructionCard}
-                        />
+                        <InstructionSurfaceProvider surface={SURFACE}>
+                            <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} />
+                        </InstructionSurfaceProvider>
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,
@@ -117,13 +111,9 @@ describe('inspector::AssociatedTokenDetailsCard', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard
-                            ix={ix}
-                            raw={ti}
-                            index={index}
-                            result={{ err: null }}
-                            InstructionCardComponent={InspectorInstructionCard}
-                        />
+                        <InstructionSurfaceProvider surface={SURFACE}>
+                            <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} />
+                        </InstructionSurfaceProvider>
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,
@@ -160,13 +150,9 @@ describe('inspector::AssociatedTokenDetailsCard with inner cards', () => {
             <ScrollAnchorProvider>
                 <ClusterProvider>
                     <AccountsProvider>
-                        <AssociatedTokenDetailsCard
-                            ix={ix}
-                            raw={ti}
-                            index={index}
-                            result={{ err: null }}
-                            InstructionCardComponent={InspectorInstructionCard}
-                        />
+                        <InstructionSurfaceProvider surface={SURFACE}>
+                            <AssociatedTokenDetailsCard ix={ix} raw={ti} index={index} />
+                        </InstructionSurfaceProvider>
                     </AccountsProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,

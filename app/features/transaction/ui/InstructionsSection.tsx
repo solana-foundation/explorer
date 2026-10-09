@@ -12,11 +12,10 @@ import { isTokenLendingInstruction } from '@components/instruction/token-lending
 import { isTokenSwapInstruction } from '@components/instruction/token-swap/types';
 import { TokenLendingDetailsCard } from '@components/instruction/TokenLendingDetailsCard';
 import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCard';
-import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
-import { TxInstructionSurface } from '@entities/instruction-card';
+import { toInstructionNode, TxInstructionSurface, UnknownDetailsCard } from '@entities/instruction-card';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { trustedInnerInstructions } from '@entities/transaction-data';
 import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
@@ -94,15 +93,6 @@ const PmpDetailsCard = dynamic(() => import('@features/decode-instruction-pmp').
     ssr: false,
 });
 
-export type InstructionDetailsProps = {
-    tx: ParsedTransaction;
-    ix: ParsedInstruction;
-    index: number;
-    result: SignatureResult;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-};
-
 export function InstructionsSection({ signature }: SignatureProps) {
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
@@ -154,7 +144,6 @@ export function InstructionsSection({ signature }: SignatureProps) {
                                             <InnerCardFallback
                                                 ix={ix}
                                                 tx={transaction}
-                                                result={result}
                                                 index={index}
                                                 childIndex={childIndex}
                                             />
@@ -195,13 +184,11 @@ export function InstructionsSection({ signature }: SignatureProps) {
 function InnerCardFallback({
     ix,
     tx,
-    result,
     index,
     childIndex,
 }: {
     ix: ParsedInstruction | PartiallyDecodedInstruction;
     tx: ParsedTransaction;
-    result: SignatureResult;
     index: number;
     childIndex: number;
 }) {
@@ -209,7 +196,7 @@ function InnerCardFallback({
     if (!fallbackIx) {
         return <ErrorCard text="Could not display this instruction, please report" />;
     }
-    return <UnknownDetailsCard ix={fallbackIx} result={result} index={index} childIndex={childIndex} />;
+    return <UnknownDetailsCard node={toInstructionNode({ childIndex, index, ix: fallbackIx })} />;
 }
 
 function InstructionCard({
@@ -254,6 +241,7 @@ function InstructionCard({
             result,
             tx,
         };
+        const node = toInstructionNode({ childIndex, index, innerCards, ix: parsedIx });
 
         switch (ix.program) {
             case SPL_TOKEN_PROGRAM_LABEL:
@@ -263,7 +251,7 @@ function InstructionCard({
                 // throws on the unrecognised type.
                 if (isRpcParsedBatchInstruction(ix.parsed)) {
                     return (
-                        <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                        <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
                             <RpcParsedTokenBatchCard
                                 ix={ix}
                                 index={index}
@@ -275,7 +263,7 @@ function InstructionCard({
                     );
                 }
                 return (
-                    <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                    <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
                         <TokenDetailsCard {...props} key={key} />
                     </ErrorBoundary>
                 );
@@ -304,7 +292,6 @@ function InstructionCard({
                         key={key}
                         ix={parsedIx}
                         index={index}
-                        result={result}
                         innerCards={innerCards}
                         childIndex={childIndex}
                     />
@@ -322,7 +309,7 @@ function InstructionCard({
                     />
                 );
             default:
-                return <UnknownDetailsCard {...props} key={key} />;
+                return <UnknownDetailsCard node={node} key={key} />;
         }
     }
 
@@ -338,6 +325,12 @@ function InstructionCard({
         result,
         signature,
     };
+    const node = toInstructionNode({
+        childIndex,
+        index,
+        innerCards,
+        ix: transactionIx,
+    });
 
     if (isEd25519Instruction(transactionIx)) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
@@ -354,7 +347,7 @@ function InstructionCard({
                 />
             );
         }
-        return <UnknownDetailsCard key={key} {...props} />;
+        return <UnknownDetailsCard key={key} node={node} />;
     }
     if (isMangoInstruction(transactionIx)) {
         return (
@@ -377,7 +370,7 @@ function InstructionCard({
             );
         }
         return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+            <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
                 <SerumDetailsCard {...props} />
             </ErrorBoundary>
         );
@@ -394,7 +387,7 @@ function InstructionCard({
     if (isPythProgramId(transactionIx.programId.toBase58())) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
         if (!dispatched) {
-            return <UnknownDetailsCard key={key} {...props} />;
+            return <UnknownDetailsCard key={key} node={node} />;
         }
         return (
             <PythDetailsCard
@@ -421,7 +414,7 @@ function InstructionCard({
                 />
             );
         }
-        return <UnknownDetailsCard key={key} {...props} />;
+        return <UnknownDetailsCard key={key} node={node} />;
     }
     if (isZkElGamalProofInstruction(transactionIx)) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
@@ -437,13 +430,13 @@ function InstructionCard({
                 />
             );
         }
-        return <UnknownDetailsCard key={key} {...props} />;
+        return <UnknownDetailsCard key={key} node={node} />;
     }
     if (isLighthouseInstruction(transactionIx)) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
         if (isParsedInstruction(dispatched)) {
             return (
-                <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
                     <LighthouseDetailsCard
                         ix={dispatched}
                         raw={transactionIx}
@@ -454,21 +447,21 @@ function InstructionCard({
                 </ErrorBoundary>
             );
         }
-        return <UnknownDetailsCard key={key} {...props} />;
+        return <UnknownDetailsCard key={key} node={node} />;
     }
     if (isStakeInstruction(transactionIx)) {
         return <RawStakeDetailsCard key={key} {...props} />;
     }
     if (isTokenBatchInstruction(transactionIx)) {
         return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+            <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
                 <TokenBatchCard {...props} />
             </ErrorBoundary>
         );
     }
     if (isSolanaAttestationInstruction(transactionIx)) {
         return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+            <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
                 <SolanaAttestationDetailsCard
                     ix={transactionIx}
                     index={index}
@@ -480,7 +473,7 @@ function InstructionCard({
     }
     if (transactionIx.programId.toBase58() === MPL_TOKEN_METADATA_PROGRAM_ID) {
         return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+            <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
                 <MetaplexTokenMetadataDetailsCard {...props} />
             </ErrorBoundary>
         );
@@ -499,7 +492,7 @@ function InstructionCard({
                     idlDecode ? (
                         <IdlInstructionCard decoded={idlDecode} {...props} />
                     ) : (
-                        <UnknownDetailsCard {...props} />
+                        <UnknownDetailsCard node={node} />
                     )
                 }
             />
@@ -509,5 +502,5 @@ function InstructionCard({
         return <IdlInstructionCard key={key} decoded={idlDecode} {...props} />;
     }
 
-    return <UnknownDetailsCard key={key} {...props} />;
+    return <UnknownDetailsCard key={key} node={node} />;
 }

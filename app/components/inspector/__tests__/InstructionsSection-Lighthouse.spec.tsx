@@ -93,7 +93,7 @@ describe('Inspector InstructionsSection with a Lighthouse instruction', () => {
 
         renderSection();
 
-        expect(await screen.findByText('Instruction')).toBeInTheDocument();
+        expect(await screen.findByText('Lighthouse Program: Unknown Instruction')).toBeInTheDocument();
         expect(screen.queryByText(/Lighthouse: Assert Sysvar Clock/)).not.toBeInTheDocument();
     });
 });

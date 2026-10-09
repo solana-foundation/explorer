@@ -1,14 +1,7 @@
-import {
-    defineInstructionCard,
-    InstructionCardView,
-    type InstructionNode,
-    sol,
-    text,
-} from '@entities/instruction-card';
+import { defineInstructionCard, InstructionCardView, sol, text, toInstructionNode } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
 import type { TransactionInstruction } from '@solana/web3.js';
 import { microLamportsToLamportsString } from '@utils/index';
-import React from 'react';
 
 import type {
     ComputeBudgetParsed,
@@ -64,7 +57,7 @@ type ComputeBudgetDetailsCardProps = {
 };
 
 export function ComputeBudgetDetailsCard({ ix, raw, index, innerCards, childIndex }: ComputeBudgetDetailsCardProps) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
+    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
 
     if ('unknown' in ix) {
         return <InstructionCardView node={node} title={`${TITLE_PREFIX}: Unknown Instruction`} defaultRaw />;

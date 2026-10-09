@@ -1,6 +1,11 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
-import { type InstructionSurface, InstructionSurfaceProvider } from '@entities/instruction-card';
+import {
+    type InstructionSurface,
+    InstructionSurfaceProvider,
+    toInstructionNode,
+    UnknownDetailsCard,
+} from '@entities/instruction-card';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
@@ -46,7 +51,6 @@ import { LoadingCard } from '../common/LoadingCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
-import { UnknownDetailsCard } from './UnknownDetailsCard';
 
 const INSPECTOR_RESULT = { err: null };
 const INSPECTOR_SIGNATURE = '';
@@ -126,9 +130,9 @@ export function InstructionsSection({
                         innerIx ? (
                             <ErrorBoundary
                                 key={childIndex}
-                                // `UnknownDetailsCard` renders the badge and the scroll anchor,
-                                // so an inner instruction that throws keeps its number and anchor.
-                                fallback={<UnknownDetailsCard index={index} childIndex={childIndex} ix={innerIx} />}
+                                fallback={
+                                    <UnknownDetailsCard node={toInstructionNode({ childIndex, index, ix: innerIx })} />
+                                }
                             >
                                 <InspectorInstructionCard
                                     index={index}
@@ -194,7 +198,7 @@ function InspectorInstructionCard({
     // declare the discriminator. The cards below must still render.
     const decodedByIdl = idlDecode?.kind === 'unknown' ? undefined : idlDecode;
 
-    const unknownCard = <UnknownDetailsCard index={index} ix={ix} childIndex={childIndex} innerCards={innerCards} />;
+    const unknownCard = <UnknownDetailsCard node={toInstructionNode({ childIndex, index, innerCards, ix })} />;
 
     // PMP owns every instruction on its program id: `setData`/`initialize`/`write` render decoded content from
     // the bundled typed decoders (no IDL needed), and the housekeeping instructions delegate to the IDL tier
@@ -343,7 +347,6 @@ function InspectorInstructionCard({
                     ix={parsedIx}
                     tx={parsedTx}
                     index={index}
-                    result={INSPECTOR_RESULT}
                     raw={ix}
                     childIndex={childIndex}
                     innerCards={innerCards}
@@ -355,8 +358,6 @@ function InspectorInstructionCard({
                     ix={parsedIx}
                     raw={ix}
                     index={index}
-                    result={INSPECTOR_RESULT}
-                    InstructionCardComponent={InspectorInstructionCardComponent}
                     childIndex={childIndex}
                     innerCards={innerCards}
                 />

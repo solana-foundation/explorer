@@ -1,8 +1,6 @@
-import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
-import type { InstructionNode } from '@entities/instruction-card';
-import type { ParsedInstruction, ParsedTransaction, SignatureResult } from '@solana/web3.js';
+import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
+import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
-import React from 'react';
 import { create } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -43,20 +41,13 @@ import { WithdrawDetailsCard } from './WithdrawDetailsCard';
 type DetailsProps = {
     tx: ParsedTransaction;
     ix: ParsedInstruction;
-    result: SignatureResult;
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
 };
 
-export function StakeDetailsCard(props: DetailsProps) {
-    const node: InstructionNode = {
-        childIndex: props.childIndex,
-        index: props.index,
-        innerCards: props.innerCards,
-        ix: props.ix,
-        programId: props.ix.programId,
-    };
+export function StakeDetailsCard({ childIndex, index, innerCards, ix, tx }: DetailsProps) {
+    const node = toInstructionNode({ childIndex, index, innerCards, ix });
 
     // TODO: Replace this try/catch + Logger with a React error boundary one level up
     // (e.g. in InstructionCard). Reasons:
@@ -68,7 +59,7 @@ export function StakeDetailsCard(props: DetailsProps) {
     //      Wormhole, Serum, …). A single boundary centralizes the fallback + logging
     //      and keeps observability concerns out of UI components.
     try {
-        const parsed = create(props.ix.parsed, ParsedInfo);
+        const parsed = create(ix.parsed, ParsedInfo);
 
         switch (parsed.type) {
             case 'initialize': {
@@ -139,12 +130,12 @@ export function StakeDetailsCard(props: DetailsProps) {
                 return <GetMinimumDelegationDetailsCard node={node} />;
             }
             default:
-                return <UnknownDetailsCard {...props} />;
+                return <UnknownDetailsCard node={node} />;
         }
     } catch (error) {
         Logger.error(error, {
-            signature: props.tx.signatures[0],
+            signature: tx.signatures[0],
         });
-        return <UnknownDetailsCard {...props} />;
+        return <UnknownDetailsCard node={node} />;
     }
 }
