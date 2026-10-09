@@ -1,35 +1,33 @@
-import { address, defineInstructionCard, type InstructionNode, preformatted, text } from '@entities/instruction-card';
-import { ParsedInstruction, ParsedTransaction, SignatureResult } from '@solana/web3.js';
+import {
+    address,
+    defineInstructionCard,
+    preformatted,
+    text,
+    toInstructionNode,
+    UnknownDetailsCard,
+} from '@entities/instruction-card';
+import { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
 import { wrap } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
-import React from 'react';
 import { create } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import { FinalizeInfo, WriteInfo } from './types';
 
 type DetailsProps = {
     tx: ParsedTransaction;
     ix: ParsedInstruction;
     index: number;
-    result: SignatureResult;
     innerCards?: JSX.Element[];
     childIndex?: number;
 };
 
-export function BpfLoaderDetailsCard(props: DetailsProps) {
-    const node: InstructionNode = {
-        childIndex: props.childIndex,
-        index: props.index,
-        innerCards: props.innerCards,
-        ix: props.ix,
-        programId: props.ix.programId,
-    };
+export function BpfLoaderDetailsCard({ childIndex, index, innerCards, ix, tx }: DetailsProps) {
+    const node = toInstructionNode({ childIndex, index, innerCards, ix });
 
     try {
-        const parsed = create(props.ix.parsed, ParsedInfo);
+        const parsed = create(ix.parsed, ParsedInfo);
 
         switch (parsed.type) {
             case 'write': {
@@ -41,13 +39,13 @@ export function BpfLoaderDetailsCard(props: DetailsProps) {
                 return <BpfLoaderFinalizeDetailsCard info={info} node={node} />;
             }
             default:
-                return <UnknownDetailsCard {...props} />;
+                return <UnknownDetailsCard node={node} />;
         }
     } catch (error) {
         Logger.error(error, {
-            signature: props.tx.signatures[0],
+            signature: tx.signatures[0],
         });
-        return <UnknownDetailsCard {...props} />;
+        return <UnknownDetailsCard node={node} />;
     }
 }
 

@@ -3,7 +3,6 @@ import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import { vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({
@@ -74,7 +73,6 @@ describe('stake::StakeDetailsCard dispatch', () => {
                                             programId: PROGRAM_ID,
                                         } as unknown as ParsedInstruction
                                     }
-                                    result={{ err: null }}
                                     index={0}
                                 />
                             </TxInstructionSurface>

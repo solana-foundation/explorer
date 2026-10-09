@@ -1,4 +1,9 @@
-import { DecodedInstructionCard, parseCodamaArgs, useInstructionSurface } from '@entities/instruction-card';
+import {
+    DecodedInstructionCard,
+    parseCodamaArgs,
+    toInstructionNode,
+    UnknownDetailsCard,
+} from '@entities/instruction-card';
 import {
     identifySolanaAttestationServiceInstruction,
     parseChangeAuthorizedSignersInstruction,
@@ -21,8 +26,6 @@ import { TransactionInstruction } from '@solana/web3.js';
 
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
-import { UnknownDetailsCard } from '../UnknownDetailsCard';
-
 export function isSolanaAttestationInstruction(transactionIx: TransactionInstruction) {
     return transactionIx.programId.toBase58() === SAS_PROGRAM_ID;
 }
@@ -44,18 +47,16 @@ export function SolanaAttestationDetailsCard({
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const { result } = useInstructionSurface();
+    const node = toInstructionNode({ childIndex, index, innerCards, ix });
     const decoded = tryParseSolanaAttestationInstruction(ix);
 
     if (!decoded) {
-        return (
-            <UnknownDetailsCard ix={ix} index={index} result={result} innerCards={innerCards} childIndex={childIndex} />
-        );
+        return <UnknownDetailsCard node={node} />;
     }
 
     return (
         <DecodedInstructionCard
-            node={{ childIndex, index, innerCards, ix, programId: ix.programId }}
+            node={node}
             ix={ix}
             title={`Solana Attestation: ${decoded.name}`}
             accountNames={Object.keys(decoded.parsed.accounts)}

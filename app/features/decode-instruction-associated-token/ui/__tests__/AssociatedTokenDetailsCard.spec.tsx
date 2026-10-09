@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
+import { type InstructionSurface, InstructionSurfaceProvider } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, isParsedInstruction } from '@entities/instruction-parser';
 import { associatedTokenInstructionParser } from '@features/decode-instruction-associated-token';
 import { ParsedInstruction, PublicKey, TransactionMessage } from '@solana/web3.js';
@@ -17,6 +18,7 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { AssociatedTokenDetailsCard } from '../AssociatedTokenDetailsCard';
 
 const dispatcher = createInstructionParserDispatcher([associatedTokenInstructionParser]);
+const SURFACE: InstructionSurface = { Shell: BaseInstructionCard, result: { err: null } };
 
 vi.mock('next/navigation');
 // @ts-expect-error does not contain `mockReturnValue`
@@ -51,12 +53,9 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard
-                        ix={ix}
-                        index={index}
-                        result={{ err: null }}
-                        InstructionCardComponent={BaseInstructionCard}
-                    />
+                    <InstructionSurfaceProvider surface={SURFACE}>
+                        <AssociatedTokenDetailsCard ix={ix} index={index} />
+                    </InstructionSurfaceProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
@@ -89,12 +88,9 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard
-                        ix={ix}
-                        index={index}
-                        result={{ err: null }}
-                        InstructionCardComponent={BaseInstructionCard}
-                    />
+                    <InstructionSurfaceProvider surface={SURFACE}>
+                        <AssociatedTokenDetailsCard ix={ix} index={index} />
+                    </InstructionSurfaceProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
@@ -128,12 +124,9 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         render(
             <ScrollAnchorProvider>
                 <ClusterProvider>
-                    <AssociatedTokenDetailsCard
-                        ix={ix}
-                        index={index}
-                        result={{ err: null }}
-                        InstructionCardComponent={BaseInstructionCard}
-                    />
+                    <InstructionSurfaceProvider surface={SURFACE}>
+                        <AssociatedTokenDetailsCard ix={ix} index={index} />
+                    </InstructionSurfaceProvider>
                 </ClusterProvider>
             </ScrollAnchorProvider>,
         );
@@ -143,10 +136,6 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
         });
     });
 
-    // When this slice's parser rejects an RPC payload, the dispatcher falls back to
-    // RPC's raw view: `type` still looks familiar but `info` holds base58 strings
-    // rather than coerced PublicKeys. The card must degrade instead of throwing on
-    // `pubkey.toBase58`.
     test.each(['create', 'createIdempotent', 'recoverNested'])(
         'should fall back to the unknown card when RPC info is not coerced (%s)',
         async type => {
@@ -166,12 +155,9 @@ describe('instruction::AssociatedTokenDetailsCard', () => {
             render(
                 <ScrollAnchorProvider>
                     <ClusterProvider>
-                        <AssociatedTokenDetailsCard
-                            ix={rawInfoIx}
-                            index={0}
-                            result={{ err: null }}
-                            InstructionCardComponent={BaseInstructionCard}
-                        />
+                        <InstructionSurfaceProvider surface={SURFACE}>
+                            <AssociatedTokenDetailsCard ix={rawInfoIx} index={0} />
+                        </InstructionSurfaceProvider>
                     </ClusterProvider>
                 </ScrollAnchorProvider>,
             );

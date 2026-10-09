@@ -11,7 +11,6 @@ import {
 } from '@solana/web3.js';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
-import React from 'react';
 import { vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({
@@ -556,12 +555,7 @@ function renderCard(parsed: { info: object; type: string }, programId: PublicKey
                 <TransactionsProvider>
                     <AccountsProvider>
                         <TxInstructionSurface result={{ err: null }}>
-                            <VoteDetailsCard
-                                index={0}
-                                ix={ix}
-                                result={{ err: null }}
-                                tx={{ signatures: ['sig'] } as ParsedTransaction}
-                            />
+                            <VoteDetailsCard index={0} ix={ix} tx={{ signatures: ['sig'] } as ParsedTransaction} />
                         </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>

@@ -1,7 +1,6 @@
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { BPF_LOADER_PROGRAM_ID, type ParsedInstruction, type ParsedTransaction, PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor, within } from '@testing-library/react';
-import React from 'react';
 import { vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({
@@ -117,7 +116,7 @@ function renderCard(ix: ParsedInstruction) {
                 <TransactionsProvider>
                     <AccountsProvider>
                         <TxInstructionSurface result={{ err: null }}>
-                            <BpfLoaderDetailsCard tx={tx} ix={ix} index={0} result={{ err: null }} />
+                            <BpfLoaderDetailsCard tx={tx} ix={ix} index={0} />
                         </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>
