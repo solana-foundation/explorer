@@ -17,7 +17,7 @@ export function parseCodamaArgs(data: unknown): readonly InstructionArg[] {
     return parseFields(data).filter(arg => arg.name !== 'discriminator');
 }
 
-const TAG_KEYS = new Set(['__kind', '__option']);
+const TAG_KEYS = new Set(['__discriminator', '__kind', '__option']);
 
 function parseFields(struct: Record<string, unknown>): InstructionArg[] {
     return Object.entries(struct)
@@ -34,7 +34,12 @@ function parseArg(name: string, value: unknown): InstructionArg {
         return parseItems({ items: entries, name, type: `Map[${value.size}]` });
     }
     if (isStruct(value)) {
-        return group({ children: parseFields(value), name, type: groupType(value) });
+        const children = parseFields(value);
+        // An enum variant without a payload is a plain value.
+        if (typeof value.__kind === 'string' && children.length === 0) {
+            return { kind: 'leaf', name, type: 'enum', value: { kind: 'text', value: value.__kind } };
+        }
+        return group({ children, name, type: groupType(value) });
     }
     if (typeof value === 'string') {
         return isAddress(value)
