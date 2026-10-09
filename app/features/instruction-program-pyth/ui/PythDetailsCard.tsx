@@ -1,4 +1,4 @@
-import { InstructionCardView, type InstructionNode } from '@entities/instruction-card';
+import { InstructionCardView, type InstructionNode, toInstructionNode } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
 import { PYTH_INSTRUCTIONS, type PythParsed } from '@explorer/decoder-pyth';
 import type { TransactionInstruction } from '@solana/web3.js';
@@ -25,7 +25,7 @@ type PythDetailsCardProps = {
 };
 
 export function PythDetailsCard({ ix, raw, index, innerCards, childIndex }: PythDetailsCardProps) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
+    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
 
     if ('unknown' in ix) {
         return <RawOnlyPythCard node={node} title="Pyth: Unknown Instruction" />;

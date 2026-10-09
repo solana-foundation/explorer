@@ -1,4 +1,5 @@
 import { Address } from '@components/common/Address';
+import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
 import {
     ParsedInstruction,
     ParsedTransaction,
@@ -8,14 +9,12 @@ import {
 } from '@solana/web3.js';
 import { camelToTitleCase } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
-import React from 'react';
 import { create, Struct } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { InstructionCard } from '../InstructionCard';
-import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import {
     CloseInfo,
     DeployWithMaxDataLenInfo,
@@ -39,6 +38,9 @@ type DetailsProps = {
 };
 
 export function BpfUpgradeableLoaderDetailsCard(props: DetailsProps) {
+    const { childIndex, index, innerCards, ix, raw } = props;
+    const unknownCard = <UnknownDetailsCard node={toInstructionNode({ childIndex, index, innerCards, ix, raw })} />;
+
     try {
         const parsed = create(props.ix.parsed, ParsedInfo);
         switch (parsed.type) {
@@ -67,13 +69,13 @@ export function BpfUpgradeableLoaderDetailsCard(props: DetailsProps) {
                 return renderDetails<ExtendProgramInfo>(props, parsed, ExtendProgramInfo);
             }
             default:
-                return <UnknownDetailsCard {...props} />;
+                return unknownCard;
         }
     } catch (error) {
         Logger.error(error, {
             signature: props.tx.signatures[0],
         });
-        return <UnknownDetailsCard {...props} />;
+        return unknownCard;
     }
 }
 

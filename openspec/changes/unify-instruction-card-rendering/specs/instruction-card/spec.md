@@ -16,7 +16,7 @@ The card body MUST draw the `Program` row in the decoded view, on both surfaces.
 
 An address MUST render the same way on both surfaces, so `InstructionSurface` MUST NOT contain an address renderer.
 
-For migrated cards, `InstructionSurface` replaces the `InstructionCardComponent` prop and the inspector's `INSPECTOR_RESULT` and `INSPECTOR_SIGNATURE` constants. Unmigrated cards keep all three. Each program migration removes that program's props. The last migration removes the constants, after the shared `UnknownDetailsCard` fallback stops requiring `result`. `useInstructionSurface` fails loudly rather than falling back to a default, matching `useInstructionParser`.
+For migrated cards, `InstructionSurface` replaces the `InstructionCardComponent` prop and the inspector's `INSPECTOR_RESULT` and `INSPECTOR_SIGNATURE` constants. Unmigrated cards keep all three. Each program migration removes that program's props. `INSPECTOR_SURFACE` reads `INSPECTOR_RESULT` as its `result`. The last inspector-reachable migration deletes the `result` and `signature` props. `useInstructionSurface` fails loudly rather than falling back to a default, matching `useInstructionParser`.
 
 #### Scenario: Same card on both surfaces
 
@@ -133,7 +133,7 @@ Program events are the deliberate exception to "nesting travels on the node". Th
 
 ### Requirement: Whole-program migration
 
-A program's cards SHALL migrate to the surface together in one change, never partially. A partially migrated program renders two different frames side by side in the inspector, because unmigrated cards hardcode the tx-page frame regardless of surface.
+A program's cards SHALL migrate to the surface together in one change, never partially. A partially migrated program renders two different frames side by side in the inspector, because unmigrated cards hardcode the tx-page frame regardless of surface. `UnknownDetailsCard` renders through the surface for every program, migrated or not.
 
 #### Scenario: Program with a hardcoded frame reaches the inspector
 

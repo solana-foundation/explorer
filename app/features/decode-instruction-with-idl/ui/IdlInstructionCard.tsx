@@ -1,7 +1,6 @@
+import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { ErrorBoundary } from 'react-error-boundary';
-
-import { UnknownDetailsCard } from '@/app/components/instruction/UnknownDetailsCard';
 
 import { type IdlInstructionDecode } from '../lib/decode-instruction-with-idl';
 import { AnchorDetailsCard } from './AnchorDetailsCard';
@@ -30,20 +29,21 @@ export function IdlInstructionCard({
     childIndex?: number;
 }) {
     const nodeProps = { childIndex, index, innerCards, ix };
-    const props = { ...nodeProps, result };
+    const unknownCard = <UnknownDetailsCard node={toInstructionNode(nodeProps)} />;
     return (
-        <ErrorBoundary fallback={<UnknownDetailsCard {...props} />}>
+        <ErrorBoundary fallback={unknownCard}>
             {decoded.kind === 'codama' ? (
                 <CodamaInstructionCard {...nodeProps} parsedIx={decoded.parsedIx} />
             ) : decoded.kind === 'anchor' ? (
                 <AnchorDetailsCard
-                    {...props}
+                    {...nodeProps}
+                    result={result}
                     signature={signature}
                     program={decoded.program}
                     decoded={decoded.details}
                 />
             ) : (
-                <UnknownDetailsCard {...props} />
+                unknownCard
             )}
         </ErrorBoundary>
     );

@@ -79,14 +79,12 @@ const blsAuthorityIx = voteParsedInstruction({
 const args = {
     index: 0,
     ix: towerSyncIx,
-    result: { err: null },
     tx: voteParsedTransaction(towerSyncIx),
 };
 
 const blsArgs = {
     index: 0,
     ix: blsAuthorityIx,
-    result: { err: null },
     tx: voteParsedTransaction(blsAuthorityIx),
 };
 

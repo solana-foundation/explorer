@@ -2,7 +2,6 @@ import { TxInstructionSurface } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { render, screen, waitFor, within } from '@testing-library/react';
-import React from 'react';
 import { vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({
@@ -75,7 +74,7 @@ function renderCard(ix: TransactionInstruction) {
                 <TransactionsProvider>
                     <AccountsProvider>
                         <TxInstructionSurface result={{ err: null }}>
-                            <RawStakeDetailsCard ix={ix} index={0} result={{ err: null }} />
+                            <RawStakeDetailsCard ix={ix} index={0} />
                         </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>

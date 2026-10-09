@@ -1,12 +1,10 @@
-import type { InstructionNode } from '@entities/instruction-card';
-import { ParsedInstruction, ParsedTransaction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
+import { ParsedInstruction, ParsedTransaction, TransactionInstruction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
-import React from 'react';
 import { create } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import { AllocateDetailsCard } from './AllocateDetailsCard';
 import { AllocateWithSeedDetailsCard } from './AllocateWithSeedDetailsCard';
 import { AssignDetailsCard } from './AssignDetailsCard';
@@ -39,7 +37,6 @@ import { UpgradeNonceDetailsCard } from './UpgradeNonceDetailsCard';
 type DetailsProps = {
     tx: ParsedTransaction;
     ix: ParsedInstruction;
-    result: SignatureResult;
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
@@ -47,21 +44,14 @@ type DetailsProps = {
     raw?: TransactionInstruction;
 };
 
-export function SystemDetailsCard(props: DetailsProps) {
+export function SystemDetailsCard({ childIndex, index, innerCards, ix, raw, tx }: DetailsProps) {
     // Transitional. Every System card now takes a single `node`, but the two
     // `InstructionsSection`s still hand this component the old prop spread. This
     // shim disappears once they build the node tree themselves.
-    const node: InstructionNode = {
-        childIndex: props.childIndex,
-        index: props.index,
-        innerCards: props.innerCards,
-        ix: props.ix,
-        programId: props.ix.programId,
-        raw: props.raw,
-    };
+    const node = toInstructionNode({ childIndex, index, innerCards, ix, raw });
 
     try {
-        const parsed = create(props.ix.parsed, ParsedInfo);
+        const parsed = create(ix.parsed, ParsedInfo);
         switch (parsed.type) {
             case 'createAccount': {
                 const info = create(parsed.info, CreateAccountInfo);
@@ -116,12 +106,12 @@ export function SystemDetailsCard(props: DetailsProps) {
                 return <UpgradeNonceDetailsCard info={info} node={node} />;
             }
             default:
-                return <UnknownDetailsCard {...props} />;
+                return <UnknownDetailsCard node={node} />;
         }
     } catch (error) {
         Logger.error(error, {
-            signature: props.tx.signatures[0],
+            signature: tx.signatures[0],
         });
-        return <UnknownDetailsCard {...props} />;
+        return <UnknownDetailsCard node={node} />;
     }
 }

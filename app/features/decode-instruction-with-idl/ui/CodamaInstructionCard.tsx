@@ -1,9 +1,12 @@
 import { parseInstruction } from '@codama/dynamic-parsers';
-import { DecodedInstructionCard, parseCodamaArgs, useInstructionSurface } from '@entities/instruction-card';
+import {
+    DecodedInstructionCard,
+    parseCodamaArgs,
+    toInstructionNode,
+    UnknownDetailsCard,
+} from '@entities/instruction-card';
 import { TransactionInstruction } from '@solana/web3.js';
 import { capitalizeFirstLetter } from '@utils/index';
-
-import { UnknownDetailsCard } from '@/app/components/instruction/UnknownDetailsCard';
 
 export function CodamaInstructionCard({
     ix,
@@ -18,24 +21,21 @@ export function CodamaInstructionCard({
     innerCards?: JSX.Element[];
     parsedIx: ReturnType<typeof parseInstruction>;
 }) {
-    const { result } = useInstructionSurface();
-    const unknownCard = (
-        <UnknownDetailsCard ix={ix} result={result} index={index} childIndex={childIndex} innerCards={innerCards} />
-    );
+    const node = toInstructionNode({ childIndex, index, innerCards, ix });
 
     if (parsedIx?.path[0].kind !== 'rootNode') {
-        return unknownCard;
+        return <UnknownDetailsCard node={node} />;
     }
     const lastNode = parsedIx.path[parsedIx.path.length - 1];
     if (lastNode.kind !== 'instructionNode') {
-        return unknownCard;
+        return <UnknownDetailsCard node={node} />;
     }
 
     const programName = capitalizeFirstLetter(parsedIx.path[0].program.name);
 
     return (
         <DecodedInstructionCard
-            node={{ childIndex, index, innerCards, ix, programId: ix.programId }}
+            node={node}
             ix={ix}
             title={`${programName}: ${capitalizeFirstLetter(lastNode.name)}`}
             programName={programName}
