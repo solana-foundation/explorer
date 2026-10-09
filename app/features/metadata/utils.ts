@@ -1,4 +1,4 @@
-import { IPFS_PROTOCOL, resolveIpfsUri } from '@/app/shared/lib/ipfs';
+import { resolveIpfsUri } from '@/app/shared/lib/ipfs';
 import { parseUrl, SAFE_EXTERNAL_PROTOCOLS } from '@/app/shared/lib/url';
 
 export const getProxiedUri = (uri: string): string | '' => {
@@ -14,10 +14,10 @@ export const getProxiedUri = (uri: string): string | '' => {
 
     const isProxyEnabled = process.env.NEXT_PUBLIC_METADATA_ENABLED === 'true';
 
-    if (url.protocol === IPFS_PROTOCOL) {
-        const gatewayUri = resolveIpfsUri(url);
-        if (gatewayUri === '') return '';
-        return isProxyEnabled ? proxyUri(gatewayUri) : gatewayUri;
+    const ipfs = resolveIpfsUri(url);
+    if (ipfs) {
+        if (ipfs.kind === 'malformed-cid') return '';
+        return isProxyEnabled ? proxyUri(ipfs.uri) : ipfs.uri;
     }
 
     if (!isProxyEnabled) return uri;
