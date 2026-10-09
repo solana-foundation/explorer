@@ -2132,7 +2132,7 @@
     "description": "Reduce Solana's target slot time from 400ms to 200ms in four feature-gated steps:",
     "devnet_activation_epoch": 1128,
     "key": "iBRLjhJnkmDZgNoZRDMW11d8ZV7HvsL3vAyRjZB5npW",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1052,
     "min_agave_versions": [
       "v4.2.0-beta.1"
     ],
