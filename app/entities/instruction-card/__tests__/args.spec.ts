@@ -7,7 +7,22 @@ const KEY = '2W7rVWpiRMzex7sGBnww6sozQp94xFBzCGYUzUKZw2X4';
 
 describe('parseCodamaArgs', () => {
     it('should drop the discriminator and the enum and option tag keys', () => {
-        expect(parseCodamaArgs({ __kind: 'A', __option: 'Some', discriminator: 3 })).toEqual([]);
+        expect(parseCodamaArgs({ __discriminator: 0, __kind: 'A', __option: 'Some', discriminator: 3 })).toEqual([]);
+    });
+
+    it('should parse a decoded enum as its variant without the discriminator tag', () => {
+        const [data, scalar] = parseCodamaArgs({
+            data: { __discriminator: 2, __kind: 'Lamports', value: 2 },
+            scalar: { __discriminator: 1, __kind: 'Burning' },
+        });
+
+        expect(scalar).toEqual(textLeaf('scalar', 'enum', 'Burning'));
+        expect(data).toEqual({
+            children: [textLeaf('value', 'number', '2')],
+            kind: 'group',
+            name: 'data',
+            type: 'Lamports',
+        });
     });
 
     it('should keep field order', () => {
@@ -102,13 +117,18 @@ describe('parseCodamaArgs', () => {
                 empty: [],
                 map: new Map(),
                 none: none(),
-                unit: { __kind: 'A' },
             }),
         ).toEqual([
             { kind: 'empty', name: 'empty', type: 'Array[0]' },
             { kind: 'empty', name: 'map', type: 'Map[0]' },
             { kind: 'empty', name: 'none', type: 'Option(None)' },
-            { kind: 'empty', name: 'unit', type: 'A' },
+        ]);
+    });
+
+    it('should parse an enum variant without a payload as an enum value', () => {
+        expect(parseCodamaArgs({ list: [{ __kind: 'Arm' }], unit: { __kind: 'A' } })).toEqual([
+            { children: [textLeaf('#0', 'enum', 'Arm')], kind: 'group', name: 'list', type: 'Array[1]' },
+            textLeaf('unit', 'enum', 'A'),
         ]);
     });
 

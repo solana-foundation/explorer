@@ -6,6 +6,9 @@ import { AccountRole, isSignerRole, isWritableRole } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import {
+    enumEmptyVariantTypeNode,
+    enumStructVariantTypeNode,
+    enumTypeNode,
     fieldDiscriminatorNode,
     type InstructionAccountNode,
     instructionAccountNode,
@@ -77,6 +80,26 @@ const COUNTER_IDL = rootNode(
                 ],
                 discriminator: 3,
                 name: 'configure',
+            }),
+            counterInstruction({
+                arguments: [
+                    instructionArgumentNode({
+                        name: 'mode',
+                        type: enumTypeNode([enumEmptyVariantTypeNode('locking'), enumEmptyVariantTypeNode('burning')]),
+                    }),
+                    instructionArgumentNode({
+                        name: 'limit',
+                        type: enumTypeNode([
+                            enumEmptyVariantTypeNode('unlimited'),
+                            enumStructVariantTypeNode(
+                                'capped',
+                                structTypeNode([structFieldTypeNode({ name: 'max', type: numberTypeNode('u8') })]),
+                            ),
+                        ]),
+                    }),
+                ],
+                discriminator: 4,
+                name: 'setMode',
             }),
         ],
         name: 'counter',
@@ -171,6 +194,20 @@ describe('CodamaInstructionCard', () => {
         fireEvent.click(screen.getByText('Collapse'));
         expect(screen.queryByTestId('ix-args-1-0')).not.toBeInTheDocument();
         expect(screen.getByText('Expand')).toBeInTheDocument();
+    });
+
+    it('should render decoded enums by their variant names', async () => {
+        await renderBuilt(client.methods.setMode({ limit: { __kind: 'Capped', max: 7 }, mode: 'burning' }));
+
+        expect(screen.getByTestId('ix-args-0-0')).toHaveTextContent('modeenumBurning');
+        expect(screen.getByTestId('ix-args-0-1')).toHaveTextContent('limit');
+        expect(screen.getByTestId('ix-args-0-1')).toHaveTextContent('Capped');
+
+        fireEvent.click(screen.getByText('Expand'));
+
+        expect(screen.getByTestId('ix-args-1-0')).toHaveTextContent('max');
+        expect(screen.getByTestId('ix-args-1-0')).toHaveTextContent('7');
+        expect(screen.queryByText('__discriminator')).not.toBeInTheDocument();
     });
 
     it('should render the Unknown card when the parse does not start at a root node', () => {
