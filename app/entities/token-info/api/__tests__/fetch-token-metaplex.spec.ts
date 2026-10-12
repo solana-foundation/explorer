@@ -380,10 +380,26 @@ describe('getTokenInfosFromMetaplex', () => {
         const [result] = await getTokenInfosFromMetaplex([MINT_A], RPC);
 
         expect(mocks.fetchResource).toHaveBeenCalledWith(
-            `https://ipfs.io/ipfs/${VALID_CID}/meta.json`,
+            `https://ipfs.filebase.io/ipfs/${VALID_CID}/meta.json`,
             expect.anything(),
         );
         expect(result.logoURI).toBe('https://example.com/logo.png');
+    });
+
+    it('should read an ipfs.io uri through the gateway', async () => {
+        mocks.safeFetchAllMetadata.mockResolvedValueOnce([
+            metadata(MINT_A, { uri: `https://ipfs.io/ipfs/${VALID_CID}/meta.json` }),
+        ]);
+        mocks.getMultipleAccounts.mockResolvedValueOnce({ value: [parsedMint(6)] });
+        mocks.fetchResource.mockResolvedValueOnce(jsonResource({ image: 'https://example.com/logo.png' }));
+
+        const { getTokenInfosFromMetaplex } = await importSubject();
+        await getTokenInfosFromMetaplex([MINT_A], RPC);
+
+        expect(mocks.fetchResource).toHaveBeenCalledWith(
+            `https://ipfs.filebase.io/ipfs/${VALID_CID}/meta.json`,
+            expect.anything(),
+        );
     });
 
     it('should skip the off-chain read for an ipfs uri with a malformed CID', async () => {
