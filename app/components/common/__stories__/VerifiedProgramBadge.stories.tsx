@@ -27,7 +27,12 @@ type OsecOutcome = 'verified' | 'unverified' | 'loading' | 'error';
 // Matches any OSEC registry request (mainnet verify.osec.io + devnet verify-devnet.osec.io).
 function isOsecRequest(input: RequestInfo | URL): boolean {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-    return url.includes('osec.io');
+    try {
+        const { hostname } = new URL(url);
+        return hostname === 'osec.io' || hostname.endsWith('.osec.io');
+    } catch {
+        return false;
+    }
 }
 
 const withMockedOsec = (outcome: OsecOutcome, state?: ClusterState): Decorator =>
