@@ -70,7 +70,6 @@ function renderWithStore(initialClusters: SavedCluster[] = []) {
 describe('ClusterModal', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
         clusterMock.customUrl = CUSTOM_URL;
         nav.searchParams = new URLSearchParams(`cluster=custom&customUrl=${CUSTOM_URL}`);
     });
@@ -276,7 +275,6 @@ describe('ClusterModal', () => {
 describe('ClusterModal cluster hrefs', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
         nav.searchParams = new URLSearchParams(`cluster=custom&customUrl=${CUSTOM_URL}&sort=fee`);
     });
 
@@ -344,7 +342,6 @@ describe('ClusterModal cluster hrefs', () => {
 describe('ClusterModal endpoint consent', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
         clusterMock.customUrl = CUSTOM_URL;
         nav.searchParams = new URLSearchParams(`cluster=custom&customUrl=${CUSTOM_URL}&sort=fee`);
     });
@@ -435,7 +432,6 @@ describe('ClusterModal endpoint consent', () => {
 describe('ClusterModal custom URL field', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
         clusterMock.customUrl = CUSTOM_URL;
         nav.searchParams = new URLSearchParams(`cluster=custom&customUrl=${CUSTOM_URL}`);
     });

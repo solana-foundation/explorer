@@ -1,7 +1,7 @@
 import { customUrlEnabledAtom } from '@entities/cluster';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createStore, Provider } from 'jotai';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { ClusterModalDeveloperSettings } from '../ClusterModalDeveloperSettings';
 
@@ -19,8 +19,6 @@ function renderSettings(enabled = false) {
 }
 
 describe('ClusterModalDeveloperSettings', () => {
-    beforeEach(() => localStorage.clear());
-
     it('should not enable the bypass until it is confirmed', () => {
         // A standing permission for every link the browser opens, so the toggle alone must not be enough.
         const { store } = renderSettings();

@@ -3,7 +3,7 @@ import { createStore, Provider } from 'jotai';
 import { createElement, type ReactNode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '../../lib/cluster';
 import { approvedOriginsAtom } from '../approved-origins';
@@ -37,12 +37,6 @@ function renderUseClusterUrl({
     return { onReplaceSearchParams, result, store };
 }
 
-// Both stores, not just localStorage: approvals live in sessionStorage, so one test's approved origin
-// would otherwise carry into the next and silently honor an endpoint that should still be pending.
-beforeEach(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-});
 afterEach(() => vi.unstubAllEnvs());
 
 describe('useClusterUrl', () => {

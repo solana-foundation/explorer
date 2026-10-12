@@ -1,5 +1,5 @@
 import { createStore } from 'jotai';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { MAX_CLUSTER_NAME_LENGTH } from '../cluster-name';
 import {
@@ -21,14 +21,6 @@ function loadFromStorage(raw: string): unknown {
 }
 
 describe('cluster-storage atoms', () => {
-    beforeEach(() => {
-        localStorage.clear();
-    });
-
-    afterEach(() => {
-        localStorage.clear();
-    });
-
     describe('savedClustersAtom', () => {
         it('should default to empty array', () => {
             const store = createStore();

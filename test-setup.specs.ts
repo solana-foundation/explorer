@@ -1,9 +1,15 @@
 import type * as SolanaKit from '@solana/kit';
-import { vi } from 'vitest';
+import { beforeEach, vi } from 'vitest';
 
 import type * as TokenInfoBatchProvider from '@/app/entities/token-info/model/token-info-batch-provider';
 
 import { mockSolanaRpc } from './app/__tests__/mock-rpc';
+
+// jsdom storage outlives a test and storage-backed state reads it on first use; node-environment specs have none.
+beforeEach(() => {
+    globalThis.localStorage?.clear();
+    globalThis.sessionStorage?.clear();
+});
 
 // Global no-op mock for Logger to suppress console output in all tests.
 vi.mock('@/app/shared/lib/logger', () => ({
