@@ -49,10 +49,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
-    strategy:
-      matrix:
-        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '24.x']
-
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -63,7 +59,7 @@ jobs:
       - name: Setup pnpm and Node.js
         uses: ./.github/actions/pnpm-setup
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
 
       - name: Format
         run: pnpm format:ci
@@ -84,7 +80,6 @@ jobs:
         run: pnpm test:packages
 
   # Split off Build-And-Test so the specs sweep fans out without re-running format/lint/build per shard.
-  # Sharded on both node versions: leaving 24.x whole would keep it the ~8 min critical path.
   Specs-Shards:
     needs: read-nvmrc
     runs-on: ubuntu-latest
@@ -93,7 +88,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '24.x']
         shard: ${{ fromJSON(needs.read-nvmrc.outputs.shard-list) }}
 
     steps:
@@ -103,7 +97,7 @@ jobs:
       - name: Setup pnpm and Node.js
         uses: ./.github/actions/pnpm-setup
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
 
       # Specs resolve sibling packages through dist. No `next build`: nothing here reads the generated
       # route types now that the specs project no longer typechecks.
@@ -207,10 +201,6 @@ jobs:
     timeout-minutes: 10
     continue-on-error: true
 
-    strategy:
-      matrix:
-        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '24.x']
-
     # The browser-mode sweep has repeatedly died on a full root partition ("No space left on device").
     # Browsers and the Vite dep-optimize cache live on the runner's ~65 GB /mnt scratch disk
     # (PLAYWRIGHT_BROWSERS_PATH / VITE_CACHE_PATH); the pnpm store stays on / so node_modules keeps hardlinking.
@@ -240,7 +230,7 @@ jobs:
       - name: Setup pnpm and Node.js
         uses: ./.github/actions/pnpm-setup
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
 
       # No-op while setup-node restores by exact key only; kept in case the store ever regains restore-keys.
       - name: Prune pnpm store
