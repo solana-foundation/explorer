@@ -23,12 +23,15 @@ type Props = {
 
 export function NicknameEditor({ address, open, onClose }: Props) {
     const [nickname, setNicknameLocal] = useState('');
+    const [savedNickname, setSavedNickname] = useState<string>();
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Reset to current saved value each time the dialog opens
     useEffect(() => {
         if (open) {
-            setNicknameLocal(getNickname(address) ?? '');
+            const saved = getNickname(address);
+            setSavedNickname(saved ?? undefined);
+            setNicknameLocal(saved ?? '');
         }
     }, [address, open]);
 
@@ -100,7 +103,7 @@ export function NicknameEditor({ address, open, onClose }: Props) {
 
                     <div className="flex justify-between">
                         <div>
-                            {getNickname(address) && (
+                            {savedNickname && (
                                 <Button ui="dashkit" variant="outline-danger" size="sm" onClick={handleRemove}>
                                     Remove
                                 </Button>

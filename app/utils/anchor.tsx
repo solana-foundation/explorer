@@ -5,11 +5,11 @@ import { BorshEventCoder, BorshInstructionCoder, Idl, Program } from '@coral-xyz
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useAnchorProgram } from '@entities/idl';
+import { ExpandableRow, FieldNameCell } from '@shared/ui/expandable-row';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
-import React, { Fragment, ReactNode, useState } from 'react';
-import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
+import React, { Fragment, ReactNode } from 'react';
 
 import { equals, fromBase64, fromHex, toBase64 } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
@@ -610,58 +610,10 @@ function SimpleRow({
     itemKey = camelToTitleCase(itemKey);
     return (
         <BaseTable.Row className={cn(nestingLevel > 0 && 'bg-black/20')}>
-            <BaseTable.Cell>
-                <div className="flex flex-row items-center">
-                    {nestingLevel > 0 && <CornerDownRight className="mb-[3px] mr-1.5" size={14} />}
-                    <div>{itemKey}</div>
-                </div>
-            </BaseTable.Cell>
+            <FieldNameCell name={itemKey} nestingLevel={nestingLevel} />
             <BaseTable.Cell>{typeDisplayName(type)}</BaseTable.Cell>
             <BaseTable.Cell className="text-right">{children}</BaseTable.Cell>
         </BaseTable.Row>
-    );
-}
-
-export function ExpandableRow({
-    fieldName,
-    fieldType,
-    nestingLevel,
-    children,
-}: {
-    fieldName: string;
-    fieldType: string;
-    nestingLevel: number;
-    children: React.ReactNode;
-}) {
-    const [expanded, setExpanded] = useState(false);
-    return (
-        <>
-            <BaseTable.Row>
-                <BaseTable.Cell>
-                    <div className="flex flex-row items-center">
-                        {nestingLevel > 0 && <CornerDownRight className="mb-[3px] mr-1.5" size={14} />}
-                        <div>{fieldName}</div>
-                    </div>
-                </BaseTable.Cell>
-                <BaseTable.Cell>{fieldType}</BaseTable.Cell>
-                <BaseTable.Cell className="text-right" onClick={() => setExpanded(current => !current)}>
-                    <div className="cursor-pointer">
-                        {expanded ? (
-                            <>
-                                <span className="mr-1.5 text-dk-info">Collapse</span>
-                                <ChevronUp size={15} />
-                            </>
-                        ) : (
-                            <>
-                                <span className="mr-1.5 text-dk-info">Expand</span>
-                                <ChevronDown size={15} />
-                            </>
-                        )}
-                    </div>
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            {expanded && <>{children}</>}
-        </>
     );
 }
 

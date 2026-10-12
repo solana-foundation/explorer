@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { processTextAsJson } from '../feature/processors';
+import { unwrap } from '@/app/shared/lib/result';
+
+import { processBinary, processJson, processTextAsJson } from '../feature/processors';
 
 function createMockResponse(text: string, headers: Headers = new Headers()): Response {
     // Cast: tests only stub the surface of Response that processTextAsJson touches.
@@ -15,7 +17,7 @@ describe('processTextAsJson', () => {
         const jsonText = '{"name": "Test", "value": 123}';
         const response = createMockResponse(jsonText);
 
-        const result = await processTextAsJson(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.data).toEqual({ name: 'Test', value: 123 });
     });
@@ -24,7 +26,7 @@ describe('processTextAsJson', () => {
         const jsonText = '{"name": "Test"}\n';
         const response = createMockResponse(jsonText);
 
-        const result = await processTextAsJson(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.data).toEqual({ name: 'Test' });
     });
@@ -33,7 +35,7 @@ describe('processTextAsJson', () => {
         const jsonText = '  \n{"name": "Test"}\n  ';
         const response = createMockResponse(jsonText);
 
-        const result = await processTextAsJson(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.data).toEqual({ name: 'Test' });
     });
@@ -47,7 +49,7 @@ describe('processTextAsJson', () => {
 }`;
         const response = createMockResponse(jsonText);
 
-        const result = await processTextAsJson(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.data).toEqual({
             description: 'The US Dollar upgraded for a new era of finance.',
@@ -61,7 +63,7 @@ describe('processTextAsJson', () => {
         const jsonText = '{\r\n"name": "Test"\r\n}\r\n';
         const response = createMockResponse(jsonText);
 
-        const result = await processTextAsJson(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.data).toEqual({ name: 'Test' });
     });
@@ -73,18 +75,33 @@ describe('processTextAsJson', () => {
         });
         const response = createMockResponse('{"test": true}', headers);
 
-        const result = await processTextAsJson(response);
+        const result = unwrap(await processTextAsJson(response));
 
         expect(result.headers.get('Cache-Control')).toBe('max-age=3600');
         expect(result.headers.get('Content-Type')).toBe('text/plain');
     });
 
-    it('should throw 415 error for invalid JSON', async () => {
+    it('should return a 415 malformed-json error for invalid JSON', async () => {
         const invalidJson = 'not valid json';
         const response = createMockResponse(invalidJson);
 
-        await expect(processTextAsJson(response)).rejects.toMatchObject({
-            status: 415,
-        });
+        const [error] = await processTextAsJson(response);
+
+        expect(error).toMatchObject({ code: 'malformed-json', status: 415 });
+    });
+});
+
+describe('decode faults', () => {
+    it.each([
+        ['processBinary', processBinary],
+        ['processJson', processJson],
+        ['processTextAsJson', processTextAsJson],
+    ])('should return a 500 decode-failed error when %s gets a body it cannot read', async (_, process) => {
+        const response = new Response('{}');
+        await response.text();
+
+        const [error] = await process(response);
+
+        expect(error).toMatchObject({ code: 'decode-failed', status: 500 });
     });
 });

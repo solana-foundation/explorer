@@ -10,10 +10,16 @@ import { publicKey, unwrapOption } from '@metaplex-foundation/umi';
 import { address } from '@solana/kit';
 import { fetchAll } from '@utils/fetch-all';
 
-import { MAX_SIZE, USER_AGENT } from '@/app/api/metadata/proxy/config';
-import { fetchResource, matchJsonContent } from '@/app/api/metadata/proxy/feature';
+import {
+    fetchResource,
+    logProxyError,
+    logResourceFetched,
+    matchJsonContent,
+    MAX_SIZE,
+    USER_AGENT,
+} from '@/app/api/metadata/proxy';
 import { chunk } from '@/app/shared/lib/array';
-import { IPFS_PROTOCOL, resolveIpfsUri } from '@/app/shared/lib/ipfs';
+import { resolveIpfsUri } from '@/app/shared/lib/ipfs';
 import { parseUrl } from '@/app/shared/lib/url';
 
 import type { TokenInfo } from '../lib/types';
@@ -109,12 +115,14 @@ async function fetchDecimals(
  * unlisted mint hosted on IPFS reports a blocked protocol instead of a logo.
  *
  * Returns '' when the URI names nothing readable — unparseable, or an ipfs address with a
- * malformed CID. Other schemes pass through unchanged, for `fetchResource` to reject.
+ * malformed CID. Any other URI passes through unchanged.
  */
 function resolveMetadataUri(uri: string): string {
     const url = parseUrl(uri);
     if (!url) return '';
-    return url.protocol === IPFS_PROTOCOL ? resolveIpfsUri(url) : uri;
+    const ipfs = resolveIpfsUri(url);
+    if (!ipfs) return uri;
+    return ipfs.kind === 'gateway' ? ipfs.uri : '';
 }
 
 /**
@@ -146,18 +154,26 @@ async function fetchLogoUri(
     if (timeout <= 0) return null;
 
     try {
-        const { data, headers } = await fetchResource(uri, {
+        const [error, resource] = await fetchResource(uri, {
             headers: new Headers({ 'User-Agent': USER_AGENT }),
             size: MAX_SIZE,
             timeout,
         });
+        if (error) {
+            // A dead link, a slow host, or a blocked address is routine for third-party metadata.
+            // `logProxyError` owns the log, so `onError` would log the failure a second time.
+            logProxyError(error);
+            // eslint-disable-next-line unicorn/no-null -- same contract as above
+            return null;
+        }
+        logResourceFetched(resource, MAX_SIZE);
+        const { data, headers } = resource;
         // eslint-disable-next-line unicorn/no-null -- same contract as above
         if (!matchJsonContent(headers.get('content-type'))) return null;
         const image = (data as { image?: unknown } | undefined)?.image;
         // eslint-disable-next-line unicorn/no-null -- same contract as above
         return typeof image === 'string' ? image : null;
     } catch (error) {
-        // A dead link, a slow host, or a blocked address is routine for third-party metadata.
         options.onError?.(error);
         // eslint-disable-next-line unicorn/no-null -- same contract as above
         return null;

@@ -9,18 +9,6 @@ import type { SearchContext, SearchOptions, SearchProvider } from '../lib/types'
 
 const SEARCH_TIMEOUT_MS = 5_000;
 
-/**
- * Remote search provider that resolves Solana domain names (SNS / Bonfida).
- *
- * When the query looks like a valid `.sol` domain and the cluster is
- * mainnet-beta, this provider fetches the domain info from the API and
- * returns links to both the domain owner's account and the name-service
- * account itself.
- *
- * @example
- * // Type a .sol domain into the search bar (mainnet only):
- * // toly.sol
- */
 export const domainSearchProvider: SearchProvider = {
     kind: 'remote',
     name: 'domain',

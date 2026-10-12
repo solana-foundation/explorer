@@ -10,7 +10,7 @@ import { TokenExtensionBadges } from './TokenExtensionBadges';
 
 export function TokenExtensionsStatusRow({ address, extensions }: { address: string; extensions: TokenExtension[] }) {
     const extension = useTokenExtensionNavigation({ uriComponent: `/address/${address}` });
-    // bypass root uriComponent to not play guessing inside the compoent as Row might be rendered at different pages
+    // bypass root uriComponent to not play guessing inside the component as Row might be rendered at different pages
 
     const parsedExtensions = useMemo(() => {
         return extensions.reduce((acc, ext) => {

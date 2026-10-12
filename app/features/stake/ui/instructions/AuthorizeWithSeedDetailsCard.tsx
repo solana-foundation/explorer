@@ -1,4 +1,4 @@
-import { address, defineInstructionCard, type InstructionFieldList, seed, text } from '@entities/instruction-card';
+import { address, defineInstructionCard, type InstructionFieldList, string, text } from '@entities/instruction-card';
 
 import type { AuthorizeCheckedWithSeedInfo, AuthorizeWithSeedInfo } from '../../lib/instruction-types';
 
@@ -20,7 +20,7 @@ function fields(info: Info): InstructionFieldList {
         address('Stake Address', info.stakeAccount),
         address('Authority Base', info.authorityBase),
         address('Authority Owner', info.authorityOwner),
-        seed('Authority Seed', info.authoritySeed),
+        string('Authority Seed', info.authoritySeed),
         address('New Authority Address', info.newAuthorized),
         text('Authority Type', info.authorityType),
         info.clockSysvar && address('Clock Sysvar', info.clockSysvar),

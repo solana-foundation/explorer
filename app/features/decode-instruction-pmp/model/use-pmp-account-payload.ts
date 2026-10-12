@@ -1,6 +1,7 @@
 import { decodePmpAccount, type PmpAccountDecodeResult, type PmpDecodeConfig } from '@entities/pmp-account';
 import { useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
+import type { Address } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
 import React from 'react';
 
@@ -21,7 +22,7 @@ export function usePmpAccountPayload({
     config,
     cap,
 }: {
-    address: string | undefined;
+    address: Address | undefined;
     config: PmpDecodeConfig;
     cap?: number;
 }): PmpAccountPayloadResult {

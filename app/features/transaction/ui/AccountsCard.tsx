@@ -6,8 +6,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { SolBalance } from '@components/common/SolBalance';
 import { Button } from '@components/shared/ui/button';
 import { cn } from '@components/shared/utils';
-import { AccountInfo, useAccountsInfo } from '@entities/account';
-import { useCluster } from '@providers/cluster';
+import { useAccountSizes } from '@entities/account';
 import { useTransactionDetails } from '@providers/transactions';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
@@ -25,8 +24,7 @@ import { AccountExpandedContent } from './AccountExpandedContent';
 
 type TransactionAccountRowProps = {
     account: ParsedMessageAccount;
-    accountInfo?: AccountInfo;
-    accountInfoLoading: boolean;
+    address: string;
     index: number;
     isDesktop: boolean;
     message: ParsedMessage;
@@ -34,17 +32,21 @@ type TransactionAccountRowProps = {
     pre: number;
 };
 
-function TransactionAccountRow({
+// Mounted expanded content re-renders on every accounts provider update, so a row mounts it on first
+// open.
+type DetailsState = 'closed' | 'open' | 'unmounted';
+
+const TransactionAccountRow = React.memo(function TransactionAccountRow({
     account,
-    accountInfo,
-    accountInfoLoading,
+    address,
     index,
     isDesktop,
     message,
     post,
     pre,
 }: TransactionAccountRowProps) {
-    const [expanded, setExpanded] = useState(false);
+    const [expandedState, setExpandedState] = useState<DetailsState>('unmounted');
+    const expanded = expandedState === 'open';
     const [drawerOpen, setDrawerOpen] = useState(false);
     // Mount the mobile drawer only once the row is first tapped — otherwise every account row mounts a
     // closed drawer up front.
@@ -57,19 +59,13 @@ function TransactionAccountRow({
     }, [isDesktop]);
 
     const pubkey = account.pubkey;
-    const key = pubkey.toBase58();
     const delta = new BigNumber(post).minus(new BigNumber(pre));
 
-    const hasBadges =
-        index === 0 ||
-        account.signer ||
-        account.writable ||
-        message.instructions.some(ix => ix.programId.equals(pubkey)) ||
-        account.source === 'lookupTable';
+    const toggleExpanded = () => setExpandedState(state => (state === 'open' ? 'closed' : 'open'));
 
     const handleRowClick = () => {
         if (isDesktop) {
-            setExpanded(v => !v);
+            toggleExpanded();
         } else {
             setDrawerMounted(true);
             setDrawerOpen(true);
@@ -95,11 +91,9 @@ function TransactionAccountRow({
                                 noCopy={!isDesktop}
                             />
                         </div>
-                        {hasBadges && (
-                            <span className="mb-0.5 mt-1 inline-flex flex-wrap gap-1">
-                                <AccountBadges index={index} message={message} pubkey={pubkey} account={account} />
-                            </span>
-                        )}
+                        <span className="mb-0.5 mt-1 inline-flex flex-wrap gap-1 empty:hidden">
+                            <AccountBadges index={index} message={message} pubkey={pubkey} account={account} />
+                        </span>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-0.5 whitespace-nowrap text-right">
                         <BalanceDelta delta={delta} isSol />
@@ -113,7 +107,7 @@ function TransactionAccountRow({
                             className="!h-5 !w-5 [&_svg]:size-4"
                             onClick={e => {
                                 e.stopPropagation();
-                                setExpanded(v => !v);
+                                toggleExpanded();
                             }}
                             size="icon"
                             variant="ghost"
@@ -138,13 +132,9 @@ function TransactionAccountRow({
                     )}
                 >
                     <div className="min-h-0 overflow-hidden">
-                        <AccountExpandedContent
-                            flat
-                            accountInfo={accountInfo}
-                            accountInfoLoading={accountInfoLoading}
-                            address={key}
-                            enabled={expanded}
-                        />
+                        {expandedState !== 'unmounted' && (
+                            <AccountExpandedContent flat address={address} enabled={expanded} />
+                        )}
                     </div>
                 </div>
             </DataListRow>
@@ -152,8 +142,6 @@ function TransactionAccountRow({
             {drawerMounted && (
                 <AccountDetailDrawer
                     account={account}
-                    accountInfo={accountInfo}
-                    accountInfoLoading={accountInfoLoading}
                     index={index}
                     message={message}
                     onOpenChange={setDrawerOpen}
@@ -162,11 +150,10 @@ function TransactionAccountRow({
             )}
         </>
     );
-}
+});
 
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
-    const { url } = useCluster();
     // One breakpoint subscription for the whole card — rows read `isDesktop` as a prop instead of each
     // registering its own matchMedia listeners.
     const { isLandscape, isLg } = useBreakpoint();
@@ -176,13 +163,20 @@ export function AccountsCard({ signature }: SignatureProps) {
     const message = transactionWithMeta?.transaction.message;
     const meta = transactionWithMeta?.meta;
 
-    const pubkeys = useMemo(() => message?.accountKeys.map(a => a.pubkey) ?? [], [message?.accountKeys]);
+    const accounts = useMemo(
+        () => message?.accountKeys.map(account => ({ account, address: account.pubkey.toBase58() })) ?? [],
+        [message?.accountKeys],
+    );
+    const addresses = useMemo(() => accounts.map(({ address }) => address), [accounts]);
 
-    const { accounts, error, loading } = useAccountsInfo(pubkeys, url);
+    const sizes = useAccountSizes(addresses);
 
     const totalAccountSize = useMemo(
-        () => Array.from(accounts.values()).reduce((acc, account) => acc + account.size, 0),
-        [accounts],
+        () =>
+            addresses.every(address => sizes.has(address))
+                ? Array.from(sizes.values()).reduce((total, size) => total + size, 0)
+                : undefined,
+        [addresses, sizes],
     );
 
     if (!transactionWithMeta) {
@@ -193,18 +187,12 @@ export function AccountsCard({ signature }: SignatureProps) {
         return <ErrorCard text="Transaction metadata is missing" />;
     }
 
-    if (error) {
-        return <ErrorCard text="Failed to fetch accounts info" />;
-    }
-
-    const accountRows = message.accountKeys.map((account, index) => {
-        const pubkeyStr = account.pubkey.toBase58();
+    const accountRows = accounts.map(({ account, address }, index) => {
         return (
             <TransactionAccountRow
-                key={pubkeyStr}
+                key={address}
                 account={account}
-                accountInfo={accounts.get(pubkeyStr)}
-                accountInfoLoading={loading}
+                address={address}
                 index={index}
                 isDesktop={isDesktop}
                 message={message}
@@ -214,7 +202,7 @@ export function AccountsCard({ signature }: SignatureProps) {
         );
     });
 
-    const footer = !loading && totalAccountSize > 0 && (
+    const footer = totalAccountSize !== undefined && totalAccountSize > 0 && (
         <div className={cn('text-sm text-outer-space-300', ROW_PADDING)}>
             <div className="flex flex-col">
                 <div className="flex items-baseline gap-2">

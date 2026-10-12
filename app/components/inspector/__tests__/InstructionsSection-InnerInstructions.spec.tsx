@@ -1,9 +1,10 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
+import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { getBase58Decoder } from '@solana/kit';
 import type { CompiledInnerInstruction } from '@solana/web3.js';
 import { MessageV0, PublicKey } from '@solana/web3.js';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
@@ -34,6 +35,11 @@ vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
     useIdlInstructionDecode: vi.fn(() => undefined),
 }));
 
+vi.mock('@components/instruction/system/SystemDetailsCard', async importOriginal => {
+    const actual = await importOriginal<typeof import('@components/instruction/system/SystemDetailsCard')>();
+    return { ...actual, SystemDetailsCard: vi.fn(actual.SystemDetailsCard) };
+});
+
 vi.mock('next/navigation', () => ({
     usePathname: vi.fn(() => '/'),
     useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn() })),
@@ -48,6 +54,8 @@ vi.mock('next/link', () => ({
 describe('Inspector InstructionsSection with inner instructions', () => {
     afterEach(() => {
         vi.mocked(useIdlInstructionDecode).mockReturnValue(undefined);
+        vi.mocked(SystemDetailsCard).mockReset();
+        vi.restoreAllMocks();
     });
 
     test('should render a card per inner instruction under its parent', async () => {
@@ -80,6 +88,35 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         // The three Token CPIs render as raw cards because the IDL decoder is mocked to return
         // undefined and the dispatcher does not parse those discriminators.
         expect(await screen.findByText(/System Program: Create Account/i)).toBeInTheDocument();
+    });
+
+    test('should replace an inner card that throws with the Unknown card', async () => {
+        vi.mocked(SystemDetailsCard).mockImplementation(() => {
+            throw new Error('system card failed');
+        });
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        const { container } = render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection
+                                    message={buildMessage()}
+                                    compiledInnerInstructions={INNER_INSTRUCTIONS}
+                                />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        await waitFor(() => expect(SystemDetailsCard).toHaveBeenCalled());
+        expect(screen.getByText(/Create Idempotent/i)).toBeInTheDocument();
+        expect(container.textContent).toContain('#1.2');
+        expect(screen.queryByText(/System Program: Create Account/i)).not.toBeInTheDocument();
     });
 
     test('should render an inner token batch as a batch card, not through the IDL decoder', async () => {
@@ -152,6 +189,75 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         );
 
         const title = await screen.findByText(/Pyth: Init Mapping Account/i);
+
+        // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
+        expect(title.parentElement).toHaveTextContent('#1.2');
+    });
+
+    test('should number an inner Compute Budget card under its parent', async () => {
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection
+                                    message={buildMessage()}
+                                    compiledInnerInstructions={INNER_COMPUTE_BUDGET_SET_LIMIT}
+                                />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        const title = await screen.findByText(/Compute Budget Program: Set Compute Unit Limit/i);
+
+        // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
+        expect(title.parentElement).toHaveTextContent('#1.2');
+    });
+
+    test('should number an inner Memo card under its parent', async () => {
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection message={buildMessage()} compiledInnerInstructions={INNER_MEMO} />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        const title = await screen.findByText(/Memo Program: Memo/i);
+
+        // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
+        expect(title.parentElement).toHaveTextContent('#1.2');
+    });
+
+    test('should number an inner Address Lookup Table card under its parent', async () => {
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection
+                                    message={buildMessage()}
+                                    compiledInnerInstructions={INNER_ALT_FREEZE}
+                                />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        const title = await screen.findByText(/Address Lookup Table: Freeze Lookup Table/i);
 
         // eslint-disable-next-line testing-library/no-node-access -- the badge's card is what is under test
         expect(title.parentElement).toHaveTextContent('#1.2');
@@ -285,6 +391,8 @@ const ATA_PROGRAM = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
 const COMPUTE_BUDGET_PROGRAM = new PublicKey('ComputeBudget111111111111111111111111111111');
 const ZK_ELGAMAL_PROOF_PROGRAM = new PublicKey('ZkE1Gama1Proof11111111111111111111111111111');
 const PYTH_PROGRAM = new PublicKey('FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH');
+const MEMO_PROGRAM = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
+const ADDRESS_LOOKUP_TABLE_PROGRAM = new PublicKey('AddressLookupTab1e1111111111111111111111111');
 
 // The account list of the transaction in HOO-611, in wire order.
 const ACCOUNT_KEYS = [
@@ -299,6 +407,8 @@ const ACCOUNT_KEYS = [
     ATA_PROGRAM, // 8
     ZK_ELGAMAL_PROOF_PROGRAM, // 9
     PYTH_PROGRAM, // 10
+    MEMO_PROGRAM, // 11
+    ADDRESS_LOOKUP_TABLE_PROGRAM, // 12
 ];
 
 // The four CPIs the RPC reports for the Create Idempotent instruction, verbatim
@@ -367,6 +477,52 @@ const INNER_PYTH_INIT_MAPPING: CompiledInnerInstruction[] = [
     },
 ];
 
+// A System CreateAccount followed by a Compute Budget SetComputeUnitLimit: discriminator 2, u32 limit 200_000.
+const INNER_COMPUTE_BUDGET_SET_LIMIT: CompiledInnerInstruction[] = [
+    {
+        index: 0,
+        instructions: [
+            {
+                accounts: [0, 2],
+                data: '11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL',
+                programIdIndex: 3,
+            },
+            { accounts: [], data: encodeBase58([2, 64, 13, 3, 0]), programIdIndex: 5 },
+        ],
+    },
+];
+
+// A System CreateAccount followed by a Memo whose data is the UTF-8 text "hi".
+const INNER_MEMO: CompiledInnerInstruction[] = [
+    {
+        index: 0,
+        instructions: [
+            {
+                accounts: [0, 2],
+                data: '11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL',
+                programIdIndex: 3,
+            },
+            { accounts: [0], data: encodeBase58([104, 105]), programIdIndex: 11 },
+        ],
+    },
+];
+
+// A System CreateAccount followed by an Address Lookup Table Freeze: u32 discriminator 1, over
+// the table and its authority.
+const INNER_ALT_FREEZE: CompiledInnerInstruction[] = [
+    {
+        index: 0,
+        instructions: [
+            {
+                accounts: [0, 2],
+                data: '11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL',
+                programIdIndex: 3,
+            },
+            { accounts: [1, 0], data: encodeBase58([1, 0, 0, 0]), programIdIndex: 12 },
+        ],
+    },
+];
+
 // Three CPIs. The middle one names an account index the message does not have.
 const INNER_WITH_BAD_ACCOUNT: CompiledInnerInstruction[] = [
     {
@@ -397,7 +553,7 @@ function buildMessage(): MessageV0 {
         ],
         header: {
             numReadonlySignedAccounts: 0,
-            numReadonlyUnsignedAccounts: 8,
+            numReadonlyUnsignedAccounts: 10,
             numRequiredSignatures: 1,
         },
         recentBlockhash: new PublicKey(new Uint8Array(32)).toBase58(),

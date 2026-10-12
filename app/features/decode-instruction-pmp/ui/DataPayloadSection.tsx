@@ -1,4 +1,5 @@
 import { RawDataField } from '@components/shared/RawDataField';
+import { DECODED_TABLE_COLUMNS } from '@entities/instruction-card';
 import {
     decodePmpPayload,
     getPayloadDataHash,
@@ -8,12 +9,12 @@ import {
     type PmpAccountDecodeResult,
     type PmpPayloadDecodeResult,
 } from '@entities/pmp-account';
-import { PublicKey } from '@solana/web3.js';
+import type { Address } from '@solana/kit';
 import { Compression, DataSource } from '@solana-program/program-metadata';
 import React from 'react';
 
-import { Address } from '@/app/components/common/Address';
 import { Copyable } from '@/app/components/common/Copyable';
+import { KitAddress } from '@/app/components/common/KitAddress';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/shared/ui/tabs';
 import { Alert } from '@/app/shared/ui/Alert';
@@ -25,52 +26,53 @@ import { createPayloadTabTracker } from '../lib/payload-tab-tracker';
 import type { PmpPayloadInstruction } from '../lib/types';
 import { type PmpAccountPayloadResult, usePmpAccountPayload } from '../model/use-pmp-account-payload';
 
-/** The card table has three columns, so every row in this section spans all of them. */
-const CARD_TABLE_COLUMNS = 3;
-
 /**
  * The Decoded Content section of the PMP card. Owns every payload state.
  * A decode failure degrades to the raw view plus an inline note INSIDE this section (it never throws
- * out to the card's error boundary, which would discard the accounts and config tables), and an oversized
+ * out to the card's error boundary, which would discard the account and argument rows), and an oversized
  * payload renders a bounded view plus a download rather than the full document.
  *
  * Raw bytes always go through `RawDataField`, which owns the hex/base64 tabs, the byte count, copy, download,
  * show-more and its own too-large guard. Nothing here reimplements those.
  */
 export function DataPayloadSection({ pmpIx }: { pmpIx: PmpPayloadInstruction }) {
-    const { config, dataSource, payload } = pmpIx;
-    // account that may hold the payload bytes
-    const payloadAccountAddress = getPayloadAccountAddress(pmpIx);
+    const { payload } = pmpIx;
+    if (payload === undefined) return <NoPayloadNote />;
 
-    const decoded = React.useMemo(
-        () => (payload ? decodePmpPayload({ config, data: payload }) : undefined),
-        [config, payload],
-    );
-
-    if (dataSource === undefined) return <NoPayloadNote />;
-
-    if (payload === undefined) {
-        // No payload bytes in the instruction args.
-        // But there is an account that contains payload.
-        return payloadAccountAddress ? (
-            <AccountRows address={payloadAccountAddress} dataSource={dataSource} pmpIx={pmpIx} />
-        ) : (
-            <NoPayloadNote />
-        );
+    switch (payload.source.kind) {
+        case 'inline':
+            return <InlineRows bytes={payload.source.bytes} dataSource={payload.dataSource} pmpIx={pmpIx} />;
+        case 'account':
+            return <AccountRows address={payload.source.account} dataSource={payload.dataSource} pmpIx={pmpIx} />;
+        case 'absent':
+            return <NoPayloadNote />;
     }
+}
 
-    if (!decoded) return <></>;
-
+function InlineRows({
+    bytes,
+    dataSource,
+    pmpIx,
+}: {
+    bytes: Uint8Array;
+    dataSource: DataSource;
+    pmpIx: PmpPayloadInstruction;
+}) {
+    const { config } = pmpIx;
+    const decoded = React.useMemo(() => decodePmpPayload({ config, data: bytes }), [bytes, config]);
     const hash = getPayloadDataHash(decoded);
+
     return (
         <>
-            {hash !== undefined && <PayloadHashRow columns={CARD_TABLE_COLUMNS} dataSource={dataSource} hash={hash} />}
+            {hash !== undefined && (
+                <PayloadHashRow columns={DECODED_TABLE_COLUMNS} dataSource={dataSource} hash={hash} />
+            )}
             <SectionRow testId="pmp-payload-section">
                 <DecodedTabs
                     compression={config.compression}
                     decoded={decoded}
                     onTabChange={createPayloadTabTracker({ dataSource, pmpIx, source: 'instruction' })}
-                    stored={payload}
+                    stored={bytes}
                 />
             </SectionRow>
         </>
@@ -90,15 +92,11 @@ function NoPayloadNote() {
 function SectionRow({ children, testId }: { children: React.ReactNode; testId?: string }) {
     return (
         <BaseTable.Row>
-            <BaseTable.Cell colSpan={CARD_TABLE_COLUMNS} data-testid={testId}>
+            <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS} data-testid={testId}>
                 {children}
             </BaseTable.Cell>
         </BaseTable.Row>
     );
-}
-
-function getPayloadAccountAddress(pmpIx: PmpPayloadInstruction): string | undefined {
-    return pmpIx.kind === 'setData' ? pmpIx.sourceBuffer : pmpIx.metadataAccount;
 }
 
 function getPayloadAccountLabel(pmpIx: PmpPayloadInstruction): string {
@@ -111,7 +109,7 @@ function AccountRows({
     dataSource,
     pmpIx,
 }: {
-    address: string;
+    address: Address;
     dataSource: DataSource;
     pmpIx: PmpPayloadInstruction;
 }) {
@@ -124,13 +122,15 @@ function AccountRows({
 
     return (
         <>
-            {hash !== undefined && <PayloadHashRow columns={CARD_TABLE_COLUMNS} dataSource={dataSource} hash={hash} />}
+            {hash !== undefined && (
+                <PayloadHashRow columns={DECODED_TABLE_COLUMNS} dataSource={dataSource} hash={hash} />
+            )}
             <SectionRow testId="pmp-payload-section">
                 <div className="flex flex-col gap-0">
                     <Alert variant="default" data-testid="pmp-deferred-source-note" className="!mb-0 pl-0">
                         <div className="flex w-full flex-row items-center gap-2">
                             <span>The payload was written to the {payloadAccountLabel}</span>
-                            <Address noNicknameEditing pubkey={new PublicKey(address)} link raw />
+                            <KitAddress address={address} noNicknameEditing link raw />
                         </div>
                     </Alert>
                     <AccountPayload

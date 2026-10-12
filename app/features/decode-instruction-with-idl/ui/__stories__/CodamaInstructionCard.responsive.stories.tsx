@@ -5,6 +5,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -21,7 +22,14 @@ const fallbackParsedIx = { path: [{ kind: 'unknownNode' }] } as any;
 
 const meta: Meta<typeof CodamaInstructionCard> = {
     component: CodamaInstructionCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withViewportFromGlobal],
+    decorators: [
+        withCluster,
+        withScrollAnchor,
+        withTokenInfoBatch,
+        withMockTransactions,
+        withTxInstructionSurface,
+        withViewportFromGlobal,
+    ],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
@@ -35,7 +43,7 @@ const meta: Meta<typeof CodamaInstructionCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { index: 0, ix: sampleIx, parsedIx: fallbackParsedIx, result: { err: null } };
+const args = { index: 0, ix: sampleIx, parsedIx: fallbackParsedIx };
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

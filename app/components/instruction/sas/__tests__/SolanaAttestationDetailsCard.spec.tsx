@@ -29,10 +29,10 @@ const ACCOUNTS = [
     '4QUZQ4c7bZuJ4o4L8tYAEGnePFV27SUFEVmC7BYfsXRp',
 ] as const;
 
-/** CreateCredential: u8 discriminator 0, then a u32-prefixed name and a u32-prefixed signer list, both empty. */
 const CREATE_CREDENTIAL = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-/** CloseAttestation carries nothing but its discriminator, so it has no arguments to tabulate. */
+const CHANGE_SCHEMA_STATUS = [2, 1];
+
 const CLOSE_ATTESTATION = [7];
 
 describe('SolanaAttestationDetailsCard', () => {
@@ -77,6 +77,32 @@ describe('SolanaAttestationDetailsCard', () => {
         expect(readNarrowRows()).toEqual([]);
     });
 
+    it('should badge each account by its role and list an undeclared account as a remaining account', async () => {
+        renderCard(
+            new TransactionInstruction({
+                data: Buffer.from(CREATE_CREDENTIAL),
+                keys: [
+                    { isSigner: true, isWritable: true, pubkey: new PublicKey(ACCOUNTS[0]) },
+                    { isSigner: false, isWritable: true, pubkey: new PublicKey(ACCOUNTS[1]) },
+                    { isSigner: true, isWritable: false, pubkey: new PublicKey(ACCOUNTS[2]) },
+                    { isSigner: false, isWritable: false, pubkey: new PublicKey(ACCOUNTS[3]) },
+                    { isSigner: false, isWritable: false, pubkey: new PublicKey(ACCOUNTS[4]) },
+                ],
+                programId: SAS_PROGRAM_ID,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(readRows().slice(2, 7)).toEqual([
+                ['PayerWritableSigner', ACCOUNTS[0]],
+                ['CredentialWritable', ACCOUNTS[1]],
+                ['AuthoritySigner', ACCOUNTS[2]],
+                ['SystemProgram', ACCOUNTS[3]],
+                ['Remaining Account #1', ACCOUNTS[4]],
+            ]);
+        });
+    });
+
     it('should omit the argument table for an instruction that has none', async () => {
         renderCard(sasInstruction(CLOSE_ATTESTATION, 7));
 
@@ -85,6 +111,17 @@ describe('SolanaAttestationDetailsCard', () => {
         });
         expect(screen.queryByText('Argument Name')).not.toBeInTheDocument();
         expect(readRows()).toHaveLength(9);
+    });
+
+    it('should render the only argument of an instruction that has one', async () => {
+        renderCard(sasInstruction(CHANGE_SCHEMA_STATUS, 3));
+
+        await waitFor(() => {
+            expect(readRows().slice(-2)).toEqual([
+                ['Argument Name', 'Type'],
+                ['isPaused', 'boolean'],
+            ]);
+        });
     });
 
     // A foreign program id proves the row reads the node rather than the SAS constant.
@@ -98,13 +135,16 @@ describe('SolanaAttestationDetailsCard', () => {
         });
     });
 
-    // The card leans on the caller's error boundary rather than inventing a fallback of its own.
-    it('should throw for an instruction the program does not define', () => {
-        const reportedError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it.each([
+        { accountCount: 1, data: [200], input: 'an unknown discriminator' },
+        { accountCount: 1, data: CREATE_CREDENTIAL, input: 'too few accounts' },
+        { accountCount: 3, data: [2], input: 'a truncated body' },
+    ])('should render the Unknown card for $input', async ({ accountCount, data }) => {
+        renderCard(sasInstruction(data, accountCount));
 
-        expect(() => renderCard(sasInstruction([200], 1))).toThrow('could not be identified');
-
-        reportedError.mockRestore();
+        await waitFor(() => {
+            expect(screen.getByText('Unknown Instruction', { exact: false })).toBeInTheDocument();
+        });
     });
 });
 

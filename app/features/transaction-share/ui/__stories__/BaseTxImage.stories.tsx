@@ -8,7 +8,7 @@ import { expect, within } from 'storybook/test';
 import { MAX_INSTRUCTION_ROWS } from '../../lib/constants';
 import type { OgGlows } from '../../lib/og-glows';
 import type { TxShareData } from '../../model/get-tx-share-data';
-import { BaseTxImage } from '../BaseTxImage';
+import { BaseTxImage, TxImageNotAvailable } from '../BaseTxImage';
 
 const SIGNATURE = gen.signature(1);
 const UNKNOWN_PROGRAM_ID = gen.address(2);
@@ -55,7 +55,7 @@ const meta: Meta<typeof BaseTxImage> = {
             description: 'Shaped transaction data. undefined renders the fallback.',
         },
     },
-    args: { glows: GLOWS },
+    args: { glows: GLOWS, signature: SIGNATURE },
     component: BaseTxImage,
     decorators: [
         Story => (
@@ -263,16 +263,35 @@ export const OversizedIdlNames: Story = {
     },
 };
 
-export const NoTransaction: Story = {
+export const ImageFallback: Story = {
     args: { data: undefined },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
 
         expect(canvas.getByText('Explorer')).toBeInTheDocument();
-        expect(canvas.getByTestId('tx-image-fallback')).toBeInTheDocument();
+        expect(canvas.getByText('Transaction')).toBeInTheDocument();
+        expect(canvas.getByTestId('tx-image-signature')).toHaveTextContent(truncateAddress(SIGNATURE, 8));
+        expect(canvas.getByTestId('tx-image-fallback')).toHaveTextContent(
+            'See the transaction details on the Solana Explorer.',
+        );
         expect(canvas.queryByTestId('tx-image-date')).not.toBeInTheDocument();
         expect(canvas.queryByTestId('tx-image-status')).not.toBeInTheDocument();
         // A card with no transaction has no status, so it takes the success glow.
         expect(canvas.getByTestId('tx-image-glow').style.backgroundImage).toContain('green_gradient');
     },
+};
+
+export const NotAvailable: Story = {
+    args: { data: undefined },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+
+        expect(canvas.getByText('Explorer')).toBeInTheDocument();
+        expect(canvas.getByText('Transaction')).toBeInTheDocument();
+        expect(canvas.getByTestId('tx-image-signature')).toHaveTextContent(truncateAddress(SIGNATURE, 8));
+        expect(canvas.getByTestId('tx-image-fallback')).toHaveTextContent(
+            'Preview is not available, see the transaction details on the Explorer.',
+        );
+    },
+    render: ({ glows, signature }) => <TxImageNotAvailable glows={glows} signature={signature} />,
 };

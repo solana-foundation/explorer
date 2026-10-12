@@ -1,19 +1,14 @@
-import { MEMO_PROGRAM_ADDRESS } from '@solana-program/memo';
+import { MEMO_PROGRAM_ADDRESS, SUPPORTED_MEMO_PROGRAM_ADDRESSES } from '@solana-program/memo';
 
 import { resolveMemoInstructionName } from '../memo-name';
 import type { InstructionNameLookup } from '../types';
 
-const MEMO_V1 = 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo';
 const SYSTEM_PROGRAM = '11111111111111111111111111111111';
 
 describe('resolveMemoInstructionName', () => {
-    describe('positive cases: either memo program', () => {
-        it('should name a v2 memo', () => {
-            expect(resolveMemoInstructionName(lookup(MEMO_PROGRAM_ADDRESS, utf8('gm')))).toBe('Memo');
-        });
-
-        it('should name a v1 memo', () => {
-            expect(resolveMemoInstructionName(lookup(MEMO_V1, utf8('gm')))).toBe('Memo');
+    describe('positive cases: any memo deployment', () => {
+        it.each(SUPPORTED_MEMO_PROGRAM_ADDRESSES)('should name a memo sent to %s', programId => {
+            expect(resolveMemoInstructionName(lookup(programId, utf8('gm')))).toBe('Memo');
         });
 
         // How `resolveInstructionNames` calls it — a ParsedInstruction carries no `data` at all.

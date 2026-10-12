@@ -6,7 +6,7 @@ import {
     ReceiptError,
 } from '@features/receipt/server';
 import { IMAGE_SIZE } from '@shared/lib/og/image-size';
-import { isSignature } from '@solana/kit';
+import { isSignatureValid } from '@utils/tx';
 import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, props: Props) {
 
     if (!isReceiptEnabled) return new NextResponse('Not Found', { status: 404 });
     if (!signature) return new Response('Signature is required', { status: 400 });
-    if (!isSignature(signature)) return new NextResponse('Invalid transaction signature', { status: 400 });
+    if (!isSignatureValid(signature)) return new NextResponse('Invalid transaction signature', { status: 400 });
 
     const cacheHeaders = getCacheHeaders();
 

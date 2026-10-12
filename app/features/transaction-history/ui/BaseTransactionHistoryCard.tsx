@@ -71,6 +71,8 @@ export function BaseTransactionHistoryCard({
         </div>
     ) : undefined;
 
+    const isEmptyHistory = isEmpty && foundOldest;
+
     const footer = (
         <div
             className={cn(
@@ -81,7 +83,11 @@ export function BaseTransactionHistoryCard({
                 isEmpty && 'py-12',
             )}
         >
-            <HistoryCardFooterContent fetching={fetching} foundOldest={foundOldest} loadMore={onLoadMore} />
+            {isEmptyHistory ? (
+                <div className="text-center text-outer-space-300">No transactions found</div>
+            ) : (
+                <HistoryCardFooterContent fetching={fetching} foundOldest={foundOldest} loadMore={onLoadMore} />
+            )}
         </div>
     );
 

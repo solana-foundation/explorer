@@ -1,4 +1,5 @@
 import { resolveDomain } from '@entities/domain/api/resolve-domain';
+import { address } from '@solana/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -9,7 +10,7 @@ vi.mock('@entities/domain/api/resolve-domain', () => ({
     resolveDomain: vi.fn(),
 }));
 
-const mockRequest = new Request('http://localhost:3000/api/domain-info/test.sol');
+const mockRequest = new Request('http://localhost:3000/api/domain-info/test.sns');
 
 describe('GET /api/domain-info/[domain]', () => {
     beforeEach(() => {
@@ -19,16 +20,19 @@ describe('GET /api/domain-info/[domain]', () => {
     it('should call resolveDomain with the domain param', async () => {
         vi.mocked(resolveDomain).mockResolvedValueOnce(null);
 
-        await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sol' }) });
+        await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sns' }) });
 
-        expect(resolveDomain).toHaveBeenCalledWith('test.sol');
+        expect(resolveDomain).toHaveBeenCalledWith('test.sns');
     });
 
     it('should return resolved domain info as JSON', async () => {
-        const mockResult = { address: 'abc123', owner: 'owner456' };
+        const mockResult = {
+            address: address('FX1APjKbFu6M8GKb3dGXcZLXjxX4fGaYwvHqb5Vaee8q'),
+            owner: address('86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdRrbukszb'),
+        };
         vi.mocked(resolveDomain).mockResolvedValueOnce(mockResult);
 
-        const response = await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sol' }) });
+        const response = await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sns' }) });
 
         expect(response.status).toBe(200);
         const data = await response.json();
@@ -38,7 +42,7 @@ describe('GET /api/domain-info/[domain]', () => {
     it('should return null when domain is not found', async () => {
         vi.mocked(resolveDomain).mockResolvedValueOnce(null);
 
-        const response = await GET(mockRequest, { params: Promise.resolve({ domain: 'unknown.sol' }) });
+        const response = await GET(mockRequest, { params: Promise.resolve({ domain: 'unknown.sns' }) });
 
         expect(response.status).toBe(200);
         const data = await response.json();
@@ -48,7 +52,7 @@ describe('GET /api/domain-info/[domain]', () => {
     it('should return cache headers with 86400s max-age', async () => {
         vi.mocked(resolveDomain).mockResolvedValueOnce(null);
 
-        const response = await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sol' }) });
+        const response = await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sns' }) });
 
         expect(response.headers.get('Cache-Control')).toBe(
             'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600',
@@ -58,7 +62,7 @@ describe('GET /api/domain-info/[domain]', () => {
     it('should return 500 on unexpected error', async () => {
         vi.mocked(resolveDomain).mockRejectedValueOnce(new Error('Unexpected failure'));
 
-        const response = await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sol' }) });
+        const response = await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sns' }) });
 
         expect(response.status).toBe(500);
         const data = await response.json();
@@ -68,7 +72,7 @@ describe('GET /api/domain-info/[domain]', () => {
     it('should set no-cache headers on error responses', async () => {
         vi.mocked(resolveDomain).mockRejectedValueOnce(new Error('fail'));
 
-        const response = await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sol' }) });
+        const response = await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sns' }) });
 
         expect(response.headers.get('Cache-Control')).toBe('no-store');
     });
@@ -77,14 +81,14 @@ describe('GET /api/domain-info/[domain]', () => {
         const error = new Error('Unexpected failure');
         vi.mocked(resolveDomain).mockRejectedValueOnce(error);
 
-        await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sol' }) });
+        await GET(mockRequest, { params: Promise.resolve({ domain: 'test.sns' }) });
 
         expect(Logger.panic).toHaveBeenCalledWith(
             expect.objectContaining({
                 cause: error,
                 message: '[api:domain-info] Failed to resolve domain',
             }),
-            { sentryExtras: { domain: 'test.sol' } },
+            { sentryExtras: { domain: 'test.sns' } },
         );
     });
 

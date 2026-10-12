@@ -1,15 +1,13 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
-import type { BlockWithV1 } from '@entities/block-data';
-import { PublicKey } from '@solana/web3.js';
+import type { BlockData } from '@entities/block-data';
+import type { Reward } from '@solana/kit';
 import React from 'react';
 
 import { GridHeaderRow, LoadMoreButton, type ResponsiveCell, ResponsiveGridRow } from '@/app/components/block/shared';
 import { DataListCard } from '@/app/shared/ui/DataListCard';
 
 const PAGE_SIZE = 10;
-
-type Reward = NonNullable<BlockWithV1['rewards']>[number];
 
 const HEADERS = [
     { label: 'Address' },
@@ -31,11 +29,19 @@ function percentChange(reward: Reward): string | undefined {
     if (!reward.postBalance) {
         return undefined;
     }
-    const pct = (Math.abs(reward.lamports) / (reward.postBalance - reward.lamports)) * 100;
-    return `${pct.toFixed(9)}%`;
+    const preBalance = reward.postBalance - reward.lamports;
+    if (preBalance === 0n) return undefined;
+
+    const precision = 1_000_000_000n;
+    const absoluteLamports = reward.lamports < 0n ? -reward.lamports : reward.lamports;
+    const absolutePreBalance = preBalance < 0n ? -preBalance : preBalance;
+    const scaledPercent = (absoluteLamports * 100n * precision) / absolutePreBalance;
+    const whole = scaledPercent / precision;
+    const fraction = (scaledPercent % precision).toString().padStart(9, '0');
+    return `${whole}.${fraction}%`;
 }
 
-export function BlockRewardsCard({ block }: { block: BlockWithV1 }) {
+export function BlockRewardsCard({ block }: { block: BlockData }) {
     const [displayed, setDisplayed] = React.useState(PAGE_SIZE);
 
     if (!block.rewards || block.rewards.length < 1) {
@@ -52,10 +58,9 @@ export function BlockRewardsCard({ block }: { block: BlockWithV1 }) {
 
                 {visible.map(reward => {
                     const pct = percentChange(reward);
-                    const pubkey = new PublicKey(reward.pubkey);
                     const cells: ResponsiveCell[] = [
                         {
-                            children: <Address pubkey={pubkey} link />,
+                            children: <Address address={reward.pubkey} link />,
                             desktopClassName: 'min-w-0',
                             key: 'address',
                             label: 'Address',

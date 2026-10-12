@@ -67,6 +67,6 @@ export function getIdlSpecType(idl: any): IdlSpec {
     return parentIdlSpecType;
 }
 
-/// export part of the internal implementation to preserve existing functonality to display the IDL
+/// export part of the internal implementation to preserve existing functionality to display the IDL
 export const convertDisplayIdl = convertLegacyIdl;
 export const privateConvertType = convertType;

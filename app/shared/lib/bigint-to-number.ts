@@ -25,3 +25,9 @@ export function withNumbersInsteadOfBigInts<T>(value: T): T {
     }
     return value;
 }
+
+export function toSafeUint(value: number | bigint | null | undefined): number | undefined {
+    if (typeof value !== 'number' && typeof value !== 'bigint') return undefined;
+    const uint = Number(value);
+    return Number.isSafeInteger(uint) && uint >= 0 ? uint : undefined;
+}

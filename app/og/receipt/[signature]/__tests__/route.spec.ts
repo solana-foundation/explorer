@@ -58,6 +58,19 @@ describe('GET /og/receipt/[signature]', () => {
         expect(createReceipt).not.toHaveBeenCalled();
     });
 
+    it('should return 400 for a signature with a character outside the base58 alphabet', async () => {
+        const { GET } = await import('../route');
+        const { createReceipt } = await import('@features/receipt/server');
+        const signature = '5xJkP9v71VQpwSxvySDX5hzjZ8vSbnsNJs3EaUSSm9hiaA2c98KlmNQxRtsFgh7Lp';
+        const request = new NextRequest(`http://localhost:3000/og/receipt/${signature}`);
+
+        const response = await GET(request, { params: Promise.resolve({ signature }) });
+
+        expect(response.status).toBe(400);
+        expect(await response.text()).toBe('Invalid transaction signature');
+        expect(createReceipt).not.toHaveBeenCalled();
+    });
+
     it('should return 404 when transaction or cluster not found', async () => {
         const { GET } = await import('../route');
         const { createReceipt, ReceiptError } = await import('@features/receipt/server');

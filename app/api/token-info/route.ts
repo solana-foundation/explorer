@@ -3,6 +3,7 @@ import {
     getChainId,
     getTokenInfos,
     getTokenInfosFromMetaplex,
+    isTransientError,
     isValidCluster,
     type TokenInfo,
 } from '@entities/token-info/server';
@@ -78,9 +79,10 @@ export async function POST(request: Request) {
     // the outage: answer 4xx/5xx so it is not cached, and so callers can tell it from "not listed"
     // instead of rendering an empty list as though the list had spoken.
     if (upstreamError !== undefined && listed.length === 0) {
-        Logger.error(new Error('[api:token-info] List lookup resolved nothing', { cause: upstreamError }), {
-            sentry: true,
-            sentryExtras: { addressCount: addresses.length, chainId: getChainId(cluster, genesisHash), cluster },
+        reportEmptyList(upstreamError, {
+            addressCount: addresses.length,
+            chainId: getChainId(cluster, genesisHash),
+            cluster,
         });
         return upstreamUnavailable();
     }
@@ -98,6 +100,15 @@ export async function POST(request: Request) {
 
     // `content` is always an array; single-address callers read `content[0]`.
     return NextResponse.json({ content: tokens });
+}
+
+function reportEmptyList(error: unknown, extras: Record<string, unknown>) {
+    const message = '[api:token-info] List lookup resolved nothing';
+    if (isTransientError(error)) {
+        Logger.warn(message, { error, ...extras });
+        return;
+    }
+    Logger.error(new Error(message, { cause: error }), { sentry: true, sentryExtras: extras });
 }
 
 function invalidRequest() {

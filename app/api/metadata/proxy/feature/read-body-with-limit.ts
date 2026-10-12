@@ -7,6 +7,12 @@ import { Readable } from 'node:stream';
 // surfaces gzip-encoded upstreams as the raw Node `Readable` (a `zlib.Gunzip`
 // stream). Branch on the runtime shape and use each stream's native API so
 // the call sites stay properly typed.
+
+// The runtime handed over a body stream this reader cannot consume: an internal fault, not an upstream one.
+export class BodyShapeError extends Error {
+    override name = 'BodyShapeError';
+}
+
 export async function readBodyWithLimit(response: Response, maxSize: number): Promise<ArrayBuffer> {
     const body: unknown = response.body;
     if (!body) {
@@ -18,7 +24,17 @@ export async function readBodyWithLimit(response: Response, maxSize: number): Pr
     if (body instanceof Readable) {
         return collectFromNodeStream(body, maxSize);
     }
-    throw new Error('Unsupported response body shape');
+    throw new BodyShapeError('Unsupported response body shape');
+}
+
+// An unread body holds the connection open until the timeout.
+export async function discardBody(response: Response): Promise<void> {
+    const body: unknown = response.body;
+    if (body instanceof ReadableStream) {
+        await body.cancel().catch(() => undefined);
+    } else if (body instanceof Readable) {
+        body.destroy();
+    }
 }
 
 async function collectFromReader(body: ReadableStream<Uint8Array>, maxSize: number): Promise<ArrayBuffer> {
@@ -49,7 +65,7 @@ async function collectFromNodeStream(body: Readable, maxSize: number): Promise<A
         // so the zlib.Gunzip happy path is unaffected.
         if (!(chunk instanceof Uint8Array)) {
             body.destroy();
-            throw new Error('Expected binary chunk in response body');
+            throw new BodyShapeError('Expected binary chunk in response body');
         }
         received += chunk.byteLength;
         if (received > maxSize) {

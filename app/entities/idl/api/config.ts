@@ -1,5 +1,5 @@
 import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '@solana-program/compute-budget';
-import { MEMO_PROGRAM_ADDRESS } from '@solana-program/memo';
+import { SUPPORTED_MEMO_PROGRAM_ADDRESSES } from '@solana-program/memo';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
@@ -16,7 +16,7 @@ export const NON_ANCHOR_PROGRAMS = new Set<string>([
     TOKEN_PROGRAM_ADDRESS,
     TOKEN_2022_PROGRAM_ADDRESS,
     COMPUTE_BUDGET_PROGRAM_ADDRESS,
-    MEMO_PROGRAM_ADDRESS, // v2
+    ...SUPPORTED_MEMO_PROGRAM_ADDRESSES,
     STAKE_PROGRAM_ADDRESS,
     ZK_ELGAMAL_PROOF_PROGRAM_ID,
     ...Object.keys(LOADER_IDS), // BPF loaders, Move loader, Native loader
@@ -26,7 +26,6 @@ export const NON_ANCHOR_PROGRAMS = new Set<string>([
     'Config1111111111111111111111111111111111111',
     'Ed25519SigVerify111111111111111111111111111',
     'KeccakSecp256k11111111111111111111111111111',
-    'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo', // SPL Memo v1
     'Vote111111111111111111111111111111111111111',
     'ZkTokenProof1111111111111111111111111111111',
 ]);

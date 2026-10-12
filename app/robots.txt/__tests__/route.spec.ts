@@ -30,11 +30,12 @@ describe('GET /robots.txt', () => {
         expect(body).toContain('Allow: /mcp/start\n');
     });
 
-    it('should keep AhrefsBot off the OG image routes', async () => {
+    it('should keep defined bots off the OG image routes', async () => {
         const body = await GET(createRequest()).text();
+        const userAgents = ['AhrefsBot', 'Amazonbot', 'GoogleOther'].map(bot => `User-agent: ${bot}\n`).join('');
 
         expect(body).toContain(
-            'User-agent: AhrefsBot\nAllow: /\nAllow: /mcp/start\nDisallow: /api/\nDisallow: /mcp\nDisallow: /og/\n',
+            `${userAgents}Allow: /\nAllow: /mcp/start\nDisallow: /api/\nDisallow: /mcp\nDisallow: /og/\n`,
         );
     });
 

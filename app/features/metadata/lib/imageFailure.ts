@@ -21,10 +21,14 @@ const REASON_BY_STATUS: Record<number, string> = {
     400: GENERIC_REASON,
     403: 'Image access denied',
     404: 'Image not found',
+    410: 'Image removed',
     413: 'Image exceeds maximum size',
     415: 'Unsupported image type',
+    429: 'Image source is rate-limited',
+    451: 'Image unavailable for legal reasons',
     500: GENERIC_REASON,
     502: 'Image source unavailable',
+    503: 'Image source unavailable',
     504: 'Image source timed out',
 };
 
