@@ -61,6 +61,16 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
         const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
         try {
             await server.connect(transport);
+            // transport.onerror is set after connect because wrapServer wraps transport.onerror inside connect.
+            const { onerror } = transport;
+            // oxlint-disable-next-line unicorn/prefer-add-event-listener -- the MCP transport has no addEventListener
+            transport.onerror = error => {
+                if (isClientRejection(error)) {
+                    logger.info(ns('client request rejected'), { error: toLoggedError(error) });
+                } else {
+                    onerror?.(error);
+                }
+            };
             return await transport.handleRequest(request);
         } finally {
             await transport
@@ -71,4 +81,13 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
                 .catch(error => logger.warn(ns('server close failed'), { error: toLoggedError(error) }));
         }
     };
+}
+
+const CLIENT_REJECTION_MESSAGES = [
+    'Bad Request: Unsupported protocol version: 2026-07-28',
+    'Not Acceptable: Client must accept text/event-stream',
+];
+
+function isClientRejection(error: Error): boolean {
+    return CLIENT_REJECTION_MESSAGES.some(message => error.message.startsWith(message));
 }
