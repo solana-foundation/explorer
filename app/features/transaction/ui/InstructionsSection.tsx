@@ -1,11 +1,6 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { BpfLoaderDetailsCard } from '@components/instruction/bpf-loader/BpfLoaderDetailsCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
-import {
-    isSolanaAttestationInstruction,
-    SolanaAttestationDetailsCard,
-} from '@components/instruction/sas/SolanaAttestationDetailsCard';
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { isTokenLendingInstruction } from '@components/instruction/token-lending/types';
@@ -40,6 +35,7 @@ import {
 } from '@explorer/parsers';
 import { AddressLookupTableDetailsCard } from '@features/decode-instruction-address-lookup-table';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
+import { BpfLoaderDetailsCard } from '@features/decode-instruction-bpf-loader';
 import { ComputeBudgetDetailsCard, isComputeBudgetInstruction } from '@features/decode-instruction-compute-budget';
 import {
     Ed25519DetailsCard,
@@ -49,6 +45,7 @@ import {
 import { isLighthouseInstruction, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { MemoDetailsCard } from '@features/decode-instruction-memo';
 import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
+import { isSolanaAttestationInstruction, SolanaAttestationDetailsCard } from '@features/decode-instruction-sas';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { isZkElGamalProofInstruction, ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
 import { PythDetailsCard } from '@features/instruction-program-pyth';
@@ -281,7 +278,15 @@ function InstructionCard({
                 );
             }
             case BPF_LOADER_PROGRAM_LABEL:
-                return <BpfLoaderDetailsCard {...props} key={key} />;
+                return (
+                    <BpfLoaderDetailsCard
+                        key={key}
+                        ix={parsedIx}
+                        index={index}
+                        innerCards={innerCards}
+                        childIndex={childIndex}
+                    />
+                );
             case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL:
                 return <BpfUpgradeableLoaderDetailsCard {...props} key={key} />;
             case SYSTEM_PROGRAM_LABEL:
@@ -467,16 +472,21 @@ function InstructionCard({
         );
     }
     if (isSolanaAttestationInstruction(transactionIx)) {
-        return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
-                <SolanaAttestationDetailsCard
-                    ix={transactionIx}
-                    index={index}
-                    innerCards={innerCards}
-                    childIndex={childIndex}
-                />
-            </ErrorBoundary>
-        );
+        const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
+        if (dispatched) {
+            return (
+                <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                    <SolanaAttestationDetailsCard
+                        ix={dispatched}
+                        raw={transactionIx}
+                        index={index}
+                        innerCards={innerCards}
+                        childIndex={childIndex}
+                    />
+                </ErrorBoundary>
+            );
+        }
+        return <UnknownDetailsCard key={key} {...props} />;
     }
     if (transactionIx.programId.toBase58() === MPL_TOKEN_METADATA_PROGRAM_ID) {
         return (

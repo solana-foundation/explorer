@@ -4,6 +4,7 @@ import { type InstructionSurface, InstructionSurfaceProvider } from '@entities/i
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
+    BPF_LOADER_PROGRAM_LABEL,
     BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,
     SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL,
     SPL_MEMO_PROGRAM_LABEL,
@@ -13,11 +14,13 @@ import {
 } from '@explorer/parsers';
 import { AddressLookupTableDetailsCard } from '@features/decode-instruction-address-lookup-table';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
+import { BpfLoaderDetailsCard } from '@features/decode-instruction-bpf-loader';
 import { ComputeBudgetDetailsCard } from '@features/decode-instruction-compute-budget';
 import { Ed25519DetailsCard } from '@features/decode-instruction-ed25519';
 import { LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { MemoDetailsCard } from '@features/decode-instruction-memo';
 import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/detection';
+import { SolanaAttestationDetailsCard } from '@features/decode-instruction-sas';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
 import { PythDetailsCard } from '@features/instruction-program-pyth';
@@ -297,6 +300,18 @@ function InspectorInstructionCard({
                 />
             );
         }
+        if (parsedIx.programLabel === 'solana-attestation-service') {
+            return (
+                <SolanaAttestationDetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    raw={ix}
+                    index={index}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            );
+        }
         if (parsedIx.programLabel === 'pyth') {
             return (
                 <ErrorBoundary fallback={unknownCard}>
@@ -375,6 +390,17 @@ function InspectorInstructionCard({
         case ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL:
             return (
                 <AddressLookupTableDetailsCard
+                    key={index}
+                    ix={parsedIx}
+                    raw={ix}
+                    index={index}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            );
+        case BPF_LOADER_PROGRAM_LABEL:
+            return (
+                <BpfLoaderDetailsCard
                     key={index}
                     ix={parsedIx}
                     raw={ix}
@@ -484,6 +510,19 @@ function InspectorInstructionCard({
             return (
                 <ErrorBoundary fallback={unknownCard}>
                     <ComputeBudgetDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        raw={ix}
+                        index={index}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
+                    />
+                </ErrorBoundary>
+            );
+        case 'solana-attestation-service':
+            return (
+                <ErrorBoundary fallback={unknownCard}>
+                    <SolanaAttestationDetailsCard
                         key={index}
                         ix={parsedIx}
                         raw={ix}

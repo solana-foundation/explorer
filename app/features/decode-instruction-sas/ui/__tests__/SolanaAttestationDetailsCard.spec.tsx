@@ -1,4 +1,5 @@
 import { TxInstructionSurface } from '@entities/instruction-card';
+import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
@@ -15,7 +16,10 @@ import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TransactionsProvider } from '@/app/providers/transactions';
 
+import { solanaAttestationInstructionParser } from '../../lib/sas-client';
 import { SolanaAttestationDetailsCard } from '../SolanaAttestationDetailsCard';
+
+const dispatcher = createInstructionParserDispatcher([solanaAttestationInstructionParser]);
 
 const SAS_PROGRAM_ID = new PublicKey('22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG');
 const SYSTEM_PROGRAM = '11111111111111111111111111111111';
@@ -128,7 +132,10 @@ describe('SolanaAttestationDetailsCard', () => {
     it('should render the program row from the node', async () => {
         const ix = sasInstruction(CLOSE_ATTESTATION, 7);
 
-        renderCard(new TransactionInstruction({ ...ix, programId: new PublicKey(ACCOUNTS[0]) }));
+        renderCard(
+            new TransactionInstruction({ ...ix, programId: new PublicKey(ACCOUNTS[0]) }),
+            dispatcher.fromTransactionInstruction(ix),
+        );
 
         await waitFor(() => {
             expect(readRows()[0]).toEqual(['Program', ACCOUNTS[0]]);
@@ -158,14 +165,14 @@ function sasInstruction(data: number[], accountCount: number): TransactionInstru
     return new TransactionInstruction({ data: Buffer.from(data), keys, programId: SAS_PROGRAM_ID });
 }
 
-function renderCard(ix: TransactionInstruction) {
+function renderCard(raw: TransactionInstruction, ix = dispatcher.fromTransactionInstruction(raw)) {
     return render(
         <ScrollAnchorProvider>
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
                         <TxInstructionSurface result={{ err: null }}>
-                            <SolanaAttestationDetailsCard ix={ix} index={0} />
+                            <SolanaAttestationDetailsCard ix={ix as DispatchResult} raw={raw} index={0} />
                         </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>

@@ -1,5 +1,6 @@
 import { TxInstructionSurface } from '@entities/instruction-card';
-import { BPF_LOADER_PROGRAM_ID, type ParsedInstruction, type ParsedTransaction, PublicKey } from '@solana/web3.js';
+import { createInstructionParserDispatcher } from '@entities/instruction-parser';
+import { BPF_LOADER_PROGRAM_ID, type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
@@ -18,7 +19,10 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { TransactionsProvider } from '@/app/providers/transactions';
 import { Logger } from '@/app/shared/lib/logger';
 
+import { bpfLoaderInstructionParser } from '../../lib/bpf-loader-client';
 import { BpfLoaderDetailsCard } from '../BpfLoaderDetailsCard';
+
+const dispatcher = createInstructionParserDispatcher([bpfLoaderInstructionParser]);
 
 const ACCOUNT = '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM';
 const PROGRAM = BPF_LOADER_PROGRAM_ID.toBase58();
@@ -31,7 +35,7 @@ describe('BpfLoaderDetailsCard', () => {
     });
 
     it('should render the rows of a write', async () => {
-        renderCard(bpfLoaderInstruction('write', { account: ACCOUNT, bytes: BYTES, offset: 1024 }));
+        renderCard(dispatch('write', { account: ACCOUNT, bytes: BYTES, offset: 1024 }));
 
         await waitFor(() => {
             expect(readRows()).toEqual([
@@ -50,7 +54,7 @@ describe('BpfLoaderDetailsCard', () => {
     it('should break write bytes longer than a line', async () => {
         const bytes = 'A'.repeat(60);
 
-        renderCard(bpfLoaderInstruction('write', { account: ACCOUNT, bytes, offset: 0 }));
+        renderCard(dispatch('write', { account: ACCOUNT, bytes, offset: 0 }));
 
         await waitFor(() => {
             expect(readRows()[2]).toEqual(['Bytes (Base 64)', ['A'.repeat(50), 'A'.repeat(10)].join('\n')]);
@@ -58,7 +62,7 @@ describe('BpfLoaderDetailsCard', () => {
     });
 
     it('should render the rows of a finalize', async () => {
-        renderCard(bpfLoaderInstruction('finalize', { account: ACCOUNT }));
+        renderCard(dispatch('finalize', { account: ACCOUNT }));
 
         await waitFor(() => {
             expect(readRows()).toEqual([
@@ -71,7 +75,7 @@ describe('BpfLoaderDetailsCard', () => {
     });
 
     it('should fall back for an instruction type it does not decode', async () => {
-        renderCard(bpfLoaderInstruction('initializeBuffer', { account: ACCOUNT }));
+        renderCard(dispatch('initializeBuffer', { account: ACCOUNT }));
 
         await waitFor(() => {
             expect(screen.getByText('BPF Loader 2: Unknown Instruction')).toBeInTheDocument();
@@ -80,7 +84,7 @@ describe('BpfLoaderDetailsCard', () => {
 
     // The schemas are what stop a renamed or missing field reaching the rows uncoerced.
     it('should fall back and report a payload its schema rejects', async () => {
-        renderCard(bpfLoaderInstruction('write', { account: ACCOUNT, offset: 'not a number' }));
+        renderCard(dispatch('write', { account: ACCOUNT, offset: 'not a number' }));
 
         await waitFor(() => {
             expect(screen.getByText('BPF Loader 2: Unknown Instruction')).toBeInTheDocument();
@@ -91,7 +95,7 @@ describe('BpfLoaderDetailsCard', () => {
     // A foreign program id proves the row reads the node rather than a BPF-loader constant.
     it('should render the program row from the node', async () => {
         const loaderV1 = new PublicKey('BPFLoader1111111111111111111111111111111111');
-        const ix = bpfLoaderInstruction('finalize', { account: ACCOUNT });
+        const ix = dispatch('finalize', { account: ACCOUNT });
 
         renderCard({ ...ix, programId: loaderV1 });
 
@@ -101,23 +105,23 @@ describe('BpfLoaderDetailsCard', () => {
     });
 });
 
-function bpfLoaderInstruction(type: string, info: Record<string, unknown>): ParsedInstruction {
-    return { parsed: { info, type }, program: 'bpf-loader', programId: BPF_LOADER_PROGRAM_ID };
+/** An RPC-parsed instruction, run through the dispatcher the way the tx page does. */
+function dispatch(type: string, info: Record<string, unknown>): ParsedInstruction {
+    return dispatcher.fromParsedInstruction({
+        parsed: { info, type },
+        program: 'bpf-loader',
+        programId: BPF_LOADER_PROGRAM_ID,
+    });
 }
 
 function renderCard(ix: ParsedInstruction) {
-    const tx = {
-        message: { accountKeys: [], instructions: [ix] },
-        signatures: ['sig'],
-    } as unknown as ParsedTransaction;
-
     return render(
         <ScrollAnchorProvider>
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
                         <TxInstructionSurface result={{ err: null }}>
-                            <BpfLoaderDetailsCard tx={tx} ix={ix} index={0} result={{ err: null }} />
+                            <BpfLoaderDetailsCard ix={ix} index={0} />
                         </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>
