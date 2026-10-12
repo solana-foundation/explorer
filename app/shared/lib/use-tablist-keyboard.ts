@@ -16,6 +16,8 @@ export function useTablistKeyboard<T extends HTMLElement>(
     const tabRefs = useRef<(T | null)[]>([]);
 
     const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+        // Modified arrows belong to the browser: Alt/Cmd+Arrow is back/forward.
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
         const focused = tabRefs.current.findIndex(node => node === document.activeElement);
         const current = focused >= 0 ? focused : Math.max(0, currentIndex);
         let next = current;
