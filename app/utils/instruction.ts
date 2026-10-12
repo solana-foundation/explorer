@@ -3,9 +3,9 @@ import {
     isTokenLendingInstruction,
     parseTokenLendingInstructionTitle,
 } from '@components/instruction/token-lending/types';
-import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { type TransactionWithMeta } from '@entities/transaction-data';
 import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
+import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@explorer/decoder-token-swap/detection';
 import { isTokenProgram } from '@explorer/parsers';
 import { isTokenProgramId } from '@providers/accounts/tokens';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';

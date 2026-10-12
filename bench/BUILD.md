@@ -25,7 +25,7 @@
 | Dynamic | `/address/[address]/slot-hashes` | 420 kB | 870 kB |
 | Dynamic | `/address/[address]/stake-history` | 420 kB | 870 kB |
 | Dynamic | `/address/[address]/subscriptions` | 420 kB | 870 kB |
-| Dynamic | `/address/[address]/token-extensions` | 420 kB | 860 kB |
+| Dynamic | `/address/[address]/token-extensions` | 420 kB | 880 kB |
 | Dynamic | `/address/[address]/tokens` | 430 kB | 870 kB |
 | Dynamic | `/address/[address]/transfers` | 430 kB | 880 kB |
 | Dynamic | `/address/[address]/verified-build` | 420 kB | 860 kB |

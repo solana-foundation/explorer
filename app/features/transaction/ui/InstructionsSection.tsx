@@ -4,7 +4,6 @@ import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upg
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { isTokenLendingInstruction } from '@components/instruction/token-lending/types';
-import { isTokenSwapInstruction } from '@components/instruction/token-swap/types';
 import { TokenLendingDetailsCard } from '@components/instruction/TokenLendingDetailsCard';
 import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCard';
 import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
@@ -21,6 +20,7 @@ import {
     isDeprecatedSerumProgram,
     isSerumInstruction,
 } from '@explorer/decoder-serum/detection';
+import { isTokenSwapInstruction } from '@explorer/decoder-token-swap/detection';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
     BPF_LOADER_PROGRAM_LABEL,

@@ -64,6 +64,13 @@ describe('resolveNamesFromLookup', () => {
             expect(names.name).toBe('Update Price');
         });
 
+        it('should resolve a Token Swap name without any IDL', () => {
+            // tag 1 = Swap
+            const names = resolveNamesFromLookup(lookup(TOKEN_SWAP_PROGRAM, 1), idlNames({}));
+
+            expect(names.name).toBe('Swap');
+        });
+
         // The generated `@solana-program/*` clients are the only thing that names a simulated System or
         // Token instruction, which is half of what the CU chart needs. Covered here and not just in
         // program-client-name.spec, so removing the source from the chain fails a test.
@@ -269,6 +276,7 @@ const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const SYSTEM_PROGRAM = '11111111111111111111111111111111';
 const MANGO_PROGRAM = 'mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68';
 const PYTH_PROGRAM = 'FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH';
+const TOKEN_SWAP_PROGRAM = 'SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8';
 
 function lookup(programId: string, ...data: number[]): InstructionNameLookup {
     return { data: Uint8Array.from(data), programId };
