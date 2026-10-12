@@ -8,7 +8,7 @@ import {
     useTabRegistration,
 } from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
-import { useScrollSpy } from '@/app/shared/ui/navigation-tabs/model/useScrollSpy';
+import { useScrollSpy } from '@/app/shared/ui/navigation-tabs/model/use-scroll-spy';
 import { useTabOverflow } from '@/app/shared/ui/navigation-tabs/model/useTabOverflow';
 import { useSticky } from '@/app/shared/ui/sticky-header/useSticky';
 

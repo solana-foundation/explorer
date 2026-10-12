@@ -4,7 +4,7 @@ import { useRef } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 import { useTablistKeyboard } from '@/app/shared/lib/use-tablist-keyboard';
-import { useScrollSpy } from '@/app/shared/ui/navigation-tabs/model/useScrollSpy';
+import { useScrollSpy } from '@/app/shared/ui/navigation-tabs/model/use-scroll-spy';
 
 import { GUTTER, MONO_LABEL, SECTIONS } from '../lib/mcp-docs-layout';
 
