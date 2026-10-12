@@ -32,6 +32,7 @@ export function useCustomUrlDraft({ commitOnType = true }: CustomUrlDraftOptions
 
     const [syncedUrl, setSyncedUrl] = useState(resolvedUrl);
     const [draftUrl, setDraftUrl] = useState(resolvedUrl);
+    // What this field last committed: its echo back from the URL must not overwrite keystrokes typed meanwhile.
     const [sentUrl, setSentUrl] = useState<string | undefined>(undefined);
     if (resolvedUrl !== syncedUrl) {
         setSyncedUrl(resolvedUrl);
@@ -39,8 +40,10 @@ export function useCustomUrlDraft({ commitOnType = true }: CustomUrlDraftOptions
         if (resolvedUrl !== sentUrl) setDraftUrl(resolvedUrl);
     }
 
+    // The latest value typed or picked, so a debounced commit that fires after a pick cannot navigate away from it.
     const intended = useRef(resolvedUrl);
 
+    // `replace`, not `push`: one history entry per typing pause would each hold a half-typed URL.
     const commitNow = (url: string, scroll: boolean) => {
         if (scroll) scrollToTop();
         if (url.trim() === '') {
@@ -50,6 +53,7 @@ export function useCustomUrlDraft({ commitOnType = true }: CustomUrlDraftOptions
         }
         const typedEndpoint = parseRpcEndpoint(url);
         if (typedEndpoint === undefined) return;
+        // Typing an endpoint is the consent: unapproved, the reader would prompt the user for their own URL.
         approveOrigin(typedEndpoint);
         setSentUrl(url);
         router.replace(buildHref({ cluster: Cluster.Custom, customUrl: url }), { scroll: false });

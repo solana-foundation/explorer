@@ -56,24 +56,32 @@ describe('PendingCustomUrlConsent', () => {
         clusterState.pendingCustomUrl = rpcEndpoint(REMOTE_URL);
         renderConsent();
 
-        // The whole address, once: the host is in it, and so is whatever follows the host.
-        expect(screen.getByTestId('consent-host')).toHaveTextContent(REMOTE_URL);
+        expect(screen.getByTestId('consent-host').textContent).toBe('my-node.example');
+        expect(screen.getByTestId('consent-full-url')).toHaveTextContent(REMOTE_URL);
     });
 
-    it('should sit above the cluster sidebar rather than under its overlay', () => {
-        // The sidebar is `z-[1060]` over a `z-[1050]` overlay and the dialog's base is `z-50`, so both its
-        // layers have to clear those or the prompt hides behind the switcher.
+    it('should name the real host when the URL puts a lookalike before it', () => {
+        clusterState.pendingCustomUrl = rpcEndpoint('https://api.mainnet-beta.solana.com@evil.example');
+        renderConsent();
+
+        expect(screen.getByTestId('consent-host').textContent).toBe('evil.example');
+    });
+
+    it('should sit above the cluster popover rather than under it', () => {
+        // The navbar's cluster popover is `z-[1202]` (shared/ui/popover.tsx), the highest layer the
+        // switcher opens, and the dialog's base is `z-50`, so both its layers have to clear it.
+        const POPOVER_Z_INDEX = 1202;
         clusterState.pendingCustomUrl = rpcEndpoint(REMOTE_URL);
         renderConsent();
 
         const content = screen.getByTestId('custom-url-consent');
-        expect(Number(content.style.zIndex)).toBeGreaterThan(1060);
+        expect(Number(content.style.zIndex)).toBeGreaterThan(POPOVER_Z_INDEX);
         // Radix portals both layers into <body>, overlay immediately before the content. The overlay is
         // decorative — no role, no accessible name — so no Testing Library query reaches it.
         // eslint-disable-next-line testing-library/no-node-access -- see above
         const overlay = content.previousElementSibling as HTMLElement;
         expect(overlay.className).toContain('inset-0');
-        expect(Number(overlay.style.zIndex)).toBeGreaterThan(1060);
+        expect(Number(overlay.style.zIndex)).toBeGreaterThan(POPOVER_Z_INDEX);
     });
 
     it('should approve the origin, not the full URL, on confirm', () => {

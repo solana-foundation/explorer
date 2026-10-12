@@ -8,6 +8,7 @@ import { type SavedCluster, useSavedClusters } from '@features/cluster-switcher/
 import React, { useEffect, useRef, useState } from 'react';
 import { Edit2, Trash2 } from 'react-feather';
 
+import { describeSaveError } from '../lib/cluster-storage';
 import { endpointProvenance } from '../lib/endpoint-provenance';
 import { MENU_SECONDARY_BUTTON, rowClasses } from './cluster-row-classes';
 import { EndpointForm } from './EndpointForm';
@@ -78,8 +79,8 @@ export function SavedEndpointRow({
                             updateSavedCluster({ name, url: entry.url });
                             setRenameError(undefined);
                             setEditing(false);
-                        } catch {
-                            setRenameError('Could not save this endpoint. Your browser storage may be full.');
+                        } catch (error) {
+                            setRenameError(describeSaveError(error));
                         }
                     }}
                     onCancel={() => {

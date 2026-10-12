@@ -1,9 +1,12 @@
 import { createStore } from 'jotai';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import { Logger } from '@/app/shared/lib/logger';
 
 import { MAX_CLUSTER_NAME_LENGTH } from '../cluster-name';
 import {
     addSavedClusterAtom,
+    describeSaveError,
     parseSavedClusters,
     removeSavedClusterAtom,
     savedClustersAtom,
@@ -68,6 +71,41 @@ describe('cluster-storage atoms', () => {
         });
     });
 
+    describe('a write that storage rejects', () => {
+        it('should leave the list as it was before the write', () => {
+            const store = createStore();
+            store.set(addSavedClusterAtom, { name: 'Local', url: 'http://localhost:8899' });
+            const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => {
+                throw new DOMException('full', 'QuotaExceededError');
+            });
+
+            expect(() =>
+                store.set(addSavedClusterAtom, { name: 'Staging', url: 'http://staging.example.com' }),
+            ).toThrow();
+            expect(store.get(savedClustersAtom)).toEqual([{ name: 'Local', url: 'http://localhost:8899' }]);
+            setItem.mockRestore();
+        });
+    });
+
+    describe('describeSaveError', () => {
+        it.each([
+            [
+                'a full storage quota',
+                new DOMException('full', 'QuotaExceededError'),
+                'Not enough storage space to save this endpoint. Try removing unused ones.',
+            ],
+            ['any other error', new Error('boom'), 'Could not save this endpoint.'],
+        ])('should describe %s', (_label, error, message) => {
+            expect(describeSaveError(error)).toBe(message);
+        });
+
+        it('should log the error', () => {
+            const error = new Error('boom');
+            describeSaveError(error);
+            expect(Logger.error).toHaveBeenCalledWith(error);
+        });
+    });
+
     describe('removeSavedClusterAtom', () => {
         it('should remove a cluster by URL', () => {
             const store = createStore();
@@ -107,6 +145,14 @@ describe('cluster-storage atoms', () => {
                 name: 'My validator',
                 url: 'http://localhost:8899',
             });
+        });
+
+        it('should throw when the entry was removed before the rename landed', () => {
+            const store = storeWithTwo();
+            store.set(removeSavedClusterAtom, 'http://localhost:8899');
+            expect(() =>
+                store.set(updateSavedClusterAtom, { name: 'My validator', url: 'http://localhost:8899' }),
+            ).toThrow();
         });
 
         it('should keep the entry where it was in the list', () => {
@@ -171,12 +217,6 @@ describe('cluster-storage atoms', () => {
                 }),
             ).toThrow('Another saved endpoint has that address.');
             expect(store.get(savedClustersAtom)).toHaveLength(2);
-        });
-
-        it('should do nothing when the URL is not in the list', () => {
-            const store = storeWithTwo();
-            store.set(updateSavedClusterAtom, { name: 'Whatever', url: 'http://localhost:9999' });
-            expect(store.get(savedClustersAtom).map(c => c.name)).toEqual(['', 'Staging']);
         });
     });
 

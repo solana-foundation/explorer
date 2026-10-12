@@ -39,14 +39,16 @@ export function ClusterDropdown({ align = 'end', className, onOpenChange, open }
     const lead = provenance ? PROVENANCE_MARK[provenance] : undefined;
     const LeadGlyph = lead?.glyph;
     const factsColour = status === ClusterStatus.Connected ? CONNECTED_GREY : STATUS_STYLE[status].colour;
+    // The mark is colour and an aria-hidden glyph, so the name has to say it too.
+    const described = lead ? `${label} (${lead.label} endpoint)` : label;
 
     return (
         <Popover open={open} onOpenChange={onOpenChange}>
             <PopoverTrigger asChild>
                 <button
                     type="button"
-                    aria-label={`Cluster: ${label}. ${statusLabel}. Change cluster`}
-                    title={`${label} · ${statusLabel}`}
+                    aria-label={`Cluster: ${described}. ${statusLabel}. Change cluster`}
+                    title={`${described} · ${statusLabel}`}
                     style={focusRuleStyle(focused || Boolean(open))}
                     onFocus={event => setFocused(isKeyboardFocus(event.currentTarget))}
                     onBlur={() => setFocused(false)}

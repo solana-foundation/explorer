@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { Plus } from 'react-feather';
 
+import { describeSaveError } from '../lib/cluster-storage';
 import {
     ACTIVE_ROW,
     INACTIVE_ROW,
@@ -190,8 +191,8 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
                                 addSavedCluster({ name, url: draft.value });
                                 setSaveError(undefined);
                                 setSaving(false);
-                            } catch {
-                                setSaveError('Could not save this endpoint. Your browser storage may be full.');
+                            } catch (error) {
+                                setSaveError(describeSaveError(error));
                             }
                         }}
                         onCancel={() => {

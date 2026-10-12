@@ -45,6 +45,14 @@ describe('SavedEndpointRow delete and undo', () => {
         expect(screen.getByTestId(`pick-cluster-${ENTRY.url}`)).toBeInTheDocument();
     });
 
+    it('should keep a restored entry when the menu closes afterwards', () => {
+        const { store, unmount } = renderRow();
+        fireEvent.click(screen.getByTestId(`delete-cluster-${ENTRY.url}`));
+        fireEvent.click(screen.getByTestId(`restore-cluster-${ENTRY.url}`));
+        unmount();
+        expect(store.get(savedClustersAtom)).toEqual([ENTRY]);
+    });
+
     it('should commit the removal once the undo window elapses', () => {
         const { store } = renderRow();
         fireEvent.click(screen.getByTestId(`delete-cluster-${ENTRY.url}`));

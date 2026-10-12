@@ -16,6 +16,7 @@ import { AlertTriangle, ChevronRight } from 'react-feather';
 
 export type ConsentRequest = { kind: 'endpoint'; endpoint: RpcEndpoint } | { kind: 'developer-bypass' };
 
+// Above the cluster popover (`z-[1202]`), which the trust toggle opens this dialog from.
 const CONSENT_Z_INDEX = 1210;
 
 const PLATE_CLASSES = 'rounded-md border border-solid border-white/10 bg-outer-space-800 p-3 text-left';
@@ -41,6 +42,7 @@ type Props = {
 export function CustomUrlConsentDialog({ request, onConfirm, onCancel }: Props) {
     const shown = useRetainedRequest(request);
 
+    // Escape, the X and Reject all decline; a stray backdrop click is not an answer to a security question.
     return (
         <Dialog open={request !== undefined} onOpenChange={open => !open && onCancel()}>
             <DialogContent
@@ -150,9 +152,18 @@ function EndpointConsent({
 
                 <div className={PLATE_CLASSES}>
                     <div className={LABEL_CLASSES}>Server</div>
+                    {/* The host alone is the decision: in a full URL, `https://real.example@evil.example` reads as the real one. */}
                     <div className="mt-1 break-all font-mono text-sm text-white" data-testid="consent-host">
-                        {endpoint.href}
+                        {endpoint.host}
                     </div>
+                    {endpoint.hasPathOrQuery && (
+                        <div
+                            className="mt-1.5 break-all font-mono text-xs text-outer-space-300"
+                            data-testid="consent-full-url"
+                        >
+                            {endpoint.href}
+                        </div>
+                    )}
                 </div>
 
                 <ServerPowersFold summary="What this server can do" />
@@ -181,6 +192,7 @@ function BypassConsent({ onConfirm, onCancel }: Pick<Props, 'onCancel' | 'onConf
     );
 }
 
+// Radix keeps the content mounted through the exit animation, so the request must outlive the prop that cleared it.
 function useRetainedRequest(request: ConsentRequest | undefined) {
     const retained = useRef(request);
     if (request !== undefined) retained.current = request;

@@ -203,8 +203,17 @@ describe('useCustomUrlDraft', () => {
         expect(draft.value()).toBe('https://a.io/rpc');
     });
 
-    // The echo guard covers one arrival and no more. Saving a cluster starts by typing its URL, so a
-    // guard left standing would match that entry's click and leave the field showing the endpoint before.
+    it('should not let a pending typed commit override an endpoint picked before it fires', () => {
+        const draft = setupDraft();
+
+        draft.type('http://typed-node:8899');
+        draft.select('http://picked-node:8899');
+        nav.replace.mockClear();
+        draft.settle();
+
+        expect(nav.replace).not.toHaveBeenCalled();
+    });
+
     // The navbar's menu has Go, so there typing is deciding and nothing applies itself: the page behind
     // the menu must not change until the reader says so.
     describe('with commitOnType off', () => {
@@ -231,6 +240,8 @@ describe('useCustomUrlDraft', () => {
         });
     });
 
+    // The echo guard covers one arrival and no more. Saving a cluster starts by typing its URL, so a
+    // guard left standing would match that entry's click and leave the field showing the endpoint before.
     it('should follow a re-selected endpoint it committed earlier', () => {
         const draft = setupDraft();
 

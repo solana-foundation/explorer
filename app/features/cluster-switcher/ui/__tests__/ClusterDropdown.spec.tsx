@@ -64,5 +64,26 @@ describe('ClusterDropdown', () => {
         const label = screen.getByText('http://localhost:8899');
         expect(label).toBeInTheDocument();
         expect(label).not.toHaveStyle({ color: UNKNOWN_COLOUR });
+        expect(screen.getByRole('button', { name: triggerName })).not.toHaveAttribute(
+            'aria-label',
+            expect.stringContaining('endpoint)'),
+        );
+    });
+
+    it('should name the provenance for readers who cannot see its colour', () => {
+        renderDropdown();
+        expect(screen.getByRole('button', { name: triggerName })).toHaveAttribute(
+            'aria-label',
+            expect.stringContaining('(unknown endpoint)'),
+        );
+    });
+
+    it('should label a built-in cluster by its name', () => {
+        clusterMock.url = undefined;
+        renderDropdown();
+        expect(screen.getByRole('button', { name: triggerName })).toHaveAttribute(
+            'aria-label',
+            expect.stringContaining('Cluster: Custom.'),
+        );
     });
 });

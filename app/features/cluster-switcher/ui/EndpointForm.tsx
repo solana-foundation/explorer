@@ -53,8 +53,13 @@ export function EndpointForm({
                 data-testid="cluster-name-input"
                 autoFocus
             />
-            <span className="block truncate font-mono text-[11px] text-outer-space-300" title={url}>
-                {url}
+            {/* Host only: provider URLs carry the API key in the path or query, and this menu gets screen-shared. */}
+            <span
+                className="block truncate font-mono text-[11px] text-outer-space-300"
+                title={url}
+                data-testid="save-cluster-host"
+            >
+                {host}
             </span>
             {error && (
                 <span className="text-xs leading-snug text-[#b45be1]" data-testid="save-cluster-error">
