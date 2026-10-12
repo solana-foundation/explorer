@@ -5,9 +5,9 @@ import { type RefObject, useCallback, useEffect, useRef } from 'react';
 const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Spacebar']);
 
 /**
- * Keeps a growing element pinned near the viewport bottom, yielding to the reader: while `follow`,
- * eases the page each frame so the element's bottom stays ~`gap`px above the fold; when `settle` flips
- * true, aligns once. Any manual scroll (wheel, touch, scroll keys) stops it for good.
+ * Scrolls the page so the element's bottom stays `gap`px above the viewport bottom.
+ * A wheel, touch or scroll-key event stops it permanently.
+ * When `settle` becomes true, it aligns the element once more.
  */
 export function useStickToBottom(
     ref: RefObject<HTMLElement | null>,
