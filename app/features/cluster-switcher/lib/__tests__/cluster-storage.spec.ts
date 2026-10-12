@@ -221,6 +221,15 @@ describe('cluster-storage atoms', () => {
     });
 
     describe('parseSavedClusters', () => {
+        it('should keep the latest name when older data holds one URL under two names', () => {
+            expect(
+                parseSavedClusters([
+                    { name: 'Old alias', url: 'http://localhost:8899' },
+                    { name: 'Current', url: 'http://localhost:8899' },
+                ]),
+            ).toEqual([{ name: 'Current', url: 'http://localhost:8899' }]);
+        });
+
         it('should keep entries whose URL is an RPC endpoint', () => {
             expect(
                 parseSavedClusters([

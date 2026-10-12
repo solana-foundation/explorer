@@ -114,8 +114,6 @@ export function BaseSearch({
                                     'border-none bg-transparent outline-none',
                                     'text-sm text-white placeholder:text-heavy-metal-100',
                                     'overflow-hidden',
-                                    '[-webkit-mask-image:linear-gradient(to_right,#000_calc(100%-24px),transparent)]',
-                                    '[mask-image:linear-gradient(to_right,#000_calc(100%-24px),transparent)]',
                                 )}
                                 placeholder="Search for tokens, validators, programs, and accounts"
                                 value={value}

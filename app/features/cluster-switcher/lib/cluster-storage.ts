@@ -15,6 +15,7 @@ const STORAGE_KEY = 'explorer:savedClusters';
 
 export function parseSavedClusters(value: unknown): SavedCluster[] {
     if (!Array.isArray(value)) return [];
+    // The URL is the identity, so older data holding one URL under two names keeps the latest name only.
     const byUrl = new Map<string, SavedCluster>();
     for (const entry of value) {
         const cluster = parseSavedCluster(entry);
