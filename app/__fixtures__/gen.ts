@@ -2,6 +2,7 @@
 // If generators proliferate, consider replacing with `fast-check` arbitraries
 // (e.g. fc.bigInt(), fc.sample()) for composability and shrinking support.
 
+import { addressFromSeed, blockhashFromSeed, signatureFromSeed } from '@explorer/utils/testing';
 import { getBase58Decoder, getBase58Encoder, type ReadonlyUint8Array } from '@solana/kit';
 import type { SecurityTxtFields, SecurityTxtSource } from '@solana/security-txt';
 import { PublicKey } from '@solana/web3.js';
@@ -12,26 +13,15 @@ const BASE58_DECODER = getBase58Decoder();
 export const gen = {
     /** base58 32-byte address; deterministic when seed provided so story fixtures stay pixel-stable. */
     address: (seed?: number) => {
+        if (seed !== undefined) return addressFromSeed(seed);
         const bytes = new Uint8Array(32);
-        if (seed === undefined) {
-            for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
-        } else {
-            for (let i = 0; i < bytes.length; i++) bytes[i] = (seed * 19 + i * 23 + 5) & 0xff;
-            // Without this, `seed` and `seed + 256` collide: every byte above is mod 256, so a
-            // caller asking for 257 distinct addresses silently gets 256. Folding the high bits
-            // in pushes the repeat out to 65536 and leaves seeds under 256 byte-identical.
-            bytes[1] = (bytes[1] + (seed >>> 8)) & 0xff;
-        }
+        for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
         return BASE58_DECODER.decode(bytes);
     },
     bigint: (max = 1_000_000n) => BigInt(Math.floor(Math.random() * Number(max))),
     blockHeight: () => gen.bigint(250_000_000n),
     /** Deterministic blockhash (same seed → same value) so story fixtures stay pixel-stable. */
-    blockhash: (seed = 0) => {
-        const bytes = new Uint8Array(32);
-        for (let i = 0; i < bytes.length; i++) bytes[i] = (seed * 7 + i * 13) & 0xff;
-        return BASE58_DECODER.decode(bytes);
-    },
+    blockhash: (seed = 0) => blockhashFromSeed(seed),
     epoch: () => gen.bigint(1_000n),
     /** Same as `address` but returns a `PublicKey` so callers needn't wrap it. */
     publicKey: (seed?: number) => new PublicKey(gen.address(seed)),
@@ -39,12 +29,9 @@ export const gen = {
     securityTxt: (fields: SecurityTxtFields = {}, type: SecurityTxtSource = 'pmp') => ({ fields, type }),
     /** Deterministic when seed provided (same seed → same value) so story fixtures stay pixel-stable. */
     signature: (seed?: number) => {
+        if (seed !== undefined) return signatureFromSeed(seed);
         const bytes = new Uint8Array(64);
-        if (seed === undefined) {
-            for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
-        } else {
-            for (let i = 0; i < bytes.length; i++) bytes[i] = (seed * 11 + i * 17) & 0xff;
-        }
+        for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
         return BASE58_DECODER.decode(bytes);
     },
     /** Deterministic when seed provided (same seed → same value) so story fixtures stay pixel-stable. */
