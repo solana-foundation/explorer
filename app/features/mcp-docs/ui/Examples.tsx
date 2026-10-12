@@ -9,7 +9,7 @@ import { useReducedMotion } from '@/app/shared/lib/use-reduced-motion';
 
 import { answerCost, MCP_EXAMPLES, type McpExample, revealAnswer, type RevealedBlock } from '../lib/example-answers';
 import { MONO_LABEL } from '../lib/mcp-docs-layout';
-import { useStickToBottom } from '../lib/useStickToBottom';
+import { useStickToBottom } from '../lib/use-stick-to-bottom';
 
 export function Examples() {
     const [picked, setPicked] = useState<McpExample | undefined>(undefined);
