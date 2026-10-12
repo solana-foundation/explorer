@@ -99,7 +99,13 @@ describe('inspector::AccountsCard raw data', () => {
         });
 
         renderCard(overOneBatchOfAccounts(150));
-        await vi.waitFor(() => expect(totalBatches).toBe(2), { timeout: 5000 });
+        await vi.waitFor(
+            () => {
+                expect(totalBatches).toBe(2);
+                expect(rowRequests()).toHaveLength(2);
+            },
+            { timeout: 5000 },
+        );
         await findRenderedSizes();
 
         expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
@@ -118,7 +124,13 @@ describe('inspector::AccountsCard raw data', () => {
         });
 
         renderCard(overOneBatchOfAccounts(150));
-        await vi.waitFor(() => expect(totalBatches).toBeGreaterThanOrEqual(2), { timeout: 5000 });
+        await vi.waitFor(
+            () => {
+                expect(totalBatches).toBeGreaterThanOrEqual(2);
+                expect(rowRequests()).toHaveLength(2);
+            },
+            { timeout: 5000 },
+        );
         await findRenderedSizes();
 
         expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
