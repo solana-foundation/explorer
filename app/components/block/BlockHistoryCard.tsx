@@ -3,11 +3,29 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
 import { cn } from '@components/shared/utils';
-import { BLOCK_TRANSACTION_VERSIONS, type BlockWithV1 } from '@entities/block-data';
+import {
+    BLOCK_TRANSACTION_VERSIONS,
+    type BlockData,
+    type BlockTransactionMeta,
+    getBlockTransactionAccounts,
+    getBlockTransactionInstructions,
+    isBlockTransaction,
+} from '@entities/block-data';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
+import {
+    type HistoryStatus,
+    isHistoryStatus,
+    STATUS_LABELS,
+    STATUS_PARAM,
+    STATUS_VALUES,
+} from '@features/transaction-history/lib/history-filters';
 import { useCluster } from '@providers/cluster';
-import type { TransactionVersion } from '@solana/kit';
-import { ConfirmedTransactionMeta, PublicKey, TransactionSignature, VOTE_PROGRAM_ID } from '@solana/web3.js';
+import {
+    type Address as KitAddress,
+    address,
+    type Signature as KitSignature,
+    type TransactionVersion,
+} from '@solana/kit';
 import { parseProgramLogs } from '@utils/program-logs';
 import { displayAddress } from '@utils/tx';
 import Link from 'next/link';
@@ -33,17 +51,18 @@ import { DataListCard } from '@/app/shared/ui/DataListCard';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
 const PAGE_SIZE = 25;
+const VOTE_PROGRAM_ADDRESS = address('Vote111111111111111111111111111111111111111');
 
 const useQueryProgramFilter = (query: ReadonlyURLSearchParams): string => {
     const filter = query.get('filter');
     return filter || '';
 };
 
-const useQueryAccountFilter = (query: ReadonlyURLSearchParams): PublicKey | null => {
+const useQueryAccountFilter = (query: ReadonlyURLSearchParams): KitAddress | null => {
     const filter = query.get('accountFilter');
     if (filter !== null) {
         try {
-            return new PublicKey(filter);
+            return address(filter);
         } catch {
             /* empty */
         }
@@ -58,6 +77,11 @@ const useQueryVersionFilter = (query: ReadonlyURLSearchParams): TransactionVersi
     return match ? match.version : null;
 };
 
+const useQueryStatusFilter = (query: ReadonlyURLSearchParams): HistoryStatus | null => {
+    const filter = query.get(STATUS_PARAM);
+    return filter !== null && isHistoryStatus(filter) ? filter : null;
+};
+
 const useQuerySort = (query: ReadonlyURLSearchParams): { mode: SortMode; direction: SortDirection } => {
     const sort = query.get('sort');
     const mode: SortMode = isSortMode(sort) ? sort : 'index';
@@ -68,23 +92,25 @@ const useQuerySort = (query: ReadonlyURLSearchParams): { mode: SortMode; directi
 
 type TransactionWithInvocations = {
     index: number;
-    signature?: TransactionSignature;
-    meta: ConfirmedTransactionMeta | null;
+    signature?: KitSignature;
+    meta: BlockTransactionMeta | null;
     invocations: Map<string, number>;
     computeUnits?: number;
-    costUnits?: number;
+    costUnits?: bigint;
     reservedComputeUnits?: number;
     logTruncated: boolean;
-    version: TransactionVersion;
+    unavailable: boolean;
+    version?: TransactionVersion;
 };
 
-export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: bigint | undefined }) {
+export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bigint | undefined }) {
     const [numDisplayed, setNumDisplayed] = React.useState(PAGE_SIZE);
     const currentPathname = usePathname();
     const currentSearchParams = useSearchParams();
     const programFilter = useQueryProgramFilter(currentSearchParams);
     const accountFilter = useQueryAccountFilter(currentSearchParams);
     const versionFilter = useQueryVersionFilter(currentSearchParams);
+    const statusFilter = useQueryStatusFilter(currentSearchParams);
     const { direction: sortDirection, mode: sortMode } = useQuerySort(currentSearchParams);
     const router = useRouter();
     const { cluster } = useCluster();
@@ -112,14 +138,22 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
     const { transactions, invokedPrograms } = React.useMemo(() => {
         const invokedPrograms = new Map<string, number>();
 
-        const transactions: TransactionWithInvocations[] = block.transactions.map((tx, index) => {
-            let signature: TransactionSignature | undefined;
-            if (tx.transaction.signatures.length > 0) {
-                signature = tx.transaction.signatures[0];
+        const transactions: TransactionWithInvocations[] = block.transactions.map(entry => {
+            if (!isBlockTransaction(entry)) {
+                return {
+                    index: entry.index,
+                    invocations: new Map(),
+                    logTruncated: false,
+                    meta: null,
+                    unavailable: true,
+                };
             }
 
-            const programIndexes = tx.transaction.message.compiledInstructions
-                .map(ix => ix.programIdIndex)
+            const tx = entry;
+            const signature = tx.signatures[0];
+
+            const programIndexes = getBlockTransactionInstructions(tx.message)
+                .map(ix => ix.programAddressIndex)
                 .concat(
                     tx.meta?.innerInstructions?.flatMap(ix => {
                         return ix.instructions.map(ix => ix.programIdIndex);
@@ -133,13 +167,11 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
             });
 
             const invocations = new Map<string, number>();
-            const accountKeys = tx.transaction.message.getAccountKeys({
-                accountKeysFromLookups: tx.meta?.loadedAddresses,
-            });
+            const accountKeys = getBlockTransactionAccounts(tx);
             indexMap.forEach((count, i) => {
-                const accountKey = accountKeys.get(i);
+                const accountKey = accountKeys[i];
                 invariant(accountKey, `account key index ${i} out of range`);
-                const programId = accountKey.toBase58();
+                const programId = accountKey;
                 invocations.set(programId, count);
                 const programTransactionCount = invokedPrograms.get(programId) || 0;
                 invokedPrograms.set(programId, programTransactionCount + 1);
@@ -156,12 +188,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                 // ignore parsing errors because some old logs aren't parsable
             }
 
-            let costUnits: number | undefined = undefined;
-            try {
-                costUnits = tx.meta?.costUnits ?? 0;
-            } catch (_err) {
-                // ignore parsing errors because some old logs aren't parsable
-            }
+            const costUnits = tx.meta?.costUnits;
 
             // Calculate reserved compute units
             const reservedComputeUnits = estimateRequestedComputeUnits(tx, epoch, cluster);
@@ -169,20 +196,21 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
             return {
                 computeUnits,
                 costUnits,
-                index,
+                index: tx.index,
                 invocations,
                 logTruncated,
                 meta: tx.meta,
                 reservedComputeUnits,
                 signature,
-                version: tx.version,
+                unavailable: false,
+                version: tx.message.version,
             };
         });
         return { invokedPrograms, transactions };
     }, [block, cluster, epoch]);
 
     const [filteredTransactions, showComputeUnits] = React.useMemo((): [TransactionWithInvocations[], boolean] => {
-        const voteFilter = VOTE_PROGRAM_ID.toBase58();
+        const voteFilter = VOTE_PROGRAM_ADDRESS;
         const filteredTxs: TransactionWithInvocations[] = transactions
             .filter(({ invocations }) => {
                 if (programFilter === ALL_TRANSACTIONS) {
@@ -199,20 +227,30 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                 }
 
                 const tx = block.transactions[index];
-                const accountKeys = tx.transaction.message.getAccountKeys({
-                    accountKeysFromLookups: tx.meta?.loadedAddresses,
-                });
-                return accountKeys
-                    .keySegments()
-                    .flat()
-                    .find(key => key.equals(accountFilter));
+                if (!tx || !isBlockTransaction(tx)) return false;
+                return getBlockTransactionAccounts(tx).includes(accountFilter);
             })
-            .filter(({ version }) => versionFilter === null || version === versionFilter);
+            .filter(({ version }) => versionFilter === null || version === versionFilter)
+            // An unavailable transaction has no known status, so no status filter matches it.
+            .filter(
+                tx =>
+                    statusFilter === null ||
+                    (!tx.unavailable && (isFailed(tx) ? 'failed' : 'succeeded') === statusFilter),
+            );
 
-        const showComputeUnits = filteredTxs.every(tx => tx.computeUnits !== undefined);
+        const showComputeUnits = filteredTxs.every(tx => tx.unavailable || tx.computeUnits !== undefined);
 
         return [sortTransactions(filteredTxs, sortMode, sortDirection, showComputeUnits), showComputeUnits];
-    }, [block.transactions, transactions, programFilter, accountFilter, versionFilter, sortMode, sortDirection]);
+    }, [
+        block.transactions,
+        transactions,
+        programFilter,
+        accountFilter,
+        versionFilter,
+        statusFilter,
+        sortMode,
+        sortDirection,
+    ]);
 
     // Shared by the filter dropdown (menu options + active row) and the removable chip below the title.
     // "Set" means anything other than "All Transactions": the empty-param default ("All Except Votes")
@@ -224,6 +262,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
     const isProgramFilterSet = programFilter !== ALL_TRANSACTIONS;
     const versionOptions = React.useMemo(() => buildVersionOptions(transactions), [transactions]);
     const versionLabel = BLOCK_TRANSACTION_VERSIONS.find(({ version }) => version === versionFilter)?.label;
+    const isFilterSet = isProgramFilterSet || accountFilter !== null || versionFilter !== null || statusFilter !== null;
 
     if (transactions.length === 0) {
         return <ErrorCard text="This block has no transactions" />;
@@ -232,7 +271,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
     const visible = filteredTransactions.slice(0, numDisplayed);
     const hasMore = filteredTransactions.length > numDisplayed;
     const emptyFilterMessage =
-        accountFilter === null && programFilter === HIDE_VOTES
+        accountFilter === null && statusFilter === null && versionFilter === null && programFilter === HIDE_VOTES
             ? "This block doesn't contain any non-vote transactions"
             : 'No transactions found with this filter';
 
@@ -246,18 +285,15 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                     {/* `inline-block` keeps the count atomic: it wraps to the next line whole rather than
                         breaking mid-phrase when it can't sit beside the title. */}
                     <span className="inline-block text-sm font-normal text-outer-space-300">
-                        {filteredTransactions.length}{' '}
-                        {isProgramFilterSet || accountFilter !== null || versionFilter !== null
-                            ? 'filtered records'
-                            : 'records'}
+                        {filteredTransactions.length} {isFilterSet ? 'filtered records' : 'records'}
                     </span>
                 </>
             }
             titleClassName="items-end gap-4"
             belowTitle={
-                isProgramFilterSet || versionLabel !== undefined || accountFilter !== null ? (
+                isFilterSet ? (
                     <>
-                        {(isProgramFilterSet || versionLabel !== undefined) && (
+                        {(isProgramFilterSet || versionLabel !== undefined || statusFilter !== null) && (
                             <div className="-mt-1 mb-0.5 flex flex-wrap items-center gap-2">
                                 {isProgramFilterSet && (
                                     <FilterChip
@@ -273,13 +309,20 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                                         applyReset={params => params.delete(VERSION_PARAM)}
                                     />
                                 )}
+                                {statusFilter !== null && (
+                                    <FilterChip
+                                        field="Status"
+                                        label={STATUS_LABELS[statusFilter]}
+                                        applyReset={params => params.delete(STATUS_PARAM)}
+                                    />
+                                )}
                             </div>
                         )}
                         {accountFilter !== null && (
                             <div className="text-sm text-white">
                                 Showing transactions which load account:
                                 <span className="ml-1.5 inline-block align-middle">
-                                    <Address pubkey={accountFilter} link />
+                                    <Address address={accountFilter} link />
                                 </span>
                             </div>
                         )}
@@ -298,9 +341,10 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                     <FilterDropdown
                         options={filterModel.options}
                         currentFilter={programFilter}
-                        isFilterSet={isProgramFilterSet || versionFilter !== null}
+                        isFilterSet={isProgramFilterSet || versionFilter !== null || statusFilter !== null}
                         versionOptions={versionOptions}
                         currentVersion={versionFilter}
+                        currentStatus={statusFilter}
                     />
                 </>
             }
@@ -325,11 +369,17 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
 const HISTORY_STATUS = {
     failed: { label: 'Failed', variant: 'warning' },
     success: { label: 'Success', variant: 'success' },
+    unavailable: { label: 'Unavailable', variant: 'warning' },
 } as const;
+
+// A transaction without a signature can't be looked up, so it's shown (and filtered) as failed.
+function isFailed(tx: Pick<TransactionWithInvocations, 'meta' | 'signature'>): boolean {
+    return Boolean(tx.meta?.err) || !tx.signature;
+}
 
 // One shared formatter instance — constructing `Intl.NumberFormat` per call is needlessly expensive.
 const NUMBER_FORMAT = new Intl.NumberFormat('en-US');
-const numberFmt = (n: number) => NUMBER_FORMAT.format(n);
+const numberFmt = (n: number | bigint) => NUMBER_FORMAT.format(n);
 
 // A dim up/down chevron pair marking a sortable header; the arrow for the active direction lights up
 // white. Absolutely positioned in an `h-4`/`w-1` box so the taller glyph stack doesn't grow the row.
@@ -446,14 +496,17 @@ function BlockHistoryGridRow({
     showComputeUnits: boolean;
     gridStyle: React.CSSProperties;
 }) {
-    const failed = Boolean(tx.meta?.err) || !tx.signature;
-    const status = failed ? HISTORY_STATUS.failed : HISTORY_STATUS.success;
+    const status = tx.unavailable
+        ? HISTORY_STATUS.unavailable
+        : isFailed(tx)
+          ? HISTORY_STATUS.failed
+          : HISTORY_STATUS.success;
     const badge = (
         <Badge ui="dashkit" variant={status.variant}>
             {status.label}
         </Badge>
     );
-    const versionBadge = (
+    const versionBadge = tx.version !== undefined && (
         <Badge ui="dashkit" variant="secondary">
             {BLOCK_TRANSACTION_VERSIONS.find(({ version }) => version === tx.version)?.label ?? String(tx.version)}
         </Badge>
@@ -477,7 +530,7 @@ function BlockHistoryGridRow({
                         <span className="whitespace-nowrap text-right tabular-nums text-outer-space-300">
                             {count} ×
                         </span>
-                        <Address pubkey={new PublicKey(programId)} link />
+                        <Address address={address(programId)} link />
                     </React.Fragment>
                 ))}
             </div>
@@ -548,7 +601,7 @@ type VersionOption = {
     version: TransactionVersion;
 };
 
-function buildVersionOptions(transactions: { version: TransactionVersion }[]): VersionOption[] {
+function buildVersionOptions(transactions: { version?: TransactionVersion }[]): VersionOption[] {
     return BLOCK_TRANSACTION_VERSIONS.map(({ label, version }) => ({
         label,
         transactionCount: transactions.filter(tx => tx.version === version).length,
@@ -574,7 +627,7 @@ function buildFilterModel(
     const defaultFilterOption: FilterOption = {
         name: 'All Except Votes',
         programId: HIDE_VOTES,
-        transactionCount: totalTransactionCount - (invokedPrograms.get(VOTE_PROGRAM_ID.toBase58()) || 0),
+        transactionCount: totalTransactionCount - (invokedPrograms.get(VOTE_PROGRAM_ADDRESS) || 0),
     };
     const allTransactionsOption: FilterOption = {
         name: 'All Transactions',
@@ -610,12 +663,14 @@ const FilterDropdown = ({
     isFilterSet,
     versionOptions,
     currentVersion,
+    currentStatus,
 }: {
     options: FilterOption[];
     currentFilter: string;
     isFilterSet: boolean;
     versionOptions: VersionOption[];
     currentVersion: TransactionVersion | null;
+    currentStatus: HistoryStatus | null;
 }) => {
     const [query, setQuery] = React.useState('');
     const trimmed = query.trim().toLowerCase();
@@ -662,14 +717,28 @@ const FilterDropdown = ({
                     </div>
                 </div>
                 <div className="border-b border-solid border-white/10 pb-1.5">
+                    <div className="px-6 pb-1 text-xs uppercase text-outer-space-300">Status</div>
+                    <ParamFilterLink active={currentStatus === null} label="Any status" param={STATUS_PARAM} />
+                    {STATUS_VALUES.map(status => (
+                        <ParamFilterLink
+                            active={currentStatus === status}
+                            key={status}
+                            label={STATUS_LABELS[status]}
+                            param={STATUS_PARAM}
+                            value={status}
+                        />
+                    ))}
+                </div>
+                <div className="border-b border-solid border-white/10 pb-1.5 pt-2">
                     <div className="px-6 pb-1 text-xs uppercase text-outer-space-300">Transaction Version</div>
-                    <VersionFilterLink currentVersion={currentVersion} label="Any version" version={null} />
+                    <ParamFilterLink active={currentVersion === null} label="Any version" param={VERSION_PARAM} />
                     {versionOptions.map(({ label, transactionCount, version }) => (
-                        <VersionFilterLink
-                            currentVersion={currentVersion}
+                        <ParamFilterLink
+                            active={currentVersion === version}
                             key={versionParam(version)}
                             label={`${label} (${transactionCount})`}
-                            version={version}
+                            param={VERSION_PARAM}
+                            value={versionParam(version)}
                         />
                     ))}
                 </div>
@@ -823,29 +892,31 @@ function FilterChip({
     );
 }
 
-function VersionFilterLink({
-    currentVersion,
+// A dropdown row that sets (or, with no `value`, deletes) one URL param while preserving the rest.
+function ParamFilterLink({
+    active,
     label,
-    version,
+    param,
+    value,
 }: {
-    currentVersion: TransactionVersion | null;
+    active: boolean;
     label: string;
-    version: TransactionVersion | null;
+    param: string;
+    value?: string;
 }) {
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
     const href = useMemo(() => {
         const params = new URLSearchParams(currentSearchParams?.toString());
-        if (version === null) {
-            params.delete(VERSION_PARAM);
+        if (value === undefined) {
+            params.delete(param);
         } else {
-            params.set(VERSION_PARAM, versionParam(version));
+            params.set(param, value);
         }
         const nextQueryString = params.toString();
         return `${currentPathname}${nextQueryString ? `?${nextQueryString}` : ''}`;
-    }, [currentPathname, currentSearchParams, version]);
+    }, [currentPathname, currentSearchParams, param, value]);
 
-    const active = version === currentVersion;
     return (
         <DropdownItem asChild className={cn(active && 'active')}>
             <Link href={href} className="relative">

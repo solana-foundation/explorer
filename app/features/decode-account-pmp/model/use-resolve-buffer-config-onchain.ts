@@ -21,7 +21,7 @@ function swrKey(url: string, address: string, fingerprint: string, enabled: bool
 /**
  * The second config-resolution strategy: read what an on-chain instruction declared for this buffer.
  *
- * `fingerprint` identifies the account body the caller resolved from - see `useDecodeBufferPayload` for why the
+ * `fingerprint` identifies the account body the caller resolved from - see `useResolveBufferConfig` for why the
  * result is cached against it rather than against the address alone.
  */
 export function useResolveBufferConfigOnchain({

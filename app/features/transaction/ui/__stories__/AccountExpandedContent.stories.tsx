@@ -1,12 +1,20 @@
+/* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
+import { gen } from '@__fixtures__/gen';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { MockAccountsProvider } from '@storybook-config/__mocks__/MockAccountsProvider';
 import { nextjsParameters, withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
+import React from 'react';
 import { expect, within } from 'storybook/test';
+
+import { FetchStatus } from '@/app/providers/cache';
+import { ClusterProvider } from '@/app/providers/cluster';
 
 import { AccountExpandedContent } from '../AccountExpandedContent';
 
 const SYSTEM_PROGRAM_ADDRESS = SystemProgram.programId.toBase58();
 const UNKNOWN_ADDRESS = new PublicKey('So11111111111111111111111111111111111111112').toBase58();
+const SIZED_ADDRESS = gen.address(1);
 
 const meta: Meta<typeof AccountExpandedContent> = {
     args: {
@@ -76,15 +84,72 @@ export const FlatLayout: Story = {
     },
 };
 
-export const WithAccountInfo: Story = {
+export const WithAccountSize: Story = {
     args: {
-        accountInfo: { data: new Uint8Array(0), size: 1024 },
-        address: SYSTEM_PROGRAM_ADDRESS,
+        address: SIZED_ADDRESS,
         enabled: true,
     },
+    decorators: [
+        Story => (
+            <ClusterProvider>
+                <MockAccountsProvider
+                    accounts={{
+                        [SIZED_ADDRESS]: {
+                            data: {
+                                data: {},
+                                executable: false,
+                                lamports: 1_000_000_000,
+                                owner: SystemProgram.programId,
+                                pubkey: new PublicKey(SIZED_ADDRESS),
+                                space: 1024,
+                            },
+                            status: FetchStatus.Fetched,
+                        },
+                    }}
+                >
+                    <Story />
+                </MockAccountsProvider>
+            </ClusterProvider>
+        ),
+    ],
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         expect(canvas.getByText('Assigned Program Id')).toBeInTheDocument();
         expect(canvas.getByText('1,024 byte(s)')).toBeInTheDocument();
+    },
+};
+
+export const EmptyAccount: Story = {
+    args: {
+        address: SIZED_ADDRESS,
+        enabled: true,
+    },
+    decorators: [
+        Story => (
+            <ClusterProvider>
+                <MockAccountsProvider
+                    accounts={{
+                        [SIZED_ADDRESS]: {
+                            data: {
+                                data: {},
+                                executable: false,
+                                lamports: 1_000_000_000,
+                                owner: SystemProgram.programId,
+                                pubkey: new PublicKey(SIZED_ADDRESS),
+                                space: 0,
+                            },
+                            status: FetchStatus.Fetched,
+                        },
+                    }}
+                >
+                    <Story />
+                </MockAccountsProvider>
+            </ClusterProvider>
+        ),
+    ],
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        expect(canvas.getByText('0 byte(s)')).toBeInTheDocument();
+        expect(canvas.queryByRole('button', { name: /byte\(s\)/ })).not.toBeInTheDocument();
     },
 };

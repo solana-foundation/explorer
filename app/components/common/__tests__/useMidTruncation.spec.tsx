@@ -6,13 +6,22 @@ import { useMidTruncation } from '../useMidTruncation';
 
 // ─── Minimal harness that wires the hook's refs to real DOM elements ───────────
 
-function Harness({ enabled, text, withTrailing = false }: { enabled: boolean; text: string; withTrailing?: boolean }) {
+function Harness({
+    chars,
+    enabled,
+    text,
+    withTrailing = false,
+}: {
+    chars?: number;
+    enabled: boolean;
+    text: string;
+    withTrailing?: boolean;
+}) {
     const trailingRef = useRef<HTMLButtonElement>(null);
-    const { rowRef, hiddenTextRef, isMidTruncated, midTruncatedText } = useMidTruncation(
-        enabled,
-        text,
-        withTrailing ? trailingRef : undefined,
-    );
+    const { rowRef, hiddenTextRef, isMidTruncated, midTruncatedText } = useMidTruncation(enabled, text, {
+        midTruncateChars: chars,
+        trailingRef: withTrailing ? trailingRef : undefined,
+    });
     return (
         <div ref={rowRef} data-testid="row">
             <span ref={hiddenTextRef} data-testid="hidden" />
@@ -42,6 +51,12 @@ describe('useMidTruncation', () => {
     it('should format midTruncatedText as first-5 + "…" + last-5', () => {
         render(<Harness enabled text="So1111111111111111111111111111111111111111112" />);
         expect(screen.getByTestId('mid-text')).toHaveTextContent('So111…11112');
+    });
+
+    it('should format midTruncatedText as first-8 + "…" + last-8 for a non-default chars', () => {
+        const digest = '7039867918bfbbe1aade33c02140c617247df2bb1528f38c66b642a2253c965b';
+        render(<Harness chars={8} enabled text={digest} />);
+        expect(screen.getByTestId('mid-text')).toHaveTextContent('70398679…253c965b');
     });
 
     it('should not truncate when disabled', () => {

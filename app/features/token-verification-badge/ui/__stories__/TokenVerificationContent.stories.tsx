@@ -25,9 +25,9 @@ const rugcheckRateLimited: VerificationSource = {
     verified: false,
 };
 
-const blupryntApply: VerificationSource = {
-    applyUrl: 'https://bluprynt.com/apply',
-    name: EVerificationSource.Bluprynt,
+const coingeckoApply: VerificationSource = {
+    applyUrl: 'https://www.coingecko.com',
+    name: EVerificationSource.CoinGecko,
     verified: false,
 };
 
@@ -43,7 +43,7 @@ type Story = StoryObj<typeof meta>;
 export const NoVerificationsWithApplyOptions: Story = {
     args: {
         rateLimitedSources: [],
-        sourcesToApply: [blupryntApply],
+        sourcesToApply: [coingeckoApply],
         verificationFoundSources: [],
     },
 };
@@ -75,7 +75,7 @@ export const WithRateLimitedSources: Story = {
 export const FullState: Story = {
     args: {
         rateLimitedSources: [rugcheckRateLimited],
-        sourcesToApply: [blupryntApply],
+        sourcesToApply: [coingeckoApply],
         verificationFoundSources: [jupiterVerified, rugcheckGood],
     },
 };

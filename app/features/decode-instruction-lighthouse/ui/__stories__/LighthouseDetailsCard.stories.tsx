@@ -6,6 +6,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -27,7 +28,6 @@ function buildArgs(raw: TransactionInstruction) {
         innerCards: undefined,
         ix: toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId),
         raw,
-        result: { err: null },
     };
 }
 
@@ -53,7 +53,7 @@ const assertAccountInfoIx = {
 
 const meta: Meta<typeof LighthouseDetailsCard> = {
     component: LighthouseDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/LighthouseDetailsCard',

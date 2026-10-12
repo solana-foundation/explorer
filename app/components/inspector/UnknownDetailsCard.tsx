@@ -50,9 +50,9 @@ export function UnknownDetailsCard({
                 <BaseRawDetails ix={ix} />
                 {innerCards && innerCards.length > 0 && (
                     <>
-                        <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                        <BaseTable.SectionRow>
                             <BaseTable.Cell colSpan={3}>Inner Instructions</BaseTable.Cell>
-                        </BaseTable.Row>
+                        </BaseTable.SectionRow>
                         <BaseTable.Row>
                             <BaseTable.Cell colSpan={3}>
                                 <div>{innerCards}</div>

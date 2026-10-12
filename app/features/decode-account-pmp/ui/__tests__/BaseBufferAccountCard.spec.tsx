@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { PMP_UNRESOLVED_SOURCE_HASH_NOTE } from '@entities/pmp-account';
 import { Compression, DataSource, Encoding, Format } from '@solana-program/program-metadata';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
@@ -75,6 +76,7 @@ describe('BaseBufferAccountCard', () => {
         expect(screen.getByTestId('pmp-account-encoding')).toHaveTextContent('Base64');
         expect(screen.getByTestId('pmp-account-format')).toHaveTextContent('YAML');
         expect(screen.getByTestId('pmp-account-dataSource')).toHaveTextContent('Direct');
+        expect(screen.queryByTestId('pmp-payload-data-hash-unresolved-source')).not.toBeInTheDocument();
     });
 
     it('should show the compression resolved from bytes when nothing was resolved onchain', () => {
@@ -82,6 +84,14 @@ describe('BaseBufferAccountCard', () => {
 
         expect(screen.getByTestId('pmp-account-compression')).toHaveTextContent('Gzip');
         expect(screen.queryByTestId('pmp-account-encoding')).not.toBeInTheDocument();
+    });
+
+    it('should display a note when no onchain lookup resolved the data source', () => {
+        render(<BaseBufferAccountCard {...bufferArgs(pack(YAML_DOC, Compression.Gzip))} />);
+
+        expect(screen.getByTestId('pmp-payload-data-hash-unresolved-source')).toHaveTextContent('Data Hash');
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(PMP_UNRESOLVED_SOURCE_HASH_NOTE);
+        expect(screen.queryByTestId('pmp-payload-data-hash-pointer')).not.toBeInTheDocument();
     });
 
     // A dead scan and a scan that found nothing leave the same rows blank, so the note is the only thing that can tell
@@ -138,6 +148,7 @@ describe('BaseBufferAccountCard', () => {
         );
 
         expect(screen.getByTestId('pmp-account-buffer-incomplete-note')).toHaveTextContent('incomplete');
+        expect(screen.queryByTestId('pmp-payload-data-hash')).not.toBeInTheDocument();
     });
 
     it('should report a failed read of the buffer itself', () => {
@@ -167,6 +178,7 @@ describe('BaseBufferAccountCard', () => {
         expect(screen.getByTestId('pmp-account-buffer-unpack-error-note')).toHaveTextContent(
             'invalid distance too far back',
         );
+        expect(screen.queryByTestId('pmp-payload-data-hash')).not.toBeInTheDocument();
     });
 
     it('should say the payload expands past the unpack limit', () => {
@@ -185,7 +197,7 @@ describe('BaseBufferAccountCard', () => {
             <BaseBufferAccountCard
                 {...bufferArgs(pack(YAML_DOC, Compression.Gzip))}
                 configFromBytes={{
-                    result: { budget: 2, bytes: new Uint8Array([1, 2, 3]), kind: 'oversized' },
+                    result: { budget: 2, bytes: new Uint8Array([1, 2, 3]), dataHash: 'deadbeef', kind: 'oversized' },
                     status: 'ready',
                 }}
             />,
@@ -193,5 +205,16 @@ describe('BaseBufferAccountCard', () => {
 
         expect(screen.getByTestId('pmp-account-payload-too-large')).toHaveTextContent('3 bytes, limit 2');
         expect(screen.getByTestId('pmp-account-raw')).toBeInTheDocument();
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent('deadbeef');
+    });
+
+    it('should show the payload data hash for a compressed buffer', () => {
+        const body = pack(YAML_DOC, Compression.Gzip);
+        const resolved = resolveBufferConfigFromBytes(body);
+        if (resolved.kind !== 'text') throw new Error(`expected a text payload, got "${resolved.kind}"`);
+
+        render(<BaseBufferAccountCard {...bufferArgs(body)} />);
+
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(resolved.dataHash);
     });
 });

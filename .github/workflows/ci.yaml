@@ -4,6 +4,10 @@ on:
   push:
     branches: [master, development, 'development-*']
   pull_request:
+  merge_group:
+
+permissions:
+  contents: read
 
 env:
   PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
@@ -45,10 +49,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
-    strategy:
-      matrix:
-        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '24.x']
-
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -59,7 +59,7 @@ jobs:
       - name: Setup pnpm and Node.js
         uses: ./.github/actions/pnpm-setup
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
 
       - name: Format
         run: pnpm format:ci
@@ -80,7 +80,6 @@ jobs:
         run: pnpm test:packages
 
   # Split off Build-And-Test so the specs sweep fans out without re-running format/lint/build per shard.
-  # Sharded on both node versions: leaving 24.x whole would keep it the ~8 min critical path.
   Specs-Shards:
     needs: read-nvmrc
     runs-on: ubuntu-latest
@@ -89,7 +88,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '24.x']
         shard: ${{ fromJSON(needs.read-nvmrc.outputs.shard-list) }}
 
     steps:
@@ -99,7 +97,7 @@ jobs:
       - name: Setup pnpm and Node.js
         uses: ./.github/actions/pnpm-setup
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
 
       # Specs resolve sibling packages through dist. No `next build`: nothing here reads the generated
       # route types now that the specs project no longer typechecks.
@@ -109,13 +107,14 @@ jobs:
       - name: Test specs (shard ${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }})
         run: pnpm test:ci:specs --shard=${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }}
 
-  # Rebuilds the route-size table for the PR, enforces that bench/BUILD.md was refreshed, and
-  # publishes a bundle-change report. Gated behind Build-And-Test so it only runs on green builds.
+  # Rebuilds the route-size table for a PR or a merge-queue commit, enforces that bench/BUILD.md
+  # was refreshed, and publishes a bundle-change report. Gated behind Build-And-Test so it only
+  # runs on green builds.
   # Fork PRs get a read-only token here, so the PR comment is posted by build-info-comment.yaml
   # (workflow_run) from the artifact this job uploads.
   Build-Info:
     needs: [read-nvmrc, Build-And-Test]
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -202,10 +201,6 @@ jobs:
     timeout-minutes: 10
     continue-on-error: true
 
-    strategy:
-      matrix:
-        node-version: ['${{ needs.read-nvmrc.outputs.node-version }}', '24.x']
-
     # The browser-mode sweep has repeatedly died on a full root partition ("No space left on device").
     # Browsers and the Vite dep-optimize cache live on the runner's ~65 GB /mnt scratch disk
     # (PLAYWRIGHT_BROWSERS_PATH / VITE_CACHE_PATH); the pnpm store stays on / so node_modules keeps hardlinking.
@@ -235,7 +230,7 @@ jobs:
       - name: Setup pnpm and Node.js
         uses: ./.github/actions/pnpm-setup
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
 
       # No-op while setup-node restores by exact key only; kept in case the store ever regains restore-keys.
       - name: Prune pnpm store
@@ -253,3 +248,18 @@ jobs:
         env:
           STORYBOOK_DISABLE_TELEMETRY: ${{ env.STORYBOOK_DISABLE_TELEMETRY }}
         run: pnpm test:sb
+
+  # The `master` branch ruleset requires this job to pass before a merge.
+  # A job blocks a merge only if it is listed in `needs`.
+  CI-Result:
+    # Without `always()`, GitHub skips this job when any job in `needs` fails.
+    # A skipped required check does not block a merge, so the broken PR would merge.
+    if: always()
+    needs: [read-nvmrc, Build-And-Test, Specs-Shards, Build-Info, Security-Audit, Sitemap-Check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Fail if a needed job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

@@ -1,3 +1,7 @@
 import 'server-only';
 
-export { findTransactionCluster, type FindTransactionClusterResult } from './api/find-transaction-cluster';
+export {
+    findTransactionCluster,
+    getSignatureStatus,
+    type FindTransactionClusterResult,
+} from './api/find-transaction-cluster';

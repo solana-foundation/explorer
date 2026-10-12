@@ -4,7 +4,7 @@ import { privateConvertType as convertReferenceType } from '../converters/conver
 
 describe('convert idl comparison', () => {
     /**
-     * Specs that cover implementation from @solana-developers/helpers as well as existing Explorer's implementaiton
+     * Specs that cover implementation from @solana-developers/helpers as well as existing Explorer's implementation
      * That is needed to see real difference between converters that are used to represent and interact with IDLs
      */
     describe('convertType', () => {

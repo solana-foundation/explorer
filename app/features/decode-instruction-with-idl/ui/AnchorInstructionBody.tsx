@@ -1,21 +1,18 @@
 import { Idl, Instruction } from '@coral-xyz/anchor';
 import { IdlInstruction } from '@coral-xyz/anchor/dist/cjs/idl';
+import { ProgramField } from '@entities/instruction-card';
+import { ExpandToggleCell } from '@shared/ui/expandable-row';
 import { TransactionInstruction } from '@solana/web3.js';
 import { FlattenedIdlAccount, mapIxArgsToRows } from '@utils/anchor';
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
+import { CornerDownRight } from 'react-feather';
 
 import { Address } from '@/app/components/common/Address';
-import { Badge } from '@/app/components/shared/ui/badge';
+import { AccountRoleBadges } from '@/app/shared/ui/AccountRoleBadges';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { type AnchorRow, buildAnchorRows, visibleAnchorRows } from '../lib/build-anchor-rows';
 
-/**
- * Rich table body for an Anchor-decoded instruction: a Program row, an account table with collapsible
- * nested account groups, and the decoded argument rows. Fed the pre-decoded data from
- * `decodeAnchorInstruction`; the Anchor counterpart to the flat `CodamaInstructionBody`.
- */
 export function AnchorInstructionBody({
     ix,
     idl,
@@ -62,18 +59,13 @@ export function AnchorInstructionBody({
 
     return (
         <>
-            <BaseTable.Row>
-                <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="text-right" colSpan={2}>
-                    <Address pubkey={ix.programId} alignRight link raw overrideText={programName} />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+            <ProgramField programId={ix.programId} name={programName} colSpan={2} />
+            <BaseTable.SectionRow>
                 <BaseTable.Cell>Account Name</BaseTable.Cell>
                 <BaseTable.Cell className="text-right" colSpan={2}>
                     Address
                 </BaseTable.Cell>
-            </BaseTable.Row>
+            </BaseTable.SectionRow>
             {visibleAnchorRows(rows, expandedGroups).map(row =>
                 row.kind === 'group' ? (
                     <GroupHeaderRow
@@ -89,11 +81,11 @@ export function AnchorInstructionBody({
 
             {ixDef.args.length > 0 && (
                 <>
-                    <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                    <BaseTable.SectionRow>
                         <BaseTable.Cell>Argument Name</BaseTable.Cell>
                         <BaseTable.Cell>Type</BaseTable.Cell>
                         <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
-                    </BaseTable.Row>
+                    </BaseTable.SectionRow>
                     {mapIxArgsToRows(decodedIxData.data, ixDef, idl)}
                 </>
             )}
@@ -113,21 +105,7 @@ function GroupHeaderRow({
     return (
         <BaseTable.Row>
             <BaseTable.Cell colSpan={2}>{row.name}</BaseTable.Cell>
-            <BaseTable.Cell className="text-right" onClick={onToggle}>
-                <div className="cursor-pointer">
-                    {expanded ? (
-                        <>
-                            <span className="mr-1.5 text-dk-info">Collapse</span>
-                            <ChevronUp size={15} />
-                        </>
-                    ) : (
-                        <>
-                            <span className="mr-1.5 text-dk-info">Expand</span>
-                            <ChevronDown size={15} />
-                        </>
-                    )}
-                </div>
-            </BaseTable.Cell>
+            <ExpandToggleCell expanded={expanded} onToggle={onToggle} />
         </BaseTable.Row>
     );
 }
@@ -139,16 +117,7 @@ function AccountRow({ row }: { row: Extract<AnchorRow, { kind: 'account' }> }) {
                 <div className="flex flex-row items-center">
                     {row.isNested && <CornerDownRight className="mb-[3px] mr-1.5" size={14} />}
                     <div className="mr-1.5 md:inline">{row.name}</div>
-                    {row.isWritable && (
-                        <Badge ui="dashkit" variant="destructive" className="mr-[3px]">
-                            Writable
-                        </Badge>
-                    )}
-                    {row.isSigner && (
-                        <Badge ui="dashkit" variant="info" className="mr-[3px]">
-                            Signer
-                        </Badge>
-                    )}
+                    <AccountRoleBadges isWritable={row.isWritable} isSigner={row.isSigner} />
                 </div>
             </BaseTable.Cell>
             <BaseTable.Cell className="text-right" colSpan={2}>

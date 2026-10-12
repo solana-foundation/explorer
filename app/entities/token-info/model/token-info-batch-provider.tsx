@@ -1,13 +1,11 @@
 'use client';
 
 import { Cluster } from '@utils/cluster';
-import { getTokenInfoSwrKey } from '@utils/token-info';
+import { fetchTokenInfosFromApi, getTokenInfoSwrKey } from '@utils/token-info';
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 import { mutate } from 'swr';
 
 import { Logger } from '@/app/shared/lib/logger';
-
-import { getTokenInfos } from '../api/fetch-token-mints';
 
 type RequestTokenInfo = (address: string, cluster: Cluster, genesisHash?: string) => void;
 type BatchRequest = { address: string; cluster: Cluster; genesisHash?: string };
@@ -69,20 +67,17 @@ export function TokenInfoBatchProvider({ children }: { children: React.ReactNode
             const tracked = addresses.map(a => trackKey(cluster, genesisHash, a));
             tracked.forEach(t => inFlight.current.add(t));
 
-            // getTokenInfos swallows fetch/HTTP errors and returns [] - indistinguishable from a genuine
-            // all-not-found result. Its onError hook is the only failure signal, so use it to avoid caching a
-            // transient error as permanent not-found: the provider is app-root-mounted and never remounts, and
-            // useTokenInfo's SWR fetcher is null, so a wrongly-resolved mint would never retry this session.
-            let failed = false;
+            // `fetchTokenInfosFromApi` returns `undefined` for a failed request. The provider never remounts and
+            // useTokenInfo's SWR fetcher is null, so a failure cached as not-found would last the whole session.
             try {
-                const tokens = await getTokenInfos(addresses, cluster, genesisHash, {
-                    onError: e => {
-                        failed = true;
-                        Logger.error(new Error('[token-info] Batch fetch failed', { cause: e }));
-                    },
+                const tokens = await fetchTokenInfosFromApi({
+                    addresses,
+                    cluster,
+                    genesisHash,
+                    includeOnChainFallback: false,
                 });
                 // Leave unresolved on failure so a re-mount or a second consumer can retry.
-                if (failed) continue;
+                if (!tokens) continue;
 
                 for (const token of tokens) {
                     mutate(getTokenInfoSwrKey(token.address, cluster, genesisHash), token, false);

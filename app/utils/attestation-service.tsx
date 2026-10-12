@@ -4,7 +4,7 @@ import {
     decodeCredential,
     decodeSchema,
     SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID,
-} from 'sas-lib';
+} from '@solana/attestation';
 
 export function decodeWithType(
     account: Account,

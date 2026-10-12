@@ -1,19 +1,9 @@
 import { createSolanaRpc, type GetAccountInfoApi, getBase64Encoder, type Rpc } from '@solana/kit';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
-import { type Infer, nullable, string, type } from 'superstruct';
 
 import { decodeAnsNameRecord, getAnsDomainAddress } from '../lib/ans-name-service';
-import { decodeNameRegistryOwner, getHashedName, getNameAccountKey } from '../lib/sns-name-service';
-import { SOL_TLD_AUTHORITY } from './constants';
-
-export const ResolvedDomainInfoSchema = nullable(
-    type({
-        address: string(),
-        owner: string(),
-    }),
-);
-
-export type ResolvedDomainInfo = Infer<typeof ResolvedDomainInfoSchema>;
+import { decodeNameRegistryOwner, getSnsNameAccount, parseSnsLabel } from '../lib/sns-name-service';
+import type { ResolvedDomainInfo } from '../model/resolved-domain-info-schema';
 
 const base64Encoder = getBase64Encoder();
 
@@ -25,12 +15,15 @@ export async function resolveDomain(
 ): Promise<ResolvedDomainInfo> {
     // SNS/ANS registries store names hashed in lowercase; mixed-case input must be normalized.
     const normalized = domain.toLowerCase();
-    return normalized.endsWith('.sol') ? resolveSnsDomain(normalized, rpc) : resolveAnsDomain(normalized, rpc);
+    const snsLabel = parseSnsLabel(normalized);
+    if (snsLabel !== undefined) return resolveSnsDomain(snsLabel, rpc);
+    // `.sol` names are in the Solana Record Service, not in SPL Name Service.
+    if (normalized.endsWith('.sol')) return null;
+    return resolveAnsDomain(normalized, rpc);
 }
 
-async function resolveSnsDomain(domain: string, rpc: Rpc<GetAccountInfoApi>): Promise<ResolvedDomainInfo> {
-    const hashedName = getHashedName(domain.slice(0, -4)); // remove .sol
-    const nameKey = await getNameAccountKey(hashedName, { nameParent: SOL_TLD_AUTHORITY });
+async function resolveSnsDomain(label: string, rpc: Rpc<GetAccountInfoApi>): Promise<ResolvedDomainInfo> {
+    const nameKey = await getSnsNameAccount(label);
     const { value: accountInfo } = await rpc.getAccountInfo(nameKey, { encoding: 'base64' }).send();
     if (accountInfo === null) return null;
 

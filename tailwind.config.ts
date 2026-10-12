@@ -53,7 +53,6 @@ export const dkColors = {
     'rainbow-5': '#1dd79b',
     'popover-bg': '#1A1A1A',
     'popover-border': 'rgba(255,255,255,0.1)',
-    'card-outline-dark': 'oklch(33.501% 0.01351 189.14)', // = outer-space-800; matches the tx-inspector card outline
     'input-placeholder-dark': '#ccc',
 };
 
@@ -227,8 +226,9 @@ const config: Config = {
         },
 
         screens: {
-            'max-sm': getScreenDim('sm', -1),
-            'max-md': getScreenDim('md', -1),
+            // Tailwind reads a string screen as min-width, so a max-width screen needs the object form.
+            'max-sm': { max: getScreenDim('sm', 0) },
+            'max-md': { max: getScreenDim('md', 0) },
             xxs: getScreenDim('xxs'),
             xs: getScreenDim('xs'),
             sm: getScreenDim('sm'),

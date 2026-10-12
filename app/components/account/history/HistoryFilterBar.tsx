@@ -9,7 +9,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@components/shared/ui/p
 // deep imports on purpose: the feature's own card renders this bar, so importing the
 // barrel here would close a cycle through ui/TransactionHistoryCard
 import { isGtfaDisabled } from '@features/transaction-history/lib/gtfa-disabled-addresses';
-import { HistoryFilters } from '@features/transaction-history/lib/history-filters';
+import {
+    HistoryFilters,
+    STATUS_LABELS,
+    STATUS_PARAM,
+    STATUS_VALUES,
+} from '@features/transaction-history/lib/history-filters';
 import { useHistoryFiltersSupported } from '@features/transaction-history/model/use-account-history';
 import { format } from 'date-fns';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -21,14 +26,7 @@ export const SLOT_GTE_PARAM = 'slot.gte';
 export const SLOT_LTE_PARAM = 'slot.lte';
 export const BLOCK_TIME_GTE_PARAM = 'blockTime.gte';
 export const BLOCK_TIME_LTE_PARAM = 'blockTime.lte';
-export const STATUS_PARAM = 'status';
-
-const STATUS_VALUES = ['succeeded', 'failed'] as const;
-
-const STATUS_LABELS: Record<(typeof STATUS_VALUES)[number], string> = {
-    failed: 'Failed',
-    succeeded: 'Succeeded',
-};
+export { STATUS_PARAM };
 
 function parseSlotParam(raw: string | null | undefined): number | undefined {
     if (!raw) return undefined;

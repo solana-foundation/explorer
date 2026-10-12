@@ -1,6 +1,9 @@
 import { getProxiedUri } from '@features/metadata/utils';
 import { vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
+
+import { STATUS_MESSAGES } from '../feature';
 import { GET } from '../route';
 
 const { dnsLookupMock, fetchMock } = vi.hoisted(() => ({
@@ -106,10 +109,8 @@ describe('Metadata Proxy Route', () => {
         );
     });
 
-    // Locks in the original passthrough contract: when fetchResource throws a
-    // StatusError with one of these statuses, the route must surface it as-is
-    // rather than collapsing to 500.
-    describe('upstream status passthrough', () => {
+    // The route answers with the status of the StatusError that fetchResource returns, not 500.
+    describe('proxy error statuses', () => {
         const TEN_MB = 10 * 1024 * 1024;
 
         it.each([
@@ -159,6 +160,109 @@ describe('Metadata Proxy Route', () => {
             expect(response.headers.get('cache-control')).toBe('private, max-age=30');
             expect(response.headers.get('vercel-cdn-cache-control')).toBeNull();
         });
+
+        it('should log the returned error through the proxy log policy', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+            fetchMock.mockResolvedValueOnce(new Response(null, { status: 404 }));
+
+            await GET(new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`));
+
+            expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Upstream returned error', {
+                host: 'external.resource',
+                status: 404,
+                url: 'http://external.resource/file.json',
+            });
+        });
+
+        it('should answer 502 and log a warning with the raw status for an unlisted upstream status', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+            fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
+
+            const response = await GET(new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`));
+
+            expect(response.status).toBe(502);
+            expect(Logger.warn).toHaveBeenCalledWith('[api:metadata-proxy] Unlisted upstream status', {
+                host: 'external.resource',
+                status: 401,
+                url: 'http://external.resource/file.json',
+            });
+        });
+
+        it('should answer 502 with a Sentry warning when the upstream drops the connection mid-body', async () => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+            const body = new ReadableStream({
+                start(controller) {
+                    controller.error(new Error('terminated'));
+                },
+            });
+            fetchMock.mockResolvedValueOnce(new Response(body, { headers: { 'Content-Type': 'application/json' } }));
+
+            const response = await GET(new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`));
+
+            expect(response.status).toBe(502);
+            expect(Logger.warn).toHaveBeenCalledWith(
+                '[api:metadata-proxy] Fetch failed',
+                expect.objectContaining({ sentry: true, url: 'http://external.resource/file.json' }),
+            );
+            expect(Logger.error).not.toHaveBeenCalled();
+        });
+
+        it.each([204, 205])('should answer 415 without a Sentry exception when the upstream sends %i', async status => {
+            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+            dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+            fetchMock.mockResolvedValueOnce(
+                new Response(null, { headers: { 'Content-Type': 'application/json' }, status }),
+            );
+
+            const response = await GET(new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`));
+
+            expect(response.status).toBe(415);
+            expect(Logger.error).not.toHaveBeenCalled();
+        });
+
+        it('should answer 500 and report a Sentry exception when the route itself throws', async () => {
+            const failure = new Error('route fault');
+            vi.mocked(Logger.info).mockImplementationOnce(() => {
+                throw failure;
+            });
+
+            const { response } = await setup('http://external.resource/file.json', {
+                upstream: { data: { name: 'NFT' }, headers: { 'Content-Type': 'application/json' } },
+            });
+
+            expect(response.status).toBe(500);
+            expect(Logger.error).toHaveBeenCalledWith(failure, {
+                sentry: true,
+                sentryExtras: { uri: 'http://external.resource/file.json' },
+            });
+        });
+    });
+
+    describe('upstream Retry-After', () => {
+        it.each([
+            { expected: '120', retryAfter: '120', status: 429 },
+            { expected: null, retryAfter: undefined, status: 429 },
+            { expected: null, retryAfter: '120', status: 503 },
+        ] as const)(
+            'should respond $status with Retry-After $expected when upstream sends $retryAfter',
+            async ({ expected, retryAfter, status }) => {
+                vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
+                dnsLookupMock.mockResolvedValueOnce([{ address: '8.8.8.8' }]);
+                fetchMock.mockResolvedValueOnce(
+                    new Response(null, { headers: retryAfter ? { 'Retry-After': retryAfter } : {}, status }),
+                );
+
+                const request = new Request(`${ORIGIN}${getProxiedUri('http://external.resource/file.json')}`);
+                const response = await GET(request);
+
+                expect(response.status).toBe(status);
+                expect(response.headers.get('retry-after')).toBe(expected);
+                expect(await response.json()).toEqual({ error: STATUS_MESSAGES[status] });
+            },
+        );
     });
 
     describe('successful response', () => {
@@ -184,6 +288,17 @@ describe('Metadata Proxy Route', () => {
             // and the upstream's own value is not forwarded.
             expect(response.headers.get('cache-control')).toBe('public, max-age=86400');
             expect(response.headers.get('vercel-cdn-cache-control')).toBeNull();
+        });
+
+        it('should log the fetched size of a successful response', async () => {
+            await setup('http://external.resource/file.json', {
+                upstream: { data: { name: 'NFT' }, headers: { 'Content-Type': 'application/json' } },
+            });
+
+            expect(Logger.info).toHaveBeenCalledWith(
+                '[api:metadata-proxy] Resource fetched',
+                expect.objectContaining({ contentType: 'application/json', host: 'external.resource' }),
+            );
         });
 
         it('should omit Content-Length to avoid browser CORS issues', async () => {

@@ -1,8 +1,9 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
+import { PMP_DECODED_RENDER_CAP_BYTES, PMP_POINTER_HASH_NOTES } from '@entities/pmp-account';
 import type { Account } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import type { Address } from '@solana/kit';
+import { type Address, address } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
 import {
     Compression,
@@ -18,9 +19,11 @@ import { gzip } from 'pako';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { trackEvent } from '@/app/shared/lib/analytics';
+import { fromUtf8 } from '@/app/shared/lib/bytes';
+import { sha256Hex } from '@/app/shared/lib/hash';
 
 import { PMP_ADDRESS } from '../../lib/constants';
-import type { PmpPayloadInstruction } from '../../lib/types';
+import type { PmpPayload, PmpPayloadInstruction } from '../../lib/types';
 import { DataPayloadSection } from '../DataPayloadSection';
 
 vi.mock('@/app/shared/lib/analytics', () => ({ trackEvent: vi.fn() }));
@@ -47,11 +50,15 @@ function pack(content: string, compression: Compression): Uint8Array {
     return packDirectData({ compression, content, encoding: Encoding.Utf8 }).data as Uint8Array;
 }
 
-function renderSection(content: PmpPayloadInstruction, cap?: number) {
+function inline(bytes: Uint8Array, dataSource: DataSource): PmpPayload {
+    return { dataSource, source: { bytes, kind: 'inline' } };
+}
+
+function renderSection(pmpIx: PmpPayloadInstruction) {
     return render(
         <table>
             <tbody>
-                <DataPayloadSection content={content} cap={cap} />
+                <DataPayloadSection pmpIx={pmpIx} />
             </tbody>
         </table>,
     );
@@ -59,15 +66,14 @@ function renderSection(content: PmpPayloadInstruction, cap?: number) {
 
 const JSON_CONFIG = { compression: Compression.None, encoding: Encoding.Utf8, format: Format.Json };
 
-const BUFFER_ADDRESS = gen.address(1);
-const METADATA_ADDRESS = gen.address(2);
+const BUFFER_ADDRESS = address(gen.address(1));
+const METADATA_ADDRESS = address(gen.address(2));
 
 /** A `setData` whose bytes live in a foreign buffer, which is the shape that offers the account read. */
 const DEFERRED_SET_DATA: PmpPayloadInstruction = {
     config: JSON_CONFIG,
-    dataSource: DataSource.Direct,
     kind: 'setData',
-    sourceBuffer: BUFFER_ADDRESS,
+    payload: { dataSource: DataSource.Direct, source: { account: BUFFER_ADDRESS, kind: 'account' } },
 };
 
 /** The library's own encoder, so the fixture carries the real 96-byte Buffer header. */
@@ -112,9 +118,8 @@ describe('DataPayloadSection', () => {
     it('should render an inline Direct JSON payload as a pretty-printed document', async () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: pack(DOC, Compression.None),
+            payload: inline(pack(DOC, Compression.None), DataSource.Direct),
         });
         await openDecodedTab();
 
@@ -124,20 +129,20 @@ describe('DataPayloadSection', () => {
         // Pretty-printed rather than echoed back verbatim, which is what separates a parsed document from the
         // verbatim-text fallback a Json payload lands on when its bytes do not parse.
         expect(decoded.textContent).toContain('\n  "name": "company"');
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(sha256Hex(fromUtf8(DOC)));
     });
 
     it('should also offer the raw encoded bytes on a Raw tab', async () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+            payload: inline(new Uint8Array([0xde, 0xad, 0xbe, 0xef]), DataSource.Direct),
         });
 
         await userEvent.click(screen.getByRole('tab', { name: 'Raw' }));
 
         // RawDataField owns the hex grid and the byte count, so asserting on them proves it is wired up.
-        const raw = screen.getByTestId('pmp-payload-raw');
+        const raw = screen.getByTestId('pmp-raw-payload');
         expect(raw).toHaveTextContent('de ad be ef');
         expect(raw).toHaveTextContent('4 bytes');
         expect(screen.getByRole('tab', { name: 'Hex' })).toBeInTheDocument();
@@ -147,9 +152,8 @@ describe('DataPayloadSection', () => {
     it('should decompress a Zlib payload before rendering it', async () => {
         renderSection({
             config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: pack(DOC, Compression.Zlib),
+            payload: inline(pack(DOC, Compression.Zlib), DataSource.Direct),
         });
         await openDecodedTab();
 
@@ -159,9 +163,8 @@ describe('DataPayloadSection', () => {
     it('should render a Yaml payload as verbatim text rather than as a parsed document', async () => {
         renderSection({
             config: { compression: Compression.None, encoding: Encoding.Utf8, format: Format.Yaml },
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: pack('name: company\n', Compression.None),
+            payload: inline(pack('name: company\n', Compression.None), DataSource.Direct),
         });
         await openDecodedTab();
 
@@ -171,9 +174,8 @@ describe('DataPayloadSection', () => {
     it('should render an Encoding None payload as hex text rather than as characters', async () => {
         renderSection({
             config: { compression: Compression.None, encoding: Encoding.None, format: Format.None },
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+            payload: inline(new Uint8Array([0xde, 0xad, 0xbe, 0xef]), DataSource.Direct),
         });
         await openDecodedTab();
 
@@ -183,9 +185,8 @@ describe('DataPayloadSection', () => {
     it('should render a Json-hinted payload that does not parse as verbatim text', async () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: pack('{not json', Compression.None),
+            payload: inline(pack('{not json', Compression.None), DataSource.Direct),
         });
         await openDecodedTab();
 
@@ -195,17 +196,29 @@ describe('DataPayloadSection', () => {
     it('should state that a header-only setData carries no new payload without surfacing a decode failure', () => {
         renderSection({ config: JSON_CONFIG, kind: 'setData' });
 
-        expect(screen.getByTestId('pmp-header-only-note')).toBeInTheDocument();
+        expect(screen.getByTestId('pmp-no-payload')).toBeInTheDocument();
         expect(screen.queryByTestId('pmp-decode-error')).not.toBeInTheDocument();
         expect(screen.queryByTestId('pmp-decoded-text')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('pmp-payload-data-hash')).not.toBeInTheDocument();
+    });
+
+    it('should state that a setData naming no source account carries no payload rather than read an account', () => {
+        renderSection({
+            config: JSON_CONFIG,
+            kind: 'setData',
+            payload: { dataSource: DataSource.Direct, source: { kind: 'absent' } },
+        });
+
+        expect(screen.getByTestId('pmp-no-payload')).toBeInTheDocument();
+        expect(screen.queryByTestId('pmp-account-loading')).not.toBeInTheDocument();
+        expect(mockFetchAccountInfo).not.toHaveBeenCalled();
     });
 
     it('should show the source buffer address when setData carries no inline payload', () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            sourceBuffer: BUFFER_ADDRESS,
+            payload: { dataSource: DataSource.Direct, source: { account: BUFFER_ADDRESS, kind: 'account' } },
         });
 
         expect(screen.getByText('The payload was written to the Source buffer account')).toBeInTheDocument();
@@ -215,9 +228,8 @@ describe('DataPayloadSection', () => {
     it('should show the metadata account when initialize is the in-place shape', () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.Direct,
             kind: 'initialize',
-            metadataAccount: METADATA_ADDRESS,
+            payload: { dataSource: DataSource.Direct, source: { account: METADATA_ADDRESS, kind: 'account' } },
             seed: 'idl',
         });
 
@@ -228,24 +240,46 @@ describe('DataPayloadSection', () => {
     it('should render an External payload through the same tabs, opening on the raw bytes', () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.External,
             kind: 'setData',
-            payload: new Uint8Array(40),
+            payload: inline(new Uint8Array(40), DataSource.External),
         });
 
-        // A non-Direct source gets no special-cased note in this section: the card's `Data Source` config row
-        // already names it, so the section stays a plain bytes view rather than repeating the same fact.
-        expect(screen.getByTestId('pmp-payload-raw')).toBeInTheDocument();
+        // A non-Direct source gets no special-cased note in the bytes view: the card's `Data Source` config row
+        // already names it, so the tabs stay a plain bytes view rather than repeating the same fact.
+        expect(screen.getByTestId('pmp-raw-payload')).toBeInTheDocument();
         expect(screen.getByRole('tab', { name: 'Decoded' })).toBeInTheDocument();
         expect(screen.queryByTestId('pmp-decoded-text')).not.toBeInTheDocument();
+    });
+
+    it('should report why an External payload has no data hash instead of hashing its pointer bytes', () => {
+        renderSection({
+            config: JSON_CONFIG,
+            kind: 'setData',
+            payload: inline(new Uint8Array(40), DataSource.External),
+        });
+
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(
+            PMP_POINTER_HASH_NOTES[DataSource.External],
+        );
+    });
+
+    it('should report why a Url payload has no data hash instead of hashing its pointer bytes', () => {
+        const url = 'https://example.com/idl.json';
+        renderSection({
+            config: JSON_CONFIG,
+            kind: 'setData',
+            payload: inline(new TextEncoder().encode(url), DataSource.Url),
+        });
+
+        expect(screen.getByTestId('pmp-payload-data-hash')).toHaveTextContent(PMP_POINTER_HASH_NOTES[DataSource.Url]);
+        expect(screen.getByTestId('pmp-payload-data-hash')).not.toHaveTextContent(sha256Hex(fromUtf8(url)));
     });
 
     it('should render a Url payload pointer as decoded text without resolving it', async () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.Url,
             kind: 'setData',
-            payload: new TextEncoder().encode('https://example.com/idl.json'),
+            payload: inline(new TextEncoder().encode('https://example.com/idl.json'), DataSource.Url),
         });
         await openDecodedTab();
 
@@ -258,9 +292,8 @@ describe('DataPayloadSection', () => {
     it('should fall back to the raw view with an inline error note when the payload fails to decode', async () => {
         renderSection({
             config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: new Uint8Array([1, 2, 3, 4]),
+            payload: inline(new Uint8Array([1, 2, 3, 4]), DataSource.Direct),
         });
         await openDecodedTab();
 
@@ -269,54 +302,48 @@ describe('DataPayloadSection', () => {
         // The failed panel no longer repeats a raw view of its own - Raw is a sibling tab, so the bytes stay one
         // click away. Assert the escape hatch is still reachable rather than that it is mounted right now.
         expect(screen.getByRole('tab', { name: 'Raw' })).toBeInTheDocument();
+        expect(screen.queryByTestId('pmp-payload-data-hash')).not.toBeInTheDocument();
     });
 
     it('should render a bounded view with the byte count and a download when the payload exceeds the cap', async () => {
-        renderSection(
-            {
-                config: JSON_CONFIG,
-                dataSource: DataSource.Direct,
-                kind: 'setData',
-                payload: new Uint8Array(2048).fill(0x41),
-            },
-            8,
-        );
+        renderSection({
+            config: JSON_CONFIG,
+            kind: 'setData',
+            payload: inline(new Uint8Array(PMP_DECODED_RENDER_CAP_BYTES + 1), DataSource.Direct),
+        });
         await openDecodedTab();
 
         const oversized = screen.getByTestId('pmp-payload-oversized');
         expect(oversized).toHaveTextContent(/too large/i);
-        // The DECOMPRESSED size, which is what the cap is measured on - the on-chain payload here is 2048 bytes
-        // uncompressed, so the two happen to match, but the number reported is the decoded one.
-        expect(oversized).toHaveTextContent('2048 bytes');
+        // The DECOMPRESSED size, which is what the cap is measured on - the on-chain payload here is uncompressed,
+        // so the two happen to match, but the number reported is the decoded one.
+        expect(oversized).toHaveTextContent(`${PMP_DECODED_RENDER_CAP_BYTES + 1} bytes`);
         expect(screen.queryByTestId('pmp-decoded-text')).not.toBeInTheDocument();
         expect(oversized).toHaveTextContent(/use download\/copy/i);
         expect(screen.getByLabelText('Download')).toBeInTheDocument();
     });
 
     it('should report both the unpacked and the stored size when an oversized payload was compressed', async () => {
-        renderSection(
-            {
-                config: { compression: Compression.Gzip, encoding: Encoding.Utf8, format: Format.Json },
-                dataSource: DataSource.Direct,
-                kind: 'setData',
-                payload: gzip(new Uint8Array(20480)),
-            },
-            8,
-        );
+        const stored = gzip(new Uint8Array(PMP_DECODED_RENDER_CAP_BYTES + 1));
+        renderSection({
+            config: { compression: Compression.Gzip, encoding: Encoding.Utf8, format: Format.Json },
+            kind: 'setData',
+            payload: inline(stored, DataSource.Direct),
+        });
         await openDecodedTab();
 
         const oversized = screen.getByTestId('pmp-payload-oversized');
-        expect(oversized).toHaveTextContent('20480 bytes unpacked from 55 stored');
-        // Sits in the field header beside the 20,480, saying which of the two counts this download carries.
+        expect(oversized).toHaveTextContent(
+            `${PMP_DECODED_RENDER_CAP_BYTES + 1} bytes unpacked from ${stored.length} stored`,
+        );
         expect(screen.getByTestId('pmp-bytes-badge-uncompressed')).toHaveTextContent('uncompressed');
     });
 
     it('should badge the Raw tab of a compressed payload with the compression it is still in', async () => {
         renderSection({
             config: { compression: Compression.Gzip, encoding: Encoding.Utf8, format: Format.Json },
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: pack(DOC, Compression.Gzip),
+            payload: inline(pack(DOC, Compression.Gzip), DataSource.Direct),
         });
 
         await userEvent.click(screen.getByRole('tab', { name: 'Raw' }));
@@ -327,9 +354,8 @@ describe('DataPayloadSection', () => {
     it('should badge a Zlib payload as zlib rather than as gzip', async () => {
         renderSection({
             config: { compression: Compression.Zlib, encoding: Encoding.Utf8, format: Format.Json },
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: pack(DOC, Compression.Zlib),
+            payload: inline(pack(DOC, Compression.Zlib), DataSource.Direct),
         });
 
         await userEvent.click(screen.getByRole('tab', { name: 'Raw' }));
@@ -340,9 +366,8 @@ describe('DataPayloadSection', () => {
     it('should badge no tab of an uncompressed payload', async () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: pack(DOC, Compression.None),
+            payload: inline(pack(DOC, Compression.None), DataSource.Direct),
         });
 
         await userEvent.click(screen.getByRole('tab', { name: 'Raw' }));
@@ -356,9 +381,8 @@ describe('DataPayloadSection', () => {
         // download. The panel must not offer an affordance it cannot honour.
         renderSection({
             config: { compression: Compression.Gzip, encoding: Encoding.Utf8, format: Format.Json },
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: gzip(new Uint8Array(2 * 1024 * 1024)),
+            payload: inline(gzip(new Uint8Array(2 * 1024 * 1024)), DataSource.Direct),
         });
         await openDecodedTab();
 
@@ -373,9 +397,8 @@ describe('DataPayloadSection', () => {
     it('should emit a tab analytics event when the reader opens the decoded tab', async () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: pack(DOC, Compression.None),
+            payload: inline(pack(DOC, Compression.None), DataSource.Direct),
         });
 
         await userEvent.click(screen.getByRole('tab', { name: 'Decoded' }));
@@ -392,9 +415,8 @@ describe('DataPayloadSection', () => {
     it('should carry the data source when the tabs render for a non-Direct payload', async () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.Url,
             kind: 'setData',
-            payload: new TextEncoder().encode('https://example.com/idl.json'),
+            payload: inline(new TextEncoder().encode('https://example.com/idl.json'), DataSource.Url),
         });
 
         await userEvent.click(screen.getByRole('tab', { name: 'Decoded' }));
@@ -408,9 +430,8 @@ describe('DataPayloadSection', () => {
     it('should emit no analytics event on mount, before any tab is clicked', () => {
         renderSection({
             config: JSON_CONFIG,
-            dataSource: DataSource.Direct,
             kind: 'setData',
-            payload: pack(DOC, Compression.None),
+            payload: inline(pack(DOC, Compression.None), DataSource.Direct),
         });
 
         // The default panel must not count as an interaction, or every rendered card inflates the tab counts.
@@ -442,6 +463,13 @@ describe('DataPayloadSection', () => {
 
         expect(screen.getByTestId('pmp-decoded-text')).toHaveTextContent('"name": "company"');
         expect(screen.getByRole('tab', { name: 'Raw' })).toBeInTheDocument();
+    });
+
+    it('should render the data hash row on the source-account path too, from its own call site', () => {
+        mockUseAccountInfo.mockReturnValue(fetchedEntry(bufferAccountData(pack(DOC, Compression.None))));
+        renderSection(DEFERRED_SET_DATA);
+
+        expect(screen.getByTestId('pmp-payload-data-hash')).toBeInTheDocument();
     });
 
     it('should say the payload is empty rather than render a blank document', async () => {

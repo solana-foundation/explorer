@@ -3,7 +3,7 @@ export { LOADER_V3_PROGRAM_ADDRESS as BPF_UPGRADEABLE_LOADER_PROGRAM_ID } from '
 export { SYSTEM_PROGRAM_ADDRESS as SYSTEM_PROGRAM_ID } from '@solana-program/system';
 export { TOKEN_PROGRAM_ADDRESS as TOKEN_PROGRAM_ID } from '@solana-program/token';
 export { TOKEN_2022_PROGRAM_ADDRESS as TOKEN_2022_PROGRAM_ID } from '@solana-program/token-2022';
-export { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SOLANA_ATTESTATION_SERVICE_PROGRAM_ID } from 'sas-lib';
+export { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SOLANA_ATTESTATION_SERVICE_PROGRAM_ID } from '@solana/attestation';
 
 // No @solana-program/* client is published for the addresses below — kept as literals.
 export const BPF_LOADER_PROGRAM_ID = 'BPFLoader1111111111111111111111111111111111';

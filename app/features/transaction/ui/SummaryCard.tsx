@@ -19,7 +19,7 @@ import {
 } from '@entities/transaction-fee';
 import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
-import { useCluster, useClusterInfo } from '@providers/cluster';
+import { useCluster, useEpochSchedule } from '@providers/cluster';
 import {
     TransactionStatusInfo,
     useFetchTransactionStatus,
@@ -35,12 +35,12 @@ import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useBuildClusterPath, useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { ZoomIn } from 'react-feather';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
-import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
+import { AutoRefresh, useAutoRefreshInterval, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 import { V1_TRANSACTION_SIZE_LIMIT } from '@/app/shared/lib/v1-message-bridge';
 import { Card } from '@/app/shared/ui/Card';
 import { KeyValue, TextValue } from '@/app/shared/ui/key-value';
@@ -80,7 +80,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const details = useTransactionDetails(signature);
     const rawDetails = useRawTransactionDetails(signature);
     const { cluster, status: clusterStatus } = useCluster();
-    const clusterInfo = useClusterInfo();
+    const epochSchedule = useEpochSchedule();
     const inspectPath = useClusterPath({ pathname: `/tx/${signature}/inspect` });
     // The error link's target is only known inside the render below, so this needs the callback form.
     const buildClusterPath = useBuildClusterPath();
@@ -94,6 +94,8 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     // Read the version off the raw details rather than the parsed ones, so the size and the limit it
     // is compared against always come from the same fetch.
     const rawVersion = rawDetails?.data?.raw?.version;
+    const blockTime = rawDetails?.data?.raw?.blockTime ?? details?.data?.transactionWithMeta?.blockTime ?? undefined;
+    const transactionFetchesSucceeded = isFetched(rawDetails) && isFetched(details);
 
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
@@ -107,31 +109,34 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         }
     }, [signature, clusterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const rawEntryRef = useRef(rawDetails);
+    rawEntryRef.current = rawDetails;
+    const refresh = useCallback(() => {
+        fetchStatus(signature);
+        const entry = rawEntryRef.current;
+        if (!entry?.data?.raw && entry?.status !== FetchStatus.Fetching) fetchRaw(signature);
+    }, [fetchStatus, fetchRaw, signature]);
+    useAutoRefreshInterval(autoRefresh, refresh);
+
+    // Finality stops auto-refresh, so a raw fetch still open on the last tick gets no retry from the timer.
+    // The ref allows one retry per cache entry, so an RPC that keeps returning nothing is not polled.
+    const isFinalized = status?.data?.info?.confirmations === 'max';
+    const hasRawEntry = rawDetails !== undefined;
+    const isRawSettledEmpty = hasRawEntry && rawDetails.status !== FetchStatus.Fetching && !rawDetails.data?.raw;
+    const finalityRetrySignatureRef = useRef<string>(undefined);
     useEffect(() => {
-        if (autoRefresh === AutoRefresh.Active) {
-            const intervalHandle: NodeJS.Timeout = setInterval(() => fetchStatus(signature), AUTO_REFRESH_INTERVAL);
-            return () => {
-                clearInterval(intervalHandle);
-            };
-        }
-    }, [autoRefresh, fetchStatus, signature]);
+        if (!hasRawEntry) finalityRetrySignatureRef.current = undefined;
+        if (!isFinalized || !isRawSettledEmpty || finalityRetrySignatureRef.current === signature) return;
+        finalityRetrySignatureRef.current = signature;
+        fetchRaw(signature);
+    }, [hasRawEntry, isFinalized, isRawSettledEmpty, signature, fetchRaw]);
 
     if (!status || (status.status === FetchStatus.Fetching && autoRefresh === AutoRefresh.Inactive)) {
         return <LoadingCard />;
     } else if (status.status === FetchStatus.FetchFailed) {
-        return <ErrorCard retry={() => fetchStatus(signature)} text="Fetch Failed" />;
+        return <ErrorCard retry={refresh} text="Fetch Failed" />;
     } else if (!status.data?.info) {
-        return (
-            <TransactionNotFoundCard
-                signature={signature}
-                retry={() => fetchStatus(signature)}
-                firstAvailableBlock={
-                    clusterInfo?.firstAvailableBlock && clusterInfo.firstAvailableBlock > 0n
-                        ? clusterInfo.firstAvailableBlock
-                        : undefined
-                }
-            />
-        );
+        return <TransactionNotFoundCard signature={signature} retry={refresh} />;
     }
 
     const { info } = status.data;
@@ -148,7 +153,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         (transactionWithMeta?.transaction && transactionWithMeta.version !== 1
             ? estimateRequestedComputeUnitsForParsedTransaction(
                   transactionWithMeta.transaction,
-                  clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(info.slot)) : undefined,
+                  epochSchedule ? getEpochForSlot(epochSchedule, BigInt(info.slot)) : undefined,
                   cluster,
               )
             : undefined);
@@ -230,7 +235,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     <RefreshButton
                         fetching={autoRefresh === AutoRefresh.Active}
                         analyticsSection="transaction_card"
-                        onClick={() => fetchStatus(signature)}
+                        onClick={refresh}
                     />
                     <DownloadDropdown
                         filename={signature}
@@ -380,25 +385,29 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     </KeyValue>
                 )}
 
-                {info.timestamp !== 'unavailable' ? (
+                {blockTime !== undefined ? (
                     <>
                         <KeyValue label="Timestamp (Local)">
-                            <span className="font-mono">{displayTimestamp(info.timestamp * 1000, true)}</span>
+                            <span className="font-mono">{displayTimestamp(blockTime * 1000, true)}</span>
                         </KeyValue>
                         <KeyValue label="Timestamp (UTC)" divider={false}>
-                            <span className="font-mono">{displayTimestampUtc(info.timestamp * 1000, true)}</span>
+                            <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>
                         </KeyValue>
                     </>
-                ) : (
+                ) : transactionFetchesSucceeded ? (
                     <KeyValue label="Timestamp" divider={false}>
                         <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
                             Unavailable
                         </InfoTooltip>
                     </KeyValue>
-                )}
+                ) : undefined}
             </Card>
         </section>
     );
+}
+
+function isFetched(entry?: { status: FetchStatus }): boolean {
+    return entry?.status === FetchStatus.Fetched;
 }
 
 /**

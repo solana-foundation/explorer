@@ -8,7 +8,7 @@ import {
     type ReadonlyUint8Array,
 } from '@solana/kit';
 
-import { NAME_PROGRAM_ADDRESS } from '../api/constants';
+import { SNS_PARENT_NAME_ACCOUNT, SPL_NAME_SERVICE_PROGRAM_ADDRESS } from './constants';
 
 const HASH_PREFIX = 'SPL Name Service';
 
@@ -17,12 +17,22 @@ const EMPTY_SEED = new Uint8Array(32);
 
 const addressEncoder = getAddressEncoder();
 
-/**
- * Hash a bare domain label (no `.sol` suffix) the way SPL Name Service does: SHA-256 over the
- * UTF-8 bytes of the prefix concatenated with the name.
- */
-export function getHashedName(name: string): Uint8Array {
-    return sha256(new TextEncoder().encode(HASH_PREFIX + name));
+const SNS_TLD = '.sns';
+
+export function formatSnsName(label: string): string {
+    return label + SNS_TLD;
+}
+
+export function parseSnsLabel(domain: string): string | undefined {
+    return domain.endsWith(SNS_TLD) ? domain.slice(0, -SNS_TLD.length) : undefined;
+}
+
+export function getSnsNameAccount(label: string): Promise<Address> {
+    return getNameAccountKey(getHashedName(label), { nameParent: SNS_PARENT_NAME_ACCOUNT });
+}
+
+export function getHashedName(label: string): Uint8Array {
+    return sha256(new TextEncoder().encode(HASH_PREFIX + label));
 }
 
 /** Derive the registry account address holding a hashed name's record. */
@@ -31,7 +41,7 @@ export async function getNameAccountKey(
     { nameClass, nameParent }: { nameClass?: Address; nameParent?: Address } = {},
 ): Promise<Address> {
     const [nameAccountKey] = await getProgramDerivedAddress({
-        programAddress: NAME_PROGRAM_ADDRESS,
+        programAddress: SPL_NAME_SERVICE_PROGRAM_ADDRESS,
         seeds: [
             hashedName,
             nameClass ? addressEncoder.encode(nameClass) : EMPTY_SEED,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 import {
@@ -10,6 +10,7 @@ import {
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
 import { useScrollSpy } from '@/app/shared/ui/navigation-tabs/model/useScrollSpy';
 import { useTabOverflow } from '@/app/shared/ui/navigation-tabs/model/useTabOverflow';
+import { useSticky } from '@/app/shared/ui/sticky-header/useSticky';
 
 import { MobileMoreDropdown } from './MobileMoreDropdown';
 import { TabLink } from './TabLink';
@@ -25,13 +26,11 @@ export type BaseNavigationTabsProps = {
     onTabClick?: (path: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
     /**
      * Enables scroll-spy mode: active tab tracks scroll position, clicking scrolls smoothly.
-     * Wraps the tab bar in a sticky full-width container with a shadow on stuck.
-     * Use `wrapperClassName` to provide the background color (e.g. "bg-heavy-metal-900").
+     * Implies `sticky` (scroll-spy tabs are always pinned).
      */
     scrollSpy?: boolean;
+    sticky?: boolean;
     tabs: NavigationTab[];
-    /** Applied to the sticky wrapper when `scrollSpy` is true. Use for background color. */
-    wrapperClassName?: string;
 };
 
 export function BaseNavigationTabs({
@@ -44,11 +43,14 @@ export function BaseNavigationTabs({
     className,
     disabledHint,
     scrollSpy,
-    wrapperClassName,
+    sticky,
 }: BaseNavigationTabsProps) {
+    // Scroll-spy tabs are always pinned; `sticky` pins route-based tabs too. Both share the same
+    // sticky wrapper + shadow-on-stuck; only the active-tab tracking below is scroll-spy specific.
+    const isSticky = scrollSpy || Boolean(sticky);
     const { registeredTabs, registerTab, unregisterTab } = useTabRegistration();
 
-    const wrapperRef = useRef<HTMLDivElement>(null);
+    const { stuck, wrapperRef } = useSticky(isSticky);
 
     const staticPaths = useMemo(() => new Set(tabs.map(t => t.path)), [tabs]);
     const disabledPaths = useMemo(() => new Set(tabs.filter(t => t.disabled).map(t => t.path)), [tabs]);
@@ -61,14 +63,12 @@ export function BaseNavigationTabs({
 
     const { measuring, moreMeasureRef, moreTabs, tablistRef, visibleTabs } = useTabOverflow(allTabs);
 
-    const {
-        active: spyActive,
-        scrollToSection,
-        stuck,
-    } = useScrollSpy({
+    // useSticky already publishes the bar height, so the spy must not register it a second time.
+    const { active: spyActive, scrollToSection } = useScrollSpy({
         enabled: !!scrollSpy,
         fallbackRef: tablistRef,
         paths: spyPaths,
+        registerStickyHeight: false,
         wrapperRef,
     });
 
@@ -93,11 +93,7 @@ export function BaseNavigationTabs({
 
     const tabBar = (
         <NavigationTabsContext.Provider value={contextValue}>
-            <div
-                ref={tablistRef}
-                role="tablist"
-                className={cn('inline-flex w-full gap-[18px] overflow-hidden', className)}
-            >
+            <div ref={tablistRef} role="tablist" className={cn('inline-flex w-full gap-5 overflow-hidden', className)}>
                 {visibleTabs.map(tab => (
                     <TabLink
                         key={tab.path}
@@ -131,7 +127,7 @@ export function BaseNavigationTabs({
         </NavigationTabsContext.Provider>
     );
 
-    if (scrollSpy) {
+    if (isSticky) {
         return (
             <div
                 ref={wrapperRef}
@@ -141,8 +137,8 @@ export function BaseNavigationTabs({
                     'pl-[calc(50vw-50%)] pr-[calc(50vw-50%)]',
                     'overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
                     'transition-[box-shadow] duration-200',
+                    'bg-heavy-metal-900',
                     stuck && 'shadow-[0_6px_16px_rgba(0,0,0,0.45)]',
-                    wrapperClassName,
                 )}
             >
                 {tabBar}

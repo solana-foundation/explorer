@@ -27,7 +27,7 @@ function positiveIntEnv(name: string, raw: string | undefined, fallback: number)
 // 4 MB default: just under Vercel's ~4.5 MB buffered-response cap (a thin
 // ~0.5 MB margin), so our cap stays the binding constraint while fitting more
 // images. Oversize fetches degrade to the ProxiedImage "view original"
-// fallback. Tune from the success-path size stats logged in fetch-resource.ts.
+// fallback. Tune from the size stats logged for each fetched resource.
 export const MAX_SIZE = positiveIntEnv(
     'NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE',
     process.env.NEXT_PUBLIC_METADATA_MAX_CONTENT_SIZE,

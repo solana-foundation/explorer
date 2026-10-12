@@ -25,7 +25,6 @@ const mockMessage = {
 const meta: Meta<typeof AccountDetailDrawer> = {
     args: {
         account: mockAccount,
-        accountInfoLoading: false,
         index: 0,
         message: mockMessage,
         onOpenChange: fn(),

@@ -1,23 +1,46 @@
 import { address, getAddressEncoder } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
-import { SOL_TLD_AUTHORITY } from '../../api/constants';
+import { SNS_PARENT_NAME_ACCOUNT } from '../constants';
 import {
     decodeNameRegistryOwner,
+    formatSnsName,
     getHashedName,
     getNameAccountKey,
+    getSnsNameAccount,
     NAME_REGISTRY_HEADER_SIZE,
+    parseSnsLabel,
 } from '../sns-name-service';
 
-// Ground-truth vectors produced by @bonfida/spl-name-service 0.1.30, the reference implementation
-// of SPL Name Service derivation. A change to the derivation that breaks these breaks .sol lookups.
-const SOL_DOMAIN_VECTORS: [name: string, nameAccountKey: string][] = [
+const BONFIDA_SDK_VECTORS: [label: string, nameAccountKey: string][] = [
     ['bonfida', 'Crf8hzfthWGbGbLTVCiqRqV5MVnbpHB1L9KQMd6gsinb'],
     ['toly', 'FX1APjKbFu6M8GKb3dGXcZLXjxX4fGaYwvHqb5Vaee8q'],
     ['a', 'ELoM9Yo5jdNE64uV7y9oQNG5yB9Npk6S518rRWDJ5hxy'],
     ['solana-explorer', 'BkoGi4aGyaEiS2Zt4WaWjeko2adtFZt5oHrfETBYJo8b'],
     ['ünïcödé', 'GxqfK8AMUK6GSiPcFi3eFuPEUJLqr2TQJm8nPrDvyVkT'],
 ];
+
+describe('formatSnsName', () => {
+    it('should append the .sns TLD', () => {
+        expect(formatSnsName('toly')).toBe('toly.sns');
+    });
+});
+
+describe('parseSnsLabel', () => {
+    it.each(BONFIDA_SDK_VECTORS)('should invert formatSnsName for %s', label => {
+        expect(parseSnsLabel(formatSnsName(label))).toBe(label);
+    });
+
+    it.each([['toly.sol'], ['toly.bonk'], ['tolysns'], ['toly.sns.sol']])('should return undefined for %s', domain => {
+        expect(parseSnsLabel(domain)).toBeUndefined();
+    });
+});
+
+describe('getSnsNameAccount', () => {
+    it.each(BONFIDA_SDK_VECTORS)('should derive the .sns name account for %s', async (label, expected) => {
+        expect(await getSnsNameAccount(label)).toBe(expected);
+    });
+});
 
 describe('getHashedName', () => {
     it('should produce a 32-byte digest', () => {
@@ -30,17 +53,11 @@ describe('getHashedName', () => {
 });
 
 describe('getNameAccountKey', () => {
-    it.each(SOL_DOMAIN_VECTORS)('should derive the .sol name account for %s', async (name, expected) => {
-        const nameAccountKey = await getNameAccountKey(getHashedName(name), { nameParent: SOL_TLD_AUTHORITY });
-
-        expect(nameAccountKey).toBe(expected);
-    });
-
     it('should derive a different account without a parent', async () => {
         const hashedName = getHashedName('bonfida');
 
         expect(await getNameAccountKey(hashedName)).not.toBe(
-            await getNameAccountKey(hashedName, { nameParent: SOL_TLD_AUTHORITY }),
+            await getNameAccountKey(hashedName, { nameParent: SNS_PARENT_NAME_ACCOUNT }),
         );
     });
 });
@@ -51,7 +68,7 @@ describe('decodeNameRegistryOwner', () => {
 
     function header(trailingBytes = 0): Uint8Array {
         const data = new Uint8Array(NAME_REGISTRY_HEADER_SIZE + trailingBytes);
-        data.set(addressEncoder.encode(SOL_TLD_AUTHORITY), 0);
+        data.set(addressEncoder.encode(SNS_PARENT_NAME_ACCOUNT), 0);
         data.set(addressEncoder.encode(OWNER), 32);
         return data;
     }

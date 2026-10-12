@@ -1,5 +1,6 @@
 import { truncateAddress } from '@entities/address';
 import { type InstructionSummary, UNKNOWN_PROGRAM_NAME } from '@entities/transaction-data';
+import type { ReactNode } from 'react';
 
 import { Logo } from '@/app/shared/components/SolanaLogo';
 import { pluralWord } from '@/app/utils';
@@ -53,12 +54,42 @@ type BaseTxImageProps = {
     data: TxShareData | undefined;
     /** Both glows are base64 data URIs. */
     glows: { failed: string; success: string };
+    /** The signature passed from the route, so a card with no transaction data can still display it in a fallback card. */
+    signature: string;
 };
 
-export function BaseTxImage({ data, glows }: BaseTxImageProps) {
+export function BaseTxImage({ data, glows, signature }: BaseTxImageProps) {
     // A card with no transaction has no status to colour, so it takes the success glow.
     const glow = data?.status === 'failed' ? glows.failed : glows.success;
 
+    return (
+        <Card glow={glow}>
+            <Header dateUtc={data?.dateUtc} status={data?.status} />
+            {/* Three flat siblings, never a fragment: satori wraps a fragment's children in one implicit
+                row box, which lays the footer out beside the body instead of below it. */}
+            {data && <Body data={data} />}
+            {data && <Footer data={data} />}
+            {!data && (
+                <FallbackMessage title={<TransactionTitle signature={signature} />}>
+                    <span>See the transaction details on the Solana Explorer.</span>
+                </FallbackMessage>
+            )}
+        </Card>
+    );
+}
+
+export function TxImageNotAvailable({ glows, signature }: Omit<BaseTxImageProps, 'data'>) {
+    return (
+        <Card glow={glows.success}>
+            <Header dateUtc={undefined} status={undefined} />
+            <FallbackMessage title={<TransactionTitle signature={signature} />}>
+                <span>Preview is not available, see the transaction details on the Explorer.</span>
+            </FallbackMessage>
+        </Card>
+    );
+}
+
+function Card({ children, glow }: { children: ReactNode; glow: string }) {
     return (
         <div
             style={{
@@ -88,13 +119,7 @@ export function BaseTxImage({ data, glows }: BaseTxImageProps) {
                     width: '100%',
                 }}
             />
-
-            <Header dateUtc={data?.dateUtc} status={data?.status} />
-            {/* Three flat siblings, never a fragment: satori wraps a fragment's children in one implicit
-                row box, which lays the footer out beside the body instead of below it. */}
-            {data && <Body data={data} />}
-            {data && <Footer data={data} />}
-            {!data && <NoTransaction />}
+            {children}
         </div>
     );
 }
@@ -149,22 +174,7 @@ function Body({ data }: { data: TxShareData }) {
                 width: '100%',
             }}
         >
-            {/* Tx with signature */}
-            <div style={{ alignItems: 'flex-end', display: 'flex', gap: '16px', width: '100%' }}>
-                <span style={{ color: COLORS.secondary, ...TYPO.headline, lineHeight: '66px' }}>Transaction</span>
-                <span
-                    data-testid="tx-image-signature"
-                    style={{
-                        color: COLORS.signature,
-                        fontFamily: 'Roboto Mono',
-                        fontWeight: 500,
-                        lineHeight: '72px',
-                        ...TYPO.headline,
-                    }}
-                >
-                    {truncateAddress(data.signature, SIGNATURE_PAD)}
-                </span>
-            </div>
+            <TransactionTitle signature={data.signature} />
             {/* Instruction rows */}
             <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '8px', width: '100%' }}>
                 {visible.map((instruction, index) => (
@@ -300,28 +310,55 @@ function StatusBadge({ status }: { status: NonNullable<TxShareData['status']> })
     );
 }
 
-function NoTransaction() {
+function TransactionTitle({ signature }: { signature: string }) {
     return (
-        <div
-            data-testid="tx-image-fallback"
-            style={{
-                alignItems: 'center',
-                display: 'flex',
-                flexGrow: 1,
-                justifyContent: 'center',
-                position: 'relative',
-            }}
-        >
+        <div style={{ alignItems: 'flex-end', display: 'flex', gap: '16px', width: '100%' }}>
+            <span style={{ color: COLORS.secondary, ...TYPO.headline, lineHeight: '66px' }}>Transaction</span>
             <span
+                data-testid="tx-image-signature"
                 style={{
-                    color: COLORS.secondary,
-                    fontSize: '48px',
-                    fontWeight: 400,
-                    textAlign: 'center',
+                    color: COLORS.signature,
+                    fontFamily: 'Roboto Mono',
+                    fontWeight: 500,
+                    lineHeight: '72px',
+                    ...TYPO.headline,
                 }}
             >
-                See the transaction details on the Solana Explorer.
+                {truncateAddress(signature, SIGNATURE_PAD)}
             </span>
+        </div>
+    );
+}
+
+function FallbackMessage({ children, title }: { children: ReactNode; title: ReactNode }) {
+    return (
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                flexGrow: 1,
+                gap: '2px',
+                justifyContent: 'center',
+                position: 'relative',
+                width: '100%',
+            }}
+        >
+            {title}
+            <div
+                data-testid="tx-image-fallback"
+                style={{
+                    color: COLORS.secondary,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    // The first line sits where the first instruction row's text does.
+                    paddingTop: '22px',
+                    width: '100%',
+                    ...TYPO.body,
+                }}
+            >
+                {children}
+            </div>
         </div>
     );
 }

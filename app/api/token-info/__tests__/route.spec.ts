@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gen } from '@/app/__fixtures__/gen';
+import { TokenInfoHttpError, TokenInfoInvalidResponseError } from '@/app/entities/token-info';
 import type { TokenInfo } from '@/app/entities/token-info/server';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
@@ -261,9 +262,9 @@ describe('POST /api/token-info', () => {
     describe('when the upstream list lookup fails', () => {
         // `getTokenInfos` answers `[]` for an outage and for a genuine all-not-found alike, and
         // reports a partial drop through the same hook. Only the first may be cached as an answer.
-        function failUpstream(resolved: TokenInfo[] = []) {
+        function failUpstream(resolved: TokenInfo[] = [], error: unknown = new Error('upstream exploded')) {
             mocks.getTokenInfos.mockImplementation(async (_addresses, _cluster, _genesisHash, config) => {
-                config.onError(new Error('upstream exploded'));
+                config.onError(error);
                 return resolved;
             });
         }
@@ -277,6 +278,32 @@ describe('POST /api/token-info', () => {
             expect(res.status).toBe(503);
             expect(await res.json()).toEqual({ error: 'Token list unavailable' });
             expect(Logger.error).toHaveBeenCalled();
+        });
+
+        it('should warn without reporting to Sentry when the list is rate limited', async () => {
+            failUpstream([], new TokenInfoHttpError({ status: 429, statusText: 'Too Many Requests' }));
+
+            const { POST } = await importRoute();
+            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+
+            expect(res.status).toBe(503);
+            expect(Logger.error).not.toHaveBeenCalled();
+            expect(Logger.warn).toHaveBeenCalledTimes(1);
+            expect(Logger.warn).toHaveBeenCalledWith(
+                '[api:token-info] List lookup resolved nothing',
+                expect.not.objectContaining({ sentry: expect.anything() }),
+            );
+        });
+
+        it('should report an invalid list response to Sentry', async () => {
+            failUpstream([], new TokenInfoInvalidResponseError());
+
+            const { POST } = await importRoute();
+            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+
+            expect(res.status).toBe(503);
+            expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), expect.objectContaining({ sentry: true }));
+            expect(Logger.warn).not.toHaveBeenCalled();
         });
 
         it('should not run the on-chain fallback when the list lookup failed outright', async () => {

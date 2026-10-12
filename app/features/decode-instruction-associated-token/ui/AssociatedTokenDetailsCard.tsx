@@ -39,14 +39,6 @@ const VARIANTS = {
     recoverNested: { fields: RECOVER_NESTED_FIELDS, title: 'Associated Token Program: Recover Nested' },
 } satisfies Record<AssociatedTokenParsed['type'], { fields: ReadonlyArray<readonly [string, string]>; title: string }>;
 
-/**
- * Renders one account address. The transaction page links out to the account;
- * the inspector substitutes `AddressWithContext` to show in-transaction context.
- */
-export type AddressCell = React.ComponentType<{ pubkey: PublicKey }>;
-
-const LinkedAddress: AddressCell = ({ pubkey }) => <Address pubkey={pubkey} alignRight link />;
-
 /** Props the injected card shell must accept. Satisfied by both shells. */
 type CardShellProps = React.PropsWithChildren<{
     childIndex?: number;
@@ -66,10 +58,7 @@ type Props = {
     innerCards?: JSX.Element[];
     childIndex?: number;
     raw?: TransactionInstruction;
-    AddressComponent?: AddressCell;
     InstructionCardComponent?: React.ComponentType<CardShellProps>;
-    /** The transaction page shows the program row; the inspector lists accounts itself. */
-    showProgramField?: boolean;
 };
 
 /**
@@ -91,9 +80,7 @@ export function AssociatedTokenDetailsCard({
     innerCards,
     childIndex,
     raw,
-    AddressComponent = LinkedAddress,
     InstructionCardComponent = InstructionCard,
-    showProgramField = true,
 }: Props) {
     const parsed = ix.parsed as { info?: Record<string, unknown>; type?: string };
     const variant = VARIANTS[parsed.type as AssociatedTokenParsed['type']];
@@ -131,12 +118,12 @@ export function AssociatedTokenDetailsCard({
             childIndex={childIndex}
             raw={raw}
         >
-            {showProgramField && <ProgramField programId={ix.programId} />}
+            <ProgramField programId={ix.programId} />
             {variant.fields.map(([label, field]) => (
                 <BaseTable.Row key={field}>
                     <BaseTable.Cell>{label}</BaseTable.Cell>
                     <BaseTable.Cell className="text-right">
-                        <AddressComponent pubkey={info[field] as PublicKey} />
+                        <Address pubkey={info[field] as PublicKey} alignRight link />
                     </BaseTable.Cell>
                 </BaseTable.Row>
             ))}

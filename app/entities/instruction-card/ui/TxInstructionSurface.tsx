@@ -1,15 +1,11 @@
 'use client';
 
-import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
 import type { SignatureResult } from '@solana/web3.js';
 import React from 'react';
 
-import type { InstructionAddressProps, InstructionSurface } from '../model/surface';
+import type { InstructionSurface } from '../model/surface';
 import { InstructionSurfaceProvider } from '../model/surface';
-
-/** On the transaction page an address links out to its own account page. */
-const TxAddress = ({ pubkey }: InstructionAddressProps) => <Address pubkey={pubkey} alignRight link />;
 
 /**
  * Declares how instruction cards render on the transaction page.
@@ -23,11 +19,8 @@ const TxAddress = ({ pubkey }: InstructionAddressProps) => <Address pubkey={pubk
 export function TxInstructionSurface({ result, children }: { result: SignatureResult; children: React.ReactNode }) {
     const surface = React.useMemo<InstructionSurface>(
         () => ({
-            Address: TxAddress,
             Shell: InstructionCard,
             result,
-            // The tx-page shell renders no Program row of its own, so the fields do.
-            showProgramField: true,
         }),
         [result],
     );

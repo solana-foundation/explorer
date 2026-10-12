@@ -1,4 +1,4 @@
-import { getBase58Decoder, getBase58Encoder } from '@solana/kit';
+import { getBase58Decoder, getBase58Encoder, isSignature, type Signature } from '@solana/kit';
 import {
     ParsedInstruction,
     ParsedTransaction,
@@ -13,6 +13,19 @@ import { LOADER_IDS, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from './progr
 
 const BASE58_ENCODER = getBase58Encoder();
 const BASE58_DECODER = getBase58Decoder();
+
+/**
+ * Non-throwing signature check.
+ * Added because @solana/kit {@link isSignature} throws on a string with
+ * a character outside the base58 alphabet.
+ */
+export function isSignatureValid(value: string): value is Signature {
+    try {
+        return isSignature(value);
+    } catch {
+        return false;
+    }
+}
 
 export type TokenLabelInfo = {
     name?: string;

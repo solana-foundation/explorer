@@ -1,13 +1,13 @@
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import React from 'react';
 import {
     Attestation as SasAttestation,
     decodeSchema,
     deserializeAttestationData,
     Schema as SasSchema,
     SchemaDataType,
-} from 'sas-lib';
+} from '@solana/attestation';
+import React from 'react';
 
 import { SolarizedJsonViewer as ReactJson } from '@/app/components/common/JsonViewer';
 import { LoadingCard } from '@/app/components/common/LoadingCard';
@@ -53,7 +53,7 @@ function SchemaCard({ schema }: { schema: SasSchema }) {
 /**
  * `VecU8` fields hold binary blobs such as hashes, which decode to number
  * arrays and render as one row per byte. Hex keeps them readable and matches
- * how sas-lib surfaces the same content in a `String` field.
+ * how @solana/attestation surfaces the same content in a `String` field.
  */
 function withByteFieldsAsHex(schema: SasSchema, data: Record<string, unknown>): Record<string, unknown> {
     return Object.fromEntries(

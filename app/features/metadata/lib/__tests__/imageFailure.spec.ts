@@ -3,17 +3,23 @@ import { describe, expect, it, vi } from 'vitest';
 import { isProxiedSrc, probeImageFailure, reasonForStatus } from '../imageFailure';
 
 describe('reasonForStatus', () => {
-    it('should map known proxy statuses to friendly copy', () => {
-        expect(reasonForStatus(413)).toBe('Image exceeds maximum size');
-        expect(reasonForStatus(404)).toBe('Image not found');
-        expect(reasonForStatus(415)).toBe('Unsupported image type');
-        expect(reasonForStatus(502)).toBe('Image source unavailable');
-        expect(reasonForStatus(504)).toBe('Image source timed out');
+    it.each([
+        [403, 'Image access denied'],
+        [404, 'Image not found'],
+        [410, 'Image removed'],
+        [413, 'Image exceeds maximum size'],
+        [415, 'Unsupported image type'],
+        [429, 'Image source is rate-limited'],
+        [451, 'Image unavailable for legal reasons'],
+        [502, 'Image source unavailable'],
+        [503, 'Image source unavailable'],
+        [504, 'Image source timed out'],
+    ])('should map proxy status %i to "%s"', (status, reason) => {
+        expect(reasonForStatus(status)).toBe(reason);
     });
 
-    it('should fall back to a generic reason for unmapped or success statuses', () => {
-        expect(reasonForStatus(418)).toBe('Image could not be displayed');
-        expect(reasonForStatus(200)).toBe('Image could not be displayed');
+    it.each([418, 200])('should fall back to a generic reason for unmapped status %i', status => {
+        expect(reasonForStatus(status)).toBe('Image could not be displayed');
     });
 });
 

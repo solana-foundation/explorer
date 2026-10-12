@@ -1,40 +1,24 @@
 import { RawDataField } from '@components/shared/RawDataField';
-import {
-    PMP_COMPRESSION_LABELS,
-    PMP_DATA_SOURCE_LABELS,
-    PMP_ENCODING_LABELS,
-    PMP_FORMAT_LABELS,
-} from '@entities/pmp-account';
-import { PublicKey, type SignatureResult, type TransactionInstruction } from '@solana/web3.js';
+import { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from '@entities/instruction-card';
+import { type TransactionInstruction } from '@solana/web3.js';
+import { capitalizeFirstLetter } from '@utils/index';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { Address } from '@/app/components/common/Address';
-import { CodamaInstructionBody } from '@/app/components/instruction/codama/CodamaInstructionBody';
-import { InstructionCard } from '@/app/components/instruction/InstructionCard';
-import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
+import { Alert } from '@/app/shared/ui/Alert';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import {
-    PMP_ACCOUNT_NAMES,
-    PMP_CODAMA_PROGRAM_NAME,
-    PMP_IX_TITLES,
-    PMP_WRITE_CHUNK_DOWNLOAD_FILENAME,
-} from '../lib/constants';
+import { PMP_ACCOUNT_NAMES, PMP_IDL_PROGRAM_NAME, PMP_WRITE_CHUNK_DOWNLOAD_FILENAME } from '../lib/constants';
 import { decodePmpContentInstruction } from '../lib/decode-pmp-instruction';
-import type { PmpContentInstruction, PmpPayloadInstruction } from '../lib/types';
+import { pmpArgs } from '../lib/pmp-args';
+import type { PmpContentInstruction } from '../lib/types';
 import { DataPayloadSection } from './DataPayloadSection';
-
-/** The card table has three columns, matching DataPayloadSection's own constant. */
-const CARD_TABLE_COLUMNS = 3;
 
 type PmpDetailsCardProps = {
     ix: TransactionInstruction;
     index: number;
-    result: SignatureResult;
-    innerCards?: React.ReactNode[];
+    innerCards?: JSX.Element[];
     childIndex?: number;
-    InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
     /**
      * What to render when this instruction carries no decodable content, and the ErrorBoundary fallback. Each
      * surface builds it: the IDL card when an IDL resolved, its own Unknown card otherwise. Injected rather than
@@ -54,149 +38,76 @@ type PmpDetailsCardProps = {
  * `setData`, `initialize` and `write` get the custom render below. Everything else, including the six
  * housekeeping instructions, renders `fallback`, which is what those instructions got before this card existed.
  */
-export function PmpDetailsCard({ fallback, ...props }: PmpDetailsCardProps) {
+export function PmpDetailsCard(props: PmpDetailsCardProps) {
     return (
-        <ErrorBoundary fallback={<>{fallback}</>}>
-            <PmpDetailsCardBody {...props} fallback={fallback} />
+        <ErrorBoundary fallback={<>{props.fallback}</>}>
+            <PmpDetailsCardBody {...props} />
         </ErrorBoundary>
     );
 }
 
-function PmpDetailsCardBody({
-    ix,
-    index,
-    result,
-    innerCards,
-    childIndex,
-    InstructionCardComponent = InstructionCard,
-    fallback,
-}: PmpDetailsCardProps) {
-    const content = React.useMemo(() => decodePmpContentInstruction(ix), [ix]);
+function PmpDetailsCardBody({ ix, index, innerCards, childIndex, fallback }: PmpDetailsCardProps) {
+    const contentInstruction = React.useMemo(() => decodePmpContentInstruction(ix), [ix]);
 
-    if (!content) {
+    if (!contentInstruction) {
         return <>{fallback}</>;
     }
 
-    // `toKitInstruction` always returns an array, so no `?? []` is needed here.
-    const kitIx = toKitInstruction(ix);
+    const programName = capitalizeFirstLetter(PMP_IDL_PROGRAM_NAME);
 
     return (
-        <InstructionCardComponent
-            title={`${PMP_CODAMA_PROGRAM_NAME}: ${PMP_IX_TITLES[content.kind]}`}
+        <DecodedInstructionCard
+            node={{ childIndex, index, innerCards, ix, programId: ix.programId }}
             ix={ix}
-            index={index}
-            result={result}
-            innerCards={innerCards}
-            childIndex={childIndex}
+            title={`${programName}: ${capitalizeFirstLetter(contentInstruction.kind)}`}
+            programName={programName}
+            accountNames={PMP_ACCOUNT_NAMES[contentInstruction.kind]}
+            args={pmpArgs(contentInstruction)}
         >
-            <CodamaInstructionBody
-                programId={ix.programId}
-                programName={PMP_CODAMA_PROGRAM_NAME}
-                accounts={kitIx.accounts}
-                accountNames={PMP_ACCOUNT_NAMES[content.kind]}
-            />
-            {content.kind === 'write' ? (
-                <WriteRows content={content} />
+            {contentInstruction.kind === 'write' ? (
+                <WriteRows pmpIx={contentInstruction} />
             ) : (
-                <>
-                    <ConfigRows content={content} />
-                    <DataPayloadSection content={content} />
-                </>
+                <DataPayloadSection pmpIx={contentInstruction} />
             )}
-        </InstructionCardComponent>
-    );
-}
-
-/**
- * The decode hints, rendered from their library enums rather than as raw numbers.
- *
- * Every label lookup below is total, with no `Unknown (n)` fallback, because no unvalidated hint ever reaches
- * here: the 5+ byte shapes come through a generated decoder that rejects an out-of-range enum byte, and the
- * 4-byte header-only shape is narrowed by `PmpDecodeConfigStruct`. Both reject by falling through to the card's
- * `fallback` instead. Adding a library variant breaks the build at the label maps, which is the intent.
- */
-function ConfigRows({ content }: { content: PmpPayloadInstruction }) {
-    return (
-        <>
-            <ArgumentHeaderRow />
-            {content.kind === 'initialize' && <ValueRow testId="pmp-config-seed" label="Seed" value={content.seed} />}
-            <ValueRow
-                testId="pmp-config-encoding"
-                label="Encoding"
-                value={PMP_ENCODING_LABELS[content.config.encoding]}
-            />
-            <ValueRow
-                testId="pmp-config-compression"
-                label="Compression"
-                value={PMP_COMPRESSION_LABELS[content.config.compression]}
-            />
-            <ValueRow testId="pmp-config-format" label="Format" value={PMP_FORMAT_LABELS[content.config.format]} />
-            {content.dataSource !== undefined && (
-                <ValueRow
-                    testId="pmp-config-data-source"
-                    label="Data Source"
-                    value={PMP_DATA_SOURCE_LABELS[content.dataSource]}
-                />
-            )}
-        </>
+        </DecodedInstructionCard>
     );
 }
 
 /** `write` is a fragment with no hints, so it can never be decoded to a document on its own. */
-function WriteRows({ content }: { content: Extract<PmpContentInstruction, { kind: 'write' }> }) {
-    return (
-        <>
-            <ArgumentHeaderRow />
-            {/* The wire `offset` is LOGICAL, 0-based inside the payload. The 96-byte header offset is a raw
-                account-slicing detail and must not be added here. */}
-            <ValueRow testId="pmp-write-offset" label="Offset" value={String(content.offset)} />
+function WriteRows({ pmpIx }: { pmpIx: Extract<PmpContentInstruction, { kind: 'write' }> }): React.ReactElement {
+    const { chunk } = pmpIx;
 
-            {content.chunk !== undefined && (
+    switch (chunk.kind) {
+        case 'inline':
+            return (
                 <BaseTable.Row data-testid="pmp-write-chunk">
-                    <BaseTable.Cell colSpan={CARD_TABLE_COLUMNS}>
-                        <div className="mb-1.5">Chunk</div>
+                    <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS}>
+                        <div className="mb-1.5">chunk</div>
                         {/* A chunk runs to ~1 KB, so it gets the same field the raw payload does: hex/base64
                             tabs, byte count, copy, download and show-more, rather than a bare HexData grid. */}
-                        <RawDataField data={content.chunk} filename={PMP_WRITE_CHUNK_DOWNLOAD_FILENAME} />
+                        <RawDataField data={chunk.bytes} filename={PMP_WRITE_CHUNK_DOWNLOAD_FILENAME} />
                     </BaseTable.Cell>
                 </BaseTable.Row>
-            )}
-
-            {content.chunk === undefined && content.sourceBuffer !== undefined && (
-                <BaseTable.Row data-testid="pmp-write-source-buffer">
-                    <BaseTable.Cell>Source Buffer</BaseTable.Cell>
-                    <BaseTable.Cell colSpan={2} className="text-right">
-                        <div className="flex flex-col items-end gap-1.5">
-                            <Address pubkey={new PublicKey(content.sourceBuffer)} alignRight link />
-                            <span className="text-xs text-neutral-500">
-                                The chunk was copied from this buffer, so it is not in this instruction.
-                            </span>
-                        </div>
+            );
+        case 'account':
+            return (
+                <BaseTable.Row>
+                    <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS}>
+                        <Alert variant="default" data-testid="pmp-write-source-buffer" className="!mb-0">
+                            The chunk was copied from the SourceBuffer account, so it is not in this instruction.
+                        </Alert>
                     </BaseTable.Cell>
                 </BaseTable.Row>
-            )}
-        </>
-    );
-}
-
-function ArgumentHeaderRow() {
-    return (
-        <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
-            <BaseTable.Cell>Argument Name</BaseTable.Cell>
-            <BaseTable.Cell className="text-right" colSpan={2}>
-                Value
-            </BaseTable.Cell>
-        </BaseTable.Row>
-    );
-}
-
-function ValueRow({ label, testId, value }: { label: string; testId: string; value: string }) {
-    return (
-        <BaseTable.Row data-testid={testId}>
-            <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell colSpan={2} className="text-right font-mono text-xs">
-                {value}
-            </BaseTable.Cell>
-        </BaseTable.Row>
-    );
+            );
+        case 'absent':
+            return (
+                <BaseTable.Row>
+                    <BaseTable.Cell colSpan={DECODED_TABLE_COLUMNS}>
+                        <Alert variant="default" data-testid="pmp-write-absent-chunk" className="!mb-0">
+                            This instruction carries no payload bytes.
+                        </Alert>
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+            );
+    }
 }

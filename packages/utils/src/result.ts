@@ -1,5 +1,9 @@
+// Named arms let inference pair `Err` with `Err` and `Ok` with `Ok`, even through an alias over `Result`.
+type Err<E> = readonly [E, undefined];
+type Ok<T> = readonly [undefined, T];
+
 /** Error-first result tuple for single-attempt operations. */
-export type Result<T, E extends Error = Error> = readonly [E, undefined] | readonly [undefined, T];
+export type Result<T, E extends Error = Error> = Err<E> | Ok<T>;
 
 export const ok = <T>(value: T): Result<T, never> => [undefined, value];
 export const err = <E extends Error>(error: E): Result<never, E> => [error, undefined];
@@ -15,7 +19,7 @@ export function unwrapOr<T, E extends Error, F>(result: Result<T, E>, fallback: 
     return isErr(result) ? fallback : result[1];
 }
 
-const isErr = <T, E extends Error>(result: Result<T, E>): result is readonly [E, undefined] => result[0] !== undefined;
+const isErr = <T, E extends Error>(result: Result<T, E>): result is Err<E> => result[0] !== undefined;
 
 /** Coerces a caught unknown into an Error. */
 export const toError = (err: unknown): Error => (err instanceof Error ? err : new Error(String(err)));

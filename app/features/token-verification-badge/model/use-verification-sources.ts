@@ -1,5 +1,4 @@
 import { EVerificationSource, VerificationSource, type VerificationTarget } from '../lib/types';
-import { BlupryntStatus, useBlupryntVerification } from './use-bluprynt';
 import { CoingeckoStatus, useCoinGeckoVerification } from './use-coingecko';
 import { JupiterStatus, useJupiterVerification } from './use-jupiter';
 import { getRiskLevel, RugCheckStatus, useRugCheckVerification } from './use-rugcheck';
@@ -16,12 +15,10 @@ export function useTokenVerification({
     isTokenMint,
     solflareVerified,
 }: VerificationTarget): TokenVerificationResult {
-    const blupryntInfo = useBlupryntVerification(address);
     const coinInfo = useCoinGeckoVerification(address, isTokenMint);
     const jupiterInfo = useJupiterVerification(address);
     const rugCheckInfo = useRugCheckVerification(address);
 
-    const blupryntVerified = blupryntInfo?.status === BlupryntStatus.Success && blupryntInfo.verified;
     const coingeckoVerified = coinInfo?.status === CoingeckoStatus.Success && coinInfo.verified;
     const jupiterVerified = jupiterInfo?.status === JupiterStatus.Success && jupiterInfo.verified;
     const rugCheckVerified = rugCheckInfo?.status === RugCheckStatus.Success && rugCheckInfo.verified;
@@ -36,14 +33,6 @@ export function useTokenVerification({
     const coinGeckoId = coinInfo?.status === CoingeckoStatus.Success ? coinInfo.coinGeckoId : undefined;
 
     const sources: VerificationSource[] = [
-        {
-            applyUrl: 'https://app.bluprynt.com/register/account?integration_partner=solana_explorer',
-            isRateLimited: blupryntInfo?.status === BlupryntStatus.RateLimited,
-            isVerificationFound: blupryntInfo?.status === BlupryntStatus.Success,
-            name: EVerificationSource.Bluprynt,
-            url: `https://verified.bluprynt.com/verified-assets/${address}/solana`,
-            verified: blupryntVerified,
-        },
         {
             applyUrl:
                 'https://support.coingecko.com/hc/en-us/articles/23725417857817-Verification-Guide-for-Listing-Update-Requests-on-CoinGecko',
