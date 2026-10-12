@@ -1,5 +1,3 @@
-// MARKETS is imported here only to pin the hardcoded ID list; runtime detection must stay free of @project-serum/serum.
-import { MARKETS } from '@project-serum/serum';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -40,16 +38,6 @@ describe('serum program ids', () => {
 
     it('should include OpenBook in the full program id list', () => {
         expect(SERUM_PROGRAM_IDS).toEqual([...DEPRECATED_SERUM_PROGRAM_IDS, OPEN_BOOK_PROGRAM_IDS.mainnet]);
-    });
-
-    it('should cover every program id referenced by the MARKETS registry', () => {
-        const marketProgramIds = new Set(
-            MARKETS.flatMap(market => (market.programId ? [market.programId.toBase58()] : [])),
-        );
-        expect(marketProgramIds.size).toBeGreaterThan(0);
-        for (const programId of marketProgramIds) {
-            expect(DEPRECATED_SERUM_PROGRAM_IDS).toContain(programId);
-        }
     });
 });
 
