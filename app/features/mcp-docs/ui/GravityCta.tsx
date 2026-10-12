@@ -7,7 +7,7 @@ import { ArrowRight } from 'react-feather';
 import { cn } from '@/app/components/shared/utils';
 import { useReducedMotion } from '@/app/shared/lib/use-reduced-motion';
 
-import { type CtaFieldScope, resolveCtaField } from '../lib/ctaFieldTuning';
+import { type CtaFieldScope, resolveCtaField } from '../lib/cta-field-tuning';
 
 const CTA_FIELD_X = 110;
 const CTA_FIELD_Y = 70;
