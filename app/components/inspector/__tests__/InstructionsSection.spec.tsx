@@ -34,7 +34,7 @@ import { FetchStatus } from '@/app/providers/cache';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
 import { InstructionsSection } from '../InstructionsSection';
-import { buildMessage, CREATE_ACCOUNT, INNER_INSTRUCTIONS } from './__fixtures__/hoo-611';
+import { buildMessage, CREATE_ACCOUNT, INNER_INSTRUCTIONS } from './__fixtures__/create-idempotent-tx';
 
 // The IDL tiers read through SWR. The mock returns no data, so instructions render through the dispatcher.
 vi.mock('swr', () => ({

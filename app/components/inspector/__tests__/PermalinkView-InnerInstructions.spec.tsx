@@ -11,7 +11,7 @@ import type { RawTransaction } from '@/app/entities/transaction-data';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
 import { PermalinkView } from '../InspectorPage';
-import { buildMessage, INNER_INSTRUCTIONS } from './__fixtures__/hoo-611';
+import { buildMessage, INNER_INSTRUCTIONS } from './__fixtures__/create-idempotent-tx';
 
 vi.mock('swr', () => ({
     __esModule: true,

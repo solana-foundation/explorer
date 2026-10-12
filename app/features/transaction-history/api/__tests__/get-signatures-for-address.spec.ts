@@ -29,7 +29,9 @@ describe('fetchSignatures', () => {
     it('should retry an empty first page and return the signatures once a healthy replica responds', async () => {
         const { rpc, getSignaturesForAddress } = rpcReturning([], [], [rpcRow('a')]);
 
-        const result = await runningTimers(fetchSignatures(rpc, ADDRESS, { limit: 25 }));
+        const pending = fetchSignatures(rpc, ADDRESS, { limit: 25 });
+        await vi.runAllTimersAsync();
+        const result = await pending;
 
         expect(result.map(s => s.signature)).toEqual(['a']);
         expect(getSignaturesForAddress).toHaveBeenCalledTimes(3);
@@ -38,7 +40,9 @@ describe('fetchSignatures', () => {
     it('should accept an empty first page only after the retries are exhausted', async () => {
         const { rpc, getSignaturesForAddress } = rpcReturning([], [], []);
 
-        const result = await runningTimers(fetchSignatures(rpc, ADDRESS, { limit: 25 }));
+        const pending = fetchSignatures(rpc, ADDRESS, { limit: 25 });
+        await vi.runAllTimersAsync();
+        const result = await pending;
 
         expect(result).toEqual([]);
         expect(getSignaturesForAddress).toHaveBeenCalledTimes(3);
@@ -83,8 +87,3 @@ describe('fetchSignatures', () => {
         expect(() => JSON.stringify(row)).not.toThrow();
     });
 });
-
-async function runningTimers<T>(pending: Promise<T>): Promise<T> {
-    await vi.runAllTimersAsync();
-    return pending;
-}
