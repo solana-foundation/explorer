@@ -15,6 +15,8 @@ vi.mock('../../lib/ans-name-service', async importOriginal => {
 
 const KNOWN_OWNER = address('86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdRrbukszb');
 const TOLY_NAME_ACCOUNT = 'FX1APjKbFu6M8GKb3dGXcZLXjxX4fGaYwvHqb5Vaee8q';
+// Real, independently-verifiable mainnet account: leventis.stonk, registered at stonknames.shop.
+const LEVENTIS_STONK_ACCOUNT = '2nJHMNjfgcVVTBUFGrFQNzeAM5a93Ma93DKTYgnDVSri';
 const addressEncoder = getAddressEncoder();
 
 describe('resolveDomain', () => {
@@ -59,6 +61,40 @@ describe('resolveDomain', () => {
             const rpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
 
             expect(await resolveDomain('Toly.SNS', rpc)).toEqual({ address: TOLY_NAME_ACCOUNT, owner: KNOWN_OWNER });
+        });
+    });
+
+    // stonk•names (stonknames.shop) — a self-owned root under the same SPL Name Service program as
+    // SNS/.sns, registered independently of SNS and ANS. Same 96-byte account layout as SNS, so
+    // these fixtures reuse createSnsAccountData directly.
+    describe('stonk domains (.stonk)', () => {
+        it('should resolve a .stonk domain to its name account and owner', async () => {
+            const rpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
+
+            const result = await resolveDomain('leventis.stonk', rpc);
+
+            expect(result).toEqual({ address: LEVENTIS_STONK_ACCOUNT, owner: KNOWN_OWNER });
+        });
+
+        it('should return null when account does not exist', async () => {
+            const rpc = mockRpc(null);
+
+            const result = await resolveDomain('nonexistent.stonk', rpc);
+
+            expect(result).toBeNull();
+            expect(rpc.getAccountInfo).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return null when the account is too short to hold a registry header', async () => {
+            const rpc = mockRpc(new Uint8Array(64));
+
+            expect(await resolveDomain('leventis.stonk', rpc)).toBeNull();
+        });
+
+        it('should resolve a mixed-case .stonk domain to the lowercase name account', async () => {
+            const rpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
+
+            expect(await resolveDomain('Leventis.STONK', rpc)).toEqual({ address: LEVENTIS_STONK_ACCOUNT, owner: KNOWN_OWNER });
         });
     });
 
@@ -135,17 +171,22 @@ describe('resolveDomain', () => {
     });
 
     describe('routing', () => {
-        it('should route .sns to SNS and other TLDs to ANS', async () => {
+        it('should route .sns to SNS, .stonk to stonk-name-service, and other TLDs to ANS', async () => {
             const snsRpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
+            const stonkRpc = mockRpc(createSnsAccountData(KNOWN_OWNER));
             const ansRpc = mockRpc(createAnsAccountData(KNOWN_OWNER));
 
             const snsResult = await resolveDomain('test.sns', snsRpc);
+            const stonkResult = await resolveDomain('test.stonk', stonkRpc);
             const bonkResult = await resolveDomain('test.bonk', ansRpc);
 
-            // Same name, different name services → different derived addresses
+            // Same name, different name services/roots → different derived addresses
             expect(snsResult).not.toBeNull();
+            expect(stonkResult).not.toBeNull();
             expect(bonkResult).not.toBeNull();
+            expect(snsResult?.address).not.toBe(stonkResult?.address);
             expect(snsResult?.address).not.toBe(bonkResult?.address);
+            expect(stonkResult?.address).not.toBe(bonkResult?.address);
         });
     });
 });
@@ -161,7 +202,7 @@ function mockRpc(accountData: Uint8Array | null): Rpc<GetAccountInfoApi> {
     } as unknown as Rpc<GetAccountInfoApi>;
 }
 
-// SNS layout: [parentName(32)] [owner(32)] [class(32)]
+// SNS/stonk layout: [parentName(32)] [owner(32)] [class(32)]
 function createSnsAccountData(owner: ReturnType<typeof address>): Uint8Array {
     const data = new Uint8Array(96);
     data.set(addressEncoder.encode(owner), 32);
