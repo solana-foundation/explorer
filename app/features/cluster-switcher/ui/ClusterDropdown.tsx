@@ -86,7 +86,7 @@ export function ClusterDropdown({ align = 'end', className, onOpenChange, open }
                 align={align}
                 sideOffset={4}
                 collisionPadding={16}
-                className="flex max-h-[var(--radix-popover-content-available-height)] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden p-1.5 shadow-[0_16px_48px_-16px_rgba(0,0,0,0.9)]"
+                className="flex max-h-[var(--radix-popover-content-available-height)] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-y-auto overscroll-contain p-1.5 shadow-[0_16px_48px_-16px_rgba(0,0,0,0.9)]"
             >
                 <ClusterMenu onDismiss={() => onOpenChange?.(false)} />
             </PopoverContent>

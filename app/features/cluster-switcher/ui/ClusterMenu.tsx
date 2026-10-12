@@ -51,11 +51,19 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
     const draft = useCustomUrlDraft({ commitOnType: false });
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState<string>();
+    const pickedRef = useRef(false);
+
+    // A pending delete commits when a pick closes the menu; the pick must win over the fallback navigation.
+    const pick = () => {
+        pickedRef.current = true;
+        onDismiss();
+    };
 
     const handleRemove = (url: string) => {
         const wasActive = cluster === Cluster.Custom && endpoint?.href === url;
         removeSavedCluster(url);
-        if (wasActive) router.push(buildHref({ cluster: DEFAULT_CLUSTER, customUrl: '' }), { scroll: false });
+        if (wasActive && !pickedRef.current)
+            router.push(buildHref({ cluster: DEFAULT_CLUSTER, customUrl: '' }), { scroll: false });
     };
 
     const pinned: SavedCluster = { name: 'Default', url: DEFAULT_RPC_ENDPOINT.href };
@@ -96,7 +104,7 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
     );
 
     return (
-        <div className="flex min-h-0 flex-col">
+        <div className="flex shrink-0 flex-col">
             <div className={cn(SECTION_CAPTION, 'shrink-0 pb-2 pt-2')}>Cluster</div>
 
             <ul className="m-0 flex shrink-0 list-none flex-col gap-0.5 p-0">
@@ -109,7 +117,7 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
                                 scroll={false}
                                 onClick={() => {
                                     scrollToTop();
-                                    onDismiss();
+                                    pick();
                                 }}
                                 aria-current={active ? 'true' : undefined}
                                 className={rowClasses({ active })}
@@ -152,7 +160,7 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
                                 onRemove={() => handleRemove(saved.url)}
                                 onPick={() => {
                                     draft.select(saved.url);
-                                    onDismiss();
+                                    pick();
                                 }}
                             />
                         ))}
@@ -209,7 +217,7 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
                                     event.preventDefault();
                                     event.currentTarget.blur();
                                     draft.select(draft.value);
-                                    onDismiss();
+                                    pick();
                                 }}
                                 aria-label="Custom RPC URL"
                                 data-testid="cluster-url-input"
@@ -222,7 +230,7 @@ export function ClusterMenu({ onDismiss }: { onDismiss: () => void }) {
                                 title={draftEndpoint ? 'Use this endpoint' : 'Enter a full RPC URL to use it'}
                                 onClick={() => {
                                     draft.select(draft.value);
-                                    onDismiss();
+                                    pick();
                                 }}
                                 data-testid="go-custom-cluster-btn"
                             >

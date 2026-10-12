@@ -7,45 +7,85 @@ import { type SavedCluster, savedClustersAtom } from '../../lib/cluster-storage'
 
 const NEW_URL = 'http://my-validator:8899';
 
-const nav = vi.hoisted(() => ({ replace: vi.fn(), searchParams: new URLSearchParams() }));
+const nav = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn(), searchParams: new URLSearchParams() }));
+
+// Start on a built-in cluster so the custom draft begins empty and the gating tests type from scratch.
+const active = vi.hoisted(() => ({ cluster: 0, endpoint: undefined as URL | undefined }));
 
 vi.mock('next/navigation', () => ({
     usePathname: () => '/',
-    useRouter: () => ({ push: vi.fn(), replace: nav.replace }),
+    useRouter: () => ({ push: nav.push, replace: nav.replace }),
     useSearchParams: () => nav.searchParams,
 }));
 
-// Start on a built-in cluster so the custom draft begins empty and the gating tests type from scratch.
+vi.mock('@shared/lib/scrollToTop', () => ({ scrollToTop: vi.fn() }));
+
 vi.mock('@entities/cluster', async importOriginal => {
     const actual = await importOriginal<typeof import('@entities/cluster')>();
     return {
         ...actual,
-        useCluster: () => ({ cluster: Cluster.MainnetBeta, endpoint: undefined, status: ClusterStatus.Connected }),
+        useCluster: () => ({ cluster: active.cluster, endpoint: active.endpoint, status: ClusterStatus.Connected }),
     };
 });
 
 // Must import after mocks
 import { ClusterMenu } from '../ClusterMenu';
 
-function renderMenu(initialClusters: SavedCluster[] = []) {
+function renderMenu(initialClusters: SavedCluster[] = [], onDismiss: () => void = vi.fn()) {
     const store = createStore();
     if (initialClusters.length > 0) store.set(savedClustersAtom, initialClusters);
     return {
         store,
         ...render(
             <Provider store={store}>
-                <ClusterMenu onDismiss={vi.fn()} />
+                <ClusterMenu onDismiss={() => onDismiss()} />
             </Provider>,
         ),
     };
 }
 
-describe('ClusterMenu custom endpoint', () => {
+beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    active.cluster = Cluster.MainnetBeta;
+    active.endpoint = undefined;
+});
+
+describe('ClusterMenu deleting the active saved endpoint', () => {
+    const ACTIVE_URL = 'http://active-validator:8899/';
+    const OTHER_URL = 'http://other-validator:8899/';
+    const saved = [
+        { name: 'Active', url: ACTIVE_URL },
+        { name: 'Other', url: OTHER_URL },
+    ];
+
     beforeEach(() => {
-        vi.clearAllMocks();
-        localStorage.clear();
+        active.cluster = Cluster.Custom;
+        active.endpoint = new URL(ACTIVE_URL);
     });
 
+    it('should fall back to the default cluster when the menu closes with the delete pending', () => {
+        const { store, unmount } = renderMenu(saved);
+        fireEvent.click(screen.getByTestId(`delete-cluster-${ACTIVE_URL}`));
+        unmount();
+
+        expect(store.get(savedClustersAtom)).toEqual([{ name: 'Other', url: OTHER_URL }]);
+        expect(nav.push).toHaveBeenCalledTimes(1);
+    });
+
+    it('should keep the picked endpoint when a pick closes the menu with the delete pending', () => {
+        let close: () => void = vi.fn();
+        const { store, unmount } = renderMenu(saved, () => close());
+        close = unmount;
+        fireEvent.click(screen.getByTestId(`delete-cluster-${ACTIVE_URL}`));
+        fireEvent.click(screen.getByTestId(`pick-cluster-${OTHER_URL}`));
+
+        expect(store.get(savedClustersAtom)).toEqual([{ name: 'Other', url: OTHER_URL }]);
+        expect(nav.push).not.toHaveBeenCalled();
+    });
+});
+
+describe('ClusterMenu custom endpoint', () => {
     it('should enable Go and Save only once the typed URL parses as an endpoint', () => {
         renderMenu();
         expect(screen.getByTestId('go-custom-cluster-btn')).toBeDisabled();
