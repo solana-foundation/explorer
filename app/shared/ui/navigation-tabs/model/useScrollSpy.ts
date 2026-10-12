@@ -5,6 +5,7 @@ import { type RefObject, useCallback, useEffect, useState } from 'react';
 import { useStickyHeaderHeight } from '@/app/shared/ui/sticky-header/useStickyHeaderHeight';
 
 const SCROLL_OFFSET = 10;
+const ACTIVATION_LINE = 0.3;
 
 export function useScrollSpy({
     enabled,
@@ -55,8 +56,7 @@ export function useScrollSpy({
             if (rect) setStuck(rect.top <= 0);
 
             const barHeight = rect?.height ?? fallbackRef?.current?.getBoundingClientRect().height ?? 0;
-            // Activate when the section is in the upper third of the visible content area.
-            const threshold = window.scrollY + barHeight + window.innerHeight * 0.3;
+            const threshold = window.scrollY + barHeight + window.innerHeight * ACTIVATION_LINE;
             let current = paths[0] ?? '';
             for (const path of paths) {
                 const el = document.getElementById(path);
