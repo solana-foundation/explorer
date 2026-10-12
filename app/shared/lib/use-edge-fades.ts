@@ -6,16 +6,8 @@ const FADE_RAMP = 24;
 type EdgeFadesAxis = 'horizontal' | 'vertical';
 
 /**
- * Background-agnostic edge fades on a scroll container: a mask-image dissolves the content to
- * transparent at whichever end still has hidden content, so it works on any background. Each end
- * ramps over {@link FADE_RAMP}, proportional to how far that end is scrolled away — a fresh edge
- * fades in as you scroll, and an edge with nothing behind it stays fully opaque.
- *
- * `axis` picks the scroll direction: `'vertical'` (top/bottom, the default) or `'horizontal'`
- * (left/right). `enabled` re-measures when it flips true — e.g. a drawer opening or a tab row
- * mounting. Returns a callback ref for the content wrapper; attaching a ResizeObserver there
- * refreshes the fades when the content's size changes (which `onScroll` alone never catches). When
- * the scroll container is also the content (a self-scrolling row), point both refs at it.
+ * Masks each end of a scroll container that has hidden content, so it works on any background.
+ * Attach `contentRef` to the content wrapper so size changes refresh the fades; a self-scrolling row takes both refs.
  */
 export function useEdgeFades(
     scrollRef: React.RefObject<HTMLDivElement | null>,
