@@ -1,7 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { getNickname, setNickname } from '../../lib/nicknames';
 import { NicknameEditor } from '../NicknameEditor';
@@ -9,10 +9,6 @@ import { NicknameEditor } from '../NicknameEditor';
 const ADDRESS = gen.address(1);
 
 describe('NicknameEditor', () => {
-    beforeEach(() => {
-        localStorage.clear();
-    });
-
     test('should prefill the saved nickname', async () => {
         setNickname(ADDRESS, 'Treasury');
 

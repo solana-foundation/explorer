@@ -1,16 +1,11 @@
 /**
  * Tests for nickname localStorage utility functions
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { getNickname, removeNickname, setNickname } from '../nicknames';
 
 describe('nicknames', () => {
-    // Clear localStorage before each test for isolation
-    beforeEach(() => {
-        localStorage.clear();
-    });
-
     describe('getNickname', () => {
         it('should return null when no nickname exists', () => {
             const result = getNickname('TestAddress123');

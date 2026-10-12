@@ -60,9 +60,6 @@ const connectableText = () => screen.getByTestId('connectable').textContent;
 
 beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
-    // Approvals live in sessionStorage, so one test's approved origin would otherwise carry into the next.
-    sessionStorage.clear();
 });
 
 // Three consumers now gate their requests on this one context field, and its type is optional, so
