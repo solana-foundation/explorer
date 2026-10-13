@@ -135,6 +135,7 @@ on-chain account and can appear the day after this was checked. Re-check with
 | **ZK ElGamal**, **Lighthouse**, **Mango**, **Serum** | ❌ none |
 | **Pyth** | ❌ none on mainnet, devnet or testnet (checked 2026-09-01) |
 | **Token Swap** | ❌ none (program frozen; names come from a leading u8 tag) |
+| **Wormhole** | ❌ none (program frozen; names come from a leading u8 tag) |
 
 Three could not use an IDL even if one existed, because none of them has a discriminator to match on.
 Serum reads a u32 instruction code after a 1-byte version prefix, and Pyth a u32 instruction index after
