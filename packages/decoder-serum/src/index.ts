@@ -56,6 +56,7 @@ export type {
     OrderType,
     Prune,
     SelfTradeBehavior,
+    SerumInstruction,
     SettleFunds,
     Side,
 } from './decoder';

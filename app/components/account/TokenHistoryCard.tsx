@@ -34,7 +34,7 @@ import { Button } from '@/app/components/shared/ui/button';
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@/app/components/shared/ui/dropdown';
 import { INITIAL_TOKENS_TO_FETCH, INITIAL_VISIBLE_COUNT, LOAD_MORE_COUNT } from '@/app/features/token-history/config';
 import { Logger } from '@/app/shared/lib/logger';
-import { toKitAddress } from '@/app/shared/lib/web3js-compat';
+import { toKitAddress, toKitInstruction } from '@/app/shared/lib/web3js-compat';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -491,10 +491,10 @@ function InstructionDetailsCell({
                 });
             }
 
-            let transactionInstruction;
-            if (transactionWithMeta?.transaction) {
-                transactionInstruction = intoTransactionInstruction(transactionWithMeta.transaction, ix);
-            }
+            const transactionInstruction = transactionWithMeta?.transaction
+                ? intoTransactionInstruction(transactionWithMeta.transaction, ix)
+                : undefined;
+            const kitInstruction = transactionInstruction && toKitInstruction(transactionInstruction);
 
             if ('parsed' in ix) {
                 if (isTokenProgramData(ix)) {
@@ -502,27 +502,27 @@ function InstructionDetailsCell({
                 } else {
                     return undefined;
                 }
-            } else if (transactionInstruction && isSerumInstruction(transactionInstruction)) {
+            } else if (kitInstruction && isSerumInstruction(kitInstruction)) {
                 try {
-                    name = parseSerumInstructionTitle(transactionInstruction);
+                    name = parseSerumInstructionTitle(kitInstruction);
                 } catch (error) {
                     Logger.error(error, {
                         signature: tx.signature,
                     });
                     return undefined;
                 }
-            } else if (transactionInstruction && isTokenSwapInstruction(transactionInstruction)) {
+            } else if (kitInstruction && isTokenSwapInstruction(kitInstruction)) {
                 try {
-                    name = parseTokenSwapInstructionTitle(transactionInstruction);
+                    name = parseTokenSwapInstructionTitle(kitInstruction);
                 } catch (error) {
                     Logger.error(error, {
                         signature: tx.signature,
                     });
                     return undefined;
                 }
-            } else if (transactionInstruction && isMangoInstruction(transactionInstruction)) {
+            } else if (kitInstruction && isMangoInstruction(kitInstruction)) {
                 try {
-                    name = parseMangoInstructionTitle(transactionInstruction);
+                    name = parseMangoInstructionTitle(kitInstruction);
                 } catch (error) {
                     Logger.error(error, {
                         signature: tx.signature,

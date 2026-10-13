@@ -1,4 +1,4 @@
-import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
+import { address, type Instruction, type InstructionWithData, type ReadonlyUint8Array } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle, resolveTokenSwapInstructionName } from '../detection';
@@ -6,8 +6,13 @@ import { TOKEN_SWAP_PROGRAM_IDS } from '../program-ids';
 
 const MAINNET_PROGRAM_ID = 'SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8';
 
-function makeInstruction(data: number[], programId: string = MAINNET_PROGRAM_ID): TransactionInstruction {
-    return new TransactionInstruction({ data: Buffer.from(data), keys: [], programId: new PublicKey(programId) });
+const SYSTEM_PROGRAM_ID = '11111111111111111111111111111111';
+
+function makeInstruction(
+    data: number[],
+    programId: string = MAINNET_PROGRAM_ID,
+): Instruction & InstructionWithData<ReadonlyUint8Array> {
+    return { data: new Uint8Array(data), programAddress: address(programId) };
 }
 
 describe('TOKEN_SWAP_PROGRAM_IDS', () => {
@@ -23,7 +28,7 @@ describe('isTokenSwapInstruction', () => {
     });
 
     it('should return false for System Program', () => {
-        expect(isTokenSwapInstruction(makeInstruction([1], SystemProgram.programId.toBase58()))).toBe(false);
+        expect(isTokenSwapInstruction(makeInstruction([1], SYSTEM_PROGRAM_ID))).toBe(false);
     });
 });
 
@@ -48,7 +53,7 @@ describe('resolveTokenSwapInstructionName', () => {
     });
 
     it('should return undefined for another program', () => {
-        expect(resolveTokenSwapInstructionName(SystemProgram.programId.toBase58(), Uint8Array.of(1))).toBeUndefined();
+        expect(resolveTokenSwapInstructionName(SYSTEM_PROGRAM_ID, Uint8Array.of(1))).toBeUndefined();
     });
 });
 

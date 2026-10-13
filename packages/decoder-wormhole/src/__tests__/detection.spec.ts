@@ -1,4 +1,4 @@
-import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
+import { address, type Instruction, type InstructionWithData, type ReadonlyUint8Array } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
 import { isWormholeInstruction, parseWormholeInstructionTitle, resolveWormholeInstructionName } from '../detection';
@@ -6,8 +6,13 @@ import { WORMHOLE_PROGRAM_IDS } from '../program-ids';
 
 const MAINNET_PROGRAM_ID = 'WormT3McKhFJ2RkiGpdw9GKvNCrB2aB54gb2uV9MfQC';
 
-function makeInstruction(data: number[], programId: string = MAINNET_PROGRAM_ID): TransactionInstruction {
-    return new TransactionInstruction({ data: Buffer.from(data), keys: [], programId: new PublicKey(programId) });
+const SYSTEM_PROGRAM_ID = '11111111111111111111111111111111';
+
+function makeInstruction(
+    data: number[],
+    programId: string = MAINNET_PROGRAM_ID,
+): Instruction & InstructionWithData<ReadonlyUint8Array> {
+    return { data: new Uint8Array(data), programAddress: address(programId) };
 }
 
 describe('WORMHOLE_PROGRAM_IDS', () => {
@@ -22,7 +27,7 @@ describe('isWormholeInstruction', () => {
     });
 
     it('should return false for System Program', () => {
-        expect(isWormholeInstruction(makeInstruction([1], SystemProgram.programId.toBase58()))).toBe(false);
+        expect(isWormholeInstruction(makeInstruction([1], SYSTEM_PROGRAM_ID))).toBe(false);
     });
 });
 
@@ -49,7 +54,7 @@ describe('resolveWormholeInstructionName', () => {
     });
 
     it('should return undefined for another program', () => {
-        expect(resolveWormholeInstructionName(SystemProgram.programId.toBase58(), Uint8Array.of(1))).toBeUndefined();
+        expect(resolveWormholeInstructionName(SYSTEM_PROGRAM_ID, Uint8Array.of(1))).toBeUndefined();
     });
 });
 

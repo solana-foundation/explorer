@@ -1,4 +1,4 @@
-import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
+import { address } from '@solana/kit';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -13,6 +13,9 @@ import {
 import { OPEN_BOOK_PROGRAM_IDS } from '../program-ids';
 import { ENCODED_INSTRUCTIONS, makeInstruction, makeRawInstructionData, SERUM_PROGRAM_IDS_BY_NAME } from './fixtures';
 
+const SYSTEM_PROGRAM = address('11111111111111111111111111111111');
+const TOKEN_PROGRAM = address('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+
 describe('isSerumInstruction', () => {
     it.each([
         ['dexV1', SERUM_PROGRAM_IDS_BY_NAME.dexV1],
@@ -26,19 +29,12 @@ describe('isSerumInstruction', () => {
     });
 
     it('should return false for the System Program', () => {
-        const ix = new TransactionInstruction({
-            data: Buffer.alloc(5),
-            keys: [],
-            programId: SystemProgram.programId,
-        });
+        const ix = makeInstruction(new Uint8Array(5), SYSTEM_PROGRAM, []);
         expect(isSerumInstruction(ix)).toBe(false);
     });
 
     it('should return false for an unrelated SPL program id', () => {
-        const ix = makeInstruction(
-            ENCODED_INSTRUCTIONS.matchOrders,
-            new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-        );
+        const ix = makeInstruction(ENCODED_INSTRUCTIONS.matchOrders, TOKEN_PROGRAM);
         expect(isSerumInstruction(ix)).toBe(false);
     });
 });
@@ -50,7 +46,7 @@ describe('isDeprecatedSerumProgram', () => {
         ['dexV2', SERUM_PROGRAM_IDS_BY_NAME.dexV2],
         ['dexV3', SERUM_PROGRAM_IDS_BY_NAME.dexV3],
     ] as const)('should return true for the deprecated %s program id', (_name, programId) => {
-        expect(isDeprecatedSerumProgram(programId.toBase58())).toBe(true);
+        expect(isDeprecatedSerumProgram(programId)).toBe(true);
     });
 
     it('should return false for OpenBook', () => {
@@ -96,15 +92,12 @@ describe('isKnownUndecodableSerumInstruction', () => {
     });
 
     it('should return false for a non-serum program id', () => {
-        const ix = makeInstruction(
-            makeRawInstructionData(7),
-            new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-        );
+        const ix = makeInstruction(makeRawInstructionData(7), TOKEN_PROGRAM);
         expect(isKnownUndecodableSerumInstruction(ix)).toBe(false);
     });
 
     it('should return false for data too short to hold an instruction code', () => {
-        const ix = makeInstruction(Buffer.from([0, 2]), SERUM_PROGRAM_IDS_BY_NAME.openBook);
+        const ix = makeInstruction(new Uint8Array([0, 2]), SERUM_PROGRAM_IDS_BY_NAME.openBook);
         expect(isKnownUndecodableSerumInstruction(ix)).toBe(false);
     });
 });
@@ -117,9 +110,9 @@ describe('resolveSerumInstructionName', () => {
     });
 
     it('should resolve for deprecated serum program ids', () => {
-        expect(
-            resolveSerumInstructionName(SERUM_PROGRAM_IDS_BY_NAME.dexV3.toBase58(), makeRawInstructionData(10)),
-        ).toBe('New Order v3');
+        expect(resolveSerumInstructionName(SERUM_PROGRAM_IDS_BY_NAME.dexV3, makeRawInstructionData(10))).toBe(
+            'New Order v3',
+        );
     });
 
     it('should return undefined for an unrelated program id', () => {
@@ -168,7 +161,7 @@ describe('parseSerumInstructionTitle', () => {
     });
 
     it('should throw on data too short to hold an instruction code', () => {
-        const ix = makeInstruction(Buffer.from([0, 2]), SERUM_PROGRAM_IDS_BY_NAME.openBook);
+        const ix = makeInstruction(new Uint8Array([0, 2]), SERUM_PROGRAM_IDS_BY_NAME.openBook);
         expect(() => parseSerumInstructionTitle(ix)).toThrow('Serum instruction data too short (2 bytes)');
     });
 });
@@ -180,7 +173,7 @@ describe('getSerumInstructionLabel', () => {
     });
 
     it('should return "No data" for an empty instruction', () => {
-        const ix = makeInstruction(Buffer.alloc(0), SERUM_PROGRAM_IDS_BY_NAME.dexV1);
+        const ix = makeInstruction(new Uint8Array(0), SERUM_PROGRAM_IDS_BY_NAME.dexV1);
         expect(getSerumInstructionLabel(ix)).toBe('No data');
     });
 

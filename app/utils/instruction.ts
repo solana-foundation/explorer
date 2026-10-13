@@ -10,6 +10,7 @@ import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
 export type InstructionType = {
     name: string;
@@ -71,10 +72,10 @@ export function getTokenInstructionName(
 ) {
     let name = 'Unknown';
 
-    let transactionInstruction;
-    if (transactionWithMeta?.transaction) {
-        transactionInstruction = intoTransactionInstruction(transactionWithMeta.transaction, ix);
-    }
+    const transactionInstruction = transactionWithMeta?.transaction
+        ? intoTransactionInstruction(transactionWithMeta.transaction, ix)
+        : undefined;
+    const kitInstruction = transactionInstruction && toKitInstruction(transactionInstruction);
 
     if ('parsed' in ix) {
         if (isTokenProgram(ix.program)) {
@@ -84,13 +85,13 @@ export function getTokenInstructionName(
         }
     }
 
-    if (transactionInstruction) {
+    if (kitInstruction) {
         try {
             // Mango is intentionally absent: its resolver lives in the modern NAME_SOURCES chain; consolidating this legacy resolver is a follow-up.
-            if (isSerumInstruction(transactionInstruction)) {
-                return parseSerumInstructionTitle(transactionInstruction);
-            } else if (isTokenSwapInstruction(transactionInstruction)) {
-                return parseTokenSwapInstructionTitle(transactionInstruction);
+            if (isSerumInstruction(kitInstruction)) {
+                return parseSerumInstructionTitle(kitInstruction);
+            } else if (isTokenSwapInstruction(kitInstruction)) {
+                return parseTokenSwapInstructionTitle(kitInstruction);
             }
         } catch (error) {
             Logger.error(error, { signature: signatureInfo.signature });
