@@ -44,7 +44,7 @@ openspec validate <change-id> --type change --strict
 openspec list
 ```
 
-CI runs `pnpm openspec:validate` as part of the `Build-And-Test` job. It enforces **well-formedness only** — that proposals and spec deltas parse and follow the canonical layout. CI does NOT enforce whether a proposal _exists_ for a given change; that judgement stays with the author and reviewer.
+CI runs `pnpm openspec:validate` as part of the `Format-And-Lint` job. It enforces **well-formedness only** — that proposals and spec deltas parse and follow the canonical layout. CI does NOT enforce whether a proposal _exists_ for a given change; that judgement stays with the author and reviewer.
 
 ## Brownfield handling
 

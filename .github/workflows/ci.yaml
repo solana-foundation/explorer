@@ -44,7 +44,30 @@ jobs:
           echo "total=$total" >> $GITHUB_OUTPUT
           echo "list=[$(seq -s, 1 $total)]" >> $GITHUB_OUTPUT
 
-  Build-And-Test:
+  Format-And-Lint:
+    needs: read-nvmrc
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm and Node.js
+        uses: ./.github/actions/pnpm-setup
+        with:
+          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
+
+      - name: Format
+        run: pnpm format:ci
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: OpenSpec
+        run: pnpm openspec:validate
+
+  Build:
     needs: read-nvmrc
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -61,25 +84,54 @@ jobs:
         with:
           node-version: ${{ needs.read-nvmrc.outputs.node-version }}
 
-      - name: Format
-        run: pnpm format:ci
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: OpenSpec
-        run: pnpm openspec:validate
-
-      # Mandatory, and the only `next build` in CI — Specs-Shards only generates types. A production
-      # build that breaks fails here or nowhere, so this step must not be weakened to typegen.
+      # Mandatory, and the only `next build` in CI. A production build that breaks fails here or
+      # nowhere, so this step must not be weakened to typegen.
       - name: Build
         run: pnpm build
 
-      # The app specs run in Specs-Shards; keeping them here would serialise ~4.5 min behind this job.
+      - name: Generate build info
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        run: pnpm build:info --skip-build .next/BUILD.fresh.md
+
+      - name: Render bundle change report
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        run: |
+          ./scripts/build-info-report.sh ${{ github.base_ref }}
+          cat .next/bundle-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      # Fork PRs get a read-only token here, so build-info-comment.yaml posts the PR comment from this artifact.
+      - name: Save bundle change report
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-info-comment
+          path: .next/bundle-report.md
+
+      # Last on purpose: the report above uploads even when this gate fails.
+      - name: Check bench/BUILD.md freshness
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        run: pnpm exec tsx scripts/build-info-diff.ts check bench/BUILD.md .next/BUILD.fresh.md
+
+  Test-Packages:
+    needs: read-nvmrc
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm and Node.js
+        uses: ./.github/actions/pnpm-setup
+        with:
+          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
+
+      - name: Build packages
+        run: pnpm build:packages
+
       - name: Test packages
         run: pnpm test:packages
 
-  # Split off Build-And-Test so the specs sweep fans out without re-running format/lint/build per shard.
   Specs-Shards:
     needs: read-nvmrc
     runs-on: ubuntu-latest
@@ -106,49 +158,6 @@ jobs:
 
       - name: Test specs (shard ${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }})
         run: pnpm test:ci:specs --shard=${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }}
-
-  # Rebuilds the route-size table for a PR or a merge-queue commit, enforces that bench/BUILD.md
-  # was refreshed, and publishes a bundle-change report. Gated behind Build-And-Test so it only
-  # runs on green builds.
-  # Fork PRs get a read-only token here, so the PR comment is posted by build-info-comment.yaml
-  # (workflow_run) from the artifact this job uploads.
-  Build-Info:
-    needs: [read-nvmrc, Build-And-Test]
-    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      # Same key as Build-And-Test: that job has just built this tree, so its .next/cache makes
-      # the extra production build here mostly incremental.
-      - name: Setup Additional Cache
-        uses: ./.github/actions/build-cache
-
-      - name: Setup pnpm and Node.js
-        uses: ./.github/actions/pnpm-setup
-        with:
-          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
-
-      - name: Generate build info
-        run: pnpm build:info .next/BUILD.fresh.md
-
-      - name: Render bundle change report
-        run: |
-          ./scripts/build-info-report.sh ${{ github.base_ref }}
-          cat .next/bundle-report.md >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Save bundle change report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: build-info-comment
-          path: .next/bundle-report.md
-
-      # Last on purpose: the report above uploads even when this gate fails.
-      - name: Check bench/BUILD.md freshness
-        run: pnpm exec tsx scripts/build-info-diff.ts check bench/BUILD.md .next/BUILD.fresh.md
 
   Security-Audit:
     # Independent of the build: the audit resolves the tree from pnpm-lock.yaml and queries
@@ -255,7 +264,7 @@ jobs:
     # Without `always()`, GitHub skips this job when any job in `needs` fails.
     # A skipped required check does not block a merge, so the broken PR would merge.
     if: always()
-    needs: [read-nvmrc, Build-And-Test, Specs-Shards, Build-Info, Security-Audit, Sitemap-Check]
+    needs: [read-nvmrc, Format-And-Lint, Build, Test-Packages, Specs-Shards, Security-Audit, Sitemap-Check]
     runs-on: ubuntu-latest
     timeout-minutes: 5
 

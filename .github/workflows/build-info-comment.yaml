@@ -1,6 +1,6 @@
 name: Build Info Comment
 
-# Posts the bundle-change report from CI's Build-Info job as a sticky PR comment. Split from ci.yaml
+# Posts the bundle-change report from CI's Build job as a sticky PR comment. Split from ci.yaml
 # because fork PRs run CI with a read-only token; this workflow runs in the base repo with write
 # access and never checks out or executes PR code.
 on:
@@ -29,7 +29,7 @@ jobs:
             scripts/build-info-locate-pr.mjs
           sparse-checkout-cone-mode: false
 
-      # The report artifact is missing when CI failed before Build-Info uploaded it; the PR number
+      # The report artifact is missing when the Build job failed before it uploaded it; the PR number
       # comes from the head SHA (workflow_run.pull_requests is empty for fork PRs).
       - name: Locate report and pull request
         id: locate

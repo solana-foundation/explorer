@@ -4,11 +4,12 @@
  * Script to build Next.js app and capture route information
  *
  * Usage:
- *   node scripts/update-build-info.js [output-file]
+ *   node scripts/update-build-info.js [--skip-build] [output-file]
  *
  * Examples:
  *   node scripts/update-build-info.js
  *   node scripts/update-build-info.js info.md
+ *   node scripts/update-build-info.js --skip-build .next/BUILD.fresh.md
  */
 
 const { spawn } = require('child_process');
@@ -24,15 +25,17 @@ async function main() {
     const logger = createLogger();
 
     try {
-        logger.info('🏗️  Running pnpm build...');
-        logger.separator();
+        if (!config.skipBuild) {
+            logger.info('🏗️  Running pnpm build...');
+            logger.separator();
 
-        const buildStartTime = performance.now();
-        await runBuild(config);
-        const buildEndTime = performance.now();
-        const buildDuration = ((buildEndTime - buildStartTime) / 1000).toFixed(2);
-        logger.separator();
-        logger.success(`Build completed in ${buildDuration}s`);
+            const buildStartTime = performance.now();
+            await runBuild(config);
+            const buildEndTime = performance.now();
+            const buildDuration = ((buildEndTime - buildStartTime) / 1000).toFixed(2);
+            logger.separator();
+            logger.success(`Build completed in ${buildDuration}s`);
+        }
 
         const routes = await collectRoutes(config);
         const sizeInfo = await loadRouteSizes(config);
@@ -363,6 +366,7 @@ function createLogger() {
  * Parses command line arguments and returns configuration object
  * @returns {Object} Configuration object
  * @returns {string} returns.outputFile - Output filename from first non-flag argument (default: 'BUILD.md')
+ * @returns {boolean} returns.skipBuild - Read the existing build output instead of building (`--skip-build`)
  * @returns {string} returns.buildCommand - Build command to execute (default: 'pnpm')
  * @returns {string[]} returns.buildArgs - Arguments to pass to build command (default: ['build'])
  * @returns {string} returns.projectRoot - Absolute path to project root directory
@@ -373,6 +377,7 @@ function getConfig() {
 
     return {
         outputFile: nonFlagArgs[0] || 'bench/BUILD.md',
+        skipBuild: process.argv.includes('--skip-build'),
         buildCommand: 'pnpm',
         buildArgs: ['build'],
         projectRoot: path.join(__dirname, '..'),
