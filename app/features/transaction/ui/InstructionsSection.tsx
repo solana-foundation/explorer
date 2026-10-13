@@ -3,8 +3,6 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
-import { isTokenLendingInstruction } from '@components/instruction/token-lending/types';
-import { TokenLendingDetailsCard } from '@components/instruction/TokenLendingDetailsCard';
 import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCard';
 import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
 import { isWormholeInstruction } from '@components/instruction/wormhole/types';
@@ -389,9 +387,6 @@ function InstructionCard({
     }
     if (isTokenSwapInstruction(transactionIx)) {
         return <TokenSwapDetailsCard key={key} {...props} />;
-    }
-    if (isTokenLendingInstruction(transactionIx)) {
-        return <TokenLendingDetailsCard key={key} {...props} />;
     }
     if (isWormholeInstruction(transactionIx)) {
         return <WormholeDetailsCard key={key} {...props} />;
