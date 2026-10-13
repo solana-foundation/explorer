@@ -15,7 +15,7 @@ export type WormholeParsed = ParsedInstructionInfo<string, Record<string, never>
  */
 export function parseWormholeInstruction(ix: KitInstruction): WormholeParsed | undefined {
     try {
-        return { info: {}, type: parseWormholeInstructionTitle(ix) };
+        return { info: {}, type: parseWormholeInstructionTitle(ix.programAddress, ix.data) };
     } catch (error) {
         // Surface stale-name-table drift (a new tag) rather than degrading to "Unknown" silently.
         Logger.error(error, { programId: ix.programAddress });

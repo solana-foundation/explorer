@@ -77,6 +77,34 @@ describe('@features/instruction-program-serum', () => {
             });
             expect(screen.queryByText('Event Queue')).not.toBeInTheDocument();
         });
+
+        test('should title an instruction on a deprecated deployment "Unknown" when its code is unrecognized', async () => {
+            renderCard(makeInstruction('00ff000000', 0, SERUM_DEX_V3_PROGRAM_IDS.mainnet));
+
+            // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+            await waitFor(() => {
+                expect(screen.getByText(/Serum Dex v3 \(deprecated\): Unknown/)).toBeInTheDocument();
+            });
+        });
+
+        test('should title a named code with no vendored layout from the name table', async () => {
+            renderCard(makeInstruction('0007000000', 0));
+
+            // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+            await waitFor(() => {
+                expect(screen.getByText(/OpenBook Dex Program: Disable Market/)).toBeInTheDocument();
+            });
+            expect(screen.queryByText('Market')).not.toBeInTheDocument();
+        });
+
+        test('should title a recognized code with a truncated payload by name', async () => {
+            renderCard(makeInstruction('000a00000001', 0));
+
+            // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
+            await waitFor(() => {
+                expect(screen.getByText(/OpenBook Dex Program: New Order v3/)).toBeInTheDocument();
+            });
+        });
     });
 });
 

@@ -1,11 +1,11 @@
-import { getU8Decoder, type Instruction, type InstructionWithData, type ReadonlyUint8Array } from '@solana/kit';
+import { getU8Decoder, type ReadonlyUint8Array } from '@solana/kit';
 
 import { TOKEN_SWAP_INSTRUCTION_NAMES } from './instruction-names';
 import { TOKEN_SWAP_PROGRAM_IDS } from './program-ids';
 
 const programIds = new Set<string>(TOKEN_SWAP_PROGRAM_IDS);
 
-export const isTokenSwapInstruction = (instruction: Instruction): boolean => programIds.has(instruction.programAddress);
+export const isTokenSwapProgramId = (programId: string): boolean => programIds.has(programId);
 
 // Token Swap keys its instructions by a leading u8 tag.
 const readTag = (data: ReadonlyUint8Array): number => getU8Decoder().decode(data);
@@ -19,15 +19,13 @@ export const resolveTokenSwapInstructionName = (
     return TOKEN_SWAP_INSTRUCTION_NAMES.get(readTag(discriminator));
 };
 
-export const parseTokenSwapInstructionTitle = (
-    instruction: Instruction & InstructionWithData<ReadonlyUint8Array>,
-): string => {
-    const title = resolveTokenSwapInstructionName(instruction.programAddress, instruction.data);
+export const parseTokenSwapInstructionTitle = (programId: string, data: ReadonlyUint8Array): string => {
+    const title = resolveTokenSwapInstructionName(programId, data);
     if (title === undefined) {
         throw new Error(
-            instruction.data.byteLength < 1
+            data.byteLength < 1
                 ? 'Token Swap instruction has no data'
-                : `Unrecognized Token Swap instruction code: ${readTag(instruction.data)}`,
+                : `Unrecognized Token Swap instruction code: ${readTag(data)}`,
         );
     }
     return title;

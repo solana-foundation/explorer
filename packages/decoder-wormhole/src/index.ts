@@ -1,5 +1,5 @@
 export {
-    isWormholeInstruction,
+    isWormholeProgramId,
     parseWormholeInstructionTitle,
     resolveWormholeInstructionName,
     WORMHOLE_PROGRAM_IDS,

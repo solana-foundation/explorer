@@ -15,7 +15,7 @@ export type TokenSwapParsed = ParsedInstructionInfo<string, Record<string, never
  */
 export function parseTokenSwapInstruction(ix: KitInstruction): TokenSwapParsed | undefined {
     try {
-        return { info: {}, type: parseTokenSwapInstructionTitle(ix) };
+        return { info: {}, type: parseTokenSwapInstructionTitle(ix.programAddress, ix.data) };
     } catch (error) {
         // Surface stale-name-table drift (a new tag) rather than degrading to "Unknown" silently.
         Logger.error(error, { programId: ix.programAddress });

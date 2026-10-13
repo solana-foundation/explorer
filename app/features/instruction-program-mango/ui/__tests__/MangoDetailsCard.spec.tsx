@@ -48,11 +48,11 @@ describe('MangoDetailsCard', () => {
         });
     });
 
-    it('should title an instruction without data "No data"', async () => {
+    it('should title an instruction without data "Unknown"', async () => {
         renderCard(makeInstruction([]));
 
         await waitFor(() => {
-            expect(screen.getByText(/Mango v3 \(deprecated\): No data$/)).toBeInTheDocument();
+            expect(screen.getByText(/Mango v3 \(deprecated\): Unknown$/)).toBeInTheDocument();
         });
     });
 });

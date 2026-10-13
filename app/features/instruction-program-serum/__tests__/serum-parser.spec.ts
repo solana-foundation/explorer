@@ -44,10 +44,21 @@ describe('parseSerumInstruction', () => {
         });
     });
 
-    it('should leave a deprecated Serum deployment undecoded', () => {
+    it('should name an instruction on a deprecated Serum deployment without decoding it', () => {
         const parsed = parseSerumInstruction({
             accounts: ACCOUNTS,
             data: CONSUME_EVENTS,
+            programAddress: SERUM_DEX_V3_PROGRAM_IDS.mainnet,
+        });
+
+        expect(parsed).toEqual({ info: {}, type: 'consumeEvents' });
+        expect(Logger.error).not.toHaveBeenCalled();
+    });
+
+    it('should return undefined without reporting an unrecognized code on a deprecated deployment', () => {
+        const parsed = parseSerumInstruction({
+            accounts: [],
+            data: new Uint8Array([0, 255, 0, 0, 0]),
             programAddress: SERUM_DEX_V3_PROGRAM_IDS.mainnet,
         });
 
@@ -55,22 +66,48 @@ describe('parseSerumInstruction', () => {
         expect(Logger.error).not.toHaveBeenCalled();
     });
 
-    it('should return undefined without reporting a code the vendored layout cannot decode', () => {
-        // Code 7 (Disable Market) has a name but no layout.
+    it.each([
+        [7, 'disableMarket'],
+        [8, 'sweepFees'],
+        [9, 'newOrderV2'],
+        [13, 'sendTake'],
+    ] as const)('should name code %i without decoding or reporting it', (code, type) => {
         const parsed = parseSerumInstruction({
             accounts: [],
-            data: new Uint8Array([0, 7, 0, 0, 0]),
+            data: new Uint8Array([0, code, 0, 0, 0]),
             programAddress: OPEN_BOOK_PROGRAM_IDS.mainnet,
         });
 
-        expect(parsed).toBeUndefined();
+        expect(parsed).toEqual({ info: {}, type });
         expect(Logger.error).not.toHaveBeenCalled();
+    });
+
+    it('should report but still name a recognized code whose payload is truncated', () => {
+        const parsed = parseSerumInstruction({
+            accounts: [],
+            data: new Uint8Array([0, 10, 0, 0, 0, 1]),
+            programAddress: OPEN_BOOK_PROGRAM_IDS.mainnet,
+        });
+
+        expect(parsed).toEqual({ info: {}, type: 'newOrderV3' });
+        expect(Logger.error).toHaveBeenCalledOnce();
     });
 
     it('should report and return undefined for an unrecognized code', () => {
         const parsed = parseSerumInstruction({
             accounts: [],
             data: new Uint8Array([0, 255, 0, 0, 0]),
+            programAddress: OPEN_BOOK_PROGRAM_IDS.mainnet,
+        });
+
+        expect(parsed).toBeUndefined();
+        expect(Logger.error).toHaveBeenCalledOnce();
+    });
+
+    it('should report and return undefined for data too short to hold a code', () => {
+        const parsed = parseSerumInstruction({
+            accounts: [],
+            data: new Uint8Array(0),
             programAddress: OPEN_BOOK_PROGRAM_IDS.mainnet,
         });
 

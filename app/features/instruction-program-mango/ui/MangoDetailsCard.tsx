@@ -20,17 +20,13 @@ type MangoDetailsCardProps = {
 export function MangoDetailsCard({ ix, raw, index, innerCards, childIndex }: MangoDetailsCardProps) {
     const { cluster } = useCluster();
     const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
-    const name = 'unknown' in ix ? unknownName(raw) : (ix.parsed as MangoParsed).type;
+    const name = 'unknown' in ix ? 'Unknown' : (ix.parsed as MangoParsed).type;
 
     return (
         <InstructionCardView
             node={node}
-            title={`${getProgramName(raw.programId.toBase58(), cluster)}: ${name}`}
+            title={`${getProgramName(ix.programId.toBase58(), cluster)}: ${name}`}
             defaultRaw
         />
     );
-}
-
-function unknownName(raw: TransactionInstruction): string {
-    return raw.data.length === 0 ? 'No data' : 'Unknown';
 }

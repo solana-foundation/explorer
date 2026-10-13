@@ -1,16 +1,15 @@
 import { IX_TITLES, TokenInstructionType } from '@components/instruction/token/types';
 import { type TransactionWithMeta } from '@entities/transaction-data';
-import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
-import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@explorer/decoder-token-swap/detection';
+import { isSerumProgramId, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
+import { isTokenSwapProgramId, parseTokenSwapInstructionTitle } from '@explorer/decoder-token-swap/detection';
 import { isTokenProgram } from '@explorer/parsers';
 import { isTokenProgramId } from '@providers/accounts/tokens';
+import { getBase58Encoder } from '@solana/kit';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction } from '@solana/web3.js';
-import { intoTransactionInstruction } from '@utils/tx';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
 export type InstructionType = {
     name: string;
@@ -66,16 +65,10 @@ export function getTokenProgramInstructionName(ix: ParsedInstruction, signatureI
 }
 
 export function getTokenInstructionName(
-    transactionWithMeta: TransactionWithMeta,
     ix: ParsedInstruction | PartiallyDecodedInstruction,
     signatureInfo: ConfirmedSignatureInfo,
 ) {
     let name = 'Unknown';
-
-    const transactionInstruction = transactionWithMeta?.transaction
-        ? intoTransactionInstruction(transactionWithMeta.transaction, ix)
-        : undefined;
-    const kitInstruction = transactionInstruction && toKitInstruction(transactionInstruction);
 
     if ('parsed' in ix) {
         if (isTokenProgram(ix.program)) {
@@ -85,18 +78,17 @@ export function getTokenInstructionName(
         }
     }
 
-    if (kitInstruction) {
-        try {
-            // Mango is intentionally absent: its resolver lives in the modern NAME_SOURCES chain; consolidating this legacy resolver is a follow-up.
-            if (isSerumInstruction(kitInstruction)) {
-                return parseSerumInstructionTitle(kitInstruction);
-            } else if (isTokenSwapInstruction(kitInstruction)) {
-                return parseTokenSwapInstructionTitle(kitInstruction);
-            }
-        } catch (error) {
-            Logger.error(error, { signature: signatureInfo.signature });
-            return undefined;
+    const programId = ix.programId.toBase58();
+    try {
+        // Mango is intentionally absent: its resolver lives in the modern NAME_SOURCES chain; consolidating this legacy resolver is a follow-up.
+        if (isSerumProgramId(programId)) {
+            return parseSerumInstructionTitle(programId, getBase58Encoder().encode(ix.data));
+        } else if (isTokenSwapProgramId(programId)) {
+            return parseTokenSwapInstructionTitle(programId, getBase58Encoder().encode(ix.data));
         }
+    } catch (error) {
+        Logger.error(error, { signature: signatureInfo.signature });
+        return undefined;
     }
 
     if (ix.accounts.findIndex(account => isTokenProgramId(account)) >= 0) {
@@ -126,7 +118,7 @@ export function getTokenInstructionType(
         });
     }
 
-    const name = getTokenInstructionName(transactionWithMeta, ix, signatureInfo) || 'Unknown';
+    const name = getTokenInstructionName(ix, signatureInfo) || 'Unknown';
 
     return {
         innerInstructions,

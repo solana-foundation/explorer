@@ -471,8 +471,8 @@ export function parseSerumInstructionKey(instruction: InstructionWithData<Readon
 }
 
 // Codes 7/8/9/13 (disableMarket, sweepFees, newOrderV2, sendTake) have no vendored layout,
-// so parseSerumInstructionKey throws for them and they can never be dispatched —
-// the card renders them as raw data with a name-table title.
+// so parseSerumInstructionKey throws for them and no variant below represents them.
+// They are identified by name only (see resolveSerumInstructionKey).
 export type DecodedSerumInstruction =
     | { type: 'cancelOrder'; info: CancelOrder }
     | { type: 'cancelOrderByClientId'; info: CancelOrderByClientId }

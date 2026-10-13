@@ -9,19 +9,14 @@ import {
     text,
 } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
-import {
-    type DecodedSerumInstruction,
-    getSerumInstructionLabel,
-    isDeprecatedSerumProgram,
-    OPENBOOK_DEX_PROGRAM_LABEL,
-} from '@explorer/decoder-serum';
+import { isDeprecatedSerumProgram, OPENBOOK_DEX_PROGRAM_LABEL, SERUM_INSTRUCTION_NAMES } from '@explorer/decoder-serum';
 import { useCluster } from '@providers/cluster';
 import type { Address } from '@solana/kit';
 import type { TransactionInstruction } from '@solana/web3.js';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
 
-import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
+import type { SerumParsed } from '../lib/serum-parser';
 
 type SerumDetailsCardProps = {
     /** The dispatcher's verdict for a DEX instruction: decoded, or registered-but-unparsed. */
@@ -36,27 +31,21 @@ type SerumDetailsCardProps = {
 export function SerumDetailsCard({ ix, raw, index, innerCards, childIndex }: SerumDetailsCardProps) {
     const { cluster } = useCluster();
     const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
-    // The name table covers codes the vendored layout cannot decode, so the title comes from the raw bytes.
-    const kitIx = toKitInstruction(raw);
-    const label = getSerumInstructionLabel(kitIx);
+    const parsed = 'unknown' in ix ? undefined : (ix.parsed as SerumParsed);
+    const name = parsed ? SERUM_INSTRUCTION_NAMES[parsed.type] : 'Unknown';
 
     // Dead Serum DEX deployments get a name-only card; the active OpenBook fork keeps full decoding.
-    if (isDeprecatedSerumProgram(kitIx.programAddress)) {
-        return (
-            <InstructionCardView
-                node={node}
-                title={`${getProgramName(kitIx.programAddress, cluster)}: ${label}`}
-                defaultRaw
-            />
-        );
+    const programId = ix.programId.toBase58();
+    if (isDeprecatedSerumProgram(programId)) {
+        return <InstructionCardView node={node} title={`${getProgramName(programId, cluster)}: ${name}`} defaultRaw />;
     }
 
-    const title = `${OPENBOOK_DEX_PROGRAM_LABEL} Program: ${label}`;
-    if ('unknown' in ix) {
+    const title = `${OPENBOOK_DEX_PROGRAM_LABEL} Program: ${name}`;
+    if (!parsed || !('accounts' in parsed.info)) {
         return <InstructionCardView node={node} title={title} defaultRaw />;
     }
 
-    const { info } = ix.parsed as DecodedSerumInstruction;
+    const { info } = parsed;
     return (
         <InstructionCardView node={node} title={title}>
             <InstructionFields
