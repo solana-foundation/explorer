@@ -5,7 +5,7 @@
 | Static | `/` | 140 kB | 570 kB |
 | Static | `/_not-found` | 0 B | 450 kB |
 | Dynamic | `/address/[address]` | 450 kB | 910 kB |
-| Dynamic | `/address/[address]/account-data` | 460 kB | 900 kB |
+| Dynamic | `/address/[address]/account-data` | 460 kB | 920 kB |
 | Dynamic | `/address/[address]/anchor-account` | 420 kB | 870 kB |
 | Dynamic | `/address/[address]/attestation` | 420 kB | 870 kB |
 | Dynamic | `/address/[address]/attributes` | 420 kB | 870 kB |
