@@ -5,7 +5,7 @@ import { getMetadataJson } from '../get-metadata-json';
 
 const mocks = vi.hoisted(() => ({ getProxiedUri: vi.fn() }));
 
-vi.mock('@/app/features/metadata/utils', () => ({ getProxiedUri: mocks.getProxiedUri }));
+vi.mock('@/app/shared/lib/metadata-proxy', () => ({ getProxiedUri: mocks.getProxiedUri }));
 
 const PROXY_PATH = '/api/metadata/proxy?uri=https%3A%2F%2Fexample.com%2Fmeta.json';
 
