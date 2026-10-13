@@ -4,7 +4,7 @@
 |------|-------|------|---------------|
 | Static | `/` | 140 kB | 570 kB |
 | Static | `/_not-found` | 0 B | 450 kB |
-| Dynamic | `/address/[address]` | 470 kB | 890 kB |
+| Dynamic | `/address/[address]` | 450 kB | 910 kB |
 | Dynamic | `/address/[address]/account-data` | 460 kB | 900 kB |
 | Dynamic | `/address/[address]/anchor-account` | 420 kB | 870 kB |
 | Dynamic | `/address/[address]/attestation` | 420 kB | 870 kB |
@@ -50,10 +50,10 @@
 | Dynamic | `/api/verification/coingecko/[address]` | — | — |
 | Dynamic | `/api/verification/jupiter/[mintAddress]` | — | — |
 | Dynamic | `/api/verification/rugcheck/[mintAddress]` | — | — |
-| Dynamic | `/block/[slot]` | 170 kB | 590 kB |
+| Dynamic | `/block/[slot]` | 170 kB | 610 kB |
 | Dynamic | `/block/[slot]/accounts` | 150 kB | 590 kB |
 | Dynamic | `/block/[slot]/programs` | 140 kB | 590 kB |
-| Dynamic | `/block/[slot]/rewards` | 160 kB | 580 kB |
+| Dynamic | `/block/[slot]/rewards` | 160 kB | 600 kB |
 | Dynamic | `/epoch/[epoch]` | 20 kB | 460 kB |
 | Static | `/feature-gates` | 50 kB | 490 kB |
 | Dynamic | `/mcp` | — | — |
@@ -64,6 +64,6 @@
 | Static | `/opengraph-image.png` | — | — |
 | Dynamic | `/robots.txt` | — | — |
 | Static | `/tos` | 10 kB | 460 kB |
-| Dynamic | `/tx/[signature]` | 470 kB | 900 kB |
-| Dynamic | `/tx/[signature]/inspect` | 450 kB | 890 kB |
-| Static | `/tx/inspector` | 450 kB | 890 kB |
+| Dynamic | `/tx/[signature]` | 470 kB | 920 kB |
+| Dynamic | `/tx/[signature]/inspect` | 450 kB | 910 kB |
+| Static | `/tx/inspector` | 450 kB | 910 kB |

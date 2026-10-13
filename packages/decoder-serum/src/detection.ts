@@ -38,7 +38,7 @@ const readInstructionCode = (data: Uint8Array): number =>
 export const parseSerumInstructionCode = (instruction: TransactionInstruction): number =>
     readInstructionCode(instruction.data);
 
-// Codes 7/8/9/13 (disableMarket, sweepFees, newOrderV2, sendTake) are absent from the serum lib's INSTRUCTION_LAYOUT, so decodeSerumInstruction always throws for them.
+// Codes 7/8/9/13 (disableMarket, sweepFees, newOrderV2, sendTake) have no vendored layout, so decodeSerumInstruction always throws for them.
 const UNDECODABLE_SERUM_CODES = new Set([7, 8, 9, 13]);
 
 export const isKnownUndecodableSerumInstruction = (instruction: TransactionInstruction): boolean =>

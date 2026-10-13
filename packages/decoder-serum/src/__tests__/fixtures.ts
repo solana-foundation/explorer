@@ -1,7 +1,4 @@
-// encodeInstruction isn't re-exported from the package root; reach into lib/instructions.js for authentic fixtures.
-import { encodeInstruction } from '@project-serum/serum/lib/instructions.js';
 import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import BN from 'bn.js';
 
 import {
     OPEN_BOOK_PROGRAM_IDS,
@@ -19,64 +16,33 @@ export const SERUM_PROGRAM_IDS_BY_NAME = {
     openBook: new PublicKey(OPEN_BOOK_PROGRAM_IDS.mainnet),
 } as const;
 
-// Variants 7/8/9/13 are absent from the library's INSTRUCTION_LAYOUT — use makeRawInstructionData for those.
+// Bytes produced by @project-serum/serum 0.13.61 `encodeInstruction`, frozen so the vendored layout is checked
+// against the original encoder rather than against itself. Variants 7/8/9/13 have no layout — use
+// makeRawInstructionData for those.
 export const ENCODED_INSTRUCTIONS = {
-    cancelOrder: encodeInstruction({
-        cancelOrder: {
-            openOrders: PublicKey.default,
-            openOrdersSlot: 3,
-            orderId: new BN('170141183460469231731687303715884105727'),
-            side: 'sell',
-        },
-    }) as Buffer,
-    cancelOrderByClientId: encodeInstruction({
-        cancelOrderByClientId: { clientId: new BN(99) },
-    }) as Buffer,
-    cancelOrderByClientIdV2: encodeInstruction({
-        cancelOrderByClientIdV2: { clientId: new BN(123) },
-    }) as Buffer,
-    cancelOrderV2: encodeInstruction({
-        cancelOrderV2: { orderId: new BN('170141183460469231731687303715884105727'), side: 'buy' },
-    }) as Buffer,
-    closeOpenOrders: encodeInstruction({ closeOpenOrders: {} }) as Buffer,
-    consumeEvents: encodeInstruction({ consumeEvents: { limit: 16 } }) as Buffer,
-    consumeEventsPermissioned: encodeInstruction({
-        consumeEventsPermissioned: { limit: 32 },
-    }) as Buffer,
-    initOpenOrders: encodeInstruction({ initOpenOrders: {} }) as Buffer,
-    initializeMarket: encodeInstruction({
-        initializeMarket: {
-            baseLotSize: new BN(1_000),
-            feeRateBps: 25,
-            quoteDustThreshold: new BN(100),
-            quoteLotSize: new BN(10),
-            vaultSignerNonce: new BN(0),
-        },
-    }) as Buffer,
-    matchOrders: encodeInstruction({ matchOrders: { limit: 5 } }) as Buffer,
-    newOrder: encodeInstruction({
-        newOrder: {
-            clientId: new BN(7),
-            limitPrice: new BN(50_000),
-            maxQuantity: new BN(10),
-            orderType: 'limit',
-            side: 'buy',
-        },
-    }) as Buffer,
-    newOrderV3: encodeInstruction({
-        newOrderV3: {
-            clientId: new BN(42),
-            limit: 65_535,
-            limitPrice: new BN(60_000),
-            maxBaseQuantity: new BN(5),
-            maxQuoteQuantity: new BN(300_000),
-            orderType: 'postOnly',
-            selfTradeBehavior: 'decrementTake',
-            side: 'sell',
-        },
-    }) as Buffer,
-    prune: encodeInstruction({ prune: { limit: 25 } }) as Buffer,
-    settleFunds: encodeInstruction({ settleFunds: {} }) as Buffer,
+    cancelOrder: Buffer.from(
+        '000400000001000000ffffffffffffffffffffffffffffff7f000000000000000000000000000000000000000000000000000000000000000003',
+        'hex',
+    ),
+    cancelOrderByClientId: Buffer.from('00060000006300000000000000', 'hex'),
+    cancelOrderByClientIdV2: Buffer.from('000c0000007b00000000000000', 'hex'),
+    cancelOrderV2: Buffer.from('000b00000000000000ffffffffffffffffffffffffffffff7f', 'hex'),
+    closeOpenOrders: Buffer.from('000e000000', 'hex'),
+    consumeEvents: Buffer.from('00030000001000', 'hex'),
+    consumeEventsPermissioned: Buffer.from('00110000002000', 'hex'),
+    initOpenOrders: Buffer.from('000f000000', 'hex'),
+    initializeMarket: Buffer.from(
+        '0000000000e8030000000000000a00000000000000190000000000000000006400000000000000',
+        'hex',
+    ),
+    matchOrders: Buffer.from('00020000000500', 'hex'),
+    newOrder: Buffer.from('00010000000000000050c30000000000000a00000000000000000000000700000000000000', 'hex'),
+    newOrderV3: Buffer.from(
+        '000a0000000100000060ea0000000000000500000000000000e09304000000000000000000020000002a00000000000000ffff',
+        'hex',
+    ),
+    prune: Buffer.from('00100000001900', 'hex'),
+    settleFunds: Buffer.from('0005000000', 'hex'),
 } as const;
 
 // Version byte 0 + u32 LE code only — for the variants encodeInstruction can't build (7/8/9/13).

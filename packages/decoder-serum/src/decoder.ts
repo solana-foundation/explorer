@@ -1,9 +1,8 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix -- `accounts` literal order drives UI row order (Object.entries); data schemas are kept in wire order only to mirror the layout */
-import { decodeInstruction } from '@project-serum/serum';
 import { type AccountMeta, type PublicKey, type TransactionInstruction } from '@solana/web3.js';
-import { enums, type Infer, mask, number, object } from 'superstruct';
+import { bigint, enums, type Infer, mask, number, object } from 'superstruct';
 
-import { BigIntFromString } from './superstructHelpers';
+import { decodeInstruction } from './instruction-layout';
 
 export type Side = Infer<typeof Side>;
 export const Side = enums(['buy', 'sell']);
@@ -42,11 +41,11 @@ export type InitializeMarket = {
 };
 
 export const InitializeMarketInstruction = object({
-    baseLotSize: BigIntFromString,
-    quoteLotSize: BigIntFromString,
+    baseLotSize: bigint(),
+    quoteLotSize: bigint(),
     feeRateBps: number(),
-    vaultSignerNonce: BigIntFromString,
-    quoteDustThreshold: BigIntFromString,
+    vaultSignerNonce: bigint(),
+    quoteDustThreshold: bigint(),
 });
 
 export function decodeInitializeMarket(ix: TransactionInstruction): InitializeMarket {
@@ -87,10 +86,10 @@ export type NewOrder = {
 
 export const NewOrderInstruction = object({
     side: Side,
-    limitPrice: BigIntFromString,
-    maxQuantity: BigIntFromString,
+    limitPrice: bigint(),
+    maxQuantity: bigint(),
     orderType: OrderType,
-    clientId: BigIntFromString,
+    clientId: bigint(),
 });
 
 export function decodeNewOrder(ix: TransactionInstruction): NewOrder {
@@ -179,7 +178,7 @@ export type CancelOrder = {
 
 export const CancelOrderInstruction = object({
     side: Side,
-    orderId: BigIntFromString,
+    orderId: bigint(),
     openOrdersSlot: number(),
 });
 
@@ -240,7 +239,7 @@ export type CancelOrderByClientId = {
 };
 
 export const CancelOrderByClientIdInstruction = object({
-    clientId: BigIntFromString,
+    clientId: bigint(),
 });
 
 export function decodeCancelOrderByClientId(ix: TransactionInstruction): CancelOrderByClientId {
@@ -276,12 +275,12 @@ export type NewOrderV3 = {
 
 export const NewOrderV3Instruction = object({
     side: Side,
-    limitPrice: BigIntFromString,
-    maxBaseQuantity: BigIntFromString,
-    maxQuoteQuantity: BigIntFromString,
+    limitPrice: bigint(),
+    maxBaseQuantity: bigint(),
+    maxQuoteQuantity: bigint(),
     selfTradeBehavior: SelfTradeBehavior,
     orderType: OrderType,
-    clientId: BigIntFromString,
+    clientId: bigint(),
     limit: number(),
 });
 
@@ -320,7 +319,7 @@ export type CancelOrderV2 = {
 
 export const CancelOrderV2Instruction = object({
     side: Side,
-    orderId: BigIntFromString,
+    orderId: bigint(),
 });
 
 export function decodeCancelOrderV2(ix: TransactionInstruction): CancelOrderV2 {
@@ -352,7 +351,7 @@ export type CancelOrderByClientIdV2 = {
 };
 
 export const CancelOrderByClientIdV2Instruction = object({
-    clientId: BigIntFromString,
+    clientId: bigint(),
 });
 
 export function decodeCancelOrderByClientIdV2(ix: TransactionInstruction): CancelOrderByClientIdV2 {
@@ -487,8 +486,8 @@ export function parseSerumInstructionKey(instruction: TransactionInstruction): s
     return keys[0];
 }
 
-// Codes 7/8/9/13 (disableMarket, sweepFees, newOrderV2, sendTake) are absent from the serum lib's
-// INSTRUCTION_LAYOUT, so parseSerumInstructionKey throws for them and they can never be dispatched —
+// Codes 7/8/9/13 (disableMarket, sweepFees, newOrderV2, sendTake) have no vendored layout,
+// so parseSerumInstructionKey throws for them and they can never be dispatched —
 // the card renders them as raw data with a name-table title.
 export type DecodedSerumInstruction =
     | { key: 'cancelOrder'; info: CancelOrder }

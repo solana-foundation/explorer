@@ -139,7 +139,9 @@ describe('decodeSerumInstruction', () => {
     });
 
     it('should throw on data the instruction layout cannot decode', () => {
-        expect(() => decodeSerumInstruction(makeInstruction(makeRawInstructionData(13), programId))).toThrow(TypeError);
+        expect(() => decodeSerumInstruction(makeInstruction(makeRawInstructionData(13), programId))).toThrow(
+            'Unsupported Serum instruction code: 13',
+        );
     });
 });
 

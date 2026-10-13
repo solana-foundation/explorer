@@ -1,3 +1,4 @@
+import { getU32Decoder } from '@solana/kit';
 import { type TransactionInstruction } from '@solana/web3.js';
 
 import { MANGO_INSTRUCTION_NAMES } from './instruction-names';
@@ -9,8 +10,7 @@ export const isMangoInstruction = (instruction: TransactionInstruction): boolean
     programIds.has(instruction.programId.toBase58());
 
 // Mango keys its instructions by a leading u32 LE discriminator.
-const readDiscriminator = (data: Uint8Array): number =>
-    new DataView(data.buffer, data.byteOffset, data.byteLength).getUint32(0, true);
+const readDiscriminator = (data: Uint8Array): number => getU32Decoder().decode(data);
 
 // Name-only resolver for the NAME_SOURCES chain: program-id-gated and never throws, so it composes with other resolvers.
 export const resolveMangoInstructionName = (programId: string, discriminator: Uint8Array): string | undefined => {
