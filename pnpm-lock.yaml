@@ -155,6 +155,9 @@ importers:
       '@explorer/decoder-token-swap':
         specifier: workspace:*
         version: link:packages/decoder-token-swap
+      '@explorer/decoder-wormhole':
+        specifier: workspace:*
+        version: link:packages/decoder-wormhole
       '@explorer/entity-inspector':
         specifier: workspace:*
         version: link:packages/entity-inspector
@@ -653,6 +656,22 @@ importers:
         version: 4.1.10(@opentelemetry/api@1.9.0)(@types/node@24.13.6)(@vitest/browser-playwright@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@26.0.0(bufferutil@4.0.7)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@24.13.6)(typescript@5.7.3))(vite@6.4.3(@types/node@24.13.6)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
 
   packages/decoder-token-swap:
+    dependencies:
+      '@solana/kit':
+        specifier: ^8.3.0
+        version: 8.3.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@solana/web3.js':
+        specifier: ^1.99.0
+        version: 1.99.0(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)
+    devDependencies:
+      typescript:
+        specifier: catalog:tooling
+        version: 5.7.3
+      vitest:
+        specifier: catalog:vitest
+        version: 4.1.10(@opentelemetry/api@1.9.0)(@types/node@24.13.6)(@vitest/browser-playwright@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@26.0.0(bufferutil@4.0.7)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@24.13.6)(typescript@5.7.3))(vite@6.4.3(@types/node@24.13.6)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
+
+  packages/decoder-wormhole:
     dependencies:
       '@solana/kit':
         specifier: ^8.3.0

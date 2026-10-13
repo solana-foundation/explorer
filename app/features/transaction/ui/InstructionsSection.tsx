@@ -5,7 +5,6 @@ import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsC
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCard';
 import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
-import { isWormholeInstruction } from '@components/instruction/wormhole/types';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { TxInstructionSurface } from '@entities/instruction-card';
@@ -19,6 +18,7 @@ import {
     isSerumInstruction,
 } from '@explorer/decoder-serum/detection';
 import { isTokenSwapInstruction } from '@explorer/decoder-token-swap/detection';
+import { isWormholeInstruction } from '@explorer/decoder-wormhole/detection';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
     BPF_LOADER_PROGRAM_LABEL,
