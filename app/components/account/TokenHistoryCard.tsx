@@ -6,10 +6,6 @@ import { InstructionDetails } from '@components/common/InstructionDetails';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { Slot } from '@components/common/Slot';
-import {
-    isTokenLendingInstruction,
-    parseTokenLendingInstructionTitle,
-} from '@components/instruction/token-lending/types';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
 import { useTokenInfo } from '@entities/token-info';
@@ -518,15 +514,6 @@ function InstructionDetailsCell({
             } else if (transactionInstruction && isTokenSwapInstruction(transactionInstruction)) {
                 try {
                     name = parseTokenSwapInstructionTitle(transactionInstruction);
-                } catch (error) {
-                    Logger.error(error, {
-                        signature: tx.signature,
-                    });
-                    return undefined;
-                }
-            } else if (transactionInstruction && isTokenLendingInstruction(transactionInstruction)) {
-                try {
-                    name = parseTokenLendingInstructionTitle(transactionInstruction);
                 } catch (error) {
                     Logger.error(error, {
                         signature: tx.signature,

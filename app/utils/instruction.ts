@@ -1,8 +1,4 @@
 import { IX_TITLES, TokenInstructionType } from '@components/instruction/token/types';
-import {
-    isTokenLendingInstruction,
-    parseTokenLendingInstructionTitle,
-} from '@components/instruction/token-lending/types';
 import { type TransactionWithMeta } from '@entities/transaction-data';
 import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@explorer/decoder-token-swap/detection';
@@ -95,8 +91,6 @@ export function getTokenInstructionName(
                 return parseSerumInstructionTitle(transactionInstruction);
             } else if (isTokenSwapInstruction(transactionInstruction)) {
                 return parseTokenSwapInstructionTitle(transactionInstruction);
-            } else if (isTokenLendingInstruction(transactionInstruction)) {
-                return parseTokenLendingInstructionTitle(transactionInstruction);
             }
         } catch (error) {
             Logger.error(error, { signature: signatureInfo.signature });
