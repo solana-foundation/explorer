@@ -604,13 +604,9 @@ export default tseslint.config(
     // logic to `shared/`).
     {
         files: [
-            // app/entities cross-entity / wrong-direction imports
-            'app/entities/nft/lib/get-metadata-json.ts',
-
             // app/features cross-feature imports
             'app/features/idl/interactive-idl/model/use-mainnet-confirmation.ts',
             'app/features/instruction-simulation/ui/SimulationCard.tsx',
-            'app/features/receipt/receipt-page.tsx',
             'app/features/stake/ui/StakeAccountSection.tsx',
             'app/features/transaction/ui/AccountDetailDrawer.tsx',
             'app/features/transaction/ui/AccountExpandedSections.tsx',

@@ -16,7 +16,7 @@ vi.mock('@/app/providers/compressed-nft', () => ({
     useCompressedNft: vi.fn(() => null),
 }));
 
-vi.mock('@/app/features/metadata/utils', () => ({
+vi.mock('@/app/shared/lib/metadata-proxy', () => ({
     getProxiedUri: vi.fn((uri: string) => uri),
 }));
 

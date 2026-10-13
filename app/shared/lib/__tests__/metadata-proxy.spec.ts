@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-import { getProxiedUri } from '../utils';
+import { getProxiedUri } from '../metadata-proxy';
 
 // A well-known valid CIDv0 (contains Hello World)
 const VALID_CID_V0 = 'QmWATWQ7fVPP2EFGu71UkfnqhYXDYH566qy47CnJDgvs8u';
