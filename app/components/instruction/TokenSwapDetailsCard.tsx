@@ -1,3 +1,4 @@
+import { parseTokenSwapInstructionTitle } from '@explorer/decoder-token-swap/detection';
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
@@ -5,7 +6,6 @@ import React from 'react';
 import { Logger } from '@/app/shared/lib/logger';
 
 import { InstructionCard } from './InstructionCard';
-import { parseTokenSwapInstructionTitle } from './token-swap/types';
 
 export function TokenSwapDetailsCard({
     ix,

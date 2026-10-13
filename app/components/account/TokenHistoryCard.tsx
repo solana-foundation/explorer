@@ -10,13 +10,13 @@ import {
     isTokenLendingInstruction,
     parseTokenLendingInstructionTitle,
 } from '@components/instruction/token-lending/types';
-import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { cn } from '@components/shared/utils';
 import { useTokenInfo } from '@entities/token-info';
 import { trustedInnerInstructions } from '@entities/transaction-data';
 import { isMangoInstruction, parseMangoInstructionTitle } from '@explorer/decoder-mango/detection';
 import { isSerumInstruction, parseSerumInstructionTitle } from '@explorer/decoder-serum/detection';
+import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@explorer/decoder-token-swap/detection';
 import { useAccountHistories } from '@features/transaction-history/model/use-account-history';
 import { useFetchAccountHistory } from '@features/transaction-history/model/use-fetch-account-history';
 import { isTokenProgramData } from '@providers/accounts';

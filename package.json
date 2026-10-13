@@ -55,6 +55,7 @@
         "@explorer/decoder-mango": "workspace:*",
         "@explorer/decoder-pyth": "workspace:*",
         "@explorer/decoder-serum": "workspace:*",
+        "@explorer/decoder-token-swap": "workspace:*",
         "@explorer/entity-inspector": "workspace:*",
         "@explorer/parsers": "workspace:*",
         "@explorer/utils": "workspace:*",
