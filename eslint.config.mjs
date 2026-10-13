@@ -967,7 +967,6 @@ export default tseslint.config(
             'app/components/account/AnchorAccountCard.tsx',
             'app/components/account/MetaplexNFTAttributesCard.tsx',
             'app/components/account/nftoken/nftoken-hooks.tsx',
-            'app/components/account/nftoken/nftoken-types.ts',
             'app/components/account/sas/AttestationDataCard.tsx',
             'app/components/common/BaseInstructionCard.tsx',
             'app/components/common/InspectorInstructionCard.tsx',

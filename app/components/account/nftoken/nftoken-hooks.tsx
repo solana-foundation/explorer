@@ -1,10 +1,10 @@
+import { type NftokenMetadata, type NftokenNftInfo } from '@explorer/decoder-nftoken';
 import { useCluster } from '@providers/cluster';
 import useSWR, { SWRResponse } from 'swr';
 
 import { invariant } from '@/app/shared/lib/invariant';
 
 import { NftokenFetcher } from './nftoken';
-import { NftokenTypes } from './nftoken-types';
 
 const getCollectionNftsFetcher = async ([_method, collectionAddress, url]: [string, string, string]) => {
     return await NftokenFetcher.getNftsInCollection({
@@ -20,9 +20,9 @@ export const useCollectionNfts = ({
 }): {
     // We can be confident that data will be nonnull even if the request fails,
     // if we defined fallbackData in the config.
-    data: NftokenTypes.NftInfo[];
+    data: NftokenNftInfo[];
     error: any;
-    mutate: SWRResponse<NftokenTypes.NftInfo[], never>['mutate'];
+    mutate: SWRResponse<NftokenNftInfo[], never>['mutate'];
 } => {
     const { url } = useCluster();
 
@@ -41,9 +41,9 @@ const getMetadataFetcher = async (metadataUrl: string) => {
 export const useNftokenMetadata = (
     metadataUrl: string | null | undefined,
 ): {
-    data: NftokenTypes.Metadata | null;
+    data: NftokenMetadata | null;
     error: any;
-    mutate: SWRResponse<NftokenTypes.Metadata | null, never>['mutate'];
+    mutate: SWRResponse<NftokenMetadata | null, never>['mutate'];
 } => {
     const swrKey = [metadataUrl];
     const { data, error, mutate } = useSWR(swrKey, getMetadataFetcher, {

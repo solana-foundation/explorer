@@ -1,18 +1,19 @@
 import { getRpc } from '@entities/cluster';
-import { address, type Base58EncodedBytes, getBase58Decoder, getBase64Encoder } from '@solana/kit';
+import {
+    decodeNftokenNftAccount,
+    NFT_ACCOUNT_COLLECTION_OFFSET,
+    NFT_ACCOUNT_DISCRIMINATOR_BASE58,
+    NFTOKEN_ADDRESS,
+    type NftokenMetadata,
+    type NftokenNftAccount,
+    type NftokenNftInfo,
+} from '@explorer/decoder-nftoken';
+import { type Base58EncodedBytes, getBase64Encoder } from '@solana/kit';
 import pLimit from 'p-limit';
 
-import { fromHex } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 
-import { NftokenTypes } from './nftoken-types';
-
-const BASE58_DECODER = getBase58Decoder();
 const BASE64_ENCODER = getBase64Encoder();
-
-export const NFTOKEN_ADDRESS = 'nftokf9qcHSYkVSP3P2gUMmV6d4AwjMueXgUu43HyLL';
-
-const nftokenAccountDiscInHex = '21b45b35ec0f3f61';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace NftokenFetcher {
@@ -22,50 +23,37 @@ export namespace NftokenFetcher {
     }: {
         collection: string;
         rpcUrl: string;
-    }): Promise<NftokenTypes.NftInfo[]> => {
+    }): Promise<NftokenNftInfo[]> => {
         const accounts = await getRpc(rpcUrl)
-            .getProgramAccounts(address(NFTOKEN_ADDRESS), {
+            .getProgramAccounts(NFTOKEN_ADDRESS, {
                 encoding: 'base64',
                 filters: [
                     {
                         memcmp: {
-                            bytes: BASE58_DECODER.decode(fromHex(nftokenAccountDiscInHex)) as Base58EncodedBytes,
+                            bytes: NFT_ACCOUNT_DISCRIMINATOR_BASE58 as Base58EncodedBytes,
                             encoding: 'base58',
                             offset: 0n,
                         },
                     },
                     {
                         memcmp: {
-                            // authority_can_update
                             bytes: collection as Base58EncodedBytes,
                             encoding: 'base58',
-                            offset:
-                                8n + // discriminator
-                                1n + // version
-                                32n + // holder
-                                32n + // authority
-                                1n,
+                            offset: NFT_ACCOUNT_COLLECTION_OFFSET,
                         },
                     },
                 ],
             })
             .send();
 
-        const parsed_accounts: NftokenTypes.NftAccount[] = accounts.flatMap(account => {
+        const parsed_accounts: NftokenNftAccount[] = accounts.flatMap(account => {
             try {
-                const parsed = NftokenTypes.nftAccountDecoder.decode(BASE64_ENCODER.encode(account.account.data[0]));
-
-                return {
-                    address: account.pubkey.toString(),
-                    authority: parsed.authority,
-                    authority_can_update: Boolean(parsed.authority_can_update),
-                    collection: parsed.collection,
-
-                    delegate: parsed.delegate,
-                    holder: parsed.holder,
-
-                    metadata_url: parsed.metadata_url,
-                };
+                return (
+                    decodeNftokenNftAccount(
+                        account.pubkey.toString(),
+                        BASE64_ENCODER.encode(account.account.data[0]),
+                    ) ?? []
+                );
             } catch (e) {
                 Logger.error(e);
                 return [];
@@ -96,11 +84,7 @@ export namespace NftokenFetcher {
         });
     };
 
-    export const getMetadata = async ({
-        url,
-    }: {
-        url: string | null | undefined;
-    }): Promise<NftokenTypes.Metadata | null> => {
+    export const getMetadata = async ({ url }: { url: string | null | undefined }): Promise<NftokenMetadata | null> => {
         if (!url) {
             return null;
         }
@@ -115,10 +99,10 @@ export namespace NftokenFetcher {
         urls: _urls,
     }: {
         urls: Array<string | null | undefined>;
-    }): Promise<Map<string, NftokenTypes.Metadata | null>> => {
+    }): Promise<Map<string, NftokenMetadata | null>> => {
         const urls = Array.from(new Set(_urls.filter((url): url is string => Boolean(url))));
 
-        const metadataMap = new Map<string, NftokenTypes.Metadata | null>();
+        const metadataMap = new Map<string, NftokenMetadata | null>();
 
         const limit = pLimit(5);
         const promises = urls.map(url =>

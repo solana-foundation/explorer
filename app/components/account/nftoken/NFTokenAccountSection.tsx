@@ -1,5 +1,6 @@
 import { Address } from '@components/common/Address';
 import { useRefreshAccount } from '@entities/account';
+import { type NftokenCollectionAccount, type NftokenNftAccount } from '@explorer/decoder-nftoken';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
@@ -11,7 +12,6 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import { UnknownAccountCard } from '../UnknownAccountCard';
 import { parseNFTokenCollectionAccount, parseNFTokenNFTAccount } from './isNFTokenAccount';
 import { useCollectionNfts } from './nftoken-hooks';
-import { NftokenTypes } from './nftoken-types';
 
 export function NFTokenAccountSection({ account }: { account: Account }) {
     const nft = parseNFTokenNFTAccount(account);
@@ -27,7 +27,7 @@ export function NFTokenAccountSection({ account }: { account: Account }) {
     return <UnknownAccountCard account={account} />;
 }
 
-const NFTCard = ({ account, nft }: { account: Account; nft: NftokenTypes.NftAccount }) => {
+const NFTCard = ({ account, nft }: { account: Account; nft: NftokenNftAccount }) => {
     const fetchInfo = useRefreshAccount();
 
     return (
@@ -86,7 +86,7 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
     );
 };
 
-const CollectionCard = ({ account, collection }: { account: Account; collection: NftokenTypes.CollectionAccount }) => {
+const CollectionCard = ({ account, collection }: { account: Account; collection: NftokenCollectionAccount }) => {
     const fetchInfo = useRefreshAccount();
 
     return (
