@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 import {
@@ -8,13 +8,12 @@ import {
     useTabRegistration,
 } from '@/app/shared/ui/navigation-tabs/model/navigation-tabs-context';
 import { type NavigationTab } from '@/app/shared/ui/navigation-tabs/model/types';
+import { useScrollSpy } from '@/app/shared/ui/navigation-tabs/model/use-scroll-spy';
 import { useTabOverflow } from '@/app/shared/ui/navigation-tabs/model/useTabOverflow';
 import { useSticky } from '@/app/shared/ui/sticky-header/useSticky';
 
 import { MobileMoreDropdown } from './MobileMoreDropdown';
 import { TabLink } from './TabLink';
-
-const SCROLL_OFFSET = 10;
 
 export type BaseNavigationTabsProps = {
     activeValue?: string;
@@ -52,10 +51,10 @@ export function BaseNavigationTabs({
     const { registeredTabs, registerTab, unregisterTab } = useTabRegistration();
 
     const { stuck, wrapperRef } = useSticky(isSticky);
-    const [spyActive, setSpyActive] = useState(() => tabs[0]?.path ?? '');
 
     const staticPaths = useMemo(() => new Set(tabs.map(t => t.path)), [tabs]);
     const disabledPaths = useMemo(() => new Set(tabs.filter(t => t.disabled).map(t => t.path)), [tabs]);
+    const spyPaths = useMemo(() => tabs.map(t => t.path), [tabs]);
 
     const allTabs = useMemo(
         () => [...tabs, ...registeredTabs.filter(t => !staticPaths.has(t.path))],
@@ -64,25 +63,14 @@ export function BaseNavigationTabs({
 
     const { measuring, moreMeasureRef, moreTabs, tablistRef, visibleTabs } = useTabOverflow(allTabs);
 
-    const scrollToSection = useCallback(
-        (path: string) => {
-            const target = document.getElementById(path);
-            const headerEl = wrapperRef.current ?? tablistRef.current;
-            if (!target || !headerEl) return;
-            const offset = headerEl.getBoundingClientRect().height;
-            let naturalTop = 0;
-            let el: HTMLElement | null = target;
-            while (el) {
-                naturalTop += el.offsetTop;
-                el = el.offsetParent as HTMLElement | null;
-            }
-            window.scrollTo({
-                behavior: 'smooth',
-                top: naturalTop - offset - SCROLL_OFFSET,
-            });
-        },
-        [tablistRef, wrapperRef],
-    );
+    // useSticky already publishes the bar height, so the spy must not register it a second time.
+    const { active: spyActive, scrollToSection } = useScrollSpy({
+        enabled: !!scrollSpy,
+        fallbackRef: tablistRef,
+        paths: spyPaths,
+        registerStickyHeight: false,
+        wrapperRef,
+    });
 
     const scrollSpyTabClick = useCallback(
         (path: string, e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -91,26 +79,6 @@ export function BaseNavigationTabs({
         },
         [scrollToSection],
     );
-
-    useEffect(() => {
-        if (!scrollSpy) return;
-        const update = () => {
-            const tabHeight = (wrapperRef.current ?? tablistRef.current)?.getBoundingClientRect().height ?? 0;
-            // Activate when section is in the upper third of the visible content area
-            const threshold = window.scrollY + tabHeight + window.innerHeight * 0.3;
-            let active = tabs[0]?.path ?? '';
-            for (const tab of tabs) {
-                const el = document.getElementById(tab.path);
-                if (el && el.getBoundingClientRect().top + window.scrollY <= threshold) {
-                    active = tab.path;
-                }
-            }
-            setSpyActive(active);
-        };
-        window.addEventListener('scroll', update, { passive: true });
-        update();
-        return () => window.removeEventListener('scroll', update);
-    }, [scrollSpy, tabs, tablistRef, wrapperRef]);
 
     const activeValue = scrollSpy ? spyActive : (activeValueProp ?? '');
     const onTabClick = scrollSpy ? scrollSpyTabClick : onTabClickProp;

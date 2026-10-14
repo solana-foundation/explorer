@@ -5,9 +5,10 @@ import { cn } from '@components/shared/utils';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import * as React from 'react';
 
+import { useEdgeFades } from '@/app/shared/lib/use-edge-fades';
+
 import { DrawerFooter } from './DrawerFooter';
 import { DrawerHeader } from './DrawerHeader';
-import { useEdgeFades } from './model/useEdgeFades';
 import { DRAWER_SLIDE_MS, useSwipeToDismiss } from './model/useSwipeToDismiss';
 
 // The drawer sits above the legacy dashkit stacking contexts (the cluster sidebar is z-[1060] over a
