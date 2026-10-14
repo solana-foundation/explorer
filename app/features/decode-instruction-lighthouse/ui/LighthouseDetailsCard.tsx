@@ -1,4 +1,4 @@
-import { DecodedInstructionCard, parseCodamaArgs } from '@entities/instruction-card';
+import { DecodedInstructionCard, parseCodamaArgs, toInstructionNode } from '@entities/instruction-card';
 import { type ParsedInstruction, type TransactionInstruction } from '@solana/web3.js';
 
 import { withFormattedOperators } from '../lib/format-operators';
@@ -28,7 +28,7 @@ export function LighthouseDetailsCard({
 
     return (
         <DecodedInstructionCard
-            node={{ childIndex, index, innerCards, ix: raw, programId: raw.programId }}
+            node={toInstructionNode({ childIndex, index, innerCards, ix: raw })}
             ix={raw}
             title={`${programName}: ${title}`}
             programName={programName}

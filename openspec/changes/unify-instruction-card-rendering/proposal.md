@@ -37,7 +37,7 @@ Making chrome ambient (React Context) and fields declarative (data) separates th
   - `ui/InstructionCardView.tsx` — resolves the frame from the surface. The escape hatch for cards that need their own markup, and the carrier for card-derived program events via an `events` prop.
   - `model/define-instruction-card.tsx` — shorthand factory for the common label/value shape.
   - `ui/TxInstructionSurface.tsx` — the transaction page surface.
-- The inspector declares `INSPECTOR_SURFACE` beside its own `InstructionsSection`. `INSPECTOR_RESULT` and `INSPECTOR_SIGNATURE` both survive this change — the surface carries `result` for System only, while unmigrated cards still take it as a prop (13 of the 14 remaining `result={INSPECTOR_RESULT}` passes and all 3 `signature={INSPECTOR_SIGNATURE}` passes). Both constants are deleted when the last inspector-reachable program migrates and the shared `components/instruction/UnknownDetailsCard` fallback, which keeps System's `result` pass alive, migrates with it.
+- The inspector declares `INSPECTOR_SURFACE` beside its own `InstructionsSection`. `INSPECTOR_RESULT` and `INSPECTOR_SIGNATURE` both survive this change, because unmigrated cards still take them as props. `INSPECTOR_SURFACE` reads `INSPECTOR_RESULT` as its `result`. The last inspector-reachable migration deletes the `result` and `signature` props.
 - Migrate all 13 System cards to `defineInstructionCard`. No file under `app/components/instruction/system/` imports `Address`, `BaseTable`, or `InstructionCard` any more.
 - `SystemDetailsCard` builds the node from the props the two `InstructionsSection`s still pass.
 

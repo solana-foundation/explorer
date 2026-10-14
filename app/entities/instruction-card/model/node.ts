@@ -26,3 +26,8 @@ export type InstructionNode = {
      */
     innerCards?: JSX.Element[];
 };
+
+/** Takes `programId` from `ix`, so the two cannot disagree. */
+export function toInstructionNode(fields: Omit<InstructionNode, 'programId'>): InstructionNode {
+    return { ...fields, programId: fields.ix.programId };
+}

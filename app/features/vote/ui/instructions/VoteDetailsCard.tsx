@@ -1,6 +1,5 @@
-import { UnknownDetailsCard } from '@components/instruction/UnknownDetailsCard';
-import type { InstructionNode } from '@entities/instruction-card';
-import type { ParsedInstruction, ParsedTransaction, SignatureResult } from '@solana/web3.js';
+import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
+import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
 
@@ -43,25 +42,18 @@ import { WithdrawDetailsCard } from './WithdrawDetailsCard';
 type DetailsProps = {
     tx: ParsedTransaction;
     ix: ParsedInstruction;
-    result: SignatureResult;
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
 };
 
-export function VoteDetailsCard(props: DetailsProps) {
-    const node: InstructionNode = {
-        childIndex: props.childIndex,
-        index: props.index,
-        innerCards: props.innerCards,
-        ix: props.ix,
-        programId: props.ix.programId,
-    };
+export function VoteDetailsCard({ childIndex, index, innerCards, ix, tx }: DetailsProps) {
+    const node = toInstructionNode({ childIndex, index, innerCards, ix });
 
     // TODO: Replace this try/catch + Logger with a React error boundary one level up
     // (see the matching note in StakeDetailsCard).
     try {
-        const parsed = create(props.ix.parsed, ParsedInfo);
+        const parsed = create(ix.parsed, ParsedInfo);
 
         switch (parsed.type) {
             case 'initialize': {
@@ -145,12 +137,12 @@ export function VoteDetailsCard(props: DetailsProps) {
                 return <DepositDelegatorRewardsDetailsCard info={info} node={node} />;
             }
             default:
-                return <UnknownDetailsCard {...props} />;
+                return <UnknownDetailsCard node={node} />;
         }
     } catch (error) {
         Logger.error(error, {
-            signature: props.tx.signatures[0],
+            signature: tx.signatures[0],
         });
-        return <UnknownDetailsCard {...props} />;
+        return <UnknownDetailsCard node={node} />;
     }
 }

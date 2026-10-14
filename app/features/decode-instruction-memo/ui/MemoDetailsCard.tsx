@@ -1,12 +1,11 @@
 import {
     defineInstructionCard,
     InstructionCardView,
-    type InstructionNode,
     preformatted,
+    toInstructionNode,
 } from '@entities/instruction-card';
 import type { ParsedInstruction, TransactionInstruction } from '@solana/web3.js';
 import { wrap } from '@utils/index';
-import React from 'react';
 
 import { isMemoParsed } from '../lib/memo-parser';
 
@@ -26,7 +25,7 @@ type MemoDetailsCardProps = {
 };
 
 export function MemoDetailsCard({ ix, raw, index, innerCards, childIndex }: MemoDetailsCardProps) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix, programId: ix.programId, raw };
+    const node = toInstructionNode({ childIndex, index, innerCards, ix, raw });
 
     if (!isMemoParsed(ix.parsed)) {
         return <InstructionCardView node={node} title="Memo Program: Unknown Instruction" defaultRaw />;

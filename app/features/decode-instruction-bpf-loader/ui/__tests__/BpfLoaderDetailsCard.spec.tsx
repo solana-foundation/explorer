@@ -2,7 +2,6 @@ import { TxInstructionSurface } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { BPF_LOADER_PROGRAM_ID, type ParsedInstruction, PublicKey } from '@solana/web3.js';
 import { render, screen, waitFor, within } from '@testing-library/react';
-import React from 'react';
 import { vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({

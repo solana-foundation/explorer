@@ -11,7 +11,8 @@ vi.mock('../CodamaInstructionCard', () => ({
 vi.mock('../AnchorDetailsCard', () => ({
     AnchorDetailsCard: ({ signature }: { signature: string }) => <div data-testid="anchor-card">{signature}</div>,
 }));
-vi.mock('@/app/components/instruction/UnknownDetailsCard', () => ({
+vi.mock('@entities/instruction-card', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/instruction-card')>()),
     UnknownDetailsCard: () => <div data-testid="unknown-card" />,
 }));
 

@@ -1,5 +1,5 @@
 import { RawDataField } from '@components/shared/RawDataField';
-import { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from '@entities/instruction-card';
+import { DECODED_TABLE_COLUMNS, DecodedInstructionCard, toInstructionNode } from '@entities/instruction-card';
 import { type TransactionInstruction } from '@solana/web3.js';
 import { capitalizeFirstLetter } from '@utils/index';
 import React from 'react';
@@ -57,7 +57,7 @@ function PmpDetailsCardBody({ ix, index, innerCards, childIndex, fallback }: Pmp
 
     return (
         <DecodedInstructionCard
-            node={{ childIndex, index, innerCards, ix, programId: ix.programId }}
+            node={toInstructionNode({ childIndex, index, innerCards, ix })}
             ix={ix}
             title={`${programName}: ${capitalizeFirstLetter(contentInstruction.kind)}`}
             programName={programName}

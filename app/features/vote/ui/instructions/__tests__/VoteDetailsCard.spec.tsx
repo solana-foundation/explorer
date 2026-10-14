@@ -135,7 +135,7 @@ function renderCard(ix: ParsedInstruction) {
                 <TransactionsProvider>
                     <AccountsProvider>
                         <TxInstructionSurface result={{ err: null }}>
-                            <VoteDetailsCard index={0} ix={ix} result={{ err: null }} tx={voteParsedTransaction(ix)} />
+                            <VoteDetailsCard index={0} ix={ix} tx={voteParsedTransaction(ix)} />
                         </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>

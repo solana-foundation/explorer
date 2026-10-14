@@ -5,11 +5,10 @@ import {
     defineInstructionCard,
     InstructionAddress,
     InstructionCardView,
-    type InstructionNode,
     text,
+    toInstructionNode,
 } from '@entities/instruction-card';
 import type { ParsedInstruction, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import React from 'react';
 import { is } from 'superstruct';
 
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
@@ -78,7 +77,7 @@ export function AddressLookupTableDetailsCard({
     innerCards,
     childIndex,
 }: AddressLookupTableDetailsCardProps) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix, programId: ix.programId, raw };
+    const node = toInstructionNode({ childIndex, index, innerCards, ix, raw });
 
     if (!isAddressLookupTableParsed(ix.parsed)) {
         return <InstructionCardView node={node} title={`${TITLE_PREFIX} Program: Unknown Instruction`} defaultRaw />;

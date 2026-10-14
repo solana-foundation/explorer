@@ -5,12 +5,11 @@ import {
     heading,
     InstructionCardView,
     type InstructionFieldList,
-    type InstructionNode,
     text,
+    toInstructionNode,
 } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
 import type { TransactionInstruction } from '@solana/web3.js';
-import React from 'react';
 
 import { Copyable } from '@/app/components/common/Copyable';
 import { toBase64 } from '@/app/shared/lib/bytes';
@@ -42,7 +41,7 @@ type Ed25519DetailsCardProps = {
 };
 
 export function Ed25519DetailsCard({ ix, raw, siblingData, index, innerCards, childIndex }: Ed25519DetailsCardProps) {
-    const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
+    const node = toInstructionNode({ childIndex, index, innerCards, ix: raw });
 
     if ('unknown' in ix) {
         return <InstructionCardView node={node} title="Ed25519: Unknown Instruction" defaultRaw />;

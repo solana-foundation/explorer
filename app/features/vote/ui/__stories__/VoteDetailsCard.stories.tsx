@@ -284,7 +284,7 @@ export const UnknownInstructionFallback: Story = {
 
 function cardArgs(parsed: { info: object; type: string }) {
     const ix = voteParsedInstruction(parsed);
-    return { index: 0, ix, result: { err: null }, tx: voteParsedTransaction(ix) };
+    return { index: 0, ix, tx: voteParsedTransaction(ix) };
 }
 
 function expectTitle(title: string) {
