@@ -112,17 +112,34 @@ A card SHALL receive the instruction it renders as one `InstructionNode`, not as
 
 `InstructionNode.children` is the target representation for CPI children and stays unpopulated until tree construction moves out of the render pass. `innerCards` is marked deprecated and is deleted in that same follow-up.
 
-`InstructionNode.ix` is provisional: it exists for the frame, which branches on `'parsed' in ix` for the Raw view. Cards MUST NOT read `node.ix`, so the field can be reshaped when the instruction-parser compat wrap is deleted without touching any card.
+`InstructionNode.ix` is provisional: it exists for the frame, which branches on `'parsed' in ix` for the Raw view. Cards MUST NOT read `node.ix`, so the field can be reshaped when the instruction-parser compat wrap is deleted without touching any card. `DecodedInstructionCard` and `AnchorDetailsCard` list the instruction's accounts, and both read the accounts from their own `ix` prop. The prop types let `node` and `ix` describe two different instructions. [HOO-2095](https://linear.app/solana-fndn/issue/HOO-2095/decodedinstructioncard-and-anchordetailscard-can-take-node-and-ix-from) moves the accounts to `node.raw` and deletes the `ix` prop.
 
-`InstructionNode.programId` SHALL carry the program id separately from `ix`, and is the only node field a card reads — it has to, because `InstructionFields` takes `programId` as a prop. It is stated as its own field rather than derived from `ix` at each call site precisely so that the `MUST NOT read node.ix` rule above stays absolute, and it is the first piece of the eventual `programId` + `raw` + optional-parsed-payload split already in place.
+`InstructionNode.programId` SHALL carry the program id separately from `ix`. It is stated as its own field rather than derived from `ix` at each call site precisely so that the `MUST NOT read node.ix` rule above stays absolute, and it is the first piece of the eventual `programId` + `raw` + optional-parsed-payload split already in place. A card reads `node.programId`, because `InstructionFields` and `ProgramField` take `programId` as a prop. A card that reads program events also reads `node.index` and `node.childIndex`. `extractEventsFromLogs` returns only the events that one invocation logged, so each card shows the events of its own instruction and decodes them with the IDL of its own program. The nth CPI invoke log under a top-level instruction belongs to inner instruction n, so `node.childIndex` selects the invocation of a CPI child.
 
-Program events are the deliberate exception to "nesting travels on the node". They are read from transaction logs *inside* the card and exist only on the tx page, so they MUST arrive as `InstructionCardView`'s `events` prop and MUST NOT be added to `InstructionNode`. A surface whose frame cannot render them SHALL drop them rather than fail.
+Program events are the deliberate exception to "nesting travels on the node". They are read from transaction logs *inside* the card, so they MUST arrive as `InstructionCardView`'s `events` prop and MUST NOT be added to `InstructionNode`. A surface whose frame cannot render them SHALL drop them rather than fail. The inspector's frame drops them. A card SHALL pass `events` only when `decodeProgramEvents` returns at least one entry, because the frame draws an `Events` section for every non-empty `events` list.
 
 #### Scenario: Program events reach the frame
 
-- **WHEN** a card derives program events from transaction logs
+- **WHEN** a card reads program events from transaction logs
 - **THEN** it MUST pass them to `InstructionCardView` as `events`, not through the node
-- **AND** on a surface with no logs the frame MUST render the card without them
+- **AND** in the inspector the frame MUST render the card without them
+
+#### Scenario: Program events of a CPI child
+
+- **WHEN** a top-level instruction and its CPI child both log events, and both render through a card that reads program events
+- **THEN** the card of the CPI child MUST show the events that the CPI child logged
+- **AND** the label of each of those events MUST carry the index of the CPI child
+- **AND** the card of the top-level instruction MUST NOT show the events that the CPI child logged
+
+#### Scenario: `Program data:` payload that does not decode
+
+- **WHEN** the instruction logs a `Program data:` payload that does not decode
+- **THEN** the frame MUST draw an `Events` section with an `Unknown Event` entry for that payload
+
+#### Scenario: No event entry
+
+- **WHEN** the instruction logs no `Program data:` payload, and no `Program log:` payload of the instruction decodes
+- **THEN** the frame MUST NOT draw an `Events` section
 
 #### Scenario: Program event logged by a CPI
 
@@ -140,8 +157,8 @@ Program events are the deliberate exception to "nesting travels on the node". Th
 
 - **WHEN** a card needs the instruction's raw bytes or its RPC-parsed payload
 - **THEN** it MUST NOT read them from `node.ix` — the frame obtains them from the node instead
-- **AND** the values the card renders MUST come only from its decoded `info`
-- **AND** the only node field the card may read MUST be `node.programId`
+- **AND** the values the card renders MUST come only from its decoded payload, or from its own `ix` prop when the card lists the instruction's accounts
+- **AND** the card MUST read only `node.programId` from the node, plus `node.index` and `node.childIndex` when the card reads program events
 
 ### Requirement: Whole-program migration
 

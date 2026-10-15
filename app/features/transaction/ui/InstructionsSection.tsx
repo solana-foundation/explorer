@@ -320,20 +320,9 @@ function InstructionCard({
         return <ErrorCard key={key} text="Could not display this instruction, please report" />;
     }
 
-    const props = {
-        childIndex,
-        index,
-        innerCards,
-        ix: transactionIx,
-        result,
-        signature,
-    };
-    const node = toInstructionNode({
-        childIndex,
-        index,
-        innerCards,
-        ix: transactionIx,
-    });
+    const nodeProps = { childIndex, index, innerCards, ix: transactionIx };
+    const props = { ...nodeProps, result, signature };
+    const node = toInstructionNode(nodeProps);
 
     if (isEd25519Instruction(transactionIx)) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
@@ -490,12 +479,12 @@ function InstructionCard({
         return (
             <PmpDetailsCard
                 key={key}
-                {...props}
+                {...nodeProps}
                 // The card cannot import the IDL feature (boundaries/dependencies), so this surface decides what
                 // a non-content PMP instruction falls back to. Same two outcomes as before the branch existed.
                 fallback={
                     idlDecode ? (
-                        <IdlInstructionCard decoded={idlDecode} {...props} />
+                        <IdlInstructionCard decoded={idlDecode} {...nodeProps} />
                     ) : (
                         <UnknownDetailsCard node={node} />
                     )
@@ -504,7 +493,7 @@ function InstructionCard({
         );
     }
     if (idlDecode) {
-        return <IdlInstructionCard key={key} decoded={idlDecode} {...props} />;
+        return <IdlInstructionCard key={key} decoded={idlDecode} {...nodeProps} />;
     }
 
     return <UnknownDetailsCard key={key} node={node} />;

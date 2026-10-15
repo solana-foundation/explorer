@@ -49,8 +49,7 @@ export type InstructionCardSpec<I> = {
  * ```
  *
  * Both styles take their chrome from the surface, which is the point; only the
- * factory's brevity is lost. `node.programId` is the only field of the node a
- * card reads; `node.ix` is for the frame.
+ * factory's brevity is lost.
  */
 export function defineInstructionCard<I>(spec: InstructionCardSpec<I>): React.FC<InstructionCardProps<I>> {
     function Card({ node, info }: InstructionCardProps<I>) {
