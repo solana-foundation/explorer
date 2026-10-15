@@ -32,7 +32,9 @@ describe('GET /robots.txt', () => {
 
     it('should keep defined bots off the OG image routes', async () => {
         const body = await GET(createRequest()).text();
-        const userAgents = ['AhrefsBot', 'Amazonbot', 'GoogleOther'].map(bot => `User-agent: ${bot}\n`).join('');
+        const userAgents = ['AhrefsBot', 'Amazonbot', 'Amzn-SearchBot', 'GoogleOther', 'PetalBot']
+            .map(bot => `User-agent: ${bot}\n`)
+            .join('');
 
         expect(body).toContain(
             `${userAgents}Allow: /\nAllow: /mcp/start\nDisallow: /api/\nDisallow: /mcp\nDisallow: /og/\n`,
