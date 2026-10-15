@@ -7,6 +7,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -30,7 +31,7 @@ function makeNewOrderV3Instruction(): TransactionInstruction {
 
 const meta: Meta<typeof SerumDetailsCard> = {
     component: SerumDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/InstructionProgramSerum/SerumDetailsCard',

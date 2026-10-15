@@ -1,4 +1,4 @@
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { createProgramClient, type ProgramMethodBuilder } from '@codama/dynamic-client';
 import { parseInstruction } from '@codama/dynamic-parsers';
 import { TxInstructionSurface } from '@entities/instruction-card';
@@ -241,7 +241,7 @@ async function renderBuilt(builder: ProgramMethodBuilder) {
 
 function renderInstruction(ix: TransactionInstruction) {
     return render(
-        <TxInstructionSurface result={{ err: null }}>
+        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
             <CodamaInstructionCard ix={ix} index={0} parsedIx={parseInstruction(COUNTER_IDL, toKitInstruction(ix))} />
         </TxInstructionSurface>,
     );
@@ -265,7 +265,7 @@ function toTransactionInstruction({
 
 function renderCard(parsedIx: ReturnType<typeof makeParsedIx>) {
     return render(
-        <TxInstructionSurface result={{ err: null }}>
+        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
             <CodamaInstructionCard ix={makeIx(parsedIx.accounts)} index={0} parsedIx={parsedIx as never} />
         </TxInstructionSurface>,
     );

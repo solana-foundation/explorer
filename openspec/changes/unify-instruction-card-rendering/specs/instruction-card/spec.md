@@ -10,13 +10,19 @@ One rendering layer for instruction cards, shared by `/tx/[signature]` and `/tx/
 
 ### Requirement: Surface-owned chrome
 
-Instruction cards MUST NOT receive surface chrome as props. An `InstructionSurface` value in React Context SHALL contain the card frame and the transaction's `SignatureResult`.
+Instruction cards MUST NOT receive surface chrome as props. An `InstructionSurface` value in React Context SHALL contain the card frame, plus the transaction's `SignatureResult` and signature.
 
 The card body MUST draw the `Program` row in the decoded view, on both surfaces. The frame MUST draw its own `Program` row only in the raw view, where the body does not render. The frame therefore needs neither the width of the body nor the program name.
 
 An address MUST render the same way on both surfaces, so `InstructionSurface` MUST NOT contain an address renderer.
 
-For migrated cards, `InstructionSurface` replaces the `InstructionCardComponent` prop and the inspector's `INSPECTOR_RESULT` and `INSPECTOR_SIGNATURE` constants. Unmigrated cards keep all three. Each program migration removes that program's props. `INSPECTOR_SURFACE` reads `INSPECTOR_RESULT` as its `result`. The last inspector-reachable migration deletes the `result` and `signature` props. `useInstructionSurface` fails loudly rather than falling back to a default, matching `useInstructionParser`.
+For migrated cards, `InstructionSurface` replaces the `InstructionCardComponent` prop and the inspector's `INSPECTOR_RESULT` constant. Unmigrated cards keep both. Each program migration removes that program's props. `INSPECTOR_SURFACE` sets `result` to `INSPECTOR_RESULT`. The last inspector-reachable migration deletes the `result` prop. The frame and the cards SHALL read the signature from `InstructionSurface`, and no other React Context SHALL carry it. `INSPECTOR_SURFACE` sets `signature` to `undefined`, because the inspector reads its logs from a simulation, not from a fetched transaction. `useInstructionSurface` throws outside a provider instead of returning a default, matching `useInstructionParser`. A surface that omits `InstructionSurface.signature` MUST fail to compile, because a missing signature throws no error. The frame then fetches no raw transaction, and a card shows no program events.
+
+#### Scenario: One source for the signature
+
+- **WHEN** the frame or a card needs the transaction signature
+- **THEN** it MUST read `InstructionSurface.signature`
+- **AND** in the inspector the frame MUST NOT request the raw transaction
 
 #### Scenario: Same card on both surfaces
 

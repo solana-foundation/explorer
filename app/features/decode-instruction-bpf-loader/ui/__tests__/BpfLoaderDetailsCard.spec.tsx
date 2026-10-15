@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { BPF_LOADER_PROGRAM_ID, type ParsedInstruction, PublicKey } from '@solana/web3.js';
@@ -119,7 +120,7 @@ function renderCard(ix: ParsedInstruction) {
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>
+                        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
                             <BpfLoaderDetailsCard ix={ix} index={0} />
                         </TxInstructionSurface>
                     </AccountsProvider>

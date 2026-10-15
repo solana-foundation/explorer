@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { ParsedInstruction, ParsedTransaction, PublicKey, VOTE_PROGRAM_ID } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
@@ -134,7 +134,7 @@ function renderCard(ix: ParsedInstruction) {
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>
+                        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
                             <VoteDetailsCard index={0} ix={ix} tx={voteParsedTransaction(ix)} />
                         </TxInstructionSurface>
                     </AccountsProvider>

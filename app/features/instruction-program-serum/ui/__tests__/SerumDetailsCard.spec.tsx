@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
+import { TxInstructionSurface } from '@entities/instruction-card';
 import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -22,6 +23,7 @@ import { SerumDetailsCard } from '../SerumDetailsCard';
 const NEW_ORDER_V3_DATA =
     '000a0000000100000050c30000000000000400000000000000400d03000000000000000000010000000000000000000000ffff';
 const CONSUME_EVENTS_DATA = '00030000002000';
+const SIGNATURE = gen.signature(0);
 
 function makeInstruction(dataHex: string, keyCount: number): TransactionInstruction {
     return new TransactionInstruction({
@@ -41,7 +43,9 @@ function renderCard(ix: TransactionInstruction) {
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
-                        <SerumDetailsCard index={0} ix={ix} result={{ err: null }} signature={gen.signature(0)} />
+                        <TxInstructionSurface result={{ err: null }} signature={SIGNATURE}>
+                            <SerumDetailsCard index={0} ix={ix} result={{ err: null }} signature={SIGNATURE} />
+                        </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>
             </ClusterProvider>

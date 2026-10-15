@@ -1,4 +1,4 @@
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -64,7 +64,7 @@ function makeIx(data: Uint8Array, accounts: PublicKey[]): TransactionInstruction
 
 function renderCard(ix: TransactionInstruction) {
     return render(
-        <TxInstructionSurface result={{ err: null }}>
+        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
             <PmpDetailsCard ix={ix} index={0} fallback={<div data-testid="injected-fallback" />} />
         </TxInstructionSurface>,
     );

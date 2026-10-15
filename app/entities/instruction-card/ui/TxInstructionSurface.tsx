@@ -1,7 +1,7 @@
 'use client';
 
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import type { SignatureResult } from '@solana/web3.js';
+import type { SignatureResult, TransactionSignature } from '@solana/web3.js';
 import React from 'react';
 
 import type { InstructionSurface } from '../model/surface';
@@ -16,13 +16,22 @@ import { InstructionSurfaceProvider } from '../model/surface';
  * `InspectorInstructionCard` imports this entity's barrel and moving it here
  * would close an import cycle.
  */
-export function TxInstructionSurface({ result, children }: { result: SignatureResult; children: React.ReactNode }) {
+export function TxInstructionSurface({
+    result,
+    signature,
+    children,
+}: {
+    result: SignatureResult;
+    signature: TransactionSignature;
+    children: React.ReactNode;
+}) {
     const surface = React.useMemo<InstructionSurface>(
         () => ({
             Shell: InstructionCard,
             result,
+            signature,
         }),
-        [result],
+        [result, signature],
     );
 
     return <InstructionSurfaceProvider surface={surface}>{children}</InstructionSurfaceProvider>;

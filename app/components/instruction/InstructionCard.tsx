@@ -1,10 +1,11 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
+// Imports `model/surface` instead of the barrel, because the barrel re-exports `TxInstructionSurface`,
+// which imports this file.
+import { useInstructionSurface } from '@entities/instruction-card/model/surface';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import React, { useCallback, useContext } from 'react';
-
-import { SignatureContext } from './SignatureContext';
+import React from 'react';
 
 type InstructionProps = {
     title: string;
@@ -36,7 +37,7 @@ export function InstructionCard({
     headerButtons,
     collapsible,
 }: InstructionProps) {
-    const signature = useContext(SignatureContext);
+    const { signature } = useInstructionSurface();
     const rawDetails = useRawTransactionDetails(signature);
 
     // Use provided raw prop, or fetch from transaction details
@@ -46,13 +47,12 @@ export function InstructionCard({
     }
 
     const fetchRaw = useFetchRawTransaction();
-    const fetchRawTrigger = useCallback(() => fetchRaw(signature), [signature, fetchRaw]);
 
     // Only allow fetching raw data if we have a valid signature (not in inspector mode), and only
     // while a fetch could still produce it: a v1 transaction has no web3.js instruction view, so
     // once its raw data has arrived, asking again would refetch on every open of the Raw view.
     const rawFetched = rawDetails?.status === FetchStatus.Fetched;
-    const canFetchRaw = signature && !raw && !rawFetched;
+    const canFetchRaw = signature !== undefined && !raw && !rawFetched;
     // Inner instructions never carry raw wire data, so their Raw view is the same with or without
     // it; only the top-level list has rows to lose.
     const rawUnavailable = rawFetched && raw === undefined && childIndex === undefined;
@@ -68,7 +68,7 @@ export function InstructionCard({
             eventCards={eventCards}
             childIndex={childIndex}
             raw={raw}
-            onRequestRaw={canFetchRaw ? fetchRawTrigger : undefined}
+            onRequestRaw={canFetchRaw ? () => fetchRaw(signature) : undefined}
             rawUnavailable={rawUnavailable}
             headerButtons={headerButtons}
             collapsible={collapsible}

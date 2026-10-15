@@ -5,6 +5,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -22,7 +23,7 @@ function makeIx(programId: string, data: number[]): TransactionInstruction {
 
 const meta: Meta<typeof CommonInstructionDetailsCard> = {
     component: CommonInstructionDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Transaction/CommonInstructionDetailsCard',

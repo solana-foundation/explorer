@@ -7,6 +7,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -36,7 +37,14 @@ const args = {
 
 const meta: Meta<typeof SerumDetailsCard> = {
     component: SerumDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withViewportFromGlobal],
+    decorators: [
+        withCluster,
+        withScrollAnchor,
+        withTokenInfoBatch,
+        withMockTransactions,
+        withTxInstructionSurface,
+        withViewportFromGlobal,
+    ],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },

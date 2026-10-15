@@ -125,7 +125,7 @@ export function InstructionsSection({ signature }: SignatureProps) {
 
     return (
         <CollapsibleSection id="programs" title="Programs" className="">
-            <TxInstructionSurface result={result}>
+            <TxInstructionSurface result={result} signature={signature}>
                 <React.Suspense fallback={<LoadingCard message="Loading Instructions" />}>
                     {transaction.message.instructions.map((instruction, index) => {
                         const innerCards: JSX.Element[] = [];
