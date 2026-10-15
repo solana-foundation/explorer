@@ -164,7 +164,7 @@ function renderCard(ix: TransactionInstruction, { index = 0, childIndex }: { ind
     return render(
         <ClusterProvider>
             <TransactionsProvider>
-                <TxInstructionSurface result={{ err: null }}>
+                <TxInstructionSurface result={{ err: null }} signature={SIGNATURE}>
                     <AnchorDetailsCard
                         ix={ix}
                         index={index}

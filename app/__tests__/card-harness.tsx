@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { type InstructionParserDispatcher, InstructionParserProvider } from '@entities/instruction-parser';
 import { render, screen, within } from '@testing-library/react';
@@ -27,7 +28,12 @@ export function renderTxCard(card: ReactElement) {
 function providers({ transactions = true, dispatcher, txSurface = false }: ProviderOptions) {
     return function Providers({ children }: { children: ReactNode }) {
         let tree = children;
-        if (txSurface) tree = <TxInstructionSurface result={{ err: null }}>{tree}</TxInstructionSurface>;
+        if (txSurface)
+            tree = (
+                <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
+                    {tree}
+                </TxInstructionSurface>
+            );
         if (dispatcher) tree = <InstructionParserProvider dispatcher={dispatcher}>{tree}</InstructionParserProvider>;
         tree = <AccountsProvider>{tree}</AccountsProvider>;
         if (transactions) tree = <TransactionsProvider>{tree}</TransactionsProvider>;
