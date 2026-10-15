@@ -17,9 +17,11 @@ export function useAnchorEvents(
         const logMessages = transactionWithMeta.meta?.logMessages;
         if (!logMessages) return [];
 
-        const programIds = transactionWithMeta.transaction.message.instructions.map(i => i.programId.toBase58());
+        const instructionProgramIds = transactionWithMeta.transaction.message.instructions.map(i =>
+            i.programId.toBase58(),
+        );
 
-        const payloads = extractEventsFromLogs({ childIndex, index, logs: logMessages, programIds });
+        const payloads = extractEventsFromLogs({ childIndex, index, instructionProgramIds, logs: logMessages });
         return decodeProgramEvents(payloads, program);
     }, [details, childIndex, index, program]);
 }

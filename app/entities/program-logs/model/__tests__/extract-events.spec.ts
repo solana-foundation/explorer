@@ -11,14 +11,18 @@ describe('extractEventsFromLogs', () => {
             'Program log: Instruction: Foo',
             'Program P success',
         ];
-        expect(extractEventsFromLogs({ index: 0, logs, programIds: ['P'] })).toEqual([
+        expect(extractEventsFromLogs({ index: 0, instructionProgramIds: ['P'], logs })).toEqual([
             { data: 'AAAAAAAAAAAA', kind: 'data' },
             { data: 'BBBBBBBBBBBB', kind: 'log' },
         ]);
     });
 
+    it('should ignore a base64 Program log payload shorter than an event discriminator', () => {
+        const logs = ['Program P invoke [1]', 'Program log: AAAAAAAA', 'Program P success'];
+        expect(extractEventsFromLogs({ index: 0, instructionProgramIds: ['P'], logs })).toEqual([]);
+    });
+
     it('should attribute an event past a non-logging precompile to the right instruction via program-id match', () => {
-        // The Ed25519 precompile sits at index 1 and emits no `invoke` log.
         const logs = [
             'Program Comp invoke [1]',
             'Program Comp success',
@@ -26,17 +30,30 @@ describe('extractEventsFromLogs', () => {
             'Program data: AAAAAAAAAAAA',
             'Program Prog success',
         ];
-        const programIds = ['Comp', 'Ed25519', 'Prog'];
+        const instructionProgramIds = ['Comp', 'Ed25519', 'Prog'];
 
-        expect(extractEventsFromLogs({ index: 2, logs, programIds })).toHaveLength(1);
-        expect(extractEventsFromLogs({ index: 1, logs, programIds })).toHaveLength(0);
-        expect(extractEventsFromLogs({ index: 1, logs })).toHaveLength(1);
+        expect(extractEventsFromLogs({ index: 2, instructionProgramIds, logs })).toHaveLength(1);
+        expect(extractEventsFromLogs({ index: 1, instructionProgramIds, logs })).toHaveLength(0);
     });
 
     it('should capture a Program data payload whose base64 contains the substring "success"', () => {
         const logs = ['Program P invoke [1]', 'Program data: success', 'Program P success'];
-        expect(extractEventsFromLogs({ index: 0, logs, programIds: ['P'] })).toEqual([
+        expect(extractEventsFromLogs({ index: 0, instructionProgramIds: ['P'], logs })).toEqual([
             { data: 'success', kind: 'data' },
+        ]);
+    });
+
+    it('should not let a Program return line containing "success" close an invocation', () => {
+        const logs = [
+            'Program A invoke [1]',
+            'Program B invoke [2]',
+            'Program return: B successsuccess',
+            'Program B success',
+            'Program data: AAAAAAAAAAAA',
+            'Program A success',
+        ];
+        expect(extractEventsFromLogs({ index: 0, instructionProgramIds: ['A'], logs })).toEqual([
+            { data: 'AAAAAAAAAAAA', kind: 'data' },
         ]);
     });
 
@@ -49,12 +66,12 @@ describe('extractEventsFromLogs', () => {
             'Program B success',
             'Program A success',
         ];
-        const programIds = ['A'];
+        const instructionProgramIds = ['A'];
 
-        expect(extractEventsFromLogs({ childIndex: 0, index: 0, logs, programIds })).toEqual([
+        expect(extractEventsFromLogs({ childIndex: 0, index: 0, instructionProgramIds, logs })).toEqual([
             { data: 'AAAAAAAAAAAA', kind: 'data' },
         ]);
-        expect(extractEventsFromLogs({ index: 0, logs, programIds })).toHaveLength(0);
+        expect(extractEventsFromLogs({ index: 0, instructionProgramIds, logs })).toHaveLength(0);
     });
 
     it('should attribute each payload to the invocation that logged it', () => {
@@ -75,7 +92,7 @@ describe('extractEventsFromLogs', () => {
             'Program A success',
         ];
         const payloads = (childIndex?: number) =>
-            extractEventsFromLogs({ childIndex, index: 0, logs, programIds: ['A'] }).map(({ data }) => data);
+            extractEventsFromLogs({ childIndex, index: 0, instructionProgramIds: ['A'], logs }).map(({ data }) => data);
 
         expect(payloads()).toEqual(['AAAAAAAAAAAA', 'FFFFFFFFFFFF']);
         expect(payloads(0)).toEqual(['BBBBBBBBBBBB', 'DDDDDDDDDDDD']);
@@ -96,11 +113,11 @@ describe('extractEventsFromLogs', () => {
             'Program C success',
             'Program B success',
         ];
-        const programIds = ['A', 'B'];
+        const instructionProgramIds = ['A', 'B'];
 
-        expect(extractEventsFromLogs({ childIndex: 0, index: 1, logs, programIds })).toEqual([
+        expect(extractEventsFromLogs({ childIndex: 0, index: 1, instructionProgramIds, logs })).toEqual([
             { data: 'BBBBBBBBBBBB', kind: 'data' },
         ]);
-        expect(extractEventsFromLogs({ childIndex: 1, index: 1, logs, programIds })).toHaveLength(0);
+        expect(extractEventsFromLogs({ childIndex: 1, index: 1, instructionProgramIds, logs })).toHaveLength(0);
     });
 });
