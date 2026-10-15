@@ -17,7 +17,7 @@ export function serverSentryDsn() {
 }
 
 /**
- * Browser error events are sent only when this is exactly 'true'; matches isEnvEnabled, which .mjs cannot import.
+ * Browser error events are sent only when the flag is exactly 'true'.
  * @returns {boolean}
  */
 export function clientErrorsEnabled() {
@@ -37,8 +37,8 @@ export function sentryEnvironment(context) {
 }
 
 /**
- * True unless this is a Vercel production deployment or ENABLE_SENTRY_SOURCEMAPS_AT_PREVIEW opts a preview in.
- * Reads VERCEL_ENV raw, not sentryEnvironment(): a local production build must never attempt uploads.
+ * True unless this is a Vercel production deployment or ENABLE_SENTRY_SOURCEMAPS_AT_PREVIEW opts any other build in.
+ * Reads VERCEL_ENV raw, not sentryEnvironment(): without the flag, a local production build never attempts uploads.
  * @returns {boolean}
  */
 export function sourcemapUploadsDisabled() {
@@ -50,7 +50,8 @@ export function sourcemapUploadsDisabled() {
  * @returns {number | undefined} value clamped to [0, 1]; undefined when unset or unparsable
  */
 function parseMultiplier(raw) {
-    if (!raw) {
+    // Number(' ') is 0, so a blank value would mute instead of reading as unset.
+    if (!raw?.trim()) {
         return undefined;
     }
     const parsed = Number(raw);
@@ -62,7 +63,7 @@ function parseMultiplier(raw) {
 
 /**
  * Multiplier applied to the code-owned vitals sample rate, clamped to (0, 1].
- * @returns {number | undefined} undefined when unset, unparsable, or not positive — vitals sampling off
+ * @returns {number | undefined} undefined when unset, unparsable, or not positive: vitals sampling off
  */
 export function vitalsSampleRateMultiplier() {
     const multiplier = parseMultiplier(process.env.NEXT_PUBLIC_TELEMETRY_VITALS_SAMPLE_RATE);
@@ -70,14 +71,14 @@ export function vitalsSampleRateMultiplier() {
 }
 
 /**
- * Multiplier applied to the baseline trace rate of one server runtime, clamped to [0, 1] — 0 mutes it.
+ * Multiplier applied to the baseline trace rate of one server runtime, clamped to [0, 1]; 0 mutes it.
  * @param {'server' | 'edge'} context
- * @returns {number | undefined} undefined when unset or unparsable — baseline applies unchanged
+ * @returns {number | undefined} undefined when unset or unparsable: baseline applies unchanged
  */
 export function traceSampleRateMultiplier(context) {
     switch (context) {
         case 'edge':
-            // Edge is "just server" to developers; the EDGE var exists only for targeted overrides.
+            // SERVER covers edge so one var mutes both; EDGE overrides it.
             // Parse each var separately so an unparsable EDGE value falls back to SERVER instead of masking it.
             return (
                 parseMultiplier(process.env.TELEMETRY_TRACE_SAMPLE_RATE_EDGE) ??

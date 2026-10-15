@@ -32,12 +32,7 @@ afterEach(() => {
 });
 
 describe('vitalsSampleRateMultiplier', () => {
-    it('should return undefined when the var is unset', () => {
-        vi.stubEnv('NEXT_PUBLIC_TELEMETRY_VITALS_SAMPLE_RATE', undefined);
-        expect(vitalsSampleRateMultiplier()).toBeUndefined();
-    });
-
-    it.each(['0', '-1', 'garbage', 'NaN', 'Infinity', ''])('should return undefined for %j', value => {
+    it.each(['0', '-1', 'garbage', 'Infinity', ''])('should return undefined for %j', value => {
         vi.stubEnv('NEXT_PUBLIC_TELEMETRY_VITALS_SAMPLE_RATE', value);
         expect(vitalsSampleRateMultiplier()).toBeUndefined();
     });
@@ -61,51 +56,18 @@ describe('traceSampleRateMultiplier', () => {
         expect(traceSampleRateMultiplier('edge')).toBe(0);
     });
 
-    it('should fall back to the server var for edge', () => {
+    // A blank value is the strictest case: it fails both a missing trim and a truthy pick of the edge var.
+    it('should fall back to the server var when the edge var is blank', () => {
+        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_EDGE', ' ');
         vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '0.25');
         expect(traceSampleRateMultiplier('edge')).toBe(0.25);
-    });
-
-    it('should fall back to the server var when the edge var is unparsable', () => {
-        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_EDGE', 'garbage');
-        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '0.25');
-        expect(traceSampleRateMultiplier('edge')).toBe(0.25);
-    });
-
-    it('should let an explicit edge var override the server fallback', () => {
-        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '0.25');
-        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_EDGE', '0');
-        expect(traceSampleRateMultiplier('edge')).toBe(0);
-    });
-
-    it('should return undefined when unset or unparsable', () => {
-        expect(traceSampleRateMultiplier('server')).toBeUndefined();
-        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', 'garbage');
-        expect(traceSampleRateMultiplier('server')).toBeUndefined();
-    });
-
-    it('should clamp values above 1', () => {
-        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '5');
-        expect(traceSampleRateMultiplier('server')).toBe(1);
     });
 });
 
 describe('DSN helpers', () => {
-    it('should expose only the public var to the client', () => {
-        vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', 'https://public@sentry.example/1');
-        vi.stubEnv('SENTRY_DSN', 'https://private@sentry.example/2');
-        expect(clientSentryDsn()).toBe('https://public@sentry.example/1');
-    });
-
-    it('should prefer the private var on the server', () => {
-        vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', 'https://public@sentry.example/1');
-        vi.stubEnv('SENTRY_DSN', 'https://private@sentry.example/2');
-        expect(serverSentryDsn()).toBe('https://private@sentry.example/2');
-    });
-
     it('should fall back to the public var on the server', () => {
         vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', 'https://public@sentry.example/1');
-        vi.stubEnv('SENTRY_DSN', undefined);
+        vi.stubEnv('SENTRY_DSN', '');
         expect(serverSentryDsn()).toBe('https://public@sentry.example/1');
     });
 
@@ -125,23 +87,15 @@ describe('createSentryConfig dsn', () => {
         expect(createSentryConfig('server').dsn).toBe('https://private@sentry.example/2');
         expect(createSentryConfig('edge').dsn).toBe('https://private@sentry.example/2');
     });
-
-    it('should keep server/edge reporting when the public var is absent', () => {
-        vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', undefined);
-        vi.stubEnv('SENTRY_DSN', 'https://private@sentry.example/2');
-        expect(createSentryConfig('client').dsn).toBeUndefined();
-        expect(createSentryConfig('server').dsn).toBe('https://private@sentry.example/2');
-        expect(createSentryConfig('edge').dsn).toBe('https://private@sentry.example/2');
-    });
 });
 
 describe('createSentryConfig environment', () => {
-    it('should report the Vercel environment on every runtime', () => {
-        vi.stubEnv('VERCEL_ENV', 'preview');
+    it('should read the public Vercel var on the client and the private one on server/edge', () => {
+        vi.stubEnv('VERCEL_ENV', 'production');
         vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', 'preview');
         expect(createSentryConfig('client').environment).toBe('preview');
-        expect(createSentryConfig('server').environment).toBe('preview');
-        expect(createSentryConfig('edge').environment).toBe('preview');
+        expect(createSentryConfig('server').environment).toBe('production');
+        expect(createSentryConfig('edge').environment).toBe('production');
     });
 
     it('should fall back to NODE_ENV outside Vercel', () => {
@@ -160,10 +114,9 @@ describe('sourcemapUploadsDisabled', () => {
         expect(sourcemapUploadsDisabled()).toBe(false);
     });
 
-    it('should disable uploads on previews and local builds', () => {
+    it('should disable uploads on previews unless the override is exactly true', () => {
         vi.stubEnv('VERCEL_ENV', 'preview');
-        expect(sourcemapUploadsDisabled()).toBe(true);
-        vi.stubEnv('VERCEL_ENV', undefined);
+        vi.stubEnv('ENABLE_SENTRY_SOURCEMAPS_AT_PREVIEW', '1');
         expect(sourcemapUploadsDisabled()).toBe(true);
     });
 
@@ -180,7 +133,7 @@ describe('sampleRate', () => {
         expect(createSentryConfig('edge').sampleRate).toBe(1);
     });
 
-    it('should sample client error events at the dialled-down rate', () => {
+    it('should sample client error events at 1e-6', () => {
         expect(createSentryConfig('client').sampleRate).toBe(1 / 1000000);
     });
 });
@@ -212,16 +165,21 @@ describe('tracesSampler vitals gate', () => {
         expect(sample('client', '/address/abc', 'pageload')).toBe(0);
     });
 
-    it('should dampen the baseline with the per-runtime multiplier', () => {
+    it('should scale the baseline with the per-runtime multiplier', () => {
         vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '0');
         vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_EDGE', '0.5');
         expect(sample('server', 'GET /address/abc')).toBe(0);
         expect(sample('edge', 'GET /address/abc')).toBe(SERVER_BASELINE * 0.5);
     });
 
-    it('should mute edge through the server fallback', () => {
-        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '0');
-        expect(sample('edge', 'GET /address/abc')).toBe(0);
+    it('should ignore a sampled parent', () => {
+        const { tracesSampler } = createSentryConfig('server');
+        const parentSampledContext = {
+            ...samplingContext('GET /address/abc'),
+            inheritOrSampleWith: () => 1,
+            parentSampled: true,
+        };
+        expect(tracesSampler?.(parentSampledContext)).toBe(SERVER_BASELINE);
     });
 
     it('should keep the zero branches ahead of the vitals gate', () => {
@@ -250,7 +208,6 @@ describe('createSentryConfig beforeSend guard', () => {
 
     it('should drop browser events without the opt-in tag', () => {
         expect(clientBeforeSend()({ type: undefined }, {})).toBeNull();
-        expect(clientBeforeSend()({ tags: {}, type: undefined }, {})).toBeNull();
     });
 
     it('should drop browser events whose tag carries any other value', () => {

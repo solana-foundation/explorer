@@ -14,9 +14,8 @@ import { vitalsTraceSampleRate } from './vitals.mjs';
  * @typedef {Exclude<RuntimeContext, 'client'>} ServerRuntime
  */
 
-// Server/edge errors are rare and load-bearing; the client starts near zero until quota headroom is proven.
-// TODO(rollout): client 1e-6 → 1e-4 → 1e-2 → 1; each ×100 step bounds the next volume at 100× the measured
-// one, advance when that still fits quota. The client beforeSend gate limits which events send, not how many.
+// Server/edge errors are rare and each one matters; the client starts near zero until quota headroom is measured.
+// Raise the client rate ×100 per step, and only while 100× the measured client volume fits quota.
 /** @type {Record<RuntimeContext, number>} */
 const ERROR_SAMPLE_RATES = {
     client: 1 / 1000000,
@@ -24,12 +23,14 @@ const ERROR_SAMPLE_RATES = {
     server: 1,
 };
 
-// Server traces are ~5 spans each; edge follows server. The client has no baseline, see tracesSampler.
-// TODO(rollout): 1e-5 → 1e-4 → 1e-3 while span quota holds (dampener env vars are the brake).
+// Server traces are ~5 spans each. Raise ×10 per step, and only while 10× the measured span volume fits quota.
+const SERVER_TRACE_SAMPLE_RATE = 1 / 100000;
+
+// Edge shares the server rate so one rollout step moves both; the client has no baseline, see tracesSampler.
 /** @type {Record<ServerRuntime, number>} */
 const TRACE_SAMPLE_RATES = {
-    edge: 1 / 100000,
-    server: 1 / 100000,
+    edge: SERVER_TRACE_SAMPLE_RATE,
+    server: SERVER_TRACE_SAMPLE_RATE,
 };
 
 // Never-sample name substrings: categories that are noise at any rate, excluded before every other rule.
@@ -60,7 +61,6 @@ export function createSentryConfig(context) {
 
         sampleRate: ERROR_SAMPLE_RATES[context],
 
-        // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
         tracesSampler: (/** @type {import('@sentry/core').TracesSamplerSamplingContext} */ samplingContext) => {
             if (TRACE_EXCLUDES.some(exclude => samplingContext.name.includes(exclude))) {
                 return 0;
@@ -71,14 +71,8 @@ export function createSentryConfig(context) {
                 return vitalsTraceSampleRate(samplingContext) ?? 0;
             }
 
-            // TODO: enable once a client DSN exists so a sampled client trace keeps its server half; callers
-            // can force sampling via sentry-trace headers, so weigh that first:
-            // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/sampling/#inheritance
-            // if (samplingContext.parentSampled !== undefined) {
-            //     return samplingContext.parentSampled;
-            // }
-
-            // Env multiplier dampens a runtime's baseline in an emergency (0 mutes); unset = unchanged.
+            // Ignore parentSampled: a caller's sentry-trace header could force sampling past TRACE_SAMPLE_RATES.
+            // The env multiplier scales a runtime's baseline in an emergency (0 mutes); unset = unchanged.
             return TRACE_SAMPLE_RATES[context] * (traceSampleRateMultiplier(context) ?? 1);
         },
 
@@ -120,7 +114,7 @@ export function createSentryBuildConfig() {
             },
         },
 
-        // Previews don't need symbolicated traces — uploading 800+ maps × 3 runtimes added ~90s/build.
+        // Previews don't need symbolicated traces: uploading 800+ maps × 3 runtimes added ~90s/build.
         sourcemaps: {
             disable: sourcemapUploadsDisabled(),
         },
