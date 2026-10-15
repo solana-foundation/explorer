@@ -1,6 +1,5 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
-import { TableCardBody } from '@components/common/TableCardBody';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { generated } from '@sqds/multisig';
@@ -10,20 +9,14 @@ import { Search } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
 import { SQUADS_V4_ADDRESS } from '@/app/providers/squadsMultisig';
-import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { useClusterPath } from '@/app/utils/url';
 
 const { batchDiscriminator, vaultTransactionDiscriminator } = generated;
 
 export type SquadsAccountType = 'batch' | 'vaultTransaction';
 
-/**
- * Identify a Squads v4 Batch or VaultTransaction account from its owner + the 8-byte
- * account discriminator, so the address page can offer a direct "Inspect" link instead
- * of falling back to the generic Unknown Account card. Both are accepted by the
- * inspector's `squadsTx` param.
- */
 export function detectSquadsAccountType(owner: PublicKey, rawData: Uint8Array): SquadsAccountType | undefined {
     if (owner.toBase58() !== SQUADS_V4_ADDRESS || rawData.length < 8) return undefined;
     const matches = (discriminator: number[]) => discriminator.every((byte, i) => byte === rawData[i]);
@@ -39,40 +32,25 @@ export function SquadsAccountSection({ account, accountType }: { account: Accoun
     });
     const label = accountType === 'batch' ? 'Squads Batch' : 'Squads Vault Transaction';
 
+    const rows: KeyValueRow[] = [
+        { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
+        { label: 'Balance (SOL)', value: <SolBalance lamports={account.lamports} />, valueClassName: 'uppercase' },
+        { label: 'Owner', value: <Address pubkey={account.owner} link /> },
+    ];
+
     return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit" className="gap-2">
-                <CardTitle as="h3" ui="dashkit" className="flex items-center">
-                    {label}
-                </CardTitle>
+        <OverviewCard
+            title={label}
+            actions={
                 <Button ui="dashkit" variant="primary" size="sm" asChild>
                     <Link href={inspectorPath}>
                         <Search className="mr-1.5 align-text-top" size={13} />
                         Inspect
                     </Link>
                 </Button>
-            </CardHeader>
-
-            <TableCardBody>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Address</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={account.pubkey} alignRight raw />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right uppercase">
-                        <SolBalance lamports={account.lamports} />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Owner</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={account.owner} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            </TableCardBody>
-        </Card>
+            }
+        >
+            <KeyValueRows rows={rows} />
+        </OverviewCard>
     );
 }
