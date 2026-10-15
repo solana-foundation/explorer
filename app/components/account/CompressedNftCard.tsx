@@ -11,7 +11,7 @@ import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { useCluster } from '@/app/providers/cluster';
 import { CompressedNft, useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { getProxiedUri } from '@/app/shared/lib/metadata-proxy';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
 
 import { Address } from '../common/Address';
 import { InfoTooltip } from '../common/InfoTooltip';
@@ -30,49 +30,32 @@ export function CompressedNftCard({ account }: { account: Account }) {
     const collectionGroup = compressedNft.grouping.find(group => group.group_key === 'collection');
     const updateAuthority = compressedNft.authorities.find(authority => authority.scopes.includes('full'))?.address;
 
+    const rows: KeyValueRow[] = [
+        { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
+        { label: 'Owner', value: <Address pubkey={new PublicKey(compressedNft.ownership.owner)} link /> },
+        {
+            label: 'Verified Collection Address',
+            value: collectionGroup ? <Address pubkey={new PublicKey(collectionGroup.group_value)} link /> : 'None',
+        },
+        {
+            label: 'Update Authority',
+            value: updateAuthority ? <Address pubkey={new PublicKey(updateAuthority)} link /> : 'None',
+        },
+        {
+            label: 'Website',
+            value: (
+                <ExternalLink href={compressedNft.content.links.external_url}>
+                    {compressedNft.content.links.external_url}
+                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                </ExternalLink>
+            ),
+        },
+        { label: 'Seller Fee', value: `${compressedNft.royalty.basis_points / 100}%` },
+    ];
+
     return (
         <AccountCard title="Overview" account={account}>
-            <BaseTable.Row>
-                <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Owner</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={new PublicKey(compressedNft.ownership.owner)} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Verified Collection Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {collectionGroup ? (
-                        <Address pubkey={new PublicKey(collectionGroup.group_value)} alignRight link />
-                    ) : (
-                        'None'
-                    )}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Update Authority</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {updateAuthority ? <Address pubkey={new PublicKey(updateAuthority)} alignRight link /> : 'None'}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Website</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <ExternalLink href={compressedNft.content.links.external_url}>
-                        {compressedNft.content.links.external_url}
-                        <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
-                    </ExternalLink>
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Seller Fee</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{`${compressedNft.royalty.basis_points / 100}%`}</BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }

@@ -8,7 +8,7 @@ import { AddressLookupTableAccount } from '@solana/web3.js';
 import { AddressLookupTableAccountInfo } from '@validators/accounts/address-lookup-table';
 import React from 'react';
 
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
 
 export function AddressLookupTableAccountSection(
     params:
@@ -34,6 +34,35 @@ export function AddressLookupTableAccountSection(
         state: lookupTableState,
     });
     const refresh = useRefreshAccount();
+
+    const rows: KeyValueRow[] = [
+        { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
+        { label: 'Balance (SOL)', value: <SolBalance lamports={account.lamports} />, valueClassName: 'uppercase' },
+        {
+            label: 'Activation Status',
+            value: lookupTableAccount.isActive() ? 'Active' : 'Deactivated',
+            valueClassName: 'uppercase',
+        },
+        {
+            label: 'Last Extended Slot',
+            value:
+                lookupTableAccount.state.lastExtendedSlot === 0 ? (
+                    'None (Empty)'
+                ) : (
+                    <Slot slot={lookupTableAccount.state.lastExtendedSlot} link />
+                ),
+        },
+        {
+            label: 'Authority',
+            value:
+                lookupTableAccount.state.authority === undefined ? (
+                    'None (Frozen)'
+                ) : (
+                    <Address pubkey={lookupTableAccount.state.authority} link />
+                ),
+        },
+    ];
+
     return (
         <AccountCard
             title="Address Lookup Table Account"
@@ -41,44 +70,7 @@ export function AddressLookupTableAccountSection(
             analyticsSection="address_lookup_table_section"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
-            <BaseTable.Row>
-                <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
-                <BaseTable.Cell className="text-right uppercase">
-                    <SolBalance lamports={account.lamports} />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Activation Status</BaseTable.Cell>
-                <BaseTable.Cell className="text-right uppercase">
-                    {lookupTableAccount.isActive() ? 'Active' : 'Deactivated'}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Last Extended Slot</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {lookupTableAccount.state.lastExtendedSlot === 0 ? (
-                        'None (Empty)'
-                    ) : (
-                        <Slot slot={lookupTableAccount.state.lastExtendedSlot} link />
-                    )}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Authority</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {lookupTableAccount.state.authority === undefined ? (
-                        'None (Frozen)'
-                    ) : (
-                        <Address pubkey={lookupTableAccount.state.authority} alignRight link />
-                    )}
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }

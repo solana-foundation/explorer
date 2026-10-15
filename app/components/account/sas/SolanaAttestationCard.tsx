@@ -7,107 +7,56 @@ import React from 'react';
 import { AccountAddressRow } from '@/app/components/common/Account';
 import { Address } from '@/app/components/common/Address';
 import { Account } from '@/app/providers/accounts';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
 import { decodeAccount } from '@/app/utils/attestation-service';
 import { decodeString, mapToPublicKey } from '@/app/utils/kit-wrapper';
 
 function SolanaCredentialCard({ credential }: { credential: SasCredential }) {
-    return (
-        <>
-            <BaseTable.Row>
-                <BaseTable.Cell>Credential Name</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{decodeString(credential.name)}</BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Credential Authority</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={mapToPublicKey(credential.authority)} alignRight raw link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Authorized Signers</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {credential.authorizedSigners.map((signer, idx) => (
-                        <Address key={idx} pubkey={mapToPublicKey(signer)} alignRight raw link />
-                    ))}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-        </>
-    );
+    const rows: KeyValueRow[] = [
+        { label: 'Credential Name', value: decodeString(credential.name) },
+        { label: 'Credential Authority', value: <Address pubkey={mapToPublicKey(credential.authority)} raw link /> },
+        {
+            label: 'Authorized Signers',
+            value: credential.authorizedSigners.map((signer, idx) => (
+                <Address key={idx} pubkey={mapToPublicKey(signer)} raw link />
+            )),
+        },
+    ];
+
+    return <KeyValueRows rows={rows} />;
 }
 
 function SolanaSchemaCard({ schema }: { schema: SasSchema }) {
-    return (
-        <>
-            <BaseTable.Row>
-                <BaseTable.Cell>Schema Name</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{schema.name}</BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Credential</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={mapToPublicKey(schema.credential)} alignRight raw link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Description</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{schema.description}</BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Is Paused</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{schema.isPaused ? 'Yes' : 'No'}</BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Version</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{schema.version}</BaseTable.Cell>
-            </BaseTable.Row>
-        </>
-    );
+    const rows: KeyValueRow[] = [
+        { label: 'Schema Name', value: schema.name },
+        { label: 'Credential', value: <Address pubkey={mapToPublicKey(schema.credential)} raw link /> },
+        { label: 'Description', value: schema.description },
+        { label: 'Is Paused', value: schema.isPaused ? 'Yes' : 'No' },
+        { label: 'Version', value: schema.version },
+    ];
+
+    return <KeyValueRows rows={rows} />;
 }
 
 function SolanaAttestationCard({ attestation }: { attestation: SasAttestation }) {
-    return (
-        <>
-            <BaseTable.Row>
-                <BaseTable.Cell>Nonce</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={mapToPublicKey(attestation.nonce)} alignRight raw link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Credential</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={mapToPublicKey(attestation.credential)} alignRight raw link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Schema</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={mapToPublicKey(attestation.schema)} alignRight raw link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Signer</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={mapToPublicKey(attestation.signer)} alignRight raw link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Token Account</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {attestation.tokenAccount.toString() === SystemProgram.programId.toBase58() ? (
-                        'Not Initialized'
-                    ) : (
-                        <Address pubkey={mapToPublicKey(attestation.tokenAccount)} alignRight raw link />
-                    )}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Expiry</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{Number(attestation.expiry)}</BaseTable.Cell>
-            </BaseTable.Row>
-        </>
-    );
+    const rows: KeyValueRow[] = [
+        { label: 'Nonce', value: <Address pubkey={mapToPublicKey(attestation.nonce)} raw link /> },
+        { label: 'Credential', value: <Address pubkey={mapToPublicKey(attestation.credential)} raw link /> },
+        { label: 'Schema', value: <Address pubkey={mapToPublicKey(attestation.schema)} raw link /> },
+        { label: 'Signer', value: <Address pubkey={mapToPublicKey(attestation.signer)} raw link /> },
+        {
+            label: 'Token Account',
+            value:
+                attestation.tokenAccount.toString() === SystemProgram.programId.toBase58() ? (
+                    'Not Initialized'
+                ) : (
+                    <Address pubkey={mapToPublicKey(attestation.tokenAccount)} raw link />
+                ),
+        },
+        { label: 'Expiry', value: Number(attestation.expiry) },
+    ];
+
+    return <KeyValueRows rows={rows} />;
 }
 
 export function SolanaAttestationServiceCard({ account }: { account: Account }) {

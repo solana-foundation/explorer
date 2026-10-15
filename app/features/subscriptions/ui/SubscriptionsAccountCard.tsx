@@ -1,7 +1,7 @@
 'use client';
 
 import { KitAddress } from '@components/common/KitAddress';
-import { cn } from '@components/shared/utils';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { useRawAccountDataOnMount, useRefreshAccount } from '@entities/account';
 import type { Account } from '@providers/accounts';
 import type { Address } from '@solana/kit';
@@ -15,10 +15,13 @@ import type {
 import { PlanStatus } from '@solana/subscriptions';
 import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { pluralUnits } from '@utils/index';
+import { type ReactNode, useState } from 'react';
+import { Code } from 'react-feather';
 
-import { BaseAccountCard, type BaseAccountCardProps } from '@/app/shared/ui/BaseAccountCard';
+import { Button } from '@/app/components/shared/ui/button';
 import { BaseRawAccountRows } from '@/app/shared/ui/BaseRawAccountRows';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 import { decodeSubscriptionsAccount } from '../lib/decode-subscriptions-account';
 import { displayExpiry } from '../lib/format';
@@ -49,6 +52,26 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
     const refresh = useRefreshAccount();
     const { data: planData, owner, status } = data;
     const { endTs, metadataUri, mint, planId, terms } = planData;
+    const rows: KeyValueRow[] = [
+        { label: 'Plan ID', value: planId.toString() },
+        { label: 'Status', value: displayPlanStatus(status) },
+        { label: 'Owner', value: addressValue(owner) },
+        { label: 'Token Mint', value: addressValue(mint) },
+        { label: 'Amount per Period', value: terms.amount.toString() },
+        { label: 'Period', value: pluralUnits(terms.periodHours, 'hour') },
+        {
+            label: 'Created At',
+            show: terms.createdAt !== 0n,
+            value: displayTimestampUtc(unixTimestampToMs(Number(terms.createdAt)), true),
+        },
+        { label: 'Expires At', value: displayExpiry(endTs) },
+        {
+            label: 'Metadata URI',
+            show: Boolean(metadataUri),
+            value: <span className="font-mono">{metadataUri}</span>,
+            valueClassName: '!whitespace-normal [overflow-wrap:anywhere]',
+        },
+    ];
     return (
         <SubscriptionCard
             title="Subscription Plan"
@@ -56,23 +79,7 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
             analyticsSection="subscriptions_plan_card"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
-            <ValueRow label="Plan ID">{planId.toString()}</ValueRow>
-            <ValueRow label="Status">{displayPlanStatus(status)}</ValueRow>
-            <AddressRow address={owner} label="Owner" />
-            <AddressRow address={mint} label="Token Mint" />
-            <ValueRow label="Amount per Period">{terms.amount.toString()}</ValueRow>
-            <ValueRow label="Period">{pluralUnits(terms.periodHours, 'hour')}</ValueRow>
-            {terms.createdAt !== 0n && (
-                <ValueRow label="Created At">
-                    {displayTimestampUtc(unixTimestampToMs(Number(terms.createdAt)), true)}
-                </ValueRow>
-            )}
-            <ValueRow label="Expires At">{displayExpiry(endTs)}</ValueRow>
-            {metadataUri && (
-                <ValueRow label="Metadata URI" wrap>
-                    <span className="font-mono">{metadataUri}</span>
-                </ValueRow>
-            )}
+            <KeyValueRows rows={rows} />
         </SubscriptionCard>
     );
 }
@@ -80,6 +87,14 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
 function FixedDelegationCard({ account, data }: { account: Account; data: FixedDelegation }) {
     const refresh = useRefreshAccount();
     const { amount, expiryTs, header, mint, subscriptionAuthority } = data;
+    const rows: KeyValueRow[] = [
+        ...delegationHeaderRows(header),
+        { label: 'Amount', value: amount.toString() },
+        { label: 'Token Mint', value: addressValue(mint) },
+        { label: 'Subscription Authority', value: addressValue(subscriptionAuthority) },
+        { label: 'Expires At', value: displayExpiry(expiryTs) },
+        { label: 'Payer', value: addressValue(header.payer) },
+    ];
     return (
         <SubscriptionCard
             title="Fixed Delegation"
@@ -87,12 +102,7 @@ function FixedDelegationCard({ account, data }: { account: Account; data: FixedD
             analyticsSection="subscriptions_fixed_delegation_card"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
-            <DelegationHeaderRows header={header} />
-            <ValueRow label="Amount">{amount.toString()}</ValueRow>
-            <AddressRow address={mint} label="Token Mint" />
-            <AddressRow address={subscriptionAuthority} label="Subscription Authority" />
-            <ValueRow label="Expires At">{displayExpiry(expiryTs)}</ValueRow>
-            <AddressRow address={header.payer} label="Payer" />
+            <KeyValueRows rows={rows} />
         </SubscriptionCard>
     );
 }
@@ -109,6 +119,21 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
         periodLengthS,
         subscriptionAuthority,
     } = data;
+    const rows: KeyValueRow[] = [
+        ...delegationHeaderRows(header),
+        { label: 'Amount per Period', value: amountPerPeriod.toString() },
+        { label: 'Amount Pulled (this period)', value: amountPulledInPeriod.toString() },
+        { label: 'Token Mint', value: addressValue(mint) },
+        { label: 'Period Length', value: pluralUnits(periodLengthS, 'second') },
+        {
+            label: 'Current Period Start',
+            show: currentPeriodStartTs !== 0n,
+            value: displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true),
+        },
+        { label: 'Expires At', value: displayExpiry(expiryTs) },
+        { label: 'Subscription Authority', value: addressValue(subscriptionAuthority) },
+        { label: 'Payer', value: addressValue(header.payer) },
+    ];
     return (
         <SubscriptionCard
             title="Recurring Delegation"
@@ -116,19 +141,7 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
             analyticsSection="subscriptions_recurring_delegation_card"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
-            <DelegationHeaderRows header={header} />
-            <ValueRow label="Amount per Period">{amountPerPeriod.toString()}</ValueRow>
-            <ValueRow label="Amount Pulled (this period)">{amountPulledInPeriod.toString()}</ValueRow>
-            <AddressRow address={mint} label="Token Mint" />
-            <ValueRow label="Period Length">{pluralUnits(periodLengthS, 'second')}</ValueRow>
-            {currentPeriodStartTs !== 0n && (
-                <ValueRow label="Current Period Start">
-                    {displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true)}
-                </ValueRow>
-            )}
-            <ValueRow label="Expires At">{displayExpiry(expiryTs)}</ValueRow>
-            <AddressRow address={subscriptionAuthority} label="Subscription Authority" />
-            <AddressRow address={header.payer} label="Payer" />
+            <KeyValueRows rows={rows} />
         </SubscriptionCard>
     );
 }
@@ -136,6 +149,19 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
 function SubscriptionDelegationCard({ account, data }: { account: Account; data: SubscriptionDelegation }) {
     const refresh = useRefreshAccount();
     const { amountPulledInPeriod, currentPeriodStartTs, expiresAtTs, header, terms } = data;
+    const rows: KeyValueRow[] = [
+        ...delegationHeaderRows(header),
+        { label: 'Amount', value: terms.amount.toString() },
+        { label: 'Period', value: pluralUnits(terms.periodHours, 'hour') },
+        { label: 'Amount Pulled (this period)', value: amountPulledInPeriod.toString() },
+        {
+            label: 'Current Period Start',
+            show: currentPeriodStartTs !== 0n,
+            value: displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true),
+        },
+        { label: 'Expires At', value: displayExpiry(expiresAtTs) },
+        { label: 'Payer', value: addressValue(header.payer) },
+    ];
     return (
         <SubscriptionCard
             title="Subscription Delegation"
@@ -143,17 +169,7 @@ function SubscriptionDelegationCard({ account, data }: { account: Account; data:
             analyticsSection="subscriptions_delegation_card"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
-            <DelegationHeaderRows header={header} />
-            <ValueRow label="Amount">{terms.amount.toString()}</ValueRow>
-            <ValueRow label="Period">{pluralUnits(terms.periodHours, 'hour')}</ValueRow>
-            <ValueRow label="Amount Pulled (this period)">{amountPulledInPeriod.toString()}</ValueRow>
-            {currentPeriodStartTs !== 0n && (
-                <ValueRow label="Current Period Start">
-                    {displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true)}
-                </ValueRow>
-            )}
-            <ValueRow label="Expires At">{displayExpiry(expiresAtTs)}</ValueRow>
-            <AddressRow address={header.payer} label="Payer" />
+            <KeyValueRows rows={rows} />
         </SubscriptionCard>
     );
 }
@@ -161,6 +177,12 @@ function SubscriptionDelegationCard({ account, data }: { account: Account; data:
 function SubscriptionAuthorityCard({ account, data }: { account: Account; data: SubscriptionAuthority }) {
     const refresh = useRefreshAccount();
     const { initId, payer, tokenMint, user } = data;
+    const rows: KeyValueRow[] = [
+        { label: 'User', value: addressValue(user) },
+        { label: 'Token Mint', value: addressValue(tokenMint) },
+        { label: 'Payer', value: addressValue(payer) },
+        { label: 'Init ID', value: initId.toString() },
+    ];
     return (
         <SubscriptionCard
             title="Subscription Authority"
@@ -168,60 +190,60 @@ function SubscriptionAuthorityCard({ account, data }: { account: Account; data: 
             analyticsSection="subscriptions_authority_card"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
-            <AddressRow address={user} label="User" />
-            <AddressRow address={tokenMint} label="Token Mint" />
-            <AddressRow address={payer} label="Payer" />
-            <ValueRow label="Init ID">{initId.toString()}</ValueRow>
+            <KeyValueRows rows={rows} />
         </SubscriptionCard>
     );
 }
 
-// Card shell for all subscriptions account types — wires up raw data view automatically.
-type SubscriptionCardProps = Omit<BaseAccountCardProps, 'rawContent'> & { account: Account };
+type SubscriptionCardProps = {
+    account: Account;
+    title: ReactNode;
+    analyticsSection?: string;
+    refresh?: () => void;
+    children: ReactNode;
+};
 
-function SubscriptionCard({ account, children, ...rest }: SubscriptionCardProps) {
+function SubscriptionCard({ account, title, analyticsSection, refresh, children }: SubscriptionCardProps) {
+    const [showRaw, setShowRaw] = useState(false);
     const { data, isLoading } = useRawAccountDataOnMount(account.pubkey);
     return (
-        <BaseAccountCard
-            rawContent={<BaseRawAccountRows account={account} rawData={data} isLoading={isLoading} />}
-            {...rest}
+        <OverviewCard
+            title={title}
+            actions={
+                <>
+                    {refresh && analyticsSection && (
+                        <RefreshButton analyticsSection={analyticsSection} onClick={refresh} />
+                    )}
+                    <Button
+                        variant={showRaw ? 'default' : 'outline'}
+                        size="sm"
+                        aria-label="Raw"
+                        className={showRaw ? 'shadow-active-sm' : undefined}
+                        onClick={() => setShowRaw(r => !r)}
+                    >
+                        <Code size={12} />
+                        <span className="hidden md:inline">Raw</span>
+                    </Button>
+                </>
+            }
         >
-            {children}
-        </BaseAccountCard>
+            {showRaw ? <BaseRawAccountRows account={account} rawData={data} isLoading={isLoading} /> : children}
+        </OverviewCard>
     );
 }
 
 // Delegator + Delegatee rows shared by all three delegation account types.
 type DelegationHeader = { delegatee: Address; delegator: Address; payer: Address };
 
-function DelegationHeaderRows({ header }: { header: DelegationHeader }) {
-    return (
-        <>
-            <AddressRow address={header.delegator} label="Delegator" />
-            <AddressRow address={header.delegatee} label="Delegatee" />
-        </>
-    );
+function delegationHeaderRows(header: DelegationHeader): KeyValueRow[] {
+    return [
+        { label: 'Delegator', value: addressValue(header.delegator) },
+        { label: 'Delegatee', value: addressValue(header.delegatee) },
+    ];
 }
 
-function AddressRow({ address, label }: { address: Address; label: string }) {
-    return (
-        <ValueRow label={label}>
-            <KitAddress address={address} raw link alignRight />
-        </ValueRow>
-    );
-}
-
-function ValueRow({ children, label, wrap }: { children: React.ReactNode; label: string; wrap?: boolean }) {
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell>{label}</BaseTable.Cell>
-            {/* The card table is `nowrap`; `wrap` lets long free-text values (e.g. a metadata URI)
-                break onto multiple lines instead of forcing the whole card to scroll on mobile. */}
-            <BaseTable.Cell className={cn('md:text-right', wrap && '!whitespace-normal [overflow-wrap:anywhere]')}>
-                {children}
-            </BaseTable.Cell>
-        </BaseTable.Row>
-    );
+function addressValue(address: Address): React.ReactNode {
+    return <KitAddress address={address} raw link />;
 }
 
 function displayPlanStatus(status: number): string {

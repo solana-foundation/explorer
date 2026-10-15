@@ -1,5 +1,5 @@
 import { Signature } from '@components/common/Signature';
-import { decodeUnpackedPayload, PayloadHashRow, type PmpAccountReadResult } from '@entities/pmp-account';
+import { decodeUnpackedPayload, type PmpAccountReadResult } from '@entities/pmp-account';
 import { useMemo } from 'react';
 
 import {
@@ -11,10 +11,10 @@ import { ConfigResolutionFromBytesState } from '../model/use-resolve-buffer-conf
 import type { ConfigResolutionOnchainState } from '../model/use-resolve-buffer-config-onchain';
 import {
     BasePmpAccountDataCard,
-    CARD_TABLE_COLUMNS,
     FieldRows,
     InfoRow,
     NoteRow,
+    PayloadHashRow,
     PendingRow,
     PMP_CARD_TITLE,
 } from './BasePmpAccountDataCard';
@@ -100,11 +100,7 @@ function BufferDataContentRows({
     if (resultFromBytes.kind === 'oversized') {
         return (
             <>
-                <PayloadHashRow
-                    columns={CARD_TABLE_COLUMNS}
-                    dataSource={foundConfig?.dataSource}
-                    hash={resultFromBytes.dataHash}
-                />
+                <PayloadHashRow dataSource={foundConfig?.dataSource} hash={resultFromBytes.dataHash} />
                 <PayloadTooLargeRow budget={resultFromBytes.budget} size={resultFromBytes.bytes.length} />
                 <RawPayloadRow bytes={resultFromBytes.bytes} />
             </>
@@ -124,11 +120,7 @@ function BufferDataContentRows({
                         (resultFromBytes.kind === 'text' ? resultFromBytes.format : undefined),
                 }}
             />
-            <PayloadHashRow
-                columns={CARD_TABLE_COLUMNS}
-                dataSource={foundConfig?.dataSource}
-                hash={resultFromBytes.dataHash}
-            />
+            <PayloadHashRow dataSource={foundConfig?.dataSource} hash={resultFromBytes.dataHash} />
             <BufferPayloadRow foundConfig={foundConfig} fromBytesConfig={resultFromBytes} />
         </>
     );

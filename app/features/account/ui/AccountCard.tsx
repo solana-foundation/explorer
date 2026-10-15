@@ -1,34 +1,54 @@
-import { TableCardBodyProps } from '@components/common/TableCardBody';
+import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { useRawAccountDataOnMount } from '@entities/account';
 import type { Account } from '@providers/accounts';
+import React from 'react';
+import { Code } from 'react-feather';
 
-import { BaseAccountCard } from '@/app/shared/ui/BaseAccountCard';
+import { Button } from '@/app/components/shared/ui/button';
 import { BaseRawAccountRows } from '@/app/shared/ui/BaseRawAccountRows';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 import { AccountDownloadDropdown } from './AccountDownloadDropdown';
 
-type AccountCardProps = TableCardBodyProps & {
+type AccountCardProps = {
     title: React.ReactNode;
-    account: Account;
+    account?: Account;
     refresh?: () => void;
-    showRawButton?: boolean;
     analyticsSection?: string;
-    /** Render the title + actions as a section header above the card instead of in CardHeader. */
-    headerOutside?: boolean;
-    /** Set when `children` are div-based `KeyValue` rows rather than `<tr>` table rows. */
-    listBody?: boolean;
+    children: React.ReactNode;
 };
 
-// FIXME: missing Storybook story — RawAccountRows uses useRawAccountDataOnMount (SWR); visuals already covered by BaseAccountCard + RawAccountRows stories.
-export function AccountCard({ account, children, ...rest }: AccountCardProps) {
+export function AccountCard({ account, title, refresh, analyticsSection, children }: AccountCardProps) {
+    const [showRaw, setShowRaw] = React.useState(false);
+
+    const rawContent = account ? <RawAccountRows account={account} /> : undefined;
+
     return (
-        <BaseAccountCard
-            rawContent={<RawAccountRows account={account} />}
-            headerActions={<AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />}
-            {...rest}
+        <OverviewCard
+            title={title}
+            actions={
+                <>
+                    {refresh && analyticsSection && (
+                        <RefreshButton analyticsSection={analyticsSection} onClick={refresh} />
+                    )}
+                    {rawContent && (
+                        <Button
+                            variant={showRaw ? 'default' : 'outline'}
+                            size="sm"
+                            aria-label="Raw"
+                            className={showRaw ? 'shadow-active-sm' : undefined}
+                            onClick={() => setShowRaw(r => !r)}
+                        >
+                            <Code size={12} />
+                            <span className="hidden md:inline">Raw</span>
+                        </Button>
+                    )}
+                    {account && <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />}
+                </>
+            }
         >
-            {children}
-        </BaseAccountCard>
+            {showRaw ? rawContent : children}
+        </OverviewCard>
     );
 }
 
