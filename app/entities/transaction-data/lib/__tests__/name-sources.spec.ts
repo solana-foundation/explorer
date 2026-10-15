@@ -71,6 +71,13 @@ describe('resolveNamesFromLookup', () => {
             expect(names.name).toBe('Swap');
         });
 
+        it('should resolve a Wormhole name without any IDL', () => {
+            // tag 2 = Post VAA
+            const names = resolveNamesFromLookup(lookup(WORMHOLE_PROGRAM, 2), idlNames({}));
+
+            expect(names.name).toBe('Post VAA');
+        });
+
         // The generated `@solana-program/*` clients are the only thing that names a simulated System or
         // Token instruction, which is half of what the CU chart needs. Covered here and not just in
         // program-client-name.spec, so removing the source from the chain fails a test.
@@ -277,6 +284,7 @@ const SYSTEM_PROGRAM = '11111111111111111111111111111111';
 const MANGO_PROGRAM = 'mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68';
 const PYTH_PROGRAM = 'FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH';
 const TOKEN_SWAP_PROGRAM = 'SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8';
+const WORMHOLE_PROGRAM = 'WormT3McKhFJ2RkiGpdw9GKvNCrB2aB54gb2uV9MfQC';
 
 function lookup(programId: string, ...data: number[]): InstructionNameLookup {
     return { data: Uint8Array.from(data), programId };
