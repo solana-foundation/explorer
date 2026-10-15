@@ -5,11 +5,12 @@ import {
     PMP_OPTIONAL_BUFFER_ACCOUNT_INDEX,
     type PmpInstructionData,
 } from '@entities/pmp-instruction';
-import { getBase58Encoder } from '@solana/kit';
-import type { VersionedTransactionResponse } from '@solana/web3.js';
+import { getBase58Encoder, type GetTransactionApiResponseJson, type TransactionVersion } from '@solana/kit';
 import type { DataSource } from '@solana-program/program-metadata';
 
 const BASE58_ENCODER = getBase58Encoder();
+
+type JsonTransaction = GetTransactionApiResponseJson<TransactionVersion | void>;
 
 /**
  * A config recovered from transaction, and who it was declared for.
@@ -38,7 +39,7 @@ export type ConfigResolutionFromTxResult =
  * bytes were copied into. The order matters - a direct declaration must never be shadowed by the weaker inference.
  */
 export function resolveConfigFromTransaction(
-    tx: VersionedTransactionResponse,
+    tx: JsonTransaction,
     bufferAddress: string,
     signature: string,
 ): ConfigResolutionFromTxResult {
@@ -67,26 +68,26 @@ type DecodedPmpInstruction = { accountKeys: string[]; data: PmpInstructionData }
 /**
  * Flattens a transaction's PMP instructions, top-level and inner alike.
  *
- * Account keys resolve through `getAccountKeys` with `loadedAddresses`, so an instruction reached through an
- * address lookup table names the same accounts the chain saw rather than indexing off the static keys alone.
+ * Instruction account indexes address the static keys followed by the lookup-table writable then readonly keys, so
+ * an instruction reached through an address lookup table names the same accounts the chain saw rather than indexing
+ * off the static keys alone.
  */
-function collectPmpInstructions(tx: VersionedTransactionResponse): PmpInstruction[] {
-    const { message } = tx.transaction;
-    const keys = message.getAccountKeys({ accountKeysFromLookups: tx.meta?.loadedAddresses ?? undefined });
-    const at = (index: number) => keys.get(index)?.toBase58() ?? '';
+function collectPmpInstructions(tx: JsonTransaction): PmpInstruction[] {
+    const keys = [
+        ...tx.transaction.message.accountKeys,
+        ...(tx.meta?.loadedAddresses?.writable ?? []),
+        ...(tx.meta?.loadedAddresses?.readonly ?? []),
+    ];
+    const at = (index: number): string => keys[index] ?? '';
 
-    // Inner instruction data is base58 on the wire, unlike the top-level `compiledInstructions` byte arrays.
-    const inner = (tx.meta?.innerInstructions ?? []).flatMap(group =>
-        group.instructions.map(ix => ({
-            accountKeyIndexes: ix.accounts,
-            data: new Uint8Array(BASE58_ENCODER.encode(ix.data)),
-            programIdIndex: ix.programIdIndex,
-        })),
-    );
+    const inner = (tx.meta?.innerInstructions ?? []).flatMap(group => group.instructions);
 
-    return [...message.compiledInstructions, ...inner]
+    return [...tx.transaction.message.instructions, ...inner]
         .filter(ix => at(ix.programIdIndex) === PMP_ADDRESS)
-        .map(ix => ({ accountKeys: ix.accountKeyIndexes.map(index => at(index)), data: ix.data }));
+        .map(ix => ({
+            accountKeys: ix.accounts.map(index => at(index)),
+            data: new Uint8Array(BASE58_ENCODER.encode(ix.data)),
+        }));
 }
 
 /**
