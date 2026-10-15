@@ -9,7 +9,11 @@ vi.mock('../CodamaInstructionCard', () => ({
     CodamaInstructionCard: vi.fn(() => <div data-testid="codama-card" />),
 }));
 vi.mock('../AnchorDetailsCard', () => ({
-    AnchorDetailsCard: ({ signature }: { signature: string }) => <div data-testid="anchor-card">{signature}</div>,
+    AnchorDetailsCard: ({ childIndex, signature }: { childIndex?: number; signature: string }) => (
+        <div data-testid="anchor-card" data-child-index={childIndex}>
+            {signature}
+        </div>
+    ),
 }));
 vi.mock('@entities/instruction-card', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/instruction-card')>()),
@@ -40,6 +44,17 @@ describe('IdlInstructionCard', () => {
             <IdlInstructionCard {...props} decoded={{ details: {} as never, kind: 'anchor', program: {} as never }} />,
         );
         expect(screen.getByTestId('anchor-card')).toHaveTextContent('SIG');
+    });
+
+    it('should forward the child index to the Anchor card', () => {
+        render(
+            <IdlInstructionCard
+                {...props}
+                childIndex={1}
+                decoded={{ details: {} as never, kind: 'anchor', program: {} as never }}
+            />,
+        );
+        expect(screen.getByTestId('anchor-card')).toHaveAttribute('data-child-index', '1');
     });
 
     it('should render the Unknown card when the decoded card throws', () => {

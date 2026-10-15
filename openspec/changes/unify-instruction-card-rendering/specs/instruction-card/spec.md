@@ -118,6 +118,12 @@ Program events are the deliberate exception to "nesting travels on the node". Th
 - **THEN** it MUST pass them to `InstructionCardView` as `events`, not through the node
 - **AND** on a surface with no logs the frame MUST render the card without them
 
+#### Scenario: Program event logged by a CPI
+
+- **WHEN** a CPI logs a program event
+- **THEN** only the card of that CPI MAY render the event
+- **AND** the card of its top-level instruction MUST NOT render it
+
 #### Scenario: Card is unaware of nesting
 
 - **WHEN** an instruction has inner instructions
