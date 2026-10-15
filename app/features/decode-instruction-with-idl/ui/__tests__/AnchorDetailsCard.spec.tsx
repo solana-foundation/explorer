@@ -1,13 +1,15 @@
 import { gen } from '@__fixtures__/gen';
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
-import { TxInstructionSurface } from '@entities/instruction-card';
+import { InstructionSurfaceProvider, toInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
 import type { TransactionWithMeta } from '@entities/transaction-data';
 import { FetchStatus } from '@providers/cache';
 import { useTransactionDetails } from '@providers/transactions';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { INSPECTOR_SURFACE } from '@/app/components/inspector/inspector-surface';
 import anchor030Devi from '@/app/entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { TransactionsProvider } from '@/app/providers/transactions';
@@ -48,6 +50,52 @@ describe('AnchorDetailsCard', () => {
         vi.mocked(useTransactionDetails).mockReset();
     });
 
+    it.each([
+        ['tx page', 0],
+        ['inspector', 1],
+    ] as const)('should draw the frame of the %s', (surface, collapseButtons) => {
+        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface });
+
+        expect(screen.getByText('Amm V3: Update Reward Infos')).toBeInTheDocument();
+        expect(screen.queryAllByRole('button', { name: 'Collapse' })).toHaveLength(collapseButtons);
+    });
+
+    it.each(['tx page', 'inspector'] as const)(
+        'should draw one Program row on the %s when the instruction decodes',
+        surface => {
+            renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface });
+
+            expect(screen.getByText('Account Name')).toBeInTheDocument();
+            expect(screen.getAllByText('Program')).toHaveLength(1);
+        },
+    );
+
+    it.each(['tx page', 'inspector'] as const)(
+        'should draw one Program row on the %s when the instruction does not decode',
+        surface => {
+            renderCard(makeIx([0, 0, 0, 0, 0, 0, 0, 0]), { surface });
+
+            expect(
+                screen.getByText('Failed to decode account data according to the public Anchor interface'),
+            ).toBeInTheDocument();
+            expect(screen.getAllByText('Program')).toHaveLength(1);
+        },
+    );
+
+    it.each(['tx page', 'inspector'] as const)(
+        'should pass the child index and the inner cards to the frame of the %s',
+        surface => {
+            renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), {
+                childIndex: 2,
+                innerCards: [<div key="inner">Inner card</div>],
+                surface,
+            });
+
+            expect(screen.getByText('#1.3')).toBeInTheDocument();
+            expect(screen.getByText('Inner card')).toBeInTheDocument();
+        },
+    );
+
     it('should show the events that a top-level instruction logged on the card of that instruction', () => {
         const other = gen.publicKey(2);
         mockTransactionLogs(
@@ -61,7 +109,7 @@ describe('AnchorDetailsCard', () => {
             [other, program.programId],
         );
 
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { index: 1 });
+        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { index: 1, surface: 'tx page' });
 
         expect(screen.getByText('Events')).toBeInTheDocument();
         expect(screen.getByText('Unknown Event')).toBeInTheDocument();
@@ -82,7 +130,7 @@ describe('AnchorDetailsCard', () => {
             [parent],
         );
 
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0 });
+        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0, surface: 'tx page' });
 
         expect(screen.getByText('Config Change Event')).toBeInTheDocument();
         expect(screen.queryByText('Unknown Event')).not.toBeInTheDocument();
@@ -101,7 +149,7 @@ describe('AnchorDetailsCard', () => {
             [parent],
         );
 
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0 });
+        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { childIndex: 0, surface: 'tx page' });
 
         expect(screen.getByText('#1.1 · event 1')).toBeInTheDocument();
     });
@@ -119,7 +167,7 @@ describe('AnchorDetailsCard', () => {
             [program.programId],
         );
 
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), {});
+        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface: 'tx page' });
 
         expect(screen.getByText('Amm V3: Update Reward Infos')).toBeInTheDocument();
         expect(screen.queryByText('Events')).not.toBeInTheDocument();
@@ -135,7 +183,7 @@ describe('AnchorDetailsCard', () => {
             [program.programId],
         );
 
-        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), {});
+        renderCard(makeIx(UPDATE_REWARD_INFOS_DISCRIMINATOR), { surface: 'tx page' });
 
         expect(screen.getByText('Amm V3: Update Reward Infos')).toBeInTheDocument();
         expect(screen.queryByText('Events')).not.toBeInTheDocument();
@@ -160,21 +208,39 @@ function mockTransactionLogs(logMessages: string[], programIds: PublicKey[]) {
     );
 }
 
-function renderCard(ix: TransactionInstruction, { index = 0, childIndex }: { index?: number; childIndex?: number }) {
+const SURFACES = {
+    inspector: ({ children }: { children: React.ReactNode }) => (
+        <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>{children}</InstructionSurfaceProvider>
+    ),
+    'tx page': ({ children }: { children: React.ReactNode }) => (
+        <TxInstructionSurface result={{ err: null }} signature={SIGNATURE}>
+            {children}
+        </TxInstructionSurface>
+    ),
+};
+
+function renderCard(
+    ix: TransactionInstruction,
+    {
+        surface,
+        index = 0,
+        childIndex,
+        innerCards,
+    }: { surface: keyof typeof SURFACES; index?: number; childIndex?: number; innerCards?: JSX.Element[] },
+) {
+    const Surface = SURFACES[surface];
+
     return render(
         <ClusterProvider>
             <TransactionsProvider>
-                <TxInstructionSurface result={{ err: null }} signature={SIGNATURE}>
+                <Surface>
                     <AnchorDetailsCard
+                        node={toInstructionNode({ childIndex, index, innerCards, ix })}
                         ix={ix}
-                        index={index}
-                        childIndex={childIndex}
-                        result={{ err: null }}
-                        signature={SIGNATURE}
                         program={program}
                         decoded={decodeAnchorInstruction(program, ix)}
                     />
-                </TxInstructionSurface>
+                </Surface>
             </TransactionsProvider>
         </ClusterProvider>,
     );

@@ -59,8 +59,6 @@ export const Allocate: Story = {
         decoded: decodeInstructionWithIdl(allocateIx, pmpIdl, url),
         index: 0,
         ix: allocateIx,
-        result: { err: null },
-        signature: '',
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
@@ -77,7 +75,5 @@ export const SetAuthority: Story = {
         decoded: decodeInstructionWithIdl(setAuthorityIx, pmpIdl, url),
         index: 0,
         ix: setAuthorityIx,
-        result: { err: null },
-        signature: '',
     },
 };

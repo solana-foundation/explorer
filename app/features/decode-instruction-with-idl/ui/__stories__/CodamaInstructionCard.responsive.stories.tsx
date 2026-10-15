@@ -1,3 +1,4 @@
+import { toInstructionNode } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
     nextjsParameters,
@@ -43,7 +44,7 @@ const meta: Meta<typeof CodamaInstructionCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { index: 0, ix: sampleIx, parsedIx: fallbackParsedIx };
+const args = { ix: sampleIx, node: toInstructionNode({ index: 0, ix: sampleIx }), parsedIx: fallbackParsedIx };
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };
