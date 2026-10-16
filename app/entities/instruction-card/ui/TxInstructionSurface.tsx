@@ -1,5 +1,6 @@
 'use client';
 
+import { readRawInstructions } from '@entities/transaction-data/@x/instruction-card';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import type { TransactionSignature } from '@solana/web3.js';
@@ -27,13 +28,16 @@ export function TxInstructionSurface({
 }) {
     const rawDetails = useRawTransactionDetails(signature);
     const fetchRaw = useFetchRawTransaction();
-    const rawInstructions = React.useMemo<RawInstructions>(
-        () =>
-            rawDetails?.status === FetchStatus.Fetched
-                ? { instructions: rawDetails.data?.raw?.transaction?.instructions, status: 'fetched' }
-                : { fetch: () => fetchRaw(signature), status: 'fetchable' },
-        [fetchRaw, rawDetails, signature],
-    );
+    const rawInstructions = React.useMemo<RawInstructions>(() => {
+        const fetch = () => fetchRaw(signature);
+        if (rawDetails?.status === FetchStatus.Fetched) {
+            const raw = rawDetails.data?.raw;
+            return { instructions: raw ? readRawInstructions(raw) : undefined, status: 'fetched' };
+        }
+        return rawDetails?.status === FetchStatus.FetchFailed
+            ? { fetch, status: 'failed' }
+            : { fetch, status: 'fetchable' };
+    }, [fetchRaw, rawDetails, signature]);
     const surface = React.useMemo<InstructionSurface>(
         () => ({
             Card,

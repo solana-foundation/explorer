@@ -4,7 +4,7 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 
 import type { InstructionIntent } from '../../lib/intent';
 import { DESTINATION, SOURCE } from '../../mocks/fixtures';
-import { BaseInstructionIntentPanel } from '../BaseInstructionIntentPanel';
+import { InstructionIntentPanel } from '../InstructionIntentPanel';
 
 const TRANSFER: InstructionIntent = {
     fields: [],
@@ -22,12 +22,12 @@ const retry = fn();
 
 const meta = {
     args: { id: 'intent-panel', intent: { status: 'loading' } },
-    component: BaseInstructionIntentPanel,
+    component: InstructionIntentPanel,
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Entities/InstructionIntent/BaseInstructionIntentPanel',
-} satisfies Meta<typeof BaseInstructionIntentPanel>;
+    title: 'Entities/InstructionIntent/InstructionIntentPanel',
+} satisfies Meta<typeof InstructionIntentPanel>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

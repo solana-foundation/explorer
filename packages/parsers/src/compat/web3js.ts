@@ -2,8 +2,8 @@
 // The explorer receives transaction data as web3.js v1 objects but
 // @solana-program/* parsers expect kit-shaped instructions.
 
-import { type AccountMeta, AccountRole, type Address, address } from '@solana/kit';
-import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
+import { type AccountMeta, AccountRole, type Address, address, isSignerRole, isWritableRole } from '@solana/kit';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import type { KitInstruction } from '../kit-instruction.js';
 
@@ -18,6 +18,19 @@ export function toKitInstruction(ix: TransactionInstruction): KitInstruction {
         data: ix.data,
         programAddress: address(ix.programId.toBase58()),
     };
+}
+
+export function toLegacyInstruction({ accounts, data, programAddress }: KitInstruction): TransactionInstruction {
+    return new TransactionInstruction({
+        // web3.js reads the data as a Buffer
+        data: Buffer.from(data),
+        keys: accounts.map(account => ({
+            isSigner: isSignerRole(account.role),
+            isWritable: isWritableRole(account.role),
+            pubkey: toLegacyPublicKey(account.address),
+        })),
+        programId: toLegacyPublicKey(programAddress),
+    });
 }
 
 function toAccountRole(isSigner: boolean, isWritable: boolean): AccountRole {

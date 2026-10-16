@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
     amountToUiAmountInstruction,
-    MINT,
     mintToInstruction,
     SYSTEM_PROGRAM_ADDRESS,
     SYSTEM_ROOT,
@@ -15,12 +14,9 @@ import {
 import { checkInstructionIntentExists, checkIntentSupport } from '../intent';
 
 type Parsers = typeof import('@codama/dynamic-parsers');
-type Display = typeof import('@codama/dynamic-instructions');
 
 const mocks = vi.hoisted(() => ({
-    getRequiredAccountsForDisplay: vi.fn(),
     parseInstruction: vi.fn(),
-    realGetRequiredAccounts: undefined as Display['getRequiredAccountsForDisplay'] | undefined,
     realParseInstruction: undefined as Parsers['parseInstruction'] | undefined,
 }));
 
@@ -29,19 +25,11 @@ vi.mock('@codama/dynamic-parsers', async importOriginal => {
     mocks.realParseInstruction = actual.parseInstruction;
     return { ...actual, parseInstruction: mocks.parseInstruction };
 });
-vi.mock('@codama/dynamic-instructions', async importOriginal => {
-    const actual = await importOriginal<Display>();
-    mocks.realGetRequiredAccounts = actual.getRequiredAccountsForDisplay;
-    return { ...actual, getRequiredAccountsForDisplay: mocks.getRequiredAccountsForDisplay };
-});
 
 beforeEach(() => {
     vi.clearAllMocks();
     mocks.parseInstruction.mockImplementation((...args: Parameters<Parsers['parseInstruction']>) =>
         mocks.realParseInstruction?.(...args),
-    );
-    mocks.getRequiredAccountsForDisplay.mockImplementation(
-        (...args: Parameters<Display['getRequiredAccountsForDisplay']>) => mocks.realGetRequiredAccounts?.(...args),
     );
 });
 
@@ -70,19 +58,19 @@ describe('checkIntentSupport', () => {
 });
 
 describe('checkInstructionIntentExists', () => {
-    it('should report exists without required accounts', () => {
+    it('should report exists with the parsed instruction when the transferSol node has a template', () => {
         const ixIntentExist = checkInstructionIntentExists(SYSTEM_ROOT, transferSolInstruction());
 
-        expect(ixIntentExist).toMatchObject({ addresses: [], status: 'exists' });
+        expect(ixIntentExist).toEqual({ parsed: expect.anything(), status: 'exists' });
         expect(ixIntentExist.status === 'exists' && getLastNodeFromPath(ixIntentExist.parsed.path).name).toBe(
             'transferSol',
         );
     });
 
-    it('should report exists with the required mint address', () => {
+    it('should report exists with the parsed instruction when the mintTo node has a template', () => {
         const ixIntentExist = checkInstructionIntentExists(TOKEN_ROOT, mintToInstruction());
 
-        expect(ixIntentExist).toMatchObject({ addresses: [MINT], status: 'exists' });
+        expect(ixIntentExist).toEqual({ parsed: expect.anything(), status: 'exists' });
         expect(ixIntentExist.status === 'exists' && getLastNodeFromPath(ixIntentExist.parsed.path).name).toBe('mintTo');
     });
 
@@ -102,17 +90,6 @@ describe('checkInstructionIntentExists', () => {
 
     it('should report malformed-metadata when parsing throws', () => {
         mocks.parseInstruction.mockImplementationOnce(() => {
-            throw new Error('broken IDL');
-        });
-
-        expect(checkInstructionIntentExists(SYSTEM_ROOT, transferSolInstruction())).toEqual({
-            reason: 'malformed-metadata',
-            status: 'unavailable',
-        });
-    });
-
-    it('should report malformed-metadata when required accounts throws', () => {
-        mocks.getRequiredAccountsForDisplay.mockImplementationOnce(() => {
             throw new Error('broken IDL');
         });
 

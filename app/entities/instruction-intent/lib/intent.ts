@@ -1,4 +1,3 @@
-import { getRequiredAccountsForDisplay } from '@codama/dynamic-instructions';
 import { type ParsedInstruction, parseInstruction } from '@codama/dynamic-parsers';
 import type { KitInstruction } from '@explorer/parsers';
 import type { Address } from '@solana/kit';
@@ -10,11 +9,8 @@ export type IntentSupportStatus =
 
 export type IntentSupportResult = { status: 'loading' } | { status: 'failed' } | IntentSupportStatus;
 
-/** Whether the instruction has an intent functionality. `retry` is set only when retrying possible. */
-export type InstructionIntentAvailability =
-    | { status: 'present'; instruction: KitInstruction }
-    | { status: 'pending' }
-    | { status: 'absent'; retry?: () => void };
+export type InstructionFetchResult =
+    { status: 'loading' } | { status: 'failed' } | { status: 'success'; instruction: KitInstruction };
 
 export type IntentSentencePart = { kind: 'text'; text: string } | { kind: 'address'; address: Address };
 
@@ -39,7 +35,7 @@ export type InstructionIntentResult =
     | { status: 'ready'; result: InstructionIntent };
 
 export type InstructionIntentExistence =
-    | { status: 'exists'; parsed: ParsedInstruction; addresses: readonly Address[] }
+    | { status: 'exists'; parsed: ParsedInstruction }
     | {
           status: 'unavailable';
           reason: Extract<IntentUnavailableReason, 'no-instruction-intent' | 'malformed-metadata'>;
@@ -78,20 +74,16 @@ export function checkIntentSupport(idl: unknown): IntentSupportStatus {
     return { root: idl as unknown as RootNode, status: 'supported' };
 }
 
-/**
- * Parses an instruction against the root and keeps it only when its node publishes an intent template.
- * Also plans the accounts the intent reads, so a later step only fetches them.
- */
+/** Parses an instruction against the root and keeps it only when its node publishes an intent template. */
 export function checkInstructionIntentExists(root: RootNode, instruction: KitInstruction): InstructionIntentExistence {
     try {
         const parsed = parseInstruction(root, instruction);
         if (!parsed || !getLastNodeFromPath(parsed.path).display?.interpolatedIntent) {
             return { reason: 'no-instruction-intent', status: 'unavailable' };
         }
-        const addresses = [...getRequiredAccountsForDisplay(root, parsed)].sort();
-        return { addresses, parsed, status: 'exists' };
+        return { parsed, status: 'exists' };
     } catch {
-        // A published IDL is untrusted, and a malformed node throws while the parser or the planner walks the root
+        // A published IDL is untrusted, and a malformed node throws while the parser walks the root
         return { reason: 'malformed-metadata', status: 'unavailable' };
     }
 }
