@@ -1,3 +1,4 @@
+import { UnknownDetailsCard } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -14,7 +15,7 @@ vi.mock('../AnchorDetailsCard', () => ({
 }));
 vi.mock('@entities/instruction-card', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/instruction-card')>()),
-    UnknownDetailsCard: () => <div data-testid="unknown-card" />,
+    UnknownDetailsCard: vi.fn(() => <div data-testid="unknown-card" />),
 }));
 
 const ix = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PublicKey.unique() });
@@ -26,6 +27,7 @@ describe('IdlInstructionCard', () => {
     afterEach(() => {
         vi.mocked(CodamaInstructionCard).mockReset();
         vi.mocked(AnchorDetailsCard).mockReset();
+        vi.mocked(UnknownDetailsCard).mockReset();
         vi.restoreAllMocks();
     });
 
@@ -70,7 +72,7 @@ describe('IdlInstructionCard', () => {
         expect(screen.getByTestId('unknown-card')).toBeInTheDocument();
     });
 
-    it('should render the Unknown card when the Anchor card throws', () => {
+    it('should render the Unknown card with the node of the instruction when the Anchor card throws', () => {
         vi.mocked(AnchorDetailsCard).mockImplementation(() => {
             throw new Error('rows failed');
         });
@@ -81,6 +83,7 @@ describe('IdlInstructionCard', () => {
         );
 
         expect(screen.getByTestId('unknown-card')).toBeInTheDocument();
+        expect(vi.mocked(UnknownDetailsCard).mock.calls[0][0]).toEqual({ node });
     });
 
     it('should render the Unknown card for an unknown decode', () => {
