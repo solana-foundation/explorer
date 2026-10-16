@@ -39,7 +39,7 @@ export function AddressLink({ address, truncate, className, 'aria-label': ariaLa
     );
 }
 
-function abbreviateAddress(address: string, { head, tail }: Truncate): string {
+export function abbreviateAddress(address: string, { head, tail }: Truncate): string {
     if (address.length <= head + tail + 1) return address;
     return `${address.slice(0, head)}…${address.slice(-tail)}`;
 }
