@@ -6,7 +6,7 @@ import { PublicKey } from '@solana/web3.js';
 import { Suspense } from 'react';
 
 import { ProxiedImage } from '@/app/features/metadata';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
 
 import { UnknownAccountCard } from '../UnknownAccountCard';
 import { parseNFTokenCollectionAccount, parseNFTokenNFTAccount } from './isNFTokenAccount';
@@ -30,6 +30,20 @@ export function NFTokenAccountSection({ account }: { account: Account }) {
 const NFTCard = ({ account, nft }: { account: Account; nft: NftokenTypes.NftAccount }) => {
     const fetchInfo = useRefreshAccount();
 
+    const rows: KeyValueRow[] = [
+        { label: 'Address', value: <Address pubkey={new PublicKey(nft.address)} raw /> },
+        { label: 'Authority', value: <Address pubkey={new PublicKey(nft.authority)} link /> },
+        { label: 'Holder', value: <Address pubkey={new PublicKey(nft.holder)} link /> },
+        {
+            label: 'Delegate',
+            value: nft.delegate ? <Address pubkey={new PublicKey(nft.delegate)} link /> : 'Not Delegated',
+        },
+        {
+            label: 'Collection',
+            value: nft.collection ? <Address pubkey={new PublicKey(nft.collection)} link /> : 'No Collection',
+        },
+    ];
+
     return (
         <AccountCard
             title="Overview"
@@ -37,40 +51,7 @@ const NFTCard = ({ account, nft }: { account: Account; nft: NftokenTypes.NftAcco
             refresh={() => fetchInfo(new PublicKey(nft.address), 'parsed')}
             analyticsSection="nft_token_card"
         >
-            <BaseTable.Row>
-                <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={new PublicKey(nft.address)} alignRight raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Authority</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={new PublicKey(nft.authority)} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Holder</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={new PublicKey(nft.holder)} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Delegate</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {nft.delegate ? <Address pubkey={new PublicKey(nft.delegate)} alignRight link /> : 'Not Delegated'}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Collection</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {nft.collection ? (
-                        <Address pubkey={new PublicKey(nft.collection)} alignRight link />
-                    ) : (
-                        'No Collection'
-                    )}
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 };
@@ -89,6 +70,19 @@ export const NftokenImage = ({ url, size }: { url: string | undefined; size: num
 const CollectionCard = ({ account, collection }: { account: Account; collection: NftokenTypes.CollectionAccount }) => {
     const fetchInfo = useRefreshAccount();
 
+    const rows: KeyValueRow[] = [
+        { label: 'Address', value: <Address pubkey={new PublicKey(collection.address)} raw /> },
+        { label: 'Authority', value: <Address pubkey={new PublicKey(collection.authority)} link /> },
+        {
+            label: 'Number of NFTs',
+            value: (
+                <Suspense fallback={<div>Loading...</div>}>
+                    <NumNfts collection={collection.address} />
+                </Suspense>
+            ),
+        },
+    ];
+
     return (
         <AccountCard
             title="Overview"
@@ -96,26 +90,7 @@ const CollectionCard = ({ account, collection }: { account: Account; collection:
             refresh={() => fetchInfo(new PublicKey(collection.address), 'parsed')}
             analyticsSection="nft_token_collection_card"
         >
-            <BaseTable.Row>
-                <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={new PublicKey(collection.address)} alignRight raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Authority</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={new PublicKey(collection.authority)} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Number of NFTs</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Suspense fallback={<div>Loading...</div>}>
-                        <NumNfts collection={collection.address} />
-                    </Suspense>
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 };

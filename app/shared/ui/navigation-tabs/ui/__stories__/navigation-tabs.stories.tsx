@@ -118,6 +118,30 @@ export const WithChildren: Story = {
     ),
 };
 
+export const SingleTab: Story = {
+    args: {
+        activeValue: '',
+        tabs: [{ path: '', title: 'Only Tab' }],
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        // One tab needs no navigation, so the tab bar is suppressed entirely.
+        expect(canvas.queryByRole('tablist', { hidden: true })).toBeNull();
+        expect(canvas.queryByText('Only Tab')).toBeNull();
+    },
+};
+
+export const NoTabs: Story = {
+    args: {
+        activeValue: '',
+        tabs: [],
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        expect(canvas.queryByRole('tablist', { hidden: true })).toBeNull();
+    },
+};
+
 export const WithOnTabClick: Story = {
     args: {
         activeValue: '',

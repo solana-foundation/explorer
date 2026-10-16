@@ -38,8 +38,9 @@ import {
     type V1TransactionConfig,
 } from '@/app/shared/lib/v1-message-bridge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { KeyValue } from '@/app/shared/ui/key-value';
+import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { PageHeader, PageLayout, PageSections } from '@/app/shared/ui/page-layout';
 import { useClusterPath } from '@/app/utils/url';
 
@@ -648,7 +649,7 @@ function LoadedView({
 
     return (
         <>
-            <OverviewCard
+            <InspectorOverviewCard
                 message={message}
                 raw={rawMessage}
                 onClear={onClear}
@@ -698,7 +699,7 @@ const DEFAULT_FEES = {
     lamportsPerSignature: 5000,
 };
 
-function OverviewCard({
+function InspectorOverviewCard({
     message,
     raw,
     onClear,
@@ -723,74 +724,83 @@ function OverviewCard({
     }, [message, raw, isV1]);
     const sizeLimit = isV1 ? V1_TRANSACTION_SIZE_LIMIT : PACKET_DATA_SIZE;
 
-    // Heading + actions sit OUTSIDE the card (matching the TX details Summary card), then the label|value
-    // rows inside a dashkit card.
+    const rows: KeyValueRow[] = [
+        {
+            label: 'Serialized Size / Limit',
+            value: (
+                <span className={size > sizeLimit ? 'text-dk-warning-on-dark' : undefined}>
+                    {size} / {sizeLimit} bytes
+                </span>
+            ),
+        },
+        { label: 'Fees', value: <SolBalance lamports={fee} /> },
+        { label: 'Transaction Version', show: isV1, value: <span className="uppercase">v1</span> },
+        {
+            label: 'Compute unit limit',
+            show: transactionConfig?.computeUnitLimit !== undefined,
+            value:
+                transactionConfig?.computeUnitLimit !== undefined &&
+                transactionConfig.computeUnitLimit.toLocaleString('en-US'),
+        },
+        {
+            label: 'Priority fee (total)',
+            show: transactionConfig?.priorityFeeLamports !== undefined,
+            value: transactionConfig?.priorityFeeLamports !== undefined && (
+                <SolBalance lamports={transactionConfig.priorityFeeLamports} />
+            ),
+        },
+        {
+            label: 'Loaded accounts data size limit',
+            show: transactionConfig?.loadedAccountsDataSizeLimit !== undefined,
+            value:
+                transactionConfig?.loadedAccountsDataSizeLimit !== undefined &&
+                transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US'),
+        },
+        {
+            label: 'Heap size',
+            show: transactionConfig?.heapSize !== undefined,
+            value: transactionConfig?.heapSize !== undefined && transactionConfig.heapSize.toLocaleString('en-US'),
+        },
+        {
+            label: 'Fee payer',
+            value:
+                message.staticAccountKeys.length === 0 ? (
+                    'No Fee Payer'
+                ) : (
+                    <AddressWithContext
+                        pubkey={message.staticAccountKeys[0]}
+                        validator={feePayerValidator}
+                        align="left"
+                        hideInfo
+                        badges={
+                            <span className="mt-1 flex flex-wrap gap-1.5">
+                                <Badge ui="dashkit" variant="info">
+                                    Signer
+                                </Badge>
+                                <Badge ui="dashkit" variant="destructive">
+                                    Writable
+                                </Badge>
+                            </span>
+                        }
+                    />
+                ),
+        },
+    ];
+
     return (
-        <section id="summary" className="flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-2">
-                <h2 className="m-0 text-lg font-normal text-white">Overview</h2>
+        <OverviewCard
+            id="summary"
+            title="Overview"
+            actions={
                 <div className="flex shrink-0 items-center gap-1">
                     <Button variant="outline" size="sm" onClick={onClear}>
                         Clear
                     </Button>
                     <DownloadDropdown filename={signature || 'signature'} data={raw} />
                 </div>
-            </div>
-            <Card ui="dashkit">
-                <KeyValue label="Serialized Size / Limit">
-                    <span className={size > sizeLimit ? 'text-dk-warning-on-dark' : undefined}>
-                        {size} / {sizeLimit} bytes
-                    </span>
-                </KeyValue>
-                <KeyValue label="Fees">
-                    <SolBalance lamports={fee} />
-                </KeyValue>
-                {isV1 && (
-                    <KeyValue label="Transaction Version">
-                        <span className="uppercase">v1</span>
-                    </KeyValue>
-                )}
-                {transactionConfig?.computeUnitLimit !== undefined && (
-                    <KeyValue label="Compute unit limit">
-                        {transactionConfig.computeUnitLimit.toLocaleString('en-US')}
-                    </KeyValue>
-                )}
-                {transactionConfig?.priorityFeeLamports !== undefined && (
-                    <KeyValue label="Priority fee (total)">
-                        <SolBalance lamports={transactionConfig.priorityFeeLamports} />
-                    </KeyValue>
-                )}
-                {transactionConfig?.loadedAccountsDataSizeLimit !== undefined && (
-                    <KeyValue label="Loaded accounts data size limit">
-                        {transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}
-                    </KeyValue>
-                )}
-                {transactionConfig?.heapSize !== undefined && (
-                    <KeyValue label="Heap size">{transactionConfig.heapSize.toLocaleString('en-US')}</KeyValue>
-                )}
-                <KeyValue label="Fee payer">
-                    {message.staticAccountKeys.length === 0 ? (
-                        'No Fee Payer'
-                    ) : (
-                        <AddressWithContext
-                            pubkey={message.staticAccountKeys[0]}
-                            validator={feePayerValidator}
-                            align="left"
-                            hideInfo
-                            badges={
-                                <span className="mt-1 flex flex-wrap gap-1.5">
-                                    <Badge ui="dashkit" variant="info">
-                                        Signer
-                                    </Badge>
-                                    <Badge ui="dashkit" variant="destructive">
-                                        Writable
-                                    </Badge>
-                                </span>
-                            }
-                        />
-                    )}
-                </KeyValue>
-            </Card>
-        </section>
+            }
+        >
+            <KeyValueRows rows={rows} />
+        </OverviewCard>
     );
 }

@@ -91,6 +91,16 @@ export function BaseNavigationTabs({
 
     const hiddenContextValue = useMemo(() => ({ ...contextValue, renderTabLink: false }), [contextValue]);
 
+    const registrationChildren = children ? (
+        <NavigationTabsContext.Provider value={hiddenContextValue}>
+            <div className="hidden">{children}</div>
+        </NavigationTabsContext.Provider>
+    ) : undefined;
+
+    if (allTabs.length <= 1) {
+        return registrationChildren;
+    }
+
     const tabBar = (
         <NavigationTabsContext.Provider value={contextValue}>
             <div ref={tablistRef} role="tablist" className={cn('inline-flex w-full gap-5 overflow-hidden', className)}>
@@ -119,11 +129,7 @@ export function BaseNavigationTabs({
                 )}
             </div>
 
-            {children && (
-                <NavigationTabsContext.Provider value={hiddenContextValue}>
-                    <div className="hidden">{children}</div>
-                </NavigationTabsContext.Provider>
-            )}
+            {registrationChildren}
         </NavigationTabsContext.Provider>
     );
 

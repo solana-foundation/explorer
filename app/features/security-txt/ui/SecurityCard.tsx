@@ -11,8 +11,8 @@ import type { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
 import { Logger } from '@/app/shared/lib/logger';
 import { triggerDownload } from '@/app/shared/lib/triggerDownload';
 import { Alert } from '@/app/shared/ui/Alert/Alert';
-import { SectionCard } from '@/app/shared/ui/Card/SectionCard';
 import { CodeBlock, ExternalLinkValue, KeyValue, StackedList, TextValue } from '@/app/shared/ui/key-value';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 import { type ResolvedSecurityTxt, useSecurityTxt } from '../model/useSecurityTxt';
 import { ContactInfo, SecurityTxtVersionBadge } from './common';
@@ -35,13 +35,6 @@ export function SecurityCard({ data, pubkey }: { data: UpgradeableLoaderAccountD
     return <ProgramSecurityTxtCard programAddress={pubkey.toBase58()} securityTxt={securityTxt} />;
 }
 
-/**
- * Renders a resolved security.txt in the spirit of UpgradeableProgramSection: both the PMP
- * (Program Metadata) and the legacy Neodyme (embedded in program data) payloads render as
- * left-aligned `KeyValue` rows instead of the right-aligned BaseTable, with the version badge
- * in the outside header alongside the Download action and the self-reported warning in the
- * SectionCard's note slot.
- */
 export function ProgramSecurityTxtCard({
     programAddress,
     securityTxt,
@@ -53,14 +46,14 @@ export function ProgramSecurityTxtCard({
     const isPmp = securityTxt.type === 'pmp';
 
     return (
-        <SectionCard
+        <OverviewCard
             title={
                 <>
                     Security.txt
                     <SecurityTxtVersionBadge version={isPmp ? 'pmp' : 'neodyme'} />
                 </>
             }
-            headerActions={
+            actions={
                 // Same trigger as the Program Account Download button (outline / size="sm"):
                 // icon-only below md, "Download" label at md+.
                 <Button
@@ -90,7 +83,7 @@ export function ProgramSecurityTxtCard({
                     <NeodymeSecurityTxtRows data={securityTxt.fields} />
                 )}
             </ErrorBoundary>
-        </SectionCard>
+        </OverviewCard>
     );
 }
 

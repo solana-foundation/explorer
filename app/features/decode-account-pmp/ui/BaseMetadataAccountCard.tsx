@@ -1,13 +1,13 @@
-import { getPayloadDataHash, PayloadHashRow, type PmpAccountReadResult } from '@entities/pmp-account';
+import { getPayloadDataHash, type PmpAccountReadResult } from '@entities/pmp-account';
 import type { DataSource } from '@solana-program/program-metadata';
 
 import { METADATA_CONFIG_FIELDS, METADATA_HEADER_FIELDS } from '../lib/pmp-field-descriptors';
 import type { MetadataPayloadDecodeResult } from '../model/use-decode-metadata-payload';
 import {
     BasePmpAccountDataCard,
-    CARD_TABLE_COLUMNS,
     FieldRows,
     NoteRow,
+    PayloadHashRow,
     PendingRow,
     PMP_CARD_TITLE,
 } from './BasePmpAccountDataCard';
@@ -63,7 +63,7 @@ function MetadataPayloadRow({
 
     return (
         <>
-            {hash !== undefined && <PayloadHashRow columns={CARD_TABLE_COLUMNS} dataSource={dataSource} hash={hash} />}
+            {hash !== undefined && <PayloadHashRow dataSource={dataSource} hash={hash} />}
             <PayloadRows payload={payloadResult.payload} />
         </>
     );

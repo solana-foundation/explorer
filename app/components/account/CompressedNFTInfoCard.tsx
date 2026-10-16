@@ -12,11 +12,10 @@ import {
     useCompressedNftProof,
 } from '@/app/providers/compressed-nft';
 import { toBuffer } from '@/app/shared/lib/bytes';
-import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 import { Address } from '../common/Address';
-import { TableCardBody } from '../common/TableCardBody';
 
 export function CompressedNFTInfoCard({ account, onNotFound }: { account?: Account; onNotFound: () => never }) {
     const { url } = useCluster();
@@ -57,59 +56,25 @@ export function DasCompressionInfoCard({
             ? ConcurrentMerkleTreeAccount.fromBuffer(toBuffer(treeAccountInfo.data.data.raw)).getCanopyDepth()
             : 0;
     const proofSize = proof.proof.length - canopyDepth;
-    return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit">
-                    Compression Info
-                </CardTitle>
-            </CardHeader>
 
-            <TableCardBody>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Concurrent Merkle Tree</BaseTable.Cell>
-                    <BaseTable.Cell>
-                        <Address pubkey={treeAddress} alignRight link raw />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Current Tree Root {getVerifiedProofPill(proofVerified)}</BaseTable.Cell>
-                    <BaseTable.Cell>
-                        <Address pubkey={root} alignRight raw />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Proof Size {getProofSizePill(proofSize)}</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">{proofSize}</BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Leaf Number</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">{compressedInfo.leaf_id}</BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Sequence Number of Last Update</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">{compressedInfo.seq}</BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Compressed Nft Hash</BaseTable.Cell>
-                    <BaseTable.Cell>
-                        <Address pubkey={new PublicKey(compressedInfo.asset_hash)} alignRight raw />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Creators Hash</BaseTable.Cell>
-                    <BaseTable.Cell>
-                        <Address pubkey={new PublicKey(compressedInfo.creator_hash)} alignRight raw />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Metadata Hash</BaseTable.Cell>
-                    <BaseTable.Cell>
-                        <Address pubkey={new PublicKey(compressedInfo.data_hash)} alignRight raw />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            </TableCardBody>
-        </Card>
+    const rows: KeyValueRow[] = [
+        { label: 'Concurrent Merkle Tree', value: <Address pubkey={treeAddress} link raw /> },
+        {
+            label: <>Current Tree Root {getVerifiedProofPill(proofVerified)}</>,
+            value: <Address pubkey={root} raw />,
+        },
+        { label: <>Proof Size {getProofSizePill(proofSize)}</>, value: proofSize },
+        { label: 'Leaf Number', value: compressedInfo.leaf_id },
+        { label: 'Sequence Number of Last Update', value: compressedInfo.seq },
+        { label: 'Compressed Nft Hash', value: <Address pubkey={new PublicKey(compressedInfo.asset_hash)} raw /> },
+        { label: 'Creators Hash', value: <Address pubkey={new PublicKey(compressedInfo.creator_hash)} raw /> },
+        { label: 'Metadata Hash', value: <Address pubkey={new PublicKey(compressedInfo.data_hash)} raw /> },
+    ];
+
+    return (
+        <OverviewCard title="Compression Info">
+            <KeyValueRows rows={rows} />
+        </OverviewCard>
     );
 }
 

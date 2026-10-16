@@ -76,7 +76,7 @@ export function useTabOverflow(allTabs: NavigationTab[]) {
         return () => {
             observer.disconnect();
         };
-    }, []);
+    }, [allTabs.length]);
 
     const visibleTabs = measuring ? allTabs : allTabs.slice(0, visibleCount);
     const moreTabs = measuring ? [] : allTabs.slice(visibleCount);
