@@ -15,7 +15,7 @@ import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { ClusterInfo, useCluster, useClusterInfo } from '@/app/providers/cluster';
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRow, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -123,17 +123,21 @@ const BaseFeatureCard = ({
         {
             label: 'SIMDs',
             show: Boolean(featureInfo),
-            value: featureInfo?.simds.map((simd, index) => (
-                <div key={index}>
-                    {simd && featureInfo.simd_link[index] ? (
-                        <ExternalLink href={featureInfo.simd_link[index]}>
-                            SIMD {simd} <ExternalLinkIcon className="align-text-top" size={13} />
-                        </ExternalLink>
-                    ) : (
-                        <code>No link</code>
-                    )}
-                </div>
-            )),
+            value: featureInfo && (
+                <StackedList mono={false}>
+                    {featureInfo.simds.map((simd, index) => (
+                        <li key={index}>
+                            {simd && featureInfo.simd_link[index] ? (
+                                <ExternalLink href={featureInfo.simd_link[index]}>
+                                    SIMD {simd} <ExternalLinkIcon className="align-text-top" size={13} />
+                                </ExternalLink>
+                            ) : (
+                                <code>No link</code>
+                            )}
+                        </li>
+                    ))}
+                </StackedList>
+            ),
         },
     ];
 

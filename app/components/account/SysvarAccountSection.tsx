@@ -19,7 +19,7 @@ import {
 } from '@validators/accounts/sysvar';
 import React from 'react';
 
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRow, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 
 export function SysvarAccountSection({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarAccount }) {
     switch (sysvarAccount.type) {
@@ -100,12 +100,15 @@ function SysvarAccountSlotHistory({
                     Slot History <span className="text-dk-gray-700">(previous 100 slots)</span>
                 </>
             ),
-            value: history.map(val => (
-                <p key={val} className="mb-0">
-                    <Slot slot={val} link />
-                </p>
-            )),
-            valueClassName: 'font-mono',
+            value: (
+                <StackedList>
+                    {history.map(val => (
+                        <li key={val}>
+                            <Slot slot={val} link />
+                        </li>
+                    ))}
+                </StackedList>
+            ),
         },
     ];
     return (

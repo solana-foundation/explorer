@@ -7,7 +7,7 @@ import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { displayTimestamp } from '@utils/date';
 
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRow, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 
 import { VoteAccount } from '../lib/validators';
 
@@ -18,17 +18,16 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
     const rows: KeyValueRow[] = [
         {
             label: `Authorized Voter${voteAccount.info.authorizedVoters.length > 1 ? 's' : ''}`,
-            value: voteAccount.info.authorizedVoters.map(voter => {
-                // The same voter can appear once per epoch, so the pubkey alone is not unique
-                return (
-                    <Address
-                        pubkey={voter.authorizedVoter}
-                        key={`${voter.epoch}-${voter.authorizedVoter.toString()}`}
-                        raw
-                        link
-                    />
-                );
-            }),
+            value: (
+                <StackedList>
+                    {voteAccount.info.authorizedVoters.map(voter => (
+                        // The same voter can appear once per epoch, so the pubkey alone is not unique
+                        <li key={`${voter.epoch}-${voter.authorizedVoter.toString()}`}>
+                            <Address pubkey={voter.authorizedVoter} raw link />
+                        </li>
+                    ))}
+                </StackedList>
+            ),
         },
         {
             label: 'Authorized Withdrawer',
