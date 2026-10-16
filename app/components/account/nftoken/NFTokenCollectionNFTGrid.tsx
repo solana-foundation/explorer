@@ -1,6 +1,7 @@
 'use client';
 
 import { RefreshButton } from '@components/shared/ui/refresh-button';
+import { type NftokenNftInfo } from '@explorer/decoder-nftoken';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
@@ -8,7 +9,6 @@ import React from 'react';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 
 import { useCollectionNfts } from './nftoken-hooks';
-import { NftokenTypes } from './nftoken-types';
 import { NftokenImage } from './NFTokenAccountSection';
 
 export function NFTokenCollectionNFTGrid({ collection }: { collection: string }) {
@@ -48,7 +48,7 @@ export function NFTokenCollectionNFTGrid({ collection }: { collection: string })
     );
 }
 
-function Nft({ nft }: { nft: NftokenTypes.NftInfo }) {
+function Nft({ nft }: { nft: NftokenNftInfo }) {
     const nftPath = useClusterPath({ pathname: `/address/${nft.address}` });
     return (
         <div

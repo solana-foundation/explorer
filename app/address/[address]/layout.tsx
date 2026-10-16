@@ -6,7 +6,6 @@ import { isAddressLookupTableAccount } from '@components/account/address-lookup-
 import { ConfigAccountSection } from '@components/account/ConfigAccountSection';
 import { FeatureAccountSection } from '@components/account/FeatureAccountSection';
 import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
-import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
 import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
 import { NonceAccountSection } from '@components/account/NonceAccountSection';
 import { detectSquadsAccountType, SquadsAccountSection } from '@components/account/squads/SquadsAccountSection';
@@ -20,6 +19,7 @@ import { Header } from '@components/Header';
 import { useRefreshAccount } from '@entities/account';
 // Deliberately import from `lib/program-address`, NOT from `index`, which pulls the client and pako.
 import { isPmpAccount } from '@entities/pmp-account/lib/program-address';
+import { NFTOKEN_ADDRESS } from '@explorer/decoder-nftoken/program-ids';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
     BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL,

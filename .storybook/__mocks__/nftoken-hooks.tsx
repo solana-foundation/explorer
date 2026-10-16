@@ -1,11 +1,12 @@
 // Synchronous stub for useCollectionNfts; bypasses suspense-mode SWR + getProgramAccounts.
 
-import type { NftokenTypes } from '../../app/components/account/nftoken/nftoken-types';
+import type { NftokenMetadata, NftokenNftInfo } from '@explorer/decoder-nftoken';
+
 import fixture from './nftoken-collection.json';
 
 const noop = () => undefined;
 
-const SAMPLE_NFTS: NftokenTypes.NftInfo[] = fixture.nfts.map((nft, i) => ({
+const SAMPLE_NFTS: NftokenNftInfo[] = fixture.nfts.map((nft, i) => ({
     address: nft.address,
     authority: nft.authority,
     authority_can_update: nft.authority_can_update,
@@ -20,7 +21,7 @@ const SAMPLE_NFTS: NftokenTypes.NftInfo[] = fixture.nfts.map((nft, i) => ({
 }));
 
 export function useCollectionNfts(_args: { collectionAddress: string }): {
-    data: NftokenTypes.NftInfo[];
+    data: NftokenNftInfo[];
     error: null;
     mutate: () => void;
 } {
@@ -28,7 +29,7 @@ export function useCollectionNfts(_args: { collectionAddress: string }): {
 }
 
 export function useNftokenMetadata(_args: { url: string | null | undefined }): {
-    data: NftokenTypes.Metadata | null;
+    data: NftokenMetadata | null;
     error: null;
     mutate: () => void;
 } {

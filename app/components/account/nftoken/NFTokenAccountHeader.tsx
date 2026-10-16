@@ -1,6 +1,7 @@
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { LoadingArtPlaceholder } from '@components/common/LoadingArtPlaceholder';
 import { NFTImageContent } from '@components/common/NFTArt';
+import { type NftokenCollectionAccount, type NftokenNftAccount } from '@explorer/decoder-nftoken';
 import { Account } from '@providers/accounts';
 import React, { Suspense } from 'react';
 
@@ -8,7 +9,6 @@ import { Badge } from '@/app/components/shared/ui/badge';
 
 import { parseNFTokenCollectionAccount, parseNFTokenNFTAccount } from './isNFTokenAccount';
 import { useNftokenMetadata } from './nftoken-hooks';
-import { NftokenTypes } from './nftoken-types';
 
 export function NFTokenAccountHeader({ account }: { account: Account }) {
     const nft = parseNFTokenNFTAccount(account);
@@ -38,7 +38,7 @@ export function NFTokenAccountHeader({ account }: { account: Account }) {
     );
 }
 
-export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
+export function NFTokenNFTHeader({ nft }: { nft: NftokenNftAccount }) {
     const { data: metadata } = useNftokenMetadata(nft.metadata_url);
 
     return (
@@ -76,7 +76,7 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
     );
 }
 
-export function NFTokenCollectionHeader({ collection }: { collection: NftokenTypes.CollectionAccount }) {
+export function NFTokenCollectionHeader({ collection }: { collection: NftokenCollectionAccount }) {
     const { data: metadata } = useNftokenMetadata(collection.metadata_url);
 
     return (
