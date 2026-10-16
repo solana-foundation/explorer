@@ -22,7 +22,7 @@ import { create } from 'superstruct';
 import { dasImageAddress } from '@/app/components/account/das-image-address';
 import { ProgramHeader } from '@/app/components/shared/account/ProgramHeader';
 import { ProxiedImage } from '@/app/features/metadata';
-import { getProxiedUri } from '@/app/features/metadata/utils';
+import { getProxiedUri } from '@/app/shared/lib/metadata-proxy';
 import { type FullTokenInfo, isRedactedTokenAddress } from '@/app/utils/token-info';
 
 export function AccountHeader({
