@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Renders the bundle-change report exactly as CI's Build-Info job does.
+# Renders the bundle-change report exactly as CI's Build job does.
 #
 # Usage:
 #   scripts/build-info-report.sh [base-ref] [fresh-table]
