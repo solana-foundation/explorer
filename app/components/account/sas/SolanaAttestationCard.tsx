@@ -7,7 +7,7 @@ import React from 'react';
 import { AccountAddressRow } from '@/app/components/common/Account';
 import { Address } from '@/app/components/common/Address';
 import { Account } from '@/app/providers/accounts';
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRow, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 import { decodeAccount } from '@/app/utils/attestation-service';
 import { decodeString, mapToPublicKey } from '@/app/utils/kit-wrapper';
 
@@ -17,9 +17,15 @@ function SolanaCredentialCard({ credential }: { credential: SasCredential }) {
         { label: 'Credential Authority', value: <Address pubkey={mapToPublicKey(credential.authority)} raw link /> },
         {
             label: 'Authorized Signers',
-            value: credential.authorizedSigners.map((signer, idx) => (
-                <Address key={idx} pubkey={mapToPublicKey(signer)} raw link />
-            )),
+            value: (
+                <StackedList>
+                    {credential.authorizedSigners.map((signer, idx) => (
+                        <li key={idx}>
+                            <Address pubkey={mapToPublicKey(signer)} raw link />
+                        </li>
+                    ))}
+                </StackedList>
+            ),
         },
     ];
 

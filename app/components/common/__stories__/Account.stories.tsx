@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
-import { BaseTable } from '@/app/shared/ui/Table';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 import { AccountAddressRow, AccountBalanceRow, AccountHeader } from '../Account';
 
@@ -32,11 +32,9 @@ export const Header: Story = {
 
 export const Rows: Story = {
     render: () => (
-        <BaseTable ui="dashkit" variant="card" nowrap>
-            <BaseTable.Body>
-                <AccountAddressRow account={sampleAccount} />
-                <AccountBalanceRow account={sampleAccount} />
-            </BaseTable.Body>
-        </BaseTable>
+        <OverviewCard title="Account Overview">
+            <AccountAddressRow account={sampleAccount} />
+            <AccountBalanceRow account={sampleAccount} />
+        </OverviewCard>
     ),
 };
