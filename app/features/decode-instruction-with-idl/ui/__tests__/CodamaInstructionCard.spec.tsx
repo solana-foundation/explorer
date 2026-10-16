@@ -1,7 +1,7 @@
 import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { createProgramClient, type ProgramMethodBuilder } from '@codama/dynamic-client';
 import { parseInstruction } from '@codama/dynamic-parsers';
-import { TxInstructionSurface } from '@entities/instruction-card';
+import { toInstructionNode, TxInstructionSurface } from '@entities/instruction-card';
 import { AccountRole, isSignerRole, isWritableRole } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { fireEvent, render, screen, within } from '@testing-library/react';
@@ -242,7 +242,11 @@ async function renderBuilt(builder: ProgramMethodBuilder) {
 function renderInstruction(ix: TransactionInstruction) {
     return render(
         <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
-            <CodamaInstructionCard ix={ix} index={0} parsedIx={parseInstruction(COUNTER_IDL, toKitInstruction(ix))} />
+            <CodamaInstructionCard
+                node={toInstructionNode({ index: 0, ix })}
+                ix={ix}
+                parsedIx={parseInstruction(COUNTER_IDL, toKitInstruction(ix))}
+            />
         </TxInstructionSurface>,
     );
 }
@@ -264,9 +268,10 @@ function toTransactionInstruction({
 }
 
 function renderCard(parsedIx: ReturnType<typeof makeParsedIx>) {
+    const ix = makeIx(parsedIx.accounts);
     return render(
         <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
-            <CodamaInstructionCard ix={makeIx(parsedIx.accounts)} index={0} parsedIx={parsedIx as never} />
+            <CodamaInstructionCard node={toInstructionNode({ index: 0, ix })} ix={ix} parsedIx={parsedIx as never} />
         </TxInstructionSurface>,
     );
 }

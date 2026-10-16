@@ -51,8 +51,6 @@ import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
 import { INSPECTOR_RESULT, INSPECTOR_SURFACE } from './inspector-surface';
 
-const INSPECTOR_SIGNATURE = '';
-
 // The PMP card carries the generated client plus pako/yaml/smol-toml (~35 kB gzip), which only a transaction that
 // actually touches the program needs. `isProgramMetadataInstruction` comes from the light `/detection` entry so
 // the branch below can stay static.
@@ -211,8 +209,6 @@ function InspectorInstructionCard({
                             decoded={decodedByIdl}
                             ix={ix}
                             index={index}
-                            result={INSPECTOR_RESULT}
-                            signature={INSPECTOR_SIGNATURE}
                             childIndex={childIndex}
                             innerCards={innerCards}
                         />
@@ -230,8 +226,6 @@ function InspectorInstructionCard({
                 decoded={decodedByIdl}
                 ix={ix}
                 index={index}
-                result={INSPECTOR_RESULT}
-                signature={INSPECTOR_SIGNATURE}
                 childIndex={childIndex}
                 innerCards={innerCards}
             />
