@@ -13,6 +13,8 @@ import { getOnChainIdls, type SourcedIdl } from './sourced-idl';
 export type ProgramIdls = {
     /** `undefined` while the on-chain IDLs load. */
     idls: readonly SourcedIdl[] | undefined;
+    /** The last fetch error. It stays set while SWR retries, so `idls` can be `undefined` or `[]` with it. */
+    error?: unknown;
 };
 
 /**
@@ -37,7 +39,11 @@ export function useProgramIdls(
 ): ProgramIdls {
     const isCustom = shouldUseDirectRpc(cluster, url);
 
-    const { data: serverIdls, isLoading: serverLoading } = useSWRImmutable(
+    const {
+        data: serverIdls,
+        error: serverError,
+        isLoading: serverLoading,
+    } = useSWRImmutable(
         !isCustom && (['program-idls', programId, cluster] as const),
         () => fetchProgramIdls(programId, cluster),
         // fetchProgramIdls throws on failure (rather than caching an empty result), so cap the
@@ -48,7 +54,11 @@ export function useProgramIdls(
     // Custom / local clusters: resolve client-side against the user's RPC. Keyed off `url` so a
     // different endpoint re-resolves; the key is `false` for known clusters so this never runs there
     // (no double-fetch, and the heavy `@solana/idl` chunk only loads when this branch is taken).
-    const { data: customIdls, isLoading: customLoading } = useSWRImmutable(
+    const {
+        data: customIdls,
+        error: customError,
+        isLoading: customLoading,
+    } = useSWRImmutable(
         isCustom && (['program-idls-custom', programId, url] as const),
         () => resolveProgramIdlsClient({ programId, url }),
         // resolveProgramIdlsClient re-throws when nothing resolved and a source errored, so cap the
@@ -58,11 +68,12 @@ export function useProgramIdls(
 
     const onChainIdls = isCustom ? customIdls : serverIdls;
     const isOnChainLoading = isCustom ? customLoading : serverLoading;
+    const error: unknown = isCustom ? customError : serverError;
 
     const idls = useMemo(() => {
         if (isOnChainLoading) return undefined;
         return onChainIdls ? getOnChainIdls(onChainIdls) : [];
     }, [isOnChainLoading, onChainIdls]);
 
-    return { idls };
+    return { error, idls };
 }

@@ -79,6 +79,18 @@ describe('useProgramIdls', () => {
 
             await waitForHook(() => expect(result.current.idls).toEqual([]));
         });
+
+        it('should report the error when the IDL fetch fails', async () => {
+            mocks.fetch.mockResolvedValue({ ok: false, status: 502 });
+
+            const { result } = renderHook(
+                () => useProgramIdls(PROGRAM_ID, 'https://api.mainnet-beta.solana.com', Cluster.MainnetBeta),
+                { wrapper },
+            );
+
+            await waitForHook(() => expect(result.current.error).toBeDefined());
+            expect(result.current.idls).toEqual([]);
+        });
     });
 
     describe('custom / local clusters (client-side @solana/idl resolver)', () => {
