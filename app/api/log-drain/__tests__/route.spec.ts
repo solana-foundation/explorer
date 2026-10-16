@@ -5,10 +5,6 @@ import { GET, POST } from '../route';
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
 
-vi.mock('@/app/shared/lib/logger', () => ({
-    Logger: { error: vi.fn(), panic: vi.fn(), warn: vi.fn() },
-}));
-
 const SECRET = 'drain-secret';
 const VERIFY = 'verify-key';
 

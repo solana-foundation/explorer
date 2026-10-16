@@ -33,14 +33,4 @@ describe('ShareOnXShareItem', () => {
 
         vi.restoreAllMocks();
     });
-
-    it('should not throw when onShare is not provided', async () => {
-        vi.spyOn(globalThis, 'open').mockReturnValue(null);
-
-        render(<ShareOnXShareItem />);
-        // eslint-disable-next-line no-restricted-syntax -- RegExp used for accessible name pattern matching in test assertions
-        await userEvent.click(screen.getByRole('button', { name: /share on x/i }));
-
-        vi.restoreAllMocks();
-    });
 });

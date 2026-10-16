@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

@@ -1,11 +1,15 @@
+import { address, none } from '@solana/kit';
 import type { AccountInfo, ParsedAccountData, SimulatedTransactionAccountInfo } from '@solana/web3.js';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
-import { getMintSize, getTokenSize, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+import { AccountState, getMintSize, getTokenEncoder, getTokenSize, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 
+import { alloc, toBase64 } from '@/app/shared/lib/bytes';
 import { USDC_MINT } from '@/app/shared/model/known-mints';
 import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
+
+import { ACCOUNT_TYPE_TOKEN } from '../lib/token-layout';
 
 const MINT_SIZE = getMintSize();
 const TOKEN_ACCOUNT_SIZE = getTokenSize();
@@ -68,4 +72,44 @@ export const POST_SYSTEM_ACCOUNT: SimulatedTransactionAccountInfo = {
 /** Post-simulation account with given base64 data and program owner */
 export function postAccount(base64Data: string, owner: string): SimulatedTransactionAccountInfo {
     return { data: [base64Data, 'base64'], executable: false, lamports: 1_000_000, owner, rentEpoch: 0 };
+}
+
+/** mintAuthorityOption(4) + mintAuthority(32) + supply(8) = 44 */
+export const MINT_DECIMALS_OFFSET = 44;
+/** Offset of the account-state byte: mint (32) + owner (32) + amount (8) + delegate COption<Address> (4 + 32) */
+const STATE_OFFSET = 108;
+const tokenEncoder = getTokenEncoder();
+
+export function encodeTokenAccountBase64(
+    mint: PublicKey,
+    owner: PublicKey,
+    amount: bigint,
+    { state, totalSize = TOKEN_ACCOUNT_SIZE }: { state?: number; totalSize?: number } = {},
+): string {
+    const encoded = tokenEncoder.encode({
+        amount,
+        closeAuthority: none(),
+        delegate: none(),
+        delegatedAmount: 0n,
+        isNative: none(),
+        mint: address(mint.toBase58()),
+        owner: address(owner.toBase58()),
+        state: AccountState.Initialized,
+    });
+
+    const buf = alloc(totalSize);
+    buf.set(encoded);
+
+    // The encoder only accepts in-range AccountState values, so corrupt vectors patch the byte directly
+    if (state !== undefined) buf[STATE_OFFSET] = state;
+    if (totalSize > TOKEN_ACCOUNT_SIZE) buf[TOKEN_ACCOUNT_SIZE] = ACCOUNT_TYPE_TOKEN;
+
+    return toBase64(buf);
+}
+
+export function encodeMintAccountBase64(decimals: number, size = MINT_SIZE): string {
+    const bytes = new Uint8Array(size);
+    bytes[MINT_DECIMALS_OFFSET] = decimals;
+    bytes[MINT_DECIMALS_OFFSET + 1] = 1; // isInitialized
+    return toBase64(bytes);
 }

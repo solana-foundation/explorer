@@ -1,5 +1,6 @@
 import type { BlockTransaction } from '@entities/block-data';
-import { address, blockhash, lamports } from '@solana/kit';
+import { makeBlockTransaction } from '@entities/block-data/__fixtures__/block-builders';
+import { address, blockhash } from '@solana/kit';
 
 import {
     getBlockTransactionAccounts,
@@ -17,23 +18,15 @@ const ADDRESSES = [
 ] as const;
 
 function createV0Transaction(): BlockTransaction {
-    return {
-        index: 0,
+    return makeBlockTransaction({
         message: {
             header: { numReadonlyNonSignerAccounts: 1, numReadonlySignerAccounts: 1, numSignerAccounts: 2 },
             instructions: [{ accountIndices: [0, 2, 4, 5], data: new Uint8Array([1, 2]), programAddressIndex: 3 }],
-            lifetimeToken: blockhash('11111111111111111111111111111111'),
             staticAccounts: ADDRESSES.slice(0, 4),
             version: 0,
         },
-        meta: {
-            err: null,
-            fee: lamports(0n),
-            loadedAddresses: { readonly: [ADDRESSES[5]], writable: [ADDRESSES[4]] },
-            logMessages: [],
-        },
-        signatures: [],
-    };
+        meta: { loadedAddresses: { readonly: [ADDRESSES[5]], writable: [ADDRESSES[4]] } },
+    });
 }
 
 describe('block transaction helpers', () => {

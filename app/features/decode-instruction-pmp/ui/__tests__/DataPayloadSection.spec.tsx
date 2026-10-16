@@ -1,21 +1,19 @@
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { gen } from '@__fixtures__/gen';
-import { PMP_DECODED_RENDER_CAP_BYTES, PMP_POINTER_HASH_NOTES } from '@entities/pmp-account';
+import {
+    decodePmpPayload,
+    PMP_MAX_UNPACKED_BYTES,
+    PMP_POINTER_HASH_NOTES,
+    type PmpPayloadDecodeResult,
+} from '@entities/pmp-account';
+import { bufferAccountData, DOC, pack } from '@entities/pmp-account/__fixtures__/pmp-account';
 import type { Account } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
-import { type Address, address } from '@solana/kit';
+import { address } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
-import {
-    Compression,
-    DataSource,
-    Encoding,
-    Format,
-    getBufferEncoder,
-    packDirectData,
-} from '@solana-program/program-metadata';
+import { Compression, DataSource, Encoding, Format } from '@solana-program/program-metadata';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { gzip } from 'pako';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { trackEvent } from '@/app/shared/lib/analytics';
@@ -27,6 +25,12 @@ import type { PmpPayload, PmpPayloadInstruction } from '../../lib/types';
 import { DataPayloadSection } from '../DataPayloadSection';
 
 vi.mock('@/app/shared/lib/analytics', () => ({ trackEvent: vi.fn() }));
+
+// Partial: the real decoder runs unless a test stubs a result that only a large buffer would reach.
+vi.mock('@entities/pmp-account', async importOriginal => {
+    const actual = await importOriginal<typeof import('@entities/pmp-account')>();
+    return { ...actual, decodePmpPayload: vi.fn(actual.decodePmpPayload) };
+});
 
 // The on-demand account read goes through the shared accounts provider, so the section is exercised against a
 // controllable cache entry rather than a live RPC.
@@ -43,12 +47,6 @@ vi.mock('@providers/accounts', () => ({
 vi.mock('@/app/components/common/Address', () => ({
     Address: ({ pubkey }: { pubkey: { toBase58(): string } }) => <div data-testid="address">{pubkey.toBase58()}</div>,
 }));
-
-const DOC = '{"name":"company","version":"1.0.0"}';
-
-function pack(content: string, compression: Compression): Uint8Array {
-    return packDirectData({ compression, content, encoding: Encoding.Utf8 }).data as Uint8Array;
-}
 
 function inline(bytes: Uint8Array, dataSource: DataSource): PmpPayload {
     return { dataSource, source: { bytes, kind: 'inline' } };
@@ -76,17 +74,6 @@ const DEFERRED_SET_DATA: PmpPayloadInstruction = {
     payload: { dataSource: DataSource.Direct, source: { account: BUFFER_ADDRESS, kind: 'account' } },
 };
 
-/** The library's own encoder, so the fixture carries the real 96-byte Buffer header. */
-function bufferAccountData(body: Uint8Array): Uint8Array {
-    return getBufferEncoder().encode({
-        authority: BUFFER_ADDRESS as Address,
-        canonical: true,
-        data: body,
-        program: BUFFER_ADDRESS as Address,
-        seed: 'idl',
-    }) as Uint8Array;
-}
-
 function fetchedEntry(raw: Uint8Array | undefined, overrides: { lamports?: number; owner?: string } = {}) {
     const data: Account = {
         data: { raw },
@@ -97,6 +84,13 @@ function fetchedEntry(raw: Uint8Array | undefined, overrides: { lamports?: numbe
     };
     return { data, status: FetchStatus.Fetched };
 }
+
+const OVERSIZED = {
+    budget: 1024,
+    bytes: new Uint8Array(1025),
+    dataHash: 'f'.repeat(64),
+    kind: 'oversized',
+} satisfies PmpPayloadDecodeResult;
 
 /**
  * The section opens on the Raw tab and Radix unmounts the inactive panel, so nothing decoded is in the DOM until
@@ -109,6 +103,7 @@ async function openDecodedTab() {
 describe('DataPayloadSection', () => {
     beforeEach(() => {
         vi.mocked(trackEvent).mockClear();
+        vi.mocked(decodePmpPayload).mockReset();
         mockFetchAccountInfo.mockClear();
         // Nothing in the cache, which is the state every test starts from - a test that needs a resolved read
         // sets its own return value.
@@ -306,25 +301,26 @@ describe('DataPayloadSection', () => {
     });
 
     it('should render a bounded view with the byte count and a download when the payload exceeds the cap', async () => {
+        vi.mocked(decodePmpPayload).mockReturnValue(OVERSIZED);
         renderSection({
             config: JSON_CONFIG,
             kind: 'setData',
-            payload: inline(new Uint8Array(PMP_DECODED_RENDER_CAP_BYTES + 1), DataSource.Direct),
+            payload: inline(new Uint8Array(64), DataSource.Direct),
         });
         await openDecodedTab();
 
         const oversized = screen.getByTestId('pmp-payload-oversized');
         expect(oversized).toHaveTextContent(/too large/i);
-        // The DECOMPRESSED size, which is what the cap is measured on - the on-chain payload here is uncompressed,
-        // so the two happen to match, but the number reported is the decoded one.
-        expect(oversized).toHaveTextContent(`${PMP_DECODED_RENDER_CAP_BYTES + 1} bytes`);
+        // The DECOMPRESSED size, which is what the cap is measured on, not the stored size.
+        expect(oversized).toHaveTextContent(`${OVERSIZED.bytes.length} bytes, limit ${OVERSIZED.budget}`);
         expect(screen.queryByTestId('pmp-decoded-text')).not.toBeInTheDocument();
         expect(oversized).toHaveTextContent(/use download\/copy/i);
         expect(screen.getByLabelText('Download')).toBeInTheDocument();
     });
 
     it('should report both the unpacked and the stored size when an oversized payload was compressed', async () => {
-        const stored = gzip(new Uint8Array(PMP_DECODED_RENDER_CAP_BYTES + 1));
+        const stored = new Uint8Array(64);
+        vi.mocked(decodePmpPayload).mockReturnValue(OVERSIZED);
         renderSection({
             config: { compression: Compression.Gzip, encoding: Encoding.Utf8, format: Format.Json },
             kind: 'setData',
@@ -333,9 +329,7 @@ describe('DataPayloadSection', () => {
         await openDecodedTab();
 
         const oversized = screen.getByTestId('pmp-payload-oversized');
-        expect(oversized).toHaveTextContent(
-            `${PMP_DECODED_RENDER_CAP_BYTES + 1} bytes unpacked from ${stored.length} stored`,
-        );
+        expect(oversized).toHaveTextContent(`${OVERSIZED.bytes.length} bytes unpacked from ${stored.length} stored`);
         expect(screen.getByTestId('pmp-bytes-badge-uncompressed')).toHaveTextContent('uncompressed');
     });
 
@@ -379,10 +373,11 @@ describe('DataPayloadSection', () => {
     it('should promise no download when the payload expands past the unpack limit', async () => {
         // What separates this from `oversized`: the unpack was abandoned, so no decompressed bytes exist to copy or
         // download. The panel must not offer an affordance it cannot honour.
+        vi.mocked(decodePmpPayload).mockReturnValue({ kind: 'unpack-overflow', limit: PMP_MAX_UNPACKED_BYTES });
         renderSection({
             config: { compression: Compression.Gzip, encoding: Encoding.Utf8, format: Format.Json },
             kind: 'setData',
-            payload: inline(gzip(new Uint8Array(2 * 1024 * 1024)), DataSource.Direct),
+            payload: inline(new Uint8Array(64), DataSource.Direct),
         });
         await openDecodedTab();
 

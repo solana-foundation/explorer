@@ -208,105 +208,105 @@ function parseDefaultAccount(acc: IdlAccount, typesMap: Map<string, IdlTypeDef>)
 }
 
 export function useFormatAnchorIdl(idl?: Idl): FormattedIdl | null {
-    const formattedIdl = useMemo(() => {
-        if (!idl) return null;
-        const typesMap = new Map<string, IdlTypeDef>(idl.types?.map(item => [item.name, item]) || []);
-        const accountsMap = new Map<string, IdlAccount>(idl.accounts?.map(item => [item.name, item]) || []);
-        const eventsMap = new Map<string, IdlEvent>(idl.events?.map(item => [item.name, item]) || []);
-        const pdas = getUniqPdaAccountsFromIxs(idl.instructions);
+    return useMemo(() => (idl ? formatAnchorIdl(idl) : null), [idl]);
+}
 
-        const formattingErrors: Array<[Error, any]> = [];
+export function formatAnchorIdl(idl: Idl): FormattedIdl {
+    const typesMap = new Map<string, IdlTypeDef>(idl.types?.map(item => [item.name, item]) || []);
+    const accountsMap = new Map<string, IdlAccount>(idl.accounts?.map(item => [item.name, item]) || []);
+    const eventsMap = new Map<string, IdlEvent>(idl.events?.map(item => [item.name, item]) || []);
+    const pdas = getUniqPdaAccountsFromIxs(idl.instructions);
 
-        // TODO: currently we modify the logic inside this helper, but we should split version-specific implementaitons later
-        const formattedIdl: FormattedIdl = {
-            accounts: idl.accounts?.map(acc => {
-                const account = parseDefaultAccount(acc, typesMap);
-                const [err] = validate(account, Account);
-                if (err) formattingErrors.push([err, acc]);
+    const formattingErrors: Array<[Error, any]> = [];
 
-                return account;
-            }),
-            constants: idl.constants?.map(constant => {
-                return {
-                    docs: (constant as any).docs || [],
-                    name: constant.name,
-                    type: parseIdlType(constant.type),
-                    value: safeJsonParse(constant.value),
-                };
-            }),
-            errors: idl.errors?.map(err => ({
-                code: err.code.toString(),
-                message: err.msg || '',
-                name: err.name,
-            })),
-            events: idl.events?.map(event => {
-                const eventType = typesMap.get(event.name)?.type as IdlTypeDefTy;
-                return {
-                    docs: [],
-                    fieldType: parseIdlTypeDef(eventType),
-                    name: event.name,
-                };
-            }),
-            instructions: idl.instructions.map(ix => {
-                return {
-                    accounts: ix.accounts.map(acc => {
-                        if ('accounts' in acc) {
-                            return {
-                                accounts: acc.accounts.map(a => ({
-                                    docs: a?.docs || [],
-                                    name: camelCase(a.name),
-                                    optional: !!a.optional,
-                                    pda: !!a.pda,
-                                    signer: !!a.signer,
-                                    writable: !!a.writable,
-                                })),
-                                docs: ix?.docs || [],
-                                name: camelCase(acc.name),
-                            };
-                        }
+    // TODO: currently we modify the logic inside this helper, but we should split version-specific implementaitons later
+    const formattedIdl: FormattedIdl = {
+        accounts: idl.accounts?.map(acc => {
+            const account = parseDefaultAccount(acc, typesMap);
+            const [err] = validate(account, Account);
+            if (err) formattingErrors.push([err, acc]);
+
+            return account;
+        }),
+        constants: idl.constants?.map(constant => {
+            return {
+                docs: (constant as any).docs || [],
+                name: constant.name,
+                type: parseIdlType(constant.type),
+                value: safeJsonParse(constant.value),
+            };
+        }),
+        errors: idl.errors?.map(err => ({
+            code: err.code.toString(),
+            message: err.msg || '',
+            name: err.name,
+        })),
+        events: idl.events?.map(event => {
+            const eventType = typesMap.get(event.name)?.type as IdlTypeDefTy;
+            return {
+                docs: [],
+                fieldType: parseIdlTypeDef(eventType),
+                name: event.name,
+            };
+        }),
+        instructions: idl.instructions.map(ix => {
+            return {
+                accounts: ix.accounts.map(acc => {
+                    if ('accounts' in acc) {
                         return {
-                            docs: acc?.docs || [],
+                            accounts: acc.accounts.map(a => ({
+                                docs: a?.docs || [],
+                                name: camelCase(a.name),
+                                optional: !!a.optional,
+                                pda: !!a.pda,
+                                signer: !!a.signer,
+                                writable: !!a.writable,
+                            })),
+                            docs: ix?.docs || [],
                             name: camelCase(acc.name),
-                            optional: !!acc.optional,
-                            pda: !!acc.pda,
-                            signer: !!acc.signer,
-                            writable: !!acc.writable,
                         };
-                    }),
-                    args: ix.args.map(arg => ({
-                        docs: arg.docs || [],
-                        name: camelCase(arg.name),
-                        rawType: arg.type,
-                        type: parseIdlType(arg.type),
-                    })),
-                    docs: ix?.docs || [],
-                    name: camelCase(ix.name),
-                };
-            }),
-            pdas: pdas.map(pda => {
-                return {
-                    docs: [],
-                    name: camelCase(pda.name),
-                    seeds: getPdaSeeds(pda.pda?.seeds || [], idl),
-                };
-            }),
-            types: idl.types
-                ?.filter(t => !accountsMap.get(t.name) && !eventsMap.get(t.name))
-                .map(t => ({
-                    docs: t?.docs || [],
-                    fieldType: parseIdlTypeDef(t.type),
-                    name: t.name,
+                    }
+                    return {
+                        docs: acc?.docs || [],
+                        name: camelCase(acc.name),
+                        optional: !!acc.optional,
+                        pda: !!acc.pda,
+                        signer: !!acc.signer,
+                        writable: !!acc.writable,
+                    };
+                }),
+                args: ix.args.map(arg => ({
+                    docs: arg.docs || [],
+                    name: camelCase(arg.name),
+                    rawType: arg.type,
+                    type: parseIdlType(arg.type),
                 })),
-        };
+                docs: ix?.docs || [],
+                name: camelCase(ix.name),
+            };
+        }),
+        pdas: pdas.map(pda => {
+            return {
+                docs: [],
+                name: camelCase(pda.name),
+                seeds: getPdaSeeds(pda.pda?.seeds || [], idl),
+            };
+        }),
+        types: idl.types
+            ?.filter(t => !accountsMap.get(t.name) && !eventsMap.get(t.name))
+            .map(t => ({
+                docs: t?.docs || [],
+                fieldType: parseIdlTypeDef(t.type),
+                name: t.name,
+            })),
+    };
 
-        if (formattingErrors.length) {
-            Logger.warn(`[idl] Formatting errors in ${idl.metadata.name} (${idl.address})`, {
-                accounts: formattingErrors.map(([, acc]) => acc),
-                sentry: true,
-            });
-        }
+    if (formattingErrors.length) {
+        Logger.warn(`[idl] Formatting errors in ${idl.metadata.name} (${idl.address})`, {
+            accounts: formattingErrors.map(([, acc]) => acc),
+            sentry: true,
+        });
+    }
 
-        return formattedIdl;
-    }, [idl]);
     return formattedIdl;
 }

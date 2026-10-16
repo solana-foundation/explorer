@@ -1,9 +1,10 @@
-import { vi } from 'vitest';
+// Every spec file loads this module through the setup file. Importing `gen` or `@solana/kit` here
+// would load kit and web3.js into every spec file.
+import { type Mock, vi } from 'vitest';
 
-import { gen } from '@/app/__fixtures__/gen';
 import { GENESIS_HASHES } from '@/app/entities/chain-id';
+import type { Dispatch, Update } from '@/app/providers/cache';
 import type { ClusterInfo } from '@/app/providers/cluster';
-import type { EpochSchedule } from '@/app/utils/epoch-schedule';
 
 interface EpochInfo {
     absoluteSlot: bigint;
@@ -15,27 +16,16 @@ interface EpochInfo {
 
 export const mockEpochInfo = (overrides?: Partial<EpochInfo>): EpochInfo => {
     const slotsInEpoch = 432_000n;
-    const absoluteSlot = gen.slot();
+    const absoluteSlot = 250_000_000n;
     return {
         absoluteSlot,
-        blockHeight: gen.blockHeight(),
+        blockHeight: 230_000_000n,
         epoch: absoluteSlot / slotsInEpoch,
         slotIndex: absoluteSlot % slotsInEpoch,
         slotsInEpoch,
         ...overrides,
     };
 };
-
-export const mockEpochSchedule = (overrides?: Partial<EpochSchedule>): EpochSchedule => ({
-    firstNormalEpoch: gen.epoch(),
-    firstNormalSlot: gen.slot(),
-    slotsPerEpoch: 432_000n,
-    ...overrides,
-});
-
-export const mockGenesisHash = (hash?: string): string => hash ?? GENESIS_HASHES.MAINNET;
-
-export const mockFirstAvailableBlock = (block?: bigint): bigint => block ?? gen.slot();
 
 /** Creates a mock RPC object matching the shape returned by createSolanaRpc() */
 export const mockSolanaRpc = (
@@ -50,16 +40,19 @@ export const mockSolanaRpc = (
     }),
     getEpochSchedule: () => ({
         send: vi.fn().mockResolvedValue({
-            ...mockEpochSchedule(overrides?.epochSchedule),
+            firstNormalEpoch: 0n,
+            firstNormalSlot: 0n,
+            slotsPerEpoch: 432_000n,
+            ...overrides?.epochSchedule,
             leaderScheduleSlotOffset: 0n,
             warmup: false,
         }),
     }),
     getFirstAvailableBlock: () => ({
-        send: vi.fn().mockResolvedValue(mockFirstAvailableBlock(overrides?.firstAvailableBlock)),
+        send: vi.fn().mockResolvedValue(overrides?.firstAvailableBlock ?? 0n),
     }),
     getGenesisHash: () => ({
-        send: vi.fn().mockResolvedValue(mockGenesisHash(overrides?.genesisHash)),
+        send: vi.fn().mockResolvedValue(overrides?.genesisHash ?? GENESIS_HASHES.MAINNET),
     }),
     getMultipleAccounts: (addresses: readonly unknown[]) => ({
         send: vi.fn().mockResolvedValue({
@@ -68,3 +61,20 @@ export const mockSolanaRpc = (
         }),
     }),
 });
+
+/** Wraps each mock as a kit RPC method, so `rpc.method(...args).send()` returns `method(...args)`. */
+export function rpcStub(methods: Record<string, Mock>) {
+    return Object.fromEntries(
+        Object.entries(methods).map(([name, method]) => [
+            name,
+            (...args: unknown[]) => ({ send: () => method(...args) }),
+        ]),
+    );
+}
+
+/** Returns the update a mocked cache dispatch received last. */
+export function lastDispatch<T>(dispatch: Mock<Dispatch<T>>): Update<T> {
+    const action = dispatch.mock.lastCall?.[0];
+    if (!action || !('status' in action)) throw new Error('the last dispatch was not an update');
+    return action;
+}

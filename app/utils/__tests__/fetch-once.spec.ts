@@ -3,22 +3,24 @@ import { describe, expect, it, vi } from 'vitest';
 import { fetchOnce } from '../fetch-once';
 
 describe('fetchOnce', () => {
-    it('should execute the callback', async () => {
+    it('should execute the callback and return true', async () => {
         const inFlight = new Set<string>();
         const fn = vi.fn().mockResolvedValue(undefined);
 
-        await fetchOnce('key', inFlight, fn);
+        const result = await fetchOnce('key', inFlight, fn);
 
+        expect(result).toBe(true);
         expect(fn).toHaveBeenCalledOnce();
     });
 
-    it('should skip duplicate calls for the same key', async () => {
+    it('should skip duplicate calls for the same key and return false', async () => {
         const inFlight = new Set<string>();
         const fn = vi.fn().mockReturnValue(new Promise<void>(() => {}));
 
         fetchOnce('key', inFlight, fn);
-        await fetchOnce('key', inFlight, fn);
+        const result = await fetchOnce('key', inFlight, fn);
 
+        expect(result).toBe(false);
         expect(fn).toHaveBeenCalledOnce();
     });
 
@@ -42,25 +44,6 @@ describe('fetchOnce', () => {
 
         expect(fnA).toHaveBeenCalledOnce();
         expect(fnB).toHaveBeenCalledOnce();
-    });
-
-    it('should return true when executed', async () => {
-        const inFlight = new Set<string>();
-        const fn = vi.fn().mockResolvedValue(undefined);
-
-        const result = await fetchOnce('key', inFlight, fn);
-
-        expect(result).toBe(true);
-    });
-
-    it('should return false when skipped', async () => {
-        const inFlight = new Set<string>();
-        const fn = vi.fn().mockReturnValue(new Promise<void>(() => {}));
-
-        fetchOnce('key', inFlight, fn);
-        const result = await fetchOnce('key', inFlight, fn);
-
-        expect(result).toBe(false);
     });
 
     it('should remove key from inFlight when callback throws', async () => {

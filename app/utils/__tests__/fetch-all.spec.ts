@@ -20,45 +20,31 @@ describe('fetchAll', () => {
         expect(results).toEqual([2, 4, 6, 8, 10]);
     });
 
-    it('should respect the concurrency limit', async () => {
-        let running = 0;
-        let maxRunning = 0;
+    it.each([
+        { concurrency: 3, maxConcurrent: 3 },
+        { concurrency: undefined, maxConcurrent: 2 },
+    ])(
+        'should run at most $maxConcurrent callbacks at once when concurrency is $concurrency',
+        async ({ concurrency, maxConcurrent }) => {
+            let running = 0;
+            let maxRunning = 0;
 
-        const items = Array.from({ length: 20 }, (_, i) => i);
-        const fn = async (n: number) => {
-            running++;
-            maxRunning = Math.max(maxRunning, running);
-            await new Promise(resolve => setTimeout(resolve, 10));
-            running--;
-            return n;
-        };
+            const items = Array.from({ length: 20 }, (_, i) => i);
+            const fn = async (n: number) => {
+                running++;
+                maxRunning = Math.max(maxRunning, running);
+                await new Promise(resolve => setTimeout(resolve, 10));
+                running--;
+                return n;
+            };
 
-        const promise = fetchAll(items, fn, 3);
-        await vi.advanceTimersByTimeAsync(10 * 20);
+            const promise = fetchAll(items, fn, concurrency);
+            await vi.advanceTimersByTimeAsync(10 * 20);
 
-        await promise;
-        expect(maxRunning).toBe(3);
-    });
-
-    it('should default concurrency to 2', async () => {
-        let running = 0;
-        let maxRunning = 0;
-
-        const items = Array.from({ length: 10 }, (_, i) => i);
-        const fn = async (n: number) => {
-            running++;
-            maxRunning = Math.max(maxRunning, running);
-            await new Promise(resolve => setTimeout(resolve, 10));
-            running--;
-            return n;
-        };
-
-        const promise = fetchAll(items, fn);
-        await vi.advanceTimersByTimeAsync(10 * 10);
-
-        await promise;
-        expect(maxRunning).toBe(2);
-    });
+            await promise;
+            expect(maxRunning).toBe(maxConcurrent);
+        },
+    );
 
     it('should propagate errors from the callback', async () => {
         const items = [1, 2, 3];

@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { renderHook } from '@testing-library/react';
 import {
     accountValueNode,
@@ -17,19 +19,25 @@ import programMock2 from '../../mocks/codama/simplified/programMock2';
 import programMock3 from '../../mocks/codama/simplified/programMock3';
 import programMock4 from '../../mocks/codama/simplified/programMock4';
 import type { EnumFieldType, FieldType, StructFieldType, TypeFieldType } from '../formatters/formatted-idl';
-import { getUniqPdaNodesFromIxs, useFormatCodamaIdl } from '../use-format-codama-idl';
+import { formatCodamaIdl, getUniqPdaNodesFromIxs, useFormatCodamaIdl } from '../use-format-codama-idl';
 
 describe('useFormatCodamaIdl', () => {
-    it('should return null when idl is undefined', () => {
-        const { result } = renderHook(() => useFormatCodamaIdl(undefined));
+    it('should return null without an IDL and the formatted IDL with one', () => {
+        const { rerender, result } = renderHook(props => useFormatCodamaIdl(props.idl), {
+            initialProps: { idl: undefined },
+        });
         expect(result.current).toBeNull();
+
+        rerender({ idl: minimalMock as any });
+        expect(result.current).toEqual(formatCodamaIdl(minimalMock as any));
     });
+});
 
+describe('formatCodamaIdl', () => {
     it('should format a minimal valid IDL correctly', () => {
-        const { result } = renderHook(() => useFormatCodamaIdl(minimalMock as any));
+        const formatted = formatCodamaIdl(minimalMock as any);
 
-        expect(result.current).not.toBeNull();
-        const ixs = result.current?.instructions;
+        const ixs = formatted.instructions;
         expect(ixs).toHaveLength(1);
         expect(ixs?.[0].name).toBe('initialize');
         expect(ixs?.[0].args).toHaveLength(1);
@@ -37,9 +45,9 @@ describe('useFormatCodamaIdl', () => {
     });
 
     it('should correctly format instruction accounts', () => {
-        const { result } = renderHook(() => useFormatCodamaIdl(minimalMock as any));
+        const formatted = formatCodamaIdl(minimalMock as any);
 
-        const accounts = result.current?.instructions?.[0].accounts;
+        const accounts = formatted.instructions?.[0].accounts;
         expect(accounts).toHaveLength(2);
         expect(accounts?.[0]).toMatchObject({
             docs: [],
@@ -60,9 +68,9 @@ describe('useFormatCodamaIdl', () => {
     });
 
     it('should correctly format instruction args', () => {
-        const { result } = renderHook(() => useFormatCodamaIdl(minimalMock as any));
+        const formatted = formatCodamaIdl(minimalMock as any);
 
-        const args = result.current?.instructions?.[0].args;
+        const args = formatted.instructions?.[0].args;
         expect(args).toHaveLength(1);
         expect(args?.[0]).toMatchObject({
             name: 'seed',
@@ -71,10 +79,10 @@ describe('useFormatCodamaIdl', () => {
     });
 
     it('should handle struct type fields correctly', () => {
-        const { result } = renderHook(() => useFormatCodamaIdl(programMock3 as any));
+        const formatted = formatCodamaIdl(programMock3 as any);
 
         // Find the Config account type
-        const accounts = result.current?.accounts;
+        const accounts = formatted.accounts;
         const configAccount = accounts?.find(a => a.name === 'config');
 
         expect(configAccount?.fieldType?.kind).toBe('struct');
@@ -87,10 +95,10 @@ describe('useFormatCodamaIdl', () => {
     });
 
     it('should handle enum types correctly', () => {
-        const { result } = renderHook(() => useFormatCodamaIdl(programMock2 as any));
+        const formatted = formatCodamaIdl(programMock2 as any);
 
         // Find the accountDiscriminator type that should be an enum
-        const types = result.current?.types;
+        const types = formatted.types;
         const enumType = types?.find(t => t.name === 'accountDiscriminator');
 
         expect(enumType?.fieldType?.kind).toBe('enum');
@@ -102,9 +110,9 @@ describe('useFormatCodamaIdl', () => {
     });
 
     it('should correctly extract PDAs', () => {
-        const { result } = renderHook(() => useFormatCodamaIdl(programMock2 as any));
+        const formatted = formatCodamaIdl(programMock2 as any);
 
-        const pdas = result.current?.pdas;
+        const pdas = formatted.pdas;
         expect(pdas).toBeDefined();
         expect(pdas?.length).toBeGreaterThan(0);
 
@@ -131,9 +139,9 @@ describe('useFormatCodamaIdl', () => {
     });
 
     it('should correctly parse complex data types', () => {
-        const { result } = renderHook(() => useFormatCodamaIdl(programMock4 as any));
+        const formatted = formatCodamaIdl(programMock4 as any);
 
-        const types = result.current?.types;
+        const types = formatted.types;
         expect(types?.length).toEqual(3);
         invariant(types, 'expected formatted IDL to contain types');
 
@@ -186,9 +194,9 @@ describe('useFormatCodamaIdl', () => {
     });
 
     it('should handle program errors correctly', () => {
-        const { result } = renderHook(() => useFormatCodamaIdl(programMock1 as any));
+        const formatted = formatCodamaIdl(programMock1 as any);
 
-        const errors = result.current?.errors;
+        const errors = formatted.errors;
         expect(errors).toHaveLength(2);
 
         const error1 = errors?.[0];
@@ -254,9 +262,9 @@ describe('useFormatCodamaIdl', () => {
             },
         };
 
-        const { result } = renderHook(() => useFormatCodamaIdl(mockWithDuplicatePdas as any));
+        const formatted = formatCodamaIdl(mockWithDuplicatePdas as any);
 
-        const pdas = result.current?.pdas;
+        const pdas = formatted.pdas;
         expect(pdas).toBeDefined();
         expect(pdas?.length).toEqual(1);
     });
@@ -304,9 +312,9 @@ describe('useFormatCodamaIdl', () => {
             },
         };
 
-        const { result } = renderHook(() => useFormatCodamaIdl(mockWithConditionalPda as any));
+        const formatted = formatCodamaIdl(mockWithConditionalPda as any);
 
-        const pdas = result.current?.pdas;
+        const pdas = formatted.pdas;
         expect(pdas).toBeDefined();
         expect(pdas?.length).toBe(2);
 
@@ -360,9 +368,9 @@ describe('useFormatCodamaIdl', () => {
             },
         };
 
-        const { result } = renderHook(() => useFormatCodamaIdl(mockWithPdaLinks as any));
+        const formatted = formatCodamaIdl(mockWithPdaLinks as any);
 
-        const pdas = result.current?.pdas;
+        const pdas = formatted.pdas;
         expect(pdas).toBeDefined();
         expect(pdas?.length).toBe(1);
 
@@ -439,9 +447,9 @@ describe('useFormatCodamaIdl', () => {
             },
         };
 
-        const { result } = renderHook(() => useFormatCodamaIdl(mockWithSeedTypes as any));
+        const formatted = formatCodamaIdl(mockWithSeedTypes as any);
 
-        const pdas = result.current?.pdas;
+        const pdas = formatted.pdas;
         expect(pdas).toBeDefined();
         expect(pdas?.length).toBe(1);
 

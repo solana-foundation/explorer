@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import { clusterApiUrl, PublicKey } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';

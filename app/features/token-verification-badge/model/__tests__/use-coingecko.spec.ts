@@ -1,15 +1,15 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { createElement, type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
+// @vitest-environment jsdom
+
+import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
+import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
 import { CoingeckoStatus, fetchCoinGeckoVerification, useCoinGeckoVerification } from '../use-coingecko';
 
 vi.mock('@/app/providers/cluster', () => ({ useCluster: vi.fn() }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), panic: vi.fn(), warn: vi.fn() } }));
 vi.mock('@/app/utils/use-tab-visibility', () => ({ default: vi.fn() }));
 
 import { useCluster } from '@/app/providers/cluster';
@@ -95,36 +95,17 @@ describe('useCoinGeckoVerification', () => {
         vi.restoreAllMocks();
     });
 
-    function wrapper({ children }: { children: ReactNode }) {
-        return createElement(
-            SWRConfig,
-            {
-                value: {
-                    dedupingInterval: 0,
-                    errorRetryCount: 2,
-                    errorRetryInterval: 50,
-                    provider: () => new Map(),
-                },
-            },
-            children,
-        );
-    }
+    const wrapper = swrWrapper({ dedupingInterval: 0, errorRetryCount: 2, errorRetryInterval: 50 });
 
     it('should return Success when fetch succeeds', async () => {
         mockResponse(200, { verified: true });
         const { result } = renderHook(() => useCoinGeckoVerification('address'), { wrapper });
-        await waitFor(() => expect(result.current?.status).toBe(CoingeckoStatus.Success));
+        await waitForHook(() => expect(result.current?.status).toBe(CoingeckoStatus.Success));
         expect(result.current?.verified).toBe(true);
     });
 
-    it('should return FetchFailed for 404 without retrying', async () => {
-        mockResponse(404);
-        const { result } = renderHook(() => useCoinGeckoVerification('address'), { wrapper });
-        await waitFor(() => expect(result.current?.status).toBe(CoingeckoStatus.FetchFailed));
-        expect(fetchSpy).toHaveBeenCalledTimes(1);
-    });
-
     it.each([
+        [404, CoingeckoStatus.FetchFailed],
         [429, CoingeckoStatus.RateLimited],
         [500, CoingeckoStatus.FetchFailed],
         [502, CoingeckoStatus.FetchFailed],
@@ -132,7 +113,7 @@ describe('useCoinGeckoVerification', () => {
         mockResponse(status);
         const { result } = renderHook(() => useCoinGeckoVerification('address'), { wrapper });
 
-        await waitFor(() => expect(result.current?.status).toBe(expectedStatus));
+        await waitForHook(() => expect(result.current?.status).toBe(expectedStatus));
         expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
 

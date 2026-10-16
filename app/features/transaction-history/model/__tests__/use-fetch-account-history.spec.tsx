@@ -1,7 +1,9 @@
 import { address as toAddress } from '@solana/kit';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { waitForHook } from '@/app/__tests__/swr-hook';
 
 vi.mock('@providers/cluster', () => ({
     useCluster: vi.fn(() => ({
@@ -26,12 +28,11 @@ vi.mock('@entities/cluster', async () => {
     };
 });
 
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn: vi.fn() } }));
-
 // Must import after mocks
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 
+import type { HistoryFilters } from '../../lib/history-filters';
 import { HistoryProvider } from '../history-provider';
 import { useAccountHistory, useHistoryFiltersSupported, useResetAccountHistory } from '../use-account-history';
 import { useFetchAccountHistory } from '../use-fetch-account-history';
@@ -84,8 +85,17 @@ function wrapper({ children }: { children: React.ReactNode }) {
     return <HistoryProvider>{children}</HistoryProvider>;
 }
 
+function renderHistory(filters: HistoryFilters = {}) {
+    return renderHook(() => ({ fetch: useFetchAccountHistory(25, filters), history: useAccountHistory(ADDRESS) }), {
+        wrapper,
+    });
+}
+
 beforeEach(() => {
     vi.clearAllMocks();
+    // Fake timers drop a test's pending retry delays when it ends, so a retry left over from one test
+    // cannot call a mock during the next. The clock still follows real time for `waitForHook`.
+    vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
     vi.stubGlobal('fetch', fetchMock);
     // Fallback response; tests queue page-specific results with mockResult (once).
     fetchMock.mockResolvedValue({
@@ -99,6 +109,10 @@ beforeEach(() => {
     vi.mocked(useCluster).mockReturnValue({ cluster: 0, url: 'https://mock.rpc' } as any);
 });
 
+afterEach(() => {
+    vi.useRealTimers();
+});
+
 describe('useFetchAccountHistory — getTransactionsForAddress', () => {
     it('should map slot filters onto the filters object on the initial fetch', async () => {
         const { result } = renderHook(() => useFetchAccountHistory(25, { slot: { gte: 100, lte: 500 } }), {
@@ -109,7 +123,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
             result.current(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        await waitForHook(() => expect(fetchMock).toHaveBeenCalled());
 
         const [address, options] = requestParams();
         expect(address).toBe(ADDRESS);
@@ -136,7 +150,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
             result.current(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        await waitForHook(() => expect(fetchMock).toHaveBeenCalled());
         const [, options] = requestParams();
         expect(options.filters).toEqual({
             blockTime: { gte: 1_700_000_000, lte: 1_700_100_000 },
@@ -151,7 +165,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
             result.current(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        await waitForHook(() => expect(fetchMock).toHaveBeenCalled());
         const [, options] = requestParams();
         expect(options).toMatchObject({ limit: 25, paginationToken: null });
         expect('filters' in options).toBe(false);
@@ -163,19 +177,13 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
             'token-page-2',
         );
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, { slot: { gte: 100 } }),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory({ slot: { gte: 100 } });
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
 
         fetchMock.mockClear();
         mockResult([], null);
@@ -184,7 +192,7 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        await waitForHook(() => expect(fetchMock).toHaveBeenCalled());
         const [, options] = requestParams();
         expect(options).toMatchObject({
             filters: { slot: { gte: 100 } },
@@ -197,19 +205,13 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
         // Fewer items than the limit, but a non-null token means more data exists.
         mockResult([sig('partial', 10)], 'token-page-2');
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, {}),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory();
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(1));
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.length).toBe(1));
         expect(result.current.history?.data?.foundOldest).toBe(false);
 
         // Load More should issue another request, threading the token forward.
@@ -219,26 +221,20 @@ describe('useFetchAccountHistory — getTransactionsForAddress', () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        await waitForHook(() => expect(fetchMock).toHaveBeenCalled());
         expect(requestParams()[1]).toMatchObject({ paginationToken: 'token-page-2' });
     });
 
     it('should stop paginating once a page returns a null token', async () => {
         mockResult([sig('only', 10)], null);
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, {}),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory();
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.foundOldest).toBe(true));
+        await waitForHook(() => expect(result.current.history?.data?.foundOldest).toBe(true));
 
         fetchMock.mockClear();
 
@@ -270,7 +266,7 @@ describe('useResetAccountHistory', () => {
         act(() => {
             result.current.fetch(toAddress(ADDRESS));
         });
-        await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+        await waitForHook(() => expect(fetchMock).toHaveBeenCalledTimes(1));
 
         // User applies a filter: reset supersedes the in-flight request, then refetch.
         mockResult([sig('filtered', 200)], null);
@@ -279,7 +275,7 @@ describe('useResetAccountHistory', () => {
             result.current.fetch(toAddress(ADDRESS), false, true);
         });
 
-        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('filtered'));
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('filtered'));
 
         // Now the original request resolves with unfiltered data — it must be dropped.
         await act(async () => {
@@ -311,8 +307,8 @@ describe('useResetAccountHistory', () => {
             result.current.fetch(toAddress(ADDRESS_B));
         });
 
-        await waitFor(() => expect(result.current.historyA?.data?.fetched?.length).toBe(1));
-        await waitFor(() => expect(result.current.historyB?.data?.fetched?.length).toBe(1));
+        await waitForHook(() => expect(result.current.historyA?.data?.fetched?.length).toBe(1));
+        await waitForHook(() => expect(result.current.historyB?.data?.fetched?.length).toBe(1));
 
         act(() => {
             result.current.reset(ADDRESS);
@@ -328,19 +324,13 @@ describe('getSignaturesForAddress fallback', () => {
         mockRpcError(-32601, 'Method not found');
         rpcMocks.getSignaturesForAddress.mockResolvedValueOnce([sig('legacy', 5)]);
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, { slot: { gte: 10, lte: 99 } }),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory({ slot: { gte: 10, lte: 99 } });
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('legacy'));
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('legacy'));
         expect(rpcMocks.getSignaturesForAddress).toHaveBeenCalledTimes(1);
         const [address, opts] = rpcMocks.getSignaturesForAddress.mock.calls[0];
         expect(address).toBe(ADDRESS);
@@ -366,7 +356,7 @@ describe('getSignaturesForAddress fallback', () => {
             result.current.fetch(toAddress(WRAPPED_SOL));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('wsol'));
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('wsol'));
         expect(fetchMock).not.toHaveBeenCalled();
         // Scoped to this address: filtering stays available for every other account.
         expect(result.current.supported).toBe(true);
@@ -390,7 +380,7 @@ describe('getSignaturesForAddress fallback', () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('legacy'));
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('legacy'));
         expect(result.current.supported).toBe(false);
     });
 
@@ -398,38 +388,26 @@ describe('getSignaturesForAddress fallback', () => {
         // Same code, genuinely different failure: a slot bound below the endpoint's index floor.
         mockRpcError(-32603, 'Slot <= 460000000 not found');
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, { slot: { lte: 460_000_000 } }),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory({ slot: { lte: 460_000_000 } });
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
+        await waitForHook(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
         expect(rpcMocks.getSignaturesForAddress).not.toHaveBeenCalled();
     });
 
     it('should not fall back on a generic RPC error', async () => {
         mockRpcError(-32000, 'boom');
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, {}),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory();
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
+        await waitForHook(() => expect(result.current.history?.status).toBe(FetchStatus.FetchFailed));
         expect(rpcMocks.getSignaturesForAddress).not.toHaveBeenCalled();
     });
 
@@ -439,38 +417,30 @@ describe('getSignaturesForAddress fallback', () => {
         mockResult([], null);
         rpcMocks.getSignaturesForAddress.mockResolvedValueOnce([sig('older-than-retention', 5)]);
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, {}),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory();
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('older-than-retention'));
+        await waitForHook(() =>
+            expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('older-than-retention'),
+        );
         expect(result.current.history?.data?.paginationToken).toBeUndefined();
     });
 
     it('should accept the empty result when the ledger index agrees the account has no history', async () => {
         mockResult([], null);
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, {}),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory();
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
+        await act(() => vi.runAllTimersAsync());
+
+        expect(result.current.history?.status).toBe(FetchStatus.Fetched);
         expect(result.current.history?.data?.fetched).toEqual([]);
         expect(result.current.history?.data?.foundOldest).toBe(true);
         expect(rpcMocks.getSignaturesForAddress).toHaveBeenCalled();
@@ -482,19 +452,14 @@ describe('getSignaturesForAddress fallback', () => {
         mockResult([], null);
         rpcMocks.getSignaturesForAddress.mockRejectedValue(new Error('429 Too Many Requests'));
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, {}),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory();
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
+        await act(() => vi.runAllTimersAsync());
 
-        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
+        expect(result.current.history?.status).toBe(FetchStatus.Fetched);
         expect(result.current.history?.data?.fetched).toEqual([]);
     });
 
@@ -507,18 +472,12 @@ describe('getSignaturesForAddress fallback', () => {
             'token-page-2',
         );
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, {}),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory();
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
-        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
 
         // Load More returns an empty page that still advances the cursor.
         rpcMocks.getSignaturesForAddress.mockClear();
@@ -527,7 +486,7 @@ describe('getSignaturesForAddress fallback', () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.paginationToken).toBe('token-page-3'));
+        await waitForHook(() => expect(result.current.history?.data?.paginationToken).toBe('token-page-3'));
         expect(result.current.history?.data?.foundOldest).toBe(false);
         expect(rpcMocks.getSignaturesForAddress).not.toHaveBeenCalled();
     });
@@ -538,19 +497,13 @@ describe('getSignaturesForAddress fallback', () => {
         mockResult([], 'token-page-2');
         rpcMocks.getSignaturesForAddress.mockResolvedValueOnce([sig('from-ledger', 5)]);
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, {}),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory();
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('from-ledger'));
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.[0]?.signature).toBe('from-ledger'));
     });
 
     it('should not confirm an empty page while a filter is active', async () => {
@@ -558,19 +511,13 @@ describe('getSignaturesForAddress fallback', () => {
         // question. An empty filtered page is a legitimate "no matches".
         mockResult([], null);
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, { status: 'failed' }),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory({ status: 'failed' });
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
+        await waitForHook(() => expect(result.current.history?.status).toBe(FetchStatus.Fetched));
         expect(result.current.history?.data?.fetched).toEqual([]);
         expect(rpcMocks.getSignaturesForAddress).not.toHaveBeenCalled();
     });
@@ -581,19 +528,13 @@ describe('getSignaturesForAddress fallback', () => {
         mockResult([], null);
         rpcMocks.getSignaturesForAddress.mockResolvedValueOnce(page);
 
-        const { result } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, {}),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result } = renderHistory();
 
         await act(async () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.length).toBe(25));
 
         fetchMock.mockClear();
         rpcMocks.getSignaturesForAddress.mockClear();
@@ -603,7 +544,7 @@ describe('getSignaturesForAddress fallback', () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.history?.data?.fetched?.length).toBe(26));
+        await waitForHook(() => expect(result.current.history?.data?.fetched?.length).toBe(26));
         // The latch holds: no second getTransactionsForAddress attempt, and the trailing
         // signature drives the cursor rather than a (now null) paginationToken.
         expect(fetchMock).not.toHaveBeenCalled();
@@ -619,19 +560,13 @@ describe('getSignaturesForAddress fallback', () => {
         mockResult([], null); // endpoint A: gTFA answers empty
         rpcMocks.getSignaturesForAddress.mockReturnValueOnce(pendingConfirm.promise);
 
-        const { result, rerender } = renderHook(
-            () => ({
-                fetch: useFetchAccountHistory(25, {}),
-                history: useAccountHistory(ADDRESS),
-            }),
-            { wrapper },
-        );
+        const { result, rerender } = renderHistory();
 
         act(() => {
             result.current.fetch(toAddress(ADDRESS));
         });
         // The confirmation is issued but not yet resolved.
-        await waitFor(() => expect(rpcMocks.getSignaturesForAddress).toHaveBeenCalledTimes(1));
+        await waitForHook(() => expect(rpcMocks.getSignaturesForAddress).toHaveBeenCalledTimes(1));
 
         // Cluster changes while that confirmation is still open.
         vi.mocked(useCluster).mockReturnValue({ cluster: 0, url: 'https://other.rpc' } as any);
@@ -652,7 +587,7 @@ describe('getSignaturesForAddress fallback', () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        await waitForHook(() => expect(fetchMock).toHaveBeenCalled());
         expect(JSON.parse(fetchMock.mock.calls[0][1].body).method).toBe('getTransactionsForAddress');
         expect(rpcMocks.getSignaturesForAddress).not.toHaveBeenCalled();
     });
@@ -676,6 +611,6 @@ describe('getSignaturesForAddress fallback', () => {
             result.current.fetch(toAddress(ADDRESS));
         });
 
-        await waitFor(() => expect(result.current.supported).toBe(false));
+        await waitForHook(() => expect(result.current.supported).toBe(false));
     });
 });

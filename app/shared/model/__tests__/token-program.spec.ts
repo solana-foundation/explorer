@@ -26,14 +26,6 @@ describe('token-program types', () => {
 });
 
 describe('isTokenProgramAddress', () => {
-    it('should return true for the Token program address', () => {
-        expect(isTokenProgramAddress(TOKEN_PROGRAM_ADDRESS)).toBe(true);
-    });
-
-    it('should return true for the Token-2022 program address', () => {
-        expect(isTokenProgramAddress(TOKEN_2022_PROGRAM_ADDRESS)).toBe(true);
-    });
-
     it('should return true for a plain string matching the Token program', () => {
         expect(isTokenProgramAddress('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')).toBe(true);
     });
@@ -54,16 +46,12 @@ describe('identifyTokenAccountType', () => {
         expect(identifyTokenAccountType(TOKEN_PROGRAM_ADDRESS, new Uint8Array([1, 2, 3]))).toBeUndefined();
     });
 
-    it('should identify an 82-byte Token account as a mint', () => {
-        expect(identifyTokenAccountType(TOKEN_PROGRAM_ADDRESS, new Uint8Array(82))).toBe(TokenAccount.Mint);
-    });
-
-    it('should identify a 165-byte Token account as a token account', () => {
-        expect(identifyTokenAccountType(TOKEN_PROGRAM_ADDRESS, new Uint8Array(165))).toBe(TokenAccount.Token);
-    });
-
-    it('should identify a 355-byte Token account as a multisig', () => {
-        expect(identifyTokenAccountType(TOKEN_PROGRAM_ADDRESS, new Uint8Array(355))).toBe(TokenAccount.Multisig);
+    it.each([
+        [82, 'a mint', TokenAccount.Mint],
+        [165, 'a token account', TokenAccount.Token],
+        [355, 'a multisig', TokenAccount.Multisig],
+    ])('should identify a %d-byte Token account as %s', (length, _kind, expected) => {
+        expect(identifyTokenAccountType(TOKEN_PROGRAM_ADDRESS, new Uint8Array(length))).toBe(expected);
     });
 
     it('should route Token-2022 owners through the Token-2022 identifier', () => {

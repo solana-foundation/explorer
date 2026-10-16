@@ -7,13 +7,11 @@ import { withBackoff } from '../with-backoff';
 describe('withBackoff', () => {
     beforeEach(() => {
         vi.useFakeTimers();
-        // Silence the retry log so test output stays clean and env-independent.
-        vi.spyOn(Logger, 'debug').mockImplementation(() => {});
+        vi.clearAllMocks();
     });
 
     afterEach(() => {
         vi.useRealTimers();
-        vi.restoreAllMocks();
     });
 
     it('should resolve with the result on the first successful attempt, without retrying or logging', async () => {
@@ -92,7 +90,6 @@ describe('withBackoff', () => {
 
     it('should throw on the first failure without sleeping when shouldRetry returns false', async () => {
         const fn = vi.fn().mockRejectedValue(new Error('fatal'));
-        vi.mocked(Logger.debug).mockClear();
 
         // No timer flush here on purpose: a fatal failure must reject before a retry timer is ever scheduled.
         await expect(withBackoff(fn, { shouldRetry: () => false })).rejects.toThrow('fatal');

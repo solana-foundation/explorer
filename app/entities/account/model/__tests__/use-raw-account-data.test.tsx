@@ -1,9 +1,9 @@
 import { PublicKey } from '@solana/web3.js';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { act } from 'react';
-import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { FAST_RETRY, settleRetries, swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 import { toBase64 } from '@/app/shared/lib/bytes';
 
 import { useLazyRawAccountData, useRawAccountData } from '../use-raw-account-data';
@@ -33,9 +33,7 @@ function accountInfoValue(data: Uint8Array) {
     return { data: [toBase64(data), 'base64'] };
 }
 
-function wrapper({ children }: { children: React.ReactNode }) {
-    return <SWRConfig value={{ errorRetryInterval: 1, provider: () => new Map() }}>{children}</SWRConfig>;
-}
+const wrapper = swrWrapper(FAST_RETRY);
 
 describe('useRawAccountData', () => {
     beforeEach(() => {
@@ -64,7 +62,7 @@ describe('useRawAccountData', () => {
             result.current.mutate();
         });
 
-        await waitFor(() => {
+        await waitForHook(() => {
             expect(result.current.data).toEqual(mockData);
         });
 
@@ -84,7 +82,7 @@ describe('useRawAccountData', () => {
             result.current.mutate();
         });
 
-        await waitFor(() => {
+        await waitForHook(() => {
             expect(result.current.data).toEqual(mockData1);
         });
 
@@ -93,7 +91,7 @@ describe('useRawAccountData', () => {
             result.current.mutate();
         });
 
-        await waitFor(() => {
+        await waitForHook(() => {
             expect(result.current.data).toEqual(mockData2);
         });
     });
@@ -106,8 +104,8 @@ describe('useRawAccountData', () => {
         act(() => {
             result.current.mutate();
         });
-        await waitFor(() => expect(mockGetAccountInfo).toHaveBeenCalledTimes(4));
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await waitForHook(() => expect(mockGetAccountInfo).toHaveBeenCalledTimes(4));
+        await settleRetries();
 
         expect(mockGetAccountInfo).toHaveBeenCalledTimes(4);
     });
@@ -126,11 +124,11 @@ describe('useLazyRawAccountData', () => {
         const { result } = renderHook(() => useLazyRawAccountData(MOCK_ADDRESS), { wrapper });
 
         act(() => result.current.load());
-        await waitFor(() => expect(result.current.loading).toBe(true));
+        await waitForHook(() => expect(result.current.loading).toBe(true));
         act(() => result.current.load());
         act(() => resolveRead(accountInfoValue(mockData)));
 
-        await waitFor(() => expect(result.current.data).toEqual(mockData));
+        await waitForHook(() => expect(result.current.data).toEqual(mockData));
         expect(mockGetAccountInfo).toHaveBeenCalledTimes(1);
     });
 
@@ -141,7 +139,7 @@ describe('useLazyRawAccountData', () => {
         const { result } = renderHook(() => useLazyRawAccountData(MOCK_ADDRESS), { wrapper });
 
         act(() => result.current.load());
-        await waitFor(() => expect(result.current.data).toEqual(mockData));
+        await waitForHook(() => expect(result.current.data).toEqual(mockData));
         await act(async () => result.current.load());
 
         expect(mockGetAccountInfo).toHaveBeenCalledTimes(1);
@@ -153,10 +151,10 @@ describe('useLazyRawAccountData', () => {
         const { result } = renderHook(() => useLazyRawAccountData(MOCK_ADDRESS), { wrapper });
 
         act(() => result.current.load());
-        await waitFor(() => expect(mockGetAccountInfo).toHaveBeenCalledTimes(4));
-        await waitFor(() => expect(result.current.loading).toBe(false));
+        await waitForHook(() => expect(mockGetAccountInfo).toHaveBeenCalledTimes(4));
+        await waitForHook(() => expect(result.current.loading).toBe(false));
         act(() => result.current.load());
 
-        await waitFor(() => expect(mockGetAccountInfo).toHaveBeenCalledTimes(5));
+        await waitForHook(() => expect(mockGetAccountInfo).toHaveBeenCalledTimes(5));
     });
 });

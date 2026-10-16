@@ -1,6 +1,14 @@
 import type { InstructionAccountData, InstructionData, NestedInstructionAccountsData } from '@entities/idl';
+import { renderHook } from '@testing-library/react';
+import { vi } from 'vitest';
+
+import { useInstructionForm } from '../../../use-instruction-form';
 
 type PlainAccountInput = string | Partial<InstructionAccountData>;
+
+export function renderInstructionForm(instruction: InstructionData) {
+    return renderHook(() => useInstructionForm({ instruction, onSubmit: vi.fn() })).result.current;
+}
 
 function toPlainAccount(input: PlainAccountInput): InstructionAccountData {
     if (typeof input === 'string') {
@@ -21,9 +29,14 @@ function toPlainAccount(input: PlainAccountInput): InstructionAccountData {
     };
 }
 
-export function createTestInstruction(accounts: PlainAccountInput[], name = 'testInstruction'): InstructionData {
+export function createTestInstruction(
+    accounts: (PlainAccountInput | NestedInstructionAccountsData)[],
+    name = 'testInstruction',
+): InstructionData {
     return {
-        accounts: accounts.map(toPlainAccount),
+        accounts: accounts.map(account =>
+            typeof account !== 'string' && 'accounts' in account ? account : toPlainAccount(account),
+        ),
         args: [],
         docs: [],
         name,

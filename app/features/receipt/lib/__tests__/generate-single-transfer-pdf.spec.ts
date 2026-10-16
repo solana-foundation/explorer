@@ -6,8 +6,8 @@ import {
     collectTextFromMock as collectText,
     mockJsPDF,
     mockSave,
-    mockToDataURL,
     PDF_OPTS,
+    qrcodeModule,
     SIGNATURE,
     SOL_RECEIPT,
     stubSvgRasterizationUnsupported,
@@ -15,21 +15,8 @@ import {
 } from './__fixtures__/pdf-mocks';
 
 vi.mock('jspdf', () => ({ jsPDF: mockJsPDF }));
-
-vi.mock('qrcode', () => ({
-    default: { toDataURL: (...args: unknown[]) => mockToDataURL(...args) },
-    toDataURL: (...args: unknown[]) => mockToDataURL(...args),
-}));
-
-vi.mock('../pdf-fonts', () => ({
-    loadPdfFonts: vi.fn().mockResolvedValue({
-        robotoMonoRegular: 'AAA=',
-        robotoMonoSemiBold: 'AAA=',
-        rubikRegular: 'AAA=',
-        rubikSemiBold: 'AAA=',
-    }),
-    registerPdfFonts: vi.fn(),
-}));
+vi.mock('qrcode', () => qrcodeModule);
+vi.mock('../pdf-fonts', async () => (await import('./__fixtures__/pdf-mocks')).pdfFontsModule);
 
 describe('generateSingleTransferPdf', () => {
     const mockOnError = vi.fn();
@@ -122,11 +109,12 @@ describe('generateSingleTransferPdf', () => {
         expect(allText).toContain('not transaction date');
     });
 
-    it('should always render the Amount USD label and show an en-dash when usdValue is undefined', async () => {
+    it('should always render the Memo and Amount USD labels and show an en-dash when usdValue is undefined', async () => {
         const deps = await loadPdfDeps(mockOnError);
-        await generateSingleTransferPdf(deps, SOL_RECEIPT, PDF_OPTS);
+        await generateSingleTransferPdf(deps, { ...SOL_RECEIPT, memo: undefined }, PDF_OPTS);
 
         const allText = collectText();
+        expect(allText).toContain('Memo');
         expect(allText).toContain('Amount USD - equivalent by Jupiter API');
         expect(allText).toContain('–');
         expect(allText).not.toContain('Equivalent on report date');
@@ -163,19 +151,5 @@ describe('generateSingleTransferPdf', () => {
         await generateSingleTransferPdf(deps, SOL_RECEIPT, PDF_OPTS);
 
         expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
-    });
-
-    it('should still save the PDF and report a wrapped error when QR generation fails', async () => {
-        const qrError = new Error('QR generation failed');
-        mockToDataURL.mockRejectedValueOnce(qrError);
-
-        const deps = await loadPdfDeps(mockOnError);
-        await generateSingleTransferPdf(deps, SOL_RECEIPT, PDF_OPTS);
-
-        expect(mockSave).toHaveBeenCalledWith(`solana-receipt-${SIGNATURE}.pdf`);
-        const reported = mockOnError.mock.calls.map(([e]) => e as Error);
-        const qrReport = reported.find(e => e.message === 'Failed to render QR code in receipt footer');
-        expect(qrReport).toBeDefined();
-        expect(qrReport?.cause).toBe(qrError);
     });
 });

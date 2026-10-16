@@ -1,5 +1,6 @@
+import { gen } from '@__fixtures__/gen';
 import { getBase58Decoder } from '@solana/kit';
-import { Keypair, MessageAccountKeys, MessageV0, PublicKey } from '@solana/web3.js';
+import { MessageAccountKeys, MessageV0, PublicKey } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
 import { resolveInnerInstructions } from '../resolve-inner-instructions';
@@ -189,7 +190,7 @@ function makeMessage(
 }
 
 function makeKeys(count: number): PublicKey[] {
-    return Array.from({ length: count }, () => Keypair.generate().publicKey);
+    return Array.from({ length: count }, (_, index) => gen.publicKey(index + 1));
 }
 
 function encodeData(bytes: number[]): string {

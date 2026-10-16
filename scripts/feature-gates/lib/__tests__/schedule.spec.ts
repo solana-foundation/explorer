@@ -27,7 +27,7 @@ function entry(overrides: Partial<ScheduleEntry> = {}): ScheduleEntry {
 }
 
 describe('featuresFromSchedule', () => {
-    it('should import every pending row and skip the fully-activated section', () => {
+    it('should import every pending row, including one with a column it does not read, and skip the fully-activated section', () => {
         const features = featuresFromSchedule(FIXTURE, NO_PROPOSALS);
         expect(features.map(feature => feature.title)).toEqual([
             'Reward full priority fee to validators',
@@ -48,12 +48,6 @@ describe('featuresFromSchedule', () => {
         const dual = features.find(feature => feature.title === 'Dual SIMD feature');
         expect(dual?.simds).toEqual(['215', '216']);
         expect(dual?.simd_link).toEqual(['https://simd/215', 'https://simd/216']);
-    });
-
-    it('should tolerate a section carrying a column we do not read', () => {
-        // `Min FRD Versions` was added upstream after this parser was written; a new
-        // column must never break the nightly cron.
-        expect(() => featuresFromSchedule(FIXTURE, NO_PROPOSALS)).not.toThrow();
     });
 
     it('should throw when a pending row is missing a field the mapper reads', () => {

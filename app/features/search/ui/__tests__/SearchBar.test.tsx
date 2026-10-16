@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeAll, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 import { searchAnalytics } from '@/app/shared/lib/analytics';
 
@@ -7,14 +7,6 @@ import type { SearchOptions } from '../../lib/types';
 import { useSearch } from '../../model/use-search';
 import { useSearchNavigation } from '../../model/use-search-navigation';
 import { SEARCH_DEBOUNCE_MS, SearchBar } from '../SearchBar';
-
-beforeAll(() => {
-    global.ResizeObserver = class {
-        observe() {}
-        unobserve() {}
-        disconnect() {}
-    };
-});
 
 beforeEach(() => {
     vi.useFakeTimers();
@@ -67,6 +59,7 @@ describe('SearchBar', () => {
         fireEvent.click(screen.getByText('Token A'));
 
         expect(mockNavigate).toHaveBeenCalledWith(tokenResults[0].options[0]);
+        expect(searchAnalytics.trackResultSelected).toHaveBeenCalledWith('address', true);
         expect(input).toHaveValue('');
     });
 
@@ -77,15 +70,6 @@ describe('SearchBar', () => {
         fireEvent.click(screen.getByText('Token B'));
 
         expect(mockNavigate).toHaveBeenCalledWith(tokenResults[0].options[1]);
-    });
-
-    it('should track result selection in analytics with type and verified status', () => {
-        setup();
-
-        typeAndSettle('token');
-        fireEvent.click(screen.getByText('Token A'));
-
-        expect(searchAnalytics.trackResultSelected).toHaveBeenCalledWith('address', true);
     });
 
     it('should fall back to "unknown" type when option has no type', () => {

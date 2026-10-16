@@ -1,27 +1,20 @@
 import { ChainId, GENESIS_HASHES } from '@entities/chain-id';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
-import type { ReactNode } from 'react';
-import { SWRConfig, unstable_serialize } from 'swr';
+import { unstable_serialize } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
+
+import { tokenInfo } from '../../__fixtures__/token-info';
 import { fetchTokenInfos } from '../../api/fetch-token-infos';
-import type { TokenInfo } from '../../lib/types';
 import { getTokenInfosSwrKey, useTokenInfos } from '../use-token-infos';
 
 vi.mock('../../api/fetch-token-infos', () => ({ fetchTokenInfos: vi.fn() }));
 
 const mockedFetch = vi.mocked(fetchTokenInfos);
 
-function tokenInfo(address: string, verified = true): TokenInfo {
-    return { address, decimals: 6, logoURI: null, name: address, symbol: address, verified };
-}
-
-// A fresh cache per test: SWR's default store is global, so a mint list resolved by one
-// test would be served from cache to the next and skip the fetch.
-function wrapper({ children }: { children: ReactNode }) {
-    return <SWRConfig value={{ provider: () => new Map() }}>{children}</SWRConfig>;
-}
+const wrapper = swrWrapper();
 
 describe('useTokenInfos', () => {
     beforeEach(() => {
@@ -35,7 +28,7 @@ describe('useTokenInfos', () => {
 
         const { result } = renderHook(() => useTokenInfos(mints, Cluster.MainnetBeta), { wrapper });
 
-        await waitFor(() => expect(result.current.tokenInfos.get('mint-a')).toEqual(tokenInfo('mint-a')));
+        await waitForHook(() => expect(result.current.tokenInfos.get('mint-a')).toEqual(tokenInfo('mint-a')));
         expect(mockedFetch).toHaveBeenCalledWith(mints, Cluster.MainnetBeta, undefined);
     });
 
@@ -45,7 +38,7 @@ describe('useTokenInfos', () => {
         const { result } = renderHook(() => useTokenInfos(mints, Cluster.MainnetBeta), { wrapper });
 
         expect(result.current.isLoading).toBe(true);
-        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        await waitForHook(() => expect(result.current.isLoading).toBe(false));
     });
 
     it('should expose an empty map while loading rather than undefined', () => {
@@ -57,7 +50,7 @@ describe('useTokenInfos', () => {
     it('should not fetch for an empty mint list', async () => {
         const { result } = renderHook(() => useTokenInfos([], Cluster.MainnetBeta), { wrapper });
 
-        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        await waitForHook(() => expect(result.current.isLoading).toBe(false));
         expect(mockedFetch).not.toHaveBeenCalled();
         expect(result.current.tokenInfos.size).toBe(0);
     });
@@ -66,7 +59,7 @@ describe('useTokenInfos', () => {
         const mints = ['mint-a', 'mint-b'];
 
         const { rerender } = renderHook(() => useTokenInfos(mints, Cluster.MainnetBeta), { wrapper });
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
+        await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
 
         rerender();
         rerender();
@@ -81,11 +74,11 @@ describe('useTokenInfos', () => {
             initialProps: { cluster: Cluster.MainnetBeta },
             wrapper,
         });
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
+        await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
 
         rerender({ cluster: Cluster.Devnet });
 
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(2));
+        await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(2));
         expect(mockedFetch).toHaveBeenLastCalledWith(mints, Cluster.Devnet, undefined);
     });
 
@@ -94,11 +87,11 @@ describe('useTokenInfos', () => {
             initialProps: { mints: ['mint-a'] },
             wrapper,
         });
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
+        await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
 
         rerender({ mints: ['mint-a', 'mint-b'] });
 
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(2));
+        await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(2));
     });
 
     it('should not refetch when an equal but freshly allocated mint list arrives', async () => {
@@ -106,7 +99,7 @@ describe('useTokenInfos', () => {
             initialProps: { mints: ['mint-a', 'mint-b'] },
             wrapper,
         });
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
+        await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
 
         rerender({ mints: ['mint-a', 'mint-b'] });
 
@@ -118,7 +111,9 @@ describe('useTokenInfos', () => {
 
         renderHook(() => useTokenInfos(mints, Cluster.Custom, GENESIS_HASHES.MAINNET), { wrapper });
 
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(mints, Cluster.Custom, GENESIS_HASHES.MAINNET));
+        await waitForHook(() =>
+            expect(mockedFetch).toHaveBeenCalledWith(mints, Cluster.Custom, GENESIS_HASHES.MAINNET),
+        );
     });
 
     it('should not fetch a custom cluster whose genesis hash resolves no chain id', async () => {
@@ -126,7 +121,7 @@ describe('useTokenInfos', () => {
             wrapper,
         });
 
-        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        await waitForHook(() => expect(result.current.isLoading).toBe(false));
         expect(mockedFetch).not.toHaveBeenCalled();
     });
 
@@ -140,11 +135,7 @@ describe('useTokenInfos', () => {
         };
 
         const { result } = renderHook(() => useTokenInfos(mints, Cluster.MainnetBeta), {
-            wrapper: ({ children }) => (
-                <SWRConfig value={{ fallback: seeded, provider: () => new Map(), revalidateOnMount: false }}>
-                    {children}
-                </SWRConfig>
-            ),
+            wrapper: swrWrapper({ fallback: seeded, revalidateOnMount: false }),
         });
 
         expect(result.current.tokenInfos.get('mint-a')).toEqual(tokenInfo('mint-a'));
@@ -160,7 +151,7 @@ describe('useTokenInfos', () => {
             initialProps: { genesisHash: undefined as string | undefined },
             wrapper,
         });
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
+        await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
 
         rerender({ genesisHash: GENESIS_HASHES.MAINNET });
 

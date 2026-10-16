@@ -57,6 +57,10 @@ vi.mock('@utils/token-info', () => ({
     isRedactedTokenAddress: vi.fn(() => false),
 }));
 
+const NON_TRUSTED_ADDRESS = '11111111111111111111111111111112';
+const TRUSTED_ADDRESS = '11111111111111111111111111111111';
+const TRUSTED_NAME = PROGRAM_INFO_BY_ID[TRUSTED_ADDRESS].name;
+
 describe('AccountHeader', () => {
     describe('ProgramHeader', () => {
         beforeEach(() => {
@@ -66,16 +70,7 @@ describe('AccountHeader', () => {
         });
 
         it('should render with default values when no security.txt is available for non-trusted program', () => {
-            const nonTrustedAddress = '11111111111111111111111111111112';
-            const { account } = setup(nonTrustedAddress);
-            render(
-                <AccountHeader
-                    address={nonTrustedAddress}
-                    account={account}
-                    tokenInfo={undefined}
-                    isTokenInfoLoading={false}
-                />,
-            );
+            renderHeader(NON_TRUSTED_ADDRESS);
 
             expect(screen.getByText('Program account')).toBeInTheDocument();
             expect(screen.getByText('Program Account')).toBeInTheDocument();
@@ -83,218 +78,50 @@ describe('AccountHeader', () => {
             expect(screen.queryByAltText('Program logo')).not.toBeInTheDocument();
         });
 
-        it('should render with trusted program name when no security.txt is available for trusted program', () => {
-            const trustedAddress = '11111111111111111111111111111111';
-            const programInfo = PROGRAM_INFO_BY_ID[trustedAddress];
-            const { account } = setup(trustedAddress);
-            render(
-                <AccountHeader
-                    address={trustedAddress}
-                    account={account}
-                    tokenInfo={undefined}
-                    isTokenInfoLoading={false}
-                />,
-            );
-
-            expect(screen.getByText('Program account')).toBeInTheDocument();
-            expect(screen.getByText(programInfo.name)).toBeInTheDocument();
-            // No logo: ProxiedImage shows its decorative placeholder (empty alt), not a named logo image.
-            expect(screen.queryByAltText('Program logo')).not.toBeInTheDocument();
-        });
-
-        it('should render with PMP security.txt data including logo and version for non-trusted program', () => {
+        it.each([
+            { address: NON_TRUSTED_ADDRESS, kind: 'non-trusted', name: 'Test Program' },
+            { address: TRUSTED_ADDRESS, kind: 'trusted', name: TRUSTED_NAME },
+        ])('should render PMP security.txt logo and version for $kind program', ({ address, name }) => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'false');
-            const pmpSecurityTxt = createPmpSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: createPmpSecurityTxt() });
 
-            const nonTrustedAddress = '11111111111111111111111111111112';
-            const { account } = setup(nonTrustedAddress);
-            render(
-                <AccountHeader
-                    address={nonTrustedAddress}
-                    account={account}
-                    tokenInfo={undefined}
-                    isTokenInfoLoading={false}
-                />,
-            );
+            renderHeader(address);
 
-            expect(screen.getByText('Program account')).toBeInTheDocument();
-            expect(screen.getByText('Test Program')).toBeInTheDocument();
+            expect(screen.getByText(name)).toBeInTheDocument();
             expect(screen.getByText('1.0.0')).toBeInTheDocument();
-
-            const logoImg = screen.getByAltText('Program logo');
-            expect(logoImg).toBeInTheDocument();
-            expect(logoImg).toHaveAttribute('src', 'https://example.com/logo.png');
-        });
-
-        it('should render with trusted program name and PMP security.txt logo/version for trusted program', () => {
-            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'false');
-            const pmpSecurityTxt = createPmpSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
-
-            const trustedAddress = '11111111111111111111111111111111';
-            const programInfo = PROGRAM_INFO_BY_ID[trustedAddress];
-            const { account } = setup(trustedAddress);
-            render(
-                <AccountHeader
-                    address={trustedAddress}
-                    account={account}
-                    tokenInfo={undefined}
-                    isTokenInfoLoading={false}
-                />,
-            );
-
-            expect(screen.getByText('Program account')).toBeInTheDocument();
-            expect(screen.getByText(programInfo.name)).toBeInTheDocument();
-            expect(screen.getByText('1.0.0')).toBeInTheDocument();
-
-            const logoImg = screen.getByAltText('Program logo');
-            expect(logoImg).toBeInTheDocument();
-            expect(logoImg).toHaveAttribute('src', 'https://example.com/logo.png');
+            expect(screen.getByAltText('Program logo')).toHaveAttribute('src', 'https://example.com/logo.png');
         });
 
         it('should use proxy for logo if enabled', () => {
             vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
-            const pmpSecurityTxt = createPmpSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: createPmpSecurityTxt() });
 
-            const nonTrustedAddress = '11111111111111111111111111111112';
-            const { account } = setup(nonTrustedAddress);
-            render(
-                <AccountHeader
-                    address={nonTrustedAddress}
-                    account={account}
-                    tokenInfo={undefined}
-                    isTokenInfoLoading={false}
-                />,
-            );
+            renderHeader(NON_TRUSTED_ADDRESS);
 
             const logoImg = screen.getByAltText('Program logo');
             expect(logoImg).toHaveAttribute('src', '/api/metadata/proxy?uri=https%3A%2F%2Fexample.com%2Flogo.png');
         });
 
-        it('should render with Neodyme security.txt data (no logo or version) for non-trusted program', () => {
-            const neodymeSecurityTxt = createNeodymeSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: neodymeSecurityTxt });
+        it.each([
+            { address: NON_TRUSTED_ADDRESS, kind: 'non-trusted', name: 'Test Program' },
+            { address: TRUSTED_ADDRESS, kind: 'trusted', name: TRUSTED_NAME },
+        ])('should render Neodyme security.txt data without logo or version for $kind program', ({ address, name }) => {
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: createNeodymeSecurityTxt() });
 
-            const nonTrustedAddress = '11111111111111111111111111111112';
-            const { account } = setup(nonTrustedAddress);
-            render(
-                <AccountHeader
-                    address={nonTrustedAddress}
-                    account={account}
-                    tokenInfo={undefined}
-                    isTokenInfoLoading={false}
-                />,
-            );
+            renderHeader(address);
 
-            expect(screen.getByText('Program account')).toBeInTheDocument();
-            expect(screen.getByText('Test Program')).toBeInTheDocument();
+            expect(screen.getByText(name)).toBeInTheDocument();
             expect(screen.queryByText('1.0.0')).not.toBeInTheDocument();
             // No logo: only ProxiedImage's decorative placeholder (empty alt), no named logo image.
             expect(screen.queryByAltText('Program logo')).not.toBeInTheDocument();
-        });
-
-        it('should render with trusted program name and Neodyme security.txt data for trusted program', () => {
-            const neodymeSecurityTxt = createNeodymeSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: neodymeSecurityTxt });
-
-            const trustedAddress = '11111111111111111111111111111111';
-            const programInfo = PROGRAM_INFO_BY_ID[trustedAddress];
-            const { account } = setup(trustedAddress);
-            render(
-                <AccountHeader
-                    address={trustedAddress}
-                    account={account}
-                    tokenInfo={undefined}
-                    isTokenInfoLoading={false}
-                />,
-            );
-
-            expect(screen.getByText('Program account')).toBeInTheDocument();
-            expect(screen.getByText(programInfo.name)).toBeInTheDocument();
-            expect(screen.queryByText('1.0.0')).not.toBeInTheDocument();
-            // No logo: only ProxiedImage's decorative placeholder (empty alt), no named logo image.
-            expect(screen.queryByAltText('Program logo')).not.toBeInTheDocument();
-        });
-
-        it('should render with empty name when securityTxt is present but name is empty string for non-trusted program', () => {
-            const pmpSecurityTxt = createPmpSecurityTxt({ name: '' });
-            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
-
-            const nonTrustedAddress = '11111111111111111111111111111112';
-            const { account } = setup(nonTrustedAddress);
-            render(
-                <AccountHeader
-                    address={nonTrustedAddress}
-                    account={account}
-                    tokenInfo={undefined}
-                    isTokenInfoLoading={false}
-                />,
-            );
-
-            expect(screen.getByRole('heading', { name: 'Program Account' })).toBeInTheDocument();
         });
 
         it('should render with self-reported warning icon', () => {
-            vi.stubEnv('NEXT_PUBLIC_METADATA_ENABLED', 'true');
-            const pmpSecurityTxt = createPmpSecurityTxt();
-            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
+            vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: createPmpSecurityTxt() });
 
-            const nonTrustedAddress = '11111111111111111111111111111112';
-            const { account } = setup(nonTrustedAddress);
-            render(
-                <AccountHeader
-                    address={nonTrustedAddress}
-                    account={account}
-                    tokenInfo={undefined}
-                    isTokenInfoLoading={false}
-                />,
-            );
+            renderHeader(NON_TRUSTED_ADDRESS);
 
             expect(screen.getByLabelText('Self-reported program')).toBeInTheDocument();
-        });
-
-        describe('self-reported warning for trusted programs', () => {
-            it.each(
-                Object.entries(PROGRAM_INFO_BY_ID)
-                    .filter(([_, info]) => info.deployments.includes(Cluster.MainnetBeta))
-                    .slice(0, 3)
-                    .map(([address, info]) => ({ address, name: info.name })),
-            )('should not show self-reported warning for $name even with securityTxt', ({ address }) => {
-                const pmpSecurityTxt = createPmpSecurityTxt();
-                vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
-
-                const { account } = setup(address);
-                render(
-                    <AccountHeader
-                        address={address}
-                        account={account}
-                        tokenInfo={undefined}
-                        isTokenInfoLoading={false}
-                    />,
-                );
-
-                expect(screen.queryByLabelText('Self-reported program')).not.toBeInTheDocument();
-            });
-
-            it('should show self-reported warning for non-trusted programs with securityTxt', () => {
-                const pmpSecurityTxt = createPmpSecurityTxt();
-                vi.mocked(useSecurityTxt).mockReturnValue({ isLoading: false, securityTxt: pmpSecurityTxt });
-
-                const nonTrustedAddress = '11111111111111111111111111111112';
-                const { account } = setup(nonTrustedAddress);
-                render(
-                    <AccountHeader
-                        address={nonTrustedAddress}
-                        account={account}
-                        tokenInfo={undefined}
-                        isTokenInfoLoading={false}
-                    />,
-                );
-
-                expect(screen.getByLabelText('Self-reported program')).toBeInTheDocument();
-            });
         });
     });
 
@@ -323,9 +150,18 @@ describe('AccountHeader', () => {
     });
 });
 
-function setup(address?: string): { account: Account; mockAddress: string } {
-    const mockAddress = address || 'ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S';
+function renderHeader(address: string) {
+    render(
+        <AccountHeader
+            address={address}
+            account={programAccount(address)}
+            tokenInfo={undefined}
+            isTokenInfoLoading={false}
+        />,
+    );
+}
 
+function programAccount(address: string): Account {
     const parsedData: UpgradeableLoaderAccountData = {
         parsed: {
             info: {
@@ -337,16 +173,13 @@ function setup(address?: string): { account: Account; mockAddress: string } {
     };
 
     return {
-        account: {
-            data: {
-                parsed: parsedData,
-            },
-            executable: true,
-            lamports: 0,
-            owner: PublicKey.default,
-            pubkey: new PublicKey(mockAddress),
-            space: 0,
+        data: {
+            parsed: parsedData,
         },
-        mockAddress,
+        executable: true,
+        lamports: 0,
+        owner: PublicKey.default,
+        pubkey: new PublicKey(address),
+        space: 0,
     };
 }

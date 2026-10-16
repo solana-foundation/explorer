@@ -1,13 +1,12 @@
 import { Cluster } from '@utils/cluster';
 import { type InstructionLogs, parseProgramLogs } from '@utils/program-logs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { warn } = vi.hoisted(() => ({ warn: vi.fn() }));
-vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn } }));
+import { Logger } from '@/app/shared/lib/logger';
 
 import { formatInstructionLogs } from '../format-instruction-logs';
 
-afterEach(() => vi.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe('formatInstructionLogs', () => {
     describe('positive cases: basic functionality', () => {
@@ -268,7 +267,7 @@ describe('formatInstructionLogs', () => {
                 instructions: [mockInstruction('TokenProgram')],
             });
 
-            expect(warn).toHaveBeenCalledWith(expect.stringContaining('misalign'), {
+            expect(Logger.warn).toHaveBeenCalledWith(expect.stringContaining('misalign'), {
                 instructionCount: 1,
                 invocationCount: 2,
             });
@@ -284,7 +283,7 @@ describe('formatInstructionLogs', () => {
                 instructions: [mockInstruction('TokenProgram')],
             });
 
-            expect(warn).toHaveBeenCalledWith(
+            expect(Logger.warn).toHaveBeenCalledWith(
                 expect.any(String),
                 expect.not.objectContaining({ sentry: expect.anything() }),
             );
@@ -298,7 +297,7 @@ describe('formatInstructionLogs', () => {
                 instructions: [mockInstruction('TokenProgram'), mockInstruction('SystemProgram')],
             });
 
-            expect(warn).not.toHaveBeenCalled();
+            expect(Logger.warn).not.toHaveBeenCalled();
         });
 
         // A different failure, and one the caller already reports itself.
@@ -311,7 +310,7 @@ describe('formatInstructionLogs', () => {
             });
 
             expect(result).toEqual([]);
-            expect(warn).not.toHaveBeenCalled();
+            expect(Logger.warn).not.toHaveBeenCalled();
         });
     });
 
@@ -344,7 +343,7 @@ describe('formatInstructionLogs', () => {
             });
 
             expect(result.map(r => r.computeUnits)).toEqual([5000]);
-            expect(warn).not.toHaveBeenCalled();
+            expect(Logger.warn).not.toHaveBeenCalled();
         });
 
         // The runtime-error entry parseProgramLogs synthesises when a simulation failed without logging.
@@ -357,7 +356,7 @@ describe('formatInstructionLogs', () => {
             });
 
             expect(result.map(r => r.computeUnits)).toEqual([0, 0]);
-            expect(warn).not.toHaveBeenCalled();
+            expect(Logger.warn).not.toHaveBeenCalled();
         });
     });
 
@@ -390,7 +389,7 @@ describe('formatInstructionLogs', () => {
             );
 
             expect(result.map(r => r.computeUnits)).toEqual([0, 105]);
-            expect(warn).not.toHaveBeenCalled();
+            expect(Logger.warn).not.toHaveBeenCalled();
         });
 
         // A runtime line with no invocation in progress opens an entry of its own. Pairing by raw index
@@ -419,7 +418,7 @@ describe('formatInstructionLogs', () => {
                 [SYSTEM],
             );
 
-            expect(warn).not.toHaveBeenCalled();
+            expect(Logger.warn).not.toHaveBeenCalled();
         });
     });
 });

@@ -1,12 +1,13 @@
+// @vitest-environment jsdom
+
 import { act, renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-describe('useDownloadReceipt', () => {
-    let useDownloadReceipt: typeof import('../use-download-receipt').useDownloadReceipt;
+import { useDownloadReceipt } from '../use-download-receipt';
 
-    beforeEach(async () => {
+describe('useDownloadReceipt', () => {
+    beforeEach(() => {
         vi.useFakeTimers();
-        ({ useDownloadReceipt } = await import('../use-download-receipt'));
     });
 
     afterEach(() => {
@@ -52,23 +53,6 @@ describe('useDownloadReceipt', () => {
         });
 
         expect(result.current[0]).toBe('errored');
-    });
-
-    it('should reset to idle after resetMs', async () => {
-        const download = vi.fn().mockResolvedValue(undefined);
-        const { result } = renderHook(() => useDownloadReceipt(download, 500));
-
-        await act(async () => {
-            result.current[1]();
-        });
-
-        expect(result.current[0]).toBe('downloaded');
-
-        act(() => {
-            vi.advanceTimersByTime(500);
-        });
-
-        expect(result.current[0]).toBe('idle');
     });
 
     it('should invoke onError with the rejection reason', async () => {

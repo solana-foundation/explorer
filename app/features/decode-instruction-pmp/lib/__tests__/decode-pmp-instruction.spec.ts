@@ -19,10 +19,7 @@ import { isProgramMetadataInstruction } from '../is-program-metadata-instruction
 const PMP = new PublicKey(PMP_ADDRESS);
 const FOREIGN_BUFFER = gen.publicKey(1);
 const METADATA_PDA = gen.publicKey(2);
-// `Uint8Array.from` is load-bearing, not redundant: under jsdom `TextEncoder` returns a Uint8Array built with a
-// DIFFERENT realm's constructor, and Vitest's `toEqual` compares prototypes, so a bare `encode()` result never
-// deep-equals a same-realm Uint8Array ("Compared values have no visual difference"). Re-wrap to this realm.
-const DOC_BYTES = Uint8Array.from(new TextEncoder().encode('{"name":"company"}'));
+const DOC_BYTES = new TextEncoder().encode('{"name":"company"}');
 
 function makeIx(data: Uint8Array, accounts: PublicKey[] = []): TransactionInstruction {
     return new TransactionInstruction({

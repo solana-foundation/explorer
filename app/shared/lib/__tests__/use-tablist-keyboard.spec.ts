@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { renderHook } from '@testing-library/react';
 import type { KeyboardEvent } from 'react';
 import { describe, expect, it, vi } from 'vitest';

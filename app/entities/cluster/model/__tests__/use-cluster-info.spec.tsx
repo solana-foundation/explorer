@@ -1,7 +1,8 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
-import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 
 vi.mock('../../api/get-rpc', () => ({ getRpc: vi.fn() }));
 
@@ -42,13 +43,9 @@ const connectedState: ClusterState = {
 };
 
 function makeWrapper(state: ClusterState) {
+    const SwrWrapper = swrWrapper({ dedupingInterval: 0 });
     return function Wrapper({ children }: { children: ReactNode }) {
-        // Fresh cache per render so SWR entries don't leak across tests.
-        return createElement(
-            SWRConfig,
-            { value: { dedupingInterval: 0, provider: () => new Map() } },
-            createElement(StateContext.Provider, { value: state }, children),
-        );
+        return createElement(SwrWrapper, null, createElement(StateContext.Provider, { value: state }, children));
     };
 }
 
@@ -62,7 +59,7 @@ describe('useEpochSchedule', () => {
     it('should fetch only the schedule', async () => {
         const { result } = renderHook(() => useEpochSchedule(), { wrapper: makeWrapper(connectedState) });
 
-        await waitFor(() => expect(result.current).toEqual(EPOCH_SCHEDULE));
+        await waitForHook(() => expect(result.current).toEqual(EPOCH_SCHEDULE));
         expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
         expect(rpc.getEpochInfo).not.toHaveBeenCalled();
         expect(rpc.getFirstAvailableBlock).not.toHaveBeenCalled();
@@ -93,7 +90,7 @@ describe('useEpochInfo', () => {
     it('should fetch only the epoch info', async () => {
         const { result } = renderHook(() => useEpochInfo(), { wrapper: makeWrapper(connectedState) });
 
-        await waitFor(() => expect(result.current).toEqual(EPOCH_INFO));
+        await waitForHook(() => expect(result.current).toEqual(EPOCH_INFO));
         expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
         expect(rpc.getEpochSchedule).not.toHaveBeenCalled();
         expect(rpc.getFirstAvailableBlock).not.toHaveBeenCalled();
@@ -113,7 +110,7 @@ describe('useFirstAvailableBlock', () => {
     it('should fetch only the first available block', async () => {
         const { result } = renderHook(() => useFirstAvailableBlock(), { wrapper: makeWrapper(connectedState) });
 
-        await waitFor(() => expect(result.current).toEqual(FIRST_BLOCK));
+        await waitForHook(() => expect(result.current).toEqual(FIRST_BLOCK));
         expect(rpc.getFirstAvailableBlock).toHaveBeenCalledTimes(1);
         expect(rpc.getEpochSchedule).not.toHaveBeenCalled();
         expect(rpc.getEpochInfo).not.toHaveBeenCalled();
@@ -133,7 +130,7 @@ describe('useClusterInfo', () => {
     it('should compose both epoch values without fetching the first available block', async () => {
         const { result } = renderHook(() => useClusterInfo(), { wrapper: makeWrapper(connectedState) });
 
-        await waitFor(() => expect(result.current).toEqual(EXPECTED_INFO));
+        await waitForHook(() => expect(result.current).toEqual(EXPECTED_INFO));
         expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1);
         expect(rpc.getEpochInfo).toHaveBeenCalledTimes(1);
         expect(rpc.getFirstAvailableBlock).not.toHaveBeenCalled();
@@ -144,7 +141,7 @@ describe('useClusterInfo', () => {
 
         const { result } = renderHook(() => useClusterInfo(), { wrapper: makeWrapper(connectedState) });
 
-        await waitFor(() => expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1));
+        await waitForHook(() => expect(rpc.getEpochSchedule).toHaveBeenCalledTimes(1));
         expect(result.current).toBeUndefined();
     });
 

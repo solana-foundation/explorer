@@ -1,31 +1,19 @@
 import { describe, expect, it } from 'vitest';
 
+import { buildFormattedReceipt } from '../__fixtures__/formatted-receipt';
 import { getReceiptAmount, getReceiptMint, getReceiptSymbol } from '../lib';
-import type { FormattedReceipt } from '../types';
+import type { FormattedReceiptToken } from '../types';
 
-const SOL_RECEIPT: FormattedReceipt = {
-    date: { timestamp: 1700000000, utc: '2023-11-14 22:13:20 UTC' },
-    fee: { formatted: '0.000005', raw: 5000 },
-    kind: 'sol',
-    memo: undefined,
-    network: 'mainnet-beta',
-    receiver: { address: 'Recv2222', truncated: 'Recv...22' },
-    sender: { address: 'Send1111', truncated: 'Send...11' },
-    total: { formatted: '1.5', raw: 1_500_000_000, unit: 'SOL' },
-};
+const SOL_RECEIPT = buildFormattedReceipt({ total: { formatted: '1.5', raw: 1_500_000_000, unit: 'SOL' } });
 
-const TOKEN_RECEIPT: FormattedReceipt = {
-    date: { timestamp: 1700000000, utc: '2023-11-14 22:13:20 UTC' },
-    fee: { formatted: '0.000005', raw: 5000 },
+const TOKEN_FIELDS: Partial<FormattedReceiptToken> = {
     kind: 'token',
-    memo: undefined,
     mint: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-    network: 'mainnet-beta',
-    receiver: { address: 'Recv2222', truncated: 'Recv...22' },
-    sender: { address: 'Send1111', truncated: 'Send...11' },
     symbol: 'USDC',
     total: { formatted: '143.25', raw: 143.25, unit: 'USDC' },
 };
+
+const TOKEN_RECEIPT = buildFormattedReceipt(TOKEN_FIELDS);
 
 describe('getReceiptMint', () => {
     it('should return undefined for SOL receipts', () => {
@@ -37,7 +25,7 @@ describe('getReceiptMint', () => {
     });
 
     it('should return undefined for token receipts without mint', () => {
-        const receipt: FormattedReceipt = { ...TOKEN_RECEIPT, mint: undefined };
+        const receipt = buildFormattedReceipt({ ...TOKEN_FIELDS, mint: undefined });
         expect(getReceiptMint(receipt)).toBeUndefined();
     });
 });
@@ -52,7 +40,7 @@ describe('getReceiptSymbol', () => {
     });
 
     it('should return undefined for token receipts without symbol', () => {
-        const receipt: FormattedReceipt = { ...TOKEN_RECEIPT, symbol: undefined };
+        const receipt = buildFormattedReceipt({ ...TOKEN_FIELDS, symbol: undefined });
         expect(getReceiptSymbol(receipt)).toBeUndefined();
     });
 });

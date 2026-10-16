@@ -25,28 +25,14 @@ vi.mock('@providers/accounts', () => ({
 }));
 
 describe('MetaplexNFTHeader', () => {
-    it('should render NFT name', () => {
-        const nftData = makeNftData({ name: 'Cool NFT #42' });
-        render(<MetaplexNFTHeader nftData={nftData} />);
-        expect(screen.getByText('Cool NFT #42')).toBeDefined();
-    });
-
-    it('should show fallback when name is empty', () => {
-        const nftData = makeNftData({ name: '' });
-        render(<MetaplexNFTHeader nftData={nftData} />);
-        expect(screen.getByText('No NFT name was found')).toBeDefined();
-    });
-
-    it('should render symbol', () => {
-        const nftData = makeNftData({ symbol: 'MYSYM' });
-        render(<MetaplexNFTHeader nftData={nftData} />);
-        expect(screen.getByText('MYSYM')).toBeDefined();
-    });
-
-    it('should show fallback when symbol is empty', () => {
-        const nftData = makeNftData({ symbol: '' });
-        render(<MetaplexNFTHeader nftData={nftData} />);
-        expect(screen.getByText('No Symbol was found')).toBeDefined();
+    it.each([
+        { overrides: { name: 'Cool NFT #42' }, text: 'Cool NFT #42' },
+        { overrides: { name: '' }, text: 'No NFT name was found' },
+        { overrides: { symbol: 'MYSYM' }, text: 'MYSYM' },
+        { overrides: { symbol: '' }, text: 'No Symbol was found' },
+    ])('should render $text for $overrides', ({ overrides, text }) => {
+        render(<MetaplexNFTHeader nftData={makeNftData(overrides)} />);
+        expect(screen.getByText(text)).toBeDefined();
     });
 
     it('should show Master Edition pill', () => {
@@ -69,15 +55,10 @@ describe('MetaplexNFTHeader', () => {
         expect(screen.getByText('Edition 3 / 10')).toBeDefined();
     });
 
-    it('should show Primary Market pill when primarySaleHappened is false', () => {
+    it('should show Primary Market and Mutable pills for an unsold mutable NFT', () => {
         const nftData = makeNftData();
         render(<MetaplexNFTHeader nftData={nftData} />);
         expect(screen.getByText('Primary Market')).toBeDefined();
-    });
-
-    it('should show Mutable pill when isMutable is true', () => {
-        const nftData = makeNftData();
-        render(<MetaplexNFTHeader nftData={nftData} />);
         expect(screen.getByText('Mutable')).toBeDefined();
     });
 });

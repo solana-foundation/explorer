@@ -1,5 +1,5 @@
-import type { BlockTransaction } from '@entities/block-data/@x/compute-unit';
-import { address, blockhash } from '@solana/kit';
+import { makeBlockTransaction } from '@entities/block-data/__fixtures__/block-builders';
+import { address } from '@solana/kit';
 import { ComputeBudgetProgram } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 
@@ -190,21 +190,17 @@ describe('estimateRequestedComputeUnits', () => {
     ): Parameters<typeof estimateRequestedComputeUnits>[0] => {
         const staticAccounts = [...new Set(instructions.map(ix => ix.programId))].map(address);
 
-        return {
-            index: 0,
+        return makeBlockTransaction({
             message: {
-                header: { numReadonlyNonSignerAccounts: 0, numReadonlySignerAccounts: 0, numSignerAccounts: 0 },
                 instructions: instructions.map(ix => ({
                     data: ix.data,
                     programAddressIndex: staticAccounts.findIndex(account => account === ix.programId),
                 })),
-                lifetimeToken: blockhash('11111111111111111111111111111111'),
                 staticAccounts,
                 version: 'legacy',
             },
             meta: null,
-            signatures: [],
-        };
+        });
     };
 
     describe('with explicit compute budget', () => {
@@ -405,25 +401,21 @@ describe('estimateRequestedComputeUnits', () => {
                     ? []
                     : [{ kind: 'u32' as const, value: transactionConfig.computeUnitLimit }];
 
-            return {
-                index: 0,
+            return makeBlockTransaction({
                 message: {
                     configMask: transactionConfig?.computeUnitLimit === undefined ? 0 : 4,
                     configValues,
-                    header: { numReadonlyNonSignerAccounts: 0, numReadonlySignerAccounts: 0, numSignerAccounts: 0 },
                     instructionHeaders: [
                         { numInstructionAccounts: 0, numInstructionDataBytes: data.length, programAccountIndex: 0 },
                     ],
                     instructionPayloads: [{ instructionAccountIndices: [], instructionData: data }],
-                    lifetimeToken: blockhash('11111111111111111111111111111111'),
                     numInstructions: 1,
                     numStaticAccounts: 1,
                     staticAccounts: [programAddress],
                     version: 1,
                 },
                 meta: null,
-                signatures: [],
-            } satisfies BlockTransaction;
+            });
         };
 
         it('should read the limit from the message config rather than the instructions', () => {

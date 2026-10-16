@@ -19,11 +19,7 @@ const STATUS_NOT_FOUND: typeof MOCK_STATUS = {
 const STATUS_FAILED: typeof MOCK_STATUS = { status: FetchStatus.FetchFailed };
 const STATUS_CONFIRMED = mockTransactionStatus({ confirmationStatus: 'confirmed', confirmations: 20 });
 
-vi.mock('next/navigation', () => ({
-    usePathname: () => `/tx/${DEFAULT_SIGNATURE}`,
-    useRouter: () => ({ replace: vi.fn() }),
-    useSearchParams: () => new URLSearchParams(),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const fetchRaw = vi.hoisted(() => vi.fn());
 vi.mock('@/app/providers/transactions/raw', async importOriginal => ({

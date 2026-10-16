@@ -1,5 +1,7 @@
 import { address, type Base58EncodedBytes } from '@solana/kit';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import { stubRpcFetch } from '@/app/__tests__/rpc-fetch';
 
 import { getRpc } from '../get-rpc';
 
@@ -12,19 +14,14 @@ vi.mock('@solana/kit', () => vi.importActual('@solana/kit'));
 // INVALID_PARAMS. These tests pin the untouched prototype and the wire format so such a patch
 // cannot land unnoticed.
 describe('kit rpc bigint params', () => {
-    afterEach(() => vi.unstubAllGlobals());
+    const { respondWith, requestBody } = stubRpcFetch();
 
     it('should leave BigInt.prototype without a toJSON method', () => {
         expect('toJSON' in BigInt.prototype).toBe(false);
     });
 
     it('should serialize a bigint memcmp offset as a JSON number', async () => {
-        const fetchMock = vi.fn().mockResolvedValue(
-            new Response(JSON.stringify({ id: 1, jsonrpc: '2.0', result: [] }), {
-                headers: { 'Content-Type': 'application/json' },
-            }),
-        );
-        vi.stubGlobal('fetch', fetchMock);
+        respondWith([]);
 
         await getRpc('https://bigint-params.test.invalid')
             .getProgramAccounts(address('nftokf9qcHSYkVSP3P2gUMmV6d4AwjMueXgUu43HyLL'), {
@@ -33,8 +30,7 @@ describe('kit rpc bigint params', () => {
             })
             .send();
 
-        const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
-        const offset = body.params[1].filters[0].memcmp.offset;
+        const offset = requestBody().params[1].filters[0].memcmp.offset;
         expect(offset).toBe(74);
         expect(typeof offset).toBe('number');
     });

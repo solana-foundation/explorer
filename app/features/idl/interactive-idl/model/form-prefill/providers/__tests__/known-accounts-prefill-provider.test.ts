@@ -1,23 +1,21 @@
+// @vitest-environment jsdom
+
 import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { ASSOCIATED_TOKEN_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { act } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
-import { useInstructionForm } from '../../../use-instruction-form';
 import { createKnownAccountsPrefillDependency } from '../known-accounts-prefill-provider';
-import { createNestedTestAccount, createTestInstruction } from './utils';
+import { createNestedTestAccount, createTestInstruction, renderInstructionForm } from './utils';
 
 describe('createKnownAccountsPrefillDependency', () => {
-    it('should fill system program account', () => {
-        const instruction = createTestInstruction(['systemProgram']);
-
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+    it.each([
+        ['systemProgram', SYSTEM_PROGRAM_ADDRESS],
+        ['tokenProgram', TOKEN_PROGRAM_ADDRESS],
+        ['associatedTokenProgram', ASSOCIATED_TOKEN_PROGRAM_ADDRESS],
+    ])('should fill %s account', (accountName, expectedAddress) => {
+        const instruction = createTestInstruction([accountName]);
+        const { form, fieldNames } = renderInstructionForm(instruction);
 
         const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
@@ -25,61 +23,12 @@ describe('createKnownAccountsPrefillDependency', () => {
 
         dependency.onValueChange(instruction.name, form);
 
-        expect(form.getValues('accounts.testInstruction.systemProgram')).toBe(SYSTEM_PROGRAM_ADDRESS);
-    });
-
-    it('should fill token program account', () => {
-        const instruction = createTestInstruction(['tokenProgram']);
-
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
-
-        const dependency = createKnownAccountsPrefillDependency(instruction, {
-            account: fieldNames.account,
-        });
-
-        dependency.onValueChange(instruction.name, form);
-
-        expect(form.getValues('accounts.testInstruction.tokenProgram')).toBe(TOKEN_PROGRAM_ADDRESS);
-    });
-
-    it('should fill associated token program account', () => {
-        const instruction = createTestInstruction(['associatedTokenProgram']);
-
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
-
-        const dependency = createKnownAccountsPrefillDependency(instruction, {
-            account: fieldNames.account,
-        });
-
-        dependency.onValueChange(instruction.name, form);
-
-        expect(form.getValues('accounts.testInstruction.associatedTokenProgram')).toBe(
-            ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
-        );
+        expect(form.getValues(`accounts.testInstruction.${accountName}`)).toBe(expectedAddress);
     });
 
     it('should match account names case-insensitively', () => {
         const instruction = createTestInstruction(['SYSTEM_PROGRAM', 'Token Program']);
-
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(instruction);
 
         const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
@@ -93,14 +42,7 @@ describe('createKnownAccountsPrefillDependency', () => {
 
     it('should not overwrite existing values', () => {
         const instruction = createTestInstruction(['systemProgram']);
-
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(instruction);
 
         const existingValue = 'CustomAddress123';
         act(() => {
@@ -118,14 +60,7 @@ describe('createKnownAccountsPrefillDependency', () => {
 
     it('should fill empty string values', () => {
         const instruction = createTestInstruction(['systemProgram']);
-
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(instruction);
 
         act(() => {
             form.setValue('accounts.testInstruction.systemProgram', '   ');
@@ -141,20 +76,8 @@ describe('createKnownAccountsPrefillDependency', () => {
     });
 
     it('should handle nested accounts', () => {
-        const instruction: Parameters<typeof createKnownAccountsPrefillDependency>[0] = {
-            accounts: [createNestedTestAccount('group', ['systemProgram'])],
-            args: [],
-            docs: [],
-            name: 'testInstruction',
-        };
-
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const instruction = createTestInstruction([createNestedTestAccount('group', ['systemProgram'])]);
+        const { form, fieldNames } = renderInstructionForm(instruction);
 
         const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,
@@ -178,14 +101,7 @@ describe('createKnownAccountsPrefillDependency', () => {
 
     it('should not fill unknown account names', () => {
         const instruction = createTestInstruction(['unknownAccount']);
-
-        const { result } = renderHook(() =>
-            useInstructionForm({
-                instruction,
-                onSubmit: vi.fn(),
-            }),
-        );
-        const { form, fieldNames } = result.current;
+        const { form, fieldNames } = renderInstructionForm(instruction);
 
         const dependency = createKnownAccountsPrefillDependency(instruction, {
             account: fieldNames.account,

@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import type { SupportedIdl } from '@entities/idl';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
@@ -6,8 +8,8 @@ import votingIdl030 from '../../../__mocks__/anchor/anchor-0.30.0-voting-AXcxp15
 import votingIdl030Variations from '../../../__mocks__/anchor/anchor-0.30.0-voting-variations-AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye.json';
 import { findInstruction } from '../../../__tests__/utils';
 import type { PdaGenerationResult } from '../../../pda-generator/types';
-import { useInstructionForm } from '../../../use-instruction-form';
 import { usePdaPrefill } from '../use-pda-prefill';
+import { renderInstructionForm } from './utils';
 
 const MOCK_PDA_ADDRESS_1 = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp';
 const MOCK_PDA_ADDRESS_2 = '7Np41oeYqPefeNQEHSv1UDhYrehxin3NStELsSKCT4K2';
@@ -233,14 +235,7 @@ function setup(idl: unknown, instructionName: string) {
         throw new Error(`Instruction ${instructionName} not found in IDL`);
     }
 
-    const createForm = () => {
-        return renderHook(() =>
-            useInstructionForm({
-                instruction: mockInstruction,
-                onSubmit: vi.fn(),
-            }),
-        ).result.current;
-    };
+    const createForm = () => renderInstructionForm(mockInstruction);
 
     return { createForm, mockIdl, mockInstruction };
 }

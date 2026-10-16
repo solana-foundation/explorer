@@ -12,15 +12,6 @@ import type {
 } from '../../model/transaction/types';
 import { InstructionExecutionActivity, InstructionSimulationActivity } from '../InstructionActivity';
 
-// jsdom doesn't implement ResizeObserver, which Radix primitives (Tabs) touch.
-if (typeof globalThis.ResizeObserver === 'undefined') {
-    globalThis.ResizeObserver = class {
-        observe() {}
-        unobserve() {}
-        disconnect() {}
-    } as unknown as typeof ResizeObserver;
-}
-
 vi.mock('@entities/cluster', () => ({
     useExplorerLink: (path: string) => ({ link: `https://example.test${path}` }),
 }));

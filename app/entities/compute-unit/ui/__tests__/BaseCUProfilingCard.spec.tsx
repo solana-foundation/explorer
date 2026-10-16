@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { cuData } from '../../__fixtures__/cu-data';
 import type { InstructionCUData } from '../../lib/types';
 
 // Chart.js needs a real canvas, which jsdom does not have. Stubbing <Bar> keeps this spec on the parts
@@ -190,10 +191,6 @@ function recordInnerHtmlWrites(run: () => void): string[] {
         Object.defineProperty(Element.prototype, 'innerHTML', descriptor);
     }
     return writes;
-}
-
-function cuData(overrides: Partial<InstructionCUData>): InstructionCUData {
-    return { computeUnits: 1000, defaultUnits: 0, programId: 'TestProgram', scheduledUnits: 200000, ...overrides };
 }
 
 function transferAndComputeBudget(): InstructionCUData[] {

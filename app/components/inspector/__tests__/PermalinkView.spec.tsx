@@ -20,13 +20,7 @@ vi.mock('@providers/transactions/raw', () => ({
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: () => ({ status: clusterStatus }),
 }));
-// InspectorPage imports router/search-param/pathname hooks from next/navigation at module scope;
-// stub them so importing PermalinkView from it doesn't blow up.
-vi.mock('next/navigation', () => ({
-    usePathname: () => '/tx/inspector',
-    useRouter: () => ({ push: vi.fn() }),
-    useSearchParams: () => new URLSearchParams(),
-}));
+vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 // The v1 tests render LoadedView; stub its data-fetching children so the overview card —
 // the part under test — renders without providers.
 vi.mock('@providers/accounts', () => ({

@@ -1,57 +1,17 @@
-import { gen } from '@__fixtures__/gen';
 import { type Address, some, unwrapOption } from '@solana/kit';
-import {
-    AccountDiscriminator,
-    Compression,
-    DataSource,
-    Encoding,
-    Format,
-    getBufferEncoder,
-    getMetadataEncoder,
-} from '@solana-program/program-metadata';
+import { AccountDiscriminator, Compression, DataSource, Encoding, Format } from '@solana-program/program-metadata';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
+import { AUTHORITY, bufferAccountData, metadataAccountData, TARGET_PROGRAM } from '../../__fixtures__/pmp-account';
 import { PMP_ADDRESS } from '../constants';
 import { readPmpAccount } from '../read-pmp-account';
 
-const PROGRAM = gen.address(1) as Address;
-const AUTHORITY = gen.address(2) as Address;
 /** All-zero address. Both option fields use `noneValue: 'zeroes'`, so this is how "unset" is written on chain. */
 const ZERO_ADDRESS = '11111111111111111111111111111111' as Address;
 
 const BODY = new Uint8Array([1, 2, 3, 4]);
-
-function bufferAccount({
-    canonical = true,
-    program = PROGRAM,
-    seed = 'idl',
-}: { canonical?: boolean; program?: Address; seed?: string } = {}): Uint8Array {
-    return getBufferEncoder().encode({
-        authority: AUTHORITY,
-        canonical,
-        data: BODY,
-        program,
-        seed,
-    }) as Uint8Array;
-}
-
-function metadataAccount({ dataLength }: { dataLength?: number } = {}): Uint8Array {
-    return getMetadataEncoder().encode({
-        authority: AUTHORITY,
-        canonical: true,
-        compression: Compression.Zlib,
-        data: BODY,
-        dataLength: dataLength ?? BODY.length,
-        dataSource: DataSource.Direct,
-        encoding: Encoding.Utf8,
-        format: Format.Json,
-        mutable: true,
-        program: PROGRAM,
-        seed: 'security',
-    }) as Uint8Array;
-}
 
 function read(data: Uint8Array | undefined, overrides: { lamports?: number; owner?: string } = {}) {
     return readPmpAccount({
@@ -68,7 +28,7 @@ describe('readPmpAccount', () => {
     it('should read a Metadata header including its decode hints', () => {
         // The generated struct verbatim: `authority` stays a wrapped Option and `data` stays the remainder, so
         // this pins the shape the card reads rather than a hand-mapped copy of it.
-        expect(read(metadataAccount())).toEqual({
+        expect(read(metadataAccountData(BODY))).toEqual({
             account: {
                 authority: some(AUTHORITY),
                 canonical: true,
@@ -80,29 +40,29 @@ describe('readPmpAccount', () => {
                 encoding: Encoding.Utf8,
                 format: Format.Json,
                 mutable: true,
-                program: PROGRAM,
-                seed: 'security',
+                program: TARGET_PROGRAM,
+                seed: 'idl',
             },
             kind: 'metadata',
         });
     });
 
     it('should report a Metadata account whose dataLength exceeds its stored body, i.e. a truncated account', () => {
-        const header = read(metadataAccount({ dataLength: BODY.length + 128 }));
+        const header = read(metadataAccountData(BODY, { dataLength: BODY.length + 128 }));
 
         expect(header.kind === 'metadata' && header.account.dataLength).toBe(BODY.length + 128);
         expect(header.kind === 'metadata' && header.account.data.length).toBe(BODY.length);
     });
 
     it('should read a PDA Buffer header', () => {
-        expect(read(bufferAccount())).toEqual({
+        expect(read(bufferAccountData(BODY))).toEqual({
             account: {
                 authority: some(AUTHORITY),
                 canonical: true,
                 data: BODY,
                 discriminator: AccountDiscriminator.Buffer,
-                program: some(PROGRAM),
-                seed: 'idl',
+                program: some(TARGET_PROGRAM),
+                seed: 'security',
             },
             kind: 'buffer',
         });
@@ -111,7 +71,7 @@ describe('readPmpAccount', () => {
     it('should report no program and no seed for a keypair Buffer, which leaves both zeroed', () => {
         // `allocate` writes program/canonical/seed only for a PDA buffer, so the option decoder reports none and
         // the card hides those rows rather than showing the reader fields the account does not have.
-        const header = read(bufferAccount({ canonical: false, program: ZERO_ADDRESS, seed: '' }));
+        const header = read(bufferAccountData(BODY, { canonical: false, program: ZERO_ADDRESS, seed: '' }));
 
         expect(header.kind === 'buffer' && unwrapOption(header.account.program)).toBeNull();
         expect(header.kind === 'buffer' && header.account.seed).toBe('');
@@ -121,13 +81,13 @@ describe('readPmpAccount', () => {
         // `orbit-registry` is 14 of the 16 bytes, the longest seed observed on chain. The decoder is
         // `fixDecoderSize(getUtf8Decoder(), 16)`, which strips NUL padding, so a near-full seed has to survive
         // intact - the short seeds the other cases use would not catch a truncation at the field boundary.
-        const header = read(bufferAccount({ seed: 'orbit-registry' }));
+        const header = read(bufferAccountData(BODY, { seed: 'orbit-registry' }));
 
         expect(header.kind === 'buffer' && header.account.seed).toBe('orbit-registry');
     });
 
     it('should report an Empty account as its own kind rather than as unreadable', () => {
-        const empty = bufferAccount();
+        const empty = bufferAccountData(BODY);
         empty[0] = 0; // AccountDiscriminator.Empty
 
         expect(read(empty)).toEqual({ kind: 'empty' });
@@ -141,9 +101,9 @@ describe('readPmpAccount', () => {
     });
 
     it('should report unreadable when the account is not owned by the Program Metadata Program', () => {
-        expect(read(metadataAccount(), { owner: PROGRAM })).toEqual({
+        expect(read(metadataAccountData(BODY), { owner: TARGET_PROGRAM })).toEqual({
             kind: 'unreadable',
-            reason: expect.stringContaining(PROGRAM),
+            reason: expect.stringContaining(TARGET_PROGRAM),
         });
     });
 
@@ -155,10 +115,11 @@ describe('readPmpAccount', () => {
         const header = read(undefined, { lamports: 2_000_000 });
 
         expect(header).toEqual({ kind: 'unreadable', reason: expect.stringContaining('without its data') });
+        expect(header.kind === 'unreadable' && header.reason).not.toContain('96-byte');
     });
 
     it('should report a discriminator outside the enum to Sentry, since it means an unknown account layout', () => {
-        const unknown = metadataAccount();
+        const unknown = metadataAccountData(BODY);
         unknown[0] = 9;
 
         expect(read(unknown)).toEqual({ kind: 'unreadable', reason: expect.stringContaining('discriminator 9') });
@@ -169,7 +130,7 @@ describe('readPmpAccount', () => {
     });
 
     it('should report a decoder throw to Sentry with the original error as the cause', () => {
-        const account = metadataAccount();
+        const account = metadataAccountData(BODY);
         account[83] = 9; // the `encoding` byte, past every variant the enum defines
 
         expect(read(account)).toEqual({ kind: 'unreadable', reason: expect.any(String) });
