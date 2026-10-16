@@ -41,10 +41,10 @@ vi.mock('@components/common/BaseInstructionCard', () => ({
     ),
 }));
 
-function renderCard(
-    props: Partial<React.ComponentProps<typeof InstructionCard>> = {},
-    surface: InstructionSurface = { Shell: InstructionCard, result: { err: null }, signature: SIGNATURE },
-) {
+function renderCard({
+    surface = { Shell: InstructionCard, result: { err: null }, signature: SIGNATURE },
+    ...props
+}: Partial<React.ComponentProps<typeof InstructionCard>> & { surface?: InstructionSurface } = {}) {
     const instruction = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PROGRAM_ID });
 
     return render(
@@ -121,11 +121,21 @@ describe('InstructionCard', () => {
     });
 
     it('should not request raw data in the inspector', async () => {
-        renderCard({}, INSPECTOR_SURFACE);
+        renderCard({ surface: INSPECTOR_SURFACE });
         await userEvent.click(screen.getByRole('button'));
 
         expect(screen.getByRole('button').dataset.canRequest).toBe('false');
         expect(fetchRaw).not.toHaveBeenCalled();
+    });
+
+    it('should throw outside an instruction surface', () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const instruction = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PROGRAM_ID });
+
+        expect(() =>
+            render(<InstructionCard title="Transfer" result={{ err: null }} index={0} ix={instruction} />),
+        ).toThrow('InstructionSurfaceProvider');
+        consoleError.mockRestore();
     });
 
     it('should reject a surface that omits the signature', () => {
