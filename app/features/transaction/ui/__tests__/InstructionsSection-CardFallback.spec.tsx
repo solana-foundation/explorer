@@ -1,4 +1,6 @@
 import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
+import { useInstructionSurface } from '@entities/instruction-card';
+import { WORMHOLE_PROGRAM_IDS } from '@explorer/decoder-wormhole/detection';
 import { LIGHTHOUSE_ADDRESS } from '@features/decode-instruction-lighthouse';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from '@solana/attestation';
 import { getBase58Decoder } from '@solana/kit';
@@ -35,6 +37,12 @@ const CREATE_CREDENTIAL_IX = instruction(new PublicKey(SAS_PROGRAM_ID), [0]);
 
 const COMPUTE_BUDGET_IX = instruction(ComputeBudgetProgram.programId, [2]);
 
+const WORMHOLE_IX = instruction(new PublicKey(WORMHOLE_PROGRAM_IDS[0]), [0]);
+
+const IDL_PROGRAM_ID = gen.publicKey(2);
+
+const IDL_IX = instruction(IDL_PROGRAM_ID, [1]);
+
 const PARSED_TRANSFER_IX: ParsedInstruction = {
     parsed: {
         info: { destination: gen.publicKey(1).toBase58(), lamports: 1, source: PAYER.toBase58() },
@@ -57,6 +65,19 @@ vi.mock('@components/instruction/ComputeBudgetDetailsCard', () => ({
     ComputeBudgetDetailsCard: () => {
         throw new Error('compute budget card failed');
     },
+}));
+
+vi.mock('@components/instruction/WormholeDetailsCard', () => ({
+    WormholeDetailsCard: () => <div>{useInstructionSurface().signature}</div>,
+}));
+
+vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
+    ...(await importOriginal<typeof import('@features/decode-instruction-with-idl')>()),
+    IdlInstructionCard: ({ childIndex, index }: { childIndex?: number; index: number }) => (
+        <div>{`IDL card ${index}/${childIndex}`}</div>
+    ),
+    useIdlInstructionDecode: ({ programId }: { programId: string }) =>
+        programId === IDL_PROGRAM_ID.toBase58() ? { kind: 'anchor' } : undefined,
 }));
 
 vi.mock('@components/instruction/system/SystemDetailsCard', () => ({
@@ -138,6 +159,21 @@ describe('Transaction page InstructionsSection with a card that throws', () => {
         renderSection([UNKNOWN_SAS_IX], [PARSED_TRANSFER_IX]);
 
         expect(await screen.findByText('System Program: Unknown Instruction')).toBeInTheDocument();
+    });
+});
+
+describe('Transaction page InstructionsSection', () => {
+    test('should pass the transaction signature to the instruction surface', async () => {
+        renderSection([WORMHOLE_IX]);
+
+        expect(await screen.findByText(DEFAULT_SIGNATURE)).toBeInTheDocument();
+    });
+
+    test('should pass the child index of an inner instruction to the IDL card', async () => {
+        // The child index selects the invocation whose program events the card shows.
+        renderSection([UNKNOWN_SAS_IX], [COMPUTE_BUDGET_IX, IDL_IX]);
+
+        expect(await screen.findByText('IDL card 0/1')).toBeInTheDocument();
     });
 });
 

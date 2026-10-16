@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { createInstructionParserDispatcher } from '@entities/instruction-parser';
 import { getBase58Decoder } from '@solana/kit';
@@ -48,7 +49,7 @@ const tx = {
 
 /** The transaction's result reaches the card through the surface, so a failed one needs its own. */
 const withFailedInstructionSurface: Decorator = Story => (
-    <TxInstructionSurface result={{ err: { InstructionError: [0, 'Custom'] } }}>
+    <TxInstructionSurface result={{ err: { InstructionError: [0, 'Custom'] } }} signature={DEFAULT_SIGNATURE}>
         <Story />
     </TxInstructionSurface>
 );

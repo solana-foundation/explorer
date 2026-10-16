@@ -8,6 +8,7 @@ import { ArgRows } from '../ui/ArgRows';
 const STUB_SURFACE: InstructionSurface = {
     Shell: () => undefined,
     result: { err: null },
+    signature: undefined,
 };
 
 describe('ArgRows', () => {

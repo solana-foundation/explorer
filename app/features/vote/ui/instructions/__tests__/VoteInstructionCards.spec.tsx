@@ -1,4 +1,4 @@
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import {
     type ParsedInstruction,
@@ -554,7 +554,7 @@ function renderCard(parsed: { info: object; type: string }, programId: PublicKey
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>
+                        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
                             <VoteDetailsCard index={0} ix={ix} tx={{ signatures: ['sig'] } as ParsedTransaction} />
                         </TxInstructionSurface>
                     </AccountsProvider>

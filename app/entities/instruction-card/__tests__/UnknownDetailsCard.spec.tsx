@@ -39,7 +39,7 @@ function renderCard(programId: PublicKey, onCluster: Cluster) {
     const ix = new TransactionInstruction({ data: Buffer.from([255]), keys: [], programId });
 
     return render(
-        <InstructionSurfaceProvider surface={{ Shell, result: { err: null } }}>
+        <InstructionSurfaceProvider surface={{ Shell, result: { err: null }, signature: undefined }}>
             <UnknownDetailsCard node={toInstructionNode({ index: 0, ix })} />
         </InstructionSurfaceProvider>,
     );

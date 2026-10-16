@@ -21,6 +21,7 @@ const STUB_SURFACE: InstructionSurface = {
         </table>
     ),
     result: { err: null },
+    signature: undefined,
 };
 
 const AMOUNT: InstructionArg = { kind: 'leaf', name: 'amount', type: 'number', value: { kind: 'text', value: '42' } };

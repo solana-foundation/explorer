@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { type InstructionNode, TxInstructionSurface } from '@entities/instruction-card';
 import { address as toAddress } from '@solana/kit';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
@@ -656,7 +657,9 @@ function renderCard(card: React.ReactElement) {
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>{card}</TxInstructionSurface>
+                        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
+                            {card}
+                        </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>
             </ClusterProvider>

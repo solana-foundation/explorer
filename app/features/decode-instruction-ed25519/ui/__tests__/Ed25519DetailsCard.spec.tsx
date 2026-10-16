@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { createInstructionParserDispatcher, toParsedInstruction } from '@entities/instruction-parser';
 import { getBase58Decoder } from '@solana/kit';
@@ -187,7 +188,7 @@ function renderCard(ix: TransactionInstruction, tx: ParsedTransaction) {
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>
+                        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
                             <Ed25519DetailsCard
                                 ix={dispatched(ix)}
                                 raw={ix}

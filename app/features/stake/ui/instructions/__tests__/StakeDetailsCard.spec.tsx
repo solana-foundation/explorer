@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { address as toAddress } from '@solana/kit';
 import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
@@ -63,7 +64,7 @@ describe('stake::StakeDetailsCard dispatch', () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TxInstructionSurface result={{ err: null }}>
+                            <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
                                 <StakeDetailsCard
                                     tx={{ signatures: ['sig'] } as ParsedTransaction}
                                     ix={

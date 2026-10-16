@@ -1,4 +1,4 @@
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { toParsedInstruction } from '@entities/instruction-parser';
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
@@ -762,7 +762,7 @@ function renderLighthouse(raw: { data: Buffer; keys: unknown[]; programId: Publi
     invariant(parsed, 'expected fixture to parse as a Lighthouse instruction');
     const ix = toParsedInstruction(parsed, LIGHTHOUSE_PROGRAM_LABEL, raw.programId);
     const view = render(
-        <TxInstructionSurface result={{ err: null }}>
+        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
             <LighthouseDetailsCard ix={ix} raw={raw as unknown as TransactionInstruction} index={0} />
         </TxInstructionSurface>,
     );

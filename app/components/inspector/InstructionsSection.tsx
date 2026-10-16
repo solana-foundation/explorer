@@ -1,11 +1,6 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
-import {
-    type InstructionSurface,
-    InstructionSurfaceProvider,
-    toInstructionNode,
-    UnknownDetailsCard,
-} from '@entities/instruction-card';
+import { InstructionSurfaceProvider, toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
@@ -54,8 +49,8 @@ import { LoadingCard } from '../common/LoadingCard';
 import { BpfUpgradeableLoaderDetailsCard } from '../instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { SystemDetailsCard } from '../instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '../instruction/token/TokenDetailsCard';
+import { INSPECTOR_RESULT, INSPECTOR_SURFACE } from './inspector-surface';
 
-const INSPECTOR_RESULT = { err: null };
 const INSPECTOR_SIGNATURE = '';
 
 // The PMP card carries the generated client plus pako/yaml/smol-toml (~35 kB gzip), which only a transaction that
@@ -65,11 +60,6 @@ const PmpDetailsCard = dynamic(() => import('@features/decode-instruction-pmp').
     loading: () => <LoadingCard />,
     ssr: false,
 });
-
-const INSPECTOR_SURFACE: InstructionSurface = {
-    Shell: InspectorInstructionCardComponent,
-    result: INSPECTOR_RESULT,
-};
 
 export function InstructionsSection({
     message,

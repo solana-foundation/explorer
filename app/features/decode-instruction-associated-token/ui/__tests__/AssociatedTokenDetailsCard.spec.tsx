@@ -18,7 +18,7 @@ import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
 import { AssociatedTokenDetailsCard } from '../AssociatedTokenDetailsCard';
 
 const dispatcher = createInstructionParserDispatcher([associatedTokenInstructionParser]);
-const SURFACE: InstructionSurface = { Shell: BaseInstructionCard, result: { err: null } };
+const SURFACE: InstructionSurface = { Shell: BaseInstructionCard, result: { err: null }, signature: undefined };
 
 vi.mock('next/navigation');
 // @ts-expect-error does not contain `mockReturnValue`

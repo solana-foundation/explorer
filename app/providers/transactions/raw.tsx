@@ -37,7 +37,9 @@ export function RawDetailsProvider({ children }: DetailsProviderProps) {
     );
 }
 
-export function useRawTransactionDetails(signature: TransactionSignature): Cache.CacheEntry<Details> | undefined {
+export function useRawTransactionDetails(
+    signature: TransactionSignature | undefined,
+): Cache.CacheEntry<Details> | undefined {
     const context = React.useContext(StateContext);
 
     if (!context) {

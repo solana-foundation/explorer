@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import { TxInstructionSurface } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
@@ -73,7 +74,7 @@ function renderCard(ix: TransactionInstruction) {
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
-                        <TxInstructionSurface result={{ err: null }}>
+                        <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
                             <RawStakeDetailsCard ix={ix} index={0} />
                         </TxInstructionSurface>
                     </AccountsProvider>

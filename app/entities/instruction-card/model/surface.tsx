@@ -1,6 +1,6 @@
 'use client';
 
-import type { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import type { ParsedInstruction, SignatureResult, TransactionInstruction, TransactionSignature } from '@solana/web3.js';
 import React, { createContext, useContext } from 'react';
 
 /** The subset of shell props every instruction shell accepts. */
@@ -18,7 +18,7 @@ export type InstructionShellProps = {
      * Program events, e.g. Anchor's `ProgramEventsCard`. Unlike `innerCards`,
      * these are *derived by the card* from transaction logs rather than passed
      * down, so they arrive as a prop on `InstructionCardView`, not on the node.
-     * Tx-page only — the inspector has no logs, and its shell drops them.
+     * The inspector's shell drops them.
      */
     eventCards?: React.ReactNode[];
 };
@@ -28,6 +28,11 @@ export type InstructionSurface = {
     Shell: React.ComponentType<InstructionShellProps>;
     /** Per-transaction, so it belongs here rather than on every card. */
     result: SignatureResult;
+    /**
+     * The key is required, because a missing signature throws no error. The
+     * frame then fetches no raw transaction.
+     */
+    signature: TransactionSignature | undefined;
 };
 
 const InstructionSurfaceContext = createContext<InstructionSurface | undefined>(undefined);

@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 /* eslint-disable no-restricted-syntax -- test assertions use RegExp for pattern matching */
 import { TxInstructionSurface } from '@entities/instruction-card';
 import {
@@ -43,7 +44,7 @@ describe('instruction::SystemDetailsCard', () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TxInstructionSurface result={{ err: null }}>
+                            <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
                                 <SystemDetailsCard index={index} ix={parsedIx} raw={ti} tx={tx} />
                             </TxInstructionSurface>
                         </AccountsProvider>
@@ -72,7 +73,7 @@ describe('instruction::SystemDetailsCard', () => {
                 <ClusterProvider>
                     <TransactionsProvider>
                         <AccountsProvider>
-                            <TxInstructionSurface result={{ err: null }}>
+                            <TxInstructionSurface result={{ err: null }} signature={DEFAULT_SIGNATURE}>
                                 <SystemDetailsCard index={index} ix={parsedIx} raw={ti} tx={tx} />
                             </TxInstructionSurface>
                         </AccountsProvider>
