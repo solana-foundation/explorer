@@ -69,7 +69,7 @@ describe('inspector::AccountsCard raw data', () => {
 
         await findRenderedSizes();
 
-        expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(1);
+        expect(rowRequests()).toHaveLength(1);
     });
 
     test('should not request account data while the list renders', async () => {
@@ -90,17 +90,22 @@ describe('inspector::AccountsCard raw data', () => {
 
     test('should hold the total back while a later batch is still in flight', async () => {
         let answerLastBatch = () => undefined as void;
-        mockGetMultipleAccounts
-            .mockImplementationOnce(async addresses => sizedAccounts(addresses))
-            .mockImplementationOnce(
-                addresses =>
-                    new Promise(resolve => {
-                        answerLastBatch = () => resolve(sizedAccounts(addresses));
-                    }),
-            );
+        let totalBatches = 0;
+        mockGetMultipleAccounts.mockImplementation((addresses, options) => {
+            if (isRowRequest(options) || ++totalBatches === 1) return Promise.resolve(sizedAccounts(addresses));
+            return new Promise(resolve => {
+                answerLastBatch = () => resolve(sizedAccounts(addresses));
+            });
+        });
 
         renderCard(overOneBatchOfAccounts(150));
-        await waitForSecondBatch();
+        await vi.waitFor(
+            () => {
+                expect(totalBatches).toBe(2);
+                expect(rowRequests()).toHaveLength(2);
+            },
+            { timeout: 5000 },
+        );
         await findRenderedSizes();
 
         expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
@@ -112,12 +117,20 @@ describe('inspector::AccountsCard raw data', () => {
     });
 
     test('should drop the total when a batch fails', async () => {
-        mockGetMultipleAccounts
-            .mockImplementationOnce(async addresses => sizedAccounts(addresses))
-            .mockRejectedValueOnce(new Error('RPC unavailable'));
+        let totalBatches = 0;
+        mockGetMultipleAccounts.mockImplementation(async (addresses, options) => {
+            if (isRowRequest(options) || ++totalBatches === 1) return sizedAccounts(addresses);
+            throw new Error('RPC unavailable');
+        });
 
         renderCard(overOneBatchOfAccounts(150));
-        await waitForSecondBatch();
+        await vi.waitFor(
+            () => {
+                expect(totalBatches).toBeGreaterThanOrEqual(2);
+                expect(rowRequests()).toHaveLength(2);
+            },
+            { timeout: 5000 },
+        );
         await findRenderedSizes();
 
         expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
@@ -224,8 +237,13 @@ function findRenderedSizes() {
     return screen.findAllByText('4 bytes');
 }
 
-function waitForSecondBatch() {
-    return vi.waitFor(() => expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(2), { timeout: 5000 });
+// Rows read sizes with a zero-length slice; the total reads its own, wider slice.
+function isRowRequest(options: { dataSlice?: { length: number } }) {
+    return options.dataSlice?.length === 0;
+}
+
+function rowRequests() {
+    return mockGetMultipleAccounts.mock.calls.filter(([, options]) => isRowRequest(options));
 }
 
 function overOneBatchOfAccounts(count: number): VersionedMessage {

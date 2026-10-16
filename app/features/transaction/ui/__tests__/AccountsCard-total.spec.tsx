@@ -18,7 +18,13 @@ vi.mock('@entities/cluster/@x/account', async () => {
     };
 });
 
-import { DEFAULT_SIGNATURE, FEE_PAYER, MOCK_PARSED_TX, MOCK_STATUS } from '../__fixtures__/transaction';
+import {
+    DEFAULT_SIGNATURE,
+    FEE_PAYER,
+    MOCK_PARSED_TX,
+    MOCK_PARSED_V1_TX,
+    MOCK_STATUS,
+} from '../__fixtures__/transaction';
 import { withTransactionProviders } from '../__fixtures__/withTransactionProviders';
 import { AccountsCard } from '../AccountsCard';
 
@@ -58,6 +64,14 @@ describe('transaction::AccountsCard total size', () => {
         expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
     });
 
+    test('should leave the total to the summary from v1 on, and read no sizes', async () => {
+        renderCard(MOCK_PARSED_V1_TX);
+
+        expect((await screen.findAllByText(FEE_PAYER.toBase58())).length).toBeGreaterThan(0);
+        expect(screen.queryByText('Total Account Size:')).not.toBeInTheDocument();
+        expect(mockGetMultipleAccounts).not.toHaveBeenCalled();
+    });
+
     test('should keep the rows and drop the total when the sizes read fails', async () => {
         mockGetMultipleAccounts.mockRejectedValue(new Error('rpc unavailable'));
 
@@ -69,11 +83,8 @@ describe('transaction::AccountsCard total size', () => {
     });
 });
 
-function renderCard() {
-    const Wrapper = withTransactionProviders(
-        { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
-        { [DEFAULT_SIGNATURE]: MOCK_STATUS },
-    );
+function renderCard(parsed = MOCK_PARSED_TX) {
+    const Wrapper = withTransactionProviders({ [DEFAULT_SIGNATURE]: parsed }, { [DEFAULT_SIGNATURE]: MOCK_STATUS });
     return render(
         <SWRConfig value={{ provider: () => new Map() }}>
             <Wrapper>

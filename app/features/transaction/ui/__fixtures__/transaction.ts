@@ -111,6 +111,11 @@ const BASE_TX = {
 
 export const MOCK_PARSED_TX = mockParsedTransactionDetails({ transactionWithMeta: BASE_TX });
 
+/** The same transaction as v1 reports it; pairs with `MOCK_RAW_V1_TX`. */
+export const MOCK_PARSED_V1_TX = mockParsedTransactionDetails({
+    transactionWithMeta: { ...BASE_TX, version: 1 } as unknown as ParsedTransactionWithMeta,
+});
+
 export const MOCK_PARSED_TX_NO_BLOCK_TIME = mockParsedTransactionDetails({
     transactionWithMeta: { ...BASE_TX, blockTime: null },
 });
@@ -192,6 +197,19 @@ const RAW_TX: RawTransaction = {
 export const MOCK_RAW_TX = mockRawTransactionDetails({ raw: { ...RAW_TX, blockTime: 1_716_000_000 } });
 
 export const MOCK_RAW_TX_NO_BLOCK_TIME = mockRawTransactionDetails({ raw: RAW_TX });
+
+/** A v1 envelope declaring a loaded accounts data size limit. */
+export const MOCK_RAW_V1_TX = mockRawTransactionDetails({
+    raw: {
+        blockTime: 1_716_000_000,
+        messageBytes: RAW_MESSAGE_BYTES,
+        serializedSize: RAW_TX_BYTES.length,
+        signatures: [DEFAULT_SIGNATURE],
+        slot: 372_654_321,
+        transactionConfig: { loadedAccountsDataSizeLimit: 75_013 },
+        version: 1,
+    },
+});
 
 export const MOCK_NO_LOGS_TX = mockParsedTransactionDetails({
     transactionWithMeta: {
