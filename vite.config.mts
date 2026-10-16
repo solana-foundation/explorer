@@ -87,6 +87,8 @@ export default defineConfig({
                         // Optimize both the renderer and its react-18 runtime up front; lazy mid-run discovery re-runs Vite's optimizer and 504s in-flight dynamic imports.
                         '@storybook/nextjs-vite',
                         'react-dom/client',
+                        // Reached through the instruction-intent stories only, so lazy discovery reloads the run mid-test.
+                        '@codama/dynamic-instructions',
                         // Not hoisted to root; reach it via its parent workspace pkg so Vite can resolve and pre-bundle this CJS dep.
                         '@explorer/decoder-serum > @project-serum/serum',
                     ],
