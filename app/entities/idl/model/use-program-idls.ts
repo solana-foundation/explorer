@@ -9,7 +9,7 @@ import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { resolveProgramIdlsClient } from '../api/load-resolve-program-idls';
 import { type ProgramIdlPair } from '../api/types';
 
-export type ProgramIdls = ProgramIdlPair & { isLoading: boolean };
+export type ProgramIdls = ProgramIdlPair & { isLoading: boolean; error?: unknown };
 
 /**
  * Resolves both IDLs a program exposes (Anchor PDA, PMP `idl` seed). Shared by the IDL card, the
@@ -34,7 +34,11 @@ export function useProgramIdls(
 ): ProgramIdls {
     const isCustom = shouldUseDirectRpc(cluster, url);
 
-    const { data: serverIdls, isLoading: serverLoading } = useSWRImmutable(
+    const {
+        data: serverIdls,
+        error: serverError,
+        isLoading: serverLoading,
+    } = useSWRImmutable(
         !isCustom && (['program-idls', programId, cluster] as const),
         () => fetchProgramIdls(programId, cluster),
         // fetchProgramIdls throws on failure (rather than caching an empty result), so cap the
@@ -45,7 +49,11 @@ export function useProgramIdls(
     // Custom / local clusters: resolve client-side against the user's RPC. Keyed off `url` so a
     // different endpoint re-resolves; the key is `false` for known clusters so this never runs there
     // (no double-fetch, and the heavy `@solana/idl` chunk only loads when this branch is taken).
-    const { data: customIdls, isLoading: customLoading } = useSWRImmutable(
+    const {
+        data: customIdls,
+        error: customError,
+        isLoading: customLoading,
+    } = useSWRImmutable(
         isCustom && (['program-idls-custom', programId, url] as const),
         () => resolveProgramIdlsClient({ programId, url }),
         // resolveProgramIdlsClient re-throws when nothing resolved and a source errored, so cap the
@@ -57,6 +65,7 @@ export function useProgramIdls(
         return {
             anchorIdl: customIdls?.anchorIdl,
             anchorIdlAddress: customIdls?.anchorIdlAddress,
+            error: customError,
             isLoading: customLoading,
             programMetadataIdl: customIdls?.programMetadataIdl,
             programMetadataIdlAddress: customIdls?.programMetadataIdlAddress,
@@ -66,6 +75,7 @@ export function useProgramIdls(
     return {
         anchorIdl: serverIdls?.anchorIdl,
         anchorIdlAddress: serverIdls?.anchorIdlAddress,
+        error: serverError,
         isLoading: serverLoading,
         programMetadataIdl: serverIdls?.programMetadataIdl,
         programMetadataIdlAddress: serverIdls?.programMetadataIdlAddress,
