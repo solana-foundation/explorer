@@ -732,6 +732,9 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
+      '@sentry/core':
+        specifier: 10.39.0
+        version: 10.39.0
       '@vitest/coverage-v8':
         specifier: catalog:vitest
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)

@@ -63,6 +63,7 @@
         "zod": "4.3.6"
     },
     "devDependencies": {
+        "@sentry/core": "10.39.0",
         "@vitest/coverage-v8": "catalog:vitest",
         "agadoo": "^3.0.0",
         "oxfmt": "catalog:oxc",
