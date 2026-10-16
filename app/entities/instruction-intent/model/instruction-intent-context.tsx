@@ -2,7 +2,7 @@
 
 import { createContext, type ReactNode, useContext, useId, useState } from 'react';
 
-import type { InstructionIntentAvailability, InstructionIntentResult } from '../lib/intent';
+import type { InstructionFetchResult, InstructionIntentResult } from '../lib/intent';
 import { useInstructionIntent } from './use-instruction-intent';
 
 type InstructionIntentContextValue = {
@@ -19,17 +19,17 @@ const InstructionIntentContext = createContext<InstructionIntentContextValue | u
  */
 export function InstructionIntentProvider({
     programId,
-    ixIntentAvailability,
+    ixFetchResult,
     children,
 }: {
     programId: string;
-    ixIntentAvailability: InstructionIntentAvailability;
+    ixFetchResult: InstructionFetchResult;
     children: ReactNode;
 }) {
     const panelId = useId();
     const [open, setOpen] = useState(false);
     const [enabled, setEnabled] = useState(false);
-    const result = useInstructionIntent({ enabled, ixIntentAvailability, programId });
+    const result = useInstructionIntent({ enabled, ixFetchResult, programId });
 
     const toggle = () => {
         setOpen(value => !value);

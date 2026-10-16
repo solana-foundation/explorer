@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
-import type { InstructionIntentAvailability, InstructionIntentResult } from '../../lib/intent';
+import type { InstructionFetchResult, InstructionIntentResult } from '../../lib/intent';
 import {
     amountToUiAmountInstruction,
     MINT,
@@ -25,8 +25,7 @@ import { useInstructionIntent } from '../use-instruction-intent';
 const RPC = { name: 'rpc' };
 const SYSTEM_IDLS = { isLoading: false, programMetadataIdl: SYSTEM_ROOT };
 const TOKEN_IDLS = { isLoading: false, programMetadataIdl: TOKEN_ROOT };
-const PENDING: InstructionIntentAvailability = { status: 'pending' };
-const retry = vi.fn();
+const LOADING: InstructionFetchResult = { status: 'loading' };
 
 type Parsers = typeof import('@codama/dynamic-parsers');
 type Display = typeof import('@codama/dynamic-instructions');
@@ -34,8 +33,10 @@ type Display = typeof import('@codama/dynamic-instructions');
 const mocks = vi.hoisted(() => ({
     fetchEncodedAccounts: vi.fn(),
     getInstructionDisplayFromParsedInstruction: vi.fn(),
+    getRequiredAccountsForDisplay: vi.fn(),
     parseInstruction: vi.fn(),
     realGetDisplay: undefined as Display['getInstructionDisplayFromParsedInstruction'] | undefined,
+    realGetRequiredAccounts: undefined as Display['getRequiredAccountsForDisplay'] | undefined,
     realParseInstruction: undefined as Parsers['parseInstruction'] | undefined,
     useProgramIdls: vi.fn(),
 }));
@@ -48,7 +49,12 @@ vi.mock('@codama/dynamic-parsers', async importOriginal => {
 vi.mock('@codama/dynamic-instructions', async importOriginal => {
     const actual = await importOriginal<Display>();
     mocks.realGetDisplay = actual.getInstructionDisplayFromParsedInstruction;
-    return { ...actual, getInstructionDisplayFromParsedInstruction: mocks.getInstructionDisplayFromParsedInstruction };
+    mocks.realGetRequiredAccounts = actual.getRequiredAccountsForDisplay;
+    return {
+        ...actual,
+        getInstructionDisplayFromParsedInstruction: mocks.getInstructionDisplayFromParsedInstruction,
+        getRequiredAccountsForDisplay: mocks.getRequiredAccountsForDisplay,
+    };
 });
 vi.mock('@solana/kit', async importOriginal => ({
     ...(await importOriginal<typeof import('@solana/kit')>()),
@@ -64,26 +70,26 @@ function wrapper({ children }: { children: ReactNode }) {
     return <SWRConfig value={{ provider: () => new Map() }}>{children}</SWRConfig>;
 }
 
-function present(instruction: KitInstruction): InstructionIntentAvailability {
-    return { instruction, status: 'present' };
+function fetched(instruction: KitInstruction): InstructionFetchResult {
+    return { instruction, status: 'success' };
 }
 
-function renderClosedCardIntent(idls: object, ixIntentAvailability: InstructionIntentAvailability) {
+function renderClosedCardIntent(idls: object, ixFetchResult: InstructionFetchResult) {
     mocks.useProgramIdls.mockReturnValue(idls);
     const { result } = renderHook(
-        () => useInstructionIntent({ enabled: false, ixIntentAvailability, programId: SYSTEM_PROGRAM_ADDRESS }),
+        () => useInstructionIntent({ enabled: false, ixFetchResult, programId: SYSTEM_PROGRAM_ADDRESS }),
         { wrapper },
     );
     return result.current;
 }
 
 function renderTwoMintToIntents(firstAmount: bigint, secondAmount: bigint) {
-    const first = present(mintToInstruction(firstAmount));
-    const second = present(mintToInstruction(secondAmount));
+    const first = fetched(mintToInstruction(firstAmount));
+    const second = fetched(mintToInstruction(secondAmount));
     return renderHook(
         () => [
-            useInstructionIntent({ enabled: true, ixIntentAvailability: first, programId: TOKEN_PROGRAM_ADDRESS }),
-            useInstructionIntent({ enabled: true, ixIntentAvailability: second, programId: TOKEN_PROGRAM_ADDRESS }),
+            useInstructionIntent({ enabled: true, ixFetchResult: first, programId: TOKEN_PROGRAM_ADDRESS }),
+            useInstructionIntent({ enabled: true, ixFetchResult: second, programId: TOKEN_PROGRAM_ADDRESS }),
         ],
         { wrapper },
     );
@@ -97,22 +103,26 @@ beforeEach(() => {
     mocks.getInstructionDisplayFromParsedInstruction.mockImplementation(
         (...args: Parameters<Display['getInstructionDisplayFromParsedInstruction']>) => mocks.realGetDisplay?.(...args),
     );
+    mocks.getRequiredAccountsForDisplay.mockImplementation(
+        (...args: Parameters<Display['getRequiredAccountsForDisplay']>) => mocks.realGetRequiredAccounts?.(...args),
+    );
     mocks.useProgramIdls.mockReturnValue(TOKEN_IDLS);
 });
 
 describe('useInstructionIntent', () => {
     it('should report idle when the card is closed and the IDL is loading', () => {
-        expect(renderClosedCardIntent({ isLoading: true }, present(transferSolInstruction()))).toEqual({
+        expect(renderClosedCardIntent({ isLoading: true }, fetched(transferSolInstruction()))).toEqual({
             status: 'idle',
         });
     });
 
-    it('should report idle when the card is closed and the instruction is pending', () => {
-        expect(renderClosedCardIntent(SYSTEM_IDLS, PENDING)).toEqual({ status: 'idle' });
+    it('should report idle when the card is closed and the instruction is loading', () => {
+        expect(renderClosedCardIntent(SYSTEM_IDLS, LOADING)).toEqual({ status: 'idle' });
     });
 
-    it('should report idle without reading accounts when the card is closed and the instruction has an intent', () => {
-        expect(renderClosedCardIntent(SYSTEM_IDLS, present(transferSolInstruction()))).toEqual({ status: 'idle' });
+    it('should report idle without planning or reading accounts when the card is closed and the instruction has an intent', () => {
+        expect(renderClosedCardIntent(SYSTEM_IDLS, fetched(transferSolInstruction()))).toEqual({ status: 'idle' });
+        expect(mocks.getRequiredAccountsForDisplay).not.toHaveBeenCalled();
         expect(mocks.fetchEncodedAccounts).not.toHaveBeenCalled();
         expect(mocks.getInstructionDisplayFromParsedInstruction).not.toHaveBeenCalled();
     });
@@ -120,7 +130,7 @@ describe('useInstructionIntent', () => {
     it('should report idl-failed when the card is closed and the IDL fetch fails', () => {
         const idls = { error: new Error('502'), isLoading: false };
 
-        expect(renderClosedCardIntent(idls, present(transferSolInstruction()))).toEqual({
+        expect(renderClosedCardIntent(idls, fetched(transferSolInstruction()))).toEqual({
             reason: 'idl-failed',
             status: 'unavailable',
         });
@@ -129,7 +139,7 @@ describe('useInstructionIntent', () => {
     it('should report no-metadata when the card is closed and the IDL has no intent templates', () => {
         const idls = { isLoading: false, programMetadataIdl: TOKEN_ROOT_WITHOUT_DISPLAY };
 
-        expect(renderClosedCardIntent(idls, present(mintToInstruction()))).toEqual({
+        expect(renderClosedCardIntent(idls, fetched(mintToInstruction()))).toEqual({
             reason: 'no-metadata',
             status: 'unavailable',
         });
@@ -138,18 +148,18 @@ describe('useInstructionIntent', () => {
     it('should report malformed-metadata when the card is closed and the IDL version is unsupported', () => {
         const idls = { isLoading: false, programMetadataIdl: { ...SYSTEM_ROOT, version: '2.0.0' } };
 
-        expect(renderClosedCardIntent(idls, present(transferSolInstruction()))).toEqual({
+        expect(renderClosedCardIntent(idls, fetched(transferSolInstruction()))).toEqual({
             reason: 'malformed-metadata',
             status: 'unavailable',
         });
     });
 
-    it('should report failed with the retry when the card is closed and the instruction is absent', () => {
-        expect(renderClosedCardIntent(SYSTEM_IDLS, { retry, status: 'absent' })).toEqual({ retry, status: 'failed' });
+    it('should report failed when the card is closed and the instruction fetch failed', () => {
+        expect(renderClosedCardIntent(SYSTEM_IDLS, { status: 'failed' })).toEqual({ status: 'failed' });
     });
 
     it('should report no-instruction-intent when the card is closed and the instruction has no template', () => {
-        expect(renderClosedCardIntent(TOKEN_IDLS, present(amountToUiAmountInstruction()))).toEqual({
+        expect(renderClosedCardIntent(TOKEN_IDLS, fetched(amountToUiAmountInstruction()))).toEqual({
             reason: 'no-instruction-intent',
             status: 'unavailable',
         });
@@ -157,10 +167,10 @@ describe('useInstructionIntent', () => {
 
     it('should not read accounts when the intent plans none', async () => {
         mocks.useProgramIdls.mockReturnValue(SYSTEM_IDLS);
-        const ixIntentAvailability = present(transferSolInstruction());
+        const ixFetchResult = fetched(transferSolInstruction());
 
         const { result } = renderHook(
-            () => useInstructionIntent({ enabled: true, ixIntentAvailability, programId: SYSTEM_PROGRAM_ADDRESS }),
+            () => useInstructionIntent({ enabled: true, ixFetchResult, programId: SYSTEM_PROGRAM_ADDRESS }),
             { wrapper },
         );
 
@@ -170,10 +180,10 @@ describe('useInstructionIntent', () => {
 
     it('should read the planned mint when the amount needs its decimals', async () => {
         mocks.fetchEncodedAccounts.mockResolvedValue([mintAccount(6)]);
-        const ixIntentAvailability = present(mintToInstruction());
+        const ixFetchResult = fetched(mintToInstruction());
 
         const { result } = renderHook(
-            () => useInstructionIntent({ enabled: true, ixIntentAvailability, programId: TOKEN_PROGRAM_ADDRESS }),
+            () => useInstructionIntent({ enabled: true, ixFetchResult, programId: TOKEN_PROGRAM_ADDRESS }),
             { wrapper },
         );
 
@@ -203,14 +213,14 @@ describe('useInstructionIntent', () => {
 
     it('should report loading when a failed account read is retried', async () => {
         mocks.fetchEncodedAccounts.mockRejectedValueOnce(new Error('429')).mockResolvedValueOnce([mintAccount(6)]);
-        const ixIntentAvailability = present(mintToInstruction());
+        const ixFetchResult = fetched(mintToInstruction());
         const statuses: InstructionIntentResult['status'][] = [];
 
         const { result } = renderHook(
             () => {
                 const intent = useInstructionIntent({
                     enabled: true,
-                    ixIntentAvailability,
+                    ixFetchResult,
                     programId: TOKEN_PROGRAM_ADDRESS,
                 });
                 statuses.push(intent.status);
@@ -235,30 +245,54 @@ describe('useInstructionIntent', () => {
     it('should report malformed-metadata when the computation throws', async () => {
         mocks.useProgramIdls.mockReturnValue(SYSTEM_IDLS);
         mocks.getInstructionDisplayFromParsedInstruction.mockRejectedValueOnce(new Error('bad metadata'));
-        const ixIntentAvailability = present(transferSolInstruction());
+        const ixFetchResult = fetched(transferSolInstruction());
 
         const { result } = renderHook(
-            () => useInstructionIntent({ enabled: true, ixIntentAvailability, programId: SYSTEM_PROGRAM_ADDRESS }),
+            () => useInstructionIntent({ enabled: true, ixFetchResult, programId: SYSTEM_PROGRAM_ADDRESS }),
             { wrapper },
         );
 
         await waitFor(() => expect(result.current).toEqual({ reason: 'malformed-metadata', status: 'unavailable' }));
     });
 
-    it('should parse once when the caller rebuilds the status object', () => {
+    it('should report idle when the card is closed and the account plan would throw', () => {
+        mocks.getRequiredAccountsForDisplay.mockImplementation(() => {
+            throw new Error('broken IDL');
+        });
+
+        expect(renderClosedCardIntent(SYSTEM_IDLS, fetched(transferSolInstruction()))).toEqual({ status: 'idle' });
+    });
+
+    it('should report malformed-metadata when the card opens and the account plan throws', async () => {
+        mocks.useProgramIdls.mockReturnValue(SYSTEM_IDLS);
+        mocks.getRequiredAccountsForDisplay.mockImplementation(() => {
+            throw new Error('broken IDL');
+        });
+        const ixFetchResult = fetched(transferSolInstruction());
+
+        const { result } = renderHook(
+            () => useInstructionIntent({ enabled: true, ixFetchResult, programId: SYSTEM_PROGRAM_ADDRESS }),
+            { wrapper },
+        );
+
+        await waitFor(() => expect(result.current).toEqual({ reason: 'malformed-metadata', status: 'unavailable' }));
+        expect(mocks.fetchEncodedAccounts).not.toHaveBeenCalled();
+    });
+
+    it('should parse once when the caller rebuilds the fetch result object', () => {
         mocks.useProgramIdls.mockReturnValue(SYSTEM_IDLS);
         const instruction = transferSolInstruction();
 
         const { rerender } = renderHook(
-            ({ status }: { status: InstructionIntentAvailability }) =>
+            ({ fetchResult }: { fetchResult: InstructionFetchResult }) =>
                 useInstructionIntent({
                     enabled: false,
-                    ixIntentAvailability: status,
+                    ixFetchResult: fetchResult,
                     programId: SYSTEM_PROGRAM_ADDRESS,
                 }),
-            { initialProps: { status: present(instruction) }, wrapper },
+            { initialProps: { fetchResult: fetched(instruction) }, wrapper },
         );
-        rerender({ status: present(instruction) });
+        rerender({ fetchResult: fetched(instruction) });
 
         expect(mocks.parseInstruction).toHaveBeenCalledTimes(1);
     });

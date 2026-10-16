@@ -1,4 +1,3 @@
-import { getInstructionDisplayFromParsedInstruction } from '@codama/dynamic-instructions';
 import type { ParsedInstruction } from '@codama/dynamic-parsers';
 import { type Address, isAddress, type MaybeEncodedAccount } from '@solana/kit';
 import type { RootNode } from 'codama';
@@ -18,6 +17,8 @@ export async function computeInstructionIntent({
     parsed: ParsedInstruction;
     accounts: readonly MaybeEncodedAccount[];
 }): Promise<InstructionIntent> {
+    // Loaded on demand to avoid adding kb on first load.
+    const { getInstructionDisplayFromParsedInstruction } = await import('@codama/dynamic-instructions');
     const byAddress = new Map(accounts.map(account => [account.address, account]));
     const display = await getInstructionDisplayFromParsedInstruction(root, parsed, {
         fetchAccount: async address => byAddress.get(address) ?? { address, exists: false },

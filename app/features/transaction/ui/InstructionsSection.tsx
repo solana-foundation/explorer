@@ -7,6 +7,7 @@ import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCa
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { toInstructionNode, TxInstructionSurface, UnknownDetailsCard } from '@entities/instruction-card';
+import { InstructionIntentProvider } from '@entities/instruction-intent';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { trustedInnerInstructions } from '@entities/transaction-data';
 import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
@@ -59,6 +60,7 @@ import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-me
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
+import { useRawTransactionDetails } from '@providers/transactions/raw';
 import {
     ParsedInnerInstruction,
     ParsedInstruction,
@@ -73,6 +75,7 @@ import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import { readRawInstructions, toInstructionFetchResult } from '../lib/to-instruction-fetch-result';
 import { CommonInstructionDetailsCard } from './CommonInstructionDetailsCard';
 
 const SerumDetailsCard = dynamic(
@@ -94,6 +97,9 @@ export function InstructionsSection({ signature }: SignatureProps) {
     const { cluster } = useCluster();
     const fetchDetails = useFetchTransactionDetails();
     const refreshDetails = () => fetchDetails(signature);
+    const rawDetails = useRawTransactionDetails(signature);
+    const raw = rawDetails?.data?.raw;
+    const rawInstructions = React.useMemo(() => (raw ? readRawInstructions(raw) : undefined), [raw]);
 
     const result = status?.data?.info?.result;
     const transactionWithMeta = details?.data?.transactionWithMeta;
@@ -159,15 +165,24 @@ export function InstructionsSection({ signature }: SignatureProps) {
                         }
 
                         return (
-                            <InstructionCard
+                            <InstructionIntentProvider
                                 key={`${index}`}
-                                index={index}
-                                ix={instruction}
-                                result={result}
-                                signature={signature}
-                                tx={transaction}
-                                innerCards={innerCards}
-                            />
+                                programId={instruction.programId.toBase58()}
+                                ixFetchResult={toInstructionFetchResult({
+                                    fetchStatus: rawDetails?.status,
+                                    index,
+                                    instructions: rawInstructions,
+                                })}
+                            >
+                                <InstructionCard
+                                    index={index}
+                                    ix={instruction}
+                                    result={result}
+                                    signature={signature}
+                                    tx={transaction}
+                                    innerCards={innerCards}
+                                />
+                            </InstructionIntentProvider>
                         );
                     })}
                 </React.Suspense>

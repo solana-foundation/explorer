@@ -4,7 +4,7 @@ import { cva } from 'class-variance-authority';
 import type { ReactNode } from 'react';
 
 import { getIntentUnavailableText, type InstructionIntent, type InstructionIntentResult } from '../lib/intent';
-import { BaseIntentSentence } from './BaseIntentSentence';
+import { IntentSentence } from './IntentSentence';
 
 type PanelIntent = Exclude<InstructionIntentResult, { status: 'idle' }>;
 
@@ -18,7 +18,7 @@ const labelVariants = cva('-mb-1 text-dk-xs font-medium uppercase tracking-[0.08
     variants: { tone: { danger: 'text-dk-danger', default: 'text-outer-space-300' } },
 });
 
-export function BaseInstructionIntentPanel({ intent, id }: { intent: PanelIntent; id: string }) {
+export function InstructionIntentPanel({ intent, id }: { intent: PanelIntent; id: string }) {
     const tone = intent.status === 'failed' ? 'danger' : 'default';
 
     return (
@@ -70,7 +70,7 @@ function PanelBody({ intent }: { intent: PanelIntent }) {
 function ReadyBody({ intent }: { intent: InstructionIntent }) {
     return (
         <>
-            <BaseIntentSentence parts={intent.sentenceParts} />
+            <IntentSentence parts={intent.sentenceParts} />
             {!intent.interpolated && (
                 <PanelNote>
                     Couldn&apos;t fill in the details for this instruction. The rows below carry them.

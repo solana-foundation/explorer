@@ -6,7 +6,7 @@ import { displayAddress } from '@utils/tx';
 
 import type { IntentSentencePart } from '../lib/intent';
 
-export function BaseIntentSentence({ parts }: { parts: readonly IntentSentencePart[] }) {
+export function IntentSentence({ parts }: { parts: readonly IntentSentencePart[] }) {
     return (
         <div className="m-0 break-words text-sm leading-normal text-white" data-testid="intent-sentence">
             {/* Index key: one address can appear twice in a sentence */}

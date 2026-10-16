@@ -15,3 +15,4 @@ export type { InstructionSummary, NamedInstruction } from './lib/types';
 // is on `client.ts`, since the hooks cannot join a server caller of this barrel. README.md has the
 // whole flow and the invariants it holds to.
 export type { RawTransaction, TransactionConfig, TransactionWithMeta } from './model/types';
+export { getInstructionsFromRawTransaction } from './lib/get-instructions-from-raw-transaction';

@@ -3,6 +3,7 @@ import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { cn } from '@components/shared/utils';
+import { InstructionIntentButton, InstructionIntentRow } from '@entities/instruction-intent';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
@@ -65,6 +66,8 @@ export function BaseInstructionCard({
     const scrollAnchorRef = useScrollAnchor(
         getInstructionCardScrollAnchorId(childIndex !== undefined ? [index + 1, childIndex + 1] : [index + 1]),
     );
+
+    const isTopLevel = childIndex === undefined;
     return (
         <CollapsibleCard
             ref={scrollAnchorRef}
@@ -85,6 +88,7 @@ export function BaseInstructionCard({
             headerButtons={
                 <div className="flex items-center gap-1.5">
                     {headerButtons}
+                    {isTopLevel && <InstructionIntentButton />}
                     <Button
                         ui="dashkit"
                         size="sm"
@@ -101,6 +105,7 @@ export function BaseInstructionCard({
         >
             <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
                 <BaseTable.Body>
+                    {isTopLevel && <InstructionIntentRow />}
                     {showRaw ? (
                         <>
                             <BaseTable.Row>
