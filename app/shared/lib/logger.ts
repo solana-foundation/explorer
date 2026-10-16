@@ -45,7 +45,8 @@ type PanicContext = LogContext & {
  *   `{ sentry: 'always' }` on the server and in the browser.
  * - `warn`  (level: `warning`) — calls `captureMessage` under the same rule.
  *
- * The browser sends error events only when `NEXT_PUBLIC_SENTRY_CLIENT_ERRORS` is `true`.
+ * The browser sends error events only when `NEXT_PUBLIC_SENTRY_CLIENT_ERRORS` is `true`, and then at the client
+ * error sample rate in `sentry/lib/config.mjs`, so a browser `panic` reaches Sentry only when sampled.
  *
  * Use `sentryExtras` to attach data exclusively to the Sentry event.
  * Context fields outside `sentryExtras` are only sent to the console.
