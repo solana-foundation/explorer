@@ -10,7 +10,7 @@ import { Loader } from 'react-feather';
 
 import { cn } from '@/app/components/shared/utils';
 import { Alert } from '@/app/shared/ui/Alert';
-import { LABEL_WIDTH } from '@/app/shared/ui/key-value';
+import { KeyValue } from '@/app/shared/ui/key-value';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
@@ -44,17 +44,9 @@ export function DataRow({
     ...props
 }: { label: React.ReactNode; children: React.ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
     return (
-        <div className={cn('flex flex-row items-baseline gap-dk-4', ROW_DIVIDER, ROW_PADDING)} {...props}>
-            <div
-                className={cn(
-                    'min-w-0 flex-none text-sm leading-5 text-outer-space-300 [overflow-wrap:normal]',
-                    LABEL_WIDTH,
-                )}
-            >
-                {label}
-            </div>
-            <div className="flex min-w-0 flex-1 text-sm [overflow-wrap:anywhere]">{children}</div>
-        </div>
+        <KeyValue label={label} {...props}>
+            {children}
+        </KeyValue>
     );
 }
 

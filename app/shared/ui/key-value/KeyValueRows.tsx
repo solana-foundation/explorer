@@ -13,8 +13,9 @@ export function KeyValueRows({ rows }: { rows: KeyValueRow[] }) {
     return (
         <>
             {rows
-                .filter(row => row.show !== false)
-                .map(({ label, value, valueClassName }, index) => (
+                .map((row, index) => ({ index, row }))
+                .filter(({ row }) => row.show !== false)
+                .map(({ index, row: { label, value, valueClassName } }) => (
                     <KeyValue
                         key={typeof label === 'string' ? label : index}
                         label={label}
