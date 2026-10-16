@@ -3,15 +3,15 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import { DESTINATION, SOURCE, SYSTEM_PROGRAM_ADDRESS } from '../../mocks/fixtures';
-import { BaseIntentSentence } from '../BaseIntentSentence';
+import { IntentSentence } from '../IntentSentence';
 
 const meta = {
-    component: BaseIntentSentence,
+    component: IntentSentence,
     decorators: [withCluster, withTokenInfoBatch],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
-    title: 'Entities/InstructionIntent/BaseIntentSentence',
-} satisfies Meta<typeof BaseIntentSentence>;
+    title: 'Entities/InstructionIntent/IntentSentence',
+} satisfies Meta<typeof IntentSentence>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

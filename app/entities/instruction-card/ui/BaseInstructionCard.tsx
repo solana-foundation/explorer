@@ -1,5 +1,6 @@
 import { Button } from '@components/shared/ui/button';
 import { cn } from '@components/shared/utils';
+import { InstructionIntentButton, InstructionIntentRow } from '@entities/instruction-intent/@x/instruction-card';
 import { SignatureResult } from '@solana/web3.js';
 import React from 'react';
 import { Code } from 'react-feather';
@@ -40,12 +41,14 @@ export function BaseInstructionCard({
     const rawOnly = children === undefined;
     const [showRaw, setShowRaw] = React.useState(rawOnly);
     const toggleRaw = () => {
-        if (!showRaw && rawSource.kind === 'fetchable') {
+        if (!showRaw && 'fetch' in rawSource) {
             rawSource.fetch();
         }
         setShowRaw(r => !r);
     };
     const { ix } = node;
+    // Inner cards render inside the provider of their parent, so only a top-level card shows the intent
+    const isTopLevel = node.childIndex === undefined;
 
     return (
         <InstructionCardFrame
@@ -55,6 +58,7 @@ export function BaseInstructionCard({
             collapsible={collapsible}
             headerButtons={
                 <div className="flex items-center gap-1.5">
+                    {isTopLevel && <InstructionIntentButton />}
                     <Button
                         ui="dashkit"
                         size="sm"
@@ -69,13 +73,16 @@ export function BaseInstructionCard({
                 </div>
             }
         >
+            {isTopLevel && <InstructionIntentRow />}
             {showRaw ? (
                 <>
                     <ProgramField programId={node.programId} validateProgram={validateProgram} />
                     {'parsed' in ix ? (
                         <BaseRawParsedDetails ix={ix}>
                             {rawSource.kind === 'instruction' && <BaseRawDetails ix={rawSource.ix} />}
-                            {rawSource.kind === 'unavailable' && <RawDetailsUnavailable />}
+                            {(rawSource.kind === 'unavailable' || rawSource.kind === 'failed') && (
+                                <RawDetailsUnavailable />
+                            )}
                         </BaseRawParsedDetails>
                     ) : (
                         <BaseRawDetails ix={ix} />

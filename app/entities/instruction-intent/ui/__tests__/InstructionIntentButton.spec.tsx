@@ -3,14 +3,14 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    type InstructionIntentAvailability,
+    type InstructionFetchResult,
     InstructionIntentButton,
     InstructionIntentProvider,
     InstructionIntentRow,
 } from '../..';
 import { SYSTEM_PROGRAM_ADDRESS } from '../../mocks/fixtures';
 
-const PENDING: InstructionIntentAvailability = { status: 'pending' };
+const LOADING: InstructionFetchResult = { status: 'loading' };
 
 const mocks = vi.hoisted(() => ({ useInstructionIntent: vi.fn() }));
 
@@ -29,9 +29,9 @@ function IntentConsumers() {
     );
 }
 
-function renderIntentProvider(programId: string, ixIntentAvailability: InstructionIntentAvailability) {
+function renderIntentProvider(programId: string, ixFetchResult: InstructionFetchResult) {
     return render(
-        <InstructionIntentProvider programId={programId} ixIntentAvailability={ixIntentAvailability}>
+        <InstructionIntentProvider programId={programId} ixFetchResult={ixFetchResult}>
             <IntentConsumers />
         </InstructionIntentProvider>,
     );
@@ -51,7 +51,7 @@ describe('InstructionIntentButton', () => {
     });
 
     it('should not render the row when the card is closed', () => {
-        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, PENDING);
+        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, LOADING);
 
         expect(screen.getByTestId('instruction-intent-trigger')).toHaveAttribute('aria-expanded', 'false');
         expect(screen.getByTestId('instruction-intent-trigger')).not.toHaveAttribute('aria-controls');
@@ -60,7 +60,7 @@ describe('InstructionIntentButton', () => {
 
     it('should render the row and point the button at it when the card opens', async () => {
         mocks.useInstructionIntent.mockReturnValue({ reason: 'no-metadata', status: 'unavailable' });
-        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, PENDING);
+        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, LOADING);
 
         await userEvent.click(screen.getByTestId('instruction-intent-trigger'));
 
@@ -71,21 +71,21 @@ describe('InstructionIntentButton', () => {
 
     it('should label the button "Intent unavailable" when the result is unavailable', () => {
         mocks.useInstructionIntent.mockReturnValue({ reason: 'no-metadata', status: 'unavailable' });
-        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, PENDING);
+        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, LOADING);
 
         expect(screen.getByRole('button', { name: 'Intent unavailable' })).toBeInTheDocument();
     });
 
     it('should label the button "Intent failed to load" when the result is failed', () => {
         mocks.useInstructionIntent.mockReturnValue({ retry: vi.fn(), status: 'failed' });
-        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, PENDING);
+        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, LOADING);
 
         expect(screen.getByRole('button', { name: 'Intent failed to load' })).toBeInTheDocument();
     });
 
     it('should mark the button busy when the open intent loads', async () => {
         mocks.useInstructionIntent.mockReturnValue({ status: 'loading' });
-        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, PENDING);
+        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, LOADING);
 
         await userEvent.click(screen.getByTestId('instruction-intent-trigger'));
 
