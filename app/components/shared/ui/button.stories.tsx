@@ -390,3 +390,22 @@ export const DashkitSolidWarningDanger: Story = {
         </div>
     ),
 };
+
+export const DashkitDashed: Story = {
+    name: 'Dashkit / Dashed',
+    play: async ({ canvasElement }) => {
+        for (const button of within(canvasElement).getAllByRole('button')) {
+            await expect(button.className).toContain('border-dashed');
+        }
+    },
+    render: () => (
+        <div className="flex flex-wrap gap-4">
+            <Button ui="dashkit" variant="white" size="sm" dashed>
+                white
+            </Button>
+            <Button ui="dashkit" variant="black" size="sm" active dashed>
+                black active
+            </Button>
+        </div>
+    ),
+};
