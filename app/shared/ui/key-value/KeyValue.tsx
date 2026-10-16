@@ -4,7 +4,6 @@ import React from 'react';
 import { cn } from '@/app/components/shared/utils';
 import { ROW_PADDING } from '@/app/shared/ui/spacing';
 
-// Shared label-column width so values line up in one column across every card and Raw-view row.
 export const LABEL_WIDTH = 'w-[clamp(84px,20%,240px)]';
 
 const rowVariants = cva('flex flex-row border-0 border-solid border-outer-space-850', {
@@ -18,8 +17,6 @@ const rowVariants = cva('flex flex-row border-0 border-solid border-outer-space-
         density: {
             comfortable: `gap-dk-4 ${ROW_PADDING}`,
             compact: 'gap-2 py-1',
-            // `flat` carries no padding of its own — the parent controls the rhythm (used by the
-            // gap-driven expanded-account rows and the block tables' mobile cells).
             flat: 'gap-2',
         },
         divider: {
@@ -31,11 +28,6 @@ const rowVariants = cva('flex flex-row border-0 border-solid border-outer-space-
 
 const LABEL_CLASS = 'min-w-0 flex-none text-sm leading-5 text-outer-space-300 [overflow-wrap:normal]';
 
-/**
- * A key-value row: a fixed-width label column beside a flexible value column. `density` sets the
- * padding (comfortable cards / compact drawers / flat gap-driven rows); `align` sets the cross-axis
- * alignment; `divider` draws a bottom border between rows.
- */
 export function KeyValue({
     label,
     trailing,
@@ -46,6 +38,7 @@ export function KeyValue({
     className,
     valueClassName,
     children,
+    ...rest
 }: {
     label: React.ReactNode;
     trailing?: React.ReactNode;
@@ -53,9 +46,10 @@ export function KeyValue({
     className?: string;
     valueClassName?: string;
     children: React.ReactNode;
-} & VariantProps<typeof rowVariants>) {
+} & VariantProps<typeof rowVariants> &
+    Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'className'>) {
     return (
-        <div className={cn(rowVariants({ align, density, divider }), className)}>
+        <div className={cn(rowVariants({ align, density, divider }), className)} {...rest}>
             <div className={cn(LABEL_CLASS, labelWidth)}>{label}</div>
             <div className={cn('flex min-w-0 flex-1 text-sm [overflow-wrap:anywhere]', valueClassName)}>{children}</div>
             {trailing}

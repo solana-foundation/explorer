@@ -258,7 +258,6 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         },
         { label: 'Fee', show: fee !== undefined, value: fee !== undefined && <SolBalance lamports={fee} /> },
         {
-            // Projected fee under SIMD-0553's inclusion + burned resource fee model
             label: (
                 <InfoTooltip text="Not active yet. SIMD-0553 would charge a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units a transaction requests, replacing today's flat 5,000-per-signature base fee and leaving the priority fee unchanged. Estimated by swapping this transaction's consumed compute units for its requested limit; the loaded-accounts-data-size term still reflects what it loaded, so each figure is a floor.">
                     Fee under SIMD-0553
@@ -291,7 +290,6 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
             ),
         },
         {
-            // v1 message-level resource limits
             label: (
                 <InfoTooltip text="A total amount paid for prioritization, unlike the per-compute-unit price used before v1">
                     Priority fee (total)
