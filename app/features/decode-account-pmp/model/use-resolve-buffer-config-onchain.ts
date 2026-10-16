@@ -1,9 +1,8 @@
 'use client';
 
+import { getRpc } from '@entities/cluster';
 import { toErrorReason } from '@entities/pmp-account';
 import { useCluster } from '@providers/cluster';
-import { Connection } from '@solana/web3.js';
-import React from 'react';
 import useSWRImmutable from 'swr/immutable';
 
 import type { ConfigResolutionOnchainResult } from '../api/find-config-in-transactions';
@@ -34,11 +33,10 @@ export function useResolveBufferConfigOnchain({
     fingerprint: string;
 }): ConfigResolutionOnchainState {
     const { url } = useCluster();
-    const connection = React.useMemo(() => new Connection(url), [url]);
 
     const { data, error, isLoading } = useSWRImmutable(
         swrKey(url, address, fingerprint, enabled),
-        () => findConfigInTransactions(connection, address),
+        () => findConfigInTransactions(getRpc(url), address),
         { shouldRetryOnError: false },
     );
 
