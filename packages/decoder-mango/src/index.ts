@@ -1,6 +1,5 @@
 export {
-    getMangoInstructionLabel,
-    isMangoInstruction,
+    isMangoProgramId,
     MANGO_PROGRAM_IDS,
     parseMangoInstructionTitle,
     resolveMangoInstructionName,

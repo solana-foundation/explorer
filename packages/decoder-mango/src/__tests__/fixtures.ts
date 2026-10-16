@@ -1,23 +1,31 @@
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import {
+    type AccountMeta,
+    AccountRole,
+    type Address,
+    type Instruction,
+    type InstructionWithAccounts,
+    type InstructionWithData,
+    type ReadonlyUint8Array,
+} from '@solana/kit';
 
 export { MANGO_PROGRAM_IDS } from '../program-ids';
 
-/** Create a TransactionInstruction from raw data and a program ID (base58 string or PublicKey). */
+/** Create a kit instruction from raw data and a program address. */
 export function makeInstruction(
-    data: Buffer,
-    programId: PublicKey | string,
-    keys: PublicKey[] = [],
-): TransactionInstruction {
-    return new TransactionInstruction({
+    data: ReadonlyUint8Array,
+    programAddress: Address,
+    keys: Address[] = [],
+): Instruction & InstructionWithAccounts<readonly AccountMeta[]> & InstructionWithData<ReadonlyUint8Array> {
+    return {
+        accounts: keys.map(key => ({ address: key, role: AccountRole.READONLY })),
         data,
-        keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
-        programId: new PublicKey(programId),
-    });
+        programAddress,
+    };
 }
 
 /** Mango keys instruction data by a leading u32 LE discriminator; that's all detection reads. */
-export function makeRawInstructionData(discriminator: number): Buffer {
-    const data = Buffer.alloc(4);
-    data.writeUInt32LE(discriminator, 0);
+export function makeRawInstructionData(discriminator: number): Uint8Array {
+    const data = new Uint8Array(4);
+    new DataView(data.buffer).setUint32(0, discriminator, true);
     return data;
 }

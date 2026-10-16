@@ -1,14 +1,11 @@
-import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { isWormholeInstruction, parseWormholeInstructionTitle, resolveWormholeInstructionName } from '../detection';
+import { isWormholeProgramId, parseWormholeInstructionTitle, resolveWormholeInstructionName } from '../detection';
 import { WORMHOLE_PROGRAM_IDS } from '../program-ids';
 
 const MAINNET_PROGRAM_ID = 'WormT3McKhFJ2RkiGpdw9GKvNCrB2aB54gb2uV9MfQC';
 
-function makeInstruction(data: number[], programId: string = MAINNET_PROGRAM_ID): TransactionInstruction {
-    return new TransactionInstruction({ data: Buffer.from(data), keys: [], programId: new PublicKey(programId) });
-}
+const SYSTEM_PROGRAM_ID = '11111111111111111111111111111111';
 
 describe('WORMHOLE_PROGRAM_IDS', () => {
     it('should list the single deployment shared by mainnet, testnet and devnet', () => {
@@ -16,13 +13,13 @@ describe('WORMHOLE_PROGRAM_IDS', () => {
     });
 });
 
-describe('isWormholeInstruction', () => {
+describe('isWormholeProgramId', () => {
     it('should return true for the Wormhole program', () => {
-        expect(isWormholeInstruction(makeInstruction([1]))).toBe(true);
+        expect(isWormholeProgramId(MAINNET_PROGRAM_ID)).toBe(true);
     });
 
     it('should return false for System Program', () => {
-        expect(isWormholeInstruction(makeInstruction([1], SystemProgram.programId.toBase58()))).toBe(false);
+        expect(isWormholeProgramId(SYSTEM_PROGRAM_ID)).toBe(false);
     });
 });
 
@@ -49,22 +46,24 @@ describe('resolveWormholeInstructionName', () => {
     });
 
     it('should return undefined for another program', () => {
-        expect(resolveWormholeInstructionName(SystemProgram.programId.toBase58(), Uint8Array.of(1))).toBeUndefined();
+        expect(resolveWormholeInstructionName(SYSTEM_PROGRAM_ID, Uint8Array.of(1))).toBeUndefined();
     });
 });
 
 describe('parseWormholeInstructionTitle', () => {
     it('should return the instruction name', () => {
-        expect(parseWormholeInstructionTitle(makeInstruction([2, 0xff]))).toBe('Post VAA');
+        expect(parseWormholeInstructionTitle(MAINNET_PROGRAM_ID, Uint8Array.of(2, 0xff))).toBe('Post VAA');
     });
 
     it('should throw on an unknown tag', () => {
-        expect(() => parseWormholeInstructionTitle(makeInstruction([8]))).toThrow(
+        expect(() => parseWormholeInstructionTitle(MAINNET_PROGRAM_ID, Uint8Array.of(8))).toThrow(
             'Unrecognized Wormhole instruction code: 8',
         );
     });
 
     it('should throw on empty data', () => {
-        expect(() => parseWormholeInstructionTitle(makeInstruction([]))).toThrow('Wormhole instruction has no data');
+        expect(() => parseWormholeInstructionTitle(MAINNET_PROGRAM_ID, Uint8Array.of())).toThrow(
+            'Wormhole instruction has no data',
+        );
     });
 });

@@ -7,6 +7,7 @@ import {
     getU32Decoder,
     getU64Decoder,
     getU128Decoder,
+    type ReadonlyUint8Array,
     transformDecoder,
 } from '@solana/kit';
 
@@ -112,7 +113,7 @@ const INSTRUCTION_LAYOUTS = new Map<number, readonly [string, Decoder<object>]>(
 ]);
 
 // Mirrors the library's output shape: a single-key object of `{ [instructionName]: fields }`.
-export function decodeInstruction(data: Uint8Array): Record<string, unknown> {
+export function decodeInstruction(data: ReadonlyUint8Array): Record<string, unknown> {
     const code = getU32Decoder().decode(data, VERSION_SPAN);
     const layout = INSTRUCTION_LAYOUTS.get(code);
     if (layout === undefined) throw new Error(`Unsupported Serum instruction code: ${code}`);

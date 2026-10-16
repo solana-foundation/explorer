@@ -134,8 +134,8 @@ describe('decodeSerumInstruction', () => {
     it.each(Object.keys(ENCODED_INSTRUCTIONS).map(key => [key]))('should dispatch %s to its decoder', key => {
         const data = ENCODED_INSTRUCTIONS[key as keyof typeof ENCODED_INSTRUCTIONS];
         const decoded = decodeSerumInstruction(makeInstruction(data, programId));
-        expect(decoded.key).toBe(key);
-        expect(decoded.info.programId.equals(programId)).toBe(true);
+        expect(decoded.type).toBe(key);
+        expect(decoded.info).not.toHaveProperty('programId');
     });
 
     it('should throw on data the instruction layout cannot decode', () => {
@@ -171,7 +171,7 @@ describe('decodeMatchOrders', () => {
     it('should decode limit and account refs', () => {
         const ix = makeInstruction(ENCODED_INSTRUCTIONS.matchOrders, programId);
         const result = decodeMatchOrders(ix);
-        expect(result.programId.equals(programId)).toBe(true);
+        expect(result).not.toHaveProperty('programId');
         expect(result.data.limit).toBe(5);
         expect(result.accounts.market).toEqual(TEST_KEYS[0]);
         expect(result.accounts.requestQueue).toEqual(TEST_KEYS[1]);
