@@ -1,8 +1,7 @@
 import { HexData } from '@components/common/HexData';
 import { Program } from '@coral-xyz/anchor';
 import { IdlField, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
-import type { ProgramEventPayload } from '@entities/program-logs';
-import { decodeEventFromLog, mapIxArgsToRows } from '@utils/anchor';
+import { mapIxArgsToRows } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
 import React, { useState } from 'react';
 import { Code } from 'react-feather';
@@ -10,43 +9,22 @@ import { Code } from 'react-feather';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
 import { fromBase64 } from '@/app/shared/lib/bytes';
-import { Logger } from '@/app/shared/lib/logger';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-type DecodedEvent = { name: string; data: any };
-type EventEntry = { event: DecodedEvent | null; rawEventData: string };
+import type { DecodedEvent, EventEntry } from '../lib/decode-program-events';
 
 export function ProgramEventsCard({
-    eventPayloads,
+    entries,
     program,
     instructionIndex,
+    childIndex,
 }: {
-    eventPayloads: ProgramEventPayload[];
+    entries: EventEntry[];
     program: Program;
     instructionIndex: number;
+    childIndex?: number;
 }) {
-    // Decode each payload, keeping its raw bytes paired so the Raw view stays aligned. An undecodable
-    // `Program data:` payload still renders as an "Unknown Event" (raw bytes), mirroring how unknown
-    // instructions render; an undecodable base64-guessed `Program log:` payload is dropped (likely not
-    // an event of this program).
-    const entries = eventPayloads
-        .map(({ data, kind }): EventEntry | null => {
-            let event: DecodedEvent | null = null;
-            try {
-                event = decodeEventFromLog(data, program);
-            } catch (error) {
-                Logger.error(error);
-            }
-            if (event) return { event, rawEventData: data };
-            return kind === 'data' ? { event: null, rawEventData: data } : null;
-        })
-        .filter((entry): entry is EventEntry => entry !== null);
-
-    if (entries.length === 0) {
-        return null;
-    }
-
     return (
         <>
             {entries.map(({ event, rawEventData }, eventIndex) => (
@@ -55,6 +33,7 @@ export function ProgramEventsCard({
                     event={event}
                     eventIndex={eventIndex}
                     instructionIndex={instructionIndex}
+                    childIndex={childIndex}
                     program={program}
                     rawEventData={rawEventData}
                 />
@@ -67,19 +46,20 @@ function EventCard({
     event,
     eventIndex,
     instructionIndex,
+    childIndex,
     program,
     rawEventData,
 }: {
-    event: DecodedEvent | null;
+    event: DecodedEvent | undefined;
     eventIndex: number;
     instructionIndex: number;
+    childIndex: number | undefined;
     program: Program;
     rawEventData: string;
 }) {
     const [showRaw, setShowRaw] = useState(false);
     const eventDef = event ? program.idl.events?.find(e => e.name === event.name) : undefined;
-    // Event fields are stored in the types section, not on the event itself
-    const eventFields = event ? program.idl.types?.find((type: any) => type.name === event.name) : undefined;
+    const eventFields = event ? program.idl.types?.find(type => type.name === event.name) : undefined;
     const fields = ((eventFields?.type as IdlTypeDefTyStruct)?.fields as IdlField[]) ?? [];
 
     // An unknown event has no decoded view — show its raw bytes only.
@@ -90,7 +70,8 @@ function EventCard({
             <CardHeader ui="dashkit">
                 <CardTitle as="h3" ui="dashkit" className="flex items-center">
                     <Badge ui="dashkit" variant="info" className="mr-1.5">
-                        #{instructionIndex + 1} · event {eventIndex + 1}
+                        #{instructionIndex + 1}
+                        {childIndex !== undefined ? `.${childIndex + 1}` : ''} · event {eventIndex + 1}
                     </Badge>
                     {event ? camelToTitleCase(event.name) : 'Unknown Event'}
                 </CardTitle>
@@ -120,6 +101,7 @@ function EventCard({
                         </BaseTable.Row>
                     ) : (
                         event &&
+                        eventDef &&
                         fields.length > 0 && (
                             <>
                                 <BaseTable.SectionRow>
@@ -127,7 +109,7 @@ function EventCard({
                                     <BaseTable.Cell>Type</BaseTable.Cell>
                                     <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
                                 </BaseTable.SectionRow>
-                                {mapIxArgsToRows(event.data, { ...eventDef, args: fields } as any, program.idl)}
+                                {mapIxArgsToRows(event.data, { ...eventDef, accounts: [], args: fields }, program.idl)}
                             </>
                         )
                     )}

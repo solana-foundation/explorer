@@ -3,6 +3,7 @@ import { nextjsParameters } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
+import { decodeProgramEvents } from '../../lib/decode-program-events';
 import { ProgramEventsCard } from '../ProgramEventsCard';
 
 const SAMPLE_DISCRIMINATOR = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -61,7 +62,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const args = {
-    eventPayloads: [{ data: sampleEventBytes.toString('base64'), kind: 'data' as const }],
+    entries: decodeProgramEvents([{ data: sampleEventBytes.toString('base64'), kind: 'data' }], sampleProgram),
     instructionIndex: 0,
     program: sampleProgram,
 };

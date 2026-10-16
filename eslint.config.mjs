@@ -812,7 +812,6 @@ export default tseslint.config(
             'app/components/inspector/AddressTableLookupsCard.tsx',
             'app/components/inspector/AddressWithContext.tsx',
             'app/components/inspector/InstructionsSection.tsx',
-            'app/components/instruction/ProgramEventsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
             'app/components/shared/StatusBadge.tsx',
             'app/components/shared/account/ProgramHeader.tsx',
@@ -972,7 +971,6 @@ export default tseslint.config(
             'app/components/common/BaseInstructionCard.tsx',
             'app/components/common/InspectorInstructionCard.tsx',
             'app/components/inspector/InstructionsSection.tsx',
-            'app/components/instruction/ProgramEventsCard.tsx',
             'app/components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
 
