@@ -67,6 +67,7 @@ describe('AnchorDetailsCard', () => {
 
             expect(screen.getByText('Account Name')).toBeInTheDocument();
             expect(screen.getAllByText('Program')).toHaveLength(1);
+            expectProgramLink();
         },
     );
 
@@ -79,6 +80,7 @@ describe('AnchorDetailsCard', () => {
                 screen.getByText('Failed to decode account data according to the public Anchor interface'),
             ).toBeInTheDocument();
             expect(screen.getAllByText('Program')).toHaveLength(1);
+            expectProgramLink();
         },
     );
 
@@ -189,6 +191,13 @@ describe('AnchorDetailsCard', () => {
         expect(screen.queryByText('Events')).not.toBeInTheDocument();
     });
 });
+
+function expectProgramLink() {
+    expect(screen.getByRole('link', { name: 'AmmV3' })).toHaveAttribute(
+        'href',
+        `/address/${program.programId.toBase58()}`,
+    );
+}
 
 function makeIx(data: number[]) {
     return new TransactionInstruction({
