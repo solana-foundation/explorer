@@ -3,11 +3,11 @@ import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import {
     type InstructionSurface,
     InstructionSurfaceProvider,
+    NameOnlyDetailsCard,
     toInstructionNode,
     UnknownDetailsCard,
 } from '@entities/instruction-card';
 import {
-    type DispatchResult,
     isParsedInstruction,
     type ParserProgramLabel,
     toParsedTransaction,
@@ -34,11 +34,8 @@ import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/d
 import { SolanaAttestationDetailsCard } from '@features/decode-instruction-sas';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
-import { MangoDetailsCard } from '@features/instruction-program-mango';
 import { PythDetailsCard } from '@features/instruction-program-pyth';
-import { SerumDetailsCard } from '@features/instruction-program-serum';
-import { TokenSwapDetailsCard } from '@features/instruction-program-token-swap';
-import { WormholeDetailsCard } from '@features/instruction-program-wormhole';
+import { SERUM_PROGRAM_LABEL, SerumDetailsCard } from '@features/instruction-program-serum';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import {
@@ -50,7 +47,7 @@ import {
 } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import dynamic from 'next/dynamic';
-import { type ComponentType, useMemo } from 'react';
+import { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { resolveInnerInstructions } from '@/app/entities/transaction-data';
@@ -76,20 +73,11 @@ const PmpDetailsCard = dynamic(() => import('@features/decode-instruction-pmp').
     ssr: false,
 });
 
-type VendoredDecoderCardProps = {
-    ix: DispatchResult;
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-};
-
-// Programs whose decoder is vendored under packages/decoder-*: each card reads the dispatcher's verdict.
-const VENDORED_DECODER_CARDS: Partial<Record<ParserProgramLabel, ComponentType<VendoredDecoderCardProps>>> = {
-    mango: MangoDetailsCard,
-    serum: SerumDetailsCard,
-    'token-swap': TokenSwapDetailsCard,
-    wormhole: WormholeDetailsCard,
+// Programs decoded by name only. `programName` overrides the registry name in the card title.
+const NAME_ONLY_PROGRAMS: Partial<Record<ParserProgramLabel, { programName?: string }>> = {
+    mango: {},
+    'token-swap': { programName: 'Token Swap' },
+    wormhole: { programName: 'Wormhole' },
 };
 
 const INSPECTOR_SURFACE: InstructionSurface = {
@@ -293,11 +281,20 @@ function InspectorInstructionCard({
     }
 
     const programLabel = dispatcher.getInstructionParser(programId.toBase58())?.programLabel;
-    const VendoredDecoderCard = programLabel && VENDORED_DECODER_CARDS[programLabel];
-    if (VendoredDecoderCard) {
+    const nameOnly = programLabel && NAME_ONLY_PROGRAMS[programLabel];
+    if (nameOnly) {
+        return (
+            <NameOnlyDetailsCard
+                node={toInstructionNode({ childIndex, index, innerCards, ix })}
+                name={isParsedInstruction(parsedIx) ? parsedIx.parsed.type : undefined}
+                programName={nameOnly.programName}
+            />
+        );
+    }
+    if (programLabel === SERUM_PROGRAM_LABEL) {
         return (
             <ErrorBoundary fallback={unknownCard}>
-                <VendoredDecoderCard
+                <SerumDetailsCard
                     ix={parsedIx}
                     raw={ix}
                     index={index}
