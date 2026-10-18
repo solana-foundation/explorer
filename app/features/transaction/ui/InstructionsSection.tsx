@@ -4,13 +4,13 @@ import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upg
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
-import { toInstructionNode, TxInstructionSurface, UnknownDetailsCard } from '@entities/instruction-card';
 import {
-    type DispatchResult,
-    isParsedInstruction,
-    type ParserProgramLabel,
-    useInstructionParser,
-} from '@entities/instruction-parser';
+    NameOnlyDetailsCard,
+    toInstructionNode,
+    TxInstructionSurface,
+    UnknownDetailsCard,
+} from '@entities/instruction-card';
+import { isParsedInstruction, type ParserProgramLabel, useInstructionParser } from '@entities/instruction-parser';
 import { trustedInnerInstructions } from '@entities/transaction-data';
 import { isPythProgramId } from '@explorer/decoder-pyth/detection';
 import {
@@ -40,11 +40,8 @@ import { isProgramMetadataInstruction } from '@features/decode-instruction-pmp/d
 import { isSolanaAttestationInstruction, SolanaAttestationDetailsCard } from '@features/decode-instruction-sas';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { isZkElGamalProofInstruction, ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
-import { MangoDetailsCard } from '@features/instruction-program-mango';
 import { PythDetailsCard } from '@features/instruction-program-pyth';
-import { SerumDetailsCard } from '@features/instruction-program-serum';
-import { TokenSwapDetailsCard } from '@features/instruction-program-token-swap';
-import { WormholeDetailsCard } from '@features/instruction-program-wormhole';
+import { SERUM_PROGRAM_LABEL, SerumDetailsCard } from '@features/instruction-program-serum';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
 import {
@@ -64,7 +61,6 @@ import {
     ParsedTransaction,
     PartiallyDecodedInstruction,
     SignatureResult,
-    TransactionInstruction,
     TransactionSignature,
 } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
@@ -73,20 +69,11 @@ import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-type VendoredDecoderCardProps = {
-    ix: DispatchResult;
-    raw: TransactionInstruction;
-    index: number;
-    innerCards?: JSX.Element[];
-    childIndex?: number;
-};
-
-// Programs whose decoder is vendored under packages/decoder-*: each card reads the dispatcher's verdict.
-const VENDORED_DECODER_CARDS: Partial<Record<ParserProgramLabel, React.ComponentType<VendoredDecoderCardProps>>> = {
-    mango: MangoDetailsCard,
-    serum: SerumDetailsCard,
-    'token-swap': TokenSwapDetailsCard,
-    wormhole: WormholeDetailsCard,
+// Programs decoded by name only. `programName` overrides the registry name in the card title.
+const NAME_ONLY_PROGRAMS: Partial<Record<ParserProgramLabel, { programName?: string }>> = {
+    mango: {},
+    'token-swap': { programName: 'Token Swap' },
+    wormhole: { programName: 'Wormhole' },
 };
 
 // The PMP card carries the generated client plus pako/yaml/smol-toml (~35 kB gzip), which only a transaction that
@@ -362,15 +349,25 @@ function InstructionCard({
         return <UnknownDetailsCard key={key} node={node} />;
     }
     const programLabel = dispatcher.getInstructionParser(transactionIx.programId.toBase58())?.programLabel;
-    const VendoredDecoderCard = programLabel && VENDORED_DECODER_CARDS[programLabel];
-    if (VendoredDecoderCard) {
+    const nameOnly = programLabel && NAME_ONLY_PROGRAMS[programLabel];
+    if (nameOnly || programLabel === SERUM_PROGRAM_LABEL) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
         if (!dispatched) {
             return <UnknownDetailsCard key={key} node={node} />;
         }
+        if (nameOnly) {
+            return (
+                <NameOnlyDetailsCard
+                    key={key}
+                    node={node}
+                    name={isParsedInstruction(dispatched) ? dispatched.parsed.type : undefined}
+                    programName={nameOnly.programName}
+                />
+            );
+        }
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
-                <VendoredDecoderCard
+                <SerumDetailsCard
                     ix={dispatched}
                     raw={transactionIx}
                     index={index}

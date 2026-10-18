@@ -6,14 +6,13 @@ import {
     type InstructionField,
     InstructionFields,
     type InstructionNode,
+    NameOnlyDetailsCard,
     text,
 } from '@entities/instruction-card';
 import type { DispatchResult } from '@entities/instruction-parser';
 import { isDeprecatedSerumProgram, OPENBOOK_DEX_PROGRAM_LABEL, SERUM_INSTRUCTION_NAMES } from '@explorer/decoder-serum';
-import { useCluster } from '@providers/cluster';
 import type { Address } from '@solana/kit';
 import type { TransactionInstruction } from '@solana/web3.js';
-import { getProgramName } from '@utils/tx';
 import React from 'react';
 
 import type { SerumParsed } from '../lib/serum-parser';
@@ -29,15 +28,13 @@ type SerumDetailsCardProps = {
 };
 
 export function SerumDetailsCard({ ix, raw, index, innerCards, childIndex }: SerumDetailsCardProps) {
-    const { cluster } = useCluster();
     const node: InstructionNode = { childIndex, index, innerCards, ix: raw, programId: raw.programId };
     const parsed = 'unknown' in ix ? undefined : (ix.parsed as SerumParsed);
     const name = parsed ? SERUM_INSTRUCTION_NAMES[parsed.type] : 'Unknown';
 
     // Dead Serum DEX deployments get a name-only card; the active OpenBook fork keeps full decoding.
-    const programId = ix.programId.toBase58();
-    if (isDeprecatedSerumProgram(programId)) {
-        return <InstructionCardView node={node} title={`${getProgramName(programId, cluster)}: ${name}`} defaultRaw />;
+    if (isDeprecatedSerumProgram(ix.programId.toBase58())) {
+        return <NameOnlyDetailsCard node={node} name={name} />;
     }
 
     const title = `${OPENBOOK_DEX_PROGRAM_LABEL} Program: ${name}`;

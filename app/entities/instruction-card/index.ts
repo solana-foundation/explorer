@@ -24,6 +24,7 @@ export { DECODED_TABLE_COLUMNS, DecodedInstructionCard } from './ui/DecodedInstr
 export { InstructionAddress } from './ui/InstructionAddress';
 export { InstructionCardView } from './ui/InstructionCardView';
 export { InstructionFields } from './ui/InstructionFields';
+export { NameOnlyDetailsCard } from './ui/NameOnlyDetailsCard';
 export { ProgramField } from './ui/ProgramField';
 export { TxInstructionSurface } from './ui/TxInstructionSurface';
 export { UnknownDetailsCard } from './ui/UnknownDetailsCard';
