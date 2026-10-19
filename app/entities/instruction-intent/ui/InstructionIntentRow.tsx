@@ -5,8 +5,8 @@ import { BaseTable } from '@/app/shared/ui/Table';
 import { useInstructionIntentContext } from '../model/instruction-intent-context';
 import { InstructionIntentPanel } from './InstructionIntentPanel';
 
-export function InstructionIntentRow() {
-    const intent = useInstructionIntentContext();
+export function InstructionIntentRow({ innerIxIndex }: { innerIxIndex?: number }) {
+    const intent = useInstructionIntentContext(innerIxIndex);
     if (!intent?.open || intent.result.status === 'idle') return undefined;
 
     return (

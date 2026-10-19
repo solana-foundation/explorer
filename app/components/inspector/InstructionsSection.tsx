@@ -114,6 +114,16 @@ export function InstructionsSection({
     }, [allLookupsResolved, compiledInnerInstructions, lookupTablesKey, message]);
     // Stable references, so the eager parse in each card provider runs once per decoded message
     const kitInstructions = useMemo(() => decoded?.instructions.map(ix => toKitInstruction(ix)), [decoded]);
+    const kitInnerInstructions = useMemo(
+        () =>
+            new Map(
+                [...(decoded?.innerByIndex ?? [])].map(([index, group]) => [
+                    index,
+                    group.map(ix => ix && toKitInstruction(ix)),
+                ]),
+            ),
+        [decoded],
+    );
 
     if (failedLookupIndex >= 0) {
         return (
@@ -133,25 +143,38 @@ export function InstructionsSection({
         <CollapsibleSection id="instructions" title="Instructions" className="">
             <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>
                 {decoded.instructions.map((ix, index) => {
-                    const innerCards = decoded.innerByIndex?.get(index)?.map((innerIx, childIndex) =>
-                        innerIx ? (
-                            <ErrorBoundary
+                    const innerCards = decoded.innerByIndex?.get(index)?.map((innerIx, childIndex) => {
+                        const kitInnerInstruction = kitInnerInstructions.get(index)?.[childIndex];
+                        return innerIx ? (
+                            <InstructionIntentProvider
                                 key={childIndex}
-                                fallback={
-                                    <UnknownDetailsCard node={toInstructionNode({ childIndex, index, ix: innerIx })} />
+                                innerIxIndex={childIndex}
+                                programId={innerIx.programId.toBase58()}
+                                ixFetchResult={
+                                    kitInnerInstruction
+                                        ? { instruction: kitInnerInstruction, status: 'success' }
+                                        : { status: 'loading' }
                                 }
                             >
-                                <InspectorInstructionCard
-                                    index={index}
-                                    childIndex={childIndex}
-                                    ix={innerIx}
-                                    message={message}
-                                />
-                            </ErrorBoundary>
+                                <ErrorBoundary
+                                    fallback={
+                                        <UnknownDetailsCard
+                                            node={toInstructionNode({ childIndex, index, ix: innerIx })}
+                                        />
+                                    }
+                                >
+                                    <InspectorInstructionCard
+                                        index={index}
+                                        childIndex={childIndex}
+                                        ix={innerIx}
+                                        message={message}
+                                    />
+                                </ErrorBoundary>
+                            </InstructionIntentProvider>
                         ) : (
                             <UndisplayableInstructionCard key={childIndex} index={index} childIndex={childIndex} />
-                        ),
-                    );
+                        );
+                    });
 
                     const kitInstruction = kitInstructions?.[index];
                     return (

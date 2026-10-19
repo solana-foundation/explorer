@@ -75,7 +75,7 @@ import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { readRawInstructions } from '../lib/read-raw-instructions';
+import { readRawInnerInstructions, readRawInstructions } from '../lib/read-raw-instructions';
 import { CommonInstructionDetailsCard } from './CommonInstructionDetailsCard';
 
 const SerumDetailsCard = dynamic(
@@ -100,6 +100,7 @@ export function InstructionsSection({ signature }: SignatureProps) {
     const rawDetails = useRawTransactionDetails(signature);
     const raw = rawDetails?.data?.raw;
     const rawInstructions = React.useMemo(() => (raw ? readRawInstructions(raw) : undefined), [raw]);
+    const rawInnerInstructions = React.useMemo(() => (raw ? readRawInnerInstructions(raw) : undefined), [raw]);
 
     const result = status?.data?.info?.result;
     const transactionWithMeta = details?.data?.transactionWithMeta;
@@ -138,40 +139,54 @@ export function InstructionsSection({ signature }: SignatureProps) {
 
                         if (index in innerInstructions) {
                             innerInstructions[index].forEach((ix, childIndex) => {
+                                const innerProgramId = ix.programId.toBase58();
                                 const res = (
-                                    <ErrorBoundary
+                                    <InstructionIntentProvider
                                         key={`${index}-${childIndex}`}
-                                        fallback={
-                                            <InnerCardFallback
-                                                ix={ix}
-                                                tx={transaction}
+                                        innerIxIndex={childIndex}
+                                        programId={innerProgramId}
+                                        ixFetchResult={toInstructionFetchResult({
+                                            fetchStatus: rawDetails?.status,
+                                            index: childIndex,
+                                            instructions: rawInnerInstructions?.get(index),
+                                            programId: innerProgramId,
+                                        })}
+                                    >
+                                        <ErrorBoundary
+                                            fallback={
+                                                <InnerCardFallback
+                                                    ix={ix}
+                                                    tx={transaction}
+                                                    index={index}
+                                                    childIndex={childIndex}
+                                                />
+                                            }
+                                        >
+                                            <InstructionCard
                                                 index={index}
+                                                ix={ix}
+                                                result={result}
+                                                signature={signature}
+                                                tx={transaction}
                                                 childIndex={childIndex}
                                             />
-                                        }
-                                    >
-                                        <InstructionCard
-                                            index={index}
-                                            ix={ix}
-                                            result={result}
-                                            signature={signature}
-                                            tx={transaction}
-                                            childIndex={childIndex}
-                                        />
-                                    </ErrorBoundary>
+                                        </ErrorBoundary>
+                                    </InstructionIntentProvider>
                                 );
                                 innerCards.push(res);
                             });
                         }
 
+                        const programId = instruction.programId.toBase58();
                         return (
                             <InstructionIntentProvider
                                 key={`${index}`}
-                                programId={instruction.programId.toBase58()}
+                                programId={programId}
                                 ixFetchResult={toInstructionFetchResult({
                                     fetchStatus: rawDetails?.status,
                                     index,
                                     instructions: rawInstructions,
+                                    programId,
                                 })}
                             >
                                 <InstructionCard

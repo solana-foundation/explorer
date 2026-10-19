@@ -97,7 +97,7 @@ function renderTwoMintToIntents(firstAmount: bigint, secondAmount: bigint) {
 }
 
 function getSecondCardFetchResult(fetchStatus: FetchStatus | undefined, instructions?: readonly KitInstruction[]) {
-    return toInstructionFetchResult({ fetchStatus, index: 1, instructions });
+    return toInstructionFetchResult({ fetchStatus, index: 1, instructions, programId: TOKEN_PROGRAM_ADDRESS });
 }
 
 beforeEach(() => {
@@ -319,6 +319,12 @@ describe('toInstructionFetchResult', () => {
             instruction: second,
             status: 'success',
         });
+    });
+
+    it('should report failed when the instruction at the card index belongs to another program', () => {
+        expect(
+            getSecondCardFetchResult(FetchStatus.Fetched, [transferSolInstruction(), transferSolInstruction()]),
+        ).toEqual({ status: 'failed' });
     });
 
     it('should report failed when the raw fetch fails', () => {

@@ -16,23 +16,23 @@ const mocks = vi.hoisted(() => ({ useInstructionIntent: vi.fn() }));
 
 vi.mock('../../model/use-instruction-intent', () => ({ useInstructionIntent: mocks.useInstructionIntent }));
 
-function IntentConsumers() {
+function IntentConsumers({ innerIxIndex }: { innerIxIndex?: number }) {
     return (
         <>
-            <InstructionIntentButton />
+            <InstructionIntentButton innerIxIndex={innerIxIndex} />
             <table>
                 <tbody>
-                    <InstructionIntentRow />
+                    <InstructionIntentRow innerIxIndex={innerIxIndex} />
                 </tbody>
             </table>
         </>
     );
 }
 
-function renderIntentProvider(programId: string, ixFetchResult: InstructionFetchResult) {
+function renderIntentProvider(programId: string, ixFetchResult: InstructionFetchResult, cardInnerIxIndex?: number) {
     return render(
         <InstructionIntentProvider programId={programId} ixFetchResult={ixFetchResult}>
-            <IntentConsumers />
+            <IntentConsumers innerIxIndex={cardInnerIxIndex} />
         </InstructionIntentProvider>,
     );
 }
@@ -45,6 +45,14 @@ describe('InstructionIntentButton', () => {
 
     it('should render nothing when outside a provider', () => {
         render(<IntentConsumers />);
+
+        expect(screen.queryByTestId('instruction-intent-trigger')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('instruction-intent-panel')).not.toBeInTheDocument();
+    });
+
+    it("should render nothing when an inner card sits in its parent's provider", () => {
+        mocks.useInstructionIntent.mockReturnValue({ reason: 'no-metadata', status: 'unavailable' });
+        renderIntentProvider(SYSTEM_PROGRAM_ADDRESS, LOADING, 0);
 
         expect(screen.queryByTestId('instruction-intent-trigger')).not.toBeInTheDocument();
         expect(screen.queryByTestId('instruction-intent-panel')).not.toBeInTheDocument();

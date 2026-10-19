@@ -6,6 +6,7 @@ import type { InstructionFetchResult, InstructionIntentResult } from '../lib/int
 import { useInstructionIntent } from './use-instruction-intent';
 
 type InstructionIntentContextValue = {
+    innerIxIndex?: number;
     open: boolean;
     toggle: () => void;
     result: InstructionIntentResult;
@@ -16,14 +17,17 @@ const InstructionIntentContext = createContext<InstructionIntentContextValue | u
 
 /**
  * The intent state of one instruction card, shared by the Intent button and its body Panel.
+ * `innerIxIndex` marks the inner instruction the state belongs to.
  */
 export function InstructionIntentProvider({
     programId,
     ixFetchResult,
+    innerIxIndex,
     children,
 }: {
     programId: string;
     ixFetchResult: InstructionFetchResult;
+    innerIxIndex?: number;
     children: ReactNode;
 }) {
     const panelId = useId();
@@ -37,12 +41,13 @@ export function InstructionIntentProvider({
     };
 
     return (
-        <InstructionIntentContext.Provider value={{ open, panelId, result, toggle }}>
+        <InstructionIntentContext.Provider value={{ innerIxIndex, open, panelId, result, toggle }}>
             {children}
         </InstructionIntentContext.Provider>
     );
 }
 
-export function useInstructionIntentContext(): InstructionIntentContextValue | undefined {
-    return useContext(InstructionIntentContext);
+export function useInstructionIntentContext(innerIxIndex?: number): InstructionIntentContextValue | undefined {
+    const intent = useContext(InstructionIntentContext);
+    return intent?.innerIxIndex === innerIxIndex ? intent : undefined;
 }

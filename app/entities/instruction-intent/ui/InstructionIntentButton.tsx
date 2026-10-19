@@ -3,8 +3,8 @@
 import { useInstructionIntentContext } from '../model/instruction-intent-context';
 import { BaseInstructionIntentButton } from './BaseInstructionIntentButton';
 
-export function InstructionIntentButton() {
-    const intent = useInstructionIntentContext();
+export function InstructionIntentButton({ innerIxIndex }: { innerIxIndex?: number }) {
+    const intent = useInstructionIntentContext(innerIxIndex);
     if (!intent) return undefined;
 
     const { open, panelId, result, toggle } = intent;

@@ -18,7 +18,10 @@ vi.mock('@/app/entities/instruction-intent/model/use-instruction-intent', () => 
     useInstructionIntent: () => ({ reason: 'no-metadata', status: 'unavailable' }),
 }));
 
-function renderInspectorInstructionCard({ childIndex }: { childIndex?: number } = {}) {
+function renderInspectorInstructionCard({
+    cardChildIndex,
+    providerInnerIxIndex,
+}: { cardChildIndex?: number; providerInnerIxIndex?: number } = {}) {
     const ix = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: SystemProgram.programId });
 
     return render(
@@ -27,11 +30,12 @@ function renderInspectorInstructionCard({ childIndex }: { childIndex?: number } 
                 <InstructionIntentProvider
                     programId={SystemProgram.programId.toBase58()}
                     ixFetchResult={{ status: 'loading' }}
+                    innerIxIndex={providerInnerIxIndex}
                 >
                     <InspectorInstructionCard
                         ix={ix}
                         index={0}
-                        childIndex={childIndex}
+                        childIndex={cardChildIndex}
                         title="System Program: Transfer"
                         result={{ err: null }}
                     />
@@ -50,10 +54,18 @@ describe('InspectorInstructionCard intent', () => {
         expect(screen.getByTestId('instruction-intent-panel')).toBeInTheDocument();
     });
 
-    it('should not show the intent button when the card is an inner card', async () => {
-        renderInspectorInstructionCard({ childIndex: 0 });
+    it("should not show the parent's intent when an inner card sits in the parent's provider", async () => {
+        renderInspectorInstructionCard({ cardChildIndex: 0 });
 
         expect(await screen.findByText('System Program: Transfer')).toBeInTheDocument();
         expect(screen.queryByTestId('instruction-intent-trigger')).not.toBeInTheDocument();
+    });
+
+    it('should open the intent row when the button on an inner card with its own provider is clicked', async () => {
+        renderInspectorInstructionCard({ cardChildIndex: 0, providerInnerIxIndex: 0 });
+
+        await userEvent.click(await screen.findByTestId('instruction-intent-trigger'));
+
+        expect(screen.getByTestId('instruction-intent-panel')).toBeInTheDocument();
     });
 });

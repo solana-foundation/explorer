@@ -60,7 +60,6 @@ export function InspectorInstructionCard({
     const scrollAnchorRef = useScrollAnchor(
         getInstructionCardScrollAnchorId(childIndex !== undefined ? [index + 1, childIndex + 1] : [index + 1]),
     );
-    const isTopLevel = childIndex === undefined;
 
     return (
         <CollapsibleCard
@@ -76,7 +75,7 @@ export function InspectorInstructionCard({
             }
             headerButtons={
                 <div className="flex items-center gap-1.5">
-                    {isTopLevel && <InstructionIntentButton />}
+                    <InstructionIntentButton innerIxIndex={childIndex} />
                     <Button
                         ui="dashkit"
                         size="sm"
@@ -93,7 +92,7 @@ export function InspectorInstructionCard({
         >
             <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
                 <BaseTable.Body>
-                    {isTopLevel && <InstructionIntentRow />}
+                    <InstructionIntentRow innerIxIndex={childIndex} />
                     {(showRaw || alwaysShowProgramRow) && (
                         <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
                     )}
