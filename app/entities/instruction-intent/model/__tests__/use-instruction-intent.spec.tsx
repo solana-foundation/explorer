@@ -124,7 +124,7 @@ describe('useInstructionIntent', () => {
         expect(renderClosedCardIntent(SYSTEM_IDLS, LOADING)).toEqual({ status: 'idle' });
     });
 
-    it('should report idle without planning or reading accounts when the card is closed and the instruction has an intent', () => {
+    it('should report idle without fetching accounts when the card is closed and the instruction has an intent', () => {
         expect(renderClosedCardIntent(SYSTEM_IDLS, fetched(transferSolInstruction()))).toEqual({ status: 'idle' });
         expect(mocks.getRequiredAccountsForDisplay).not.toHaveBeenCalled();
         expect(mocks.fetchEncodedAccounts).not.toHaveBeenCalled();
@@ -169,7 +169,7 @@ describe('useInstructionIntent', () => {
         });
     });
 
-    it('should not read accounts when the intent plans none', async () => {
+    it('should not fetch accounts when the intent plans none', async () => {
         mocks.useProgramIdls.mockReturnValue(SYSTEM_IDLS);
         const ixFetchResult = fetched(transferSolInstruction());
 
@@ -196,7 +196,7 @@ describe('useInstructionIntent', () => {
         expect(result.current.status === 'ready' && result.current.result.usedAccountData).toBe(true);
     });
 
-    it('should share one account read when two instructions read one mint', async () => {
+    it('should share one account fetch when two instructions require one mint', async () => {
         mocks.fetchEncodedAccounts.mockResolvedValue([mintAccount(6)]);
 
         const { result } = renderTwoMintToIntents(1_500_000n, 2_500_000n);
@@ -215,7 +215,7 @@ describe('useInstructionIntent', () => {
         expect(mocks.getInstructionDisplayFromParsedInstruction).toHaveBeenCalledTimes(1);
     });
 
-    it('should report loading when a failed account read is retried', async () => {
+    it('should report loading when a failed account fetch is retried', async () => {
         mocks.fetchEncodedAccounts.mockRejectedValueOnce(new Error('429')).mockResolvedValueOnce([mintAccount(6)]);
         const ixFetchResult = fetched(mintToInstruction());
         const statuses: InstructionIntentResult['status'][] = [];

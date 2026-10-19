@@ -6,7 +6,6 @@ import type { InstructionIntent, IntentField, IntentSentencePart } from './inten
 
 /**
  * Builds the intent of a parsed instruction from accounts fetched beforehand.
- * An account missing from `accounts` reads as nonexistent, so the SDK withholds a sentence it cannot scale.
  */
 export async function computeInstructionIntent({
     root,
@@ -33,7 +32,6 @@ export async function computeInstructionIntent({
         fields: display.fields,
         interpolated,
         sentenceParts,
-        // The account note belongs to a sentence, and a withheld sentence already shows its own note
         usedAccountData: interpolated && accounts.some(account => account.exists),
     };
 }
