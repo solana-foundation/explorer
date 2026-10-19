@@ -1,25 +1,48 @@
-import { type AnchorIdl, type ProgramIdls } from '@entities/idl';
+import { type AnchorIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { Cluster } from '@/app/utils/cluster';
 
 import { AnchorProgramName } from '../anchor';
 
 const idlState: Pick<ProgramIdls, 'candidates'> = { candidates: [] };
+const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@entities/idl', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/idl')>()),
-    useProgramIdls: () => idlState,
+    useProgramIdls: (...args: unknown[]) => useProgramIdls(...args),
 }));
 
 describe('AnchorProgramName', () => {
+    beforeEach(() => useProgramIdls.mockClear());
+
+    it('should read the IDLs of the program', () => {
+        idlState.candidates = [];
+
+        render(<AnchorProgramName programId={new PublicKey(anchorModernIdl.address)} url="http://localhost" />);
+
+        expect(useProgramIdls).toHaveBeenCalledWith(anchorModernIdl.address, 'http://localhost', Cluster.MainnetBeta);
+    });
+
     it.each([
         [
             'an Anchor-standard PMP IDL before the Anchor IDL account',
             [
-                { address: undefined, idl: namedIdl('pmp_program'), source: 'programMetadata', standard: 'Anchor' },
-                { address: undefined, idl: namedIdl('anchor_program'), source: 'anchor', standard: 'Anchor' },
+                {
+                    idl: namedIdl('pmp_program'),
+                    idlAddress: undefined,
+                    source: IdlVariant.ProgramMetadata,
+                    standard: 'Anchor',
+                },
+                {
+                    idl: namedIdl('anchor_program'),
+                    idlAddress: undefined,
+                    source: IdlVariant.Anchor,
+                    standard: 'Anchor',
+                },
             ],
             'PmpProgram',
         ],
@@ -27,9 +50,9 @@ describe('AnchorProgramName', () => {
             'an Anchor IDL that declares no account types',
             [
                 {
-                    address: undefined,
                     idl: { ...namedIdl('stateless_program'), accounts: [] },
-                    source: 'anchor',
+                    idlAddress: undefined,
+                    source: IdlVariant.Anchor,
                     standard: 'Anchor',
                 },
             ],

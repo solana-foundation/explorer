@@ -1,20 +1,22 @@
 // @vitest-environment jsdom
 
 import { type ProgramIdls } from '@entities/idl';
+import { IdlVariant } from '@entities/idl/model/idl-variant';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useIdlInstructionDecode } from '../use-idl-instruction-decode';
 
-// Mock the resolution boundary + the decode helper so the test pins the hook's own job — candidate choice,
-// argument forwarding, and gating — not the SWR/decode machinery (each tested in its own slice). The
-// panic→Unknown degrade is `safeDecodeInstructionWithIdl`'s responsibility and is tested with the lib.
+// Mock the resolution boundary and the decode helper, so the test covers only the hook's candidate choice,
+// argument forwarding and gating. The SWR and decode code have their own specs. The panic→Unknown degrade
+// belongs to `safeDecodeInstructionWithIdl` and is tested with the lib.
 const idlState: Pick<ProgramIdls, 'candidates'> = { candidates: [] };
 const safeDecodeInstructionWithIdl = vi.fn();
+const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: 'devnet', url: 'http://localhost' }) }));
-vi.mock('@entities/idl', () => ({ useProgramIdls: () => idlState }));
+vi.mock('@entities/idl', () => ({ useProgramIdls: (...args: unknown[]) => useProgramIdls(...args) }));
 vi.mock('../../lib/decode-instruction-with-idl', () => ({
     safeDecodeInstructionWithIdl: (...a: unknown[]) => safeDecodeInstructionWithIdl(...a),
 }));
@@ -22,13 +24,14 @@ vi.mock('../../lib/decode-instruction-with-idl', () => ({
 const raw = new TransactionInstruction({ data: Buffer.from([1, 2, 3]), keys: [], programId: PublicKey.unique() });
 const programId = raw.programId.toString();
 const anchorIdl = { kind: 'anchor' } as never;
-const pmpIdl = { kind: 'pmp' } as never;
-const ANCHOR = { address: undefined, idl: anchorIdl, source: 'anchor', standard: 'Anchor' } as const;
-const PMP = { address: undefined, idl: pmpIdl, source: 'programMetadata', standard: 'Codama' } as const;
+const pmpIdl = { kind: 'rootNode', standard: 'codama' } as never;
+const ANCHOR = { idl: anchorIdl, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' } as const;
+const PMP = { idl: pmpIdl, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' } as const;
 
 describe('useIdlInstructionDecode', () => {
     beforeEach(() => {
         safeDecodeInstructionWithIdl.mockReset();
+        useProgramIdls.mockClear();
         idlState.candidates = [];
     });
 
@@ -42,7 +45,7 @@ describe('useIdlInstructionDecode', () => {
         expect(result.current).toEqual({ kind: 'codama' });
     });
 
-    it('should decode with the Anchor IDL account when the program has no PMP IDL', () => {
+    it('should decode with the IDL from the Anchor IDL account when the program has no PMP IDL', () => {
         idlState.candidates = [ANCHOR];
         safeDecodeInstructionWithIdl.mockReturnValue({ kind: 'anchor' });
 
@@ -50,6 +53,12 @@ describe('useIdlInstructionDecode', () => {
 
         expect(safeDecodeInstructionWithIdl).toHaveBeenCalledWith(raw, anchorIdl, 'http://localhost');
         expect(result.current).toEqual({ kind: 'anchor' });
+    });
+
+    it('should read the IDLs of the instruction program', () => {
+        renderHook(() => useIdlInstructionDecode({ programId, raw }));
+
+        expect(useProgramIdls).toHaveBeenCalledWith(programId, 'http://localhost', 'devnet');
     });
 
     it('should return undefined and not decode while the on-chain IDLs load', () => {

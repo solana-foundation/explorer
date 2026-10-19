@@ -1,10 +1,9 @@
 import { type ProgramIdlPair } from '../api/types';
 import { type AnchorIdl, type CodamaIdl, type SupportedIdl, type TaggedIdl } from '../lib/types';
+import { IdlVariant } from './idl-variant';
 import { getIdlStandard } from './idl-version';
 
-export type OnChainIdlSource = 'programMetadata' | 'anchor';
-
-export type SourcedIdl = TaggedIdl & { source: OnChainIdlSource; address: string | undefined };
+export type SourcedIdl = TaggedIdl & { source: IdlVariant; idlAddress: string | undefined };
 
 export function getOnChainCandidates({
     programMetadataIdl,
@@ -16,16 +15,16 @@ export function getOnChainCandidates({
     if (programMetadataIdl) {
         candidates.push({
             ...tagIdl(programMetadataIdl),
-            address: programMetadataIdlAddress,
-            source: 'programMetadata',
+            idlAddress: programMetadataIdlAddress,
+            source: IdlVariant.ProgramMetadata,
         });
     }
-    if (anchorIdl) candidates.push({ ...tagIdl(anchorIdl), address: anchorIdlAddress, source: 'anchor' });
+    if (anchorIdl) candidates.push({ ...tagIdl(anchorIdl), idlAddress: anchorIdlAddress, source: IdlVariant.Anchor });
     return candidates;
 }
 
-export function getOnChainAnchorIdl(onChain: ProgramIdlPair): AnchorIdl | undefined {
-    return getFirstAnchorIdl(getOnChainCandidates(onChain).filter(candidate => candidate.source === 'anchor'));
+export function getOnChainAnchorIdl(candidates: readonly SourcedIdl[]): AnchorIdl | undefined {
+    return getFirstAnchorIdl(candidates.filter(candidate => candidate.source === IdlVariant.Anchor));
 }
 
 export function getFirstAnchorIdl(candidates: readonly SourcedIdl[]): AnchorIdl | undefined {
@@ -38,7 +37,9 @@ export function getFirstAnchorIdlWithAccounts(candidates: readonly SourcedIdl[])
 }
 
 function tagIdl(idl: SupportedIdl): TaggedIdl {
-    return getIdlStandard(idl) === 'Anchor'
-        ? { idl: idl as AnchorIdl, standard: 'Anchor' }
-        : { idl: idl as CodamaIdl, standard: 'Codama' };
+    return isCodamaIdl(idl) ? { idl, standard: 'Codama' } : { idl, standard: 'Anchor' };
+}
+
+function isCodamaIdl(idl: SupportedIdl): idl is CodamaIdl {
+    return getIdlStandard(idl) === 'Codama';
 }

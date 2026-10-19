@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 import { Cluster } from '@/app/utils/cluster';
 
-import { useProgramIdls } from '../use-program-idls';
+import { IdlVariant } from '../idl-variant';
+import { type ProgramIdls, useProgramIdls } from '../use-program-idls';
 
 const mocks = vi.hoisted(() => ({
     fetch: vi.fn(),
@@ -52,8 +53,11 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitForHook(() => expect(result.current.onChain.anchorIdl).toEqual({ name: 'anchor_idl' }));
-            expect(result.current.onChain.programMetadataIdl).toEqual({ name: 'pmp_idl' });
+            await waitForHook(() => expect(result.current.candidates).toBeDefined());
+            expect(idlBySource(result.current.candidates)).toEqual({
+                [IdlVariant.Anchor]: { name: 'anchor_idl' },
+                [IdlVariant.ProgramMetadata]: { name: 'pmp_idl' },
+            });
 
             const requestedUrl = mocks.fetch.mock.calls[0]?.[0] as string;
             expect(requestedUrl).toContain('/api/idl-latest');
@@ -68,9 +72,7 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitForHook(() => expect(result.current.isOnChainLoading).toBe(false));
-            expect(result.current.onChain.anchorIdl).toBeUndefined();
-            expect(result.current.onChain.programMetadataIdl).toBeUndefined();
+            await waitForHook(() => expect(result.current.candidates).toEqual([]));
         });
     });
 
@@ -85,14 +87,28 @@ describe('useProgramIdls', () => {
                 wrapper,
             });
 
-            await waitForHook(() => expect(result.current.onChain.anchorIdl).toEqual({ name: 'custom_anchor_idl' }));
-            expect(result.current.onChain.programMetadataIdl).toEqual({ name: 'custom_pmp_idl' });
+            await waitForHook(() => expect(result.current.candidates).toBeDefined());
+            expect(idlBySource(result.current.candidates)).toEqual({
+                [IdlVariant.Anchor]: { name: 'custom_anchor_idl' },
+                [IdlVariant.ProgramMetadata]: { name: 'custom_pmp_idl' },
+            });
             // The resolver runs against the user-supplied RPC URL (so localhost works end-to-end).
             expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
                 expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),
             );
             // The server route can't reach a user's local validator; custom clusters must not hit it.
             expect(mocks.fetch).not.toHaveBeenCalled();
+        });
+
+        it('should return undefined candidates while the client resolver loads', async () => {
+            mocks.resolveProgramIdlsClient.mockReturnValue(new Promise(() => undefined));
+
+            const { result } = renderHook(() => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.Custom), {
+                wrapper,
+            });
+
+            await waitForHook(() => expect(mocks.resolveProgramIdlsClient).toHaveBeenCalled());
+            expect(result.current.candidates).toBeUndefined();
         });
 
         it('should fall back to undefined IDLs when the resolver throws', async () => {
@@ -102,9 +118,7 @@ describe('useProgramIdls', () => {
                 wrapper,
             });
 
-            await waitForHook(() => expect(result.current.isOnChainLoading).toBe(false));
-            expect(result.current.onChain.anchorIdl).toBeUndefined();
-            expect(result.current.onChain.programMetadataIdl).toBeUndefined();
+            await waitForHook(() => expect(result.current.candidates).toEqual([]));
         });
     });
 
@@ -123,7 +137,11 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitForHook(() => expect(result.current.onChain.anchorIdl).toEqual({ name: 'local_anchor_idl' }));
+            await waitForHook(() =>
+                expect(idlBySource(result.current.candidates)).toEqual({
+                    [IdlVariant.Anchor]: { name: 'local_anchor_idl' },
+                }),
+            );
             // Resolved against the user's local RPC URL (the correct network)...
             expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
                 expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),
@@ -149,12 +167,12 @@ describe('useProgramIdls', () => {
 
             await waitForHook(() => expect(result.current.candidates).toBeDefined());
             expect(result.current.candidates?.map(candidate => candidate.source)).toEqual([
-                'programMetadata',
-                'anchor',
+                IdlVariant.ProgramMetadata,
+                IdlVariant.Anchor,
             ]);
         });
 
-        it('should return no candidates while the on-chain IDLs load', async () => {
+        it('should return undefined candidates while the on-chain IDLs load', async () => {
             mocks.fetch.mockReturnValue(new Promise(() => undefined));
 
             const { result } = renderHook(
@@ -163,8 +181,11 @@ describe('useProgramIdls', () => {
             );
 
             await waitForHook(() => expect(mocks.fetch).toHaveBeenCalled());
-            expect(result.current.isOnChainLoading).toBe(true);
             expect(result.current.candidates).toBeUndefined();
         });
     });
 });
+
+function idlBySource(candidates: ProgramIdls['candidates']) {
+    return Object.fromEntries((candidates ?? []).map(({ idl, source }) => [source, idl]));
+}

@@ -1,4 +1,4 @@
-import { type AnchorIdl, type CodamaIdl, type ProgramIdls } from '@entities/idl';
+import { type AnchorIdl, type CodamaIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import referenceIdl from '@entities/idl/mocks/anchor/reference-0.29.json';
 import { PublicKey } from '@solana/web3.js';
@@ -8,11 +8,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AccountDataTab } from '../AccountDataTab';
 
 const idlState: Pick<ProgramIdls, 'candidates'> = { candidates: [] };
+const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: 'mainnet-beta', url: 'http://localhost' }) }));
 vi.mock('@entities/idl', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/idl')>()),
-    useProgramIdls: () => idlState,
+    useProgramIdls: (...args: unknown[]) => useProgramIdls(...args),
 }));
 vi.mock('@/app/shared/ui/navigation-tabs', () => ({
     NavigationTabLink: ({ title }: { title: string }) => <span>{title}</span>,
@@ -28,12 +29,18 @@ const renderTab = () => render(<AccountDataTab programId={new PublicKey(anchorMo
 describe('AccountDataTab', () => {
     beforeEach(() => {
         idlState.candidates = [];
+        useProgramIdls.mockClear();
+    });
+
+    it('should read the IDLs of the program', () => {
+        renderTab();
+        expect(useProgramIdls).toHaveBeenCalledWith(anchorModernIdl.address, 'http://localhost', 'mainnet-beta');
     });
 
     it('should show the Anchor Data tab when an Anchor-standard candidate declares account types', () => {
         idlState.candidates = [
-            { address: undefined, idl: CODAMA, source: 'programMetadata', standard: 'Codama' },
-            { address: undefined, idl: ANCHOR_WITH_ACCOUNTS, source: 'anchor', standard: 'Anchor' },
+            { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+            { idl: ANCHOR_WITH_ACCOUNTS, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
         ];
         renderTab();
         expect(screen.getByText('Anchor Data')).toBeInTheDocument();
@@ -41,7 +48,12 @@ describe('AccountDataTab', () => {
 
     it('should show the Anchor Data tab when an Anchor-standard PMP IDL declares account types', () => {
         idlState.candidates = [
-            { address: undefined, idl: ANCHOR_WITH_ACCOUNTS, source: 'programMetadata', standard: 'Anchor' },
+            {
+                idl: ANCHOR_WITH_ACCOUNTS,
+                idlAddress: undefined,
+                source: IdlVariant.ProgramMetadata,
+                standard: 'Anchor',
+            },
         ];
         renderTab();
         expect(screen.getByText('Anchor Data')).toBeInTheDocument();
@@ -54,7 +66,12 @@ describe('AccountDataTab', () => {
 
     it('should hide the tab when the Anchor-standard candidate has an empty accounts array', () => {
         idlState.candidates = [
-            { address: undefined, idl: ANCHOR_WITHOUT_ACCOUNTS, source: 'programMetadata', standard: 'Anchor' },
+            {
+                idl: ANCHOR_WITHOUT_ACCOUNTS,
+                idlAddress: undefined,
+                source: IdlVariant.ProgramMetadata,
+                standard: 'Anchor',
+            },
         ];
         renderTab();
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
@@ -62,14 +79,16 @@ describe('AccountDataTab', () => {
 
     it('should hide the tab when the Anchor-standard candidate with account types does not build a program', () => {
         idlState.candidates = [
-            { address: undefined, idl: ANCHOR_WITHOUT_PROGRAM, source: 'anchor', standard: 'Anchor' },
+            { idl: ANCHOR_WITHOUT_PROGRAM, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
         ];
         renderTab();
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
     });
 
     it('should hide the tab when only a Codama candidate exists', () => {
-        idlState.candidates = [{ address: undefined, idl: CODAMA, source: 'programMetadata', standard: 'Codama' }];
+        idlState.candidates = [
+            { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+        ];
         renderTab();
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
     });

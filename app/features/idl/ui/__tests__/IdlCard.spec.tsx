@@ -37,11 +37,7 @@ function mockProgramIdls(overrides: Partial<ProgramIdlPair>): void {
         programMetadataIdlAddress: undefined,
         ...overrides,
     };
-    mocks.useProgramIdls.mockReturnValue({
-        candidates: getOnChainCandidates(onChain),
-        isOnChainLoading: false,
-        onChain,
-    } satisfies ProgramIdls);
+    mocks.useProgramIdls.mockReturnValue({ candidates: getOnChainCandidates(onChain) } satisfies ProgramIdls);
 }
 
 function createMockAnchorIdl(address = DEFAULT_ADDRESS): Idl {

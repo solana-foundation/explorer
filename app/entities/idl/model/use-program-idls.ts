@@ -8,12 +8,9 @@ import { type Cluster } from '@/app/utils/cluster';
 
 import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { resolveProgramIdlsClient } from '../api/load-resolve-program-idls';
-import { type ProgramIdlPair } from '../api/types';
 import { getOnChainCandidates, type SourcedIdl } from './idl-candidates';
 
 export type ProgramIdls = {
-    onChain: ProgramIdlPair;
-    isOnChainLoading: boolean;
     /** `undefined` while the on-chain IDLs load. */
     candidates: readonly SourcedIdl[] | undefined;
 };
@@ -60,21 +57,12 @@ export function useProgramIdls(
     );
 
     const onChainIdls = isCustom ? customIdls : serverIdls;
-    const onChain = useMemo<ProgramIdlPair>(
-        () => ({
-            anchorIdl: onChainIdls?.anchorIdl,
-            anchorIdlAddress: onChainIdls?.anchorIdlAddress,
-            programMetadataIdl: onChainIdls?.programMetadataIdl,
-            programMetadataIdlAddress: onChainIdls?.programMetadataIdlAddress,
-        }),
-        [onChainIdls],
-    );
     const isOnChainLoading = isCustom ? customLoading : serverLoading;
 
-    const candidates = useMemo(
-        () => (isOnChainLoading ? undefined : getOnChainCandidates(onChain)),
-        [isOnChainLoading, onChain],
-    );
+    const candidates = useMemo(() => {
+        if (isOnChainLoading) return undefined;
+        return onChainIdls ? getOnChainCandidates(onChainIdls) : [];
+    }, [isOnChainLoading, onChainIdls]);
 
-    return { candidates, isOnChainLoading, onChain };
+    return { candidates };
 }

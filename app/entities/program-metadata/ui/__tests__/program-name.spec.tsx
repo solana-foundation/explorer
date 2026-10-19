@@ -1,5 +1,6 @@
 import { rootNodeFromAnchor } from '@codama/nodes-from-anchor';
 import { type AnchorIdl, type CodamaIdl, type ProgramIdls } from '@entities/idl';
+import { IdlVariant } from '@entities/idl/@x/program-metadata';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import anchorLegacyIdl from '@entities/idl/mocks/anchor/anchor-legacy-account_compression-compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq.json';
 import codamaIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
@@ -13,7 +14,10 @@ import ProgramName from '../program-name';
 
 const mocks = vi.hoisted(() => ({ useProgramIdls: vi.fn() }));
 
-vi.mock('@entities/idl/@x/program-metadata', () => ({ useProgramIdls: mocks.useProgramIdls }));
+vi.mock('@entities/idl/@x/program-metadata', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/idl/@x/program-metadata')>()),
+    useProgramIdls: mocks.useProgramIdls,
+}));
 vi.mock('@/app/utils/anchor', () => ({ AnchorProgramName: () => <span>Anchor program name</span> }));
 
 const PROGRAM_ID = new PublicKey(codamaIdl.program.publicKey);
@@ -34,7 +38,7 @@ describe('ProgramName', () => {
         });
     });
 
-    it('should show the default name until the candidates are final', () => {
+    it('should show the default name when the candidates are undefined', () => {
         mockCandidates(undefined);
 
         renderName();
@@ -46,7 +50,7 @@ describe('ProgramName', () => {
         ['the program has no IDL', []],
         [
             'the first candidate is the Anchor IDL account',
-            [{ address: undefined, idl: ANCHOR, source: 'anchor', standard: 'Anchor' }],
+            [{ idl: ANCHOR, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' }],
         ],
     ] satisfies [string, NonNullable<ProgramIdls['candidates']>][])(
         'should show the Anchor program name when %s',
@@ -59,23 +63,20 @@ describe('ProgramName', () => {
         },
     );
 
-    it.each([
-        ['the PMP Codama IDL', { address: undefined, idl: CODAMA, source: 'programMetadata', standard: 'Codama' }],
-    ] satisfies [string, NonNullable<ProgramIdls['candidates']>[number]][])(
-        'should name the program from %s',
-        (_, candidate) => {
-            mockCandidates([candidate]);
+    it('should name the program from the PMP Codama IDL', () => {
+        mockCandidates([
+            { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+        ]);
 
-            renderName();
+        renderName();
 
-            expect(screen.getByText('ProgramMetadata')).toBeInTheDocument();
-        },
-    );
+        expect(screen.getByText('ProgramMetadata')).toBeInTheDocument();
+    });
 
     it('should name the program from the PMP IDL before the Anchor IDL account', () => {
         mockCandidates([
-            { address: undefined, idl: CODAMA, source: 'programMetadata', standard: 'Codama' },
-            { address: undefined, idl: ANCHOR, source: 'anchor', standard: 'Anchor' },
+            { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+            { idl: ANCHOR, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
         ]);
 
         renderName();
@@ -84,7 +85,9 @@ describe('ProgramName', () => {
     });
 
     it('should name the program from an Anchor-standard PMP IDL', () => {
-        mockCandidates([{ address: undefined, idl: ANCHOR, source: 'programMetadata', standard: 'Anchor' }]);
+        mockCandidates([
+            { idl: ANCHOR, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' },
+        ]);
 
         renderName();
 
@@ -94,7 +97,7 @@ describe('ProgramName', () => {
     it('should show the Anchor program name for an Anchor-standard PMP IDL that Codama cannot convert', () => {
         const idl = anchorModernIdl as unknown as AnchorIdl;
         expect(() => rootNodeFromAnchor(idl as never)).toThrow();
-        mockCandidates([{ address: undefined, idl, source: 'programMetadata', standard: 'Anchor' }]);
+        mockCandidates([{ idl, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' }]);
 
         expect(() => renderName()).not.toThrow();
         expect(screen.getByText('Anchor program name')).toBeInTheDocument();

@@ -9,6 +9,7 @@ import {
     getOnChainCandidates,
     type SourcedIdl,
 } from '../idl-candidates';
+import { IdlVariant } from '../idl-variant';
 
 const PMP_IDL = { name: 'pmp' } as unknown as SupportedIdl;
 const ANCHOR_IDL = { name: 'anchor' } as unknown as SupportedIdl;
@@ -27,11 +28,14 @@ const BOTH = pair({
 describe('getOnChainCandidates', () => {
     it.each([
         ['no on-chain IDL', NONE, []],
-        ['a PMP IDL only', PMP_ONLY, ['programMetadata']],
-        ['an Anchor IDL only', ANCHOR_ONLY, ['anchor']],
-        ['both on-chain IDLs', BOTH, ['programMetadata', 'anchor']],
-    ])('should list the PMP IDL before the Anchor IDL account, for %s', (_, onChain, sources) => {
+        ['a PMP IDL only', PMP_ONLY, [IdlVariant.ProgramMetadata]],
+        ['an Anchor IDL only', ANCHOR_ONLY, [IdlVariant.Anchor]],
+    ])('should list the sources of %s', (_, onChain, sources) => {
         expect(sourcesOf(getOnChainCandidates(onChain))).toEqual(sources);
+    });
+
+    it('should list the PMP IDL before the Anchor IDL account', () => {
+        expect(sourcesOf(getOnChainCandidates(BOTH))).toEqual([IdlVariant.ProgramMetadata, IdlVariant.Anchor]);
     });
 
     it('should tag each IDL with its standard and the account it was read from', () => {
@@ -43,8 +47,8 @@ describe('getOnChainCandidates', () => {
         });
 
         expect(getOnChainCandidates(onChain)).toEqual([
-            { address: 'pmp-account', idl: CODAMA_IDL, source: 'programMetadata', standard: 'Codama' },
-            { address: 'anchor-account', idl: ANCHOR_IDL, source: 'anchor', standard: 'Anchor' },
+            { idl: CODAMA_IDL, idlAddress: 'pmp-account', source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+            { idl: ANCHOR_IDL, idlAddress: 'anchor-account', source: IdlVariant.Anchor, standard: 'Anchor' },
         ]);
     });
 });
@@ -80,12 +84,12 @@ describe('getFirstAnchorIdlWithAccounts', () => {
 });
 
 describe('getOnChainAnchorIdl', () => {
-    it('should return the Anchor IDL account and ignore the PMP IDL', () => {
-        expect(getOnChainAnchorIdl(BOTH)).toBe(ANCHOR_IDL);
+    it('should return the IDL from the Anchor IDL account and ignore the PMP IDL', () => {
+        expect(getOnChainAnchorIdl(getOnChainCandidates(BOTH))).toBe(ANCHOR_IDL);
     });
 
     it('should return undefined when the Anchor IDL account holds a Codama IDL', () => {
-        expect(getOnChainAnchorIdl(pair({ anchorIdl: CODAMA_IDL }))).toBeUndefined();
+        expect(getOnChainAnchorIdl(getOnChainCandidates(pair({ anchorIdl: CODAMA_IDL })))).toBeUndefined();
     });
 });
 

@@ -5,10 +5,6 @@ import { useMemo } from 'react';
 
 import { type IdlInstructionDecode, safeDecodeInstructionWithIdl } from '../lib/decode-instruction-with-idl';
 
-/**
- * Decodes `raw` with the program's first IDL candidate, for the tx page and the inspector.
- * Returns `undefined` without a candidate or without `raw`.
- */
 export function useIdlInstructionDecode({
     programId,
     raw,

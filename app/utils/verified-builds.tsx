@@ -282,8 +282,13 @@ function useEnrichedOsecInfo({
 }) {
     const { url: clusterUrl, cluster: cluster } = useCluster();
 
-    const { onChain, isOnChainLoading: isIdlLoading } = useProgramIdls(VERIFY_PROGRAM_ID, clusterUrl, cluster);
-    const accountAnchorProgram = useAnchorProgram(getOnChainAnchorIdl(onChain), VERIFY_PROGRAM_ID, clusterUrl);
+    const { candidates } = useProgramIdls(VERIFY_PROGRAM_ID, clusterUrl, cluster);
+    const isIdlLoading = candidates === undefined;
+    const accountAnchorProgram = useAnchorProgram(
+        candidates && getOnChainAnchorIdl(candidates),
+        VERIFY_PROGRAM_ID,
+        clusterUrl,
+    );
     const signerAuthorities = useMemo(
         () =>
             Array.from(

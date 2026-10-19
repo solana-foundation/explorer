@@ -4,7 +4,7 @@ import { PublicKey } from '@solana/web3.js';
 
 import { NavigationTabLink } from '@/app/shared/ui/navigation-tabs';
 
-// The tab reads the same IDL as AnchorAccountCard, so a shown tab never opens a card with no IDL to decode.
+// AnchorAccountCard reads the same IDL, so a shown tab never opens a card that cannot decode.
 export function AccountDataTab({ programId }: { programId: PublicKey }) {
     const { url, cluster } = useCluster();
     const { candidates } = useProgramIdls(programId.toString(), url, cluster);

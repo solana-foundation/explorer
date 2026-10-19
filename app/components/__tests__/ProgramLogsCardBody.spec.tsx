@@ -1,5 +1,5 @@
 import { gen } from '@__fixtures__/gen';
-import { type AnchorIdl, type ProgramIdls } from '@entities/idl';
+import { type AnchorIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { getBase58Decoder } from '@solana/kit';
 import {
@@ -10,17 +10,18 @@ import {
     type VersionedMessage,
 } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Cluster } from '@/app/utils/cluster';
 
 import { ProgramLogsCardBody } from '../ProgramLogsCardBody';
 
 const idlState: Pick<ProgramIdls, 'candidates'> = { candidates: [] };
+const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@entities/idl', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/idl')>()),
-    useProgramIdls: () => idlState,
+    useProgramIdls: (...args: unknown[]) => useProgramIdls(...args),
 }));
 vi.mock('@utils/program-name', () => ({ ProgramName: () => <span>Program</span> }));
 vi.mock('@utils/url', () => ({ useClusterPath: () => '/tx' }));
@@ -35,17 +36,32 @@ const CREATE_AMM_CONFIG_IX = new TransactionInstruction({
 });
 
 describe('ProgramLogsCardBody', () => {
+    beforeEach(() => useProgramIdls.mockClear());
+
+    it('should read the IDLs of the invoked program', () => {
+        idlState.candidates = [];
+
+        renderLogs();
+
+        expect(useProgramIdls).toHaveBeenCalledWith(DEVI.toBase58(), 'http://localhost', Cluster.Devnet);
+    });
+
     it.each([
         [
             'an Anchor-standard PMP IDL before the Anchor IDL account',
             [
                 {
-                    address: undefined,
                     idl: renamedIdl('pmp_instruction'),
-                    source: 'programMetadata',
+                    idlAddress: undefined,
+                    source: IdlVariant.ProgramMetadata,
                     standard: 'Anchor',
                 },
-                { address: undefined, idl: renamedIdl('anchor_instruction'), source: 'anchor', standard: 'Anchor' },
+                {
+                    idl: renamedIdl('anchor_instruction'),
+                    idlAddress: undefined,
+                    source: IdlVariant.Anchor,
+                    standard: 'Anchor',
+                },
             ],
             'Pmp Instruction',
         ],
@@ -53,9 +69,9 @@ describe('ProgramLogsCardBody', () => {
             'an Anchor IDL that declares no account types',
             [
                 {
-                    address: undefined,
                     idl: { ...renamedIdl('stateless_instruction'), accounts: [] },
-                    source: 'anchor',
+                    idlAddress: undefined,
+                    source: IdlVariant.Anchor,
                     standard: 'Anchor',
                 },
             ],
@@ -74,7 +90,12 @@ describe('ProgramLogsCardBody', () => {
 
     it('should name the instruction of a jsonParsed message', () => {
         idlState.candidates = [
-            { address: undefined, idl: renamedIdl('parsed_instruction'), source: 'anchor', standard: 'Anchor' },
+            {
+                idl: renamedIdl('parsed_instruction'),
+                idlAddress: undefined,
+                source: IdlVariant.Anchor,
+                standard: 'Anchor',
+            },
         ];
 
         renderLogs(parsedMessage());
@@ -106,11 +127,11 @@ function v0Message(): VersionedMessage {
 function parsedMessage(): ParsedMessage {
     const { data, keys } = CREATE_AMM_CONFIG_IX;
     return {
-        accountKeys: keys.map(({ isSigner, isWritable, pubkey }) => ({
-            pubkey,
-            signer: isSigner,
-            writable: isWritable,
-        })),
+        accountKeys: [
+            { pubkey: gen.publicKey(0), signer: true, writable: true },
+            ...keys.map(({ isSigner, isWritable, pubkey }) => ({ pubkey, signer: isSigner, writable: isWritable })),
+            { pubkey: DEVI, signer: false, writable: false },
+        ],
         instructions: [
             { accounts: keys.map(({ pubkey }) => pubkey), data: BASE58_DECODER.decode(data), programId: DEVI },
         ],

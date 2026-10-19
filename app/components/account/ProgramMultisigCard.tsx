@@ -34,8 +34,8 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
     const { cluster, url } = useCluster();
     const { data: squadMapInfo } = useSquadsMultisigLookup(programAuthority, cluster);
     const squadsAddress = squadMapInfo?.version === 'v3' ? SQUADS_V3_ADDRESS : SQUADS_V4_ADDRESS;
-    const { onChain } = useProgramIdls(squadsAddress, url, cluster);
-    const anchorProgram = useAnchorProgram(getOnChainAnchorIdl(onChain), squadsAddress, url);
+    const { candidates } = useProgramIdls(squadsAddress, url, cluster);
+    const anchorProgram = useAnchorProgram(candidates && getOnChainAnchorIdl(candidates), squadsAddress, url);
     const { data: squadInfo } = useSquadsMultisig(
         anchorProgram,
         squadMapInfo?.multisig,

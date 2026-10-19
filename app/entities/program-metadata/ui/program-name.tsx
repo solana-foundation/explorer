@@ -1,5 +1,5 @@
 import { rootNodeFromAnchor } from '@codama/nodes-from-anchor';
-import { type AnchorIdl, useProgramIdls } from '@entities/idl/@x/program-metadata';
+import { type AnchorIdl, IdlVariant, useProgramIdls } from '@entities/idl/@x/program-metadata';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { RootNode } from 'codama';
@@ -21,7 +21,7 @@ export default function ProgramName({
     const { candidates } = useProgramIdls(programId.toString(), url, cluster, { suspense: true });
     if (!candidates) return <>{defaultName}</>;
     const candidate = candidates.at(0);
-    if (!candidate || candidate.source === 'anchor') {
+    if (!candidate || candidate.source === IdlVariant.Anchor) {
         return <AnchorProgramName programId={programId} url={url} cluster={cluster} defaultName={defaultName} />;
     }
 
@@ -32,7 +32,6 @@ export default function ProgramName({
     return <>{programNameFromIdl(rootNode)}</>;
 }
 
-// The decoder accepts an Anchor IDL that builds an Anchor program even when Codama cannot convert it.
 function convertAnchorIdl(idl: AnchorIdl): RootNode | undefined {
     try {
         // `rootNodeFromAnchor`'s node types are version-skewed from our `codama` import, hence the bridge casts.
