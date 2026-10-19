@@ -29,5 +29,6 @@ export { useFormatAnchorIdl } from './model/anchor/use-format-anchor-idl';
 export { useAnchorProgram } from './model/anchor/use-anchor-program';
 export { getProvider } from './model/anchor/anchor-provider';
 export { useProgramIdls, type ProgramIdls } from './model/use-program-idls';
+export { getFirstAnchorIdl, getFirstAnchorIdlWithAccounts, getOnChainAnchorIdl } from './model/idl-candidates';
 export { useFormatCodamaIdl } from './model/use-format-codama-idl';
 export { getIdlSpecType } from './model/converters/convert-legacy-idl';

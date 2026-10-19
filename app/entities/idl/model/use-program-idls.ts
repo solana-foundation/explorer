@@ -1,6 +1,7 @@
 'use client';
 
 import { shouldUseDirectRpc } from '@entities/cluster/@x/idl';
+import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
 import { type Cluster } from '@/app/utils/cluster';
@@ -8,13 +9,18 @@ import { type Cluster } from '@/app/utils/cluster';
 import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { resolveProgramIdlsClient } from '../api/load-resolve-program-idls';
 import { type ProgramIdlPair } from '../api/types';
+import { getOnChainCandidates, type SourcedIdl } from './idl-candidates';
 
-export type ProgramIdls = ProgramIdlPair & { isLoading: boolean };
+export type ProgramIdls = {
+    onChain: ProgramIdlPair;
+    isOnChainLoading: boolean;
+    /** `undefined` while the on-chain IDLs load. */
+    candidates: readonly SourcedIdl[] | undefined;
+};
 
 /**
- * Resolves both IDLs a program exposes (Anchor PDA, PMP `idl` seed). Shared by the IDL card, the
- * Anchor tx-decoder (`useAnchorProgram`), and the program-name label (`useProgramMetadataIdl`) so all
- * three read one cached resolution and never surface divergent IDLs for a program.
+ * Resolves both IDLs a program exposes (Anchor PDA, PMP `idl` seed). `candidates` holds them in PMP-first
+ * order. The callers share one cached resolution per program.
  *
  * Known public clusters use a single server route (`/api/idl-latest`) backed by `@solana/idl`, which
  * surfaces native-program IDLs via the fndn fallback authority. Custom / localhost clusters can't use
@@ -53,21 +59,22 @@ export function useProgramIdls(
         { errorRetryCount: 3, suspense },
     );
 
-    if (isCustom) {
-        return {
-            anchorIdl: customIdls?.anchorIdl,
-            anchorIdlAddress: customIdls?.anchorIdlAddress,
-            isLoading: customLoading,
-            programMetadataIdl: customIdls?.programMetadataIdl,
-            programMetadataIdlAddress: customIdls?.programMetadataIdlAddress,
-        };
-    }
+    const onChainIdls = isCustom ? customIdls : serverIdls;
+    const onChain = useMemo<ProgramIdlPair>(
+        () => ({
+            anchorIdl: onChainIdls?.anchorIdl,
+            anchorIdlAddress: onChainIdls?.anchorIdlAddress,
+            programMetadataIdl: onChainIdls?.programMetadataIdl,
+            programMetadataIdlAddress: onChainIdls?.programMetadataIdlAddress,
+        }),
+        [onChainIdls],
+    );
+    const isOnChainLoading = isCustom ? customLoading : serverLoading;
 
-    return {
-        anchorIdl: serverIdls?.anchorIdl,
-        anchorIdlAddress: serverIdls?.anchorIdlAddress,
-        isLoading: serverLoading,
-        programMetadataIdl: serverIdls?.programMetadataIdl,
-        programMetadataIdlAddress: serverIdls?.programMetadataIdlAddress,
-    };
+    const candidates = useMemo(
+        () => (isOnChainLoading ? undefined : getOnChainCandidates(onChain)),
+        [isOnChainLoading, onChain],
+    );
+
+    return { candidates, isOnChainLoading, onChain };
 }

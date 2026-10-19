@@ -1,5 +1,5 @@
 import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
-import { useAnchorProgram } from '@entities/idl';
+import { getFirstAnchorIdl, useAnchorProgram, useProgramIdls } from '@entities/idl';
 import { ParsedMessage, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import { getAnchorNameForInstruction, getAnchorProgramName } from '@utils/anchor';
 import { Cluster } from '@utils/cluster';
@@ -178,7 +178,8 @@ function ProgramLogRow({
 }) {
     const pathname = usePathname();
     const anchorPath = useClusterPath({ pathname: `${pathname}#${getInstructionCardScrollAnchorId([index + 1])}` });
-    const { program: anchorProgram } = useAnchorProgram(programId.toString(), url, cluster);
+    const { candidates } = useProgramIdls(programId.toString(), url, cluster);
+    const anchorProgram = useAnchorProgram(candidates && getFirstAnchorIdl(candidates), programId.toString(), url);
 
     // Try to get instruction name from IDL if available
     let instructionName = 'Instruction';

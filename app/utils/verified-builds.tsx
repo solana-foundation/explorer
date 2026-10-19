@@ -1,4 +1,4 @@
-import { useAnchorProgram } from '@entities/idl';
+import { getOnChainAnchorIdl, useAnchorProgram, useProgramIdls } from '@entities/idl';
 import { hashProgramBytes, orderVerifiedEntries, TRUSTED_SIGNERS } from '@explorer/entity-inspector/verification';
 import { PublicKey } from '@solana/web3.js';
 import { useEffect, useMemo } from 'react';
@@ -290,11 +290,8 @@ function useEnrichedOsecInfo({
 }) {
     const { url: clusterUrl, cluster: cluster } = useCluster();
 
-    const { program: accountAnchorProgram, isLoading: isIdlLoading } = useAnchorProgram(
-        VERIFY_PROGRAM_ID,
-        clusterUrl,
-        cluster,
-    );
+    const { onChain, isOnChainLoading: isIdlLoading } = useProgramIdls(VERIFY_PROGRAM_ID, clusterUrl, cluster);
+    const accountAnchorProgram = useAnchorProgram(getOnChainAnchorIdl(onChain), VERIFY_PROGRAM_ID, clusterUrl);
     const signerAuthorities = useMemo(
         () =>
             Array.from(
