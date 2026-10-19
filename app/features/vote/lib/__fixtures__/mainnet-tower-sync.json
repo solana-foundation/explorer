@@ -1,0 +1,145 @@
+{
+    "signature": "2WZuEhikvkvvNkADSWvdbm7MTqG5LpFnVo4bVRMV6kiEHgCS4cPyuY9dfNkNESnuYZwZv5JA2xtCKuN3Y17erJGD",
+    "slot": 458905146,
+    "accounts": ["CcaHc2L43ZWjwCHART3oZoJvHLAe9hzT2DJNUpBzoTN1", "Fd7btgySsrjuo25CJCj7oE7VPMyezDhnx7pZkj2v69Nk"],
+    "data": "67MGn1dBUBDDGXwVi1obcEfFCtVNkXyySnRnMwX1D2exgabgeFrZVFh5kWQTGQhuFx8WGDjMeB6944VT8M4Hvh9AYnr4CFSiViaM5LDrkSSUg6gfbQYjgTdLoYuUkvNULWMsVGcZGiQABtTKY2fLAudaq1v5g1UVBnc7Cawby71VKYKZ11RmLp2EkubitfWdeNDQMn43gA",
+    "parsed": {
+        "info": {
+            "towerSync": {
+                "blockId": "AgPF6fVT5Eja1TFyuBPcQXg1qEF4FAczpimXzu5UskPg",
+                "hash": "HQ8STntk8Z4136z3w6nW7Bg4mJFVFYd8r4PeDAdMGVze",
+                "lockouts": [
+                    {
+                        "confirmation_count": 31,
+                        "slot": 458905115
+                    },
+                    {
+                        "confirmation_count": 30,
+                        "slot": 458905116
+                    },
+                    {
+                        "confirmation_count": 29,
+                        "slot": 458905117
+                    },
+                    {
+                        "confirmation_count": 28,
+                        "slot": 458905118
+                    },
+                    {
+                        "confirmation_count": 27,
+                        "slot": 458905119
+                    },
+                    {
+                        "confirmation_count": 26,
+                        "slot": 458905120
+                    },
+                    {
+                        "confirmation_count": 25,
+                        "slot": 458905121
+                    },
+                    {
+                        "confirmation_count": 24,
+                        "slot": 458905122
+                    },
+                    {
+                        "confirmation_count": 23,
+                        "slot": 458905123
+                    },
+                    {
+                        "confirmation_count": 22,
+                        "slot": 458905124
+                    },
+                    {
+                        "confirmation_count": 21,
+                        "slot": 458905125
+                    },
+                    {
+                        "confirmation_count": 20,
+                        "slot": 458905126
+                    },
+                    {
+                        "confirmation_count": 19,
+                        "slot": 458905127
+                    },
+                    {
+                        "confirmation_count": 18,
+                        "slot": 458905128
+                    },
+                    {
+                        "confirmation_count": 17,
+                        "slot": 458905129
+                    },
+                    {
+                        "confirmation_count": 16,
+                        "slot": 458905130
+                    },
+                    {
+                        "confirmation_count": 15,
+                        "slot": 458905131
+                    },
+                    {
+                        "confirmation_count": 14,
+                        "slot": 458905132
+                    },
+                    {
+                        "confirmation_count": 13,
+                        "slot": 458905133
+                    },
+                    {
+                        "confirmation_count": 12,
+                        "slot": 458905134
+                    },
+                    {
+                        "confirmation_count": 11,
+                        "slot": 458905135
+                    },
+                    {
+                        "confirmation_count": 10,
+                        "slot": 458905136
+                    },
+                    {
+                        "confirmation_count": 9,
+                        "slot": 458905137
+                    },
+                    {
+                        "confirmation_count": 8,
+                        "slot": 458905138
+                    },
+                    {
+                        "confirmation_count": 7,
+                        "slot": 458905139
+                    },
+                    {
+                        "confirmation_count": 6,
+                        "slot": 458905140
+                    },
+                    {
+                        "confirmation_count": 5,
+                        "slot": 458905141
+                    },
+                    {
+                        "confirmation_count": 4,
+                        "slot": 458905142
+                    },
+                    {
+                        "confirmation_count": 3,
+                        "slot": 458905143
+                    },
+                    {
+                        "confirmation_count": 2,
+                        "slot": 458905144
+                    },
+                    {
+                        "confirmation_count": 1,
+                        "slot": 458905145
+                    }
+                ],
+                "root": 458905114,
+                "timestamp": 1792428472
+            },
+            "voteAccount": "CcaHc2L43ZWjwCHART3oZoJvHLAe9hzT2DJNUpBzoTN1",
+            "voteAuthority": "Fd7btgySsrjuo25CJCj7oE7VPMyezDhnx7pZkj2v69Nk"
+        },
+        "type": "towersync"
+    }
+}

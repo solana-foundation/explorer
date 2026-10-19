@@ -46,6 +46,7 @@ export type ParserProgramLabel =
     | typeof STAKE_PROGRAM_LABEL
     | typeof SYSTEM_PROGRAM_LABEL
     | 'token-swap'
+    | typeof VOTE_PROGRAM_LABEL
     | 'wormhole'
     | 'zk-elgamal-proof';
 

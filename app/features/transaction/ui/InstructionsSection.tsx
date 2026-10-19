@@ -349,6 +349,22 @@ function InstructionCard({
         return <UnknownDetailsCard key={key} node={node} />;
     }
     const programLabel = dispatcher.getInstructionParser(transactionIx.programId.toBase58())?.programLabel;
+    if (programLabel === VOTE_PROGRAM_LABEL) {
+        const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
+        if (isParsedInstruction(dispatched)) {
+            return (
+                <VoteDetailsCard
+                    key={key}
+                    ix={dispatched}
+                    tx={tx}
+                    index={index}
+                    innerCards={innerCards}
+                    childIndex={childIndex}
+                />
+            );
+        }
+        return <UnknownDetailsCard key={key} node={node} />;
+    }
     const nameOnly = programLabel && NAME_ONLY_PROGRAMS[programLabel];
     if (nameOnly || programLabel === SERUM_PROGRAM_LABEL) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
