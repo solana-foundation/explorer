@@ -1,6 +1,6 @@
 'use client';
 
-import { readRawInstructions } from '@entities/transaction-data/@x/instruction-card';
+import { readRawInnerInstructions, readRawInstructions } from '@entities/transaction-data/@x/instruction-card';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import type { TransactionSignature } from '@solana/web3.js';
@@ -32,7 +32,11 @@ export function TxInstructionSurface({
         const fetch = () => fetchRaw(signature);
         if (rawDetails?.status === FetchStatus.Fetched) {
             const raw = rawDetails.data?.raw;
-            return { instructions: raw ? readRawInstructions(raw) : undefined, status: 'fetched' };
+            return {
+                innerInstructions: raw ? readRawInnerInstructions(raw) : undefined,
+                instructions: raw ? readRawInstructions(raw) : undefined,
+                status: 'fetched',
+            };
         }
         return rawDetails?.status === FetchStatus.FetchFailed
             ? { fetch, status: 'failed' }

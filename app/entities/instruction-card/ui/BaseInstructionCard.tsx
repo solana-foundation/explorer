@@ -47,8 +47,6 @@ export function BaseInstructionCard({
         setShowRaw(r => !r);
     };
     const { ix } = node;
-    // Inner cards render inside the provider of their parent, so only a top-level card shows the intent
-    const isTopLevel = node.childIndex === undefined;
 
     return (
         <InstructionCardFrame
@@ -58,7 +56,7 @@ export function BaseInstructionCard({
             collapsible={collapsible}
             headerButtons={
                 <div className="flex items-center gap-1.5">
-                    {isTopLevel && <InstructionIntentButton />}
+                    <InstructionIntentButton />
                     <Button
                         ui="dashkit"
                         size="sm"
@@ -73,7 +71,7 @@ export function BaseInstructionCard({
                 </div>
             }
         >
-            {isTopLevel && <InstructionIntentRow />}
+            <InstructionIntentRow />
             {showRaw ? (
                 <>
                     <ProgramField programId={node.programId} validateProgram={validateProgram} />

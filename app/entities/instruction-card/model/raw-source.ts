@@ -2,12 +2,17 @@ import type { TransactionInstruction } from '@solana/web3.js';
 
 import type { InstructionNode } from './node';
 
-/** The top-level instructions of a transaction that the page can fetch in raw form. */
+/** The instructions of a transaction that the page can fetch in raw form. */
 export type RawInstructions =
     | { status: 'fetchable'; fetch: () => void }
     | { status: 'failed'; fetch: () => void }
-    /** `instructions` is `undefined` when the message cannot be decompiled. */
-    | { status: 'fetched'; instructions: readonly TransactionInstruction[] | undefined };
+    | {
+          status: 'fetched';
+          /** `undefined` when the message cannot be decompiled. */
+          instructions: readonly TransactionInstruction[] | undefined;
+          /** Keyed by the index of the top-level instruction that invoked them. `undefined` when they cannot be resolved. */
+          innerInstructions: ReadonlyMap<number, readonly (TransactionInstruction | undefined)[]> | undefined;
+      };
 
 /** What the Raw view of a parsed instruction shows above its JSON. */
 export type RawSource =
@@ -22,10 +27,12 @@ export function rawSourceOf(node: InstructionNode, rawInstructions: RawInstructi
     if (!rawInstructions) return { kind: 'none' };
     if (rawInstructions.status === 'fetchable') return { fetch: rawInstructions.fetch, kind: 'fetchable' };
     if (rawInstructions.status === 'failed') return { fetch: rawInstructions.fetch, kind: 'failed' };
-    // Inner instructions never carry raw wire data, so only the top-level list has rows to lose.
-    if (node.childIndex !== undefined) return { kind: 'none' };
-    const ix = rawInstructions.instructions?.[node.index];
-    return ix ? { ix, kind: 'instruction' } : { kind: 'unavailable' };
+    const ix =
+        node.childIndex === undefined
+            ? rawInstructions.instructions?.[node.index]
+            : rawInstructions.innerInstructions?.get(node.index)?.[node.childIndex];
+    // The page and the raw transaction list the instructions separately, so a mismatch must not show another program
+    return ix?.programId.equals(node.programId) ? { ix, kind: 'instruction' } : { kind: 'unavailable' };
 }
 
 export function parsedInstructionOf(node: InstructionNode, rawSource: RawSource): TransactionInstruction | undefined {

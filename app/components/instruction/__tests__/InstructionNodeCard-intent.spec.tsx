@@ -4,7 +4,7 @@ import { InstructionParserProvider } from '@entities/instruction-parser';
 import { toKitInstruction } from '@explorer/parsers/compat';
 import { useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { FetchStatus } from '@providers/cache';
-import { type ParsedInstruction, SystemProgram } from '@solana/web3.js';
+import { type ParsedInstruction, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -22,9 +22,16 @@ const PARSED_TRANSFER: ParsedInstruction = {
     program: 'system',
     programId: SystemProgram.programId,
 };
+const INNER_TRANSFER = SystemProgram.transfer({ fromPubkey: TO, lamports: 2, toPubkey: FROM });
+const PARSED_INNER_TRANSFER: ParsedInstruction = {
+    parsed: { info: { destination: FROM.toBase58(), lamports: 2, source: TO.toBase58() }, type: 'transfer' },
+    program: 'system',
+    programId: SystemProgram.programId,
+};
+const FETCHED_RAW = { data: { raw: { transaction: { instructions: [TRANSFER] } } }, status: FetchStatus.Fetched };
 
 let rawDetails: { data?: { raw?: unknown }; status: FetchStatus } | undefined;
-const mocks = vi.hoisted(() => ({ useInstructionIntent: vi.fn() }));
+const mocks = vi.hoisted(() => ({ readRawInnerInstructions: vi.fn(), useInstructionIntent: vi.fn() }));
 
 vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 vi.mock('@providers/transactions/raw', () => ({
@@ -38,10 +45,15 @@ vi.mock('@features/decode-instruction-with-idl', async importOriginal => ({
 vi.mock('@/app/entities/instruction-intent/model/use-instruction-intent', () => ({
     useInstructionIntent: mocks.useInstructionIntent,
 }));
+vi.mock('@entities/transaction-data/@x/instruction-card', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/transaction-data/@x/instruction-card')>()),
+    readRawInnerInstructions: mocks.readRawInnerInstructions,
+}));
 
 beforeEach(() => {
     vi.clearAllMocks();
     rawDetails = undefined;
+    mocks.readRawInnerInstructions.mockReturnValue(new Map());
     vi.mocked(useIdlInstructionDecode).mockReturnValue(undefined);
     mocks.useInstructionIntent.mockReturnValue({ reason: 'no-metadata', status: 'unavailable' });
 });
@@ -55,13 +67,39 @@ describe('InstructionNodeCard intent', () => {
         expect(screen.getByTestId('instruction-intent-panel')).toBeInTheDocument();
     });
 
-    it('should show the intent button on the top-level card only', () => {
-        const inner = toInstructionNode({ childIndex: 0, index: 0, ix: TRANSFER });
-
-        renderCard(toInstructionNode({ children: [inner], index: 0, ix: TRANSFER }));
+    it('should show an intent button on the top-level card and on its inner card', () => {
+        renderCard(withInner(toInstructionNode({ childIndex: 0, index: 0, ix: INNER_TRANSFER })));
 
         expect(screen.getAllByText('System Program: Transfer')).toHaveLength(2);
-        expect(screen.getAllByTestId('instruction-intent-trigger')).toHaveLength(1);
+        expect(screen.getAllByTestId('instruction-intent-trigger')).toHaveLength(2);
+    });
+
+    it('should open only the intent row of the card whose button is clicked', async () => {
+        renderCard(withInner(toInstructionNode({ childIndex: 0, index: 0, ix: INNER_TRANSFER })));
+
+        const [, innerTrigger] = screen.getAllByTestId('instruction-intent-trigger');
+        await userEvent.click(innerTrigger);
+
+        expect(screen.getAllByTestId('instruction-intent-panel')).toHaveLength(1);
+    });
+
+    it('should build the intent of a parsed inner card from the raw inner instructions', () => {
+        rawDetails = FETCHED_RAW;
+        mocks.readRawInnerInstructions.mockReturnValue(new Map([[0, [INNER_TRANSFER]]]));
+
+        renderCard(withInner(toInstructionNode({ childIndex: 0, index: 0, ix: PARSED_INNER_TRANSFER })));
+
+        expect(fetchResults()).toContainEqual({ instruction: toKitInstruction(INNER_TRANSFER), status: 'success' });
+    });
+
+    it('should report failed for a parsed inner card whose raw inner instruction calls another program', () => {
+        const otherProgramIx = new TransactionInstruction({ keys: [], programId: new PublicKey(gen.address(9)) });
+        rawDetails = FETCHED_RAW;
+        mocks.readRawInnerInstructions.mockReturnValue(new Map([[0, [otherProgramIx]]]));
+
+        renderCard(withInner(toInstructionNode({ childIndex: 0, index: 0, ix: PARSED_INNER_TRANSFER })));
+
+        expect(fetchResults()).toContainEqual({ status: 'failed' });
     });
 
     it('should build the intent of an unparsed card from its own instruction', () => {
@@ -71,7 +109,7 @@ describe('InstructionNodeCard intent', () => {
     });
 
     it('should build the intent of a parsed card from the raw transaction', () => {
-        rawDetails = { data: { raw: { transaction: { instructions: [TRANSFER] } } }, status: FetchStatus.Fetched };
+        rawDetails = FETCHED_RAW;
 
         renderCard(toInstructionNode({ index: 0, ix: PARSED_TRANSFER }));
 
@@ -123,6 +161,14 @@ function routed(node: InstructionNode) {
     );
 }
 
+function withInner(inner: InstructionNode) {
+    return toInstructionNode({ children: [inner], index: 0, ix: TRANSFER });
+}
+
 function lastFetchResult() {
     return mocks.useInstructionIntent.mock.lastCall?.[0].ixFetchResult;
+}
+
+function fetchResults() {
+    return mocks.useInstructionIntent.mock.calls.map(([{ ixFetchResult }]) => ixFetchResult);
 }

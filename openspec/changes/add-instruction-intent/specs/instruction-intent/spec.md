@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The intent of a top-level instruction, the sRFC 39 sentence that `@codama/dynamic-instructions` builds from the
+The intent of an instruction, the sRFC 39 sentence that `@codama/dynamic-instructions` builds from the
 program's Program Metadata IDL, shown on the instruction cards of the transaction page and the Inspector.
 
 ## ADDED Requirements
@@ -88,12 +88,22 @@ from the transaction's slot.
 - **WHEN** a `mintTo` intent reads a mint that no longer exists
 - **THEN** the panel MUST show "Mint tokens" with the fill-in note, and the amount MUST stay unscaled
 
-### Requirement: Only top-level cards show an intent
+### Requirement: Each card shows only its own intent
 
-The Intent button and row SHALL render only on top-level instruction cards. Inner instruction cards MUST NOT show
-them, also when they render inside a parent card's provider.
+Every top-level and inner instruction card SHALL show the intent of its own instruction. An inner card renders
+inside its parent card, and it MUST NOT show the parent's intent.
 
-#### Scenario: An inner card inside a parent card
+#### Scenario: An inner card with its own provider
 
-- **WHEN** an inner instruction card renders inside the top-level card's `InstructionIntentProvider`
+- **WHEN** an inner instruction card renders inside an `InstructionIntentProvider` with its own `innerIxIndex`
+- **THEN** the inner card MUST render the Intent button, and a click MUST open the inner card's intent row
+
+#### Scenario: An inner card inside only the parent's provider
+
+- **WHEN** an inner instruction card renders inside the top-level card's `InstructionIntentProvider` only
 - **THEN** the inner card MUST NOT render the Intent button
+
+#### Scenario: The raw inner instruction belongs to another program
+
+- **WHEN** the raw inner instruction at the card's position has a program other than the card's program
+- **THEN** the card MUST show "Intent failed to load", not an intent built from the other instruction

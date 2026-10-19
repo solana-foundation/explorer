@@ -60,27 +60,27 @@ const PmpDetailsCard = React.lazy(() =>
 
 export function InstructionNodeCard({ node }: { node: InstructionNode }) {
     const { signature } = useInstructionSurface();
-    const card = (
-        <ErrorBoundary
-            resetKeys={[node]}
-            fallback={<UnknownDetailsCard node={node} />}
-            onError={error =>
-                Logger.error(error, {
-                    sentry: 'always',
-                    sentryExtras: {
-                        childIndex: node.childIndex,
-                        index: node.index,
-                        programId: node.programId.toBase58(),
-                        signature,
-                    },
-                })
-            }
-        >
-            <ProgramCard node={node} />
-        </ErrorBoundary>
+    return (
+        <InstructionIntentScope node={node}>
+            <ErrorBoundary
+                resetKeys={[node]}
+                fallback={<UnknownDetailsCard node={node} />}
+                onError={error =>
+                    Logger.error(error, {
+                        sentry: 'always',
+                        sentryExtras: {
+                            childIndex: node.childIndex,
+                            index: node.index,
+                            programId: node.programId.toBase58(),
+                            signature,
+                        },
+                    })
+                }
+            >
+                <ProgramCard node={node} />
+            </ErrorBoundary>
+        </InstructionIntentScope>
     );
-    if (node.childIndex !== undefined) return card;
-    return <InstructionIntentScope node={node}>{card}</InstructionIntentScope>;
 }
 
 function InstructionIntentScope({ node, children }: { node: InstructionNode; children: React.ReactNode }) {
@@ -89,7 +89,7 @@ function InstructionIntentScope({ node, children }: { node: InstructionNode; chi
     const parsedIx = parsedInstructionOf(node, rawSource);
     const ixFetchResult = React.useMemo<InstructionFetchResult>(
         () =>
-                parsedIx
+            parsedIx
                 ? { instruction: toKitInstruction(parsedIx), status: 'success' }
                 : { status: rawSource.kind === 'fetchable' ? 'loading' : 'failed' },
         [parsedIx, rawSource.kind],
