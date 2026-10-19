@@ -1,14 +1,11 @@
-import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
-import { isTokenSwapInstruction, parseTokenSwapInstructionTitle, resolveTokenSwapInstructionName } from '../detection';
+import { isTokenSwapProgramId, parseTokenSwapInstructionTitle, resolveTokenSwapInstructionName } from '../detection';
 import { TOKEN_SWAP_PROGRAM_IDS } from '../program-ids';
 
 const MAINNET_PROGRAM_ID = 'SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8';
 
-function makeInstruction(data: number[], programId: string = MAINNET_PROGRAM_ID): TransactionInstruction {
-    return new TransactionInstruction({ data: Buffer.from(data), keys: [], programId: new PublicKey(programId) });
-}
+const SYSTEM_PROGRAM_ID = '11111111111111111111111111111111';
 
 describe('TOKEN_SWAP_PROGRAM_IDS', () => {
     it('should list the current deployment and every legacy deployment', () => {
@@ -17,13 +14,13 @@ describe('TOKEN_SWAP_PROGRAM_IDS', () => {
     });
 });
 
-describe('isTokenSwapInstruction', () => {
+describe('isTokenSwapProgramId', () => {
     it.each(TOKEN_SWAP_PROGRAM_IDS.map(id => [id]))('should return true for %s', programId => {
-        expect(isTokenSwapInstruction(makeInstruction([1], programId))).toBe(true);
+        expect(isTokenSwapProgramId(programId)).toBe(true);
     });
 
     it('should return false for System Program', () => {
-        expect(isTokenSwapInstruction(makeInstruction([1], SystemProgram.programId.toBase58()))).toBe(false);
+        expect(isTokenSwapProgramId(SYSTEM_PROGRAM_ID)).toBe(false);
     });
 });
 
@@ -48,22 +45,24 @@ describe('resolveTokenSwapInstructionName', () => {
     });
 
     it('should return undefined for another program', () => {
-        expect(resolveTokenSwapInstructionName(SystemProgram.programId.toBase58(), Uint8Array.of(1))).toBeUndefined();
+        expect(resolveTokenSwapInstructionName(SYSTEM_PROGRAM_ID, Uint8Array.of(1))).toBeUndefined();
     });
 });
 
 describe('parseTokenSwapInstructionTitle', () => {
     it('should return the instruction name', () => {
-        expect(parseTokenSwapInstructionTitle(makeInstruction([1, 0xff]))).toBe('Swap');
+        expect(parseTokenSwapInstructionTitle(MAINNET_PROGRAM_ID, Uint8Array.of(1, 0xff))).toBe('Swap');
     });
 
     it('should throw on an unknown tag', () => {
-        expect(() => parseTokenSwapInstructionTitle(makeInstruction([6]))).toThrow(
+        expect(() => parseTokenSwapInstructionTitle(MAINNET_PROGRAM_ID, Uint8Array.of(6))).toThrow(
             'Unrecognized Token Swap instruction code: 6',
         );
     });
 
     it('should throw on empty data', () => {
-        expect(() => parseTokenSwapInstructionTitle(makeInstruction([]))).toThrow('Token Swap instruction has no data');
+        expect(() => parseTokenSwapInstructionTitle(MAINNET_PROGRAM_ID, Uint8Array.of())).toThrow(
+            'Token Swap instruction has no data',
+        );
     });
 });

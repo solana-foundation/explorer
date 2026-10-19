@@ -3,10 +3,16 @@ import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import {
     type InstructionSurface,
     InstructionSurfaceProvider,
+    NameOnlyDetailsCard,
     toInstructionNode,
     UnknownDetailsCard,
 } from '@entities/instruction-card';
-import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
+import {
+    isParsedInstruction,
+    type ParserProgramLabel,
+    toParsedTransaction,
+    useInstructionParser,
+} from '@entities/instruction-parser';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
     BPF_LOADER_PROGRAM_LABEL,
@@ -29,6 +35,7 @@ import { SolanaAttestationDetailsCard } from '@features/decode-instruction-sas';
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
 import { PythDetailsCard } from '@features/instruction-program-pyth';
+import { SERUM_PROGRAM_LABEL, SerumDetailsCard } from '@features/instruction-program-serum';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import {
@@ -65,6 +72,13 @@ const PmpDetailsCard = dynamic(() => import('@features/decode-instruction-pmp').
     loading: () => <LoadingCard />,
     ssr: false,
 });
+
+// Programs decoded by name only. `programName` overrides the registry name in the card title.
+const NAME_ONLY_PROGRAMS: Partial<Record<ParserProgramLabel, { programName?: string }>> = {
+    mango: {},
+    'token-swap': { programName: 'Token Swap' },
+    wormhole: { programName: 'Wormhole' },
+};
 
 const INSPECTOR_SURFACE: InstructionSurface = {
     Shell: InspectorInstructionCardComponent,
@@ -264,6 +278,31 @@ function InspectorInstructionCard({
 
     if (!parsedIx) {
         return unknownCard;
+    }
+
+    const programLabel = dispatcher.getInstructionParser(programId.toBase58())?.programLabel;
+    const nameOnly = programLabel && NAME_ONLY_PROGRAMS[programLabel];
+    if (nameOnly) {
+        return (
+            <NameOnlyDetailsCard
+                node={toInstructionNode({ childIndex, index, innerCards, ix })}
+                name={isParsedInstruction(parsedIx) ? parsedIx.parsed.type : undefined}
+                programName={nameOnly.programName}
+            />
+        );
+    }
+    if (programLabel === SERUM_PROGRAM_LABEL) {
+        return (
+            <ErrorBoundary fallback={unknownCard}>
+                <SerumDetailsCard
+                    ix={parsedIx}
+                    raw={ix}
+                    index={index}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            </ErrorBoundary>
+        );
     }
 
     if ('unknown' in parsedIx) {

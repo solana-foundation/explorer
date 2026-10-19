@@ -3,21 +3,16 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import { BpfUpgradeableLoaderDetailsCard } from '@components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard';
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard';
-import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCard';
-import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
-import { toInstructionNode, TxInstructionSurface, UnknownDetailsCard } from '@entities/instruction-card';
-import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
-import { trustedInnerInstructions } from '@entities/transaction-data';
-import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
-import { isPythProgramId } from '@explorer/decoder-pyth/detection';
 import {
-    getSerumInstructionLabel,
-    isDeprecatedSerumProgram,
-    isSerumInstruction,
-} from '@explorer/decoder-serum/detection';
-import { isTokenSwapInstruction } from '@explorer/decoder-token-swap/detection';
-import { isWormholeInstruction } from '@explorer/decoder-wormhole/detection';
+    NameOnlyDetailsCard,
+    toInstructionNode,
+    TxInstructionSurface,
+    UnknownDetailsCard,
+} from '@entities/instruction-card';
+import { isParsedInstruction, type ParserProgramLabel, useInstructionParser } from '@entities/instruction-parser';
+import { trustedInnerInstructions } from '@entities/transaction-data';
+import { isPythProgramId } from '@explorer/decoder-pyth/detection';
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_LABEL,
     BPF_LOADER_PROGRAM_LABEL,
@@ -46,6 +41,7 @@ import { isSolanaAttestationInstruction, SolanaAttestationDetailsCard } from '@f
 import { IdlInstructionCard, useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
 import { isZkElGamalProofInstruction, ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgamal-proof';
 import { PythDetailsCard } from '@features/instruction-program-pyth';
+import { SERUM_PROGRAM_LABEL, SerumDetailsCard } from '@features/instruction-program-serum';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
 import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
 import {
@@ -73,12 +69,12 @@ import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { CommonInstructionDetailsCard } from './CommonInstructionDetailsCard';
-
-const SerumDetailsCard = dynamic(
-    () => import('@features/instruction-program-serum').then(mod => mod.SerumDetailsCard),
-    { ssr: false },
-);
+// Programs decoded by name only. `programName` overrides the registry name in the card title.
+const NAME_ONLY_PROGRAMS: Partial<Record<ParserProgramLabel, { programName?: string }>> = {
+    mango: {},
+    'token-swap': { programName: 'Token Swap' },
+    wormhole: { programName: 'Wormhole' },
+};
 
 // The PMP card carries the generated client plus pako/yaml/smol-toml (~35 kB gzip), which only a transaction that
 // actually touches the program needs. `isProgramMetadataInstruction` comes from the light `/detection` entry so
@@ -352,37 +348,34 @@ function InstructionCard({
         }
         return <UnknownDetailsCard key={key} node={node} />;
     }
-    if (isMangoInstruction(transactionIx)) {
-        return (
-            <CommonInstructionDetailsCard
-                key={key}
-                {...props}
-                instructionName={getMangoInstructionLabel(transactionIx)}
-            />
-        );
-    }
-    if (isSerumInstruction(transactionIx)) {
-        // Dead Serum DEX deployments get the generic name-only card; the active OpenBook fork keeps full decoding.
-        if (isDeprecatedSerumProgram(transactionIx.programId.toBase58())) {
+    const programLabel = dispatcher.getInstructionParser(transactionIx.programId.toBase58())?.programLabel;
+    const nameOnly = programLabel && NAME_ONLY_PROGRAMS[programLabel];
+    if (nameOnly || programLabel === SERUM_PROGRAM_LABEL) {
+        const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
+        if (!dispatched) {
+            return <UnknownDetailsCard key={key} node={node} />;
+        }
+        if (nameOnly) {
             return (
-                <CommonInstructionDetailsCard
+                <NameOnlyDetailsCard
                     key={key}
-                    {...props}
-                    instructionName={getSerumInstructionLabel(transactionIx)}
+                    node={node}
+                    name={isParsedInstruction(dispatched) ? dispatched.parsed.type : undefined}
+                    programName={nameOnly.programName}
                 />
             );
         }
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
-                <SerumDetailsCard {...props} />
+                <SerumDetailsCard
+                    ix={dispatched}
+                    raw={transactionIx}
+                    index={index}
+                    innerCards={innerCards}
+                    childIndex={childIndex}
+                />
             </ErrorBoundary>
         );
-    }
-    if (isTokenSwapInstruction(transactionIx)) {
-        return <TokenSwapDetailsCard key={key} {...props} />;
-    }
-    if (isWormholeInstruction(transactionIx)) {
-        return <WormholeDetailsCard key={key} {...props} />;
     }
     if (isPythProgramId(transactionIx.programId.toBase58())) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);

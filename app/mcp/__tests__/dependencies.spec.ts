@@ -1,4 +1,5 @@
 import { PYTH_INSTRUCTIONS, PYTH_ORACLE_PROGRAM_IDS } from '@explorer/decoder-pyth';
+import { OPEN_BOOK_PROGRAM_IDS } from '@explorer/decoder-serum';
 import { getBase58Decoder } from '@solana/kit';
 import { ZK_ELGAMAL_PROOF_PROGRAM_ADDRESS } from '@solana-program/zk-elgamal-proof';
 import { describe, expect, it } from 'vitest';
@@ -137,6 +138,16 @@ describe('decodeInstructionFallback', () => {
             program: 'zk-elgamal-proof',
             type: 'VerifyProof',
         });
+    });
+
+    it('should report a Serum instruction with no vendored layout by its name with empty info', () => {
+        const decoded = decodeInstructionFallback?.({
+            accounts: [],
+            data: getBase58Decoder().decode(new Uint8Array([0, 7, 0, 0, 0])),
+            programId: OPEN_BOOK_PROGRAM_IDS.mainnet,
+        });
+
+        expect(decoded).toEqual({ info: {}, program: 'serum', type: 'disableMarket' });
     });
 
     it('should return undefined for a program no slice handles', () => {

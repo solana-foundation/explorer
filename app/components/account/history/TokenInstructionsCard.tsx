@@ -68,7 +68,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
             instructions.forEach((ix, index) => {
                 const programId = ix.programId;
 
-                const instructionName = getTokenInstructionName(transactionWithMeta, ix, signatureInfo);
+                const instructionName = getTokenInstructionName(ix, signatureInfo);
 
                 if (instructionName) {
                     detailsList.push(

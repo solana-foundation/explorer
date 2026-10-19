@@ -15,7 +15,11 @@ import { systemInstructionParser } from '@features/decode-instruction-system/lib
 import { tokenInstructionParser } from '@features/decode-instruction-token/lib/token-client';
 import { token2022InstructionParser } from '@features/decode-instruction-token-2022/lib/token-2022-client';
 import { zkElGamalProofInstructionParser } from '@features/decode-instruction-zk-elgamal-proof/lib/zk-elgamal-proof-client';
+import { mangoInstructionParsers } from '@features/instruction-program-mango/lib/mango-client';
 import { pythInstructionParsers } from '@features/instruction-program-pyth/lib/pyth-client';
+import { serumInstructionParsers } from '@features/instruction-program-serum/lib/serum-client';
+import { tokenSwapInstructionParsers } from '@features/instruction-program-token-swap/lib/token-swap-client';
+import { wormholeInstructionParsers } from '@features/instruction-program-wormhole/lib/wormhole-client';
 import { metaplexTokenMetadataInstructionParser } from '@features/mpl-token-metadata/lib/metaplex-token-metadata-client';
 
 export const instructionParserDispatcher = createInstructionParserDispatcher([
@@ -34,4 +38,8 @@ export const instructionParserDispatcher = createInstructionParserDispatcher([
     solanaAttestationInstructionParser,
     ...pythInstructionParsers,
     ...memoInstructionParsers,
+    ...serumInstructionParsers,
+    ...mangoInstructionParsers,
+    ...tokenSwapInstructionParsers,
+    ...wormholeInstructionParsers,
 ]);

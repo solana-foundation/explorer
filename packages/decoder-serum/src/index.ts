@@ -1,12 +1,13 @@
 export {
-    getSerumInstructionLabel,
     isDeprecatedSerumProgram,
-    isKnownUndecodableSerumInstruction,
-    isSerumInstruction,
-    parseSerumInstructionCode,
+    isSerumProgramId,
+    isUndecodableSerumInstructionName,
     parseSerumInstructionTitle,
+    resolveSerumInstructionKey,
     resolveSerumInstructionName,
+    SERUM_INSTRUCTION_NAMES,
 } from './detection';
+export type { SerumInstructionName, UndecodableSerumInstructionName } from './detection';
 export {
     DEPRECATED_SERUM_PROGRAM_IDS,
     OPEN_BOOK_PROGRAM_IDS,
@@ -56,6 +57,7 @@ export type {
     OrderType,
     Prune,
     SelfTradeBehavior,
+    SerumInstruction,
     SettleFunds,
     Side,
 } from './decoder';
