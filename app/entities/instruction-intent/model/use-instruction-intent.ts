@@ -9,6 +9,7 @@ import useSWRImmutable from 'swr/immutable';
 
 import { toHex } from '@/app/shared/lib/bytes';
 import { invariant } from '@/app/shared/lib/invariant';
+import { Logger } from '@/app/shared/lib/logger';
 
 import { computeInstructionIntent } from '../lib/compute-instruction-intent';
 import { getAccountsForIntent } from '../lib/get-accounts-for-intent';
@@ -18,9 +19,10 @@ import {
     type InstructionIntentResult,
     type IntentUnavailableReason,
 } from '../lib/intent';
+import { IntentSdkLoadError } from '../lib/load-intent-sdk';
 import { useCheckIntentSupport } from './use-check-intent-support';
 
-// The panel owns Retry, and a computation failure is deterministic
+// The panel owns Retry, and an SDK error repeats for the same IDL and instruction
 const SWR_OPTIONS = { shouldRetryOnError: false } as const;
 const IDLE: InstructionIntentResult = { status: 'idle' };
 const LOADING: InstructionIntentResult = { status: 'loading' };
@@ -55,11 +57,19 @@ export function useInstructionIntent({
     );
     const ixIntentFound = ixIntentExist?.status === 'exists' ? ixIntentExist : undefined;
     const contentKey = useMemo(() => instruction && toContentKey(instruction), [instruction]);
+    const sdkOptions = {
+        ...SWR_OPTIONS,
+        onError: (error: unknown) =>
+            Logger.error(new Error('Could not build the instruction intent', { cause: error }), {
+                sentry: 'always',
+                sentryExtras: { programId },
+            }),
+    };
 
     const addressesForIntent = useSWRImmutable(
         enabled && root && ixIntentFound ? ['instruction-intent-addresses', cluster, url, contentKey] : undefined,
         () => root && ixIntentFound && getAccountsForIntent(root, ixIntentFound.parsed),
-        SWR_OPTIONS,
+        sdkOptions,
     );
     const addresses = addressesForIntent.data;
     const hasRequiredAddressesForIntent = addresses && addresses.length > 0;
@@ -80,7 +90,7 @@ export function useInstructionIntent({
     const computedIxIntent = useSWRImmutable(
         computeInput ? ['instruction-intent', cluster, url, contentKey] : undefined,
         () => computeInput && computeInstructionIntent(computeInput),
-        SWR_OPTIONS,
+        sdkOptions,
     );
 
     const waiting = enabled ? LOADING : IDLE;
@@ -97,12 +107,10 @@ export function useInstructionIntent({
 
     // The result wins: a refresh of a shared account entry must not replace a sentence already shown
     if (computedIxIntent.data) return { result: computedIxIntent.data, status: 'ready' };
+    if (addressesForIntent.error instanceof IntentSdkLoadError) return failedWithRetry(addressesForIntent);
+    if (computedIxIntent.error instanceof IntentSdkLoadError) return failedWithRetry(computedIxIntent);
     if (computedIxIntent.error || addressesForIntent.error) return unavailable('malformed-metadata');
-    // SWR keeps the last error while a Retry runs
-    if (accounts.error && !accounts.isValidating) {
-        // The wrapper drops the click event, which `mutate` would store as data
-        return { retry: () => void accounts.mutate(), status: 'failed' };
-    }
+    if (accounts.error) return failedWithRetry(accounts);
     return LOADING;
 }
 
@@ -130,6 +138,19 @@ export function toInstructionFetchResult({
 
 function unavailable(reason: IntentUnavailableReason): InstructionIntentResult {
     return { reason, status: 'unavailable' };
+}
+
+function failedWithRetry({
+    isValidating,
+    mutate,
+}: {
+    isValidating: boolean;
+    mutate: () => Promise<unknown>;
+}): InstructionIntentResult {
+    // SWR keeps the last error while a Retry runs
+    if (isValidating) return LOADING;
+    // The wrapper drops the click event, which `mutate` would store as data
+    return { retry: () => void mutate(), status: 'failed' };
 }
 
 function toContentKey({ programAddress, accounts, data }: KitInstruction): string {

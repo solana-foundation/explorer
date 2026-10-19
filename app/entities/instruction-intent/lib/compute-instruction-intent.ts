@@ -3,6 +3,7 @@ import { type Address, isAddress, type MaybeEncodedAccount } from '@solana/kit';
 import type { RootNode } from 'codama';
 
 import type { InstructionIntent, IntentField, IntentSentencePart } from './intent';
+import { loadIntentSdk } from './load-intent-sdk';
 
 /**
  * Builds the intent of a parsed instruction from accounts fetched beforehand.
@@ -16,8 +17,7 @@ export async function computeInstructionIntent({
     parsed: ParsedInstruction;
     accounts: readonly MaybeEncodedAccount[];
 }): Promise<InstructionIntent> {
-    // Loaded on demand to avoid adding kb on first load.
-    const { getInstructionDisplayFromParsedInstruction } = await import('@codama/dynamic-instructions');
+    const { getInstructionDisplayFromParsedInstruction } = await loadIntentSdk();
     const byAddress = new Map(accounts.map(account => [account.address, account]));
     const display = await getInstructionDisplayFromParsedInstruction(root, parsed, {
         fetchAccount: async address => byAddress.get(address) ?? { address, exists: false },
@@ -48,7 +48,7 @@ function splitIntoSentenceParts(text: string, addresses: readonly Address[]): In
     }
 
     const parts: IntentSentencePart[] = [];
-    // eslint-disable-next-line no-restricted-globals -- base58 has no regex metacharacters to escape.
+    // eslint-disable-next-line no-restricted-globals -- one pass matches every address, base58 needs no escaping
     const matchAddressesRegex = new RegExp(addresses.join('|'), 'g');
     let cursor = 0;
 

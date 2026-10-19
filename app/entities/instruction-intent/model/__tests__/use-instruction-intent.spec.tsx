@@ -6,9 +6,11 @@ import { type ReactNode } from 'react';
 import { SWRConfig } from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
 import type { InstructionFetchResult, InstructionIntentResult } from '../../lib/intent';
+import { IntentSdkLoadError } from '../../lib/load-intent-sdk';
 import {
     amountToUiAmountInstruction,
     MINT,
@@ -30,14 +32,17 @@ const LOADING: InstructionFetchResult = { status: 'loading' };
 
 type Parsers = typeof import('@codama/dynamic-parsers');
 type Display = typeof import('@codama/dynamic-instructions');
+type Loader = typeof import('../../lib/load-intent-sdk');
 
 const mocks = vi.hoisted(() => ({
     fetchEncodedAccounts: vi.fn(),
     getInstructionDisplayFromParsedInstruction: vi.fn(),
     getRequiredAccountsForDisplay: vi.fn(),
+    loadIntentSdk: vi.fn(),
     parseInstruction: vi.fn(),
     realGetDisplay: undefined as Display['getInstructionDisplayFromParsedInstruction'] | undefined,
     realGetRequiredAccounts: undefined as Display['getRequiredAccountsForDisplay'] | undefined,
+    realLoadIntentSdk: undefined as Loader['loadIntentSdk'] | undefined,
     realParseInstruction: undefined as Parsers['parseInstruction'] | undefined,
     useProgramIdls: vi.fn(),
 }));
@@ -56,6 +61,11 @@ vi.mock('@codama/dynamic-instructions', async importOriginal => {
         getInstructionDisplayFromParsedInstruction: mocks.getInstructionDisplayFromParsedInstruction,
         getRequiredAccountsForDisplay: mocks.getRequiredAccountsForDisplay,
     };
+});
+vi.mock('../../lib/load-intent-sdk', async importOriginal => {
+    const actual = await importOriginal<Loader>();
+    mocks.realLoadIntentSdk = actual.loadIntentSdk;
+    return { ...actual, loadIntentSdk: mocks.loadIntentSdk };
 });
 vi.mock('@solana/kit', async importOriginal => ({
     ...(await importOriginal<typeof import('@solana/kit')>()),
@@ -111,6 +121,7 @@ beforeEach(() => {
     mocks.getRequiredAccountsForDisplay.mockImplementation(
         (...args: Parameters<Display['getRequiredAccountsForDisplay']>) => mocks.realGetRequiredAccounts?.(...args),
     );
+    mocks.loadIntentSdk.mockImplementation(() => mocks.realLoadIntentSdk?.());
     mocks.useProgramIdls.mockReturnValue(TOKEN_IDLS);
 });
 
@@ -258,6 +269,55 @@ describe('useInstructionIntent', () => {
         );
 
         await waitFor(() => expect(result.current).toEqual({ reason: 'malformed-metadata', status: 'unavailable' }));
+    });
+
+    it('should log the error with the program when the computation throws', async () => {
+        const error = new Error('bad metadata');
+        mocks.useProgramIdls.mockReturnValue(SYSTEM_IDLS);
+        mocks.getInstructionDisplayFromParsedInstruction.mockRejectedValueOnce(error);
+        const ixFetchResult = fetched(transferSolInstruction());
+
+        const { result } = renderHook(
+            () => useInstructionIntent({ enabled: true, ixFetchResult, programId: SYSTEM_PROGRAM_ADDRESS }),
+            { wrapper },
+        );
+
+        await waitFor(() => expect(result.current.status).toBe('unavailable'));
+        expect(Logger.error).toHaveBeenCalledWith(expect.objectContaining({ cause: error }), {
+            sentry: 'always',
+            sentryExtras: { programId: SYSTEM_PROGRAM_ADDRESS },
+        });
+    });
+
+    it('should report loading when a failed intent SDK load is retried', async () => {
+        mocks.useProgramIdls.mockReturnValue(SYSTEM_IDLS);
+        mocks.loadIntentSdk.mockRejectedValueOnce(new IntentSdkLoadError({ cause: new Error('chunk 404') }));
+        const ixFetchResult = fetched(transferSolInstruction());
+        const statuses: InstructionIntentResult['status'][] = [];
+
+        const { result } = renderHook(
+            () => {
+                const intent = useInstructionIntent({
+                    enabled: true,
+                    ixFetchResult,
+                    programId: SYSTEM_PROGRAM_ADDRESS,
+                });
+                statuses.push(intent.status);
+                return intent;
+            },
+            { wrapper },
+        );
+
+        await waitFor(() => expect(result.current.status).toBe('failed'));
+        const failedAt = statuses.length;
+        const failed = result.current;
+        if (failed.status !== 'failed' || !failed.retry) throw new Error('Expected a failed result with a retry');
+        const retryLoad = failed.retry;
+
+        await act(async () => retryLoad());
+
+        await waitFor(() => expect(result.current.status).toBe('ready'));
+        expect(statuses.slice(failedAt)).toContain('loading');
     });
 
     it('should report idle when the card is closed and the account plan would throw', () => {

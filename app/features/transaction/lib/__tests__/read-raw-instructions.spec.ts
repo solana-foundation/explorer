@@ -1,3 +1,4 @@
+import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
 import type { RawTransaction } from '@entities/transaction-data';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -13,7 +14,7 @@ const UNDECODABLE_RAW: RawTransaction = {
         preBalances: [],
     },
     serializedSize: 0,
-    signatures: [],
+    signatures: [DEFAULT_SIGNATURE],
     slot: 0,
     version: 1,
 };
@@ -22,16 +23,18 @@ beforeEach(() => {
     vi.clearAllMocks();
 });
 
+const BROWSER_REPORT = { sentry: 'always', sentryExtras: { signature: DEFAULT_SIGNATURE, version: 1 } };
+
 describe('readRawInstructions', () => {
-    it('should log and return undefined when the message cannot be decompiled', () => {
+    it('should report to Sentry from the browser and return undefined when the message cannot be decompiled', () => {
         expect(readRawInstructions(UNDECODABLE_RAW)).toBeUndefined();
-        expect(Logger.error).toHaveBeenCalled();
+        expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), BROWSER_REPORT);
     });
 });
 
 describe('readRawInnerInstructions', () => {
-    it('should log and return undefined when the inner instructions cannot be resolved', () => {
+    it('should report to Sentry from the browser and return undefined when inner instructions do not resolve', () => {
         expect(readRawInnerInstructions(UNDECODABLE_RAW)).toBeUndefined();
-        expect(Logger.error).toHaveBeenCalled();
+        expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), BROWSER_REPORT);
     });
 });

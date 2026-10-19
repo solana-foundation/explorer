@@ -30,11 +30,12 @@ request. The Anchor IDL MUST NOT be used. A Codama IDL MUST pass `validateCodama
 ### Requirement: Untrusted metadata never breaks the page
 
 A throw from the instruction parse, the account plan, or the intent computation SHALL be caught and MUST resolve to
-the `malformed-metadata` reason, without a Retry.
+the `malformed-metadata` reason, without a Retry. A failed load of the `@codama/dynamic-instructions` chunk is not a
+metadata error.
 
 #### Scenario: The parser throws on a malformed IDL
 
-- **WHEN** `parseInstruction` throws for a top-level instruction
+- **WHEN** `parseInstruction` throws for a top-level or inner instruction
 - **THEN** that card MUST show `malformed-metadata`, and the other cards and the page MUST keep rendering
 
 ### Requirement: Account reads start on the first open and are shared
@@ -57,20 +58,27 @@ cached by the sorted address set, and computations by instruction content, per c
 - **WHEN** two cards open with the same program, accounts, and data
 - **THEN** the intent MUST be computed once
 
-### Requirement: Retry only for the account read
+### Requirement: Retry only for the account read and the SDK load
 
-The panel SHALL offer Retry only for a failed account read. A Retry MUST show the loading state until the read
-settles. A card whose instruction cannot be loaded SHALL show the failed state without Retry.
+The panel SHALL offer Retry only for a failed account read and a failed load of the `@codama/dynamic-instructions`
+chunk. A Retry MUST show the loading state until the read or the load settles. A card whose instruction cannot be
+loaded SHALL show the failed state without Retry.
 
 #### Scenario: The account read fails
 
 - **WHEN** the account read fails
 - **THEN** the panel MUST show Retry, and a click MUST show the loading state, then the sentence on success
 
+#### Scenario: The SDK chunk fails to load
+
+- **WHEN** the `@codama/dynamic-instructions` chunk fails to load on the first open
+- **THEN** the panel MUST show Retry, and a click MUST show the loading state, then the sentence on success
+
 #### Scenario: The raw transaction fetch fails
 
 - **WHEN** the raw transaction fetch fails
-- **THEN** every top-level card MUST show the failed state without Retry
+- **THEN** every top-level and inner card whose Program Metadata IDL carries intent templates MUST show the failed
+  state without Retry
 
 #### Scenario: The transaction does not decode
 
@@ -86,7 +94,7 @@ from the transaction's slot.
 #### Scenario: The mint account is missing
 
 - **WHEN** a `mintTo` intent reads a mint that no longer exists
-- **THEN** the panel MUST show "Mint tokens" with the fill-in note, and the amount MUST stay unscaled
+- **THEN** the panel MUST show "Mint tokens" with the fill-in note
 
 ### Requirement: Each card shows only its own intent
 
