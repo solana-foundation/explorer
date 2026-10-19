@@ -43,7 +43,7 @@ import { isZkElGamalProofInstruction, ZkElGamalProofDetailsCard } from '@feature
 import { PythDetailsCard } from '@features/instruction-program-pyth';
 import { SERUM_PROGRAM_LABEL, SerumDetailsCard } from '@features/instruction-program-serum';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
-import { isStakeInstruction, RawStakeDetailsCard, StakeDetailsCard } from '@features/stake';
+import { isStakeInstruction, StakeDetailsCard } from '@features/stake';
 import {
     isRpcParsedBatchInstruction,
     isTokenBatchInstruction,
@@ -443,7 +443,20 @@ function InstructionCard({
         return <UnknownDetailsCard key={key} node={node} />;
     }
     if (isStakeInstruction(transactionIx)) {
-        return <RawStakeDetailsCard key={key} {...props} />;
+        const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
+        if (isParsedInstruction(dispatched)) {
+            return (
+                <StakeDetailsCard
+                    key={key}
+                    ix={dispatched}
+                    tx={tx}
+                    index={index}
+                    innerCards={innerCards}
+                    childIndex={childIndex}
+                />
+            );
+        }
+        return <UnknownDetailsCard key={key} node={node} />;
     }
     if (isTokenBatchInstruction(transactionIx)) {
         return (

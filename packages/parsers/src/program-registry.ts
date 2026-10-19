@@ -43,6 +43,7 @@ export type ParserProgramLabel =
     | typeof SPL_MEMO_PROGRAM_LABEL
     | typeof SPL_TOKEN_PROGRAM_LABEL
     | typeof SPL_TOKEN_2022_PROGRAM_LABEL
+    | typeof STAKE_PROGRAM_LABEL
     | typeof SYSTEM_PROGRAM_LABEL
     | 'token-swap'
     | 'wormhole'

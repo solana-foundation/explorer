@@ -7,7 +7,7 @@ export const InitializeCheckedDetailsCard = defineInstructionCard<InitializeChec
         address('Stake Address', info.stakeAccount),
         address('Stake Authority Address', info.staker),
         address('Withdraw Authority Address', info.withdrawer),
-        address('Rent Sysvar', info.rentSysvar),
+        info.rentSysvar && address('Rent Sysvar', info.rentSysvar),
     ],
     title: 'Stake Program: Initialize Checked',
 });

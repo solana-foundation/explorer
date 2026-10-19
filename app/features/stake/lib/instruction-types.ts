@@ -12,7 +12,7 @@ export const InitializeInfo = type({
         epoch: number(),
         unixTimestamp: number(),
     }),
-    rentSysvar: AddressFromString,
+    rentSysvar: optional(AddressFromString),
     stakeAccount: AddressFromString,
 });
 
@@ -99,7 +99,7 @@ export const AuthorizeWithSeedInfo = type({
 
 export type InitializeCheckedInfo = Infer<typeof InitializeCheckedInfo>;
 export const InitializeCheckedInfo = type({
-    rentSysvar: AddressFromString,
+    rentSysvar: optional(AddressFromString),
     stakeAccount: AddressFromString,
     staker: AddressFromString,
     withdrawer: AddressFromString,
@@ -109,7 +109,7 @@ export type AuthorizeCheckedInfo = Infer<typeof AuthorizeCheckedInfo>;
 export const AuthorizeCheckedInfo = type({
     authority: AddressFromString,
     authorityType: enums(['Staker', 'Withdrawer']),
-    clockSysvar: AddressFromString,
+    clockSysvar: optional(AddressFromString),
     custodian: optional(AddressFromString),
     newAuthority: AddressFromString,
     stakeAccount: AddressFromString,
@@ -121,7 +121,7 @@ export const AuthorizeCheckedWithSeedInfo = type({
     authorityOwner: AddressFromString,
     authoritySeed: string(),
     authorityType: enums(['Staker', 'Withdrawer']),
-    clockSysvar: AddressFromString,
+    clockSysvar: optional(AddressFromString),
     custodian: optional(AddressFromString),
     newAuthorized: AddressFromString,
     stakeAccount: AddressFromString,
