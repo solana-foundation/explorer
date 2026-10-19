@@ -1,4 +1,4 @@
-import { gen } from '@__fixtures__/gen';
+import { DEFAULT_SIGNATURE, gen } from '@__fixtures__/gen';
 import {
     AccountRole,
     address,
@@ -25,6 +25,7 @@ type CompiledInner = { accounts: number[]; data: string; programIdIndex: number 
 
 const PROGRAM = address(gen.address(5));
 const DATA = new Uint8Array([2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]);
+const BROWSER_REPORT = { sentry: 'always', sentryExtras: { signature: DEFAULT_SIGNATURE, version: 1 } };
 
 describe('readRawInstructions', () => {
     it('should keep the instructions of a v0 transaction', () => {
@@ -80,11 +81,11 @@ describe('readRawInstructions', () => {
         ]);
     });
 
-    it('should report and hold no instructions when a v1 message cannot be decompiled', () => {
+    it('should report to Sentry from the browser and hold no instructions when a v1 message cannot be decompiled', () => {
         const logError = vi.spyOn(Logger, 'error').mockImplementation(() => {});
 
         expect(readRawInstructions(v1Raw(new Uint8Array([0x81])))).toBeUndefined();
-        expect(logError).toHaveBeenCalled();
+        expect(logError).toHaveBeenCalledWith(expect.any(Error), BROWSER_REPORT);
         logError.mockRestore();
     });
 });
@@ -118,12 +119,12 @@ describe('readRawInnerInstructions', () => {
         expect(readRawInnerInstructions(raw)).toEqual(new Map([[0, [undefined]]]));
     });
 
-    it('should report and hold no inner instructions when they cannot be resolved', () => {
+    it('should report to Sentry from the browser and hold no inner instructions when they do not resolve', () => {
         const logError = vi.spyOn(Logger, 'error').mockImplementation(() => {});
         const raw = withInner(v1Raw(new Uint8Array([0x81])), [{ accounts: [0], data: '', programIdIndex: 0 }]);
 
         expect(readRawInnerInstructions(raw)).toBeUndefined();
-        expect(logError).toHaveBeenCalled();
+        expect(logError).toHaveBeenCalledWith(expect.any(Error), BROWSER_REPORT);
         logError.mockRestore();
     });
 });
@@ -150,5 +151,5 @@ function withInner(raw: RawTransaction, instructions: CompiledInner[]): RawTrans
 }
 
 function v1Raw(messageBytes: Uint8Array): RawTransaction {
-    return { messageBytes, serializedSize: 0, signatures: [], slot: 0, version: 1 };
+    return { messageBytes, serializedSize: 0, signatures: [DEFAULT_SIGNATURE], slot: 0, version: 1 };
 }
