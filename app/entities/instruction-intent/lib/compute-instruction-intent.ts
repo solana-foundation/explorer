@@ -1,5 +1,5 @@
 import type { ParsedInstruction } from '@codama/dynamic-parsers';
-import { type Address, isAddress, type MaybeEncodedAccount } from '@solana/kit';
+import { type Address, address, isAddress, type MaybeEncodedAccount } from '@solana/kit';
 import type { RootNode } from 'codama';
 
 import type { InstructionIntent, IntentField, IntentSentencePart } from './intent';
@@ -43,27 +43,27 @@ function knownAddresses(parsed: ParsedInstruction, fields: readonly IntentField[
 }
 
 function splitIntoSentenceParts(text: string, addresses: readonly Address[]): IntentSentencePart[] {
-    if (addresses.length === 0) {
-        return text ? [{ kind: 'text', text }] : [];
-    }
-
+    const known = new Set<string>(addresses);
     const parts: IntentSentencePart[] = [];
-    // The regex takes the first listed address that matches, so a longer address must come before its prefix
-    const sorted = [...addresses].sort((a, b) => b.length - a.length);
-    // eslint-disable-next-line no-restricted-globals -- one pass matches every address, base58 needs no escaping
-    const matchAddressesRegex = new RegExp(sorted.join('|'), 'g');
-    let cursor = 0;
+    let pendingText = '';
+    // A base58 address is one word segment, so an address inside a longer string stays text
+    // Created per call, so a browser without Intl.Segmenter fails only the intent, not the module import
+    const wordSegmenter = new Intl.Segmenter('en', { granularity: 'word' });
 
-    for (const match of text.matchAll(matchAddressesRegex)) {
-        if (match.index > cursor) {
-            parts.push({ kind: 'text', text: text.slice(cursor, match.index) });
+    for (const { segment } of wordSegmenter.segment(text)) {
+        if (!known.has(segment)) {
+            pendingText += segment;
+            continue;
         }
-        parts.push({ address: match[0] as Address, kind: 'address' });
-        cursor = match.index + match[0].length;
+        if (pendingText) {
+            parts.push({ kind: 'text', text: pendingText });
+            pendingText = '';
+        }
+        parts.push({ address: address(segment), kind: 'address' });
     }
 
-    if (cursor < text.length) {
-        parts.push({ kind: 'text', text: text.slice(cursor) });
+    if (pendingText) {
+        parts.push({ kind: 'text', text: pendingText });
     }
     return parts;
 }
