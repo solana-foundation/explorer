@@ -51,3 +51,15 @@ export const WithKnownAddress: Story = {
 export const ProseOnly: Story = {
     args: { parts: [{ kind: 'text', text: 'Mint tokens' }] },
 };
+
+export const WithLongUnbrokenText: Story = {
+    args: { parts: [{ kind: 'text', text: `Add memo "${'xlc1.1.23Sg4hdeVFZRMAvJgBeZEmhTsNtXW35Ys'.repeat(10)}"` }] },
+    play: async ({ canvasElement }) => {
+        const sentence = within(canvasElement).getByTestId('intent-sentence');
+        sentence.style.width = 'min-content';
+        const minContentWidth = sentence.getBoundingClientRect().width;
+        sentence.style.width = '';
+
+        await expect(minContentWidth).toBeLessThan(canvasElement.getBoundingClientRect().width);
+    },
+};
