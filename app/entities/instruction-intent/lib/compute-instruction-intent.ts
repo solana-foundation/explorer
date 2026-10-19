@@ -48,8 +48,10 @@ function splitIntoSentenceParts(text: string, addresses: readonly Address[]): In
     }
 
     const parts: IntentSentencePart[] = [];
+    // The regex takes the first listed address that matches, so a longer address must come before its prefix
+    const sorted = [...addresses].sort((a, b) => b.length - a.length);
     // eslint-disable-next-line no-restricted-globals -- one pass matches every address, base58 needs no escaping
-    const matchAddressesRegex = new RegExp(addresses.join('|'), 'g');
+    const matchAddressesRegex = new RegExp(sorted.join('|'), 'g');
     let cursor = 0;
 
     for (const match of text.matchAll(matchAddressesRegex)) {
