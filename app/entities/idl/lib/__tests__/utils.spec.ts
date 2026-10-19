@@ -7,36 +7,46 @@ import { describe, expect, it } from 'vitest';
 import { getIdlDeclaredAddress } from '../utils';
 
 const ANCHOR_ADDRESS = 'devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH';
+const OTHER_ADDRESS = 'compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq';
 
 describe('getIdlDeclaredAddress', () => {
     it.each([
         ['a Codama root', codama, 'ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S'],
         ['an Anchor 0.30 IDL', anchor030, ANCHOR_ADDRESS],
         ['a legacy Anchor IDL', anchor029, ANCHOR_ADDRESS],
-        ['an IDL that declares no address', anchorNoAddress, undefined],
-        ['an IDL that declares an empty address', { ...anchorNoAddress, metadata: { address: '' } }, undefined],
-        [
-            'a Codama root whose program public key is not a string',
-            { ...codama, program: { ...codama.program, publicKey: 1 } },
-            undefined,
-        ],
+        ['a legacy Anchor IDL with an empty root address', { ...anchor029, address: '' }, ANCHOR_ADDRESS],
         [
             'an Anchor IDL with a program public key',
-            { ...anchor030, program: { publicKey: 'compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq' } },
+            { ...anchor030, program: { publicKey: OTHER_ADDRESS } },
             ANCHOR_ADDRESS,
         ],
-        ['null', null, undefined],
-        ['a string', 'idl', undefined],
-    ])('should read the address from %s', (_, idl, address) => {
-        expect(getIdlDeclaredAddress(idl)).toBe(address);
+    ])('should return the address that %s declares', (_, idl, address) => {
+        expect(getIdlDeclaredAddress(idl)).toEqual({ address, kind: 'address' });
+    });
+
+    it.each([
+        ['an IDL that declares no address', anchorNoAddress],
+        ['an IDL that declares an empty address', { ...anchorNoAddress, metadata: { address: '' } }],
+        ['a root node without the Codama standard', { kind: 'rootNode', program: { publicKey: OTHER_ADDRESS } }],
+        ['null', null],
+        ['a string', 'idl'],
+    ])('should return no address for %s', (_, idl) => {
+        expect(getIdlDeclaredAddress(idl)).toEqual({ kind: 'none' });
+    });
+
+    it.each([
+        [
+            'a Codama root whose program public key is a number',
+            { ...codama, program: { ...codama.program, publicKey: 1 } },
+        ],
+        ['an Anchor IDL whose address is an object', { ...anchor030, address: {} }],
+    ])('should return a malformed address for %s', (_, idl) => {
+        expect(getIdlDeclaredAddress(idl)).toEqual({ kind: 'malformed' });
     });
 
     it('should prefer the root address over metadata.address', () => {
-        const idl = {
-            ...anchor030,
-            metadata: { ...anchor030.metadata, address: 'compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq' },
-        };
+        const idl = { ...anchor030, metadata: { ...anchor030.metadata, address: OTHER_ADDRESS } };
 
-        expect(getIdlDeclaredAddress(idl)).toBe(ANCHOR_ADDRESS);
+        expect(getIdlDeclaredAddress(idl)).toEqual({ address: ANCHOR_ADDRESS, kind: 'address' });
     });
 });

@@ -30,7 +30,8 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
 
     // A resolved IDL whose declared program differs from the instruction's is a wiring bug (wrong IDL
     // routed to this instruction) — fail loud rather than mis-decode against the wrong interface.
-    const declaredProgram = getIdlDeclaredAddress(idl);
+    const declared = getIdlDeclaredAddress(idl);
+    const declaredProgram = declared.kind === 'address' ? declared.address : undefined;
     if (declaredProgram && declaredProgram !== kitIx.programAddress) {
         const error = new Error(
             `[decode-instruction-with-idl] IDL program ${declaredProgram} does not match instruction program ${kitIx.programAddress}`,

@@ -36,11 +36,12 @@ export function isInteractiveIdlSupported(idl: SupportedIdl): boolean {
 }
 
 export function isIdlProgramIdMismatch(idl: SupportedIdl, programAddress: string): boolean {
-    const idlAddress = getIdlDeclaredAddress(idl);
-    if (!idlAddress) return false;
+    const declared = getIdlDeclaredAddress(idl);
+    if (declared.kind === 'none') return false;
+    if (declared.kind === 'malformed') return true;
 
     try {
-        const idlKey = new PublicKey(idlAddress);
+        const idlKey = new PublicKey(declared.address);
         const programKey = new PublicKey(programAddress);
         return !idlKey.equals(programKey);
     } catch {

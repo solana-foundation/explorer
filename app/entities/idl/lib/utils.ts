@@ -1,18 +1,20 @@
-export function getIdlDeclaredAddress(idl: unknown): string | undefined {
+export type IdlDeclaredAddress = { kind: 'none' } | { kind: 'malformed' } | { address: string; kind: 'address' };
+
+export function getIdlDeclaredAddress(idl: unknown): IdlDeclaredAddress {
     const root = idl as {
-        kind?: unknown;
         standard?: unknown;
         program?: { publicKey?: unknown };
         address?: unknown;
         metadata?: { address?: unknown };
     };
-    const isCodamaRoot = root?.kind === 'rootNode' || root?.standard === 'codama';
-    const addresses = isCodamaRoot ? [root.program?.publicKey] : [root?.address, root?.metadata?.address];
-    return addresses.find(isNonEmptyString);
+    const values = root?.standard === 'codama' ? [root.program?.publicKey] : [root?.address, root?.metadata?.address];
+    const value = values.find(isDeclared);
+    if (value === undefined) return { kind: 'none' };
+    return typeof value === 'string' ? { address: value, kind: 'address' } : { kind: 'malformed' };
 }
 
-function isNonEmptyString(value: unknown): value is string {
-    return typeof value === 'string' && value !== '';
+function isDeclared(value: unknown): boolean {
+    return value !== undefined && value !== null && value !== '';
 }
 
 /**
