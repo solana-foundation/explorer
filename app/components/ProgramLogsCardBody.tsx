@@ -1,5 +1,6 @@
 import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
 import { getFirstAnchorIdl, useAnchorProgram, useProgramIdls } from '@entities/idl';
+import { getBase58Encoder } from '@solana/kit';
 import { ParsedMessage, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import { getAnchorNameForInstruction, getAnchorProgramName } from '@utils/anchor';
 import { Cluster } from '@utils/cluster';
@@ -16,7 +17,7 @@ import React from 'react';
 import { ChevronsUp } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
-import { fromBase64, toBuffer } from '@/app/shared/lib/bytes';
+import { toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -157,6 +158,8 @@ export function ProgramLogsCardBody({
     );
 }
 
+const BASE58_ENCODER = getBase58Encoder();
+
 function ProgramLogRow({
     badgeColor,
     cluster,
@@ -233,7 +236,7 @@ function ProgramLogRow({
                 });
 
                 txInstruction = new TransactionInstruction({
-                    data: toBuffer(fromBase64(instruction.data)),
+                    data: toBuffer(new Uint8Array(BASE58_ENCODER.encode(instruction.data))),
                     keys,
                     programId,
                 });

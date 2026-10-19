@@ -1,7 +1,14 @@
 import { gen } from '@__fixtures__/gen';
 import { type AnchorIdl, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
-import { PublicKey, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
+import { getBase58Decoder } from '@solana/kit';
+import {
+    type ParsedMessage,
+    PublicKey,
+    TransactionInstruction,
+    TransactionMessage,
+    type VersionedMessage,
+} from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -19,6 +26,7 @@ vi.mock('@utils/program-name', () => ({ ProgramName: () => <span>Program</span> 
 vi.mock('@utils/url', () => ({ useClusterPath: () => '/tx' }));
 vi.mock('next/navigation', () => ({ usePathname: () => '/tx' }));
 
+const BASE58_DECODER = getBase58Decoder();
 const DEVI = new PublicKey(anchorModernIdl.address);
 const CREATE_AMM_CONFIG_IX = new TransactionInstruction({
     data: Buffer.from([137, 52, 237, 212, 215, 117, 108, 104, ...new Array(16).fill(0)]),
@@ -51,6 +59,16 @@ describe('ProgramLogsCardBody', () => {
             expect(screen.getByText(instructionName, { exact: false })).toBeInTheDocument();
         },
     );
+
+    it('should name the instruction of a jsonParsed message', () => {
+        idlState.candidates = [
+            { address: undefined, idl: renamedIdl('parsed_instruction'), source: 'anchor', standard: 'Anchor' },
+        ];
+
+        renderLogs(parsedMessage());
+
+        expect(screen.getByText('Parsed Instruction', { exact: false })).toBeInTheDocument();
+    });
 });
 
 function renamedIdl(name: string): AnchorIdl {
@@ -58,14 +76,32 @@ function renamedIdl(name: string): AnchorIdl {
     return { ...anchorModernIdl, instructions: [{ ...first, name }, ...rest] } as unknown as AnchorIdl;
 }
 
-function renderLogs() {
-    const message = new TransactionMessage({
-        instructions: [CREATE_AMM_CONFIG_IX],
-        payerKey: gen.publicKey(0),
-        recentBlockhash: PublicKey.default.toBase58(),
-    }).compileToV0Message();
+function renderLogs(message: VersionedMessage | ParsedMessage = v0Message()) {
     const logs = [{ computeUnits: 0, failed: false, invokedProgram: DEVI.toBase58(), logs: [], truncated: false }];
     return render(
         <ProgramLogsCardBody message={message} logs={logs} cluster={Cluster.Devnet} url="http://localhost" />,
     );
+}
+
+function v0Message(): VersionedMessage {
+    return new TransactionMessage({
+        instructions: [CREATE_AMM_CONFIG_IX],
+        payerKey: gen.publicKey(0),
+        recentBlockhash: PublicKey.default.toBase58(),
+    }).compileToV0Message();
+}
+
+function parsedMessage(): ParsedMessage {
+    const { data, keys } = CREATE_AMM_CONFIG_IX;
+    return {
+        accountKeys: keys.map(({ isSigner, isWritable, pubkey }) => ({
+            pubkey,
+            signer: isSigner,
+            writable: isWritable,
+        })),
+        instructions: [
+            { accounts: keys.map(({ pubkey }) => pubkey), data: BASE58_DECODER.decode(data), programId: DEVI },
+        ],
+        recentBlockhash: PublicKey.default.toBase58(),
+    };
 }
