@@ -212,6 +212,25 @@ describe('custom IDL store', () => {
             expect(recordOf(store)?.customIdl.idl).toEqual(otherTabIdl);
         });
 
+        it('should not overwrite an IDL that another tab saves during a selection change', async () => {
+            const store = await mountedStore();
+            await store.set(uploadCustomIdlAtom, upload(IDL_TEXT));
+            const otherTabIdl = { ...anchorModernIdl, metadata: { ...anchorModernIdl.metadata, name: 'other_tab' } };
+            const list = customIdlStorage.list.bind(customIdlStorage);
+            vi.spyOn(customIdlStorage, 'list').mockImplementationOnce(async () => {
+                const read = await list();
+                await otherTab.put({
+                    programAddress: PROGRAM_ADDRESS,
+                    value: JSON.stringify({ ...STORED, idl: otherTabIdl }),
+                });
+                return read;
+            });
+
+            await store.set(setIdlSelectionAtom, { programAddress: PROGRAM_ADDRESS, selected: 'onChain' });
+
+            expect(JSON.parse(String(await storedValue(PROGRAM_ADDRESS))).idl).toEqual(otherTabIdl);
+        });
+
         it('should not restore an IDL that another tab removed after this tab loaded', async () => {
             const store = await mountedStore();
             await store.set(uploadCustomIdlAtom, upload(IDL_TEXT));

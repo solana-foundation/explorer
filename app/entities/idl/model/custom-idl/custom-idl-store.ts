@@ -81,21 +81,20 @@ export const setIdlSelectionAtom = atom(undefined, (get, set, change: SelectionC
     return result;
 });
 
-// The selection change reads the storage, not storeStateAtom, to keep an IDL that another tab saved.
+// The selection change reads and writes the stored record in one transaction to keep an IDL that another tab saved.
 async function changeSelection(
     get: Getter,
     set: Setter,
     { programAddress, selected }: SelectionChange,
 ): Promise<StorageWriteResult> {
-    const read = await customIdlStorage.list();
-    if (!read.ok) return read;
-    const stored = read.entries.find(entry => entry.programAddress === programAddress);
-    const value = stored && withSelection(stored.value, selected);
-    if (value !== undefined) {
-        const written = await customIdlStorage.put({ programAddress, value });
-        if (!written.ok) return written;
-        customIdlAnalytics.trackSelected(programAddress, selected);
-    }
+    let isChanged = false;
+    const written = await customIdlStorage.update(programAddress, value => {
+        const next = withSelection(value, selected);
+        isChanged = next !== undefined;
+        return next;
+    });
+    if (!written.ok) return written;
+    if (isChanged) customIdlAnalytics.trackSelected(programAddress, selected);
     await reload(get, set);
     return { ok: true };
 }
