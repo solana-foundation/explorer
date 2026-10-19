@@ -65,7 +65,11 @@ describe('TxInstructionSurface', () => {
     it('should hold the fetched instructions', () => {
         rawDetails = { data: { raw: { transaction: { instructions: [WIRE_IX] } } }, status: FetchStatus.Fetched };
 
-        expect(readRawInstructions()).toEqual({ instructions: [WIRE_IX], status: 'fetched' });
+        expect(readRawInstructions()).toEqual({
+            innerInstructions: new Map(),
+            instructions: [WIRE_IX],
+            status: 'fetched',
+        });
     });
 
     it('should hold no instructions for a fetched transaction that cannot be decompiled', () => {
@@ -75,7 +79,11 @@ describe('TxInstructionSurface', () => {
             status: FetchStatus.Fetched,
         };
 
-        expect(readRawInstructions()).toEqual({ instructions: undefined, status: 'fetched' });
+        expect(readRawInstructions()).toEqual({
+            innerInstructions: new Map(),
+            instructions: undefined,
+            status: 'fetched',
+        });
         logError.mockRestore();
     });
 

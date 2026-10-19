@@ -43,8 +43,10 @@ unscaled, and the SDK withholds the sentence.
 - **Kit for every version, lookup tables rebuilt from `meta.loadedAddresses`.** One code path, but it repeats the
   lookup resolution `fetchRawTransaction` already does, and it needs the fetcher to keep `loadedAddresses`.
 
-Inner instructions need the compiled `meta.innerInstructions` mapped through the lookup tables. They are out of
-scope, and inner cards show no intent.
+Inner instructions come from the same response. `fetchRawTransaction` keeps `meta.loadedAddresses`, and
+`getInnerInstructionsFromRawTransaction` resolves the compiled `meta.innerInstructions` against the static keys and
+the loaded addresses. The cards come from the parsed response and the bytes from the raw one, so a card whose raw
+instruction belongs to another program reads `failed` instead of showing a wrong intent.
 
 ### Eager check, lazy fetch
 
@@ -61,7 +63,9 @@ existence check, the account read, the computation.
 ### UI wiring
 
 The design puts the button in the card header and the intent row at the top of the card body. A per-card
-`InstructionIntentProvider` holds the open state and the result, and two consumers read it.
+`InstructionIntentProvider` holds the open state and the result, and two consumers read it. Inner cards render
+inside their parent card, so each provider carries the `innerIxIndex` of its card and the consumers render only
+for the card with the same `innerIxIndex`.
 
 ## What Changes
 
@@ -70,8 +74,9 @@ The design puts the button in the card header and the intent row at the top of t
 - Dependency `@codama/dynamic-instructions` 1.0.0.
 - `entities/idl` and `entities/cluster` gain `@x/instruction-intent`. `useProgramIdls` returns the fetch `error`.
 - `Button` gains a `dashed` variant. `abbreviateAddress` is exported from `AddressLink`.
-- `entities/transaction-data` gains `getInstructionsFromRawTransaction`.
-- Both `InstructionsSection` components mount a provider per top-level card. `BaseInstructionCard` and
+- `entities/transaction-data` gains `getInstructionsFromRawTransaction` and `getInnerInstructionsFromRawTransaction`.
+  `RawTransaction.meta` keeps `loadedAddresses`.
+- Both `InstructionsSection` components mount a provider per top-level and per inner card. `BaseInstructionCard` and
   `InspectorInstructionCard` place the button and the row.
 
 ## Impact
@@ -81,4 +86,3 @@ The design puts the button in the card header and the intent row at the top of t
 - Accepted risk: account data is read when the page is viewed, not at the transaction's slot.
 - Accepted risk: a program can publish broken metadata. A throw from the parse, the account plan, or the
   computation is caught and shown as the `malformed-metadata` reason.
-- Out of scope of this change: inner instructions, the transaction summary block, and the interactive IDL surfaces.
