@@ -4,18 +4,23 @@ import type { Address } from '@solana/kit';
 import { getLastNodeFromPath, type RootNode, validateCodamaVersion } from 'codama';
 import { array, is, literal, optional, string, type } from 'superstruct';
 
+// Shows if intent is supported in a given IDL.
 export type IntentSupportStatus =
     { status: 'none' } | { status: 'unsupported' } | { status: 'supported'; root: RootNode };
 
 export type IntentSupportResult = { status: 'loading' } | { status: 'failed' } | IntentSupportStatus;
 
+// Fetched instruction, required for intent computation.
 export type InstructionFetchResult =
     { status: 'loading' } | { status: 'failed' } | { status: 'success'; instruction: KitInstruction };
 
+// A part of the computed intent sentence.
+// Codama returns plain intent string but Explorer needs to render <Addresses /> components.
 export type IntentSentencePart = { kind: 'text'; text: string } | { kind: 'address'; address: Address };
 
 export type IntentField = { label: string; value: string };
 
+// The computed intent for an instruction.
 export type InstructionIntent = {
     sentenceParts: readonly IntentSentencePart[];
     /** False when a template value could not be filled and the sentence is the short intent label. */

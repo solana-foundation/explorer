@@ -7,7 +7,7 @@ import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCa
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { toInstructionNode, TxInstructionSurface, UnknownDetailsCard } from '@entities/instruction-card';
-import { InstructionIntentProvider } from '@entities/instruction-intent';
+import { InstructionIntentProvider, toInstructionFetchResult } from '@entities/instruction-intent';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { trustedInnerInstructions } from '@entities/transaction-data';
 import { getMangoInstructionLabel, isMangoInstruction } from '@explorer/decoder-mango/detection';
@@ -75,7 +75,7 @@ import dynamic from 'next/dynamic';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { readRawInstructions, toInstructionFetchResult } from '../lib/to-instruction-fetch-result';
+import { readRawInstructions } from '../lib/read-raw-instructions';
 import { CommonInstructionDetailsCard } from './CommonInstructionDetailsCard';
 
 const SerumDetailsCard = dynamic(

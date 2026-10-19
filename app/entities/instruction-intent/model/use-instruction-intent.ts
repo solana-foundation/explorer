@@ -2,6 +2,7 @@ import 'client-only';
 
 import { useCluster, useSolanaRpc } from '@entities/cluster/@x/instruction-intent';
 import type { KitInstruction } from '@explorer/parsers';
+import { FetchStatus } from '@providers/cache';
 import { fetchEncodedAccounts } from '@solana/kit';
 import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
@@ -55,7 +56,6 @@ export function useInstructionIntent({
     const ixIntentFound = ixIntentExist?.status === 'exists' ? ixIntentExist : undefined;
     const contentKey = useMemo(() => instruction && toContentKey(instruction), [instruction]);
 
-    // SWR calls a fetcher only while its key is set, so the `&&` guards in the fetchers only narrow the types
     const addressesForIntent = useSWRImmutable(
         enabled && root && ixIntentFound ? ['instruction-intent-addresses', cluster, url, contentKey] : undefined,
         () => root && ixIntentFound && getAccountsForIntent(root, ixIntentFound.parsed),
@@ -104,6 +104,22 @@ export function useInstructionIntent({
         return { retry: () => void accounts.mutate(), status: 'failed' };
     }
     return LOADING;
+}
+
+/** The instruction one top-level card on the transaction page builds its intent from, read from the raw transaction. */
+export function toInstructionFetchResult({
+    fetchStatus,
+    instructions,
+    index,
+}: {
+    fetchStatus: FetchStatus | undefined;
+    instructions: readonly KitInstruction[] | undefined;
+    index: number;
+}): InstructionFetchResult {
+    const instruction = instructions?.[index];
+    if (instruction) return { instruction, status: 'success' };
+    if (fetchStatus === undefined || fetchStatus === FetchStatus.Fetching) return { status: 'loading' };
+    return { status: 'failed' };
 }
 
 function unavailable(reason: IntentUnavailableReason): InstructionIntentResult {

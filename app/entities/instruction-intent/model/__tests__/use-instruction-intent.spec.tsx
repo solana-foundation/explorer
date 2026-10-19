@@ -1,5 +1,6 @@
 import { DEFAULT_RPC_URL } from '@__fixtures__/gen';
 import type { KitInstruction } from '@explorer/parsers';
+import { FetchStatus } from '@providers/cache';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { type ReactNode } from 'react';
 import { SWRConfig } from 'swr';
@@ -20,7 +21,7 @@ import {
     TOKEN_ROOT_WITHOUT_DISPLAY,
     transferSolInstruction,
 } from '../../mocks/fixtures';
-import { useInstructionIntent } from '../use-instruction-intent';
+import { toInstructionFetchResult, useInstructionIntent } from '../use-instruction-intent';
 
 const RPC = { name: 'rpc' };
 const SYSTEM_IDLS = { isLoading: false, programMetadataIdl: SYSTEM_ROOT };
@@ -95,6 +96,10 @@ function renderTwoMintToIntents(firstAmount: bigint, secondAmount: bigint) {
     );
 }
 
+function getSecondCardFetchResult(fetchStatus: FetchStatus | undefined, instructions?: readonly KitInstruction[]) {
+    return toInstructionFetchResult({ fetchStatus, index: 1, instructions });
+}
+
 beforeEach(() => {
     vi.clearAllMocks();
     mocks.parseInstruction.mockImplementation((...args: Parameters<Parsers['parseInstruction']>) =>
@@ -120,7 +125,7 @@ describe('useInstructionIntent', () => {
         expect(renderClosedCardIntent(SYSTEM_IDLS, LOADING)).toEqual({ status: 'idle' });
     });
 
-    it('should report idle without planning or reading accounts when the card is closed and the instruction has an intent', () => {
+    it('should report idle without fetching accounts when the card is closed and the instruction has an intent', () => {
         expect(renderClosedCardIntent(SYSTEM_IDLS, fetched(transferSolInstruction()))).toEqual({ status: 'idle' });
         expect(mocks.getRequiredAccountsForDisplay).not.toHaveBeenCalled();
         expect(mocks.fetchEncodedAccounts).not.toHaveBeenCalled();
@@ -165,7 +170,7 @@ describe('useInstructionIntent', () => {
         });
     });
 
-    it('should not read accounts when the intent plans none', async () => {
+    it('should not fetch accounts when the intent plans none', async () => {
         mocks.useProgramIdls.mockReturnValue(SYSTEM_IDLS);
         const ixFetchResult = fetched(transferSolInstruction());
 
@@ -192,7 +197,7 @@ describe('useInstructionIntent', () => {
         expect(result.current.status === 'ready' && result.current.result.usedAccountData).toBe(true);
     });
 
-    it('should share one account read when two instructions read one mint', async () => {
+    it('should share one account fetch when two instructions require one mint', async () => {
         mocks.fetchEncodedAccounts.mockResolvedValue([mintAccount(6)]);
 
         const { result } = renderTwoMintToIntents(1_500_000n, 2_500_000n);
@@ -211,7 +216,7 @@ describe('useInstructionIntent', () => {
         expect(mocks.getInstructionDisplayFromParsedInstruction).toHaveBeenCalledTimes(1);
     });
 
-    it('should report loading when a failed account read is retried', async () => {
+    it('should report loading when a failed account fetch is retried', async () => {
         mocks.fetchEncodedAccounts.mockRejectedValueOnce(new Error('429')).mockResolvedValueOnce([mintAccount(6)]);
         const ixFetchResult = fetched(mintToInstruction());
         const statuses: InstructionIntentResult['status'][] = [];
@@ -295,5 +300,32 @@ describe('useInstructionIntent', () => {
         rerender({ fetchResult: fetched(instruction) });
 
         expect(mocks.parseInstruction).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('toInstructionFetchResult', () => {
+    it('should report loading when the raw transaction is not requested', () => {
+        expect(getSecondCardFetchResult(undefined)).toEqual({ status: 'loading' });
+    });
+
+    it('should report loading when the raw transaction is loading', () => {
+        expect(getSecondCardFetchResult(FetchStatus.Fetching)).toEqual({ status: 'loading' });
+    });
+
+    it('should report success with the instruction at the card index when the raw transaction is fetched', () => {
+        const second = mintToInstruction();
+
+        expect(getSecondCardFetchResult(FetchStatus.Fetched, [transferSolInstruction(), second])).toEqual({
+            instruction: second,
+            status: 'success',
+        });
+    });
+
+    it('should report failed when the raw fetch fails', () => {
+        expect(getSecondCardFetchResult(FetchStatus.FetchFailed)).toEqual({ status: 'failed' });
+    });
+
+    it('should report failed when the fetched transaction has no decodable instructions', () => {
+        expect(getSecondCardFetchResult(FetchStatus.Fetched)).toEqual({ status: 'failed' });
     });
 });
