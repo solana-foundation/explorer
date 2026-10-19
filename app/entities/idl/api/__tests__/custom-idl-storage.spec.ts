@@ -122,6 +122,45 @@ describe('createIndexedDbCustomIdlStorage', () => {
         });
     });
 
+    describe('update', () => {
+        it('should store the value that the change returns for the stored value', async () => {
+            await storage.put({ programAddress: PROGRAM_ADDRESS, value: 'a' });
+
+            expect(await storage.update(PROGRAM_ADDRESS, value => `${String(value)}b`)).toEqual({ ok: true });
+
+            expect(await storage.list()).toEqual({
+                entries: [{ programAddress: PROGRAM_ADDRESS, value: 'ab' }],
+                ok: true,
+            });
+        });
+
+        it('should keep the stored value when the change returns undefined', async () => {
+            await storage.put({ programAddress: PROGRAM_ADDRESS, value: 'a' });
+
+            expect(await storage.update(PROGRAM_ADDRESS, () => undefined)).toEqual({ ok: true });
+
+            expect(await storage.list()).toEqual({
+                entries: [{ programAddress: PROGRAM_ADDRESS, value: 'a' }],
+                ok: true,
+            });
+        });
+
+        it('should pass undefined to the change for a program with no stored value', async () => {
+            const change = vi.fn(() => undefined);
+
+            await storage.update(PROGRAM_ADDRESS, change);
+
+            expect(change).toHaveBeenCalledWith(undefined);
+            expect(await storage.list()).toEqual({ entries: [], ok: true });
+        });
+
+        it('should return unavailable when the open throws a SecurityError', async () => {
+            openThrows('SecurityError');
+
+            expect(await storage.update(PROGRAM_ADDRESS, () => 'a')).toEqual({ ok: false, reason: 'unavailable' });
+        });
+    });
+
     describe('remove', () => {
         it('should remove the stored value', async () => {
             await storage.put({ programAddress: PROGRAM_ADDRESS, value: '{}' });
