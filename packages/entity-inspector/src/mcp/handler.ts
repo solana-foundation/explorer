@@ -56,6 +56,12 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
     };
     const { wrapServer } = config;
     return async request => {
+        if (request.method !== 'POST') {
+            return Response.json(
+                { error: { code: -32000, message: 'Method not allowed.' }, id: null, jsonrpc: '2.0' },
+                { headers: { Allow: 'POST' }, status: 405 },
+            );
+        }
         const baseServer = createMcpServer(dependencies);
         const server = wrapServer ? wrapServer(baseServer) : baseServer;
         const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
@@ -65,7 +71,7 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
             const { onerror } = transport;
             // oxlint-disable-next-line unicorn/prefer-add-event-listener -- the MCP transport has no addEventListener
             transport.onerror = error => {
-                if (isClientRejection(error)) {
+                if (isUnsupportedProtocolVersion(error)) {
                     logger.info(ns('client request rejected'), { error: toLoggedError(error) });
                 } else {
                     onerror?.(error);
@@ -83,11 +89,6 @@ export function createMcpRequestHandler(config: EntityInspectorConfig): McpReque
     };
 }
 
-const CLIENT_REJECTION_MESSAGES = [
-    'Bad Request: Unsupported protocol version: 2026-07-28',
-    'Not Acceptable: Client must accept text/event-stream',
-];
-
-function isClientRejection(error: Error): boolean {
-    return CLIENT_REJECTION_MESSAGES.some(message => error.message.startsWith(message));
+function isUnsupportedProtocolVersion(error: Error): boolean {
+    return error.message.startsWith('Bad Request: Unsupported protocol version:');
 }

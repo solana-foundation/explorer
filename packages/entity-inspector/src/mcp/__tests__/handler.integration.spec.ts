@@ -422,52 +422,46 @@ describe('createMcpRequestHandler — real MCP SDK transport, close failures', (
     });
 });
 
+describe('createMcpRequestHandler methods other than POST', () => {
+    it.each([
+        { accept: 'text/event-stream', method: 'GET' },
+        { accept: 'application/json', method: 'GET' },
+        { accept: 'application/json', method: 'HEAD' },
+        { accept: 'application/json', method: 'DELETE' },
+        { accept: 'application/json', method: 'PUT' },
+    ])('should answer $method with Accept $accept with 405 and Allow POST', async ({ accept, method }) => {
+        const handler = createMcpRequestHandler(TEST_CONFIG);
+
+        const response = await handler(new Request('http://localhost/mcp', { headers: { accept }, method }));
+
+        expect(response.status).toBe(405);
+        expect(response.headers.get('allow')).toBe('POST');
+    });
+});
+
 describe('createMcpRequestHandler client rejections', () => {
-    it('should log a GET without text/event-stream in Accept at info and return 406', async () => {
-        const info = vi.fn();
-        const handler = createMcpRequestHandler({
-            ...TEST_CONFIG,
-            logger: { debug: vi.fn(), error: vi.fn(), info, warn: vi.fn() },
-        });
+    it.each(['2026-07-28', '2099-01-01'])(
+        'should log a POST with protocol version %s at info and return 400',
+        async version => {
+            const info = vi.fn();
+            const handler = createMcpRequestHandler({
+                ...TEST_CONFIG,
+                logger: { debug: vi.fn(), error: vi.fn(), info, warn: vi.fn() },
+            });
 
-        const response = await handler(getRequestWithoutEventStream());
+            const response = await handler(postWithProtocolVersion(version, 40));
 
-        expect(response.status).toBe(406);
-        expect(info).toHaveBeenCalledExactlyOnceWith('[entity-inspector] client request rejected', {
-            error: { message: 'Not Acceptable: Client must accept text/event-stream', name: 'Error' },
-        });
-    });
-
-    it('should log a POST with protocol version 2026-07-28 at info and return 400', async () => {
-        const info = vi.fn();
-        const handler = createMcpRequestHandler({
-            ...TEST_CONFIG,
-            logger: { debug: vi.fn(), error: vi.fn(), info, warn: vi.fn() },
-        });
-
-        const response = await handler(postWithProtocolVersion('2026-07-28', 40));
-
-        expect(response.status).toBe(400);
-        expect(info).toHaveBeenCalledExactlyOnceWith('[entity-inspector] client request rejected', {
-            error: {
-                message: expect.stringMatching(/^Bad Request: Unsupported protocol version: 2026-07-28 /),
-                name: 'Error',
-            },
-        });
-    });
-
-    it('should not log a POST with any other unsupported protocol version', async () => {
-        const info = vi.fn();
-        const handler = createMcpRequestHandler({
-            ...TEST_CONFIG,
-            logger: { debug: vi.fn(), error: vi.fn(), info, warn: vi.fn() },
-        });
-
-        const response = await handler(postWithProtocolVersion('2099-01-01', 41));
-
-        expect(response.status).toBe(400);
-        expect(info).not.toHaveBeenCalled();
-    });
+            expect(response.status).toBe(400);
+            expect(info).toHaveBeenCalledExactlyOnceWith('[entity-inspector] client request rejected', {
+                error: {
+                    message: expect.stringMatching(
+                        new RegExp(`^Bad Request: Unsupported protocol version: ${version} `),
+                    ),
+                    name: 'Error',
+                },
+            });
+        },
+    );
 
     it('should not log a POST without application/json in Accept', async () => {
         const info = vi.fn();
@@ -489,12 +483,13 @@ describe('createMcpRequestHandler with wrapMcpServerWithSentry', () => {
         getCurrentScope().setClient(undefined);
     });
 
-    it('should send no Sentry event for either client rejection', async () => {
+    it('should send no Sentry event for a GET, a HEAD or an unsupported protocol version', async () => {
         const reported = initSentry();
         const handler = createMcpRequestHandler({ ...TEST_CONFIG, wrapServer: wrapMcpServerWithSentry });
 
-        await handler(getRequestWithoutEventStream());
-        await handler(postWithProtocolVersion('2026-07-28', 43));
+        await handler(new Request('http://localhost/mcp', { headers: { accept: 'application/json' }, method: 'GET' }));
+        await handler(new Request('http://localhost/mcp', { method: 'HEAD' }));
+        await handler(postWithProtocolVersion('2099-01-01', 43));
         await getClient()?.flush();
 
         expect(reported).toEqual([]);
@@ -510,10 +505,6 @@ describe('createMcpRequestHandler with wrapMcpServerWithSentry', () => {
         expect(reported).toEqual(['Not Acceptable: Client must accept both application/json and text/event-stream']);
     });
 });
-
-function getRequestWithoutEventStream(): Request {
-    return new Request('http://localhost/mcp', { headers: { accept: 'application/json' }, method: 'GET' });
-}
 
 function postWithProtocolVersion(version: string, id: number): Request {
     return mcpRequest('tools/list', {}, id, { ...MCP_HEADERS, 'mcp-protocol-version': version });
