@@ -169,6 +169,56 @@ describe('createMcpRequestHandler — real MCP SDK transport', () => {
     });
 });
 
+describe('createMcpRequestHandler — request limits', () => {
+    const handler = createMcpRequestHandler(TEST_CONFIG);
+    const MAX_BODY_BYTES = 4 * 1024 * 1024;
+
+    it('should answer a batch of 100 messages', async () => {
+        const response = await handler(pingBatch(100));
+
+        expect(response.status).toBe(200);
+        await expect(response.json()).resolves.toHaveLength(100);
+    });
+
+    it('should reject a batch of 101 messages', async () => {
+        const response = await handler(pingBatch(101));
+
+        expect(response.status).toBe(400);
+        await expect(response.json()).resolves.toMatchObject({ error: { code: -32600 } });
+    });
+
+    it('should answer a body of exactly 4 MiB', async () => {
+        const response = await handler(pingOfSize(MAX_BODY_BYTES));
+
+        expect(response.status).toBe(200);
+        await expect(response.json()).resolves.toMatchObject({ id: 1, result: {} });
+    });
+
+    it('should reject a body one byte over 4 MiB', async () => {
+        const response = await handler(pingOfSize(MAX_BODY_BYTES + 1));
+
+        expect(response.status).toBe(413);
+    });
+});
+
+function pingBatch(size: number): Request {
+    const messages = Array.from({ length: size }, (_, id) => ({ id, jsonrpc: '2.0', method: 'ping' }));
+    return new Request('http://localhost/mcp', {
+        body: JSON.stringify(messages),
+        headers: MCP_HEADERS,
+        method: 'POST',
+    });
+}
+
+function pingOfSize(bytes: number): Request {
+    const padding = 'x'.repeat(bytes - pingMessage('').length);
+    return new Request('http://localhost/mcp', { body: pingMessage(padding), headers: MCP_HEADERS, method: 'POST' });
+}
+
+function pingMessage(padding: string): string {
+    return JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'ping', params: { padding } });
+}
+
 describe('createMcpRequestHandler — a deployment that enables one cluster', () => {
     const handler = createMcpRequestHandler({ ...TEST_CONFIG, enabledClusterNames: ['devnet'] });
 
