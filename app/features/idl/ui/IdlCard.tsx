@@ -14,11 +14,13 @@ import {
 } from '@components/shared/ui/dialog';
 import { ExternalLink } from '@components/shared/ui/external-link';
 import {
+    AddCustomIdlButton,
     buildProgramName,
     getIdlBadgeLabel,
     getIdlProgramVersion,
-    IdlVariant,
+    IDL_SOURCE_LABELS,
     isIdlProgramIdMismatch,
+    ProgramIdlSelector,
     useProgramIdls,
 } from '@entities/idl';
 import { useCluster } from '@providers/cluster';
@@ -38,7 +40,7 @@ import { IdlSection } from './IdlSection';
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const network = clusterSlug(cluster);
-    const { candidates } = useProgramIdls(programId, url, cluster);
+    const { candidates, stored } = useProgramIdls(programId, url, cluster);
     const [searchStr, setSearchStr] = useState<string>('');
     const [isOrquestraDialogOpen, setIsOrquestraDialogOpen] = useState(false);
 
@@ -79,6 +81,12 @@ export function IdlCard({ programId }: { programId: string }) {
 
     const headerLinks = (
         <div className="flex flex-wrap items-center gap-2">
+            {stored.status === 'ready' &&
+                (stored.record ? (
+                    <ProgramIdlSelector programAddress={programId} />
+                ) : (
+                    <AddCustomIdlButton programAddress={programId} />
+                ))}
             {idlHistoryLink}
             {orquestraLink}
             <Dialog open={isOrquestraDialogOpen} onOpenChange={setIsOrquestraDialogOpen}>
@@ -174,10 +182,10 @@ export function IdlCard({ programId }: { programId: string }) {
     // Single badge: the IDL standard with its version(s) — `Codama (version 1.5.1)` /
     // `Anchor 0.30.1 (version 0.1.0)` / `Anchor (legacy)`. The program's own semver lives in the info
     // rows below. Dashkit style: the Anchor fallback (no PMP IDL) is "warning" (matching the "Program
-    // has no security.txt" badge) with the adjacent info icon; otherwise (any PMP IDL) it's "success".
+    // has no security.txt" badge) with the adjacent info icon; a custom IDL is "info"; otherwise it's "success".
     const badge = (
         <div className="flex flex-wrap items-center gap-2">
-            <Badge ui="dashkit" variant={isFallback ? 'warning' : 'success'}>
+            <Badge ui="dashkit" variant={source === 'custom' ? 'info' : isFallback ? 'warning' : 'success'}>
                 {getIdlBadgeLabel(idl)}
             </Badge>
             {isFallback && (
@@ -200,9 +208,11 @@ export function IdlCard({ programId }: { programId: string }) {
     );
 
     // Metadata shown directly under the badge: the storage account the displayed IDL was read from,
-    // which source it came from, and the program's own version (distinct from the badge's spec label).
-    const idlAddress = selected.address;
-    const idlSourceLabel = isFallback ? 'Anchor' : 'PMP';
+    // which source it came from, the file of a custom IDL, and the program's own version (distinct from the
+    // badge's spec label).
+    const idlAddress = selected.source === 'custom' ? undefined : selected.address;
+    const customIdlFileName =
+        selected.source === 'custom' && selected.origin.kind === 'file' ? selected.origin.fileName : undefined;
     const programVersion = getIdlProgramVersion(idl);
     // Codama / modern Anchor names only; legacy Anchor top-level name is intentionally not shown.
     const programName = buildProgramName([idl]);
@@ -225,8 +235,14 @@ export function IdlCard({ programId }: { programId: string }) {
             )}
             <div className="flex items-baseline gap-2">
                 <dt className="w-32 shrink-0 text-neutral-400">Source</dt>
-                <dd className="text-white">{idlSourceLabel}</dd>
+                <dd className="text-white">{IDL_SOURCE_LABELS[source]}</dd>
             </div>
+            {customIdlFileName && (
+                <div className="flex items-baseline gap-2">
+                    <dt className="w-32 shrink-0 text-neutral-400">File</dt>
+                    <dd className="break-all text-white">{customIdlFileName}</dd>
+                </div>
+            )}
             {programVersion && (
                 <div className="flex items-baseline gap-2">
                     <dt className="w-32 shrink-0 text-neutral-400">Program Version</dt>
@@ -255,7 +271,7 @@ export function IdlCard({ programId }: { programId: string }) {
                         badge={badge}
                         info={info}
                         idl={idl}
-                        idlSource={isFallback ? IdlVariant.Anchor : IdlVariant.ProgramMetadata}
+                        source={source}
                         network={network}
                         programId={programId}
                         searchStr={searchStr}

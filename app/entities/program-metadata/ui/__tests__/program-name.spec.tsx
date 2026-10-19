@@ -61,6 +61,10 @@ describe('ProgramName', () => {
 
     it.each([
         ['the PMP Codama IDL', { address: undefined, idl: CODAMA, source: 'programMetadata', standard: 'Codama' }],
+        [
+            'a selected custom Codama IDL',
+            { idl: CODAMA, origin: { kind: 'pasted' }, source: 'custom', standard: 'Codama' },
+        ],
     ] satisfies [string, NonNullable<ProgramIdls['candidates']>[number]][])(
         'should name the program from %s',
         (_, candidate) => {
@@ -84,6 +88,23 @@ describe('ProgramName', () => {
         const idl = anchorModernIdl as unknown as AnchorIdl;
         expect(() => rootNodeFromAnchor(idl as never)).toThrow();
         mockCandidates([{ address: undefined, idl, source: 'programMetadata', standard: 'Anchor' }]);
+
+        expect(() => renderName()).not.toThrow();
+        expect(screen.getByText('Anchor program name')).toBeInTheDocument();
+    });
+
+    it('should name the program from a selected custom Anchor IDL', () => {
+        mockCandidates([{ idl: ANCHOR, origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' }]);
+
+        renderName();
+
+        expect(screen.getByText('AccountCompression')).toBeInTheDocument();
+    });
+
+    it('should show the Anchor program name for a custom Anchor IDL that Codama cannot convert', () => {
+        const idl = anchorModernIdl as unknown as AnchorIdl;
+        expect(() => rootNodeFromAnchor(idl as never)).toThrow();
+        mockCandidates([{ idl, origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' }]);
 
         expect(() => renderName()).not.toThrow();
         expect(screen.getByText('Anchor program name')).toBeInTheDocument();

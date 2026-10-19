@@ -60,6 +60,14 @@ describe('AccountDataTab', () => {
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
     });
 
+    it('should show the Anchor Data tab when the selected custom IDL declares account types', () => {
+        idlState.candidates = [
+            { idl: ANCHOR_WITH_ACCOUNTS, origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' },
+        ];
+        renderTab();
+        expect(screen.getByText('Anchor Data')).toBeInTheDocument();
+    });
+
     it('should hide the tab when only a Codama candidate exists', () => {
         idlState.candidates = [{ address: undefined, idl: CODAMA, source: 'programMetadata', standard: 'Codama' }];
         renderTab();

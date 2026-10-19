@@ -23,6 +23,11 @@ describe('AnchorProgramName', () => {
             ],
             'PmpProgram',
         ],
+        [
+            'a selected custom Anchor IDL',
+            [{ idl: namedIdl('custom_program'), origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' }],
+            'CustomProgram',
+        ],
     ] satisfies [string, NonNullable<ProgramIdls['candidates']>, string][])(
         'should name the program with %s',
         (_, candidates, programName) => {

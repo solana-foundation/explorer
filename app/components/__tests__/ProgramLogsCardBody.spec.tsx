@@ -41,6 +41,18 @@ describe('ProgramLogsCardBody', () => {
             ],
             'Pmp Instruction',
         ],
+        [
+            'a selected custom Anchor IDL',
+            [
+                {
+                    idl: renamedIdl('custom_instruction'),
+                    origin: { kind: 'pasted' },
+                    source: 'custom',
+                    standard: 'Anchor',
+                },
+            ],
+            'Custom Instruction',
+        ],
     ] satisfies [string, NonNullable<ProgramIdls['candidates']>, string][])(
         'should name the instruction with %s',
         (_, candidates, instructionName) => {

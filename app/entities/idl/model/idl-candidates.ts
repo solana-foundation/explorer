@@ -1,18 +1,29 @@
 import { type ProgramIdlPair } from '../api/types';
 import { type AnchorIdl, type CodamaIdl, type SupportedIdl, type TaggedIdl } from '../lib/types';
+import { type CustomIdlOrigin, type CustomIdlRecord } from './custom-idl/types';
 import { getIdlStandard } from './idl-version';
 
 export type OnChainIdlSource = 'programMetadata' | 'anchor';
 
-export type SourcedIdl = TaggedIdl & { source: OnChainIdlSource; address: string | undefined };
+export type IdlSource = 'custom' | OnChainIdlSource;
+
+export type SourcedIdl = TaggedIdl &
+    ({ source: 'custom'; origin: CustomIdlOrigin } | { source: OnChainIdlSource; address: string | undefined });
+
+type OnChainSourcedIdl = Extract<SourcedIdl, { source: OnChainIdlSource }>;
+
+export function selectIdlCandidates(onChain: ProgramIdlPair, record: CustomIdlRecord | undefined): SourcedIdl[] {
+    if (record?.selected === 'custom') return [{ ...record.customIdl, origin: record.origin, source: 'custom' }];
+    return getOnChainCandidates(onChain);
+}
 
 export function getOnChainCandidates({
     programMetadataIdl,
     programMetadataIdlAddress,
     anchorIdl,
     anchorIdlAddress,
-}: ProgramIdlPair): SourcedIdl[] {
-    const candidates: SourcedIdl[] = [];
+}: ProgramIdlPair): OnChainSourcedIdl[] {
+    const candidates: OnChainSourcedIdl[] = [];
     if (programMetadataIdl) {
         candidates.push({
             ...tagIdl(programMetadataIdl),

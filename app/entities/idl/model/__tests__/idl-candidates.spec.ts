@@ -1,12 +1,16 @@
+import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { describe, expect, it } from 'vitest';
 
 import { type ProgramIdlPair } from '../../api/types';
 import { type SupportedIdl } from '../../lib/types';
+import { parseCustomIdl } from '../custom-idl/parse-custom-idl';
+import { type CustomIdlRecord, type IdlSelection } from '../custom-idl/types';
 import {
     getFirstAnchorIdl,
     getFirstAnchorIdlWithAccounts,
     getOnChainAnchorIdl,
     getOnChainCandidates,
+    selectIdlCandidates,
     type SourcedIdl,
 } from '../idl-candidates';
 
@@ -22,6 +26,40 @@ const BOTH = pair({
     anchorIdlAddress: 'anchor-account',
     programMetadataIdl: PMP_IDL,
     programMetadataIdlAddress: 'pmp-account',
+});
+
+describe('selectIdlCandidates', () => {
+    it.each([
+        ['no on-chain IDL', NONE, []],
+        ['a PMP IDL only', PMP_ONLY, ['programMetadata']],
+        ['an Anchor IDL only', ANCHOR_ONLY, ['anchor']],
+        ['both on-chain IDLs', BOTH, ['programMetadata', 'anchor']],
+    ])('should list the on-chain IDLs in default order without a record, for %s', (_, onChain, sources) => {
+        expect(sourcesOf(selectIdlCandidates(onChain, undefined))).toEqual(sources);
+    });
+
+    it.each([NONE, PMP_ONLY, ANCHOR_ONLY, BOTH])(
+        'should list only the custom IDL, with its origin, when Custom is selected',
+        async onChain => {
+            const custom = await record('custom');
+
+            expect(selectIdlCandidates(onChain, custom)).toEqual([
+                { ...custom.customIdl, origin: { kind: 'pasted' }, source: 'custom' },
+            ]);
+        },
+    );
+
+    it.each([
+        ['a PMP IDL only', PMP_ONLY, ['programMetadata']],
+        ['an Anchor IDL only', ANCHOR_ONLY, ['anchor']],
+        ['both on-chain IDLs', BOTH, ['programMetadata', 'anchor']],
+        ['no on-chain IDL', NONE, []],
+    ])(
+        'should list the on-chain IDLs in default order when On-chain is selected, for %s',
+        async (_, onChain, sources) => {
+            expect(sourcesOf(selectIdlCandidates(onChain, await record('onChain')))).toEqual(sources);
+        },
+    );
 });
 
 describe('getOnChainCandidates', () => {
@@ -97,6 +135,12 @@ function pair(idls: Partial<ProgramIdlPair>): ProgramIdlPair {
         programMetadataIdlAddress: undefined,
         ...idls,
     };
+}
+
+async function record(selected: IdlSelection): Promise<CustomIdlRecord> {
+    const parsed = await parseCustomIdl(anchorModernIdl, undefined);
+    if (!parsed.ok) throw new Error('fixture IDL must parse');
+    return { customIdl: parsed.customIdl, origin: { kind: 'pasted' }, selected };
 }
 
 function sourcesOf(candidates: readonly SourcedIdl[]): SourcedIdl['source'][] {

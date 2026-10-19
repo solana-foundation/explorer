@@ -1,9 +1,10 @@
 import { gen } from '@__fixtures__/gen';
-import type { ProgramIdls, SupportedIdl } from '@entities/idl';
+import type { AnchorIdl, CustomIdlRecord, ProgramIdls } from '@entities/idl';
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { getOnChainCandidates } from '@/app/entities/idl/model/idl-candidates';
+import type { CustomIdl } from '@/app/entities/idl/model/custom-idl/types';
+import { selectIdlCandidates } from '@/app/entities/idl/model/idl-candidates';
 import { Cluster } from '@/app/utils/cluster';
 
 import { ProgramHeader } from '../ProgramHeader';
@@ -36,25 +37,36 @@ vi.mock('@features/metadata', () => ({ ProxiedImage: () => null }));
 
 const ADDRESS = 'EgJAPMy5V2j442dTGFRqT5ZtPCWtg6BEbEo2QzkExYyw';
 
-function anchorIdlNamed(name: string): SupportedIdl {
+function anchorIdlNamed(name: string): AnchorIdl {
     return {
         address: ADDRESS,
         instructions: [],
         metadata: { name, spec: '0.1.0', version: '0.1.0' },
-    } as unknown as SupportedIdl;
+    } as unknown as AnchorIdl;
 }
 
-function mockIdls(idl?: SupportedIdl): void {
-    const onChain: ProgramIdls['onChain'] = {
-        anchorIdl: idl,
-        anchorIdlAddress: undefined,
-        programMetadataIdl: undefined,
-        programMetadataIdlAddress: undefined,
-    };
+const NO_ON_CHAIN_IDLS: ProgramIdls['onChain'] = {
+    anchorIdl: undefined,
+    anchorIdlAddress: undefined,
+    programMetadataIdl: undefined,
+    programMetadataIdlAddress: undefined,
+};
+
+function mockIdls(idl?: AnchorIdl, source: 'anchor' | 'custom' = 'anchor'): void {
+    const onChain = { ...NO_ON_CHAIN_IDLS, anchorIdl: source === 'anchor' ? idl : undefined };
+    const record: CustomIdlRecord | undefined =
+        idl && source === 'custom'
+            ? {
+                  customIdl: { idl, programAddress: ADDRESS, standard: 'Anchor' } as CustomIdl,
+                  origin: { kind: 'pasted' },
+                  selected: 'custom',
+              }
+            : undefined;
     mocks.useProgramIdls.mockReturnValue({
-        candidates: getOnChainCandidates(onChain),
+        candidates: selectIdlCandidates(onChain, record),
         isOnChainLoading: false,
         onChain,
+        stored: { record, status: 'ready' },
     } satisfies ProgramIdls);
 }
 
@@ -94,6 +106,35 @@ describe('ProgramHeader', () => {
         render(<ProgramHeader address={ADDRESS} />);
 
         expect(screen.getByText('Idl Program')).toBeInTheDocument();
+        expect(screen.getByLabelText('Self-reported program')).toBeInTheDocument();
+    });
+
+    test('should show the custom IDL program name without the self-reported warning', () => {
+        mockIdls(anchorIdlNamed('my_program'), 'custom');
+
+        render(<ProgramHeader address={ADDRESS} />);
+
+        expect(screen.getByText('My Program')).toBeInTheDocument();
+        expect(screen.queryByLabelText('Self-reported program')).not.toBeInTheDocument();
+    });
+
+    test('should prefer the trusted-registry name over the custom IDL program name', () => {
+        mocks.programInfoById = { [ADDRESS]: { deployments: [Cluster.MainnetBeta], name: 'Trusted Program' } };
+        mockIdls(anchorIdlNamed('my_program'), 'custom');
+
+        render(<ProgramHeader address={ADDRESS} />);
+
+        expect(screen.getByText('Trusted Program')).toBeInTheDocument();
+        expect(screen.queryByText('My Program')).not.toBeInTheDocument();
+    });
+
+    test('should prefer the security.txt name over the custom IDL program name', () => {
+        mocks.useSecurityTxt.mockReturnValue({ securityTxt: gen.securityTxt({ name: 'SecTxt Name' }) });
+        mockIdls(anchorIdlNamed('my_program'), 'custom');
+
+        render(<ProgramHeader address={ADDRESS} />);
+
+        expect(screen.getByText('SecTxt Name')).toBeInTheDocument();
         expect(screen.getByLabelText('Self-reported program')).toBeInTheDocument();
     });
 

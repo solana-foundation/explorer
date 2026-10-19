@@ -29,6 +29,7 @@ export const DisplayCodamaIdl: Story = {
     args: {
         idl: codamaIdlMock as unknown as RootNode,
         programId: gen.address(1),
+        source: 'programMetadata',
     },
 };
 
@@ -36,5 +37,6 @@ export const DisplayConvertedAnchorIdl: Story = {
     args: {
         idl: convertedFromAnchorIdlMock as unknown as RootNode,
         programId: gen.address(2),
+        source: 'programMetadata',
     },
 };

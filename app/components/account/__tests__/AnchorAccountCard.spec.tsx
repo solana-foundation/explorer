@@ -25,6 +25,10 @@ const ANCHOR_ACCOUNT_IDL = {
     ...anchorModernIdl,
     metadata: { ...anchorModernIdl.metadata, name: 'anchor_program' },
 } as unknown as AnchorIdl;
+const CUSTOM_ANCHOR_IDL = {
+    ...anchorModernIdl,
+    metadata: { ...anchorModernIdl.metadata, name: 'custom_program' },
+} as unknown as AnchorIdl;
 const CODAMA_IDL = { kind: 'rootNode', standard: 'codama' } as unknown as CodamaIdl;
 
 const ACCOUNT: Account = {
@@ -72,6 +76,35 @@ describe('AnchorAccountCard', () => {
         render(<AnchorAccountCard account={ACCOUNT} />);
 
         expect(screen.getByText('AnchorProgram: AmmConfig')).toBeInTheDocument();
+    });
+
+    it('should decode with the selected custom Anchor IDL', () => {
+        idlState.candidates = [
+            { idl: CUSTOM_ANCHOR_IDL, origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' },
+        ];
+
+        render(<AnchorAccountCard account={ACCOUNT} />);
+
+        expect(screen.getByText('CustomProgram: AmmConfig')).toBeInTheDocument();
+    });
+
+    it('should report a failed decode under the selected custom IDL', () => {
+        idlState.candidates = [
+            { idl: CUSTOM_ANCHOR_IDL, origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' },
+        ];
+        const account = { ...ACCOUNT, data: { raw: new Uint8Array(208) } };
+
+        render(<AnchorAccountCard account={account} />);
+
+        expect(screen.getByText('Failed to decode account data according to the Anchor interface')).toBeInTheDocument();
+    });
+
+    it('should report no Anchor IDL when the selected custom IDL is Codama', () => {
+        idlState.candidates = [{ idl: CODAMA_IDL, origin: { kind: 'pasted' }, source: 'custom', standard: 'Codama' }];
+
+        render(<AnchorAccountCard account={ACCOUNT} />);
+
+        expect(screen.getByText('No Anchor IDL found')).toBeInTheDocument();
     });
 
     it('should show the loading card, not a decode, while the IDLs load', () => {
