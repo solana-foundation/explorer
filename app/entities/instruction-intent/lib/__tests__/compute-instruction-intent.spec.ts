@@ -4,6 +4,7 @@ import type { RootNode } from 'codama';
 import { describe, expect, it } from 'vitest';
 
 import {
+    createAccountWithSeedInstruction,
     DESTINATION,
     MINT,
     mintAccount,
@@ -13,6 +14,7 @@ import {
     SYSTEM_ROOT,
     TOKEN_ROOT,
     transferSolInstruction,
+    withIntentTemplate,
 } from '../../mocks/fixtures';
 import { computeInstructionIntent } from '../compute-instruction-intent';
 import { checkInstructionIntentExists } from '../intent';
@@ -69,6 +71,42 @@ describe('computeInstructionIntent', () => {
             { address: source, kind: 'address' },
             { kind: 'text', text: ' to ' },
             { address: destination, kind: 'address' },
+        ]);
+    });
+
+    it('should keep an address as text when it is part of a longer string', async () => {
+        const root = withIntentTemplate(
+            SYSTEM_ROOT,
+            'createAccountWithSeed',
+            'Create ${accounts.newAccount} with seed ${data.seed}',
+        );
+
+        const intent = await computeInstructionIntent({
+            accounts: [],
+            parsed: parse(root, createAccountWithSeedInstruction(`${SOURCE}x`)),
+            root,
+        });
+
+        expect(intent.sentenceParts).toEqual([
+            { kind: 'text', text: 'Create ' },
+            { address: DESTINATION, kind: 'address' },
+            { kind: 'text', text: ` with seed ${SOURCE}x` },
+        ]);
+    });
+
+    it('should link an address wrapped in punctuation', async () => {
+        const root = withIntentTemplate(SYSTEM_ROOT, 'createAccountWithSeed', 'my token (${accounts.newAccount}).');
+
+        const intent = await computeInstructionIntent({
+            accounts: [],
+            parsed: parse(root, createAccountWithSeedInstruction('seed')),
+            root,
+        });
+
+        expect(intent.sentenceParts).toEqual([
+            { kind: 'text', text: 'my token (' },
+            { address: DESTINATION, kind: 'address' },
+            { kind: 'text', text: ').' },
         ]);
     });
 
