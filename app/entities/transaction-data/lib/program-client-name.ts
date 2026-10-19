@@ -1,3 +1,4 @@
+import { identifyVoteInstruction, VOTE_PROGRAM_ADDRESS, VoteInstruction } from '@explorer/parsers/programs/vote';
 import { identifyStakeInstruction, STAKE_PROGRAM_ADDRESS, StakeInstruction } from '@solana-program/stake';
 import { identifySystemInstruction, SYSTEM_PROGRAM_ADDRESS, SystemInstruction } from '@solana-program/system';
 import {
@@ -76,6 +77,22 @@ const PROGRAM_CLIENTS: Partial<Record<string, ProgramClient>> = {
             TransferSolWithSeed: 'transferWithSeed',
             UpgradeNonceAccount: 'upgradeNonce',
             WithdrawNonceAccount: 'withdrawNonce',
+        },
+    },
+    // No generated client exists for the vote program, so the enum comes from @explorer/parsers. The RPC
+    // spells the vote-state and tower-sync variants in lowercase.
+    [VOTE_PROGRAM_ADDRESS]: {
+        identify: identifyVoteInstruction,
+        names: VoteInstruction,
+        rpcTypeOverrides: {
+            CompactUpdateVoteState: 'compactupdatevotestate',
+            CompactUpdateVoteStateSwitch: 'compactupdatevotestateswitch',
+            InitializeAccount: 'initialize',
+            InitializeAccountV2: 'initializeV2',
+            TowerSync: 'towersync',
+            TowerSyncSwitch: 'towersyncswitch',
+            UpdateVoteState: 'updatevotestate',
+            UpdateVoteStateSwitch: 'updatevotestateswitch',
         },
     },
     // Token and Token-2022 enum names match the RPC's `parsed.type` for every instruction we have

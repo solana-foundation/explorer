@@ -21,7 +21,9 @@ import {
     SPL_MEMO_PROGRAM_LABEL,
     SPL_TOKEN_2022_PROGRAM_LABEL,
     SPL_TOKEN_PROGRAM_LABEL,
+    STAKE_PROGRAM_LABEL,
     SYSTEM_PROGRAM_LABEL,
+    VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
 import { AddressLookupTableDetailsCard } from '@features/decode-instruction-address-lookup-table';
 import { AssociatedTokenDetailsCard } from '@features/decode-instruction-associated-token';
@@ -37,6 +39,8 @@ import { ZkElGamalProofDetailsCard } from '@features/decode-instruction-zk-elgam
 import { PythDetailsCard } from '@features/instruction-program-pyth';
 import { SERUM_PROGRAM_LABEL, SerumDetailsCard } from '@features/instruction-program-serum';
 import { MetaplexTokenMetadataDetailsCard } from '@features/mpl-token-metadata';
+import { StakeDetailsCard } from '@features/stake';
+import { VoteDetailsCard } from '@features/vote';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import {
     AddressLookupTableAccount,
@@ -402,6 +406,26 @@ function InspectorInstructionCard({
                     tx={parsedTx}
                     index={index}
                     raw={ix}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            );
+        case STAKE_PROGRAM_LABEL:
+            return (
+                <StakeDetailsCard
+                    ix={parsedIx}
+                    tx={parsedTx}
+                    index={index}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            );
+        case VOTE_PROGRAM_LABEL:
+            return (
+                <VoteDetailsCard
+                    ix={parsedIx}
+                    tx={parsedTx}
+                    index={index}
                     childIndex={childIndex}
                     innerCards={innerCards}
                 />

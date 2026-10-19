@@ -5,6 +5,7 @@ import {
     type ParserProgramLabel,
     VOTE_PROGRAM_LABEL,
 } from '@explorer/parsers';
+import { VOTE_PROGRAM_ADDRESS, VoteInstruction } from '@explorer/parsers/programs/vote';
 import {
     addDecoderSizePrefix,
     type Address,
@@ -31,7 +32,6 @@ import { create, type Infer, type Struct } from 'superstruct';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { VOTE_PROGRAM_ADDRESS } from './constants';
 import {
     AuthorizeInfo,
     AuthorizeWithSeedInfo,
@@ -122,7 +122,6 @@ type DecodedVoteInstruction = {
     toParsed(accounts: Address[]): { type: VoteInstructionType; info: unknown };
 };
 
-// Bincode u32 discriminants of agave's `VoteInstruction` enum, in declaration order.
 function decodeVoteInstruction(
     discriminant: number,
     data: ReadonlyUint8Array,
@@ -130,7 +129,7 @@ function decodeVoteInstruction(
 ): DecodedVoteInstruction | undefined {
     const read = <T>(decoder: Decoder<T>) => decoder.read(data, offset)[0];
     switch (discriminant) {
-        case 0: {
+        case VoteInstruction.InitializeAccount: {
             const init = read(voteInitDecoder);
             return {
                 minAccounts: 4,
@@ -148,7 +147,7 @@ function decodeVoteInstruction(
                 }),
             };
         }
-        case 1: {
+        case VoteInstruction.Authorize: {
             const { authorityType, newAuthority } = read(authorizeDecoder);
             return {
                 minAccounts: 3,
@@ -158,9 +157,9 @@ function decodeVoteInstruction(
                 }),
             };
         }
-        case 2:
+        case VoteInstruction.Vote:
             return legacyVote('vote', read(voteDecoder));
-        case 3: {
+        case VoteInstruction.Withdraw: {
             const lamports = toNumber(read(getU64Decoder()));
             return {
                 minAccounts: 3,
@@ -170,7 +169,7 @@ function decodeVoteInstruction(
                 }),
             };
         }
-        case 4:
+        case VoteInstruction.UpdateValidatorIdentity:
             return {
                 minAccounts: 3,
                 toParsed: ([voteAccount, newValidatorIdentity, withdrawAuthority]) => ({
@@ -178,7 +177,7 @@ function decodeVoteInstruction(
                     type: 'updateValidatorIdentity',
                 }),
             };
-        case 5: {
+        case VoteInstruction.UpdateCommission: {
             const commission = read(getU8Decoder());
             return {
                 minAccounts: 2,
@@ -188,11 +187,11 @@ function decodeVoteInstruction(
                 }),
             };
         }
-        case 6: {
+        case VoteInstruction.VoteSwitch: {
             const { hash, update } = read(withSwitchHash(voteDecoder));
             return legacyVote('voteSwitch', update, hash);
         }
-        case 7: {
+        case VoteInstruction.AuthorizeChecked: {
             const authorityType = read(voteAuthorizeDecoder);
             return {
                 minAccounts: 4,
@@ -202,13 +201,13 @@ function decodeVoteInstruction(
                 }),
             };
         }
-        case 8:
+        case VoteInstruction.UpdateVoteState:
             return voteStateUpdate('updatevotestate', read(voteStateUpdateDecoder));
-        case 9: {
+        case VoteInstruction.UpdateVoteStateSwitch: {
             const { hash, update } = read(withSwitchHash(voteStateUpdateDecoder));
             return voteStateUpdate('updatevotestateswitch', update, hash);
         }
-        case 10: {
+        case VoteInstruction.AuthorizeWithSeed: {
             const args = read(authorizeWithSeedDecoder);
             return {
                 minAccounts: 3,
@@ -226,7 +225,7 @@ function decodeVoteInstruction(
                 }),
             };
         }
-        case 11: {
+        case VoteInstruction.AuthorizeCheckedWithSeed: {
             const args = read(authorizeCheckedWithSeedDecoder);
             return {
                 minAccounts: 4,
@@ -236,19 +235,19 @@ function decodeVoteInstruction(
                 }),
             };
         }
-        case 12:
+        case VoteInstruction.CompactUpdateVoteState:
             return voteStateUpdate('compactupdatevotestate', read(compactVoteStateUpdateDecoder));
-        case 13: {
+        case VoteInstruction.CompactUpdateVoteStateSwitch: {
             const { hash, update } = read(withSwitchHash(compactVoteStateUpdateDecoder));
             return voteStateUpdate('compactupdatevotestateswitch', update, hash);
         }
-        case 14:
+        case VoteInstruction.TowerSync:
             return towerSync('towersync', read(compactTowerSyncDecoder));
-        case 15: {
+        case VoteInstruction.TowerSyncSwitch: {
             const { hash, update } = read(withSwitchHash(compactTowerSyncDecoder));
             return towerSync('towersyncswitch', update, hash);
         }
-        case 16: {
+        case VoteInstruction.InitializeAccountV2: {
             const init = read(voteInitV2Decoder);
             return {
                 minAccounts: 4,
@@ -271,7 +270,7 @@ function decodeVoteInstruction(
                 }),
             };
         }
-        case 17: {
+        case VoteInstruction.UpdateCommissionCollector: {
             const commissionKind = read(commissionKindDecoder);
             return {
                 minAccounts: 3,
@@ -281,7 +280,7 @@ function decodeVoteInstruction(
                 }),
             };
         }
-        case 18: {
+        case VoteInstruction.UpdateCommissionBps: {
             const { commissionBps, commissionKind } = read(
                 getStructDecoder([
                     ['commissionBps', getU16Decoder()],
@@ -296,7 +295,7 @@ function decodeVoteInstruction(
                 }),
             };
         }
-        case 19: {
+        case VoteInstruction.DepositDelegatorRewards: {
             const deposit = toNumber(read(getU64Decoder()));
             return {
                 minAccounts: 2,

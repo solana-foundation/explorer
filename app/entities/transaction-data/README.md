@@ -118,7 +118,7 @@ Two things are held back from it. The built-in sources below are one. The other 
 (`entities/idl/api/config.ts`), which `useProgramIdlNames` and its server-side counterpart
 `resolveProgramIdlNames` both filter out of the fetch entirely: those programs never reach the IDL source
 whether or not a built-in source names them. That set is why the ✅ rows in the table below are not
-programs we *chose* not to read an IDL for — the fetch refuses them structurally. It also covers builtins with no built-in source at all (Vote, Config, Address Lookup Table,
+programs we *chose* not to read an IDL for — the fetch refuses them structurally. It also covers builtins with no built-in source at all (Config, Address Lookup Table,
 Ed25519, Secp256k1, the BPF loaders), which stay unnamed by design rather than by omission.
 
 The built-in sources are a short list of exceptions, kept for three reasons.
@@ -132,6 +132,7 @@ on-chain account and can appear the day after this was checked. Re-check with
 | `compute-budget-name` | ✅ pmp, 5 ix |
 | `program-client-name` → System / Token / Stake / ATA | ✅ pmp |
 | `program-client-name` → **Token-2022** | ❌ none |
+| `program-client-name` → **Vote** | not checked: it is in `NON_ANCHOR_PROGRAMS`, so the fetch refuses it, and no generated client exists — its enum is in `@explorer/parsers/programs/vote` |
 | **ZK ElGamal**, **Lighthouse**, **Mango**, **Serum** | ❌ none |
 | **Pyth** | ❌ none on mainnet, devnet or testnet (checked 2026-09-01) |
 | **Token Swap** | ❌ none (program frozen; names come from a leading u8 tag) |

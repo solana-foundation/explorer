@@ -29,6 +29,11 @@
             "import": "./dist/programs/address-lookup-table/index.js",
             "default": "./dist/programs/address-lookup-table/index.js"
         },
+        "./programs/vote": {
+            "types": "./dist/programs/vote/index.d.ts",
+            "import": "./dist/programs/vote/index.js",
+            "default": "./dist/programs/vote/index.js"
+        },
         "./token-batch": {
             "types": "./dist/token-batch/index.d.ts",
             "import": "./dist/token-batch/index.js",

@@ -5,7 +5,7 @@ import { PublicKey } from '@solana/web3.js';
 
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
-import { VOTE_PROGRAM_ADDRESS } from '../../lib/constants';
+import { VOTE_PROGRAM_ADDRESS } from '@explorer/parsers/programs/vote';
 import type { Vote, VoteAccount } from '../../lib/validators';
 
 export const BASE_SLOT = Number(gen.slot(0));
