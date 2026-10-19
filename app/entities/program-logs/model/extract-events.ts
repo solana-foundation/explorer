@@ -1,67 +1,71 @@
 import { isValidBase64 } from '@shared/lib/bytes';
 
-// A `Program log:` payload that looks like a base64-encoded event: at least the 8-byte discriminator
-// (≥12 base64 chars, a multiple of 4) and valid base64. Plain-text logs fail the codec check; any
-// straggler is rejected by the event decoder.
-function isLikelyBase64Event(payload: string): boolean {
-    return payload.length >= 12 && payload.length % 4 === 0 && isValidBase64(payload);
-}
-
-/**
- * A base64-encoded event payload tagged by emission style: `data` = `Program data:` (Anchor
- * `sol_log_data`, definitively structured), `log` = base64 logged via `Program log:` (a heuristic
- * guess). The tag lets callers treat an undecodable `data` payload as an "Unknown Event" while dropping
- * an undecodable `log` payload (likely a non-event base64 log).
- */
 export type ProgramEventPayload = { data: string; kind: 'data' | 'log' };
 
-/**
- * Extracts event payloads from transaction logs for a specific instruction.
- *
- * Handles both event-emission styles (see {@link ProgramEventPayload}). When `programIds` (the ordered
- * top-level instruction program ids) is provided, invocations are matched to their instruction by
- * program id so instructions that emit no `invoke` log — the ed25519/secp256k1 precompiles — don't
- * shift the index. Without it, falls back to counting top-level invocations.
- */
-export function extractEventsFromLogs(
-    logs: string[],
-    instructionIndex: number,
-    programIds?: string[],
-): ProgramEventPayload[] {
-    const events: ProgramEventPayload[] = [];
-    let currentIxIndex = -1;
-    let depth = 0;
+export function extractEventsFromLogs({
+    childIndex,
+    index,
+    instructionProgramIds,
+    logs,
+}: {
+    childIndex?: number;
+    index: number;
+    instructionProgramIds: string[];
+    logs: string[];
+}): ProgramEventPayload[] {
+    return attributePayloads(logs, instructionProgramIds)
+        .filter(payload => payload.index === index && payload.childIndex === childIndex)
+        .map(({ data, kind }) => ({ data, kind }));
+}
+
+type AttributedPayload = ProgramEventPayload & { childIndex: number | undefined; index: number };
+
+// eslint-disable-next-line no-restricted-syntax -- match program invoke pattern
+const INVOKE = /^Program (\w+) invoke \[\d+\]/;
+// eslint-disable-next-line no-restricted-syntax -- match program status pattern
+const STATUS = /^Program (?:\w+ (?:success|failed)|failed)/;
+
+function attributePayloads(logs: string[], instructionProgramIds: string[]): AttributedPayload[] {
+    const payloads: AttributedPayload[] = [];
+    const frames: (number | undefined)[] = [];
+    let index = -1;
+    let childCount = 0;
 
     for (const log of logs) {
-        // eslint-disable-next-line no-restricted-syntax -- match program invoke pattern
-        const invoke = log.match(/^Program (\w+) invoke \[\d+\]/);
+        const invoke = log.match(INVOKE);
         if (invoke) {
-            if (depth === 0) {
-                if (programIds) {
-                    // Advance to the next top-level instruction using this program, skipping any
-                    // non-logging instructions (precompiles) between the previous one and this.
-                    let i = currentIxIndex + 1;
-                    while (i < programIds.length && programIds[i] !== invoke[1]) i++;
-                    currentIxIndex = i < programIds.length ? i : currentIxIndex + 1;
-                } else {
-                    currentIxIndex++;
-                }
+            if (frames.length === 0) {
+                index = nextInstructionIndex(instructionProgramIds, index, invoke[1]);
+                childCount = 0;
+                frames.push(undefined);
+            } else {
+                frames.push(childCount++);
             }
-            depth++;
-            // eslint-disable-next-line no-restricted-syntax -- match program status pattern
-        } else if (/^Program (?:\w+ (?:success|failed)|failed)/.test(log)) {
-            // Anchor on the `Program <id> success/failed` format so user log text or a `Program data:`
-            // base64 payload containing the substring "success"/"failed" can't decrement depth.
-            depth--;
-        } else if (currentIxIndex === instructionIndex) {
-            if (log.startsWith('Program data:')) {
-                events.push({ data: log.slice('Program data: '.length).trim(), kind: 'data' });
-            } else if (log.startsWith('Program log:')) {
-                const payload = log.slice('Program log: '.length).trim();
-                if (isLikelyBase64Event(payload)) events.push({ data: payload, kind: 'log' });
-            }
+        } else if (STATUS.test(log)) {
+            frames.pop();
+        } else if (frames.length > 0) {
+            const payload = toPayload(log);
+            if (payload) payloads.push({ ...payload, childIndex: frames.at(-1), index });
         }
     }
 
-    return events;
+    return payloads;
+}
+
+function nextInstructionIndex(instructionProgramIds: string[], previous: number, programId: string): number {
+    const next = instructionProgramIds.indexOf(programId, previous + 1);
+    return next === -1 ? previous + 1 : next;
+}
+
+function toPayload(log: string): ProgramEventPayload | undefined {
+    if (log.startsWith('Program data:')) return { data: log.slice('Program data: '.length).trim(), kind: 'data' };
+    if (!log.startsWith('Program log:')) return undefined;
+    const payload = log.slice('Program log: '.length).trim();
+    return isLikelyBase64Event(payload) ? { data: payload, kind: 'log' } : undefined;
+}
+
+const ANCHOR_DISCRIMINATOR_BASE64_LENGTH = 12;
+
+function isLikelyBase64Event(payload: string): boolean {
+    return payload.length >= ANCHOR_DISCRIMINATOR_BASE64_LENGTH && payload.length % 4 === 0 && isValidBase64(payload);
 }
