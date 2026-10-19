@@ -55,7 +55,6 @@ export function useInstructionIntent({
     const ixIntentFound = ixIntentExist?.status === 'exists' ? ixIntentExist : undefined;
     const contentKey = useMemo(() => instruction && toContentKey(instruction), [instruction]);
 
-    // SWR calls a fetcher only while its key is set, so the `&&` guards in the fetchers only narrow the types
     const addressesForIntent = useSWRImmutable(
         enabled && root && ixIntentFound ? ['instruction-intent-addresses', cluster, url, contentKey] : undefined,
         () => root && ixIntentFound && getAccountsForIntent(root, ixIntentFound.parsed),

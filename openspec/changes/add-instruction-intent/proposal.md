@@ -66,9 +66,8 @@ The design puts the button in the card header and the intent row at the top of t
 ## What Changes
 
 - Entity `app/entities/instruction-intent`: the support check, the existence check, the intent computation, the
-  unavailable copy, `useCheckIntentSupport`, `useInstructionIntent`, `InstructionIntentProvider`, Base UI with
-  stories, and the consumers `InstructionIntentButton` and `InstructionIntentRow`.
-- Dependency `@codama/dynamic-instructions` 1.0.0, pre-bundled for the Storybook tests in `vite.config.mts`.
+  ui components.
+- Dependency `@codama/dynamic-instructions` 1.0.0.
 - `entities/idl` and `entities/cluster` gain `@x/instruction-intent`. `useProgramIdls` returns the fetch `error`.
 - `Button` gains a `dashed` variant. `abbreviateAddress` is exported from `AddressLink`.
 - `entities/transaction-data` gains `getInstructionsFromRawTransaction`.

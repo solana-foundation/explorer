@@ -13,13 +13,13 @@ function parse(root: RootNode, instruction: KitInstruction) {
 }
 
 describe('getAccountsForIntent', () => {
-    it('should plan no accounts when the amount needs none', async () => {
+    it('should return no accounts when the amount needs none', async () => {
         await expect(getAccountsForIntent(SYSTEM_ROOT, parse(SYSTEM_ROOT, transferSolInstruction()))).resolves.toEqual(
             [],
         );
     });
 
-    it('should plan the mint when the amount needs its decimals', async () => {
+    it('should return the mint when the amount needs its decimals', async () => {
         await expect(getAccountsForIntent(TOKEN_ROOT, parse(TOKEN_ROOT, mintToInstruction()))).resolves.toEqual([MINT]);
     });
 });
