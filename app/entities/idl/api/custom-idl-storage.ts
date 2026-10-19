@@ -13,6 +13,8 @@ export type CustomIdlStorage = {
     put(entry: StoredEntry): Promise<StorageWriteResult>;
     remove(programAddress: string): Promise<StorageWriteResult>;
     subscribe(onChange: () => void): () => void;
+    /** Writes the value that `change` returns for the stored value, or nothing for `undefined`. */
+    update(programAddress: string, change: (value: unknown) => string | undefined): Promise<StorageWriteResult>;
 };
 
 const DATABASE_NAME = 'explorer:customIdl';
@@ -65,6 +67,15 @@ export function createIndexedDbCustomIdlStorage(): CustomIdlStorage {
             const listener = () => onChange();
             target?.addEventListener('message', listener);
             return () => target?.removeEventListener('message', listener);
+        },
+        update(programAddress, change) {
+            return writeAndNotify(store => {
+                const request = store.get(programAddress);
+                request.onsuccess = () => {
+                    const value = change(request.result);
+                    if (value !== undefined) store.put(value, programAddress);
+                };
+            });
         },
     };
 }
