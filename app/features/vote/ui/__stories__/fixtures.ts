@@ -1,11 +1,11 @@
 import { gen } from '@__fixtures__/gen';
+import { VOTE_PROGRAM_ADDRESS } from '@explorer/parsers/programs/vote';
 import type { Account } from '@providers/accounts';
 import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 
 import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
-import { VOTE_PROGRAM_ADDRESS } from '@explorer/parsers/programs/vote';
 import type { Vote, VoteAccount } from '../../lib/validators';
 
 export const BASE_SLOT = Number(gen.slot(0));

@@ -1,7 +1,7 @@
-import { type Address, getU32Decoder, type ReadonlyUint8Array } from '@solana/kit';
+import { address, getU32Decoder, type ReadonlyUint8Array } from '@solana/kit';
 
 // No @solana-program/vote package is published, so the native program address is pinned here.
-export const VOTE_PROGRAM_ADDRESS = 'Vote111111111111111111111111111111111111111' as Address;
+export const VOTE_PROGRAM_ADDRESS = address('Vote111111111111111111111111111111111111111');
 
 /** Variants of the vote program's `VoteInstruction`, numbered by their bincode `u32` discriminant. */
 export enum VoteInstruction {

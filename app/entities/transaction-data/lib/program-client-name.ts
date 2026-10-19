@@ -79,6 +79,11 @@ const PROGRAM_CLIENTS: Partial<Record<string, ProgramClient>> = {
             WithdrawNonceAccount: 'withdrawNonce',
         },
     },
+    // Token and Token-2022 enum names match the RPC's `parsed.type` for every instruction we have
+    // checked, so neither carries overrides. Token-2022's extension groups are unverified against the
+    // RPC — see the extension cases in program-client-name.spec.
+    [TOKEN_2022_PROGRAM_ADDRESS]: { identify: identifyToken2022Instruction, names: Token2022Instruction },
+    [TOKEN_PROGRAM_ADDRESS]: { identify: identifyTokenInstruction, names: TokenInstruction },
     // No generated client exists for the vote program, so the enum comes from @explorer/parsers. The RPC
     // spells the vote-state and tower-sync variants in lowercase.
     [VOTE_PROGRAM_ADDRESS]: {
@@ -95,11 +100,6 @@ const PROGRAM_CLIENTS: Partial<Record<string, ProgramClient>> = {
             UpdateVoteStateSwitch: 'updatevotestateswitch',
         },
     },
-    // Token and Token-2022 enum names match the RPC's `parsed.type` for every instruction we have
-    // checked, so neither carries overrides. Token-2022's extension groups are unverified against the
-    // RPC — see the extension cases in program-client-name.spec.
-    [TOKEN_2022_PROGRAM_ADDRESS]: { identify: identifyToken2022Instruction, names: Token2022Instruction },
-    [TOKEN_PROGRAM_ADDRESS]: { identify: identifyTokenInstruction, names: TokenInstruction },
 };
 
 /**
