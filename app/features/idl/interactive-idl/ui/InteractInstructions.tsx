@@ -43,7 +43,7 @@ export function InteractInstructions({
         <Accordion type="multiple" value={expandedSections} onValueChange={handleValueChange} className="space-y-4">
             {instructions.map(instruction => (
                 <InteractInstruction
-                    key={instruction.name}
+                    key={getInstructionFormKey(instruction)}
                     idl={idl}
                     instruction={instruction}
                     onExecuteInstruction={onExecuteInstruction}
@@ -53,4 +53,9 @@ export function InteractInstructions({
             ))}
         </Accordion>
     );
+}
+
+// A form keeps the argument order of its first instruction, so a changed instruction needs a new form.
+function getInstructionFormKey(instruction: InstructionData): string {
+    return JSON.stringify(instruction);
 }
