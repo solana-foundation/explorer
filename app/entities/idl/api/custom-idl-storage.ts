@@ -22,12 +22,28 @@ const STORE_NAME = 'records';
 export function createIndexedDbCustomIdlStorage(): CustomIdlStorage {
     // A channel does not receive its own messages, so `subscribe` does not call back for a write from this tab.
     let channel: BroadcastChannel | undefined;
-    const getChannel = () => (channel ??= new BroadcastChannel(DATABASE_NAME));
+    const getChannel = (): BroadcastChannel | undefined => {
+        if (channel || typeof BroadcastChannel === 'undefined') return channel;
+        try {
+            channel = new BroadcastChannel(DATABASE_NAME);
+        } catch {
+            // Without a channel, other tabs read a change only when they load the store again.
+        }
+        return channel;
+    };
 
     async function writeAndNotify(operation: (store: IDBObjectStore) => void): Promise<StorageWriteResult> {
         const result = await write(operation);
-        if (result.ok) getChannel().postMessage(undefined);
+        if (result.ok) notifyOtherTabs();
         return result;
+    }
+
+    function notifyOtherTabs() {
+        try {
+            getChannel()?.postMessage(undefined);
+        } catch {
+            // The write is already stored, so a failed notification must not fail the write.
+        }
     }
 
     return {
@@ -45,9 +61,10 @@ export function createIndexedDbCustomIdlStorage(): CustomIdlStorage {
             return writeAndNotify(store => store.delete(programAddress));
         },
         subscribe(onChange) {
+            const target = getChannel();
             const listener = () => onChange();
-            getChannel().addEventListener('message', listener);
-            return () => getChannel().removeEventListener('message', listener);
+            target?.addEventListener('message', listener);
+            return () => target?.removeEventListener('message', listener);
         },
     };
 }
