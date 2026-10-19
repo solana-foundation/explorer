@@ -12,6 +12,7 @@ import { BaseTable } from '@/app/shared/ui/Table';
 
 import { type NftokenCollectionAccount, type NftokenNftAccount, parseNftokenAccount } from '../lib/nftoken-accounts';
 import { type CollectionNftsState, useCollectionNfts } from '../model/use-collection-nfts';
+import { useRefreshNftokenMetadata } from '../model/use-nftoken-metadata';
 
 export function NftokenAccountSection({ account }: { account: Account }) {
     const nftoken = parseNftokenAccount(account);
@@ -28,14 +29,14 @@ export function NftokenAccountSection({ account }: { account: Account }) {
 
 function NftCard({ account, nft }: { account: Account; nft: NftokenNftAccount }) {
     const refreshAccount = useRefreshAccount();
+    const refreshMetadata = useRefreshNftokenMetadata();
+    const refresh = () => {
+        refreshAccount(account.pubkey, 'parsed');
+        refreshMetadata();
+    };
 
     return (
-        <AccountCard
-            title="Overview"
-            account={account}
-            refresh={() => refreshAccount(account.pubkey, 'parsed')}
-            analyticsSection="nft_token_card"
-        >
+        <AccountCard title="Overview" account={account} refresh={refresh} analyticsSection="nft_token_card">
             <AccountAddressRow account={account} />
             <AddressRow address={nft.authority} label="Authority" />
             <AddressRow address={nft.holder} label="Holder" />
@@ -47,10 +48,12 @@ function NftCard({ account, nft }: { account: Account; nft: NftokenNftAccount })
 
 function CollectionCard({ account, collection }: { account: Account; collection: NftokenCollectionAccount }) {
     const refreshAccount = useRefreshAccount();
+    const refreshMetadata = useRefreshNftokenMetadata();
     const nfts = useCollectionNfts(collection.address);
     const refresh = () => {
         refreshAccount(account.pubkey, 'parsed');
         nfts.refresh();
+        refreshMetadata();
     };
 
     return (

@@ -15,9 +15,15 @@ import {
     MAINNET_NFTS,
     nftokenAccount,
 } from '../../__tests__/fixtures';
+import { parseNftokenAccount } from '../../lib/nftoken-accounts';
+import { NftokenAccountHeader } from '../NftokenAccountHeader';
 import { NftokenAccountSection } from '../NftokenAccountSection';
 
-const mocks = vi.hoisted(() => ({ fetchCollectionNfts: vi.fn(), refreshAccount: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+    fetchCollectionNfts: vi.fn(),
+    fetchNftokenMetadata: vi.fn(),
+    refreshAccount: vi.fn(),
+}));
 
 vi.mock('@entities/cluster', () => ({ useCluster: () => ({ connectableUrl: 'https://mock.rpc' }) }));
 vi.mock('@entities/account', () => ({ useRefreshAccount: () => mocks.refreshAccount }));
@@ -36,6 +42,7 @@ vi.mock('@components/common/Address', () => ({
     Address: ({ pubkey }: { pubkey: PublicKey }) => <span>{pubkey.toBase58()}</span>,
 }));
 vi.mock('../../api/fetch-collection-nfts', () => ({ fetchCollectionNfts: mocks.fetchCollectionNfts }));
+vi.mock('../../api/fetch-nftoken-metadata', () => ({ fetchNftokenMetadata: mocks.fetchNftokenMetadata }));
 
 const [NFT] = MAINNET_NFTS;
 
@@ -107,6 +114,26 @@ describe('NftokenAccountSection', () => {
         expect(mocks.refreshAccount).toHaveBeenCalledWith(account.pubkey, 'parsed');
     });
 
+    it.each([
+        ['an NFT', () => nftokenAccount(accountBytes(NFT.base64), NFT.pubkey)],
+        ['a collection', collectionAccount],
+    ])('should show the new name in the header when the user refreshes the overview of %s', async (_, account) => {
+        mocks.fetchCollectionNfts.mockResolvedValue({
+            kind: 'loaded',
+            nfts: MAINNET_NFT_ACCOUNTS,
+            undecodableCount: 0,
+        });
+        mocks.fetchNftokenMetadata
+            .mockResolvedValueOnce({ kind: 'loaded', metadata: { image: undefined, name: 'Old name' } })
+            .mockResolvedValue({ kind: 'loaded', metadata: { image: undefined, name: 'New name' } });
+        renderSectionWithHeader(account());
+        await screen.findByRole('heading', { name: 'Old name' });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+        expect(await screen.findByRole('heading', { name: 'New name' })).toBeInTheDocument();
+    });
+
     it('should show Loading... as the count while the request is pending', () => {
         mocks.fetchCollectionNfts.mockReturnValue(new Promise(() => {}));
 
@@ -148,6 +175,18 @@ describe('NftokenAccountSection', () => {
 
 function renderSection(account: Account) {
     return render(<NftokenAccountSection account={account} />, { wrapper: Providers });
+}
+
+function renderSectionWithHeader(account: Account) {
+    const nftoken = parseNftokenAccount(account);
+    if (!nftoken) throw new Error('the fixture does not decode');
+    return render(
+        <>
+            <NftokenAccountHeader nftoken={nftoken} />
+            <NftokenAccountSection account={account} />
+        </>,
+        { wrapper: Providers },
+    );
 }
 
 function Providers({ children }: { children: ReactNode }) {
