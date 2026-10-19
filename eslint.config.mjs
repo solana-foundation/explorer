@@ -64,7 +64,6 @@ const HOOKS_PENDING_CLIENT_ONLY = [
     'app/entities/idl/model/use-format-codama-idl.ts',
     'app/entities/idl/model/use-program-idl-names.ts',
     'app/entities/idl/model/use-program-idls.ts',
-    'app/entities/program-metadata/model/use-program-metadata-idl.tsx',
     'app/entities/slot-time/model/use-slot-time.ts',
     'app/entities/token-info/model/use-token-info.ts',
     'app/entities/transaction-data/model/use-resolved-instruction-names.ts',
