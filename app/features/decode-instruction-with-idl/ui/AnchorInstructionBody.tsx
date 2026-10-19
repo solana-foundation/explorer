@@ -1,8 +1,7 @@
-import { Idl, Instruction } from '@coral-xyz/anchor';
-import { IdlInstruction } from '@coral-xyz/anchor/dist/cjs/idl';
+import { Idl } from '@coral-xyz/anchor';
 import { ExpandToggleCell } from '@shared/ui/expandable-row';
 import { TransactionInstruction } from '@solana/web3.js';
-import { FlattenedIdlAccount, mapIxArgsToRows } from '@utils/anchor';
+import { mapIxArgsToRows } from '@utils/anchor';
 import { useMemo, useState } from 'react';
 import { CornerDownRight } from 'react-feather';
 
@@ -11,28 +10,26 @@ import { AccountRoleBadges } from '@/app/shared/ui/AccountRoleBadges';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { type AnchorRow, buildAnchorRows, visibleAnchorRows } from '../lib/build-anchor-rows';
+import { type AnchorInstructionDecoded, isFullyDecodedAnchorInstruction } from '../lib/decode-anchor-instruction';
 
 export function AnchorInstructionBody({
     ix,
     idl,
-    ixAccounts,
-    decodedIxData,
-    ixDef,
+    decoded,
 }: {
     ix: TransactionInstruction;
     idl: Idl;
-    ixAccounts: FlattenedIdlAccount[] | undefined;
-    decodedIxData: Instruction | undefined;
-    ixDef: IdlInstruction | undefined;
+    decoded: AnchorInstructionDecoded;
 }) {
     // Which groups the user has expanded; empty = all collapsed (the default). Keyed by stable group id
     // rather than array position, and never seeded from props, so it survives a re-decode.
     const [expandedGroups, setExpandedGroups] = useState<ReadonlySet<string>>(() => new Set<string>());
 
     // Flatten the IDL accounts + on-chain keys into a render plan once; collapse is applied on top.
+    const { ixAccounts } = decoded;
     const rows = useMemo(() => (ixAccounts ? buildAnchorRows(ix.keys, ixAccounts) : []), [ix.keys, ixAccounts]);
 
-    if (!ixAccounts || !decodedIxData || !ixDef) {
+    if (!isFullyDecodedAnchorInstruction(decoded)) {
         return (
             <BaseTable.Row>
                 <BaseTable.Cell colSpan={3} className="lg:text-center">
@@ -42,6 +39,7 @@ export function AnchorInstructionBody({
         );
     }
 
+    const { decodedIxData, ixDef } = decoded;
     const toggleGroup = (id: string) => {
         setExpandedGroups(prev => {
             const next = new Set(prev);

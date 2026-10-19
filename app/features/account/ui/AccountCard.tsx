@@ -16,9 +16,10 @@ type AccountCardProps = {
     refresh?: () => void;
     analyticsSection?: string;
     children: React.ReactNode;
+    headerActions?: React.ReactNode;
 };
 
-export function AccountCard({ account, title, refresh, analyticsSection, children }: AccountCardProps) {
+export function AccountCard({ account, title, refresh, analyticsSection, children, headerActions }: AccountCardProps) {
     const [showRaw, setShowRaw] = React.useState(false);
     const fetching = useAccountFetching(account?.pubkey.toBase58());
 
@@ -29,6 +30,7 @@ export function AccountCard({ account, title, refresh, analyticsSection, childre
             title={title}
             actions={
                 <>
+                    {headerActions}
                     {refresh && analyticsSection && (
                         <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
                     )}

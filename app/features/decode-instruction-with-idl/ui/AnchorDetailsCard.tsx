@@ -35,13 +35,7 @@ export function AnchorDetailsCard({
     return (
         <InstructionCardView node={node} title={decoded.cardTitle} events={events}>
             <ProgramField programId={node.programId} name={decoded.programName} colSpan={2} />
-            <AnchorInstructionBody
-                ix={ix}
-                idl={program.idl}
-                ixAccounts={decoded.ixAccounts}
-                decodedIxData={decoded.decodedIxData}
-                ixDef={decoded.ixDef}
-            />
+            <AnchorInstructionBody ix={ix} idl={program.idl} decoded={decoded} />
         </InstructionCardView>
     );
 }

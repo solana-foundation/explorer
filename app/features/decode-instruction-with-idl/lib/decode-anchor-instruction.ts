@@ -25,6 +25,18 @@ export type AnchorInstructionDecoded = {
     ixDef: IdlInstruction | undefined;
 };
 
+export type FullyDecodedAnchorInstruction = AnchorInstructionDecoded & {
+    decodedIxData: Instruction;
+    ixAccounts: FlattenedIdlAccount[];
+    ixDef: IdlInstruction;
+};
+
+export function isFullyDecodedAnchorInstruction(
+    decoded: AnchorInstructionDecoded,
+): decoded is FullyDecodedAnchorInstruction {
+    return Boolean(decoded.decodedIxData && decoded.ixAccounts && decoded.ixDef);
+}
+
 // Decode a single Anchor instruction against its program's IDL — the rich-path counterpart to the codama
 // decode in `decode-instruction-with-idl` (reached as the fallback when codama can't convert the IDL).
 // Pure: lifted out of the former AnchorDetailsCard so the card stays presentational. Handles self-CPI

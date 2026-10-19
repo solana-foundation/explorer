@@ -1,4 +1,5 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
+import { InstructionIdlSelector } from '@entities/idl';
 // Imports `model/surface` instead of the barrel, because the barrel re-exports `TxInstructionSurface`,
 // which imports this file.
 import { useInstructionSurface } from '@entities/instruction-card/model/surface';
@@ -70,7 +71,12 @@ export function InstructionCard({
             raw={raw}
             onRequestRaw={canFetchRaw ? () => fetchRaw(signature) : undefined}
             rawUnavailable={rawUnavailable}
-            headerButtons={headerButtons}
+            headerButtons={
+                <>
+                    <InstructionIdlSelector />
+                    {headerButtons}
+                </>
+            }
             collapsible={collapsible}
         >
             {children}

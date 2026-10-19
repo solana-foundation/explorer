@@ -1,4 +1,5 @@
 // Repo's stored PMP Codama IDL mock (not kept in sync with the published IDL) — drives the real decode path.
+import { IdlVariant } from '@entities/idl';
 import pmpIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { address } from '@solana/kit';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
@@ -56,7 +57,7 @@ type Story = StoryObj<typeof meta>;
 const allocateIx = makeIx(Buffer.from(getAllocateInstructionDataEncoder().encode({ seed: 'idl' })), 5);
 export const Allocate: Story = {
     args: {
-        decoded: decodeInstructionWithIdl(allocateIx, pmpIdl, url),
+        decoded: { ...decodeInstructionWithIdl(allocateIx, pmpIdl, url), source: IdlVariant.ProgramMetadata },
         index: 0,
         ix: allocateIx,
     },
@@ -72,7 +73,7 @@ const setAuthorityIx = makeIx(
 );
 export const SetAuthority: Story = {
     args: {
-        decoded: decodeInstructionWithIdl(setAuthorityIx, pmpIdl, url),
+        decoded: { ...decodeInstructionWithIdl(setAuthorityIx, pmpIdl, url), source: IdlVariant.ProgramMetadata },
         index: 0,
         ix: setAuthorityIx,
     },

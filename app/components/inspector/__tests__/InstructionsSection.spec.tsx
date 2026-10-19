@@ -3,6 +3,7 @@ import { gen } from '@__fixtures__/gen';
 import { SystemDetailsCard } from '@components/instruction/system/SystemDetailsCard';
 // From the literal's own library-free module: the feature no longer re-exports it, and this spec only needs the
 // program id to build a fixture instruction - not the decoders that `@entities/pmp-account` would pull in.
+import { IdlVariant } from '@entities/idl';
 import { PMP_ADDRESS } from '@entities/pmp-account/lib/program-address';
 import { LIGHTHOUSE_ADDRESS, LighthouseDetailsCard } from '@features/decode-instruction-lighthouse';
 import { useIdlInstructionDecode } from '@features/decode-instruction-with-idl';
@@ -156,7 +157,7 @@ describe('Inspector InstructionsSection with address lookup tables', () => {
         expect(screen.getByText(`Failed to fetch address lookup table: ${TABLE_KEY.toBase58()}`)).toBeInTheDocument();
     });
 
-    test('should decompile through a resolved table, and only once it resolves', () => {
+    test('should decompile through a resolved table, and only once it resolves', async () => {
         vi.mocked(useAddressLookupTables).mockReturnValue([undefined]);
         const { rerender } = renderSection(buildLookupMessage());
         expect(screen.getByText(/Loading/)).toBeInTheDocument();
@@ -165,7 +166,7 @@ describe('Inspector InstructionsSection with address lookup tables', () => {
         vi.mocked(useAddressLookupTables).mockReturnValue([[lookupTable(), FetchStatus.Fetched]]);
         rerender(<InstructionsSection message={buildLookupMessage()} />);
 
-        expect(screen.getByText('#1')).toBeInTheDocument();
+        expect(await screen.findByText('#1')).toBeInTheDocument();
         expect(screen.queryByText(/Failed to fetch address lookup table/)).not.toBeInTheDocument();
     });
 });
@@ -212,7 +213,7 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         // On mainnet the Token program has an IDL. The IDL decoder returns `{ kind: 'unknown' }`,
         // not `undefined`, when the IDL does not declare the discriminator.
         // The batch card must still render.
-        vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'unknown' });
+        vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'unknown', source: IdlVariant.ProgramMetadata });
 
         renderSection(buildMessage(), INNER_BATCH);
 
@@ -254,7 +255,7 @@ describe('Inspector InstructionsSection with inner instructions', () => {
     });
 
     test('should render the curated card when the IDL declares nothing for the instruction', async () => {
-        vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'unknown' });
+        vi.mocked(useIdlInstructionDecode).mockReturnValue({ kind: 'unknown', source: IdlVariant.ProgramMetadata });
 
         renderSection(buildMessage());
 

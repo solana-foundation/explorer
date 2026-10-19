@@ -3,6 +3,7 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
 import { AdjacentClusterLink, SearchingClusterIndicator, useClusterResourceSearch } from '@entities/cluster';
+import { ProgramIdlSelector } from '@entities/idl';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
@@ -36,7 +37,11 @@ export function UnknownAccountCard({ account }: { account: Account }) {
     ];
 
     return (
-        <AccountCard title="Overview" account={account}>
+        <AccountCard
+            title="Overview"
+            account={account}
+            headerActions={<ProgramIdlSelector programAddress={account.owner.toBase58()} />}
+        >
             <KeyValueRows rows={rows} />
         </AccountCard>
     );

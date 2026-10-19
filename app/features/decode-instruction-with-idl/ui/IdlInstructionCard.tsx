@@ -2,9 +2,10 @@ import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-car
 import { TransactionInstruction } from '@solana/web3.js';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { type IdlInstructionDecode } from '../lib/decode-instruction-with-idl';
+import { type SourcedIdlInstructionDecode } from '../model/use-idl-instruction-decode';
 import { AnchorDetailsCard } from './AnchorDetailsCard';
 import { CodamaInstructionCard } from './CodamaInstructionCard';
+import { CustomIdlDecodeFailureCard } from './CustomIdlDecodeFailureCard';
 
 export function IdlInstructionCard({
     decoded,
@@ -13,16 +14,18 @@ export function IdlInstructionCard({
     innerCards,
     childIndex,
 }: {
-    decoded: IdlInstructionDecode;
+    decoded: SourcedIdlInstructionDecode;
     ix: TransactionInstruction;
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
     const node = toInstructionNode({ childIndex, index, innerCards, ix });
+    if (decoded.kind === 'failed') return <CustomIdlDecodeFailureCard node={node} />;
     const unknownCard = <UnknownDetailsCard node={node} />;
+    const fallback = decoded.source === 'custom' ? <CustomIdlDecodeFailureCard node={node} /> : unknownCard;
     return (
-        <ErrorBoundary fallback={unknownCard}>
+        <ErrorBoundary fallback={fallback} resetKeys={[decoded]}>
             {decoded.kind === 'codama' ? (
                 <CodamaInstructionCard node={node} ix={ix} parsedIx={decoded.parsedIx} />
             ) : decoded.kind === 'anchor' ? (

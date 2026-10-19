@@ -1,3 +1,4 @@
+import { IdlVariant } from '@entities/idl/model/idl-variant';
 import { UnknownDetailsCard } from '@entities/instruction-card';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
@@ -5,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AnchorDetailsCard } from '../AnchorDetailsCard';
 import { CodamaInstructionCard } from '../CodamaInstructionCard';
+import { CustomIdlDecodeFailureCard } from '../CustomIdlDecodeFailureCard';
 import { IdlInstructionCard } from '../IdlInstructionCard';
 
 vi.mock('../CodamaInstructionCard', () => ({
@@ -12,6 +14,9 @@ vi.mock('../CodamaInstructionCard', () => ({
 }));
 vi.mock('../AnchorDetailsCard', () => ({
     AnchorDetailsCard: vi.fn(() => <div data-testid="anchor-card" />),
+}));
+vi.mock('../CustomIdlDecodeFailureCard', () => ({
+    CustomIdlDecodeFailureCard: vi.fn(() => <div data-testid="custom-failure-card" />),
 }));
 vi.mock('@entities/instruction-card', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/instruction-card')>()),
@@ -22,6 +27,7 @@ const ix = new TransactionInstruction({ data: Buffer.from([1]), keys: [], progra
 const innerCards = [<div key="inner" />];
 const props = { childIndex: 1, index: 2, innerCards, ix };
 const node = { ...props, programId: ix.programId };
+const PARSED_IX = { accounts: [], path: [] } as never;
 
 describe('IdlInstructionCard', () => {
     afterEach(() => {
@@ -35,7 +41,7 @@ describe('IdlInstructionCard', () => {
         render(
             <IdlInstructionCard
                 {...props}
-                decoded={{ kind: 'codama', parsedIx: { accounts: [], path: [] } as never }}
+                decoded={{ kind: 'codama', parsedIx: PARSED_IX, source: IdlVariant.ProgramMetadata }}
             />,
         );
         expect(screen.getByTestId('codama-card')).toBeInTheDocument();
@@ -44,7 +50,10 @@ describe('IdlInstructionCard', () => {
 
     it('should render the Anchor card with the node of the instruction for an anchor decode', () => {
         render(
-            <IdlInstructionCard {...props} decoded={{ details: {} as never, kind: 'anchor', program: {} as never }} />,
+            <IdlInstructionCard
+                {...props}
+                decoded={{ details: {} as never, kind: 'anchor', program: {} as never, source: IdlVariant.Anchor }}
+            />,
         );
         expect(screen.getByTestId('anchor-card')).toBeInTheDocument();
         expect(vi.mocked(AnchorDetailsCard).mock.calls[0][0]).toEqual({
@@ -65,7 +74,7 @@ describe('IdlInstructionCard', () => {
         render(
             <IdlInstructionCard
                 {...props}
-                decoded={{ kind: 'codama', parsedIx: { accounts: [], path: [] } as never }}
+                decoded={{ kind: 'codama', parsedIx: PARSED_IX, source: IdlVariant.ProgramMetadata }}
             />,
         );
 
@@ -79,15 +88,59 @@ describe('IdlInstructionCard', () => {
         vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
         render(
-            <IdlInstructionCard {...props} decoded={{ details: {} as never, kind: 'anchor', program: {} as never }} />,
+            <IdlInstructionCard
+                {...props}
+                decoded={{ details: {} as never, kind: 'anchor', program: {} as never, source: IdlVariant.Anchor }}
+            />,
         );
 
         expect(screen.getByTestId('unknown-card')).toBeInTheDocument();
         expect(vi.mocked(UnknownDetailsCard).mock.calls[0][0]).toEqual({ node });
     });
 
+    it('should render a new decode after the previous decoded card threw', () => {
+        vi.mocked(CodamaInstructionCard).mockImplementation(() => {
+            throw new Error('decode failed');
+        });
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const { rerender } = render(
+            <IdlInstructionCard
+                {...props}
+                decoded={{ kind: 'codama', parsedIx: PARSED_IX, source: IdlVariant.ProgramMetadata }}
+            />,
+        );
+        expect(screen.getByTestId('unknown-card')).toBeInTheDocument();
+
+        rerender(
+            <IdlInstructionCard
+                {...props}
+                decoded={{ details: {} as never, kind: 'anchor', program: {} as never, source: IdlVariant.Anchor }}
+            />,
+        );
+
+        expect(screen.getByTestId('anchor-card')).toBeInTheDocument();
+    });
+
+    it('should render the custom failure card when a custom decoded card throws', () => {
+        vi.mocked(CodamaInstructionCard).mockImplementation(() => {
+            throw new Error('decode failed');
+        });
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        render(<IdlInstructionCard {...props} decoded={{ kind: 'codama', parsedIx: PARSED_IX, source: 'custom' }} />);
+
+        expect(screen.getByTestId('custom-failure-card')).toBeInTheDocument();
+    });
+
+    it('should render the custom failure card with the node of the instruction for a failed custom decode', () => {
+        render(<IdlInstructionCard {...props} decoded={{ kind: 'failed', source: 'custom' }} />);
+
+        expect(screen.getByTestId('custom-failure-card')).toBeInTheDocument();
+        expect(vi.mocked(CustomIdlDecodeFailureCard).mock.calls[0][0]).toEqual({ node });
+    });
+
     it('should render the Unknown card for an unknown decode', () => {
-        render(<IdlInstructionCard {...props} decoded={{ kind: 'unknown' }} />);
+        render(<IdlInstructionCard {...props} decoded={{ kind: 'unknown', source: IdlVariant.ProgramMetadata }} />);
         expect(screen.getByTestId('unknown-card')).toBeInTheDocument();
     });
 });
