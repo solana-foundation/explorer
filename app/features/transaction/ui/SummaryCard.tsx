@@ -29,7 +29,6 @@ import {
 import type { TransactionVersion } from '@solana/kit';
 import { PACKET_DATA_SIZE, ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
-import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
@@ -38,6 +37,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef } from 'react';
 import { ZoomIn } from 'react-feather';
 
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { AutoRefresh, useAutoRefreshInterval, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
@@ -386,14 +386,9 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                 )}
 
                 {blockTime !== undefined ? (
-                    <>
-                        <KeyValue label="Timestamp (Local)">
-                            <span className="font-mono">{displayTimestamp(blockTime * 1000, true)}</span>
-                        </KeyValue>
-                        <KeyValue label="Timestamp (UTC)" divider={false}>
-                            <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>
-                        </KeyValue>
-                    </>
+                    <KeyValue label="Timestamp" divider={false}>
+                        <Timestamp unixTimestamp={blockTime} />
+                    </KeyValue>
                 ) : transactionFetchesSucceeded ? (
                     <KeyValue label="Timestamp" divider={false}>
                         <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">

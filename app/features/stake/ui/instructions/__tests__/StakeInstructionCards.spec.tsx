@@ -3,7 +3,7 @@ import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { screen, waitFor } from '@testing-library/react';
-import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
+import { displayTimestampAbsolute, unixTimestampToMs } from '@utils/date';
 import { vi } from 'vitest';
 
 import { type CardRow, findCell, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
@@ -31,8 +31,8 @@ const PROGRAM: string = STAKE_PROGRAM_ADDRESS;
 
 /** A lockup timestamp and the string the row must derive from it. */
 const LOCKUP_TS = 1_700_000_000;
-const LOCKUP_TS_TEXT = displayTimestampUtc(unixTimestampToMs(LOCKUP_TS));
-const ZERO_TS_TEXT = displayTimestampUtc(unixTimestampToMs(0));
+const LOCKUP_TS_TEXT = displayTimestampAbsolute(unixTimestampToMs(LOCKUP_TS), true);
+const ZERO_TS_TEXT = displayTimestampAbsolute(unixTimestampToMs(0), true);
 
 const AUTHORIZE_WITH_SEED = {
     authorityBase: A.base,

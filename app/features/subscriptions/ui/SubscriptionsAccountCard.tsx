@@ -13,9 +13,9 @@ import type {
     SubscriptionDelegation,
 } from '@solana/subscriptions';
 import { PlanStatus } from '@solana/subscriptions';
-import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import { pluralUnits } from '@utils/index';
 
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { BaseAccountCard, type BaseAccountCardProps } from '@/app/shared/ui/BaseAccountCard';
 import { BaseRawAccountRows } from '@/app/shared/ui/BaseRawAccountRows';
 import { BaseTable } from '@/app/shared/ui/Table';
@@ -64,7 +64,7 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
             <ValueRow label="Period">{pluralUnits(terms.periodHours, 'hour')}</ValueRow>
             {terms.createdAt !== 0n && (
                 <ValueRow label="Created At">
-                    {displayTimestampUtc(unixTimestampToMs(Number(terms.createdAt)), true)}
+                    <Timestamp unixTimestamp={Number(terms.createdAt)} />
                 </ValueRow>
             )}
             <ValueRow label="Expires At">{displayExpiry(endTs)}</ValueRow>
@@ -123,7 +123,7 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
             <ValueRow label="Period Length">{pluralUnits(periodLengthS, 'second')}</ValueRow>
             {currentPeriodStartTs !== 0n && (
                 <ValueRow label="Current Period Start">
-                    {displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true)}
+                    <Timestamp unixTimestamp={Number(currentPeriodStartTs)} />
                 </ValueRow>
             )}
             <ValueRow label="Expires At">{displayExpiry(expiryTs)}</ValueRow>
@@ -149,7 +149,7 @@ function SubscriptionDelegationCard({ account, data }: { account: Account; data:
             <ValueRow label="Amount Pulled (this period)">{amountPulledInPeriod.toString()}</ValueRow>
             {currentPeriodStartTs !== 0n && (
                 <ValueRow label="Current Period Start">
-                    {displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true)}
+                    <Timestamp unixTimestamp={Number(currentPeriodStartTs)} />
                 </ValueRow>
             )}
             <ValueRow label="Expires At">{displayExpiry(expiresAtTs)}</ValueRow>

@@ -3,9 +3,9 @@
 import { Copyable } from '@components/common/Copyable';
 import { SolBalance } from '@components/common/SolBalance';
 import { cn } from '@components/shared/utils';
-import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 import React from 'react';
 
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { FieldValue } from '../model/fields';
@@ -47,7 +47,7 @@ function Value({ value }: { value: FieldValue }): React.ReactElement {
         case 'text':
             return <>{value.value}</>;
         case 'timestamp':
-            return <>{displayTimestampUtc(unixTimestampToMs(value.unixSeconds))}</>;
+            return <Timestamp unixTimestamp={value.unixSeconds} />;
         case 'preformatted':
             return <pre className="mb-0 inline-block text-left">{joinLines(value.value)}</pre>;
         case 'custom':

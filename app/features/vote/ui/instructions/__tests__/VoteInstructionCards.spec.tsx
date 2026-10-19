@@ -9,7 +9,7 @@ import {
     VOTE_PROGRAM_ID,
 } from '@solana/web3.js';
 import { screen, waitFor } from '@testing-library/react';
-import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
+import { displayTimestampAbsolute, unixTimestampToMs } from '@utils/date';
 import { vi } from 'vitest';
 
 import { type CardRow, findCell, readCardRows, renderTxCard } from '@/app/__tests__/card-harness';
@@ -44,7 +44,7 @@ const SWITCH_HASH = gen.blockhash(3);
 
 /** A vote timestamp and the string the row must derive from it. */
 const TS = 1_700_000_000;
-const TS_TEXT = displayTimestampUtc(unixTimestampToMs(TS));
+const TS_TEXT = displayTimestampAbsolute(unixTimestampToMs(TS), true);
 
 const BLS_PUBKEY = Buffer.from(new Array(48).fill(3)).toString('base64');
 const BLS_POP = Buffer.from(new Array(96).fill(7)).toString('base64');

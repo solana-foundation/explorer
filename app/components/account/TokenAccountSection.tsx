@@ -10,7 +10,6 @@ import { TOKEN_2022_PROGRAM_ID, useScaledUiAmountForMint } from '@providers/acco
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { displayTimestamp } from '@utils/date';
 import { normalizeTokenAmount } from '@utils/index';
 import { getCurrentTokenScaledUiAmountMultiplier } from '@utils/token-info';
 import { addressLabel } from '@utils/tx';
@@ -51,6 +50,7 @@ import useSWR from 'swr';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 import { getSafeExternalHref } from '@/app/shared/lib/url';
@@ -802,13 +802,13 @@ export function TokenExtensionRow(
                     <BaseTable.Row>
                         <BaseTable.Cell>Last Update Timestamp</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">
-                            {displayTimestamp(extension.lastUpdateTimestamp * 1000)}
+                            <Timestamp unixTimestamp={extension.lastUpdateTimestamp} />
                         </BaseTable.Cell>
                     </BaseTable.Row>
                     <BaseTable.Row>
                         <BaseTable.Cell>Initialization Timestamp</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">
-                            {displayTimestamp(extension.initializationTimestamp * 1000)}
+                            <Timestamp unixTimestamp={extension.initializationTimestamp} />
                         </BaseTable.Cell>
                     </BaseTable.Row>
                 </>
@@ -838,7 +838,7 @@ export function TokenExtensionRow(
                     <BaseTable.Row>
                         <BaseTable.Cell>New Multiplier Effective Timestamp</BaseTable.Cell>
                         <BaseTable.Cell className="md:text-right">
-                            {displayTimestamp(extension.newMultiplierEffectiveTimestamp * 1000)}
+                            <Timestamp unixTimestamp={extension.newMultiplierEffectiveTimestamp} />
                         </BaseTable.Cell>
                     </BaseTable.Row>
                 </>

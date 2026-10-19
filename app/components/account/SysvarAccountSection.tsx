@@ -4,7 +4,6 @@ import { Slot } from '@components/common/Slot';
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
-import { displayTimestamp, unixTimestampToMs } from '@utils/date';
 import {
     SysvarAccount,
     SysvarClockAccount,
@@ -19,6 +18,7 @@ import {
 } from '@validators/accounts/sysvar';
 import React from 'react';
 
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 export function SysvarAccountSection({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarAccount }) {
@@ -221,7 +221,7 @@ function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; 
             <BaseTable.Row>
                 <BaseTable.Cell>Timestamp</BaseTable.Cell>
                 <BaseTable.Cell className="text-right font-mono">
-                    {displayTimestamp(unixTimestampToMs(sysvarAccount.info.unixTimestamp))}
+                    <Timestamp unixTimestamp={sysvarAccount.info.unixTimestamp} />
                 </BaseTable.Cell>
             </BaseTable.Row>
 
