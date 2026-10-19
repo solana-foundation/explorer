@@ -25,7 +25,7 @@ const IDLE: InstructionIntentResult = { status: 'idle' };
 const LOADING: InstructionIntentResult = { status: 'loading' };
 
 /**
- * The intent of one instruction.
+ * Resolves the intent state of one instruction card.
  * Checks whether program has idl with intent templates.
  * Checks whether instruction has intent.
  * Gets accounts required for the instruction intent, if necessary.

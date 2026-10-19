@@ -55,10 +55,13 @@ const config: StorybookConfig = {
                         find: '@bundlr-network/client',
                         replacement: path.resolve(__dirname, './__mocks__/@bundlr-network/client.ts'),
                     },
+                    // The codegen entry imports `fs`, so the browser build of @codama/dynamic-client cannot link it
                     {
-                        // eslint-disable-next-line no-restricted-syntax -- module path matcher for Vite alias
-                        find: /^fs$/,
-                        replacement: path.resolve(__dirname, './__mocks__/fs.ts'),
+                        find: '@codama/dynamic-address-resolution/codegen',
+                        replacement: path.resolve(
+                            __dirname,
+                            './__mocks__/@codama/dynamic-address-resolution/codegen.ts',
+                        ),
                     },
                     // Stub useCollectionNfts so suspense-mode SWR never fires getProgramAccounts.
                     {

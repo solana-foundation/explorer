@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { DEFAULT_RPC_URL } from '@__fixtures__/gen';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
