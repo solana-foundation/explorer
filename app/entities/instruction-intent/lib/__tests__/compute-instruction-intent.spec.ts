@@ -1,4 +1,5 @@
 import type { KitInstruction } from '@explorer/parsers';
+import { AccountRole, address } from '@solana/kit';
 import type { RootNode } from 'codama';
 import { describe, expect, it } from 'vitest';
 
@@ -45,6 +46,30 @@ describe('computeInstructionIntent', () => {
             ],
             usedAccountData: false,
         });
+    });
+
+    it('should link the full address when another address in the sentence is its prefix', async () => {
+        const source = address('9'.repeat(43));
+        const destination = address(`${source}2`);
+
+        const intent = await computeInstructionIntent({
+            accounts: [],
+            parsed: parse(SYSTEM_ROOT, {
+                ...transferSolInstruction(),
+                accounts: [
+                    { address: source, role: AccountRole.WRITABLE_SIGNER },
+                    { address: destination, role: AccountRole.WRITABLE },
+                ],
+            }),
+            root: SYSTEM_ROOT,
+        });
+
+        expect(intent.sentenceParts).toEqual([
+            { kind: 'text', text: 'Transfer 1.5 SOL from ' },
+            { address: source, kind: 'address' },
+            { kind: 'text', text: ' to ' },
+            { address: destination, kind: 'address' },
+        ]);
     });
 
     it('should scale the minted amount when the account list holds the mint', async () => {
