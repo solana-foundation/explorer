@@ -1,33 +1,18 @@
-import { is, string } from 'superstruct';
-
-import { invariant } from '@/app/shared/lib/invariant';
-
-const Address = string();
-
-function isString(a: unknown): a is string {
-    return is(a, Address);
+export function getIdlDeclaredAddress(idl: unknown): string | undefined {
+    const root = idl as {
+        kind?: unknown;
+        standard?: unknown;
+        program?: { publicKey?: unknown };
+        address?: unknown;
+        metadata?: { address?: unknown };
+    };
+    const isCodamaRoot = root?.kind === 'rootNode' || root?.standard === 'codama';
+    const addresses = isCodamaRoot ? [root.program?.publicKey] : [root?.address, root?.metadata?.address];
+    return addresses.find(isNonEmptyString);
 }
 
-/**
- * Extracts single address from IDL as it might be on the root level or inside the metadata
- *
- * @param idlData
- * @returns
- */
-export function extractProgramAddressFromIdlData(idlData: NonNullable<any>, fallbackAddress?: string) {
-    const { address, metadata } = idlData;
-
-    const result = (metadata?.address ?? address) || fallbackAddress;
-    invariant(result, 'IDL does not contain address');
-
-    if (isString(result)) return result;
-
-    if (!fallbackAddress) {
-        invariant(fallbackAddress, 'IDL requires address');
-    }
-
-    // use fallback value as some IDLs do not include address
-    return fallbackAddress;
+function isNonEmptyString(value: unknown): value is string {
+    return typeof value === 'string' && value !== '';
 }
 
 /**

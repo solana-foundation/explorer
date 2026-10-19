@@ -9,9 +9,11 @@ const programCtor = vi.fn();
 
 vi.mock('@codama/dynamic-parsers', () => ({ parseInstruction: (...a: unknown[]) => parseInstruction(...a) }));
 vi.mock('@codama/nodes-from-anchor', () => ({ rootNodeFromAnchor: (...a: unknown[]) => rootNodeFromAnchor(...a) }));
-vi.mock('@entities/idl', () => ({
+vi.mock('@entities/idl', async () => ({
     formatSerdeIdl: '',
     getFormattedIdl: (_fmt: unknown, idl: unknown) => idl,
+    getIdlDeclaredAddress: (await vi.importActual<typeof import('@entities/idl/lib/utils')>('@entities/idl/lib/utils'))
+        .getIdlDeclaredAddress,
     getProvider: () => ({}),
 }));
 vi.mock('@coral-xyz/anchor', () => ({
