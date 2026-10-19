@@ -81,7 +81,7 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitFor(() => expect(result.current.error).toBeDefined());
+            await waitForHook(() => expect(result.current.error).toBeDefined());
             expect(result.current.programMetadataIdl).toBeUndefined();
         });
     });
