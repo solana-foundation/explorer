@@ -14,7 +14,10 @@ export function readRawInstructions(raw: RawTransaction): TransactionInstruction
     try {
         return getInstructionsFromRawTransaction(raw).map(toLegacyInstruction);
     } catch (error) {
-        Logger.error(new Error('Could not decompile the raw transaction instructions', { cause: error }), report(raw));
+        Logger.error(
+            new Error('Could not decompile the raw transaction instructions', { cause: error }),
+            browserReport(raw),
+        );
         return undefined;
     }
 }
@@ -36,12 +39,12 @@ export function readRawInnerInstructions(
     } catch (error) {
         Logger.error(
             new Error('Could not resolve the raw transaction inner instructions', { cause: error }),
-            report(raw),
+            browserReport(raw),
         );
         return undefined;
     }
 }
 
-function report(raw: RawTransaction) {
+function browserReport(raw: RawTransaction) {
     return { sentry: 'always', sentryExtras: { signature: raw.signatures[0], version: raw.version } } as const;
 }
