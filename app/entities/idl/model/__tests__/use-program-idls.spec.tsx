@@ -52,8 +52,8 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitForHook(() => expect(result.current.anchorIdl).toEqual({ name: 'anchor_idl' }));
-            expect(result.current.programMetadataIdl).toEqual({ name: 'pmp_idl' });
+            await waitForHook(() => expect(result.current.onChain.anchorIdl).toEqual({ name: 'anchor_idl' }));
+            expect(result.current.onChain.programMetadataIdl).toEqual({ name: 'pmp_idl' });
 
             const requestedUrl = mocks.fetch.mock.calls[0]?.[0] as string;
             expect(requestedUrl).toContain('/api/idl-latest');
@@ -68,9 +68,9 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitForHook(() => expect(result.current.isLoading).toBe(false));
-            expect(result.current.anchorIdl).toBeUndefined();
-            expect(result.current.programMetadataIdl).toBeUndefined();
+            await waitForHook(() => expect(result.current.isOnChainLoading).toBe(false));
+            expect(result.current.onChain.anchorIdl).toBeUndefined();
+            expect(result.current.onChain.programMetadataIdl).toBeUndefined();
         });
     });
 
@@ -85,8 +85,8 @@ describe('useProgramIdls', () => {
                 wrapper,
             });
 
-            await waitForHook(() => expect(result.current.anchorIdl).toEqual({ name: 'custom_anchor_idl' }));
-            expect(result.current.programMetadataIdl).toEqual({ name: 'custom_pmp_idl' });
+            await waitForHook(() => expect(result.current.onChain.anchorIdl).toEqual({ name: 'custom_anchor_idl' }));
+            expect(result.current.onChain.programMetadataIdl).toEqual({ name: 'custom_pmp_idl' });
             // The resolver runs against the user-supplied RPC URL (so localhost works end-to-end).
             expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
                 expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),
@@ -102,9 +102,9 @@ describe('useProgramIdls', () => {
                 wrapper,
             });
 
-            await waitForHook(() => expect(result.current.isLoading).toBe(false));
-            expect(result.current.anchorIdl).toBeUndefined();
-            expect(result.current.programMetadataIdl).toBeUndefined();
+            await waitForHook(() => expect(result.current.isOnChainLoading).toBe(false));
+            expect(result.current.onChain.anchorIdl).toBeUndefined();
+            expect(result.current.onChain.programMetadataIdl).toBeUndefined();
         });
     });
 
@@ -123,13 +123,48 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitForHook(() => expect(result.current.anchorIdl).toEqual({ name: 'local_anchor_idl' }));
+            await waitForHook(() => expect(result.current.onChain.anchorIdl).toEqual({ name: 'local_anchor_idl' }));
             // Resolved against the user's local RPC URL (the correct network)...
             expect(mocks.resolveProgramIdlsClient).toHaveBeenCalledWith(
                 expect.objectContaining({ programId: PROGRAM_ID, url: 'http://localhost:8899' }),
             );
             // ...and the mainnet server route was never queried, so we never read mainnet for a local URL.
             expect(mocks.fetch).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('candidates', () => {
+        it('should list the PMP IDL before the Anchor IDL account', async () => {
+            mocks.fetch.mockResolvedValue({
+                json: async () => ({
+                    idls: { anchor: { name: 'anchor_idl' }, programMetadata: { name: 'pmp_idl' } },
+                }),
+                ok: true,
+            });
+
+            const { result } = renderHook(
+                () => useProgramIdls(PROGRAM_ID, 'https://api.mainnet-beta.solana.com', Cluster.MainnetBeta),
+                { wrapper },
+            );
+
+            await waitForHook(() => expect(result.current.candidates).toBeDefined());
+            expect(result.current.candidates?.map(candidate => candidate.source)).toEqual([
+                'programMetadata',
+                'anchor',
+            ]);
+        });
+
+        it('should return no candidates while the on-chain IDLs load', async () => {
+            mocks.fetch.mockReturnValue(new Promise(() => undefined));
+
+            const { result } = renderHook(
+                () => useProgramIdls(PROGRAM_ID, 'https://api.mainnet-beta.solana.com', Cluster.MainnetBeta),
+                { wrapper },
+            );
+
+            await waitForHook(() => expect(mocks.fetch).toHaveBeenCalled());
+            expect(result.current.isOnChainLoading).toBe(true);
+            expect(result.current.candidates).toBeUndefined();
         });
     });
 });

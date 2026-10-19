@@ -4,7 +4,7 @@ import { cn } from '@components/shared/utils';
 import { BorshEventCoder, BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
 import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
 import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
-import { useAnchorProgram } from '@entities/idl';
+import { getFirstAnchorIdl, useAnchorProgram, useProgramIdls } from '@entities/idl';
 import { ExpandableRow, FieldNameCell } from '@shared/ui/expandable-row';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -115,7 +115,8 @@ export function AnchorProgramName({
     defaultName?: string;
     cluster?: Cluster;
 }) {
-    const { program } = useAnchorProgram(programId.toString(), url, cluster);
+    const { candidates } = useProgramIdls(programId.toString(), url, cluster ?? Cluster.MainnetBeta);
+    const program = useAnchorProgram(candidates && getFirstAnchorIdl(candidates), programId.toString(), url);
     const programName = getAnchorProgramName(program) || defaultName;
     return <>{programName}</>;
 }

@@ -6,7 +6,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
-import type { ProgramIdls, SupportedIdl } from '@/app/entities/idl';
+import type { ProgramIdlPair, ProgramIdls, SupportedIdl } from '@/app/entities/idl';
+import { getOnChainCandidates } from '@/app/entities/idl/model/idl-candidates';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
@@ -28,15 +29,19 @@ vi.mock('next/navigation', () => ({
 const DEFAULT_ADDRESS = PublicKey.default.toBase58();
 const PMP_PDA = gen.vanityAddress('PMP');
 
-function mockProgramIdls(overrides: Partial<ProgramIdls>): void {
-    mocks.useProgramIdls.mockReturnValue({
+function mockProgramIdls(overrides: Partial<ProgramIdlPair>): void {
+    const onChain: ProgramIdlPair = {
         anchorIdl: undefined,
         anchorIdlAddress: undefined,
-        isLoading: false,
         programMetadataIdl: undefined,
         programMetadataIdlAddress: undefined,
         ...overrides,
-    });
+    };
+    mocks.useProgramIdls.mockReturnValue({
+        candidates: getOnChainCandidates(onChain),
+        isOnChainLoading: false,
+        onChain,
+    } satisfies ProgramIdls);
 }
 
 function createMockAnchorIdl(address = DEFAULT_ADDRESS): Idl {
