@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
     classifyTransientError,
+    isQuotaExceededError,
     isRetryableError,
     isRetryableFetchError,
     isRpcMisconfigError,
@@ -157,5 +158,19 @@ describe('matchAbortError', () => {
     it('should not match other errors', () => {
         expect(matchAbortError(new Error('nope'))).toBe(false);
         expect(matchAbortError('AbortError')).toBe(false);
+    });
+});
+
+describe('isQuotaExceededError', () => {
+    it('should match a DOMException named QuotaExceededError', () => {
+        expect(isQuotaExceededError(new DOMException('full', 'QuotaExceededError'))).toBe(true);
+    });
+
+    it.each([
+        ['a DOMException with another name', new DOMException('blocked', 'SecurityError')],
+        ['an Error named QuotaExceededError', Object.assign(new Error('full'), { name: 'QuotaExceededError' })],
+        ['a string', 'QuotaExceededError'],
+    ])('should not match %s', (_, error) => {
+        expect(isQuotaExceededError(error)).toBe(false);
     });
 });

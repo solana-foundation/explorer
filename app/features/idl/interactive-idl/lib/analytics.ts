@@ -1,6 +1,6 @@
-import type { IdlStandard } from '@entities/idl';
+import type { IdlSource, IdlStandard } from '@entities/idl';
 
-import { type GA4EventName, trackEvent } from '@/app/shared/lib/analytics';
+import { type EventParams, type GA4EventName, trackEvent } from '@/app/shared/lib/analytics';
 
 type IdlTypeLabel = 'anchor' | 'codama';
 
@@ -48,57 +48,53 @@ export type IdlAnalytics = {
  * - 'Anchor' -> iidl_anchor_*
  * - 'Codama' -> iidl_codama_*
  */
-export function createIdlAnalytics(standard: IdlStandard): IdlAnalytics {
+export function createIdlAnalytics(standard: IdlStandard, source: IdlSource): IdlAnalytics {
     const idlType = IDL_TYPE_LABELS[standard];
+    const track = (action: IidlAction, params: EventParams) =>
+        trackEvent(eventName(idlType, action), { ...params, idl_source: source });
+    // A custom IDL never leaves the browser, so its events carry no text from the IDL.
+    const fromIdl = (params: EventParams): EventParams => (source === 'custom' ? {} : params);
     return {
         trackIdlViewed(programId) {
-            trackEvent(eventName(idlType, IIDL_ACTIONS.IdlViewed), {
-                program_id: programId,
-            });
+            track(IIDL_ACTIONS.IdlViewed, { program_id: programId });
         },
         trackSectionsExpanded(programId, expandedSections) {
-            trackEvent(eventName(idlType, IIDL_ACTIONS.SectionsExpanded), {
-                expanded_sections: expandedSections?.join(','),
+            track(IIDL_ACTIONS.SectionsExpanded, {
+                ...fromIdl({ expanded_sections: expandedSections?.join(',') }),
                 expanded_sections_count: expandedSections?.length,
                 program_id: programId,
             });
         },
         trackTabOpened(programId) {
-            trackEvent(eventName(idlType, IIDL_ACTIONS.TabOpened), {
-                program_id: programId,
-            });
+            track(IIDL_ACTIONS.TabOpened, { program_id: programId });
         },
         trackTransactionConfirmed(programId, instructionName, signature) {
-            trackEvent(eventName(idlType, IIDL_ACTIONS.TransactionConfirmed), {
-                instruction_name: instructionName,
+            track(IIDL_ACTIONS.TransactionConfirmed, {
+                ...fromIdl({ instruction_name: instructionName }),
                 program_id: programId,
                 transaction_signature: signature,
             });
         },
         trackTransactionFailed(programId, instructionName, error) {
-            trackEvent(eventName(idlType, IIDL_ACTIONS.TransactionFailed), {
-                error_message: error,
-                instruction_name: instructionName,
+            track(IIDL_ACTIONS.TransactionFailed, {
+                ...fromIdl({ error_message: error, instruction_name: instructionName }),
                 program_id: programId,
             });
         },
-        trackTransactionSimulated(programId?: string, instructionName?: string): void {
-            trackEvent(eventName(idlType, IIDL_ACTIONS.TransactionSimulated), {
-                instruction_name: instructionName,
+        trackTransactionSimulated(programId, instructionName) {
+            track(IIDL_ACTIONS.TransactionSimulated, {
+                ...fromIdl({ instruction_name: instructionName }),
                 program_id: programId,
             });
         },
         trackTransactionSubmitted(programId, instructionName) {
-            trackEvent(eventName(idlType, IIDL_ACTIONS.TransactionSubmitted), {
-                instruction_name: instructionName,
+            track(IIDL_ACTIONS.TransactionSubmitted, {
+                ...fromIdl({ instruction_name: instructionName }),
                 program_id: programId,
             });
         },
         trackWalletConnected(programId, walletType) {
-            trackEvent(eventName(idlType, IIDL_ACTIONS.WalletConnected), {
-                program_id: programId,
-                wallet_type: walletType,
-            });
+            track(IIDL_ACTIONS.WalletConnected, { program_id: programId, wallet_type: walletType });
         },
     };
 }
