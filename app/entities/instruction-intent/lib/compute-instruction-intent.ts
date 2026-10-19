@@ -43,28 +43,25 @@ function knownAddresses(parsed: ParsedInstruction, fields: readonly IntentField[
 }
 
 function splitIntoSentenceParts(text: string, addresses: readonly Address[]): IntentSentencePart[] {
+    if (addresses.length === 0) {
+        return text ? [{ kind: 'text', text }] : [];
+    }
+
     const parts: IntentSentencePart[] = [];
+    // eslint-disable-next-line no-restricted-globals -- base58 has no regex metacharacters to escape.
+    const matchAddressesRegex = new RegExp(addresses.join('|'), 'g');
     let cursor = 0;
 
-    for (let next = findNextAddress(text, cursor, addresses); next; next = findNextAddress(text, cursor, addresses)) {
-        if (next.index > cursor) parts.push({ kind: 'text', text: text.slice(cursor, next.index) });
-        parts.push({ address: next.address, kind: 'address' });
-        cursor = next.index + next.address.length;
+    for (const match of text.matchAll(matchAddressesRegex)) {
+        if (match.index > cursor) {
+            parts.push({ kind: 'text', text: text.slice(cursor, match.index) });
+        }
+        parts.push({ address: match[0] as Address, kind: 'address' });
+        cursor = match.index + match[0].length;
     }
 
-    if (cursor < text.length) parts.push({ kind: 'text', text: text.slice(cursor) });
+    if (cursor < text.length) {
+        parts.push({ kind: 'text', text: text.slice(cursor) });
+    }
     return parts;
-}
-
-function findNextAddress(
-    text: string,
-    from: number,
-    addresses: readonly Address[],
-): { address: Address; index: number } | undefined {
-    let next: { address: Address; index: number } | undefined;
-    for (const address of addresses) {
-        const index = text.indexOf(address, from);
-        if (index !== -1 && (next === undefined || index < next.index)) next = { address, index };
-    }
-    return next;
 }
