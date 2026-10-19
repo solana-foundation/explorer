@@ -74,17 +74,17 @@ describe('ProgramIdlSelector', () => {
         expect(JSON.parse(String(await storedValue())).selected).toBe('onChain');
     });
 
-    // The store reads the storage again after a selection change, so the second read means the change has ended.
+    // The store reads the storage once after a selection change, so the read means the change has ended.
     it('should not write the selection again when the user picks the stored one', async () => {
         await storeCustomIdl();
         renderSelector();
         await userEvent.click(await screen.findByRole('button', { name: 'IDL: Custom' }));
         const list = vi.spyOn(customIdlStorage, 'list');
-        const put = vi.spyOn(customIdlStorage, 'put');
+        const put = vi.spyOn(IDBObjectStore.prototype, 'put');
 
         await userEvent.click(screen.getByRole('menuitemradio', { name: 'Custom Pasted JSON' }));
 
-        await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+        await waitFor(() => expect(list).toHaveBeenCalledTimes(1));
         expect(put).not.toHaveBeenCalled();
     });
 
@@ -93,10 +93,11 @@ describe('ProgramIdlSelector', () => {
         renderSelector();
         await userEvent.click(await screen.findByRole('button', { name: 'IDL: Custom' }));
         const list = vi.spyOn(customIdlStorage, 'list');
-        const put = customIdlStorage.put.bind(customIdlStorage);
+        const update = customIdlStorage.update.bind(customIdlStorage);
         let storeFirstPick: () => void = () => undefined;
-        vi.spyOn(customIdlStorage, 'put').mockImplementationOnce(
-            entry => new Promise(resolve => (storeFirstPick = () => resolve(put(entry)))),
+        vi.spyOn(customIdlStorage, 'update').mockImplementationOnce(
+            (programAddress, change) =>
+                new Promise(resolve => (storeFirstPick = () => resolve(update(programAddress, change)))),
         );
 
         await userEvent.click(screen.getByRole('menuitemradio', { name: 'On-chain PMP' }));
@@ -104,8 +105,8 @@ describe('ProgramIdlSelector', () => {
         await userEvent.click(screen.getByRole('menuitemradio', { name: 'Custom Pasted JSON' }));
         storeFirstPick();
 
-        // Each change reads the storage before it writes and again when it reloads.
-        await waitFor(() => expect(list).toHaveBeenCalledTimes(4));
+        // Each change reads the storage once, when the store reloads.
+        await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
         expect(JSON.parse(String(await storedValue())).selected).toBe('custom');
         expect(await screen.findByRole('button', { name: 'IDL: Custom' })).toBeInTheDocument();
     });
@@ -114,7 +115,7 @@ describe('ProgramIdlSelector', () => {
         await storeCustomIdl();
         renderSelector();
         await userEvent.click(await screen.findByRole('button', { name: 'IDL: Custom' }));
-        vi.spyOn(customIdlStorage, 'put').mockResolvedValue({ ok: false, reason: 'unavailable' });
+        vi.spyOn(customIdlStorage, 'update').mockResolvedValue({ ok: false, reason: 'unavailable' });
 
         await userEvent.click(screen.getByRole('menuitemradio', { name: 'On-chain PMP' }));
 
@@ -123,11 +124,13 @@ describe('ProgramIdlSelector', () => {
         );
     });
 
-    it('should report a failure when the browser cannot read the stored record for a selection change', async () => {
+    it('should report a failure when the browser cannot open the storage for a selection change', async () => {
         await storeCustomIdl();
         renderSelector();
         await userEvent.click(await screen.findByRole('button', { name: 'IDL: Custom' }));
-        vi.spyOn(customIdlStorage, 'list').mockResolvedValueOnce({ ok: false, reason: 'unavailable' });
+        vi.spyOn(indexedDB, 'open').mockImplementation(() => {
+            throw new DOMException('blocked', 'SecurityError');
+        });
 
         await userEvent.click(screen.getByRole('menuitemradio', { name: 'On-chain PMP' }));
 
