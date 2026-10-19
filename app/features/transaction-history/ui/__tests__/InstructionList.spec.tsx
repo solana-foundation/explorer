@@ -21,18 +21,31 @@ describe('InstructionList', () => {
         expect(screen.getByText('Set Compute Unit Limit')).toBeInTheDocument();
     });
 
-    it('should render all four instructions', () => {
+    it('should collapse repeated instructions into a single counted row', () => {
+        render(
+            <InstructionList
+                instructions={[
+                    { name: 'Transfer', programName: 'Token Program' },
+                    { name: 'Transfer', programName: 'Token Program' },
+                    { name: 'Transfer', programName: 'Token Program' },
+                ]}
+            />,
+        );
+
+        expect(screen.getAllByText('Transfer')).toHaveLength(1);
+        expect(screen.getByText('3 ×')).toBeInTheDocument();
+    });
+
+    it('should not show a count for instructions that appear once', () => {
         render(
             <InstructionList
                 instructions={[
                     { name: 'Transfer', programName: 'System' },
                     { name: 'Mint To', programName: 'Token' },
-                    { name: 'Burn', programName: 'Token' },
-                    { name: 'Transfer Checked', programName: 'Token' },
                 ]}
             />,
         );
 
-        expect(screen.getByText('Transfer Checked')).toBeInTheDocument();
+        expect(screen.queryByText('1 ×')).not.toBeInTheDocument();
     });
 });
