@@ -13,7 +13,7 @@ import {
     type MaybeEncodedAccount,
     type ReadonlyUint8Array,
 } from '@solana/kit';
-import { SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
+import { getCreateAccountWithSeedInstructionDataEncoder, SYSTEM_PROGRAM_ADDRESS } from '@solana-program/system';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import type { RootNode } from 'codama';
 
@@ -46,6 +46,21 @@ export function programMetadataIdls(idl: unknown, standard: 'Anchor' | 'Codama' 
     return { idls: [{ idl, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard }] };
 }
 
+/** The root with the sentence template of one instruction replaced. */
+export function withIntentTemplate(root: RootNode, instructionName: string, interpolatedIntent: string): RootNode {
+    return {
+        ...root,
+        program: {
+            ...root.program,
+            instructions: root.program.instructions?.map(instruction =>
+                instruction.name === instructionName
+                    ? { ...instruction, display: { interpolatedIntent, kind: 'instructionDisplayNode' } }
+                    : instruction,
+            ),
+        },
+    };
+}
+
 const MINT_SIZE = 82;
 
 export function transferSolInstruction(amount = 1_500_000_000n): KitInstruction {
@@ -76,6 +91,26 @@ export function amountToUiAmountInstruction(): KitInstruction {
         accounts: [{ address: MINT, role: AccountRole.READONLY }],
         data: withAmount(getU8Encoder().encode(23), 1_500_000n),
         programAddress: TOKEN_PROGRAM_ADDRESS,
+    };
+}
+
+export function createAccountWithSeedInstruction(seed: string): KitInstruction {
+    return {
+        accounts: [
+            { address: SOURCE, role: AccountRole.WRITABLE_SIGNER },
+            { address: DESTINATION, role: AccountRole.WRITABLE },
+            { address: AUTHORITY, role: AccountRole.READONLY_SIGNER },
+        ],
+        data: new Uint8Array(
+            getCreateAccountWithSeedInstructionDataEncoder().encode({
+                amount: 1_500_000_000n,
+                base: AUTHORITY,
+                programAddress: SYSTEM_PROGRAM_ADDRESS,
+                seed,
+                space: 0n,
+            }),
+        ),
+        programAddress: SYSTEM_PROGRAM_ADDRESS,
     };
 }
 
