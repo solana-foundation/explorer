@@ -23,6 +23,18 @@ describe('AnchorProgramName', () => {
             ],
             'PmpProgram',
         ],
+        [
+            'an Anchor IDL that declares no account types',
+            [
+                {
+                    address: undefined,
+                    idl: { ...namedIdl('stateless_program'), accounts: [] },
+                    source: 'anchor',
+                    standard: 'Anchor',
+                },
+            ],
+            'StatelessProgram',
+        ],
     ] satisfies [string, NonNullable<ProgramIdls['candidates']>, string][])(
         'should name the program with %s',
         (_, candidates, programName) => {

@@ -72,6 +72,17 @@ describe('ProgramName', () => {
         },
     );
 
+    it('should name the program from the PMP IDL before the Anchor IDL account', () => {
+        mockCandidates([
+            { address: undefined, idl: CODAMA, source: 'programMetadata', standard: 'Codama' },
+            { address: undefined, idl: ANCHOR, source: 'anchor', standard: 'Anchor' },
+        ]);
+
+        renderName();
+
+        expect(screen.getByText('ProgramMetadata')).toBeInTheDocument();
+    });
+
     it('should name the program from an Anchor-standard PMP IDL', () => {
         mockCandidates([{ address: undefined, idl: ANCHOR, source: 'programMetadata', standard: 'Anchor' }]);
 

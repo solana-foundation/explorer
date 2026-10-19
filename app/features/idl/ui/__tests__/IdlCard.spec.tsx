@@ -241,6 +241,25 @@ describe('IdlCard', () => {
         expect(castawayUrl.searchParams.get('idlSource')).toBe('program-metadata');
     });
 
+    test('should show the PMP IDL when both sources are Anchor IDLs', async () => {
+        mockProgramIdls({
+            anchorIdl: createMockAnchorIdl(),
+            programMetadataIdl: createMockAnchorIdl(),
+            programMetadataIdlAddress: PMP_PDA,
+        });
+
+        renderCard();
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
+        });
+        expect(screen.getByText('PMP')).toBeInTheDocument();
+        expect(screen.queryByLabelText('Fallback IDL source')).not.toBeInTheDocument();
+
+        const castawayUrl = openCastawayUrl();
+        expect(castawayUrl.searchParams.get('idlSource')).toBe('program-metadata');
+    });
+
     test('should render the mismatch warning when the displayed IDL program id does not match', async () => {
         mockProgramIdls({
             // Imitate a malicious IDL whose address differs from the program being viewed.

@@ -74,6 +74,16 @@ describe('AnchorAccountCard', () => {
         expect(screen.getByText('AnchorProgram: AmmConfig')).toBeInTheDocument();
     });
 
+    it('should show "No Anchor IDL found" when the only Anchor IDL declares no account types', () => {
+        idlState.candidates = [
+            { address: undefined, idl: { ...ANCHOR_ACCOUNT_IDL, accounts: [] }, source: 'anchor', standard: 'Anchor' },
+        ];
+
+        render(<AnchorAccountCard account={ACCOUNT} />);
+
+        expect(screen.getByText('No Anchor IDL found')).toBeInTheDocument();
+    });
+
     it('should show the loading card, not a decode, while the IDLs load', () => {
         idlState.candidates = undefined;
 

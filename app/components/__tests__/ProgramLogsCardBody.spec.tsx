@@ -49,6 +49,18 @@ describe('ProgramLogsCardBody', () => {
             ],
             'Pmp Instruction',
         ],
+        [
+            'an Anchor IDL that declares no account types',
+            [
+                {
+                    address: undefined,
+                    idl: { ...renamedIdl('stateless_instruction'), accounts: [] },
+                    source: 'anchor',
+                    standard: 'Anchor',
+                },
+            ],
+            'Stateless Instruction',
+        ],
     ] satisfies [string, NonNullable<ProgramIdls['candidates']>, string][])(
         'should name the instruction with %s',
         (_, candidates, instructionName) => {

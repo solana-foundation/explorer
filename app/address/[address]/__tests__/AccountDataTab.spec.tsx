@@ -39,6 +39,14 @@ describe('AccountDataTab', () => {
         expect(screen.getByText('Anchor Data')).toBeInTheDocument();
     });
 
+    it('should show the Anchor Data tab when an Anchor-standard PMP IDL declares account types', () => {
+        idlState.candidates = [
+            { address: undefined, idl: ANCHOR_WITH_ACCOUNTS, source: 'programMetadata', standard: 'Anchor' },
+        ];
+        renderTab();
+        expect(screen.getByText('Anchor Data')).toBeInTheDocument();
+    });
+
     it('should hide the tab when the program has no IDL', () => {
         renderTab();
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();

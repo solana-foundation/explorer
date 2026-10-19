@@ -42,6 +42,16 @@ describe('useIdlInstructionDecode', () => {
         expect(result.current).toEqual({ kind: 'codama' });
     });
 
+    it('should decode with the Anchor IDL account when the program has no PMP IDL', () => {
+        idlState.candidates = [ANCHOR];
+        safeDecodeInstructionWithIdl.mockReturnValue({ kind: 'anchor' });
+
+        const { result } = renderHook(() => useIdlInstructionDecode({ programId, raw }));
+
+        expect(safeDecodeInstructionWithIdl).toHaveBeenCalledWith(raw, anchorIdl, 'http://localhost');
+        expect(result.current).toEqual({ kind: 'anchor' });
+    });
+
     it('should return undefined and not decode while the on-chain IDLs load', () => {
         idlState.candidates = undefined;
 
