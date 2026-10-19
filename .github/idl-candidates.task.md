@@ -36,27 +36,27 @@ Both items have one cause: the Anchor callers choose an IDL by its standard tag,
 
 ## Nits
 
-- [ ] Drop `onChain` and `isOnChainLoading` from `ProgramIdls`, so the type holds each IDL and the loading state once. Make `getOnChainAnchorIdl` filter `candidates` by `source === 'anchor'`.
-- [ ] Make `getIdlDeclaredAddress` test only `standard === 'codama'`, the rule that `getIdlSpecType` uses.
-- [ ] Make `isIdlProgramIdMismatch` return `true` for a declared address that is not a non-empty string. The base sent that value to `new PublicKey` and returned `true` from the `catch`.
-- [ ] In [idl-candidates.ts](../app/entities/idl/model/idl-candidates.ts), type `source` as `IdlVariant`, rename `SourcedIdl.address` to `idlAddress`, and replace the casts in `tagIdl` with a type predicate.
-- [ ] Fix the comments:
+- [x] Drop `onChain` and `isOnChainLoading` from `ProgramIdls`, so the type holds each IDL and the loading state once. Make `getOnChainAnchorIdl` filter `candidates` by `source === 'anchor'`.
+- [x] Make `getIdlDeclaredAddress` test only `standard === 'codama'`, the rule that `getIdlSpecType` uses.
+- [x] Make `isIdlProgramIdMismatch` return `true` for a declared address that is not a string. The base sent that value to `new PublicKey` and returned `true` from the `catch`. `getIdlDeclaredAddress` returns `IdlDeclaredAddress`, so the check can tell a malformed address from no address.
+- [x] In [idl-candidates.ts](../app/entities/idl/model/idl-candidates.ts), type `source` as `IdlVariant`, rename `SourcedIdl.address` to `idlAddress`, and replace the casts in `tagIdl` with a type predicate.
+- [x] Fix the comments:
     - In `IdlCard`, change "an Anchor IDL comes first" to "the Anchor IDL account comes first".
     - Delete the `convertAnchorIdl` comment, because "the decoder" names no symbol.
     - Delete the docblocks of `useIdlInstructionDecode` and `TaggedIdl`, because both restate the code.
     - Shorten the comments in [@x/program-metadata/index.ts](../app/entities/idl/@x/program-metadata/index.ts) and `AccountDataTab`.
     - Replace the em-dashes in the mock comment of `use-idl-instruction-decode.spec.ts`.
-- [ ] Fix the test titles:
+- [x] Fix the test titles:
     - In `use-program-idls.spec.tsx`, change "no candidates" to "undefined candidates".
-    - In `program-name.spec.tsx`, change "until the candidates are final" to "while the IDLs load".
+    - In `program-name.spec.tsx`, change "until the candidates are final" to "when the candidates are undefined", because a suspense read never renders while the IDLs load.
     - Change "the Anchor IDL account" to "the Anchor IDL" where the input is the IDL: `idl-candidates.spec.ts`, `use-idl-instruction-decode.spec.ts` and `AnchorAccountCard.spec.tsx`.
     - Split the `getIdlDeclaredAddress` table in `utils.spec.ts` into rows that return an address and rows that return `undefined`.
     - Keep the order wording in the `getOnChainCandidates` table only on the row with both IDLs.
-- [ ] Fix the spec fixtures:
+- [x] Fix the spec fixtures:
     - Make the `useProgramIdls` mocks a `vi.fn` and assert the program address they receive.
     - Add a fee payer and the program to the jsonParsed stub in `ProgramLogsCardBody.spec.tsx`.
     - Make the PMP stub in `use-idl-instruction-decode.spec.ts` a real Codama root.
     - Add a custom-cluster loading case to `use-program-idls.spec.tsx`.
     - Delete the second assertion of the loading case in `AnchorAccountCard.spec.tsx`, because no IDL reaches the card while `candidates` is `undefined`.
     - Replace the one-row `it.each` table in `program-name.spec.tsx` with a plain `it`.
-- [ ] Delete the `HOOKS_PENDING_CLIENT_ONLY` entry for the deleted `use-program-metadata-idl.tsx` in [eslint.config.mjs](../eslint.config.mjs).
+- [x] Delete the `HOOKS_PENDING_CLIENT_ONLY` entry for the deleted `use-program-metadata-idl.tsx` in [eslint.config.mjs](../eslint.config.mjs).
