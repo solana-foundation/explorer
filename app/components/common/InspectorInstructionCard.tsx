@@ -3,6 +3,7 @@ import { Button } from '@components/shared/ui/button';
 import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { cn } from '@components/shared/utils';
 import { ProgramField } from '@entities/instruction-card';
+import { InstructionIntentButton, InstructionIntentRow } from '@entities/instruction-intent';
 import { useScrollAnchor } from '@providers/scroll-anchor';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
@@ -73,21 +74,25 @@ export function InspectorInstructionCard({
                 </>
             }
             headerButtons={
-                <Button
-                    ui="dashkit"
-                    size="sm"
-                    variant={showRaw ? 'black' : 'white'}
-                    active={showRaw}
-                    disabled={defaultRaw}
-                    className={cn('flex items-center', defaultRaw && '!pointer-events-auto cursor-not-allowed')}
-                    onClick={rawClickHandler}
-                >
-                    <Code className="mr-1.5" size={13} /> Raw
-                </Button>
+                <div className="flex items-center gap-1.5">
+                    <InstructionIntentButton innerIxIndex={childIndex} />
+                    <Button
+                        ui="dashkit"
+                        size="sm"
+                        variant={showRaw ? 'black' : 'white'}
+                        active={showRaw}
+                        disabled={defaultRaw}
+                        className={cn('flex items-center', defaultRaw && '!pointer-events-auto cursor-not-allowed')}
+                        onClick={rawClickHandler}
+                    >
+                        <Code className="mr-1.5" size={13} /> Raw
+                    </Button>
+                </div>
             }
         >
             <BaseTable ui="dashkit" variant="card" nowrap className="[&>tbody>tr:first-child>td]:!border-t-0">
                 <BaseTable.Body>
+                    <InstructionIntentRow innerIxIndex={childIndex} />
                     {(showRaw || alwaysShowProgramRow) && (
                         <ProgramField programId={ix.programId} showExtendedInfo={showRaw} />
                     )}

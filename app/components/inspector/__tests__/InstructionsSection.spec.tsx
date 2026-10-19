@@ -285,6 +285,20 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         expect(await screen.findByText(/Create Idempotent/i)).toBeInTheDocument();
         expect(screen.queryByText(/Inner Instructions/i)).not.toBeInTheDocument();
     });
+
+    test('should show an intent button on the top-level card and on every inner card', async () => {
+        renderSection(buildMessage(), INNER_INSTRUCTIONS);
+
+        expect(await screen.findByText(/Inner Instructions/i)).toBeInTheDocument();
+        expect(screen.getAllByTestId('instruction-intent-trigger')).toHaveLength(5);
+    });
+
+    test('should show no intent button on a child it cannot decompile', async () => {
+        renderSection(buildMessage(), INNER_WITH_BAD_ACCOUNT);
+
+        expect(await screen.findByText(/Could not display instruction #1\.2, please report/i)).toBeInTheDocument();
+        expect(screen.getAllByTestId('instruction-intent-trigger')).toHaveLength(3);
+    });
 });
 
 function renderSection(message: MessageV0, compiledInnerInstructions?: CompiledInnerInstruction[]) {

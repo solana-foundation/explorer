@@ -32,6 +32,8 @@ type RawTransactionBase = {
     messageBytes: Uint8Array;
     meta?: {
         innerInstructions?: CompiledInnerInstruction[];
+        /** The lookup-table addresses of a v0 message, which account indexes count after the static keys. */
+        loadedAddresses?: { readonly: string[]; writable: string[] };
         postBalances: number[];
         preBalances: number[];
     };

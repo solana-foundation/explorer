@@ -175,6 +175,20 @@ describe('fetchRawTransaction', () => {
         ]);
     });
 
+    it('should return the loaded addresses from the transaction meta', async () => {
+        respondWith(
+            transactionResult(createWeb3TransactionBytes('legacy'), {
+                loadedAddresses: { readonly: [RECIPIENT], writable: [FEE_PAYER] },
+                postBalances: [],
+                preBalances: [],
+            }),
+        );
+
+        const raw = await fetchRawTransaction(URL, SIGNATURE);
+
+        expect(raw?.meta?.loadedAddresses).toEqual({ readonly: [RECIPIENT], writable: [FEE_PAYER] });
+    });
+
     it('should return the slot from the RPC response', async () => {
         respondWith(transactionResult(createWeb3TransactionBytes('legacy')));
 

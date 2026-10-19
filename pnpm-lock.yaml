@@ -137,6 +137,9 @@ importers:
       '@codama/dynamic-client':
         specifier: 1.0.0
         version: 1.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
+      '@codama/dynamic-instructions':
+        specifier: 1.0.0
+        version: 1.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)
       '@codama/dynamic-parsers':
         specifier: 1.4.2
         version: 1.4.2(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)

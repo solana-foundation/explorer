@@ -163,12 +163,15 @@ const buttonVariants = cva([], {
     ],
     defaultVariants: {
         active: false,
+        dashed: false,
         size: 'default',
         ui: 'tw',
         variant: 'default',
     },
     variants: {
         active: { false: '', true: '' },
+        // Marks a control whose content is unavailable. `!` because every variant sets its own text colour.
+        dashed: { false: '', true: 'border-dashed !text-neutral-400 hover:!text-neutral-200' },
         size: { compact: '', default: '', icon: '', lg: '', sm: '', tile: '', toolbar: '' },
         ui: { dashkit: '', tw: '' },
         variant: {
@@ -200,9 +203,15 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, active, size, ui, variant, asChild = false, ...props }, ref) => {
+    ({ className, active, dashed, size, ui, variant, asChild = false, ...props }, ref) => {
         const Comp = asChild ? Slot : 'button';
-        return <Comp className={cn(buttonVariants({ active, size, ui, variant }), className)} ref={ref} {...props} />;
+        return (
+            <Comp
+                className={cn(buttonVariants({ active, dashed, size, ui, variant }), className)}
+                ref={ref}
+                {...props}
+            />
+        );
     },
 );
 Button.displayName = 'Button';
