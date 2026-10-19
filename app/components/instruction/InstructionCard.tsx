@@ -1,4 +1,5 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
+import { InstructionIdlSelector } from '@entities/idl';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
 import { ParsedInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
@@ -70,7 +71,12 @@ export function InstructionCard({
             raw={raw}
             onRequestRaw={canFetchRaw ? fetchRawTrigger : undefined}
             rawUnavailable={rawUnavailable}
-            headerButtons={headerButtons}
+            headerButtons={
+                <>
+                    <InstructionIdlSelector />
+                    {headerButtons}
+                </>
+            }
             collapsible={collapsible}
         >
             {children}

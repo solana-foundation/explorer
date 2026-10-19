@@ -3,6 +3,7 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SolBalance } from '@components/common/SolBalance';
+import { CustomIdlStorePreload } from '@entities/idl';
 import { usePrevious } from '@mantine/hooks';
 import { useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
@@ -450,6 +451,7 @@ export function TransactionInspectorPage({
 
     return (
         <PageLayout>
+            <CustomIdlStorePreload />
             <PageHeader eyebrow="Transaction" title="Inspector" />
             <PageSections>
                 {signature ? (

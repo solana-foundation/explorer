@@ -17,14 +17,20 @@ type AccountCardProps = TableCardBodyProps & {
     headerOutside?: boolean;
     /** Set when `children` are div-based `KeyValue` rows rather than `<tr>` table rows. */
     listBody?: boolean;
+    headerActions?: React.ReactNode;
 };
 
 // FIXME: missing Storybook story — RawAccountRows uses useRawAccountDataOnMount (SWR); visuals already covered by BaseAccountCard + RawAccountRows stories.
-export function AccountCard({ account, children, ...rest }: AccountCardProps) {
+export function AccountCard({ account, children, headerActions, ...rest }: AccountCardProps) {
     return (
         <BaseAccountCard
             rawContent={<RawAccountRows account={account} />}
-            headerActions={<AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />}
+            headerActions={
+                <>
+                    {headerActions}
+                    <AccountDownloadDropdown pubkey={account.pubkey} space={account.space} />
+                </>
+            }
             {...rest}
         >
             {children}

@@ -1,5 +1,6 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
+import { InstructionIdlSelector, InstructionIdlSelectorProvider } from '@entities/idl';
 import {
     type InstructionSurface,
     InstructionSurfaceProvider,
@@ -40,7 +41,7 @@ import {
 } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import dynamic from 'next/dynamic';
-import { useMemo } from 'react';
+import { type ComponentProps, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { resolveInnerInstructions } from '@/app/entities/transaction-data';
@@ -133,8 +134,14 @@ export function InstructionsSection({
                         innerIx ? (
                             <ErrorBoundary
                                 key={childIndex}
+                                // The fallback renders inside the parent card, so it needs its own
+                                // InstructionIdlSelectorProvider.
                                 fallback={
-                                    <UnknownDetailsCard node={toInstructionNode({ childIndex, index, ix: innerIx })} />
+                                    <InstructionIdlSelectorProvider programAddress={innerIx.programId.toBase58()}>
+                                        <UnknownDetailsCard
+                                            node={toInstructionNode({ childIndex, index, ix: innerIx })}
+                                        />
+                                    </InstructionIdlSelectorProvider>
                                 }
                             >
                                 <InspectorInstructionCard
@@ -174,19 +181,29 @@ function UndisplayableInstructionCard({ index, childIndex }: { index: number; ch
     );
 }
 
-function InspectorInstructionCard({
-    message,
-    ix,
-    index,
-    childIndex,
-    innerCards,
-}: {
+type InspectorInstructionCardProps = {
     message: VersionedMessage;
     ix: TransactionInstruction;
     index: number;
     childIndex?: number;
     innerCards?: JSX.Element[];
-}) {
+};
+
+function InspectorInstructionCard(props: InspectorInstructionCardProps) {
+    return (
+        <InstructionIdlSelectorProvider programAddress={props.ix.programId.toBase58()}>
+            <InspectorInstructionCardContent {...props} />
+        </InstructionIdlSelectorProvider>
+    );
+}
+
+function InspectorInstructionCardContent({
+    message,
+    ix,
+    index,
+    childIndex,
+    innerCards,
+}: InspectorInstructionCardProps) {
     const dispatcher = useInstructionParser();
 
     const programId = ix.programId;
@@ -197,15 +214,31 @@ function InspectorInstructionCard({
     );
 
     const idlDecode = useIdlInstructionDecode({ programId: programId.toString(), raw: ix });
+    if (idlDecode?.kind === 'pending') return <LoadingCard message="Loading instruction" />;
     // The IDL decoder returns `{ kind: 'unknown' }`, not `undefined`, when the IDL does not
     // declare the discriminator. The cards below must still render.
     const decodedByIdl = idlDecode?.kind === 'unknown' ? undefined : idlDecode;
 
     const unknownCard = <UnknownDetailsCard node={toInstructionNode({ childIndex, index, innerCards, ix })} />;
 
-    // PMP owns every instruction on its program id: `setData`/`initialize`/`write` render decoded content from
-    // the bundled typed decoders (no IDL needed), and the housekeeping instructions delegate to the IDL tier
-    // from inside the card. Must sit before the generic idlDecode tier so it wins for the content instructions.
+    if (idlDecode?.source === 'custom') {
+        return (
+            <IdlInstructionCard
+                decoded={idlDecode}
+                ix={ix}
+                index={index}
+                result={INSPECTOR_RESULT}
+                signature={INSPECTOR_SIGNATURE}
+                childIndex={childIndex}
+                innerCards={innerCards}
+            />
+        );
+    }
+
+    // PMP owns every instruction on its program id unless a custom IDL is selected for it: `setData`/`initialize`/
+    // `write` render decoded content from the bundled typed decoders (no IDL needed), and the housekeeping
+    // instructions delegate to the IDL tier from inside the card. Must sit before the generic idlDecode tier so it
+    // wins for the content instructions.
     if (isProgramMetadataInstruction(ix)) {
         return (
             <PmpDetailsCard
@@ -337,7 +370,7 @@ function InspectorInstructionCard({
                         ix={ix}
                         index={index}
                         result={INSPECTOR_RESULT}
-                        InstructionCardComponent={BaseInstructionCard}
+                        InstructionCardComponent={InstructionCardWithIdlSelector}
                         childIndex={childIndex}
                         innerCards={innerCards}
                     />
@@ -449,7 +482,7 @@ function InspectorInstructionCard({
                         parsedIx={parsedIx}
                         index={index}
                         result={INSPECTOR_RESULT}
-                        InstructionCardComponent={BaseInstructionCard}
+                        InstructionCardComponent={InstructionCardWithIdlSelector}
                         childIndex={childIndex}
                         innerCards={innerCards}
                     />
@@ -536,4 +569,18 @@ function InspectorInstructionCard({
     }
 
     return unknownCard;
+}
+
+function InstructionCardWithIdlSelector(props: ComponentProps<typeof BaseInstructionCard>) {
+    return (
+        <BaseInstructionCard
+            {...props}
+            headerButtons={
+                <>
+                    <InstructionIdlSelector />
+                    {props.headerButtons}
+                </>
+            }
+        />
+    );
 }

@@ -40,6 +40,8 @@ export {
 export { AddCustomIdlButton } from './ui/AddCustomIdlButton';
 export { IDL_SOURCE_LABELS } from './ui/BaseIdlSourceSelect';
 export { ProgramIdlSelector } from './ui/ProgramIdlSelector';
+export { InstructionIdlSelector, InstructionIdlSelectorProvider } from './ui/InstructionIdlSelector';
+export { CustomIdlStorePreload } from './ui/CustomIdlStorePreload';
 export { getFirstAnchorIdl, getFirstAnchorIdlWithAccounts, getOnChainAnchorIdl } from './model/idl-candidates';
 export { useFormatCodamaIdl } from './model/use-format-codama-idl';
 export { getIdlSpecType } from './model/converters/convert-legacy-idl';

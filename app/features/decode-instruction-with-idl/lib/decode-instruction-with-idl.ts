@@ -8,7 +8,12 @@ import { type RootNode } from 'codama';
 import { Logger } from '@/app/shared/lib/logger';
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 
-import { type AnchorInstructionDecoded, decodeAnchorInstruction } from './decode-anchor-instruction';
+import {
+    type AnchorInstructionDecoded,
+    decodeAnchorInstruction,
+    type FullyDecodedAnchorInstruction,
+    isFullyDecodedAnchorInstruction,
+} from './decode-anchor-instruction';
 
 type CodamaParsedInstruction = NonNullable<ReturnType<typeof parseInstruction>>;
 
@@ -96,4 +101,14 @@ export function safeDecodeInstructionWithIdl(
     } catch {
         return { kind: 'unknown' };
     }
+}
+
+export type FullIdlInstructionDecode =
+    | Extract<IdlInstructionDecode, { kind: 'codama' }>
+    | { kind: 'anchor'; program: Program<Idl>; details: FullyDecodedAnchorInstruction };
+
+export function isFullyDecoded(decode: IdlInstructionDecode): decode is FullIdlInstructionDecode {
+    if (decode.kind === 'codama') return true;
+    if (decode.kind === 'unknown') return false;
+    return isFullyDecodedAnchorInstruction(decode.details);
 }
