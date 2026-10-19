@@ -5,6 +5,7 @@ import { cn } from '@components/shared/utils';
 import {
     FormattedIdl,
     getIdlStandard,
+    type IdlSource,
     isIdlProgramIdMismatch,
     isInteractiveIdlSupported,
     type SupportedIdl,
@@ -46,7 +47,13 @@ export type InteractTab = {
 
 type Tab = DataTab | InteractTab;
 
-export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, programId?: string, searchStr?: string) {
+export function useTabs(
+    idl: FormattedIdl | null,
+    originalIdl: SupportedIdl,
+    source: IdlSource,
+    programId?: string,
+    searchStr?: string,
+) {
     const tabs: Tab[] = useMemo(() => {
         if (!idl) return [];
 
@@ -116,7 +123,7 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, pro
         if (originalIdl && isInteractiveIdlSupported(originalIdl) && IS_INTERACTIVE_IDL_ENABLED) {
             const isProgramIdMismatch = programId ? isIdlProgramIdMismatch(originalIdl, programId) : false;
             // Analytics is created during runtime because GA events are scoped to the IDL standard (Anchor | Codama).
-            const idlAnalytics = createIdlAnalytics(getIdlStandard(originalIdl));
+            const idlAnalytics = createIdlAnalytics(getIdlStandard(originalIdl), source);
 
             tabItems.push({
                 disabled: !idl.instructions?.length,
@@ -141,7 +148,7 @@ export function useTabs(idl: FormattedIdl | null, originalIdl: SupportedIdl, pro
         }
 
         return tabItems;
-    }, [idl, originalIdl, programId, searchStr]);
+    }, [idl, originalIdl, source, programId, searchStr]);
 
     return tabs;
 }

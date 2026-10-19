@@ -18,7 +18,7 @@ import { Cluster } from '@/app/utils/cluster';
 
 import { ProgramLogsCardBody } from '../ProgramLogsCardBody';
 
-const idlState: ProgramIdls = { idls: [] };
+const idlState: ProgramIdls = { idls: [], onChainIdls: [], stored: { record: undefined, status: 'ready' } };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@/app/entities/idl/model/use-program-idls', () => ({
@@ -105,6 +105,18 @@ describe('ProgramLogsCardBody', () => {
                 },
             ],
             'Stateless Instruction',
+        ],
+        [
+            'a selected custom Anchor IDL',
+            [
+                {
+                    idl: renamedIdl('custom_instruction'),
+                    origin: { kind: 'pasted' },
+                    source: 'custom',
+                    standard: 'Anchor',
+                },
+            ],
+            'Custom Instruction',
         ],
     ] satisfies [string, NonNullable<ProgramIdls['idls']>, string][])(
         'should name the instruction with %s',

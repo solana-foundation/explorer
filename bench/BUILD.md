@@ -4,32 +4,32 @@
 |------|-------|------|---------------|
 | Static | `/` | 130 kB | 550 kB |
 | Static | `/_not-found` | 0 B | 430 kB |
-| Dynamic | `/address/[address]` | 430 kB | 840 kB |
+| Dynamic | `/address/[address]` | 460 kB | 880 kB |
 | Dynamic | `/address/[address]/account-data` | 440 kB | 850 kB |
-| Dynamic | `/address/[address]/anchor-account` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/attestation` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/attributes` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/blockhashes` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/compression` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/concurrent-merkle-tree` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/domains` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/entries` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/feature-gate` | 380 kB | 810 kB |
-| Dynamic | `/address/[address]/idl` | 500 kB | 930 kB |
-| Dynamic | `/address/[address]/instructions` | 400 kB | 820 kB |
-| Dynamic | `/address/[address]/metadata` | 380 kB | 810 kB |
-| Dynamic | `/address/[address]/nftoken-collection-nfts` | 380 kB | 810 kB |
-| Dynamic | `/address/[address]/program-multisig` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/rewards` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/security` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/slot-hashes` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/stake-history` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/subscriptions` | 380 kB | 810 kB |
-| Dynamic | `/address/[address]/token-extensions` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/tokens` | 410 kB | 820 kB |
-| Dynamic | `/address/[address]/transfers` | 390 kB | 820 kB |
-| Dynamic | `/address/[address]/verified-build` | 400 kB | 810 kB |
-| Dynamic | `/address/[address]/vote-history` | 380 kB | 810 kB |
+| Dynamic | `/address/[address]/anchor-account` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/attestation` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/attributes` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/blockhashes` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/compression` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/concurrent-merkle-tree` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/domains` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/entries` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/feature-gate` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/idl` | 550 kB | 970 kB |
+| Dynamic | `/address/[address]/instructions` | 440 kB | 860 kB |
+| Dynamic | `/address/[address]/metadata` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/nftoken-collection-nfts` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/program-multisig` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/rewards` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/security` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/slot-hashes` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/stake-history` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/subscriptions` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/token-extensions` | 430 kB | 860 kB |
+| Dynamic | `/address/[address]/tokens` | 440 kB | 860 kB |
+| Dynamic | `/address/[address]/transfers` | 440 kB | 860 kB |
+| Dynamic | `/address/[address]/verified-build` | 430 kB | 850 kB |
+| Dynamic | `/address/[address]/vote-history` | 430 kB | 850 kB |
 | Dynamic | `/api/ans-domains/[address]` | — | — |
 | Dynamic | `/api/domain-info/[domain]` | — | — |
 | Dynamic | `/api/geo-location` | — | — |
@@ -65,6 +65,6 @@
 | Static | `/opengraph-image.png` | — | — |
 | Dynamic | `/robots.txt` | — | — |
 | Static | `/tos` | 10 kB | 440 kB |
-| Dynamic | `/tx/[signature]` | 460 kB | 870 kB |
-| Dynamic | `/tx/[signature]/inspect` | 450 kB | 860 kB |
-| Static | `/tx/inspector` | 450 kB | 860 kB |
+| Dynamic | `/tx/[signature]` | 490 kB | 910 kB |
+| Dynamic | `/tx/[signature]/inspect` | 490 kB | 910 kB |
+| Static | `/tx/inspector` | 490 kB | 910 kB |
