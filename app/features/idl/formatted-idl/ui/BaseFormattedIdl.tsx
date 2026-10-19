@@ -14,11 +14,12 @@ import type { FormattedIdlViewProps } from './types';
 export function BaseFormattedIdl({
     idl,
     originalIdl,
+    source,
     programId,
     searchStr,
 }: FormattedIdlViewProps<Idl> | FormattedIdlViewProps<RootNode>) {
     const [activeTabIndex, setActiveTabIndex] = useState<number | null>(null);
-    const tabs = useTabs(idl, originalIdl, programId, searchStr);
+    const tabs = useTabs(idl, originalIdl, source, programId, searchStr);
 
     useEffect(() => {
         if (typeof activeTabIndex === 'number') return;
@@ -27,7 +28,12 @@ export function BaseFormattedIdl({
 
     if (!tabs || activeTabIndex === null || !idl) return null;
 
-    const activeTab = tabs[activeTabIndex];
+    // The IDL can change while this view is mounted, and the new IDL can lack or disable the tab at this index.
+    // A search also disables a tab with no match, and that tab stays active while the user searches.
+    const storedTab = tabs[activeTabIndex];
+    const isStale = !storedTab || (storedTab.disabled && !searchStr?.trim());
+    const activeIndex = isStale ? tabs.findIndex(tab => !tab.disabled) : activeTabIndex;
+    const activeTab = tabs[activeIndex];
 
     return (
         <SearchHighlightProvider searchStr={searchStr || ''}>
@@ -36,7 +42,7 @@ export function BaseFormattedIdl({
                     {tabs.map((tab, index) => (
                         <TabsTrigger
                             key={tab.id}
-                            active={index === activeTabIndex}
+                            active={index === activeIndex}
                             disabled={tab.disabled}
                             onClick={() => setActiveTabIndex(index)}
                         >

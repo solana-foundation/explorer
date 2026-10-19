@@ -1,4 +1,9 @@
+import 'fake-indexeddb/auto';
+
+import { threadId } from 'node:worker_threads';
+
 import type * as SolanaKit from '@solana/kit';
+import { IDBFactory } from 'fake-indexeddb';
 import { beforeEach, vi } from 'vitest';
 
 import type * as TokenInfoBatchProvider from '@/app/entities/token-info/model/token-info-batch-provider';
@@ -6,10 +11,20 @@ import type * as TokenInfoBatchProvider from '@/app/entities/token-info/model/to
 import { mockSolanaRpc } from './app/__tests__/mock-rpc';
 
 // jsdom storage outlives a test and storage-backed state reads it on first use; node-environment specs have none.
+// jsdom has no IndexedDB, so every test gets an empty in-memory one.
 beforeEach(() => {
     globalThis.localStorage?.clear();
     globalThis.sessionStorage?.clear();
+    globalThis.indexedDB = new IDBFactory();
 });
+
+// Spec files run as threads of one process, and a BroadcastChannel delivers to every thread of the process.
+const ProcessBroadcastChannel = globalThis.BroadcastChannel;
+globalThis.BroadcastChannel = class extends ProcessBroadcastChannel {
+    constructor(name: string) {
+        super(`${name}:${threadId}`);
+    }
+};
 
 // Global no-op mock for Logger to suppress console output in all tests.
 vi.mock('@/app/shared/lib/logger', () => ({

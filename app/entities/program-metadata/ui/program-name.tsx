@@ -6,7 +6,7 @@ import { RootNode } from 'codama';
 
 import { AnchorProgramName } from '@/app/utils/anchor';
 
-// FIXME: missing Storybook story. The story needs a useProgramIdls SWR mock.
+// FIXME: missing Storybook story. The story needs a useProgramIdls SWR mock and a custom IDL store.
 export default function ProgramName({
     programId,
     url,

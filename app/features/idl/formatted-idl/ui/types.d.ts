@@ -1,7 +1,8 @@
-import type { FormattedIdl } from '@entities/idl';
+import type { FormattedIdl, IdlSource } from '@entities/idl';
 
 export type StandardFormattedIdlProps<T> = {
     idl?: T;
+    source: IdlSource;
     programId: string;
     searchStr?: string;
 };
@@ -9,6 +10,7 @@ export type StandardFormattedIdlProps<T> = {
 export type FormattedIdlViewProps<T> = {
     idl: FormattedIdl | null;
     originalIdl: T;
+    source: IdlSource;
     programId?: string;
     searchStr?: string;
 };

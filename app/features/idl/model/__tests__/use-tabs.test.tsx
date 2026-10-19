@@ -1,4 +1,4 @@
-import type { FormattedIdl, SupportedIdl } from '@entities/idl';
+import { type FormattedIdl, IdlVariant, type SupportedIdl } from '@entities/idl';
 import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -39,13 +39,19 @@ describe('useTabs interactive analytics wiring', () => {
 
     it('should create an Anchor-scoped tracker for Anchor IDLs', () => {
         const originalIdl = { __standard: 'Anchor' } as unknown as SupportedIdl;
-        renderHook(() => useTabs(formattedIdl, originalIdl, 'prog1'));
-        expect(createIdlAnalytics).toHaveBeenCalledWith('Anchor');
+        renderHook(() => useTabs(formattedIdl, originalIdl, IdlVariant.Anchor, 'prog1'));
+        expect(createIdlAnalytics).toHaveBeenCalledWith('Anchor', IdlVariant.Anchor);
     });
 
     it('should create a Codama-scoped tracker for Codama IDLs', () => {
         const originalIdl = { __standard: 'Codama' } as unknown as SupportedIdl;
-        renderHook(() => useTabs(formattedIdl, originalIdl, 'prog1'));
-        expect(createIdlAnalytics).toHaveBeenCalledWith('Codama');
+        renderHook(() => useTabs(formattedIdl, originalIdl, IdlVariant.ProgramMetadata, 'prog1'));
+        expect(createIdlAnalytics).toHaveBeenCalledWith('Codama', IdlVariant.ProgramMetadata);
+    });
+
+    it('should pass the custom source to the IDL analytics', () => {
+        const originalIdl = { __standard: 'Anchor' } as unknown as SupportedIdl;
+        renderHook(() => useTabs(formattedIdl, originalIdl, 'custom', 'prog1'));
+        expect(createIdlAnalytics).toHaveBeenCalledWith('Anchor', 'custom');
     });
 });
