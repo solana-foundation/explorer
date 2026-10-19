@@ -358,6 +358,7 @@ function InstructionCard({
                     ix={dispatched}
                     tx={tx}
                     index={index}
+                    raw={transactionIx}
                     innerCards={innerCards}
                     childIndex={childIndex}
                 />
@@ -467,6 +468,7 @@ function InstructionCard({
                     ix={dispatched}
                     tx={tx}
                     index={index}
+                    raw={transactionIx}
                     innerCards={innerCards}
                     childIndex={childIndex}
                 />

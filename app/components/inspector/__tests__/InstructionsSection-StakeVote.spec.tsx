@@ -3,6 +3,7 @@ import { VOTE_PROGRAM_ADDRESS } from '@explorer/parsers/programs/vote';
 import { MessageV0, PublicKey, TransactionInstruction, TransactionMessage } from '@solana/web3.js';
 import { STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
 
@@ -53,6 +54,19 @@ describe('Inspector InstructionsSection with stake and vote instructions', () =>
 
         expect(await screen.findByText(title)).toBeInTheDocument();
         expect(screen.queryByText(text => text.endsWith(': Unknown Instruction'))).not.toBeInTheDocument();
+    });
+
+    test.each([
+        { programId: STAKE_PROGRAM_ADDRESS, title: 'Stake Program: Split Stake' },
+        { programId: VOTE_PROGRAM_ADDRESS, title: 'Vote: Withdraw' },
+    ])('should show the accounts and bytes of $title in the raw view', async ({ programId, title }) => {
+        renderSection(buildMessage(makeInstruction(programId, [3, 0, 0, 0, ...LAMPORTS_ARG], 3)));
+
+        expect(await screen.findByText(title)).toBeInTheDocument();
+        await userEvent.click(screen.getByRole('button', { name: 'Raw' }));
+
+        expect(screen.getAllByText(text => text.startsWith('Instruction Data')).length).toBeGreaterThan(0);
+        expect(screen.getByText('Account #3')).toBeInTheDocument();
     });
 
     test('should fall back to the unknown card for an unrecognized vote discriminant', async () => {

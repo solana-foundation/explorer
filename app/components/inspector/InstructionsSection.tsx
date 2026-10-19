@@ -416,6 +416,7 @@ function InspectorInstructionCard({
                     ix={parsedIx}
                     tx={parsedTx}
                     index={index}
+                    raw={ix}
                     childIndex={childIndex}
                     innerCards={innerCards}
                 />
@@ -426,6 +427,7 @@ function InspectorInstructionCard({
                     ix={parsedIx}
                     tx={parsedTx}
                     index={index}
+                    raw={ix}
                     childIndex={childIndex}
                     innerCards={innerCards}
                 />
