@@ -168,6 +168,38 @@ describe('createIndexedDbCustomIdlStorage', () => {
             expect(postMessage).not.toHaveBeenCalled();
         });
 
+        it.each([
+            ['has no BroadcastChannel', undefined],
+            [
+                'throws from the BroadcastChannel constructor',
+                class {
+                    constructor() {
+                        throw new DOMException('blocked', 'SecurityError');
+                    }
+                },
+            ],
+        ])('should store and list a value when the browser %s', async (_, channel) => {
+            vi.stubGlobal('BroadcastChannel', channel);
+            const tab = createIndexedDbCustomIdlStorage();
+            const onChange = subscribe(tab);
+
+            expect(await tab.put({ programAddress: PROGRAM_ADDRESS, value: '{}' })).toEqual({ ok: true });
+
+            expect(await tab.list()).toEqual({ entries: [{ programAddress: PROGRAM_ADDRESS, value: '{}' }], ok: true });
+            expect(onChange).not.toHaveBeenCalled();
+        });
+
+        it('should report a stored write as saved when the channel message fails', async () => {
+            vi.spyOn(BroadcastChannel.prototype, 'postMessage').mockImplementation(() => {
+                throw new DOMException('closed', 'InvalidStateError');
+            });
+            const tab = createIndexedDbCustomIdlStorage();
+
+            expect(await tab.put({ programAddress: PROGRAM_ADDRESS, value: '{}' })).toEqual({ ok: true });
+
+            expect(await tab.list()).toEqual({ entries: [{ programAddress: PROGRAM_ADDRESS, value: '{}' }], ok: true });
+        });
+
         it('should stop calling back after unsubscribe', async () => {
             const onChange = vi.fn();
             storage.subscribe(onChange)();
