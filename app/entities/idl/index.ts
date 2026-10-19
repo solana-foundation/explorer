@@ -13,6 +13,7 @@ export { type AnchorIdl, type CodamaIdl, type IdlStandard, type SupportedIdl } f
 export { type ProgramIdlPair } from './api/types';
 export { isIdlProgramIdMismatch, isInteractiveIdlSupported } from './model/interactive-idl';
 export { IdlVariant } from './model/idl-variant';
+export { getIdlDeclaredAddress } from './lib/utils';
 
 // Per-program names built from each program's IDL — a display name plus an instruction-name resolver
 // matched by discriminator (no Borsh decode) — used to label transaction rows the RPC leaves as

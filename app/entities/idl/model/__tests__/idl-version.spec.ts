@@ -164,6 +164,20 @@ describe('isIdlProgramIdMismatch', () => {
         });
     });
 
+    describe('Legacy Anchor IDL', () => {
+        const createLegacyIdl = (address: string) =>
+            ({ ...createMockIdl('legacy'), metadata: { address } }) as unknown as SupportedIdl;
+
+        it('should return false when metadata.address matches programAddress', () => {
+            expect(isIdlProgramIdMismatch(createLegacyIdl(DEFAULT_PUBKEY), DEFAULT_PUBKEY)).toBe(false);
+        });
+
+        it('should return true when metadata.address differs from programAddress', () => {
+            const randomAddress = PublicKey.unique().toBase58();
+            expect(isIdlProgramIdMismatch(createLegacyIdl(DEFAULT_PUBKEY), randomAddress)).toBe(true);
+        });
+    });
+
     describe('Codama IDL', () => {
         it('should return false when program.publicKey matches programAddress', () => {
             const idl = createMockIdl('codama', '1.0.0', DEFAULT_PUBKEY);
