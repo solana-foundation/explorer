@@ -6,6 +6,7 @@ import { TokenDetailsCard } from '@components/instruction/token/TokenDetailsCard
 import { TokenSwapDetailsCard } from '@components/instruction/TokenSwapDetailsCard';
 import { WormholeDetailsCard } from '@components/instruction/WormholeDetailsCard';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
+import { InstructionIdlSelectorProvider } from '@entities/idl';
 import { toInstructionNode, TxInstructionSurface, UnknownDetailsCard } from '@entities/instruction-card';
 import { isParsedInstruction, useInstructionParser } from '@entities/instruction-parser';
 import { trustedInnerInstructions } from '@entities/transaction-data';
@@ -191,18 +192,15 @@ function InnerCardFallback({
     if (!fallbackIx) {
         return <ErrorCard text="Could not display this instruction, please report" />;
     }
-    return <UnknownDetailsCard node={toInstructionNode({ childIndex, index, ix: fallbackIx })} />;
+    // The fallback renders inside the parent card, so it needs its own InstructionIdlSelectorProvider.
+    return (
+        <InstructionIdlSelectorProvider programAddress={'parsed' in ix ? undefined : ix.programId.toBase58()}>
+            <UnknownDetailsCard node={toInstructionNode({ childIndex, index, ix: fallbackIx })} />
+        </InstructionIdlSelectorProvider>
+    );
 }
 
-function InstructionCard({
-    ix,
-    tx,
-    result,
-    index,
-    signature,
-    innerCards,
-    childIndex,
-}: {
+type InstructionCardProps = {
     ix: ParsedInstruction | PartiallyDecodedInstruction;
     tx: ParsedTransaction;
     result: SignatureResult;
@@ -210,7 +208,18 @@ function InstructionCard({
     signature: TransactionSignature;
     innerCards?: JSX.Element[];
     childIndex?: number;
-}) {
+};
+
+function InstructionCard(props: InstructionCardProps) {
+    const { ix } = props;
+    return (
+        <InstructionIdlSelectorProvider programAddress={'parsed' in ix ? undefined : ix.programId.toBase58()}>
+            <InstructionCardContent {...props} />
+        </InstructionIdlSelectorProvider>
+    );
+}
+
+function InstructionCardContent({ ix, tx, result, index, signature, innerCards, childIndex }: InstructionCardProps) {
     const key = `${index}-${childIndex}`;
     const dispatcher = useInstructionParser();
 
@@ -334,6 +343,13 @@ function InstructionCard({
         innerCards,
         ix: transactionIx,
     });
+
+    if (idlDecode?.kind === 'pending') {
+        return <LoadingCard key={key} message="Loading instruction" />;
+    }
+    if (idlDecode?.source === 'custom') {
+        return <IdlInstructionCard key={key} decoded={idlDecode} {...props} />;
+    }
 
     if (isEd25519Instruction(transactionIx)) {
         const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
@@ -483,9 +499,10 @@ function InstructionCard({
             </ErrorBoundary>
         );
     }
-    // PMP owns every instruction on its program id: `setData`/`initialize`/`write` render decoded content from
-    // the bundled typed decoders (no IDL needed), and the housekeeping instructions delegate to the IDL tier
-    // from inside the card. Must sit before the generic idlDecode tier so it wins for the content instructions.
+    // PMP owns every instruction on its program id unless a custom IDL is selected for it: `setData`/`initialize`/
+    // `write` render decoded content from the bundled typed decoders (no IDL needed), and the housekeeping
+    // instructions delegate to the IDL tier from inside the card. Must sit before the generic idlDecode tier so it
+    // wins for the content instructions.
     if (isProgramMetadataInstruction(transactionIx)) {
         return (
             <PmpDetailsCard

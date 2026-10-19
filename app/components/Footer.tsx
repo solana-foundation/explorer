@@ -3,6 +3,7 @@
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 
+import { CustomIdlCatalogTrigger } from '@/app/features/custom-idl-catalog';
 import { FeedbackTrigger } from '@/app/features/feedback';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
@@ -20,6 +21,9 @@ export function Footer() {
                         <FeedbackTrigger className="cursor-pointer border-0 bg-transparent p-0 text-inherit transition-colors hover:text-accent-500">
                             Feedback
                         </FeedbackTrigger>
+                        <CustomIdlCatalogTrigger className="cursor-pointer border-0 bg-transparent p-0 text-inherit transition-colors hover:text-accent-500">
+                            Custom IDLs
+                        </CustomIdlCatalogTrigger>
                         <Link className="transition-colors hover:text-accent-500" href={tosPath}>
                             Terms of Services
                         </Link>

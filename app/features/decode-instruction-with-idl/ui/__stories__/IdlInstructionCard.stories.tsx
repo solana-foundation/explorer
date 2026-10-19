@@ -56,7 +56,7 @@ type Story = StoryObj<typeof meta>;
 const allocateIx = makeIx(Buffer.from(getAllocateInstructionDataEncoder().encode({ seed: 'idl' })), 5);
 export const Allocate: Story = {
     args: {
-        decoded: decodeInstructionWithIdl(allocateIx, pmpIdl, url),
+        decoded: { ...decodeInstructionWithIdl(allocateIx, pmpIdl, url), source: 'programMetadata' },
         index: 0,
         ix: allocateIx,
         result: { err: null },
@@ -74,7 +74,7 @@ const setAuthorityIx = makeIx(
 );
 export const SetAuthority: Story = {
     args: {
-        decoded: decodeInstructionWithIdl(setAuthorityIx, pmpIdl, url),
+        decoded: { ...decodeInstructionWithIdl(setAuthorityIx, pmpIdl, url), source: 'programMetadata' },
         index: 0,
         ix: setAuthorityIx,
         result: { err: null },

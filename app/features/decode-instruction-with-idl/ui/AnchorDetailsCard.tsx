@@ -49,14 +49,7 @@ export function AnchorDetailsCard({
             childIndex={childIndex}
             eventCards={eventCards}
         >
-            <AnchorInstructionBody
-                ix={ix}
-                idl={program.idl}
-                programName={decoded.programName}
-                ixAccounts={decoded.ixAccounts}
-                decodedIxData={decoded.decodedIxData}
-                ixDef={decoded.ixDef}
-            />
+            <AnchorInstructionBody ix={ix} idl={program.idl} decoded={decoded} />
         </InstructionCard>
     );
 }

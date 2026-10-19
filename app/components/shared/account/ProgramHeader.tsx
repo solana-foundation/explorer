@@ -28,9 +28,13 @@ export function ProgramHeader({
 }) {
     const { securityTxt } = useSecurityTxt(address);
     const { url, cluster } = useCluster();
-    const { anchorIdl, programMetadataIdl } = useProgramIdls(address, url, cluster);
+    const { candidates } = useProgramIdls(address, url, cluster);
     // Codama / modern Anchor names only; legacy Anchor top-level name is intentionally not shown.
-    const idlProgramName = buildProgramName([programMetadataIdl, anchorIdl]);
+    const idlProgramName = candidates && buildProgramName(candidates.map(candidate => candidate.idl));
+    // A custom IDL comes from this browser, not from the program authority, so its name is not self-reported.
+    const isCustomIdl = candidates?.at(0)?.source === 'custom';
+    const onChainIdlName = isCustomIdl ? undefined : idlProgramName;
+    const customIdlName = isCustomIdl ? idlProgramName : undefined;
     const { programName, logo, version, selfReported } = ((): {
         programName: string;
         logo?: string;
@@ -44,8 +48,8 @@ export function ProgramHeader({
 
         // Self-reported name fallbacks, in order: security.txt, then the program's own IDL.
         // `||` (not `??`) so an empty security.txt name falls through to the IDL name.
-        const selfReportedName = securityTxt?.fields.name || idlProgramName;
-        const programName = trustedProgramName ?? selfReportedName ?? namePlaceholder;
+        const selfReportedName = securityTxt?.fields.name || onChainIdlName;
+        const programName = trustedProgramName ?? selfReportedName ?? customIdlName ?? namePlaceholder;
         // Warn only when the displayed name is self-reported (no trusted-registry entry).
         const selfReported = !trustedProgramName && Boolean(selfReportedName);
 

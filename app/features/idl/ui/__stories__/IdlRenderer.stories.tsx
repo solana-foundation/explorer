@@ -67,6 +67,7 @@ export const AnchorFormatted: Story = {
         programId: PROGRAM_ID,
         raw: false,
         searchStr: '',
+        source: 'anchor',
     },
 };
 
@@ -77,6 +78,7 @@ export const CodamaFormatted: Story = {
         programId: PROGRAM_ID,
         raw: false,
         searchStr: '',
+        source: 'programMetadata',
     },
 };
 
@@ -87,6 +89,7 @@ export const RawJson: Story = {
         programId: PROGRAM_ID,
         raw: true,
         searchStr: '',
+        source: 'anchor',
     },
 };
 

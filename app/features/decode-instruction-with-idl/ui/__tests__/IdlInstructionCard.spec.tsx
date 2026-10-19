@@ -8,6 +8,9 @@ import { IdlInstructionCard } from '../IdlInstructionCard';
 vi.mock('../CodamaInstructionCard', () => ({
     CodamaInstructionCard: vi.fn(() => <div data-testid="codama-card" />),
 }));
+vi.mock('../CustomIdlDecodeFailureCard', () => ({
+    CustomIdlDecodeFailureCard: () => <div data-testid="custom-failure-card" />,
+}));
 vi.mock('../AnchorDetailsCard', () => ({
     AnchorDetailsCard: ({ signature }: { signature: string }) => <div data-testid="anchor-card">{signature}</div>,
 }));
@@ -29,7 +32,7 @@ describe('IdlInstructionCard', () => {
         render(
             <IdlInstructionCard
                 {...props}
-                decoded={{ kind: 'codama', parsedIx: { accounts: [], path: [] } as never }}
+                decoded={{ kind: 'codama', parsedIx: { accounts: [], path: [] } as never, source: 'programMetadata' }}
             />,
         );
         expect(screen.getByTestId('codama-card')).toBeInTheDocument();
@@ -37,7 +40,10 @@ describe('IdlInstructionCard', () => {
 
     it('should render the Anchor card and forward the signature for an anchor decode', () => {
         render(
-            <IdlInstructionCard {...props} decoded={{ details: {} as never, kind: 'anchor', program: {} as never }} />,
+            <IdlInstructionCard
+                {...props}
+                decoded={{ details: {} as never, kind: 'anchor', program: {} as never, source: 'anchor' }}
+            />,
         );
         expect(screen.getByTestId('anchor-card')).toHaveTextContent('SIG');
     });
@@ -52,15 +58,54 @@ describe('IdlInstructionCard', () => {
         render(
             <IdlInstructionCard
                 {...props}
-                decoded={{ kind: 'codama', parsedIx: { accounts: [], path: [] } as never }}
+                decoded={{ kind: 'codama', parsedIx: { accounts: [], path: [] } as never, source: 'programMetadata' }}
             />,
         );
 
         expect(screen.getByTestId('unknown-card')).toBeInTheDocument();
     });
 
+    it('should render a new decode after the previous decoded card threw', () => {
+        vi.mocked(CodamaInstructionCard).mockImplementation(() => {
+            throw new Error('decode failed');
+        });
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const { rerender } = render(
+            <IdlInstructionCard
+                {...props}
+                decoded={{ kind: 'codama', parsedIx: { accounts: [], path: [] } as never, source: 'programMetadata' }}
+            />,
+        );
+        expect(screen.getByTestId('unknown-card')).toBeInTheDocument();
+
+        rerender(
+            <IdlInstructionCard
+                {...props}
+                decoded={{ details: {} as never, kind: 'anchor', program: {} as never, source: 'anchor' }}
+            />,
+        );
+
+        expect(screen.getByTestId('anchor-card')).toBeInTheDocument();
+    });
+
+    it('should render the custom failure card when a custom decoded card throws', () => {
+        vi.mocked(CodamaInstructionCard).mockImplementation(() => {
+            throw new Error('decode failed');
+        });
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        render(
+            <IdlInstructionCard
+                {...props}
+                decoded={{ kind: 'codama', parsedIx: { accounts: [], path: [] } as never, source: 'custom' }}
+            />,
+        );
+
+        expect(screen.getByTestId('custom-failure-card')).toBeInTheDocument();
+    });
+
     it('should render the Unknown card for an unknown decode', () => {
-        render(<IdlInstructionCard {...props} decoded={{ kind: 'unknown' }} />);
+        render(<IdlInstructionCard {...props} decoded={{ kind: 'unknown', source: 'programMetadata' }} />);
         expect(screen.getByTestId('unknown-card')).toBeInTheDocument();
     });
 });

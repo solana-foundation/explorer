@@ -39,13 +39,19 @@ describe('useTabs interactive analytics wiring', () => {
 
     it('should create an Anchor-scoped tracker for Anchor IDLs', () => {
         const originalIdl = { __standard: 'Anchor' } as unknown as SupportedIdl;
-        renderHook(() => useTabs(formattedIdl, originalIdl, 'prog1'));
-        expect(createIdlAnalytics).toHaveBeenCalledWith('Anchor');
+        renderHook(() => useTabs(formattedIdl, originalIdl, 'anchor', 'prog1'));
+        expect(createIdlAnalytics).toHaveBeenCalledWith('Anchor', 'anchor');
     });
 
     it('should create a Codama-scoped tracker for Codama IDLs', () => {
         const originalIdl = { __standard: 'Codama' } as unknown as SupportedIdl;
-        renderHook(() => useTabs(formattedIdl, originalIdl, 'prog1'));
-        expect(createIdlAnalytics).toHaveBeenCalledWith('Codama');
+        renderHook(() => useTabs(formattedIdl, originalIdl, 'programMetadata', 'prog1'));
+        expect(createIdlAnalytics).toHaveBeenCalledWith('Codama', 'programMetadata');
+    });
+
+    it('should pass the custom source to the IDL analytics', () => {
+        const originalIdl = { __standard: 'Anchor' } as unknown as SupportedIdl;
+        renderHook(() => useTabs(formattedIdl, originalIdl, 'custom', 'prog1'));
+        expect(createIdlAnalytics).toHaveBeenCalledWith('Anchor', 'custom');
     });
 });

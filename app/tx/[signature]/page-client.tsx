@@ -3,6 +3,7 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SignatureContext } from '@components/instruction/SignatureContext';
+import { CustomIdlStorePreload } from '@entities/idl';
 import { CUProfilingSection } from '@features/cu-profiling';
 import { Receipt } from '@features/receipt';
 import { isReceiptEnabled } from '@features/receipt';
@@ -87,6 +88,7 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
 
     return (
         <PageLayout>
+            <CustomIdlStorePreload />
             <PageHeader eyebrow="Details" title="Transaction" />
             <PageSections>
                 {signature === undefined ? (

@@ -8,7 +8,7 @@ import { ExplorerLink } from '@/app/entities/cluster';
 import { useWallet } from '@/app/providers/wallet/use-wallet';
 import { BaseWarningCard } from '@/app/shared/ui/WarningCard';
 
-import { originalIdlAtom, programIdAtom } from '../model/state-atoms';
+import { originalIdlAtom, originalIdlSourceAtom, programIdAtom } from '../model/state-atoms';
 import type { ExecutionOptions } from '../model/transaction/types';
 import { isEnabled, useInstruction } from '../model/use-instruction';
 import type { InstructionCallParams } from '../model/use-instruction-form';
@@ -42,6 +42,7 @@ export function InteractWithIdl({
     const toast = useToast();
     const idl = useAtomValue(originalIdlAtom);
     const progId = useAtomValue(programIdAtom);
+    const idlSource = useAtomValue(originalIdlSourceAtom);
     const { canSign, connected, publicKey, walletName } = useWallet();
 
     const [currentInstruction, setCurrentInstruction] = useState<{ name: string; programId?: string } | null>(null);
@@ -171,6 +172,7 @@ export function InteractWithIdl({
             />
             {hasPendingAction && (
                 <MainnetWarningDialog
+                    isCustomIdl={idlSource === 'custom'}
                     open={isOpen}
                     onOpenChange={open => {
                         if (!open) {

@@ -27,5 +27,6 @@ export const DisplayLegacyShankIdl: Story = {
     args: {
         idl: idlMock as unknown as Idl,
         programId: '6LtLpnUFNByNXLyCoK9wA2MykKAmQNZKBdY8s47dehDc',
+        source: 'anchor',
     },
 };

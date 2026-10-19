@@ -1,6 +1,7 @@
 import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { Cluster } from '@utils/cluster';
+import { type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { toInstructionNode } from '../model/node';
@@ -32,24 +33,32 @@ describe('UnknownDetailsCard', () => {
 
         expect(screen.getByRole('checkbox', { name: 'Raw' })).toBeChecked();
     });
+
+    it('should start in the decoded view, not the raw view, when the card has a body', () => {
+        renderCard(SystemProgram.programId, Cluster.MainnetBeta, <p>Reason</p>);
+
+        expect(screen.getByText('Reason')).toBeInTheDocument();
+        expect(screen.getByRole('checkbox', { name: 'Raw' })).not.toBeChecked();
+    });
 });
 
-function renderCard(programId: PublicKey, onCluster: Cluster) {
+function renderCard(programId: PublicKey, onCluster: Cluster, body?: ReactNode) {
     cluster.current = onCluster;
     const ix = new TransactionInstruction({ data: Buffer.from([255]), keys: [], programId });
 
     return render(
         <InstructionSurfaceProvider surface={{ Shell, result: { err: null } }}>
-            <UnknownDetailsCard node={toInstructionNode({ index: 0, ix })} />
+            <UnknownDetailsCard node={toInstructionNode({ index: 0, ix })}>{body}</UnknownDetailsCard>
         </InstructionSurfaceProvider>,
     );
 }
 
-function Shell({ title, defaultRaw }: InstructionShellProps) {
+function Shell({ title, defaultRaw, children }: InstructionShellProps) {
     return (
         <section>
             <h2>{title}</h2>
             <input type="checkbox" aria-label="Raw" checked={Boolean(defaultRaw)} readOnly />
+            {children}
         </section>
     );
 }

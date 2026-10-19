@@ -12,7 +12,7 @@ export { getIdlBadgeLabel, getIdlProgramVersion, getIdlSpec, getIdlStandard, get
 export { type AnchorIdl, type CodamaIdl, type IdlStandard, type SupportedIdl } from './lib/types';
 export { type ProgramIdlPair } from './api/types';
 export { isIdlProgramIdMismatch, isInteractiveIdlSupported } from './model/interactive-idl';
-export { IdlVariant } from './model/idl-variant';
+export { getIdlDeclaredAddress } from './lib/utils';
 
 // Per-program names built from each program's IDL — a display name plus an instruction-name resolver
 // matched by discriminator (no Borsh decode) — used to label transaction rows the RPC leaves as
@@ -28,5 +28,20 @@ export { useFormatAnchorIdl } from './model/anchor/use-format-anchor-idl';
 export { useAnchorProgram } from './model/anchor/use-anchor-program';
 export { getProvider } from './model/anchor/anchor-provider';
 export { useProgramIdls, type ProgramIdls } from './model/use-program-idls';
+export type { CustomIdlRecord } from './model/custom-idl/types';
+export type { IdlSource } from './model/idl-candidates';
+export { customIdlStoreAtom, removeCustomIdlAtom } from './model/custom-idl/custom-idl-store';
+export { CustomIdlForm } from './ui/CustomIdlForm';
+export {
+    CUSTOM_IDL_PRIVACY_NOTE,
+    CUSTOM_IDL_SAVE_FAILED_MESSAGE,
+    CUSTOM_IDL_STORAGE_UNAVAILABLE_MESSAGE,
+} from './ui/custom-idl-messages';
+export { AddCustomIdlButton } from './ui/AddCustomIdlButton';
+export { IDL_SOURCE_LABELS } from './ui/BaseIdlSourceSelect';
+export { ProgramIdlSelector } from './ui/ProgramIdlSelector';
+export { InstructionIdlSelector, InstructionIdlSelectorProvider } from './ui/InstructionIdlSelector';
+export { CustomIdlStorePreload } from './ui/CustomIdlStorePreload';
+export { getFirstAnchorIdl, getFirstAnchorIdlWithAccounts, getOnChainAnchorIdl } from './model/idl-candidates';
 export { useFormatCodamaIdl } from './model/use-format-codama-idl';
 export { getIdlSpecType } from './model/converters/convert-legacy-idl';
