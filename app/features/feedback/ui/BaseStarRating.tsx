@@ -25,6 +25,9 @@ export function BaseStarRating({ onChange, value = 0 }: BaseStarRatingProps) {
                         className="peer sr-only"
                         name={name}
                         onChange={() => onChange?.(star)}
+                        onClick={() => {
+                            if (value === star) onChange?.(0);
+                        }}
                         type="radio"
                         value={star}
                     />

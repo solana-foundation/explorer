@@ -63,11 +63,10 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                                             <MessageBanner />
                                             {children}
                                         </div>
+                                        <FeedbackWidget />
                                         <Footer />
                                     </div>
                                     <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
-                                    {/* FeedbackWidget reads the cluster, so it must stay inside ClusterProvider. */}
-                                    <FeedbackWidget />
                                 </TokenInfoBatchProvider>
                             </VisibilityProvider>
                         </ClusterProvider>

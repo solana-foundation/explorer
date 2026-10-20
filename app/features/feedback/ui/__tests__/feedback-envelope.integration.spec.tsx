@@ -1,8 +1,10 @@
 import { type Envelope, getCurrentScope, ServerRuntimeClient } from '@sentry/core';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { getDefaultStore } from 'jotai';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { feedbackOpenAtom } from '../../model/feedback';
 import { FeedbackWidget } from '../FeedbackWidget';
 
 // The @sentry/nextjs entry imports server code that fails in jsdom, so the test uses @sentry/core.
@@ -29,6 +31,8 @@ describe('FeedbackWidget — real captureFeedback envelope', () => {
     const envelopes: Envelope[] = [];
 
     beforeEach(() => {
+        // The popup's open state is a shared atom; each test starts closed.
+        getDefaultStore().set(feedbackOpenAtom, false);
         envelopes.length = 0;
         vi.stubEnv('NEXT_PUBLIC_FEEDBACK_ENABLED', 'true');
         vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
@@ -58,9 +62,7 @@ describe('FeedbackWidget — real captureFeedback envelope', () => {
         const user = userEvent.setup({ delay: null });
         render(<FeedbackWidget />);
         await user.click(await screen.findByRole('button', { name: 'Feedback' }));
-        await user.click(await screen.findByText('Share feedback'));
-
-        await screen.findByRole('heading', { name: 'Give feedback' });
+        await screen.findByRole('dialog', { name: 'Feedback' });
         await user.click(screen.getByRole('radio', { name: '4 of 5 stars' }));
         await user.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Great explorer!');
         await user.type(screen.getByRole('textbox', { name: 'X handle (optional)' }), '@fren');

@@ -1,28 +1,29 @@
 'use client';
 
 import { BUG_REPORT_ISSUES_URL, FEEDBACK_ISSUES_URL, isFeedbackEnabled } from '../env';
+import { useFeedbackOpen } from '../model/feedback';
 import { useFeedbackForm } from '../model/use-feedback-form';
-import { BaseFeedbackForm } from './BaseFeedbackForm';
 import { BaseFeedbackWidget } from './BaseFeedbackWidget';
+import { FeedbackPopup } from './FeedbackPopup';
 
 export function FeedbackWidgetPanel() {
-    const { isOpen, isSubmitting, setIsOpen, submit } = useFeedbackForm();
+    const { isSubmitting, submit } = useFeedbackForm();
+    const [open, setOpen] = useFeedbackOpen();
 
     return (
         <>
-            <BaseFeedbackWidget
-                bugReportUrl={BUG_REPORT_ISSUES_URL}
-                ideasUrl={FEEDBACK_ISSUES_URL}
-                onShareFeedback={() => setIsOpen(true)}
-                showSentryActions={isFeedbackEnabled()}
-            />
-            <BaseFeedbackForm
+            <div className="sticky bottom-0 z-40 hidden h-0 lg:block">
+                <div className="absolute bottom-4 right-4 flex">
+                    <BaseFeedbackWidget aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen(true)} />
+                </div>
+            </div>
+            <FeedbackPopup
                 bugReportUrl={BUG_REPORT_ISSUES_URL}
                 ideasUrl={FEEDBACK_ISSUES_URL}
                 isSubmitting={isSubmitting}
-                onOpenChange={setIsOpen}
-                onSubmit={submit}
-                open={isOpen}
+                onOpenChange={setOpen}
+                onSubmitFeedback={isFeedbackEnabled() ? submit : undefined}
+                open={open}
             />
         </>
     );

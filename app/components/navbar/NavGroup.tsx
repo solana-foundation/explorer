@@ -13,6 +13,7 @@ import React from 'react';
 import { Menu } from 'react-feather';
 
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
+import { FeedbackTrigger, isFeedbackWidgetEnabled } from '@/app/features/feedback';
 
 import {
     EXPLORER_REPO_URL,
@@ -107,6 +108,13 @@ export function NavMenu({
                         </Link>
                     </DropdownMenuItem>
                 ))}
+                {isFeedbackWidgetEnabled() && (
+                    <DropdownMenuItem asChild>
+                        <FeedbackTrigger className="flex w-full cursor-pointer items-center border-0 bg-transparent px-3 py-2 text-left text-outer-space-300">
+                            Feedback
+                        </FeedbackTrigger>
+                    </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                     <ExternalLink
