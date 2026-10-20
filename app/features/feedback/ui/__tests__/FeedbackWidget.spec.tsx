@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getDefaultStore } from 'jotai';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -134,6 +134,42 @@ describe('FeedbackWidget', () => {
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     });
 
+    it('should close itself a short while after showing the sent note', async () => {
+        vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
+        const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+        vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
+        render(<FeedbackWidget />);
+        await openPopup(user);
+
+        await user.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Great explorer!');
+        await user.click(screen.getByRole('button', { name: 'Submit' }));
+        expect(await screen.findByText('Feedback sent!')).toBeInTheDocument();
+
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(2500);
+        });
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+
+        vi.useRealTimers();
+    });
+
+    it('should reset the topic and rating when the popup is reopened', async () => {
+        vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
+        render(<FeedbackWidget />);
+        await openPopup();
+
+        await userEvent.click(screen.getByRole('radio', { name: '4 of 5 stars' }));
+        await userEvent.click(screen.getByRole('button', { name: 'Idea' }));
+        expect(screen.getByRole('button', { name: 'Idea' })).toHaveAttribute('aria-pressed', 'true');
+
+        await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+
+        await openPopup();
+        expect(screen.getByRole('button', { name: 'Your thoughts' })).toHaveAttribute('aria-pressed', 'true');
+        expect(screen.getByRole('radio', { name: '4 of 5 stars' })).not.toBeChecked();
+    });
+
     it('should open the same popup from an inline trigger, such as the footer link', async () => {
         vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
         render(
@@ -151,7 +187,7 @@ describe('FeedbackWidget', () => {
     });
 });
 
-async function openPopup() {
-    await userEvent.click(await screen.findByRole('button', { name: 'Feedback' }));
+async function openPopup(user: Pick<typeof userEvent, 'click'> = userEvent) {
+    await user.click(await screen.findByRole('button', { name: 'Feedback' }));
     await screen.findByRole('dialog', { name: 'Feedback' });
 }

@@ -1,6 +1,7 @@
 import { clusterSlug, useCluster } from '@entities/cluster';
 import { useState } from 'react';
 
+import { Logger } from '@/app/shared/lib/logger';
 import { withScope } from '@/app/shared/lib/sentry';
 import { sendFeedback } from '@/app/shared/lib/sentry/client';
 
@@ -36,7 +37,8 @@ export function useFeedbackForm() {
                 }),
             );
             return true;
-        } catch {
+        } catch (error) {
+            Logger.error(error, { sentry: 'always', sentryExtras: { source: FEEDBACK_SOURCE } });
             return false;
         } finally {
             setIsSubmitting(false);
