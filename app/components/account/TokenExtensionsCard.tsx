@@ -2,6 +2,8 @@
 
 import { AccountHeader } from '@components/common/Account';
 import { useRefreshAccount } from '@entities/account';
+import { useAccountInfo } from '@providers/accounts';
+import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -32,6 +34,7 @@ export function TokenExtensionsCard({
 }) {
     const { cluster, url } = useCluster();
     const refresh = useRefreshAccount();
+    const fetching = useAccountInfo(address)?.status === FetchStatus.Fetching;
     const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
     const { data: tokenInfo, isLoading } = useSWR(swrKey, fetchTokenInfo);
 
@@ -53,6 +56,7 @@ export function TokenExtensionsCard({
                 title="Extensions"
                 analyticsSection="extensions_section"
                 refresh={() => refresh(new PublicKey(address), 'parsed')}
+                fetching={fetching}
             />
             <CardBody ui="dashkit" className="overflow-x-scroll !p-0">
                 <TokenExtensionsSection
