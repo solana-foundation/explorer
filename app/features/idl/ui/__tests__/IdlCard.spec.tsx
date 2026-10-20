@@ -238,9 +238,10 @@ describe('IdlCard', () => {
     });
 
     test('should show the PMP IDL when both sources are Anchor IDLs', async () => {
+        const pmpIdl = createMockAnchorIdl();
         mockProgramIdls({
             anchorIdl: createMockAnchorIdl(),
-            programMetadataIdl: createMockAnchorIdl(),
+            programMetadataIdl: { ...pmpIdl, metadata: { ...pmpIdl.metadata, name: 'pmp_program' } },
             programMetadataIdlAddress: PMP_PDA,
         });
 
@@ -250,6 +251,7 @@ describe('IdlCard', () => {
             expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
         });
         expect(screen.getByText('PMP')).toBeInTheDocument();
+        expect(screen.getByText('Pmp Program')).toBeInTheDocument();
         expect(screen.queryByLabelText('Fallback IDL source')).not.toBeInTheDocument();
 
         const castawayUrl = openCastawayUrl();

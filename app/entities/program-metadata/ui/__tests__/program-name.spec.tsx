@@ -38,14 +38,6 @@ describe('ProgramName', () => {
         });
     });
 
-    it('should show the default name when the candidates are undefined', () => {
-        mockCandidates(undefined);
-
-        renderName();
-
-        expect(screen.getByText('Default name')).toBeInTheDocument();
-    });
-
     it.each([
         ['the program has no IDL', []],
         [
@@ -73,7 +65,7 @@ describe('ProgramName', () => {
         expect(screen.getByText('ProgramMetadata')).toBeInTheDocument();
     });
 
-    it('should name the program from the PMP IDL before the Anchor IDL account', () => {
+    it('should name the program from the PMP IDL over the Anchor IDL account', () => {
         mockCandidates([
             { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
             { idl: ANCHOR, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },

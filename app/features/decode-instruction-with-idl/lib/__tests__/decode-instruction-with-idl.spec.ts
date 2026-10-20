@@ -45,7 +45,7 @@ const ix = new TransactionInstruction({
 });
 const anchorIdl = { accounts: [], address: ix.programId.toBase58(), instructions: [{ name: 'foo' }] };
 // A Codama-native root node (as a PMP IDL is) — routed through Codama, never the Anchor Program.
-const codamaIdl = { kind: 'rootNode', program: { publicKey: ix.programId.toBase58() } };
+const codamaIdl = { kind: 'rootNode', program: { publicKey: ix.programId.toBase58() }, standard: 'codama' };
 
 describe('decodeInstructionWithIdl', () => {
     beforeEach(() => {

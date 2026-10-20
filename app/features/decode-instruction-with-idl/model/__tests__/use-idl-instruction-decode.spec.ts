@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { type ProgramIdls } from '@entities/idl';
+import { type AnchorIdl, type CodamaIdl, type ProgramIdls } from '@entities/idl';
 import { IdlVariant } from '@entities/idl/model/idl-variant';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
@@ -11,7 +11,7 @@ import { useIdlInstructionDecode } from '../use-idl-instruction-decode';
 // Mock the resolution boundary and the decode helper, so the test covers only the hook's candidate choice,
 // argument forwarding and gating. The SWR and decode code have their own specs. The panic→Unknown degrade
 // belongs to `safeDecodeInstructionWithIdl` and is tested with the lib.
-const idlState: Pick<ProgramIdls, 'candidates'> = { candidates: [] };
+const idlState: ProgramIdls = { candidates: [] };
 const safeDecodeInstructionWithIdl = vi.fn();
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
@@ -23,8 +23,8 @@ vi.mock('../../lib/decode-instruction-with-idl', () => ({
 
 const raw = new TransactionInstruction({ data: Buffer.from([1, 2, 3]), keys: [], programId: PublicKey.unique() });
 const programId = raw.programId.toString();
-const anchorIdl = { kind: 'anchor' } as never;
-const pmpIdl = { kind: 'rootNode', standard: 'codama' } as never;
+const anchorIdl = { kind: 'anchor' } as unknown as AnchorIdl;
+const pmpIdl = { kind: 'rootNode', standard: 'codama' } as unknown as CodamaIdl;
 const ANCHOR = { idl: anchorIdl, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' } as const;
 const PMP = { idl: pmpIdl, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' } as const;
 
@@ -35,7 +35,7 @@ describe('useIdlInstructionDecode', () => {
         idlState.candidates = [];
     });
 
-    it('should decode with the first candidate', () => {
+    it('should decode with the PMP IDL over the IDL from the Anchor IDL account', () => {
         idlState.candidates = [PMP, ANCHOR];
         safeDecodeInstructionWithIdl.mockReturnValue({ kind: 'codama' });
 

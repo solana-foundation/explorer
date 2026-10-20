@@ -15,11 +15,7 @@ describe('getIdlDeclaredAddress', () => {
         ['an Anchor 0.30 IDL', anchor030, ANCHOR_ADDRESS],
         ['a legacy Anchor IDL', anchor029, ANCHOR_ADDRESS],
         ['a legacy Anchor IDL with an empty root address', { ...anchor029, address: '' }, ANCHOR_ADDRESS],
-        [
-            'an Anchor IDL with a program public key',
-            { ...anchor030, program: { publicKey: OTHER_ADDRESS } },
-            ANCHOR_ADDRESS,
-        ],
+        ['a legacy Anchor IDL with a null root address', { ...anchor029, address: null }, ANCHOR_ADDRESS],
     ])('should return the address that %s declares', (_, idl, address) => {
         expect(getIdlDeclaredAddress(idl)).toEqual({ address, kind: 'address' });
     });
@@ -28,6 +24,10 @@ describe('getIdlDeclaredAddress', () => {
         ['an IDL that declares no address', anchorNoAddress],
         ['an IDL that declares an empty address', { ...anchorNoAddress, metadata: { address: '' } }],
         ['a root node without the Codama standard', { kind: 'rootNode', program: { publicKey: OTHER_ADDRESS } }],
+        [
+            'a Codama root with a null program public key',
+            { ...codama, program: { ...codama.program, publicKey: null } },
+        ],
         ['null', null],
         ['a string', 'idl'],
     ])('should return no address for %s', (_, idl) => {
@@ -46,6 +46,12 @@ describe('getIdlDeclaredAddress', () => {
 
     it('should prefer the root address over metadata.address', () => {
         const idl = { ...anchor030, metadata: { ...anchor030.metadata, address: OTHER_ADDRESS } };
+
+        expect(getIdlDeclaredAddress(idl)).toEqual({ address: ANCHOR_ADDRESS, kind: 'address' });
+    });
+
+    it('should ignore program.publicKey outside the Codama standard', () => {
+        const idl = { ...anchor030, program: { publicKey: OTHER_ADDRESS } };
 
         expect(getIdlDeclaredAddress(idl)).toEqual({ address: ANCHOR_ADDRESS, kind: 'address' });
     });

@@ -40,7 +40,7 @@ describe('useProgramIdls', () => {
     });
 
     describe('known clusters (server route)', () => {
-        it('should map the /api/idl-latest payload into the IDL slots', async () => {
+        it('should map the /api/idl-latest payload into one candidate per source', async () => {
             mocks.fetch.mockResolvedValue({
                 json: async () => ({
                     idls: { anchor: { name: 'anchor_idl' }, programMetadata: { name: 'pmp_idl' } },
@@ -54,10 +54,15 @@ describe('useProgramIdls', () => {
             );
 
             await waitForHook(() => expect(result.current.candidates).toBeDefined());
-            expect(idlBySource(result.current.candidates)).toEqual({
-                [IdlVariant.Anchor]: { name: 'anchor_idl' },
-                [IdlVariant.ProgramMetadata]: { name: 'pmp_idl' },
-            });
+            expect(result.current.candidates).toEqual([
+                {
+                    idl: { name: 'pmp_idl' },
+                    idlAddress: undefined,
+                    source: IdlVariant.ProgramMetadata,
+                    standard: 'Anchor',
+                },
+                { idl: { name: 'anchor_idl' }, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
+            ]);
 
             const requestedUrl = mocks.fetch.mock.calls[0]?.[0] as string;
             expect(requestedUrl).toContain('/api/idl-latest');
@@ -111,7 +116,7 @@ describe('useProgramIdls', () => {
             expect(result.current.candidates).toBeUndefined();
         });
 
-        it('should fall back to undefined IDLs when the resolver throws', async () => {
+        it('should return no candidates when the resolver throws', async () => {
             mocks.resolveProgramIdlsClient.mockRejectedValue(new Error('connection refused'));
 
             const { result } = renderHook(() => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.Custom), {
@@ -152,26 +157,6 @@ describe('useProgramIdls', () => {
     });
 
     describe('candidates', () => {
-        it('should list the PMP IDL before the Anchor IDL account', async () => {
-            mocks.fetch.mockResolvedValue({
-                json: async () => ({
-                    idls: { anchor: { name: 'anchor_idl' }, programMetadata: { name: 'pmp_idl' } },
-                }),
-                ok: true,
-            });
-
-            const { result } = renderHook(
-                () => useProgramIdls(PROGRAM_ID, 'https://api.mainnet-beta.solana.com', Cluster.MainnetBeta),
-                { wrapper },
-            );
-
-            await waitForHook(() => expect(result.current.candidates).toBeDefined());
-            expect(result.current.candidates?.map(candidate => candidate.source)).toEqual([
-                IdlVariant.ProgramMetadata,
-                IdlVariant.Anchor,
-            ]);
-        });
-
         it('should return undefined candidates while the on-chain IDLs load', async () => {
             mocks.fetch.mockReturnValue(new Promise(() => undefined));
 

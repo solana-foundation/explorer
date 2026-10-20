@@ -1,13 +1,14 @@
 import { type AnchorIdl, type CodamaIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import referenceIdl from '@entities/idl/mocks/anchor/reference-0.29.json';
+import codamaIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AccountDataTab } from '../AccountDataTab';
 
-const idlState: Pick<ProgramIdls, 'candidates'> = { candidates: [] };
+const idlState: ProgramIdls = { candidates: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: 'mainnet-beta', url: 'http://localhost' }) }));
@@ -22,7 +23,7 @@ vi.mock('@/app/shared/ui/navigation-tabs', () => ({
 const ANCHOR_WITH_ACCOUNTS = anchorModernIdl as unknown as AnchorIdl;
 const ANCHOR_WITHOUT_ACCOUNTS = { ...anchorModernIdl, accounts: [] } as unknown as AnchorIdl;
 const ANCHOR_WITHOUT_PROGRAM = referenceIdl as unknown as AnchorIdl;
-const CODAMA = { kind: 'rootNode', standard: 'codama' } as unknown as CodamaIdl;
+const CODAMA = codamaIdl as unknown as CodamaIdl;
 
 const renderTab = () => render(<AccountDataTab programId={new PublicKey(anchorModernIdl.address)} />);
 
@@ -64,7 +65,7 @@ describe('AccountDataTab', () => {
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
     });
 
-    it('should hide the tab when the Anchor-standard candidate has an empty accounts array', () => {
+    it('should hide the tab when the Anchor-standard candidate declares no account types', () => {
         idlState.candidates = [
             {
                 idl: ANCHOR_WITHOUT_ACCOUNTS,

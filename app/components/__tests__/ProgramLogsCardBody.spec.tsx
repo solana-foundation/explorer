@@ -1,6 +1,7 @@
 import { gen } from '@__fixtures__/gen';
-import { type AnchorIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
+import { type AnchorIdl, type CodamaIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
+import codamaIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { getBase58Decoder } from '@solana/kit';
 import {
     type ParsedMessage,
@@ -16,7 +17,7 @@ import { Cluster } from '@/app/utils/cluster';
 
 import { ProgramLogsCardBody } from '../ProgramLogsCardBody';
 
-const idlState: Pick<ProgramIdls, 'candidates'> = { candidates: [] };
+const idlState: ProgramIdls = { candidates: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@entities/idl', async importOriginal => ({
@@ -28,6 +29,7 @@ vi.mock('@utils/url', () => ({ useClusterPath: () => '/tx' }));
 vi.mock('next/navigation', () => ({ usePathname: () => '/tx' }));
 
 const BASE58_DECODER = getBase58Decoder();
+const CODAMA_IDL = codamaIdl as unknown as CodamaIdl;
 const DEVI = new PublicKey(anchorModernIdl.address);
 const CREATE_AMM_CONFIG_IX = new TransactionInstruction({
     data: Buffer.from([137, 52, 237, 212, 215, 117, 108, 104, ...new Array(16).fill(0)]),
@@ -48,7 +50,7 @@ describe('ProgramLogsCardBody', () => {
 
     it.each([
         [
-            'an Anchor-standard PMP IDL before the Anchor IDL account',
+            'an Anchor-standard PMP IDL over the Anchor IDL account',
             [
                 {
                     idl: renamedIdl('pmp_instruction'),
@@ -64,6 +66,19 @@ describe('ProgramLogsCardBody', () => {
                 },
             ],
             'Pmp Instruction',
+        ],
+        [
+            'the IDL from the Anchor IDL account when the PMP IDL is Codama',
+            [
+                { idl: CODAMA_IDL, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+                {
+                    idl: renamedIdl('anchor_instruction'),
+                    idlAddress: undefined,
+                    source: IdlVariant.Anchor,
+                    standard: 'Anchor',
+                },
+            ],
+            'Anchor Instruction',
         ],
         [
             'an Anchor IDL that declares no account types',

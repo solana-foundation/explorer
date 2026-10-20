@@ -1,5 +1,6 @@
 import { type AnchorIdl, type CodamaIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
+import codamaIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -8,7 +9,7 @@ import { type Account } from '@/app/providers/accounts';
 
 import { AnchorAccountCard } from '../AnchorAccountCard';
 
-const idlState: Pick<ProgramIdls, 'candidates'> = { candidates: [] };
+const idlState: ProgramIdls = { candidates: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: 'devnet', url: 'http://localhost' }) }));
@@ -26,7 +27,7 @@ const ANCHOR_ACCOUNT_IDL = {
     ...anchorModernIdl,
     metadata: { ...anchorModernIdl.metadata, name: 'anchor_program' },
 } as unknown as AnchorIdl;
-const CODAMA_IDL = { kind: 'rootNode', standard: 'codama' } as unknown as CodamaIdl;
+const CODAMA_IDL = codamaIdl as unknown as CodamaIdl;
 
 const ACCOUNT: Account = {
     data: { raw: Uint8Array.from([...AMM_CONFIG_DISCRIMINATOR, ...new Array(200).fill(0)]) },
@@ -47,7 +48,7 @@ describe('AnchorAccountCard', () => {
         expect(useProgramIdls).toHaveBeenCalledWith(ACCOUNT.owner.toString(), 'http://localhost', 'devnet');
     });
 
-    it('should decode with an Anchor-standard PMP IDL before the Anchor IDL account', () => {
+    it('should decode with an Anchor-standard PMP IDL over the Anchor IDL account', () => {
         idlState.candidates = [
             { idl: PMP_ANCHOR_IDL, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' },
             { idl: ANCHOR_ACCOUNT_IDL, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
