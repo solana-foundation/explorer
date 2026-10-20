@@ -1,6 +1,7 @@
 import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { PublicKey } from '@solana/web3.js';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -77,4 +78,139 @@ describe('MetaplexNFTAttributesCard', () => {
             expect(screen.getByText('Failed to fetch attributes')).toBeDefined();
         });
     });
+
+    it('should refetch the attributes when the metadata URI changes', async () => {
+        global.fetch = vi
+            .fn()
+            .mockResolvedValueOnce(attributesResponse('Blue'))
+            .mockResolvedValueOnce(attributesResponse('Red'));
+        const onNotFound = vi.fn<() => never>();
+        const { rerender } = render(
+            <MetaplexNFTAttributesCard account={makeAccount('https://example.com/1.json')} onNotFound={onNotFound} />,
+        );
+        expect(await screen.findByText('Blue')).toBeInTheDocument();
+
+        rerender(
+            <MetaplexNFTAttributesCard account={makeAccount('https://example.com/2.json')} onNotFound={onNotFound} />,
+        );
+
+        expect(await screen.findByText('Red')).toBeInTheDocument();
+    });
+
+    it('should ignore the attributes of the previous metadata URI when they arrive last', async () => {
+        let resolvePreviousFetch: (response: unknown) => void = () => {};
+        global.fetch = vi
+            .fn()
+            .mockReturnValueOnce(new Promise(resolve => (resolvePreviousFetch = resolve)))
+            .mockResolvedValueOnce(attributesResponse('Red'));
+        const onNotFound = vi.fn<() => never>();
+        const { rerender } = render(
+            <MetaplexNFTAttributesCard account={makeAccount('https://example.com/1.json')} onNotFound={onNotFound} />,
+        );
+        rerender(
+            <MetaplexNFTAttributesCard account={makeAccount('https://example.com/2.json')} onNotFound={onNotFound} />,
+        );
+        expect(await screen.findByText('Red')).toBeInTheDocument();
+
+        await act(async () => {
+            resolvePreviousFetch(attributesResponse('Blue'));
+            await new Promise(resolve => setTimeout(resolve, 0));
+        });
+
+        expect(screen.getByText('Red')).toBeInTheDocument();
+        expect(screen.queryByText('Blue')).not.toBeInTheDocument();
+    });
+
+    it('should ignore a fetch of the previous metadata URI that fails last', async () => {
+        let rejectPreviousFetch: (error: Error) => void = () => {};
+        global.fetch = vi
+            .fn()
+            .mockReturnValueOnce(new Promise((_, reject) => (rejectPreviousFetch = reject)))
+            .mockResolvedValueOnce(attributesResponse('Red'));
+        const onNotFound = vi.fn<() => never>();
+        const { rerender } = render(
+            <MetaplexNFTAttributesCard account={makeAccount('https://example.com/1.json')} onNotFound={onNotFound} />,
+        );
+        rerender(
+            <MetaplexNFTAttributesCard account={makeAccount('https://example.com/2.json')} onNotFound={onNotFound} />,
+        );
+        expect(await screen.findByText('Red')).toBeInTheDocument();
+
+        await act(async () => {
+            rejectPreviousFetch(new Error('Network error'));
+            await new Promise(resolve => setTimeout(resolve, 0));
+        });
+
+        expect(screen.getByText('Red')).toBeInTheDocument();
+        expect(screen.queryByText('Failed to fetch attributes')).not.toBeInTheDocument();
+    });
+
+    it('should ignore a retry for the previous metadata URI that resolves last', async () => {
+        let resolveRetry: (response: unknown) => void = () => {};
+        global.fetch = vi
+            .fn()
+            .mockRejectedValueOnce(new Error('Network error'))
+            .mockReturnValueOnce(new Promise(resolve => (resolveRetry = resolve)))
+            .mockResolvedValueOnce(attributesResponse('Red'));
+        const onNotFound = vi.fn<() => never>();
+        const { rerender } = render(
+            <MetaplexNFTAttributesCard account={makeAccount('https://example.com/1.json')} onNotFound={onNotFound} />,
+        );
+        await screen.findByText('Failed to fetch attributes');
+        await userEvent.click(screen.getAllByText('Try Again')[0]);
+        rerender(
+            <MetaplexNFTAttributesCard account={makeAccount('https://example.com/2.json')} onNotFound={onNotFound} />,
+        );
+        expect(await screen.findByText('Red')).toBeInTheDocument();
+
+        await act(async () => {
+            resolveRetry(attributesResponse('Blue'));
+            await new Promise(resolve => setTimeout(resolve, 0));
+        });
+
+        expect(screen.getByText('Red')).toBeInTheDocument();
+        expect(screen.queryByText('Blue')).not.toBeInTheDocument();
+    });
+
+    it('should refetch the attributes on retry after a failed fetch', async () => {
+        global.fetch = vi
+            .fn()
+            .mockRejectedValueOnce(new Error('Network error'))
+            .mockResolvedValueOnce(attributesResponse('Blue'));
+        render(
+            <MetaplexNFTAttributesCard
+                account={makeAccount('https://example.com/metadata.json')}
+                onNotFound={vi.fn<() => never>()}
+            />,
+        );
+        await screen.findByText('Failed to fetch attributes');
+
+        await userEvent.click(screen.getAllByText('Try Again')[0]);
+
+        expect(await screen.findByText('Blue')).toBeInTheDocument();
+    });
+
+    it('should skip the browser cache when it retries after a failed fetch', async () => {
+        const cachedProxyError = { json: () => Promise.resolve({ error: 'Bad Gateway' }) };
+        global.fetch = vi
+            .fn()
+            .mockImplementation(async (_uri: string, init?: RequestInit) =>
+                init?.cache === 'no-cache' ? attributesResponse('Blue') : cachedProxyError,
+            );
+        render(
+            <MetaplexNFTAttributesCard
+                account={makeAccount('https://example.com/metadata.json')}
+                onNotFound={vi.fn<() => never>()}
+            />,
+        );
+        await screen.findByText('Failed to fetch attributes');
+
+        await userEvent.click(screen.getAllByText('Try Again')[0]);
+
+        expect(await screen.findByText('Blue')).toBeInTheDocument();
+    });
 });
+
+function attributesResponse(background: string) {
+    return { json: () => Promise.resolve({ attributes: [{ trait_type: 'Background', value: background }] }) };
+}

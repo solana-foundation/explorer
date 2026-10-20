@@ -31,11 +31,14 @@ export function MetaplexNFTAttributesCard({ account, onNotFound }: { account?: A
 export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string }) {
     const [attributes, setAttributes] = React.useState<Attribute[]>([]);
     const [status, setStatus] = React.useState<'loading' | 'success' | 'error'>('loading');
+    const [attempt, setAttempt] = React.useState(0);
 
-    async function fetchMetadataAttributes() {
+    async function fetchMetadataAttributes(isCancelled: () => boolean) {
         try {
-            const response = await fetch(getProxiedUri(metadataUri));
+            // The browser caches a proxy error response, so a retry must skip the cache.
+            const response = await fetch(getProxiedUri(metadataUri), attempt > 0 ? { cache: 'no-cache' } : undefined);
             const metadata = await response.json();
+            if (isCancelled()) return;
 
             // Verify if the attributes value is an array
             if (Array.isArray(metadata.attributes)) {
@@ -54,20 +57,29 @@ export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: 
                 throw new Error('Attributes is not an array');
             }
         } catch (_error) {
-            setStatus('error');
+            if (!isCancelled()) setStatus('error');
         }
     }
 
+    function retryAttributes() {
+        setStatus('loading');
+        setAttempt(count => count + 1);
+    }
+
     React.useEffect(() => {
-        fetchMetadataAttributes();
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+        let cancelled = false;
+        fetchMetadataAttributes(() => cancelled);
+        return () => {
+            cancelled = true;
+        };
+    }, [metadataUri, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (status === 'loading') {
         return <LoadingCard />;
     }
 
     if (status === 'error') {
-        return <ErrorCard text="Failed to fetch attributes" />;
+        return <ErrorCard retry={retryAttributes} text="Failed to fetch attributes" />;
     }
 
     const attributesList: React.ReactNode[] = attributes.map(({ trait_type, value }) => {
