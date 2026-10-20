@@ -9,6 +9,7 @@ const DEFAULT_PUBKEY = PublicKey.default.toString();
 const createMockIdl = (type: 'legacy' | 'anchor' | 'codama', specVersion?: string, address?: string): SupportedIdl => {
     if (type === 'codama') {
         return {
+            kind: 'rootNode',
             program: { publicKey: address ?? DEFAULT_PUBKEY },
             standard: 'codama',
             version: specVersion || '1.0.0',

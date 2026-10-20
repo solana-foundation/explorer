@@ -31,6 +31,7 @@ describe('CodamaInterpreter', () => {
         it.each([
             [
                 {
+                    kind: 'rootNode',
                     name: 'test-program',
                     nodes: [],
                     standard: 'codama',
