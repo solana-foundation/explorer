@@ -32,9 +32,9 @@ export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknow
     // routed to this instruction) — fail loud rather than mis-decode against the wrong interface.
     const declared = getIdlDeclaredAddress(idl);
     const declaredProgram = declared.kind === 'address' ? declared.address : undefined;
-    if (declaredProgram && declaredProgram !== kitIx.programAddress) {
+    if (declared.kind === 'malformed' || (declaredProgram && declaredProgram !== kitIx.programAddress)) {
         const error = new Error(
-            `[decode-instruction-with-idl] IDL program ${declaredProgram} does not match instruction program ${kitIx.programAddress}`,
+            `[decode-instruction-with-idl] IDL program ${declaredProgram ?? '(malformed)'} does not match instruction program ${kitIx.programAddress}`,
         );
         Logger.panic(error, { sentryExtras: { declaredProgram, programAddress: kitIx.programAddress } });
         throw error;

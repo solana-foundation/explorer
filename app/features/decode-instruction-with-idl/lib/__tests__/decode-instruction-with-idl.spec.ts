@@ -87,12 +87,15 @@ describe('decodeInstructionWithIdl', () => {
         expect(decodeInstructionWithIdl(ix, anchorIdl, 'http://localhost').kind).toBe('unknown');
     });
 
-    it('should panic and throw when the IDL program does not match the instruction program', () => {
+    it.each([
+        ['names another program', PublicKey.unique().toBase58()],
+        ['is malformed', {}],
+    ])('should panic and throw when the IDL program address %s', (_, address) => {
         const panic = vi.spyOn(Logger, 'panic').mockImplementation(() => {});
         // `vi.spyOn` can hand back a spy already installed by another test/file; clear it so the count
         // below reflects only this decode, not any inherited calls.
         panic.mockClear();
-        const mismatchedIdl = { ...anchorIdl, address: PublicKey.unique().toBase58() };
+        const mismatchedIdl = { ...anchorIdl, address };
 
         expect(() => decodeInstructionWithIdl(ix, mismatchedIdl, 'http://localhost')).toThrow('does not match');
         expect(panic).toHaveBeenCalledOnce();
