@@ -11,11 +11,10 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { SolBalance } from '@components/common/SolBalance';
 import { RawDataField } from '@components/shared/RawDataField';
 import { cn } from '@components/shared/utils';
-import { useLazyRawAccountData } from '@entities/account';
+import { useLazyRawAccountData, useLoadedAccounts } from '@entities/account';
 import { isResolvedLookupTable, rowAddresses } from '@entities/transaction-data';
 import {
     useAccountInfo,
-    useAccountInfos,
     useAddressLookupTable,
     useAddressLookupTables,
     useFetchAccountInfo,
@@ -92,8 +91,6 @@ export function AccountsCard({
     const lookupTables = useAddressLookupTables(lookupTableAddresses);
 
     const addresses = rowAddresses(message, lookupTables);
-
-    const accounts = useAccountInfos(addresses);
 
     // Tracked here (a persistently-mounted host) so the header popover can show the last run's time even
     // though its own content mounts only while open.
@@ -195,11 +192,7 @@ export function AccountsCard({
     }, [validMessage, simulation, changeByKey]);
 
     const tablesSettled = lookupTables.every(isResolvedLookupTable);
-    const spaces = accounts.map(entry => entry?.data?.space);
-    const totalAccountSize =
-        tablesSettled && spaces.every(space => space !== undefined)
-            ? spaces.reduce((total, space) => total + space, 0)
-            : undefined;
+    const totalAccountSize = useLoadedAccounts(tablesSettled ? addresses : [])?.dataSize;
 
     if (error) {
         return <ErrorCard text={`Unable to display accounts. ${error}`} />;

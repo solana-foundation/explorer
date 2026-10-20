@@ -8,6 +8,7 @@ import { SolBalance } from '@components/common/SolBalance';
 import { Badge } from '@components/shared/ui/badge';
 import { Button } from '@components/shared/ui/button';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
+import { getLoadedAccountsDataSize, useLoadedAccounts } from '@entities/account';
 import { estimateRequestedComputeUnitsForParsedTransaction } from '@entities/compute-unit';
 import { formatTransactionVersion } from '@entities/transaction-data';
 import {
@@ -35,7 +36,7 @@ import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useBuildClusterPath, useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ZoomIn } from 'react-feather';
 
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
@@ -96,6 +97,18 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const rawVersion = rawDetails?.data?.raw?.version;
     const blockTime = rawDetails?.data?.raw?.blockTime ?? details?.data?.transactionWithMeta?.blockTime ?? undefined;
     const transactionFetchesSucceeded = isFetched(rawDetails) && isFetched(details);
+
+    // Only v1 declares the limit on the message, so earlier versions skip the row and its account reads.
+    const loadedAccountsDataSizeLimit = rawDetails?.data?.raw?.transactionConfig?.loadedAccountsDataSizeLimit;
+    const accountKeys = details?.data?.transactionWithMeta?.transaction.message.accountKeys;
+    const loadedAddresses = useMemo(
+        () =>
+            loadedAccountsDataSizeLimit !== undefined && accountKeys
+                ? accountKeys.map(key => key.pubkey.toBase58())
+                : [],
+        [loadedAccountsDataSizeLimit, accountKeys],
+    );
+    const loadedAccounts = useLoadedAccounts(loadedAddresses);
 
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
@@ -160,6 +173,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const transaction = transactionWithMeta?.transaction;
     const blockhash = transaction?.message.recentBlockhash;
     const version = transactionWithMeta?.version;
+    const loadedAccountsDataSize = loadedAccounts && getLoadedAccountsDataSize(loadedAccounts);
     const feePayer = transaction?.message.accountKeys[0]?.pubkey;
     const priorityFeeLamports = readPriorityFeeLamports({
         declared: transactionConfig?.priorityFeeLamports,
@@ -350,9 +364,19 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                         <SolBalance lamports={transactionConfig.priorityFeeLamports} />
                     </KeyValue>
                 )}
-                {transactionConfig?.loadedAccountsDataSizeLimit !== undefined && (
-                    <KeyValue label="Loaded accounts data size limit">
-                        <TextValue>{transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}</TextValue>
+                {loadedAccountsDataSizeLimit !== undefined && (
+                    <KeyValue
+                        label={
+                            <InfoTooltip text="Each account's data size plus 64 bytes of metadata, counting the program data behind every upgradeable program, as SIMD-0186 charges it. Current data: account sizes may have been different at the time of the transaction.">
+                                {loadedAccountsDataSize === undefined ? 'Loaded Data Limit' : 'Loaded Data / Limit'}
+                            </InfoTooltip>
+                        }
+                    >
+                        <TextValue>
+                            {loadedAccountsDataSize === undefined
+                                ? `${loadedAccountsDataSizeLimit.toLocaleString('en-US')} bytes`
+                                : `${loadedAccountsDataSize.toLocaleString('en-US')} / ${loadedAccountsDataSizeLimit.toLocaleString('en-US')} bytes`}
+                        </TextValue>
                     </KeyValue>
                 )}
                 {transactionConfig?.heapSize !== undefined && (

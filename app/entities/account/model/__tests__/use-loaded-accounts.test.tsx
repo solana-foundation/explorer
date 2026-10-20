@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Logger } from '@/app/shared/lib/logger';
 
-import { ERROR_RETRY_COUNT, useAccountSizes } from '../use-account-sizes';
+import { ERROR_RETRY_COUNT, useLoadedAccounts } from '../use-loaded-accounts';
 
 const DEVNET_URL = 'https://api.devnet.solana.com';
 const CUSTOM_URL = 'http://localhost:8899';
@@ -31,7 +31,7 @@ vi.mock('@entities/cluster/@x/account', async () => {
     };
 });
 
-describe('useAccountSizes', () => {
+describe('useLoadedAccounts', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockCluster.current = { cluster: Cluster.MainnetBeta, url: DEFAULT_RPC_URL };
@@ -39,33 +39,31 @@ describe('useAccountSizes', () => {
     });
 
     it('should send no request for an empty list', () => {
-        renderHook(() => useAccountSizes([]), { wrapper });
+        renderHook(() => useLoadedAccounts([]), { wrapper });
 
         expect(mockGetMultipleAccounts).not.toHaveBeenCalled();
     });
 
-    it('should map each address to the size the node reports', async () => {
-        const { result } = renderHook(() => useAccountSizes([ADDRESS_1, ADDRESS_2]), { wrapper });
+    it('should count the accounts and total their sizes', async () => {
+        const { result } = renderHook(() => useLoadedAccounts([ADDRESS_1, ADDRESS_2]), { wrapper });
 
-        await waitFor(() => expect(result.current.get(ADDRESS_1)).toBe(100));
-        expect(result.current.get(ADDRESS_2)).toBe(101);
+        await waitFor(() => expect(result.current).toEqual({ accountCount: 2, dataSize: 201 }));
     });
 
-    it('should read a new list rather than return the sizes of the first list', async () => {
-        const { rerender, result } = renderHook(({ addresses }) => useAccountSizes(addresses), {
+    it('should read a new list rather than return the total of the first list', async () => {
+        const { rerender, result } = renderHook(({ addresses }) => useLoadedAccounts(addresses), {
             initialProps: { addresses: [ADDRESS_1] },
             wrapper,
         });
-        await waitFor(() => expect(result.current.size).toBe(1));
+        await waitFor(() => expect(result.current).toEqual({ accountCount: 1, dataSize: 100 }));
 
-        rerender({ addresses: [ADDRESS_2] });
+        rerender({ addresses: [ADDRESS_1, ADDRESS_2] });
 
-        await waitFor(() => expect(result.current.get(ADDRESS_2)).toBe(100));
-        expect(result.current.has(ADDRESS_1)).toBe(false);
+        await waitFor(() => expect(result.current).toEqual({ accountCount: 2, dataSize: 201 }));
     });
 
     it('should read the sizes again when the cluster changes', async () => {
-        const { rerender } = renderHook(() => useAccountSizes([ADDRESS_1]), { wrapper });
+        const { rerender } = renderHook(() => useLoadedAccounts([ADDRESS_1]), { wrapper });
         await waitFor(() => expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(1));
 
         mockCluster.current = { cluster: Cluster.Devnet, url: DEVNET_URL };
@@ -77,7 +75,7 @@ describe('useAccountSizes', () => {
     it('should log a failed request to the console only', async () => {
         mockGetMultipleAccounts.mockRejectedValue(new Error('rpc unavailable'));
 
-        renderHook(() => useAccountSizes([ADDRESS_1]), { wrapper });
+        renderHook(() => useLoadedAccounts([ADDRESS_1]), { wrapper });
 
         await waitFor(() =>
             expect(Logger.error).toHaveBeenCalledWith(new Error('rpc unavailable'), { url: DEFAULT_RPC_URL }),
@@ -88,7 +86,7 @@ describe('useAccountSizes', () => {
         mockCluster.current = { cluster: Cluster.Custom, url: CUSTOM_URL };
         mockGetMultipleAccounts.mockRejectedValue(new Error('rpc unavailable'));
 
-        renderHook(() => useAccountSizes([ADDRESS_1]), { wrapper });
+        renderHook(() => useLoadedAccounts([ADDRESS_1]), { wrapper });
         await waitFor(() => expect(mockGetMultipleAccounts).toHaveBeenCalled());
         await settleRetries();
 
@@ -98,27 +96,24 @@ describe('useAccountSizes', () => {
     it('should stop asking a failing node after the capped retries', async () => {
         mockGetMultipleAccounts.mockRejectedValue(new Error('rpc unavailable'));
 
-        renderHook(() => useAccountSizes([ADDRESS_1]), { wrapper });
+        renderHook(() => useLoadedAccounts([ADDRESS_1]), { wrapper });
         await waitFor(() => expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(ERROR_RETRY_COUNT + 1));
         await settleRetries();
 
         expect(mockGetMultipleAccounts).toHaveBeenCalledTimes(ERROR_RETRY_COUNT + 1);
     });
 
-    it('should hold one empty map until the sizes arrive', () => {
+    it('should report no total until the sizes arrive', () => {
         mockGetMultipleAccounts.mockReturnValue(new Promise(() => undefined));
 
-        const { rerender, result } = renderHook(() => useAccountSizes([ADDRESS_1]), { wrapper });
-        const first = result.current;
-        rerender();
+        const { result } = renderHook(() => useLoadedAccounts([ADDRESS_1]), { wrapper });
 
-        expect(result.current).toBe(first);
-        expect(first.size).toBe(0);
+        expect(result.current).toBeUndefined();
     });
 });
 
 function sizedAccounts(addresses: readonly string[]) {
-    return addresses.map((_, index) => ({ data: ['', 'base64'], space: BigInt(100 + index) }));
+    return addresses.map((_, index) => ({ data: ['', 'base64'], executable: false, space: BigInt(100 + index) }));
 }
 
 function wrapper({ children }: { children: React.ReactNode }) {

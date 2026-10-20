@@ -6,7 +6,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { SolBalance } from '@components/common/SolBalance';
 import { Button } from '@components/shared/ui/button';
 import { cn } from '@components/shared/utils';
-import { useAccountSizes } from '@entities/account';
+import { useLoadedAccounts } from '@entities/account';
 import { useTransactionDetails } from '@providers/transactions';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
@@ -169,15 +169,10 @@ export function AccountsCard({ signature }: SignatureProps) {
     );
     const addresses = useMemo(() => accounts.map(({ address }) => address), [accounts]);
 
-    const sizes = useAccountSizes(addresses);
-
-    const totalAccountSize = useMemo(
-        () =>
-            addresses.every(address => sizes.has(address))
-                ? Array.from(sizes.values()).reduce((total, size) => total + size, 0)
-                : undefined,
-        [addresses, sizes],
-    );
+    // From v1 on, the summary shows the loaded data instead.
+    const version = transactionWithMeta?.version;
+    const isV1OrLater = typeof version === 'number' && version >= 1;
+    const totalAccountSize = useLoadedAccounts(isV1OrLater ? [] : addresses)?.dataSize;
 
     if (!transactionWithMeta) {
         return null;

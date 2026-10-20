@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax -- storybook play functions use RegExp for pattern matching */
+import { getLoadedAccountsSwrKey } from '@entities/account';
 import { PublicKey, VersionedMessage } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { mockVersionedMessage } from '@storybook-config/__fixtures__/messages';
@@ -7,6 +8,7 @@ import { nextjsParameters, withTokenInfoBatch } from '@storybook-config/decorato
 import type { Meta, StoryObj } from '@storybook-config/types';
 import React from 'react';
 import { expect, within } from 'storybook/test';
+import { SWRConfig, unstable_serialize } from 'swr';
 
 import { DispatchContext, FetchersContext, State, StateContext } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
@@ -36,6 +38,13 @@ const createMessage = (): VersionedMessage => {
         },
         staticAccountKeys,
     });
+};
+
+// The total also counts the Token program's program data, which the message does not list.
+const LOADED_ACCOUNTS = {
+    [unstable_serialize(
+        getLoadedAccountsSwrKey([PublicKey.default.toBase58(), TOKEN_PROGRAM_ADDRESS], MAINNET_BETA_URL),
+    )]: { accountCount: 3, dataSize: 134_080 },
 };
 
 // Mock provider with accounts
@@ -101,9 +110,11 @@ export const Default: Story = {
     decorators: [
         Story => (
             <ClusterProvider>
-                <MockAccountsProvider>
-                    <Story />
-                </MockAccountsProvider>
+                <SWRConfig value={{ fallback: LOADED_ACCOUNTS }}>
+                    <MockAccountsProvider>
+                        <Story />
+                    </MockAccountsProvider>
+                </SWRConfig>
             </ClusterProvider>
         ),
     ],
@@ -118,6 +129,7 @@ export const Default: Story = {
         await expect(canvas.getAllByText('Signer').length).toBeGreaterThan(0);
         await expect(canvas.getAllByText('Writable').length).toBeGreaterThan(0);
         await expect(canvas.getByText('Total Account Size:')).toBeInTheDocument();
+        await expect(canvas.getByText('134,080 bytes')).toBeInTheDocument();
         await expect(canvas.getAllByText('36 bytes').length).toBeGreaterThan(0);
     },
 };
