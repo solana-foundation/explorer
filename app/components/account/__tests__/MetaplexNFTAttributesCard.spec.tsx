@@ -97,6 +97,25 @@ describe('MetaplexNFTAttributesCard', () => {
         expect(await screen.findByText('Red')).toBeInTheDocument();
     });
 
+    it('should show the loading card while the attributes of a new metadata URI load', async () => {
+        global.fetch = vi
+            .fn()
+            .mockResolvedValueOnce(attributesResponse('Blue'))
+            .mockReturnValueOnce(new Promise(() => {}));
+        const onNotFound = vi.fn<() => never>();
+        const { rerender } = render(
+            <MetaplexNFTAttributesCard account={makeAccount('https://example.com/1.json')} onNotFound={onNotFound} />,
+        );
+        expect(await screen.findByText('Blue')).toBeInTheDocument();
+
+        rerender(
+            <MetaplexNFTAttributesCard account={makeAccount('https://example.com/2.json')} onNotFound={onNotFound} />,
+        );
+
+        expect(await screen.findByText('Loading')).toBeInTheDocument();
+        expect(screen.queryByText('Blue')).not.toBeInTheDocument();
+    });
+
     it('should ignore the attributes of the previous metadata URI when they arrive last', async () => {
         let resolvePreviousFetch: (response: unknown) => void = () => {};
         global.fetch = vi

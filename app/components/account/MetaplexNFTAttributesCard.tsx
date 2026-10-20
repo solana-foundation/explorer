@@ -68,6 +68,7 @@ export function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: 
 
     React.useEffect(() => {
         let cancelled = false;
+        setStatus('loading');
         fetchMetadataAttributes(() => cancelled);
         return () => {
             cancelled = true;
