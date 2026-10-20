@@ -2,9 +2,7 @@ import { vi } from 'vitest';
 
 import { getProxiedUri } from '../metadata-proxy';
 
-// A well-known valid CIDv0 (contains Hello World)
 const VALID_CID_V0 = 'QmWATWQ7fVPP2EFGu71UkfnqhYXDYH566qy47CnJDgvs8u';
-// A well-known valid CIDv1 (contains Hello World)
 const VALID_CID_V1 = 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3ek5bfx73d7h4x7bgd35y2nuq';
 const GATEWAY = 'https://ipfs.filebase.io/ipfs';
 
@@ -98,8 +96,6 @@ describe('getProxiedUri', () => {
         ],
         ['return empty string for malformed IPFS CIDs', 'true', 'ipfs://not-a-valid-cid', ''],
         ['return empty string when empty string is passed', 'true', '', ''],
-        // Unparseable on-chain URIs must not crash callers that render the
-        // result inline (e.g. ProxiedImage outside an error boundary).
         ['return a malformed URL unchanged rather than throw', 'true', 'not-a-valid-url', 'not-a-valid-url'],
         ['return a URL without a protocol unchanged', 'true', '://missing-protocol', '://missing-protocol'],
         ['return a URL without a host unchanged', 'true', 'http://', 'http://'],

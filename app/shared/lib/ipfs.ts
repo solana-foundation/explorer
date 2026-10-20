@@ -25,7 +25,7 @@ export function resolveIpfsUri(url: URL): IpfsResolution | undefined {
     return cidPath === undefined ? undefined : toGateway(cidPath, url);
 }
 
-const IPFS_PROTOCOL = 'ipfs:';
+export const IPFS_PROTOCOL = 'ipfs:';
 const GATEWAY_PATH_PREFIX = '/ipfs/';
 const SUBDOMAIN_NAMESPACE = 'ipfs';
 
