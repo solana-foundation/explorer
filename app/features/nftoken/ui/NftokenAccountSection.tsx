@@ -62,7 +62,7 @@ function CollectionCard({ account, collection }: { account: Account; collection:
             <AddressRow address={collection.authority} label="Authority" />
             <BaseTable.Row>
                 <BaseTable.Cell>Number of NFTs</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
+                <BaseTable.Cell className="md:text-right">
                     <NftCount nfts={nfts} />
                 </BaseTable.Cell>
             </BaseTable.Row>
@@ -74,7 +74,7 @@ function AddressRow({ address, label, missing }: { address: Address | undefined;
     return (
         <BaseTable.Row>
             <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell className="text-right">
+            <BaseTable.Cell className="md:text-right">
                 {address ? <KitAddress address={address} alignRight link /> : missing}
             </BaseTable.Cell>
         </BaseTable.Row>
