@@ -178,8 +178,8 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
     } = useSWRImmutable(
         shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, genesisHash) : null,
         fetchFullTokenInfoOrNull,
-        // Each mount refetches because the fetcher also returns `null` when the token-info request fails.
-        { revalidateOnMount: true },
+        // The token-info request logs each failure, so a refresh or a remount retries it instead of SWR.
+        { shouldRetryOnError: false },
     );
     const tokenInfo = fullTokenInfo ?? undefined;
 

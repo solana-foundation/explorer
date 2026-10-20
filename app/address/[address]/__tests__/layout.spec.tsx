@@ -3,7 +3,7 @@ import { GENESIS_HASHES } from '@entities/chain-id';
 import type { Account } from '@providers/accounts';
 import { type CacheEntry, FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { useState } from 'react';
@@ -147,8 +147,31 @@ describe('AddressLayout', () => {
         expect(screen.getByRole('button', { name: 'clicks: 1' })).toBeInTheDocument();
     });
 
-    it('should refetch missing token info when the page mounts again', async () => {
-        mock.fetchFullTokenInfo.mockResolvedValueOnce(undefined);
+    it('should keep the token info in the header when a refresh of it fails', async () => {
+        mock.fetchFullTokenInfo.mockResolvedValueOnce(TOKEN_INFO).mockRejectedValueOnce(new Error('fetch failed'));
+        mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
+        render(page());
+        expect(await screen.findByRole('heading', { name: 'USD Coin' })).toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole('button', { name: 'refresh' }));
+
+        await waitFor(() => expect(mock.fetchFullTokenInfo).toHaveBeenCalledTimes(2));
+        expect(screen.getByRole('heading', { name: 'USD Coin' })).toBeInTheDocument();
+    });
+
+    it('should not retry a failed token-info request', async () => {
+        mock.fetchFullTokenInfo.mockRejectedValueOnce(new Error('fetch failed'));
+        mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
+        render(page());
+        expect(await screen.findByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
+
+        await act(() => new Promise(resolve => setTimeout(resolve, 100)));
+
+        expect(mock.fetchFullTokenInfo).toHaveBeenCalledTimes(1);
+    });
+
+    it('should refetch failed token info when the page mounts again', async () => {
+        mock.fetchFullTokenInfo.mockRejectedValueOnce(new Error('fetch failed'));
         mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
         const { rerender } = render(page());
         expect(await screen.findByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
@@ -157,6 +180,20 @@ describe('AddressLayout', () => {
         rerender(page());
 
         expect(await screen.findByRole('heading', { name: 'USD Coin' })).toBeInTheDocument();
+    });
+
+    it('should not refetch missing token info when the page mounts again', async () => {
+        mock.fetchFullTokenInfo.mockResolvedValueOnce(undefined);
+        mock.entry = { data: ACCOUNT, status: FetchStatus.Fetched };
+        const { rerender } = render(page());
+        expect(await screen.findByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
+
+        rerender(page({ mounted: false }));
+        rerender(page());
+        await act(() => new Promise(resolve => setTimeout(resolve, 100)));
+
+        expect(mock.fetchFullTokenInfo).toHaveBeenCalledTimes(1);
+        expect(screen.getByRole('heading', { name: 'header without token info' })).toBeInTheDocument();
     });
 });
 
@@ -194,7 +231,7 @@ const TOKEN_INFO: FullTokenInfo = {
 
 function page({ mounted = true } = {}) {
     return (
-        <SWRConfig value={{ dedupingInterval: 0, provider: () => new Map() }}>
+        <SWRConfig value={{ dedupingInterval: 0, errorRetryInterval: 10, provider: () => new Map() }}>
             {mounted && (
                 <AddressLayout params={FULFILLED_PARAMS}>
                     <AccountTab />
