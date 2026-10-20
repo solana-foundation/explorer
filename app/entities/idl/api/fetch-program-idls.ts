@@ -7,8 +7,7 @@ import { type ProgramIdlPair } from './types';
 /**
  * Fetch a program's resolved IDLs from the shared, CDN-cached `/api/idl-latest` route — the single
  * known-cluster IDL source for the IDL card, the program-name label, and the transaction inspector.
- * Every consumer hits the same cache entry and reads the field it needs (`anchorIdl` /
- * `programMetadataIdl`).
+ * Every consumer hits the same cache entry.
  *
  * Throws on a non-ok response instead of returning empties: under `useSWRImmutable` a returned value
  * is cached as a success and never revalidated, so a transient 502 would stick as "no IDLs" for the

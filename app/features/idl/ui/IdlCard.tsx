@@ -168,7 +168,6 @@ export function IdlCard({ programId }: { programId: string }) {
     }
 
     const { idl, source } = selected;
-    // The on-chain candidates list the PMP IDL first, so the Anchor IDL account comes first only without a PMP IDL.
     const isFallback = source === IdlVariant.Anchor;
     const isMismatch = isIdlProgramIdMismatch(idl, programId);
     // Single badge: the IDL standard with its version(s) — `Codama (version 1.5.1)` /

@@ -16,8 +16,8 @@ export type ProgramIdls = {
 };
 
 /**
- * Resolves both IDLs a program exposes (Anchor PDA, PMP `idl` seed). `candidates` holds them in PMP-first
- * order. The callers share one cached resolution per program.
+ * Resolves both IDLs a program exposes (PMP `idl` seed, Anchor PDA). `candidates` holds them in PMP-first
+ * order. The callers share one cached resolution per program and cluster.
  *
  * Known public clusters use a single server route (`/api/idl-latest`) backed by `@solana/idl`, which
  * surfaces native-program IDLs via the fndn fallback authority. Custom / localhost clusters can't use
