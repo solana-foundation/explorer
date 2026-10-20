@@ -3,7 +3,7 @@ import { SolBalance } from '@components/common/SolBalance';
 import { RawDataField } from '@components/shared/RawDataField';
 import type { Account } from '@providers/accounts';
 
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 
 export type BaseRawAccountRowsProps = {
     account: Account;
@@ -12,14 +12,13 @@ export type BaseRawAccountRowsProps = {
 };
 
 export function BaseRawAccountRows({ account, rawData, isLoading }: BaseRawAccountRowsProps) {
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
         { label: 'Balance (SOL)', value: <SolBalance lamports={account.lamports} /> },
         { label: 'Assigned Program Id', value: <Address pubkey={account.owner} link /> },
-        {
+        account.space !== undefined && {
             label: 'Allocated Data Size',
-            show: account.space !== undefined,
-            value: account.space !== undefined && `${account.space} byte(s)`,
+            value: `${account.space} byte(s)`,
         },
         { label: 'Executable', value: account.executable ? 'Yes' : 'No' },
         {

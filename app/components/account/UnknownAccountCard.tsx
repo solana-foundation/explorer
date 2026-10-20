@@ -9,15 +9,15 @@ import { useCluster } from '@providers/cluster';
 import { address as createAddress, createSolanaRpc } from '@solana/kit';
 import { addressLabel } from '@utils/tx';
 
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 
 export function UnknownAccountCard({ account }: { account: Account }) {
     const { cluster } = useCluster();
 
     const label = addressLabel(account.pubkey.toBase58(), cluster);
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
-        { label: 'Address Label', show: Boolean(label), value: label },
+        label && { label: 'Address Label', value: label },
         {
             label: 'Balance (SOL)',
             value:
@@ -27,10 +27,9 @@ export function UnknownAccountCard({ account }: { account: Account }) {
                     <SolBalance lamports={account.lamports} />
                 ),
         },
-        {
+        account.space !== undefined && {
             label: 'Allocated Data Size',
-            show: account.space !== undefined,
-            value: account.space !== undefined && `${account.space} byte(s)`,
+            value: `${account.space} byte(s)`,
         },
         { label: 'Assigned Program Id', value: <Address pubkey={account.owner} link /> },
         { label: 'Executable', value: account.executable ? 'Yes' : 'No' },

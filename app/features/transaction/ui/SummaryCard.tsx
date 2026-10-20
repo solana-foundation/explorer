@@ -42,7 +42,7 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { AutoRefresh, useAutoRefreshInterval, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 import { V1_TRANSACTION_SIZE_LIMIT } from '@/app/shared/lib/v1-message-bridge';
-import { type KeyValueRow, KeyValueRows, TextValue } from '@/app/shared/ui/key-value';
+import { type KeyValueRowInput, KeyValueRows, TextValue } from '@/app/shared/ui/key-value';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -216,7 +216,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         statusFinality = `${info.confirmations ?? 0} confirmation${info.confirmations === 1 ? '' : 's'}`;
     }
 
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         {
             label: 'Status',
             value: (
@@ -239,13 +239,12 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         },
         { label: 'Confirmation', value: <TextValue mono={false}>{statusFinality}</TextValue> },
         { label: 'Signature', value: <Signature signature={signature} alignItems="start" noTruncate /> },
-        {
+        feePayer && {
             label: 'Fee payer',
-            show: Boolean(feePayer),
-            value: feePayer && <Address pubkey={feePayer} link noTruncate />,
+            value: <Address pubkey={feePayer} link noTruncate />,
         },
         { label: 'Slot', value: <Slot slot={info.slot} link /> },
-        {
+        blockhash && {
             label: isNonce ? (
                 'Nonce'
             ) : (
@@ -253,81 +252,64 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                     Recent Blockhash
                 </InfoTooltip>
             ),
-            show: Boolean(blockhash),
             value: <TextValue>{blockhash}</TextValue>,
         },
-        { label: 'Fee', show: fee !== undefined, value: fee !== undefined && <SolBalance lamports={fee} /> },
-        {
-            label: (
-                <InfoTooltip text="Not active yet. SIMD-0553 would charge a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units a transaction requests, replacing today's flat 5,000-per-signature base fee and leaving the priority fee unchanged. Estimated by swapping this transaction's consumed compute units for its requested limit; the loaded-accounts-data-size term still reflects what it loaded, so each figure is a floor.">
-                    Fee under SIMD-0553
-                </InfoTooltip>
-            ),
-            show: fee !== undefined && feeProjections !== undefined,
-            value: fee !== undefined && feeProjections !== undefined && (
-                <BaseResourceFeeProjection currentFeeLamports={fee} projections={feeProjections} />
-            ),
-        },
-        {
+        fee !== undefined && { label: 'Fee', value: <SolBalance lamports={fee} /> },
+        fee !== undefined &&
+            feeProjections !== undefined && {
+                label: (
+                    <InfoTooltip text="Not active yet. SIMD-0553 would charge a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units a transaction requests, replacing today's flat 5,000-per-signature base fee and leaving the priority fee unchanged. Estimated by swapping this transaction's consumed compute units for its requested limit; the loaded-accounts-data-size term still reflects what it loaded, so each figure is a floor.">
+                        Fee under SIMD-0553
+                    </InfoTooltip>
+                ),
+                value: <BaseResourceFeeProjection currentFeeLamports={fee} projections={feeProjections} />,
+            },
+        costUnits !== undefined && {
             label: 'Transaction cost',
-            show: costUnits !== undefined,
-            value: costUnits !== undefined && <TextValue>{costUnits.toLocaleString('en-US')}</TextValue>,
+            value: <TextValue>{costUnits.toLocaleString('en-US')}</TextValue>,
         },
-        {
-            label: 'CUs Consumed / Limit',
-            show: computeUnitsConsumed !== undefined && reservedCUs !== undefined,
-            value: computeUnitsConsumed !== undefined && reservedCUs !== undefined && (
-                <TextValue>
-                    {computeUnitsConsumed.toLocaleString('en-US')} / {reservedCUs.toLocaleString('en-US')}
-                </TextValue>
-            ),
-        },
-        {
-            label: 'CUs Consumed',
-            show: computeUnitsConsumed !== undefined && reservedCUs === undefined,
-            value: computeUnitsConsumed !== undefined && reservedCUs === undefined && (
-                <TextValue>{computeUnitsConsumed.toLocaleString('en-US')}</TextValue>
-            ),
-        },
-        {
+        computeUnitsConsumed !== undefined &&
+            reservedCUs !== undefined && {
+                label: 'CUs Consumed / Limit',
+                value: (
+                    <TextValue>
+                        {computeUnitsConsumed.toLocaleString('en-US')} / {reservedCUs.toLocaleString('en-US')}
+                    </TextValue>
+                ),
+            },
+        computeUnitsConsumed !== undefined &&
+            reservedCUs === undefined && {
+                label: 'CUs Consumed',
+                value: <TextValue>{computeUnitsConsumed.toLocaleString('en-US')}</TextValue>,
+            },
+        transactionConfig?.priorityFeeLamports !== undefined && {
             label: (
                 <InfoTooltip text="A total amount paid for prioritization, unlike the per-compute-unit price used before v1">
                     Priority fee (total)
                 </InfoTooltip>
             ),
-            show: transactionConfig?.priorityFeeLamports !== undefined,
-            value: transactionConfig?.priorityFeeLamports !== undefined && (
-                <SolBalance lamports={transactionConfig.priorityFeeLamports} />
-            ),
+            value: <SolBalance lamports={transactionConfig.priorityFeeLamports} />,
         },
-        {
+        transactionConfig?.loadedAccountsDataSizeLimit !== undefined && {
             label: 'Loaded accounts data size limit',
-            show: transactionConfig?.loadedAccountsDataSizeLimit !== undefined,
-            value: transactionConfig?.loadedAccountsDataSizeLimit !== undefined && (
-                <TextValue>{transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}</TextValue>
-            ),
+            value: <TextValue>{transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}</TextValue>,
         },
-        {
+        transactionConfig?.heapSize !== undefined && {
             label: 'Heap size',
-            show: transactionConfig?.heapSize !== undefined,
-            value: transactionConfig?.heapSize !== undefined && (
-                <TextValue>{transactionConfig.heapSize.toLocaleString('en-US')}</TextValue>
-            ),
+            value: <TextValue>{transactionConfig.heapSize.toLocaleString('en-US')}</TextValue>,
         },
-        {
+        version !== undefined && {
             label: 'Transaction Version',
-            show: version !== undefined,
-            value: version !== undefined && formatTransactionVersion(version),
+            value: formatTransactionVersion(version),
             valueClassName: 'font-mono uppercase',
         },
-        {
+        serializedSize !== undefined && {
             label: (
                 <InfoTooltip text="Size on the wire: signatures plus the compiled message">
                     Transaction size
                 </InfoTooltip>
             ),
-            show: serializedSize !== undefined,
-            value: serializedSize !== undefined && (
+            value: (
                 <>
                     {serializedSize.toLocaleString('en-US')} bytes
                     {/* No over-limit styling here, unlike the inspector: a transaction that landed is
@@ -339,29 +321,23 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
             ),
             valueClassName: 'flex-wrap items-baseline gap-x-2 font-mono',
         },
-        {
+        blockTime !== undefined && {
             label: 'Timestamp (Local)',
-            show: blockTime !== undefined,
-            value: blockTime !== undefined && (
-                <span className="font-mono">{displayTimestamp(blockTime * 1000, true)}</span>
-            ),
+            value: <span className="font-mono">{displayTimestamp(blockTime * 1000, true)}</span>,
         },
-        {
+        blockTime !== undefined && {
             label: 'Timestamp (UTC)',
-            show: blockTime !== undefined,
-            value: blockTime !== undefined && (
-                <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>
-            ),
+            value: <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>,
         },
-        {
-            label: 'Timestamp',
-            show: blockTime === undefined && transactionFetchesSucceeded,
-            value: (
-                <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
-                    Unavailable
-                </InfoTooltip>
-            ),
-        },
+        blockTime === undefined &&
+            transactionFetchesSucceeded && {
+                label: 'Timestamp',
+                value: (
+                    <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
+                        Unavailable
+                    </InfoTooltip>
+                ),
+            },
     ];
 
     return (

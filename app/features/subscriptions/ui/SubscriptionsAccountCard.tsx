@@ -20,7 +20,7 @@ import { Code } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
 import { BaseRawAccountRows } from '@/app/shared/ui/BaseRawAccountRows';
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 import { decodeSubscriptionsAccount } from '../lib/decode-subscriptions-account';
@@ -52,22 +52,20 @@ function PlanCard({ account, data }: { account: Account; data: Plan }) {
     const refresh = useRefreshAccount();
     const { data: planData, owner, status } = data;
     const { endTs, metadataUri, mint, planId, terms } = planData;
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         { label: 'Plan ID', value: planId.toString() },
         { label: 'Status', value: displayPlanStatus(status) },
         { label: 'Owner', value: addressValue(owner) },
         { label: 'Token Mint', value: addressValue(mint) },
         { label: 'Amount per Period', value: terms.amount.toString() },
         { label: 'Period', value: pluralUnits(terms.periodHours, 'hour') },
-        {
+        terms.createdAt !== 0n && {
             label: 'Created At',
-            show: terms.createdAt !== 0n,
             value: displayTimestampUtc(unixTimestampToMs(Number(terms.createdAt)), true),
         },
         { label: 'Expires At', value: displayExpiry(endTs) },
-        {
+        metadataUri && {
             label: 'Metadata URI',
-            show: Boolean(metadataUri),
             value: <span className="font-mono">{metadataUri}</span>,
             valueClassName: '!whitespace-normal [overflow-wrap:anywhere]',
         },
@@ -119,15 +117,14 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
         periodLengthS,
         subscriptionAuthority,
     } = data;
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         ...delegationHeaderRows(header),
         { label: 'Amount per Period', value: amountPerPeriod.toString() },
         { label: 'Amount Pulled (this period)', value: amountPulledInPeriod.toString() },
         { label: 'Token Mint', value: addressValue(mint) },
         { label: 'Period Length', value: pluralUnits(periodLengthS, 'second') },
-        {
+        currentPeriodStartTs !== 0n && {
             label: 'Current Period Start',
-            show: currentPeriodStartTs !== 0n,
             value: displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true),
         },
         { label: 'Expires At', value: displayExpiry(expiryTs) },
@@ -149,14 +146,13 @@ function RecurringDelegationCard({ account, data }: { account: Account; data: Re
 function SubscriptionDelegationCard({ account, data }: { account: Account; data: SubscriptionDelegation }) {
     const refresh = useRefreshAccount();
     const { amountPulledInPeriod, currentPeriodStartTs, expiresAtTs, header, terms } = data;
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         ...delegationHeaderRows(header),
         { label: 'Amount', value: terms.amount.toString() },
         { label: 'Period', value: pluralUnits(terms.periodHours, 'hour') },
         { label: 'Amount Pulled (this period)', value: amountPulledInPeriod.toString() },
-        {
+        currentPeriodStartTs !== 0n && {
             label: 'Current Period Start',
-            show: currentPeriodStartTs !== 0n,
             value: displayTimestampUtc(unixTimestampToMs(Number(currentPeriodStartTs)), true),
         },
         { label: 'Expires At', value: displayExpiry(expiresAtTs) },

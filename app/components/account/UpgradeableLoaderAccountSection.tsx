@@ -91,9 +91,8 @@ export function UpgradeableProgramSection({
                         label: 'Address',
                         value: <Address pubkey={account.pubkey} raw />,
                     },
-                    {
+                    label && {
                         label: 'Address Label',
-                        show: Boolean(label),
                         value: label,
                     },
                     {
@@ -108,42 +107,36 @@ export function UpgradeableProgramSection({
                         label: `Executable Data${programData === undefined ? ' (Closed)' : ''}`,
                         value: <Address pubkey={programAccount.programData} link />,
                     },
-                    {
+                    programData !== undefined && {
                         label: 'Upgradeable',
-                        show: programData !== undefined,
-                        value: programData !== undefined && (programData.authority !== null ? 'Yes' : 'No'),
+                        value: programData.authority !== null ? 'Yes' : 'No',
                     },
-                    {
+                    programData !== undefined && {
                         label: <VerifiedLabel />,
-                        show: programData !== undefined,
-                        value: programData !== undefined && (
-                            <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />
-                        ),
+                        value: <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />,
                     },
-                    {
+                    programData !== undefined && {
                         label: <ProgramSecurityTXTLabel />,
-                        show: programData !== undefined,
-                        value: programData !== undefined && <ProgramSecurityTXTBadge programPubkey={account.pubkey} />,
+                        value: <ProgramSecurityTXTBadge programPubkey={account.pubkey} />,
                     },
-                    {
+                    programData !== undefined && {
                         label: 'Last Deployed Slot',
-                        show: programData !== undefined,
-                        value: programData !== undefined && <Slot slot={programData.slot} link />,
+                        value: <Slot slot={programData.slot} link />,
                     },
-                    {
-                        label: 'Upgrade Authority',
-                        show: programData !== undefined && programData.authority !== null,
-                        value: programData !== undefined && programData.authority !== null && (
-                            <div className="flex min-w-0 items-center gap-2">
-                                <span className="min-w-0">
-                                    <Address pubkey={programData.authority} link />
-                                </span>
-                                {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad && (
-                                    <MultisigBadge pubkey={account.pubkey} />
-                                )}
-                            </div>
-                        ),
-                    },
+                    programData !== undefined &&
+                        programData.authority !== null && {
+                            label: 'Upgrade Authority',
+                            value: (
+                                <div className="flex min-w-0 items-center gap-2">
+                                    <span className="min-w-0">
+                                        <Address pubkey={programData.authority} link />
+                                    </span>
+                                    {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad && (
+                                        <MultisigBadge pubkey={account.pubkey} />
+                                    )}
+                                </div>
+                            ),
+                        },
                 ]}
             />
         </AccountCard>
@@ -192,10 +185,9 @@ export function UpgradeableProgramDataSection({
                         label: 'Balance (SOL)',
                         value: <SolBalance lamports={account.lamports} />,
                     },
-                    {
+                    account.space !== undefined && {
                         label: 'Data Size (Bytes)',
-                        show: account.space !== undefined,
-                        value: account.space !== undefined && (
+                        value: (
                             <DownloadableIcon data={programData.data[0]} filename={`${account.pubkey.toString()}.bin`}>
                                 <span className="mr-1.5">{account.space}</span>
                             </DownloadableIcon>
@@ -209,10 +201,9 @@ export function UpgradeableProgramDataSection({
                         label: 'Last Deployed Slot',
                         value: <Slot slot={programData.slot} link />,
                     },
-                    {
+                    programData.authority !== null && {
                         label: 'Upgrade Authority',
-                        show: programData.authority !== null,
-                        value: programData.authority !== null && <Address pubkey={programData.authority} link />,
+                        value: <Address pubkey={programData.authority} link />,
                     },
                 ]}
             />
@@ -246,24 +237,21 @@ export function UpgradeableProgramBufferSection({
                         label: 'Balance (SOL)',
                         value: <SolBalance lamports={account.lamports} />,
                     },
-                    {
+                    account.space !== undefined && {
                         label: 'Data Size (Bytes)',
-                        show: account.space !== undefined,
                         value: account.space,
                     },
-                    {
+                    bufferHash && {
                         label: <BufferHashLabel />,
-                        show: Boolean(bufferHash),
-                        value: bufferHash && (
+                        value: (
                             <Copyable text={bufferHash}>
                                 <span className="break-all font-mono">{bufferHash}</span>
                             </Copyable>
                         ),
                     },
-                    {
+                    programBuffer.authority !== null && {
                         label: 'Deploy Authority',
-                        show: programBuffer.authority !== null,
-                        value: programBuffer.authority !== null && <Address pubkey={programBuffer.authority} link />,
+                        value: <Address pubkey={programBuffer.authority} link />,
                     },
                     {
                         label: 'Owner',

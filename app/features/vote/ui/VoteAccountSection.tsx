@@ -7,7 +7,7 @@ import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { displayTimestamp } from '@utils/date';
 
-import { type KeyValueRow, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
+import { type KeyValueRowInput, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 
 import { VoteAccount } from '../lib/validators';
 
@@ -15,7 +15,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
     const refresh = useRefreshAccount();
     const rootSlot = voteAccount.info.rootSlot;
 
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         {
             label: `Authorized Voter${voteAccount.info.authorizedVoters.length > 1 ? 's' : ''}`,
             value: (
@@ -39,46 +39,30 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
             valueClassName: 'font-mono',
         },
         { label: 'Commission', value: `${voteAccount.info.commission}%` },
-        {
+        voteAccount.info.blsPubkeyCompressed && {
             label: 'BLS Pubkey',
-            show: Boolean(voteAccount.info.blsPubkeyCompressed),
             value: voteAccount.info.blsPubkeyCompressed,
             valueClassName: 'font-mono',
         },
-        {
+        voteAccount.info.inflationRewardsCommissionBps !== undefined && {
             label: 'Inflation Rewards Commission',
-            show: voteAccount.info.inflationRewardsCommissionBps !== undefined,
-            value:
-                voteAccount.info.inflationRewardsCommissionBps !== undefined &&
-                `${voteAccount.info.inflationRewardsCommissionBps / 100}%`,
+            value: `${voteAccount.info.inflationRewardsCommissionBps / 100}%`,
         },
-        {
+        voteAccount.info.inflationRewardsCollector && {
             label: 'Inflation Rewards Collector',
-            show: Boolean(voteAccount.info.inflationRewardsCollector),
-            value: voteAccount.info.inflationRewardsCollector && (
-                <Address pubkey={voteAccount.info.inflationRewardsCollector} raw link />
-            ),
+            value: <Address pubkey={voteAccount.info.inflationRewardsCollector} raw link />,
         },
-        {
+        voteAccount.info.blockRevenueCommissionBps !== undefined && {
             label: 'Block Revenue Commission',
-            show: voteAccount.info.blockRevenueCommissionBps !== undefined,
-            value:
-                voteAccount.info.blockRevenueCommissionBps !== undefined &&
-                `${voteAccount.info.blockRevenueCommissionBps / 100}%`,
+            value: `${voteAccount.info.blockRevenueCommissionBps / 100}%`,
         },
-        {
+        voteAccount.info.blockRevenueCollector && {
             label: 'Block Revenue Collector',
-            show: Boolean(voteAccount.info.blockRevenueCollector),
-            value: voteAccount.info.blockRevenueCollector && (
-                <Address pubkey={voteAccount.info.blockRevenueCollector} raw link />
-            ),
+            value: <Address pubkey={voteAccount.info.blockRevenueCollector} raw link />,
         },
-        {
+        voteAccount.info.pendingDelegatorRewards !== undefined && {
             label: 'Pending Delegator Rewards (SOL)',
-            show: voteAccount.info.pendingDelegatorRewards !== undefined,
-            value: voteAccount.info.pendingDelegatorRewards !== undefined && (
-                <SolBalance lamports={BigInt(voteAccount.info.pendingDelegatorRewards)} />
-            ),
+            value: <SolBalance lamports={BigInt(voteAccount.info.pendingDelegatorRewards)} />,
         },
         {
             label: 'Root Slot',

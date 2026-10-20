@@ -54,7 +54,7 @@ import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 import { getSafeExternalHref } from '@/app/shared/lib/url';
-import { KeyValue, type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { KeyValue, type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
@@ -148,7 +148,7 @@ function FungibleTokenMintAccountCard({
     mintExtensions?.sort(cmpExtension);
     const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintExtensions);
 
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
         {
             label: mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply',
@@ -169,46 +169,43 @@ function FungibleTokenMintAccountCard({
                 </>
             ),
         },
-        {
+        tokenInfo?.extensions?.website && {
             label: 'Website',
-            show: Boolean(tokenInfo?.extensions?.website),
-            value: tokenInfo?.extensions?.website && (
+            value: (
                 <ExternalLink href={tokenInfo.extensions.website}>
                     {tokenInfo.extensions.website}
                     <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
                 </ExternalLink>
             ),
         },
-        {
+        mintInfo.mintAuthority && {
             label: 'Mint Authority',
-            show: Boolean(mintInfo.mintAuthority),
-            value: mintInfo.mintAuthority && <Address pubkey={mintInfo.mintAuthority} link />,
+            value: <Address pubkey={mintInfo.mintAuthority} link />,
         },
-        {
+        mintInfo.freezeAuthority && {
             label: 'Freeze Authority',
-            show: Boolean(mintInfo.freezeAuthority),
-            value: mintInfo.freezeAuthority && <Address pubkey={mintInfo.freezeAuthority} link />,
+            value: <Address pubkey={mintInfo.freezeAuthority} link />,
         },
         { label: 'Decimals', value: mintInfo.decimals },
-        { label: 'Status', show: !mintInfo.isInitialized, value: 'Uninitialized' },
-        {
-            label: 'Bridge Contract',
-            show: Boolean(tokenInfo?.extensions?.bridgeContract && bridgeContractAddress),
-            value: tokenInfo?.extensions?.bridgeContract && bridgeContractAddress && (
-                <Copyable text={bridgeContractAddress}>
-                    <ExternalLink href={tokenInfo.extensions.bridgeContract}>{bridgeContractAddress}</ExternalLink>
-                </Copyable>
-            ),
-        },
-        {
-            label: 'Bridged Asset Contract',
-            show: Boolean(tokenInfo?.extensions?.assetContract && assetContractAddress),
-            value: tokenInfo?.extensions?.assetContract && assetContractAddress && (
-                <Copyable text={assetContractAddress}>
-                    <ExternalLink href={tokenInfo.extensions.assetContract}>{assetContractAddress}</ExternalLink>
-                </Copyable>
-            ),
-        },
+        !mintInfo.isInitialized && { label: 'Status', value: 'Uninitialized' },
+        tokenInfo?.extensions?.bridgeContract &&
+            bridgeContractAddress && {
+                label: 'Bridge Contract',
+                value: (
+                    <Copyable text={bridgeContractAddress}>
+                        <ExternalLink href={tokenInfo.extensions.bridgeContract}>{bridgeContractAddress}</ExternalLink>
+                    </Copyable>
+                ),
+            },
+        tokenInfo?.extensions?.assetContract &&
+            assetContractAddress && {
+                label: 'Bridged Asset Contract',
+                value: (
+                    <Copyable text={assetContractAddress}>
+                        <ExternalLink href={tokenInfo.extensions.assetContract}>{assetContractAddress}</ExternalLink>
+                    </Copyable>
+                ),
+            },
     ];
 
     return (
@@ -251,52 +248,46 @@ function NonFungibleTokenMintAccountCard({
             : undefined;
     const maxSupply = maxSupplyOpt && isSome(maxSupplyOpt) ? Number(maxSupplyOpt.value) : null;
 
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
         { label: 'Owner', value: <Address pubkey={account.owner} link /> },
-        { label: 'Max Total Supply', show: maxSupply != null, value: maxSupply === 0 ? 1 : maxSupply },
-        {
+        maxSupply != null && { label: 'Max Total Supply', value: maxSupply === 0 ? 1 : maxSupply },
+        nftData?.editionInfo.masterEdition != null && {
             label: 'Current Supply',
-            show: nftData?.editionInfo.masterEdition != null,
             value:
-                nftData?.editionInfo.masterEdition != null &&
-                (Number(nftData.editionInfo.masterEdition.supply) === 0
+                Number(nftData.editionInfo.masterEdition.supply) === 0
                     ? 1
-                    : Number(nftData.editionInfo.masterEdition.supply)),
+                    : Number(nftData.editionInfo.masterEdition.supply),
         },
-        {
+        collection?.verified && {
             label: 'Verified Collection Address',
-            show: Boolean(collection?.verified),
-            value: collection?.verified && <Address pubkey={new PublicKey(collection.key.toString())} link />,
+            value: <Address pubkey={new PublicKey(collection.key.toString())} link />,
         },
-        {
+        mintInfo.mintAuthority && {
             label: 'Mint Authority',
-            show: Boolean(mintInfo.mintAuthority),
-            value: mintInfo.mintAuthority && <Address pubkey={mintInfo.mintAuthority} link />,
+            value: <Address pubkey={mintInfo.mintAuthority} link />,
         },
-        {
+        mintInfo.freezeAuthority && {
             label: 'Freeze Authority',
-            show: Boolean(mintInfo.freezeAuthority),
-            value: mintInfo.freezeAuthority && <Address pubkey={mintInfo.freezeAuthority} link />,
+            value: <Address pubkey={mintInfo.freezeAuthority} link />,
         },
         {
             label: 'Update Authority',
             value: <Address pubkey={new PublicKey(nftData.metadata.updateAuthority.toString())} link />,
         },
-        {
-            label: 'Website',
-            show: Boolean(nftData?.json && nftData.json.external_url),
-            value: nftData?.json && nftData.json.external_url && (
-                <ExternalLink href={nftData.json.external_url}>
-                    {nftData.json.external_url}
-                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
-                </ExternalLink>
-            ),
-        },
-        {
+        nftData?.json &&
+            nftData.json.external_url && {
+                label: 'Website',
+                value: (
+                    <ExternalLink href={nftData.json.external_url}>
+                        {nftData.json.external_url}
+                        <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                    </ExternalLink>
+                ),
+            },
+        nftData?.metadata && {
             label: 'Seller Fee',
-            show: Boolean(nftData?.metadata),
-            value: nftData?.metadata && `${nftData.metadata.sellerFeeBasisPoints / 100}%`,
+            value: `${nftData.metadata.sellerFeeBasisPoints / 100}%`,
         },
     ];
 
@@ -345,9 +336,9 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
         }
     }, [tokenInfo, info]);
 
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
-        { label: 'Address Label', show: Boolean(label), value: label },
+        label && { label: 'Address Label', value: label },
         { label: 'Mint', value: <Address pubkey={info.mint} link tokenLabelInfo={tokenInfo} /> },
         { label: 'Owner', value: <Address pubkey={info.owner} link /> },
         {
@@ -366,21 +357,18 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
             ),
         },
         { label: 'Status', value: <StatusBadge status={info.state} /> },
-        {
+        info.rentExemptReserve && {
             label: 'Rent-exempt reserve (SOL)',
-            show: Boolean(info.rentExemptReserve),
-            value: info.rentExemptReserve && (
+            value: (
                 <span className="font-mono">◎{new BigNumber(info.rentExemptReserve.uiAmountString).toFormat(9)}</span>
             ),
         },
-        {
+        info.delegate && {
             label: 'Delegate',
-            show: Boolean(info.delegate),
-            value: info.delegate && <Address pubkey={info.delegate} link />,
+            value: <Address pubkey={info.delegate} link />,
         },
-        {
+        info.delegate && {
             label: <>Delegated amount {typeof symbol === 'string' && `(${symbol})`}</>,
-            show: Boolean(info.delegate),
             value: info.isNative ? (
                 <>
                     {'\u25ce'}

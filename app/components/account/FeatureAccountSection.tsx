@@ -15,7 +15,7 @@ import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { ClusterInfo, useCluster, useClusterInfo } from '@/app/providers/cluster';
-import { type KeyValueRow, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
+import { type KeyValueRowInput, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -82,7 +82,7 @@ const BaseFeatureCard = ({
     const { cluster } = useCluster();
     const clusterInfo = useClusterInfo();
 
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         { label: 'Address', value: <Address pubkey={new PublicKey(address)} raw /> },
         {
             label: 'Activated?',
@@ -99,10 +99,9 @@ const BaseFeatureCard = ({
                     <code>Not yet activated on {clusterName(cluster)}</code>
                 ),
         },
-        {
+        activatedAt && {
             label: 'Activated At Slot',
-            show: Boolean(activatedAt),
-            value: activatedAt && <Slot slot={activatedAt} link />,
+            value: <Slot slot={activatedAt} link />,
         },
         {
             label: 'Cluster Activation',
@@ -115,15 +114,13 @@ const BaseFeatureCard = ({
                 />
             ),
         },
-        {
+        featureInfo?.description && {
             label: 'Description',
-            show: Boolean(featureInfo?.description),
             value: featureInfo?.description,
         },
-        {
+        featureInfo && {
             label: 'SIMDs',
-            show: Boolean(featureInfo),
-            value: featureInfo && (
+            value: (
                 <StackedList mono={false}>
                     {featureInfo.simds.map((simd, index) => (
                         <li key={index}>

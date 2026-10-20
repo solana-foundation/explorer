@@ -12,7 +12,7 @@ import { IBRL_EXPLORER_URL } from '@utils/env';
 import { ExternalLink } from 'react-feather';
 
 import { Timestamp } from '@/app/components/shared/ui/timestamp';
-import { type KeyValueRow, KeyValueRows, TextValue } from '@/app/shared/ui/key-value';
+import { type KeyValueRowInput, KeyValueRows, TextValue } from '@/app/shared/ui/key-value';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 type BlockOverviewCardProps = {
@@ -51,7 +51,7 @@ export function BlockOverviewCard({
     const showSuccessfulCount = block.transactions.every(tx => isBlockTransaction(tx) && tx.meta !== null);
     const successfulTxs = block.transactions.filter(tx => isBlockTransaction(tx) && tx.meta?.err === null);
 
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         {
             label: 'Blockhash',
             value: (
@@ -68,16 +68,15 @@ export function BlockOverviewCard({
                 </Copyable>
             ),
         },
-        {
+        blockLeader !== undefined && {
             label: 'Slot Leader',
-            show: blockLeader !== undefined,
-            value: blockLeader !== undefined && <Address address={blockLeader} link noTruncate />,
+            value: <Address address={blockLeader} link noTruncate />,
         },
         {
             label: 'Timestamp',
             value: block.blockTime ? <Timestamp unixTimestamp={Number(block.blockTime)} /> : 'Unavailable',
         },
-        { label: 'Epoch', show: epoch !== undefined, value: epoch !== undefined && <Epoch epoch={epoch} link /> },
+        epoch !== undefined && { label: 'Epoch', value: <Epoch epoch={epoch} link /> },
         {
             label: 'Parent Blockhash',
             value: (
@@ -87,20 +86,17 @@ export function BlockOverviewCard({
             ),
         },
         { label: 'Parent Slot', value: <Slot slot={block.parentSlot} link /> },
-        {
+        parentLeader !== undefined && {
             label: 'Parent Slot Leader',
-            show: parentLeader !== undefined,
-            value: parentLeader !== undefined && <Address address={parentLeader} link noTruncate />,
+            value: <Address address={parentLeader} link noTruncate />,
         },
-        {
+        childSlot !== undefined && {
             label: 'Child Slot',
-            show: childSlot !== undefined,
-            value: childSlot !== undefined && <Slot slot={childSlot} link />,
+            value: <Slot slot={childSlot} link />,
         },
-        {
+        childLeader !== undefined && {
             label: 'Child Slot Leader',
-            show: childLeader !== undefined,
-            value: childLeader !== undefined && <Address address={childLeader} link noTruncate />,
+            value: <Address address={childLeader} link noTruncate />,
         },
         { label: 'Processed Transactions', value: block.transactions.length },
         {
@@ -118,7 +114,7 @@ export function BlockOverviewCard({
                 </span>
             ),
         },
-        { label: 'Successful Transactions', show: showSuccessfulCount, value: successfulTxs.length },
+        showSuccessfulCount && { label: 'Successful Transactions', value: successfulTxs.length },
         {
             label: 'Total CUs Consumed',
             value: (

@@ -41,13 +41,13 @@ export const HiddenRows: Story = {
     args: {
         rows: [
             { label: 'Address', value: '11111111111111111111111111111111' },
-            { label: 'Hidden when absent', show: false, value: 'should not render' },
+            false && { label: 'Hidden when absent', value: 'should not render' },
             { label: 'Executable', value: 'Yes' },
         ],
     },
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        // A row with `show: false` is dropped, while rows without `show` stay visible.
+        // A falsy entry is dropped, while object rows stay visible.
         await expect(canvas.queryByText('Hidden when absent')).toBeNull();
         await expect(canvas.getByText('Address')).toBeVisible();
         await expect(canvas.getByText('Executable')).toBeVisible();

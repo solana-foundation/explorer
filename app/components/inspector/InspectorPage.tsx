@@ -38,7 +38,7 @@ import {
     type V1TransactionConfig,
 } from '@/app/shared/lib/v1-message-bridge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { PageHeader, PageLayout, PageSections } from '@/app/shared/ui/page-layout';
@@ -724,7 +724,7 @@ function InspectorOverviewCard({
     }, [message, raw, isV1]);
     const sizeLimit = isV1 ? V1_TRANSACTION_SIZE_LIMIT : PACKET_DATA_SIZE;
 
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         {
             label: 'Serialized Size / Limit',
             value: (
@@ -734,32 +734,22 @@ function InspectorOverviewCard({
             ),
         },
         { label: 'Fees', value: <SolBalance lamports={fee} /> },
-        { label: 'Transaction Version', show: isV1, value: <span className="uppercase">v1</span> },
-        {
+        isV1 && { label: 'Transaction Version', value: <span className="uppercase">v1</span> },
+        transactionConfig?.computeUnitLimit !== undefined && {
             label: 'Compute unit limit',
-            show: transactionConfig?.computeUnitLimit !== undefined,
-            value:
-                transactionConfig?.computeUnitLimit !== undefined &&
-                transactionConfig.computeUnitLimit.toLocaleString('en-US'),
+            value: transactionConfig.computeUnitLimit.toLocaleString('en-US'),
         },
-        {
+        transactionConfig?.priorityFeeLamports !== undefined && {
             label: 'Priority fee (total)',
-            show: transactionConfig?.priorityFeeLamports !== undefined,
-            value: transactionConfig?.priorityFeeLamports !== undefined && (
-                <SolBalance lamports={transactionConfig.priorityFeeLamports} />
-            ),
+            value: <SolBalance lamports={transactionConfig.priorityFeeLamports} />,
         },
-        {
+        transactionConfig?.loadedAccountsDataSizeLimit !== undefined && {
             label: 'Loaded accounts data size limit',
-            show: transactionConfig?.loadedAccountsDataSizeLimit !== undefined,
-            value:
-                transactionConfig?.loadedAccountsDataSizeLimit !== undefined &&
-                transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US'),
+            value: transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US'),
         },
-        {
+        transactionConfig?.heapSize !== undefined && {
             label: 'Heap size',
-            show: transactionConfig?.heapSize !== undefined,
-            value: transactionConfig?.heapSize !== undefined && transactionConfig.heapSize.toLocaleString('en-US'),
+            value: transactionConfig.heapSize.toLocaleString('en-US'),
         },
         {
             label: 'Fee payer',

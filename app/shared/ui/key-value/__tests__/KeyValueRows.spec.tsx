@@ -1,28 +1,29 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { type KeyValueRow, KeyValueRows } from '../KeyValueRows';
+import { type KeyValueRowInput, KeyValueRows } from '../KeyValueRows';
 
 describe('KeyValueRows', () => {
-    it('should render rows whose show is true, omitted, or undefined and omit show:false', () => {
-        const rows: KeyValueRow[] = [
-            { label: 'Shown explicitly', show: true, value: 'a' },
-            { label: 'Shown by default', value: 'b' },
-            { label: 'Shown when undefined', show: undefined, value: 'c' },
-            { label: 'Hidden', show: false, value: 'd' },
+    it('should render truthy rows and omit falsy entries', () => {
+        const hidden = false;
+        const rows: KeyValueRowInput[] = [
+            { label: 'Shown object', value: 'a' },
+            hidden && { label: 'Hidden by false', value: 'b' },
+            null,
+            undefined,
+            { label: 'Also shown', value: 'c' },
         ];
 
         render(<KeyValueRows rows={rows} />);
 
-        expect(screen.getByText('Shown explicitly')).toBeInTheDocument();
-        expect(screen.getByText('Shown by default')).toBeInTheDocument();
-        expect(screen.getByText('Shown when undefined')).toBeInTheDocument();
-        expect(screen.queryByText('Hidden')).toBeNull();
+        expect(screen.getByText('Shown object')).toBeInTheDocument();
+        expect(screen.getByText('Also shown')).toBeInTheDocument();
+        expect(screen.queryByText('Hidden by false')).toBeNull();
     });
 
     it('should keep a JSX-labelled row mounted when a preceding row toggles visibility', () => {
-        const buildRows = (showFirst: boolean): KeyValueRow[] => [
-            { label: 'Toggles', show: showFirst, value: 'x' },
+        const buildRows = (showFirst: boolean): KeyValueRowInput[] => [
+            showFirst && { label: 'Toggles', value: 'x' },
             { label: <span>JSX label</span>, value: <input data-testid="stateful" /> },
         ];
 

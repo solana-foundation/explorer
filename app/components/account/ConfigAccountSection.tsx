@@ -8,7 +8,7 @@ import { ConfigAccount, StakeConfigInfoAccount, ValidatorInfoAccount } from '@va
 import React from 'react';
 
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 
 const MAX_SLASH_PENALTY = Math.pow(2, 8);
 
@@ -56,38 +56,32 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
 function ValidatorInfoCard({ account, configAccount }: { account: Account; configAccount: ValidatorInfoAccount }) {
     const refresh = useRefreshAccount();
 
-    const rows: KeyValueRow[] = [
-        {
+    const rows: KeyValueRowInput[] = [
+        configAccount.info.configData.name && {
             label: 'Name',
-            show: Boolean(configAccount.info.configData.name),
             value: configAccount.info.configData.name,
         },
-        {
+        configAccount.info.configData.keybaseUsername && {
             label: 'Keybase Username',
-            show: Boolean(configAccount.info.configData.keybaseUsername),
             value: configAccount.info.configData.keybaseUsername,
         },
-        {
+        configAccount.info.configData.website && {
             label: 'Website',
-            show: Boolean(configAccount.info.configData.website),
-            value: configAccount.info.configData.website && (
+            value: (
                 <ExternalLink href={configAccount.info.configData.website}>
                     {configAccount.info.configData.website}
                 </ExternalLink>
             ),
         },
-        {
+        configAccount.info.configData.details && {
             label: 'Details',
-            show: Boolean(configAccount.info.configData.details),
             value: configAccount.info.configData.details,
         },
-        {
-            label: 'Signer',
-            show: Boolean(configAccount.info.keys && configAccount.info.keys.length > 1),
-            value: configAccount.info.keys && configAccount.info.keys.length > 1 && (
-                <Address pubkey={new PublicKey(configAccount.info.keys[1].pubkey)} link />
-            ),
-        },
+        configAccount.info.keys &&
+            configAccount.info.keys.length > 1 && {
+                label: 'Signer',
+                value: <Address pubkey={new PublicKey(configAccount.info.keys[1].pubkey)} link />,
+            },
     ];
 
     return (

@@ -12,7 +12,7 @@ import { ClusterStatus } from '@utils/cluster';
 import React from 'react';
 
 import { Timestamp } from '@/app/components/shared/ui/timestamp';
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { PageHeader, PageLayout, PageSections } from '@/app/shared/ui/page-layout';
 import { getFirstSlotInEpoch, getLastSlotInEpoch } from '@/app/utils/epoch-schedule';
@@ -78,7 +78,7 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
     const lastSlot = getLastSlotInEpoch(epochSchedule, BigInt(epoch));
     const inProgress = <span className="text-outer-space-300">Epoch in progress</span>;
 
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         {
             label: 'Epoch',
             value: (
@@ -87,21 +87,19 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
                 </Copyable>
             ),
         },
-        { label: 'Previous Epoch', show: epoch > 0, value: <Epoch epoch={epoch - 1} link /> },
+        epoch > 0 && { label: 'Previous Epoch', value: <Epoch epoch={epoch - 1} link /> },
         { label: 'Next Epoch', value: currentEpoch > epoch ? <Epoch epoch={epoch + 1} link /> : inProgress },
         { label: 'First Slot', value: <Slot slot={firstSlot} /> },
         { label: 'Last Slot', value: <Slot slot={lastSlot} /> },
-        {
+        data.firstTimestamp && {
             label: 'First Block Timestamp',
-            show: Boolean(data.firstTimestamp),
-            value: data.firstTimestamp && <Timestamp unixTimestamp={data.firstTimestamp} />,
+            value: <Timestamp unixTimestamp={data.firstTimestamp} />,
         },
         { label: 'First Block', value: <Slot slot={data.firstBlock} link /> },
         { label: 'Last Block', value: data.lastBlock !== undefined ? <Slot slot={data.lastBlock} link /> : inProgress },
-        {
+        data.lastTimestamp && {
             label: 'Last Block Timestamp',
-            show: Boolean(data.lastTimestamp),
-            value: data.lastTimestamp && <Timestamp unixTimestamp={data.lastTimestamp} />,
+            value: <Timestamp unixTimestamp={data.lastTimestamp} />,
         },
     ];
 

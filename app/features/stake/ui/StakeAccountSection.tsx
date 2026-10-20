@@ -14,7 +14,7 @@ import { Skeleton } from '@/app/components/shared/ui/skeleton';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 import { NATIVE_MINT_ADDRESS } from '@/app/shared/model/token-program';
 import { Alert } from '@/app/shared/ui/Alert';
-import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
+import { type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 import type { StakeActivationStatus } from '../api/stake-activation';
@@ -121,8 +121,8 @@ function StakeOverviewCard({
     // Only delegated accounts carry a live activation state; other types are fully described by Type.
     const state = stakeAccountType === 'delegated' && activation ? capitalizeFirstLetter(activation.state) : undefined;
     const isOnCurve = PublicKey.isOnCurve(account.pubkey.toBytes());
-    const rows: KeyValueRow[] = [
-        { label: 'Total Value', show: totalValueUsd != null, value: totalValueUsd },
+    const rows: KeyValueRowInput[] = [
+        totalValueUsd != null && { label: 'Total Value', value: totalValueUsd },
         { label: 'Address', value: <KitAddress address={toKitAddress(account.pubkey)} raw /> },
         {
             label: 'Balance (SOL)',
@@ -130,13 +130,12 @@ function StakeOverviewCard({
             valueClassName: 'uppercase',
         },
         { label: 'Type', value: STAKE_TYPE_LABELS[stakeAccountType] },
-        { label: 'State', show: state !== undefined, value: state },
+        state !== undefined && { label: 'State', value: state },
         { label: 'Rent Reserve (SOL)', value: <SolBalance lamports={stakeAccount.meta.rentExemptReserve} /> },
         { label: 'Is On Curve', value: isOnCurve ? 'Yes' : 'No' },
-        {
+        account.space !== undefined && {
             label: 'Allocated Data Size',
-            show: account.space !== undefined,
-            value: account.space !== undefined && `${account.space} byte(s)`,
+            value: `${account.space} byte(s)`,
         },
     ];
     return (
@@ -174,27 +173,22 @@ export function DelegationCard({
     const activationEpoch = delegation.activationEpoch !== EPOCH_NEVER_SET ? delegation.activationEpoch : undefined;
     const deactivationEpoch =
         delegation.deactivationEpoch !== EPOCH_NEVER_SET ? delegation.deactivationEpoch : undefined;
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         {
             label: 'Delegated Stake (SOL)',
             value: <SolWithUsd lamports={delegation.stake} solPrice={solPrice} />,
         },
-        {
+        activation != null && {
             label: 'Active Stake (SOL)',
-            show: activation != null,
-            value: activation && <SolWithUsd lamports={activation.active} solPrice={solPrice} />,
+            value: <SolWithUsd lamports={activation.active} solPrice={solPrice} />,
         },
-        {
+        activation != null && {
             label: 'Inactive Stake (SOL)',
-            show: activation != null,
-            value: activation && <SolWithUsd lamports={activation.inactive} solPrice={solPrice} />,
+            value: <SolWithUsd lamports={activation.inactive} solPrice={solPrice} />,
         },
-        {
+        totalReward.status !== TotalRewardStatus.Disabled && {
             label: 'Total Reward (SOL)',
-            show: totalReward.status !== TotalRewardStatus.Disabled,
-            value: totalReward.status !== TotalRewardStatus.Disabled && (
-                <TotalReward state={totalReward} solPrice={solPrice} />
-            ),
+            value: <TotalReward state={totalReward} solPrice={solPrice} />,
         },
         { label: 'Delegated Vote Address', value: <KitAddress address={delegation.voter} link /> },
         {
@@ -238,13 +232,12 @@ function TotalReward({
 
 function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
     const hasLockup = meta.lockup.unixTimestamp > 0;
-    const rows: KeyValueRow[] = [
+    const rows: KeyValueRowInput[] = [
         { label: 'Stake Authority Address', value: <KitAddress address={meta.authorized.staker} link /> },
         { label: 'Withdraw Authority Address', value: <KitAddress address={meta.authorized.withdrawer} link /> },
-        {
+        hasLockup && {
             label: 'Lockup Authority Address',
-            show: hasLockup,
-            value: hasLockup && <KitAddress address={meta.lockup.custodian} link />,
+            value: <KitAddress address={meta.lockup.custodian} link />,
         },
     ];
     return (

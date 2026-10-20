@@ -72,10 +72,9 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
                             />
                         ),
                     },
-                    {
+                    squadMapInfo?.isSquad && {
                         label: 'Multisig Account',
-                        show: squadMapInfo?.isSquad,
-                        value: squadMapInfo?.isSquad && <Address pubkey={new PublicKey(squadMapInfo.multisig)} link />,
+                        value: <Address pubkey={new PublicKey(squadMapInfo.multisig)} link />,
                     },
                     {
                         label: 'Multisig Approval Threshold',
