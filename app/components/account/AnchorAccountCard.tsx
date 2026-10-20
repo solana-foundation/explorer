@@ -2,7 +2,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { BorshAccountsCoder, Idl } from '@coral-xyz/anchor';
 import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
-import { getFirstAnchorIdlWithAccounts, useAnchorProgram, useProgramIdls } from '@entities/idl';
+import { getAnchorIdlsWithAccounts, useAnchorProgram, useProgramIdls } from '@entities/idl';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
@@ -17,11 +17,12 @@ export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;
     const { url, cluster } = useCluster();
     const { candidates } = useProgramIdls(account.owner.toString(), url, cluster);
-    const anchorProgram = useAnchorProgram(
-        candidates && getFirstAnchorIdlWithAccounts(candidates),
-        account.owner.toString(),
+    const anchorProgram = useAnchorProgram({
+        candidates,
+        programAddress: account.owner.toString(),
+        select: getAnchorIdlsWithAccounts,
         url,
-    );
+    });
     const rawData = account.data.raw;
     const idl: Idl | undefined = anchorProgram?.idl;
     const programName = getAnchorProgramName(anchorProgram) || 'Unknown Program';

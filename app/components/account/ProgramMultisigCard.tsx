@@ -1,4 +1,4 @@
-import { getAnchorAccountIdl, useAnchorProgram, useProgramIdls } from '@entities/idl';
+import { getAnchorAccountIdls, useAnchorProgram, useProgramIdls } from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
 import { Suspense } from 'react';
 
@@ -35,7 +35,12 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
     const { data: squadMapInfo } = useSquadsMultisigLookup(programAuthority, cluster);
     const squadsAddress = squadMapInfo?.version === 'v3' ? SQUADS_V3_ADDRESS : SQUADS_V4_ADDRESS;
     const { candidates } = useProgramIdls(squadsAddress, url, cluster);
-    const anchorProgram = useAnchorProgram(candidates && getAnchorAccountIdl(candidates), squadsAddress, url);
+    const anchorProgram = useAnchorProgram({
+        candidates,
+        programAddress: squadsAddress,
+        select: getAnchorAccountIdls,
+        url,
+    });
     const { data: squadInfo } = useSquadsMultisig(
         anchorProgram,
         squadMapInfo?.multisig,

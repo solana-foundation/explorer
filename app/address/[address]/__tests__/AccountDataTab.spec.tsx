@@ -60,6 +60,20 @@ describe('AccountDataTab', () => {
         expect(screen.getByText('Anchor Data')).toBeInTheDocument();
     });
 
+    it('should show the Anchor Data tab when the PMP IDL does not build a program', () => {
+        idlState.candidates = [
+            {
+                idl: ANCHOR_WITHOUT_PROGRAM,
+                idlAddress: undefined,
+                source: IdlVariant.ProgramMetadata,
+                standard: 'Anchor',
+            },
+            { idl: ANCHOR_WITH_ACCOUNTS, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
+        ];
+        renderTab();
+        expect(screen.getByText('Anchor Data')).toBeInTheDocument();
+    });
+
     it('should hide the tab when the program has no IDL', () => {
         renderTab();
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();

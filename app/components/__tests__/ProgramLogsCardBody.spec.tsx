@@ -1,6 +1,7 @@
 import { gen } from '@__fixtures__/gen';
 import { type AnchorIdl, type CodamaIdl, IdlVariant, type ProgramIdls } from '@entities/idl';
 import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
+import referenceIdl from '@entities/idl/mocks/anchor/reference-0.29.json';
 import codamaIdl from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import { getBase58Decoder } from '@solana/kit';
 import {
@@ -30,6 +31,7 @@ vi.mock('next/navigation', () => ({ usePathname: () => '/tx' }));
 
 const BASE58_DECODER = getBase58Decoder();
 const CODAMA_IDL = codamaIdl as unknown as CodamaIdl;
+const UNBUILDABLE_IDL = referenceIdl as unknown as AnchorIdl;
 const DEVI = new PublicKey(anchorModernIdl.address);
 const CREATE_AMM_CONFIG_IX = new TransactionInstruction({
     data: Buffer.from([137, 52, 237, 212, 215, 117, 108, 104, ...new Array(16).fill(0)]),
@@ -71,6 +73,19 @@ describe('ProgramLogsCardBody', () => {
             'the IDL from the Anchor IDL account when the PMP IDL is Codama',
             [
                 { idl: CODAMA_IDL, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
+                {
+                    idl: renamedIdl('anchor_instruction'),
+                    idlAddress: undefined,
+                    source: IdlVariant.Anchor,
+                    standard: 'Anchor',
+                },
+            ],
+            'Anchor Instruction',
+        ],
+        [
+            'the IDL from the Anchor IDL account when the PMP IDL does not build a program',
+            [
+                { idl: UNBUILDABLE_IDL, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' },
                 {
                     idl: renamedIdl('anchor_instruction'),
                     idlAddress: undefined,

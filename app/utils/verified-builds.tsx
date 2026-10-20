@@ -1,4 +1,4 @@
-import { getAnchorAccountIdl, useAnchorProgram, useProgramIdls } from '@entities/idl';
+import { getAnchorAccountIdls, useAnchorProgram, useProgramIdls } from '@entities/idl';
 import { hashProgramBytes, orderVerifiedEntries, TRUSTED_SIGNERS } from '@explorer/entity-inspector/verification';
 import { PublicKey } from '@solana/web3.js';
 import { useEffect, useMemo } from 'react';
@@ -284,11 +284,12 @@ function useEnrichedOsecInfo({
 
     const { candidates } = useProgramIdls(VERIFY_PROGRAM_ID, clusterUrl, cluster);
     const isIdlLoading = candidates === undefined;
-    const accountAnchorProgram = useAnchorProgram(
-        candidates && getAnchorAccountIdl(candidates),
-        VERIFY_PROGRAM_ID,
-        clusterUrl,
-    );
+    const accountAnchorProgram = useAnchorProgram({
+        candidates,
+        programAddress: VERIFY_PROGRAM_ID,
+        select: getAnchorAccountIdls,
+        url: clusterUrl,
+    });
     const signerAuthorities = useMemo(
         () =>
             Array.from(

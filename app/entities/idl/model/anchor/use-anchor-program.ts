@@ -7,19 +7,38 @@ import { Logger } from '@/app/shared/lib/logger';
 
 import { type AnchorIdl } from '../../lib/types';
 import { formatSerdeIdl, getFormattedIdl } from '../formatters/format';
+import { type SourcedIdl } from '../idl-candidates';
 import { getProvider } from './anchor-provider';
 
-export function useAnchorProgram(idl: AnchorIdl | undefined, programAddress: string, url: string): Program | null {
+export function useAnchorProgram({
+    candidates,
+    programAddress,
+    select,
+    url,
+}: {
+    candidates: readonly SourcedIdl[] | undefined;
+    programAddress: string;
+    select: (candidates: readonly SourcedIdl[]) => readonly AnchorIdl[];
+    url: string;
+}): Program | null {
     return useMemo(() => {
-        if (!idl) return null;
+        if (!candidates) return null;
 
-        try {
-            return new Program(getFormattedIdl(formatSerdeIdl, idl, programAddress), getProvider(url));
-        } catch (e) {
-            Logger.error(new Error('[idl] Error creating anchor program', { cause: e }), { idl, programAddress });
-            return null;
+        for (const idl of select(candidates)) {
+            const program = buildProgram(idl, programAddress, url);
+            if (program) return program;
         }
-    }, [idl, programAddress, url]);
+        return null;
+    }, [candidates, programAddress, select, url]);
+}
+
+function buildProgram(idl: AnchorIdl, programAddress: string, url: string): Program | null {
+    try {
+        return new Program(getFormattedIdl(formatSerdeIdl, idl, programAddress), getProvider(url));
+    } catch (e) {
+        Logger.error(new Error('[idl] Error creating anchor program', { cause: e }), { idl, programAddress });
+        return null;
+    }
 }
 
 export type AnchorAccount = {

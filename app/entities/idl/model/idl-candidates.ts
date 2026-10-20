@@ -26,17 +26,16 @@ export function getOnChainCandidates({
     return candidates;
 }
 
-export function getAnchorAccountIdl(candidates: readonly SourcedIdl[]): AnchorIdl | undefined {
-    return getFirstAnchorIdl(candidates.filter(candidate => candidate.source === IdlVariant.Anchor));
+export function getAnchorAccountIdls(candidates: readonly SourcedIdl[]): AnchorIdl[] {
+    return getAnchorIdls(candidates.filter(candidate => candidate.source === IdlVariant.Anchor));
 }
 
-export function getFirstAnchorIdl(candidates: readonly SourcedIdl[]): AnchorIdl | undefined {
-    return candidates.find(candidate => candidate.standard === 'Anchor')?.idl;
+export function getAnchorIdls(candidates: readonly SourcedIdl[]): AnchorIdl[] {
+    return candidates.flatMap(candidate => (candidate.standard === 'Anchor' ? [candidate.idl] : []));
 }
 
-export function getFirstAnchorIdlWithAccounts(candidates: readonly SourcedIdl[]): AnchorIdl | undefined {
-    const anchorIdls = candidates.flatMap(candidate => (candidate.standard === 'Anchor' ? [candidate.idl] : []));
-    return anchorIdls.find(idl => (idl.accounts?.length ?? 0) > 0);
+export function getAnchorIdlsWithAccounts(candidates: readonly SourcedIdl[]): AnchorIdl[] {
+    return getAnchorIdls(candidates).filter(idl => (idl.accounts?.length ?? 0) > 0);
 }
 
 function tagIdl(idl: SupportedIdl): TaggedIdl {

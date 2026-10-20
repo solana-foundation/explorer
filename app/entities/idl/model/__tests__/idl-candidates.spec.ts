@@ -4,9 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { type ProgramIdlPair } from '../../api/types';
 import { type SupportedIdl } from '../../lib/types';
 import {
-    getAnchorAccountIdl,
-    getFirstAnchorIdl,
-    getFirstAnchorIdlWithAccounts,
+    getAnchorAccountIdls,
+    getAnchorIdls,
+    getAnchorIdlsWithAccounts,
     getOnChainCandidates,
     type SourcedIdl,
 } from '../idl-candidates';
@@ -54,23 +54,23 @@ describe('getOnChainCandidates', () => {
     });
 });
 
-describe('getFirstAnchorIdl', () => {
+describe('getAnchorIdls', () => {
     it('should skip a Codama candidate', () => {
         const candidates = getOnChainCandidates(pair({ anchorIdl: ANCHOR_IDL, programMetadataIdl: CODAMA_IDL }));
 
-        expect(getFirstAnchorIdl(candidates)).toBe(ANCHOR_IDL);
+        expect(getAnchorIdls(candidates)).toEqual([ANCHOR_IDL]);
     });
 
-    it('should take an Anchor-standard PMP IDL over the Anchor IDL account', () => {
-        expect(getFirstAnchorIdl(getOnChainCandidates(BOTH))).toBe(PMP_IDL);
+    it('should list an Anchor-standard PMP IDL before the Anchor IDL account', () => {
+        expect(getAnchorIdls(getOnChainCandidates(BOTH))).toEqual([PMP_IDL, ANCHOR_IDL]);
     });
 
-    it('should return undefined when no candidate is Anchor-standard', () => {
-        expect(getFirstAnchorIdl(getOnChainCandidates(pair({ programMetadataIdl: CODAMA_IDL })))).toBeUndefined();
+    it('should return no IDLs when no candidate is Anchor-standard', () => {
+        expect(getAnchorIdls(getOnChainCandidates(pair({ programMetadataIdl: CODAMA_IDL })))).toEqual([]);
     });
 });
 
-describe('getFirstAnchorIdlWithAccounts', () => {
+describe('getAnchorIdlsWithAccounts', () => {
     it('should skip an Anchor IDL that declares no account types', () => {
         const withAccounts = { accounts: [{ name: 'State' }], name: 'anchor' } as unknown as SupportedIdl;
         const candidates = getOnChainCandidates(
@@ -80,17 +80,17 @@ describe('getFirstAnchorIdlWithAccounts', () => {
             }),
         );
 
-        expect(getFirstAnchorIdlWithAccounts(candidates)).toBe(withAccounts);
+        expect(getAnchorIdlsWithAccounts(candidates)).toEqual([withAccounts]);
     });
 });
 
-describe('getAnchorAccountIdl', () => {
+describe('getAnchorAccountIdls', () => {
     it('should return the IDL from the Anchor IDL account and ignore the PMP IDL', () => {
-        expect(getAnchorAccountIdl(getOnChainCandidates(BOTH))).toBe(ANCHOR_IDL);
+        expect(getAnchorAccountIdls(getOnChainCandidates(BOTH))).toEqual([ANCHOR_IDL]);
     });
 
-    it('should return undefined when the Anchor IDL account holds a Codama IDL', () => {
-        expect(getAnchorAccountIdl(getOnChainCandidates(pair({ anchorIdl: CODAMA_IDL })))).toBeUndefined();
+    it('should return no IDLs when the Anchor IDL account holds a Codama IDL', () => {
+        expect(getAnchorAccountIdls(getOnChainCandidates(pair({ anchorIdl: CODAMA_IDL })))).toEqual([]);
     });
 });
 
