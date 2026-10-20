@@ -2,7 +2,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { BorshAccountsCoder, Idl } from '@coral-xyz/anchor';
 import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
-import { getAnchorIdlsWithAccounts, useAnchorProgram, useProgramIdls } from '@entities/idl';
+import { getAnchorIdls, getAnchorIdlsWithAccounts, useAnchorProgram, useProgramIdls } from '@entities/idl';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
@@ -57,8 +57,8 @@ export function AnchorAccountCard({ account }: { account: Account }) {
 
     if (lamports === undefined) return null;
     if (!candidates) return <LoadingCard message="Loading program IDL" />;
-    if (!idl) return <ErrorCard text="No Anchor IDL found" />;
-    if (!decodedAccountData || !accountDef) {
+    if (getAnchorIdls(candidates).length === 0) return <ErrorCard text="No Anchor IDL found" />;
+    if (!idl || !decodedAccountData || !accountDef) {
         return <ErrorCard text="Failed to decode account data according to the public Anchor interface" />;
     }
 

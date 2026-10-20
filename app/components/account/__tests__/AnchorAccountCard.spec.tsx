@@ -99,14 +99,22 @@ describe('AnchorAccountCard', () => {
         expect(screen.getByText('AnchorProgram: AmmConfig')).toBeInTheDocument();
     });
 
-    it('should show "No Anchor IDL found" when the only Anchor IDL declares no account types', () => {
+    it.each([
+        ['declares no account types', { ...ANCHOR_ACCOUNT_IDL, accounts: [] }],
+        ['does not build a program', UNBUILDABLE_IDL],
+    ])('should show the decode error when the only Anchor IDL %s', (_, idl) => {
+        idlState.candidates = [{ idl, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' }];
+
+        render(<AnchorAccountCard account={ACCOUNT} />);
+
+        expect(
+            screen.getByText('Failed to decode account data according to the public Anchor interface'),
+        ).toBeInTheDocument();
+    });
+
+    it('should show "No Anchor IDL found" when the only IDL is Codama', () => {
         idlState.candidates = [
-            {
-                idl: { ...ANCHOR_ACCOUNT_IDL, accounts: [] },
-                idlAddress: undefined,
-                source: IdlVariant.Anchor,
-                standard: 'Anchor',
-            },
+            { idl: CODAMA_IDL, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
         ];
 
         render(<AnchorAccountCard account={ACCOUNT} />);
