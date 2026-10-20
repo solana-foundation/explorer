@@ -592,7 +592,8 @@ const InitializeTransferFeeConfig = type({
 const SetTransferFee = type({
     maximumFee: optional(number()),
     mint: PublicKeyFromString,
-    multisigAuthority: optional(PublicKeyFromString),
+    // Spelled with a lowercase 't' by the RPC parser itself (agave `parse_token/extension/transfer_fee.rs`).
+    multisigtransferFeeConfigAuthority: optional(PublicKeyFromString),
     signers: optional(array(PublicKeyFromString)),
     transferFeeBasisPoints: optional(number()),
     transferFeeConfigAuthority: optional(PublicKeyFromString),
@@ -620,10 +621,10 @@ const InitializeScaledUiAmountConfig = type({
 
 const UpdateMultiplier = type({
     authority: optional(PublicKeyFromString),
-    effectiveTimestamp: optional(union([string(), number()])),
     mint: PublicKeyFromString,
     multisigAuthority: optional(PublicKeyFromString),
     newMultiplier: union([string(), number()]),
+    newMultiplierTimestamp: optional(number()),
     signers: optional(array(PublicKeyFromString)),
 });
 
@@ -712,7 +713,7 @@ export const TokenInstructionType = enums([
     'resume',
     'setTransferFee',
     'updateDefaultAccountState',
-    'updateInterestRate',
+    'updateInterestBearingConfigRate',
     'updateMultiplier',
     'updateTransferHook',
     'withdrawWithheldTokensFromAccounts',
@@ -795,7 +796,7 @@ export const IX_STRUCTS = {
     updateDefaultAccountState: UpdateDefaultAccountState,
     updateGroupMemberPointer: UpdateGroupMemberPointer,
     updateGroupPointer: UpdateGroupPointer,
-    updateInterestRate: UpdateInterestRate,
+    updateInterestBearingConfigRate: UpdateInterestRate,
     updateMetadataPointer: UpdateMetadataPointer,
     updateMultiplier: UpdateMultiplier,
     updateTokenGroupMaxSize: UpdateTokenGroupMaxSize,
@@ -891,7 +892,7 @@ export const IX_TITLES = {
     updateDefaultAccountState: 'Update Default Account State',
     updateGroupMemberPointer: 'Update Group Member Pointer',
     updateGroupPointer: 'Update Group Pointer',
-    updateInterestRate: 'Update Interest Rate',
+    updateInterestBearingConfigRate: 'Update Interest Bearing Config Rate',
     updateMetadataPointer: 'Update Metadata Pointer',
     updateMultiplier: 'Update Multiplier',
     updateTokenGroupMaxSize: 'Update Token Group Max Size',
