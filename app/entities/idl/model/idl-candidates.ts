@@ -1,8 +1,11 @@
 import { type ProgramIdlPair } from '../api/types';
-import { type AnchorIdl, type CodamaIdl, type SupportedIdl, type TaggedIdl } from '../lib/types';
+import { type AnchorIdl, type CodamaIdl, type IdlStandard, type SupportedIdl } from '../lib/types';
 import { IdlVariant } from './idl-variant';
 import { getIdlStandard } from './idl-version';
 
+type TaggedIdl = {
+    [S in IdlStandard]: { standard: S; idl: { Anchor: AnchorIdl; Codama: CodamaIdl }[S] };
+}[IdlStandard];
 export type SourcedIdl = TaggedIdl & { source: IdlVariant; idlAddress: string | undefined };
 
 export function getOnChainCandidates({
@@ -23,7 +26,7 @@ export function getOnChainCandidates({
     return candidates;
 }
 
-export function getOnChainAnchorIdl(candidates: readonly SourcedIdl[]): AnchorIdl | undefined {
+export function getAnchorAccountIdl(candidates: readonly SourcedIdl[]): AnchorIdl | undefined {
     return getFirstAnchorIdl(candidates.filter(candidate => candidate.source === IdlVariant.Anchor));
 }
 
