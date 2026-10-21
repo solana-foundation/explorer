@@ -1,17 +1,19 @@
 import {
     address,
     type Address,
+    type Base58EncodedDataResponse,
+    type Base64EncodedDataResponse,
     bytesEqual,
     type CompiledTransactionMessage,
     type CompiledTransactionMessageWithLifetime,
+    decodeTransactionFromRpcResponse,
     getBase58Decoder,
     getBase58Encoder,
-    getBase64Encoder,
     getCompiledTransactionMessageDecoder,
     getCompiledTransactionMessageEncoder,
     getInstructionsFromCompiledTransactionMessage,
-    getTransactionDecoder,
     isSolanaError,
+    type ReadonlyUint8Array,
     type ResolvedInstruction,
     SOLANA_ERROR__TRANSACTION__INVALID_CONFIG_MASK_PRIORITY_FEE_BITS,
     SOLANA_ERROR__TRANSACTION__VERSION_NUMBER_NOT_SUPPORTED,
@@ -34,6 +36,7 @@ import type {
     RpcJsonTransaction,
     RpcParsedInstruction,
     RpcTransactionResponse,
+    RpcWireTransaction,
     TransactionAccount,
     TransactionInstruction,
     TransactionVersion,
@@ -41,7 +44,6 @@ import type {
 
 const BASE58_DECODER = getBase58Decoder();
 const BASE58_ENCODER = getBase58Encoder();
-const BASE64_ENCODER = getBase64Encoder();
 
 export function fromCompiledMessage(
     message: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime,
@@ -107,12 +109,13 @@ export function fromRpcTransaction(response: RpcTransactionResponse): ParsedTran
     const reportedVersion =
         response.version === undefined || response.version === null ? undefined : normalizeVersion(response.version);
 
-    const [data, encoding] = transaction;
-    // base64/base58 carry a full wire transaction, not a bare message.
-    const encoder = encoding === 'base64' ? BASE64_ENCODER : BASE58_ENCODER;
-    const wireBytes = new Uint8Array(tryRunDecode(() => encoder.encode(data)));
-    const decoded = tryRunDecode(() => getTransactionDecoder().decode(wireBytes));
-    const compiled = decodeMessageBytes(new Uint8Array(decoded.messageBytes));
+    if (!isWireTransaction(transaction)) {
+        throw new MalformedTransactionError('Transaction encoding is neither base58 nor base64.');
+    }
+    const { compiledMessage: compiled, transaction: wire } = tryRunDecode(() =>
+        decodeTransactionFromRpcResponse({ transaction }),
+    );
+    assertCanonicalMessage(compiled, wire.messageBytes);
 
     if (reportedVersion !== undefined && reportedVersion !== compiled.version) {
         throw new Error(
@@ -121,13 +124,20 @@ export function fromRpcTransaction(response: RpcTransactionResponse): ParsedTran
         );
     }
 
-    return fromCompiledMessage(compiled, { loadedAddresses, signatures: toBase58Signatures(decoded.signatures) });
+    return fromCompiledMessage(compiled, { loadedAddresses, signatures: toBase58Signatures(wire.signatures) });
 }
 
 function decodeMessageBytes(bytes: Uint8Array): CompiledTransactionMessage & CompiledTransactionMessageWithLifetime {
     const compiled = tryRunDecode(() => getCompiledTransactionMessageDecoder().decode(bytes));
+    assertCanonicalMessage(compiled, bytes);
+    return compiled;
+}
 
-    // The message decoder ignores trailing bytes and can decode a truncated message. A round trip detects both.
+/** The message decoder ignores trailing bytes and can decode a truncated message. A round trip detects both. */
+function assertCanonicalMessage(
+    compiled: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime,
+    bytes: ReadonlyUint8Array,
+): void {
     const encoded = getCompiledTransactionMessageEncoder().encode(compiled);
     if (!bytesEqual(encoded, bytes)) {
         throw new Error(
@@ -135,8 +145,6 @@ function decodeMessageBytes(bytes: Uint8Array): CompiledTransactionMessage & Com
                 `${bytes.length} bytes in, ${encoded.length} bytes re-encoded.`,
         );
     }
-
-    return compiled;
 }
 
 function tryRunDecode<T>(decode: () => T): T {
@@ -188,6 +196,12 @@ function normalizeVersion(version: ReportedTransactionVersion | undefined): Tran
     const reported = typeof version === 'bigint' ? Number(version) : version;
     if (reported === 'legacy' || reported === 0 || reported === 1) return reported;
     throw new UnsupportedTransactionVersionError(version);
+}
+
+function isWireTransaction(
+    transaction: RpcWireTransaction,
+): transaction is Base58EncodedDataResponse | Base64EncodedDataResponse {
+    return transaction[1] === 'base58' || transaction[1] === 'base64';
 }
 
 function isRpcJsonTransaction(
