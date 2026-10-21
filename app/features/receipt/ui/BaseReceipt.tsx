@@ -185,12 +185,18 @@ function TransferRowItem({
                                         alt="Token logo"
                                         height="16"
                                         width="16"
-                                        className="flex-shrink-0"
+                                        className="flex-shrink-0 rounded-full"
                                     />
                                 </a>
                             ) : (
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <img src={logoURI} alt="Token logo" height="16" width="16" className="flex-shrink-0" />
+                                <img
+                                    src={logoURI}
+                                    alt="Token logo"
+                                    height="16"
+                                    width="16"
+                                    className="flex-shrink-0 rounded-full"
+                                />
                             ))}
                         {amount.formatted} <span className="text-gray-400">{amount.unit}</span>
                     </span>
