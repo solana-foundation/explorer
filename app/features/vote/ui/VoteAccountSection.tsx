@@ -7,13 +7,69 @@ import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { displayTimestamp } from '@utils/date';
 
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRowInput, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 
 import { VoteAccount } from '../lib/validators';
 
 export function VoteAccountSection({ account, voteAccount }: { account: Account; voteAccount: VoteAccount }) {
     const refresh = useRefreshAccount();
     const rootSlot = voteAccount.info.rootSlot;
+
+    const rows: KeyValueRowInput[] = [
+        {
+            label: `Authorized Voter${voteAccount.info.authorizedVoters.length > 1 ? 's' : ''}`,
+            value: (
+                <StackedList>
+                    {voteAccount.info.authorizedVoters.map(voter => (
+                        // The same voter can appear once per epoch, so the pubkey alone is not unique
+                        <li key={`${voter.epoch}-${voter.authorizedVoter.toString()}`}>
+                            <Address pubkey={voter.authorizedVoter} raw link />
+                        </li>
+                    ))}
+                </StackedList>
+            ),
+        },
+        {
+            label: 'Authorized Withdrawer',
+            value: <Address pubkey={voteAccount.info.authorizedWithdrawer} raw link />,
+        },
+        {
+            label: 'Last Timestamp',
+            value: displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000),
+            valueClassName: 'font-mono',
+        },
+        { label: 'Commission', value: `${voteAccount.info.commission}%` },
+        voteAccount.info.blsPubkeyCompressed && {
+            label: 'BLS Pubkey',
+            value: voteAccount.info.blsPubkeyCompressed,
+            valueClassName: 'font-mono',
+        },
+        voteAccount.info.inflationRewardsCommissionBps !== undefined && {
+            label: 'Inflation Rewards Commission',
+            value: `${voteAccount.info.inflationRewardsCommissionBps / 100}%`,
+        },
+        voteAccount.info.inflationRewardsCollector && {
+            label: 'Inflation Rewards Collector',
+            value: <Address pubkey={voteAccount.info.inflationRewardsCollector} raw link />,
+        },
+        voteAccount.info.blockRevenueCommissionBps !== undefined && {
+            label: 'Block Revenue Commission',
+            value: `${voteAccount.info.blockRevenueCommissionBps / 100}%`,
+        },
+        voteAccount.info.blockRevenueCollector && {
+            label: 'Block Revenue Collector',
+            value: <Address pubkey={voteAccount.info.blockRevenueCollector} raw link />,
+        },
+        voteAccount.info.pendingDelegatorRewards !== undefined && {
+            label: 'Pending Delegator Rewards (SOL)',
+            value: <SolBalance lamports={BigInt(voteAccount.info.pendingDelegatorRewards)} />,
+        },
+        {
+            label: 'Root Slot',
+            value: rootSlot !== null ? <Slot slot={rootSlot} link /> : 'N/A',
+        },
+    ];
+
     return (
         <AccountCard
             title="Vote Account"
@@ -23,107 +79,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
         >
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
-
-            <BaseTable.Row>
-                <BaseTable.Cell>
-                    Authorized Voter
-                    {voteAccount.info.authorizedVoters.length > 1 ? 's' : ''}
-                </BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {voteAccount.info.authorizedVoters.map(voter => {
-                        // The same voter can appear once per epoch, so the pubkey alone is not unique
-                        return (
-                            <Address
-                                pubkey={voter.authorizedVoter}
-                                key={`${voter.epoch}-${voter.authorizedVoter.toString()}`}
-                                alignRight
-                                raw
-                                link
-                            />
-                        );
-                    })}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Authorized Withdrawer</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={voteAccount.info.authorizedWithdrawer} alignRight raw link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Last Timestamp</BaseTable.Cell>
-                <BaseTable.Cell className="text-right font-mono">
-                    {displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000)}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Commission</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{`${voteAccount.info.commission}%`}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            {voteAccount.info.blsPubkeyCompressed && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>BLS Pubkey</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right font-mono">
-                        {voteAccount.info.blsPubkeyCompressed}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            {voteAccount.info.inflationRewardsCommissionBps !== undefined && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Inflation Rewards Commission</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        {`${voteAccount.info.inflationRewardsCommissionBps / 100}%`}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            {voteAccount.info.inflationRewardsCollector && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Inflation Rewards Collector</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={voteAccount.info.inflationRewardsCollector} alignRight raw link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            {voteAccount.info.blockRevenueCommissionBps !== undefined && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Block Revenue Commission</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        {`${voteAccount.info.blockRevenueCommissionBps / 100}%`}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            {voteAccount.info.blockRevenueCollector && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Block Revenue Collector</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={voteAccount.info.blockRevenueCollector} alignRight raw link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            {voteAccount.info.pendingDelegatorRewards !== undefined && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Pending Delegator Rewards (SOL)</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <SolBalance lamports={BigInt(voteAccount.info.pendingDelegatorRewards)} />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Root Slot</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {rootSlot !== null ? <Slot slot={rootSlot} link /> : 'N/A'}
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }

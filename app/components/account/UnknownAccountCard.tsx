@@ -9,55 +9,35 @@ import { useCluster } from '@providers/cluster';
 import { address as createAddress, createSolanaRpc } from '@solana/kit';
 import { addressLabel } from '@utils/tx';
 
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 
 export function UnknownAccountCard({ account }: { account: Account }) {
     const { cluster } = useCluster();
 
     const label = addressLabel(account.pubkey.toBase58(), cluster);
+    const rows: KeyValueRowInput[] = [
+        { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
+        label && { label: 'Address Label', value: label },
+        {
+            label: 'Balance (SOL)',
+            value:
+                account.lamports === 0 ? (
+                    <AccountNofFound account={account} />
+                ) : (
+                    <SolBalance lamports={account.lamports} />
+                ),
+        },
+        account.space !== undefined && {
+            label: 'Allocated Data Size',
+            value: `${account.space} byte(s)`,
+        },
+        { label: 'Assigned Program Id', value: <Address pubkey={account.owner} link /> },
+        { label: 'Executable', value: account.executable ? 'Yes' : 'No' },
+    ];
+
     return (
         <AccountCard title="Overview" account={account}>
-            <BaseTable.Row>
-                <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            {label && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Address Label</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">{label}</BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            <BaseTable.Row>
-                <BaseTable.Cell>Balance (SOL)</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    {account.lamports === 0 ? (
-                        <AccountNofFound account={account} />
-                    ) : (
-                        <SolBalance lamports={account.lamports} />
-                    )}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            {account.space !== undefined && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Allocated Data Size</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">{account.space} byte(s)</BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Assigned Program Id</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <Address pubkey={account.owner} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Executable</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">{account.executable ? 'Yes' : 'No'}</BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }

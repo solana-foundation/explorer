@@ -95,6 +95,7 @@ export function NavMenu({
                         <Link
                             href={route.href}
                             aria-current={route.active ? 'page' : undefined}
+                            onClick={() => onOpenChange?.(false)}
                             className={cn(
                                 'cursor-pointer px-3 py-2 no-underline',
                                 route.active ? 'text-white' : 'text-outer-space-300',
@@ -111,6 +112,7 @@ export function NavMenu({
                 <DropdownMenuItem asChild>
                     <ExternalLink
                         href={EXPLORER_REPO_URL}
+                        onClick={() => onOpenChange?.(false)}
                         className="flex cursor-pointer items-center gap-2 px-3 py-2 text-outer-space-300 no-underline"
                     >
                         <GitHubMark className="h-4 w-4" />

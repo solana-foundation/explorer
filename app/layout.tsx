@@ -56,7 +56,7 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                                     <ClusterModal />
                                     <PendingCustomUrlConsent />
                                     <div className="flex min-h-screen flex-col">
-                                        <div className="min-w-[292px] flex-1 pb-6">
+                                        <div className="min-w-[292px] flex-1 overflow-x-clip pb-6">
                                             <Navbar>
                                                 <SearchBar />
                                             </Navbar>

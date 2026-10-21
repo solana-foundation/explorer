@@ -19,7 +19,7 @@ import {
 } from '@validators/accounts/sysvar';
 import React from 'react';
 
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 
 export function SysvarAccountSection({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarAccount }) {
     switch (sysvarAccount.type) {
@@ -93,6 +93,24 @@ function SysvarAccountSlotHistory({
         },
         (v, k) => sysvarAccount.info.nextSlot - k,
     );
+    const rows: KeyValueRow[] = [
+        {
+            label: (
+                <>
+                    Slot History <span className="text-dk-gray-700">(previous 100 slots)</span>
+                </>
+            ),
+            value: (
+                <StackedList>
+                    {history.map(val => (
+                        <li key={val}>
+                            <Slot slot={val} link />
+                        </li>
+                    ))}
+                </StackedList>
+            ),
+        },
+    ];
     return (
         <AccountCard
             title="Sysvar: Slot History"
@@ -103,18 +121,7 @@ function SysvarAccountSlotHistory({
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <BaseTable.Row>
-                <BaseTable.Cell className="align-top">
-                    Slot History <span className="text-dk-gray-700">(previous 100 slots)</span>
-                </BaseTable.Cell>
-                <BaseTable.Cell className="text-right font-mono">
-                    {history.map(val => (
-                        <p key={val} className="mb-0">
-                            <Slot slot={val} link />
-                        </p>
-                    ))}
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }
@@ -136,6 +143,9 @@ function SysvarAccountStakeHistory({ account }: { account: Account; sysvarAccoun
 
 function SysvarAccountFeesCard({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarFeesAccount }) {
     const refresh = useRefreshAccount();
+    const rows: KeyValueRow[] = [
+        { label: 'Lamports Per Signature', value: sysvarAccount.info.feeCalculator.lamportsPerSignature },
+    ];
     return (
         <AccountCard
             title="Sysvar: Fees"
@@ -146,12 +156,7 @@ function SysvarAccountFeesCard({ account, sysvarAccount }: { account: Account; s
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <BaseTable.Row>
-                <BaseTable.Cell>Lamports Per Signature</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {sysvarAccount.info.feeCalculator.lamportsPerSignature}
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }
@@ -164,6 +169,13 @@ function SysvarAccountEpochScheduleCard({
     sysvarAccount: SysvarEpochScheduleAccount;
 }) {
     const refresh = useRefreshAccount();
+    const rows: KeyValueRow[] = [
+        { label: 'Slots Per Epoch', value: sysvarAccount.info.slotsPerEpoch },
+        { label: 'Leader Schedule Slot Offset', value: sysvarAccount.info.leaderScheduleSlotOffset },
+        { label: 'Epoch Warmup Enabled', value: <code>{sysvarAccount.info.warmup ? 'true' : 'false'}</code> },
+        { label: 'First Normal Epoch', value: sysvarAccount.info.firstNormalEpoch },
+        { label: 'First Normal Slot', value: <Slot slot={sysvarAccount.info.firstNormalSlot} /> },
+    ];
     return (
         <AccountCard
             title="Sysvar: Epoch Schedule"
@@ -174,40 +186,23 @@ function SysvarAccountEpochScheduleCard({
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <BaseTable.Row>
-                <BaseTable.Cell>Slots Per Epoch</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{sysvarAccount.info.slotsPerEpoch}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Leader Schedule Slot Offset</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{sysvarAccount.info.leaderScheduleSlotOffset}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Epoch Warmup Enabled</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <code>{sysvarAccount.info.warmup ? 'true' : 'false'}</code>
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>First Normal Epoch</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{sysvarAccount.info.firstNormalEpoch}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>First Normal Slot</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Slot slot={sysvarAccount.info.firstNormalSlot} />
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }
 
 function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarClockAccount }) {
     const refresh = useRefreshAccount();
+    const rows: KeyValueRow[] = [
+        {
+            label: 'Timestamp',
+            value: displayTimestamp(unixTimestampToMs(sysvarAccount.info.unixTimestamp)),
+            valueClassName: 'font-mono',
+        },
+        { label: 'Epoch', value: <Epoch epoch={sysvarAccount.info.epoch} link /> },
+        { label: 'Leader Schedule Epoch', value: <Epoch epoch={sysvarAccount.info.leaderScheduleEpoch} link /> },
+        { label: 'Slot', value: <Slot slot={sysvarAccount.info.slot} link /> },
+    ];
     return (
         <AccountCard
             title="Sysvar: Clock"
@@ -218,39 +213,18 @@ function SysvarAccountClockCard({ account, sysvarAccount }: { account: Account; 
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <BaseTable.Row>
-                <BaseTable.Cell>Timestamp</BaseTable.Cell>
-                <BaseTable.Cell className="text-right font-mono">
-                    {displayTimestamp(unixTimestampToMs(sysvarAccount.info.unixTimestamp))}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Epoch</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Epoch epoch={sysvarAccount.info.epoch} link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Leader Schedule Epoch</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Epoch epoch={sysvarAccount.info.leaderScheduleEpoch} link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Slot</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Slot slot={sysvarAccount.info.slot} link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }
 
 function SysvarAccountRentCard({ account, sysvarAccount }: { account: Account; sysvarAccount: SysvarRentAccount }) {
     const refresh = useRefreshAccount();
+    const rows: KeyValueRow[] = [
+        { label: 'Burn Percent', value: `${sysvarAccount.info.burnPercent}%` },
+        { label: 'Exemption Threshold', value: `${sysvarAccount.info.exemptionThreshold} years` },
+        { label: 'Lamports Per Byte Year', value: sysvarAccount.info.lamportsPerByteYear },
+    ];
     return (
         <AccountCard
             title="Sysvar: Rent"
@@ -261,20 +235,7 @@ function SysvarAccountRentCard({ account, sysvarAccount }: { account: Account; s
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <BaseTable.Row>
-                <BaseTable.Cell>Burn Percent</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{`${sysvarAccount.info.burnPercent}%`}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Exemption Threshold</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{sysvarAccount.info.exemptionThreshold} years</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Lamports Per Byte Year</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{sysvarAccount.info.lamportsPerByteYear}</BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }
@@ -292,6 +253,14 @@ function SysvarAccountRewardsCard({
         maximumSignificantDigits: 20,
     }).format(sysvarAccount.info.validatorPointValue);
 
+    const rows: KeyValueRow[] = [
+        {
+            label: 'Validator Point Value',
+            value: `${validatorPointValueFormatted} lamports`,
+            valueClassName: 'font-mono',
+        },
+    ];
+
     return (
         <AccountCard
             title="Sysvar: Rewards"
@@ -302,12 +271,7 @@ function SysvarAccountRewardsCard({
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
 
-            <BaseTable.Row>
-                <BaseTable.Cell>Validator Point Value</BaseTable.Cell>
-                <BaseTable.Cell className="text-right font-mono">
-                    {validatorPointValueFormatted} lamports
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }

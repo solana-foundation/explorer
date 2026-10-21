@@ -42,8 +42,8 @@ import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/provider
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { AutoRefresh, useAutoRefreshInterval, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 import { V1_TRANSACTION_SIZE_LIMIT } from '@/app/shared/lib/v1-message-bridge';
-import { Card } from '@/app/shared/ui/Card';
-import { KeyValue, TextValue } from '@/app/shared/ui/key-value';
+import { type KeyValueRowInput, KeyValueRows, TextValue } from '@/app/shared/ui/key-value';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
 import { TransactionNotFoundCard } from './TransactionNotFoundCard';
@@ -216,10 +216,135 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         statusFinality = `${info.confirmations ?? 0} confirmation${info.confirmations === 1 ? '' : 's'}`;
     }
 
+    const rows: KeyValueRowInput[] = [
+        {
+            label: 'Status',
+            value: (
+                <>
+                    <Badge ui="dashkit" variant={statusClass}>
+                        {statusText}
+                    </Badge>
+                    {errorReason && (
+                        <Badge
+                            ui="dashkit"
+                            variant={statusClass}
+                            className="min-w-0 max-w-full !whitespace-normal break-words !text-left"
+                        >
+                            {errorLink ? <Link href={errorLink}>{errorReason}</Link> : errorReason}
+                        </Badge>
+                    )}
+                </>
+            ),
+            valueClassName: 'flex-wrap items-center gap-x-3 gap-y-2',
+        },
+        { label: 'Confirmation', value: <TextValue mono={false}>{statusFinality}</TextValue> },
+        { label: 'Signature', value: <Signature signature={signature} alignItems="start" noTruncate /> },
+        feePayer && {
+            label: 'Fee payer',
+            value: <Address pubkey={feePayer} link noTruncate />,
+        },
+        { label: 'Slot', value: <Slot slot={info.slot} link /> },
+        blockhash && {
+            label: isNonce ? (
+                'Nonce'
+            ) : (
+                <InfoTooltip text="Transactions use a previously confirmed blockhash as a nonce to prevent double spends">
+                    Recent Blockhash
+                </InfoTooltip>
+            ),
+            value: <TextValue>{blockhash}</TextValue>,
+        },
+        fee !== undefined && { label: 'Fee', value: <SolBalance lamports={fee} /> },
+        fee !== undefined &&
+            feeProjections !== undefined && {
+                label: (
+                    <InfoTooltip text="Not active yet. SIMD-0553 would charge a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units a transaction requests, replacing today's flat 5,000-per-signature base fee and leaving the priority fee unchanged. Estimated by swapping this transaction's consumed compute units for its requested limit; the loaded-accounts-data-size term still reflects what it loaded, so each figure is a floor.">
+                        Fee under SIMD-0553
+                    </InfoTooltip>
+                ),
+                value: <BaseResourceFeeProjection currentFeeLamports={fee} projections={feeProjections} />,
+            },
+        costUnits !== undefined && {
+            label: 'Transaction cost',
+            value: <TextValue>{costUnits.toLocaleString('en-US')}</TextValue>,
+        },
+        computeUnitsConsumed !== undefined &&
+            reservedCUs !== undefined && {
+                label: 'CUs Consumed / Limit',
+                value: (
+                    <TextValue>
+                        {computeUnitsConsumed.toLocaleString('en-US')} / {reservedCUs.toLocaleString('en-US')}
+                    </TextValue>
+                ),
+            },
+        computeUnitsConsumed !== undefined &&
+            reservedCUs === undefined && {
+                label: 'CUs Consumed',
+                value: <TextValue>{computeUnitsConsumed.toLocaleString('en-US')}</TextValue>,
+            },
+        transactionConfig?.priorityFeeLamports !== undefined && {
+            label: (
+                <InfoTooltip text="A total amount paid for prioritization, unlike the per-compute-unit price used before v1">
+                    Priority fee (total)
+                </InfoTooltip>
+            ),
+            value: <SolBalance lamports={transactionConfig.priorityFeeLamports} />,
+        },
+        transactionConfig?.loadedAccountsDataSizeLimit !== undefined && {
+            label: 'Loaded accounts data size limit',
+            value: <TextValue>{transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}</TextValue>,
+        },
+        transactionConfig?.heapSize !== undefined && {
+            label: 'Heap size',
+            value: <TextValue>{transactionConfig.heapSize.toLocaleString('en-US')}</TextValue>,
+        },
+        version !== undefined && {
+            label: 'Transaction Version',
+            value: formatTransactionVersion(version),
+            valueClassName: 'font-mono uppercase',
+        },
+        serializedSize !== undefined && {
+            label: (
+                <InfoTooltip text="Size on the wire: signatures plus the compiled message">
+                    Transaction size
+                </InfoTooltip>
+            ),
+            value: (
+                <>
+                    {serializedSize.toLocaleString('en-US')} bytes
+                    {/* No over-limit styling here, unlike the inspector: a transaction that landed is
+                        necessarily within the limit. The cap is context for headroom. */}
+                    <span className="text-xs text-outer-space-300">
+                        Max is {transactionSizeLimit(rawVersion).toLocaleString('en-US')} bytes
+                    </span>
+                </>
+            ),
+            valueClassName: 'flex-wrap items-baseline gap-x-2 font-mono',
+        },
+        blockTime !== undefined && {
+            label: 'Timestamp (Local)',
+            value: <span className="font-mono">{displayTimestamp(blockTime * 1000, true)}</span>,
+        },
+        blockTime !== undefined && {
+            label: 'Timestamp (UTC)',
+            value: <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>,
+        },
+        blockTime === undefined &&
+            transactionFetchesSucceeded && {
+                label: 'Timestamp',
+                value: (
+                    <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
+                        Unavailable
+                    </InfoTooltip>
+                ),
+            },
+    ];
+
     return (
-        <section id="summary" className="flex flex-col gap-3">
-            <div className="flex justify-between">
-                <h2 className="m-0 text-lg font-normal text-white">Summary</h2>
+        <OverviewCard
+            id="summary"
+            title="Summary"
+            actions={
                 <div className="flex shrink-0 gap-1">
                     <ViewReceiptButton
                         signature={signature}
@@ -248,161 +373,10 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                         }
                     />
                 </div>
-            </div>
-
-            <Card ui="dashkit">
-                <KeyValue label="Status" valueClassName="flex-wrap items-center gap-x-3 gap-y-2">
-                    <Badge ui="dashkit" variant={statusClass}>
-                        {statusText}
-                    </Badge>
-                    {errorReason && (
-                        <Badge
-                            ui="dashkit"
-                            variant={statusClass}
-                            className="min-w-0 max-w-full !whitespace-normal break-words !text-left"
-                        >
-                            {errorLink ? <Link href={errorLink}>{errorReason}</Link> : errorReason}
-                        </Badge>
-                    )}
-                </KeyValue>
-
-                <KeyValue label="Confirmation">
-                    <TextValue mono={false}>{statusFinality}</TextValue>
-                </KeyValue>
-
-                <KeyValue label="Signature">
-                    <Signature signature={signature} alignItems="start" noTruncate />
-                </KeyValue>
-
-                {feePayer && (
-                    <KeyValue label="Fee payer">
-                        <Address pubkey={feePayer} link noTruncate />
-                    </KeyValue>
-                )}
-
-                <KeyValue label="Slot">
-                    <Slot slot={info.slot} link />
-                </KeyValue>
-
-                {blockhash && (
-                    <KeyValue
-                        label={
-                            isNonce ? (
-                                'Nonce'
-                            ) : (
-                                <InfoTooltip text="Transactions use a previously confirmed blockhash as a nonce to prevent double spends">
-                                    Recent Blockhash
-                                </InfoTooltip>
-                            )
-                        }
-                    >
-                        <TextValue>{blockhash}</TextValue>
-                    </KeyValue>
-                )}
-
-                {fee !== undefined && (
-                    <KeyValue label="Fee">
-                        <SolBalance lamports={fee} />
-                    </KeyValue>
-                )}
-
-                {/* Projected fee under SIMD-0553's inclusion + burned resource fee model */}
-                {fee !== undefined && feeProjections !== undefined && (
-                    <KeyValue
-                        label={
-                            <InfoTooltip text="Not active yet. SIMD-0553 would charge a 2,500-lamport inclusion fee to the leader plus a burned resource fee on the cost units a transaction requests, replacing today's flat 5,000-per-signature base fee and leaving the priority fee unchanged. Estimated by swapping this transaction's consumed compute units for its requested limit; the loaded-accounts-data-size term still reflects what it loaded, so each figure is a floor.">
-                                Fee under SIMD-0553
-                            </InfoTooltip>
-                        }
-                    >
-                        <BaseResourceFeeProjection currentFeeLamports={fee} projections={feeProjections} />
-                    </KeyValue>
-                )}
-
-                {costUnits !== undefined && (
-                    <KeyValue label="Transaction cost">
-                        <TextValue>{costUnits.toLocaleString('en-US')}</TextValue>
-                    </KeyValue>
-                )}
-
-                {computeUnitsConsumed !== undefined && reservedCUs !== undefined && (
-                    <KeyValue label="CUs Consumed / Limit">
-                        <TextValue>
-                            {computeUnitsConsumed.toLocaleString('en-US')} / {reservedCUs.toLocaleString('en-US')}
-                        </TextValue>
-                    </KeyValue>
-                )}
-                {computeUnitsConsumed !== undefined && reservedCUs === undefined && (
-                    <KeyValue label="CUs Consumed">
-                        <TextValue>{computeUnitsConsumed.toLocaleString('en-US')}</TextValue>
-                    </KeyValue>
-                )}
-
-                {/* v1 message-level resource limits */}
-                {transactionConfig?.priorityFeeLamports !== undefined && (
-                    <KeyValue
-                        label={
-                            <InfoTooltip text="A total amount paid for prioritization, unlike the per-compute-unit price used before v1">
-                                Priority fee (total)
-                            </InfoTooltip>
-                        }
-                    >
-                        <SolBalance lamports={transactionConfig.priorityFeeLamports} />
-                    </KeyValue>
-                )}
-                {transactionConfig?.loadedAccountsDataSizeLimit !== undefined && (
-                    <KeyValue label="Loaded accounts data size limit">
-                        <TextValue>{transactionConfig.loadedAccountsDataSizeLimit.toLocaleString('en-US')}</TextValue>
-                    </KeyValue>
-                )}
-                {transactionConfig?.heapSize !== undefined && (
-                    <KeyValue label="Heap size">
-                        <TextValue>{transactionConfig.heapSize.toLocaleString('en-US')}</TextValue>
-                    </KeyValue>
-                )}
-
-                {version !== undefined && (
-                    <KeyValue label="Transaction Version" valueClassName="font-mono uppercase">
-                        {formatTransactionVersion(version)}
-                    </KeyValue>
-                )}
-
-                {serializedSize !== undefined && (
-                    <KeyValue
-                        label={
-                            <InfoTooltip text="Size on the wire: signatures plus the compiled message">
-                                Transaction size
-                            </InfoTooltip>
-                        }
-                        valueClassName="flex-wrap items-baseline gap-x-2 font-mono"
-                    >
-                        {serializedSize.toLocaleString('en-US')} bytes
-                        {/* No over-limit styling here, unlike the inspector: a transaction that landed is
-                            necessarily within the limit. The cap is context for headroom. */}
-                        <span className="text-xs text-outer-space-300">
-                            Max is {transactionSizeLimit(rawVersion).toLocaleString('en-US')} bytes
-                        </span>
-                    </KeyValue>
-                )}
-
-                {blockTime !== undefined ? (
-                    <>
-                        <KeyValue label="Timestamp (Local)">
-                            <span className="font-mono">{displayTimestamp(blockTime * 1000, true)}</span>
-                        </KeyValue>
-                        <KeyValue label="Timestamp (UTC)" divider={false}>
-                            <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>
-                        </KeyValue>
-                    </>
-                ) : transactionFetchesSucceeded ? (
-                    <KeyValue label="Timestamp" divider={false}>
-                        <InfoTooltip bottom text="Timestamps are only available for confirmed blocks">
-                            Unavailable
-                        </InfoTooltip>
-                    </KeyValue>
-                ) : undefined}
-            </Card>
-        </section>
+            }
+        >
+            <KeyValueRows rows={rows} />
+        </OverviewCard>
     );
 }
 

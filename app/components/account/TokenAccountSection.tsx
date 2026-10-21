@@ -54,6 +54,7 @@ import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Logger } from '@/app/shared/lib/logger';
 import { getSafeExternalHref } from '@/app/shared/lib/url';
+import { KeyValue, type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 import { BaseTable } from '@/app/shared/ui/Table';
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
@@ -147,6 +148,66 @@ function FungibleTokenMintAccountCard({
     mintExtensions?.sort(cmpExtension);
     const scaledUiAmountMultiplier = getCurrentTokenScaledUiAmountMultiplier(mintExtensions);
 
+    const rows: KeyValueRowInput[] = [
+        { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
+        {
+            label: mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply',
+            value: (
+                <>
+                    <span>
+                        {normalizeTokenAmount(
+                            Number(mintInfo.supply) * Number(scaledUiAmountMultiplier),
+                            mintInfo.decimals,
+                        ).toLocaleString('en-US', {
+                            maximumFractionDigits: 20,
+                        })}
+                    </span>
+                    <ScaledUiAmountMultiplierTooltip
+                        rawAmount={normalizeTokenAmount(Number(mintInfo.supply), mintInfo.decimals).toString()}
+                        scaledUiAmountMultiplier={scaledUiAmountMultiplier}
+                    />
+                </>
+            ),
+        },
+        tokenInfo?.extensions?.website && {
+            label: 'Website',
+            value: (
+                <ExternalLink href={tokenInfo.extensions.website}>
+                    {tokenInfo.extensions.website}
+                    <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                </ExternalLink>
+            ),
+        },
+        mintInfo.mintAuthority && {
+            label: 'Mint Authority',
+            value: <Address pubkey={mintInfo.mintAuthority} link />,
+        },
+        mintInfo.freezeAuthority && {
+            label: 'Freeze Authority',
+            value: <Address pubkey={mintInfo.freezeAuthority} link />,
+        },
+        { label: 'Decimals', value: mintInfo.decimals },
+        !mintInfo.isInitialized && { label: 'Status', value: 'Uninitialized' },
+        tokenInfo?.extensions?.bridgeContract &&
+            bridgeContractAddress && {
+                label: 'Bridge Contract',
+                value: (
+                    <Copyable text={bridgeContractAddress}>
+                        <ExternalLink href={tokenInfo.extensions.bridgeContract}>{bridgeContractAddress}</ExternalLink>
+                    </Copyable>
+                ),
+            },
+        tokenInfo?.extensions?.assetContract &&
+            assetContractAddress && {
+                label: 'Bridged Asset Contract',
+                value: (
+                    <Copyable text={assetContractAddress}>
+                        <ExternalLink href={tokenInfo.extensions.assetContract}>{assetContractAddress}</ExternalLink>
+                    </Copyable>
+                ),
+            },
+    ];
+
     return (
         <AccountCard
             title={
@@ -160,90 +221,7 @@ function FungibleTokenMintAccountCard({
             refresh={() => fetchInfo(account.pubkey, 'parsed')}
             analyticsSection="token_mint_card"
         >
-            <BaseTable.Row>
-                <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>{mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply'}</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <span>
-                        {normalizeTokenAmount(
-                            Number(mintInfo.supply) * Number(scaledUiAmountMultiplier),
-                            mintInfo.decimals,
-                        ).toLocaleString('en-US', {
-                            maximumFractionDigits: 20,
-                        })}
-                    </span>
-                    <ScaledUiAmountMultiplierTooltip
-                        rawAmount={normalizeTokenAmount(Number(mintInfo.supply), mintInfo.decimals).toString()}
-                        scaledUiAmountMultiplier={scaledUiAmountMultiplier}
-                    />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            {tokenInfo?.extensions?.website && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Website</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <ExternalLink href={tokenInfo.extensions.website}>
-                            {tokenInfo.extensions.website}
-                            <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
-                        </ExternalLink>
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            {mintInfo.mintAuthority && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Mint Authority</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <Address pubkey={mintInfo.mintAuthority} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            {mintInfo.freezeAuthority && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Freeze Authority</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <Address pubkey={mintInfo.freezeAuthority} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            <BaseTable.Row>
-                <BaseTable.Cell>Decimals</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">{mintInfo.decimals}</BaseTable.Cell>
-            </BaseTable.Row>
-            {!mintInfo.isInitialized && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Status</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">Uninitialized</BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            {tokenInfo?.extensions?.bridgeContract && bridgeContractAddress && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Bridge Contract</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <Copyable text={bridgeContractAddress}>
-                            <ExternalLink href={tokenInfo.extensions.bridgeContract}>
-                                {bridgeContractAddress}
-                            </ExternalLink>
-                        </Copyable>
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            {tokenInfo?.extensions?.assetContract && assetContractAddress && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Bridged Asset Contract</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <Copyable text={assetContractAddress}>
-                            <ExternalLink href={tokenInfo.extensions.assetContract}>
-                                {assetContractAddress}
-                            </ExternalLink>
-                        </Copyable>
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
+            <KeyValueRows rows={rows} />
             {mintExtensions && (
                 <TokenExtensionsStatusRow address={account.pubkey.toBase58()} extensions={mintExtensions} />
             )}
@@ -269,6 +247,50 @@ function NonFungibleTokenMintAccountCard({
             ? nftData.editionInfo.masterEdition.maxSupply
             : undefined;
     const maxSupply = maxSupplyOpt && isSome(maxSupplyOpt) ? Number(maxSupplyOpt.value) : null;
+
+    const rows: KeyValueRowInput[] = [
+        { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
+        { label: 'Owner', value: <Address pubkey={account.owner} link /> },
+        maxSupply != null && { label: 'Max Total Supply', value: maxSupply === 0 ? 1 : maxSupply },
+        nftData?.editionInfo.masterEdition != null && {
+            label: 'Current Supply',
+            value:
+                Number(nftData.editionInfo.masterEdition.supply) === 0
+                    ? 1
+                    : Number(nftData.editionInfo.masterEdition.supply),
+        },
+        collection?.verified && {
+            label: 'Verified Collection Address',
+            value: <Address pubkey={new PublicKey(collection.key.toString())} link />,
+        },
+        mintInfo.mintAuthority && {
+            label: 'Mint Authority',
+            value: <Address pubkey={mintInfo.mintAuthority} link />,
+        },
+        mintInfo.freezeAuthority && {
+            label: 'Freeze Authority',
+            value: <Address pubkey={mintInfo.freezeAuthority} link />,
+        },
+        {
+            label: 'Update Authority',
+            value: <Address pubkey={new PublicKey(nftData.metadata.updateAuthority.toString())} link />,
+        },
+        nftData?.json &&
+            nftData.json.external_url && {
+                label: 'Website',
+                value: (
+                    <ExternalLink href={nftData.json.external_url}>
+                        {nftData.json.external_url}
+                        <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
+                    </ExternalLink>
+                ),
+            },
+        nftData?.metadata && {
+            label: 'Seller Fee',
+            value: `${nftData.metadata.sellerFeeBasisPoints / 100}%`,
+        },
+    ];
+
     return (
         <AccountCard
             title="Overview"
@@ -276,81 +298,7 @@ function NonFungibleTokenMintAccountCard({
             refresh={() => fetchInfo(account.pubkey, 'parsed')}
             analyticsSection="nft_mint_card"
         >
-            <BaseTable.Row>
-                <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Owner</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <Address pubkey={account.owner} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            {maxSupply != null && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Max Total Supply</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">{maxSupply === 0 ? 1 : maxSupply}</BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            {nftData?.editionInfo.masterEdition != null && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Current Supply</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        {Number(nftData.editionInfo.masterEdition.supply) === 0
-                            ? 1
-                            : Number(nftData.editionInfo.masterEdition.supply)}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            {collection?.verified && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Verified Collection Address</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <Address pubkey={new PublicKey(collection.key.toString())} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            {mintInfo.mintAuthority && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Mint Authority</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <Address pubkey={mintInfo.mintAuthority} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            {mintInfo.freezeAuthority && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Freeze Authority</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <Address pubkey={mintInfo.freezeAuthority} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            <BaseTable.Row>
-                <BaseTable.Cell>Update Authority</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <Address pubkey={new PublicKey(nftData.metadata.updateAuthority.toString())} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            {nftData?.json && nftData.json.external_url && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Website</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <ExternalLink href={nftData.json.external_url}>
-                            {nftData.json.external_url}
-                            <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
-                        </ExternalLink>
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            {nftData?.metadata && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Seller Fee</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">{`${nftData.metadata.sellerFeeBasisPoints / 100}%`}</BaseTable.Cell>
-                </BaseTable.Row>
-            )}
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }
@@ -388,40 +336,15 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
         }
     }, [tokenInfo, info]);
 
-    return (
-        <AccountCard
-            title={<>Token{account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && '-2022'} Account</>}
-            account={account}
-            analyticsSection="token_account_card"
-            refresh={() => refresh(account.pubkey, 'parsed')}
-        >
-            <BaseTable.Row>
-                <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            {label && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Address Label</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">{label}</BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            <BaseTable.Row>
-                <BaseTable.Cell>Mint</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <Address pubkey={info.mint} alignRight link tokenLabelInfo={tokenInfo} />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Owner</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <Address pubkey={info.owner} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Token balance {typeof symbol === 'string' && `(${symbol})`}</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
+    const rows: KeyValueRowInput[] = [
+        { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
+        label && { label: 'Address Label', value: label },
+        { label: 'Mint', value: <Address pubkey={info.mint} link tokenLabelInfo={tokenInfo} /> },
+        { label: 'Owner', value: <Address pubkey={info.owner} link /> },
+        {
+            label: <>Token balance {typeof symbol === 'string' && `(${symbol})`}</>,
+            value: (
+                <>
                     {balance}
                     <ScaledUiAmountMultiplierTooltip
                         rawAmount={normalizeTokenAmount(
@@ -430,51 +353,43 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                         ).toString()}
                         scaledUiAmountMultiplier={scaledUiAmountMultiplier}
                     />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Status</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <StatusBadge status={info.state} />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            {info.rentExemptReserve && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Rent-exempt reserve (SOL)</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <span className="font-mono">
-                            ◎{new BigNumber(info.rentExemptReserve.uiAmountString).toFormat(9)}
-                        </span>
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-            {info.delegate && (
-                <>
-                    <BaseTable.Row>
-                        <BaseTable.Cell>Delegate</BaseTable.Cell>
-                        <BaseTable.Cell className="md:text-right">
-                            <Address pubkey={info.delegate} alignRight link />
-                        </BaseTable.Cell>
-                    </BaseTable.Row>
-                    <BaseTable.Row>
-                        <BaseTable.Cell>Delegated amount {typeof symbol === 'string' && `(${symbol})`}</BaseTable.Cell>
-                        <BaseTable.Cell className="md:text-right">
-                            {info.isNative ? (
-                                <>
-                                    {'\u25ce'}
-                                    <span className="font-mono">
-                                        {new BigNumber(
-                                            info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0',
-                                        ).toFormat(9)}
-                                    </span>
-                                </>
-                            ) : (
-                                <>{info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0'}</>
-                            )}
-                        </BaseTable.Cell>
-                    </BaseTable.Row>
                 </>
-            )}
+            ),
+        },
+        { label: 'Status', value: <StatusBadge status={info.state} /> },
+        info.rentExemptReserve && {
+            label: 'Rent-exempt reserve (SOL)',
+            value: (
+                <span className="font-mono">◎{new BigNumber(info.rentExemptReserve.uiAmountString).toFormat(9)}</span>
+            ),
+        },
+        info.delegate && {
+            label: 'Delegate',
+            value: <Address pubkey={info.delegate} link />,
+        },
+        info.delegate && {
+            label: <>Delegated amount {typeof symbol === 'string' && `(${symbol})`}</>,
+            value: info.isNative ? (
+                <>
+                    {'\u25ce'}
+                    <span className="font-mono">
+                        {new BigNumber(info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0').toFormat(9)}
+                    </span>
+                </>
+            ) : (
+                <>{info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0'}</>
+            ),
+        },
+    ];
+
+    return (
+        <AccountCard
+            title={<>Token{account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && '-2022'} Account</>}
+            account={account}
+            analyticsSection="token_account_card"
+            refresh={() => refresh(account.pubkey, 'parsed')}
+        >
+            <KeyValueRows rows={rows} />
             {accountExtensions && (
                 <TokenExtensionsStatusRow address={account.pubkey.toBase58()} extensions={accountExtensions} />
             )}
@@ -485,6 +400,12 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
 function MultisigAccountCard({ account, info }: { account: Account; info: MultisigAccountInfo }) {
     const refresh = useRefreshAccount();
 
+    const headerRows: KeyValueRow[] = [
+        { label: 'Address', value: <Address pubkey={account.pubkey} raw /> },
+        { label: 'Required Signers', value: info.numRequiredSigners },
+        { label: 'Valid Signers', value: info.numValidSigners },
+    ];
+
     return (
         <AccountCard
             title="Multisig Account"
@@ -492,34 +413,13 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
             analyticsSection="multisig_account_card"
             refresh={() => refresh(account.pubkey, 'parsed')}
         >
-            <BaseTable.Row>
-                <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <Address pubkey={account.pubkey} alignRight raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Required Signers</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">{info.numRequiredSigners}</BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Valid Signers</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">{info.numValidSigners}</BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={headerRows} />
             {info.signers.map(signer => (
-                <BaseTable.Row key={signer.toString()}>
-                    <BaseTable.Cell>Signer</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">
-                        <Address pubkey={signer} alignRight link />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
+                <KeyValue key={signer.toString()} label="Signer">
+                    <Address pubkey={signer} link />
+                </KeyValue>
             ))}
-            {!info.isInitialized && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Status</BaseTable.Cell>
-                    <BaseTable.Cell className="md:text-right">Uninitialized</BaseTable.Cell>
-                </BaseTable.Row>
-            )}
+            {!info.isInitialized && <KeyValue label="Status">Uninitialized</KeyValue>}
         </AccountCard>
     );
 }

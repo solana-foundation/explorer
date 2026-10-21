@@ -9,9 +9,9 @@ import { Badge } from '@/app/components/shared/ui/badge';
 import { getSafeExternalHref } from '@/app/shared/lib/url';
 import { Alert } from '@/app/shared/ui/Alert/Alert';
 import { CardBody } from '@/app/shared/ui/Card';
-import { SectionCard } from '@/app/shared/ui/Card/SectionCard';
 import { CopyableCode } from '@/app/shared/ui/CopyableCode';
 import { ExternalLinkValue, KeyValue, TextValue } from '@/app/shared/ui/key-value';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { OSEC_URL, OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 import { VERIFIED_BUILDS_GUIDE_URL } from '@/app/utils/verified-builds-url';
 
@@ -61,7 +61,7 @@ export function BaseVerifiedBuildCard({
 
     if (!registryInfo) {
         return (
-            <SectionCard title="Verified Build">
+            <OverviewCard title="Verified Build">
                 <CardBody ui="dashkit" className="text-center">
                     Verified build information not yet uploaded by the program authority. For more information, see the{' '}
                     <Link href={VERIFIED_BUILDS_GUIDE_URL} target="_blank">
@@ -72,7 +72,7 @@ export function BaseVerifiedBuildCard({
                     Note: Some programs were verified using older, deprecated versions of the API and may not include
                     on-chain verification details.
                 </CardBody>
-            </SectionCard>
+            </OverviewCard>
         );
     }
 
@@ -96,9 +96,8 @@ export function BaseVerifiedBuildCard({
 
     return (
         <>
-            <SectionCard
+            <OverviewCard
                 title="Verified Build"
-                noCardMargin
                 note={
                     <Alert variant="info" appearance="outlined" icon={<Info size={16} />} className="!mb-0">
                         A verified build badge indicates that this program was built from source code that is publicly
@@ -116,7 +115,7 @@ export function BaseVerifiedBuildCard({
                         <RenderEntry value={registryInfo[x.key]} type={x.type} mono={x.mono ?? true} />
                     </KeyValue>
                 ))}
-            </SectionCard>
+            </OverviewCard>
             {verificationMessage && (
                 <div className="mb-10 mt-3 px-1 text-sm text-outer-space-300">{verificationMessage}</div>
             )}

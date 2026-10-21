@@ -6,10 +6,20 @@ import { Account } from '@providers/accounts';
 import { NonceAccount } from '@validators/accounts/nonce';
 import React from 'react';
 
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
 
 export function NonceAccountSection({ account, nonceAccount }: { account: Account; nonceAccount: NonceAccount }) {
     const refresh = useRefreshAccount();
+
+    const rows: KeyValueRow[] = [
+        { label: 'Authority', value: <Address pubkey={nonceAccount.info.authority} raw link /> },
+        { label: 'Blockhash', value: <code>{nonceAccount.info.blockhash}</code> },
+        {
+            label: 'Fee',
+            value: `${nonceAccount.info.feeCalculator.lamportsPerSignature} lamports per signature`,
+        },
+    ];
+
     return (
         <AccountCard
             title="Nonce Account"
@@ -19,27 +29,7 @@ export function NonceAccountSection({ account, nonceAccount }: { account: Accoun
         >
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Authority</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={nonceAccount.info.authority} alignRight raw link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Blockhash</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <code>{nonceAccount.info.blockhash}</code>
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Fee</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {nonceAccount.info.feeCalculator.lamportsPerSignature} lamports per signature
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }

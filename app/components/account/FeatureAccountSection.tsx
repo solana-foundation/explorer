@@ -15,7 +15,7 @@ import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { ClusterInfo, useCluster, useClusterInfo } from '@/app/providers/cluster';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRowInput, KeyValueRows, StackedList } from '@/app/shared/ui/key-value';
 import { Cluster, clusterName } from '@/app/utils/cluster';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 
@@ -82,25 +82,48 @@ const BaseFeatureCard = ({
     const { cluster } = useCluster();
     const clusterInfo = useClusterInfo();
 
-    let activatedAtSlot;
-    let simdLink;
-    if (activatedAt) {
-        activatedAtSlot = (
-            <BaseTable.Row>
-                <BaseTable.Cell className="whitespace-nowrap">Activated At Slot</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Slot slot={activatedAt} link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-        );
-    }
-    if (featureInfo) {
-        simdLink = (
-            <BaseTable.Row>
-                <BaseTable.Cell>SIMDs</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
+    const rows: KeyValueRowInput[] = [
+        { label: 'Address', value: <Address pubkey={new PublicKey(address)} raw /> },
+        {
+            label: 'Activated?',
+            value:
+                activatedAt !== null ? (
+                    <Badge ui="dashkit" variant="success" tone="solid">
+                        Active on {clusterName(cluster)}
+                    </Badge>
+                ) : isPending ? (
+                    <Badge ui="dashkit" variant="warning" tone="solid">
+                        Pending activation on {clusterName(cluster)}
+                    </Badge>
+                ) : (
+                    <code>Not yet activated on {clusterName(cluster)}</code>
+                ),
+        },
+        activatedAt && {
+            label: 'Activated At Slot',
+            value: <Slot slot={activatedAt} link />,
+        },
+        {
+            label: 'Cluster Activation',
+            value: (
+                <ClusterActivationEpochAtCluster
+                    cluster={cluster}
+                    clusterInfo={clusterInfo}
+                    activatedAt={activatedAt}
+                    isPending={isPending}
+                />
+            ),
+        },
+        featureInfo?.description && {
+            label: 'Description',
+            value: featureInfo?.description,
+        },
+        featureInfo && {
+            label: 'SIMDs',
+            value: (
+                <StackedList mono={false}>
                     {featureInfo.simds.map((simd, index) => (
-                        <div key={index}>
+                        <li key={index}>
                             {simd && featureInfo.simd_link[index] ? (
                                 <ExternalLink href={featureInfo.simd_link[index]}>
                                     SIMD {simd} <ExternalLinkIcon className="align-text-top" size={13} />
@@ -108,61 +131,16 @@ const BaseFeatureCard = ({
                             ) : (
                                 <code>No link</code>
                             )}
-                        </div>
+                        </li>
                     ))}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-        );
-    }
+                </StackedList>
+            ),
+        },
+    ];
 
     return (
-        <AccountCard title={featureInfo?.title ?? 'Feature Activation'} account={account} layout="expanded">
-            <BaseTable.Row>
-                <BaseTable.Cell>Address</BaseTable.Cell>
-                <BaseTable.Cell>
-                    <Address pubkey={new PublicKey(address)} alignRight raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell className="whitespace-nowrap">Activated?</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    {activatedAt !== null ? (
-                        <Badge ui="dashkit" variant="success" tone="solid">
-                            Active on {clusterName(cluster)}
-                        </Badge>
-                    ) : isPending ? (
-                        <Badge ui="dashkit" variant="warning" tone="solid">
-                            Pending activation on {clusterName(cluster)}
-                        </Badge>
-                    ) : (
-                        <code>Not yet activated on {clusterName(cluster)}</code>
-                    )}
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            {activatedAtSlot}
-
-            <BaseTable.Row>
-                <BaseTable.Cell className="whitespace-nowrap">Cluster Activation</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <ClusterActivationEpochAtCluster
-                        cluster={cluster}
-                        clusterInfo={clusterInfo}
-                        activatedAt={activatedAt}
-                        isPending={isPending}
-                    />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            {featureInfo?.description && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Description</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">{featureInfo?.description}</BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            {simdLink}
+        <AccountCard title={featureInfo?.title ?? 'Feature Activation'} account={account}>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 };

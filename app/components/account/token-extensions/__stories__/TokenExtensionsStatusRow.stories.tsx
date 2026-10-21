@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
 import * as mockExtensions from '@/app/__tests__/mock-parsed-extensions-stubs';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 import { populatePartialParsedTokenExtension } from '@/app/utils/token-extension';
 
 import { TokenExtensionsStatusRow } from '../TokenExtensionsStatusRow';
@@ -11,13 +11,11 @@ import { TokenExtensionsStatusRow } from '../TokenExtensionsStatusRow';
 const meta = {
     component: TokenExtensionsStatusRow,
     decorators: [
-        // Mirrors the production wrapper (TableCardBody) the row renders in.
+        // Mirrors the production wrapper (AccountCard / OverviewCard) the row renders in.
         Story => (
-            <BaseTable ui="dashkit" variant="card">
-                <BaseTable.Body>
-                    <Story />
-                </BaseTable.Body>
-            </BaseTable>
+            <OverviewCard title="Token Mint">
+                <Story />
+            </OverviewCard>
         ),
     ],
     parameters: {

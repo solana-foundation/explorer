@@ -11,8 +11,8 @@ import {
     useSquadsMultisig,
     useSquadsMultisigLookup,
 } from '@/app/providers/squadsMultisig';
-import { SectionCard } from '@/app/shared/ui/Card/SectionCard';
-import { KeyValue } from '@/app/shared/ui/key-value';
+import { KeyValueRows } from '@/app/shared/ui/key-value';
+import { OverviewCard } from '@/app/shared/ui/OverviewCard';
 
 import { Address } from '../common/Address';
 import { LoadingCard } from '../common/LoadingCard';
@@ -56,24 +56,40 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
         squadInfo?.version === 'v4' ? squadInfo?.multisig.members.length : squadInfo?.multisig.keys.length;
 
     return (
-        <SectionCard title="Upgrade Authority Multisig Information">
-            <KeyValue label="Multisig Program">{squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}</KeyValue>
-            <KeyValue label="Multisig Program Id">
-                <Address pubkey={squadMapInfo?.version === 'v4' ? SQUADS_V4_PUBKEY : SQUADS_V3_PUBKEY} link />
-            </KeyValue>
-            <KeyValue label="Multisig Account">
-                {squadMapInfo?.isSquad && <Address pubkey={new PublicKey(squadMapInfo.multisig)} link />}
-            </KeyValue>
-            <KeyValue label="Multisig Approval Threshold">
-                {/* `useSquadsMultisig` resolves after the Suspense-covered lookup, so guard the quorum
-                    text with a skeleton — otherwise the row flashes a bare "of" until it loads. */}
-                {squadInfo ? `${squadInfo.multisig.threshold} of ${memberCount}` : <Skeleton className="h-4 w-16" />}
-            </KeyValue>
-            {members.map((member, idx) => (
-                <KeyValue key={idx} label={`Multisig Member ${idx + 1}`}>
-                    <Address pubkey={member} link />
-                </KeyValue>
-            ))}
-        </SectionCard>
+        <OverviewCard title="Upgrade Authority Multisig Information">
+            <KeyValueRows
+                rows={[
+                    {
+                        label: 'Multisig Program',
+                        value: squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3',
+                    },
+                    {
+                        label: 'Multisig Program Id',
+                        value: (
+                            <Address
+                                pubkey={squadMapInfo?.version === 'v4' ? SQUADS_V4_PUBKEY : SQUADS_V3_PUBKEY}
+                                link
+                            />
+                        ),
+                    },
+                    squadMapInfo?.isSquad && {
+                        label: 'Multisig Account',
+                        value: <Address pubkey={new PublicKey(squadMapInfo.multisig)} link />,
+                    },
+                    {
+                        label: 'Multisig Approval Threshold',
+                        value: squadInfo ? (
+                            `${squadInfo.multisig.threshold} of ${memberCount}`
+                        ) : (
+                            <Skeleton className="h-4 w-16" />
+                        ),
+                    },
+                    ...members.map((member, idx) => ({
+                        label: `Multisig Member ${idx + 1}`,
+                        value: <Address pubkey={member} link />,
+                    })),
+                ]}
+            />
+        </OverviewCard>
     );
 }

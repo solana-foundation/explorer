@@ -6,9 +6,8 @@ import { KitAddress } from '@components/common/KitAddress';
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
 import type { Account } from '@providers/accounts';
-import type { Address } from '@solana/kit';
 
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, KeyValueRows } from '@/app/shared/ui/key-value';
 
 import { type NftokenCollectionAccount, type NftokenNftAccount, parseNftokenAccount } from '../lib/nftoken-accounts';
 import { type CollectionNftsState, useCollectionNfts } from '../model/use-collection-nfts';
@@ -35,13 +34,23 @@ function NftCard({ account, nft }: { account: Account; nft: NftokenNftAccount })
         refreshMetadata();
     };
 
+    const rows: KeyValueRow[] = [
+        { label: 'Authority', value: <KitAddress address={nft.authority} link /> },
+        { label: 'Holder', value: <KitAddress address={nft.holder} link /> },
+        {
+            label: 'Delegate',
+            value: nft.delegate ? <KitAddress address={nft.delegate} link /> : 'Not Delegated',
+        },
+        {
+            label: 'Collection',
+            value: nft.collection ? <KitAddress address={nft.collection} link /> : 'No Collection',
+        },
+    ];
+
     return (
         <AccountCard title="Overview" account={account} refresh={refresh} analyticsSection="nft_token_card">
             <AccountAddressRow account={account} />
-            <AddressRow address={nft.authority} label="Authority" />
-            <AddressRow address={nft.holder} label="Holder" />
-            <AddressRow address={nft.delegate} label="Delegate" missing="Not Delegated" />
-            <AddressRow address={nft.collection} label="Collection" missing="No Collection" />
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }
@@ -56,28 +65,16 @@ function CollectionCard({ account, collection }: { account: Account; collection:
         refreshMetadata();
     };
 
+    const rows: KeyValueRow[] = [
+        { label: 'Authority', value: <KitAddress address={collection.authority} link /> },
+        { label: 'Number of NFTs', value: <NftCount nfts={nfts} /> },
+    ];
+
     return (
         <AccountCard title="Overview" account={account} refresh={refresh} analyticsSection="nft_token_collection_card">
             <AccountAddressRow account={account} />
-            <AddressRow address={collection.authority} label="Authority" />
-            <BaseTable.Row>
-                <BaseTable.Cell>Number of NFTs</BaseTable.Cell>
-                <BaseTable.Cell className="md:text-right">
-                    <NftCount nfts={nfts} />
-                </BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
-    );
-}
-
-function AddressRow({ address, label, missing }: { address: Address | undefined; label: string; missing?: string }) {
-    return (
-        <BaseTable.Row>
-            <BaseTable.Cell>{label}</BaseTable.Cell>
-            <BaseTable.Cell className="md:text-right">
-                {address ? <KitAddress address={address} alignRight link /> : missing}
-            </BaseTable.Cell>
-        </BaseTable.Row>
     );
 }
 

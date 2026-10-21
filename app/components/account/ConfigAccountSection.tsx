@@ -8,7 +8,7 @@ import { ConfigAccount, StakeConfigInfoAccount, ValidatorInfoAccount } from '@va
 import React from 'react';
 
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { type KeyValueRow, type KeyValueRowInput, KeyValueRows } from '@/app/shared/ui/key-value';
 
 const MAX_SLASH_PENALTY = Math.pow(2, 8);
 
@@ -34,6 +34,11 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
         style: 'percent',
     }).format(configAccount.info.slashPenalty / MAX_SLASH_PENALTY);
 
+    const rows: KeyValueRow[] = [
+        { label: 'Warmup / Cooldown Rate', value: warmupCooldownFormatted },
+        { label: 'Slash Penalty', value: slashPenaltyFormatted },
+    ];
+
     return (
         <AccountCard
             title="Stake Config"
@@ -43,22 +48,42 @@ function StakeConfigCard({ account, configAccount }: { account: Account; configA
         >
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Warmup / Cooldown Rate</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{warmupCooldownFormatted}</BaseTable.Cell>
-            </BaseTable.Row>
-
-            <BaseTable.Row>
-                <BaseTable.Cell>Slash Penalty</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">{slashPenaltyFormatted}</BaseTable.Cell>
-            </BaseTable.Row>
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }
 
 function ValidatorInfoCard({ account, configAccount }: { account: Account; configAccount: ValidatorInfoAccount }) {
     const refresh = useRefreshAccount();
+
+    const rows: KeyValueRowInput[] = [
+        configAccount.info.configData.name && {
+            label: 'Name',
+            value: configAccount.info.configData.name,
+        },
+        configAccount.info.configData.keybaseUsername && {
+            label: 'Keybase Username',
+            value: configAccount.info.configData.keybaseUsername,
+        },
+        configAccount.info.configData.website && {
+            label: 'Website',
+            value: (
+                <ExternalLink href={configAccount.info.configData.website}>
+                    {configAccount.info.configData.website}
+                </ExternalLink>
+            ),
+        },
+        configAccount.info.configData.details && {
+            label: 'Details',
+            value: configAccount.info.configData.details,
+        },
+        configAccount.info.keys &&
+            configAccount.info.keys.length > 1 && {
+                label: 'Signer',
+                value: <Address pubkey={new PublicKey(configAccount.info.keys[1].pubkey)} link />,
+            },
+    ];
+
     return (
         <AccountCard
             title="Validator Info"
@@ -68,49 +93,7 @@ function ValidatorInfoCard({ account, configAccount }: { account: Account; confi
         >
             <AccountAddressRow account={account} />
             <AccountBalanceRow account={account} />
-
-            {configAccount.info.configData.name && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Name</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">{configAccount.info.configData.name}</BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            {configAccount.info.configData.keybaseUsername && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Keybase Username</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        {configAccount.info.configData.keybaseUsername}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            {configAccount.info.configData.website && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Website</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <ExternalLink href={configAccount.info.configData.website}>
-                            {configAccount.info.configData.website}
-                        </ExternalLink>
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            {configAccount.info.configData.details && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Details</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">{configAccount.info.configData.details}</BaseTable.Cell>
-                </BaseTable.Row>
-            )}
-
-            {configAccount.info.keys && configAccount.info.keys.length > 1 && (
-                <BaseTable.Row>
-                    <BaseTable.Cell>Signer</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address pubkey={new PublicKey(configAccount.info.keys[1].pubkey)} link alignRight />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-            )}
+            <KeyValueRows rows={rows} />
         </AccountCard>
     );
 }
