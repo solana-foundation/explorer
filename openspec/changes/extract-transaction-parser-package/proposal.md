@@ -33,7 +33,9 @@ Alternatives considered:
 - **Use kit's transaction helpers directly.** Rejected for the parts kit does not cover. Its account metas
   carry no `source` or lookup table, its config value codec is internal, `getTransactionSizeLimit` needs a kit
   `Transaction` that the union never holds, and each of its priority fee helpers covers only some versions.
-  The package still calls kit for instruction normalisation and the config mask predicates.
+  The package still calls kit for instruction normalisation, the config mask predicates and the wire envelope
+  decode. Its `json` decode stays in the package: kit sets an empty v1 config although the RPC sends
+  `transactionConfig`, and reads absent `addressTableLookups` as no tables.
 
 ## What Changes
 
