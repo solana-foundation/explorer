@@ -330,6 +330,12 @@ describe('fromRpcTransaction', () => {
         expect(() => fromRpcTransaction(response)).toThrow(MalformedTransactionError);
     });
 
+    it('should reject a wire response with an unknown encoding', () => {
+        const response = { transaction: ['AQID', 'base32'] } as unknown as RpcTransactionResponse;
+
+        expect(() => fromRpcTransaction(response)).toThrow('neither base58 nor base64');
+    });
+
     it('should reject v1 wire bytes of an unknown version', () => {
         const bytes = wireBytes(1);
         bytes[0] = 0x82;
