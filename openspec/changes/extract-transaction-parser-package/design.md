@@ -51,10 +51,10 @@ takes a version.
 - `fromCompiledMessage` takes a decoded message. The version comes off the message.
 - `fromMessageBytes` decodes, then delegates. It rejects trailing bytes, so a wire transaction cannot pass as a
   message.
-- `fromRpcTransaction` is one entry point for every encoding. It detects which encoding arrived the way kit's
-  `decodeTransactionFromRpcResponse` does. `base64` and `base58` carry the full wire transaction, whose
-  `messageBytes` and signatures go to `fromCompiledMessage`. `json` carries the compiled header. `jsonParsed`
-  carries neither, and sends accounts with their roles already resolved.
+- `fromRpcTransaction` is one entry point for every encoding. `base64` and `base58` go through kit's
+  `decodeTransactionFromRpcResponse`, then a canonical round trip on `messageBytes` and a check of the reported
+  version against the encoded one. `json` carries the compiled header. `jsonParsed` carries neither, and sends
+  accounts with their roles already resolved.
 
 `RpcTransactionResponse` and the three encoding shapes are declared structurally, not derived from kit's
 overloaded `GetTransactionApi`. `fromRpcTransaction` throws `UnsupportedTransactionVersionError` on an unknown
