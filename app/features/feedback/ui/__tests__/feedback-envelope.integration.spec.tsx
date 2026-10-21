@@ -1,10 +1,9 @@
 import { type Envelope, getCurrentScope, ServerRuntimeClient } from '@sentry/core';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getDefaultStore } from 'jotai';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { feedbackOpenAtom } from '../../model/feedback';
+import { takeFeedbackRequest } from '../../model/feedback';
 import { FeedbackWidget } from '../FeedbackWidget';
 
 // The @sentry/nextjs entry imports server code that fails in jsdom, so the test uses @sentry/core.
@@ -31,8 +30,8 @@ describe('FeedbackWidget — real captureFeedback envelope', () => {
     const envelopes: Envelope[] = [];
 
     beforeEach(() => {
-        // The popup's open state is a shared atom; each test starts closed.
-        getDefaultStore().set(feedbackOpenAtom, false);
+        // The open request is a shared atom; each test starts with none pending.
+        takeFeedbackRequest();
         envelopes.length = 0;
         vi.stubEnv('NEXT_PUBLIC_FEEDBACK_ENABLED', 'true');
         vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);

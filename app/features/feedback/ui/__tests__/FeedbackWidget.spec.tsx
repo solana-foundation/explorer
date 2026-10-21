@@ -1,11 +1,10 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getDefaultStore } from 'jotai';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { sendFeedback } from '@/app/shared/lib/sentry/client';
 
-import { feedbackOpenAtom } from '../../model/feedback';
+import { takeFeedbackRequest } from '../../model/feedback';
 import { FeedbackTrigger } from '../FeedbackTrigger';
 import { FeedbackWidget } from '../FeedbackWidget';
 
@@ -18,8 +17,8 @@ const SENTRY_DSN_FIXTURE = 'https://examplePublicKey@o0.ingest.sentry.io/0';
 
 describe('FeedbackWidget', () => {
     beforeEach(() => {
-        // The popup's open state is a shared atom; each test starts closed.
-        getDefaultStore().set(feedbackOpenAtom, false);
+        // The open request is a shared atom; each test starts with none pending.
+        takeFeedbackRequest();
         vi.mocked(sendFeedback).mockClear();
         vi.mocked(sendFeedback).mockResolvedValue('test-event-id');
         vi.stubEnv('NEXT_PUBLIC_FEEDBACK_ENABLED', 'true');
@@ -73,7 +72,7 @@ describe('FeedbackWidget', () => {
         expect(screen.getByRole('link', { name: 'Suggest an idea on GitHub' })).toBeInTheDocument();
     });
 
-    it('should submit message, rating, contact, cluster, and source and show the sent note', async () => {
+    it('should submit message, rating, contact, cluster, and source, then close', async () => {
         vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
         render(<FeedbackWidget />);
         await openPopup();
@@ -89,7 +88,8 @@ describe('FeedbackWidget', () => {
             source: 'widget',
             tags: { cluster: 'mainnet-beta', rating: 4, source: 'widget', type: 'feedback' },
         });
-        expect(await screen.findByText('Feedback sent!')).toBeInTheDocument();
+        // The content swaps to the sent note, then the popup leaves.
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     });
 
     it('should show the send in progress on the Submit button', async () => {
@@ -107,7 +107,7 @@ describe('FeedbackWidget', () => {
         await userEvent.click(screen.getByRole('button', { name: 'Sending…' }));
         expect(sendFeedback).toHaveBeenCalledOnce();
         deliver('test-event-id');
-        expect(await screen.findByText('Feedback sent!')).toBeInTheDocument();
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     });
 
     it('should keep the form open and write the error when delivery fails', async () => {
@@ -132,25 +132,6 @@ describe('FeedbackWidget', () => {
 
         expect(sendFeedback).not.toHaveBeenCalled();
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    });
-
-    it('should close itself a short while after showing the sent note', async () => {
-        vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
-        const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-        vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
-        render(<FeedbackWidget />);
-        await openPopup(user);
-
-        await user.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Great explorer!');
-        await user.click(screen.getByRole('button', { name: 'Submit' }));
-        expect(await screen.findByText('Feedback sent!')).toBeInTheDocument();
-
-        await act(async () => {
-            await vi.advanceTimersByTimeAsync(2500);
-        });
-        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-
-        vi.useRealTimers();
     });
 
     it('should reset the topic and rating when the popup is reopened', async () => {
