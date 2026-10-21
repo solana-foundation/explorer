@@ -42,7 +42,7 @@ describe('partitionFeatures', () => {
             makeFeature({ key: 'A', mainnet_activation_epoch: 800, title: 'A' }),
             makeFeature({ key: 'IDLE', title: 'IDLE' }),
         ]);
-        const { activated, upcoming } = partition(Cluster.MainnetBeta);
+        const { activated, upcoming } = partition(Cluster.Mainnet);
         expect(activated.map(feature => feature.key)).toEqual(['A']);
         expect(activated[0]).toMatchObject({ clusterActivationEpoch: 800 });
         expect(upcoming).toHaveLength(0);
@@ -53,7 +53,7 @@ describe('partitionFeatures', () => {
             makeFeature({ devnet_activation_epoch: 1050, key: 'B', testnet_activation_epoch: 1000 }),
             makeFeature({ devnet_activation_epoch: 950, key: 'A', testnet_activation_epoch: 900 }),
         ]);
-        const { activated, upcoming } = partition(Cluster.MainnetBeta);
+        const { activated, upcoming } = partition(Cluster.Mainnet);
         expect(activated).toHaveLength(0);
         // A has a lower devnet epoch (950) than B (1050), so A comes first.
         expect(upcoming.map(feature => feature.key)).toEqual(['A', 'B']);
@@ -72,7 +72,7 @@ describe('partitionFeatures', () => {
                 testnet_activation_epoch: 760,
             }),
         ]);
-        const { activated, upcoming } = partition(Cluster.MainnetBeta);
+        const { activated, upcoming } = partition(Cluster.Mainnet);
         expect(upcoming).toHaveLength(0);
         expect(activated[0]).toMatchObject({ clusterActivationEpoch: 800, key: 'A' });
         expect(activated[0].otherActivations).toEqual([
@@ -90,7 +90,7 @@ describe('partitionFeatures', () => {
                 simds: ['148', '149', '200'],
             }),
         ]);
-        const { activated } = partition(Cluster.MainnetBeta);
+        const { activated } = partition(Cluster.Mainnet);
         expect(activated[0].simdEntries).toEqual([
             { link: 'https://simd/148', simd: '148' },
             { link: 'https://simd/200', simd: '200' },
@@ -112,7 +112,7 @@ describe('partitionFeatures', () => {
                 simds: ['200'],
             }),
         ]);
-        const { activated } = partition(Cluster.MainnetBeta);
+        const { activated } = partition(Cluster.Mainnet);
         const byKey = Object.fromEntries(activated.map(f => [f.key, f.simdEntries]));
         expect(byKey['A']).toEqual([{ link: 'https://simd/148', simd: '148' }]);
         expect(byKey['B']).toEqual([]);
@@ -122,14 +122,14 @@ describe('partitionFeatures', () => {
         const partition = await importWith([
             makeFeature({ key: 'A', mainnet_activation_epoch: 800, simd_link: ['x'], simds: ['148'] }),
         ]);
-        const { activated } = partition(Cluster.MainnetBeta);
+        const { activated } = partition(Cluster.Mainnet);
         expect('simds' in activated[0]).toBe(false);
         expect('simd_link' in activated[0]).toBe(false);
     });
 
     it('should ignore features that are not active anywhere', async () => {
         const partition = await importWith([makeFeature({ key: 'IDLE' })]);
-        const { activated, upcoming } = partition(Cluster.MainnetBeta);
+        const { activated, upcoming } = partition(Cluster.Mainnet);
         expect(activated).toHaveLength(0);
         expect(upcoming).toHaveLength(0);
     });

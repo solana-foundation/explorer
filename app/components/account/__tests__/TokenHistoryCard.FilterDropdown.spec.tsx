@@ -45,7 +45,7 @@ describe('should label the Token History filter with fetched token metadata', ()
     afterEach(() => vi.clearAllMocks());
 
     it('should show the fetched symbol and name on the selected-filter toggle button', async () => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis' });
+        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis' });
         useTokenInfoMock.mockReturnValue({
             address: FILTER_MINT,
             decimals: 6,
@@ -61,7 +61,7 @@ describe('should label the Token History filter with fetched token metadata', ()
     });
 
     it('should fall back to a truncated pubkey when metadata is unavailable', async () => {
-        useClusterMock.mockReturnValue({ cluster: Cluster.MainnetBeta, genesisHash: 'genesis' });
+        useClusterMock.mockReturnValue({ cluster: Cluster.Mainnet, genesisHash: 'genesis' });
         useTokenInfoMock.mockReturnValue(undefined);
 
         render(<FilterDropdown filter={FILTER_MINT} tokens={[tokenFor(FILTER_MINT)] as any} />);

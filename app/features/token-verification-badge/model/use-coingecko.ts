@@ -29,7 +29,7 @@ function getCoinGeckoSwrKey(
 ): CoinGeckoSwrKey | null {
     // SWR treats a null key as "skip fetch" — only fetch for a visible mainnet token mint.
     // eslint-disable-next-line unicorn/no-null
-    if (!enabled || !isTabVisible || cluster !== Cluster.MainnetBeta) return null;
+    if (!enabled || !isTabVisible || cluster !== Cluster.Mainnet) return null;
     return ['coingecko', address];
 }
 

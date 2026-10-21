@@ -100,7 +100,7 @@ function resolveClusterParam(request: NextRequest): ClusterParam {
         return { kind: 'invalid' };
     }
 
-    if (slug === undefined) return { cluster: Cluster.MainnetBeta, kind: 'ok' };
+    if (slug === undefined) return { cluster: Cluster.Mainnet, kind: 'ok' };
 
     const cluster = clusterFromSlug(slug);
     // Custom is rejected rather than resolved. Its URL is client-supplied, so honouring it on an

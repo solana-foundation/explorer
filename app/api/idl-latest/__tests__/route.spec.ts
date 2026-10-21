@@ -40,7 +40,7 @@ describe('GET /api/idl-latest', () => {
     it('should return 400 when required params are missing', async () => {
         const { GET } = await importRoute();
         const cases = [
-            createRequest({ cluster: String(Cluster.MainnetBeta) }), // missing programAddress
+            createRequest({ cluster: String(Cluster.Mainnet) }), // missing programAddress
             createRequest({ programAddress: PROGRAM_ADDRESS }), // missing cluster
         ];
         const responses = await Promise.all(cases.map(r => GET(r)));
@@ -60,7 +60,7 @@ describe('GET /api/idl-latest', () => {
 
     it('should return 400 for an invalid program address', async () => {
         const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: 'not-a-pubkey' }));
+        const res = await GET(createRequest({ cluster: String(Cluster.Mainnet), programAddress: 'not-a-pubkey' }));
         expect(res.status).toBe(400);
         expect(await res.json()).toEqual({ error: 'Invalid program address' });
     });
@@ -76,7 +76,7 @@ describe('GET /api/idl-latest', () => {
         );
 
         const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
+        const res = await GET(createRequest({ cluster: String(Cluster.Mainnet), programAddress: PROGRAM_ADDRESS }));
 
         expect(res.status).toBe(200);
         // Storage accounts are forwarded alongside each IDL (anchorIdlAddress → anchorAddress, etc.).
@@ -95,7 +95,7 @@ describe('GET /api/idl-latest', () => {
         mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ programMetadataIdl: { name: 'pmp' } }));
 
         const { GET } = await importRoute();
-        await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
+        await GET(createRequest({ cluster: String(Cluster.Mainnet), programAddress: PROGRAM_ADDRESS }));
 
         expect(mocks.resolveProgramIdls).toHaveBeenCalledWith(expect.anything(), PROGRAM_ADDRESS);
     });
@@ -106,7 +106,7 @@ describe('GET /api/idl-latest', () => {
         );
 
         const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
+        const res = await GET(createRequest({ cluster: String(Cluster.Mainnet), programAddress: PROGRAM_ADDRESS }));
 
         expect(res.status).toBe(502);
         expect(await res.json()).toEqual({ error: 'Upstream RPC error' });
@@ -125,7 +125,7 @@ describe('GET /api/idl-latest', () => {
         mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ anchorIdl: { name: 'a' } }));
 
         const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
+        const res = await GET(createRequest({ cluster: String(Cluster.Mainnet), programAddress: PROGRAM_ADDRESS }));
 
         expect(res.status).toBe(200);
         expect(mocks.resolveProgramIdls).toHaveBeenCalledTimes(2);
@@ -142,7 +142,7 @@ describe('GET /api/idl-latest', () => {
         mocks.resolveProgramIdls.mockResolvedValueOnce(resolved({ anchorIdl: { name: 'a' } }));
 
         const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
+        const res = await GET(createRequest({ cluster: String(Cluster.Mainnet), programAddress: PROGRAM_ADDRESS }));
 
         expect(res.status).toBe(200);
         expect(mocks.resolveProgramIdls).toHaveBeenCalledTimes(2);
@@ -153,7 +153,7 @@ describe('GET /api/idl-latest', () => {
         mocks.resolveProgramIdls.mockRejectedValueOnce(new Error('boom'));
 
         const { GET } = await importRoute();
-        const res = await GET(createRequest({ cluster: String(Cluster.MainnetBeta), programAddress: PROGRAM_ADDRESS }));
+        const res = await GET(createRequest({ cluster: String(Cluster.Mainnet), programAddress: PROGRAM_ADDRESS }));
 
         expect(res.status).toBe(502);
         expect(await res.json()).toEqual({ error: 'Failed to resolve IDLs' });

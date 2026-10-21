@@ -14,7 +14,7 @@ const idlState: ProgramIdls = { idls: [] };
 
 vi.mock('@providers/cluster', async importOriginal => ({
     ...(await importOriginal<typeof import('@providers/cluster')>()),
-    useCluster: () => ({ cluster: Cluster.MainnetBeta, url: 'http://localhost' }),
+    useCluster: () => ({ cluster: Cluster.Mainnet, url: 'http://localhost' }),
 }));
 vi.mock('@/app/entities/idl/model/use-program-idls', () => ({ useProgramIdls: () => idlState }));
 vi.mock('@/app/providers/squadsMultisig', async importOriginal => ({

@@ -15,7 +15,7 @@ const MAINNET_ONLY_PROGRAM = new PublicKey('27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9
 
 describe('UnknownDetailsCard', () => {
     it('should title the card with the program name', () => {
-        renderCard(SystemProgram.programId, Cluster.MainnetBeta);
+        renderCard(SystemProgram.programId, Cluster.Mainnet);
 
         expect(screen.getByText('System Program: Unknown Instruction')).toBeInTheDocument();
     });
@@ -29,7 +29,7 @@ describe('UnknownDetailsCard', () => {
     });
 
     it('should open the card in raw mode', () => {
-        renderCard(SystemProgram.programId, Cluster.MainnetBeta);
+        renderCard(SystemProgram.programId, Cluster.Mainnet);
 
         expect(screen.getByRole('button', { name: 'Raw' })).toBeDisabled();
         expect(screen.getByText('Instruction Data')).toBeInTheDocument();

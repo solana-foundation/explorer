@@ -21,7 +21,7 @@ describe('useTotalReward', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.stubEnv('NEXT_PUBLIC_STAKE_TOTAL_REWARD_ENABLED', 'true');
-        mocks.cluster = { cluster: Cluster.MainnetBeta };
+        mocks.cluster = { cluster: Cluster.Mainnet };
     });
 
     afterEach(() => {

@@ -15,7 +15,7 @@ const { partitionFeatures, push } = vi.hoisted(() => ({
 }));
 
 vi.mock('@/app/providers/cluster', () => ({
-    useCluster: vi.fn(() => ({ cluster: Cluster.MainnetBeta })),
+    useCluster: vi.fn(() => ({ cluster: Cluster.Mainnet })),
     useClusterInfo: vi.fn(() => undefined),
 }));
 
@@ -84,7 +84,7 @@ const CLUSTER_INFO = {
 } as unknown as ReturnType<typeof useClusterInfo>;
 
 beforeEach(() => {
-    vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.MainnetBeta } as ReturnType<typeof useCluster>);
+    vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.Mainnet } as ReturnType<typeof useCluster>);
     partitionFeatures.mockReturnValue({ activated: [], upcoming: [] });
     vi.mocked(useClusterInfo).mockReturnValue(undefined);
     vi.mocked(useSlotTime).mockReturnValue(undefined);
@@ -151,7 +151,7 @@ describe('FeatureGatesView', () => {
 
             expect(screen.getByRole('heading', { level: 2, name: startsWith('Upcoming') })).toBeInTheDocument();
             expect(screen.queryByRole('heading', { level: 2, name: startsWith('Activated') })).not.toBeInTheDocument();
-            expect(screen.queryByText('No feature gates on Mainnet Beta.')).not.toBeInTheDocument();
+            expect(screen.queryByText('No feature gates on Mainnet.')).not.toBeInTheDocument();
         });
 
         it('should show only the Activated section when nothing is upcoming', () => {
@@ -165,7 +165,7 @@ describe('FeatureGatesView', () => {
         it('should show the empty state when a cluster has no feature gates', () => {
             render(<FeatureGatesView />);
 
-            expect(screen.getByText('No feature gates on Mainnet Beta.')).toBeInTheDocument();
+            expect(screen.getByText('No feature gates on Mainnet.')).toBeInTheDocument();
         });
 
         it('should explain an empty Upcoming list on testnet', () => {

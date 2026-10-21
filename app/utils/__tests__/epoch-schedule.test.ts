@@ -91,17 +91,17 @@ describe('getLastSlotInEpoch', () => {
 
 describe('getMaxComputeUnitsForEpoch', () => {
     it('should return the correct max compute units for an epoch on mainnet', () => {
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: 0n })).toEqual(48_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: 769n })).toEqual(48_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: 770n })).toEqual(50_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: 821n })).toEqual(50_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: 822n })).toEqual(60_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: 823n })).toEqual(60_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: 1008n })).toEqual(60_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: 1009n })).toEqual(100_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: 1010n })).toEqual(100_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: undefined })).toEqual(48_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.MainnetBeta, epoch: -1n })).toEqual(48_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: 0n })).toEqual(48_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: 769n })).toEqual(48_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: 770n })).toEqual(50_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: 821n })).toEqual(50_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: 822n })).toEqual(60_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: 823n })).toEqual(60_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: 1008n })).toEqual(60_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: 1009n })).toEqual(100_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: 1010n })).toEqual(100_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: undefined })).toEqual(48_000_000);
+        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Mainnet, epoch: -1n })).toEqual(48_000_000);
     });
 
     it('should return the correct max compute units for an epoch on devnet', () => {

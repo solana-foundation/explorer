@@ -45,7 +45,7 @@ describe('useSupply', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mocks.cluster = clusterContext({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             connectableUrl: MAINNET_URL,
             // Connecting on purpose: supply must not wait on the health check.
             status: ClusterStatus.Connecting,
@@ -70,7 +70,7 @@ describe('useSupply', () => {
 
         await waitForHook(() =>
             expect(fetchMock).toHaveBeenCalledWith(
-                `/api/supply?cluster=${Cluster.MainnetBeta}`,
+                `/api/supply?cluster=${Cluster.Mainnet}`,
                 expect.objectContaining({ signal: expect.any(AbortSignal) }),
             ),
         );
@@ -80,7 +80,7 @@ describe('useSupply', () => {
     // the cache can still answer. Gating on status at all would turn that into a dead card.
     it('should ask the route when the cluster health check has failed', async () => {
         mocks.cluster = clusterContext({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             connectableUrl: MAINNET_URL,
             status: ClusterStatus.Failure,
             url: MAINNET_URL,
@@ -89,7 +89,7 @@ describe('useSupply', () => {
         const { result } = renderSupply();
 
         await waitForHook(() => expect(result.current.kind).toBe('ready'));
-        expect(fetchMock).toHaveBeenCalledWith(`/api/supply?cluster=${Cluster.MainnetBeta}`, expect.anything());
+        expect(fetchMock).toHaveBeenCalledWith(`/api/supply?cluster=${Cluster.Mainnet}`, expect.anything());
     });
 
     // The value, not just the presence: this deadline has to outlast the route's own, or a cold start
@@ -213,7 +213,7 @@ describe('useSupply', () => {
         await waitForHook(() => expect(result.current.kind).toBe('ready'));
 
         mocks.cluster = clusterContext({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             connectableUrl: LOCAL_URL,
             status: ClusterStatus.Connecting,
             url: LOCAL_URL,
@@ -279,7 +279,7 @@ describe('useSupply', () => {
             expect.any(String),
             expect.objectContaining({
                 sentry: true,
-                sentryExtras: expect.objectContaining({ cluster: Cluster.MainnetBeta, status: 400 }),
+                sentryExtras: expect.objectContaining({ cluster: Cluster.Mainnet, status: 400 }),
             }),
         );
     });
@@ -336,7 +336,7 @@ describe('useSupply', () => {
             expect.any(Error),
             expect.objectContaining({
                 sentry: true,
-                sentryExtras: expect.objectContaining({ cluster: Cluster.MainnetBeta }),
+                sentryExtras: expect.objectContaining({ cluster: Cluster.Mainnet }),
             }),
         );
     });
@@ -384,7 +384,7 @@ describe('useSupply', () => {
 
         fetchMock.mockResolvedValue({ ok: false, status: 502 } as Response);
         await act(async () => {
-            await result.current.revalidate(['supply', Cluster.MainnetBeta, MAINNET_URL]);
+            await result.current.revalidate(['supply', Cluster.Mainnet, MAINNET_URL]);
         });
 
         // The key is written out here, so it has to be checked: `mutate` on one the hook does not use is

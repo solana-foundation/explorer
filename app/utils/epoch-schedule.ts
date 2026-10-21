@@ -93,7 +93,7 @@ interface ComputeUnitConfigEntry {
     readonly maxComputeUnits: number;
     /** When the configuration becomes active on each cluster */
     readonly activations: {
-        readonly [Cluster.MainnetBeta]: number;
+        readonly [Cluster.Mainnet]: number;
         readonly [Cluster.Devnet]: number;
         readonly [Cluster.Testnet]: number;
     };
@@ -106,7 +106,7 @@ interface ComputeUnitConfigEntry {
 const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
     {
         activations: {
-            [Cluster.MainnetBeta]: 0,
+            [Cluster.Mainnet]: 0,
             [Cluster.Devnet]: 0,
             [Cluster.Testnet]: 0,
         },
@@ -114,7 +114,7 @@ const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
     },
     {
         activations: {
-            [Cluster.MainnetBeta]: 770,
+            [Cluster.Mainnet]: 770,
             [Cluster.Devnet]: 857,
             [Cluster.Testnet]: 764,
         },
@@ -124,7 +124,7 @@ const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
     },
     {
         activations: {
-            [Cluster.MainnetBeta]: 822,
+            [Cluster.Mainnet]: 822,
             [Cluster.Devnet]: 915,
             [Cluster.Testnet]: 812,
         },
@@ -134,7 +134,7 @@ const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
     },
     {
         activations: {
-            [Cluster.MainnetBeta]: 1009,
+            [Cluster.Mainnet]: 1009,
             [Cluster.Devnet]: 1100,
             [Cluster.Testnet]: 983,
         },

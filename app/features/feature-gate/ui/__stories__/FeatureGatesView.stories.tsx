@@ -38,8 +38,8 @@ function atEpoch(epoch: bigint): Decorator {
 
 const SLOT_TIME_KEY = unstable_serialize([
     'slot-time',
-    Cluster.MainnetBeta,
-    toConnectableUrl(clusterUrl(clusterSelection(Cluster.MainnetBeta))),
+    Cluster.Mainnet,
+    toConnectableUrl(clusterUrl(clusterSelection(Cluster.Mainnet))),
 ]);
 
 const meta: Meta<typeof FeatureGatesView> = {
@@ -71,7 +71,7 @@ export const WithCountdown: Story = {
     decorators: [atEpoch(1060n)],
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        const [label] = canvas.getAllByText(content => content.startsWith('Mainnet Beta:'));
+        const [label] = canvas.getAllByText(content => content.startsWith('Mainnet:'));
         const [countdown] = canvas.getAllByText(content => content.startsWith('in ~'));
         expect(getComputedStyle(countdown).fontSize).toBe(getComputedStyle(label).fontSize);
     },

@@ -113,5 +113,5 @@ function mayCarryCustomUrl(clusterMoniker: string | null, candidateUrl: string |
     return clusterMoniker === CUSTOM_MONIKER && isCustomUrlCarryable(candidateUrl);
 }
 
-const MAINNET_MONIKER = clusterSlug(Cluster.MainnetBeta);
+const MAINNET_MONIKER = clusterSlug(Cluster.Mainnet);
 const CUSTOM_MONIKER = clusterSlug(Cluster.Custom);

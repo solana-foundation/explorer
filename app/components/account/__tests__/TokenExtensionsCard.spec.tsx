@@ -14,7 +14,7 @@ vi.mock('@providers/accounts', () => ({
     useAccountInfo: (address: string) => (address === MINT ? mock.entry : undefined),
 }));
 vi.mock('@providers/cluster', () => ({
-    useCluster: () => ({ cluster: Cluster.MainnetBeta, url: 'https://api.mainnet-beta.solana.com' }),
+    useCluster: () => ({ cluster: Cluster.Mainnet, url: 'https://api.mainnet-beta.solana.com' }),
 }));
 vi.mock('@entities/account', async importOriginal => ({
     ...(await importOriginal<typeof import('@entities/account')>()),

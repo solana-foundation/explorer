@@ -8,7 +8,7 @@ import type { DomainInfo } from './types';
 
 export function useUserANSDomains(userAddress: string): SWRResponse<DomainInfo[], Error, { revalidateOnFocus: false }> {
     const { cluster } = useCluster();
-    const enabled = userAddress && (cluster === Cluster.MainnetBeta || cluster === Cluster.Custom);
+    const enabled = userAddress && (cluster === Cluster.Mainnet || cluster === Cluster.Custom);
 
     return useSWR(enabled ? ['user-ans-domains', userAddress] : null, ([, address]) => fetchAnsDomains(address), {
         revalidateOnFocus: false,

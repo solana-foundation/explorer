@@ -35,7 +35,7 @@ type Story = StoryObj<typeof meta>;
 export const Several: Story = {
     args: { savedClusters: SAVED, status: ClusterStatus.Connected },
     decorators: [
-        withClusterState({ cluster: Cluster.MainnetBeta, status: ClusterStatus.Connected }),
+        withClusterState({ cluster: Cluster.Mainnet, status: ClusterStatus.Connected }),
         withSavedClusters(SAVED),
     ],
     play: async ({ canvasElement }) => {
@@ -82,7 +82,7 @@ export const SelectedUnreachable: Story = {
 export const SingleEntry: Story = {
     args: { savedClusters: [SAVED[0]], status: ClusterStatus.Connected },
     decorators: [
-        withClusterState({ cluster: Cluster.MainnetBeta, status: ClusterStatus.Connected }),
+        withClusterState({ cluster: Cluster.Mainnet, status: ClusterStatus.Connected }),
         withSavedClusters([SAVED[0]]),
     ],
     play: async ({ canvasElement }) => {

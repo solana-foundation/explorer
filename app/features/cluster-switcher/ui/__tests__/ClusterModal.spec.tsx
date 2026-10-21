@@ -77,7 +77,7 @@ describe('ClusterModal', () => {
     it('should render the cluster modal with built-in clusters', () => {
         renderWithStore();
         expect(screen.getByText('Choose a Cluster')).toBeInTheDocument();
-        expect(screen.getByText('Mainnet Beta')).toBeInTheDocument();
+        expect(screen.getByText('Mainnet')).toBeInTheDocument();
         expect(screen.getByText('Testnet')).toBeInTheDocument();
         expect(screen.getByText('Devnet')).toBeInTheDocument();
         expect(screen.getByText('Custom RPC URL')).toBeInTheDocument();
@@ -288,7 +288,7 @@ describe('ClusterModal cluster hrefs', () => {
 
     it('should express the default cluster as the absence of the param', () => {
         renderWithStore();
-        expect(hrefOf('Mainnet Beta')).toBe(`/?customUrl=${encodeURIComponent(CUSTOM_URL)}&sort=fee`);
+        expect(hrefOf('Mainnet')).toBe(`/?customUrl=${encodeURIComponent(CUSTOM_URL)}&sort=fee`);
     });
 
     it('should point a saved cluster at its own endpoint', () => {

@@ -30,7 +30,7 @@ export function useSearchNavigation(): (option: SearchItem) => void {
                 router.push(nextPath);
             } else if (option.cluster !== undefined) {
                 // Item carries its own cluster — use it instead of inheriting from the URL bar.
-                if (effectiveCluster === Cluster.MainnetBeta) {
+                if (effectiveCluster === Cluster.Mainnet) {
                     router.push(pathname);
                 } else {
                     router.push(`${pathname}?cluster=${clusterSlug(effectiveCluster)}`);
