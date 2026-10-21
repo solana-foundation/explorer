@@ -1,15 +1,17 @@
-// Authority-path trust core shared by the MCP resolver and the explorer's verified-builds UI.
-// The frozen-path logic is deliberately NOT shared: the app re-validates hashes and accepts
-// non-frozen trusted signers; this package keeps explorer-mcp parity (frozen-only, no re-hash).
 import { TRUSTED_SIGNERS } from './config.js';
 
 type VerifiableEntry = { signer: string; is_verified: boolean; on_chain_hash: string };
 
-/**
- * Keeps entries signed by the program authority or a trusted signer, re-validates `is_verified`
- * against the locally computed hash, and orders authority-first then trusted signers.
- * Hash-mismatched entries stay in the list downgraded — pick winners with `.find(e => e.is_verified)`.
- */
+export async function fetchOsecStatusAll(
+    baseUrl: string,
+    programAddress: string,
+    signal: AbortSignal,
+): Promise<unknown> {
+    const response = await fetch(`${baseUrl}/status-all/${encodeURIComponent(programAddress)}`, { signal });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+}
+
 export function orderVerifiedEntries<T extends VerifiableEntry>(
     entries: T[],
     programAuthority: string,

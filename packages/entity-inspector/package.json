@@ -27,6 +27,11 @@
             "types": "./dist/verification/index.d.ts",
             "import": "./dist/verification/index.js",
             "default": "./dist/verification/index.js"
+        },
+        "./constants": {
+            "types": "./dist/shared/constants.d.ts",
+            "import": "./dist/shared/constants.js",
+            "default": "./dist/shared/constants.js"
         }
     },
     "scripts": {

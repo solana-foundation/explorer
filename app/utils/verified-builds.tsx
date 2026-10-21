@@ -11,28 +11,20 @@ import { Logger } from '@/app/shared/lib/logger';
 import { useCluster } from '../providers/cluster';
 import { ProgramBufferAccountInfo, ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
 import { Cluster } from './cluster';
-import { composeOnchainRepoUrl, normalizeRepoUrl, safeRepoUrl } from './verified-builds-url';
+import {
+    composeOnchainRepoUrl,
+    getOsecRegistryUrl,
+    normalizeRepoUrl,
+    safeRepoUrl,
+    supportsVerifiedBuilds,
+} from './verified-builds-url';
 
-const OSEC_REGISTRY_URL = 'https://verify.osec.io';
-const OSEC_DEVNET_REGISTRY_URL = 'https://verify-devnet.osec.io';
+// Re-exported from the React-free url module so existing importers keep their `@/app/utils/verified-builds`
+// path while server routes can pull the same helpers without this file's SWR/web3.js graph.
+export { getOsecRegistryUrl, supportsVerifiedBuilds };
+
 export const OSEC_URL = 'https://osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
-
-export function supportsVerifiedBuilds(cluster: Cluster): boolean {
-    return getOsecRegistryUrl(cluster) !== undefined;
-}
-
-// OSEC hosts a separate verified-builds registry per cluster; Testnet/Custom have none.
-export function getOsecRegistryUrl(cluster: Cluster): string | undefined {
-    switch (cluster) {
-        case Cluster.MainnetBeta:
-            return OSEC_REGISTRY_URL;
-        case Cluster.Devnet:
-            return OSEC_DEVNET_REGISTRY_URL;
-        default:
-            return undefined;
-    }
-}
 
 export enum VerificationStatus {
     Verified = 'Verified Build',
