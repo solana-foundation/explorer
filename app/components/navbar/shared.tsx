@@ -30,7 +30,7 @@ export function BrandLockup({ className }: { className?: string }) {
                 <Image alt="Solana" height={22} src={Logo} width={214} priority className="max-w-none" />
             </span>
             <span className="ml-[8px] mt-0.5 text-[9px] font-medium uppercase tracking-[0.12em] text-[#b4b4b4]">
-                Explorer (beta)
+                Explorer
             </span>
         </Link>
     );
