@@ -15,6 +15,7 @@ import {
     MAINNET_NFTS,
     nftokenAccount,
 } from '../../__tests__/fixtures';
+import type { CollectionNftsAnswer } from '../../api/fetch-collection-nfts';
 import { parseNftokenAccount } from '../../lib/nftoken-accounts';
 import { NftokenAccountHeader } from '../NftokenAccountHeader';
 import { NftokenAccountSection } from '../NftokenAccountSection';
@@ -107,6 +108,22 @@ describe('NftokenAccountSection', () => {
 
         expect(await screen.findByText(String(MAINNET_NFT_ACCOUNTS.length - 1))).toBeInTheDocument();
         expect(mocks.refreshAccount).toHaveBeenCalledWith(account.pubkey, 'parsed');
+    });
+
+    it('should show the count when the user clicks Refresh twice before the request resolves', async () => {
+        let answer: (value: CollectionNftsAnswer) => void = () => {};
+        mocks.fetchCollectionNfts
+            .mockRejectedValueOnce(new Error('HTTP error (429)'))
+            .mockReturnValueOnce(new Promise(resolve => (answer = resolve)))
+            .mockRejectedValue(new Error('HTTP error (429)'));
+        renderSection(collectionAccount());
+        await screen.findByText('Fetch Failed');
+
+        fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+        await act(async () => answer({ kind: 'loaded', nfts: MAINNET_NFT_ACCOUNTS, undecodableCount: 0 }));
+
+        expect(await screen.findByText(String(MAINNET_NFT_ACCOUNTS.length))).toBeInTheDocument();
     });
 
     it.each([

@@ -21,7 +21,9 @@ export function useCollectionNfts(collection: Address): CollectionNftsState & { 
             fetchCollectionNfts(url, collection),
         { errorRetryCount: ERROR_RETRY_COUNT, onError: error => Logger.error(error, { collection }) },
     );
-    const refresh = () => void mutate();
+    const refresh = () => {
+        if (!isValidating) void mutate();
+    };
 
     if (data) return { ...data, refresh, refreshFailed: error !== undefined, refreshing: isValidating };
     if (error) return { kind: 'failed', refresh };
