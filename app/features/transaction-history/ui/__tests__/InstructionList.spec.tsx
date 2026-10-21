@@ -36,16 +36,18 @@ describe('InstructionList', () => {
         expect(screen.getByText('3 ×')).toBeInTheDocument();
     });
 
-    it('should not show a count for instructions that appear once', () => {
+    it('should show the count on a repeated row and no count on a single row', () => {
         render(
             <InstructionList
                 instructions={[
-                    { name: 'Transfer', programName: 'System' },
-                    { name: 'Mint To', programName: 'Token' },
+                    { name: 'Transfer', programName: 'Token Program' },
+                    { name: 'Transfer', programName: 'Token Program' },
+                    { name: 'Mint To', programName: 'Token Program' },
                 ]}
             />,
         );
 
+        expect(screen.getByText('2 ×')).toBeInTheDocument();
         expect(screen.queryByText('1 ×')).not.toBeInTheDocument();
     });
 });
