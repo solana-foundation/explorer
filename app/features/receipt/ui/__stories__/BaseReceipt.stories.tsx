@@ -68,6 +68,17 @@ export const TokenTransfer: Story = {
     args: {
         data: forBaseReceipt(receiptTokenTransfer, { tokenHref: 'https://example.com/token' }),
     },
+    play: async ({ canvasElement }) => {
+        const logo = within(canvasElement).getByAltText<HTMLImageElement>('Token logo');
+        expect(parseFloat(getComputedStyle(logo).borderRadius)).toBeGreaterThanOrEqual(logo.width / 2);
+    },
+};
+
+export const TokenTransferWithoutTokenLink: Story = {
+    args: {
+        data: forBaseReceipt(receiptTokenTransfer),
+    },
+    play: TokenTransfer.play,
 };
 
 const multiTransferRows: TransferRow[] = Array.from({ length: 7 }, (_, i) => ({
