@@ -80,11 +80,12 @@ export function FeedbackTopics({
                     );
                 })}
             </div>
-            {selected.id === 'feedback' ? (
-                <FeedbackForm error={error} isSubmitting={isSubmitting} onSubmit={onSubmit} />
-            ) : (
-                <GitHubTopic onNavigateAway={onNavigateAway} topic={selected} />
+            {showForm && (
+                <div className={cn(selected.id !== 'feedback' && 'hidden')}>
+                    <FeedbackForm error={error} isSubmitting={isSubmitting} onSubmit={onSubmit} />
+                </div>
             )}
+            {selected.id !== 'feedback' && <GitHubTopic onNavigateAway={onNavigateAway} topic={selected} />}
         </div>
     );
 }

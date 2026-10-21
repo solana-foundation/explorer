@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CheckCircle } from 'react-feather';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/app/components/shared/ui/dialog';
@@ -30,12 +30,12 @@ export function FeedbackPopup({
 }: FeedbackPopupProps) {
     const [sent, setSent] = useState(false);
     const [sendFailed, setSendFailed] = useState(false);
+    const sessionRef = useRef(0);
 
     useEffect(() => {
-        if (!open) {
-            setSent(false);
-            setSendFailed(false);
-        }
+        sessionRef.current += 1;
+        setSent(false);
+        setSendFailed(false);
     }, [open]);
 
     useEffect(() => {
@@ -46,14 +46,19 @@ export function FeedbackPopup({
 
     const handleSubmit = (values: FeedbackFormValues) => {
         setSendFailed(false);
-        void onSubmitFeedback?.(values).then(delivered => (delivered ? setSent(true) : setSendFailed(true)));
+        const session = sessionRef.current;
+        void onSubmitFeedback?.(values).then(delivered => {
+            if (session !== sessionRef.current) return;
+            if (delivered) setSent(true);
+            else setSendFailed(true);
+        });
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 className={cn(
-                    'max-w-md border-solid',
+                    'max-h-[90dvh] !w-[calc(100%-2rem)] !max-w-md overflow-y-auto border-solid',
                     sent ? 'border-dark-accent bg-dark-accent' : 'border-outer-space-800 bg-outer-space-900',
                 )}
             >

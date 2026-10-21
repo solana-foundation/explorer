@@ -1,23 +1,31 @@
 'use client';
 
 import { useSetAtom } from 'jotai';
-import type { ReactNode } from 'react';
+import { type ButtonHTMLAttributes, forwardRef } from 'react';
 
 import { isFeedbackWidgetEnabled } from '../env';
 import { feedbackOpenAtom } from '../model/feedback';
 
-export interface FeedbackTriggerProps {
-    children: ReactNode;
-    className?: string;
-}
+export type FeedbackTriggerProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
-export function FeedbackTrigger({ children, className }: FeedbackTriggerProps) {
+export const FeedbackTrigger = forwardRef<HTMLButtonElement, FeedbackTriggerProps>(function FeedbackTrigger(
+    { children, onClick, ...props },
+    ref,
+) {
     const setOpen = useSetAtom(feedbackOpenAtom);
     if (!isFeedbackWidgetEnabled()) return undefined;
 
     return (
-        <button className={className} onClick={() => setOpen(true)} type="button">
+        <button
+            {...props}
+            ref={ref}
+            onClick={event => {
+                onClick?.(event);
+                setOpen(true);
+            }}
+            type="button"
+        >
             {children}
         </button>
     );
-}
+});
