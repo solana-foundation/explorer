@@ -13,7 +13,7 @@ const { partitionFeatures } = vi.hoisted(() => ({
 }));
 
 vi.mock('@/app/providers/cluster', () => ({
-    useCluster: vi.fn(() => ({ cluster: Cluster.MainnetBeta })),
+    useCluster: vi.fn(() => ({ cluster: Cluster.Mainnet })),
     useClusterInfo: vi.fn(() => undefined),
 }));
 
@@ -36,7 +36,7 @@ vi.mock('../FeatureGateTable', () => ({
 
 describe('FeatureGatesView', () => {
     beforeEach(() => {
-        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.MainnetBeta } as ReturnType<typeof useCluster>);
+        vi.mocked(useCluster).mockReturnValue({ cluster: Cluster.Mainnet } as ReturnType<typeof useCluster>);
         partitionFeatures.mockReturnValue({ activated: [], upcoming: [] });
         vi.mocked(useClusterInfo).mockReturnValue(undefined);
         vi.mocked(useSlotTime).mockReturnValue(undefined);

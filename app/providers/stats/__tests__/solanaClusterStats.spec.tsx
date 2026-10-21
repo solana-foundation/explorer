@@ -23,7 +23,7 @@ describe('SolanaClusterStatsProvider', () => {
         // Nothing settles, so the polling below cannot dispatch or fail its way out of the effect.
         mocks.getRpc.mockReturnValue(pendingRpc());
         mocks.cluster = clusterContext({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             connectableUrl: FALLBACK_URL,
             status: ClusterStatus.Connected,
             url: FALLBACK_URL,

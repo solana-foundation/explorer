@@ -73,7 +73,7 @@ export function stubSvgRasterizationUnsupported(): void {
 
 export const SIGNATURE = '5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef';
 export const RECEIPT_URL = 'https://explorer.solana.com/receipt/5UfDuX7hXbGjGHqPXRGaHdSecretSignature1234567890abcdef';
-export const CLUSTER_LABEL = 'Mainnet Beta';
+export const CLUSTER_LABEL = 'Mainnet';
 
 export const PDF_OPTS = { clusterLabel: CLUSTER_LABEL, receiptUrl: RECEIPT_URL, signature: SIGNATURE } as const;
 

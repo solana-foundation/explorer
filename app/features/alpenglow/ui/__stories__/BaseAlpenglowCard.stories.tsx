@@ -23,11 +23,11 @@ type Story = StoryObj<typeof meta>;
 
 /** Every cluster before the migration: the node answers, and has no certificate to show. */
 export const Pending: Story = {
-    args: { cluster: Cluster.MainnetBeta, upgrade: { kind: 'pending' } },
+    args: { cluster: Cluster.Mainnet, upgrade: { kind: 'pending' } },
 };
 
 export const Migrated: Story = {
-    args: { cluster: Cluster.MainnetBeta, upgrade: MIGRATED },
+    args: { cluster: Cluster.Mainnet, upgrade: MIGRATED },
 };
 
 export const MigratedOnDevnet: Story = {

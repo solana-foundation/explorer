@@ -19,7 +19,7 @@ export type ClusterResourceProbe = (url: string, resourceId: string) => Promise<
 
 // The clusters this searches, and the only ones it may. Cluster.Custom is absent on purpose — see
 // `getSelectionsToProbe`.
-const PUBLIC_CLUSTERS: ServerCluster[] = [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet];
+const PUBLIC_CLUSTERS: ServerCluster[] = [Cluster.Mainnet, Cluster.Devnet, Cluster.Testnet];
 const PROBE_DELAY_MS = 700;
 
 /**

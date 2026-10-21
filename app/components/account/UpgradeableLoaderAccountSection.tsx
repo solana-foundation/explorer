@@ -131,7 +131,7 @@ export function UpgradeableProgramSection({
                                     <span className="min-w-0">
                                         <Address pubkey={programData.authority} link />
                                     </span>
-                                    {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad && (
+                                    {cluster == Cluster.Mainnet && squadMapInfo?.isSquad && (
                                         <MultisigBadge pubkey={account.pubkey} />
                                     )}
                                 </div>

@@ -39,7 +39,7 @@ function getRiskLevel(score: number): ERiskLevel {
 }
 
 function getRugCheckSwrKey(cluster: Cluster, mintAddress?: string): RugCheckSwrKey | null {
-    if (!mintAddress || cluster !== Cluster.MainnetBeta) {
+    if (!mintAddress || cluster !== Cluster.Mainnet) {
         return null;
     }
 

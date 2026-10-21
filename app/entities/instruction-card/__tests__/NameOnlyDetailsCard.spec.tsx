@@ -8,7 +8,7 @@ import { toInstructionNode } from '../model/node';
 import { InstructionSurfaceProvider } from '../model/surface';
 import { NameOnlyDetailsCard } from '../ui/NameOnlyDetailsCard';
 
-vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: Cluster.MainnetBeta }) }));
+vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: Cluster.Mainnet }) }));
 vi.mock('@/app/components/common/Address', () => ({ Address: () => <div /> }));
 
 const MANGO = new PublicKey(MANGO_PROGRAM_IDS.mainnet);

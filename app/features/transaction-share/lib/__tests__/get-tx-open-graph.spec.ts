@@ -22,7 +22,7 @@ describe('getTxOpenGraph', () => {
     });
 
     it('should omit the cluster param on mainnet', () => {
-        expect(getTxOpenGraph(SIGNATURE, Cluster.MainnetBeta)).toMatchObject({
+        expect(getTxOpenGraph(SIGNATURE, Cluster.Mainnet)).toMatchObject({
             images: [{ url: `${BASE_URL}/og/tx/${SIGNATURE}` }],
             url: `${BASE_URL}/tx/${SIGNATURE}`,
         });

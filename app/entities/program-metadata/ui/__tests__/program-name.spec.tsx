@@ -33,7 +33,7 @@ describe('ProgramName', () => {
 
         renderName();
 
-        expect(mocks.useProgramIdls).toHaveBeenCalledWith(PROGRAM_ID.toString(), DEFAULT_RPC_URL, Cluster.MainnetBeta, {
+        expect(mocks.useProgramIdls).toHaveBeenCalledWith(PROGRAM_ID.toString(), DEFAULT_RPC_URL, Cluster.Mainnet, {
             suspense: true,
         });
     });
@@ -101,7 +101,7 @@ function renderName() {
         <ProgramName
             programId={PROGRAM_ID}
             url={DEFAULT_RPC_URL}
-            cluster={Cluster.MainnetBeta}
+            cluster={Cluster.Mainnet}
             defaultName="Default name"
         />,
     );

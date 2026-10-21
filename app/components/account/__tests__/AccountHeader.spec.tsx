@@ -13,7 +13,7 @@ import { PROGRAM_INFO_BY_ID } from '@/app/utils/programs';
 
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: vi.fn(() => ({
-        cluster: Cluster.MainnetBeta,
+        cluster: Cluster.Mainnet,
         url: 'https://api.mainnet-beta.solana.com',
     })),
 }));

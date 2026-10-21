@@ -25,25 +25,25 @@ function makeUpcoming(overrides: Partial<Omit<UpcomingFeature, 'key'>> & { key?:
 }
 
 describe('filterUpcomingForCluster', () => {
-    describe('MainnetBeta', () => {
+    describe('Mainnet', () => {
         it('should include features active on both devnet and testnet', () => {
             const feature = makeUpcoming({ devnet_activation_epoch: 950, key: 'A', testnet_activation_epoch: 900 });
-            expect(filterUpcomingForCluster([feature], Cluster.MainnetBeta)).toHaveLength(1);
+            expect(filterUpcomingForCluster([feature], Cluster.Mainnet)).toHaveLength(1);
         });
 
         it('should exclude features active only on devnet', () => {
             const feature = makeUpcoming({ devnet_activation_epoch: 950, key: 'A', testnet_activation_epoch: null });
-            expect(filterUpcomingForCluster([feature], Cluster.MainnetBeta)).toHaveLength(0);
+            expect(filterUpcomingForCluster([feature], Cluster.Mainnet)).toHaveLength(0);
         });
 
         it('should exclude features active only on testnet', () => {
             const feature = makeUpcoming({ devnet_activation_epoch: null, key: 'A', testnet_activation_epoch: 900 });
-            expect(filterUpcomingForCluster([feature], Cluster.MainnetBeta)).toHaveLength(0);
+            expect(filterUpcomingForCluster([feature], Cluster.Mainnet)).toHaveLength(0);
         });
 
         it('should exclude features active on neither devnet nor testnet', () => {
             const feature = makeUpcoming({ key: 'A' });
-            expect(filterUpcomingForCluster([feature], Cluster.MainnetBeta)).toHaveLength(0);
+            expect(filterUpcomingForCluster([feature], Cluster.Mainnet)).toHaveLength(0);
         });
     });
 

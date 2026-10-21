@@ -19,9 +19,9 @@ export type FeaturePartition = {
 };
 
 const OTHER_CLUSTERS: Partial<Record<Cluster, Cluster[]>> = {
-    [Cluster.Devnet]: [Cluster.MainnetBeta, Cluster.Testnet],
-    [Cluster.MainnetBeta]: [Cluster.Devnet, Cluster.Testnet],
-    [Cluster.Testnet]: [Cluster.MainnetBeta, Cluster.Devnet],
+    [Cluster.Devnet]: [Cluster.Mainnet, Cluster.Testnet],
+    [Cluster.Mainnet]: [Cluster.Devnet, Cluster.Testnet],
+    [Cluster.Testnet]: [Cluster.Mainnet, Cluster.Devnet],
 };
 
 /**
@@ -74,7 +74,7 @@ export function partitionFeatures(cluster: Cluster): FeaturePartition {
 function activationEpochFor(feature: FeatureInfoType, cluster: Cluster): number | undefined {
     const raw = (() => {
         switch (cluster) {
-            case Cluster.MainnetBeta:
+            case Cluster.Mainnet:
                 return feature.mainnet_activation_epoch;
             case Cluster.Devnet:
                 return feature.devnet_activation_epoch;

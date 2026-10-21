@@ -24,17 +24,17 @@ describe('getTx', () => {
 
     describe('successful cases', () => {
         it('should return transaction and cluster when the probe finds mainnet', async () => {
-            vi.mocked(findTransactionCluster).mockResolvedValue({ cluster: Cluster.MainnetBeta, kind: 'found' });
+            vi.mocked(findTransactionCluster).mockResolvedValue({ cluster: Cluster.Mainnet, kind: 'found' });
             vi.mocked(fetchTransactionDetails).mockResolvedValueOnce(mockSingleTransferTransaction);
 
             const result = await getTx(mockSignature);
 
             expect(result).toEqual({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockSingleTransferTransaction,
             });
             expect(fetchTransactionDetails).toHaveBeenCalledTimes(1);
-            expect(fetchTransactionDetails).toHaveBeenCalledWith(serverClusterUrl(Cluster.MainnetBeta), mockSignature);
+            expect(fetchTransactionDetails).toHaveBeenCalledWith(serverClusterUrl(Cluster.Mainnet), mockSignature);
         });
 
         it('should skip the probe when the caller already knows the cluster', async () => {
@@ -51,7 +51,7 @@ describe('getTx', () => {
         it('should probe mainnet only', async () => {
             await expect(getTx(mockSignature)).rejects.toThrow('Cluster not found');
 
-            expect(findTransactionCluster).toHaveBeenCalledWith([Cluster.MainnetBeta], mockSignature);
+            expect(findTransactionCluster).toHaveBeenCalledWith([Cluster.Mainnet], mockSignature);
         });
     });
 
@@ -63,7 +63,7 @@ describe('getTx', () => {
         });
 
         it('should throw error when transaction is not found', async () => {
-            vi.mocked(findTransactionCluster).mockResolvedValue({ cluster: Cluster.MainnetBeta, kind: 'found' });
+            vi.mocked(findTransactionCluster).mockResolvedValue({ cluster: Cluster.Mainnet, kind: 'found' });
             vi.mocked(fetchTransactionDetails).mockResolvedValueOnce(null);
 
             await expect(getTx(mockSignature)).rejects.toSatisfy((error: Error) => {
@@ -76,7 +76,7 @@ describe('getTx', () => {
         });
 
         it('should throw error when the transaction fetch throws an error', async () => {
-            vi.mocked(findTransactionCluster).mockResolvedValue({ cluster: Cluster.MainnetBeta, kind: 'found' });
+            vi.mocked(findTransactionCluster).mockResolvedValue({ cluster: Cluster.Mainnet, kind: 'found' });
 
             const fetchError = new Error('Failed to fetch');
             vi.mocked(fetchTransactionDetails).mockRejectedValueOnce(fetchError);
@@ -89,7 +89,7 @@ describe('getTx', () => {
         it('should throw immediately on mainnet network error', async () => {
             const probeError = new Error('Forbidden access');
             vi.mocked(findTransactionCluster).mockResolvedValue({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 error: probeError,
                 kind: 'error',
             });

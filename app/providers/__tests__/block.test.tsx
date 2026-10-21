@@ -38,7 +38,7 @@ describe('fetchBlock', () => {
         getBlocks.mockResolvedValue([101n, 102n]);
         getSlotLeaders.mockResolvedValue(LEADERS);
 
-        await fetchBlock(dispatch, MOCK_URL, Cluster.MainnetBeta, SLOT);
+        await fetchBlock(dispatch, MOCK_URL, Cluster.Mainnet, SLOT);
 
         expect(getRpc).toHaveBeenCalledWith(MOCK_URL);
         expect(getBlocks).toHaveBeenCalledWith(101n, 200n);
@@ -57,7 +57,7 @@ describe('fetchBlock', () => {
         getBlocks.mockResolvedValue([]);
         getSlotLeaders.mockResolvedValue(LEADERS);
 
-        await fetchBlock(dispatch, MOCK_URL, Cluster.MainnetBeta, SLOT);
+        await fetchBlock(dispatch, MOCK_URL, Cluster.Mainnet, SLOT);
 
         expect(getSlotLeaders).toHaveBeenCalledWith(99n, 2);
         const { data } = lastDispatch(dispatch);
@@ -70,7 +70,7 @@ describe('fetchBlock', () => {
         getBlocks.mockResolvedValue([101n]);
         getSlotLeaders.mockRejectedValue(new Error('leader schedule unavailable'));
 
-        await fetchBlock(dispatch, MOCK_URL, Cluster.MainnetBeta, SLOT);
+        await fetchBlock(dispatch, MOCK_URL, Cluster.Mainnet, SLOT);
 
         const { data, status } = lastDispatch(dispatch);
         expect(status).toBe(FetchStatus.Fetched);
@@ -80,7 +80,7 @@ describe('fetchBlock', () => {
     it('should report an empty block when the slot was skipped', async () => {
         fetchBlockBySlot.mockResolvedValue(null);
 
-        await fetchBlock(dispatch, MOCK_URL, Cluster.MainnetBeta, SLOT);
+        await fetchBlock(dispatch, MOCK_URL, Cluster.Mainnet, SLOT);
 
         expect(getBlocks).not.toHaveBeenCalled();
         expect(lastDispatch(dispatch)).toMatchObject({ data: {}, status: FetchStatus.Fetched });
@@ -89,7 +89,7 @@ describe('fetchBlock', () => {
     it('should dispatch FetchFailed when the block fetch throws', async () => {
         fetchBlockBySlot.mockRejectedValue(new Error('rpc boom'));
 
-        await fetchBlock(dispatch, MOCK_URL, Cluster.MainnetBeta, SLOT);
+        await fetchBlock(dispatch, MOCK_URL, Cluster.Mainnet, SLOT);
 
         expect(lastDispatch(dispatch)).toMatchObject({ data: undefined, status: FetchStatus.FetchFailed });
     });

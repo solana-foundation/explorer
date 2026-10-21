@@ -10,7 +10,7 @@ import { Cluster } from '@/app/utils/cluster';
 import { TransactionNotFoundCard } from '../TransactionNotFoundCard';
 
 vi.mock('@/app/providers/cluster', () => ({
-    useCluster: vi.fn(() => ({ cluster: Cluster.MainnetBeta })),
+    useCluster: vi.fn(() => ({ cluster: Cluster.Mainnet })),
     useFirstAvailableBlock: vi.fn(() => undefined),
 }));
 

@@ -14,7 +14,7 @@ const SEARCH_QUERY_MAX_LENGTH = 200;
 function clusterFromGenesisHash(genesisHash: string): ServerCluster | null {
     switch (genesisHash) {
         case GENESIS_HASHES.MAINNET:
-            return Cluster.MainnetBeta;
+            return Cluster.Mainnet;
         case GENESIS_HASHES.TESTNET:
             return Cluster.Testnet;
         case GENESIS_HASHES.DEVNET:
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
         );
     }
 
-    const cluster = clusterFromSlug(clusterParam || clusterSlug(Cluster.MainnetBeta));
+    const cluster = clusterFromSlug(clusterParam || clusterSlug(Cluster.Mainnet));
 
     if (cluster === undefined) {
         return NextResponse.json(

@@ -10,7 +10,7 @@ import { Logger } from '@/app/shared/lib/logger';
 const { useProgramIdlNames } = vi.hoisted(() => ({ useProgramIdlNames: vi.fn() }));
 // The `@x` path: `useResolvedInstructionNames` reaches the fetch through the cross-entity API.
 vi.mock('@entities/idl/@x/transaction-data', () => ({ useProgramIdlNames }));
-vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: Cluster.MainnetBeta, url: MAINNET_URL }) }));
+vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: Cluster.Mainnet, url: MAINNET_URL }) }));
 
 import { useSimulationInstructionNames } from '../use-simulation-instruction-names';
 
@@ -182,7 +182,7 @@ describe('useSimulationInstructionNames', () => {
 
             expect(useProgramIdlNames).toHaveBeenCalledWith(
                 [ComputeBudgetProgram.programId.toBase58(), JUPITER_PROGRAM.toBase58(), TOKEN_PROGRAM.toBase58()],
-                Cluster.MainnetBeta,
+                Cluster.Mainnet,
                 MAINNET_URL,
             );
         });

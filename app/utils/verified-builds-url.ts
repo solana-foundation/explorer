@@ -11,7 +11,7 @@ const OSEC_DEVNET_REGISTRY_URL = 'https://verify-devnet.osec.io';
 // web3.js graph in `verified-builds.tsx`.
 export function getOsecRegistryUrl(cluster: Cluster): string | undefined {
     switch (cluster) {
-        case Cluster.MainnetBeta:
+        case Cluster.Mainnet:
             return OSEC_REGISTRY_URL;
         case Cluster.Devnet:
             return OSEC_DEVNET_REGISTRY_URL;

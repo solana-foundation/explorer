@@ -22,7 +22,7 @@ vi.mock('@providers/transactions', () => ({ useTransactionDetails }));
 // The `@x` path: `useResolvedInstructionNames` reaches the fetch through the cross-entity API.
 vi.mock('@entities/idl/@x/transaction-data', () => ({ useProgramIdlNames }));
 vi.mock('@providers/cluster', () => ({
-    useCluster: () => ({ cluster: Cluster.MainnetBeta, url: MAINNET_URL }),
+    useCluster: () => ({ cluster: Cluster.Mainnet, url: MAINNET_URL }),
     useEpochScheduleResult,
 }));
 
@@ -101,7 +101,7 @@ describe('CUProfilingSection', () => {
             // `NON_ANCHOR_PROGRAMS` is what stops it becoming a fetch.
             expect(useProgramIdlNames).toHaveBeenCalledWith(
                 [ComputeBudgetProgram.programId.toBase58(), JUPITER_PROGRAM.toBase58()],
-                Cluster.MainnetBeta,
+                Cluster.Mainnet,
                 MAINNET_URL,
             );
         });

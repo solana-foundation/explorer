@@ -27,7 +27,7 @@ describe('getIdlNames', () => {
     it('should resolve a duplicated program once', async () => {
         mocks.resolveProgramIdlNames.mockResolvedValue(firstNames);
 
-        const names = await getIdlNames({ cluster: Cluster.MainnetBeta, programIds: [FIRST, FIRST, FIRST] });
+        const names = await getIdlNames({ cluster: Cluster.Mainnet, programIds: [FIRST, FIRST, FIRST] });
 
         expect(mocks.resolveProgramIdlNames).toHaveBeenCalledTimes(1);
         expect(names.get(FIRST)).toBe(firstNames);
@@ -43,7 +43,7 @@ describe('getIdlNames', () => {
     });
 
     it('should resolve nothing for an empty program list', async () => {
-        const names = await getIdlNames({ cluster: Cluster.MainnetBeta, programIds: [] });
+        const names = await getIdlNames({ cluster: Cluster.Mainnet, programIds: [] });
 
         expect(mocks.resolveProgramIdlNames).not.toHaveBeenCalled();
         expect(names).toEqual(new Map());
@@ -54,7 +54,7 @@ describe('getIdlNames', () => {
             programId === SECOND ? Promise.reject(new Error('rpc unreachable')) : Promise.resolve(firstNames),
         );
 
-        const names = await getIdlNames({ cluster: Cluster.MainnetBeta, programIds: [FIRST, SECOND] });
+        const names = await getIdlNames({ cluster: Cluster.Mainnet, programIds: [FIRST, SECOND] });
 
         expect(names.get(FIRST)).toBe(firstNames);
         expect(names.has(SECOND)).toBe(false);
@@ -75,7 +75,7 @@ describe('getIdlNames', () => {
     });
 
     it('should leave the key absent when a program simply has no IDL', async () => {
-        const names = await getIdlNames({ cluster: Cluster.MainnetBeta, programIds: [FIRST] });
+        const names = await getIdlNames({ cluster: Cluster.Mainnet, programIds: [FIRST] });
 
         expect(names.size).toBe(0);
     });
@@ -87,7 +87,7 @@ describe('getIdlNames', () => {
             programId === SECOND ? new Promise(() => {}) : Promise.resolve(firstNames),
         );
 
-        const pending = getIdlNames({ cluster: Cluster.MainnetBeta, programIds: [FIRST, SECOND] });
+        const pending = getIdlNames({ cluster: Cluster.Mainnet, programIds: [FIRST, SECOND] });
         await vi.advanceTimersByTimeAsync(IDL_FETCH_BUDGET_MS);
 
         const names = await pending;
@@ -104,7 +104,7 @@ describe('getIdlNames', () => {
             return new Promise(() => {});
         });
 
-        const pending = getIdlNames({ cluster: Cluster.MainnetBeta, programIds: [FIRST] });
+        const pending = getIdlNames({ cluster: Cluster.Mainnet, programIds: [FIRST] });
         // While the budget holds, the request has to stay live.
         expect(signals[0]?.aborted).toBe(false);
 
@@ -124,7 +124,7 @@ describe('getIdlNames', () => {
                 ),
         );
 
-        const pending = getIdlNames({ cluster: Cluster.MainnetBeta, programIds: [FIRST] });
+        const pending = getIdlNames({ cluster: Cluster.Mainnet, programIds: [FIRST] });
         await vi.advanceTimersByTimeAsync(IDL_FETCH_BUDGET_MS);
         await pending;
         // The rejection lands after the budget resolves the batch, so let its catch run before asserting.
@@ -132,7 +132,7 @@ describe('getIdlNames', () => {
 
         expect(Logger.error).not.toHaveBeenCalled();
         expect(Logger.debug).toHaveBeenCalledWith(expect.stringContaining('IDL name resolution request timed out'), {
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             programId: FIRST,
         });
     });
@@ -141,7 +141,7 @@ describe('getIdlNames', () => {
         vi.useFakeTimers();
         mocks.resolveProgramIdlNames.mockResolvedValue(firstNames);
 
-        const names = await getIdlNames({ cluster: Cluster.MainnetBeta, programIds: [FIRST] });
+        const names = await getIdlNames({ cluster: Cluster.Mainnet, programIds: [FIRST] });
 
         expect(names.get(FIRST)).toBe(firstNames);
         // Nothing is left holding the event loop open for the rest of the budget after a fast render.

@@ -23,7 +23,7 @@ type Story = StoryObj<typeof meta>;
 // Rows arrive resolved from useSimulationInstructionNames, so the card never fetches.
 export const TwoInstructions: Story = {
     args: {
-        cluster: Cluster.MainnetBeta,
+        cluster: Cluster.Mainnet,
         epoch: 800n,
         instructions: [
             { name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },
@@ -53,7 +53,7 @@ export const TwoInstructions: Story = {
 // are still named, which is what the tooltip qualifies the position with.
 export const WithoutResolvedNames: Story = {
     args: {
-        cluster: Cluster.MainnetBeta,
+        cluster: Cluster.Mainnet,
         epoch: 800n,
         instructions: [
             { name: undefined, programId: SYSTEM_PROGRAM, programName: 'System Program' },
@@ -67,7 +67,7 @@ export const WithoutResolvedNames: Story = {
 // The logs said nothing about either instruction, so both fall back to their scheduled CU reserve.
 export const NoLogs: Story = {
     args: {
-        cluster: Cluster.MainnetBeta,
+        cluster: Cluster.Mainnet,
         epoch: 800n,
         instructions: [
             { name: 'Transfer', programId: SYSTEM_PROGRAM, programName: 'System Program' },

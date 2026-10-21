@@ -32,7 +32,7 @@ export const Default: Story = {
 
 export const MainnetWithWarning: Story = {
     args: {
-        currentCluster: 'Mainnet Beta',
+        currentCluster: 'Mainnet',
         onClusterChange: fn(),
         showMainnetWarning: true,
     },
