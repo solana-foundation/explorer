@@ -43,3 +43,28 @@ describe('token instruction types: withdrawExcessLamports', () => {
         expect(parsed.authority).toBeUndefined();
     });
 });
+
+describe('token instruction types: Token-2022 extension instructions', () => {
+    // Shapes taken from the RPC's jsonParsed output for devnet tx WohmW2vS…, which rendered as Unknown.
+    it('should recognise initializePausableConfig and initializeDefaultAccountState', () => {
+        const mint = randomAddress();
+        const authority = randomAddress();
+
+        expect(() => create('initializePausableConfig', TokenInstructionType)).not.toThrow();
+        expect(() => create('initializeDefaultAccountState', TokenInstructionType)).not.toThrow();
+
+        const pausable = create({ authority, mint }, IX_STRUCTS.initializePausableConfig);
+        expect(pausable.authority?.toBase58()).toBe(authority);
+        expect(pausable.mint.toBase58()).toBe(mint);
+
+        const state = create({ accountState: 'initialized', mint }, IX_STRUCTS.initializeDefaultAccountState);
+        expect(state.accountState).toBe('initialized');
+    });
+
+    it('should give every instruction type a validator and a title', () => {
+        for (const type of TokenInstructionType.schema ? Object.keys(TokenInstructionType.schema) : []) {
+            expect(IX_STRUCTS).toHaveProperty(type);
+            expect(IX_TITLES).toHaveProperty(type);
+        }
+    });
+});
