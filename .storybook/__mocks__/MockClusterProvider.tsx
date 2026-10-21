@@ -8,7 +8,7 @@ import { useHydrateAtoms } from 'jotai/utils';
 import { type ReactNode, useState } from 'react';
 import { SWRConfig, unstable_serialize } from 'swr';
 
-const defaultSelection = clusterSelection(Cluster.MainnetBeta);
+const defaultSelection = clusterSelection(Cluster.Mainnet);
 
 const defaultState: ClusterState = {
     connectableUrl: toConnectableUrl(clusterUrl(defaultSelection)),

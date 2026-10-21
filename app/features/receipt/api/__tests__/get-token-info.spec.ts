@@ -26,7 +26,7 @@ describe('getTokenInfo', () => {
             }),
         );
 
-        const result = await getTokenInfo(mintAddress, Cluster.MainnetBeta);
+        const result = await getTokenInfo(mintAddress, Cluster.Mainnet);
 
         expect(result).toEqual(tokenInfo);
     });
@@ -40,7 +40,7 @@ describe('getTokenInfo', () => {
             }),
         );
 
-        const result = await getTokenInfo(mintAddress, Cluster.MainnetBeta);
+        const result = await getTokenInfo(mintAddress, Cluster.Mainnet);
 
         expect(result).toBeUndefined();
     });

@@ -18,7 +18,7 @@ describe('useDasImage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(useCluster).mockReturnValue({
-            ...clusterSelection(Cluster.MainnetBeta),
+            ...clusterSelection(Cluster.Mainnet),
         } as ReturnType<typeof useCluster>);
         vi.mocked(useSWR).mockReturnValue({ data: undefined } as ReturnType<typeof useSWR>);
     });

@@ -46,7 +46,7 @@ const STAKE = { active: 33n, delinquent: 3n };
 describe('useVoteAccounts', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.cluster = connectedTo(Cluster.MainnetBeta, MAINNET_URL);
+        mocks.cluster = connectedTo(Cluster.Mainnet, MAINNET_URL);
         mocks.getRpc.mockReturnValue({ getVoteAccounts: mocks.getVoteAccounts });
         mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.resolve(RESPONSE) });
     });
@@ -55,7 +55,7 @@ describe('useVoteAccounts', () => {
     afterEach(() => vi.restoreAllMocks());
 
     it('should ask nothing while the health check is still connecting', () => {
-        mocks.cluster = { ...connectedTo(Cluster.MainnetBeta, MAINNET_URL), status: ClusterStatus.Connecting };
+        mocks.cluster = { ...connectedTo(Cluster.Mainnet, MAINNET_URL), status: ClusterStatus.Connecting };
 
         const { result } = renderVoteAccounts();
 
@@ -84,7 +84,7 @@ describe('useVoteAccounts', () => {
             expect.any(String),
             expect.objectContaining({
                 sentry: true,
-                sentryExtras: expect.objectContaining({ cluster: Cluster.MainnetBeta, rpcError: 'rpc down' }),
+                sentryExtras: expect.objectContaining({ cluster: Cluster.Mainnet, rpcError: 'rpc down' }),
             }),
         );
         // One slow cluster must not be able to set the *error* rate: this fires from the browser, once per
@@ -118,7 +118,7 @@ describe('useVoteAccounts', () => {
     });
 
     it('should still ask on a failed connection, so the retry has something to revalidate', async () => {
-        mocks.cluster = { ...connectedTo(Cluster.MainnetBeta, MAINNET_URL), status: ClusterStatus.Failure };
+        mocks.cluster = { ...connectedTo(Cluster.Mainnet, MAINNET_URL), status: ClusterStatus.Failure };
         mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
 
         const { result } = renderVoteAccounts();
@@ -162,7 +162,7 @@ describe('useVoteAccounts', () => {
         const { rerender, result } = renderVoteAccounts();
         await waitForHook(() => expect(result.current.kind).toBe('ready'));
 
-        mocks.cluster = connectedTo(Cluster.MainnetBeta, 'http://localhost:8899');
+        mocks.cluster = connectedTo(Cluster.Mainnet, 'http://localhost:8899');
         rerender();
 
         await waitForHook(() => expect(mocks.getRpc).toHaveBeenCalledWith('http://localhost:8899'));
@@ -175,7 +175,7 @@ describe('useVoteAccounts', () => {
 
         mocks.getVoteAccounts.mockReturnValue({ send: () => Promise.reject(new Error('rpc down')) });
         await act(async () => {
-            await result.current.revalidate(['vote-accounts', Cluster.MainnetBeta, MAINNET_URL]);
+            await result.current.revalidate(['vote-accounts', Cluster.Mainnet, MAINNET_URL]);
         });
 
         // The key is written out here, so it has to be checked: `mutate` on one the hook does not use is

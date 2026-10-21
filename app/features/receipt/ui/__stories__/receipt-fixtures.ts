@@ -4,7 +4,7 @@ import { formatReceiptData } from '../../model/receipt-data';
 import type { Receipt } from '../../model/types';
 import type { FormattedExtendedReceipt, FormattedReceipt } from '../../types';
 
-const CLUSTER = Cluster.MainnetBeta;
+const CLUSTER = Cluster.Mainnet;
 
 // Fixed literal addresses so screenshot captures are deterministic (was Keypair.generate()).
 const SENDER = 'UM1jjYaM2Y4BDSdCw3AiELrP6HDpz62VjUHcHVJosix';

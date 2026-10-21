@@ -32,7 +32,7 @@ describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
     afterEach(() => vi.clearAllMocks());
 
     it('should show verified badge when isVerified is true', () => {
-        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
+        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.Mainnet });
         (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
             data: true,
             error: false,
@@ -43,7 +43,7 @@ describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
     });
 
     it('should show not verified badge when isVerified is false', () => {
-        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
+        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.Mainnet });
         (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
             data: false,
             error: false,
@@ -54,7 +54,7 @@ describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
     });
 
     it('should show error badge when error is true', () => {
-        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
+        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.Mainnet });
         (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
             data: false,
             error: true,
@@ -65,7 +65,7 @@ describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
     });
 
     it('should show a loading skeleton when isLoading is true', () => {
-        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
+        (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.Mainnet });
         (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
             data: false,
             error: false,

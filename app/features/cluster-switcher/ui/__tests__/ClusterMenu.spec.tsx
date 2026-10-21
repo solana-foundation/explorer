@@ -48,7 +48,7 @@ function renderMenu(initialClusters: SavedCluster[] = [], onDismiss: () => void 
 
 beforeEach(() => {
     vi.clearAllMocks();
-    active.cluster = Cluster.MainnetBeta;
+    active.cluster = Cluster.Mainnet;
     active.endpoint = undefined;
 });
 

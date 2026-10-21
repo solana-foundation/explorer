@@ -74,7 +74,7 @@ type Story = StoryObj<typeof FeatureGateTable<ActivatedFeature>>;
 
 export const ActivatedRows: Story = {
     args: {
-        cluster: Cluster.MainnetBeta,
+        cluster: Cluster.Mainnet,
         emptyState: <EmptyStateCard>No activated features.</EmptyStateCard>,
         features: activated,
         secondColumn: {
@@ -86,7 +86,7 @@ export const ActivatedRows: Story = {
 
 export const UpcomingRows: StoryObj<typeof FeatureGateTable<UpcomingFeature>> = {
     args: {
-        cluster: Cluster.MainnetBeta,
+        cluster: Cluster.Mainnet,
         emptyState: <EmptyStateCard>No upcoming features.</EmptyStateCard>,
         features: upcoming,
         secondColumn: {
@@ -98,7 +98,7 @@ export const UpcomingRows: StoryObj<typeof FeatureGateTable<UpcomingFeature>> = 
 
 export const Empty: Story = {
     args: {
-        cluster: Cluster.MainnetBeta,
+        cluster: Cluster.Mainnet,
         emptyState: <EmptyStateCard>No activated features on this cluster.</EmptyStateCard>,
         features: [],
         secondColumn: {

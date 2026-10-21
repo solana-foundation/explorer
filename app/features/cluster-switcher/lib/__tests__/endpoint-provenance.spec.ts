@@ -31,7 +31,7 @@ describe('endpointProvenance', () => {
     });
 
     it('should treat an endpoint the deployment ships with as known', () => {
-        const shipped = clusterUrl(clusterSelection(Cluster.MainnetBeta));
+        const shipped = clusterUrl(clusterSelection(Cluster.Mainnet));
         expect(endpointProvenance(shipped)).toBe('known');
     });
 
@@ -42,7 +42,7 @@ describe('endpointProvenance', () => {
 
 describe('isKnownEndpoint', () => {
     it('should be true for an endpoint the deployment ships with', () => {
-        expect(isKnownEndpoint(clusterUrl(clusterSelection(Cluster.MainnetBeta)))).toBe(true);
+        expect(isKnownEndpoint(clusterUrl(clusterSelection(Cluster.Mainnet)))).toBe(true);
     });
 
     it('should be false for an arbitrary remote endpoint', () => {

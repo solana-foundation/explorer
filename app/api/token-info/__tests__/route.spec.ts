@@ -63,7 +63,7 @@ describe('POST /api/token-info', () => {
 
     it('should return 400 when neither address nor addresses is given', async () => {
         const { POST } = await importRoute();
-        const res = await POST(createRequest({ cluster: Cluster.MainnetBeta }));
+        const res = await POST(createRequest({ cluster: Cluster.Mainnet }));
 
         expect(res.status).toBe(400);
         expect(mocks.getTokenInfos).not.toHaveBeenCalled();
@@ -71,7 +71,7 @@ describe('POST /api/token-info', () => {
 
     it('should return 400 for a malformed address', async () => {
         const { POST } = await importRoute();
-        const res = await POST(createRequest({ addresses: [MINT_A, 'not-a-pubkey'], cluster: Cluster.MainnetBeta }));
+        const res = await POST(createRequest({ addresses: [MINT_A, 'not-a-pubkey'], cluster: Cluster.Mainnet }));
 
         expect(res.status).toBe(400);
         expect(mocks.getTokenInfos).not.toHaveBeenCalled();
@@ -103,7 +103,7 @@ describe('POST /api/token-info', () => {
 
     it('should ignore keys it does not know', async () => {
         const { POST } = await importRoute();
-        const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta, verbose: true }));
+        const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.Mainnet, verbose: true }));
 
         expect(res.status).toBe(200);
     });
@@ -111,7 +111,7 @@ describe('POST /api/token-info', () => {
     it('should return 400 when more distinct addresses than the cap are requested', async () => {
         const { POST } = await importRoute();
         const addresses = Array.from({ length: MAX_ADDRESSES + 1 }, (_, i) => gen.address(i));
-        const res = await POST(createRequest({ addresses, cluster: Cluster.MainnetBeta }));
+        const res = await POST(createRequest({ addresses, cluster: Cluster.Mainnet }));
 
         expect(res.status).toBe(400);
         expect(mocks.getTokenInfos).not.toHaveBeenCalled();
@@ -122,33 +122,33 @@ describe('POST /api/token-info', () => {
         // A single transaction can move one mint through far more than `MAX_ADDRESSES` token
         // accounts; that must not be rejected, because it is one distinct lookup.
         const addresses = Array.from({ length: 400 }, () => MINT_A);
-        const res = await POST(createRequest({ addresses, cluster: Cluster.MainnetBeta }));
+        const res = await POST(createRequest({ addresses, cluster: Cluster.Mainnet }));
 
         expect(res.status).toBe(200);
-        expect(mocks.getTokenInfos).toHaveBeenCalledWith([MINT_A], Cluster.MainnetBeta, undefined, expect.anything());
+        expect(mocks.getTokenInfos).toHaveBeenCalledWith([MINT_A], Cluster.Mainnet, undefined, expect.anything());
     });
 
     it('should accept a single address and still answer with an array', async () => {
         mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A)]);
 
         const { POST } = await importRoute();
-        const res = await POST(createRequest({ address: MINT_A, cluster: Cluster.MainnetBeta }));
+        const res = await POST(createRequest({ address: MINT_A, cluster: Cluster.Mainnet }));
 
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ content: [token(MINT_A)] });
-        expect(mocks.getTokenInfos).toHaveBeenCalledWith([MINT_A], Cluster.MainnetBeta, undefined, expect.anything());
+        expect(mocks.getTokenInfos).toHaveBeenCalledWith([MINT_A], Cluster.Mainnet, undefined, expect.anything());
     });
 
     it('should resolve several addresses in one request', async () => {
         mocks.getTokenInfos.mockResolvedValueOnce([token(MINT_A), token(MINT_B)]);
 
         const { POST } = await importRoute();
-        const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
+        const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.Mainnet }));
 
         expect(await res.json()).toEqual({ content: [token(MINT_A), token(MINT_B)] });
         expect(mocks.getTokenInfos).toHaveBeenCalledWith(
             [MINT_A, MINT_B],
-            Cluster.MainnetBeta,
+            Cluster.Mainnet,
             undefined,
             expect.anything(),
         );
@@ -156,11 +156,11 @@ describe('POST /api/token-info', () => {
 
     it('should de-duplicate repeated addresses', async () => {
         const { POST } = await importRoute();
-        await POST(createRequest({ addresses: [MINT_A, MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
+        await POST(createRequest({ addresses: [MINT_A, MINT_A, MINT_B], cluster: Cluster.Mainnet }));
 
         expect(mocks.getTokenInfos).toHaveBeenCalledWith(
             [MINT_A, MINT_B],
-            Cluster.MainnetBeta,
+            Cluster.Mainnet,
             undefined,
             expect.anything(),
         );
@@ -180,7 +180,7 @@ describe('POST /api/token-info', () => {
         mocks.getTokenInfos.mockResolvedValueOnce([]);
 
         const { POST } = await importRoute();
-        const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+        const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.Mainnet }));
 
         expect(await res.json()).toEqual({ content: [] });
         expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
@@ -194,7 +194,7 @@ describe('POST /api/token-info', () => {
         const res = await POST(
             createRequest({
                 addresses: [MINT_A, MINT_B, MINT_C],
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 includeOnChainFallback: true,
             }),
         );
@@ -216,7 +216,7 @@ describe('POST /api/token-info', () => {
         await POST(
             createRequest({
                 addresses: [MINT_A, MINT_B],
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 includeOnChainFallback: true,
             }),
         );
@@ -232,7 +232,7 @@ describe('POST /api/token-info', () => {
         const res = await POST(
             createRequest({
                 addresses: [MINT_A, MINT_B],
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 includeOnChainFallback: true,
             }),
         );
@@ -244,7 +244,7 @@ describe('POST /api/token-info', () => {
 
     it('should answer with an empty list for an empty addresses array', async () => {
         const { POST } = await importRoute();
-        const res = await POST(createRequest({ addresses: [], cluster: Cluster.MainnetBeta }));
+        const res = await POST(createRequest({ addresses: [], cluster: Cluster.Mainnet }));
 
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ content: [] });
@@ -253,7 +253,7 @@ describe('POST /api/token-info', () => {
 
     it('should bound the upstream lookup with an abort signal', async () => {
         const { POST } = await importRoute();
-        await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+        await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.Mainnet }));
 
         const config = mocks.getTokenInfos.mock.calls[0][3];
         expect(config.signal).toBeInstanceOf(AbortSignal);
@@ -273,7 +273,7 @@ describe('POST /api/token-info', () => {
             failUpstream();
 
             const { POST } = await importRoute();
-            const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
+            const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.Mainnet }));
 
             expect(res.status).toBe(503);
             expect(await res.json()).toEqual({ error: 'Token list unavailable' });
@@ -284,7 +284,7 @@ describe('POST /api/token-info', () => {
             failUpstream([], new TokenInfoHttpError({ status: 429, statusText: 'Too Many Requests' }));
 
             const { POST } = await importRoute();
-            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.Mainnet }));
 
             expect(res.status).toBe(503);
             expect(Logger.error).not.toHaveBeenCalled();
@@ -299,7 +299,7 @@ describe('POST /api/token-info', () => {
             failUpstream([], new TokenInfoInvalidResponseError());
 
             const { POST } = await importRoute();
-            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.Mainnet }));
 
             expect(res.status).toBe(503);
             expect(Logger.error).toHaveBeenCalledWith(expect.any(Error), expect.objectContaining({ sentry: true }));
@@ -313,7 +313,7 @@ describe('POST /api/token-info', () => {
             await POST(
                 createRequest({
                     addresses: [MINT_A],
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     includeOnChainFallback: true,
                 }),
             );
@@ -325,7 +325,7 @@ describe('POST /api/token-info', () => {
             failUpstream([token(MINT_A)]);
 
             const { POST } = await importRoute();
-            const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
+            const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.Mainnet }));
 
             expect(res.status).toBe(200);
             expect(await res.json()).toEqual({ content: [token(MINT_A)] });
@@ -335,7 +335,7 @@ describe('POST /api/token-info', () => {
             mocks.getTokenInfos.mockResolvedValue([]);
 
             const { POST } = await importRoute();
-            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.Mainnet }));
 
             expect(res.status).toBe(200);
             expect(await res.json()).toEqual({ content: [] });

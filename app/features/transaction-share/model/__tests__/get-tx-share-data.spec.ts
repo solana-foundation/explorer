@@ -142,7 +142,7 @@ describe('should shape the transaction behind an OG image', () => {
     it('should print a placeholder when the transaction has no block time', async () => {
         mocks.getTx.mockResolvedValue({ ...TX, blockTime: null });
 
-        const result = await getTxShareData(SIGNATURE, Cluster.MainnetBeta);
+        const result = await getTxShareData(SIGNATURE, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { dateUtc: '-' }, kind: 'ok' });
     });
@@ -150,7 +150,7 @@ describe('should shape the transaction behind an OG image', () => {
     it('should leave the fee and the status absent when the transaction carries no meta', async () => {
         mocks.getTx.mockResolvedValue({ ...TX, meta: null });
 
-        const result = await getTxShareData(SIGNATURE, Cluster.MainnetBeta);
+        const result = await getTxShareData(SIGNATURE, Cluster.Mainnet);
 
         expect(result).toMatchObject({ kind: 'ok' });
         expect(result).toHaveProperty('data.fee', undefined);
@@ -175,9 +175,9 @@ describe('getTxShareData errors', () => {
     it('should report a timeout warning when the fetch runs past the budget', async () => {
         mocks.getTx.mockRejectedValue(TIMEOUT_ERROR);
 
-        await expect(getTxShareData(SIGNATURE, Cluster.MainnetBeta)).resolves.toEqual({ kind: 'rpc-budget-timeout' });
+        await expect(getTxShareData(SIGNATURE, Cluster.Mainnet)).resolves.toEqual({ kind: 'rpc-budget-timeout' });
         expect(Logger.warn).toHaveBeenCalledWith('[transaction-share] Transaction request budget exceeded', {
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             signature: SIGNATURE,
         });
     });

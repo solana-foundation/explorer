@@ -28,7 +28,7 @@ describe.each([
 
     it.each([
         ['the cluster is not Mainnet or Custom', Cluster.Devnet, USER_ADDRESS],
-        ['userAddress is empty', Cluster.MainnetBeta, ''],
+        ['userAddress is empty', Cluster.Mainnet, ''],
     ])('should not request when %s', (_label, cluster, userAddress) => {
         mockCluster(cluster);
 
@@ -38,7 +38,7 @@ describe.each([
     });
 
     it.each([
-        ['Mainnet', Cluster.MainnetBeta],
+        ['Mainnet', Cluster.Mainnet],
         ['a Custom cluster', Cluster.Custom],
     ])('should request with the SWR key on %s and return the SWR response', (_label, cluster) => {
         mockCluster(cluster);

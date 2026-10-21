@@ -24,7 +24,7 @@ const MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 function Requester({ nonce }: { nonce: number }) {
     const request = useTokenInfoBatch();
     React.useEffect(() => {
-        request(MINT, Cluster.MainnetBeta, 'genesis');
+        request(MINT, Cluster.Mainnet, 'genesis');
     }, [request, nonce]);
     return null;
 }
@@ -89,7 +89,7 @@ describe('should skip already-resolved token-info requests', () => {
 function MultiNetworkRequester() {
     const request = useTokenInfoBatch();
     React.useEffect(() => {
-        request(MINT, Cluster.MainnetBeta, 'genesis-main');
+        request(MINT, Cluster.Mainnet, 'genesis-main');
         request(MINT, Cluster.Devnet, 'genesis-dev');
     }, [request]);
     return null;
@@ -116,7 +116,7 @@ describe('should keep pending token-info requests distinct per network', () => {
         expect(fetchTokenInfosFromApiMock).toHaveBeenCalledTimes(2);
         expect(fetchTokenInfosFromApiMock).toHaveBeenCalledWith({
             addresses: [MINT],
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             genesisHash: 'genesis-main',
             includeOnChainFallback: false,
         });

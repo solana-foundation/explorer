@@ -27,18 +27,18 @@ describe('useProgramMetadataIdl', () => {
             programMetadataIdl: { name: 'pmp_idl' },
         });
 
-        const { result } = renderHook(() => useProgramMetadataIdl(PROGRAM, RPC_URL, Cluster.MainnetBeta));
+        const { result } = renderHook(() => useProgramMetadataIdl(PROGRAM, RPC_URL, Cluster.Mainnet));
 
         expect(result.current.programMetadataIdl).toEqual({ name: 'pmp_idl' });
         expect(result.current.isLoading).toBe(false);
-        expect(mocks.useProgramIdls).toHaveBeenCalledWith(PROGRAM, RPC_URL, Cluster.MainnetBeta, { suspense: false });
+        expect(mocks.useProgramIdls).toHaveBeenCalledWith(PROGRAM, RPC_URL, Cluster.Mainnet, { suspense: false });
     });
 
     it('should forward the suspense flag to the shared resolution', () => {
         mocks.useProgramIdls.mockReturnValue({ anchorIdl: undefined, isLoading: true, programMetadataIdl: undefined });
 
-        renderHook(() => useProgramMetadataIdl(PROGRAM, RPC_URL, Cluster.MainnetBeta, true));
+        renderHook(() => useProgramMetadataIdl(PROGRAM, RPC_URL, Cluster.Mainnet, true));
 
-        expect(mocks.useProgramIdls).toHaveBeenCalledWith(PROGRAM, RPC_URL, Cluster.MainnetBeta, { suspense: true });
+        expect(mocks.useProgramIdls).toHaveBeenCalledWith(PROGRAM, RPC_URL, Cluster.Mainnet, { suspense: true });
     });
 });

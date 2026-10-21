@@ -21,12 +21,12 @@ const announcements = new Map<Cluster, Announcement>();
 //     start: new Date('July 25, 2020 18:00:00 GMT+8:00'),
 //     estimate: '2 hours',
 // });
-// announcements.set(Cluster.MainnetBeta, {
+// announcements.set(Cluster.Mainnet, {
 //   message: "Mainnet Beta upgrade in progress. Transactions disabled until epoch 62",
 //   start: new Date("August 2, 2020 00:00:00 GMT+0:00"),
 //   end: new Date("August 4, 2020 00:00:00 GMT+0:00"),
 // });
-// announcements.set(Cluster.MainnetBeta, {
+// announcements.set(Cluster.Mainnet, {
 //   message:
 //     "Mainnet Beta upgrade in progress. Transactions disabled until epoch 62",
 // });

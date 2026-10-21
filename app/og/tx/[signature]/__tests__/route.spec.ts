@@ -122,7 +122,7 @@ describe('should handle GET /og/tx/[signature]', () => {
         const response = await GET(makeRequest(SIGNATURE), makeProps(SIGNATURE));
 
         expect(response.status).toBe(200);
-        expect(getTxShareData).toHaveBeenCalledWith(SIGNATURE, Cluster.MainnetBeta);
+        expect(getTxShareData).toHaveBeenCalledWith(SIGNATURE, Cluster.Mainnet);
     });
 
     it('should resolve against devnet when the cluster param is devnet', async () => {

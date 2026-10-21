@@ -13,7 +13,7 @@ describe('getReservedComputeUnits', () => {
             // Before epoch 759 on mainnet
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     epoch: 758n,
                     programId: '11111111111111111111111111111111', // System Program
                 }),
@@ -21,7 +21,7 @@ describe('getReservedComputeUnits', () => {
 
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     epoch: 0n,
                     programId: 'Vote111111111111111111111111111111111111111', // Vote Program
                 }),
@@ -32,7 +32,7 @@ describe('getReservedComputeUnits', () => {
             // After epoch 759 on mainnet
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     epoch: 759n,
                     programId: '11111111111111111111111111111111', // System Program
                 }),
@@ -40,7 +40,7 @@ describe('getReservedComputeUnits', () => {
 
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     epoch: 1000n,
                     programId: 'Vote111111111111111111111111111111111111111', // Vote Program
                 }),
@@ -48,7 +48,7 @@ describe('getReservedComputeUnits', () => {
 
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     epoch: 759n,
                     programId: 'ComputeBudget111111111111111111111111111111', // Compute Budget
                 }),
@@ -58,7 +58,7 @@ describe('getReservedComputeUnits', () => {
         it('should return default compute units for non-builtins after feature activation', () => {
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     epoch: 759n,
                     programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', // Token Program
                 }),
@@ -69,7 +69,7 @@ describe('getReservedComputeUnits', () => {
             // Before migration (epoch 753), feature gate is builtin
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     epoch: 752n,
                     programId: 'Feature111111111111111111111111111111111111',
                 }),
@@ -78,7 +78,7 @@ describe('getReservedComputeUnits', () => {
             // After builtin optimization but before migration
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     epoch: 758n, // After 753 but before 759
                     programId: 'Feature111111111111111111111111111111111111',
                 }),
@@ -87,7 +87,7 @@ describe('getReservedComputeUnits', () => {
             // After both migration and builtin optimization
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     epoch: 759n,
                     programId: 'Feature111111111111111111111111111111111111',
                 }),
@@ -163,7 +163,7 @@ describe('getReservedComputeUnits', () => {
         it('should handle undefined epoch', () => {
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     programId: '11111111111111111111111111111111',
                 }),
             ).toEqual(200_000);
@@ -172,7 +172,7 @@ describe('getReservedComputeUnits', () => {
         it('should handle negative epoch', () => {
             expect(
                 getReservedComputeUnits({
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     epoch: -1n,
                     programId: '11111111111111111111111111111111',
                 }),
@@ -217,7 +217,7 @@ describe('estimateRequestedComputeUnits', () => {
                 },
             ]);
 
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(computeUnits);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(computeUnits);
         });
 
         it('should return compute units from deprecated RequestUnits instruction', () => {
@@ -234,7 +234,7 @@ describe('estimateRequestedComputeUnits', () => {
                 },
             ]);
 
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(computeUnits);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(computeUnits);
         });
 
         it('should prioritize first compute budget instruction found', () => {
@@ -257,7 +257,7 @@ describe('estimateRequestedComputeUnits', () => {
                 },
             ]);
 
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(100_000);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(100_000);
         });
     });
 
@@ -270,7 +270,7 @@ describe('estimateRequestedComputeUnits', () => {
                 },
             ]);
 
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(200_000);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(200_000);
         });
 
         it('should return minimal units for builtin programs after activation', () => {
@@ -282,10 +282,10 @@ describe('estimateRequestedComputeUnits', () => {
             ]);
 
             // After activation
-            expect(estimateRequestedComputeUnits(tx, 759n, Cluster.MainnetBeta)).toEqual(3_000);
+            expect(estimateRequestedComputeUnits(tx, 759n, Cluster.Mainnet)).toEqual(3_000);
 
             // Before activation
-            expect(estimateRequestedComputeUnits(tx, 758n, Cluster.MainnetBeta)).toEqual(200_000);
+            expect(estimateRequestedComputeUnits(tx, 758n, Cluster.Mainnet)).toEqual(200_000);
         });
 
         it('should return sum of reserved units for mixed instructions', () => {
@@ -301,7 +301,7 @@ describe('estimateRequestedComputeUnits', () => {
             ]);
 
             // Should return the sum (3k + 200k = 203k)
-            expect(estimateRequestedComputeUnits(tx, 759n, Cluster.MainnetBeta)).toEqual(203_000);
+            expect(estimateRequestedComputeUnits(tx, 759n, Cluster.Mainnet)).toEqual(203_000);
         });
 
         it('should handle feature gate program correctly across epochs', () => {
@@ -313,10 +313,10 @@ describe('estimateRequestedComputeUnits', () => {
             ]);
 
             // Before migration - uses default
-            expect(estimateRequestedComputeUnits(tx, 752n, Cluster.MainnetBeta)).toEqual(200_000);
+            expect(estimateRequestedComputeUnits(tx, 752n, Cluster.Mainnet)).toEqual(200_000);
 
             // After migration and builtin optimization - still uses default (now BPF)
-            expect(estimateRequestedComputeUnits(tx, 759n, Cluster.MainnetBeta)).toEqual(200_000);
+            expect(estimateRequestedComputeUnits(tx, 759n, Cluster.Mainnet)).toEqual(200_000);
         });
     });
 
@@ -330,7 +330,7 @@ describe('estimateRequestedComputeUnits', () => {
             ]);
 
             // ComputeBudget is a builtin, so after activation it gets 3k
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(3_000);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(3_000);
         });
 
         it('should handle invalid compute budget instruction data', () => {
@@ -342,12 +342,12 @@ describe('estimateRequestedComputeUnits', () => {
             ]);
 
             // ComputeBudget is a builtin, so after activation it gets 3k
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(3_000);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(3_000);
         });
 
         it('should handle transactions with no instructions', () => {
             const tx = createMockTransaction([]);
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(0);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(0);
         });
 
         it('should respect the 1.4M compute unit cap', () => {
@@ -362,7 +362,7 @@ describe('estimateRequestedComputeUnits', () => {
             const tx = createMockTransaction(instructions);
 
             // Should cap at 1.4M even though sum would be 2M
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(1_400_000);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(1_400_000);
         });
 
         it('should handle compute budget with other instructions', () => {
@@ -382,7 +382,7 @@ describe('estimateRequestedComputeUnits', () => {
             ]);
 
             // Should return the explicit compute budget, not the sum
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(500_000);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(500_000);
         });
     });
 
@@ -420,22 +420,22 @@ describe('estimateRequestedComputeUnits', () => {
 
         it('should read the limit from the message config rather than the instructions', () => {
             const tx = createV1Transaction({ computeUnitLimit: 10_000 });
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(10_000);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(10_000);
         });
 
         it('should report zero when the config sets no compute unit limit', () => {
             const tx = createV1Transaction({});
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(0);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(0);
         });
 
         it('should report zero when the message carries no config at all', () => {
             const tx = createV1Transaction(undefined);
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(0);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(0);
         });
 
         it('should respect the 1.4M compute unit cap', () => {
             const tx = createV1Transaction({ computeUnitLimit: 5_000_000 });
-            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.MainnetBeta)).toEqual(1_400_000);
+            expect(estimateRequestedComputeUnits(tx, 1000n, Cluster.Mainnet)).toEqual(1_400_000);
         });
     });
 });

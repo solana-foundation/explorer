@@ -31,7 +31,7 @@ export async function getTokenInfo(mintAddress: string, cluster: Cluster): Promi
 
 function getChainIdForCluster(cluster: Cluster): number | undefined {
     switch (cluster) {
-        case Cluster.MainnetBeta:
+        case Cluster.Mainnet:
             return 101;
         case Cluster.Testnet:
             return 102;

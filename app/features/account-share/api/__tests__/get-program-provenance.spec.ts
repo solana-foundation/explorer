@@ -25,7 +25,7 @@ function noIdls() {
     return { anchorIdl: undefined, programMetadataIdl: undefined };
 }
 
-function run(cluster: ServerCluster = Cluster.MainnetBeta) {
+function run(cluster: ServerCluster = Cluster.Mainnet) {
     return getProgramProvenance(RPC, PROGRAM_ID, cluster, AbortSignal.timeout(1_000));
 }
 

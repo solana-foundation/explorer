@@ -201,12 +201,12 @@ describe('search', () => {
 });
 
 describe('useSearch', () => {
-    const selection = clusterSelection(Cluster.MainnetBeta);
+    const selection = clusterSelection(Cluster.Mainnet);
     const clusterState = {
         ...selection,
         connectableUrl: toConnectableUrl('https://rpc.example'),
         genesisHash: 'genesis-hash',
-        name: 'Mainnet Beta',
+        name: 'Mainnet',
         selection,
         status: ClusterStatus.Connected,
         url: 'https://rpc.example',
@@ -234,7 +234,7 @@ describe('useSearch', () => {
         renderHook(() => useSearch('someaddress'));
 
         const [key] = vi.mocked(useSWR).mock.calls[0];
-        expect(key).toEqual(['search', 'someaddress', Cluster.MainnetBeta, 'genesis-hash', undefined]);
+        expect(key).toEqual(['search', 'someaddress', Cluster.Mainnet, 'genesis-hash', undefined]);
     });
 
     it('should include the current epoch in the SWR key for a numeric query', () => {
@@ -249,7 +249,7 @@ describe('useSearch', () => {
         renderHook(() => useSearch('600'));
 
         const [key] = vi.mocked(useSWR).mock.calls[0];
-        expect(key).toEqual(['search', '600', Cluster.MainnetBeta, 'genesis-hash', '500']);
+        expect(key).toEqual(['search', '600', Cluster.Mainnet, 'genesis-hash', '500']);
     });
 });
 

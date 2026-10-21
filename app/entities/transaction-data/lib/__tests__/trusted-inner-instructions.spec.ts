@@ -10,7 +10,7 @@ describe('trustedInnerInstructions', () => {
     it('should report nothing for a mainnet slot before inner instructions were recorded', () => {
         expect(
             trustedInnerInstructions(GROUPS, {
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 slot: INNER_INSTRUCTIONS_START_SLOT - 1,
             }),
         ).toBeUndefined();
@@ -18,7 +18,7 @@ describe('trustedInnerInstructions', () => {
 
     it('should report the groups from the first mainnet slot that recorded them', () => {
         expect(
-            trustedInnerInstructions(GROUPS, { cluster: Cluster.MainnetBeta, slot: INNER_INSTRUCTIONS_START_SLOT }),
+            trustedInnerInstructions(GROUPS, { cluster: Cluster.Mainnet, slot: INNER_INSTRUCTIONS_START_SLOT }),
         ).toBe(GROUPS);
     });
 
@@ -29,7 +29,7 @@ describe('trustedInnerInstructions', () => {
     });
 
     it('should report nothing when the source supplied no slot to check against', () => {
-        expect(trustedInnerInstructions(GROUPS, { cluster: Cluster.MainnetBeta, slot: NaN })).toBeUndefined();
+        expect(trustedInnerInstructions(GROUPS, { cluster: Cluster.Mainnet, slot: NaN })).toBeUndefined();
     });
 
     it('should keep an absent list absent rather than reporting an empty one', () => {

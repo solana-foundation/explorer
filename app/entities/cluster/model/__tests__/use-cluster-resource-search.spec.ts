@@ -31,7 +31,7 @@ describe('useClusterResourceSearch', () => {
         const probe = vi.fn(() => new Promise<boolean>(() => {}));
 
         const { result } = renderHook(() =>
-            useClusterResourceSearch({ currentCluster: Cluster.MainnetBeta, probe, resourceId: RESOURCE_ID }),
+            useClusterResourceSearch({ currentCluster: Cluster.Mainnet, probe, resourceId: RESOURCE_ID }),
         );
 
         await waitForHook(() => expect(result.current.status).toBe('searching'));
@@ -46,15 +46,15 @@ describe('useClusterResourceSearch', () => {
         );
 
         await waitForHook(() => expect(result.current.status).toBe('found'));
-        // Devnet is the current cluster and excluded, so MainnetBeta is probed first
-        expect(result.current.foundCluster).toBe(Cluster.MainnetBeta);
+        // Devnet is the current cluster and excluded, so Mainnet is probed first
+        expect(result.current.foundCluster).toBe(Cluster.Mainnet);
     });
 
     it('should report not-found after probing every public cluster except the current one', async () => {
         const probe = vi.fn().mockResolvedValue(false);
 
         const { result } = renderHook(() =>
-            useClusterResourceSearch({ currentCluster: Cluster.MainnetBeta, probe, resourceId: RESOURCE_ID }),
+            useClusterResourceSearch({ currentCluster: Cluster.Mainnet, probe, resourceId: RESOURCE_ID }),
         );
 
         await act(async () => {
@@ -64,7 +64,7 @@ describe('useClusterResourceSearch', () => {
         await waitForHook(() => expect(result.current.status).toBe('not-found'));
         expect(result.current.foundCluster).toBeUndefined();
         expect(result.current.searchingCluster).toBeUndefined();
-        // MainnetBeta is current, so only Devnet + Testnet are probed
+        // Mainnet is current, so only Devnet + Testnet are probed
         expect(probe).toHaveBeenCalledTimes(2);
     });
 
@@ -95,7 +95,7 @@ describe('useClusterResourceSearch', () => {
         const probe = vi.fn().mockRejectedValueOnce(new Error('RPC unreachable')).mockResolvedValueOnce(true);
 
         const { result } = renderHook(() =>
-            useClusterResourceSearch({ currentCluster: Cluster.MainnetBeta, probe, resourceId: RESOURCE_ID }),
+            useClusterResourceSearch({ currentCluster: Cluster.Mainnet, probe, resourceId: RESOURCE_ID }),
         );
 
         await waitForHook(() => expect(result.current.status).toBe('found'));
@@ -107,7 +107,7 @@ describe('useClusterResourceSearch', () => {
         const probe = vi.fn().mockRejectedValue(new Error('RPC unreachable'));
 
         const { result } = renderHook(() =>
-            useClusterResourceSearch({ currentCluster: Cluster.MainnetBeta, probe, resourceId: RESOURCE_ID }),
+            useClusterResourceSearch({ currentCluster: Cluster.Mainnet, probe, resourceId: RESOURCE_ID }),
         );
 
         await act(async () => {

@@ -130,7 +130,7 @@ describe('account card', () => {
     it('should shape a non-executable account with balance, owner, size and activity', async () => {
         useRpc({ [ADDRESS]: walletValue() }, [{ blockTime: BLOCK_TIME }, { blockTime: BLOCK_TIME - 1 }]);
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toEqual({
             data: {
@@ -152,7 +152,7 @@ describe('account card', () => {
     it('should omit the owner for a system-owned wallet', async () => {
         useRpc({ [ADDRESS]: walletValue({ owner: SYSTEM_PROGRAM_ADDRESS }) }, []);
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { kind: 'account' }, kind: 'ok' });
         expect(result).toHaveProperty('data.owner', undefined);
@@ -162,7 +162,7 @@ describe('account card', () => {
         const signatures = Array.from({ length: SIGNATURE_LOOKUP_LIMIT + 50 }, () => ({ blockTime: BLOCK_TIME }));
         useRpc({ [ADDRESS]: walletValue() }, signatures);
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({
             data: {
@@ -176,7 +176,7 @@ describe('account card', () => {
     it('should omit activity when the address has no signatures', async () => {
         useRpc({ [ADDRESS]: walletValue() }, []);
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { kind: 'account' }, kind: 'ok' });
         expect(result).toHaveProperty('data.transactionCount', undefined);
@@ -192,7 +192,7 @@ describe('program card', () => {
         });
         mocks.getProgramProvenance.mockResolvedValue({ ...NO_PROVENANCE, name: 'Jupiter' });
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toEqual({
             data: {
@@ -215,7 +215,7 @@ describe('program card', () => {
             [PROGRAM_DATA]: programDataValue({ slot: 1, space: 45 }),
         });
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { upgradeAuthority: { note: 'Immutable' } }, kind: 'ok' });
         expect(
@@ -231,7 +231,7 @@ describe('program card', () => {
         mocks.programLabel.mockReturnValue('Known Program');
         mocks.getProgramProvenance.mockResolvedValue({ ...NO_PROVENANCE, name: 'idl-name' });
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { name: 'Known Program' }, kind: 'ok' });
     });
@@ -242,7 +242,7 @@ describe('program card', () => {
             [PROGRAM_DATA]: programDataValue({ authority: AUTHORITY, slot: 1, space: 45 }),
         });
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect((result as { data: { name: string } }).data.name).toContain('..');
     });
@@ -259,7 +259,7 @@ describe('program card', () => {
         });
         mocks.verifiedBuildState.mockReturnValue('yes');
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({
             data: { incomplete: false, markers: { idlUploaded: 'yes', securityTxt: 'no', verifiedBuild: 'yes' } },
@@ -273,7 +273,7 @@ describe('program card', () => {
         });
         mocks.getProgramProvenance.mockResolvedValue({ ...NO_PROVENANCE, idlUploaded: 'unknown' });
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { incomplete: true, markers: { idlUploaded: 'unknown' } } });
     });
@@ -281,7 +281,7 @@ describe('program card', () => {
     it('should leave size and authority absent when the program-data account cannot be read', async () => {
         useRpc({ [ADDRESS]: programValue(), [PROGRAM_DATA]: null });
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { kind: 'program' }, kind: 'ok' });
         expect(result).not.toHaveProperty('data.programSize');
@@ -294,7 +294,7 @@ describe('program loaders', () => {
     it('should size a legacy BPF-loader program from its own account and mark it immutable', async () => {
         useRpc({ [ADDRESS]: programValue({ owner: BPF_LOADER_2_ADDRESS, space: 8_320n }) });
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({
             data: { kind: 'program', programSize: '8,320 B', upgradeAuthority: { note: 'Immutable' } },
@@ -306,7 +306,7 @@ describe('program loaders', () => {
     it('should hash a legacy BPF-loader program directly so it can be verified against the registry', async () => {
         useRpc({ [ADDRESS]: programValue({ owner: BPF_LOADER_2_ADDRESS, space: 8_320n }) });
 
-        await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         // A legacy program keeps its ELF in the program account, so it is hashed directly (no authority) and
         // handed to the verified-build check - rather than passing `undefined` and always reading "unverified".
@@ -318,7 +318,7 @@ describe('program loaders', () => {
             [ADDRESS]: programValue({ owner: LOADER_V4_ADDRESS, space: BigInt(LOADER_V4_HEADER_SIZE + 1_048_576) }),
         });
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { kind: 'program', programSize: '1.00 MB' }, kind: 'ok' });
         expect(result).not.toHaveProperty('data.upgradeAuthority');
@@ -327,7 +327,7 @@ describe('program loaders', () => {
     it('should show no byte size for a native program and mark it immutable', async () => {
         useRpc({ [ADDRESS]: programValue({ owner: NATIVE_LOADER_ADDRESS, space: 36n }) });
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({
             data: { kind: 'program', upgradeAuthority: { note: 'Immutable' } },
@@ -339,7 +339,7 @@ describe('program loaders', () => {
     it('should fall back to the account size for an unknown loader without asserting immutability', async () => {
         useRpc({ [ADDRESS]: programValue({ owner: gen.address(7), space: 100n }) });
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { kind: 'program', programSize: '100 B' }, kind: 'ok' });
         expect(result).not.toHaveProperty('data.upgradeAuthority');
@@ -350,7 +350,7 @@ describe('not-found card', () => {
     it('should read a missing account with no history as never used', async () => {
         useRpc({ [ADDRESS]: null }, []);
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toEqual({ data: { address: ADDRESS, kind: 'not-found', reason: 'never-used' }, kind: 'ok' });
     });
@@ -358,7 +358,7 @@ describe('not-found card', () => {
     it('should record that a missing account has history without claiming it was closed', async () => {
         useRpc({ [ADDRESS]: null }, [{ blockTime: BLOCK_TIME }]);
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { kind: 'not-found', reason: 'has-history' }, kind: 'ok' });
     });
@@ -370,7 +370,7 @@ describe('not-found card', () => {
         };
         mocks.getRpc.mockReturnValue(rpc);
 
-        const result = await getAccountShareData(ADDRESS, Cluster.MainnetBeta);
+        const result = await getAccountShareData(ADDRESS, Cluster.Mainnet);
 
         expect(result).toMatchObject({ data: { kind: 'not-found', reason: 'unknown' }, kind: 'ok' });
     });
@@ -382,7 +382,7 @@ describe('failures and defaults', () => {
             throw new Error('boom');
         });
 
-        await expect(getAccountShareData(ADDRESS, Cluster.MainnetBeta)).resolves.toEqual({ kind: 'error' });
+        await expect(getAccountShareData(ADDRESS, Cluster.Mainnet)).resolves.toEqual({ kind: 'error' });
     });
 
     it('should default to the mainnet endpoint when the request carried no cluster', async () => {
@@ -390,7 +390,7 @@ describe('failures and defaults', () => {
 
         const result = await getAccountShareData(ADDRESS);
 
-        expect(mocks.getRpc).toHaveBeenCalledWith(serverClusterUrl(Cluster.MainnetBeta));
+        expect(mocks.getRpc).toHaveBeenCalledWith(serverClusterUrl(Cluster.Mainnet));
         expect(result.kind).toBe('ok');
     });
 });

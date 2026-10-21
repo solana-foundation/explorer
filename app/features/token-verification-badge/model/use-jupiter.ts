@@ -25,7 +25,7 @@ export type JupiterResult = {
 type JupiterSwrKey = ['jupiter-verification', string];
 
 function getJupiterSwrKey(cluster: Cluster, mintAddress?: string): JupiterSwrKey | null {
-    if (!mintAddress || cluster !== Cluster.MainnetBeta) {
+    if (!mintAddress || cluster !== Cluster.Mainnet) {
         return null;
     }
 

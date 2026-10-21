@@ -74,7 +74,7 @@ describe('useMainnetConfirmation', () => {
         });
     });
 
-    describe('when cluster is not MainnetBeta', () => {
+    describe('when cluster is not Mainnet', () => {
         it.each([
             { action: async () => {}, cluster: Cluster.Devnet, kind: 'async', name: 'Devnet' },
             { action: async () => {}, cluster: Cluster.Testnet, kind: 'async', name: 'Testnet' },
@@ -204,7 +204,7 @@ describe('useMainnetConfirmation', () => {
     });
 });
 
-function setup(cluster: Cluster = Cluster.MainnetBeta) {
+function setup(cluster: Cluster = Cluster.Mainnet) {
     const selection = clusterSelection(cluster);
     vi.mocked(useCluster).mockReturnValue({
         ...selection,

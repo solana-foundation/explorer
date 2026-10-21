@@ -169,7 +169,7 @@ const MARKET_REGISTRY: { [key: string]: string } = {
 /* eslint-enable sort-keys-fix/sort-keys-fix */
 
 function get(address: string, cluster: Cluster): string | undefined {
-    if (cluster === Cluster.MainnetBeta) return MARKET_REGISTRY[address];
+    if (cluster === Cluster.Mainnet) return MARKET_REGISTRY[address];
 }
 
 export const SerumMarketRegistry = {
