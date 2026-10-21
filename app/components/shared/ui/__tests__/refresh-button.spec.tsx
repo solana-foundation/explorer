@@ -35,6 +35,18 @@ describe('RefreshButton', () => {
         expect(screen.getByText('Refresh')).toBeInTheDocument();
     });
 
+    // History cards keep their old rows after a failed fetch, so the button must stay usable for a retry.
+    it('should enable the button without a checkmark after a clicked refresh fails', () => {
+        const { rerender } = renderButton(false);
+
+        fireEvent.click(refreshButton());
+        rerender(button(true));
+        rerender(button(false, true));
+
+        expect(refreshButton()).toBeEnabled();
+        expect(screen.queryByText('Refreshed')).not.toBeInTheDocument();
+    });
+
     // The account fetch starts after the click, so the first render after the click still has `fetching` false.
     it('should keep the button enabled until the clicked refresh starts fetching', () => {
         const { rerender } = renderButton(false);
@@ -62,8 +74,8 @@ function renderButton(fetching: boolean) {
     return render(button(fetching));
 }
 
-function button(fetching: boolean) {
-    return <RefreshButton analyticsSection="test" fetching={fetching} onClick={() => {}} />;
+function button(fetching: boolean, failed = false) {
+    return <RefreshButton analyticsSection="test" fetching={fetching} failed={failed} onClick={() => {}} />;
 }
 
 function refreshButton() {

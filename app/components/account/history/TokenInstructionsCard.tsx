@@ -123,6 +123,7 @@ export function TokenInstructionsCard({ address }: { address: string }) {
         <Card ui="dashkit">
             <HistoryCardHeader
                 fetching={fetching}
+                failed={history.status === FetchStatus.FetchFailed}
                 refresh={() => refresh()}
                 title="Token Instructions"
                 analyticsSection="token_instructions_header"

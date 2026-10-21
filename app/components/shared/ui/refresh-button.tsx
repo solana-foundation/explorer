@@ -9,14 +9,15 @@ import { Button } from './button';
 type Props = {
     analyticsSection: string;
     fetching?: boolean;
+    failed?: boolean;
     onClick: () => void;
     className?: string;
 };
 
 const COOLDOWN_MS = 2000;
 
-export function RefreshButton({ analyticsSection, fetching = false, onClick, className }: Props) {
-    const [phase, request] = useRefreshPhase(fetching);
+export function RefreshButton({ analyticsSection, fetching = false, failed = false, onClick, className }: Props) {
+    const [phase, request] = useRefreshPhase(fetching, failed);
     const refreshed = phase === 'refreshed';
 
     return (
@@ -65,11 +66,11 @@ function RefreshButtonContent({ fetching, refreshed }: { fetching: boolean; refr
 type RefreshPhase = 'idle' | 'requested' | 'fetching' | 'refreshed';
 
 // The fetch can start after the click, so `requested` waits for `fetching` to turn true before it can end.
-function useRefreshPhase(fetching: boolean) {
+function useRefreshPhase(fetching: boolean, failed: boolean) {
     const [phase, setPhase] = useState<RefreshPhase>('idle');
 
     if (phase === 'requested' && fetching) setPhase('fetching');
-    if (phase === 'fetching' && !fetching) setPhase('refreshed');
+    if (phase === 'fetching' && !fetching) setPhase(failed ? 'idle' : 'refreshed');
 
     useEffect(() => {
         if (phase !== 'refreshed') return;

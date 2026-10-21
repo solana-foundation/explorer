@@ -107,6 +107,7 @@ export function TransactionHistoryCard({ address }: { address: string }) {
         <BaseTransactionHistoryCard
             rows={rows}
             fetching={history.status === FetchStatus.Fetching}
+            failed={history.status === FetchStatus.FetchFailed}
             foundOldest={history.data.foundOldest}
             onRefresh={refresh}
             onLoadMore={loadMore}

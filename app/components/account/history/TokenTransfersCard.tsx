@@ -251,6 +251,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
         <Card ui="dashkit">
             <HistoryCardHeader
                 fetching={fetching}
+                failed={history.status === FetchStatus.FetchFailed}
                 refresh={() => refresh()}
                 title="Token Transfers"
                 analyticsSection="token_transfers_header"
