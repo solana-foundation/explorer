@@ -19,6 +19,7 @@ const mockGetProgramAccounts = vi.fn();
 const mockGetMultipleAccounts = vi.fn();
 
 vi.mock('@utils/cluster', () => ({
+    // TODO: switch to 'mainnet' together with the RPC address switch to https://api.mainnet.solana.com
     Cluster: { Mainnet: 'mainnet-beta' },
     serverClusterUrl: () => 'https://unused.test',
 }));
