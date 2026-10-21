@@ -31,9 +31,7 @@ vi.mock('@features/account', () => ({
     AccountCard: ({ children, refresh }: { children: ReactNode; refresh: () => void }) => (
         <>
             <button onClick={refresh}>Refresh</button>
-            <table>
-                <tbody>{children}</tbody>
-            </table>
+            <div>{children}</div>
         </>
     ),
 }));
@@ -52,14 +50,14 @@ afterEach(() => {
 });
 
 describe('NftokenAccountSection', () => {
-    it('should show each address of an NFT in its own row', () => {
+    it('should show each labelled field of an NFT', () => {
         renderSection(nftokenAccount(accountBytes(NFT.base64), NFT.pubkey));
 
-        expect(screen.getByRole('row', { name: `Address ${NFT.pubkey}` })).toBeInTheDocument();
-        expect(screen.getByRole('row', { name: `Authority ${MAINNET_AUTHORITY}` })).toBeInTheDocument();
-        expect(screen.getByRole('row', { name: `Holder ${NFT.holder}` })).toBeInTheDocument();
-        expect(screen.getByRole('row', { name: 'Delegate Not Delegated' })).toBeInTheDocument();
-        expect(screen.getByRole('row', { name: `Collection ${COLLECTION}` })).toBeInTheDocument();
+        expectRow('Address', NFT.pubkey);
+        expectRow('Authority', MAINNET_AUTHORITY);
+        expectRow('Holder', NFT.holder);
+        expectRow('Delegate', 'Not Delegated');
+        expectRow('Collection', COLLECTION);
     });
 
     it('should show No Collection for an NFT without a collection', () => {
@@ -68,7 +66,7 @@ describe('NftokenAccountSection', () => {
 
         renderSection(nftokenAccount(data, NFT.pubkey));
 
-        expect(screen.getByRole('row', { name: 'Collection No Collection' })).toBeInTheDocument();
+        expectRow('Collection', 'No Collection');
     });
 
     it('should show the authority of a collection', () => {
@@ -80,8 +78,8 @@ describe('NftokenAccountSection', () => {
 
         renderSection(collectionAccount());
 
-        expect(screen.getByRole('row', { name: `Address ${COLLECTION}` })).toBeInTheDocument();
-        expect(screen.getByRole('row', { name: `Authority ${MAINNET_AUTHORITY}` })).toBeInTheDocument();
+        expectRow('Address', COLLECTION);
+        expectRow('Authority', MAINNET_AUTHORITY);
     });
 
     it('should count every NFT account in a collection, including the ones that do not decode', async () => {
@@ -93,9 +91,8 @@ describe('NftokenAccountSection', () => {
 
         renderSection(collectionAccount());
 
-        expect(
-            await screen.findByRole('row', { name: `Number of NFTs ${MAINNET_NFT_ACCOUNTS.length + 2}` }),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(String(MAINNET_NFT_ACCOUNTS.length + 2))).toBeInTheDocument();
+        expect(screen.getByText('Number of NFTs')).toBeInTheDocument();
     });
 
     it('should count the NFTs again when the user refreshes the overview', async () => {
@@ -104,13 +101,11 @@ describe('NftokenAccountSection', () => {
             .mockResolvedValueOnce({ kind: 'loaded', nfts: MAINNET_NFT_ACCOUNTS.slice(1), undecodableCount: 0 });
         const account = collectionAccount();
         renderSection(account);
-        await screen.findByRole('row', { name: `Number of NFTs ${MAINNET_NFT_ACCOUNTS.length}` });
+        await screen.findByText(String(MAINNET_NFT_ACCOUNTS.length));
 
         fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
 
-        expect(
-            await screen.findByRole('row', { name: `Number of NFTs ${MAINNET_NFT_ACCOUNTS.length - 1}` }),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(String(MAINNET_NFT_ACCOUNTS.length - 1))).toBeInTheDocument();
         expect(mocks.refreshAccount).toHaveBeenCalledWith(account.pubkey, 'parsed');
     });
 
@@ -139,7 +134,7 @@ describe('NftokenAccountSection', () => {
 
         renderSection(collectionAccount());
 
-        expect(screen.getByRole('row', { name: 'Number of NFTs Loading...' })).toBeInTheDocument();
+        expectRow('Number of NFTs', 'Loading...');
     });
 
     it.each([
@@ -151,7 +146,8 @@ describe('NftokenAccountSection', () => {
 
         renderSection(collectionAccount());
 
-        expect(await screen.findByRole('row', { name: 'Number of NFTs Fetch Failed' })).toBeInTheDocument();
+        expect(await screen.findByText('Fetch Failed')).toBeInTheDocument();
+        expect(screen.getByText('Number of NFTs')).toBeInTheDocument();
     });
 
     it('should stop requesting the NFTs after two retries', async () => {
@@ -162,7 +158,7 @@ describe('NftokenAccountSection', () => {
         await act(() => vi.advanceTimersByTimeAsync(10 * 60_000));
 
         expect(mocks.fetchCollectionNfts).toHaveBeenCalledTimes(3);
-        expect(screen.getByRole('row', { name: 'Number of NFTs Fetch Failed' })).toBeInTheDocument();
+        expectRow('Number of NFTs', 'Fetch Failed');
     });
 
     it('should render the unknown account card for data that does not decode', () => {
@@ -172,6 +168,13 @@ describe('NftokenAccountSection', () => {
         expect(mocks.fetchCollectionNfts).not.toHaveBeenCalled();
     });
 });
+
+// Each KeyValue renders its label and value as their own text nodes, so an exact match on both
+// confirms the labelled field is present.
+function expectRow(label: string, value: string) {
+    expect(screen.getByText(label)).toBeInTheDocument();
+    expect(screen.getByText(value)).toBeInTheDocument();
+}
 
 function renderSection(account: Account) {
     return render(<NftokenAccountSection account={account} />, { wrapper: Providers });
