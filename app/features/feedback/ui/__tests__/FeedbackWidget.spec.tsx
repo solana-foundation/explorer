@@ -62,6 +62,17 @@ describe('FeedbackWidget', () => {
         );
     });
 
+    it('should close the popup when a GitHub topic link is followed', async () => {
+        vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
+        render(<FeedbackWidget />);
+        await openPopup();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Idea' }));
+        await userEvent.click(screen.getByRole('link', { name: 'Suggest an idea on GitHub' }));
+
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    });
+
     it('should offer only the GitHub topics when client Sentry is disabled', async () => {
         vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', '');
         render(<FeedbackWidget />);
@@ -90,6 +101,17 @@ describe('FeedbackWidget', () => {
         });
         // The content swaps to the sent note, then the popup leaves.
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    });
+
+    it('should not send when the message is empty', async () => {
+        vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
+        render(<FeedbackWidget />);
+        await openPopup();
+
+        await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+
+        expect(sendFeedback).not.toHaveBeenCalled();
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
     it('should show the send in progress on the Submit button', async () => {
@@ -121,6 +143,26 @@ describe('FeedbackWidget', () => {
 
         expect(await screen.findByRole('alert')).toHaveTextContent('Could not send feedback. Try again.');
         expect(screen.getByRole('textbox', { name: 'Feedback' })).toHaveValue('Lost feedback');
+    });
+
+    it('should clear the error and close when a retry succeeds', async () => {
+        vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
+        vi.mocked(sendFeedback).mockRejectedValueOnce('Unable to send feedback.');
+        render(<FeedbackWidget />);
+        await openPopup();
+
+        await userEvent.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Retry me');
+        await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+        expect(await screen.findByRole('alert')).toBeInTheDocument();
+
+        // The retry clears the banner before its send settles, with the dialog still open.
+        let deliver: (id: string) => void = () => undefined;
+        vi.mocked(sendFeedback).mockReturnValueOnce(new Promise(resolve => (deliver = resolve)));
+        await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+        expect(screen.queryByRole('alert')).toBeNull();
+
+        deliver('test-event-id');
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     });
 
     it('should close the popup without sending when the close button is clicked', async () => {
