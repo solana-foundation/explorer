@@ -5,8 +5,8 @@ import { SolBalance } from '@components/common/SolBalance';
 import { useRefreshAccount } from '@entities/account';
 import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
-import { displayTimestamp } from '@utils/date';
 
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { VoteAccount } from '../lib/validators';
@@ -55,7 +55,7 @@ export function VoteAccountSection({ account, voteAccount }: { account: Account;
             <BaseTable.Row>
                 <BaseTable.Cell>Last Timestamp</BaseTable.Cell>
                 <BaseTable.Cell className="text-right font-mono">
-                    {displayTimestamp(voteAccount.info.lastTimestamp.timestamp * 1000)}
+                    <Timestamp unixTimestamp={voteAccount.info.lastTimestamp.timestamp} />
                 </BaseTable.Cell>
             </BaseTable.Row>
 

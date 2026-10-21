@@ -803,7 +803,6 @@ export default tseslint.config(
             'app/components/common/InspectorInstructionCard.tsx',
             'app/components/common/NFTArt.tsx',
             'app/components/common/TableCardBody.tsx',
-            'app/components/common/TimestampToggle.tsx',
             'app/components/inspector/AccountsCard.tsx',
             'app/components/inspector/AddressTableLookupsCard.tsx',
             'app/components/inspector/AddressWithContext.tsx',

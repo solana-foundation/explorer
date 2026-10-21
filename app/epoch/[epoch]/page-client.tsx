@@ -9,9 +9,9 @@ import { FetchStatus } from '@providers/cache';
 import { useCluster, useClusterInfo } from '@providers/cluster';
 import { useEpoch, useFetchEpoch } from '@providers/epoch';
 import { ClusterStatus } from '@utils/cluster';
-import { displayTimestampUtc } from '@utils/date';
 import React from 'react';
 
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { getFirstSlotInEpoch, getLastSlotInEpoch } from '@/app/utils/epoch-schedule';
@@ -131,9 +131,7 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
                         <tr>
                             <td className="w-full">First Block Timestamp</td>
                             <td className="text-right">
-                                <span className="font-mono">
-                                    {displayTimestampUtc(epochState.data.firstTimestamp * 1000, true)}
-                                </span>
+                                <Timestamp unixTimestamp={epochState.data.firstTimestamp} />
                             </td>
                         </tr>
                     )}
@@ -157,9 +155,7 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
                         <tr>
                             <td className="w-full">Last Block Timestamp</td>
                             <td className="text-right">
-                                <span className="font-mono">
-                                    {displayTimestampUtc(epochState.data.lastTimestamp * 1000, true)}
-                                </span>
+                                <Timestamp unixTimestamp={epochState.data.lastTimestamp} />
                             </td>
                         </tr>
                     )}
