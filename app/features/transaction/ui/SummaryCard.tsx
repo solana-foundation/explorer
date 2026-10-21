@@ -1,3 +1,4 @@
+// TODO(HOO-1664): take requested CUs, priority fee and size limit from @explorer/parsers/transaction.
 import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { InfoTooltip } from '@components/common/InfoTooltip';
