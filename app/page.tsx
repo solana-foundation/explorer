@@ -100,7 +100,7 @@ function StatsCardBody() {
                     <tr>
                         <td className="w-full">Cluster time</td>
                         <td className="text-right font-mono">
-                            <Timestamp unixTimestamp={blockTime / 1000} />
+                            <Timestamp unixTimestamp={Math.floor(blockTime / 1000)} />
                         </td>
                     </tr>
                 )}
