@@ -16,6 +16,7 @@ vi.stubGlobal('fetch', mocks.fetch);
 
 // Known cluster → the hook hits the cached `/api/security-txt` route (mocked via global fetch).
 vi.mock('@/app/providers/cluster', () => ({
+    // TODO: switch to https://api.mainnet.solana.com
     useCluster: vi.fn(() => ({ cluster: Cluster.Mainnet, url: 'https://api.mainnet-beta.solana.com' })),
 }));
 
