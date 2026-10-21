@@ -19,8 +19,7 @@ vi.mock('@features/transaction', () => ({
     generateTokenBalanceRows: () => [],
 }));
 vi.mock('@providers/cluster', () => ({
-    // TODO: switch to https://api.mainnet.solana.com
-    useCluster: () => ({ cluster: Cluster.Mainnet, url: 'https://api.mainnet-beta.solana.com' }),
+    useCluster: () => ({ cluster: Cluster.Mainnet, url: 'https://api.mainnet.solana.com' }),
 }));
 
 import { SimulatorCard } from '../SimulationCard';
