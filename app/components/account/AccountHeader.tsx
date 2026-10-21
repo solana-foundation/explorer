@@ -45,12 +45,7 @@ export function AccountHeader({
 
     const fallback = <AccountDetailsHeader title="Account" />;
 
-    // Headers derived purely from on-chain account data (NFTs, programs) don't
-    // depend on the async token-info (UTL) fetch, so resolve them before the
-    // isTokenInfoLoading gate. Gating them on it would blank and *remount* the
-    // header — re-requesting its image and flickering — on every account refetch
-    // or token-info revalidation. (The accounts cache keeps stale data during a
-    // refetch, so these conditions still hold and the header stays mounted.)
+    // NFT and program headers read only account data and must still render while the token-info fetch loads.
     // TODO: adopt @explorer/entity-inspector's accounts module (src/accounts: classifyAccountKindBase + kinds.ts; needs a browser-safe ./accounts subpath) instead of this inline kind chain
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} />;
