@@ -1,6 +1,6 @@
 // TODO(HOO-1670): replaces the MCP copy in packages/entity-inspector/src/transactions/account-resolver.ts.
 // Delete that file once MCP resolves accounts through this module.
-import type { Address } from '@solana/kit';
+import { type Address, getAccountMetasFromCompiledTransactionMessage, isSignerRole, isWritableRole } from '@solana/kit';
 
 import type { AddressTableLookup, TransactionAccount, TransactionVersion } from './types.js';
 
@@ -73,17 +73,18 @@ export function resolveAccounts(params: AccountResolutionParams): AccountResolut
 }
 
 function resolveStaticAccounts(staticKeys: readonly Address[], header: MessageHeader): TransactionAccount[] {
-    const { numReadonlyNonSignerAccounts, numReadonlySignerAccounts, numSignerAccounts } = header;
-    const readonlySignerStart = numSignerAccounts - numReadonlySignerAccounts;
-    const readonlyNonSignerStart = staticKeys.length - numReadonlyNonSignerAccounts;
-
-    return staticKeys.map((address, i) => {
-        const signer = i < numSignerAccounts;
-        const readonlySigned = signer && i >= readonlySignerStart;
-        const readonlyNonSigned = !signer && i >= readonlyNonSignerStart;
-
-        return { address, signer, source: 'static' as const, writable: !readonlySigned && !readonlyNonSigned };
+    const metas = getAccountMetasFromCompiledTransactionMessage({
+        header,
+        instructions: [],
+        staticAccounts: [...staticKeys],
+        version: 'legacy',
     });
+    return metas.map(({ address, role }) => ({
+        address,
+        signer: isSignerRole(role),
+        source: 'static' as const,
+        writable: isWritableRole(role),
+    }));
 }
 
 type LookupTableIndex = { lookupTableAddress: Address; index: number };
