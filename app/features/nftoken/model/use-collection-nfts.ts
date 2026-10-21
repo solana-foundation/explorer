@@ -10,7 +10,7 @@ import { type CollectionNftsAnswer, fetchCollectionNfts } from '../api/fetch-col
 import { ERROR_RETRY_COUNT } from './swr-options';
 
 export type CollectionNftsState =
-    { kind: 'loading' } | (CollectionNftsAnswer & { refreshing: boolean }) | { kind: 'failed' };
+    { kind: 'loading' } | (CollectionNftsAnswer & { refreshing: boolean; refreshFailed: boolean }) | { kind: 'failed' };
 
 export function useCollectionNfts(collection: Address): CollectionNftsState & { refresh: () => void } {
     const { connectableUrl } = useCluster();
@@ -23,7 +23,7 @@ export function useCollectionNfts(collection: Address): CollectionNftsState & { 
     );
     const refresh = () => void mutate();
 
-    if (data) return { ...data, refresh, refreshing: isValidating };
+    if (data) return { ...data, refresh, refreshFailed: error !== undefined, refreshing: isValidating };
     if (error) return { kind: 'failed', refresh };
     return { kind: 'loading', refresh };
 }

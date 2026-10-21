@@ -36,6 +36,7 @@ export function NftokenCollectionGrid({ collection }: { collection: Address }): 
                 <BaseNftokenCollectionGrid
                     onRefresh={refresh}
                     refreshing={nfts.refreshing}
+                    refreshFailed={nfts.refreshFailed}
                     tiles={nfts.nfts.map(nft => (
                         <NftokenTile key={nft.address} nft={nft} />
                     ))}
