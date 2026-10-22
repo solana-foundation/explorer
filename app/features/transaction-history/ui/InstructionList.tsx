@@ -2,15 +2,18 @@ import { type InstructionSummary } from '@entities/transaction-data';
 
 import { Skeleton } from '@/app/components/shared/ui/skeleton';
 
+import { summarizeInstructions } from '../lib/summarize-instructions';
+
 type InstructionListProps = {
     instructions: InstructionSummary[];
 };
 
 export function InstructionList({ instructions }: InstructionListProps) {
+    const summarized = summarizeInstructions(instructions);
     return (
         <div className="flex flex-col gap-1">
-            {instructions.map((instruction, i) => (
-                <InstructionLine key={i} instruction={instruction} />
+            {summarized.map(({ instruction, count }, i) => (
+                <InstructionLine key={i} instruction={instruction} count={count} />
             ))}
         </div>
     );
@@ -25,12 +28,10 @@ export function InstructionListSkeleton() {
     );
 }
 
-function InstructionLine({ instruction }: { instruction: InstructionSummary }) {
-    // Inline (not flex): program + instruction need to behave as one text run
-    // so they wrap together at the cell boundary rather than each becoming a
-    // separately-wrapping flex item with weird gaps between them.
+function InstructionLine({ instruction, count }: { instruction: InstructionSummary; count: number }) {
     return (
         <span className="cursor-default text-sm">
+            {count > 1 && <span className="mr-1.5 tabular-nums text-outer-space-300">{count} ×</span>}
             <span className="text-muted">{instruction.programName}: </span>
             <span className="text-white">{instruction.name}</span>
         </span>

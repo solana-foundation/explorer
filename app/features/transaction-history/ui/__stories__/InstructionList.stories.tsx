@@ -26,18 +26,6 @@ export const FewInstructions: Story = {
     },
 };
 
-// Exactly the inline limit (3) — all rendered inline, no overflow line.
-export const ExactlyThree: Story = {
-    args: {
-        instructions: [
-            { name: 'Set Compute Unit Limit', programName: 'Compute Budget' },
-            { name: 'Set Compute Unit Price', programName: 'Compute Budget' },
-            { name: 'Transfer', programName: 'System' },
-        ],
-    },
-};
-
-// Beyond the inline limit — the first 3 render inline, the rest collapse into a "+N more" tooltip.
 export const ManyInstructions: Story = {
     args: {
         instructions: [
@@ -46,6 +34,15 @@ export const ManyInstructions: Story = {
             { name: 'Transfer', programName: 'System' },
             { name: 'Transfer Checked', programName: 'Token' },
             { name: 'Create', programName: 'Associated Token Account' },
+        ],
+    },
+};
+
+export const RepeatedInstructions: Story = {
+    args: {
+        instructions: [
+            { name: 'Set Compute Unit Limit', programName: 'Compute Budget' },
+            ...Array.from({ length: 20 }, () => ({ name: 'Transfer', programName: 'Token Program' })),
         ],
     },
 };
