@@ -60,7 +60,7 @@ describe('AccountDataTab', () => {
         expect(screen.getByText('Anchor Data')).toBeInTheDocument();
     });
 
-    it('should show the Anchor Data tab when the PMP IDL does not build a program', () => {
+    it('should use the Anchor IDL account when the PMP IDL does not build a program', () => {
         idlState.candidates = [
             {
                 idl: ANCHOR_WITHOUT_PROGRAM,

@@ -1,3 +1,4 @@
+import { DEFAULT_RPC_URL } from '@__fixtures__/gen';
 import { rootNodeFromAnchor } from '@codama/nodes-from-anchor';
 import { type AnchorIdl, type CodamaIdl, type ProgramIdls } from '@entities/idl';
 import { IdlVariant } from '@entities/idl/@x/program-metadata';
@@ -21,7 +22,6 @@ vi.mock('@entities/idl/@x/program-metadata', async importOriginal => ({
 vi.mock('@/app/utils/anchor', () => ({ AnchorProgramName: () => <span>Anchor program name</span> }));
 
 const PROGRAM_ID = new PublicKey(codamaIdl.program.publicKey);
-const URL = 'https://api.mainnet-beta.solana.com';
 const CODAMA = codamaIdl as unknown as CodamaIdl;
 const ANCHOR = anchorLegacyIdl as unknown as AnchorIdl;
 
@@ -33,7 +33,7 @@ describe('ProgramName', () => {
 
         renderName();
 
-        expect(mocks.useProgramIdls).toHaveBeenCalledWith(PROGRAM_ID.toString(), URL, Cluster.MainnetBeta, {
+        expect(mocks.useProgramIdls).toHaveBeenCalledWith(PROGRAM_ID.toString(), DEFAULT_RPC_URL, Cluster.MainnetBeta, {
             suspense: true,
         });
     });
@@ -102,6 +102,11 @@ function mockCandidates(candidates: ProgramIdls['candidates']) {
 
 function renderName() {
     return render(
-        <ProgramName programId={PROGRAM_ID} url={URL} cluster={Cluster.MainnetBeta} defaultName="Default name" />,
+        <ProgramName
+            programId={PROGRAM_ID}
+            url={DEFAULT_RPC_URL}
+            cluster={Cluster.MainnetBeta}
+            defaultName="Default name"
+        />,
     );
 }
