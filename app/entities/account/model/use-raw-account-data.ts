@@ -3,9 +3,11 @@ import { PublicKey } from '@solana/web3.js';
 import useSWR from 'swr';
 import useSWRImmutable from 'swr/immutable';
 
+import { accountRefreshKey } from '@/app/shared/lib/account-refresh-key';
+
 import { fetchRawAccountData } from '../api/fetch-raw-account-data';
 
-export const rawAccountDataKey = (url: string, address: string) => ['raw-account-data', url, address] as const;
+export const rawAccountDataKey = (url: string, address: string) => accountRefreshKey(url, address, 'raw-account-data');
 
 export function useLazyRawAccountData(accountAddress: string) {
     const { data, error, isLoading, mutate } = useRawAccountData(accountAddress);

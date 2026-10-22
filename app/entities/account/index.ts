@@ -2,6 +2,7 @@ export { toBigNumber } from './lib/toBigNumber';
 export { selectMintDecimals, selectTokenAccountMint } from './model/selectors';
 export { useAccountQuery } from './model/use-account-query';
 export { useAccountExpandedInfo } from './model/use-account-expanded-info';
+export { useAccountFetching } from './model/use-account-fetching';
 export { useAccountSizes } from './model/use-account-sizes';
 export { useLazyRawAccountData, useRawAccountDataOnMount } from './model/use-raw-account-data';
 export { useRefreshAccount } from './model/use-refresh-account';

@@ -1,6 +1,6 @@
 // TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
-import React from 'react';
-import { RefreshCw } from 'react-feather';
+import { useEffect, useState } from 'react';
+import { CheckCircle, RefreshCw } from 'react-feather';
 
 import { refreshAnalytics } from '@/app/shared/lib/analytics';
 
@@ -9,34 +9,74 @@ import { Button } from './button';
 type Props = {
     analyticsSection: string;
     fetching?: boolean;
+    failed?: boolean;
     onClick: () => void;
     className?: string;
 };
 
-export function RefreshButton({ analyticsSection, fetching = false, onClick, className }: Props) {
+const COOLDOWN_MS = 2000;
+
+export function RefreshButton({ analyticsSection, fetching = false, failed = false, onClick, className }: Props) {
+    const [phase, request] = useRefreshPhase(fetching, failed);
+    const refreshed = phase === 'refreshed';
+
     return (
         <Button
             variant="outline"
             size="sm"
             aria-label="Refresh"
             className={className}
-            disabled={fetching}
+            disabled={fetching || refreshed}
             onClick={() => {
                 refreshAnalytics.trackButtonClicked(analyticsSection);
+                request();
                 onClick();
             }}
         >
-            {fetching ? (
-                <>
-                    <span className="spinner-grow spinner-grow-sm" />
-                    <span className="hidden md:inline">Loading</span>
-                </>
-            ) : (
-                <>
-                    <RefreshCw size={12} />
-                    <span className="hidden md:inline">Refresh</span>
-                </>
-            )}
+            <RefreshButtonContent fetching={fetching} refreshed={refreshed} />
         </Button>
     );
+}
+
+function RefreshButtonContent({ fetching, refreshed }: { fetching: boolean; refreshed: boolean }) {
+    if (fetching) {
+        return (
+            <>
+                <span className="spinner-grow spinner-grow-sm" />
+                <span className="hidden md:inline">Loading</span>
+            </>
+        );
+    }
+    if (refreshed) {
+        return (
+            <>
+                <CheckCircle size={12} className="text-dk-info" />
+                <span className="hidden md:inline">Refreshed</span>
+            </>
+        );
+    }
+    return (
+        <>
+            <RefreshCw size={12} />
+            <span className="hidden md:inline">Refresh</span>
+        </>
+    );
+}
+
+type RefreshPhase = 'idle' | 'requested' | 'fetching' | 'refreshed';
+
+// The fetch can start after the click, so `requested` waits for `fetching` to turn true before it can end.
+function useRefreshPhase(fetching: boolean, failed: boolean) {
+    const [phase, setPhase] = useState<RefreshPhase>('idle');
+
+    if (phase === 'requested' && fetching) setPhase('fetching');
+    if (phase === 'fetching' && !fetching) setPhase(failed ? 'idle' : 'refreshed');
+
+    useEffect(() => {
+        if (phase !== 'refreshed') return;
+        const timeout = setTimeout(() => setPhase('idle'), COOLDOWN_MS);
+        return () => clearTimeout(timeout);
+    }, [phase]);
+
+    return [phase, () => setPhase('requested')] as const;
 }

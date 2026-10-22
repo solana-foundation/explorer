@@ -232,6 +232,7 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     analyticsSection="token_history_card"
                     onClick={() => fetchHistories(true)}
                     fetching={fetching}
+                    failed={failed}
                 />
             </CardHeader>
 

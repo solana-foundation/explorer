@@ -8,6 +8,7 @@ export type HistoryCardHeaderProps = {
     analyticsSection: string;
     refresh: () => void;
     fetching: boolean;
+    failed?: boolean;
     actions?: ReactNode;
     subHeader?: ReactNode;
 };
@@ -17,6 +18,7 @@ export function HistoryCardHeader({
     analyticsSection,
     refresh,
     fetching,
+    failed,
     actions,
     subHeader,
 }: HistoryCardHeaderProps) {
@@ -27,7 +29,12 @@ export function HistoryCardHeader({
                     {title}
                 </CardTitle>
                 {actions}
-                <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
+                <RefreshButton
+                    analyticsSection={analyticsSection}
+                    onClick={refresh}
+                    fetching={fetching}
+                    failed={failed}
+                />
             </div>
             {subHeader && <div className="flex flex-wrap gap-2">{subHeader}</div>}
         </CardHeader>

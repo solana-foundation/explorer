@@ -13,6 +13,11 @@ vi.mock('@/app/providers/cluster', () => ({
     useCluster: vi.fn(() => ({ cluster: 'devnet', url: 'https://api.devnet.solana.com' })),
 }));
 
+vi.mock('@/app/providers/accounts', async importOriginal => ({
+    ...(await importOriginal<typeof import('@/app/providers/accounts')>()),
+    useAccountInfo: vi.fn(() => undefined),
+}));
+
 vi.mock('@/app/providers/compressed-nft', () => ({
     useCompressedNft,
     useMetadataJsonLink: vi.fn(() => null),

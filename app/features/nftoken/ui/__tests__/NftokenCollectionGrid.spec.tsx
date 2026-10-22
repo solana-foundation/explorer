@@ -149,7 +149,7 @@ describe('NftokenCollectionGrid', () => {
         expect(mocks.fetchCollectionNfts).toHaveBeenCalledTimes(2);
     });
 
-    it('should disable the refresh button until the NFTs load again', async () => {
+    it('should disable the refresh button until the NFTs load again, then show the checkmark', async () => {
         let settle: (answer: unknown) => void = () => {};
         mocks.fetchCollectionNfts.mockResolvedValueOnce({
             kind: 'loaded',
@@ -164,7 +164,7 @@ describe('NftokenCollectionGrid', () => {
 
         await waitFor(() => expect(screen.getByRole('button', { name: 'Refresh' })).toBeDisabled());
         await act(async () => settle({ kind: 'loaded', nfts: MAINNET_NFT_ACCOUNTS, undecodableCount: 0 }));
-        expect(screen.getByRole('button', { name: 'Refresh' })).toBeEnabled();
+        expect(screen.getByText('Refreshed')).toBeInTheDocument();
     });
 
     it('should keep the NFTs on screen when a refresh fails', async () => {
@@ -183,6 +183,8 @@ describe('NftokenCollectionGrid', () => {
         await waitFor(() => expect(Logger.error).toHaveBeenCalledWith(error, { collection: COLLECTION }));
         expect(screen.getAllByRole('link', { name: 'Loading...' })).toHaveLength(MAINNET_NFT_ACCOUNTS.length);
         expect(screen.queryByText('Failed to load NFTs')).not.toBeInTheDocument();
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Refresh' })).toBeEnabled());
+        expect(screen.queryByText('Refreshed')).not.toBeInTheDocument();
     });
 
     it('should keep the name of a tile when a refresh of its metadata fails', async () => {

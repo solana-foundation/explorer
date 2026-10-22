@@ -147,6 +147,15 @@ describe('AccountsProvider: fetch and mount', () => {
         return render(<AccountsProvider>{children}</AccountsProvider>);
     }
 
+    let entry: State['entries'][string] | undefined;
+    function CaptureEntry() {
+        const state = React.useContext(StateContext);
+        React.useEffect(() => {
+            entry = state?.entries[TEST_PUBKEY.toBase58()];
+        }, [state]);
+        return null;
+    }
+
     beforeEach(() => {
         vi.clearAllMocks();
         vi.useFakeTimers();
@@ -234,6 +243,35 @@ describe('AccountsProvider: fetch and mount', () => {
 
         // A custom endpoint fails for reasons we do not control, so its failures are not ours to report.
         expect(vi.mocked(Logger.error)).not.toHaveBeenCalled();
+    });
+
+    it('should keep the fetched data while a refetch of the same account runs', async () => {
+        getMultipleAccounts.mockResolvedValueOnce({
+            value: [
+                {
+                    data: ['', 'base64'],
+                    executable: false,
+                    lamports: 5n,
+                    owner: '11111111111111111111111111111111',
+                    space: 0n,
+                },
+            ],
+        });
+        renderProvider(
+            <>
+                <FetchOnMount />
+                <Capture />
+                <CaptureEntry />
+            </>,
+        );
+        await flushDebounce();
+
+        getMultipleAccounts.mockReturnValue(new Promise(() => {}));
+        act(() => captured?.skip.fetch(TEST_PUBKEY));
+        await flushDebounce();
+
+        expect(entry?.status).toBe(FetchStatus.Fetching);
+        expect(entry?.data?.lamports).toBe(5);
     });
 });
 

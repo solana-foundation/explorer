@@ -1,7 +1,7 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Account, useAccountInfo, useFetchAccountInfo } from '@providers/accounts';
-import { FetchStatus } from '@providers/cache';
+import { FetchStatus, isFetchingWithoutData } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
@@ -36,7 +36,7 @@ export function ParsedAccountRenderer({
             fetchAccount(pubkey, 'parsed');
         }
     }, [accountInfoCacheEntry, address, fetchAccount, pubkey, status]);
-    if (!accountInfoCacheEntry || accountInfoCacheEntry.status === FetchStatus.Fetching) {
+    if (!accountInfoCacheEntry || isFetchingWithoutData(accountInfoCacheEntry)) {
         return <LoadingCard />;
     } else if (
         accountInfoCacheEntry.status === FetchStatus.FetchFailed ||

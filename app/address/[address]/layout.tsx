@@ -42,7 +42,7 @@ import {
     useFetchAccountInfo,
 } from '@providers/accounts';
 import FLAGGED_ACCOUNTS_WARNING from '@providers/accounts/flagged-accounts';
-import { CacheEntry, FetchStatus } from '@providers/cache';
+import { CacheEntry, FetchStatus, isFetchingWithoutData } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS as SAS_PROGRAM_ID } from '@solana/attestation';
 import { Address } from '@solana/kit';
@@ -76,6 +76,7 @@ import { isAttestationAccount } from '@/app/utils/attestation-service';
 import {
     fetchFullTokenInfo,
     FullTokenInfo,
+    FullTokenInfoSwrKey,
     getFullTokenInfoSwrKey,
     isRedactedTokenAddress,
 } from '@/app/utils/token-info';
@@ -167,18 +168,23 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
         /* empty */
     }
 
-    const infoStatus = info?.status;
     const infoParsed = info?.data?.data.parsed;
 
-    const shouldFetchTokenInfo =
-        infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey;
-    const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
+    const shouldFetchTokenInfo = infoParsed && isTokenProgramData(infoParsed) && pubkey;
+    const {
+        data: fullTokenInfo,
+        error: fullTokenInfoError,
+        isLoading: isFullTokenInfoLoading,
+    } = useSWRImmutable(
         shouldFetchTokenInfo ? getFullTokenInfoSwrKey(address, cluster, url, genesisHash) : null,
-        fetchFullTokenInfo,
+        fetchFullTokenInfoOrNull,
+        // The token-info request logs each failure, so a refresh or a remount retries it instead of SWR.
+        { shouldRetryOnError: false },
     );
+    const tokenInfo = fullTokenInfo ?? undefined;
 
-    const isAccountLoading = !info || info.status === FetchStatus.Fetching;
-    const isTokenInfoLoading = isAccountLoading || isFullTokenInfoLoading;
+    const isAccountLoading = !info || isFetchingWithoutData(info);
+    const isTokenInfoLoading = isAccountLoading || (isFullTokenInfoLoading && fullTokenInfoError === undefined);
 
     // Fetch account on load. `info` is in the deps so the fetch re-arms if the cache entry is
     // cleared from under us (e.g. a dev-mode segment remount wiping provider state mid-fetch).
@@ -193,7 +199,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
             <Header
                 address={address}
                 account={info?.data}
-                tokenInfo={fullTokenInfo}
+                tokenInfo={tokenInfo}
                 isTokenInfoLoading={isTokenInfoLoading}
             />
             {!pubkey ? (
@@ -202,7 +208,7 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
                 <DetailsSections
                     info={info}
                     pubkey={pubkey}
-                    tokenInfo={fullTokenInfo}
+                    tokenInfo={tokenInfo}
                     isTokenInfoLoading={isTokenInfoLoading}
                     notification={<SecurityNotification parsedData={infoParsed} address={address} />}
                 >
@@ -211,6 +217,11 @@ function AddressLayoutInner({ children, params: { address } }: InnerProps) {
             )}
         </PageLayout>
     );
+}
+
+// SWR sets `isLoading` while a request runs and `data` is `undefined`, so a missing token info caches `null` instead.
+async function fetchFullTokenInfoOrNull(key: FullTokenInfoSwrKey) {
+    return (await fetchFullTokenInfo(key)) ?? null;
 }
 
 export default function AddressLayout(props: Props) {
@@ -243,7 +254,7 @@ function DetailsSections({
     const refreshAccount = useRefreshAccount();
     const address = pubkey.toBase58();
 
-    if (!info || info.status === FetchStatus.Fetching || isTokenInfoLoading) {
+    if (!info || isTokenInfoLoading) {
         return <LoadingCard />;
     } else if (info.status === FetchStatus.FetchFailed || info.data?.lamports === undefined) {
         return <ErrorCard retry={() => refreshAccount(pubkey, 'parsed')} text="Fetch Failed" />;

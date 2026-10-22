@@ -11,6 +11,10 @@ export type CacheEntry<T> = {
     data?: T;
 };
 
+export function isFetchingWithoutData<T>(entry: CacheEntry<T>): boolean {
+    return entry.status === FetchStatus.Fetching && entry.data === undefined;
+}
+
 export type State<T> = {
     entries: {
         [key: string]: CacheEntry<T>;

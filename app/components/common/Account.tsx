@@ -12,19 +12,20 @@ type AccountHeaderProps = {
     title: string;
     analyticsSection: string;
     refresh: () => void;
+    fetching?: boolean;
 };
 
 type AccountProps = {
     account: Account;
 };
 
-export function AccountHeader({ title, analyticsSection, refresh }: AccountHeaderProps) {
+export function AccountHeader({ title, analyticsSection, refresh, fetching }: AccountHeaderProps) {
     return (
         <CardHeader ui="dashkit">
             <CardTitle as="h3" ui="dashkit">
                 {title}
             </CardTitle>
-            <RefreshButton analyticsSection={analyticsSection} onClick={refresh} />
+            <RefreshButton analyticsSection={analyticsSection} onClick={refresh} fetching={fetching} />
         </CardHeader>
     );
 }

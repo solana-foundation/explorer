@@ -7,11 +7,13 @@ import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 export function BaseNftokenCollectionGrid({
     onRefresh,
     refreshing,
+    refreshFailed,
     tiles,
     undecodableCount,
 }: {
     onRefresh: () => void;
     refreshing: boolean;
+    refreshFailed?: boolean;
     tiles: ReactElement[];
     undecodableCount: number;
 }) {
@@ -21,7 +23,12 @@ export function BaseNftokenCollectionGrid({
                 <CardTitle as="h3" ui="dashkit">
                     NFTs
                 </CardTitle>
-                <RefreshButton analyticsSection="nft_token_collection_grid" fetching={refreshing} onClick={onRefresh} />
+                <RefreshButton
+                    analyticsSection="nft_token_collection_grid"
+                    fetching={refreshing}
+                    failed={refreshFailed}
+                    onClick={onRefresh}
+                />
             </CardHeader>
 
             <div className="flex flex-col gap-6 py-6">
