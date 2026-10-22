@@ -298,7 +298,7 @@ function getTransfer(
                 return create(instruction.parsed.info, Transfer);
             }
         } catch (error) {
-            if (cluster === Cluster.MainnetBeta) {
+            if (cluster === Cluster.Mainnet) {
                 Logger.error(error, {
                     signature,
                 });

@@ -34,7 +34,7 @@ function mockRpc() {
 
 let rpc: ReturnType<typeof mockRpc>;
 
-const connectedSelection = clusterSelection(Cluster.MainnetBeta);
+const connectedSelection = clusterSelection(Cluster.Mainnet);
 
 const connectedState: ClusterState = {
     connectableUrl: toConnectableUrl(clusterUrl(connectedSelection)),

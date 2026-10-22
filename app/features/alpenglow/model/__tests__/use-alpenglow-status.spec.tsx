@@ -35,7 +35,7 @@ vi.mock('../../api/fetch-ag-genesis-cert', () => ({ fetchAgGenesisCert: mocks.fe
 describe('useAlpenglowStatus', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.cluster = connectedTo(Cluster.MainnetBeta, MAINNET_URL);
+        mocks.cluster = connectedTo(Cluster.Mainnet, MAINNET_URL);
         // `shouldAdvanceTime` keeps `waitFor` and the fetcher's promises settling while this test
         // controls SWR's polling timer.
         vi.useFakeTimers({ advanceTimeDelta: 1, shouldAdvanceTime: true });
@@ -50,7 +50,7 @@ describe('useAlpenglowStatus', () => {
     });
 
     it('should wait rather than ask while a custom URL is still unsettled', () => {
-        mocks.cluster = { ...connectedTo(Cluster.MainnetBeta, MAINNET_URL), connectableUrl: undefined };
+        mocks.cluster = { ...connectedTo(Cluster.Mainnet, MAINNET_URL), connectableUrl: undefined };
 
         expect(renderStatus().result.current).toEqual({ kind: 'loading' });
         expect(mocks.fetchAgGenesisCert).not.toHaveBeenCalled();

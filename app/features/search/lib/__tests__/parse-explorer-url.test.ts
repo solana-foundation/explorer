@@ -41,7 +41,7 @@ describe('parseExplorerUrl', () => {
         it('should parse an account URL', () => {
             expect(parseExplorerUrl('https://solscan.io/account/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E')).toEqual(
                 {
-                    cluster: Cluster.MainnetBeta,
+                    cluster: Cluster.Mainnet,
                     entity: 'Account',
                     pathname: '/address/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E',
                     source: 'solscan.io',
@@ -52,7 +52,7 @@ describe('parseExplorerUrl', () => {
 
         it('should parse a token URL', () => {
             expect(parseExplorerUrl('https://solscan.io/token/So11111111111111111111111111111111111111112')).toEqual({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 entity: 'Token',
                 pathname: '/address/So11111111111111111111111111111111111111112',
                 source: 'solscan.io',
@@ -62,7 +62,7 @@ describe('parseExplorerUrl', () => {
 
         it('should parse a transaction URL', () => {
             expect(parseExplorerUrl('https://solscan.io/tx/5abc123')).toEqual({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 entity: 'Transaction',
                 pathname: '/tx/5abc123',
                 source: 'solscan.io',
@@ -72,7 +72,7 @@ describe('parseExplorerUrl', () => {
 
         it('should parse a block URL', () => {
             expect(parseExplorerUrl('https://solscan.io/block/300000000')).toEqual({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 entity: 'Block',
                 pathname: '/block/300000000',
                 source: 'solscan.io',
@@ -84,7 +84,7 @@ describe('parseExplorerUrl', () => {
             expect(
                 parseExplorerUrl('https://www.solscan.io/account/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E'),
             ).toEqual({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 entity: 'Account',
                 pathname: '/address/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E',
                 source: 'solscan.io',
@@ -111,14 +111,14 @@ describe('parseExplorerUrl', () => {
             const result = parseExplorerUrl(
                 'https://solscan.io/account/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E?cluster=mainnet-beta',
             );
-            expect(result?.cluster).toBe(Cluster.MainnetBeta);
+            expect(result?.cluster).toBe(Cluster.Mainnet);
         });
 
-        it('should default to MainnetBeta for unrecognised cluster values', () => {
+        it('should default to Mainnet for unrecognised cluster values', () => {
             const result = parseExplorerUrl(
                 'https://solscan.io/account/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E?cluster=unknown',
             );
-            expect(result?.cluster).toBe(Cluster.MainnetBeta);
+            expect(result?.cluster).toBe(Cluster.Mainnet);
         });
 
         it('should ignore sub-paths after the identifier', () => {
@@ -143,7 +143,7 @@ describe('parseExplorerUrl', () => {
             expect(
                 parseExplorerUrl('https://orb.markets/address/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E'),
             ).toEqual({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 entity: 'Address',
                 pathname: '/address/AU971DrPyhhrpRnmEBp5pDTWL2ny7nofb5vYBjDJkR2E',
                 source: 'orb.markets',
@@ -153,7 +153,7 @@ describe('parseExplorerUrl', () => {
 
         it('should parse a transaction URL', () => {
             expect(parseExplorerUrl('https://orb.markets/tx/5abc123')).toEqual({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 entity: 'Transaction',
                 pathname: '/tx/5abc123',
                 source: 'orb.markets',
@@ -163,7 +163,7 @@ describe('parseExplorerUrl', () => {
 
         it('should parse a block URL', () => {
             expect(parseExplorerUrl('https://orb.markets/block/300000000')).toEqual({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 entity: 'Block',
                 pathname: '/block/300000000',
                 source: 'orb.markets',
@@ -173,7 +173,7 @@ describe('parseExplorerUrl', () => {
 
         it('should parse an epoch URL', () => {
             expect(parseExplorerUrl('https://orb.markets/epoch/500')).toEqual({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 entity: 'Epoch',
                 pathname: '/epoch/500',
                 source: 'orb.markets',
@@ -183,7 +183,7 @@ describe('parseExplorerUrl', () => {
 
         it('should handle www prefix', () => {
             expect(parseExplorerUrl('https://www.orb.markets/address/abc')).toEqual({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 entity: 'Address',
                 pathname: '/address/abc',
                 source: 'orb.markets',

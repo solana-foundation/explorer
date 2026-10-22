@@ -45,7 +45,7 @@ interface ComputeUnitReserveConfig {
     readonly featureAccount?: string;
     /** When the configuration becomes active on each cluster */
     readonly activations: {
-        readonly [Cluster.MainnetBeta]: number;
+        readonly [Cluster.Mainnet]: number;
         readonly [Cluster.Devnet]: number;
         readonly [Cluster.Testnet]: number;
     };
@@ -71,7 +71,7 @@ const MAX_COMPUTE_UNITS = 1_400_000;
 const COMPUTE_UNIT_RESERVE_CONFIGS: readonly ComputeUnitReserveConfig[] = [
     {
         activations: {
-            [Cluster.MainnetBeta]: 0,
+            [Cluster.Mainnet]: 0,
             [Cluster.Devnet]: 0,
             [Cluster.Testnet]: 0,
         },
@@ -80,7 +80,7 @@ const COMPUTE_UNIT_RESERVE_CONFIGS: readonly ComputeUnitReserveConfig[] = [
     },
     {
         activations: {
-            [Cluster.MainnetBeta]: 759,
+            [Cluster.Mainnet]: 759,
             [Cluster.Devnet]: 842,
             [Cluster.Testnet]: 750,
         },

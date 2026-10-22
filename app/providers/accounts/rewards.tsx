@@ -13,7 +13,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
 
 const REWARDS_AVAILABLE_EPOCH = new Map<Cluster, number>([
-    [Cluster.MainnetBeta, 132],
+    [Cluster.Mainnet, 132],
     [Cluster.Testnet, 43],
 ]);
 

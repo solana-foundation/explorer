@@ -7,17 +7,17 @@ export enum ClusterStatus {
 }
 
 export enum Cluster {
-    MainnetBeta,
+    Mainnet,
     Testnet,
     Devnet,
     Custom,
 }
 
-export const CLUSTERS = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet, Cluster.Custom];
+export const CLUSTERS = [Cluster.Mainnet, Cluster.Testnet, Cluster.Devnet, Cluster.Custom];
 
 export function clusterSlug(cluster: Cluster): string {
     switch (cluster) {
-        case Cluster.MainnetBeta:
+        case Cluster.Mainnet:
             return 'mainnet-beta';
         case Cluster.Testnet:
             return 'testnet';
@@ -30,8 +30,8 @@ export function clusterSlug(cluster: Cluster): string {
 
 export function clusterName(cluster: Cluster): string {
     switch (cluster) {
-        case Cluster.MainnetBeta:
-            return 'Mainnet Beta';
+        case Cluster.Mainnet:
+            return 'Mainnet';
         case Cluster.Testnet:
             return 'Testnet';
         case Cluster.Devnet:
@@ -41,11 +41,11 @@ export function clusterName(cluster: Cluster): string {
     }
 }
 
-export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
+export const MAINNET_BETA_URL = 'https://api.mainnet.solana.com';
 export const TESTNET_URL = 'https://api.testnet.solana.com';
 export const DEVNET_URL = 'https://api.devnet.solana.com';
 
-// On localhost we use the default public Solana RPCs (e.g. api.mainnet-beta.solana.com)
+// On localhost we use the default public Solana RPCs (e.g. api.mainnet.solana.com)
 // unless custom ones (server + client) are specified via env vars.
 // In deployed environments (production/preview) we rewrite to the explorer-api subdomain
 // so the request goes to our own RPC instance.
@@ -82,7 +82,7 @@ export function clusterUrl(selection: ClusterSelection): string {
     switch (selection.cluster) {
         case Cluster.Devnet:
             return process.env.NEXT_PUBLIC_DEVNET_RPC_URL || modifyUrl(DEVNET_URL);
-        case Cluster.MainnetBeta:
+        case Cluster.Mainnet:
             return process.env.NEXT_PUBLIC_MAINNET_RPC_URL || modifyUrl(MAINNET_BETA_URL);
         case Cluster.Testnet:
             return process.env.NEXT_PUBLIC_TESTNET_RPC_URL || modifyUrl(TESTNET_URL);
@@ -111,7 +111,7 @@ export function serverClusterUrl(cluster: ServerCluster): string {
     switch (cluster) {
         case Cluster.Devnet:
             return process.env.DEVNET_RPC_URL ?? modifyUrl(DEVNET_URL);
-        case Cluster.MainnetBeta:
+        case Cluster.Mainnet:
             return process.env.MAINNET_RPC_URL ?? modifyUrl(MAINNET_BETA_URL);
         case Cluster.Testnet:
             return process.env.TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
@@ -122,4 +122,4 @@ export function clusterFromSlug(slug: string): Cluster | undefined {
     return CLUSTERS.find(c => clusterSlug(c) === slug);
 }
 
-export const DEFAULT_CLUSTER = Cluster.MainnetBeta;
+export const DEFAULT_CLUSTER = Cluster.Mainnet;

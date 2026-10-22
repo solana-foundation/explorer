@@ -17,7 +17,7 @@ export function useAnchorProgram(
 ): { program: Program | null; idl: Idl | null; isLoading: boolean } {
     // The Anchor leg of the shared program-IDL resolution (same hook the IDL card uses, so the
     // decoder and card never diverge); the PMP leg it also resolves is unused here.
-    const { anchorIdl, isLoading } = useProgramIdls(programAddress, url, cluster ?? Cluster.MainnetBeta);
+    const { anchorIdl, isLoading } = useProgramIdls(programAddress, url, cluster ?? Cluster.Mainnet);
     const idl: Idl | null = (anchorIdl as Idl | undefined) ?? null;
     const program: Program<Idl> | null = useMemo(() => {
         if (!idl) return null;

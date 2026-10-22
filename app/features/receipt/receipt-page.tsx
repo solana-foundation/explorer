@@ -188,7 +188,7 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
                 signature,
                 transactionUrl,
                 usdUnavailableNote:
-                    cluster === Cluster.MainnetBeta ? undefined : 'USD conversion is only available on Mainnet Beta',
+                    cluster === Cluster.Mainnet ? undefined : 'USD conversion is only available on Mainnet',
                 usdValue,
             });
         } catch (error) {

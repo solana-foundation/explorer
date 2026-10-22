@@ -122,7 +122,7 @@ describe('generateSingleTransferPdf', () => {
 
     it('should render usdUnavailableNote as a caption when usdValue is undefined', async () => {
         const deps = await loadPdfDeps(mockOnError);
-        const note = 'USD conversion is only available on Mainnet Beta';
+        const note = 'USD conversion is only available on Mainnet';
         await generateSingleTransferPdf(deps, SOL_RECEIPT, { ...PDF_OPTS, usdUnavailableNote: note });
 
         const allText = collectText();
@@ -133,7 +133,7 @@ describe('generateSingleTransferPdf', () => {
 
     it('should ignore usdUnavailableNote when usdValue is provided', async () => {
         const deps = await loadPdfDeps(mockOnError);
-        const note = 'USD conversion is only available on Mainnet Beta';
+        const note = 'USD conversion is only available on Mainnet';
         await generateSingleTransferPdf(deps, SOL_RECEIPT, {
             ...PDF_OPTS,
             usdUnavailableNote: note,

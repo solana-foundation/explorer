@@ -26,29 +26,29 @@ describe('useTokenInfos', () => {
         mockedFetch.mockResolvedValue(new Map([['mint-a', tokenInfo('mint-a')]]));
         const mints = ['mint-a'];
 
-        const { result } = renderHook(() => useTokenInfos(mints, Cluster.MainnetBeta), { wrapper });
+        const { result } = renderHook(() => useTokenInfos(mints, Cluster.Mainnet), { wrapper });
 
         await waitForHook(() => expect(result.current.tokenInfos.get('mint-a')).toEqual(tokenInfo('mint-a')));
-        expect(mockedFetch).toHaveBeenCalledWith(mints, Cluster.MainnetBeta, undefined);
+        expect(mockedFetch).toHaveBeenCalledWith(mints, Cluster.Mainnet, undefined);
     });
 
     it('should report loading until the lookup settles', async () => {
         const mints = ['mint-a'];
 
-        const { result } = renderHook(() => useTokenInfos(mints, Cluster.MainnetBeta), { wrapper });
+        const { result } = renderHook(() => useTokenInfos(mints, Cluster.Mainnet), { wrapper });
 
         expect(result.current.isLoading).toBe(true);
         await waitForHook(() => expect(result.current.isLoading).toBe(false));
     });
 
     it('should expose an empty map while loading rather than undefined', () => {
-        const { result } = renderHook(() => useTokenInfos(['mint-a'], Cluster.MainnetBeta), { wrapper });
+        const { result } = renderHook(() => useTokenInfos(['mint-a'], Cluster.Mainnet), { wrapper });
 
         expect(result.current.tokenInfos.size).toBe(0);
     });
 
     it('should not fetch for an empty mint list', async () => {
-        const { result } = renderHook(() => useTokenInfos([], Cluster.MainnetBeta), { wrapper });
+        const { result } = renderHook(() => useTokenInfos([], Cluster.Mainnet), { wrapper });
 
         await waitForHook(() => expect(result.current.isLoading).toBe(false));
         expect(mockedFetch).not.toHaveBeenCalled();
@@ -58,7 +58,7 @@ describe('useTokenInfos', () => {
     it('should not refetch when the caller re-renders with a stable mint list', async () => {
         const mints = ['mint-a', 'mint-b'];
 
-        const { rerender } = renderHook(() => useTokenInfos(mints, Cluster.MainnetBeta), { wrapper });
+        const { rerender } = renderHook(() => useTokenInfos(mints, Cluster.Mainnet), { wrapper });
         await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
 
         rerender();
@@ -71,7 +71,7 @@ describe('useTokenInfos', () => {
         const mints = ['mint-a'];
 
         const { rerender } = renderHook(({ cluster }) => useTokenInfos(mints, cluster), {
-            initialProps: { cluster: Cluster.MainnetBeta },
+            initialProps: { cluster: Cluster.Mainnet },
             wrapper,
         });
         await waitForHook(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
@@ -83,7 +83,7 @@ describe('useTokenInfos', () => {
     });
 
     it('should refetch when the mint list changes', async () => {
-        const { rerender } = renderHook(({ mints }) => useTokenInfos(mints, Cluster.MainnetBeta), {
+        const { rerender } = renderHook(({ mints }) => useTokenInfos(mints, Cluster.Mainnet), {
             initialProps: { mints: ['mint-a'] },
             wrapper,
         });
@@ -95,7 +95,7 @@ describe('useTokenInfos', () => {
     });
 
     it('should not refetch when an equal but freshly allocated mint list arrives', async () => {
-        const { rerender } = renderHook(({ mints }) => useTokenInfos(mints, Cluster.MainnetBeta), {
+        const { rerender } = renderHook(({ mints }) => useTokenInfos(mints, Cluster.Mainnet), {
             initialProps: { mints: ['mint-a', 'mint-b'] },
             wrapper,
         });
@@ -134,7 +134,7 @@ describe('useTokenInfos', () => {
             ]),
         };
 
-        const { result } = renderHook(() => useTokenInfos(mints, Cluster.MainnetBeta), {
+        const { result } = renderHook(() => useTokenInfos(mints, Cluster.Mainnet), {
             wrapper: swrWrapper({ fallback: seeded, revalidateOnMount: false }),
         });
 
@@ -147,7 +147,7 @@ describe('useTokenInfos', () => {
     it('should not refetch when the genesis hash arrives late on a named cluster', async () => {
         const mints = ['mint-a'];
 
-        const { rerender } = renderHook(({ genesisHash }) => useTokenInfos(mints, Cluster.MainnetBeta, genesisHash), {
+        const { rerender } = renderHook(({ genesisHash }) => useTokenInfos(mints, Cluster.Mainnet, genesisHash), {
             initialProps: { genesisHash: undefined as string | undefined },
             wrapper,
         });

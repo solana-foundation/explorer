@@ -26,7 +26,7 @@ vi.mock('@components/account/token-extensions/ScaledUiAmountMultiplierTooltip', 
 describe('TokenBalancesCard token symbols', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.cluster = { cluster: Cluster.MainnetBeta, genesisHash: undefined };
+        mocks.cluster = { cluster: Cluster.Mainnet, genesisHash: undefined };
     });
 
     it('should label each balance with the symbol of its own mint', async () => {

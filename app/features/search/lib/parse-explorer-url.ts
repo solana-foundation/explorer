@@ -14,7 +14,7 @@ type ExternalExplorer = {
     routes: RouteMapping[];
     /**
      * Maps the explorer's `?cluster=` values to our Cluster enum.
-     * Values absent from this map resolve to {@link Cluster.MainnetBeta}.
+     * Values absent from this map resolve to {@link Cluster.Mainnet}.
      */
     clusters: Record<string, Cluster>;
 };
@@ -23,7 +23,7 @@ const EXPLORERS: ExternalExplorer[] = [
     {
         clusters: {
             devnet: Cluster.Devnet,
-            'mainnet-beta': Cluster.MainnetBeta,
+            'mainnet-beta': Cluster.Mainnet,
             testnet: Cluster.Testnet,
         },
         hostname: 'solscan.io',
@@ -119,6 +119,6 @@ function extractIdentifier(rawSegment: string): string | undefined {
 }
 
 function resolveCluster(explorer: ExternalExplorer, rawCluster: string | null): Cluster {
-    if (!rawCluster) return Cluster.MainnetBeta;
-    return explorer.clusters[rawCluster] ?? Cluster.MainnetBeta;
+    if (!rawCluster) return Cluster.Mainnet;
+    return explorer.clusters[rawCluster] ?? Cluster.Mainnet;
 }

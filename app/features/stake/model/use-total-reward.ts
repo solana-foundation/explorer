@@ -67,7 +67,7 @@ export function useTotalReward(stakeAccountAddress: Address): TotalRewardState {
     const { cluster } = useCluster();
     const isEnabled = isStakeTotalRewardEnabled();
     // Solscan indexes mainnet-beta only, so other clusters skip the request rather than fail it.
-    const isSupported = cluster === Cluster.MainnetBeta;
+    const isSupported = cluster === Cluster.Mainnet;
 
     const { data, error, isLoading } = useSWR(
         // A falsy key disables the fetch, so a disabled deployment never asks for the total.

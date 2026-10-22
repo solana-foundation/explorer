@@ -49,9 +49,9 @@ const STATIC_OVERRIDES: Record<string, RouteOverride> = {
 // The MCP pages stay out until the MCP endpoint is announced — drop an entry to list it again.
 const EXCLUDED_STATIC_ROUTES = ['/_not-found', '/opengraph-image.png', '/mcp/start', '/mcp/docs'];
 
-// Collect all known program addresses from programs.ts (MainnetBeta only)
+// Collect all known program addresses from programs.ts (Mainnet only)
 const MAINNET_PROGRAM_IDS = Object.entries(PROGRAM_INFO_BY_ID)
-    .filter(([, info]) => info.deployments.includes(Cluster.MainnetBeta))
+    .filter(([, info]) => info.deployments.includes(Cluster.Mainnet))
     .map(([address]) => address);
 
 const PROGRAM_ADDRESSES = [

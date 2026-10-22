@@ -15,7 +15,7 @@ describe('formatInstructionLogs', () => {
             const instructionLogs = [mockInstructionLog(5000)];
 
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs,
                 instructions,
@@ -40,7 +40,7 @@ describe('formatInstructionLogs', () => {
             const instructionLogs = [mockInstructionLog(5000), mockInstructionLog(150), mockInstructionLog(1000)];
 
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs,
                 instructions,
@@ -62,7 +62,7 @@ describe('formatInstructionLogs', () => {
             const instructionLogs = [mockInstructionLog(105), mockInstructionLog(150)];
 
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs,
                 instructions,
@@ -84,7 +84,7 @@ describe('formatInstructionLogs', () => {
             const instructionLogs = [mockInstructionLog(5000), mockInstructionLog(0)];
 
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs,
                 instructions,
@@ -99,7 +99,7 @@ describe('formatInstructionLogs', () => {
             const instructionLogs = [mockInstructionLog(0)];
 
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs,
                 instructions,
@@ -126,7 +126,7 @@ describe('formatInstructionLogs', () => {
             const instructionLogs = instructions.map(() => mockInstructionLog(0));
 
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs,
                 instructions,
@@ -148,7 +148,7 @@ describe('formatInstructionLogs', () => {
             const instructionLogs = [mockInstructionLog(5000)];
 
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs,
                 instructions,
@@ -166,7 +166,7 @@ describe('formatInstructionLogs', () => {
     describe('negative cases: empty/missing data', () => {
         it('should handle empty instructions array', () => {
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs: [],
                 instructions: [],
@@ -180,7 +180,7 @@ describe('formatInstructionLogs', () => {
             const instructionLogs: InstructionLogs[] = [];
 
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs,
                 instructions,
@@ -214,7 +214,7 @@ describe('formatInstructionLogs', () => {
             ];
 
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs,
                 instructions,
@@ -237,7 +237,7 @@ describe('formatInstructionLogs', () => {
             ];
 
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs,
                 instructions,
@@ -261,7 +261,7 @@ describe('formatInstructionLogs', () => {
     describe('index alignment with the logs', () => {
         it('should report more top-level invocations than instructions', () => {
             formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs: [mockInstructionLog(5000), mockInstructionLog(100)],
                 instructions: [mockInstruction('TokenProgram')],
@@ -277,7 +277,7 @@ describe('formatInstructionLogs', () => {
         // on every recompute, so the counts stay console-only context rather than `sentryExtras`.
         it('should not send the report to Sentry', () => {
             formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs: [mockInstructionLog(5000), mockInstructionLog(100)],
                 instructions: [mockInstruction('TokenProgram')],
@@ -291,7 +291,7 @@ describe('formatInstructionLogs', () => {
 
         it('should stay silent when a failed transaction logs fewer instructions than it carries', () => {
             formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs: [mockInstructionLog(5000)],
                 instructions: [mockInstruction('TokenProgram'), mockInstruction('SystemProgram')],
@@ -303,7 +303,7 @@ describe('formatInstructionLogs', () => {
         // A different failure, and one the caller already reports itself.
         it('should stay silent when the caller resolved no instructions', () => {
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs: [mockInstructionLog(5000), mockInstructionLog(100)],
                 instructions: [],
@@ -322,7 +322,7 @@ describe('formatInstructionLogs', () => {
     describe('log entries that belong to no instruction', () => {
         it('should keep the figures aligned when an orphan entry precedes the real ones', () => {
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs: [mockOrphanLog(), mockInstructionLog(5000), mockInstructionLog(3000)],
                 instructions: [mockInstruction('TokenProgram'), mockInstruction('MemoProgram')],
@@ -336,7 +336,7 @@ describe('formatInstructionLogs', () => {
 
         it('should not report misalignment for a trailing orphan entry', () => {
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs: [mockInstructionLog(5000), mockOrphanLog()],
                 instructions: [mockInstruction('TokenProgram')],
@@ -349,7 +349,7 @@ describe('formatInstructionLogs', () => {
         // The runtime-error entry parseProgramLogs synthesises when a simulation failed without logging.
         it('should leave every row unlogged when the only entry is an orphan', () => {
             const result = formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
                 instructionLogs: [mockOrphanLog()],
                 instructions: [mockInstruction('TokenProgram'), mockInstruction('MemoProgram')],
@@ -370,9 +370,9 @@ describe('formatInstructionLogs', () => {
 
         const format = (logs: string[], programIds: string[]) =>
             formatInstructionLogs({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 epoch: 0n,
-                instructionLogs: parseProgramLogs(logs, null, Cluster.MainnetBeta),
+                instructionLogs: parseProgramLogs(logs, null, Cluster.Mainnet),
                 instructions: programIds.map(mockInstruction),
             });
 

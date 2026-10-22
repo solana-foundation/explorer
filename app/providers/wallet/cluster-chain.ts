@@ -15,7 +15,7 @@ export type WalletChain = 'solana:devnet' | 'solana:localnet' | 'solana:mainnet'
  */
 export function clusterToWalletChain(cluster: Cluster): WalletChain {
     switch (cluster) {
-        case Cluster.MainnetBeta:
+        case Cluster.Mainnet:
             return 'solana:mainnet';
         case Cluster.Devnet:
             return 'solana:devnet';

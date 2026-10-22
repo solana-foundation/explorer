@@ -61,7 +61,7 @@ describe('createReceipt', () => {
     describe('SOL transfer receipts', () => {
         it('should create a formatted SOL transfer receipt for a single transfer', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockSingleTransferTransaction,
             });
 
@@ -72,7 +72,7 @@ describe('createReceipt', () => {
                     formatted: '0.000005',
                     raw: 5000,
                 },
-                network: 'Mainnet Beta',
+                network: 'Mainnet',
                 receiver: {
                     truncated: truncateAddress(RECEIVER.publicKey.toBase58(), 5),
                 },
@@ -92,7 +92,7 @@ describe('createReceipt', () => {
 
         it('should create a formatted SOL receipt for multiple transfers', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockMultipleTransfersTransaction,
             });
 
@@ -123,7 +123,7 @@ describe('createReceipt', () => {
 
         it('should handle custom fee payer transaction', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockCustomFeePayerTransaction,
             });
 
@@ -245,7 +245,7 @@ describe('createReceipt', () => {
                     }),
                 ],
             });
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction: tx });
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -273,7 +273,7 @@ describe('createReceipt', () => {
             };
 
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcTransferTransaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
@@ -285,7 +285,7 @@ describe('createReceipt', () => {
                     formatted: '0.000005',
                     raw: 5000,
                 },
-                network: 'Mainnet Beta',
+                network: 'Mainnet',
                 receiver: {
                     truncated: 'Hd3f3..R3bD5',
                 },
@@ -298,10 +298,7 @@ describe('createReceipt', () => {
                     unit: 'USDC',
                 },
             });
-            expect(getTokenInfo).toHaveBeenCalledWith(
-                '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-                Cluster.MainnetBeta,
-            );
+            expect(getTokenInfo).toHaveBeenCalledWith('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU', Cluster.Mainnet);
         });
 
         it('should create a formatted token transfer receipt for regular transfer', async () => {
@@ -310,7 +307,7 @@ describe('createReceipt', () => {
             };
 
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcRegularTransferTransaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
@@ -341,7 +338,7 @@ describe('createReceipt', () => {
             ['throws an error', () => vi.mocked(getTokenInfo).mockRejectedValueOnce(new Error('Token info not found'))],
         ])('should handle token transfer when getTokenInfo %s', async (_, mockTokenInfo) => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcTransferTransaction,
             });
             mockTokenInfo();
@@ -362,7 +359,7 @@ describe('createReceipt', () => {
             };
 
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockToken2022Transfer2Transaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
@@ -374,7 +371,7 @@ describe('createReceipt', () => {
                     formatted: '0.000005',
                     raw: 5000,
                 },
-                network: 'Mainnet Beta',
+                network: 'Mainnet',
                 receiver: {
                     truncated: '65MUM..L2Fhk',
                 },
@@ -387,10 +384,7 @@ describe('createReceipt', () => {
                     unit: 'T22',
                 },
             });
-            expect(getTokenInfo).toHaveBeenCalledWith(
-                '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-                Cluster.MainnetBeta,
-            );
+            expect(getTokenInfo).toHaveBeenCalledWith('7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU', Cluster.Mainnet);
         });
 
         it('should create a formatted token transfer receipt for Token-2022 transferChecked', async () => {
@@ -400,7 +394,7 @@ describe('createReceipt', () => {
             };
 
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockToken2022TransferTransaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce(mockTokenInfo);
@@ -412,7 +406,7 @@ describe('createReceipt', () => {
                     formatted: '0.000005',
                     raw: 5000,
                 },
-                network: 'Mainnet Beta',
+                network: 'Mainnet',
                 receiver: {
                     truncated: '65MUM..L2Fhk',
                 },
@@ -425,15 +419,12 @@ describe('createReceipt', () => {
                     unit: 'T2022',
                 },
             });
-            expect(getTokenInfo).toHaveBeenCalledWith(
-                'AN8h2reVWuPAWXhfJQounhTMqb5bvwVKumX6pMmSK25U',
-                Cluster.MainnetBeta,
-            );
+            expect(getTokenInfo).toHaveBeenCalledWith('AN8h2reVWuPAWXhfJQounhTMqb5bvwVKumX6pMmSK25U', Cluster.Mainnet);
         });
 
         it('should create a receipt for multisig token transfer using multisigAuthority as sender', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcMultisigTransferTransaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
@@ -446,7 +437,7 @@ describe('createReceipt', () => {
 
         it('should create a multi-transfer token receipt summing totals and exposing per-instruction transfers', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcMultipleTransfersTransaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
@@ -473,7 +464,7 @@ describe('createReceipt', () => {
                 receiver: { address: receiver2 },
                 sender: { address: authority },
             });
-            expect(getTokenInfo).toHaveBeenCalledWith(mint, Cluster.MainnetBeta);
+            expect(getTokenInfo).toHaveBeenCalledWith(mint, Cluster.Mainnet);
         });
     });
 
@@ -483,7 +474,7 @@ describe('createReceipt', () => {
             ['Jito-only SOL transfer', mockJitoOnlyTransferTransaction],
             ['transaction with no transfers', mockNoTransferTransaction],
         ])('should report no-transfers for %s', async (_, transaction) => {
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction });
 
             const result = await createReceipt(mockSignature);
 
@@ -523,7 +514,7 @@ describe('createReceipt', () => {
                 ],
                 instructions: [buildPartiallyDecodedIx({ programId: wrapperProgram })],
             });
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction: tx });
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -601,7 +592,7 @@ describe('createReceipt', () => {
                     },
                 ],
             });
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction: tx });
             vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
 
             const receipt = unwrap(await createReceipt(mockSignature));
@@ -649,7 +640,7 @@ describe('createReceipt', () => {
                     buildPartiallyDecodedIx({ programId: ataProgram }),
                 ],
             });
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction: tx });
 
             const receipt = unwrap(await createReceipt(mockSignature));
 
@@ -720,7 +711,7 @@ describe('createReceipt', () => {
                     },
                 ],
             });
-            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.MainnetBeta, transaction: tx });
+            vi.mocked(getTx).mockResolvedValueOnce({ cluster: Cluster.Mainnet, transaction: tx });
             vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });
 
             const receipt = unwrap(await createReceipt(mockSignature));
@@ -738,7 +729,7 @@ describe('createReceipt', () => {
     describe('mixed-mint token transfers', () => {
         it('should report mixed-mint when token transfers use different mints', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockMixedMintTransfersTransaction,
             });
 
@@ -749,7 +740,7 @@ describe('createReceipt', () => {
 
         it('should sum same-mint token transfers exactly (no float drift)', async () => {
             vi.mocked(getTx).mockResolvedValueOnce({
-                cluster: Cluster.MainnetBeta,
+                cluster: Cluster.Mainnet,
                 transaction: mockUsdcFpPrecisionTransfersTransaction,
             });
             vi.mocked(getTokenInfo).mockResolvedValueOnce({ symbol: 'USDC' });

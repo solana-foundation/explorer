@@ -18,7 +18,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
-        await expect(canvas.getByText('(Beta)')).toBeInTheDocument();
+        await expect(canvas.getByText('Solana explorer')).toBeInTheDocument();
         await expect(canvas.getByRole('link', { name: 'Terms of Services' })).toBeInTheDocument();
     },
 };

@@ -45,7 +45,7 @@ export default meta;
 type Story = StoryObj<typeof FeatureGateTable<ActivatedFeature>>;
 
 const args = {
-    cluster: Cluster.MainnetBeta,
+    cluster: Cluster.Mainnet,
     emptyState: <EmptyStateCard>No activated features.</EmptyStateCard>,
     features: activated,
     secondColumn: {

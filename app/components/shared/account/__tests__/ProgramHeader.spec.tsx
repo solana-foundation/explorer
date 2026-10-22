@@ -17,7 +17,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/app/entities/idl/model/use-program-idls', () => ({ useProgramIdls: mocks.useProgramIdls }));
 vi.mock('@features/security-txt', () => ({ useSecurityTxt: mocks.useSecurityTxt }));
 vi.mock('@providers/cluster', () => ({
-    useCluster: () => ({ cluster: Cluster.MainnetBeta, url: 'https://example.com' }),
+    useCluster: () => ({ cluster: Cluster.Mainnet, url: 'https://example.com' }),
 }));
 // Partial mock: the @entities/idl barrel transitively pulls real exports from this module, so only
 // override PROGRAM_INFO_BY_ID (via a getter so each test can swap the trusted-registry contents).
@@ -62,7 +62,7 @@ describe('ProgramHeader', () => {
     });
 
     test('should prefer the trusted-registry name over security.txt and IDL names', () => {
-        mocks.programInfoById = { [ADDRESS]: { deployments: [Cluster.MainnetBeta], name: 'Trusted Program' } };
+        mocks.programInfoById = { [ADDRESS]: { deployments: [Cluster.Mainnet], name: 'Trusted Program' } };
         mocks.useSecurityTxt.mockReturnValue({ securityTxt: gen.securityTxt({ name: 'SecTxt Name' }) });
         mockIdls(anchorIdlNamed('idl_program'));
 

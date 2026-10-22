@@ -159,7 +159,7 @@ describe('hashProgramBuffer', () => {
 
 describe('getOsecRegistryUrl', () => {
     it('should return the mainnet registry for Mainnet Beta', () => {
-        expect(getOsecRegistryUrl(Cluster.MainnetBeta)).toBe('https://verify.osec.io');
+        expect(getOsecRegistryUrl(Cluster.Mainnet)).toBe('https://verify.osec.io');
     });
 
     it('should return the devnet registry for Devnet', () => {
@@ -174,7 +174,7 @@ describe('getOsecRegistryUrl', () => {
 
 describe('supportsVerifiedBuilds', () => {
     it('should support Mainnet Beta and Devnet only', () => {
-        expect(supportsVerifiedBuilds(Cluster.MainnetBeta)).toBe(true);
+        expect(supportsVerifiedBuilds(Cluster.Mainnet)).toBe(true);
         expect(supportsVerifiedBuilds(Cluster.Devnet)).toBe(true);
         expect(supportsVerifiedBuilds(Cluster.Testnet)).toBe(false);
         expect(supportsVerifiedBuilds(Cluster.Custom)).toBe(false);
@@ -209,7 +209,7 @@ describe('buildEnrichedOsecInfo', () => {
 
     it('should enrich the verified card from the on-chain PDA when available', () => {
         const info = buildEnrichedOsecInfo({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             osecInfo: makeOsecInfo(),
             pdaData: PDA,
             programId: PROGRAM_ID,
@@ -227,7 +227,7 @@ describe('buildEnrichedOsecInfo', () => {
     // resolved (e.g. the verify-program IDL failed to load, or it was verified via the deprecated API).
     it('should still render the verified card when the PDA is unavailable, falling back to OSEC data', () => {
         const info = buildEnrichedOsecInfo({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             osecInfo: makeOsecInfo(),
             pdaData: null,
             programId: PROGRAM_ID,
@@ -273,7 +273,7 @@ describe('buildEnrichedOsecInfo', () => {
 
     it('should label a frozen, non-trusted signer as the program deployer', () => {
         const info = buildEnrichedOsecInfo({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             osecInfo: makeOsecInfo({ is_frozen: true, signer: PROGRAM_ID.toBase58() }),
             pdaData: null,
             programId: PROGRAM_ID,
@@ -283,7 +283,7 @@ describe('buildEnrichedOsecInfo', () => {
 
     it('should label a mutable, non-trusted signer as the program authority', () => {
         const info = buildEnrichedOsecInfo({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             osecInfo: makeOsecInfo({ is_frozen: false, signer: PROGRAM_ID.toBase58() }),
             pdaData: null,
             programId: PROGRAM_ID,
@@ -293,7 +293,7 @@ describe('buildEnrichedOsecInfo', () => {
 
     it('should drop a non-https repo url from the OSEC fallback', () => {
         const info = buildEnrichedOsecInfo({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             osecInfo: makeOsecInfo({ repo_url: 'http://insecure.example/repo' }),
             pdaData: null,
             programId: PROGRAM_ID,

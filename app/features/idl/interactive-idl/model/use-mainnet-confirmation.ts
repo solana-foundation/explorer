@@ -25,7 +25,7 @@ export function useMainnetConfirmation<T = unknown>() {
 
     const requireConfirmation = useCallback(
         async (action: () => Promise<void> | void, context?: T) => {
-            if (currentCluster === Cluster.MainnetBeta && !getCookie(MAINNET_DISCLAIMER_COOKIE)) {
+            if (currentCluster === Cluster.Mainnet && !getCookie(MAINNET_DISCLAIMER_COOKIE)) {
                 setPendingAction({ action, context });
                 setIsOpen(true);
             } else {

@@ -6,7 +6,7 @@ import { clusterToWalletChain } from '../cluster-chain';
 
 describe('clusterToWalletChain', () => {
     it.each([
-        [Cluster.MainnetBeta, 'solana:mainnet'],
+        [Cluster.Mainnet, 'solana:mainnet'],
         [Cluster.Devnet, 'solana:devnet'],
         [Cluster.Testnet, 'solana:testnet'],
     ])('should map cluster %s to %s', (cluster, expected) => {

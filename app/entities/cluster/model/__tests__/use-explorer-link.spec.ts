@@ -24,8 +24,8 @@ describe('buildExplorerLink', () => {
             expect(result).toBe(`${BASE}/tx/abc?${expectedParam}`);
         });
 
-        it('should omit cluster param for MainnetBeta', () => {
-            const result = buildExplorerLink({ cluster: Cluster.MainnetBeta }, '/tx/abc');
+        it('should omit cluster param for Mainnet', () => {
+            const result = buildExplorerLink({ cluster: Cluster.Mainnet }, '/tx/abc');
             expect(result).toBe(`${BASE}/tx/abc`);
         });
 
@@ -40,12 +40,12 @@ describe('buildExplorerLink', () => {
 
     describe('path joining', () => {
         it('should join path without leading slash using a separator', () => {
-            const result = buildExplorerLink({ cluster: Cluster.MainnetBeta }, 'tx/abc');
+            const result = buildExplorerLink({ cluster: Cluster.Mainnet }, 'tx/abc');
             expect(result).toBe(`${BASE}/tx/abc`);
         });
 
         it('should return base URL when path is empty', () => {
-            const result = buildExplorerLink({ cluster: Cluster.MainnetBeta }, '');
+            const result = buildExplorerLink({ cluster: Cluster.Mainnet }, '');
             expect(result).toBe(BASE);
         });
 
@@ -73,7 +73,7 @@ describe('buildExplorerLink', () => {
 
 describe('useExplorerLink', () => {
     it('should follow the selection useCluster reports', () => {
-        vi.mocked(useCluster).mockReturnValue({ selection: { cluster: Cluster.MainnetBeta } } as any);
+        vi.mocked(useCluster).mockReturnValue({ selection: { cluster: Cluster.Mainnet } } as any);
 
         const { result, rerender } = renderHook(() => useExplorerLink('/address/123'));
 

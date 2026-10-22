@@ -8,7 +8,7 @@ import { getChainId } from '../get-chain-id';
 describe('getChainId', () => {
     describe('standard clusters', () => {
         it.each([
-            [Cluster.MainnetBeta, ChainId.MAINNET],
+            [Cluster.Mainnet, ChainId.MAINNET],
             [Cluster.Testnet, ChainId.TESTNET],
             [Cluster.Devnet, ChainId.DEVNET],
         ])('should return %s for cluster %s', (cluster, expected) => {
@@ -16,7 +16,7 @@ describe('getChainId', () => {
         });
 
         it.each([
-            [Cluster.MainnetBeta, GENESIS_HASHES.DEVNET, ChainId.MAINNET],
+            [Cluster.Mainnet, GENESIS_HASHES.DEVNET, ChainId.MAINNET],
             [Cluster.Testnet, GENESIS_HASHES.MAINNET, ChainId.TESTNET],
             [Cluster.Devnet, GENESIS_HASHES.TESTNET, ChainId.DEVNET],
         ])('should ignore genesisHash for %s cluster', (cluster, genesisHash, expected) => {

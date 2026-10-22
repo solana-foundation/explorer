@@ -50,6 +50,6 @@ describe('should delegate the transaction fetch to the entity', () => {
     it('should pass a missing transaction through as null', async () => {
         mocks.fetchTransactionDetails.mockResolvedValue(null);
 
-        await expect(getTx({ cluster: Cluster.MainnetBeta, signature: SIGNATURE })).resolves.toBeNull();
+        await expect(getTx({ cluster: Cluster.Mainnet, signature: SIGNATURE })).resolves.toBeNull();
     });
 });

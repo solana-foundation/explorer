@@ -49,7 +49,7 @@ type AnsRpc = Rpc<GetProgramAccountsApi & GetMultipleAccountsApi>;
 const base64Encoder = getBase64Encoder();
 
 export async function fetchAnsDomains(userAddress: string): Promise<AnsDomain[]> {
-    const rpc = createSolanaRpc(serverClusterUrl(Cluster.MainnetBeta));
+    const rpc = createSolanaRpc(serverClusterUrl(Cluster.Mainnet));
 
     const [userAccounts, tlds] = await Promise.all([
         fetchAllUserNameAccounts(rpc, address(userAddress)),

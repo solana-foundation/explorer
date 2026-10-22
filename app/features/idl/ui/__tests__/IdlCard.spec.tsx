@@ -114,7 +114,7 @@ describe('IdlCard', () => {
         vi.clearAllMocks();
 
         (useSearchParams as ReturnType<typeof vi.fn>).mockReturnValue({
-            get: () => clusterSlug(Cluster.MainnetBeta),
+            get: () => clusterSlug(Cluster.Mainnet),
             has: (_query?: string) => false,
             toString: () => '',
         });

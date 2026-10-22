@@ -36,7 +36,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, {
+        await getTokenInfos([mockToken.address], Cluster.Mainnet, undefined, {
             signal: abortController.signal,
         });
 
@@ -57,7 +57,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, {
+        await getTokenInfos([mockToken.address], Cluster.Mainnet, undefined, {
             next: nextOptions,
         });
 
@@ -75,7 +75,7 @@ describe('getTokenInfos', () => {
 
         vi.mocked(global.fetch).mockRejectedValueOnce(error);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, {
+        const result = await getTokenInfos([mockToken.address], Cluster.Mainnet, undefined, {
             onError,
         });
 
@@ -84,7 +84,7 @@ describe('getTokenInfos', () => {
     });
 
     it('should return empty array for empty addresses', async () => {
-        const result = await getTokenInfos([], Cluster.MainnetBeta, undefined);
+        const result = await getTokenInfos([], Cluster.Mainnet, undefined);
 
         expect(global.fetch).not.toHaveBeenCalled();
         expect(result).toEqual([]);
@@ -106,7 +106,7 @@ describe('getTokenInfos', () => {
             statusText: 'Internal Server Error',
         } as Response);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
+        const result = await getTokenInfos([mockToken.address], Cluster.Mainnet, undefined, { onError });
 
         expect(onError).toHaveBeenCalledTimes(1);
         const error = onError.mock.calls[0][0];
@@ -127,7 +127,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
+        const result = await getTokenInfos([mockToken.address], Cluster.Mainnet, undefined, { onError });
 
         expect(onError).toHaveBeenCalledTimes(1);
         expect(onError.mock.calls[0][0]).toBeInstanceOf(TokenInfoInvalidResponseError);
@@ -145,7 +145,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
+        const result = await getTokenInfos([mockToken.address], Cluster.Mainnet, undefined, { onError });
 
         expect(result).toEqual([mockToken]);
         expect(onError).toHaveBeenCalledTimes(1);
@@ -164,7 +164,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
+        const result = await getTokenInfos([mockToken.address], Cluster.Mainnet, undefined, { onError });
 
         expect(result).toEqual([{ ...withoutLogo, logoURI: null }]);
         expect(onError).not.toHaveBeenCalled();
@@ -179,7 +179,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined, { onError });
+        const result = await getTokenInfos([mockToken.address], Cluster.Mainnet, undefined, { onError });
 
         expect(result).toEqual([{ ...withoutDecimals, decimals: null }]);
         expect(onError).not.toHaveBeenCalled();
@@ -193,7 +193,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined);
+        const result = await getTokenInfos([mockToken.address], Cluster.Mainnet, undefined);
 
         expect(result).toEqual([withExtras]);
     });
@@ -206,7 +206,7 @@ describe('getTokenInfos', () => {
             ok: true,
         } as Response);
 
-        const result = await getTokenInfos([mockToken.address], Cluster.MainnetBeta, undefined);
+        const result = await getTokenInfos([mockToken.address], Cluster.Mainnet, undefined);
 
         expect(result).toEqual([mockToken]);
     });
@@ -232,7 +232,7 @@ describe('getTokenInfo', () => {
             ok: true,
         } as Response);
 
-        const result = await getTokenInfo(mockToken.address, Cluster.MainnetBeta);
+        const result = await getTokenInfo(mockToken.address, Cluster.Mainnet);
 
         expect(result).toEqual(mockToken);
     });
@@ -245,7 +245,7 @@ describe('getTokenInfo', () => {
             ok: true,
         } as Response);
 
-        const result = await getTokenInfo(mockToken.address, Cluster.MainnetBeta);
+        const result = await getTokenInfo(mockToken.address, Cluster.Mainnet);
 
         expect(result).toBeUndefined();
     });

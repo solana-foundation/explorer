@@ -57,11 +57,11 @@ describe('useSearchNavigation', () => {
         expect(pushMock).toHaveBeenCalledWith('/address/abc?cluster=testnet');
     });
 
-    it('should omit cluster param when item cluster override is MainnetBeta', () => {
+    it('should omit cluster param when item cluster override is Mainnet', () => {
         const { result } = renderHook(() => useSearchNavigation());
 
         result.current({
-            cluster: Cluster.MainnetBeta,
+            cluster: Cluster.Mainnet,
             label: 'solscan.io — Account',
             pathname: '/address/abc',
             value: ['https://solscan.io/account/abc'],

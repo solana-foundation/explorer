@@ -19,7 +19,7 @@ const mockGetProgramAccounts = vi.fn();
 const mockGetMultipleAccounts = vi.fn();
 
 vi.mock('@utils/cluster', () => ({
-    Cluster: { MainnetBeta: 'mainnet-beta' },
+    Cluster: { Mainnet: 'mainnet' },
     serverClusterUrl: () => 'https://unused.test',
 }));
 
