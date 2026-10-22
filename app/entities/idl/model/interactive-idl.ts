@@ -1,5 +1,3 @@
-import { PublicKey } from '@solana/web3.js';
-
 import { type SupportedIdl } from '../lib/types';
 import { getIdlDeclaredAddress } from '../lib/utils';
 import { getIdlSpecType as getSerdeIdlSpecType } from './converters/convert-legacy-idl';
@@ -39,12 +37,5 @@ export function isIdlProgramIdMismatch(idl: SupportedIdl, programAddress: string
     const declared = getIdlDeclaredAddress(idl);
     if (declared.kind === 'none') return false;
     if (declared.kind === 'malformed') return true;
-
-    try {
-        const idlKey = new PublicKey(declared.address);
-        const programKey = new PublicKey(programAddress);
-        return !idlKey.equals(programKey);
-    } catch {
-        return true; // unparseable address → treat as mismatch
-    }
+    return declared.address !== programAddress;
 }

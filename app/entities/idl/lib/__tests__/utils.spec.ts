@@ -40,6 +40,7 @@ describe('getIdlDeclaredAddress', () => {
             { ...codama, program: { ...codama.program, publicKey: 1 } },
         ],
         ['an Anchor IDL whose address is an object', { ...anchor030, address: {} }],
+        ['an Anchor IDL whose address is not base58', { ...anchor030, address: 'not-an-address' }],
     ])('should return a malformed address for %s', (_, idl) => {
         expect(getIdlDeclaredAddress(idl)).toEqual({ kind: 'malformed' });
     });

@@ -1,4 +1,6 @@
-export type IdlDeclaredAddress = { kind: 'none' } | { kind: 'malformed' } | { address: string; kind: 'address' };
+import { type Address, isAddress } from '@solana/kit';
+
+export type IdlDeclaredAddress = { kind: 'none' } | { kind: 'malformed' } | { address: Address; kind: 'address' };
 
 export function getIdlDeclaredAddress(idl: unknown): IdlDeclaredAddress {
     const root = idl as {
@@ -10,7 +12,7 @@ export function getIdlDeclaredAddress(idl: unknown): IdlDeclaredAddress {
     const values = root?.kind === 'rootNode' ? [root.program?.publicKey] : [root?.address, root?.metadata?.address];
     const value = values.find(isDeclared);
     if (value === undefined) return { kind: 'none' };
-    return typeof value === 'string' ? { address: value, kind: 'address' } : { kind: 'malformed' };
+    return typeof value === 'string' && isAddress(value) ? { address: value, kind: 'address' } : { kind: 'malformed' };
 }
 
 function isDeclared(value: unknown): boolean {
