@@ -39,12 +39,6 @@ describe('getOnChainCandidates', () => {
         expect(sourcesOf(getOnChainCandidates(BOTH))).toEqual([IdlVariant.ProgramMetadata, IdlVariant.Anchor]);
     });
 
-    it('should tag a Kinobi root as Codama', () => {
-        const kinobiIdl = { ...codamaIdl, standard: 'kinobi' } as unknown as SupportedIdl;
-
-        expect(getOnChainCandidates(pair({ programMetadataIdl: kinobiIdl }))[0].standard).toBe('Codama');
-    });
-
     it('should tag each IDL with its standard and the account it was read from', () => {
         const onChain = pair({
             anchorIdl: ANCHOR_IDL,

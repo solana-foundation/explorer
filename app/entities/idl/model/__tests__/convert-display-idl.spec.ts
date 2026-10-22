@@ -44,7 +44,6 @@ describe('[idl] convert-display-idl', () => {
         describe('non-legacy', () => {
             it('should preserve "codama" when parent returns "codama"', () => {
                 const idl = {
-                    kind: 'rootNode',
                     standard: 'codama',
                 };
                 const result = getIdlSpecType(idl);
@@ -53,7 +52,6 @@ describe('[idl] convert-display-idl', () => {
 
             it('should not return "legacy-shank" when parent is "codama" even with shank origin', () => {
                 const idl = {
-                    kind: 'rootNode',
                     metadata: {
                         origin: 'shank',
                     },

@@ -4,12 +4,12 @@ export type IdlDeclaredAddress = { kind: 'none' } | { kind: 'malformed' } | { ad
 
 export function getIdlDeclaredAddress(idl: unknown): IdlDeclaredAddress {
     const root = idl as {
-        kind?: unknown;
+        standard?: unknown;
         program?: { publicKey?: unknown };
         address?: unknown;
         metadata?: { address?: unknown };
     };
-    const values = root?.kind === 'rootNode' ? [root.program?.publicKey] : [root?.address, root?.metadata?.address];
+    const values = root?.standard === 'codama' ? [root.program?.publicKey] : [root?.address, root?.metadata?.address];
     const value = values.find(isDeclared);
     if (value === undefined) return { kind: 'none' };
     return typeof value === 'string' && isAddress(value) ? { address: value, kind: 'address' } : { kind: 'malformed' };

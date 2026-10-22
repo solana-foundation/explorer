@@ -488,7 +488,7 @@ function convertDefinedTypeArg(arg: LegacyIdlDefinedTypeArg): any {
 export type IdlSpec = '0.1.0' | 'legacy' | 'codama';
 
 export function getIdlSpecType(idl: any): IdlSpec {
-    if (idl?.kind === 'rootNode') return 'codama';
+    if (idl?.standard === 'codama') return 'codama';
     return idl?.metadata?.spec ?? 'legacy';
 }
 
