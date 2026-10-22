@@ -6,7 +6,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
-import type { ProgramIdls, SupportedIdl } from '@/app/entities/idl';
+import type { ProgramIdlPair, ProgramIdls, SupportedIdl } from '@/app/entities/idl';
+import { getOnChainIdls } from '@/app/entities/idl/model/sourced-idl';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
@@ -28,15 +29,15 @@ vi.mock('next/navigation', () => ({
 const DEFAULT_ADDRESS = PublicKey.default.toBase58();
 const PMP_PDA = gen.vanityAddress('PMP');
 
-function mockProgramIdls(overrides: Partial<ProgramIdls>): void {
-    mocks.useProgramIdls.mockReturnValue({
+function mockProgramIdls(overrides: Partial<ProgramIdlPair>): void {
+    const onChain: ProgramIdlPair = {
         anchorIdl: undefined,
         anchorIdlAddress: undefined,
-        isLoading: false,
         programMetadataIdl: undefined,
         programMetadataIdlAddress: undefined,
         ...overrides,
-    });
+    };
+    mocks.useProgramIdls.mockReturnValue({ idls: getOnChainIdls(onChain) } satisfies ProgramIdls);
 }
 
 function createMockAnchorIdl(address = DEFAULT_ADDRESS): Idl {
@@ -231,6 +232,27 @@ describe('IdlCard', () => {
         // No fallback marker and no Anchor tab — the Anchor source is not reachable from the card.
         expect(screen.queryByLabelText('Fallback IDL source')).not.toBeInTheDocument();
         expectNoSourceTabs();
+
+        const castawayUrl = openCastawayUrl();
+        expect(castawayUrl.searchParams.get('idlSource')).toBe('program-metadata');
+    });
+
+    test('should show the PMP IDL when both sources are Anchor IDLs', async () => {
+        const pmpIdl = createMockAnchorIdl();
+        mockProgramIdls({
+            anchorIdl: createMockAnchorIdl(),
+            programMetadataIdl: { ...pmpIdl, metadata: { ...pmpIdl.metadata, name: 'pmp_program' } },
+            programMetadataIdlAddress: PMP_PDA,
+        });
+
+        renderCard();
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
+        });
+        expect(screen.getByText('PMP')).toBeInTheDocument();
+        expect(screen.getByText('Pmp Program')).toBeInTheDocument();
+        expect(screen.queryByLabelText('Fallback IDL source')).not.toBeInTheDocument();
 
         const castawayUrl = openCastawayUrl();
         expect(castawayUrl.searchParams.get('idlSource')).toBe('program-metadata');

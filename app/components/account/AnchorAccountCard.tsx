@@ -1,8 +1,8 @@
 import { ErrorCard } from '@components/common/ErrorCard';
+import { LoadingCard } from '@components/common/LoadingCard';
 import { BorshAccountsCoder, Idl } from '@coral-xyz/anchor';
 import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
-import { useAnchorProgram } from '@entities/idl';
-import { useProgramMetadataIdl } from '@entities/program-metadata';
+import { getAnchorIdls, getAnchorIdlsWithAccounts, useAnchorProgram, useProgramIdls } from '@entities/idl';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
@@ -16,23 +16,16 @@ import { BaseTable } from '@/app/shared/ui/Table';
 export function AnchorAccountCard({ account }: { account: Account }) {
     const { lamports } = account;
     const { url, cluster } = useCluster();
-    const { program: anchorProgram } = useAnchorProgram(account.owner.toString(), url, cluster);
-    const { programMetadataIdl } = useProgramMetadataIdl(account.owner.toString(), url, cluster);
+    const { idls } = useProgramIdls(account.owner.toString(), url, cluster);
+    const { program: anchorProgram } = useAnchorProgram({
+        cluster,
+        programAddress: account.owner.toString(),
+        select: getAnchorIdlsWithAccounts,
+        url,
+    });
     const rawData = account.data.raw;
-
-    // Prefer the legacy Anchor IDL; fall back to an Anchor-format IDL published via the Program
-    // Metadata Program so PMP-only programs (no on-chain Anchor IDL account) decode account data too.
-    const idl: Idl | undefined = useMemo(() => {
-        if (anchorProgram?.idl) return anchorProgram.idl;
-        const pmp = programMetadataIdl as Idl | undefined;
-        // `accounts: []` (Anchor 0.30+ default with no account types) has nothing to decode — treat as absent.
-        return pmp && Array.isArray(pmp.accounts) && pmp.accounts.length > 0 ? pmp : undefined;
-    }, [anchorProgram, programMetadataIdl]);
-
-    const programName =
-        getAnchorProgramName(anchorProgram) ||
-        (idl?.metadata as { name?: string } | undefined)?.name ||
-        'Unknown Program';
+    const idl: Idl | undefined = anchorProgram?.idl;
+    const programName = getAnchorProgramName(anchorProgram) || 'Unknown Program';
 
     const { decodedAccountData, accountDef } = useMemo(() => {
         let decodedAccountData: any | null = null;
@@ -63,8 +56,9 @@ export function AnchorAccountCard({ account }: { account: Account }) {
     }, [idl, rawData]);
 
     if (lamports === undefined) return null;
-    if (!idl) return <ErrorCard text="No Anchor IDL found" />;
-    if (!decodedAccountData || !accountDef) {
+    if (!idls) return <LoadingCard message="Loading program IDL" />;
+    if (getAnchorIdls(idls).length === 0) return <ErrorCard text="No Anchor IDL found" />;
+    if (!idl || !decodedAccountData || !accountDef) {
         return <ErrorCard text="Failed to decode account data according to the public Anchor interface" />;
     }
 

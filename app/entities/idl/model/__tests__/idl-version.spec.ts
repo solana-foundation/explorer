@@ -158,9 +158,28 @@ describe('isIdlProgramIdMismatch', () => {
             expect(isIdlProgramIdMismatch(idl, DEFAULT_PUBKEY)).toBe(true);
         });
 
+        it('should return true when the IDL address is not a string', () => {
+            const idl = { ...createMockIdl('anchor', '0.1.0'), address: {} } as unknown as SupportedIdl;
+            expect(isIdlProgramIdMismatch(idl, DEFAULT_PUBKEY)).toBe(true);
+        });
+
         it('should return true when programAddress is invalid', () => {
             const idl = createMockIdl('anchor', '0.1.0', DEFAULT_PUBKEY);
             expect(isIdlProgramIdMismatch(idl, 'not-a-key')).toBe(true);
+        });
+    });
+
+    describe('Legacy Anchor IDL', () => {
+        const createLegacyIdl = (address: string) =>
+            ({ ...createMockIdl('legacy'), metadata: { address } }) as unknown as SupportedIdl;
+
+        it('should return false when metadata.address matches programAddress', () => {
+            expect(isIdlProgramIdMismatch(createLegacyIdl(DEFAULT_PUBKEY), DEFAULT_PUBKEY)).toBe(false);
+        });
+
+        it('should return true when metadata.address differs from programAddress', () => {
+            const randomAddress = PublicKey.unique().toBase58();
+            expect(isIdlProgramIdMismatch(createLegacyIdl(DEFAULT_PUBKEY), randomAddress)).toBe(true);
         });
     });
 

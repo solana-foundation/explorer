@@ -13,6 +13,7 @@ export { type AnchorIdl, type CodamaIdl, type IdlStandard, type SupportedIdl } f
 export { type ProgramIdlPair } from './api/types';
 export { isIdlProgramIdMismatch, isInteractiveIdlSupported } from './model/interactive-idl';
 export { IdlVariant } from './model/idl-variant';
+export { getIdlDeclaredAddress } from './lib/utils';
 
 // Per-program names built from each program's IDL — a display name plus an instruction-name resolver
 // matched by discriminator (no Borsh decode) — used to label transaction rows the RPC leaves as
@@ -28,5 +29,6 @@ export { useFormatAnchorIdl } from './model/anchor/use-format-anchor-idl';
 export { useAnchorProgram } from './model/anchor/use-anchor-program';
 export { getProvider } from './model/anchor/anchor-provider';
 export { useProgramIdls, type ProgramIdls } from './model/use-program-idls';
+export { getAnchorAccountIdls, getAnchorIdls, getAnchorIdlsWithAccounts } from './model/sourced-idl';
 export { useFormatCodamaIdl } from './model/use-format-codama-idl';
 export { getIdlSpecType } from './model/converters/convert-legacy-idl';

@@ -1,8 +1,9 @@
 import { gen } from '@__fixtures__/gen';
-import type { SupportedIdl } from '@entities/idl';
+import type { ProgramIdlPair, ProgramIdls, SupportedIdl } from '@entities/idl';
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 
+import { getOnChainIdls } from '@/app/entities/idl/model/sourced-idl';
 import { Cluster } from '@/app/utils/cluster';
 
 import { ProgramHeader } from '../ProgramHeader';
@@ -44,13 +45,13 @@ function anchorIdlNamed(name: string): SupportedIdl {
 }
 
 function mockIdls(idl?: SupportedIdl): void {
-    mocks.useProgramIdls.mockReturnValue({
+    const onChain: ProgramIdlPair = {
         anchorIdl: idl,
         anchorIdlAddress: undefined,
-        isLoading: false,
         programMetadataIdl: undefined,
         programMetadataIdlAddress: undefined,
-    });
+    };
+    mocks.useProgramIdls.mockReturnValue({ idls: getOnChainIdls(onChain) } satisfies ProgramIdls);
 }
 
 describe('ProgramHeader', () => {

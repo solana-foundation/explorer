@@ -16,8 +16,7 @@ export type ResolvedProgramIdls = ProgramIdlSources<unknown>;
 /**
  * Resolve a program's Anchor + PMP `idl`-seed IDLs, backed by `@solana/idl`. Shared by the
  * `/api/idl-latest` route (server) and the custom/localhost client resolver, so known and custom
- * clusters resolve identically. Both sources are always resolved; each consumer reads the field it
- * needs (`anchorIdl` / `programMetadataIdl`).
+ * clusters resolve identically. Both sources are always resolved.
  *
  * Both come from `fetchLatestIdls` — the package's own `GET /api/latest` resolver (PMP canonical →
  * fndn fallback, Anchor PDA, side by side). Native/builtin programs skip the Anchor leg (PMP only via

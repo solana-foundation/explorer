@@ -14,12 +14,12 @@ export type ResolveProgramIdlsClientArgs = {
  * custom / localhost clusters the server route can't reach (the server has no route to a user's
  * `localhost:8899`). Same `@solana/idl` resolution as `/api/idl-latest` — the fndn fallback authority
  * for the PMP `idl` seed — so a local validator surfaces exactly what a public cluster does
- * (including Foundation-published native IDLs). Both sources are resolved; consumers read the field
- * they need (the tx-decoder takes `anchorIdl`, the program-name label takes `programMetadataIdl`).
+ * (including Foundation-published native IDLs). Both sources are resolved; consumers read the
+ * PMP-first `idls` from `useProgramIdls`.
  *
  * `resolve-program-idls` statically pulls in `@solana/idl` (~40 KB gzip — pako/yaml/toml — measured as
  * the First Load JS it adds across the `/address/*` and `/tx/*` routes, since it's reachable from the
- * broadly-used `useAnchorProgram`), so it's reached only through the dynamic `import()` here — keeping
+ * broadly-used `useProgramIdls`), so it's reached only through the dynamic `import()` here — keeping
  * that weight out of the bundle for the common known-cluster path, which resolves on the server.
  *
  * The resolver throws only on RPC failure, which here propagates so SWR retries rather than caching a

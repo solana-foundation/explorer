@@ -28,9 +28,9 @@ export function ProgramHeader({
 }) {
     const { securityTxt } = useSecurityTxt(address);
     const { url, cluster } = useCluster();
-    const { anchorIdl, programMetadataIdl } = useProgramIdls(address, url, cluster);
+    const { idls } = useProgramIdls(address, url, cluster);
     // Codama / modern Anchor names only; legacy Anchor top-level name is intentionally not shown.
-    const idlProgramName = buildProgramName([programMetadataIdl, anchorIdl]);
+    const idlProgramName = idls && buildProgramName(idls.map(({ idl }) => idl));
     const { programName, logo, version, selfReported } = ((): {
         programName: string;
         logo?: string;

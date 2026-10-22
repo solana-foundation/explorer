@@ -1,5 +1,6 @@
 import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
-import { useAnchorProgram } from '@entities/idl';
+import { getAnchorIdls, useAnchorProgram } from '@entities/idl';
+import { getBase58Encoder } from '@solana/kit';
 import { ParsedMessage, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import { getAnchorNameForInstruction, getAnchorProgramName } from '@utils/anchor';
 import { Cluster } from '@utils/cluster';
@@ -16,7 +17,7 @@ import React from 'react';
 import { ChevronsUp } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
-import { fromBase64, toBuffer } from '@/app/shared/lib/bytes';
+import { toBuffer } from '@/app/shared/lib/bytes';
 import { Logger } from '@/app/shared/lib/logger';
 import { BaseTable } from '@/app/shared/ui/Table';
 
@@ -157,6 +158,8 @@ export function ProgramLogsCardBody({
     );
 }
 
+const BASE58_ENCODER = getBase58Encoder();
+
 function ProgramLogRow({
     badgeColor,
     cluster,
@@ -178,7 +181,12 @@ function ProgramLogRow({
 }) {
     const pathname = usePathname();
     const anchorPath = useClusterPath({ pathname: `${pathname}#${getInstructionCardScrollAnchorId([index + 1])}` });
-    const { program: anchorProgram } = useAnchorProgram(programId.toString(), url, cluster);
+    const { program: anchorProgram } = useAnchorProgram({
+        cluster,
+        programAddress: programId.toString(),
+        select: getAnchorIdls,
+        url,
+    });
 
     // Try to get instruction name from IDL if available
     let instructionName = 'Instruction';
@@ -232,7 +240,7 @@ function ProgramLogRow({
                 });
 
                 txInstruction = new TransactionInstruction({
-                    data: toBuffer(fromBase64(instruction.data)),
+                    data: toBuffer(new Uint8Array(BASE58_ENCODER.encode(instruction.data))),
                     keys,
                     programId,
                 });

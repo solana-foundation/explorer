@@ -1,33 +1,26 @@
-import { is, string } from 'superstruct';
+import { type Address, isAddress } from '@solana/kit';
 
-import { invariant } from '@/app/shared/lib/invariant';
+export type IdlDeclaredAddress = { kind: 'none' } | { kind: 'malformed' } | { address: Address; kind: 'address' };
 
-const Address = string();
-
-function isString(a: unknown): a is string {
-    return is(a, Address);
+export function getIdlDeclaredAddress(idl: unknown): IdlDeclaredAddress {
+    const root = idl as {
+        program?: { publicKey?: unknown };
+        address?: unknown;
+        metadata?: { address?: unknown };
+    };
+    const values = isCodamaRoot(idl) ? [root.program?.publicKey] : [root?.address, root?.metadata?.address];
+    const value = values.find(isDeclared);
+    if (value === undefined) return { kind: 'none' };
+    return typeof value === 'string' && isAddress(value) ? { address: value, kind: 'address' } : { kind: 'malformed' };
 }
 
-/**
- * Extracts single address from IDL as it might be on the root level or inside the metadata
- *
- * @param idlData
- * @returns
- */
-export function extractProgramAddressFromIdlData(idlData: NonNullable<any>, fallbackAddress?: string) {
-    const { address, metadata } = idlData;
+export function isCodamaRoot(idl: unknown): boolean {
+    const root = idl as { kind?: unknown; standard?: unknown } | null | undefined;
+    return root?.kind === 'rootNode' || root?.standard === 'codama';
+}
 
-    const result = (metadata?.address ?? address) || fallbackAddress;
-    invariant(result, 'IDL does not contain address');
-
-    if (isString(result)) return result;
-
-    if (!fallbackAddress) {
-        invariant(fallbackAddress, 'IDL requires address');
-    }
-
-    // use fallback value as some IDLs do not include address
-    return fallbackAddress;
+function isDeclared(value: unknown): boolean {
+    return value !== undefined && value !== null && value !== '';
 }
 
 /**

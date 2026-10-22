@@ -1,8 +1,5 @@
-import type { Idl } from '@coral-xyz/anchor';
-import { PublicKey } from '@solana/web3.js';
-import type { RootNode } from 'codama';
-
 import { type SupportedIdl } from '../lib/types';
+import { getIdlDeclaredAddress } from '../lib/utils';
 import { getIdlSpecType as getSerdeIdlSpecType } from './converters/convert-legacy-idl';
 import { getIdlVersion, MODERN_ANCHOR_IDL_WILDCARD } from './idl-version';
 
@@ -36,20 +33,9 @@ export function isInteractiveIdlSupported(idl: SupportedIdl): boolean {
     return false;
 }
 
-/**
- * Checks if the IDL's embedded program address mismatches the given program address.
- * Supports both Anchor IDLs (root-level `address`) and Codama IDLs (`program.publicKey`).
- */
 export function isIdlProgramIdMismatch(idl: SupportedIdl, programAddress: string): boolean {
-    const spec = getSerdeIdlSpecType(idl);
-    const idlAddress = spec === 'codama' ? (idl as RootNode).program.publicKey : (idl as Idl).address;
-    if (!idlAddress) return false;
-
-    try {
-        const idlKey = new PublicKey(idlAddress);
-        const programKey = new PublicKey(programAddress);
-        return !idlKey.equals(programKey);
-    } catch {
-        return true; // unparseable address → treat as mismatch
-    }
+    const declared = getIdlDeclaredAddress(idl);
+    if (declared.kind === 'none') return false;
+    if (declared.kind === 'malformed') return true;
+    return declared.address !== programAddress;
 }

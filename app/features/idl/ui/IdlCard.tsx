@@ -19,7 +19,6 @@ import {
     getIdlProgramVersion,
     IdlVariant,
     isIdlProgramIdMismatch,
-    type SupportedIdl,
     useProgramIdls,
 } from '@entities/idl';
 import { useCluster } from '@providers/cluster';
@@ -39,11 +38,7 @@ import { IdlSection } from './IdlSection';
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const network = clusterSlug(cluster);
-    const { anchorIdl, anchorIdlAddress, programMetadataIdl, programMetadataIdlAddress, isLoading } = useProgramIdls(
-        programId,
-        url,
-        cluster,
-    );
+    const { idls } = useProgramIdls(programId, url, cluster);
     const [searchStr, setSearchStr] = useState<string>('');
     const [isOrquestraDialogOpen, setIsOrquestraDialogOpen] = useState(false);
 
@@ -121,15 +116,12 @@ export function IdlCard({ programId }: { programId: string }) {
         </div>
     );
 
-    // Single IDL view: show the program-metadata (PMP) IDL, falling back to the Anchor source only
-    // when no PMP IDL exists.
-    const idl: SupportedIdl | undefined = programMetadataIdl ?? anchorIdl;
-    const isFallback = !programMetadataIdl && Boolean(anchorIdl);
+    if (!idls) {
+        return <LoadingCard message="Loading program IDL" />;
+    }
 
-    if (!idl) {
-        if (isLoading) {
-            return <LoadingCard message="Loading program IDL" />;
-        }
+    const selected = idls.at(0);
+    if (!selected) {
         return (
             <Card ui="dashkit">
                 <CardHeader ui="dashkit">
@@ -175,6 +167,8 @@ export function IdlCard({ programId }: { programId: string }) {
         );
     }
 
+    const { idl, source } = selected;
+    const isFallback = source === IdlVariant.Anchor;
     const isMismatch = isIdlProgramIdMismatch(idl, programId);
     // Single badge: the IDL standard with its version(s) — `Codama (version 1.5.1)` /
     // `Anchor 0.30.1 (version 0.1.0)` / `Anchor (legacy)`. The program's own semver lives in the info
@@ -206,7 +200,7 @@ export function IdlCard({ programId }: { programId: string }) {
 
     // Metadata shown directly under the badge: the storage account the displayed IDL was read from,
     // which source it came from, and the program's own version (distinct from the badge's spec label).
-    const idlAddress = isFallback ? anchorIdlAddress : programMetadataIdlAddress;
+    const { idlAddress } = selected;
     const idlSourceLabel = isFallback ? 'Anchor' : 'PMP';
     const programVersion = getIdlProgramVersion(idl);
     // Codama / modern Anchor names only; legacy Anchor top-level name is intentionally not shown.
@@ -260,7 +254,7 @@ export function IdlCard({ programId }: { programId: string }) {
                         badge={badge}
                         info={info}
                         idl={idl}
-                        idlSource={isFallback ? IdlVariant.Anchor : IdlVariant.ProgramMetadata}
+                        idlSource={source}
                         network={network}
                         programId={programId}
                         searchStr={searchStr}

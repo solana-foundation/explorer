@@ -9,9 +9,11 @@ const programCtor = vi.fn();
 
 vi.mock('@codama/dynamic-parsers', () => ({ parseInstruction: (...a: unknown[]) => parseInstruction(...a) }));
 vi.mock('@codama/nodes-from-anchor', () => ({ rootNodeFromAnchor: (...a: unknown[]) => rootNodeFromAnchor(...a) }));
-vi.mock('@entities/idl', () => ({
+vi.mock('@entities/idl', async () => ({
     formatSerdeIdl: '',
     getFormattedIdl: (_fmt: unknown, idl: unknown) => idl,
+    getIdlDeclaredAddress: (await vi.importActual<typeof import('@entities/idl/lib/utils')>('@entities/idl/lib/utils'))
+        .getIdlDeclaredAddress,
     getProvider: () => ({}),
 }));
 vi.mock('@coral-xyz/anchor', () => ({
@@ -43,7 +45,7 @@ const ix = new TransactionInstruction({
 });
 const anchorIdl = { accounts: [], address: ix.programId.toBase58(), instructions: [{ name: 'foo' }] };
 // A Codama-native root node (as a PMP IDL is) — routed through Codama, never the Anchor Program.
-const codamaIdl = { kind: 'rootNode', program: { publicKey: ix.programId.toBase58() } };
+const codamaIdl = { kind: 'rootNode', program: { publicKey: ix.programId.toBase58() }, standard: 'codama' };
 
 describe('decodeInstructionWithIdl', () => {
     beforeEach(() => {
@@ -85,12 +87,15 @@ describe('decodeInstructionWithIdl', () => {
         expect(decodeInstructionWithIdl(ix, anchorIdl, 'http://localhost').kind).toBe('unknown');
     });
 
-    it('should panic and throw when the IDL program does not match the instruction program', () => {
+    it.each([
+        ['names another program', PublicKey.unique().toBase58()],
+        ['is malformed', {}],
+    ])('should panic and throw when the IDL program address %s', (_, address) => {
         const panic = vi.spyOn(Logger, 'panic').mockImplementation(() => {});
         // `vi.spyOn` can hand back a spy already installed by another test/file; clear it so the count
         // below reflects only this decode, not any inherited calls.
         panic.mockClear();
-        const mismatchedIdl = { ...anchorIdl, address: PublicKey.unique().toBase58() };
+        const mismatchedIdl = { ...anchorIdl, address };
 
         expect(() => decodeInstructionWithIdl(ix, mismatchedIdl, 'http://localhost')).toThrow('does not match');
         expect(panic).toHaveBeenCalledOnce();

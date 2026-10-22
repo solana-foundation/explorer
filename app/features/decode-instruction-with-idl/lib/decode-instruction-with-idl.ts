@@ -1,7 +1,7 @@
 import { parseInstruction } from '@codama/dynamic-parsers';
 import { rootNodeFromAnchor } from '@codama/nodes-from-anchor';
 import { Idl, Program } from '@coral-xyz/anchor';
-import { formatSerdeIdl, getFormattedIdl, getProvider } from '@entities/idl';
+import { formatSerdeIdl, getFormattedIdl, getIdlDeclaredAddress, getProvider } from '@entities/idl';
 import { TransactionInstruction } from '@solana/web3.js';
 import { type RootNode } from 'codama';
 
@@ -25,21 +25,16 @@ export type IdlInstructionDecode =
 // `decode-instruction-*` slices, which know one program statically, this decodes any program given its
 // (Codama or Anchor) IDL. Uses web3.js because the Anchor fallback (`Program`/`BorshInstructionCoder`)
 // is web3.js-native.
-// Codama root nodes carry the program id at `program.publicKey`; Anchor IDLs at `address` (0.30+) or `metadata.address`.
-function idlProgramAddress(idl: unknown): string | undefined {
-    const root = idl as { program?: { publicKey?: string }; address?: string; metadata?: { address?: string } };
-    return root?.program?.publicKey ?? root?.address ?? root?.metadata?.address;
-}
-
 export function decodeInstructionWithIdl(ix: TransactionInstruction, idl: unknown, url: string): IdlInstructionDecode {
     const kitIx = toKitInstruction(ix);
 
     // A resolved IDL whose declared program differs from the instruction's is a wiring bug (wrong IDL
     // routed to this instruction) — fail loud rather than mis-decode against the wrong interface.
-    const declaredProgram = idlProgramAddress(idl);
-    if (declaredProgram && declaredProgram !== kitIx.programAddress) {
+    const declared = getIdlDeclaredAddress(idl);
+    const declaredProgram = declared.kind === 'address' ? declared.address : undefined;
+    if (declared.kind === 'malformed' || (declaredProgram && declaredProgram !== kitIx.programAddress)) {
         const error = new Error(
-            `[decode-instruction-with-idl] IDL program ${declaredProgram} does not match instruction program ${kitIx.programAddress}`,
+            `[decode-instruction-with-idl] IDL program ${declaredProgram ?? '(malformed)'} does not match instruction program ${kitIx.programAddress}`,
         );
         Logger.panic(error, { sentryExtras: { declaredProgram, programAddress: kitIx.programAddress } });
         throw error;

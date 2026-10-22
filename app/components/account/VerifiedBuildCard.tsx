@@ -31,7 +31,7 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
 }
 
 function DeployedProgramVerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAccountData; pubkey: PublicKey }) {
-    // suspense:false -- the chain mixes with a non-suspense SWR (useProgramIdls via useAnchorProgram); the mixed path triggers hook-order warnings under HMR.
+    // suspense:false -- the chain mixes with a non-suspense SWR (useProgramIdls); the mixed path triggers hook-order warnings under HMR.
     const { data: registryInfo, isLoading } = useVerifiedProgram({
         options: { suspense: false },
         programAuthority: data.programData?.authority ? new PublicKey(data.programData.authority) : null,
