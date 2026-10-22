@@ -6,13 +6,9 @@ import anchor030devi from '../../mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN2
 import anchorLegacy094ShankWave from '../../mocks/anchor/anchor-legacy-0.9.4-shank-waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF.json';
 import anchor029 from '../../mocks/anchor/reference-0.29.json';
 import anchor030 from '../../mocks/anchor/reference-0.30.json';
-import { formatReferenceSerdeIdl } from '../formatters/format-reference-serde-idl';
 import { formatSerdeIdl } from '../formatters/format-serde-idl';
 
-describe.each([
-    ['formatSerdeIdl', formatSerdeIdl],
-    ['formatReferenceSerdeIdl', formatReferenceSerdeIdl],
-])('Implementation for `%s`', (_name, formatIdl) => {
+describe.each([['formatSerdeIdl', formatSerdeIdl]])('Implementation for `%s`', (_name, formatIdl) => {
     it('should work for devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH program', async () => {
         let idl: AnchorIdl;
         const address = extractProgramAddressFromIdlData(anchor029Devi);
@@ -107,16 +103,6 @@ describe('0.9.4 waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF program', () => {
                 getFieldLengths(['accounts', 'constants', 'errors', 'events', 'instructions', 'types'], idl),
             );
         }).not.toThrowError();
-    });
-
-    it('should fail for `formatReferenceSerdeIdl` as it contains unsuported types', async () => {
-        const address = extractProgramAddressFromIdlData(
-            anchorLegacy094ShankWave,
-            'waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF',
-        );
-        expect(() => formatReferenceSerdeIdl(anchorLegacy094ShankWave, address)).toThrowError(
-            new Error('Unsupported type: {"tuple":["u64","u64"]}'),
-        );
     });
 });
 
