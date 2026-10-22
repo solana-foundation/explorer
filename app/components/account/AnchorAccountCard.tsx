@@ -59,7 +59,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
     if (!idls) return <LoadingCard message="Loading program IDL" />;
     if (getAnchorIdls(idls).length === 0) return <ErrorCard text="No Anchor IDL found" />;
     if (!idl || !decodedAccountData || !accountDef) {
-        return <ErrorCard text="Failed to decode account data according to the public Anchor interface" />;
+        return <ErrorCard text="Failed to decode account data according to the Anchor interface" />;
     }
 
     return (

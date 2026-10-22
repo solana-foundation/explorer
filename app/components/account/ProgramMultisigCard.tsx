@@ -36,6 +36,7 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
     const squadsAddress = squadMapInfo?.version === 'v3' ? SQUADS_V3_ADDRESS : SQUADS_V4_ADDRESS;
     const { program: anchorProgram } = useAnchorProgram({
         cluster,
+        onChainOnly: true,
         programAddress: squadsAddress,
         select: getAnchorAccountIdls,
         url,

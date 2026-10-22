@@ -1,6 +1,7 @@
 'use client';
 
 import { shouldUseDirectRpc } from '@entities/cluster/@x/idl';
+import { useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
@@ -9,26 +10,33 @@ import { type Cluster } from '@/app/utils/cluster';
 
 import { NON_ANCHOR_PROGRAMS } from '../api/config';
 import { fetchProgramIdls } from '../api/fetch-program-idls';
+import { customIdlStoreAtom } from './custom-idl/custom-idl-store';
+import { type CustomIdlRecord } from './custom-idl/types';
 import { buildProgramIdlNames, type InstructionNameResolver, type ProgramIdlNames } from './instruction-name-table';
+import { getOnChainIdls, getSelectedIdls } from './sourced-idl';
 
 export type { InstructionNameResolver, ProgramIdlNames };
 
 /**
  * Per-program names built from each program's IDL: a display name plus an instruction-name resolver
  * (matched by discriminator, no Borsh decode). One SWR entry covers the whole set so the caller can
- * resolve names without any per-row data hooks — the list/line components stay pure. Builtins and
- * custom/localhost clusters resolve to nothing.
+ * resolve names without any per-row data hooks — the list/line components stay pure. Names follow each
+ * program's selected IDLs, so a program with a selected custom IDL is named without a fetch, on every
+ * cluster. Otherwise builtins and custom/localhost clusters resolve to nothing.
  *
  * The last source `transaction-data` tries and the only one that fetches, so an empty map means "no
  * IDL", never "nothing is named yet".
  */
 export function useProgramIdlNames(programIds: string[], cluster: Cluster, url: string): Map<string, ProgramIdlNames> {
+    const store = useAtomValue(customIdlStoreAtom);
+    const records = store.status === 'ready' ? store.records : NO_RECORDS;
+    const uniqueIds = useMemo(() => [...new Set(programIds)], [programIds]);
     const resolvable = useMemo(
         () =>
-            shouldUseDirectRpc(cluster, url)
+            store.status === 'loading' || shouldUseDirectRpc(cluster, url)
                 ? []
-                : [...new Set(programIds)].filter(id => !NON_ANCHOR_PROGRAMS.has(id)).sort(),
-        [programIds, cluster, url],
+                : uniqueIds.filter(id => !NON_ANCHOR_PROGRAMS.has(id) && records.get(id)?.selected !== 'custom').sort(),
+        [uniqueIds, records, store.status, cluster, url],
     );
 
     // Keyed on the whole resolvable set, not per program. In practice resolvable is almost always a
@@ -67,11 +75,17 @@ export function useProgramIdlNames(programIds: string[], cluster: Cluster, url: 
 
     return useMemo(() => {
         const resolvers = new Map<string, ProgramIdlNames>();
-        for (const [id, idls] of data ?? []) {
-            // Program-metadata IDL is preferred; Anchor only names what program-metadata can't.
-            const names = buildProgramIdlNames([idls.programMetadataIdl, idls.anchorIdl]);
+        if (store.status === 'loading') return resolvers;
+        const onChainById = new Map(data ?? []);
+        for (const id of uniqueIds) {
+            const onChain = onChainById.get(id);
+            const idls = getSelectedIdls(onChain ? getOnChainIdls(onChain) : [], records.get(id));
+            // Earlier IDLs take precedence; a later one only names what the earlier ones can't.
+            const names = buildProgramIdlNames(idls.map(({ idl }) => idl));
             if (names) resolvers.set(id, names);
         }
         return resolvers;
-    }, [data]);
+    }, [data, records, store.status, uniqueIds]);
 }
+
+const NO_RECORDS: ReadonlyMap<string, CustomIdlRecord> = new Map();

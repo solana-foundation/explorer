@@ -1,10 +1,14 @@
+import anchorModernIdl from '@entities/idl/mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import { renderHook } from '@testing-library/react';
+import { Provider as JotaiProvider } from 'jotai';
+import { type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { swrWrapper, waitForHook } from '@/app/__tests__/swr-hook';
 import { Logger } from '@/app/shared/lib/logger';
 import { Cluster } from '@/app/utils/cluster';
 
+import { customIdlStorage } from '../../api/custom-idl-storage';
 import { useProgramIdlNames } from '../use-program-idl-names';
 
 const mocks = vi.hoisted(() => ({ fetch: vi.fn() }));
@@ -14,8 +18,10 @@ const VOTING = 'AXcxp15oz1L4YYtqZo6Qt6EkUj1jtLR6wXYqaJvn4oye';
 const SECOND = 'ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S';
 const SYSTEM = '11111111111111111111111111111111';
 const COMPUTE_BUDGET = 'ComputeBudget111111111111111111111111111111';
+const DEVI = anchorModernIdl.address;
 const VOTE = Uint8Array.from([227, 110, 155, 23, 136, 126, 172, 25]);
 const FOO = Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8]);
+const CREATE_AMM_CONFIG = Uint8Array.from([137, 52, 237, 212, 215, 117, 108, 104]);
 
 const IDL_BY_PROGRAM: Record<string, unknown> = {
     [SECOND]: {
@@ -28,10 +34,19 @@ const IDL_BY_PROGRAM: Record<string, unknown> = {
     },
 };
 
+const SwrWrapper = swrWrapper({ dedupingInterval: 0, shouldRetryOnError: false });
+
+// A fresh Jotai store per render, so one test's custom IDLs never reach the next.
+function wrapper({ children }: { children: ReactNode }) {
+    return (
+        <JotaiProvider>
+            <SwrWrapper>{children}</SwrWrapper>
+        </JotaiProvider>
+    );
+}
+
 function render(programIds: string[], cluster = Cluster.Devnet, url = 'https://api.devnet.solana.com') {
-    return renderHook(() => useProgramIdlNames(programIds, cluster, url), {
-        wrapper: swrWrapper({ dedupingInterval: 0, shouldRetryOnError: false }),
-    });
+    return renderHook(() => useProgramIdlNames(programIds, cluster, url), { wrapper });
 }
 
 describe('useProgramIdlNames', () => {
@@ -115,17 +130,62 @@ describe('useProgramIdlNames', () => {
     });
 
     // Compute Budget reaches this hook on nearly every transaction, so its exclusion is load-bearing.
+    // The store read delays the fetch past the first render, so each test waits for a name before it checks the fetch.
     it('should exclude builtin programs and not fetch them', async () => {
-        const { result } = render([SYSTEM, COMPUTE_BUDGET]);
+        const { result } = render([SYSTEM, COMPUTE_BUDGET, VOTING]);
 
-        await waitForHook(() => expect(result.current.size).toBe(0));
-        expect(mocks.fetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/idl-latest'));
+        await waitForHook(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
+        const fetched = mocks.fetch.mock.calls.flat().join(' ');
+        expect(fetched).not.toContain(SYSTEM);
+        expect(fetched).not.toContain(COMPUTE_BUDGET);
     });
 
     it('should not fetch on a custom/localhost cluster the server route cannot reach', async () => {
-        const { result } = render([VOTING], Cluster.Custom, 'http://localhost:8899');
+        await storeCustomIdl(DEVI, anchorModernIdl, 'custom');
 
-        await waitForHook(() => expect(result.current.size).toBe(0));
+        const { result } = render([DEVI, VOTING], Cluster.Custom, 'http://localhost:8899');
+
+        await waitForHook(() =>
+            expect(result.current.get(DEVI)?.resolveInstructionName?.(CREATE_AMM_CONFIG)).toBe('Create Amm Config'),
+        );
         expect(mocks.fetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/idl-latest'));
     });
+
+    describe('custom IDL', () => {
+        it('should not fetch the on-chain IDLs of a program with a selected custom IDL', async () => {
+            await storeCustomIdl(DEVI, anchorModernIdl, 'custom');
+
+            const { result } = render([DEVI, VOTING]);
+
+            await waitForHook(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
+            expect(result.current.get(DEVI)?.resolveInstructionName?.(CREATE_AMM_CONFIG)).toBe('Create Amm Config');
+            expect(mocks.fetch.mock.calls.flat().join(' ')).not.toContain(DEVI);
+        });
+
+        it('should name a program from its on-chain IDLs when On-chain is selected', async () => {
+            await storeCustomIdl(VOTING, { ...anchorModernIdl, address: VOTING }, 'onChain');
+
+            const { result } = render([VOTING]);
+
+            await waitForHook(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
+            expect(result.current.get(VOTING)?.resolveInstructionName?.(CREATE_AMM_CONFIG)).toBeUndefined();
+        });
+
+        it('should name a program from its on-chain IDLs when the browser blocks storage', async () => {
+            vi.spyOn(indexedDB, 'open').mockImplementation(() => {
+                throw new DOMException('blocked', 'SecurityError');
+            });
+
+            const { result } = render([VOTING]);
+
+            await waitForHook(() => expect(result.current.get(VOTING)?.resolveInstructionName?.(VOTE)).toBe('Vote'));
+        });
+    });
 });
+
+function storeCustomIdl(address: string, idl: object, selected: string) {
+    return customIdlStorage.put({
+        programAddress: address,
+        value: JSON.stringify({ idl, origin: { kind: 'pasted' }, selected }),
+    });
+}

@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useVerifiedProgram } from '../verified-builds';
 
-const idlState: ProgramIdls = { idls: [] };
+const idlState: ProgramIdls = { idls: [], onChainIdls: [], stored: { record: undefined, status: 'ready' } };
 
 // A cluster without an OSEC registry skips the registry fetch.
 vi.mock('@providers/cluster', async importOriginal => ({
@@ -26,7 +26,7 @@ describe('useVerifiedProgram', () => {
     });
 
     it('should build the Program from the IDL in the Anchor IDL account over the PMP IDL', () => {
-        idlState.idls = [
+        setOnChainIdls([
             {
                 idl: namedIdl('pmp_program'),
                 idlAddress: undefined,
@@ -34,7 +34,7 @@ describe('useVerifiedProgram', () => {
                 standard: 'Anchor',
             },
             { idl: namedIdl('anchor_program'), idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
-        ];
+        ]);
 
         renderHook(() => useVerifiedProgram({ programAuthority: null, programId: PublicKey.default }));
 
@@ -44,20 +44,40 @@ describe('useVerifiedProgram', () => {
     });
 
     it('should build no Program when the only Anchor IDL is the PMP IDL', () => {
-        idlState.idls = [
+        setOnChainIdls([
             {
                 idl: namedIdl('pmp_program'),
                 idlAddress: undefined,
                 source: IdlVariant.ProgramMetadata,
                 standard: 'Anchor',
             },
-        ];
+        ]);
 
         renderHook(() => useVerifiedProgram({ programAuthority: null, programId: PublicKey.default }));
 
         expect(vi.mocked(useAnchorProgram).mock.results.at(-1)?.value?.program).toBeNull();
     });
+
+    it('should build the Program from the on-chain IDL when a custom IDL is selected for the program', () => {
+        idlState.idls = [
+            { idl: namedIdl('custom_program'), origin: { kind: 'pasted' }, source: 'custom', standard: 'Anchor' },
+        ];
+        idlState.onChainIdls = [
+            { idl: namedIdl('anchor_program'), idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
+        ];
+
+        renderHook(() => useVerifiedProgram({ programAuthority: null, programId: PublicKey.default }));
+
+        expect(vi.mocked(useAnchorProgram).mock.results.at(-1)?.value?.program?.idl.metadata.name).toBe(
+            'anchorProgram',
+        );
+    });
 });
+
+function setOnChainIdls(idls: NonNullable<ProgramIdls['onChainIdls']>) {
+    idlState.idls = idls;
+    idlState.onChainIdls = idls;
+}
 
 function namedIdl(name: string): AnchorIdl {
     return { ...anchorModernIdl, metadata: { ...anchorModernIdl.metadata, name } } as unknown as AnchorIdl;

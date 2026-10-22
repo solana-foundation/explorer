@@ -1,4 +1,5 @@
 import { gen } from '@__fixtures__/gen';
+import { IdlVariant } from '@entities/idl';
 import codamaIdlMock from '@entities/idl/mocks/codama/codama-1.0.0-ProgM6JCCvbYkfKqJYHePx4xxSUSqJp7rh8Lyv7nk7S.json';
 import convertedFromAnchorIdlMock from '@entities/idl/mocks/codama/whirlpool@0.30.1.json';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -29,6 +30,7 @@ export const DisplayCodamaIdl: Story = {
     args: {
         idl: codamaIdlMock as unknown as RootNode,
         programId: gen.address(1),
+        source: IdlVariant.ProgramMetadata,
     },
 };
 
@@ -36,5 +38,6 @@ export const DisplayConvertedAnchorIdl: Story = {
     args: {
         idl: convertedFromAnchorIdlMock as unknown as RootNode,
         programId: gen.address(2),
+        source: IdlVariant.ProgramMetadata,
     },
 };

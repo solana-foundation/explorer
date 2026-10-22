@@ -14,16 +14,19 @@ import { getProvider } from './anchor-provider';
 
 export function useAnchorProgram({
     cluster,
+    onChainOnly = false,
     programAddress,
     select,
     url,
 }: {
     cluster: Cluster;
+    onChainOnly?: boolean;
     programAddress: string;
     select: (idls: readonly SourcedIdl[]) => readonly AnchorIdl[];
     url: string;
 }): { program: Program | null; isLoading: boolean } {
-    const { idls } = useProgramIdls(programAddress, url, cluster);
+    const programIdls = useProgramIdls(programAddress, url, cluster);
+    const idls = onChainOnly ? programIdls.onChainIdls : programIdls.idls;
     const program = useMemo(() => {
         if (!idls) return null;
 
