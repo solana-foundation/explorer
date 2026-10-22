@@ -54,7 +54,6 @@ export function FeedbackPopup({
             panelRef.current = node;
             if (!node) return;
             closingRef.current = false;
-            pinToCentre(node);
             if (skipMotion()) return;
             playPop(
                 { content: contentRef.current, overlay: overlayRef.current, panel: node },
@@ -146,7 +145,7 @@ export function FeedbackPopup({
                     className="fixed inset-x-0 -top-[50vh] z-50 h-[200vh] bg-black/70"
                 />
                 <DialogPrimitive.Content
-                    className="fixed inset-0 z-50 flex items-start justify-center px-4 py-24 outline-none"
+                    className="fixed inset-0 z-50 flex items-center justify-center px-4 py-24 outline-none"
                     onClick={event => {
                         if (endSentRef.current || event.target === event.currentTarget) close();
                     }}
@@ -223,17 +222,6 @@ export function FeedbackPopup({
 const POP_MS = 300;
 const POP_EASE = 'cubic-bezier(0.2, 0.9, 0.1, 1)';
 const FALLBACK_MS = 160;
-
-function pinToCentre(panel: HTMLElement) {
-    const container = panel.parentElement;
-    if (!container) return;
-    panel.style.marginTop = '0px';
-    const styles = getComputedStyle(container);
-    const room = container.clientHeight - parseFloat(styles.paddingTop) - parseFloat(styles.paddingBottom);
-    const top = Math.max(0, (room - panel.offsetHeight) / 2);
-    panel.style.marginTop = `${top}px`;
-    panel.style.maxHeight = `calc(100% - ${top}px)`;
-}
 
 function originFrame(origin: HTMLElement | null, panel: HTMLElement): Keyframe | undefined {
     const transform = morphTransform(origin, panel);
