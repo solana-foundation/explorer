@@ -12,15 +12,14 @@ import { vi } from 'vitest';
 import { renderWithProviders } from '@/app/__tests__/card-harness';
 import * as stubs from '@/app/__tests__/mock-stubs';
 import { decompileStubInstruction } from '@/app/__tests__/mocks';
-import { InspectorInstructionCard } from '@/app/components/common/InspectorInstructionCard';
+import { INSPECTOR_SURFACE } from '@/app/components/inspector/inspector-surface';
 
 import { AssociatedTokenDetailsCard } from '../AssociatedTokenDetailsCard';
 
 vi.mock('next/navigation', () => import('@/app/__tests__/next-navigation'));
 
 const dispatcher = createInstructionParserDispatcher([associatedTokenInstructionParser]);
-const BASE_SURFACE: InstructionSurface = { Shell: BaseInstructionCard, result: { err: null } };
-const INSPECTOR_SURFACE: InstructionSurface = { Shell: InspectorInstructionCard, result: { err: null } };
+const BASE_SURFACE: InstructionSurface = { Shell: BaseInstructionCard, result: { err: null }, signature: undefined };
 
 const CASES = [
     {

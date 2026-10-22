@@ -12,6 +12,7 @@ vi.mock('@/app/components/common/Address', () => ({ Address: () => <div /> }));
 const STUB_SURFACE: InstructionSurface = {
     Shell: () => undefined,
     result: { err: null },
+    signature: undefined,
 };
 
 describe('InstructionFields', () => {

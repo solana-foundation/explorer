@@ -2,7 +2,6 @@
 
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { SignatureContext } from '@components/instruction/SignatureContext';
 import { buildExplorerLink, useExplorerLink } from '@entities/cluster';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -202,31 +201,29 @@ function ReceiptContent({ receipt, signature, status, transactionPath }: Receipt
     }, [receipt, signature, transactionPath, usdValue, cluster]);
 
     return (
-        <SignatureContext.Provider value={signature}>
-            <ReceiptView
-                data={{
-                    ...receipt,
-                    confirmationStatus: status.data?.info?.confirmationStatus,
-                    logoURI,
-                    receiver: { ...receipt.receiver, domain: receiverDomain },
-                    receiverHref: receiverLink.link,
-                    sender: { ...receipt.sender, domain: senderDomain },
-                    senderHref: senderLink.link,
-                    tokenHref: tokenLink.link,
-                    transfers: receipt.transfers?.map(t => ({
-                        amount: t.amount,
-                        receiver: t.receiver,
-                        receiverHref: makeAddressHref(t.receiver.address),
-                        sender: t.sender,
-                        senderHref: makeAddressHref(t.sender.address),
-                    })),
-                }}
-                downloadCsv={downloadCsv}
-                downloadPdf={downloadPdf}
-                isPriceLoading={isPriceLoading}
-                signature={signature}
-                transactionPath={transactionPath}
-            />
-        </SignatureContext.Provider>
+        <ReceiptView
+            data={{
+                ...receipt,
+                confirmationStatus: status.data?.info?.confirmationStatus,
+                logoURI,
+                receiver: { ...receipt.receiver, domain: receiverDomain },
+                receiverHref: receiverLink.link,
+                sender: { ...receipt.sender, domain: senderDomain },
+                senderHref: senderLink.link,
+                tokenHref: tokenLink.link,
+                transfers: receipt.transfers?.map(t => ({
+                    amount: t.amount,
+                    receiver: t.receiver,
+                    receiverHref: makeAddressHref(t.receiver.address),
+                    sender: t.sender,
+                    senderHref: makeAddressHref(t.sender.address),
+                })),
+            }}
+            downloadCsv={downloadCsv}
+            downloadPdf={downloadPdf}
+            isPriceLoading={isPriceLoading}
+            signature={signature}
+            transactionPath={transactionPath}
+        />
     );
 }

@@ -2,7 +2,6 @@
 
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { SignatureContext } from '@components/instruction/SignatureContext';
 import { CUProfilingSection } from '@features/cu-profiling';
 import { Receipt } from '@features/receipt';
 import { isReceiptEnabled } from '@features/receipt';
@@ -94,12 +93,12 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
                 ) : clusterStatus === ClusterStatus.Failure ? (
                     <ErrorCard text="RPC is not responding. Please change your RPC url and try again." />
                 ) : (
-                    <SignatureContext.Provider value={signature}>
+                    <>
                         <SummaryCard signature={signature} autoRefresh={autoRefresh} />
                         <Suspense fallback={<LoadingCard message="Loading transaction details" />}>
                             <DetailsSection signature={signature} />
                         </Suspense>
-                    </SignatureContext.Provider>
+                    </>
                 )}
             </PageSections>
         </PageLayout>

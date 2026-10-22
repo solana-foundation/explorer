@@ -1,4 +1,6 @@
 import { gen } from '@__fixtures__/gen';
+import { INSPECTOR_SURFACE } from '@components/inspector/inspector-surface';
+import { type InstructionSurface, InstructionSurfaceProvider } from '@entities/instruction-card';
 import { FetchStatus } from '@providers/cache';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
@@ -7,7 +9,6 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InstructionCard } from '../InstructionCard';
-import { SignatureContext } from '../SignatureContext';
 
 const SIGNATURE = gen.signature(1);
 const PROGRAM_ID = new PublicKey(gen.address(1));
@@ -40,13 +41,16 @@ vi.mock('@components/common/BaseInstructionCard', () => ({
     ),
 }));
 
-function renderCard(props: Partial<React.ComponentProps<typeof InstructionCard>> = {}) {
+function renderCard({
+    surface = { Shell: InstructionCard, result: { err: null }, signature: SIGNATURE },
+    ...props
+}: Partial<React.ComponentProps<typeof InstructionCard>> & { surface?: InstructionSurface } = {}) {
     const instruction = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PROGRAM_ID });
 
     return render(
-        <SignatureContext.Provider value={SIGNATURE}>
+        <InstructionSurfaceProvider surface={surface}>
             <InstructionCard title="Transfer" result={{ err: null }} index={0} ix={instruction} {...props} />
-        </SignatureContext.Provider>,
+        </InstructionSurfaceProvider>,
     );
 }
 
@@ -114,6 +118,32 @@ describe('InstructionCard', () => {
         await userEvent.click(screen.getByRole('button'));
 
         expect(fetchRaw).toHaveBeenCalledWith(SIGNATURE);
+    });
+
+    it('should not request raw data in the inspector', async () => {
+        renderCard({ surface: INSPECTOR_SURFACE });
+        await userEvent.click(screen.getByRole('button'));
+
+        expect(screen.getByRole('button').dataset.canRequest).toBe('false');
+        expect(fetchRaw).not.toHaveBeenCalled();
+    });
+
+    it('should throw outside an instruction surface', () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const instruction = new TransactionInstruction({ data: Buffer.from([1]), keys: [], programId: PROGRAM_ID });
+
+        expect(() =>
+            render(<InstructionCard title="Transfer" result={{ err: null }} index={0} ix={instruction} />),
+        ).toThrow('InstructionSurfaceProvider');
+        consoleError.mockRestore();
+    });
+
+    it('should reject a surface that omits the signature', () => {
+        // An unused `@ts-expect-error` fails tsc, so this breaks if the key turns optional.
+        // @ts-expect-error A surface states its signature, even as `undefined`.
+        const surface: InstructionSurface = { Shell: InstructionCard, result: { err: null } };
+
+        expect(surface.signature).toBeUndefined();
     });
 
     it('should not request raw data for an instruction supplied by the inspector', () => {
