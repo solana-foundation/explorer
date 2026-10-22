@@ -4,32 +4,37 @@ import { Program } from '@coral-xyz/anchor';
 import { useMemo } from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
+import { type Cluster } from '@/app/utils/cluster';
 
 import { type AnchorIdl } from '../../lib/types';
 import { formatSerdeIdl, getFormattedIdl } from '../formatters/format';
-import { type SourcedIdl } from '../idl-candidates';
+import { type SourcedIdl } from '../sourced-idl';
+import { useProgramIdls } from '../use-program-idls';
 import { getProvider } from './anchor-provider';
 
 export function useAnchorProgram({
-    candidates,
+    cluster,
     programAddress,
     select,
     url,
 }: {
-    candidates: readonly SourcedIdl[] | undefined;
+    cluster: Cluster;
     programAddress: string;
-    select: (candidates: readonly SourcedIdl[]) => readonly AnchorIdl[];
+    select: (idls: readonly SourcedIdl[]) => readonly AnchorIdl[];
     url: string;
-}): Program | null {
-    return useMemo(() => {
-        if (!candidates) return null;
+}): { program: Program | null; isLoading: boolean } {
+    const { idls } = useProgramIdls(programAddress, url, cluster);
+    const program = useMemo(() => {
+        if (!idls) return null;
 
-        for (const idl of select(candidates)) {
-            const program = buildProgram(idl, programAddress, url);
-            if (program) return program;
+        for (const idl of select(idls)) {
+            const built = buildProgram(idl, programAddress, url);
+            if (built) return built;
         }
         return null;
-    }, [candidates, programAddress, select, url]);
+    }, [idls, programAddress, select, url]);
+
+    return { isLoading: idls === undefined, program };
 }
 
 function buildProgram(idl: AnchorIdl, programAddress: string, url: string): Program | null {

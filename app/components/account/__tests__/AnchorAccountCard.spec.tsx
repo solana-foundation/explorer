@@ -10,12 +10,11 @@ import { type Account } from '@/app/providers/accounts';
 
 import { AnchorAccountCard } from '../AnchorAccountCard';
 
-const idlState: ProgramIdls = { candidates: [] };
+const idlState: ProgramIdls = { idls: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: 'devnet', url: 'http://localhost' }) }));
-vi.mock('@entities/idl', async importOriginal => ({
-    ...(await importOriginal<typeof import('@entities/idl')>()),
+vi.mock('@/app/entities/idl/model/use-program-idls', () => ({
     useProgramIdls: (...args: unknown[]) => useProgramIdls(...args),
 }));
 
@@ -43,7 +42,7 @@ describe('AnchorAccountCard', () => {
     beforeEach(() => useProgramIdls.mockClear());
 
     it('should read the IDLs of the owner program', () => {
-        idlState.candidates = [];
+        idlState.idls = [];
 
         render(<AnchorAccountCard account={ACCOUNT} />);
 
@@ -51,7 +50,7 @@ describe('AnchorAccountCard', () => {
     });
 
     it('should decode with an Anchor-standard PMP IDL over the Anchor IDL account', () => {
-        idlState.candidates = [
+        idlState.idls = [
             { idl: PMP_ANCHOR_IDL, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' },
             { idl: ANCHOR_ACCOUNT_IDL, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
         ];
@@ -62,7 +61,7 @@ describe('AnchorAccountCard', () => {
     });
 
     it('should decode with the IDL from the Anchor IDL account when the PMP IDL is Codama', () => {
-        idlState.candidates = [
+        idlState.idls = [
             { idl: CODAMA_IDL, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
             { idl: ANCHOR_ACCOUNT_IDL, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
         ];
@@ -73,7 +72,7 @@ describe('AnchorAccountCard', () => {
     });
 
     it('should skip an Anchor-standard PMP IDL that declares no account types', () => {
-        idlState.candidates = [
+        idlState.idls = [
             {
                 idl: { ...PMP_ANCHOR_IDL, accounts: [] },
                 idlAddress: undefined,
@@ -89,7 +88,7 @@ describe('AnchorAccountCard', () => {
     });
 
     it('should decode with the IDL from the Anchor IDL account when the PMP IDL does not build a program', () => {
-        idlState.candidates = [
+        idlState.idls = [
             { idl: UNBUILDABLE_IDL, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' },
             { idl: ANCHOR_ACCOUNT_IDL, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
         ];
@@ -103,7 +102,7 @@ describe('AnchorAccountCard', () => {
         ['declares no account types', { ...ANCHOR_ACCOUNT_IDL, accounts: [] }],
         ['does not build a program', UNBUILDABLE_IDL],
     ])('should show the decode error when the only Anchor IDL %s', (_, idl) => {
-        idlState.candidates = [{ idl, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' }];
+        idlState.idls = [{ idl, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' }];
 
         render(<AnchorAccountCard account={ACCOUNT} />);
 
@@ -113,7 +112,7 @@ describe('AnchorAccountCard', () => {
     });
 
     it('should show "No Anchor IDL found" when the only IDL is Codama', () => {
-        idlState.candidates = [
+        idlState.idls = [
             { idl: CODAMA_IDL, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
         ];
 
@@ -123,7 +122,7 @@ describe('AnchorAccountCard', () => {
     });
 
     it('should show the loading card while the IDLs load', () => {
-        idlState.candidates = undefined;
+        idlState.idls = undefined;
 
         render(<AnchorAccountCard account={ACCOUNT} />);
 

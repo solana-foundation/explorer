@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useVerifiedProgram } from '../verified-builds';
 
-const idlState: ProgramIdls = { candidates: [] };
+const idlState: ProgramIdls = { idls: [] };
 
 // A cluster without an OSEC registry skips the registry fetch.
 vi.mock('@providers/cluster', async importOriginal => ({
@@ -16,8 +16,9 @@ vi.mock('@providers/cluster', async importOriginal => ({
 }));
 vi.mock('@entities/idl', async importOriginal => {
     const actual = await importOriginal<typeof import('@entities/idl')>();
-    return { ...actual, useAnchorProgram: vi.fn(actual.useAnchorProgram), useProgramIdls: () => idlState };
+    return { ...actual, useAnchorProgram: vi.fn(actual.useAnchorProgram) };
 });
+vi.mock('@/app/entities/idl/model/use-program-idls', () => ({ useProgramIdls: () => idlState }));
 
 describe('useVerifiedProgram', () => {
     beforeEach(() => {
@@ -25,7 +26,7 @@ describe('useVerifiedProgram', () => {
     });
 
     it('should build the Program from the IDL in the Anchor IDL account over the PMP IDL', () => {
-        idlState.candidates = [
+        idlState.idls = [
             {
                 idl: namedIdl('pmp_program'),
                 idlAddress: undefined,
@@ -37,11 +38,13 @@ describe('useVerifiedProgram', () => {
 
         renderHook(() => useVerifiedProgram({ programAuthority: null, programId: PublicKey.default }));
 
-        expect(vi.mocked(useAnchorProgram).mock.results.at(-1)?.value?.idl.metadata.name).toBe('anchorProgram');
+        expect(vi.mocked(useAnchorProgram).mock.results.at(-1)?.value?.program?.idl.metadata.name).toBe(
+            'anchorProgram',
+        );
     });
 
     it('should build no Program when the only Anchor IDL is the PMP IDL', () => {
-        idlState.candidates = [
+        idlState.idls = [
             {
                 idl: namedIdl('pmp_program'),
                 idlAddress: undefined,
@@ -52,7 +55,7 @@ describe('useVerifiedProgram', () => {
 
         renderHook(() => useVerifiedProgram({ programAuthority: null, programId: PublicKey.default }));
 
-        expect(vi.mocked(useAnchorProgram).mock.results.at(-1)?.value).toBeNull();
+        expect(vi.mocked(useAnchorProgram).mock.results.at(-1)?.value?.program).toBeNull();
     });
 });
 

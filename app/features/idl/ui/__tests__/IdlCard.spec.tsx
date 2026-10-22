@@ -7,7 +7,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { vi } from 'vitest';
 
 import type { ProgramIdlPair, ProgramIdls, SupportedIdl } from '@/app/entities/idl';
-import { getOnChainCandidates } from '@/app/entities/idl/model/idl-candidates';
+import { getOnChainIdls } from '@/app/entities/idl/model/sourced-idl';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { invariant } from '@/app/shared/lib/invariant';
 import { Cluster, clusterSlug } from '@/app/utils/cluster';
@@ -37,7 +37,7 @@ function mockProgramIdls(overrides: Partial<ProgramIdlPair>): void {
         programMetadataIdlAddress: undefined,
         ...overrides,
     };
-    mocks.useProgramIdls.mockReturnValue({ candidates: getOnChainCandidates(onChain) } satisfies ProgramIdls);
+    mocks.useProgramIdls.mockReturnValue({ idls: getOnChainIdls(onChain) } satisfies ProgramIdls);
 }
 
 function createMockAnchorIdl(address = DEFAULT_ADDRESS): Idl {

@@ -18,11 +18,10 @@ import { Cluster } from '@/app/utils/cluster';
 
 import { ProgramLogsCardBody } from '../ProgramLogsCardBody';
 
-const idlState: ProgramIdls = { candidates: [] };
+const idlState: ProgramIdls = { idls: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
-vi.mock('@entities/idl', async importOriginal => ({
-    ...(await importOriginal<typeof import('@entities/idl')>()),
+vi.mock('@/app/entities/idl/model/use-program-idls', () => ({
     useProgramIdls: (...args: unknown[]) => useProgramIdls(...args),
 }));
 vi.mock('@utils/program-name', () => ({ ProgramName: () => <span>Program</span> }));
@@ -43,7 +42,7 @@ describe('ProgramLogsCardBody', () => {
     beforeEach(() => useProgramIdls.mockClear());
 
     it('should read the IDLs of the invoked program', () => {
-        idlState.candidates = [];
+        idlState.idls = [];
 
         renderLogs();
 
@@ -107,10 +106,10 @@ describe('ProgramLogsCardBody', () => {
             ],
             'Stateless Instruction',
         ],
-    ] satisfies [string, NonNullable<ProgramIdls['candidates']>, string][])(
+    ] satisfies [string, NonNullable<ProgramIdls['idls']>, string][])(
         'should name the instruction with %s',
-        (_, candidates, instructionName) => {
-            idlState.candidates = candidates;
+        (_, idls, instructionName) => {
+            idlState.idls = idls;
 
             renderLogs();
 
@@ -119,7 +118,7 @@ describe('ProgramLogsCardBody', () => {
     );
 
     it('should name the instruction of a jsonParsed message', () => {
-        idlState.candidates = [
+        idlState.idls = [
             {
                 idl: renamedIdl('parsed_instruction'),
                 idlAddress: undefined,

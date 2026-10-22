@@ -18,14 +18,14 @@ export default function ProgramName({
     defaultName?: string;
     cluster: Cluster;
 }) {
-    const { candidates } = useProgramIdls(programId.toString(), url, cluster, { suspense: true });
-    if (!candidates) return <>{defaultName}</>;
-    const candidate = candidates.at(0);
-    if (!candidate || candidate.source === IdlVariant.Anchor) {
+    const { idls } = useProgramIdls(programId.toString(), url, cluster, { suspense: true });
+    if (!idls) return <>{defaultName}</>;
+    const selected = idls.at(0);
+    if (!selected || selected.source === IdlVariant.Anchor) {
         return <AnchorProgramName programId={programId} url={url} cluster={cluster} defaultName={defaultName} />;
     }
 
-    const rootNode = candidate.standard === 'Codama' ? candidate.idl : convertAnchorIdl(candidate.idl);
+    const rootNode = selected.standard === 'Codama' ? selected.idl : convertAnchorIdl(selected.idl);
     if (!rootNode) {
         return <AnchorProgramName programId={programId} url={url} cluster={cluster} defaultName={defaultName} />;
     }

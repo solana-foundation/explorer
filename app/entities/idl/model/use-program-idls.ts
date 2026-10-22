@@ -8,15 +8,15 @@ import { type Cluster } from '@/app/utils/cluster';
 
 import { fetchProgramIdls } from '../api/fetch-program-idls';
 import { resolveProgramIdlsClient } from '../api/load-resolve-program-idls';
-import { getOnChainCandidates, type SourcedIdl } from './idl-candidates';
+import { getOnChainIdls, type SourcedIdl } from './sourced-idl';
 
 export type ProgramIdls = {
     /** `undefined` while the on-chain IDLs load. */
-    candidates: readonly SourcedIdl[] | undefined;
+    idls: readonly SourcedIdl[] | undefined;
 };
 
 /**
- * Resolves both IDLs a program exposes (PMP `idl` seed, Anchor PDA). `candidates` holds them in PMP-first
+ * Resolves both IDLs a program exposes (PMP `idl` seed, Anchor PDA). `idls` holds them in PMP-first
  * order. The callers share one cached resolution per program and cluster.
  *
  * Known public clusters use a single server route (`/api/idl-latest`) backed by `@solana/idl`, which
@@ -59,10 +59,10 @@ export function useProgramIdls(
     const onChainIdls = isCustom ? customIdls : serverIdls;
     const isOnChainLoading = isCustom ? customLoading : serverLoading;
 
-    const candidates = useMemo(() => {
+    const idls = useMemo(() => {
         if (isOnChainLoading) return undefined;
-        return onChainIdls ? getOnChainCandidates(onChainIdls) : [];
+        return onChainIdls ? getOnChainIdls(onChainIdls) : [];
     }, [isOnChainLoading, onChainIdls]);
 
-    return { candidates };
+    return { idls };
 }

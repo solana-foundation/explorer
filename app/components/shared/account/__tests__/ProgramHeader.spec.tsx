@@ -3,7 +3,7 @@ import type { ProgramIdlPair, ProgramIdls, SupportedIdl } from '@entities/idl';
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { getOnChainCandidates } from '@/app/entities/idl/model/idl-candidates';
+import { getOnChainIdls } from '@/app/entities/idl/model/sourced-idl';
 import { Cluster } from '@/app/utils/cluster';
 
 import { ProgramHeader } from '../ProgramHeader';
@@ -51,7 +51,7 @@ function mockIdls(idl?: SupportedIdl): void {
         programMetadataIdl: undefined,
         programMetadataIdlAddress: undefined,
     };
-    mocks.useProgramIdls.mockReturnValue({ candidates: getOnChainCandidates(onChain) } satisfies ProgramIdls);
+    mocks.useProgramIdls.mockReturnValue({ idls: getOnChainIdls(onChain) } satisfies ProgramIdls);
 }
 
 describe('ProgramHeader', () => {

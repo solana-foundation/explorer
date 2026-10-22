@@ -40,7 +40,7 @@ describe('useProgramIdls', () => {
     });
 
     describe('known clusters (server route)', () => {
-        it('should map the /api/idl-latest payload into one candidate per source', async () => {
+        it('should map the /api/idl-latest payload into one IDL per source', async () => {
             mocks.fetch.mockResolvedValue({
                 json: async () => ({
                     idls: { anchor: { name: 'anchor_idl' }, programMetadata: { name: 'pmp_idl' } },
@@ -53,8 +53,8 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitForHook(() => expect(result.current.candidates).toBeDefined());
-            expect(result.current.candidates).toEqual([
+            await waitForHook(() => expect(result.current.idls).toBeDefined());
+            expect(result.current.idls).toEqual([
                 {
                     idl: { name: 'pmp_idl' },
                     idlAddress: undefined,
@@ -77,7 +77,7 @@ describe('useProgramIdls', () => {
                 { wrapper },
             );
 
-            await waitForHook(() => expect(result.current.candidates).toEqual([]));
+            await waitForHook(() => expect(result.current.idls).toEqual([]));
         });
     });
 
@@ -92,8 +92,8 @@ describe('useProgramIdls', () => {
                 wrapper,
             });
 
-            await waitForHook(() => expect(result.current.candidates).toBeDefined());
-            expect(idlBySource(result.current.candidates)).toEqual({
+            await waitForHook(() => expect(result.current.idls).toBeDefined());
+            expect(idlBySource(result.current.idls)).toEqual({
                 [IdlVariant.Anchor]: { name: 'custom_anchor_idl' },
                 [IdlVariant.ProgramMetadata]: { name: 'custom_pmp_idl' },
             });
@@ -105,7 +105,7 @@ describe('useProgramIdls', () => {
             expect(mocks.fetch).not.toHaveBeenCalled();
         });
 
-        it('should return undefined candidates while the client resolver loads', async () => {
+        it('should return undefined while the client resolver loads', async () => {
             mocks.resolveProgramIdlsClient.mockReturnValue(new Promise(() => undefined));
 
             const { result } = renderHook(() => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.Custom), {
@@ -113,17 +113,17 @@ describe('useProgramIdls', () => {
             });
 
             await waitForHook(() => expect(mocks.resolveProgramIdlsClient).toHaveBeenCalled());
-            expect(result.current.candidates).toBeUndefined();
+            expect(result.current.idls).toBeUndefined();
         });
 
-        it('should return no candidates when the resolver throws', async () => {
+        it('should return no IDLs when the resolver throws', async () => {
             mocks.resolveProgramIdlsClient.mockRejectedValue(new Error('connection refused'));
 
             const { result } = renderHook(() => useProgramIdls(PROGRAM_ID, 'http://localhost:8899', Cluster.Custom), {
                 wrapper,
             });
 
-            await waitForHook(() => expect(result.current.candidates).toEqual([]));
+            await waitForHook(() => expect(result.current.idls).toEqual([]));
         });
     });
 
@@ -143,7 +143,7 @@ describe('useProgramIdls', () => {
             );
 
             await waitForHook(() =>
-                expect(idlBySource(result.current.candidates)).toEqual({
+                expect(idlBySource(result.current.idls)).toEqual({
                     [IdlVariant.Anchor]: { name: 'local_anchor_idl' },
                 }),
             );
@@ -156,8 +156,8 @@ describe('useProgramIdls', () => {
         });
     });
 
-    describe('candidates', () => {
-        it('should return undefined candidates while the on-chain IDLs load', async () => {
+    describe('idls', () => {
+        it('should return undefined while the on-chain IDLs load', async () => {
             mocks.fetch.mockReturnValue(new Promise(() => undefined));
 
             const { result } = renderHook(
@@ -166,11 +166,11 @@ describe('useProgramIdls', () => {
             );
 
             await waitForHook(() => expect(mocks.fetch).toHaveBeenCalled());
-            expect(result.current.candidates).toBeUndefined();
+            expect(result.current.idls).toBeUndefined();
         });
     });
 });
 
-function idlBySource(candidates: ProgramIdls['candidates']) {
-    return Object.fromEntries((candidates ?? []).map(({ idl, source }) => [source, idl]));
+function idlBySource(idls: ProgramIdls['idls']) {
+    return Object.fromEntries((idls ?? []).map(({ idl, source }) => [source, idl]));
 }

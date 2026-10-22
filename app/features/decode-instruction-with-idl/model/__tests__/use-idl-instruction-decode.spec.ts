@@ -8,10 +8,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useIdlInstructionDecode } from '../use-idl-instruction-decode';
 
-// Mock the resolution boundary and the decode helper, so the test covers only the hook's candidate choice,
+// Mock the resolution boundary and the decode helper, so the test covers only the hook's IDL choice,
 // argument forwarding and gating. The SWR and decode code have their own specs. The panic→Unknown degrade
 // belongs to `safeDecodeInstructionWithIdl` and is tested with the lib.
-const idlState: ProgramIdls = { candidates: [] };
+const idlState: ProgramIdls = { idls: [] };
 const safeDecodeInstructionWithIdl = vi.fn();
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
@@ -32,11 +32,11 @@ describe('useIdlInstructionDecode', () => {
     beforeEach(() => {
         safeDecodeInstructionWithIdl.mockReset();
         useProgramIdls.mockClear();
-        idlState.candidates = [];
+        idlState.idls = [];
     });
 
     it('should decode with the PMP IDL over the IDL from the Anchor IDL account', () => {
-        idlState.candidates = [PMP, ANCHOR];
+        idlState.idls = [PMP, ANCHOR];
         safeDecodeInstructionWithIdl.mockReturnValue({ kind: 'codama' });
 
         const { result } = renderHook(() => useIdlInstructionDecode({ programId, raw }));
@@ -46,7 +46,7 @@ describe('useIdlInstructionDecode', () => {
     });
 
     it('should decode with the IDL from the Anchor IDL account when the program has no PMP IDL', () => {
-        idlState.candidates = [ANCHOR];
+        idlState.idls = [ANCHOR];
         safeDecodeInstructionWithIdl.mockReturnValue({ kind: 'anchor' });
 
         const { result } = renderHook(() => useIdlInstructionDecode({ programId, raw }));
@@ -62,7 +62,7 @@ describe('useIdlInstructionDecode', () => {
     });
 
     it('should return undefined and not decode while the on-chain IDLs load', () => {
-        idlState.candidates = undefined;
+        idlState.idls = undefined;
 
         const { result } = renderHook(() => useIdlInstructionDecode({ programId, raw }));
 
@@ -78,7 +78,7 @@ describe('useIdlInstructionDecode', () => {
     });
 
     it('should return undefined and not decode when there is no raw instruction (pre-parsed)', () => {
-        idlState.candidates = [ANCHOR];
+        idlState.idls = [ANCHOR];
 
         const { result } = renderHook(() => useIdlInstructionDecode({ programId, raw: undefined }));
 

@@ -28,8 +28,8 @@ const ANCHOR = anchorLegacyIdl as unknown as AnchorIdl;
 describe('ProgramName', () => {
     beforeEach(() => mocks.useProgramIdls.mockReset());
 
-    it('should read the candidates with suspense', () => {
-        mockCandidates([]);
+    it('should read the IDLs with suspense', () => {
+        mockIdls([]);
 
         renderName();
 
@@ -41,13 +41,13 @@ describe('ProgramName', () => {
     it.each([
         ['the program has no IDL', []],
         [
-            'the first candidate is the Anchor IDL account',
+            'the first IDL is from the Anchor IDL account',
             [{ idl: ANCHOR, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' }],
         ],
-    ] satisfies [string, NonNullable<ProgramIdls['candidates']>][])(
+    ] satisfies [string, NonNullable<ProgramIdls['idls']>][])(
         'should show the Anchor program name when %s',
-        (_, candidates) => {
-            mockCandidates(candidates);
+        (_, idls) => {
+            mockIdls(idls);
 
             renderName();
 
@@ -56,9 +56,7 @@ describe('ProgramName', () => {
     );
 
     it('should name the program from the PMP Codama IDL', () => {
-        mockCandidates([
-            { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
-        ]);
+        mockIdls([{ idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' }]);
 
         renderName();
 
@@ -66,7 +64,7 @@ describe('ProgramName', () => {
     });
 
     it('should name the program from the PMP IDL over the Anchor IDL account', () => {
-        mockCandidates([
+        mockIdls([
             { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
             { idl: ANCHOR, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
         ]);
@@ -77,9 +75,7 @@ describe('ProgramName', () => {
     });
 
     it('should name the program from an Anchor-standard PMP IDL', () => {
-        mockCandidates([
-            { idl: ANCHOR, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' },
-        ]);
+        mockIdls([{ idl: ANCHOR, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' }]);
 
         renderName();
 
@@ -89,15 +85,15 @@ describe('ProgramName', () => {
     it('should show the Anchor program name for an Anchor-standard PMP IDL that Codama cannot convert', () => {
         const idl = anchorModernIdl as unknown as AnchorIdl;
         expect(() => rootNodeFromAnchor(idl as never)).toThrow();
-        mockCandidates([{ idl, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' }]);
+        mockIdls([{ idl, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Anchor' }]);
 
         expect(() => renderName()).not.toThrow();
         expect(screen.getByText('Anchor program name')).toBeInTheDocument();
     });
 });
 
-function mockCandidates(candidates: ProgramIdls['candidates']) {
-    mocks.useProgramIdls.mockReturnValue({ candidates });
+function mockIdls(idls: ProgramIdls['idls']) {
+    mocks.useProgramIdls.mockReturnValue({ idls });
 }
 
 function renderName() {

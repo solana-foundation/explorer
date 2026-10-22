@@ -8,12 +8,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AccountDataTab } from '../AccountDataTab';
 
-const idlState: ProgramIdls = { candidates: [] };
+const idlState: ProgramIdls = { idls: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
 vi.mock('@providers/cluster', () => ({ useCluster: () => ({ cluster: 'mainnet-beta', url: 'http://localhost' }) }));
-vi.mock('@entities/idl', async importOriginal => ({
-    ...(await importOriginal<typeof import('@entities/idl')>()),
+vi.mock('@/app/entities/idl/model/use-program-idls', () => ({
     useProgramIdls: (...args: unknown[]) => useProgramIdls(...args),
 }));
 vi.mock('@/app/shared/ui/navigation-tabs', () => ({
@@ -29,7 +28,7 @@ const renderTab = () => render(<AccountDataTab programId={new PublicKey(anchorMo
 
 describe('AccountDataTab', () => {
     beforeEach(() => {
-        idlState.candidates = [];
+        idlState.idls = [];
         useProgramIdls.mockClear();
     });
 
@@ -38,8 +37,8 @@ describe('AccountDataTab', () => {
         expect(useProgramIdls).toHaveBeenCalledWith(anchorModernIdl.address, 'http://localhost', 'mainnet-beta');
     });
 
-    it('should show the Anchor Data tab when an Anchor-standard candidate declares account types', () => {
-        idlState.candidates = [
+    it('should show the Anchor Data tab when an Anchor-standard IDL declares account types', () => {
+        idlState.idls = [
             { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
             { idl: ANCHOR_WITH_ACCOUNTS, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
         ];
@@ -48,7 +47,7 @@ describe('AccountDataTab', () => {
     });
 
     it('should show the Anchor Data tab when an Anchor-standard PMP IDL declares account types', () => {
-        idlState.candidates = [
+        idlState.idls = [
             {
                 idl: ANCHOR_WITH_ACCOUNTS,
                 idlAddress: undefined,
@@ -61,7 +60,7 @@ describe('AccountDataTab', () => {
     });
 
     it('should use the Anchor IDL account when the PMP IDL does not build a program', () => {
-        idlState.candidates = [
+        idlState.idls = [
             {
                 idl: ANCHOR_WITHOUT_PROGRAM,
                 idlAddress: undefined,
@@ -79,8 +78,8 @@ describe('AccountDataTab', () => {
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
     });
 
-    it('should hide the tab when the Anchor-standard candidate declares no account types', () => {
-        idlState.candidates = [
+    it('should hide the tab when the Anchor-standard IDL declares no account types', () => {
+        idlState.idls = [
             {
                 idl: ANCHOR_WITHOUT_ACCOUNTS,
                 idlAddress: undefined,
@@ -92,16 +91,16 @@ describe('AccountDataTab', () => {
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
     });
 
-    it('should hide the tab when the Anchor-standard candidate with account types does not build a program', () => {
-        idlState.candidates = [
+    it('should hide the tab when the Anchor-standard IDL with account types does not build a program', () => {
+        idlState.idls = [
             { idl: ANCHOR_WITHOUT_PROGRAM, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' },
         ];
         renderTab();
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
     });
 
-    it('should hide the tab when only a Codama candidate exists', () => {
-        idlState.candidates = [
+    it('should hide the tab when the only IDL is Codama', () => {
+        idlState.idls = [
             { idl: CODAMA, idlAddress: undefined, source: IdlVariant.ProgramMetadata, standard: 'Codama' },
         ];
         renderTab();
@@ -109,7 +108,7 @@ describe('AccountDataTab', () => {
     });
 
     it('should hide the tab while the IDLs load', () => {
-        idlState.candidates = undefined;
+        idlState.idls = undefined;
         renderTab();
         expect(screen.queryByText('Anchor Data')).not.toBeInTheDocument();
     });

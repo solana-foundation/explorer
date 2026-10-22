@@ -13,11 +13,10 @@ import { AnchorProgramName } from '../anchor';
 const CODAMA_IDL = codamaIdl as unknown as CodamaIdl;
 const UNBUILDABLE_IDL = referenceIdl as unknown as AnchorIdl;
 
-const idlState: ProgramIdls = { candidates: [] };
+const idlState: ProgramIdls = { idls: [] };
 const useProgramIdls = vi.fn((..._args: unknown[]) => idlState);
 
-vi.mock('@entities/idl', async importOriginal => ({
-    ...(await importOriginal<typeof import('@entities/idl')>()),
+vi.mock('@/app/entities/idl/model/use-program-idls', () => ({
     useProgramIdls: (...args: unknown[]) => useProgramIdls(...args),
 }));
 
@@ -25,7 +24,7 @@ describe('AnchorProgramName', () => {
     beforeEach(() => useProgramIdls.mockClear());
 
     it('should read the IDLs of the program', () => {
-        idlState.candidates = [];
+        idlState.idls = [];
 
         render(<AnchorProgramName programId={new PublicKey(anchorModernIdl.address)} url="http://localhost" />);
 
@@ -89,10 +88,10 @@ describe('AnchorProgramName', () => {
             ],
             'StatelessProgram',
         ],
-    ] satisfies [string, NonNullable<ProgramIdls['candidates']>, string][])(
+    ] satisfies [string, NonNullable<ProgramIdls['idls']>, string][])(
         'should name the program with %s',
-        (_, candidates, programName) => {
-            idlState.candidates = candidates;
+        (_, idls, programName) => {
+            idlState.idls = idls;
 
             render(<AnchorProgramName programId={new PublicKey(anchorModernIdl.address)} url="http://localhost" />);
 

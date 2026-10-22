@@ -38,7 +38,7 @@ import { IdlSection } from './IdlSection';
 export function IdlCard({ programId }: { programId: string }) {
     const { url, cluster } = useCluster();
     const network = clusterSlug(cluster);
-    const { candidates } = useProgramIdls(programId, url, cluster);
+    const { idls } = useProgramIdls(programId, url, cluster);
     const [searchStr, setSearchStr] = useState<string>('');
     const [isOrquestraDialogOpen, setIsOrquestraDialogOpen] = useState(false);
 
@@ -116,11 +116,11 @@ export function IdlCard({ programId }: { programId: string }) {
         </div>
     );
 
-    if (!candidates) {
+    if (!idls) {
         return <LoadingCard message="Loading program IDL" />;
     }
 
-    const selected = candidates.at(0);
+    const selected = idls.at(0);
     if (!selected) {
         return (
             <Card ui="dashkit">

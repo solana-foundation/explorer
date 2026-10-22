@@ -10,16 +10,13 @@ import { useSquadsMultisig } from '@/app/providers/squadsMultisig';
 
 import { ProgramMultisigCard } from '../ProgramMultisigCard';
 
-const idlState: ProgramIdls = { candidates: [] };
+const idlState: ProgramIdls = { idls: [] };
 
 vi.mock('@providers/cluster', async importOriginal => ({
     ...(await importOriginal<typeof import('@providers/cluster')>()),
     useCluster: () => ({ cluster: Cluster.MainnetBeta, url: 'http://localhost' }),
 }));
-vi.mock('@entities/idl', async importOriginal => ({
-    ...(await importOriginal<typeof import('@entities/idl')>()),
-    useProgramIdls: () => idlState,
-}));
+vi.mock('@/app/entities/idl/model/use-program-idls', () => ({ useProgramIdls: () => idlState }));
 vi.mock('@/app/providers/squadsMultisig', async importOriginal => ({
     ...(await importOriginal<typeof import('@/app/providers/squadsMultisig')>()),
     useSquadsMultisig: vi.fn(() => ({ data: undefined })),
@@ -37,7 +34,7 @@ describe('ProgramMultisigCard', () => {
     });
 
     it('should decode the multisig with the IDL from the Anchor IDL account over the PMP IDL', () => {
-        idlState.candidates = [
+        idlState.idls = [
             {
                 idl: namedIdl('pmp_program'),
                 idlAddress: undefined,
@@ -53,7 +50,7 @@ describe('ProgramMultisigCard', () => {
     });
 
     it('should build no Program when the only Anchor IDL is the PMP IDL', () => {
-        idlState.candidates = [
+        idlState.idls = [
             {
                 idl: namedIdl('pmp_program'),
                 idlAddress: undefined,

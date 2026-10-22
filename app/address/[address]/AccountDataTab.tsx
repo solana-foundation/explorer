@@ -1,4 +1,4 @@
-import { getAnchorIdlsWithAccounts, useAnchorProgram, useProgramIdls } from '@entities/idl';
+import { getAnchorIdlsWithAccounts, useAnchorProgram } from '@entities/idl';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 
@@ -6,9 +6,8 @@ import { NavigationTabLink } from '@/app/shared/ui/navigation-tabs';
 
 export function AccountDataTab({ programId }: { programId: PublicKey }) {
     const { url, cluster } = useCluster();
-    const { candidates } = useProgramIdls(programId.toString(), url, cluster);
-    const program = useAnchorProgram({
-        candidates,
+    const { program } = useAnchorProgram({
+        cluster,
         programAddress: programId.toString(),
         select: getAnchorIdlsWithAccounts,
         url,

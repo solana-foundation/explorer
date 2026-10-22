@@ -5,16 +5,21 @@ import { clusterApiUrl, PublicKey } from '@solana/web3.js';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, vi } from 'vitest';
 
+import { Cluster } from '@/app/utils/cluster';
+
 import { type AnchorIdl } from '../../../lib/types';
 import anchor029Devi from '../../../mocks/anchor/anchor-0.29.0-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import anchor030devi from '../../../mocks/anchor/anchor-0.30.1-devi51mZmdwUJGU9hjN27vEz64Gps7uUefqxg27EAtH.json';
 import anchorLegacy094ShankWave from '../../../mocks/anchor/anchor-legacy-0.9.4-shank-waveQX2yP3H1pVU8djGvEHmYg8uamQ84AuyGtpsrXTF.json';
 import referenceIdl from '../../../mocks/anchor/reference-0.29.json';
 import { formatSerdeIdl, getFormattedIdl } from '../../formatters/format';
-import { type SourcedIdl } from '../../idl-candidates';
 import { IdlVariant } from '../../idl-variant';
+import { getAnchorIdls, type SourcedIdl } from '../../sourced-idl';
+import { type ProgramIdls } from '../../use-program-idls';
 import { getProvider } from '../anchor-provider';
 import { useAnchorProgram } from '../use-anchor-program';
+
+const idlState: ProgramIdls = { idls: [] };
 
 // Create a mock provider that matches Anchor's expected structure
 const createMockProvider = (mockUrl: string, mockProgramAddress: string) => ({
@@ -33,6 +38,7 @@ const createMockProvider = (mockUrl: string, mockProgramAddress: string) => ({
 });
 
 vi.mock('@entities/idl/model/anchor/anchor-provider', () => ({ getProvider: vi.fn() }));
+vi.mock('@entities/idl/model/use-program-idls', () => ({ useProgramIdls: () => idlState }));
 
 describe('Create program instance from legacy idl', () => {
     const url = clusterApiUrl('devnet');
@@ -99,10 +105,11 @@ describe('Allow for useAnchorProgram to create program instance', () => {
 
         vi.mocked(getProvider).mockReturnValue(createMockProvider(url, programId) as unknown as AnchorProvider);
 
-        const { result } = renderHook(() =>
-            useAnchorProgram({ candidates: [anchorCandidate(idl)], programAddress: programId, select, url }),
-        );
-        expect(result.current?.programId.toString()).toEqual(programId);
+        idlState.idls = [fromAnchorAccount(idl)];
+
+        const { result } = renderAnchorProgram(programId, url);
+
+        expect(result.current.program?.programId.toString()).toEqual(programId);
     });
 });
 
@@ -116,43 +123,45 @@ describe('useAnchorProgram', () => {
     });
 
     it('should build the Program from the next IDL when the first IDL does not build', () => {
-        const candidates = [anchorCandidate(referenceIdl), anchorCandidate(anchor030devi)];
+        idlState.idls = [fromAnchorAccount(referenceIdl), fromAnchorAccount(anchor030devi)];
 
-        const { result } = renderHook(() => useAnchorProgram({ candidates, programAddress, select, url }));
+        const { result } = renderAnchorProgram(programAddress, url);
 
-        expect(result.current?.idl.metadata.name).toBe('ammV3');
+        expect(result.current.program?.idl.metadata.name).toBe('ammV3');
     });
 
-    it('should return null when no IDL builds a Program', () => {
-        const candidates = [anchorCandidate(referenceIdl)];
+    it('should return no Program when no IDL builds a Program', () => {
+        idlState.idls = [fromAnchorAccount(referenceIdl)];
 
-        const { result } = renderHook(() => useAnchorProgram({ candidates, programAddress, select, url }));
+        const { result } = renderAnchorProgram(programAddress, url);
 
-        expect(result.current).toBeNull();
+        expect(result.current).toEqual({ isLoading: false, program: null });
     });
 
-    it('should return null while the IDLs load', () => {
-        const { result } = renderHook(() => useAnchorProgram({ candidates: undefined, programAddress, select, url }));
+    it('should return no Program while the IDLs load', () => {
+        idlState.idls = undefined;
 
-        expect(result.current).toBeNull();
+        const { result } = renderAnchorProgram(programAddress, url);
+
+        expect(result.current).toEqual({ isLoading: true, program: null });
     });
 
-    it('should return the same Program when the candidates do not change', () => {
-        const candidates = [anchorCandidate(anchor030devi)];
-        const { result, rerender } = renderHook(() => useAnchorProgram({ candidates, programAddress, select, url }));
-        const first = result.current;
+    it('should return the same Program when the IDLs do not change', () => {
+        idlState.idls = [fromAnchorAccount(anchor030devi)];
+        const { result, rerender } = renderAnchorProgram(programAddress, url);
+        const first = result.current.program;
 
         rerender();
 
-        expect(result.current).not.toBeNull();
-        expect(result.current).toBe(first);
+        expect(result.current.program).not.toBeNull();
+        expect(result.current.program).toBe(first);
     });
 });
 
-function select(candidates: readonly SourcedIdl[]): AnchorIdl[] {
-    return candidates.flatMap(candidate => (candidate.standard === 'Anchor' ? [candidate.idl] : []));
+function renderAnchorProgram(programAddress: string, url: string) {
+    return renderHook(() => useAnchorProgram({ cluster: Cluster.Devnet, programAddress, select: getAnchorIdls, url }));
 }
 
-function anchorCandidate(idl: unknown): SourcedIdl {
+function fromAnchorAccount(idl: unknown): SourcedIdl {
     return { idl: idl as AnchorIdl, idlAddress: undefined, source: IdlVariant.Anchor, standard: 'Anchor' };
 }
