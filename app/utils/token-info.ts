@@ -4,6 +4,7 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { TokenExtension } from '@validators/accounts/token-extension';
 
+import { accountRefreshKey } from '@/app/shared/lib/account-refresh-key';
 import { Logger } from '@/app/shared/lib/logger';
 
 type TokenExtensions = {
@@ -169,18 +170,13 @@ export function isRedactedTokenAddress(address: string): boolean {
  * @param cluster Cluster to fetch the token info for
  * @param genesisHash Genesis hash for cluster identification (required for the Custom cluster)
  */
-export type FullTokenInfoSwrKey = ['get-full-token-info', string, Cluster, string, string | undefined];
+export type FullTokenInfoSwrKey = ReturnType<typeof getFullTokenInfoSwrKey>;
 
-export function getFullTokenInfoSwrKey(
-    address: string,
-    cluster: Cluster,
-    url: string,
-    genesisHash?: string,
-): FullTokenInfoSwrKey {
-    return ['get-full-token-info', address, cluster, url, genesisHash];
+export function getFullTokenInfoSwrKey(address: string, cluster: Cluster, url: string, genesisHash?: string) {
+    return accountRefreshKey(url, address, 'full-token-info', cluster, genesisHash);
 }
 
-export async function fetchFullTokenInfo([_, pubkey, cluster, _url, genesisHash]: FullTokenInfoSwrKey) {
+export async function fetchFullTokenInfo([_prefix, _url, pubkey, _kind, cluster, genesisHash]: FullTokenInfoSwrKey) {
     return await getFullTokenInfo(new PublicKey(pubkey), cluster, genesisHash);
 }
 

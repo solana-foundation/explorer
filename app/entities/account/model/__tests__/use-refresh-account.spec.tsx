@@ -6,6 +6,9 @@ import { SWRConfig } from 'swr';
 import useSWRImmutable from 'swr/immutable';
 import { describe, expect, it, vi } from 'vitest';
 
+import { accountRefreshKey } from '@/app/shared/lib/account-refresh-key';
+
+import { rawAccountDataKey } from '../use-raw-account-data';
 import { useRefreshAccount } from '../use-refresh-account';
 
 const MOCK_URL = 'https://api.mainnet-beta.solana.com';
@@ -17,27 +20,47 @@ vi.mock('@providers/cluster', () => ({
 }));
 
 describe('useRefreshAccount', () => {
-    it('should refetch the full token info of the account', async () => {
-        const fetchFullTokenInfo = vi.fn(async () => null);
-        const { result } = renderHook(
-            () => {
-                useSWRImmutable(
-                    getFullTokenInfoSwrKey(MINT.toBase58(), Cluster.Custom, MOCK_URL, MOCK_GENESIS_HASH),
-                    fetchFullTokenInfo,
-                );
-                return useRefreshAccount();
-            },
-            { wrapper },
-        );
-        await waitFor(() => expect(fetchFullTokenInfo).toHaveBeenCalledTimes(1));
+    it.each([
+        ['full token info', getFullTokenInfoSwrKey(MINT.toBase58(), Cluster.Custom, MOCK_URL, MOCK_GENESIS_HASH)],
+        ['raw account data', rawAccountDataKey(MOCK_URL, MINT.toBase58())],
+    ])('should refetch the %s of the account', async (_, key) => {
+        const fetcher = await refreshWith(key);
 
-        act(() => result.current(MINT, 'parsed'));
+        await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(2));
+    });
 
-        await waitFor(() => expect(fetchFullTokenInfo).toHaveBeenCalledTimes(2));
+    it.each([
+        ['a key outside the refresh keys', ['nftoken-collection-nfts', MOCK_URL, MINT.toBase58()]],
+        ['a refresh key of another account', rawAccountDataKey(MOCK_URL, OTHER.toBase58())],
+        [
+            'a refresh key of another cluster',
+            accountRefreshKey('https://api.devnet.solana.com', MINT.toBase58(), 'raw'),
+        ],
+    ])('should not refetch %s', async (_, key) => {
+        const fetcher = await refreshWith(key);
+        await act(() => new Promise(resolve => setTimeout(resolve, 50)));
+
+        expect(fetcher).toHaveBeenCalledTimes(1);
     });
 });
 
+async function refreshWith(key: readonly unknown[]) {
+    const fetcher = vi.fn(async () => null);
+    const { result } = renderHook(
+        () => {
+            useSWRImmutable(key, fetcher);
+            return useRefreshAccount();
+        },
+        { wrapper },
+    );
+    await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1));
+
+    act(() => result.current(MINT, 'parsed'));
+    return fetcher;
+}
+
 const MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+const OTHER = new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
 
 function wrapper({ children }: { children: React.ReactNode }) {
     return <SWRConfig value={{ provider: () => new Map() }}>{children}</SWRConfig>;
