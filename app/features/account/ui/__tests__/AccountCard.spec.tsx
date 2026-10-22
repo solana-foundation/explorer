@@ -11,7 +11,10 @@ const mock = vi.hoisted(() => ({ entry: undefined as CacheEntry<Account> | undef
 vi.mock('@providers/accounts', () => ({
     useAccountInfo: (address: string) => (address === ACCOUNT.pubkey.toBase58() ? mock.entry : undefined),
 }));
-vi.mock('@entities/account', () => ({ useRawAccountDataOnMount: () => ({ data: undefined, isLoading: false }) }));
+vi.mock('@entities/account', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/account')>()),
+    useRawAccountDataOnMount: () => ({ data: undefined, isLoading: false }),
+}));
 vi.mock('../AccountDownloadDropdown', () => ({ AccountDownloadDropdown: () => null }));
 
 describe('AccountCard', () => {

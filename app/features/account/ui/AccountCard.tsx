@@ -1,7 +1,6 @@
 import { RefreshButton } from '@components/shared/ui/refresh-button';
-import { useRawAccountDataOnMount } from '@entities/account';
-import { type Account, useAccountInfo } from '@providers/accounts';
-import { FetchStatus } from '@providers/cache';
+import { useAccountFetching, useRawAccountDataOnMount } from '@entities/account';
+import type { Account } from '@providers/accounts';
 import React from 'react';
 import { Code } from 'react-feather';
 
@@ -21,7 +20,7 @@ type AccountCardProps = {
 
 export function AccountCard({ account, title, refresh, analyticsSection, children }: AccountCardProps) {
     const [showRaw, setShowRaw] = React.useState(false);
-    const fetching = useAccountInfo(account?.pubkey.toBase58())?.status === FetchStatus.Fetching;
+    const fetching = useAccountFetching(account?.pubkey.toBase58());
 
     const rawContent = account ? <RawAccountRows account={account} /> : undefined;
 

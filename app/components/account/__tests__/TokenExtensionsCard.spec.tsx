@@ -16,7 +16,10 @@ vi.mock('@providers/accounts', () => ({
 vi.mock('@providers/cluster', () => ({
     useCluster: () => ({ cluster: Cluster.MainnetBeta, url: 'https://api.mainnet-beta.solana.com' }),
 }));
-vi.mock('@entities/account', () => ({ useRefreshAccount: () => vi.fn() }));
+vi.mock('@entities/account', async importOriginal => ({
+    ...(await importOriginal<typeof import('@entities/account')>()),
+    useRefreshAccount: () => vi.fn(),
+}));
 vi.mock('@/app/utils/token-info', async importOriginal => ({
     ...(await importOriginal<typeof import('@/app/utils/token-info')>()),
     getTokenInfo: vi.fn(async () => undefined),

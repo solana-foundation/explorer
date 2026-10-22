@@ -2,9 +2,8 @@
 
 import { KitAddress } from '@components/common/KitAddress';
 import { RefreshButton } from '@components/shared/ui/refresh-button';
-import { useRawAccountDataOnMount, useRefreshAccount } from '@entities/account';
-import { type Account, useAccountInfo } from '@providers/accounts';
-import { FetchStatus } from '@providers/cache';
+import { useAccountFetching, useRawAccountDataOnMount, useRefreshAccount } from '@entities/account';
+import type { Account } from '@providers/accounts';
 import type { Address } from '@solana/kit';
 import type {
     FixedDelegation,
@@ -203,7 +202,7 @@ type SubscriptionCardProps = {
 function SubscriptionCard({ account, title, analyticsSection, refresh, children }: SubscriptionCardProps) {
     const [showRaw, setShowRaw] = useState(false);
     const { data, isLoading } = useRawAccountDataOnMount(account.pubkey);
-    const fetching = useAccountInfo(account.pubkey.toBase58())?.status === FetchStatus.Fetching;
+    const fetching = useAccountFetching(account.pubkey.toBase58());
     return (
         <OverviewCard
             title={title}

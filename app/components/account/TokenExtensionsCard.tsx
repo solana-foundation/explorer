@@ -1,9 +1,7 @@
 'use client';
 
 import { AccountHeader } from '@components/common/Account';
-import { useRefreshAccount } from '@entities/account';
-import { useAccountInfo } from '@providers/accounts';
-import { FetchStatus } from '@providers/cache';
+import { useAccountFetching, useRefreshAccount } from '@entities/account';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -34,7 +32,7 @@ export function TokenExtensionsCard({
 }) {
     const { cluster, url } = useCluster();
     const refresh = useRefreshAccount();
-    const fetching = useAccountInfo(address)?.status === FetchStatus.Fetching;
+    const fetching = useAccountFetching(address);
     const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
     const { data: tokenInfo, isLoading } = useSWR(swrKey, fetchTokenInfo);
 
