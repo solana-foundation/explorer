@@ -6,7 +6,7 @@ The transitional pieces — `toParsedInstruction`/`toParsedTransaction` shims an
 
 The design and rationale live in the OpenSpec proposal [`unify-instruction-parsing`](../../openspec/changes/unify-instruction-parsing/proposal.md) — one parser per program, one canonical `SliceParsed` shape, one place to add a program. This package hosts the _contract_; the per-program parser slices (`app/features/decode-instruction-*`) and the React provider stay in the app.
 
-Program decoders shared between the app slices and `@explorer/entity-inspector` live under `src/programs/<program>` (exported as `@explorer/parsers/programs/<program>`), starting with the System program.
+Program decoders shared between the app slices and `@explorer/entity-inspector` live under `src/programs/<program>` (exported as `@explorer/parsers/programs/<program>`), starting with the System program. `programs/vote` carries the Vote program's address and its `VoteInstruction` discriminants, because no `@solana-program/vote` client is published.
 
 Not to be confused with the per-program `@explorer/decoder-*` packages (serum, mango, pyth): those decode one protocol each, this package carries the generic parsing contract they and the app slices plug into.
 

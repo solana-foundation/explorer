@@ -1,4 +1,4 @@
-export { VOTE_PROGRAM_ADDRESS } from './lib/constants';
+export { VOTE_PROGRAM_ADDRESS } from '@explorer/parsers/programs/vote';
 export { VoteAccount } from './lib/validators';
 export { useVoteAccounts } from './model/vote-accounts';
 export { VoteDetailsCard } from './ui/instructions/VoteDetailsCard';

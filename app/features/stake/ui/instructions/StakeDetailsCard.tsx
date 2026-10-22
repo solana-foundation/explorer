@@ -1,5 +1,5 @@
 import { toInstructionNode, UnknownDetailsCard } from '@entities/instruction-card';
-import type { ParsedInstruction, ParsedTransaction } from '@solana/web3.js';
+import type { ParsedInstruction, ParsedTransaction, TransactionInstruction } from '@solana/web3.js';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
 
@@ -44,10 +44,11 @@ type DetailsProps = {
     index: number;
     innerCards?: JSX.Element[];
     childIndex?: number;
+    raw?: TransactionInstruction;
 };
 
-export function StakeDetailsCard({ childIndex, index, innerCards, ix, tx }: DetailsProps) {
-    const node = toInstructionNode({ childIndex, index, innerCards, ix });
+export function StakeDetailsCard({ childIndex, index, innerCards, ix, raw, tx }: DetailsProps) {
+    const node = toInstructionNode({ childIndex, index, innerCards, ix, raw });
 
     // TODO: Replace this try/catch + Logger with a React error boundary one level up
     // (e.g. in InstructionCard). Reasons:

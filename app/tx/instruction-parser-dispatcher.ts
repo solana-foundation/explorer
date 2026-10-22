@@ -21,9 +21,12 @@ import { serumInstructionParsers } from '@features/instruction-program-serum/lib
 import { tokenSwapInstructionParsers } from '@features/instruction-program-token-swap/lib/token-swap-client';
 import { wormholeInstructionParsers } from '@features/instruction-program-wormhole/lib/wormhole-client';
 import { metaplexTokenMetadataInstructionParser } from '@features/mpl-token-metadata/lib/metaplex-token-metadata-client';
+import { stakeInstructionParser } from '@features/stake/lib/stake-client';
+import { voteInstructionParser } from '@features/vote/lib/vote-client';
 
 export const instructionParserDispatcher = createInstructionParserDispatcher([
     systemInstructionParser,
+    stakeInstructionParser,
     tokenInstructionParser,
     token2022InstructionParser,
     associatedTokenInstructionParser,
@@ -36,6 +39,7 @@ export const instructionParserDispatcher = createInstructionParserDispatcher([
     computeBudgetInstructionParser,
     zkElGamalProofInstructionParser,
     solanaAttestationInstructionParser,
+    voteInstructionParser,
     ...pythInstructionParsers,
     ...memoInstructionParsers,
     ...serumInstructionParsers,

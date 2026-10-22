@@ -4,5 +4,4 @@
 export { isStakeInstruction } from './lib/is-stake-instruction';
 export { StakeAccountSection } from './ui/StakeAccountSection';
 export { StakeHistoryCard } from './ui/StakeHistoryCard';
-export { RawStakeDetailsCard } from './ui/instructions/RawStakeDetailsCard';
 export { StakeDetailsCard } from './ui/instructions/StakeDetailsCard';

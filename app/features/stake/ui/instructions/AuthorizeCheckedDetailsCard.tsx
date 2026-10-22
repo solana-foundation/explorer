@@ -8,7 +8,7 @@ export const AuthorizeCheckedDetailsCard = defineInstructionCard<AuthorizeChecke
         address('Old Authority Address', info.authority),
         address('New Authority Address', info.newAuthority),
         text('Authority Type', info.authorityType),
-        address('Clock Sysvar', info.clockSysvar),
+        info.clockSysvar && address('Clock Sysvar', info.clockSysvar),
         info.custodian && address('Lockup Custodian', info.custodian),
     ],
     title: 'Stake Program: Authorize Checked',

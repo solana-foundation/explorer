@@ -12,7 +12,7 @@ export const InitializeDetailsCard = defineInstructionCard<InitializeInfo>({
         info.lockup.epoch > 0 && custom('Lockup Expiry Epoch', <Epoch epoch={info.lockup.epoch} link />),
         info.lockup.unixTimestamp > 0 && timestamp('Lockup Expiry Timestamp', info.lockup.unixTimestamp),
         info.lockup.custodian !== SYSTEM_PROGRAM_ADDRESS && address('Lockup Custodian Address', info.lockup.custodian),
-        address('Rent Sysvar', info.rentSysvar),
+        info.rentSysvar && address('Rent Sysvar', info.rentSysvar),
     ],
     title: 'Stake Program: Initialize Stake',
 });

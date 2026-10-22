@@ -7,6 +7,7 @@ const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const TOKEN_2022_PROGRAM = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
 const ASSOCIATED_TOKEN_PROGRAM = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 const STAKE_PROGRAM = 'Stake11111111111111111111111111111111111111';
+const VOTE_PROGRAM = 'Vote111111111111111111111111111111111111111';
 
 const CONFIGURED_PROGRAMS = [
     ['System', SYSTEM_PROGRAM],
@@ -14,6 +15,7 @@ const CONFIGURED_PROGRAMS = [
     ['Token-2022', TOKEN_2022_PROGRAM],
     ['Associated Token', ASSOCIATED_TOKEN_PROGRAM],
     ['Stake', STAKE_PROGRAM],
+    ['Vote', VOTE_PROGRAM],
 ] as const;
 
 function name(programId: string, bytes: number[]): string | undefined {
@@ -30,6 +32,7 @@ describe('resolveProgramClientInstructionName', () => {
             ['Token-2022 transferChecked', TOKEN_2022_PROGRAM, [12, 0, 0, 0, 0, 0, 0, 0, 0, 6], 'Transfer Checked'],
             ['ATA createIdempotent', ASSOCIATED_TOKEN_PROGRAM, [1], 'Create Idempotent'],
             ['Stake withdraw', STAKE_PROGRAM, [4, 0, 0, 0, 0, 0, 0, 0, 0], 'Withdraw'],
+            ['Vote withdraw', VOTE_PROGRAM, [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'Withdraw'],
         ])('should name a %s instruction', (_label, programId, bytes, expected) => {
             expect(name(programId, bytes)).toBe(expected);
         });
@@ -58,7 +61,7 @@ describe('resolveProgramClientInstructionName', () => {
      * The whole point of this resolver: a simulated instruction must read exactly as the same
      * instruction reads on a fetched transaction, where the name comes from the RPC's `parsed.type`.
      * The generated enum names disagree with the RPC for 7 of System's 13 instructions, for Stake's
-     * delegate, and for all three ATA instructions, so those are mapped back to the RPC spelling.
+     * delegate, for Vote's initialize and vote-state variants, and for all three ATA instructions, so those are mapped back to the RPC spelling.
      */
     describe('wording matches the RPC parse', () => {
         it.each([
@@ -70,6 +73,15 @@ describe('resolveProgramClientInstructionName', () => {
             ['authorizeNonce', SYSTEM_PROGRAM, [7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
             ['createAccount', SYSTEM_PROGRAM, [0, 0, 0, 0]],
             ['delegate', STAKE_PROGRAM, [2, 0, 0, 0]],
+            ['initialize', VOTE_PROGRAM, [0, 0, 0, 0]],
+            ['initializeV2', VOTE_PROGRAM, [16, 0, 0, 0]],
+            ['updatevotestate', VOTE_PROGRAM, [8, 0, 0, 0]],
+            ['updatevotestateswitch', VOTE_PROGRAM, [9, 0, 0, 0]],
+            ['compactupdatevotestate', VOTE_PROGRAM, [12, 0, 0, 0]],
+            ['compactupdatevotestateswitch', VOTE_PROGRAM, [13, 0, 0, 0]],
+            ['towersync', VOTE_PROGRAM, [14, 0, 0, 0]],
+            ['towersyncswitch', VOTE_PROGRAM, [15, 0, 0, 0]],
+            ['voteSwitch', VOTE_PROGRAM, [6, 0, 0, 0]],
             ['createIdempotent', ASSOCIATED_TOKEN_PROGRAM, [1]],
             ['recoverNested', ASSOCIATED_TOKEN_PROGRAM, [2]],
             ['transferChecked', TOKEN_PROGRAM, [12, 0, 0, 0, 0, 0, 0, 0, 0, 6]],

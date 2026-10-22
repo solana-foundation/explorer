@@ -1,3 +1,4 @@
+import { identifyVoteInstruction, VOTE_PROGRAM_ADDRESS, VoteInstruction } from '@explorer/parsers/programs/vote';
 import { identifyStakeInstruction, STAKE_PROGRAM_ADDRESS, StakeInstruction } from '@solana-program/stake';
 import { identifySystemInstruction, SYSTEM_PROGRAM_ADDRESS, SystemInstruction } from '@solana-program/system';
 import {
@@ -83,6 +84,22 @@ const PROGRAM_CLIENTS: Partial<Record<string, ProgramClient>> = {
     // RPC — see the extension cases in program-client-name.spec.
     [TOKEN_2022_PROGRAM_ADDRESS]: { identify: identifyToken2022Instruction, names: Token2022Instruction },
     [TOKEN_PROGRAM_ADDRESS]: { identify: identifyTokenInstruction, names: TokenInstruction },
+    // No generated client exists for the vote program, so the enum comes from @explorer/parsers. The RPC
+    // spells the vote-state and tower-sync variants in lowercase.
+    [VOTE_PROGRAM_ADDRESS]: {
+        identify: identifyVoteInstruction,
+        names: VoteInstruction,
+        rpcTypeOverrides: {
+            CompactUpdateVoteState: 'compactupdatevotestate',
+            CompactUpdateVoteStateSwitch: 'compactupdatevotestateswitch',
+            InitializeAccount: 'initialize',
+            InitializeAccountV2: 'initializeV2',
+            TowerSync: 'towersync',
+            TowerSyncSwitch: 'towersyncswitch',
+            UpdateVoteState: 'updatevotestate',
+            UpdateVoteStateSwitch: 'updatevotestateswitch',
+        },
+    },
 };
 
 /**

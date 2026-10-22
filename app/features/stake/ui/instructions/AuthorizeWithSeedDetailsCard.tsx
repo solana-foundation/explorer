@@ -14,7 +14,7 @@ export const AuthorizeCheckedWithSeedDetailsCard = defineInstructionCard<Info>({
     title: 'Stake Program: Authorize Checked With Seed',
 });
 
-/** One field list serves both cards. The checked variant only makes the clock sysvar required. */
+/** One field list serves both cards. */
 function fields(info: Info): InstructionFieldList {
     return [
         address('Stake Address', info.stakeAccount),
