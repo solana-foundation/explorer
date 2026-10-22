@@ -22,6 +22,7 @@ import type {
 import { sha256 } from '@noble/hashes/sha256';
 import { snakeCase } from 'change-case';
 
+import { isCodamaRoot } from '../../lib/utils';
 import { isLeafTupleU8String, parseAnchorType_U8_PathTuple } from './type-handlers/leaf-tuple-type-handler';
 import { parseHomogeneousTuple } from './type-handlers/tuple-type-handlers';
 
@@ -488,7 +489,7 @@ function convertDefinedTypeArg(arg: LegacyIdlDefinedTypeArg): any {
 export type IdlSpec = '0.1.0' | 'legacy' | 'codama';
 
 export function getIdlSpecType(idl: any): IdlSpec {
-    if (idl?.standard === 'codama') return 'codama';
+    if (isCodamaRoot(idl)) return 'codama';
     return idl?.metadata?.spec ?? 'legacy';
 }
 

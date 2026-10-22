@@ -6,10 +6,12 @@ import { getIdlSpecType } from '../converters/convert-legacy-idl';
 describe('[idl] convert-legacy-idl', () => {
     describe('getIdlSpecType', async () => {
         describe('codama', () => {
-            it('should return "codama" when idl.standard is "codama"', () => {
-                const idl = { standard: 'codama' };
-                const result = getIdlSpecType(idl);
-                expect(result).toBe('codama');
+            it.each([
+                ['a Codama root', { kind: 'rootNode', standard: 'codama' }],
+                ['a Kinobi root', { kind: 'rootNode', standard: 'kinobi' }],
+                ['a Codama root without a kind', { standard: 'codama' }],
+            ])('should return "codama" for %s', (_label, idl) => {
+                expect(getIdlSpecType(idl)).toBe('codama');
             });
 
             it('should prioritize standard over metadata.spec when both exist', () => {
@@ -27,6 +29,13 @@ describe('[idl] convert-legacy-idl', () => {
                 ['a longer string', 'codama-v2'],
             ])('should not return "codama" when standard is %s', (_label, standard) => {
                 expect(getIdlSpecType({ standard })).toBe('legacy');
+            });
+
+            it.each([
+                ['a different value', 'programNode'],
+                ['a different case', 'RootNode'],
+            ])('should not return "codama" when kind is %s', (_label, kind) => {
+                expect(getIdlSpecType({ kind })).toBe('legacy');
             });
         });
 
