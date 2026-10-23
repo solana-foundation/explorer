@@ -1,3 +1,4 @@
+import { createInstructionParserDispatcher, type DispatchResult } from '@entities/instruction-parser';
 import {
     getCreateMasterEditionV3InstructionDataSerializer,
     getCreateMetadataAccountV3InstructionDataSerializer,
@@ -15,6 +16,7 @@ import {
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
 
+import { metaplexTokenMetadataInstructionParser } from '../../lib/metaplex-token-metadata-client';
 import { MetaplexTokenMetadataDetailsCard } from '../MetaplexTokenMetadataDetailsCard';
 
 const PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
@@ -24,12 +26,18 @@ const KEY_C = new PublicKey(new Uint8Array(32).fill(3));
 const KEY_D = new PublicKey(new Uint8Array(32).fill(4));
 const KEY_E = PublicKey.default;
 
-function makeIx(data: Uint8Array | Buffer, keys: PublicKey[] = []): TransactionInstruction {
-    return new TransactionInstruction({
+const dispatcher = createInstructionParserDispatcher([metaplexTokenMetadataInstructionParser]);
+
+function makeIx(
+    data: Uint8Array | Buffer,
+    keys: PublicKey[] = [],
+): { ix: DispatchResult; raw: TransactionInstruction } {
+    const raw = new TransactionInstruction({
         data: Buffer.from(data),
         keys: keys.map(pubkey => ({ isSigner: false, isWritable: false, pubkey })),
         programId: PROGRAM_ID,
     });
+    return { ix: dispatcher.fromTransactionInstruction(raw) as DispatchResult, raw };
 }
 
 const createMetadataV3Serializer = getCreateMetadataAccountV3InstructionDataSerializer();
@@ -52,7 +60,7 @@ type Story = StoryObj<typeof meta>;
 export const CreateMetadataAccountV3: Story = {
     args: {
         index: 0,
-        ix: makeIx(
+        ...makeIx(
             Buffer.from(
                 createMetadataV3Serializer.serialize({
                     collectionDetails: none(),
@@ -84,7 +92,7 @@ export const CreateMetadataAccountV3: Story = {
 export const UpdateMetadataAccountV2: Story = {
     args: {
         index: 1,
-        ix: makeIx(
+        ...makeIx(
             Buffer.from(
                 updateMetadataV2Serializer.serialize({
                     data: some({
@@ -115,7 +123,7 @@ export const UpdateMetadataAccountV2: Story = {
 export const CreateMasterEditionV3: Story = {
     args: {
         index: 2,
-        ix: makeIx(
+        ...makeIx(
             Buffer.from(
                 createMasterEditionV3Serializer.serialize({
                     maxSupply: some(100n),
@@ -136,7 +144,7 @@ export const SignMetadata: Story = {
     args: {
         index: 3,
         // discriminator byte 7 = signMetadata
-        ix: makeIx(new Uint8Array([7]), [KEY_A, KEY_B]),
+        ...makeIx(new Uint8Array([7]), [KEY_A, KEY_B]),
         result: { err: null },
     },
     play: async ({ canvasElement }) => {
@@ -148,7 +156,7 @@ export const SignMetadata: Story = {
 export const UnknownInstruction: Story = {
     args: {
         index: 4,
-        ix: makeIx(new Uint8Array([0xff]), [KEY_A, KEY_B]),
+        ...makeIx(new Uint8Array([0xff]), [KEY_A, KEY_B]),
         result: { err: null },
     },
     play: async ({ canvasElement }) => {
@@ -160,7 +168,7 @@ export const UnknownInstruction: Story = {
 export const FailedTransaction: Story = {
     args: {
         index: 5,
-        ix: makeIx(new Uint8Array([7]), [KEY_A, KEY_B]),
+        ...makeIx(new Uint8Array([7]), [KEY_A, KEY_B]),
         result: { err: 'InstructionError' },
     },
     play: async ({ canvasElement }) => {

@@ -367,7 +367,8 @@ function InspectorInstructionCard({
             return (
                 <ErrorBoundary fallback={unknownCard}>
                     <MetaplexTokenMetadataDetailsCard
-                        ix={ix}
+                        ix={parsedIx}
+                        raw={ix}
                         index={index}
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={BaseInstructionCard}
@@ -478,8 +479,8 @@ function InspectorInstructionCard({
             return (
                 <ErrorBoundary fallback={unknownCard}>
                     <MetaplexTokenMetadataDetailsCard
-                        ix={ix}
-                        parsedIx={parsedIx}
+                        ix={parsedIx}
+                        raw={ix}
                         index={index}
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={BaseInstructionCard}

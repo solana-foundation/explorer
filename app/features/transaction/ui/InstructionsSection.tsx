@@ -470,11 +470,22 @@ function InstructionCard({
         return <UnknownDetailsCard key={key} node={node} />;
     }
     if (transactionIx.programId.toBase58() === MPL_TOKEN_METADATA_PROGRAM_ID) {
-        return (
-            <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
-                <MetaplexTokenMetadataDetailsCard {...props} />
-            </ErrorBoundary>
-        );
+        const dispatched = dispatcher.fromTransactionInstruction(transactionIx);
+        if (dispatched) {
+            return (
+                <ErrorBoundary fallback={<UnknownDetailsCard node={node} />} key={key}>
+                    <MetaplexTokenMetadataDetailsCard
+                        ix={dispatched}
+                        raw={transactionIx}
+                        index={index}
+                        result={result}
+                        innerCards={innerCards}
+                        childIndex={childIndex}
+                    />
+                </ErrorBoundary>
+            );
+        }
+        return <UnknownDetailsCard key={key} node={node} />;
     }
     // PMP owns every instruction on its program id: `setData`/`initialize`/`write` render decoded content from
     // the bundled typed decoders (no IDL needed), and the housekeeping instructions delegate to the IDL tier

@@ -1,11 +1,13 @@
 import { Address } from '@components/common/Address';
 import { InstructionCard } from '@components/instruction/InstructionCard';
-import { MetaplexInstructionType, parseMetaplexTokenMetadataInstruction } from '@features/mpl-token-metadata';
-import { ParsedInstruction, PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import type { DispatchResult } from '@entities/instruction-parser';
+import { PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
-import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 import { BaseTable } from '@/app/shared/ui/Table';
+
+import type { MetaplexTokenMetadataParsed } from '../lib/metaplex-token-metadata-client';
+import type { MetaplexInstructionType } from '../lib/metaplex-token-metadata-parser';
 
 const IX_TITLES: Record<MetaplexInstructionType, string> = {
     burnEditionNft: 'Burn Edition NFT',
@@ -348,41 +350,22 @@ export function MetaplexTokenMetadataDetailsCard({
     index,
     innerCards,
     ix,
-    parsedIx,
+    raw,
     result,
     InstructionCardComponent = InstructionCard,
 }: {
     childIndex?: number;
     index: number;
     innerCards?: JSX.Element[];
-    ix: TransactionInstruction;
-    /**
-     * Already-parsed slice output from the upstream dispatcher. When provided
-     * and non-empty, skip re-parsing — the dispatcher already did the work.
-     * Tx-page predicate-based callers pass nothing and the card parses itself.
-     */
-    parsedIx?: ParsedInstruction;
+    ix: DispatchResult;
+    raw: TransactionInstruction;
     result: SignatureResult;
     InstructionCardComponent?: React.FC<Parameters<typeof InstructionCard>[0]>;
 }) {
-    const parsed = React.useMemo(() => {
-        if (parsedIx?.parsed.type) {
-            // Dispatcher already ran the slice parser; reuse its output.
-            // The cast is safe by construction: a non-empty `type` from the MPL
-            // slice is always a MetaplexInstructionType, and the slice contract
-            // is that `info` is `Record<string, unknown>` for this program.
-            return {
-                info: parsedIx.parsed.info as Record<string, unknown>,
-                type: parsedIx.parsed.type as MetaplexInstructionType,
-            };
-        }
-        return parseMetaplexTokenMetadataInstruction(toKitInstruction(ix));
-    }, [ix, parsedIx]);
-
-    if (!parsed) {
+    if ('unknown' in ix) {
         return (
             <InstructionCardComponent
-                ix={ix}
+                ix={raw}
                 index={index}
                 result={result}
                 title="Token Metadata Program: Unknown Instruction"
@@ -393,19 +376,19 @@ export function MetaplexTokenMetadataDetailsCard({
         );
     }
 
-    const { type, info } = parsed;
+    const { type, info } = ix.parsed as MetaplexTokenMetadataParsed;
     const title = `Token Metadata Program: ${IX_TITLES[type] ?? type}`;
 
     return (
         <InstructionCardComponent
-            ix={ix}
+            ix={raw}
             index={index}
             result={result}
             title={title}
             innerCards={innerCards}
             childIndex={childIndex}
         >
-            {renderContent(type, info, ix)}
+            {renderContent(type, info, raw)}
         </InstructionCardComponent>
     );
 }
