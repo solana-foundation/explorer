@@ -36,11 +36,6 @@ ignoreScripts: true
 
 minimumReleaseAge: 20160
 
-minimumReleaseAgeExclude:
-  # 2.1.0 (2026-10-05) is the first release of the package that replaces sas-lib.
-  # Clears the quarantine window on 2026-10-19; remove then.
-  - '@solana/attestation'
-
 # Pin resolution to the public npm registry so it can't silently inherit a
 # global/org .npmrc mirror. Scoped keys (e.g. '@my-org') can be added here.
 registries:
