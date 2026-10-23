@@ -17,12 +17,9 @@ export function useAnchorProgram(
     url: string,
     cluster?: Cluster,
 ): { program: Program | null; idl: SupportedIdl | null; isLoading: boolean } {
-    // The Anchor leg of the shared program-IDL resolution (same hook the IDL card uses, so the
-    // decoder and card never diverge); the PMP leg it also resolves is unused here.
     const { anchorIdl, isLoading } = useProgramIdls(programAddress, url, cluster ?? Cluster.MainnetBeta);
     const idl: SupportedIdl | null = anchorIdl ?? null;
     const program: Program<Idl> | null = useMemo(() => {
-        // Codama IDLs (incl. converted legacy IDLs) decode through the Codama pipeline, not an Anchor Program.
         if (!idl || getIdlSpecType(idl) === 'codama') return null;
 
         try {

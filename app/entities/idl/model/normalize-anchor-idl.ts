@@ -23,8 +23,6 @@ export function normalizeAnchorIdl(idl: unknown, programAddress?: string): Suppo
         return undefined;
     }
 
-    // idl-decode and the app pin slightly different `codama` node types (version-template + display-node
-    // branding); the runtime root node is identical, so cross the type boundary once here.
     const root = converted as unknown as RootNode;
     const program =
         programAddress && !root.program.publicKey ? { ...root.program, publicKey: programAddress } : root.program;

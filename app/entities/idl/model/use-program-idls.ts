@@ -57,9 +57,6 @@ export function useProgramIdls(
 
     const resolved = isCustom ? customIdls : serverIdls;
 
-    // Normalize both IDL slots once: legacy pre-0.30 Anchor IDLs — whether read from the Anchor PDA or
-    // published through the Program Metadata Program — become Codama root nodes so they flow through the
-    // same Codama display/decode/interactive paths. Modern Anchor and Codama IDLs pass through unchanged.
     const anchorIdl = useMemo(
         () => normalizeAnchorIdl(resolved?.anchorIdl, programId),
         [resolved?.anchorIdl, programId],
